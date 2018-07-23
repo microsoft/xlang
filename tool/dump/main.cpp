@@ -27,7 +27,10 @@ namespace xlang::impl
 using namespace xlang;
 using namespace xlang::meta::reader;
 
-void print_type_name(coded_index<TypeDefOrRef> const& index, range<row_iterator<GenericParam>> const& generic_params);
+template <typename T>
+using range = std::pair<T, T>;
+
+void print_type_name(coded_index<TypeDefOrRef> const& index, range<GenericParam> const& generic_params);
 
 void print_type_name(TypeRef const& type)
 {
@@ -36,7 +39,7 @@ void print_type_name(TypeRef const& type)
         c_str(type.TypeName()));
 }
 
-void print_type_name(TypeDef const& type, range<row_iterator<GenericParam>> const& generic_params)
+void print_type_name(TypeDef const& type, range<GenericParam> const& generic_params)
 {
     printf("%s.%s",
         c_str(type.TypeNamespace()),
@@ -61,12 +64,12 @@ void print_type_name(TypeDef const& type, range<row_iterator<GenericParam>> cons
     }
 }
 
-void print_type_name(xlang::meta::reader::GenericTypeInstSig const& signature, range<row_iterator<GenericParam>> const& generic_params);
+void print_type_name(xlang::meta::reader::GenericTypeInstSig const& signature, range<GenericParam> const& generic_params);
 
 template <typename ... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <typename ... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
-void print_type_name(xlang::meta::reader::TypeSig type, range<row_iterator<GenericParam>> const& generic_params)
+void print_type_name(xlang::meta::reader::TypeSig type, range<GenericParam> const& generic_params)
 {
     std::visit(overloaded{
         [](ElementType type)
@@ -78,16 +81,16 @@ void print_type_name(xlang::meta::reader::TypeSig type, range<row_iterator<Gener
                 "Void",
                 "Boolean",
                 "Char",
-                "I1",
-                "U1",
-                "I2",
-                "U2",
-                "I4",
-                "U4",
-                "I8",
-                "U8",
-                "R4",
-                "R8",
+                "Int8",
+                "UInt8",
+                "Int16",
+                "UInt16",
+                "Int32",
+                "UInt32",
+                "Int64",
+                "UInt64",
+                "Float32",
+                "Float64",
                 "String"
             };
             printf("%s", primitives[static_cast<uint32_t>(type)]);
@@ -99,7 +102,7 @@ void print_type_name(xlang::meta::reader::TypeSig type, range<row_iterator<Gener
     },
         [&generic_params](uint32_t var)
     {
-        printf("%s", c_str(generic_params.begin()[var].Name()));
+        printf("%s", c_str(begin(generic_params)[var].Name()));
     },
         [&generic_params](auto&& type)
     {
@@ -108,7 +111,56 @@ void print_type_name(xlang::meta::reader::TypeSig type, range<row_iterator<Gener
         }, type.Type());
 }
 
-void print_type_name(xlang::meta::reader::GenericTypeInstSig const& signature, range<row_iterator<GenericParam>> const& generic_params)
+void print_constant(Constant const& value)
+{
+    switch (value.Type())
+    {
+    case ConstantType::Boolean:
+        printf("Boolean(%s)", value.ValueBoolean() ? "true" : "false");
+        break;
+    case ConstantType::Char:
+        printf("Char16(%#0hx)", value.ValueChar());
+        break;
+    case ConstantType::Int8:
+        printf("Int8(%hhd)", value.ValueInt8());
+        break;
+    case ConstantType::UInt8:
+        printf("UInt8(%#0hhx)", value.ValueUInt8());
+        break;
+    case ConstantType::Int16:
+        printf("Int16(%hd)", value.ValueInt16());
+        break;
+    case ConstantType::UInt16:
+        printf("UInt16(%#0hx)", value.ValueUInt16());
+        break;
+    case ConstantType::Int32:
+        printf("Int32(%d)", value.ValueInt32());
+        break;
+    case ConstantType::UInt32:
+        printf("UInt32(%#0x)", value.ValueUInt32());
+        break;
+    case ConstantType::Int64:
+        printf("Int64(%lld)", value.ValueInt64());
+        break;
+    case ConstantType::UInt64:
+        printf("UInt64(%#0llx)", value.ValueUInt64());
+        break;
+    case ConstantType::Float32:
+        printf("Float32(%f)", value.ValueFloat32());
+        break;
+    case ConstantType::Float64:
+        printf("Float64(%f)", value.ValueFloat64());
+        break;
+    case ConstantType::String:
+        printf("String(%s)", c_str(value.ValueString()));
+        break;
+    case ConstantType::Class:
+        printf("null");
+        break;
+    }
+}
+
+void print_type_name(xlang::meta::reader::GenericTypeInstSig const& signature, range<GenericParam> const& generic_params)
 {
     print_type_name(signature.GenericType(), generic_params);
     WINRT_ASSERT(signature.GenericArgCount() >= 1);
@@ -131,12 +183,12 @@ void print_type_name(xlang::meta::reader::GenericTypeInstSig const& signature, r
     printf(">");
 }
 
-void print_type_name(xlang::meta::reader::TypeSpec const& type, range<row_iterator<GenericParam>> const& generic_params)
+void print_type_name(xlang::meta::reader::TypeSpec const& type, range<GenericParam> const& generic_params)
 {
     print_type_name(type.Signature().GenericTypeInst(), generic_params);
 }
 
-void print_type_name(xlang::meta::reader::coded_index<TypeDefOrRef> const& index, range<row_iterator<GenericParam>> const& generic_params)
+void print_type_name(xlang::meta::reader::coded_index<TypeDefOrRef> const& index, range<GenericParam> const& generic_params)
 {
     switch (index.type())
     {
@@ -178,9 +230,9 @@ int main(int, char* argv[])
     {
         printf("Dumping %s\n\n", path.string().c_str());
 
-        database const db{ path.string() };
+        cache cache{ {path.string()} };
 
-        for (auto&& type : db.TypeDef)
+        for (auto&& type : cache.databases().begin()->TypeDef)
         {
             const auto& generic_params = type.GenericParam();
             print_type_name(type, generic_params);
@@ -229,7 +281,7 @@ int main(int, char* argv[])
                         print_type_name(class_index.TypeRef());
 
                         auto const& signature = attribute_index.MemberRef().MethodSignature();
-                        WINRT_ASSERT(signature.ReturnType().IsVoid());
+                        WINRT_ASSERT(!signature.ReturnType().Type());
 
                         printf("(");
                         bool found = false;
@@ -243,13 +295,60 @@ int main(int, char* argv[])
                             {
                                 found = true;
                             }
-                            print_type_name(param.Type(), range{ std::pair{ row_iterator<GenericParam>{}, row_iterator<GenericParam>{} } });
+                            print_type_name(param.Type(), std::pair{ GenericParam{}, GenericParam{} });
                         }
                         printf(")");
 
                         printf("\n");
                     }
+                }
+            }
 
+            for (auto&& field : type.FieldList())
+            {
+                printf("  field ");
+                if (enum_mask(field.Flags(), FieldAttributes::Literal) == FieldAttributes::Literal)
+                {
+                    printf("literal ");
+                }
+                else if (enum_mask(field.Flags(), FieldAttributes::Static) == FieldAttributes::Static)
+                {
+                    printf("static ");
+                }
+                print_type_name(field.Signature().Type(), generic_params);
+                printf(" %s", c_str(field.Name()));
+                auto const& constant = field.Constant();
+                if (constant)
+                {
+                    printf(" = ");
+                    print_constant(*constant);
+                }
+                printf("\n");
+            }
+
+            for (auto && property : type.PropertyList())
+            {
+                printf("  property ");
+                print_type_name(property.Type().Type(), generic_params);
+                printf(" %s", c_str(property.Name()));
+                printf("\n");
+                WINRT_ASSERT(property.Parent() == type);
+                for (auto && semantic : property.MethodSemantic())
+                {
+                    if (enum_mask(semantic.Semantic(), MethodSemanticsAttributes::Getter) == MethodSemanticsAttributes::Getter)
+                    {
+                        printf("    getter ");
+                    }
+                    else if (enum_mask(semantic.Semantic(), MethodSemanticsAttributes::Setter) == MethodSemanticsAttributes::Setter)
+                    {
+                        printf("    setter ");
+                    }
+                    else
+                    {
+                        WINRT_ASSERT(false);
+                    }
+                    printf(" %s", c_str(semantic.Method().Name()));
+                    printf("\n");
                 }
             }
 

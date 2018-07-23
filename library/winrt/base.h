@@ -1,42 +1,9 @@
-﻿// C++/WinRT v1.0.180624.1
+﻿// C++/WinRT v1.0.180710.1
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 #pragma once
-
-#if defined(__clang__) 
-#define WINRT_WARNING_PUSH \
-_Pragma("clang diagnostic push") \
-_Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"") \
-_Pragma("clang diagnostic ignored \"-Wdeprecated-implementations\"")
-#define WINRT_WARNING_POP \
-_Pragma("clang diagnostic pop")
-#else
-#define WINRT_WARNING_PUSH \
-__pragma(warning(push)) \
-__pragma(warning(disable: 4996))
-#define WINRT_WARNING_POP \
-__pragma(warning(pop))
-#endif
-
-WINRT_WARNING_PUSH
-
-#if defined(_WIN32)
-#define WINRT_PLATFORM_WINDOWS 1
-#else 
-#define WINRT_PLATFORM_WINDOWS 0
-#endif
-
-#if defined(_MSC_VER)
-#define WINRT_COMPILER_CLANG 0
-#define WINRT_COMPILER_MSVC  1
-#elif defined(__clang__)
-#define WINRT_COMPILER_CLANG 1
-#define WINRT_COMPILER_MSVC  0
-#else
-static_assert(false, "C++/WinRT only tested against MSVC and Clang");
-#endif
 
 #include <algorithm>
 #include <array>
@@ -59,23 +26,10 @@ static_assert(false, "C++/WinRT only tested against MSVC and Clang");
 #include <utility>
 #include <unordered_map>
 #include <vector>
-
-#if WINRT_PLATFORM_WINDOWS
 #include <experimental/coroutine>
-#endif
-
-#if !WINRT_PLATFORM_WINDOWS
-#include <codecvt>
-#include <condition_variable>
-#include <locale>
-#include <cstring>
-#endif
-
-#if defined(_LIBCPP_VERSION)
-static_assert(_LIBCPP_VERSION >= 5000, "the earliest supported version of libc++ is release 50");
-#endif
 
 #if __has_include(<WindowsNumerics.impl.h>)
+#define WINRT_NUMERICS
 #include <directxmath.h>
 #endif
 
@@ -85,7 +39,7 @@ static_assert(_LIBCPP_VERSION >= 5000, "the earliest supported version of libc++
 export module winrt;
 #endif
 
-#if __has_include(<WindowsNumerics.impl.h>)
+#ifdef WINRT_NUMERICS
 
 #define _WINDOWS_NUMERICS_NAMESPACE_ winrt::Windows::Foundation::Numerics
 #define _WINDOWS_NUMERICS_BEGIN_NAMESPACE_ WINRT_EXPORT namespace winrt::Windows::Foundation::Numerics
@@ -105,50 +59,6 @@ export module winrt;
 #undef _WINDOWS_NUMERICS_BEGIN_NAMESPACE_
 #undef _WINDOWS_NUMERICS_END_NAMESPACE_
 
-#else
-namespace winrt::Windows::Foundation::Numerics
-{
-    struct float2
-    {
-        float x, y;
-    };
-
-    struct float3
-    {
-        float x, y, z;
-    };
-
-    struct float4
-    {
-        float x, y, z, w;
-    };
-
-    struct float3x2
-    {
-        float m11, m12;
-        float m21, m22;
-        float m31, m32;
-    };
-
-    struct float4x4
-    {
-        float m11, m12, m13, m14;
-        float m21, m22, m23, m24;
-        float m31, m32, m33, m34;
-        float m41, m42, m43, m44;
-    };
-
-    struct plane
-    {
-        float3 normal;
-        float d;
-    };
-
-    struct quaternion
-    {
-        float x, y, z, w;
-    };
-}
 #endif
 
 #ifdef _DEBUG
@@ -165,21 +75,21 @@ namespace winrt::Windows::Foundation::Numerics
 
 #endif
 
-#if WINRT_COMPILER_MSVC 
+#if defined(_MSC_VER)
 #define WINRT_EBO __declspec(empty_bases)
 #define WINRT_NOVTABLE __declspec(novtable)
 #define WINRT_CALL __stdcall
 #define WINRT_NOINLINE  __declspec(noinline)
 #define WINRT_FORCEINLINE __forceinline
-#elif WINRT_COMPILER_CLANG
+#else
 #define WINRT_EBO
 #define WINRT_NOVTABLE
 #define WINRT_CALL
-#define WINRT_NOINLINE  __attribute__((noinline))
-#define WINRT_FORCEINLINE __attribute__((always_inline))
+#define WINRT_NOINLINE
+#define WINRT_FORCEINLINE
 #endif
 
-#if WINRT_COMPILER_MSVC && _ITERATOR_DEBUG_LEVEL != 0
+#if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0
 #define WINRT_CHECKED_ITERATORS
 #endif
 
@@ -189,20 +99,16 @@ namespace winrt::Windows::Foundation::Numerics
 #define WINRT_EXTERNAL_CATCH_CLAUSE
 #endif
 
-#if WINRT_COMPILER_MSVC
+#if defined(_MSC_VER)
 #ifdef _M_HYBRID
 #define WINRT_LINK(function, count) __pragma(comment(linker, "/alternatename:#WINRT_" #function "@" #count "=#" #function "@" #count))
-#define WINRT_OS_LINK(function, count) __pragma(comment(linker, "/alternatename:#OS_" #function "@" #count "=#" #function "@" #count))
 #elif _M_IX86
 #define WINRT_LINK(function, count) __pragma(comment(linker, "/alternatename:_WINRT_" #function "@" #count "=_" #function "@" #count))
-#define WINRT_OS_LINK(function, count) __pragma(comment(linker, "/alternatename:_OS_" #function "@" #count "=_" #function "@" #count))
 #else
 #define WINRT_LINK(function, count) __pragma(comment(linker, "/alternatename:WINRT_" #function "=" #function))
-#define WINRT_OS_LINK(function, count) __pragma(comment(linker, "/alternatename:OS_" #function "=" #function))
 #endif
 #else
 #define WINRT_LINK(function, count)
-#define WINRT_OS_LINK(function, count)
 #endif
 
 #if defined _M_ARM
@@ -230,42 +136,55 @@ namespace winrt::impl
 
 #endif
 
+#if defined(_DEBUG) && defined(_MSC_VER) && !defined(__clang__)
+
 namespace winrt::impl
 {
-    template <typename L, typename T, typename... Args>
+    template <typename L, typename T, typename...Args>
     using invoker_t = decltype(std::declval<L>()(std::declval<T>(), std::declval<Args>()...));
 }
 
 #define WINRT_WRAP(...) __VA_ARGS__
 
-#define WINRT_ASSERT_INSTANCE_METHOD(D, M, R, ...) \
-    WINRT_ASSERT_INVOCABLE(D, d., "", M, R, __VA_ARGS__)
+#define WINRT_ASSERT_DECLARATION(M, R, ...) WINRT_ASSERT_DECLARATION_(M, R, __VA_ARGS__)
 
-#define WINRT_ASSERT_STATIC_METHOD(D, M, R, ...) \
-    WINRT_ASSERT_INVOCABLE(D, std::remove_reference_t<decltype(d)>::, "static ", M, R, __VA_ARGS__)
-
-// TODO: WINRT_ASSERT_INVOCABLE is triggering incorrectly on Linux. stub out for now 
-#if WINRT_PLATFORM_WINDOWS
-#define WINRT_ASSERT_INVOCABLE(D, T, V, M, R, ...) \
+#define WINRT_ASSERT_DECLARATION_(M, R, ...) \
 { \
-    auto invocation = [](auto&& d, auto&&... params) -> \
-        decltype((R)T M(params...)) {}; \
+    auto invocation = [](auto&& d, auto&&... params) -> decltype((R)d.M(params...)) {}; \
     static_assert(winrt::impl::is_detected_v<winrt::impl::invoker_t, decltype(invocation), D, __VA_ARGS__>, \
-        "\n\n\tC++/WinRT: Could not find method in implementation class:\n\t\t" V #R " " #M "(" #__VA_ARGS__ ");\n"); \
+        "\n\n\tC++/WinRT: Could not find method in implementation class:\n\t\t" #R " " #M "(" #__VA_ARGS__ ");\n"); \
 }
+
 #else
-#define WINRT_ASSERT_INVOCABLE(D, T, V, M, R, ...)
+
+#define WINRT_ASSERT_DECLARATION(...) ((void)0)
+
 #endif
+
+#if defined(__clang__) 
+
+#define WINRT_WARNING_PUSH \
+_Pragma("clang diagnostic push") \
+_Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+
+#define WINRT_WARNING_POP \
+_Pragma("clang diagnostic pop")
+
+#else
+
+#define WINRT_WARNING_PUSH
+#define WINRT_WARNING_POP
+
+#endif
+
 namespace winrt::impl
 {
-#if WINRT_PLATFORM_WINDOWS
     using ptp_io = struct tp_io*;
     using ptp_timer = struct tp_timer*;
     using ptp_wait = struct tp_wait*;
     using srwlock = struct srwlock_*;
     using condition_variable = struct condition_variable_*;
     using bstr = wchar_t*;
-#endif
 
     inline bool is_guid_equal(uint32_t const* const left, uint32_t const* const right) noexcept
     {
@@ -322,56 +241,36 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-#if WINRT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
-#endif
-
 extern "C"
 {
-#if WINRT_PLATFORM_WINDOWS
     int32_t WINRT_CALL WINRT_GetRestrictedErrorInfo(void** info) noexcept;
-#endif
     int32_t WINRT_CALL WINRT_RoGetActivationFactory(void* classId, winrt::guid const& iid, void** factory) noexcept;
     int32_t WINRT_CALL WINRT_RoInitialize(uint32_t type) noexcept;
-#if WINRT_PLATFORM_WINDOWS
     int32_t WINRT_CALL WINRT_RoOriginateLanguageException(int32_t error, void* message, void* exception) noexcept;
-#endif
     void    WINRT_CALL WINRT_RoUninitialize() noexcept;
-#if WINRT_PLATFORM_WINDOWS
     int32_t WINRT_CALL WINRT_SetRestrictedErrorInfo(void* info) noexcept;
     int32_t WINRT_CALL WINRT_RoGetAgileReference(uint32_t options, winrt::guid const& iid, void* object, void** reference) noexcept;
     int32_t WINRT_CALL WINRT_CoIncrementMTAUsage(void** cookie) noexcept;
-#endif
 
-    int32_t WINRT_CALL WINRT_WindowsCreateString(char16_t const* sourceString, uint32_t length, void** string) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsCreateStringReference(char16_t const* sourceString, uint32_t length, void* hstringHeader, void** string) noexcept;
+    int32_t WINRT_CALL WINRT_WindowsCreateString(wchar_t const* sourceString, uint32_t length, void** string) noexcept;
+    int32_t WINRT_CALL WINRT_WindowsCreateStringReference(wchar_t const* sourceString, uint32_t length, void* hstringHeader, void** string) noexcept;
     int32_t WINRT_CALL WINRT_WindowsDuplicateString(void* string, void** newString) noexcept;
     int32_t WINRT_CALL WINRT_WindowsDeleteString(void* string) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsStringHasEmbeddedNull(void* string, int32_t* hasEmbedNull) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsPreallocateStringBuffer(uint32_t length, char16_t** charBuffer, void** bufferHandle) noexcept;
+    int32_t WINRT_CALL WINRT_WindowsStringHasEmbeddedNull(void* string, int* hasEmbedNull) noexcept;
+    int32_t WINRT_CALL WINRT_WindowsPreallocateStringBuffer(uint32_t length, wchar_t** charBuffer, void** bufferHandle) noexcept;
     int32_t WINRT_CALL WINRT_WindowsDeleteStringBuffer(void* bufferHandle) noexcept;
     int32_t WINRT_CALL WINRT_WindowsPromoteStringBuffer(void* bufferHandle, void** string) noexcept;
     int32_t WINRT_CALL WINRT_WindowsConcatString(void* string1, void* string2, void** newString) noexcept;
-    char16_t const* WINRT_CALL WINRT_WindowsGetStringRawBuffer(void* string, uint32_t* length) noexcept;
+    wchar_t const* WINRT_CALL WINRT_WindowsGetStringRawBuffer(void* string, uint32_t* length) noexcept;
     uint32_t WINRT_CALL WINRT_WindowsGetStringLen(void* string) noexcept;
-#if WINRT_PLATFORM_WINDOWS
-    int32_t WINRT_CALL OS_WindowsCreateString(wchar_t const* sourceString, uint32_t length, void** string) noexcept;
-    int32_t WINRT_CALL OS_WindowsCreateStringReference(wchar_t const* sourceString, uint32_t length, void* hstringHeader, void** string) noexcept;
-    int32_t WINRT_CALL OS_WindowsPreallocateStringBuffer(uint32_t length, wchar_t** charBuffer, void** bufferHandle) noexcept;
-    wchar_t const* WINRT_CALL OS_WindowsGetStringRawBuffer(void* string, uint32_t* length) noexcept;
-#endif 
 
-#if WINRT_PLATFORM_WINDOWS
     int32_t  WINRT_CALL WINRT_CoCreateFreeThreadedMarshaler(void* outer, void** marshaler) noexcept;
     int32_t  WINRT_CALL WINRT_CoCreateInstance(winrt::guid const& clsid, void* outer, uint32_t context, winrt::guid const& iid, void** object) noexcept;
     int32_t  WINRT_CALL WINRT_CoGetCallContext(winrt::guid const& iid, void** object) noexcept;
     int32_t  WINRT_CALL WINRT_CoGetObjectContext(winrt::guid const& iid, void** object) noexcept;
     int32_t  WINRT_CALL WINRT_CoGetApartmentType(int32_t* type, int32_t* qualifier) noexcept;
-#endif 
     void*    WINRT_CALL WINRT_CoTaskMemAlloc(std::size_t size) noexcept;
     void     WINRT_CALL WINRT_CoTaskMemFree(void* ptr) noexcept;
-#if WINRT_PLATFORM_WINDOWS
     void     WINRT_CALL WINRT_SysFreeString(winrt::impl::bstr string) noexcept;
     uint32_t WINRT_CALL WINRT_SysStringLen(winrt::impl::bstr string) noexcept;
     int32_t  WINRT_CALL WINRT_IIDFromString(wchar_t const* string, winrt::guid* iid) noexcept;
@@ -416,17 +315,10 @@ extern "C"
     void     WINRT_CALL WINRT_StartThreadpoolIo(winrt::impl::ptp_io io) noexcept;
     void     WINRT_CALL WINRT_CancelThreadpoolIo(winrt::impl::ptp_io io) noexcept;
     void     WINRT_CALL WINRT_CloseThreadpoolIo(winrt::impl::ptp_io io) noexcept;
-#endif  
 
     int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept;
     int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;
 }
-
-#if WINRT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif
-
-#if WINRT_COMPILER_MSVC
 
 WINRT_LINK(GetRestrictedErrorInfo, 4)
 WINRT_LINK(RoGetActivationFactory, 12)
@@ -448,11 +340,6 @@ WINRT_LINK(WindowsPromoteStringBuffer, 8)
 WINRT_LINK(WindowsConcatString, 12)
 WINRT_LINK(WindowsGetStringRawBuffer, 8)
 WINRT_LINK(WindowsGetStringLen, 4)
-
-WINRT_OS_LINK(WindowsCreateString, 12)
-WINRT_OS_LINK(WindowsCreateStringReference, 16)
-WINRT_OS_LINK(WindowsPreallocateStringBuffer, 12)
-WINRT_OS_LINK(WindowsGetStringRawBuffer, 8)
 
 WINRT_LINK(CoCreateFreeThreadedMarshaler, 8)
 WINRT_LINK(CoCreateInstance, 20)
@@ -505,33 +392,6 @@ WINRT_LINK(CreateThreadpoolIo, 16)
 WINRT_LINK(StartThreadpoolIo, 4)
 WINRT_LINK(CancelThreadpoolIo, 4)
 WINRT_LINK(CloseThreadpoolIo, 4)
-
-#endif
-
-#if WINRT_PLATFORM_WINDOWS
-
-static_assert(sizeof(wchar_t) == sizeof(char16_t));
-
-inline int32_t WINRT_CALL WINRT_WindowsCreateString(const char16_t* sourceString, uint32_t length, void** string) noexcept
-{
-	return OS_WindowsCreateString(reinterpret_cast<const wchar_t*>(sourceString), length, string); 	
-}
-
-inline int32_t WINRT_CALL WINRT_WindowsCreateStringReference(char16_t const* sourceString, uint32_t length, void* hstringHeader, void** string) noexcept
-{
-	return OS_WindowsCreateStringReference(reinterpret_cast<const wchar_t*>(sourceString), length, hstringHeader, string);
-}
-
-inline const char16_t* WINRT_CALL WINRT_WindowsGetStringRawBuffer(void* string, uint32_t* length) noexcept
-{
-	return reinterpret_cast<const char16_t *>(OS_WindowsGetStringRawBuffer(string, length));
-}
-
-inline int32_t WINRT_CALL WINRT_WindowsPreallocateStringBuffer(uint32_t length, char16_t** charBuffer, void** bufferHandle) noexcept
-{
-    return OS_WindowsPreallocateStringBuffer(length, reinterpret_cast<wchar_t**>(charBuffer), bufferHandle);
-}
-#endif
 
 WINRT_EXPORT namespace winrt::Windows::Foundation
 {
@@ -692,16 +552,26 @@ namespace winrt::impl
     };
 
     template <typename T>
-    struct guid_storage
+    struct missing_guid_of
     {
-#ifdef WINRT_WINDOWS_ABI
-        static constexpr guid value{ __uuidof(T) };
-#endif
+        static constexpr bool value{};
     };
 
-#if WINRT_COMPILER_CLANG && (__clang_major__ <= 5)
     template <typename T>
-    constexpr guid const guid_storage_v = guid_storage<default_interface_t<T>>::value;
+    struct missing_guid
+    {
+        static_assert(missing_guid_of<T>::value, "Support for non-WinRT interfaces is disabled. To enable, simply #include <unknwn.h> before any C++/WinRT headers.");
+    };
+
+#ifdef WINRT_WINDOWS_ABI
+    template <typename T>
+    struct guid_storage
+    {
+        static constexpr guid value{ __uuidof(T) };
+    };
+#else
+    template <typename T>
+    struct guid_storage : missing_guid<T> {};
 #endif
 
     template <typename T>
@@ -885,11 +755,7 @@ WINRT_EXPORT namespace winrt
     template <typename T>
     constexpr guid const& guid_of() noexcept
     {
-#if WINRT_COMPILER_CLANG && (__clang_major__ <= 5)
-        return impl::guid_storage_v<T>;
-#else
         return impl::guid_storage<impl::default_interface_t<T>>::value;
-#endif
     }
 
     struct event_token;
@@ -922,7 +788,7 @@ namespace winrt::impl
     }
 
     template <size_t Size>
-    constexpr auto to_array(char16_t const(&value)[Size]) noexcept
+    constexpr auto to_array(wchar_t const(&value)[Size]) noexcept
     {
         return to_array<Size - 1>(value, std::make_index_sequence<Size - 1>());
     }
@@ -977,6 +843,49 @@ namespace winrt::impl
         else
         {
             return concat(first, combine(rest...));
+        }
+    }
+
+    template <typename T, size_t LS, size_t RS, size_t... LI, size_t... RI>
+    constexpr std::array<T, LS + RS - 1> zconcat_base(std::array<T, LS> const& left, std::array<T, RS> const& right, std::index_sequence<LI...> const, std::index_sequence<RI...> const) noexcept
+    {
+        return { left[LI]..., right[RI]..., T{} };
+    }
+
+    template <typename T, size_t LS, size_t RS>
+    constexpr auto zconcat(std::array<T, LS> const& left, std::array<T, RS> const& right) noexcept
+    {
+        return zconcat_base(left, right, std::make_index_sequence<LS - 1>(), std::make_index_sequence<RS - 1>());
+    }
+
+    template <typename T, size_t S, size_t... I>
+    constexpr std::array<T, S> to_zarray_base(T const(&value)[S], std::index_sequence<I...> const) noexcept
+    {
+        return { value[I]... };
+    }
+
+    template <typename T, size_t S>
+    constexpr auto to_zarray(T const(&value)[S]) noexcept
+    {
+        return to_zarray_base(value, std::make_index_sequence<S>());
+    }
+
+    template <typename T, size_t S>
+    constexpr auto to_zarray(std::array<T, S> const& value) noexcept
+    {
+        return value;
+    }
+
+    template <typename First, typename... Rest>
+    constexpr auto zcombine(First const& first, Rest const&... rest) noexcept
+    {
+        if constexpr (sizeof...(rest) == 0)
+        {
+            return to_zarray(first);
+        }
+        else
+        {
+            return zconcat(to_zarray(first), zcombine(rest...));
         }
     }
 
@@ -1064,7 +973,7 @@ namespace winrt::impl
     struct name
     {
 #pragma warning(suppress: 4307)
-        static constexpr auto value{ to_array<char16_t>(guid_of<T>()) };
+        static constexpr auto value{ to_array<wchar_t>(guid_of<T>()) };
     };
 
     template <typename T>
@@ -1303,7 +1212,7 @@ namespace winrt::impl
         static constexpr guid value{ generate_guid(signature<T>::data) };
     };
 
-    constexpr size_t to_utf8_size(char16_t const value) noexcept
+    constexpr size_t to_utf8_size(wchar_t const value) noexcept
     {
         if (value <= 0x7F)
         {
@@ -1318,7 +1227,7 @@ namespace winrt::impl
         return 3;
     }
 
-    constexpr size_t to_utf8(char16_t const value, char* buffer) noexcept
+    constexpr size_t to_utf8(wchar_t const value, char* buffer) noexcept
     {
         if (value <= 0x7F)
         {
@@ -1345,7 +1254,7 @@ namespace winrt::impl
         auto input = to_array(name_v<T>);
         size_t length = 0;
 
-        for (char16_t const element : input)
+        for (wchar_t const element : input)
         {
             length += to_utf8_size(element);
         }
@@ -1360,7 +1269,7 @@ namespace winrt::impl
         std::array<char, to_utf8_size<T>()> output{};
         size_t offset{};
 
-        for (char16_t const element : input)
+        for (wchar_t const element : input)
         {
             offset += to_utf8(element, &output[offset]);
         }
@@ -1371,7 +1280,7 @@ namespace winrt::impl
     template <>
     struct name<bool>
     {
-        static constexpr auto & value{ u"Boolean" };
+        static constexpr auto & value{ L"Boolean" };
         static constexpr auto & data{ "b1" };
     };
 
@@ -1384,7 +1293,7 @@ namespace winrt::impl
     template <>
     struct name<int8_t>
     {
-        static constexpr auto & value{ u"Int8" };
+        static constexpr auto & value{ L"Int8" };
         static constexpr auto & data{ "i1" };
     };
 
@@ -1397,7 +1306,7 @@ namespace winrt::impl
     template <>
     struct name<int16_t>
     {
-        static constexpr auto & value{ u"Int16" };
+        static constexpr auto & value{ L"Int16" };
         static constexpr auto & data{ "i2" };
     };
 
@@ -1410,7 +1319,7 @@ namespace winrt::impl
     template <>
     struct name<int32_t>
     {
-        static constexpr auto & value{ u"Int32" };
+        static constexpr auto & value{ L"Int32" };
         static constexpr auto & data{ "i4" };
     };
 
@@ -1423,7 +1332,7 @@ namespace winrt::impl
     template <>
     struct name<int64_t>
     {
-        static constexpr auto & value{ u"Int64" };
+        static constexpr auto & value{ L"Int64" };
         static constexpr auto & data{ "i8" };
     };
 
@@ -1436,7 +1345,7 @@ namespace winrt::impl
     template <>
     struct name<uint8_t>
     {
-        static constexpr auto & value{ u"UInt8" };
+        static constexpr auto & value{ L"UInt8" };
         static constexpr auto & data{ "u1" };
     };
 
@@ -1449,7 +1358,7 @@ namespace winrt::impl
     template <>
     struct name<uint16_t>
     {
-        static constexpr auto & value{ u"UInt16" };
+        static constexpr auto & value{ L"UInt16" };
         static constexpr auto & data{ "u2" };
     };
 
@@ -1462,7 +1371,7 @@ namespace winrt::impl
     template <>
     struct name<uint32_t>
     {
-        static constexpr auto & value{ u"UInt32" };
+        static constexpr auto & value{ L"UInt32" };
         static constexpr auto & data{ "u4" };
     };
 
@@ -1475,7 +1384,7 @@ namespace winrt::impl
     template <>
     struct name<uint64_t>
     {
-        static constexpr auto & value{ u"UInt64" };
+        static constexpr auto & value{ L"UInt64" };
         static constexpr auto & data{ "u8" };
     };
 
@@ -1488,7 +1397,7 @@ namespace winrt::impl
     template <>
     struct name<float>
     {
-        static constexpr auto & value{ u"Single" };
+        static constexpr auto & value{ L"Single" };
         static constexpr auto & data{ "f4" };
     };
 
@@ -1501,7 +1410,7 @@ namespace winrt::impl
     template <>
     struct name<double>
     {
-        static constexpr auto & value{ u"Double" };
+        static constexpr auto & value{ L"Double" };
         static constexpr auto & data{ "f8" };
     };
 
@@ -1514,7 +1423,7 @@ namespace winrt::impl
     template <>
     struct name<char16_t>
     {
-        static constexpr auto & value{ u"Char16" };
+        static constexpr auto & value{ L"Char16" };
         static constexpr auto & data{ "c2" };
     };
 
@@ -1527,7 +1436,7 @@ namespace winrt::impl
     template <>
     struct name<guid>
     {
-        static constexpr auto & value{ u"Guid" };
+        static constexpr auto & value{ L"Guid" };
         static constexpr auto & data{ "g16" };
     };
 
@@ -1540,7 +1449,7 @@ namespace winrt::impl
     template <>
     struct name<hresult>
     {
-        static constexpr auto & value{ u"Windows.Foundation.HResult" };
+        static constexpr auto & value{ L"Windows.Foundation.HResult" };
     };
 
     template <>
@@ -1552,7 +1461,7 @@ namespace winrt::impl
     template <>
     struct name<event_token>
     {
-        static constexpr auto & value{ u"Windows.Foundation.EventRegistrationToken" };
+        static constexpr auto & value{ L"Windows.Foundation.EventRegistrationToken" };
     };
 
     template <>
@@ -1605,13 +1514,13 @@ namespace winrt::impl
     };
 
     template <size_t Size>
-    constexpr std::u16string_view to_u16string_view(std::array<char16_t, Size> const& value) noexcept
+    constexpr std::wstring_view to_wstring_view(std::array<wchar_t, Size> const& value) noexcept
     {
-        return { value.data(), Size };
+        return { value.data(), Size - 1 };
     }
 
     template <size_t Size>
-    constexpr std::u16string_view to_u16string_view(char16_t const (&value)[Size]) noexcept
+    constexpr std::wstring_view to_wstring_view(wchar_t const (&value)[Size]) noexcept
     {
         return { value, Size - 1 };
     }
@@ -1622,7 +1531,7 @@ WINRT_EXPORT namespace winrt
     template <typename T>
     constexpr auto name_of() noexcept
     {
-        return impl::to_u16string_view(impl::name_v<T>);
+        return impl::to_wstring_view(impl::name_v<T>);
     }
 }
 
@@ -1706,7 +1615,6 @@ WINRT_EXPORT namespace winrt
         type m_value = T::invalid();
     };
 
-#if WINRT_PLATFORM_WINDOWS
     struct handle_traits
     {
         using type = void*;
@@ -1740,12 +1648,10 @@ WINRT_EXPORT namespace winrt
     };
 
     using file_handle = handle_type<file_handle_traits>;
-#endif
 }
 
 WINRT_EXPORT namespace winrt
 {
-#if WINRT_PLATFORM_WINDOWS
     struct slim_condition_variable;
 
     struct slim_mutex
@@ -1795,10 +1701,6 @@ WINRT_EXPORT namespace winrt
         impl::srwlock m_lock{};
     };
 
-#else
-    using slim_mutex = std::shared_mutex;
-#endif
-
     struct slim_lock_guard
     {
         explicit slim_lock_guard(slim_mutex& m) noexcept :
@@ -1833,7 +1735,6 @@ WINRT_EXPORT namespace winrt
         slim_mutex& m_mutex;
     };
 
-#if WINRT_PLATFORM_WINDOWS
     struct slim_condition_variable
     {
         slim_condition_variable(slim_condition_variable const&) = delete;
@@ -1885,10 +1786,6 @@ WINRT_EXPORT namespace winrt
     private:
         impl::condition_variable m_cv{};
     };
-
-#else
-    using slim_condition_variable = std::condition_variable_any;
-#endif
 }
 
 #ifdef WINRT_DIAGNOSTICS
@@ -1977,7 +1874,6 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-#if WINRT_PLATFORM_WINDOWS
     struct com_callback_args
     {
         uint32_t reserved1;
@@ -1986,7 +1882,6 @@ namespace winrt::impl
     };
 
     struct ICallbackWithNoReentrancyToApplicationSTA;
-#endif
 
     template <> struct abi<Windows::Foundation::IUnknown>
     {
@@ -2012,7 +1907,6 @@ namespace winrt::impl
 
     using IInspectable = abi_t<Windows::Foundation::IInspectable>;
 
-#if WINRT_PLATFORM_WINDOWS
     struct WINRT_NOVTABLE IAgileObject : IUnknown
     {
     };
@@ -2037,7 +1931,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL unused() noexcept = 0;
         virtual int32_t WINRT_CALL GetCollection(void** value) noexcept = 0;
     };
-#endif
 
     struct WINRT_NOVTABLE IWeakReference : IUnknown
     {
@@ -2049,7 +1942,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL GetWeakReference(IWeakReference** weakReference) noexcept = 0;
     };
 
-#if WINRT_PLATFORM_WINDOWS
     struct WINRT_NOVTABLE IRestrictedErrorInfo : IUnknown
     {
         virtual int32_t WINRT_CALL GetErrorDetails(bstr* description, int32_t* error, bstr* restrictedDescription, bstr* capabilitySid) noexcept = 0;
@@ -2080,7 +1972,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL RevertToSelf() noexcept = 0;
         virtual int32_t WINRT_CALL IsImpersonating() noexcept = 0;
     };
-#endif
 
     struct WINRT_NOVTABLE IBufferByteAccess : IUnknown
     {
@@ -2398,7 +2289,7 @@ WINRT_EXPORT namespace winrt
         reinterpret_cast<T&>(value) = object;
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, std::decay_t<T>> && !std::is_convertible_v<T, std::u16string_view>>>
+    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, std::decay_t<T>> && !std::is_convertible_v<T, std::wstring_view>>>
     auto detach_abi(T&& object)
     {
         impl::abi_t<T> result{};
@@ -2698,7 +2589,7 @@ namespace winrt::impl
         return result;
     }
 
-    inline void* create_string(char16_t const* value, uint32_t const length)
+    inline void* create_string(wchar_t const* value, uint32_t const length)
     {
         void* result = nullptr;
         check_hresult(WINRT_WindowsCreateString(value, length, &result));
@@ -2732,7 +2623,7 @@ WINRT_EXPORT namespace winrt
 {
     struct hstring
     {
-        using value_type = char16_t;
+        using value_type = wchar_t;
         using size_type = uint32_t;
         using const_reference = value_type const&;
         using pointer = value_type*;
@@ -2756,39 +2647,33 @@ WINRT_EXPORT namespace winrt
         hstring& operator=(hstring&&) = default;
         hstring(std::nullptr_t) = delete;
 
-        hstring(std::initializer_list<char16_t> value) :
+        hstring(std::initializer_list<wchar_t> value) :
             hstring(value.begin(), static_cast<uint32_t>(value.size()))
         {}
 
-        hstring(char16_t const* value) :
-            hstring(std::u16string_view(value))
+        hstring(wchar_t const* value) :
+            hstring(std::wstring_view(value))
         {}
 
-        hstring(char16_t const* value, size_type size) :
+        hstring(wchar_t const* value, size_type size) :
             m_handle(impl::create_string(value, size))
         {}
 
-#if WINRT_PLATFORM_WINDOWS
-        hstring(wchar_t const* value) : 
-            hstring(reinterpret_cast<char16_t const*>(value))
-        {}
-#endif
-
-        explicit hstring(std::u16string_view const& value) :
+        explicit hstring(std::wstring_view const& value) :
             hstring(value.data(), static_cast<size_type>(value.size()))
         {}
 
-        hstring& operator=(std::u16string_view const& value)
+        hstring& operator=(std::wstring_view const& value)
         {
             return *this = hstring{ value };
         }
 
-        hstring& operator=(char16_t const* const value)
+        hstring& operator=(wchar_t const* const value)
         {
             return *this = hstring{ value };
         }
 
-        hstring& operator=(std::initializer_list<char16_t> value)
+        hstring& operator=(std::initializer_list<wchar_t> value)
         {
             return *this = hstring{ value };
         }
@@ -2798,21 +2683,12 @@ WINRT_EXPORT namespace winrt
             m_handle.close();
         }
 
-        operator std::u16string_view() const noexcept
+        operator std::wstring_view() const noexcept
         {
             uint32_t size;
-            char16_t const* data = WINRT_WindowsGetStringRawBuffer(m_handle.get(), &size);
-            return std::u16string_view(data, size);
+            wchar_t const* data = WINRT_WindowsGetStringRawBuffer(m_handle.get(), &size);
+            return std::wstring_view(data, size);
         }
-
-#if WINRT_PLATFORM_WINDOWS
-        explicit operator std::wstring_view() const noexcept
-        {
-            uint32_t size;
-            char16_t const* data = WINRT_WindowsGetStringRawBuffer(m_handle.get(), &size);
-            return std::wstring_view(reinterpret_cast<wchar_t const*>(data), size);
-        }
-#endif
 
         const_reference operator[](size_type pos) const noexcept
         {
@@ -2944,15 +2820,14 @@ WINRT_EXPORT namespace winrt
         value = impl::duplicate_string(get_abi(object));
     }
 
-    inline void* detach_abi(std::u16string_view const& value)
+    inline void* detach_abi(std::wstring_view const& value)
     {
         return impl::create_string(value.data(), static_cast<uint32_t>(value.size()));
     }
 
-    inline void* detach_abi(char16_t const* const value)
+    inline void* detach_abi(wchar_t const* const value)
     {
-
-        return impl::create_string(value, static_cast<uint32_t>(std::char_traits<char16_t>::length(value)));
+        return impl::create_string(value, static_cast<uint32_t>(wcslen(value)));
     }
 }
 
@@ -2965,7 +2840,7 @@ namespace winrt::impl
 
     template <> struct name<hstring>
     {
-        static constexpr auto & value{ u"String" };
+        static constexpr auto & value{ L"String" };
         static constexpr auto & data{ "string" };
     };
 
@@ -2974,7 +2849,6 @@ namespace winrt::impl
         using type = basic_category;
     };
 
-#if WINRT_PLATFORM_WINDOWS
     // Temporary workaround to support locale-independent numeric formatting
     // until C++17's to_chars arrives
     struct locale_handle_traits
@@ -2997,7 +2871,6 @@ namespace winrt::impl
         static handle_type<locale_handle_traits> locale_handle{ _create_locale(LC_ALL, "C") };
         return locale_handle.get();
     }
-#endif
 
     struct hstring_builder
     {
@@ -3017,7 +2890,7 @@ namespace winrt::impl
             }
         }
 
-        char16_t* data() noexcept
+        wchar_t* data() noexcept
         {
             WINRT_ASSERT(m_buffer != nullptr);
             return m_data;
@@ -3034,7 +2907,7 @@ namespace winrt::impl
 
     private:
 
-        char16_t* m_data{ nullptr };
+        wchar_t* m_data{ nullptr };
         void* m_buffer{ nullptr };
     };
 }
@@ -3046,171 +2919,79 @@ WINRT_EXPORT namespace winrt
         return impl::embedded_null(get_abi(value));
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_convertible_v<T, std::string_view>>>
-    hstring to_hstring(T const& value)
-    {
-        std::string_view const view(value);
-
-#if WINRT_PLATFORM_WINDOWS
-        int const size = WINRT_MultiByteToWideChar(65001 /*CP_UTF8*/, 0, view.data(), static_cast<int32_t>(view.size()), nullptr, 0);
-
-        if (size == 0)
-        {
-            return{};
-        }
-
-        impl::hstring_builder result(size);
-        WINRT_VERIFY_(size, WINRT_MultiByteToWideChar(65001 /*CP_UTF8*/, 0, view.data(), static_cast<int32_t>(view.size()), reinterpret_cast<wchar_t*>(result.data()), size));
-        return result.to_hstring();
-#else 
-        std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConverter;
-        return hstring{ utfConverter.from_bytes(view.data()) };
-#endif
-    }
-   
     inline hstring to_hstring(uint8_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%hhu", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%hhu", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(int8_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%hhd", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%hhd", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(uint16_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%hu", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%hu", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(int16_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%hd", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%hd", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(uint32_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%I32u", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%u", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(int32_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%I32d", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%d", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(uint64_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%I64u", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%lu", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(int64_t value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         swprintf_s(buffer, L"%I64d", value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%ld", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(float value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         _swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%G", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(double value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[32];
         _swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[32];
-        sprintf(buffer, "%G", value);
-        return to_hstring(buffer);
-#endif
     }
 
     inline hstring to_hstring(char16_t value)
     {
-        char16_t buffer[2] = { value, 0 };
+        wchar_t buffer[2] = { value, 0 };
         return hstring{ buffer };
     }
 
@@ -3224,35 +3005,40 @@ WINRT_EXPORT namespace winrt
     {
         if (value)
         {
-            return hstring{ u"true" };
+            return hstring{ L"true" };
         }
         else
         {
-            return hstring{ u"false" };
+            return hstring{ L"false" };
         }
     }
 
     inline hstring to_hstring(guid const& value)
     {
-#if WINRT_PLATFORM_WINDOWS
         wchar_t buffer[40];
         //{00000000-0000-0000-0000-000000000000}
         swprintf_s(buffer, L"{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
             value.Data1, value.Data2, value.Data3, value.Data4[0], value.Data4[1],
             value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6], value.Data4[7]);
         return hstring{ buffer };
-#else
-        // TODO: Solution that doesn't require generating interim UTF8 string
-        char buffer[40];
-        //{00000000-0000-0000-0000-000000000000}
-        sprintf(buffer, "{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
-            value.Data1, value.Data2, value.Data3, value.Data4[0], value.Data4[1],
-            value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6], value.Data4[7]);
-        return to_hstring(buffer);
-#endif
     }
 
-#if WINRT_PLATFORM_WINDOWS
+    template <typename T, typename = std::enable_if_t<std::is_convertible_v<T, std::string_view>>>
+    hstring to_hstring(T const& value)
+    {
+        std::string_view const view(value);
+        int const size = WINRT_MultiByteToWideChar(65001 /*CP_UTF8*/, 0, view.data(), static_cast<int32_t>(view.size()), nullptr, 0);
+
+        if (size == 0)
+        {
+            return{};
+        }
+
+        impl::hstring_builder result(size);
+        WINRT_VERIFY_(size, WINRT_MultiByteToWideChar(65001 /*CP_UTF8*/, 0, view.data(), static_cast<int32_t>(view.size()), result.data(), size));
+        return result.to_hstring();
+    }
+
     inline std::string to_string(std::wstring_view value)
     {
         int const size = WINRT_WideCharToMultiByte(65001 /*CP_UTF8*/, 0, value.data(), static_cast<int32_t>(value.size()), nullptr, 0, nullptr, nullptr);
@@ -3265,17 +3051,6 @@ WINRT_EXPORT namespace winrt
         std::string result(size, '?');
         WINRT_VERIFY_(size, WINRT_WideCharToMultiByte(65001 /*CP_UTF8*/, 0, value.data(), static_cast<int32_t>(value.size()), result.data(), size, nullptr, nullptr));
         return result;
-    }
-#endif
-
-    inline std::string to_string(std::u16string_view value)
-    {
-#if WINRT_PLATFORM_WINDOWS
-        return to_string(std::wstring_view{ reinterpret_cast<const wchar_t*>(value.data()), value.size() });
-#else 
-        std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConverter;
-        return utfConverter.to_bytes(value.data());
-#endif
     }
 }
 
@@ -3292,7 +3067,7 @@ WINRT_EXPORT namespace winrt::param
         {
         }
 
-        hstring(std::u16string_view const& value) noexcept
+        hstring(std::wstring_view const& value) noexcept
         {
             if (impl::error_ok != WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle))
             {
@@ -3300,14 +3075,14 @@ WINRT_EXPORT namespace winrt::param
             }
         }
 
-        hstring(std::u16string const& value) noexcept
+        hstring(std::wstring const& value) noexcept
         {
             WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle));
         }
 
-        hstring(char16_t const* const value) noexcept
+        hstring(wchar_t const* const value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value, static_cast<uint32_t>(std::char_traits<char16_t>::length(value)), &m_header, &m_handle));
+            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value, static_cast<uint32_t>(wcslen(value)), &m_header, &m_handle));
         }
 
     private:
@@ -3345,109 +3120,104 @@ WINRT_EXPORT namespace winrt
 {
     inline bool operator==(hstring const& left, hstring const& right) noexcept
     {
-        return std::u16string_view(left) == std::u16string_view(right);
+        return std::wstring_view(left) == std::wstring_view(right);
     }
 
-    inline bool operator==(hstring const& left, std::u16string const& right) noexcept
+    inline bool operator==(hstring const& left, std::wstring const& right) noexcept
     {
-        return std::u16string_view(left) == right;
+        return std::wstring_view(left) == right;
     }
 
-    inline bool operator==(std::u16string const& left, hstring const& right) noexcept
+    inline bool operator==(std::wstring const& left, hstring const& right) noexcept
     {
-        return left == std::u16string_view(right);
+        return left == std::wstring_view(right);
     }
 
-    inline bool operator==(hstring const& left, char16_t const* right) noexcept
+    inline bool operator==(hstring const& left, wchar_t const* right) noexcept
     {
-        return std::u16string_view(left) == right;
+        return std::wstring_view(left) == right;
     }
 
-    inline bool operator==(char16_t const* left, hstring const& right) noexcept
+    inline bool operator==(wchar_t const* left, hstring const& right) noexcept
     {
-        return left == std::u16string_view(right);
+        return left == std::wstring_view(right);
     }
 
-    bool operator==(hstring const& left, std::nullptr_t) = delete;
+    bool operator==(hstring const& left, nullptr_t) = delete;
 
-    bool operator==(std::nullptr_t, hstring const& right) = delete;
+    bool operator==(nullptr_t, hstring const& right) = delete;
 
     inline bool operator<(hstring const& left, hstring const& right) noexcept
     {
-        return std::u16string_view(left) < std::u16string_view(right);
+        return std::wstring_view(left) < std::wstring_view(right);
     }
 
-    inline bool operator<(std::u16string const& left, hstring const& right) noexcept
+    inline bool operator<(std::wstring const& left, hstring const& right) noexcept
     {
-        return left < std::u16string_view(right);
+        return left < std::wstring_view(right);
     }
 
-    inline bool operator<(hstring const& left, std::u16string const& right) noexcept
+    inline bool operator<(hstring const& left, std::wstring const& right) noexcept
     {
-        return std::u16string_view(left) < right;
+        return std::wstring_view(left) < right;
     }
 
-    inline bool operator<(hstring const& left, char16_t const* right) noexcept
+    inline bool operator<(hstring const& left, wchar_t const* right) noexcept
     {
-        return std::u16string_view(left) < right;
+        return std::wstring_view(left) < right;
     }
 
-    inline bool operator<(char16_t const* left, hstring const& right) noexcept
+    inline bool operator<(wchar_t const* left, hstring const& right) noexcept
     {
-        return left < std::u16string_view(right);
+        return left < std::wstring_view(right);
     }
 
-    bool operator<(hstring const& left, std::nullptr_t) = delete;
+    bool operator<(hstring const& left, nullptr_t) = delete;
 
-    bool operator<(std::nullptr_t, hstring const& right) = delete;
+    bool operator<(nullptr_t, hstring const& right) = delete;
     inline bool operator!=(hstring const& left, hstring const& right) noexcept { return !(left == right); }
     inline bool operator>(hstring const& left, hstring const& right) noexcept { return right < left; }
     inline bool operator<=(hstring const& left, hstring const& right) noexcept { return !(right < left); }
     inline bool operator>=(hstring const& left, hstring const& right) noexcept { return !(left < right); }
 
-    inline bool operator!=(hstring const& left, std::u16string const& right) noexcept { return !(left == right); }
-    inline bool operator>(hstring const& left, std::u16string const& right) noexcept { return right < left; }
-    inline bool operator<=(hstring const& left, std::u16string const& right) noexcept { return !(right < left); }
-    inline bool operator>=(hstring const& left, std::u16string const& right) noexcept { return !(left < right); }
+    inline bool operator!=(hstring const& left, std::wstring const& right) noexcept { return !(left == right); }
+    inline bool operator>(hstring const& left, std::wstring const& right) noexcept { return right < left; }
+    inline bool operator<=(hstring const& left, std::wstring const& right) noexcept { return !(right < left); }
+    inline bool operator>=(hstring const& left, std::wstring const& right) noexcept { return !(left < right); }
 
-    inline bool operator!=(std::u16string const& left, hstring const& right) noexcept { return !(left == right); }
-    inline bool operator>(std::u16string const& left, hstring const& right) noexcept { return right < left; }
-    inline bool operator<=(std::u16string const& left, hstring const& right) noexcept { return !(right < left); }
-    inline bool operator>=(std::u16string const& left, hstring const& right) noexcept { return !(left < right); }
+    inline bool operator!=(std::wstring const& left, hstring const& right) noexcept { return !(left == right); }
+    inline bool operator>(std::wstring const& left, hstring const& right) noexcept { return right < left; }
+    inline bool operator<=(std::wstring const& left, hstring const& right) noexcept { return !(right < left); }
+    inline bool operator>=(std::wstring const& left, hstring const& right) noexcept { return !(left < right); }
 
-    inline bool operator!=(hstring const& left, char16_t const* right) noexcept { return !(left == right); }
-    inline bool operator>(hstring const& left, char16_t const* right) noexcept { return right < left; }
-    inline bool operator<=(hstring const& left, char16_t const* right) noexcept { return !(right < left); }
-    inline bool operator>=(hstring const& left, char16_t const* right) noexcept { return !(left < right); }
+    inline bool operator!=(hstring const& left, wchar_t const* right) noexcept { return !(left == right); }
+    inline bool operator>(hstring const& left, wchar_t const* right) noexcept { return right < left; }
+    inline bool operator<=(hstring const& left, wchar_t const* right) noexcept { return !(right < left); }
+    inline bool operator>=(hstring const& left, wchar_t const* right) noexcept { return !(left < right); }
 
-    inline bool operator!=(char16_t const* left, hstring const& right) noexcept { return !(left == right); }
-    inline bool operator>(char16_t const* left, hstring const& right) noexcept { return right < left; }
-    inline bool operator<=(char16_t const* left, hstring const& right) noexcept { return !(right < left); }
-    inline bool operator>=(char16_t const* left, hstring const& right) noexcept { return !(left < right); }
+    inline bool operator!=(wchar_t const* left, hstring const& right) noexcept { return !(left == right); }
+    inline bool operator>(wchar_t const* left, hstring const& right) noexcept { return right < left; }
+    inline bool operator<=(wchar_t const* left, hstring const& right) noexcept { return !(right < left); }
+    inline bool operator>=(wchar_t const* left, hstring const& right) noexcept { return !(left < right); }
 
-    bool operator!=(hstring const& left, std::nullptr_t right) = delete;
-    bool operator>(hstring const& left, std::nullptr_t right) = delete;
-    bool operator<=(hstring const& left, std::nullptr_t right) = delete;
-    bool operator>=(hstring const& left, std::nullptr_t right) = delete;
+    bool operator!=(hstring const& left, nullptr_t right) = delete;
+    bool operator>(hstring const& left, nullptr_t right) = delete;
+    bool operator<=(hstring const& left, nullptr_t right) = delete;
+    bool operator>=(hstring const& left, nullptr_t right) = delete;
 
-    bool operator!=(std::nullptr_t left, hstring const& right) = delete;
-    bool operator>(std::nullptr_t left, hstring const& right) = delete;
-    bool operator<=(std::nullptr_t left, hstring const& right) = delete;
-    bool operator>=(std::nullptr_t left, hstring const& right) = delete;
+    bool operator!=(nullptr_t left, hstring const& right) = delete;
+    bool operator>(nullptr_t left, hstring const& right) = delete;
+    bool operator<=(nullptr_t left, hstring const& right) = delete;
+    bool operator>=(nullptr_t left, hstring const& right) = delete;
 }
 
 namespace winrt::impl
 {
-    inline hstring concat_hstring(std::u16string_view const& left, std::u16string_view const& right)
+    inline hstring concat_hstring(std::wstring_view const& left, std::wstring_view const& right)
     {
         hstring_builder text(static_cast<uint32_t>(left.size() + right.size()));
-#if WINRT_PLATFORM_WINDOWS
         memcpy_s(text.data(), left.size() * sizeof(wchar_t), left.data(), left.size() * sizeof(wchar_t));
         memcpy_s(text.data() + left.size(), right.size() * sizeof(wchar_t), right.data(), right.size() * sizeof(wchar_t));
-#else
-        memcpy(text.data(), left.data(), left.size() * sizeof(wchar_t));
-        memcpy(text.data() + left.size(), right.data(), right.size() * sizeof(wchar_t));
-#endif
         return text.to_hstring();
     }
 }
@@ -3459,46 +3229,46 @@ WINRT_EXPORT namespace winrt
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(hstring const& left, std::u16string const& right)
+    inline hstring operator+(hstring const& left, std::wstring const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(std::u16string const& left, hstring const& right)
+    inline hstring operator+(std::wstring const& left, hstring const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(hstring const& left, char16_t const* right)
+    inline hstring operator+(hstring const& left, wchar_t const* right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(char16_t const* left, hstring const& right)
+    inline hstring operator+(wchar_t const* left, hstring const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(hstring const& left, char16_t right)
+    inline hstring operator+(hstring const& left, wchar_t right)
     {
-        return impl::concat_hstring(left, std::u16string_view(&right, 1));
+        return impl::concat_hstring(left, std::wstring_view(&right, 1));
     }
 
-    inline hstring operator+(char16_t left, hstring const& right)
+    inline hstring operator+(wchar_t left, hstring const& right)
     {
-        return impl::concat_hstring(std::u16string_view(&left, 1), right);
+        return impl::concat_hstring(std::wstring_view(&left, 1), right);
     }
 
-    hstring operator+(hstring const& left, std::nullptr_t) = delete;
+    hstring operator+(hstring const& left, nullptr_t) = delete;
 
-    hstring operator+(std::nullptr_t, hstring const& right) = delete;
+    hstring operator+(nullptr_t, hstring const& right) = delete;
 
-    inline hstring operator+(hstring const& left, std::u16string_view const& right)
+    inline hstring operator+(hstring const& left, std::wstring_view const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(std::u16string_view const& left, hstring const& right)
+    inline hstring operator+(std::wstring_view const& left, hstring const& right)
     {
         return impl::concat_hstring(left, right);
     }
@@ -3915,12 +3685,10 @@ namespace winrt::impl
             return &m_size;
         }
 
-#if WINRT_PLATFORM_WINDOWS
         operator unsigned long*() noexcept
         {
             return reinterpret_cast<unsigned long*>(&m_size);
         }
-#endif
 
     private:
 
@@ -4322,6 +4090,7 @@ namespace winrt::impl
         return result;
     }
 }
+
 WINRT_EXPORT namespace winrt
 {
     template <typename T>
@@ -4388,8 +4157,6 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-#if WINRT_PLATFORM_WINDOWS
-
 WINRT_EXPORT namespace winrt
 {
     template <typename T>
@@ -4434,11 +4201,8 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-#endif
-
 namespace winrt::impl
 {
-#if WINRT_PLATFORM_WINDOWS
     struct heap_traits
     {
         using type = wchar_t*;
@@ -4470,11 +4234,10 @@ namespace winrt::impl
     };
 
     using bstr_handle = handle_type<bstr_traits>;
-#endif
 
-    inline hstring trim_hresult_message(char16_t const* const message, uint32_t size) noexcept
+    inline hstring trim_hresult_message(wchar_t const* const message, uint32_t size) noexcept
     {
-        char16_t const* back = message + size - 1;
+        wchar_t const* back = message + size - 1;
 
         while (size&& iswspace(*back))
         {
@@ -4508,19 +4271,15 @@ WINRT_EXPORT namespace winrt
         hresult_error& operator=(hresult_error&&) = default;
 
         hresult_error(hresult_error const& other) noexcept :
-            m_code(other.m_code)
-#if WINRT_PLATFORM_WINDOWS
-            ,m_info(other.m_info)
-#endif
+            m_code(other.m_code),
+            m_info(other.m_info)
         {
         }
 
         hresult_error& operator=(hresult_error const& other) noexcept
         {
             m_code = other.m_code;
-#if WINRT_PLATFORM_WINDOWS
             m_info = other.m_info;
-#endif
             return *this;
         }
 
@@ -4536,7 +4295,6 @@ WINRT_EXPORT namespace winrt
 
         hresult_error(hresult const code, from_abi_t) noexcept : m_code(code)
         {
-#if WINRT_PLATFORM_WINDOWS
             WINRT_GetRestrictedErrorInfo(m_info.put_void());
 
             if (m_info == nullptr)
@@ -4552,9 +4310,6 @@ WINRT_EXPORT namespace winrt
                     WINRT_VERIFY_(impl::error_ok, info2->CapturePropagationContext(nullptr));
                 }
             }
-#else
-            originate(code, nullptr);
-#endif
         }
 
         hresult code() const noexcept
@@ -4564,7 +4319,6 @@ WINRT_EXPORT namespace winrt
 
         hstring message() const noexcept
         {
-#if WINRT_PLATFORM_WINDOWS
             if (m_info)
             {
                 int32_t code{};
@@ -4578,11 +4332,11 @@ WINRT_EXPORT namespace winrt
                     {
                         if (message)
                         {
-                            return impl::trim_hresult_message(reinterpret_cast<char16_t *>(message.get()), WINRT_SysStringLen(message.get()));
+                            return impl::trim_hresult_message(message.get(), WINRT_SysStringLen(message.get()));
                         }
                         else
                         {
-                            return impl::trim_hresult_message(reinterpret_cast<char16_t *>(fallback.get()), WINRT_SysStringLen(fallback.get()));
+                            return impl::trim_hresult_message(fallback.get(), WINRT_SysStringLen(fallback.get()));
                         }
                     }
                 }
@@ -4598,30 +4352,21 @@ WINRT_EXPORT namespace winrt
                 0,
                 nullptr);
 
-            return impl::trim_hresult_message(reinterpret_cast<char16_t*>(message.get()), size);
-#else
-            return u"";
-#endif
+            return impl::trim_hresult_message(message.get(), size);
         }
 
         template <typename To>
         auto try_as() const noexcept
         {
-#if WINRT_PLATFORM_WINDOWS
             return m_info.try_as<To>();
-#else
-            return nullptr;
-#endif
         }
 
         hresult to_abi() const noexcept
         {
-#if WINRT_PLATFORM_WINDOWS
             if (m_info)
             {
                 WINRT_SetRestrictedErrorInfo(m_info.get());
             }
-#endif
 
             return m_code;
         }
@@ -4630,18 +4375,14 @@ WINRT_EXPORT namespace winrt
 
         void originate(hresult const code, void* message) noexcept
         {
-#if WINRT_PLATFORM_WINDOWS
             WINRT_VERIFY(WINRT_RoOriginateLanguageException(code, message, nullptr));
             WINRT_VERIFY_(impl::error_ok, WINRT_GetRestrictedErrorInfo(m_info.put_void()));
-#endif
         }
 
-#if WINRT_PLATFORM_WINDOWS
         impl::bstr_handle m_debug_reference;
         uint32_t const m_debug_magic{ 0xAABBCCDD };
-        com_ptr<impl::IRestrictedErrorInfo> m_info;
-#endif
         hresult m_code{ impl::error_fail };
+        com_ptr<impl::IRestrictedErrorInfo> m_info;
     };
 
     struct hresult_access_denied : hresult_error
@@ -4798,11 +4539,6 @@ WINRT_EXPORT namespace winrt
         throw hresult_error(result, hresult_error::from_abi);
     }
 
-#if WINRT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexceptions"
-#endif
-
     inline WINRT_NOINLINE hresult to_hresult() noexcept
     {
         try
@@ -4836,16 +4572,10 @@ WINRT_EXPORT namespace winrt
         }
     }
 
-#if WINRT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif
-
-#if WINRT_PLATFORM_WINDOWS
     [[noreturn]] inline void throw_last_error()
     {
         throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
     }
-#endif
 
     inline WINRT_FORCEINLINE void check_hresult(hresult const result)
     {
@@ -4855,7 +4585,6 @@ WINRT_EXPORT namespace winrt
         }
     }
 
-#if WINRT_PLATFORM_WINDOWS
     template<typename T>
     void check_nt(T result)
     {
@@ -4893,7 +4622,6 @@ WINRT_EXPORT namespace winrt
 
         return pointer;
     }
-#endif
 }
 
 WINRT_EXPORT namespace winrt
@@ -5029,8 +4757,7 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-
-    template <typename I, auto Method>
+    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(event_token)>
     struct event_revoker
     {
         event_revoker() noexcept = default;
@@ -5087,11 +4814,11 @@ namespace winrt::impl
             }
         }
 
-        weak_ref<I> m_object{};
+        winrt::weak_ref<I> m_object{};
         event_token m_token{};
     };
 
-    template <typename I, auto Method>
+    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(event_token)>
     struct factory_event_revoker
     {
         factory_event_revoker() noexcept = default;
@@ -5170,12 +4897,12 @@ namespace winrt::impl
             std::uninitialized_fill_n(data(), count, value_type());
         }
 
-        uint32_t AddRef() noexcept
+        unsigned long AddRef() noexcept
         {
             return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t Release() noexcept
+        unsigned long Release() noexcept
         {
             uint32_t const remaining = m_references.fetch_sub(1, std::memory_order_release) - 1;
 
@@ -5269,7 +4996,6 @@ WINRT_EXPORT namespace winrt
                     std::copy_n(m_targets->begin(), m_targets->size(), new_targets->begin());
                 }
 
-#if WINRT_PLATFORM_WINDOWS
                 if constexpr (!impl::has_category_v<delegate_type>)
                 {
                     new_targets->back() = delegate;
@@ -5285,9 +5011,7 @@ WINRT_EXPORT namespace winrt
                         delegate.get()(args...);
                     };
                 }
-#else
-                new_targets->back() = delegate;
-#endif
+
                 token = get_token(new_targets->back());
 
                 slim_lock_guard const swap_guard(m_swap);
@@ -5954,7 +5678,6 @@ namespace winrt::impl
         static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
-#if WINRT_PLATFORM_WINDOWS
     template <> struct guid_storage<IAgileObject>
     {
         static constexpr guid value{ 0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 } };
@@ -5969,7 +5692,6 @@ namespace winrt::impl
     {
         static constexpr guid value{ 0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae } };
     };
-#endif
 
     template <> struct guid_storage<IWeakReference>
     {
@@ -5981,7 +5703,6 @@ namespace winrt::impl
         static constexpr guid value{ 0x00000038,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
-#if WINRT_PLATFORM_WINDOWS
     template <> struct guid_storage<ILanguageExceptionErrorInfo2>
     {
         static constexpr guid value{ 0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD } };
@@ -6001,7 +5722,6 @@ namespace winrt::impl
     {
         static constexpr guid value{ 0x0A299774,0x3E4E,0xFC42,{ 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 } };
     };
-#endif
 
     template <> struct guid_storage<IBufferByteAccess>
     {
@@ -6245,165 +5965,163 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::AsyncActionCompletedHandler>
     {
-        static constexpr auto & value{ u"Windows.Foundation.AsyncActionCompletedHandler" };
+        static constexpr auto & value{ L"Windows.Foundation.AsyncActionCompletedHandler" };
     };
 
     template <typename TResult> struct name<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.AsyncOperationCompletedHandler`1<", name_v<TResult>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationCompletedHandler`1<", name_v<TResult>, L">") };
     };
 
     template <typename TProgress> struct name<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.AsyncActionWithProgressCompletedHandler`1<", name_v<TProgress>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncActionWithProgressCompletedHandler`1<", name_v<TProgress>, L">") };
     };
 
     template <typename TProgress> struct name<Windows::Foundation::AsyncActionProgressHandler<TProgress>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.AsyncActionProgressHandler`1<", name_v<TProgress>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncActionProgressHandler`1<", name_v<TProgress>, L">") };
     };
 
     template <typename TResult, typename TProgress> struct name<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.AsyncOperationProgressHandler`2<", name_v<TResult>, u", ", name_v<TProgress>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationProgressHandler`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
     };
 
     template <typename TResult, typename TProgress> struct name<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.AsyncOperationWithProgressCompletedHandler`2<", name_v<TResult>, u", ", name_v<TProgress>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationWithProgressCompletedHandler`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
     };
 
     template <> struct name<Windows::Foundation::IAsyncInfo>
     {
-        static constexpr auto & value{ u"Windows.Foundation.IAsyncInfo" };
+        static constexpr auto & value{ L"Windows.Foundation.IAsyncInfo" };
     };
 
     template <> struct name<Windows::Foundation::IAsyncAction>
     {
-        static constexpr auto & value{ u"Windows.Foundation.IAsyncAction" };
+        static constexpr auto & value{ L"Windows.Foundation.IAsyncAction" };
     };
 
     template <typename TResult> struct name<Windows::Foundation::IAsyncOperation<TResult>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.IAsyncOperation`1<", name_v<TResult>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncOperation`1<", name_v<TResult>, L">") };
     };
 
     template <typename TProgress> struct name<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.IAsyncActionWithProgress`1<", name_v<TProgress>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncActionWithProgress`1<", name_v<TProgress>, L">") };
     };
 
     template <typename TResult, typename TProgress> struct name<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.IAsyncOperationWithProgress`2<", name_v<TResult>, u", ", name_v<TProgress>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncOperationWithProgress`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
     };
 
     template <> struct name<Windows::Foundation::IInspectable>
     {
-        static constexpr auto & value{ u"Object" };
+        static constexpr auto & value{ L"Object" };
         static constexpr auto & data{ "cinterface(IInspectable)" };
     };
 
     template <> struct name<Windows::Foundation::IActivationFactory>
     {
-        static constexpr auto & value{ u"Windows.Foundation.IActivationFactory" };
+        static constexpr auto & value{ L"Windows.Foundation.IActivationFactory" };
     };
 
-#if WINRT_PLATFORM_WINDOWS
     template <> struct name<IAgileObject>
     {
-        static constexpr auto & value{ u"IAgileObject" };
+        static constexpr auto & value{ L"IAgileObject" };
     };
-#endif
 
     template <> struct name<IWeakReferenceSource>
     {
-        static constexpr auto & value{ u"IWeakReferenceSource" };
+        static constexpr auto & value{ L"IWeakReferenceSource" };
     };
 
     template <typename T> struct name<Windows::Foundation::IReference<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.IReference`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IReference`1<", name_v<T>, L">") };
     };
 
     template <typename T> struct name<Windows::Foundation::IReferenceArray<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.IReferenceArray`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
     };
 
     template <> struct name<wfc::IVectorChangedEventArgs>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Collections.IVectorChangedEventArgs" };
+        static constexpr auto & value{ L"Windows.Foundation.Collections.IVectorChangedEventArgs" };
     };
 
     template <typename K> struct name<wfc::IMapChangedEventArgs<K>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
     };
 
     template <typename T> struct name<wfc::VectorChangedEventHandler<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.VectorChangedEventHandler`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.VectorChangedEventHandler`1<", name_v<T>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, u", ", name_v<V>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename T> struct name<wfc::IIterator<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IIterator`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterator`1<", name_v<T>, L">") };
     };
 
     template <typename T> struct name<wfc::IIterable<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IIterable`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterable`1<", name_v<T>, L">") };
     };
 
     template <typename T> struct name<wfc::IVectorView<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IVectorView`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVectorView`1<", name_v<T>, L">") };
     };
 
     template <typename T> struct name<wfc::IVector<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IVector`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVector`1<", name_v<T>, L">") };
     };
 
     template <typename T> struct name<wfc::IObservableVector<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IObservableVector`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableVector`1<", name_v<T>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IKeyValuePair`2<", name_v<K>, u", ", name_v<V>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IKeyValuePair`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IMapView<K, V>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IMapView`2<", name_v<K>, u", ", name_v<V>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapView`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IMap<K, V>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IMap`2<", name_v<K>, u", ", name_v<V>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMap`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IObservableMap<K, V>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, u", ", name_v<V>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename T> struct name<Windows::Foundation::EventHandler<T>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.EventHandler`1<", name_v<T>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.EventHandler`1<", name_v<T>, L">") };
     };
 
     template <typename TSender, typename TArgs> struct name<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
     {
-        static constexpr auto value{ combine(u"Windows.Foundation.TypedEventHandler`2<", name_v<TSender>, u", ", name_v<TArgs>, u">") };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.TypedEventHandler`2<", name_v<TSender>, L", ", name_v<TArgs>, L">") };
     };
 
     template <> struct category<Windows::Foundation::AsyncActionCompletedHandler>
@@ -6586,8 +6304,6 @@ namespace winrt::impl
     };
 }
 
-#if WINRT_PLATFORM_WINDOWS
-
 namespace winrt::impl
 {
     inline int32_t make_marshaler(IUnknown* outer, void** result) noexcept
@@ -6708,36 +6424,26 @@ namespace winrt::impl
     }
 }
 
-#endif
-
 namespace winrt::impl
 {
     template <typename T, typename H>
     struct implements_delegate : abi_t<T>, H
     {
         implements_delegate(H&& handler) : H(std::forward<H>(handler)) {}
-        virtual ~implements_delegate() {}
-        
+
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-#if WINRT_PLATFORM_WINDOWS
-            // TODO: Agile support for non-windows
             if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
-#else
-            if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
-#endif
             {
                 *result = static_cast<abi_t<T>*>(this);
                 AddRef();
                 return error_ok;
             }
 
-#if WINRT_PLATFORM_WINDOWS
             if (is_guid_of<IMarshal>(id))
             {
                 return make_marshaler(this, result);
             }
-#endif
 
             *result = nullptr;
             return error_no_interface;
@@ -6792,12 +6498,7 @@ namespace winrt::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-#if WINRT_PLATFORM_WINDOWS
-            // TODO: Agile support for non-windows
             if (is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
-#else
-            if (is_guid_of<Windows::Foundation::IUnknown>(id))
-#endif
             {
                 *result = static_cast<IUnknown*>(this);
                 AddRef();
@@ -7453,13 +7154,7 @@ namespace winrt::impl
     }
 }
 
-/*
-    TODO: Factory caching is completely stubbed out on non-Windows.
-          The implementation below relies on several Windows intrinsics,
-          including atomic single-linked list, memory barrier, and
-          interlocked comparison. I'm sure this can be implemented in 
-          ISO C++, but I'll get to it later. 
-*/
+WINRT_WARNING_PUSH
 
 WINRT_EXPORT namespace winrt
 {
@@ -7469,14 +7164,12 @@ WINRT_EXPORT namespace winrt
         impl::com_ref<Interface> object;
         hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
 
-#if WINRT_PLATFORM_WINDOWS
         if (hr == impl::error_not_initialized)
         {
             void* cookie{};
             check_hresult(WINRT_CoIncrementMTAUsage(&cookie));
             hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
         }
-#endif
 
         check_hresult(hr);
         return object;
@@ -7485,7 +7178,6 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-#if WINRT_PLATFORM_WINDOWS
     inline int32_t interlocked_read_32(int32_t const volatile* target) noexcept
     {
 #if defined _M_IX86 || defined _M_X64
@@ -7607,7 +7299,6 @@ namespace winrt::impl
 #endif
         }
     };
-#endif
 
     struct factory_cache
     {
@@ -7616,22 +7307,17 @@ namespace winrt::impl
 
         factory_cache() noexcept
         {
-#if WINRT_PLATFORM_WINDOWS
             WINRT_InitializeSListHead(&m_list);
-#endif
         }
 
-#if WINRT_PLATFORM_WINDOWS
         void add(factory_cache_typeless_entry* const entry) noexcept
         {
             WINRT_ASSERT(entry);
             WINRT_InterlockedPushEntrySList(&m_list, &entry->next);
         }
-#endif
 
         void clear() noexcept
         {
-#if WINRT_PLATFORM_WINDOWS
             slist_entry* entry = static_cast<slist_entry*>(WINRT_InterlockedFlushSList(&m_list));
 
             while (entry != nullptr)
@@ -7642,13 +7328,11 @@ namespace winrt::impl
                 reinterpret_cast<factory_cache_typeless_entry*>(reinterpret_cast<uint8_t*>(entry) - offsetof(factory_cache_typeless_entry, next))->clear();
                 entry = next;
             }
-#endif
         }
 
     private:
-#if WINRT_PLATFORM_WINDOWS
+
         alignas(memory_allocation_alignment) slist_header m_list;
-#endif
     };
 
     inline factory_cache& get_factory_cache() noexcept
@@ -7663,7 +7347,6 @@ namespace winrt::impl
         template <typename F>
         auto call(F&& callback)
         {
-#if WINRT_PLATFORM_WINDOWS
 #ifdef WINRT_DIAGNOSTICS
             get_diagnostics_info().add_factory<Class>();
 #endif
@@ -7676,11 +7359,9 @@ namespace winrt::impl
                     return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
                 }
             }
-#endif
 
             auto object = get_activation_factory<Interface>(name_of<Class>());
 
-#if WINRT_PLATFORM_WINDOWS
             if (!object.template try_as<IAgileObject>())
             {
 #ifdef WINRT_DIAGNOSTICS
@@ -7709,12 +7390,7 @@ namespace winrt::impl
                     return callback(object);
                 }
             }
-#else
-            return callback(object);
-#endif
         }
-
-#if WINRT_PLATFORM_WINDOWS
 
     private:
 
@@ -7754,7 +7430,6 @@ namespace winrt::impl
 
         object_and_count m_value;
         alignas(memory_allocation_alignment) slist_entry m_next;
-#endif
     };
 
     template <typename Class, typename Interface>
@@ -7769,12 +7444,10 @@ namespace winrt::impl
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
     auto call_factory(F&& callback)
     {
-#if WINRT_PLATFORM_WINDOWS
         static_assert(sizeof(factory_cache_typeless_entry) == sizeof(factory_cache_entry<Class, Interface>));
         static_assert(std::alignment_of_v<factory_cache_typeless_entry> == std::alignment_of_v<factory_cache_entry<Class, Interface>>);
         static_assert(std::is_standard_layout_v<factory_cache_typeless_entry>);
         static_assert(std::is_standard_layout_v<factory_cache_entry<Class, Interface>>);
-#endif
 
         return factory_storage<Class, Interface>::factory.call(callback);
     }
@@ -7864,7 +7537,6 @@ WINRT_EXPORT namespace winrt
         impl::get_factory_cache().clear();
     }
 
-#if WINRT_PLATFORM_WINDOWS
     template <typename Interface>
     impl::com_ref<Interface> create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
     {
@@ -7872,12 +7544,16 @@ WINRT_EXPORT namespace winrt
         check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), put_abi(temp)));
         return temp;
     }
-#endif
 }
+
+WINRT_WARNING_POP
 
 namespace winrt::impl
 {
-    struct marker {};
+    struct marker
+    {
+        marker() = delete;
+    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -7887,6 +7563,7 @@ WINRT_EXPORT namespace winrt
     struct composing : impl::marker {};
     struct composable : impl::marker {};
     struct no_module_lock : impl::marker {};
+    struct static_lifetime : impl::marker {};
 
     template <typename Interface>
     struct cloaked : Interface {};
@@ -7903,26 +7580,47 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-    template <typename T>
-    struct is_marker : std::is_base_of<impl::marker, T> {};
+    template<typename...T>
+    using tuple_cat_t = decltype(std::tuple_cat(std::declval<T>()...));
+
+    template <template <typename> typename Condition, typename>
+    struct tuple_if_base;
+
+    template <template <typename> typename Condition, typename...T>
+    struct tuple_if_base<Condition, std::tuple<T...>> { using type = tuple_cat_t<typename std::conditional<Condition<T>::value, std::tuple<T>, std::tuple<>>::type...>; };
+
+    template <template <typename> typename Condition, typename T>
+    using tuple_if = typename tuple_if_base<Condition, T>::type;
+
+#ifdef WINRT_WINDOWS_ABI
 
     template <typename T>
-    inline constexpr bool is_marker_v = is_marker<T>::value;
+    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
+
+#else
 
     template <typename T>
-    struct uncloak
+    struct is_interface : std::is_base_of<Windows::Foundation::IInspectable, T> {};
+
+#endif
+
+    template <typename T>
+    struct is_marker : std::disjunction<std::is_base_of<marker, T>, std::is_void<T>> {};
+
+    template <typename T>
+    struct uncloak_base
     {
         using type = T;
     };
 
     template <typename T>
-    struct uncloak<cloaked<T>>
+    struct uncloak_base<cloaked<T>>
     {
         using type = T;
     };
 
     template <typename T>
-    using uncloak_t = typename uncloak<T>::type;
+    using uncloak = typename uncloak_base<T>::type;
 
     template <typename I>
     struct is_cloaked : std::disjunction<
@@ -7933,12 +7631,21 @@ namespace winrt::impl
     template <typename I>
     struct is_cloaked<cloaked<I>> : std::true_type {};
 
-    template <typename I>
-    inline constexpr bool is_cloaked_v = is_cloaked<I>::value;
+    template <typename D, typename I, typename Enable = void>
+    struct producer;
+
+    template <typename D, typename T>
+    struct producers_base;
+
+    template <typename D, typename...T>
+    struct producers_base<D, std::tuple<T...>> : producer<D, T>... {};
+
+    template <typename D, typename...T>
+    using producers = producers_base<D, tuple_if<is_interface, std::tuple<uncloak<T>...>>>;
 
     template <typename D, typename... I>
     struct root_implements;
-    
+
     template <typename T, typename = std::void_t<>>
     struct unwrap_implements
     {
@@ -7979,9 +7686,6 @@ namespace winrt::impl
     using base_implements = base_implements_impl<D, void, I...>;
 
     template <typename D, typename I, typename Enable = void>
-    struct producer;
-
-    template <typename D, typename I, typename Enable = void>
     struct produce_base;
 
     template <typename D, typename I>
@@ -8000,6 +7704,15 @@ namespace winrt::impl
 
     template <typename T>
     struct has_class_type<T, std::void_t<typename T::class_type>> : std::true_type {};
+
+    template <typename>
+    struct has_static_lifetime : std::false_type {};
+
+    template <typename D, typename...I>
+    struct has_static_lifetime<implements<D, I...>> : std::disjunction<std::is_same<static_lifetime, I>...> {};
+
+    template <typename D>
+    inline constexpr bool has_static_lifetime_v = has_static_lifetime<typename D::implements_type>::value;
 
     template <typename T>
     void clear_abi(T*) noexcept
@@ -8088,7 +7801,7 @@ namespace winrt::impl
         using type = typename interface_list_append_impl<
             std::conditional_t<
             Predicate<T>::value,
-            interface_list<winrt::impl::uncloak_t<T>>,
+            interface_list<winrt::impl::uncloak<T>>,
             interface_list<>
             >,
             typename filter_impl<Predicate, Rest...>::type
@@ -8113,8 +7826,6 @@ namespace winrt::impl
         >::type;
     };
 
-    template <typename T>
-    struct is_interface : std::negation<winrt::impl::is_marker<T>> {};
     template <typename T>
     using implemented_interfaces = filter<is_interface, typename T::implements_type>;
 
@@ -8298,14 +8009,6 @@ namespace winrt::impl
 
 #endif
 
-    template <typename D, typename I>
-    struct producer<D, I, std::enable_if_t<is_marker_v<I>>>
-    {};
-
-    template <typename D, typename I>
-    struct producer<D, I, std::enable_if_t<is_implements_v<I>>>
-    {};
-
     struct INonDelegatingInspectable : Windows::Foundation::IUnknown
     {
         INonDelegatingInspectable(std::nullptr_t = nullptr) noexcept {}
@@ -8415,8 +8118,6 @@ namespace winrt::impl
                 return error_ok;
             }
 
-#if WINRT_PLATFORM_WINDOWS
-            // TODO: Agile support for non-windows
             if constexpr (Agile)
             {
                 if (is_guid_of<IAgileObject>(id))
@@ -8431,7 +8132,6 @@ namespace winrt::impl
                     return make_marshaler(this, object);
                 }
             }
-#endif
 
             *object = nullptr;
             return error_no_interface;
@@ -8546,7 +8246,7 @@ namespace winrt::impl
     protected:
         static constexpr IInspectable* outer() noexcept { return nullptr; }
 
-        template <typename T, typename DD, typename I>
+        template <typename T, typename D, typename I>
         friend class produce_dispatch_to_overridable_base;
     };
 
@@ -8558,10 +8258,10 @@ namespace winrt::impl
     private:
         IInspectable* m_outer = nullptr;
 
-        template <typename T, typename DD, typename I>
+        template <typename T, typename D, typename I>
         friend class produce_dispatch_to_overridable_base;
 
-        template <typename DD>
+        template <typename D>
         friend struct composable_factory;
     };
 
@@ -8743,7 +8443,7 @@ namespace winrt::impl
         {
             const auto& local_iids = static_cast<D*>(this)->get_local_iids();
             const uint32_t& local_count = local_iids.first;
-            if constexpr(root_implements_type::is_composing)
+            if constexpr (root_implements_type::is_composing)
             {
                 if (local_count > 0)
                 {
@@ -8858,8 +8558,6 @@ namespace winrt::impl
         using use_module_lock = std::negation<std::disjunction<std::is_same<no_module_lock, I>...>>;
         using weak_ref_t = impl::weak_ref<is_agile::value>;
 
-        static_assert(!is_factory::value || (is_factory::value&& is_agile::value), "winrt::implements - activation factories must be agile.");
-
         std::atomic<std::conditional_t<is_weak_ref_source::value, uintptr_t, uint32_t>> m_references{ 1 };
 
         int32_t query_interface(guid const& id, void** object) noexcept
@@ -8872,8 +8570,6 @@ namespace winrt::impl
                 return error_ok;
             }
 
-#if WINRT_PLATFORM_WINDOWS
-            // TODO: Agile support for non-windows
             if constexpr (is_agile::value)
             {
                 if (is_guid_of<IAgileObject>(id))
@@ -8888,7 +8584,6 @@ namespace winrt::impl
                     return make_marshaler(get_unknown(), object);
                 }
             }
-#endif
 
             if constexpr (is_inspectable::value)
             {
@@ -8988,42 +8683,94 @@ namespace winrt::impl
             return Windows::Foundation::TrustLevel::BaseTrust;
         }
 
-        template <typename DD, typename II, typename Enable>
+        template <typename D, typename I, typename Enable>
         friend struct impl::produce_base;
 
-        template <typename DD, typename II>
+        template <typename D, typename I>
         friend struct impl::produce;
     };
+
+    template <typename D>
+    Windows::Foundation::IActivationFactory make_factory()
+    {
+        if constexpr (!has_static_lifetime_v<D>)
+        {
+            Windows::Foundation::IActivationFactory factory;
+            *put_abi(factory) = to_abi<Windows::Foundation::IActivationFactory>(new D);
+            return factory;
+        }
+        else
+        {
+            static slim_mutex lock;
+            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
+            Windows::Foundation::IUnknown collection;
+            check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
+            auto const map = collection.as<Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>>();
+
+            {
+                slim_lock_guard const guard{ lock };
+
+                if (Windows::Foundation::IInspectable value = map.TryLookup(name_of<typename D::instance_type>()))
+                {
+                    Windows::Foundation::IActivationFactory factory;
+                    *put_abi(factory) = detach_abi(value);
+                    return factory;
+                }
+            }
+
+            Windows::Foundation::IActivationFactory object;
+            *put_abi(object) = to_abi<Windows::Foundation::IActivationFactory>(new D);
+
+            {
+                slim_lock_guard const guard{ lock };
+
+                if (Windows::Foundation::IInspectable value = map.TryLookup(name_of<typename D::instance_type>()))
+                {
+                    Windows::Foundation::IActivationFactory factory;
+                    *put_abi(factory) = detach_abi(value);
+                    return factory;
+                }
+                else
+                {
+                    map.Insert(name_of<typename D::instance_type>(), object);
+                    return object;
+                }
+            }
+        }
+    }
 }
 
 WINRT_EXPORT namespace winrt
 {
-    template <typename D, typename... Args, std::enable_if_t<!impl::has_composable<D>::value && !impl::has_class_type<D>::value>* = nullptr>
+    template <typename D, typename... Args>
     auto make(Args&&... args)
     {
         using I = typename impl::implements_default_interface<D>::type;
-        impl::com_ref<I> result{ nullptr };
-        *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-        return result;
-    }
 
-    template <typename D, typename... Args, std::enable_if_t<!impl::has_composable<D>::value && impl::has_class_type<D>::value>* = nullptr>
-    auto make(Args&&... args)
-    {
-        using I = typename impl::implements_default_interface<D>::type;
-        static_assert(std::is_same_v<I, impl::default_interface_t<typename D::class_type>>);
-        typename D::class_type result{ nullptr };
-        *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-        return result;
-    }
-
-    template <typename D, typename... Args, std::enable_if_t<impl::has_composable<D>::value>* = nullptr>
-    auto make(Args&&... args)
-    {
-        using I = typename impl::implements_default_interface<D>::type;
-        impl::com_ref<I> result;
-        *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-        return result.template as<typename D::composable>();
+        if constexpr (std::is_same_v<I, Windows::Foundation::IActivationFactory>)
+        {
+            static_assert(sizeof...(args) == 0);
+            return impl::make_factory<D>();
+        }
+        else if constexpr (impl::has_composable<D>::value)
+        {
+            impl::com_ref<I> result{ nullptr };
+            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
+            return result.template as<typename D::composable>();
+        }
+        else if constexpr (impl::has_class_type<D>::value)
+        {
+            static_assert(std::is_same_v<I, impl::default_interface_t<typename D::class_type>>);
+            typename D::class_type result{ nullptr };
+            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
+            return result;
+        }
+        else
+        {
+            impl::com_ref<I> result{ nullptr };
+            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
+            return result;
+        }
     }
 
     template <typename D, typename... Args>
@@ -9035,7 +8782,7 @@ WINRT_EXPORT namespace winrt
     }
 
     template <typename D, typename... I>
-    struct implements : impl::producer<D, impl::uncloak_t<I>>..., impl::base_implements<D, I...>::type
+    struct implements : impl::producers<D, I...>, impl::base_implements<D, I...>::type
     {
     protected:
 
@@ -9044,20 +8791,6 @@ WINRT_EXPORT namespace winrt
         using is_factory = typename root_implements_type::is_factory;
 
         using base_type::base_type;
-
-#if WINRT_PLATFORM_WINDOWS
-        void static_lifetime()
-        {
-            static_assert(is_factory::value);
-
-            auto factory = get_activation_factory<impl::IStaticLifetime>(u"Windows.ApplicationModel.Core.CoreApplication");
-            Windows::Foundation::IUnknown collection;
-            check_hresult(factory->GetCollection(put_abi(collection)));
-
-            auto map = collection.as<Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>>();
-            map.Insert(GetRuntimeClassName(), *this);
-        }
-#endif
 
     public:
 
@@ -9135,7 +8868,7 @@ WINRT_EXPORT namespace winrt
             return impl::runtime_class_name<typename impl::implements_default_interface<D>::type>::get();
         }
 
-        template <typename DD, typename... II>
+        template <typename D, typename... I>
         friend struct impl::root_implements;
 
         template <typename T>
@@ -10181,10 +9914,10 @@ namespace winrt::impl
         {
             D& instance;
 
-            template <typename T, typename DD, typename II>
+            template <typename T, typename D, typename I>
             friend class produce_dispatch_to_overridable_base;
 
-            template <typename DD, typename... II>
+            template <typename D, typename... I>
             friend class dispatch_to_overridable;
 
             explicit wrapper(D& d) : instance(d) {}
@@ -10215,6 +9948,8 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
             : X(X), Y(Y)
         {}
 
+#ifdef WINRT_NUMERICS
+
         constexpr Point(Numerics::float2 const& value) noexcept
             : X(value.x), Y(value.y)
         {}
@@ -10223,6 +9958,8 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         {
             return { X, Y };
         }
+
+#endif
     };
 
     constexpr bool operator==(Point const& left, Point const& right) noexcept
@@ -10246,6 +9983,8 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
             : Width(Width), Height(Height)
         {}
 
+#ifdef WINRT_NUMERICS
+
         constexpr Size(Numerics::float2 const& value) noexcept
             : Width(value.x), Height(value.y)
         {}
@@ -10254,6 +9993,8 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         {
             return { Width, Height };
         }
+
+#endif
     };
 
     constexpr bool operator==(Size const& left, Size const& right) noexcept
@@ -10299,7 +10040,7 @@ namespace winrt::impl
 {
     template <> struct name<Windows::Foundation::Point>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Point" };
+        static constexpr auto & value{ L"Windows.Foundation.Point" };
     };
 
     template <> struct category<Windows::Foundation::Point>
@@ -10309,7 +10050,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Size>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Size" };
+        static constexpr auto & value{ L"Windows.Foundation.Size" };
     };
 
     template <> struct category<Windows::Foundation::Size>
@@ -10319,7 +10060,7 @@ namespace winrt::impl
     
     template <> struct name<Windows::Foundation::Rect>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Rect" };
+        static constexpr auto & value{ L"Windows.Foundation.Rect" };
     };
 
     template <> struct category<Windows::Foundation::Rect>
@@ -10327,9 +10068,11 @@ namespace winrt::impl
         using type = struct_category<float, float, float, float>;
     };
 
+#ifdef WINRT_NUMERICS
+
     template <> struct name<Windows::Foundation::Numerics::float2>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Numerics.Vector2" };
+        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector2" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float2>
@@ -10339,7 +10082,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float3>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Numerics.Vector3" };
+        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector3" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float3>
@@ -10349,7 +10092,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float4>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Numerics.Vector4" };
+        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector4" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float4>
@@ -10359,7 +10102,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float3x2>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Numerics.Matrix3x2" };
+        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix3x2" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float3x2>
@@ -10369,7 +10112,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float4x4>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Numerics.Matrix4x4" };
+        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix4x4" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float4x4>
@@ -10384,7 +10127,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::quaternion>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Numerics.Quaternion" };
+        static constexpr auto & value{ L"Windows.Foundation.Numerics.Quaternion" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::quaternion>
@@ -10394,13 +10137,15 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::plane>
     {
-        static constexpr auto & value{ u"Windows.Foundation.Numerics.Plane" };
+        static constexpr auto & value{ L"Windows.Foundation.Numerics.Plane" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::plane>
     {
         using type = struct_category<Windows::Foundation::Numerics::float3, float>;
     };
+
+#endif
 }
 
 namespace winrt::impl
@@ -10423,7 +10168,7 @@ namespace winrt::impl
 {
     template <> struct name<Windows::Foundation::TimeSpan>
     {
-        static constexpr auto & value{ u"Windows.Foundation.TimeSpan" };
+        static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };
     };
 
     template <> struct category<Windows::Foundation::TimeSpan>
@@ -10433,7 +10178,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::DateTime>
     {
-        static constexpr auto & value{ u"Windows.Foundation.DateTime" };
+        static constexpr auto & value{ L"Windows.Foundation.DateTime" };
     };
 
     template <> struct category<Windows::Foundation::DateTime>
@@ -10476,15 +10221,12 @@ WINRT_EXPORT namespace winrt
 
         static constexpr bool is_steady = false;
 
-#if WINRT_PLATFORM_WINDOWS
-        // TODO: non-win version of now
         static time_point now() noexcept
         {
             file_time ft;
             WINRT_GetSystemTimePreciseAsFileTime(&ft);
             return from_file_time(ft);
         }
-#endif
 
         static time_t to_time_t(time_point const& time) noexcept
         {
@@ -10506,7 +10248,6 @@ WINRT_EXPORT namespace winrt
             return time_point{ duration{ time.value } };
         }
 
-#if WINRT_PLATFORM_WINDOWS
         static auto to_FILETIME(time_point const& time) noexcept
         {
             return to_file_time(time);
@@ -10516,7 +10257,6 @@ WINRT_EXPORT namespace winrt
         {
             return from_file_time(time);
         }
-#endif
 
     private:
 
@@ -10528,7 +10268,6 @@ WINRT_EXPORT namespace winrt
 
 WINRT_EXPORT namespace winrt
 {
-#if WINRT_PLATFORM_WINDOWS
     struct access_token : handle
     {
         static access_token process()
@@ -10625,20 +10364,15 @@ WINRT_EXPORT namespace winrt
             return guard(impersonate());
         }
     };
-#endif
 }
 
 namespace winrt::impl
 {
     inline bool is_sta() noexcept
     {
-#if WINRT_PLATFORM_WINDOWS
         int32_t aptType;
         int32_t aptTypeQualifier;
         return (error_ok == WINRT_CoGetApartmentType(&aptType, &aptTypeQualifier)) && ((aptType == 0 /*APTTYPE_STA*/) || (aptType == 3 /*APTTYPE_MAINSTA*/));
-#else
-        return false;
-#endif
     }
 
     template <typename Async>
@@ -10662,7 +10396,6 @@ namespace winrt::impl
         cv.wait(m, [&] { return completed; });
     }
 
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
     template <typename Async>
     struct await_adapter
     {
@@ -10698,7 +10431,6 @@ namespace winrt::impl
             return async.GetResults();
         }
     };
-#endif
 }
 
 #ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
@@ -10728,8 +10460,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     }
 }
 #endif
-
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
 
 WINRT_EXPORT namespace winrt
 {
@@ -11115,10 +10845,12 @@ WINRT_EXPORT namespace winrt
         handle_type<io_traits> m_io;
     };
 
+#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
     inline auto operator co_await(Windows::Foundation::TimeSpan duration)
     {
         return resume_after(duration);
     }
+#endif
 
     struct get_progress_token_t {};
 
@@ -11212,7 +10944,7 @@ namespace winrt::impl
     {
         using AsyncStatus = Windows::Foundation::AsyncStatus;
 
-        uint32_t WINRT_CALL Release() noexcept
+        unsigned long WINRT_CALL Release() noexcept
         {
             uint32_t const remaining = this->subtract_reference();
 
@@ -11437,8 +11169,6 @@ namespace winrt::impl
         bool m_completed_assigned{ false };
     };
 }
-
-#endif
 
 namespace winrt::impl
 {
@@ -13184,13 +12914,11 @@ WINRT_EXPORT namespace std
         size_t operator()(winrt::hstring const& value) const noexcept
         {
             uint32_t length = 0;
-            const char16_t* const buffer = WINRT_WindowsGetStringRawBuffer(get_abi(value), &length);
-            return winrt::impl::hash_data(buffer, length * sizeof(char16_t));
+            const wchar_t* const buffer = WINRT_WindowsGetStringRawBuffer(get_abi(value), &length);
+            return winrt::impl::hash_data(buffer, length * sizeof(wchar_t));
         }
     };
 }
-
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
 
 WINRT_EXPORT namespace std::experimental
 {
@@ -13224,10 +12952,6 @@ WINRT_EXPORT namespace std::experimental
         };
     };
 }
-
-#endif
-
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
 
 WINRT_EXPORT namespace std::experimental
 {
@@ -13283,10 +13007,6 @@ WINRT_EXPORT namespace std::experimental
         };
     };
 }
-
-#endif
-
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
 
 WINRT_EXPORT namespace std::experimental
 {
@@ -13366,10 +13086,6 @@ WINRT_EXPORT namespace std::experimental
     };
 }
 
-#endif
-
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
-
 WINRT_EXPORT namespace std::experimental
 {
     template <typename TResult, typename... Args>
@@ -13427,10 +13143,6 @@ WINRT_EXPORT namespace std::experimental
         };
     };
 }
-
-#endif
-
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
 
 WINRT_EXPORT namespace std::experimental
 {
@@ -13511,8 +13223,6 @@ WINRT_EXPORT namespace std::experimental
         };
     };
 }
-
-#endif
 
 WINRT_EXPORT namespace winrt::experimental::reflect
 {
@@ -13683,9 +13393,8 @@ decltype(winrt::impl::natvis::get_val) & WINRT_get_val = winrt::impl::natvis::ge
 
 #endif
 
-#define CPPWINRT_VERSION "1.0.180624.1"
+#define CPPWINRT_VERSION "1.0.180710.1"
 
-#if WINRT_PLATFORM_WINDOWS
 // WINRT_version is used by Microsoft to analyze C++/WinRT library adoption and inform future product decisions.
 extern "C"
 __declspec(selectany)
@@ -13695,7 +13404,6 @@ char const * const WINRT_version = "C++/WinRT version:" CPPWINRT_VERSION;
 #pragma comment(linker, "/include:_WINRT_version")
 #else
 #pragma comment(linker, "/include:WINRT_version")
-#endif
 #endif
 
 WINRT_EXPORT namespace winrt
@@ -13719,5 +13427,3 @@ WINRT_EXPORT namespace winrt
         return true;
     }
 }
-
-WINRT_WARNING_POP

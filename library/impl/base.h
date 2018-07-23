@@ -1,4 +1,6 @@
+#pragma once
 
+#include <windows.h>
 #include "winrt/base.h"
 #include <bitset>
 #include <variant>
@@ -7,7 +9,7 @@ namespace xlang
 {
     using namespace std::literals;
 
-    [[noreturn]] inline void throw_invalid(std::u16string_view const& message)
+    [[noreturn]] inline void throw_invalid(std::wstring_view const& message)
     {
         throw winrt::hresult_invalid_argument(message);
     }

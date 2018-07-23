@@ -5,21 +5,28 @@ namespace xlang::meta::reader
 
     struct table_base
     {
-        explicit table_base(database const& database) noexcept : m_database(database)
+        explicit table_base(database const* database) noexcept : m_database(database)
         {
         }
-
-        table_base(table_base const&) = delete;
-        table_base& operator=(table_base const&) = delete;
 
         database const& get_database() const noexcept
         {
-            return m_database;
+            return *m_database;
         }
 
-        auto size() const noexcept
+        uint32_t size() const noexcept
         {
             return m_row_count;
+        }
+
+        uint32_t row_size() const noexcept
+        {
+            return m_row_size;
+        }
+
+        uint32_t column_size(uint32_t const column) const noexcept
+        {
+            return m_columns[column].size;
         }
 
         template <typename T>
@@ -29,7 +36,7 @@ namespace xlang::meta::reader
 
             if (row > size())
             {
-                throw_invalid(u"Invalid row index");
+                throw_invalid(L"Invalid row index");
             }
 
             T result{};
@@ -47,7 +54,7 @@ namespace xlang::meta::reader
             uint8_t size;
         };
 
-        database const& m_database;
+        database const* m_database;
         uint8_t const* m_data{};
         uint32_t m_row_count{};
         uint8_t m_row_size{};
@@ -106,7 +113,7 @@ namespace xlang::meta::reader
 
         index_base(table_base const* const table, T const type, uint32_t const row) noexcept :
             m_table{ table },
-            m_value{ ((row + 1) << static_cast<uint32_t>(T::coded_index_bits)) | static_cast<uint32_t>(type) }
+            m_value{ ((row + 1) << coded_index_bits_v<T>) | static_cast<uint32_t>(type) }
         {
         }
 
@@ -123,13 +130,16 @@ namespace xlang::meta::reader
 
         T type() const noexcept
         {
-            return static_cast<T>(m_value & ((1 << static_cast<uint32_t>(T::coded_index_bits)) - 1));
+            return static_cast<T>(m_value & ((1 << coded_index_bits_v<T>) - 1));
         }
 
         uint32_t index() const noexcept
         {
-            return (m_value >> static_cast<uint32_t>(T::coded_index_bits)) - 1;
+            return (m_value >> coded_index_bits_v<T>) - 1;
         }
+
+        template <typename Row>
+        Row get_row() const;
 
         bool operator==(index_base const& other) const noexcept
         {
@@ -153,8 +163,8 @@ namespace xlang::meta::reader
 
     protected:
 
-        table_base const* const m_table{};
-        uint32_t const m_value{};
+        table_base const* m_table{};
+        uint32_t m_value{};
     };
 
     template <typename T>
@@ -186,8 +196,16 @@ namespace xlang::meta::reader
         }
     };
 
+    template <typename Row>
     struct row_base
     {
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = Row;
+        using difference_type = int32_t;
+        using pointer = value_type*;
+        using reference = value_type&;
+        using const_reference = value_type const&;
+
         row_base(table_base const* const table, uint32_t const index) noexcept : m_table(table), m_index(index)
         {
         }
@@ -200,7 +218,7 @@ namespace xlang::meta::reader
         template <typename T>
         auto coded_index() const noexcept
         {
-            return reader::coded_index{ m_table, T::TypeDef, index() };
+            return reader::coded_index{ m_table, index_tag_v<T, Row>, index() };
         }
 
         template <typename T>
@@ -209,15 +227,111 @@ namespace xlang::meta::reader
             return m_table->get_value<T>(m_index, column);
         }
 
+        template <typename T>
+        auto get_list(uint32_t const column) const;
+
+        template <typename T>
+        auto get_target_row(uint32_t const column) const;
+
+        database const& get_database() const noexcept
+        {
+            return m_table->get_database();
+        }
+
+        reference operator++() noexcept
+        {
+            ++m_index;
+            return static_cast<reference>(*this);
+        }
+
+        value_type operator++(int) noexcept
+        {
+            row_base temp{ *this };
+            operator++();
+            return temp;
+        }
+
+        reference operator--() noexcept
+        {
+            --m_index;
+            return *this;
+        }
+
+        value_type operator--(int) noexcept
+        {
+            row_base temp{ *this };
+            operator--();
+            return temp;
+        }
+
+        reference operator+=(difference_type offset) noexcept
+        {
+            m_index += offset;
+            return static_cast<reference>(*this);
+        }
+
+        value_type operator+(difference_type offset) const noexcept
+        {
+            row_base temp{ *this };
+            return { m_table, m_index + offset };
+        }
+
+        reference operator-=(difference_type offset) noexcept
+        {
+            return *this += -offset;
+        }
+
+        value_type operator-(difference_type offset) const noexcept
+        {
+            return *this + -offset;
+        }
+
+        difference_type operator-(row_base const& other) const noexcept
+        {
+            WINRT_ASSERT(m_table == other.m_table);
+            return m_index - other.m_index;
+        }
+
+        value_type operator[](difference_type offset) const noexcept
+        {
+            return { m_table, m_index + offset };
+        }
+
         bool operator==(row_base const& other) const noexcept
         {
             WINRT_ASSERT(m_table == other.m_table);
-            return index() == other.index();
+            return m_index == other.m_index;
         }
 
         bool operator!=(row_base const& other) const noexcept
         {
             return !(*this == other);
+        }
+
+        bool operator<(row_base const& other) const noexcept
+        {
+            WINRT_ASSERT(m_table == other.m_table);
+            return m_index < other.m_index;
+        }
+
+        bool operator>(row_base const& other) const noexcept
+        {
+            return other < *this;
+        }
+
+        bool operator<=(row_base const& other) const noexcept
+        {
+            return !(other < *this);
+        }
+
+        bool operator>=(row_base const& other) const noexcept
+        {
+            return !(*this < other);
+        }
+
+        [[nodiscard]] const_reference operator*() const noexcept
+        {
+            return static_cast<const_reference>(*this);
         }
 
     protected:
@@ -233,11 +347,6 @@ namespace xlang::meta::reader
             return reader::coded_index<T>{ m_table, m_table->get_value<uint32_t>(m_index, column) };
         }
 
-        database const& get_database() const noexcept
-        {
-            return m_table->get_database();
-        }
-
         table_base const* get_table() const noexcept
         {
             return m_table;
@@ -245,138 +354,23 @@ namespace xlang::meta::reader
 
     private:
 
-        table_base const* const m_table{};
-        uint32_t const m_index{};
+        table_base const* m_table{};
+        uint32_t m_index{};
     };
-
-    template <typename Row>
-    struct row_iterator
-    {
-        using iterator_category = std::random_access_iterator_tag;
-        using value_type = Row;
-        using difference_type = int32_t;
-        using pointer = value_type * ;
-        using reference = value_type & ;
-
-        table_base const* table{};
-        uint32_t index{};
-
-        row_iterator& operator++() noexcept
-        {
-            ++index;
-            return *this;
-        }
-
-        row_iterator operator++(int) noexcept
-        {
-            row_iterator temp{ *this };
-            operator++();
-            return temp;
-        }
-
-        row_iterator& operator--() noexcept
-        {
-            --index;
-            return *this;
-        }
-
-        row_iterator operator--(int) noexcept
-        {
-            row_iterator temp{ *this };
-            operator--();
-            return temp;
-        }
-
-        row_iterator& operator+=(difference_type offset) noexcept
-        {
-            index += offset;
-            return *this;
-        }
-
-        row_iterator operator+(difference_type offset) const noexcept
-        {
-            row_iterator temp{ *this };
-            return temp += offset;
-        }
-
-        row_iterator& operator-=(difference_type offset) noexcept
-        {
-            return *this += -offset;
-        }
-
-        row_iterator operator-(difference_type offset) const noexcept
-        {
-            return *this + -offset;
-        }
-
-        difference_type operator-(row_iterator const& other) const noexcept
-        {
-            WINRT_ASSERT(table == other.table);
-            return index - other.index;
-        }
-
-        value_type operator[](difference_type offset) const noexcept
-        {
-            return { table, index + offset };
-        }
-
-        bool operator==(row_iterator const& other) const noexcept
-        {
-            WINRT_ASSERT(table == other.table);
-            return index == other.index;
-        }
-
-        bool operator!=(row_iterator const& other) const noexcept
-        {
-            return !(*this == other);
-        }
-
-        bool operator<(row_iterator const& other) const noexcept
-        {
-            WINRT_ASSERT(table == other.table);
-            return index < other.index;
-        }
-
-        bool operator>(row_iterator const& other) const noexcept
-        {
-            return other < *this;
-        }
-
-        bool operator<=(row_iterator const& other) const noexcept
-        {
-            return !(other < *this);
-        }
-
-        bool operator>=(row_iterator const& other) const noexcept
-        {
-            return !(*this < other);
-        }
-
-        value_type operator*() const noexcept
-        {
-            return { table, index };
-        }
-    };
-
-    template <typename Row>
-    inline row_iterator<Row> operator+(typename row_iterator<Row>::difference_type n, row_iterator<Row> const& iter) noexcept
-    {
-        return iter + n;
-    }
 
     template <typename T>
     struct table : table_base
     {
-        explicit table(database const* const database) noexcept : table_base{ *database }
+        explicit table(database const* const database) noexcept : table_base{ database }
         {
         }
 
-        row_iterator<T> begin() const noexcept
+        T begin() const noexcept
         {
             return { this, 0 };
         }
 
-        row_iterator<T> end() const noexcept
+        T end() const noexcept
         {
             return { this, size() };
         }

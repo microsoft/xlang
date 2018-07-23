@@ -23,22 +23,27 @@ namespace xlang::impl
 
 namespace xlang::meta::reader
 {
+    struct cache;
+
     struct database : file_view
     {
-        database(std::string_view const& path) : file_view{ path }
+        database(database&&) = delete;
+        database& operator=(database&&) = delete;
+
+        database(std::string_view const& path, cache const* cache) : file_view{ path }, m_path{ path }, m_cache{ cache }
         {
             auto dos = as<impl::image_dos_header>();
 
             if (dos.e_magic != 0x5A4D) // IMAGE_DOS_SIGNATURE
             {
-                throw_invalid(u"Invalid DOS signature");
+                throw_invalid(L"Invalid DOS signature");
             }
 
             auto pe = as<impl::image_nt_headers32>(dos.e_lfanew);
 
             if (pe.FileHeader.NumberOfSections == 0 || pe.FileHeader.NumberOfSections > 100)
             {
-                throw_invalid(u"Invalid PE section count");
+                throw_invalid(L"Invalid PE section count");
             }
 
             auto com = pe.OptionalHeader.DataDirectory[14]; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
@@ -49,7 +54,7 @@ namespace xlang::meta::reader
 
             if (section == sections_end)
             {
-                throw_invalid(u"PE section containing CLI header not found");
+                throw_invalid(L"PE section containing CLI header not found");
             }
 
             auto offset = offset_from_rva(*section, com.VirtualAddress);
@@ -58,21 +63,21 @@ namespace xlang::meta::reader
 
             if (cli.cb != sizeof(impl::image_cor20_header))
             {
-                throw_invalid(u"Invalid CLI header");
+                throw_invalid(L"Invalid CLI header");
             }
 
             section = section_from_rva(sections, sections_end, cli.MetaData.VirtualAddress);
 
             if (section == sections_end)
             {
-                throw_invalid(u"PE section containing CLI metadata not found");
+                throw_invalid(L"PE section containing CLI metadata not found");
             }
 
             offset = offset_from_rva(*section, cli.MetaData.VirtualAddress);
 
             if (as<uint32_t>(offset) != 0x424a5342)
             {
-                throw_invalid(u"CLI metadata magic signature not found");
+                throw_invalid(L"CLI metadata magic signature not found");
             }
 
             auto version_length = as<uint32_t>(offset + 12);
@@ -103,18 +108,18 @@ namespace xlang::meta::reader
                 }
                 else if (name.data() != "#US"sv)
                 {
-                    throw_invalid(u"Unknown metadata stream");
+                    throw_invalid(L"Unknown metadata stream");
                 }
 
                 view = view.seek(stream_offset(name.data()));
             }
 
-            auto heap_sizes = tables.as<std::bitset<8>>();
+            std::bitset<8> const heap_sizes{ tables.as<uint8_t>(6) };
             uint8_t const string_index_size = heap_sizes.test(0) ? 4 : 2;
             uint8_t const guid_index_size = heap_sizes.test(1) ? 4 : 2;
             uint8_t const blob_index_size = heap_sizes.test(2) ? 4 : 2;
 
-            auto valid_bits = tables.as<std::bitset<64>>(8);
+            std::bitset<64> const valid_bits{ tables.as<uint64_t>(8) };
             view = tables.seek(24);
 
             for (uint32_t i{}; i < 64; ++i)
@@ -167,9 +172,11 @@ namespace xlang::meta::reader
                 case 0x2a: GenericParam.set_row_count(row_count); break;
                 case 0x2b: MethodSpec.set_row_count(row_count); break;
                 case 0x2c: GenericParamConstraint.set_row_count(row_count); break;
-                default: throw_invalid(u"Unknown metadata table");
+                default: throw_invalid(L"Unknown metadata table");
                 };
             }
+
+            table_base const empty_table{ nullptr };
 
             auto const TypeDefOrRef = composite_index_size(TypeDef, TypeRef, TypeSpec);
             auto const HasConstant = composite_index_size(Field, Param, Property);
@@ -181,7 +188,7 @@ namespace xlang::meta::reader
             auto const MethodDefOrRef = composite_index_size(MethodDef, MemberRef);
             auto const MemberForwarded = composite_index_size(Field, MethodDef);
             auto const Implementation = composite_index_size(File, AssemblyRef, ExportedType);
-            auto const CustomAttributeType = composite_index_size(MethodDef, MemberRef);
+            auto const CustomAttributeType = composite_index_size(MethodDef, MemberRef, empty_table, empty_table, empty_table);
             auto const ResolutionScope = composite_index_size(Module, ModuleRef, AssemblyRef, TypeRef);
             auto const TypeOrMethodDef = composite_index_size(TypeDef, MethodDef);
 
@@ -303,20 +310,33 @@ namespace xlang::meta::reader
         table<GenericParam> GenericParam{ this };
         table<MethodSpec> MethodSpec{ this };
 
-        std::string_view get_string(uint32_t const index) const noexcept
+        template <typename T>
+        table<T> const& get_table() const noexcept;
+
+        cache const* get_cache() const noexcept
+        {
+            return m_cache;
+        }
+
+        std::string_view path() const noexcept
+        {
+            return m_path;
+        }
+
+        std::string_view get_string(uint32_t const index) const
         {
             auto view = m_strings.seek(index);
             auto last = std::find(view.begin(), view.end(), 0);
 
             if (last == view.end())
             {
-                throw_invalid(u"Missing string terminator");
+                throw_invalid(L"Missing string terminator");
             }
 
             return { reinterpret_cast<char const*>(view.begin()), static_cast<uint32_t>(last - view.begin()) };
         }
 
-        byte_view get_blob(uint32_t const index) const noexcept
+        byte_view get_blob(uint32_t const index) const
         {
             auto view = m_blobs.seek(index);
             auto initial_byte = view.as<uint8_t>();
@@ -344,7 +364,7 @@ namespace xlang::meta::reader
                 break;
 
             default:
-                throw_invalid(u"Invalid blob encoding");
+                throw_invalid(L"Invalid blob encoding");
             }
 
             uint32_t blob_size{ initial_byte };
@@ -401,18 +421,99 @@ namespace xlang::meta::reader
             return rva - section.VirtualAddress + section.PointerToRawData;
         }
 
+        std::string const m_path;
         byte_view m_strings;
         byte_view m_blobs;
         byte_view m_guids;
+        cache const* m_cache;
     };
 
-    inline byte_view row_base::get_blob(uint32_t const column) const
+    template <typename Row>
+    inline byte_view row_base<Row>::get_blob(uint32_t const column) const
     {
         return get_database().get_blob(m_table->get_value<uint32_t>(m_index, column));
     }
 
-    inline std::string_view row_base::get_string(uint32_t const column) const
+    template <typename Row>
+    inline std::string_view row_base<Row>::get_string(uint32_t const column) const
     {
         return get_database().get_string(m_table->get_value<uint32_t>(m_index, column));
     }
+
+    template <>
+    inline table<Module> const& database::get_table<Module>() const noexcept { return Module; }
+    template <>
+    inline table<TypeRef> const& database::get_table<TypeRef>() const noexcept { return TypeRef; }
+    template <>
+    inline table<TypeDef> const& database::get_table<TypeDef>() const noexcept { return TypeDef; }
+    template <>
+    inline table<Field> const& database::get_table<Field>() const noexcept { return Field; }
+    template <>
+    inline table<MethodDef> const& database::get_table<MethodDef>() const noexcept { return MethodDef; }
+    template <>
+    inline table<Param> const& database::get_table<Param>() const noexcept { return Param; }
+    template <>
+    inline table<InterfaceImpl> const& database::get_table<InterfaceImpl>() const noexcept { return InterfaceImpl; }
+    template <>
+    inline table<MemberRef> const& database::get_table<MemberRef>() const noexcept { return MemberRef; }
+    template <>
+    inline table<Constant> const& database::get_table<Constant>() const noexcept { return Constant; }
+    template <>
+    inline table<CustomAttribute> const& database::get_table<CustomAttribute>() const noexcept { return CustomAttribute; }
+    template <>
+    inline table<FieldMarshal> const& database::get_table<FieldMarshal>() const noexcept { return FieldMarshal; }
+    template <>
+    inline table<DeclSecurity> const& database::get_table<DeclSecurity>() const noexcept { return DeclSecurity; }
+    template <>
+    inline table<ClassLayout> const& database::get_table<ClassLayout>() const noexcept { return ClassLayout; }
+    template <>
+    inline table<FieldLayout> const& database::get_table<FieldLayout>() const noexcept { return FieldLayout; }
+    template <>
+    inline table<StandAloneSig> const& database::get_table<StandAloneSig>() const noexcept { return StandAloneSig; }
+    template <>
+    inline table<EventMap> const& database::get_table<EventMap>() const noexcept { return EventMap; }
+    template <>
+    inline table<Event> const& database::get_table<Event>() const noexcept { return Event; }
+    template <>
+    inline table<PropertyMap> const& database::get_table<PropertyMap>() const noexcept { return PropertyMap; }
+    template <>
+    inline table<Property> const& database::get_table<Property>() const noexcept { return Property; }
+    template <>
+    inline table<MethodSemantics> const& database::get_table<MethodSemantics>() const noexcept { return MethodSemantics; }
+    template <>
+    inline table<MethodImpl> const& database::get_table<MethodImpl>() const noexcept { return MethodImpl; }
+    template <>
+    inline table<ModuleRef> const& database::get_table<ModuleRef>() const noexcept { return ModuleRef; }
+    template <>
+    inline table<TypeSpec> const& database::get_table<TypeSpec>() const noexcept { return TypeSpec; }
+    template <>
+    inline table<ImplMap> const& database::get_table<ImplMap>() const noexcept { return ImplMap; }
+    template <>
+    inline table<FieldRVA> const& database::get_table<FieldRVA>() const noexcept { return FieldRVA; }
+    template <>
+    inline table<Assembly> const& database::get_table<Assembly>() const noexcept { return Assembly; }
+    template <>
+    inline table<AssemblyProcessor> const& database::get_table<AssemblyProcessor>() const noexcept { return AssemblyProcessor; }
+    template <>
+    inline table<AssemblyOS> const& database::get_table<AssemblyOS>() const noexcept { return AssemblyOS; }
+    template <>
+    inline table<AssemblyRef> const& database::get_table<AssemblyRef>() const noexcept { return AssemblyRef; }
+    template <>
+    inline table<AssemblyRefProcessor> const& database::get_table<AssemblyRefProcessor>() const noexcept { return AssemblyRefProcessor; }
+    template <>
+    inline table<AssemblyRefOS> const& database::get_table<AssemblyRefOS>() const noexcept { return AssemblyRefOS; }
+    template <>
+    inline table<File> const& database::get_table<File>() const noexcept { return File; }
+    template <>
+    inline table<ExportedType> const& database::get_table<ExportedType>() const noexcept { return ExportedType; }
+    template <>
+    inline table<ManifestResource> const& database::get_table<ManifestResource>() const noexcept { return ManifestResource; }
+    template <>
+    inline table<NestedClass> const& database::get_table<NestedClass>() const noexcept { return NestedClass; }
+    template <>
+    inline table<GenericParam> const& database::get_table<GenericParam>() const noexcept { return GenericParam; }
+    template <>
+    inline table<MethodSpec> const& database::get_table<MethodSpec>() const noexcept { return MethodSpec; }
+    template <>
+    inline table<GenericParamConstraint> const& database::get_table<GenericParamConstraint>() const noexcept { return GenericParamConstraint; }
 }

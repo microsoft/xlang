@@ -1,51 +1,66 @@
 
 namespace xlang::meta::reader
 {
+    template <typename T>
+    template <typename Row>
+    Row index_base<T>::get_row() const
+    {
+        WINRT_ASSERT(type() == (index_tag_v<T, Row>));
+        return get_database().get_table<Row>()[index()];
+    }
+
     inline auto typed_index<TypeDefOrRef>::TypeDef() const
     {
-        WINRT_ASSERT(type() == TypeDefOrRef::TypeDef);
-        return get_database().TypeDef[index()];
+        return get_row<reader::TypeDef>();
     }
 
     inline auto typed_index<TypeDefOrRef>::TypeRef() const
     {
-        WINRT_ASSERT(type() == TypeDefOrRef::TypeRef);
-        return get_database().TypeRef[index()];
+        return get_row<reader::TypeRef>();
     }
 
     inline auto typed_index<TypeDefOrRef>::TypeSpec() const
     {
-        WINRT_ASSERT(type() == TypeDefOrRef::TypeSpec);
-        return get_database().TypeSpec[index()];
+        return get_row<reader::TypeSpec>();
     }
 
     inline auto typed_index<HasConstant>::Field() const
     {
-        WINRT_ASSERT(type() == HasConstant::Field);
-        return get_database().Field[index()];
+        return get_row<reader::Field>();
     }
 
     inline auto typed_index<HasConstant>::Param() const
     {
-        WINRT_ASSERT(type() == HasConstant::Param);
-        return get_database().Param[index()];
+        return get_row<reader::Param>();
     }
 
     inline auto typed_index<HasConstant>::Property() const
     {
-        WINRT_ASSERT(type() == HasConstant::Property);
-        return get_database().Property[index()];
+        return get_row<reader::Property>();
     }
 
     inline auto typed_index<CustomAttributeType>::MemberRef() const
     {
-        WINRT_ASSERT(type() == CustomAttributeType::MemberRef);
-        return get_database().MemberRef[index()];
+        return get_row<reader::MemberRef>();
     }
 
     inline auto typed_index<MemberRefParent>::TypeRef() const
     {
-        WINRT_ASSERT(type() == MemberRefParent::TypeRef);
-        return get_database().TypeRef[index()];
+        return get_row<reader::TypeRef>();
+    }
+
+    inline bool TypeDef::has_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const
+    {
+        for (auto&& attribute : CustomAttribute())
+        {
+            auto type = attribute.Type().MemberRef().Class().TypeRef();
+
+            if (type_name == type.TypeName() && type_namespace == type.TypeNamespace())
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
