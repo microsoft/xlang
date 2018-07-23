@@ -434,6 +434,11 @@ int main(int, char* argv[])
                 printf("\n");
             }
 
+            for (auto && method : type.MethodList())
+            {
+                method.Signature();
+            }
+
             for (auto && property : type.PropertyList())
             {
                 printf("  property ");

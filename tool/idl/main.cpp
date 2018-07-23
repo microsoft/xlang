@@ -246,12 +246,6 @@ void write_required(writer& w, std::string_view const& requires, TypeDef const& 
 
 void write_interface(writer& w, TypeDef const& type)
 {
-    // TODO: Seems we're not parsing 'const&' struct parameter signatures correctly.
-    if (type.TypeName() == "IGuidHelperStatics")
-    {
-        return;
-    }
-
     w.write("\n    interface %%\n    {%\n    };\n",
         type.TypeName(),
         bind<write_required>("requires", type),

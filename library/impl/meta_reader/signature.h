@@ -179,7 +179,7 @@ namespace xlang::meta::reader
             element_type = uncompress_enum<ElementType>(cursor))
         {
             result.emplace_back(table, data);
-            data = cursor;
+            cursor = data;
         }
         return result;
     }
