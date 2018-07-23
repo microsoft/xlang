@@ -36,7 +36,7 @@ namespace xlang::meta::reader
 
             if (row > size())
             {
-                throw_invalid(L"Invalid row index");
+                throw_invalid("Invalid row index");
             }
 
             T result{};

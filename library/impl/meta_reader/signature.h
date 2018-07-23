@@ -26,7 +26,7 @@ namespace xlang::meta::reader
         }
         else
         {
-            throw_invalid(L"Invalid compressed integer in blob");
+            throw_invalid("Invalid compressed integer in blob");
         }
         cursor = cursor.seek(length);
         return value;
@@ -373,7 +373,7 @@ namespace xlang::meta::reader
             auto conv = read<CallingConvention>(data);
             if (enum_mask(conv, CallingConvention::Field) != CallingConvention::Field)
             {
-                throw_invalid(L"Invalid calling convention for field blob");
+                throw_invalid("Invalid calling convention for field blob");
             }
             return conv;
         }
@@ -408,7 +408,7 @@ namespace xlang::meta::reader
             auto conv = read<CallingConvention>(data);
             if (enum_mask(conv, CallingConvention::Property) != CallingConvention::Property)
             {
-                throw_invalid(L"Invalid calling convention for property blob");
+                throw_invalid("Invalid calling convention for property blob");
             }
             return conv;
         }
@@ -448,7 +448,7 @@ namespace xlang::meta::reader
     {
         if (!(m_class_or_value == ElementType::Class || m_class_or_value == ElementType::ValueType))
         {
-            throw_invalid(L"Generic type instantiation signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
+            throw_invalid("Generic type instantiation signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
         }
 
         m_generic_args.reserve(m_generic_arg_count);
@@ -494,7 +494,7 @@ namespace xlang::meta::reader
             break;
 
         default:
-            throw_invalid(L"Unrecognized ELEMENT_TYPE encountered");
+            throw_invalid("Unrecognized ELEMENT_TYPE encountered");
             break;
         }
     }

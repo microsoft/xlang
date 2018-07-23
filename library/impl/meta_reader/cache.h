@@ -27,7 +27,7 @@ namespace xlang::meta::reader
                     if (insert.second == false)
                     {
                         // TODO: test with MIDL as we may need to support winmd files generated with duplicate TypeDef rows.
-                        throw_invalid(L"Duplicate type indicates invalid combination of metadata files");
+                        throw_invalid("Duplicate type indicates invalid combination of metadata files");
                     }
                 }
             }

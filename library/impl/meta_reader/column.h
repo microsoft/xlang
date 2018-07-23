@@ -266,7 +266,7 @@ namespace xlang::meta::reader
         case ConstantType::Class:
             return ValueClass();
         default:
-            throw_invalid(L"Invalid constant type");
+            throw_invalid("Invalid constant type");
         }
     }
 }

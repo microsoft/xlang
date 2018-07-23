@@ -122,7 +122,7 @@ namespace xlang::meta::reader
         {
             if (m_first + offset > m_last)
             {
-                throw_invalid(L"Buffer too small");
+                throw_invalid("Buffer too small");
             }
         }
 

@@ -68,20 +68,20 @@ namespace xlang::meta::reader
                         }
                         else
                         {
-                            throw_invalid(L"Unresolved type in CustomAttribute blob");
+                            throw_invalid("Unresolved type in CustomAttribute blob");
                         }
                     };
                     TypeDef const& enum_type = resolve_type();
                     if (!enum_type.is_enum())
                     {
-                        throw_invalid(L"CustomAttribute params that are TypeDefOrRef must be an enum or System.Type");
+                        throw_invalid("CustomAttribute params that are TypeDefOrRef must be an enum or System.Type");
                     }
 
                     auto const& enum_def = enum_type.get_enum_definition();
                     return EnumValue{ enum_def, read_enum(enum_def.m_underlying_type, data) };
                 }
             }
-            throw_invalid(L"Custom attribute params must be primitives, enums, or System.Type");
+            throw_invalid("Custom attribute params must be primitives, enums, or System.Type");
         }
 
         static value_type read_primitive(ElementType type, byte_view& data)
@@ -128,7 +128,7 @@ namespace xlang::meta::reader
                 return read<std::string_view>(data);
 
             default:
-                throw_invalid(L"Non-primitive type encountered");
+                throw_invalid("Non-primitive type encountered");
             }
         }
 
@@ -167,7 +167,7 @@ namespace xlang::meta::reader
                 return read<uint64_t>(data);
 
             default:
-                throw_invalid(L"Invalid underling enum type encountered");
+                throw_invalid("Invalid underling enum type encountered");
             }
         }
 
@@ -255,7 +255,7 @@ namespace xlang::meta::reader
             auto const field_or_prop = read<ElementType>(data);
             if (field_or_prop != ElementType::Field && field_or_prop != ElementType::Property)
             {
-                throw_invalid(L"NamedArg must be either FIELD or PROPERTY");
+                throw_invalid("NamedArg must be either FIELD or PROPERTY");
             }
             
             auto type = read<ElementType>(data);
@@ -272,16 +272,16 @@ namespace xlang::meta::reader
                 auto const pos = type_string.find('.');
                 if (pos == std::string_view::npos)
                 {
-                    throw_invalid(L"CustomAttribute param of Enum or System.Type is missing namespace separator");
+                    throw_invalid("CustomAttribute param of Enum or System.Type is missing namespace separator");
                 }
                 auto type_def = db.get_cache()->find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
                 if (!type_def.has_value())
                 {
-                    throw_invalid(L"CustomAttribute named param referenced unresolved enum type");
+                    throw_invalid("CustomAttribute named param referenced unresolved enum type");
                 }
                 if (!type_def->is_enum())
                 {
-                    throw_invalid(L"CustomAttribute named param referenced non-enum type");
+                    throw_invalid("CustomAttribute named param referenced non-enum type");
                 }
 
                 return FixedArgSig{ type_def->get_enum_definition(), data };
@@ -296,7 +296,7 @@ namespace xlang::meta::reader
                 }
                 if (type < ElementType::Boolean || ElementType::String < type)
                 {
-                    throw_invalid(L"CustomAttribute named param must be a primitive, System.Type, or an Enum");
+                    throw_invalid("CustomAttribute named param must be a primitive, System.Type, or an Enum");
                 }
                 m_name = read<std::string_view>(data);
                 return FixedArgSig{ type, is_array, data };
@@ -313,7 +313,7 @@ namespace xlang::meta::reader
             auto const prolog = read<uint16_t>(data);
             if (prolog != 0x0001)
             {
-                throw_invalid(L"CustomAttribute blobs must start with prolog of 0x0001");
+                throw_invalid("CustomAttribute blobs must start with prolog of 0x0001");
             }
 
             for (auto const& param : ctor.Params())

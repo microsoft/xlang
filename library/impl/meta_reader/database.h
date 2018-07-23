@@ -36,14 +36,14 @@ namespace xlang::meta::reader
 
             if (dos.e_magic != 0x5A4D) // IMAGE_DOS_SIGNATURE
             {
-                throw_invalid(L"Invalid DOS signature");
+                throw_invalid("Invalid DOS signature");
             }
 
             auto pe = as<impl::image_nt_headers32>(dos.e_lfanew);
 
             if (pe.FileHeader.NumberOfSections == 0 || pe.FileHeader.NumberOfSections > 100)
             {
-                throw_invalid(L"Invalid PE section count");
+                throw_invalid("Invalid PE section count");
             }
 
             auto com = pe.OptionalHeader.DataDirectory[14]; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
@@ -54,7 +54,7 @@ namespace xlang::meta::reader
 
             if (section == sections_end)
             {
-                throw_invalid(L"PE section containing CLI header not found");
+                throw_invalid("PE section containing CLI header not found");
             }
 
             auto offset = offset_from_rva(*section, com.VirtualAddress);
@@ -63,21 +63,21 @@ namespace xlang::meta::reader
 
             if (cli.cb != sizeof(impl::image_cor20_header))
             {
-                throw_invalid(L"Invalid CLI header");
+                throw_invalid("Invalid CLI header");
             }
 
             section = section_from_rva(sections, sections_end, cli.MetaData.VirtualAddress);
 
             if (section == sections_end)
             {
-                throw_invalid(L"PE section containing CLI metadata not found");
+                throw_invalid("PE section containing CLI metadata not found");
             }
 
             offset = offset_from_rva(*section, cli.MetaData.VirtualAddress);
 
             if (as<uint32_t>(offset) != 0x424a5342)
             {
-                throw_invalid(L"CLI metadata magic signature not found");
+                throw_invalid("CLI metadata magic signature not found");
             }
 
             auto version_length = as<uint32_t>(offset + 12);
@@ -108,7 +108,7 @@ namespace xlang::meta::reader
                 }
                 else if (name.data() != "#US"sv)
                 {
-                    throw_invalid(L"Unknown metadata stream");
+                    throw_invalid("Unknown metadata stream");
                 }
 
                 view = view.seek(stream_offset(name.data()));
@@ -172,7 +172,7 @@ namespace xlang::meta::reader
                 case 0x2a: GenericParam.set_row_count(row_count); break;
                 case 0x2b: MethodSpec.set_row_count(row_count); break;
                 case 0x2c: GenericParamConstraint.set_row_count(row_count); break;
-                default: throw_invalid(L"Unknown metadata table");
+                default: throw_invalid("Unknown metadata table");
                 };
             }
 
@@ -330,7 +330,7 @@ namespace xlang::meta::reader
 
             if (last == view.end())
             {
-                throw_invalid(L"Missing string terminator");
+                throw_invalid("Missing string terminator");
             }
 
             return { reinterpret_cast<char const*>(view.begin()), static_cast<uint32_t>(last - view.begin()) };
@@ -364,7 +364,7 @@ namespace xlang::meta::reader
                 break;
 
             default:
-                throw_invalid(L"Invalid blob encoding");
+                throw_invalid("Invalid blob encoding");
             }
 
             uint32_t blob_size{ initial_byte };

@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "meta_reader.h"
 #include "text_writer.h"
+#include "cmd_reader.h"
 
 using namespace std::chrono;
 using namespace std::filesystem;
 using namespace winrt::Windows::Foundation;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
+using namespace xlang::cmd;
 
 template <typename...T> struct overloaded : T... { using T::operator()...; };
 template <typename...T> overloaded(T...)->overloaded<T...>;
@@ -221,7 +223,7 @@ void write_delegate(writer& w, TypeDef const& type)
 
     if (method == end(methods))
     {
-        xlang::throw_invalid(L"Delegate's Invoke method not found");
+        xlang::throw_invalid("Delegate's Invoke method not found");
     }
 
     w.write("\n    delegate % %(%);\n", method.Signature().ReturnType(), type.TypeName(), method);
@@ -279,28 +281,62 @@ IAsyncAction write_namespace(cache const& c, std::string_view const& name, cache
     w.save_to_file(path);
 }
 
-auto directory_vector(std::string_view const& folder)
+auto directory_vector(reader const& args)
 {
     std::vector<std::string> files;
 
-    for (auto&& file : directory_iterator(folder))
+    for (auto&& path : args.values("in"))
     {
-        if (file.is_regular_file())
+        if (is_directory(path))
         {
-            files.push_back(file.path().string());
+            for (auto&& file : directory_iterator(path))
+            {
+                if (file.is_regular_file())
+                {
+                    files.push_back(file.path().string());
+                }
+            }
+        }
+        else if (is_regular_file(path))
+        {
+            files.push_back(path);
+        }
+        else
+        {
+            xlang::throw_invalid("Path '", path, "' is not a file or directory");
         }
     }
-
     return files;
 }
 
-int main(int, char**)
+void print_usage()
+{
+    puts("Usage...");
+}
+
+int main(int const argc, char** argv)
 {
     try
     {
+        std::vector<option> options
+        {
+            // name, min, max
+            { "in", 1 },
+            { "out", 0, 1 },
+            { "verbose", 0, 0 },
+        };
+
+        reader args{ argc, argv, options };
+
+        if (!args)
+        {
+            print_usage();
+            return 0;
+        }
+
         auto start = high_resolution_clock::now();
         winrt::init_apartment();
-        cache c{ directory_vector(R"(C:\Windows\System32\WinMetadata)") };
+        cache c{ directory_vector(args) };
         std::vector<IAsyncAction> actions;
 
         for (auto&& ns : c.namespaces())
@@ -313,10 +349,14 @@ int main(int, char**)
             async.get();
         }
 
-        printf(" time: %llums\n", duration_cast<milliseconds>(high_resolution_clock::now() - start).count());
+        printf("Time: %llums\n", duration_cast<milliseconds>(high_resolution_clock::now() - start).count());
     }
     catch (winrt::hresult_error const& e)
     {
         printf("%ls\n", e.message().c_str());
+    }
+    catch (std::exception const& e)
+    {
+        printf("%s\n", e.what());
     }
 }
