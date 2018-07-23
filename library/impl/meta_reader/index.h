@@ -25,6 +25,7 @@ namespace xlang::meta::reader
         using index_base<CustomAttributeType>::index_base;
 
         auto MemberRef() const;
+        auto MethodDef() const;
     };
 
 }

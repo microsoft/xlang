@@ -111,48 +111,113 @@ void print_type_name(xlang::meta::reader::TypeSig type, range<GenericParam> cons
         }, type.Type());
 }
 
+void print_value(bool value)
+{
+    printf("%s", value ? "true" : "false");
+}
+
+void print_value(char16_t value)
+{
+    printf("%#0hx", value);
+}
+
+void print_value(int8_t value)
+{
+    printf("%hhd", value);
+}
+
+void print_value(uint8_t value)
+{
+    printf("%#0hhx", value);
+}
+
+void print_value(int16_t value)
+{
+    printf("%hd", value);
+}
+
+void print_value(uint16_t value)
+{
+    printf("%#0hx", value);
+}
+
+void print_value(int32_t value)
+{
+    printf("%d", value);
+}
+
+void print_value(uint32_t value)
+{
+    printf("%#0x", value);
+}
+
+void print_value(int64_t value)
+{
+    printf("%lld", value);
+}
+
+void print_value(uint64_t value)
+{
+    printf("%#0llx", value);
+}
+
+void print_value(float value)
+{
+    printf("%f", value);
+}
+
+void print_value(double value)
+{
+    printf("%f", value);
+}
+
+void print_value(std::string_view value)
+{
+    printf("%s", c_str(value));
+}
+
 void print_constant(Constant const& value)
 {
     switch (value.Type())
     {
     case ConstantType::Boolean:
-        printf("Boolean(%s)", value.ValueBoolean() ? "true" : "false");
+        print_value(value.ValueBoolean());
         break;
     case ConstantType::Char:
-        printf("Char16(%#0hx)", value.ValueChar());
+        print_value(value.ValueChar());
         break;
     case ConstantType::Int8:
-        printf("Int8(%hhd)", value.ValueInt8());
+        print_value(value.ValueInt8());
         break;
     case ConstantType::UInt8:
-        printf("UInt8(%#0hhx)", value.ValueUInt8());
+        print_value(value.ValueUInt8());
         break;
     case ConstantType::Int16:
-        printf("Int16(%hd)", value.ValueInt16());
+        print_value(value.ValueInt16());
         break;
     case ConstantType::UInt16:
-        printf("UInt16(%#0hx)", value.ValueUInt16());
+        print_value(value.ValueUInt16());
         break;
     case ConstantType::Int32:
-        printf("Int32(%d)", value.ValueInt32());
+        print_value(value.ValueInt32());
         break;
     case ConstantType::UInt32:
-        printf("UInt32(%#0x)", value.ValueUInt32());
+        print_value(value.ValueUInt32());
         break;
     case ConstantType::Int64:
-        printf("Int64(%lld)", value.ValueInt64());
+        print_value(value.ValueInt64());
         break;
     case ConstantType::UInt64:
-        printf("UInt64(%#0llx)", value.ValueUInt64());
+        print_value(value.ValueUInt64());
         break;
     case ConstantType::Float32:
-        printf("Float32(%f)", value.ValueFloat32());
+        print_value(value.ValueFloat32());
         break;
     case ConstantType::Float64:
-        printf("Float64(%f)", value.ValueFloat64());
+        print_value(value.ValueFloat64());
         break;
     case ConstantType::String:
-        printf("String(%s)", c_str(value.ValueString()));
+        print_value(value.ValueString());
         break;
     case ConstantType::Class:
         printf("null");
@@ -204,6 +269,43 @@ void print_type_name(xlang::meta::reader::coded_index<TypeDefOrRef> const& index
         print_type_name(index.TypeSpec(), generic_params);
         break;
     }
+}
+
+void print(xlang::meta::reader::ElemSig const& arg)
+{
+    std::visit(overloaded{
+        [](ElemSig::SystemType arg)
+    {
+        print_value(arg.name);
+    },
+        [](ElemSig::EnumValue arg)
+    {
+        std::visit([](auto&& value) { print_value(value); }, arg.value);
+    },
+        [](auto&& arg)
+    {
+        print_value(arg);
+    },
+        }, arg.m_value);
+}
+
+void print(std::vector<xlang::meta::reader::ElemSig> const& arg)
+{
+    printf("[ ");
+    bool first = true;
+    for (auto const& elem : arg)
+    {
+        if (first)
+        {
+            first = false;
+        }
+        else
+        {
+            printf(", ");
+        }
+        print(elem);
+    }
+    printf(" ]");
 }
 
 int main(int, char* argv[])
@@ -283,6 +385,9 @@ int main(int, char* argv[])
                         auto const& signature = attribute_index.MemberRef().MethodSignature();
                         WINRT_ASSERT(!signature.ReturnType().Type());
 
+                        auto const& blob = attribute.Value();
+                        auto fixed_arg_iterator = blob.FixedArgs().cbegin();
+
                         printf("(");
                         bool found = false;
                         for (auto&& param : signature.Params())
@@ -296,6 +401,9 @@ int main(int, char* argv[])
                                 found = true;
                             }
                             print_type_name(param.Type(), std::pair{ GenericParam{}, GenericParam{} });
+                            printf(" ");
+                            std::visit([](auto&& arg) { print(arg); }, fixed_arg_iterator->m_value);
+                            ++fixed_arg_iterator;
                         }
                         printf(")");
 
@@ -307,11 +415,11 @@ int main(int, char* argv[])
             for (auto&& field : type.FieldList())
             {
                 printf("  field ");
-                if (enum_mask(field.Flags(), FieldAttributes::Literal) == FieldAttributes::Literal)
+                if (field.is_literal())
                 {
                     printf("literal ");
                 }
-                else if (enum_mask(field.Flags(), FieldAttributes::Static) == FieldAttributes::Static)
+                else if (field.is_static())
                 {
                     printf("static ");
                 }

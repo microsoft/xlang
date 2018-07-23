@@ -96,6 +96,14 @@ namespace xlang::meta::reader
         return result;
     }
 
+    template <>
+    std::string_view read<std::string_view>(byte_view& cursor)
+    {
+        auto const& result = cursor.as_string();
+        cursor = cursor.seek(static_cast<uint32_t>(1 + result.size()));
+        return result;
+    }
+
     struct CustomModSig;
     struct FieldSig;
     struct GenericTypeInstSig;

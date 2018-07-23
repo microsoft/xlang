@@ -35,10 +35,7 @@ namespace xlang::meta::reader
             return get_coded_index<CustomAttributeType>(1);
         }
 
-        auto Value() const
-        {
-            return get_blob(2);
-        }
+        auto Value() const;
     };
 
     struct TypeDef : row_base<TypeDef>
@@ -74,6 +71,8 @@ namespace xlang::meta::reader
         auto PropertyList() const;
 
         bool has_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const;
+        bool is_enum() const;
+        auto get_enum_definition() const;
     };
 
     struct MethodDef : row_base<MethodDef>
@@ -161,6 +160,15 @@ namespace xlang::meta::reader
         }
 
         auto Constant() const;
+        bool is_static() const
+        {
+            return enum_mask(Flags(), FieldAttributes::Static) == FieldAttributes::Static;
+        }
+
+        bool is_literal() const
+        {
+            return enum_mask(Flags(), FieldAttributes::Literal) == FieldAttributes::Literal;
+        }
     };
 
     struct Param : row_base<Param>
