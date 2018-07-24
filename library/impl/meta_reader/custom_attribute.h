@@ -244,7 +244,9 @@ namespace xlang::meta::reader
 
     struct NamedArgSig
     {
-        NamedArgSig(database const& db, byte_view& data);
+        NamedArgSig(database const& db, byte_view& data)
+            : m_value{ parse_value(db, data) }
+        {}
 
         std::string_view m_name;
         FixedArgSig m_value;
@@ -322,12 +324,20 @@ namespace xlang::meta::reader
             }
 
             const auto num_named_args = read<uint16_t>(data);
+            m_named_args.reserve(num_named_args);
+
+            for (uint16_t i = 0; i < num_named_args; ++i)
+            {
+                m_named_args.emplace_back(db, data);
+            }
         }
 
         std::vector<FixedArgSig> const& FixedArgs() const noexcept { return m_fixed_args; }
+        std::vector<NamedArgSig> const& NamedArgs() const noexcept { return m_named_args; }
 
     private:
         std::vector<FixedArgSig> m_fixed_args;
+        std::vector<NamedArgSig> m_named_args;
     };
 
     inline auto CustomAttribute::Value() const
