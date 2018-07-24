@@ -192,17 +192,71 @@ namespace xlang::meta::reader
 
     enum class MethodImplAttributes : uint16_t
     {
+        CodeTypeMask = 0x0003,
+        IL = 0x0000,      // Method impl is CIL
+        Native = 0x0001,  // Method impl is native
+        OPTIL = 0x0002,   // Reserved: shall be zero in conforming implementations
+        Runtime = 0x0003, // Method impl is provided by the runtime
 
+        ManagedMask = 0x0004,
+        Unmanaged = 0x0004,
+        Managed = 0x0000,
+
+        ForwardRef = 0x0010, // Method is defined; used primarily in merge scenarios
+        PreserveSig = 0x0080, // Reserved
+        InternalCall = 0x1000, // Reserved
+        Synchronized = 0x0020, // Method is single threaded through the body
+        NoInlining = 0x0008, // Method cannot be inlined
+        MaxMethodImplVal = 0xffff, // Range check value
+        NoOptimization = 0x0040, // Method will not be optimized when generatinv native code
     };
 
     enum class MethodAttributes : uint16_t
     {
+        MemberAccessMask = 0x0007,
+        CompilerControlled = 0x0000, // Member not referenceable
+        Private = 0x0001,
+        FamAndAssem = 0x0002,        // Accessible by subtypes only in this Assembly
+        Assembly = 0x0003,           // Accessible by anyone in this Assembly
+        Family = 0x0004,             // aka Protected
+        FamOrAssem = 0x0005,         // Accessible by subtypes anywhere, plus anyone in this Assembly
+        Public = 0x0006,
 
+        Static = 0x0010,
+        Final = 0x0020,
+        Virtual = 0x0040,
+        HideBySig = 0x0080,
+        
+        VtableLayoutMask = 0x0100,
+        ReuseSlot = 0x0000, // Method reuses existing slot in a vtable
+        NewSlot = 0x0100,   // Method always gets a new slot in the vtable
+
+        Strict = 0x0200,
+        Abstract = 0x0400,
+        SpecialName = 0x0800,
+
+        PInvokeImpl = 0x2000, // Implementation is forwarded through PInvoke
+        UnmanagedExport = 0x0008, // Reerved: shall be zero for conforming implementations
+
+        RTSpecialName = 0x1000,
+        HasSecurity = 0x4000,
+        RequireSecObject = 0x8000,
     };
 
     enum class ParamAttributes : uint16_t
     {
+        In = 0x0001,
+        Out = 0x0002,
+        Optional = 0x0010,
+        HasDefault = 0x1000, // Param has default value
+        HasFieldMarshal = 0x2000,
+        Unused = 0xcfe0, // Reserved
+    };
 
+    enum class EventAttributes : uint16_t
+    {
+        SpecialName = 0x0200,
+        RTSpecialName = 0x0400,
     };
 
     enum class MethodSemanticsAttributes : uint16_t
@@ -343,6 +397,21 @@ namespace xlang::meta::reader
         HasThis = 0x20,
         ExplicitThis = 0x40,
         Generic = 0x10,
+    };
+
+    enum class AssemblyHashAlgorithm : uint32_t
+    {
+        None = 0x0000,
+        Reserved_MD5 = 0x8003,
+        SHA1 = 0x8004,
+    };
+
+    enum class AssemblyFlags : uint32_t
+    {
+        PublicKey = 0x0001, // The assembly reference holds the full (unhashed) public key
+        Retargetable = 0x01000,
+        DisableJITcompileOptimizer = 0x4000,
+        EnableJITcompileTracking = 0x8000,
     };
 
     template <typename T>

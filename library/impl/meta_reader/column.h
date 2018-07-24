@@ -24,11 +24,6 @@ namespace xlang::meta::reader
         return get_database().get_table<T>()[get_value<uint32_t>(column) - 1];
     }
 
-    inline auto TypeDef::CustomAttribute() const
-    {
-        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
-    }
-
     inline auto TypeDef::GenericParam() const
     {
         return equal_range(get_database().GenericParam, coded_index<TypeOrMethodDef>());
@@ -40,16 +35,16 @@ namespace xlang::meta::reader
         {
             bool operator()(uint32_t const left, reader::InterfaceImpl const& right) noexcept
             {
-                return left < right.get_value<uint32_t>(0) - 1;
+                return left < right.get_value<uint32_t>(0);
             }
 
             bool operator()(reader::InterfaceImpl const& left, uint32_t const right) noexcept
             {
-                return left.get_value<uint32_t>(0) - 1 < right;
+                return left.get_value<uint32_t>(0) < right;
             }
         };
 
-        return equal_range(get_database().InterfaceImpl, index(), compare{});
+        return equal_range(get_database().InterfaceImpl, index() + 1, compare{});
     }
 
     inline auto TypeDef::FieldList() const
@@ -117,6 +112,46 @@ namespace xlang::meta::reader
         return get_list<Property>(1);
     }
 
+    inline auto EventMap::Parent() const
+    {
+        return get_target_row<TypeDef>(0);
+    }
+
+    inline auto EventMap::EventList() const
+    {
+        return get_list<Event>(1);
+    }
+
+    inline auto Event::MethodSemantic() const
+    {
+        return equal_range(get_database().get_table<reader::MethodSemantics>(), coded_index<HasSemantics>());
+    }
+
+    inline auto Event::Parent() const
+    {
+        auto const& map = get_database().get_table<EventMap>();
+        struct compare
+        {
+            bool operator()(EventMap const& lhs, uint32_t rhs) const noexcept
+            {
+                return lhs.get_value<uint32_t>(1) < rhs;
+            }
+            bool operator()(uint32_t lhs, EventMap const& rhs) const noexcept
+            {
+                return lhs < rhs.get_value<uint32_t>(1);
+            }
+        };
+        auto iter = std::lower_bound(map.begin(), map.end(), index() + 1, compare{});
+        if (iter.get_value<uint32_t>(1) == index() + 1)
+        {
+            return iter.Parent();
+        }
+        else
+        {
+            return (iter - 1).Parent();
+        }
+    }
+
     inline auto TypeDef::PropertyList() const
     {
         auto const& map = get_database().get_table<PropertyMap>();
@@ -136,6 +171,41 @@ namespace xlang::meta::reader
         }
     }
 
+    inline auto TypeDef::EventList() const
+    {
+        auto const& map = get_database().get_table<EventMap>();
+        auto index = this->index() + 1;
+        auto iter = std::find_if(map.begin(), map.end(), [index](EventMap const& elem)
+        {
+            return elem.get_value<uint32_t>(0) == index;
+        });
+        if (iter == map.end())
+        {
+            auto const& props = get_database().get_table<Event>();
+            return std::pair{ props.end(), props.end() };
+        }
+        else
+        {
+            return iter.EventList();
+        }
+    }
+
+    inline auto TypeDef::MethodImplList() const
+    {
+        struct compare
+        {
+            bool operator()(MethodImpl const& lhs, uint32_t rhs) const noexcept
+            {
+                return lhs.get_value<uint32_t>(1) < rhs;
+            }
+            bool operator()(uint32_t lhs, MethodImpl const& rhs) const noexcept
+            {
+                return lhs < rhs.get_value<uint32_t>(1);
+            }
+        };
+        return equal_range(get_database().get_table<MethodImpl>(), index() + 1, compare{});
+    }
+
     inline auto Field::Constant() const
     {
         auto const range = equal_range(get_database().Constant, coded_index<HasConstant>());
@@ -146,6 +216,35 @@ namespace xlang::meta::reader
             result = range.first;
         }
         return result;
+    }
+
+    inline auto Param::Constant() const
+    {
+        auto const range = equal_range(get_database().Constant, coded_index<HasConstant>());
+        std::optional<reader::Constant> result;
+        if (range.second != range.first)
+        {
+            WINRT_ASSERT(range.second - range.first == 1);
+            result = range.first;
+        }
+        return result;
+    }
+
+    inline auto Property::Constant() const
+    {
+        auto const range = equal_range(get_database().Constant, coded_index<HasConstant>());
+        std::optional<reader::Constant> result;
+        if (range.second != range.first)
+        {
+            WINRT_ASSERT(range.second - range.first == 1);
+            result = range.first;
+        }
+        return result;
+    }
+
+    inline auto MethodImpl::Class() const
+    {
+        return get_target_row<TypeDef>(0);
     }
 
     inline auto Constant::ValueBoolean() const
@@ -268,5 +367,143 @@ namespace xlang::meta::reader
         default:
             throw_invalid("Invalid constant type");
         }
+    }
+
+    inline auto MethodDef::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto Field::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto TypeRef::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto TypeDef::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto Param::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto InterfaceImpl::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto MemberRef::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto Module::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto Property::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto Event::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto StandAloneSig::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto ModuleRef::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto TypeSpec::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto Assembly::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto AssemblyRef::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto File::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto ExportedType::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto ManifestResource::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto GenericParam::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto GenericParamConstraint::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    inline auto MethodSpec::CustomAttribute() const
+    {
+        return equal_range(get_database().get_table<reader::CustomAttribute>(), coded_index<HasCustomAttribute>());
+    }
+
+    struct AssemblyVersion
+    {
+        uint16_t RevisionNumber;
+        uint16_t BuildNumber;
+        uint16_t MinorVersion;
+        uint16_t MajorVersion;
+    };
+
+    auto Assembly::Version() const
+    {
+        return get_value<AssemblyVersion>(1);
+    }
+
+    auto AssemblyRef::Version() const
+    {
+        return get_value<AssemblyVersion>(0);
+    }
+
+    auto AssemblyRefOS::AssemblyRef() const
+    {
+        return get_target_row<reader::AssemblyRef>(3);
+    }
+
+    auto AssemblyRefProcessor::AssemblyRef() const
+    {
+        return get_target_row<reader::AssemblyRef>(3);
+    }
+
+    auto ClassLayout::Parent() const
+    {
+        return get_target_row<TypeDef>(2);
     }
 }

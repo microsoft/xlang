@@ -19,6 +19,8 @@ namespace xlang::meta::reader
         {
             return get_string(2);
         }
+
+        auto CustomAttribute() const;
     };
 
     struct CustomAttribute : row_base<CustomAttribute>
@@ -69,6 +71,8 @@ namespace xlang::meta::reader
         auto InterfaceImpl() const;
         auto GenericParam() const;
         auto PropertyList() const;
+        auto EventList() const;
+        auto MethodImplList() const;
 
         bool has_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const;
         bool is_enum() const;
@@ -106,6 +110,7 @@ namespace xlang::meta::reader
         }
 
         auto ParamList() const;
+        auto CustomAttribute() const;
     };
 
     struct MemberRef : row_base<MemberRef>
@@ -127,6 +132,8 @@ namespace xlang::meta::reader
             auto cursor = get_blob(2);
             return{ get_table(), cursor };
         }
+
+        auto CustomAttribute() const;
     };
 
     struct Module : row_base<Module>
@@ -137,6 +144,8 @@ namespace xlang::meta::reader
         {
             return get_string(1);
         }
+
+        auto CustomAttribute() const;
     };
 
     struct Field : row_base<Field>
@@ -159,6 +168,7 @@ namespace xlang::meta::reader
             return FieldSig{ get_table(), cursor };
         }
 
+        auto CustomAttribute() const;
         auto Constant() const;
         bool is_static() const
         {
@@ -189,6 +199,9 @@ namespace xlang::meta::reader
         {
             return get_string(2);
         }
+
+        auto CustomAttribute() const;
+        auto Constant() const;
     };
 
     struct InterfaceImpl : row_base<InterfaceImpl>
@@ -201,6 +214,8 @@ namespace xlang::meta::reader
         {
             return get_coded_index<TypeDefOrRef>(1);
         }
+
+        auto CustomAttribute() const;
     };
 
     struct Constant : row_base<Constant>
@@ -251,6 +266,8 @@ namespace xlang::meta::reader
             auto cursor = get_blob(0);
             return{ get_table(), cursor };
         }
+
+        auto CustomAttribute() const;
     };
 
     struct DeclSecurity : row_base<DeclSecurity>
@@ -261,6 +278,18 @@ namespace xlang::meta::reader
     struct ClassLayout : row_base<ClassLayout>
     {
         using row_base::row_base;
+
+        auto PackingSize() const
+        {
+            return get_value<uint16_t>(0);
+        }
+
+        auto ClassSize() const
+        {
+            return get_value<uint32_t>(1);
+        }
+
+        auto Parent() const;
     };
 
     struct FieldLayout : row_base<FieldLayout>
@@ -271,11 +300,16 @@ namespace xlang::meta::reader
     struct StandAloneSig : row_base<StandAloneSig>
     {
         using row_base::row_base;
+
+        auto CustomAttribute() const;
     };
 
     struct EventMap : row_base<EventMap>
     {
         using row_base::row_base;
+
+        auto Parent() const;
+        auto EventList() const;
     };
 
     struct Event : row_base<Event>
@@ -286,6 +320,15 @@ namespace xlang::meta::reader
         {
             return get_string(1);
         }
+
+        auto EventType() const
+        {
+            return get_value<TypeDefOrRef>(2);
+        }
+
+        auto MethodSemantic() const;
+        auto Parent() const;
+        auto CustomAttribute() const;
     };
 
     struct PropertyMap : row_base<PropertyMap>
@@ -318,6 +361,8 @@ namespace xlang::meta::reader
 
         auto MethodSemantic() const;
         auto Parent() const;
+        auto Constant() const;
+        auto CustomAttribute() const;
     };
 
     struct MethodSemantics : row_base<MethodSemantics>
@@ -340,11 +385,25 @@ namespace xlang::meta::reader
     struct MethodImpl : row_base<MethodImpl>
     {
         using row_base::row_base;
+
+        auto Class() const;
+
+        auto MethodBody() const
+        {
+            return get_value<MethodDefOrRef>(1);
+        }
+
+        auto MethodDeclaration() const
+        {
+            return get_value<MethodDefOrRef>(2);
+        }
     };
 
     struct ModuleRef : row_base<ModuleRef>
     {
         using row_base::row_base;
+
+        auto CustomAttribute() const;
     };
 
     struct ImplMap : row_base<ImplMap>
@@ -361,55 +420,153 @@ namespace xlang::meta::reader
     {
         using row_base::row_base;
 
+        auto HashAlgId() const
+        {
+            return get_value<AssemblyHashAlgorithm>(0);
+        }
+
+        auto Version() const;
+
+        auto Flags() const
+        {
+            return get_value<AssemblyFlags>(2);
+        }
+
+        auto PublicKey() const
+        {
+            return get_blob(3);
+        }
+
         auto Name() const
         {
             return get_string(4);
         }
+
+        auto Culture() const
+        {
+            return get_string(5);
+        }
+
+        auto CustomAttribute() const;
     };
 
     struct AssemblyProcessor : row_base<AssemblyProcessor>
     {
         using row_base::row_base;
+
+        auto Processor() const
+        {
+            return get_value<uint32_t>(0);
+        }
     };
 
     struct AssemblyOS : row_base<AssemblyOS>
     {
         using row_base::row_base;
+
+        auto OSPlatformId() const
+        {
+            return get_value<uint32_t>(0);
+        }
+
+        auto OSMajorVersion() const
+        {
+            return get_value<uint32_t>(1);
+        }
+
+        auto OSMinorVersion() const
+        {
+            return get_value<uint32_t>(2);
+        }
     };
 
     struct AssemblyRef : row_base<AssemblyRef>
     {
         using row_base::row_base;
 
+        auto Version() const;
+
+        auto Flags() const
+        {
+            return get_value<AssemblyFlags>(1);
+        }
+
+        auto PublicKeyOrToken() const
+        {
+            return get_blob(2);
+        }
+
         auto Name() const
         {
             return get_string(3);
         }
+
+        auto Culture() const
+        {
+            return get_string(4);
+        }
+
+        auto HashValue() const
+        {
+            return get_string(5);
+        }
+
+        auto CustomAttribute() const;
     };
 
     struct AssemblyRefProcessor : row_base<AssemblyRefProcessor>
     {
         using row_base::row_base;
+
+        auto Processor() const
+        {
+            return get_value<uint32_t>(0);
+        }
+
+        auto AssemblyRef() const;
     };
 
     struct AssemblyRefOS : row_base<AssemblyRefOS>
     {
         using row_base::row_base;
+
+        auto OSPlatformId() const
+        {
+            return get_value<uint32_t>(0);
+        }
+
+        auto OSMajorVersion() const
+        {
+            return get_value<uint32_t>(1);
+        }
+
+        auto OSMinorVersion() const
+        {
+            return get_value<uint32_t>(2);
+        }
+
+        auto AssemblyRef() const;
     };
 
     struct File : row_base<File>
     {
         using row_base::row_base;
+
+        auto CustomAttribute() const;
     };
 
     struct ExportedType : row_base<ExportedType>
     {
         using row_base::row_base;
+
+        auto CustomAttribute() const;
     };
 
     struct ManifestResource : row_base<ManifestResource>
     {
         using row_base::row_base;
+
+        auto CustomAttribute() const;
     };
 
     struct NestedClass : row_base<NestedClass>
@@ -440,16 +597,22 @@ namespace xlang::meta::reader
         {
             return get_string(3);
         }
+
+        auto CustomAttribute() const;
     };
 
     struct MethodSpec : row_base<MethodSpec>
     {
         using row_base::row_base;
+
+        auto CustomAttribute() const;
     };
 
     struct GenericParamConstraint : row_base<GenericParamConstraint>
     {
         using row_base::row_base;
+
+        auto CustomAttribute() const;
     };
 
     inline bool operator<(coded_index<HasCustomAttribute> const& left, CustomAttribute const& right) noexcept
