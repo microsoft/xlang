@@ -143,6 +143,27 @@ struct writer : writer_base<writer>
             ++param;
         }
 
+        auto is_const = [](ParamSig const& param) -> bool
+        {
+            for (auto const& cmod : param.CustomMod())
+            {
+                switch (cmod.Type().type())
+                {
+                case TypeDefOrRef::TypeRef:
+                {
+                    auto const& type = cmod.Type().TypeRef();
+                    return type.TypeNamespace() == "System.Runtime.CompilerServices" && type.TypeName() == "IsConst";
+                }
+                case TypeDefOrRef::TypeDef:
+                {
+                    auto const& type = cmod.Type().TypeDef();
+                    return type.TypeNamespace() == "System.Runtime.CompilerServices" && type.TypeName() == "IsConst";
+                }
+                }
+            }
+            return false;
+        };
+
         bool first{ true };
 
         for (auto&& arg : signature.Params())
@@ -154,6 +175,16 @@ struct writer : writer_base<writer>
             else
             {
                 write(", ");
+            }
+
+            if (arg.ByRef())
+            {
+                write("ref ");
+            }
+
+            if (is_const(arg))
+            {
+                write("const ");
             }
 
             write("% %", arg.Type(), param.Name());
