@@ -1,5 +1,9 @@
 // https://www.ecma-international.org/publications/standards/Ecma-335.htm
 
+#define NOMINMAX
+
+#include <windows.h>
+
 #include "meta_reader.h"
 
 #include <experimental/filesystem>

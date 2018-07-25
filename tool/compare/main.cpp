@@ -1,3 +1,6 @@
+#define NOMINMAX
+
+#include <windows.h>
 #include "meta_reader.h"
 #include <filesystem>
 #include <cor.h>
@@ -239,7 +242,7 @@ int main(int, char**)
             com_ptr<IMetaDataTables2> tables;
             check_hresult(dispenser->OpenScope(file.path().c_str(), ofRead, IID_IMetaDataTables2, reinterpret_cast<::IUnknown**>(tables.put())));
 
-            compare(tables.get(), database{ file.path().string() });
+            compare(tables.get(), database{ file.path().string(), nullptr });
         }
     }
     catch (winrt::hresult_error const& e)
