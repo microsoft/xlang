@@ -102,6 +102,16 @@ namespace xlang::meta::reader
             return type->second;
         }
 
+        std::optional<TypeDef> find(std::string_view const& type_string) const noexcept
+        {
+            auto pos = type_string.rfind('.');
+            if (pos == std::string_view::npos)
+            {
+                throw_invalid("Type name is missing namespace separator");
+            }
+            return find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
+        }
+
         auto const& databases() const noexcept
         {
             return m_databases;

@@ -99,8 +99,9 @@ namespace xlang::meta::reader
     template <>
     std::string_view read<std::string_view>(byte_view& cursor)
     {
-        auto const& result = cursor.as_string();
-        cursor = cursor.seek(static_cast<uint32_t>(1 + result.size()));
+        uint32_t const length = uncompress_unsigned(cursor);
+        std::string_view result{ reinterpret_cast<const char*>(cursor.begin()), length };
+        cursor = cursor.seek(length);
         return result;
     }
 

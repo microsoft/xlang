@@ -203,6 +203,12 @@ struct writer : writer_base<writer>
             write("void");
         }
     }
+
+    void write(CustomAttribute const& attr)
+    {
+        auto const& name = attr.TypeNamespaceAndName();
+        write("\n    [%.%]", name.first, name.second);
+    }
 };
 
 void write_enum_field(writer& w, Field const& field)
@@ -217,11 +223,9 @@ void write_enum_field(writer& w, Field const& field)
 
 void write_enum(writer& w, TypeDef const& type)
 {
-    // TODO: since attributs are so important to IDL, we should probably have an IDL attribute writer
-    // that walks all the attributes and prints the complete IDL representation...
-    if (type.has_attribute("System", "FlagsAttribute"))
+    for (auto const& attr : type.CustomAttribute())
     {
-        w.write("\n    [flags]");
+        w.write(attr);
     }
 
     w.write("\n    enum %\n    {%\n    };\n",
@@ -238,6 +242,11 @@ void write_struct_field(writer& w, Field const& field)
 
 void write_struct(writer& w, TypeDef const& type)
 {
+    for (auto const& attr : type.CustomAttribute())
+    {
+        w.write(attr);
+    }
+
     w.write("\n    struct %\n    {%\n    };\n",
         type.TypeName(),
         bind_each<write_struct_field>(type.FieldList()));
@@ -257,11 +266,21 @@ void write_delegate(writer& w, TypeDef const& type)
         xlang::throw_invalid("Delegate's Invoke method not found");
     }
 
+    for (auto const& attr : type.CustomAttribute())
+    {
+        w.write(attr);
+    }
+
     w.write("\n    delegate % %(%);\n", method.Signature().ReturnType(), type.TypeName(), method);
 }
 
 void write_method(writer& w, MethodDef const& method)
 {
+    for (auto const& attr : method.CustomAttribute())
+    {
+        w.write(attr);
+    }
+
     w.write("\n        % %(%);", method.Signature().ReturnType(), method.Name(), method);
 }
 
@@ -279,6 +298,11 @@ void write_required(writer& w, std::string_view const& requires, TypeDef const& 
 
 void write_interface(writer& w, TypeDef const& type)
 {
+    for (auto const& attr : type.CustomAttribute())
+    {
+        w.write(attr);
+    }
+
     w.write("\n    interface %%\n    {%\n    };\n",
         type.TypeName(),
         bind<write_required>("requires", type),
@@ -287,6 +311,11 @@ void write_interface(writer& w, TypeDef const& type)
 
 void write_class(writer& w, TypeDef const& type)
 {
+    for (auto const& attr : type.CustomAttribute())
+    {
+        w.write(attr);
+    }
+
     w.write("\n    runtimeclass %%\n    {\n    };\n",
         type.TypeName(),
         bind<write_required>(":", type));

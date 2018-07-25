@@ -1,6 +1,35 @@
 
 namespace xlang::meta::reader
 {
+    inline auto CustomAttribute::TypeNamespaceAndName() const
+    {
+        if (Type().type() == CustomAttributeType::MemberRef)
+        {
+            auto const& member_parent = Type().MemberRef().Class();
+            switch (member_parent.type())
+            {
+            case MemberRefParent::TypeDef:
+            {
+                auto const& def = member_parent.TypeDef();
+                return std::pair{ def.TypeNamespace(), def.TypeName() };
+            }
+
+            case MemberRefParent::TypeRef:
+            {
+                auto const& ref = member_parent.TypeRef();
+                return std::pair{ ref.TypeNamespace(), ref.TypeName() };
+            }
+            default:
+                throw_invalid("A CustomAttribute MemberRef should only be a TypeDef or TypeRef");
+            }
+        }
+        else
+        {
+            auto const& def = Type().MethodDef().Parent();
+            return std::pair{ def.TypeNamespace(), def.TypeName() };
+        }
+    }
+
     struct ElemSig
     {
         struct SystemType
@@ -271,12 +300,7 @@ namespace xlang::meta::reader
             {
                 auto type_string = read<std::string_view>(data);
                 m_name = read<std::string_view>(data);
-                auto const pos = type_string.find('.');
-                if (pos == std::string_view::npos)
-                {
-                    throw_invalid("CustomAttribute param of Enum or System.Type is missing namespace separator");
-                }
-                auto type_def = db.get_cache()->find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
+                auto type_def = db.get_cache()->find(type_string);
                 if (!type_def.has_value())
                 {
                     throw_invalid("CustomAttribute named param referenced unresolved enum type");

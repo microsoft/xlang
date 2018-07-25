@@ -24,6 +24,33 @@ namespace xlang::meta::reader
         return get_database().get_table<T>()[get_value<uint32_t>(column) - 1];
     }
 
+    template <typename Row>
+    template <typename T, uint32_t ParentColumn>
+    auto row_base<Row>::get_parent_row() const
+    {
+        struct compare
+        {
+            bool operator()(T const& lhs, uint32_t rhs) const noexcept
+            {
+                return lhs.get_value<uint32_t>(ParentColumn) < rhs;
+            }
+            bool operator()(uint32_t lhs, T const& rhs) const noexcept
+            {
+                return lhs < rhs.get_value<uint32_t>(ParentColumn);
+            }
+        };
+        auto const& map = get_database().get_table<T>();
+        auto iter = std::lower_bound(map.begin(), map.end(), index() + 1, compare{});
+        if (iter.get_value<uint32_t>(ParentColumn) == index() + 1)
+        {
+            return iter;
+        }
+        else
+        {
+            return iter - 1;
+        }
+    }
+
     inline auto TypeDef::GenericParam() const
     {
         return equal_range(get_database().GenericParam, coded_index<TypeOrMethodDef>());
@@ -62,6 +89,16 @@ namespace xlang::meta::reader
         return get_list<Param>(5);
     }
 
+    inline auto MethodDef::Parent() const
+    {
+        return get_parent_row<TypeDef, 5>();
+    }
+
+    inline auto Field::Parent() const
+    {
+        return get_parent_row<TypeDef, 4>();
+    }
+
     inline auto InterfaceImpl::Class() const
     {
         return get_target_row<TypeDef>(0);
@@ -84,27 +121,7 @@ namespace xlang::meta::reader
 
     inline auto Property::Parent() const
     {
-        auto const& map = get_database().get_table<PropertyMap>();
-        struct compare
-        {
-            bool operator()(PropertyMap const& lhs, uint32_t rhs) const noexcept
-            {
-                return lhs.get_value<uint32_t>(1) < rhs;
-            }
-            bool operator()(uint32_t lhs, PropertyMap const& rhs) const noexcept
-            {
-                return lhs < rhs.get_value<uint32_t>(1);
-            }
-        };
-        auto iter = std::lower_bound(map.begin(), map.end(), index() + 1, compare{});
-        if (iter.get_value<uint32_t>(1) == index() + 1)
-        {
-            return iter.Parent();
-        }
-        else
-        {
-            return (iter - 1).Parent();
-        }
+        return get_parent_row<TypeDef, 1>();
     }
 
     inline auto PropertyMap::PropertyList() const

@@ -19,7 +19,6 @@ namespace xlang::meta::reader
         auto TypeSpec() const;
     };
 
-
     template <> struct typed_index<CustomAttributeType> : index_base<CustomAttributeType>
     {
         using index_base<CustomAttributeType>::index_base;
@@ -27,5 +26,4 @@ namespace xlang::meta::reader
         auto MemberRef() const;
         auto MethodDef() const;
     };
-
 }

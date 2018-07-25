@@ -54,6 +54,11 @@ namespace xlang::meta::reader
         return get_row<reader::TypeRef>();
     }
 
+    inline auto typed_index<MemberRefParent>::TypeDef() const
+    {
+        return get_row<reader::TypeDef>();
+    }
+
     inline bool TypeDef::has_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const
     {
         for (auto&& attribute : CustomAttribute())

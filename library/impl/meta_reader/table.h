@@ -178,6 +178,7 @@ namespace xlang::meta::reader
         using index_base<MemberRefParent>::index_base;
 
         auto TypeRef() const;
+        auto TypeDef() const;
     };
 
     template <typename T>
@@ -232,6 +233,9 @@ namespace xlang::meta::reader
 
         template <typename T>
         auto get_target_row(uint32_t const column) const;
+
+        template <typename T, uint32_t ParentColumn>
+        auto get_parent_row() const;
 
         database const& get_database() const noexcept
         {

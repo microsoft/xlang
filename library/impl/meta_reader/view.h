@@ -25,6 +25,9 @@ namespace xlang::meta::reader
         return std::equal_range(container.begin(), container.end(), value, compare);
     }
 
+    struct byte_view;
+    inline int32_t uncompress_signed(byte_view& cursor, uint32_t length);
+
     struct byte_view
     {
         byte_view() noexcept = default;

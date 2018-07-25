@@ -38,6 +38,8 @@ namespace xlang::meta::reader
         }
 
         auto Value() const;
+
+        auto TypeNamespaceAndName() const;
     };
 
     struct TypeDef : row_base<TypeDef>
@@ -111,6 +113,7 @@ namespace xlang::meta::reader
 
         auto ParamList() const;
         auto CustomAttribute() const;
+        auto Parent() const;
     };
 
     struct MemberRef : row_base<MemberRef>
@@ -170,6 +173,7 @@ namespace xlang::meta::reader
 
         auto CustomAttribute() const;
         auto Constant() const;
+        auto Parent() const;
         bool is_static() const
         {
             return enum_mask(Flags(), FieldAttributes::Static) == FieldAttributes::Static;
