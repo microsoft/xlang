@@ -99,6 +99,18 @@ namespace xlang::cmd
             return result->second;
         }
 
+        auto value(std::string_view const& name, std::string_view const& default_value = {}) const
+        {
+            auto result = m_options.find(name);
+
+            if (result == m_options.end())
+            {
+                return std::string{ default_value };
+            }
+
+            return result->second.front();
+        }
+
     private:
 
         std::map<std::string_view, std::vector<std::string>> m_options;

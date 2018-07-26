@@ -450,52 +450,52 @@ void write_class(writer& w, TypeDef const& type)
         bind<write_required>(":", type));
 }
 
-IAsyncAction write_namespace(cache const& c, std::string_view const& name, cache::namespace_members const& members)
-{
-    co_await winrt::resume_background();
-    writer w;
-    w.current = name;
-
-    w.write("\nnamespace %\n{%%%%%}\n",
-        name,
-        bind_each<write_enum>(members.enums),
-        bind_each<write_struct>(members.structs),
-        bind_each<write_delegate>(members.delegates),
-        bind_each<write_interface>(members.interfaces),
-        bind_each<write_class>(members.classes));
-
-    std::string path{ R"(C:\git\xlang\output\idl\)" };
-    path += name;
-    path += ".idl";
-    w.save_to_file(path);
-}
-
-auto directory_vector(reader const& args)
+auto get_in(reader const& args)
 {
     std::vector<std::string> files;
+
+    auto add_directory = [&](auto&& path)
+    {
+        for (auto&& file : directory_iterator(path))
+        {
+            if (file.is_regular_file())
+            {
+                files.push_back(file.path().string());
+            }
+        }
+    };
 
     for (auto&& path : args.values("in"))
     {
         if (is_directory(path))
         {
-            for (auto&& file : directory_iterator(path))
-            {
-                if (file.is_regular_file())
-                {
-                    files.push_back(file.path().string());
-                }
-            }
+            add_directory(path);
         }
         else if (is_regular_file(path))
         {
             files.push_back(path);
+        }
+        else if (path == "local")
+        {
+            std::array<char, MAX_PATH> local;
+            winrt::check_bool(ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size())));
+            add_directory(local.data());
         }
         else
         {
             xlang::throw_invalid("Path '", path, "' is not a file or directory");
         }
     }
+
     return files;
+}
+
+auto get_out(reader const& args)
+{
+    auto out{ absolute(args.value("out", "idl")) };
+    create_directories(out);
+    out += path::preferred_separator;
+    return out.string();
 }
 
 void print_usage()
@@ -503,10 +503,31 @@ void print_usage()
     puts("Usage...");
 }
 
+template <typename T, typename F>
+void for_each_async(T&& range, F callback)
+{
+    std::vector<IAsyncAction> actions;
+
+    for (auto&& each : range)
+    {
+        actions.push_back(callback(each));
+    }
+
+    for (auto&& async : actions)
+    {
+        async.get();
+    }
+}
+
 int main(int const argc, char** argv)
 {
+    writer w;
+
     try
     {
+        winrt::init_apartment();
+        auto start = high_resolution_clock::now();
+
         std::vector<option> options
         {
             // name, min, max
@@ -523,29 +544,55 @@ int main(int const argc, char** argv)
             return 0;
         }
 
-        auto start = high_resolution_clock::now();
-        winrt::init_apartment();
-        cache c{ directory_vector(args) };
-        std::vector<IAsyncAction> actions;
+        cache c{ get_in(args) };
+        auto const out = get_out(args);
+        bool const verbose = args.exists("verbose");
 
-        for (auto&& ns : c.namespaces())
+        if (verbose)
         {
-            actions.push_back(write_namespace(c, ns.first, ns.second));
+            std::for_each(c.databases().begin(), c.databases().end(), [&](auto&& db)
+            {
+                w.write("in: %\n", db.path());
+            });
+
+            w.write("out: %\n", out);
         }
 
-        for (auto&& async : actions)
-        {
-            async.get();
-        }
+        w.flush_to_console();
 
-        printf("Time: %llums\n", duration_cast<milliseconds>(high_resolution_clock::now() - start).count());
+        for_each_async(c.namespaces(), [&](auto&& ns) -> IAsyncAction
+        {
+            co_await winrt::resume_background();
+            writer w;
+            w.current = ns.first;
+
+            w.write("\nnamespace %\n{%%%%%}\n",
+                w.current,
+                bind_each<write_enum>(ns.second.enums),
+                bind_each<write_struct>(ns.second.structs),
+                bind_each<write_delegate>(ns.second.delegates),
+                bind_each<write_interface>(ns.second.interfaces),
+                bind_each<write_class>(ns.second.classes));
+
+            auto filename{ out };
+            filename += w.current;
+            filename += ".idl";
+            w.flush_to_file(filename);
+        });
+
+        if (verbose)
+        {
+            w.write("time: %ms\n", duration_cast<milliseconds>(high_resolution_clock::now() - start).count());
+        }
     }
     catch (winrt::hresult_error const& e)
     {
-        printf("%ls\n", e.message().c_str());
+        w.write("%\n", winrt::to_string(e.message()));
     }
     catch (std::exception const& e)
     {
-        printf("%s\n", e.what());
+        w.write("%\n", e.what());
     }
+
+    w.flush_to_console();
 }

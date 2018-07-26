@@ -57,12 +57,12 @@ namespace xlang::text
             f(*static_cast<T*>(this));
         }
 
-        void write(int32_t const value)
+        void write(int64_t const value)
         {
             write(std::to_string(value));
         }
 
-        void write(uint32_t const value)
+        void write(uint64_t const value)
         {
             write(std::to_string(value));
         }
@@ -75,12 +75,13 @@ namespace xlang::text
             write(std::string_view{ buffer, size });
         }
 
-        void save_to_console() const noexcept
+        void flush_to_console() noexcept
         {
-            ::printf("%.*s", m_buffer.size(), m_buffer.data());
+            printf("%.*s", static_cast<int>(m_buffer.size()), m_buffer.data());
+            m_buffer.clear();
         }
 
-        void save_to_file(std::string_view const& filename) const
+        void flush_to_file(std::string_view const& filename)
         {
             winrt::file_handle file
             {
@@ -117,6 +118,7 @@ namespace xlang::text
                 nullptr));
 
             WINRT_ASSERT(copied == m_buffer.size());
+            m_buffer.clear();
         }
 
 #if defined(_DEBUG)
