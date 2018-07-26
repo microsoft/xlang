@@ -18,6 +18,37 @@ struct writer : writer_base<writer>
     using writer_base<writer>::write;
     std::string_view current;
 
+    std::vector<std::pair<GenericParam, GenericParam>> generic_param_stack;
+
+    struct generic_param_guard
+    {
+        explicit generic_param_guard(writer* arg)
+            : owner(arg)
+        {}
+
+        ~generic_param_guard()
+        {
+            if (owner)
+            {
+                owner->generic_param_stack.pop_back();
+            }
+        }
+
+        generic_param_guard(generic_param_guard && other)
+            : owner(other.owner)
+        {
+            owner = nullptr;
+        }
+        generic_param_guard& operator=(generic_param_guard const&) = delete;
+        writer* owner;
+    };
+
+    generic_param_guard push_generic_params(std::pair<GenericParam, GenericParam>&& arg)
+    {
+        generic_param_stack.push_back(std::move(arg));
+        return generic_param_guard{ this };
+    }
+
     void write(Constant const& value)
     {
         auto const type = value.Type();
@@ -115,9 +146,9 @@ struct writer : writer_base<writer>
                         write("Object");
                     }
                 },
-                [&](uint32_t var)
+                [&](GenericTypeIndex var)
                 {
-                    write("?%?", var);
+                    write("%", begin(generic_param_stack.back())[var.index].Name());
                 },
                 [&](auto&& type)
                 {
@@ -211,6 +242,28 @@ struct writer : writer_base<writer>
     }
 };
 
+void write_type_name(writer& w, std::string_view name)
+{
+    w.write(name);
+    bool found = false;
+    for (auto const& param : w.generic_param_stack.back())
+    {
+        if (found)
+        {
+            w.write(", %", param.Name());
+        }
+        else
+        {
+            found = true;
+            w.write("<%", param.Name());
+        }
+    }
+    if (found)
+    {
+        w.write(">");
+    }
+}
+
 void write_enum_field(writer& w, Field const& field)
 {
     if (auto const& constant = field.Constant())
@@ -254,6 +307,7 @@ void write_struct(writer& w, TypeDef const& type)
 
 void write_delegate(writer& w, TypeDef const& type)
 {
+    auto guard{ w.push_generic_params(type.GenericParam()) };
     auto methods = type.MethodList();
 
     auto method = std::find_if(begin(methods), end(methods), [](auto&& method)
@@ -271,7 +325,7 @@ void write_delegate(writer& w, TypeDef const& type)
         w.write(attr);
     }
 
-    w.write("\n    delegate % %(%);\n", method.Signature().ReturnType(), type.TypeName(), method);
+    w.write("\n    delegate % %(%);\n", method.Signature().ReturnType(), bind<write_type_name>(type.TypeName()), method);
 }
 
 void write_method(writer& w, MethodDef const& method)
@@ -369,26 +423,30 @@ void write_interface_methods(writer& w, TypeDef const& type)
 
 void write_interface(writer& w, TypeDef const& type)
 {
+    auto guard = w.push_generic_params(type.GenericParam());
+
     for (auto const& attr : type.CustomAttribute())
     {
         w.write(attr);
     }
 
     w.write("\n    interface %%\n    {%\n    };\n",
-        type.TypeName(),
+        bind<write_type_name>(type.TypeName()),
         bind<write_required>("requires", type),
         bind<write_interface_methods>(type));
 }
 
 void write_class(writer& w, TypeDef const& type)
 {
+    auto guard = w.push_generic_params(type.GenericParam());
+
     for (auto const& attr : type.CustomAttribute())
     {
         w.write(attr);
     }
 
     w.write("\n    runtimeclass %%\n    {\n    };\n",
-        type.TypeName(),
+        bind<write_type_name>(type.TypeName()),
         bind<write_required>(":", type));
 }
 

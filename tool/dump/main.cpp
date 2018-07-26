@@ -104,9 +104,9 @@ void print_type_name(xlang::meta::reader::TypeSig type, range<GenericParam> cons
             printf("Object");
         }
     },
-        [&generic_params](uint32_t var)
+        [&generic_params](GenericTypeIndex var)
     {
-        printf("%s", c_str(begin(generic_params)[var].Name()));
+        printf("%s", c_str(begin(generic_params)[var.index].Name()));
     },
         [&generic_params](auto&& type)
     {
