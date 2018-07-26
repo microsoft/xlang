@@ -121,7 +121,7 @@ namespace xlang::meta::reader
 
     inline auto Property::Parent() const
     {
-        return get_parent_row<TypeDef, 1>();
+        return get_parent_row<PropertyMap, 1>().Parent();
     }
 
     inline auto PropertyMap::PropertyList() const
@@ -146,27 +146,7 @@ namespace xlang::meta::reader
 
     inline auto Event::Parent() const
     {
-        auto const& map = get_database().get_table<EventMap>();
-        struct compare
-        {
-            bool operator()(EventMap const& lhs, uint32_t rhs) const noexcept
-            {
-                return lhs.get_value<uint32_t>(1) < rhs;
-            }
-            bool operator()(uint32_t lhs, EventMap const& rhs) const noexcept
-            {
-                return lhs < rhs.get_value<uint32_t>(1);
-            }
-        };
-        auto iter = std::lower_bound(map.begin(), map.end(), index() + 1, compare{});
-        if (iter.get_value<uint32_t>(1) == index() + 1)
-        {
-            return iter.Parent();
-        }
-        else
-        {
-            return (iter - 1).Parent();
-        }
+        return get_parent_row<EventMap, 1>().Parent();
     }
 
     inline auto TypeDef::PropertyList() const

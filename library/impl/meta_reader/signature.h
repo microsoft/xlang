@@ -478,6 +478,8 @@ namespace xlang::meta::reader
         case ElementType::R8:
         case ElementType::String:
         case ElementType::Object:
+        case ElementType::U:
+        case ElementType::I:
             return element_type;
             break;
 
