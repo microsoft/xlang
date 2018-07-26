@@ -26,4 +26,12 @@ namespace xlang::meta::reader
         auto MemberRef() const;
         auto MethodDef() const;
     };
+
+    template <> struct typed_index<HasSemantics> : index_base<HasSemantics>
+    {
+        using index_base<HasSemantics>::index_base;
+
+        auto Property() const;
+        auto Event() const;
+    };
 }

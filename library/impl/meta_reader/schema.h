@@ -320,6 +320,11 @@ namespace xlang::meta::reader
     {
         using row_base::row_base;
 
+        auto EventFlags() const
+        {
+            return get_value<EventAttributes>(0);
+        }
+
         auto Name() const
         {
             return get_string(1);
@@ -327,7 +332,7 @@ namespace xlang::meta::reader
 
         auto EventType() const
         {
-            return get_value<TypeDefOrRef>(2);
+            return get_coded_index<TypeDefOrRef>(2);
         }
 
         auto MethodSemantic() const;
@@ -383,6 +388,26 @@ namespace xlang::meta::reader
         auto Association() const
         {
             return get_coded_index<HasSemantics>(2);
+        }
+
+        bool PropertyGetter() const
+        {
+            return enum_mask(Semantic(), MethodSemanticsAttributes::Getter) == MethodSemanticsAttributes::Getter;
+        }
+
+        bool PropertySetter() const
+        {
+            return enum_mask(Semantic(), MethodSemanticsAttributes::Setter) == MethodSemanticsAttributes::Setter;
+        }
+
+        bool EventAdder() const
+        {
+            return enum_mask(Semantic(), MethodSemanticsAttributes::AddOn) == MethodSemanticsAttributes::AddOn;
+        }
+
+        bool EventRemover() const
+        {
+            return enum_mask(Semantic(), MethodSemanticsAttributes::RemoveOn) == MethodSemanticsAttributes::RemoveOn;
         }
     };
 

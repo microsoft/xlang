@@ -284,6 +284,32 @@ void write_method(writer& w, MethodDef const& method)
     w.write("\n        % %(%);", method.Signature().ReturnType(), method.Name(), method);
 }
 
+void write_method_semantic(writer& w, MethodSemantics const& method)
+{
+    switch (method.Semantic())
+    {
+    case MethodSemanticsAttributes::Getter:
+        w.write("\n        % % { get; };", method.Association().Property().Type().Type(), method.Association().Property().Name());
+        break;
+
+    case MethodSemanticsAttributes::Setter:
+        w.write("\n        % % { set; };", method.Association().Property().Type().Type(), method.Association().Property().Name());
+        break;
+
+    case MethodSemanticsAttributes::AddOn:
+        w.write("\n        % % { add; };", method.Association().Event().EventType(), method.Association().Event().Name());
+        break;
+
+    case MethodSemanticsAttributes::RemoveOn:
+        w.write("\n        % % { remove; };", method.Association().Event().EventType(), method.Association().Event().Name());
+        break;
+
+    default:
+        xlang::throw_invalid("Invalid method semantic encountered");
+    }
+}
+
+
 void write_required(writer& w, std::string_view const& requires, TypeDef const& type)
 {
     auto interfaces{ type.InterfaceImpl() };
@@ -296,6 +322,51 @@ void write_required(writer& w, std::string_view const& requires, TypeDef const& 
     w.write(" %\n        %", requires, bind_list(",\n        ", interfaces));
 }
 
+void write_interface_methods(writer& w, TypeDef const& type)
+{
+    auto const& methods = type.MethodList();
+    auto const& properties = type.PropertyList();
+    auto const& events = type.EventList();
+
+    auto method_semantic = [&properties, &events](MethodDef const& method) -> std::optional<MethodSemantics>
+    {
+        for (auto const& prop : properties)
+        {
+            for (auto const& semantic : prop.MethodSemantic())
+            {
+                if (semantic.Method() == method)
+                {
+                    return semantic;
+                }
+            }
+        }
+        for (auto const& event : events)
+        {
+            for (auto const& semantic : event.MethodSemantic())
+            {
+                if (semantic.Method() == method)
+                {
+                    return semantic;
+                }
+            }
+        }
+        return {};
+    };
+
+    for (auto const& method : methods)
+    {
+        auto const& semantic = method_semantic(method);
+        if (semantic)
+        {
+            write_method_semantic(w, *semantic);
+        }
+        else
+        {
+            write_method(w, method);
+        }
+    }
+}
+
 void write_interface(writer& w, TypeDef const& type)
 {
     for (auto const& attr : type.CustomAttribute())
@@ -306,7 +377,7 @@ void write_interface(writer& w, TypeDef const& type)
     w.write("\n    interface %%\n    {%\n    };\n",
         type.TypeName(),
         bind<write_required>("requires", type),
-        bind_each<write_method>(type.MethodList()));
+        bind<write_interface_methods>(type));
 }
 
 void write_class(writer& w, TypeDef const& type)

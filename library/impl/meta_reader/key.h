@@ -59,6 +59,16 @@ namespace xlang::meta::reader
         return get_row<reader::TypeDef>();
     }
 
+    inline auto typed_index<HasSemantics>::Property() const
+    {
+        return get_row<reader::Property>();
+    }
+
+    inline auto typed_index<HasSemantics>::Event() const
+    {
+        return get_row<reader::Event>();
+    }
+
     inline bool TypeDef::has_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const
     {
         for (auto&& attribute : CustomAttribute())
