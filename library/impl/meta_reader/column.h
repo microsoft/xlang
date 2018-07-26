@@ -473,20 +473,22 @@ namespace xlang::meta::reader
 
     struct AssemblyVersion
     {
-        uint16_t RevisionNumber;
-        uint16_t BuildNumber;
-        uint16_t MinorVersion;
         uint16_t MajorVersion;
+        uint16_t MinorVersion;
+        uint16_t BuildNumber;
+        uint16_t RevisionNumber;
     };
 
     auto Assembly::Version() const
     {
-        return get_value<AssemblyVersion>(1);
+        auto const temp = get_value<uint64_t>(1);
+        return AssemblyVersion{ temp & 0xffff, (temp >> 16) & 0xffff, (temp >> 32) & 0xffff, (temp >> 48) & 0xffff };
     }
 
     auto AssemblyRef::Version() const
     {
-        return get_value<AssemblyVersion>(0);
+        auto const temp = get_value<uint64_t>(1);
+        return AssemblyVersion{ temp & 0xffff, (temp >> 16) & 0xffff, (temp >> 32) & 0xffff, (temp >> 48) & 0xffff };
     }
 
     auto AssemblyRefOS::AssemblyRef() const

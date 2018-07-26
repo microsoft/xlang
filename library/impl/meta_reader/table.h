@@ -32,16 +32,40 @@ namespace xlang::meta::reader
         template <typename T>
         T get_value(uint32_t const row, uint32_t const column) const
         {
-            WINRT_ASSERT(m_columns[column].size);
+            static_assert(std::is_enum_v<T> || std::is_integral_v<T>);
+            uint32_t const data_size = m_columns[column].size;
+            WINRT_ASSERT(data_size == 1 || data_size == 2 || data_size == 4 || data_size == 8);
+            WINRT_ASSERT(data_size <= sizeof(T));
 
             if (row > size())
             {
                 throw_invalid("Invalid row index");
             }
 
-            T result{};
-            memcpy(&result, m_data + row * m_row_size + m_columns[column].offset, m_columns[column].size);
-            return result;
+            uint8_t const* ptr = m_data + row * m_row_size + m_columns[column].offset;
+            switch (data_size)
+            {
+            case  1:
+            {
+                uint8_t temp = *ptr;
+                return static_cast<T>(temp);
+            }
+            case 2:
+            {
+                uint16_t temp = *reinterpret_cast<uint16_t const*>(ptr);
+                return static_cast<T>(temp);
+            }
+            case 4:
+            {
+                uint32_t temp = *reinterpret_cast<uint32_t const*>(ptr);
+                return static_cast<T>(temp);
+            }
+            default:
+            {
+                uint64_t temp = *reinterpret_cast<uint64_t const*>(ptr);
+                return static_cast<T>(temp);
+            }
+            }
         }
 
     private:
