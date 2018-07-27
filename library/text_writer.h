@@ -26,7 +26,7 @@ namespace xlang::text
         {
             m_buffer.insert(m_buffer.end(), value.begin(), value.end());
 
-#if defined(_DEBUG)
+#if defined(DEBUG)
             if (debug_trace)
             {
                 ::printf("%.*s", static_cast<int>(value.size()), value.data());
@@ -38,7 +38,7 @@ namespace xlang::text
         {
             m_buffer.push_back(value);
 
-#if defined(_DEBUG)
+#if defined(DEBUG)
             if (debug_trace)
             {
                 ::printf("%c", value);
@@ -90,7 +90,7 @@ namespace xlang::text
             m_buffer.clear();
         }
 
-#if defined(_DEBUG)
+#if defined(DEBUG)
         bool debug_trace{};
 #endif
 

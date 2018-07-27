@@ -9,7 +9,7 @@
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 
-#ifdef DEBUG
+#if defined(DEBUG)
 
 #include <Windows.h>
 
