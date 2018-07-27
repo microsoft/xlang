@@ -148,37 +148,73 @@ namespace xlang::meta::reader
         {
             if (*this)
             {
-                WINRT_VERIFY(UnmapViewOfFile(begin()));
+                UnmapViewOfFile(begin());
             }
         }
 
     private:
 
+        struct handle
+        {
+            HANDLE value{};
+
+            ~handle() noexcept
+            {
+                if (value)
+                {
+                    CloseHandle(value);
+                }
+            }
+
+            explicit operator bool() const noexcept
+            {
+                return value != 0;
+            }
+        };
+
+        struct file_handle
+        {
+            HANDLE value{ INVALID_HANDLE_VALUE };
+
+            ~file_handle() noexcept
+            {
+                if (value != INVALID_HANDLE_VALUE)
+                {
+                    CloseHandle(value);
+                }
+            }
+
+            explicit operator bool() const noexcept
+            {
+                return value != INVALID_HANDLE_VALUE;
+            }
+        };
+
         static byte_view open_file(std::string_view const& path)
         {
-            winrt::file_handle file{ CreateFileA(c_str(path), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
+            file_handle file{ CreateFileA(c_str(path), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
 
             if (!file)
             {
-                winrt::throw_last_error();
+                throw_invalid("Could not open file '", path, "'");
             }
 
             LARGE_INTEGER size{};
-            WINRT_VERIFY(GetFileSizeEx(file.get(), &size));
+            GetFileSizeEx(file.value, &size);
 
             if (!size.QuadPart)
             {
                 return{};
             }
 
-            winrt::handle mapping{ CreateFileMappingA(file.get(), nullptr, PAGE_READONLY, 0, 0, nullptr) };
+            handle mapping{ CreateFileMappingA(file.value, nullptr, PAGE_READONLY, 0, 0, nullptr) };
 
             if (!mapping)
             {
-                winrt::throw_last_error();
+                throw_invalid("Could not open file '", path, "'");
             }
 
-            auto const first{ static_cast<uint8_t const*>(MapViewOfFile(mapping.get(), FILE_MAP_READ, 0, 0, 0)) };
+            auto const first{ static_cast<uint8_t const*>(MapViewOfFile(mapping.value, FILE_MAP_READ, 0, 0, 0)) };
             return{ first, first + size.QuadPart };
         }
     };

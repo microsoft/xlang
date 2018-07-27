@@ -60,7 +60,7 @@ namespace xlang::meta::reader
                 break;
 
             default:
-                WINRT_ASSERT(length == 4);
+                XLANG_ASSERT(length == 4);
                 unsigned_data |= sign_mask_four_byte;
                 break;
             }
@@ -121,7 +121,7 @@ namespace xlang::meta::reader
             : m_cmod(uncompress_enum<ElementType>(data))
             , m_type(table, uncompress_unsigned(data))
         {
-            WINRT_ASSERT(m_cmod == ElementType::CModReqd || m_cmod == ElementType::CModOpt);
+            XLANG_ASSERT(m_cmod == ElementType::CModReqd || m_cmod == ElementType::CModOpt);
         }
 
         ElementType CustomMod() const noexcept
@@ -238,7 +238,7 @@ namespace xlang::meta::reader
         }
         else
         {
-            WINRT_ASSERT(element_type != ElementType::TypedByRef);
+            XLANG_ASSERT(element_type != ElementType::TypedByRef);
             return false;
         }
     }
@@ -441,7 +441,7 @@ namespace xlang::meta::reader
         static GenericTypeInstSig ParseType(table_base const* table, byte_view& data)
         {
             [[maybe_unused]] auto element_type = uncompress_enum<ElementType>(data);
-            WINRT_ASSERT(element_type == ElementType::GenericInst);
+            XLANG_ASSERT(element_type == ElementType::GenericInst);
             return { table, data };
         }
         GenericTypeInstSig m_type;

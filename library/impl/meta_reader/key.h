@@ -5,7 +5,7 @@ namespace xlang::meta::reader
     template <typename Row>
     Row index_base<T>::get_row() const
     {
-        WINRT_ASSERT(type() == (index_tag_v<T, Row>));
+        XLANG_ASSERT(type() == (index_tag_v<T, Row>));
         return get_database().get_table<Row>()[index()];
     }
 
@@ -84,7 +84,7 @@ namespace xlang::meta::reader
             }
             else
             {
-                WINRT_ASSERT(attribute.Type().type() == CustomAttributeType::MethodDef);
+                XLANG_ASSERT(attribute.Type().type() == CustomAttributeType::MethodDef);
                 // TODO: Resolve method parent (TypeDef)
             }
         }
@@ -103,14 +103,14 @@ namespace xlang::meta::reader
         explicit EnumDefinition(TypeDef const& type)
             : m_typedef(type)
         {
-            WINRT_ASSERT(type.is_enum());
+            XLANG_ASSERT(type.is_enum());
             for (auto field : type.FieldList())
             {
                 if (!field.is_literal() && !field.is_static())
                 {
-                    WINRT_ASSERT(m_underlying_type == ElementType::End);
+                    XLANG_ASSERT(m_underlying_type == ElementType::End);
                     m_underlying_type = std::get<ElementType>(field.Signature().Type().Type());
-                    WINRT_ASSERT(ElementType::Boolean <= m_underlying_type && m_underlying_type <= ElementType::U8);
+                    XLANG_ASSERT(ElementType::Boolean <= m_underlying_type && m_underlying_type <= ElementType::U8);
                 }
             }
         }

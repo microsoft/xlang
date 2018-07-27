@@ -2,11 +2,11 @@
 #include "meta_reader.h"
 #include "text_writer.h"
 #include "cmd_reader.h"
+#include "task_group.h"
 
 using namespace std::chrono;
 using namespace std::filesystem;
 using namespace std::string_view_literals;
-using namespace winrt::Windows::Foundation;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
 using namespace xlang::cmd;
@@ -663,8 +663,8 @@ auto get_in(reader const& args)
         }
         else if (path == "local")
         {
-            std::array<char, MAX_PATH> local;
-            winrt::check_bool(ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size())));
+            std::array<char, MAX_PATH> local{};
+            ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
             add_directory(local.data());
         }
         else
@@ -692,17 +692,17 @@ void print_usage()
 template <typename T, typename F>
 void for_each_async(T&& range, F callback)
 {
-    std::vector<IAsyncAction> actions;
+    xlang::task_group group;
 
     for (auto&& each : range)
     {
-        actions.push_back(callback(each));
+        group.add([&]
+        {
+            callback(each);
+        });
     }
 
-    for (auto&& async : actions)
-    {
-        async.get();
-    }
+    group.get();
 }
 
 int main(int const argc, char** argv)
@@ -711,7 +711,6 @@ int main(int const argc, char** argv)
 
     try
     {
-        winrt::init_apartment();
         auto start = high_resolution_clock::now();
 
         std::vector<option> options
@@ -746,9 +745,8 @@ int main(int const argc, char** argv)
 
         w.flush_to_console();
 
-        for_each_async(c.namespaces(), [&](auto&& ns) -> IAsyncAction
+        for_each_async(c.namespaces(), [&](auto&& ns)
         {
-            co_await winrt::resume_background();
             writer w;
             w.current = ns.first;
 
@@ -770,10 +768,6 @@ int main(int const argc, char** argv)
         {
             w.write("time: %ms\n", duration_cast<milliseconds>(high_resolution_clock::now() - start).count());
         }
-    }
-    catch (winrt::hresult_error const& e)
-    {
-        w.write("%\n", winrt::to_string(e.message()));
     }
     catch (std::exception const& e)
     {

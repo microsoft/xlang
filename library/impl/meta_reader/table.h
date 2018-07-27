@@ -34,8 +34,8 @@ namespace xlang::meta::reader
         {
             static_assert(std::is_enum_v<T> || std::is_integral_v<T>);
             uint32_t const data_size = m_columns[column].size;
-            WINRT_ASSERT(data_size == 1 || data_size == 2 || data_size == 4 || data_size == 8);
-            WINRT_ASSERT(data_size <= sizeof(T));
+            XLANG_ASSERT(data_size == 1 || data_size == 2 || data_size == 4 || data_size == 8);
+            XLANG_ASSERT(data_size <= sizeof(T));
 
             if (row > size())
             {
@@ -86,23 +86,23 @@ namespace xlang::meta::reader
 
         void set_row_count(uint32_t const row_count) noexcept
         {
-            WINRT_ASSERT(!m_row_count);
+            XLANG_ASSERT(!m_row_count);
             m_row_count = row_count;
         }
 
         void set_columns(uint8_t const a, uint8_t const b = 0, uint8_t const c = 0, uint8_t const d = 0, uint8_t const e = 0, uint8_t const f = 0) noexcept
         {
-            WINRT_ASSERT(a);
-            WINRT_ASSERT(a <= 8);
-            WINRT_ASSERT(b <= 8);
-            WINRT_ASSERT(c <= 8);
-            WINRT_ASSERT(d <= 8);
-            WINRT_ASSERT(e <= 8);
-            WINRT_ASSERT(f <= 8);
+            XLANG_ASSERT(a);
+            XLANG_ASSERT(a <= 8);
+            XLANG_ASSERT(b <= 8);
+            XLANG_ASSERT(c <= 8);
+            XLANG_ASSERT(d <= 8);
+            XLANG_ASSERT(e <= 8);
+            XLANG_ASSERT(f <= 8);
 
-            WINRT_ASSERT(!m_row_size);
+            XLANG_ASSERT(!m_row_size);
             m_row_size = a + b + c + d + e + f;
-            WINRT_ASSERT(m_row_size < UINT8_MAX);
+            XLANG_ASSERT(m_row_size < UINT8_MAX);
 
             m_columns[0] = { 0, a };
             if (b) { m_columns[1] = { static_cast<uint8_t>(a), b }; }
@@ -114,11 +114,11 @@ namespace xlang::meta::reader
 
         void set_data(byte_view& view) noexcept
         {
-            WINRT_ASSERT(!m_data);
+            XLANG_ASSERT(!m_data);
 
             if (m_row_count)
             {
-                WINRT_ASSERT(m_row_size);
+                XLANG_ASSERT(m_row_size);
                 m_data = view.begin();
                 view = view.seek(m_row_count * m_row_size);
             }
@@ -316,7 +316,7 @@ namespace xlang::meta::reader
 
         difference_type operator-(row_base const& other) const noexcept
         {
-            WINRT_ASSERT(m_table == other.m_table);
+            XLANG_ASSERT(m_table == other.m_table);
             return m_index - other.m_index;
         }
 
@@ -327,7 +327,7 @@ namespace xlang::meta::reader
 
         bool operator==(row_base const& other) const noexcept
         {
-            WINRT_ASSERT(m_table == other.m_table);
+            XLANG_ASSERT(m_table == other.m_table);
             return m_index == other.m_index;
         }
 
@@ -338,7 +338,7 @@ namespace xlang::meta::reader
 
         bool operator<(row_base const& other) const noexcept
         {
-            WINRT_ASSERT(m_table == other.m_table);
+            XLANG_ASSERT(m_table == other.m_table);
             return m_index < other.m_index;
         }
 

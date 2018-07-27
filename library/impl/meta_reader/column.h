@@ -209,7 +209,7 @@ namespace xlang::meta::reader
         std::optional<reader::Constant> result;
         if (range.second != range.first)
         {
-            WINRT_ASSERT(range.second - range.first == 1);
+            XLANG_ASSERT(range.second - range.first == 1);
             result = range.first;
         }
         return result;
@@ -221,7 +221,7 @@ namespace xlang::meta::reader
         std::optional<reader::Constant> result;
         if (range.second != range.first)
         {
-            WINRT_ASSERT(range.second - range.first == 1);
+            XLANG_ASSERT(range.second - range.first == 1);
             result = range.first;
         }
         return result;
@@ -233,7 +233,7 @@ namespace xlang::meta::reader
         std::optional<reader::Constant> result;
         if (range.second != range.first)
         {
-            WINRT_ASSERT(range.second - range.first == 1);
+            XLANG_ASSERT(range.second - range.first == 1);
             result = range.first;
         }
         return result;
@@ -246,86 +246,86 @@ namespace xlang::meta::reader
 
     inline auto Constant::ValueBoolean() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Boolean);
+        XLANG_ASSERT(Type() == ConstantType::Boolean);
         return get_blob(2).as<bool>();
     }
 
     inline auto Constant::ValueChar() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Char);
+        XLANG_ASSERT(Type() == ConstantType::Char);
         return get_blob(2).as<char16_t>();
     }
 
     inline auto Constant::ValueInt8() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Int8);
+        XLANG_ASSERT(Type() == ConstantType::Int8);
         return get_blob(2).as<int8_t>();
     }
 
     inline auto Constant::ValueUInt8() const
     {
-        WINRT_ASSERT(Type() == ConstantType::UInt8);
+        XLANG_ASSERT(Type() == ConstantType::UInt8);
         return get_blob(2).as<uint8_t>();
     }
 
     inline auto Constant::ValueInt16() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Int16);
+        XLANG_ASSERT(Type() == ConstantType::Int16);
         return get_blob(2).as<int16_t>();
     }
 
     inline auto Constant::ValueUInt16() const
     {
-        WINRT_ASSERT(Type() == ConstantType::UInt16);
+        XLANG_ASSERT(Type() == ConstantType::UInt16);
         return get_blob(2).as<uint16_t>();
     }
 
     inline auto Constant::ValueInt32() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Int32);
+        XLANG_ASSERT(Type() == ConstantType::Int32);
         return get_blob(2).as<int32_t>();
     }
 
     inline auto Constant::ValueUInt32() const
     {
-        WINRT_ASSERT(Type() == ConstantType::UInt32);
+        XLANG_ASSERT(Type() == ConstantType::UInt32);
         return get_blob(2).as<uint32_t>();
     }
 
     inline auto Constant::ValueInt64() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Int64);
+        XLANG_ASSERT(Type() == ConstantType::Int64);
         return get_blob(2).as<int64_t>();
     }
 
     inline auto Constant::ValueUInt64() const
     {
-        WINRT_ASSERT(Type() == ConstantType::UInt64);
+        XLANG_ASSERT(Type() == ConstantType::UInt64);
         return get_blob(2).as<uint64_t>();
     }
 
     inline auto Constant::ValueFloat32() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Float32);
+        XLANG_ASSERT(Type() == ConstantType::Float32);
         return get_blob(2).as<float>();
     }
 
     inline auto Constant::ValueFloat64() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Float64);
+        XLANG_ASSERT(Type() == ConstantType::Float64);
         return get_blob(2).as<double>();
     }
 
     inline auto Constant::ValueString() const
     {
-        WINRT_ASSERT(Type() == ConstantType::String);
+        XLANG_ASSERT(Type() == ConstantType::String);
         return get_blob(2).as_string();
     }
 
     inline auto Constant::ValueClass() const
     {
-        WINRT_ASSERT(Type() == ConstantType::Class);
-        WINRT_ASSERT(get_blob(2).as<uint32_t>() == 0);
+        XLANG_ASSERT(Type() == ConstantType::Class);
+        XLANG_ASSERT(get_blob(2).as<uint32_t>() == 0);
         return nullptr;
     }
 

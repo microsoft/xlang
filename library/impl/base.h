@@ -1,8 +1,18 @@
 #pragma once
 
-#include "winrt/base.h"
+#include <windows.h>
+#include <stdexcept>
+#include <assert.h>
+#include <array>
 #include <bitset>
+#include <list>
+#include <map>
+#include <optional>
+#include <string_view>
 #include <variant>
+#include <vector>
+
+#define XLANG_ASSERT assert
 
 namespace xlang
 {

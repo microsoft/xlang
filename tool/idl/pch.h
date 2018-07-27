@@ -4,6 +4,6 @@
 
 #include <windows.h>
 #include <filesystem>
+#include <fstream>
 #include <bitset>
 #include <variant>
-#include "winrt/base.h"

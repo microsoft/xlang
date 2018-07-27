@@ -230,7 +230,7 @@ void print_constant(Constant const& value)
 void print_type_name(xlang::meta::reader::GenericTypeInstSig const& signature, range<GenericParam> const& generic_params)
 {
     print_type_name(signature.GenericType(), generic_params);
-    WINRT_ASSERT(signature.GenericArgCount() >= 1);
+    XLANG_ASSERT(signature.GenericArgCount() >= 1);
 
     printf("<");
     bool first = true;
@@ -312,8 +312,6 @@ void print(std::vector<xlang::meta::reader::ElemSig> const& arg)
 
 int main(int, char* argv[])
 {
-    winrt::init_apartment();
-
     auto const metadata_file = "Windows.Foundation.winmd";
     auto path = fs::canonical(argv[0]).remove_filename();
 
@@ -385,7 +383,7 @@ int main(int, char* argv[])
                         print_type_name(class_index.TypeRef());
 
                         auto const& signature = attribute_index.MemberRef().MethodSignature();
-                        WINRT_ASSERT(!signature.ReturnType().Type());
+                        XLANG_ASSERT(!signature.ReturnType().Type());
 
                         auto const& blob = attribute.Value();
                         auto fixed_arg_iterator = blob.FixedArgs().cbegin();
@@ -447,7 +445,7 @@ int main(int, char* argv[])
                 print_type_name(property.Type().Type(), generic_params);
                 printf(" %s", c_str(property.Name()));
                 printf("\n");
-                WINRT_ASSERT(property.Parent() == type);
+                XLANG_ASSERT(property.Parent() == type);
                 for (auto && semantic : property.MethodSemantic())
                 {
                     if (enum_mask(semantic.Semantic(), MethodSemanticsAttributes::Getter) == MethodSemanticsAttributes::Getter)
@@ -460,7 +458,7 @@ int main(int, char* argv[])
                     }
                     else
                     {
-                        WINRT_ASSERT(false);
+                        XLANG_ASSERT(false);
                     }
                     printf(" %s", c_str(semantic.Method().Name()));
                     printf("\n");
@@ -470,8 +468,8 @@ int main(int, char* argv[])
             puts("");
         }
     }
-    catch (winrt::hresult_error const& e)
+    catch (std::exception const& e)
     {
-        printf("%ls\n", reinterpret_cast<const wchar_t*>(e.message().c_str()));
+        puts(e.what());
     }
 }

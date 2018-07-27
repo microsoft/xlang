@@ -1,6 +1,7 @@
 #define NOMINMAX
 
 #include <windows.h>
+#include <winrt/base.h>
 #include "meta_reader.h"
 #include <filesystem>
 #include <cor.h>

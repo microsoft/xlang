@@ -83,41 +83,10 @@ namespace xlang::text
 
         void flush_to_file(std::string_view const& filename)
         {
-            winrt::file_handle file
-            {
-                CreateFileA(c_str(filename),
-                    GENERIC_WRITE,
-                    FILE_SHARE_READ,
-                    nullptr, // default security
-                    CREATE_ALWAYS,
-                    FILE_ATTRIBUTE_NORMAL,
-                    nullptr) // no template
-            };
-
-            if (!file)
-            {
-                winrt::throw_last_error();
-            }
-
-            DWORD copied = 0;
-
-            std::array<uint8_t, 3> byte_order_mark{ 0xEF, 0xBB, 0xBF };
-
-            winrt::check_bool(WriteFile(file.get(),
-                byte_order_mark.data(),
-                static_cast<uint32_t>(byte_order_mark.size()),
-                &copied,
-                nullptr));
-
-            WINRT_ASSERT(copied == byte_order_mark.size());
-
-            winrt::check_bool(WriteFile(file.get(),
-                m_buffer.data(),
-                static_cast<uint32_t>(m_buffer.size()),
-                &copied,
-                nullptr));
-
-            WINRT_ASSERT(copied == m_buffer.size());
+            std::ofstream file{ filename, std::ios::out | std::ios::binary };
+            std::array<uint8_t, 3> bom{ 0xEF, 0xBB, 0xBF };
+            file.write(reinterpret_cast<char*>(bom.data()), bom.size());
+            file.write(m_buffer.data(), m_buffer.size());
             m_buffer.clear();
         }
 
