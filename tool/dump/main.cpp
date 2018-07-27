@@ -288,7 +288,7 @@ void print(xlang::meta::reader::ElemSig const& arg)
     {
         print_value(arg);
     },
-        }, arg.m_value);
+        }, arg.value);
 }
 
 void print(std::vector<xlang::meta::reader::ElemSig> const& arg)
@@ -404,7 +404,7 @@ int main(int, char* argv[])
                             }
                             print_type_name(param.Type(), std::pair{ GenericParam{}, GenericParam{} });
                             printf(" ");
-                            std::visit([](auto&& arg) { print(arg); }, fixed_arg_iterator->m_value);
+                            std::visit([](auto&& arg) { print(arg); }, fixed_arg_iterator->value);
                             ++fixed_arg_iterator;
                         }
                         printf(")");

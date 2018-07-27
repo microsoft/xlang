@@ -47,22 +47,22 @@ namespace xlang::meta::reader
         using value_type = std::variant<bool, char16_t, uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t, uint64_t, int64_t, float, double, std::string_view, SystemType, EnumValue>;
 
         ElemSig(database const& db, ParamSig const& param, byte_view& data)
-            : m_value{ read_element(db, param, data) }
+            : value{ read_element(db, param, data) }
         {
         }
 
         ElemSig(SystemType type)
-            : m_value(type)
+            : value(type)
         {
         }
 
         ElemSig(EnumDefinition const& enum_def, byte_view& data)
-            : m_value{ EnumValue{enum_def, read_enum(enum_def.m_underlying_type, data) } }
+            : value{ EnumValue{enum_def, read_enum(enum_def.m_underlying_type, data) } }
         {
         }
 
         ElemSig(ElementType type, byte_view& data)
-            : m_value{ read_primitive(type, data) }
+            : value{ read_primitive(type, data) }
         {
         }
 
@@ -200,7 +200,7 @@ namespace xlang::meta::reader
             }
         }
 
-        value_type m_value;
+        value_type value;
     };
 
     struct FixedArgSig
@@ -208,19 +208,19 @@ namespace xlang::meta::reader
         using value_type = std::variant<ElemSig, std::vector<ElemSig>>;
 
         FixedArgSig(database const& db, ParamSig const& ctor_param, byte_view& data)
-            : m_value{ read_arg(db, ctor_param, data) }
+            : value{ read_arg(db, ctor_param, data) }
         {}
 
         FixedArgSig(ElemSig::SystemType type)
-            : m_value{ ElemSig{type} }
+            : value{ ElemSig{type} }
         {}
 
         FixedArgSig(EnumDefinition const& enum_def, byte_view& data)
-            : m_value{ ElemSig{ enum_def, data } }
+            : value{ ElemSig{ enum_def, data } }
         {}
 
         FixedArgSig(ElementType type, bool is_array, byte_view& data)
-            : m_value{ read_arg(type, is_array, data) }
+            : value{ read_arg(type, is_array, data) }
         {}
 
         static value_type read_arg(database const& db, ParamSig const& ctor_param, byte_view& data)
@@ -268,17 +268,17 @@ namespace xlang::meta::reader
             }
         }
 
-        value_type m_value;
+        value_type value;
     };
 
     struct NamedArgSig
     {
         NamedArgSig(database const& db, byte_view& data)
-            : m_value{ parse_value(db, data) }
+            : value{ parse_value(db, data) }
         {}
 
-        std::string_view m_name;
-        FixedArgSig m_value;
+        std::string_view name;
+        FixedArgSig value;
 
     private:
         FixedArgSig parse_value(database const& db, byte_view& data)
@@ -293,13 +293,13 @@ namespace xlang::meta::reader
             switch (type)
             {
             case ElementType::Type:
-                m_name = read<std::string_view>(data);
+                name = read<std::string_view>(data);
                 return FixedArgSig{ ElemSig::SystemType{read<std::string_view>(data)} };
 
             case ElementType::Enum:
             {
                 auto type_string = read<std::string_view>(data);
-                m_name = read<std::string_view>(data);
+                name = read<std::string_view>(data);
                 auto type_def = db.get_cache()->find(type_string);
                 if (!type_def.has_value())
                 {
@@ -324,7 +324,7 @@ namespace xlang::meta::reader
                 {
                     throw_invalid("CustomAttribute named param must be a primitive, System.Type, or an Enum");
                 }
-                m_name = read<std::string_view>(data);
+                name = read<std::string_view>(data);
                 return FixedArgSig{ type, is_array, data };
             }
             }

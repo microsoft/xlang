@@ -5,6 +5,7 @@
 
 using namespace std::chrono;
 using namespace std::filesystem;
+using namespace std::string_view_literals;
 using namespace winrt::Windows::Foundation;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
@@ -49,17 +50,117 @@ struct writer : writer_base<writer>
         return generic_param_guard{ this };
     }
 
+    void write_value(bool value)
+    {
+        write(value ? "TRUE"sv : "FALSE"sv);
+    }
+
+    void write_value(char16_t value)
+    {
+        write_printf("%#0hx", value);
+    }
+
+    void write_value(int8_t value)
+    {
+        write_printf("%hhd", value);
+    }
+
+    void write_value(uint8_t value)
+    {
+        write_printf("%#0hhx", value);
+    }
+
+    void write_value(int16_t value)
+    {
+        write_printf("%hd", value);
+    }
+
+    void write_value(uint16_t value)
+    {
+        write_printf("%#0hx", value);
+    }
+
+    void write_value(int32_t value)
+    {
+        write_printf("%d", value);
+    }
+
+    void write_value(uint32_t value)
+    {
+        write_printf("%#0x", value);
+    }
+
+    void write_value(int64_t value)
+    {
+        write_printf("%lld", value);
+    }
+
+    void write_value(uint64_t value)
+    {
+        write_printf("%#0llx", value);
+    }
+
+    void write_value(float value)
+    {
+        write_printf("%f", value);
+    }
+
+    void write_value(double value)
+    {
+        write_printf("%f", value);
+    }
+
+    void write_value(std::string_view value)
+    {
+        write("\"%\"", value);
+    }
+
     void write(Constant const& value)
     {
-        auto const type = value.Type();
-
-        if (type == ConstantType::Int32)
+        switch (value.Type())
         {
-            write_printf("%d", value.ValueInt32());
-        }
-        else if (type == ConstantType::UInt32)
-        {
-            write_printf("0x%X", value.ValueUInt32());
+        case ConstantType::Boolean:
+            write_value(value.ValueBoolean());
+            break;
+        case ConstantType::Char:
+            write_value(value.ValueChar());
+            break;
+        case ConstantType::Int8:
+            write_value(value.ValueInt8());
+            break;
+        case ConstantType::UInt8:
+            write_value(value.ValueUInt8());
+            break;
+        case ConstantType::Int16:
+            write_value(value.ValueInt16());
+            break;
+        case ConstantType::UInt16:
+            write_value(value.ValueUInt16());
+            break;
+        case ConstantType::Int32:
+            write_value(value.ValueInt32());
+            break;
+        case ConstantType::UInt32:
+            write_value(value.ValueUInt32());
+            break;
+        case ConstantType::Int64:
+            write_value(value.ValueInt64());
+            break;
+        case ConstantType::UInt64:
+            write_value(value.ValueUInt64());
+            break;
+        case ConstantType::Float32:
+            write_value(value.ValueFloat32());
+            break;
+        case ConstantType::Float64:
+            write_value(value.ValueFloat64());
+            break;
+        case ConstantType::String:
+            write_value(value.ValueString());
+            break;
+        case ConstantType::Class:
+            write("null");
+            break;
         }
     }
 
@@ -235,10 +336,95 @@ struct writer : writer_base<writer>
         }
     }
 
+    void write(FixedArgSig const& arg)
+    {
+        std::visit(overloaded{
+            [this](ElemSig::SystemType arg)
+        {
+            write(arg.name);
+        },
+            [this](ElemSig::EnumValue arg)
+        {
+            // TODO: Map the integer value to an enumerator
+            std::visit([this](auto&& value) { write_value(value); }, arg.value);
+        },
+            [this](auto&& arg)
+        {
+            write_value(arg);
+        }
+            }, std::get<ElemSig>(arg.value).value);
+    }
+
+    void write(NamedArgSig const& arg)
+    {
+        write(arg.value);
+    }
+
+    void write_uuid(CustomAttributeSig const& arg)
+    {
+        auto const& args = arg.FixedArgs();
+
+        write_printf("\n    [Windows.Foundation.Metadata.GuidAttribute(%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X)]"
+            , std::get<uint32_t>(std::get<ElemSig>(args[0].value).value)
+            , std::get<uint16_t>(std::get<ElemSig>(args[1].value).value)
+            , std::get<uint16_t>(std::get<ElemSig>(args[2].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[3].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[4].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[5].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[6].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[7].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[8].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[9].value).value)
+            , std::get<uint8_t>(std::get<ElemSig>(args[10].value).value)
+        );
+    }
+
     void write(CustomAttribute const& attr)
     {
         auto const& name = attr.TypeNamespaceAndName();
-        write("\n    [%.%]", name.first, name.second);
+        auto const& sig = attr.Value();
+
+        if (name.first == "Windows.Foundation.Metadata"sv && name.second == "GuidAttribute"sv)
+        {
+            write_uuid(sig);
+            return;
+        }
+
+        write("\n    [%.%", name.first, name.second);
+
+        bool first = true;
+        for (auto const& fixed_arg : sig.FixedArgs())
+        {
+            if (first)
+            {
+                first = false;
+                write("(%", fixed_arg);
+            }
+            else
+            {
+                write(", %", fixed_arg);
+            }
+        }
+        for (auto const& named_arg : sig.NamedArgs())
+        {
+            if (first)
+            {
+                first = false;
+                write("(%", named_arg);
+            }
+            else
+            {
+                write(", %", named_arg);
+            }
+        }
+        if (first)
+        {
+            write("]");
+        }
+        else
+        {
+            write(")]");
+        }
     }
 };
 

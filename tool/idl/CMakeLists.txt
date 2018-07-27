@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 project(idl)
 
 add_executable(idl ${sources})
+configure_file(idl.vcxproj.user ${CMAKE_CURRENT_BINARY_DIR}/idl.vcxproj.user)
 target_sources(idl PUBLIC main.cpp pch.cpp)
 target_include_directories(idl PUBLIC ${LW_LIBRARY_PATH})
 target_compile_options(idl PUBLIC /await)
