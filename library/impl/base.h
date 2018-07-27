@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <array>
 #include <bitset>
+#include <future>
 #include <list>
 #include <map>
 #include <optional>
