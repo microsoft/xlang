@@ -3,10 +3,12 @@
 #include "text_writer.h"
 #include "cmd_reader.h"
 #include "task_group.h"
+#include <filesystem>
 
 using namespace std::chrono;
 using namespace std::filesystem;
 using namespace std::string_view_literals;
+using namespace xlang;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
 using namespace xlang::cmd;
@@ -503,7 +505,7 @@ void write_delegate(writer& w, TypeDef const& type)
 
     if (method == end(methods))
     {
-        xlang::throw_invalid("Delegate's Invoke method not found");
+        throw_invalid("Delegate's Invoke method not found");
     }
 
     for (auto const& attr : type.CustomAttribute())
@@ -545,7 +547,7 @@ void write_method_semantic(writer& w, MethodSemantics const& method)
         break;
 
     default:
-        xlang::throw_invalid("Invalid method semantic encountered");
+        throw_invalid("Invalid method semantic encountered");
     }
 }
 
@@ -669,7 +671,7 @@ auto get_in(reader const& args)
         }
         else
         {
-            xlang::throw_invalid("Path '", path, "' is not a file or directory");
+            throw_invalid("Path '", path, "' is not a file or directory");
         }
     }
 
@@ -687,22 +689,6 @@ auto get_out(reader const& args)
 void print_usage()
 {
     puts("Usage...");
-}
-
-template <typename T, typename F>
-void for_each_async(T&& range, F callback)
-{
-    xlang::task_group group;
-
-    for (auto&& each : range)
-    {
-        group.add([&]
-        {
-            callback(each);
-        });
-    }
-
-    group.get();
 }
 
 int main(int const argc, char** argv)
@@ -744,25 +730,31 @@ int main(int const argc, char** argv)
         }
 
         w.flush_to_console();
+        task_group group;
 
-        for_each_async(c.namespaces(), [&](auto&& ns)
+        for (auto&& ns : c.namespaces())
         {
-            writer w;
-            w.current = ns.first;
+            group.add([&]
+            {
+                writer w;
+                w.current = ns.first;
 
-            w.write("\nnamespace %\n{%%%%%}\n",
-                w.current,
-                bind_each<write_enum>(ns.second.enums),
-                bind_each<write_struct>(ns.second.structs),
-                bind_each<write_delegate>(ns.second.delegates),
-                bind_each<write_interface>(ns.second.interfaces),
-                bind_each<write_class>(ns.second.classes));
+                w.write("\nnamespace %\n{%%%%%}\n",
+                    w.current,
+                    bind_each<write_enum>(ns.second.enums),
+                    bind_each<write_struct>(ns.second.structs),
+                    bind_each<write_delegate>(ns.second.delegates),
+                    bind_each<write_interface>(ns.second.interfaces),
+                    bind_each<write_class>(ns.second.classes));
 
-            auto filename{ out };
-            filename += w.current;
-            filename += ".idl";
-            w.flush_to_file(filename);
-        });
+                auto filename{ out };
+                filename += w.current;
+                filename += ".idl";
+                w.flush_to_file(filename);
+            });
+        }
+
+        group.get();
 
         if (verbose)
         {

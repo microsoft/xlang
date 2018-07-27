@@ -1,10 +1,13 @@
 #pragma once
 
+#define NOMINMAX
+
 #include <windows.h>
 #include <stdexcept>
 #include <assert.h>
 #include <array>
 #include <bitset>
+#include <fstream>
 #include <future>
 #include <list>
 #include <map>
