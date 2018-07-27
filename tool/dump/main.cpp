@@ -9,7 +9,6 @@
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 
-#if WINDOWS_PLATFORM_WINDOWS
 #ifdef DEBUG
 
 #include <Windows.h>
@@ -25,7 +24,6 @@ namespace xlang::impl
     static_assert(sizeof(image_cor20_header) == sizeof(IMAGE_COR20_HEADER));
 }
 
-#endif
 #endif
 
 using namespace xlang;
