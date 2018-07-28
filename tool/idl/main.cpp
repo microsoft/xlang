@@ -526,28 +526,146 @@ void write_method(writer& w, MethodDef const& method)
     w.write("\n        % %(%);", method.Signature().ReturnType(), method.Name(), method);
 }
 
-void write_method_semantic(writer& w, MethodSemantics const& method)
+void write_method_semantic(writer& w, MethodSemantics const& method_semantic, MethodDef& method)
 {
-    switch (method.Semantic())
+    auto const& target = method_semantic.Association();
+    auto const& semantic = method_semantic.Semantic();
+
+    if (target.type() == HasSemantics::Property)
     {
-    case MethodSemanticsAttributes::Getter:
-        w.write("\n        % % { get; };", method.Association().Property().Type().Type(), method.Association().Property().Name());
-        break;
+        if (semantic != MethodSemanticsAttributes::Getter && semantic != MethodSemanticsAttributes::Setter)
+        {
+            xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
+        }
+        auto const& property = target.Property();
+        auto const& accessors = property.MethodSemantic();
+        
+        if (distance(accessors) < 1 || 2 < distance(accessors))
+        {
+            xlang::throw_invalid("Properties can only have 1 or 2 accessors");
+        }
 
-    case MethodSemanticsAttributes::Setter:
-        w.write("\n        % % { set; };", method.Association().Property().Type().Type(), method.Association().Property().Name());
-        break;
+        if (distance(accessors) == 2)
+        {
+            auto const& other_method_semantic = (accessors.first == method_semantic) ? accessors.first + 1 : accessors.first;
+            auto const& other_method = other_method_semantic.Method();
+            if (method < other_method)
+            {
+                // First accessor seen for this property
+                for (auto const& attr : property.CustomAttribute())
+                {
+                    w.write(attr);
+                }
+            }
 
-    case MethodSemanticsAttributes::AddOn:
-        w.write("\n        % % { add; };", method.Association().Event().EventType(), method.Association().Event().Name());
-        break;
+            if (semantic == MethodSemanticsAttributes::Getter)
+            {
+                if (method + 1 == other_method)
+                {
+                    if (other_method_semantic.Semantic() != MethodSemanticsAttributes::Setter)
+                    {
+                        xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
+                    }
+                    w.write("\n        % %;", property.Type().Type(), property.Name());
+                    ++method;
+                }
+                else
+                {
+                    XLANG_ASSERT(semantic == MethodSemanticsAttributes::Getter);
+                    w.write("\n        % % { get; };", property.Type().Type(), property.Name());
+                }
+            }
+            else
+            {
+                XLANG_ASSERT(semantic == MethodSemanticsAttributes::Setter);
+                w.write("\n        % % { set; };", property.Type().Type(), property.Name());
+            }
+        }
+        else
+        {
+            XLANG_ASSERT(distance(accessors) == 1);
+            for (auto const& attr : property.CustomAttribute())
+            {
+                w.write(attr);
+            }
+            if (semantic == MethodSemanticsAttributes::Getter)
+            {
+                w.write("\n        % % { get; };", property.Type().Type(), property.Name());
+            }
+            else
+            {
+                XLANG_ASSERT(semantic == MethodSemanticsAttributes::Setter);
+                w.write("\n        % % { set; };", property.Type().Type(), property.Name());
+            }
+        }
+    }
+    else
+    {
+        if (semantic != MethodSemanticsAttributes::AddOn && semantic != MethodSemanticsAttributes::RemoveOn)
+        {
+            xlang::throw_invalid("Invalid semantic: events can only have an add and/or remove");
+        }
+        auto const& event = target.Event();
+        auto const& accessors = event.MethodSemantic();
 
-    case MethodSemanticsAttributes::RemoveOn:
-        w.write("\n        % % { remove; };", method.Association().Event().EventType(), method.Association().Event().Name());
-        break;
+        if (distance(accessors) < 1 || 2 < distance(accessors))
+        {
+            xlang::throw_invalid("Events can only have 1 or 2 accessors");
+        }
 
-    default:
-        throw_invalid("Invalid method semantic encountered");
+        if (distance(accessors) == 2)
+        {
+            auto const& other_method_semantic = (accessors.first == method_semantic) ? accessors.first + 1 : accessors.first;
+            auto const& other_method = other_method_semantic.Method();
+            if (method < other_method)
+            {
+                // First accessor seen for this event
+                for (auto const& attr : event.CustomAttribute())
+                {
+                    w.write(attr);
+                }
+            }
+
+            if (semantic == MethodSemanticsAttributes::AddOn)
+            {
+                if (method + 1 == other_method)
+                {
+                    if (other_method_semantic.Semantic() != MethodSemanticsAttributes::RemoveOn)
+                    {
+                        xlang::throw_invalid("Invalid semantic: events can only have a add and/or remove");
+                    }
+                    w.write("\n        % %;", event.EventType(), event.Name());
+                    ++method;
+                }
+                else
+                {
+                    XLANG_ASSERT(semantic == MethodSemanticsAttributes::AddOn);
+                    w.write("\n        % % { add; };", event.EventType(), event.Name());
+                }
+            }
+            else
+            {
+                XLANG_ASSERT(semantic == MethodSemanticsAttributes::RemoveOn);
+                w.write("\n        % % { remove; };", event.EventType(), event.Name());
+            }
+        }
+        else
+        {
+            XLANG_ASSERT(distance(accessors) == 1);
+            for (auto const& attr : event.CustomAttribute())
+            {
+                w.write(attr);
+            }
+            if (semantic == MethodSemanticsAttributes::AddOn)
+            {
+                w.write("\n        % % { add; };", event.EventType(), event.Name());
+            }
+            else
+            {
+                XLANG_ASSERT(semantic == MethodSemanticsAttributes::RemoveOn);
+                w.write("\n        % % { remove; };", event.EventType(), event.Name());
+            }
+        }
     }
 }
 
@@ -595,12 +713,12 @@ void write_interface_methods(writer& w, TypeDef const& type)
         return {};
     };
 
-    for (auto const& method : methods)
+    for (auto method = begin(methods); method != end(methods); ++method)
     {
         auto const& semantic = method_semantic(method);
         if (semantic)
         {
-            write_method_semantic(w, *semantic);
+            write_method_semantic(w, *semantic, method);
         }
         else
         {

@@ -13,6 +13,12 @@ namespace xlang::meta::reader
         return values.second;
     }
 
+    template <typename T>
+    auto distance(std::pair<T, T> const& values) noexcept
+    {
+        return values.second - values.first;
+    }
+
     template <typename Container, typename T>
     auto equal_range(Container const& container, T const& value) noexcept
     {
