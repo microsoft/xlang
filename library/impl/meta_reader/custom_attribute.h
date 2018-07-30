@@ -76,7 +76,7 @@ namespace xlang::meta::reader
             else if (auto type_index = std::get_if<coded_index<TypeDefOrRef>>(&type))
             {
                 if ((type_index->type() == TypeDefOrRef::TypeRef && type_index->TypeRef().TypeNamespace() == "System" && type_index->TypeRef().TypeName() == "Type") ||
-                    type_index->type() == TypeDefOrRef::TypeDef && type_index->TypeDef().TypeNamespace() == "System" && type_index->TypeDef().TypeName() == "Type")
+                    (type_index->type() == TypeDefOrRef::TypeDef && type_index->TypeDef().TypeNamespace() == "System" && type_index->TypeDef().TypeName() == "Type"))
                 {
                     return SystemType{ read<std::string_view>(data) };
                 }

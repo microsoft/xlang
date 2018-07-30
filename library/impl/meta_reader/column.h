@@ -5,14 +5,14 @@ namespace xlang::meta::reader
     template <typename T>
     auto row_base<Row>::get_list(uint32_t const column) const
     {
-        auto const& my_table = get_database().get_table<Row>();
-        auto const& target_table = get_database().get_table<T>();
+        auto const& my_table = get_database().template get_table<Row>();
+        auto const& target_table = get_database().template get_table<T>();
 
         auto first = target_table.begin() + get_value<uint32_t>(column) - 1;
         auto last = target_table.end();
         if (index() + 1 < my_table.size())
         {
-            last = target_table.begin() + my_table[index() + 1].get_value<uint32_t>(column) - 1;
+            last = target_table.begin() + my_table[index() + 1].template get_value<uint32_t>(column) - 1;
         }
         return std::pair{ first, last };
     }
@@ -21,7 +21,7 @@ namespace xlang::meta::reader
     template <typename T>
     auto row_base<Row>::get_target_row(uint32_t const column) const
     {
-        return get_database().get_table<T>()[get_value<uint32_t>(column) - 1];
+        return get_database().template get_table<T>()[get_value<uint32_t>(column) - 1];
     }
 
     template <typename Row>
@@ -32,16 +32,16 @@ namespace xlang::meta::reader
         {
             bool operator()(T const& lhs, uint32_t rhs) const noexcept
             {
-                return lhs.get_value<uint32_t>(ParentColumn) < rhs;
+                return lhs.template get_value<uint32_t>(ParentColumn) < rhs;
             }
             bool operator()(uint32_t lhs, T const& rhs) const noexcept
             {
-                return lhs < rhs.get_value<uint32_t>(ParentColumn);
+                return lhs < rhs.template get_value<uint32_t>(ParentColumn);
             }
         };
-        auto const& map = get_database().get_table<T>();
+        auto const& map = get_database().template get_table<T>();
         auto iter = std::lower_bound(map.begin(), map.end(), index() + 1, compare{});
-        if (iter.get_value<uint32_t>(ParentColumn) == index() + 1)
+        if (iter.template get_value<uint32_t>(ParentColumn) == index() + 1)
         {
             return iter;
         }

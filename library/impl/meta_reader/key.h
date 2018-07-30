@@ -6,7 +6,7 @@ namespace xlang::meta::reader
     Row index_base<T>::get_row() const
     {
         XLANG_ASSERT(type() == (index_tag_v<T, Row>));
-        return get_database().get_table<Row>()[index()];
+        return get_database().template get_table<Row>()[index()];
     }
 
     inline auto typed_index<TypeDefOrRef>::TypeDef() const
