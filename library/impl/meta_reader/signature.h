@@ -97,7 +97,7 @@ namespace xlang::meta::reader
     }
 
     template <>
-    std::string_view read<std::string_view>(byte_view& cursor)
+    inline std::string_view read<std::string_view>(byte_view& cursor)
     {
         uint32_t const length = uncompress_unsigned(cursor);
         std::string_view result{ reinterpret_cast<const char*>(cursor.begin()), length };
@@ -170,7 +170,7 @@ namespace xlang::meta::reader
         std::vector<TypeSig> m_generic_args;
     };
 
-    std::vector<CustomModSig> parse_cmods(table_base const* table, byte_view& data)
+    inline std::vector<CustomModSig> parse_cmods(table_base const* table, byte_view& data)
     {
         std::vector<CustomModSig> result;
         auto cursor = data;
@@ -185,7 +185,7 @@ namespace xlang::meta::reader
         return result;
     }
 
-    bool parse_szarray(table_base const*, byte_view& data)
+    inline bool parse_szarray(table_base const*, byte_view& data)
     {
         auto cursor = data;
         if (uncompress_enum<ElementType>(cursor) == ElementType::SZArray)
@@ -227,7 +227,7 @@ namespace xlang::meta::reader
         value_type m_type;
     };
 
-    bool is_by_ref(byte_view& data)
+    inline bool is_by_ref(byte_view& data)
     {
         auto cursor = data;
         auto element_type = uncompress_enum<ElementType>(cursor);
@@ -447,7 +447,7 @@ namespace xlang::meta::reader
         GenericTypeInstSig m_type;
     };
 
-    GenericTypeInstSig::GenericTypeInstSig(table_base const* table, byte_view& data)
+    inline GenericTypeInstSig::GenericTypeInstSig(table_base const* table, byte_view& data)
         : m_class_or_value(uncompress_enum<ElementType>(data))
         , m_type(table, uncompress_unsigned(data))
         , m_generic_arg_count(uncompress_unsigned(data))
@@ -464,7 +464,7 @@ namespace xlang::meta::reader
         }
     }
 
-    TypeSig::value_type TypeSig::ParseType(table_base const* table, byte_view& data)
+    inline TypeSig::value_type TypeSig::ParseType(table_base const* table, byte_view& data)
     {
         auto element_type = uncompress_enum<ElementType>(data);
         switch (element_type)

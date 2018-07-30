@@ -75,6 +75,15 @@ namespace xlang::text
             write(std::string_view{ buffer, size });
         }
 
+        template <auto F, typename List, typename... Args>
+        void write_each(List const& list, Args const&... args)
+        {
+            for (auto&& item : list)
+            {
+                F(*static_cast<T*>(this), item, args...);
+            }
+        }
+
         void flush_to_console() noexcept
         {
             printf("%.*s", static_cast<int>(m_buffer.size()), m_buffer.data());
