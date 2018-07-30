@@ -1,5 +1,22 @@
 cmake_minimum_required(VERSION 3.9)
 
+function(TARGET_CONFIG_MSVC_PCH target pch_cpp pch_header)
+    GET_TARGET_PROPERTY(sources ${target} SOURCES)
+    foreach(file ${sources})
+        if (${file} STREQUAL ${pch_cpp})
+            SET_SOURCE_FILES_PROPERTIES(${file}
+                PROPERTIES
+                COMPILE_FLAGS " /Yc${pch_header} /Fp\"${CMAKE_CURRENT_BINARY_DIR}\\${PROJECT_NAME}.pch\""
+                OBJECT_OUTPUTS ${PROJECT_NAME}.pch)
+        else()
+            SET_SOURCE_FILES_PROPERTIES(${file}
+                PROPERTIES
+                COMPILE_FLAGS " /Yu${pch_header} /Fp\"${CMAKE_CURRENT_BINARY_DIR}\\${PROJECT_NAME}.pch\""
+                OBJECT_DEPENDS ${PROJECT_NAME}.pch)
+        endif()
+    endforeach()
+endfunction(TARGET_CONFIG_MSVC_PCH)
+
 set(LW_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
 
 set(CMAKE_CXX_STANDARD 17)

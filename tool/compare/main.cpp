@@ -1,14 +1,4 @@
-#define NOMINMAX
-
-#include <windows.h>
-#include <winrt/base.h>
-#include "meta_reader.h"
-#include <filesystem>
-#include <cor.h>
-#include <corerror.h>
-#include <corhdr.h>
-#include <rometadataapi.h>
-#include <rometadata.h>
+#include "pch.h"
 
 using namespace std::filesystem;
 using namespace winrt;

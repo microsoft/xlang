@@ -13,4 +13,9 @@ $vsInstallPath = & $vswherepath -latest -property installationPath
 $cmakePath = join-path $vsInstallPath "Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
 $ninjaPath = join-path $vsInstallPath "Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
 
-& $cmakePath "$rootPath" "-B$buildPath" -G Ninja -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_MAKE_PROGRAM="$ninjaPath"
+if (-not (test-path (join-path $buildPath CMakeCache.txt))) 
+{
+    & $cmakePath "$rootPath" "-B$buildPath" -G Ninja -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_MAKE_PROGRAM="$ninjaPath"
+}
+
+& $ninjaPath -C "$buildPath" -v
