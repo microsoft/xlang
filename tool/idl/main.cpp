@@ -338,6 +338,50 @@ struct writer : writer_base<writer>
         }
     }
 
+    std::vector<Field> find_enumerators(ElemSig::EnumValue const& arg)
+    {
+        std::vector<Field> result;
+        uint64_t const original_value = std::visit([](auto&& value) { return static_cast<uint64_t>(value); }, arg.value);
+        uint64_t flags_value = original_value;
+
+        auto get_enumerator_value = [](auto&& arg) -> uint64_t
+        {
+            if constexpr (std::is_integral_v<std::remove_reference_t<decltype(arg)>>)
+            {
+                return static_cast<uint64_t>(arg);
+            }
+            else
+            {
+                throw_invalid("Non-integral enumerator encountered");
+            }
+        };
+        
+        for (auto const& field : arg.type.m_typedef.FieldList())
+        {
+            if (auto const& constant = field.Constant())
+            {
+                uint64_t const enumerator_value = std::visit(get_enumerator_value, constant->Value());
+                if (enumerator_value == original_value)
+                {
+                    result.assign(1, field);
+                    return result;
+                }
+                else if ((flags_value & enumerator_value) == enumerator_value)
+                {
+                    result.push_back(field);
+                    flags_value &= (~enumerator_value);
+                }
+            }
+        }
+
+        // Didn't find a match, or a set of flags that could build up the value
+        if (flags_value != 0)
+        {
+            result.clear();
+        }
+        return result;
+    }
+
     void write(FixedArgSig const& arg)
     {
         std::visit(overloaded{
@@ -347,8 +391,24 @@ struct writer : writer_base<writer>
         },
             [this](ElemSig::EnumValue arg)
         {
-            // TODO: Map the integer value to an enumerator
-            std::visit([this](auto&& value) { write_value(value); }, arg.value);
+            auto const enumerators = find_enumerators(arg);
+            if (enumerators.empty())
+            {
+                std::visit([this](auto&& value) { write_value(value); }, arg.value);
+            }
+            else
+            {
+                bool first = true;
+                for (auto const& enumerator : enumerators)
+                {
+                    if (!first)
+                    {
+                        write(" | ");
+                    }
+                    write("%.%.%", arg.type.m_typedef.TypeNamespace(), arg.type.m_typedef.TypeName(), enumerator.Name());
+                    first = false;
+                }
+            }
         },
             [this](auto&& arg)
         {
