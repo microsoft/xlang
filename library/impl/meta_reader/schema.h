@@ -226,7 +226,7 @@ namespace xlang::meta::reader
     {
         using row_base::row_base;
 
-        using value_type = std::variant<bool, char16_t, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, float, double, std::string_view, std::nullptr_t>;
+        using constant_type = std::variant<bool, char16_t, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, float, double, std::string_view, std::nullptr_t>;
 
         auto Type() const
         {
@@ -253,7 +253,7 @@ namespace xlang::meta::reader
         auto ValueString() const;
         auto ValueClass() const;
 
-        value_type Value() const;
+        constant_type Value() const;
     };
 
     struct FieldMarshal : row_base<FieldMarshal>

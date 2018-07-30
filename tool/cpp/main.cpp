@@ -1,7 +1,7 @@
 #include "pch.h"
 
 using namespace std::chrono;
-using namespace std::filesystem;
+using namespace std::experimental::filesystem;
 using namespace std::string_view_literals;
 using namespace xlang;
 using namespace xlang::meta::reader;
@@ -292,6 +292,10 @@ struct writer : writer_base<writer>
                 {
                     auto const& type = cmod.Type().TypeDef();
                     return type.TypeNamespace() == "System.Runtime.CompilerServices" && type.TypeName() == "IsConst";
+                }
+                case TypeDefOrRef::TypeSpec:
+                {
+                    throw_invalid("TypeDefOrRef::TypeSpec not supported for CustomMod");
                 }
                 }
             }
@@ -723,7 +727,7 @@ auto get_in(reader const& args)
     {
         for (auto&& file : directory_iterator(path))
         {
-            if (file.is_regular_file())
+            if (is_regular_file(file))
             {
                 files.push_back(file.path().string());
             }
@@ -740,12 +744,14 @@ auto get_in(reader const& args)
         {
             files.push_back(path);
         }
+#if XLANG_PLATFORM_WINDOWS
         else if (path == "local")
         {
             std::array<char, MAX_PATH> local{};
             ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
             add_directory(local.data());
         }
+#endif
         else
         {
             throw_invalid("Path '", path, "' is not a file or directory");
@@ -889,7 +895,7 @@ int main(int const argc, char** argv)
 
         if (verbose)
         {
-            w.write("time: %ms\n", duration_cast<milliseconds>(high_resolution_clock::now() - start).count());
+            w.write("time: %ms\n", static_cast<int64_t>(duration_cast<milliseconds>(high_resolution_clock::now() - start).count()));
         }
     }
     catch (std::exception const& e)

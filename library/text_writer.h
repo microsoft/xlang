@@ -71,7 +71,11 @@ namespace xlang::text
         void write_printf(char const* format, Args const&... args)
         {
             char buffer[128];
+#if XLANG_PLATFORM_WINDOWS
             size_t const size = sprintf_s(buffer, format, args...);
+#else
+            size_t const size = snprintf(buffer, sizeof(buffer), format, args...);
+#endif
             write(std::string_view{ buffer, size });
         }
 
@@ -90,7 +94,7 @@ namespace xlang::text
             m_buffer.clear();
         }
 
-        void flush_to_file(std::string_view const& filename)
+        void flush_to_file(std::string const& filename)
         {
             std::ofstream file{ filename, std::ios::out | std::ios::binary };
             std::array<uint8_t, 3> bom{ 0xEF, 0xBB, 0xBF };

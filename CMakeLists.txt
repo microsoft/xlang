@@ -17,11 +17,11 @@ function(TARGET_CONFIG_MSVC_PCH target pch_cpp pch_header)
     endforeach()
 endfunction(TARGET_CONFIG_MSVC_PCH)
 
-set(LW_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
-
-set(CMAKE_CXX_STANDARD 17)
+set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
 
 if (WIN32)
+    add_compile_options(/std:c++17)
+
     # change the warning level to 4
     string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
@@ -36,13 +36,11 @@ if (WIN32)
 
     add_compile_options(/permissive-)
 else()
+    add_compile_options(-std=c++17)
     add_compile_options(-stdlib=libc++)
-    add_compile_options(-pthread)
-    add_compile_options(-fexceptions)
-    add_compile_options(-fPIC)
-    add_compile_options(-g -gdwarf-4)  
 
-    SET( CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined" ) 
+    # Add DEBUG preprocessor macro 
+    string(APPEND CMAKE_CXX_FLAGS_DEBUG " -DDEBUG")
 endif()
 
 add_subdirectory(tool)

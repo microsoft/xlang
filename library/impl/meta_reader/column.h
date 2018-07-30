@@ -329,7 +329,7 @@ namespace xlang::meta::reader
         return nullptr;
     }
 
-    inline Constant::value_type Constant::Value() const
+    inline Constant::constant_type Constant::Value() const
     {
         switch (Type())
         {
@@ -479,29 +479,29 @@ namespace xlang::meta::reader
         uint16_t RevisionNumber;
     };
 
-    auto Assembly::Version() const
+    inline auto Assembly::Version() const
     {
         auto const temp = get_value<uint64_t>(1);
-        return AssemblyVersion{ temp & 0xffff, (temp >> 16) & 0xffff, (temp >> 32) & 0xffff, (temp >> 48) & 0xffff };
+        return AssemblyVersion{ static_cast<uint16_t>(temp & 0xffff), static_cast<uint16_t>((temp >> 16) & 0xffff), static_cast<uint16_t>((temp >> 32) & 0xffff), static_cast<uint16_t>((temp >> 48) & 0xffff) };
     }
 
-    auto AssemblyRef::Version() const
+    inline auto AssemblyRef::Version() const
     {
         auto const temp = get_value<uint64_t>(1);
-        return AssemblyVersion{ temp & 0xffff, (temp >> 16) & 0xffff, (temp >> 32) & 0xffff, (temp >> 48) & 0xffff };
+        return AssemblyVersion{ static_cast<uint16_t>(temp & 0xffff), static_cast<uint16_t>((temp >> 16) & 0xffff), static_cast<uint16_t>((temp >> 32) & 0xffff), static_cast<uint16_t>((temp >> 48) & 0xffff) };
     }
 
-    auto AssemblyRefOS::AssemblyRef() const
+    inline auto AssemblyRefOS::AssemblyRef() const
     {
         return get_target_row<reader::AssemblyRef>(3);
     }
 
-    auto AssemblyRefProcessor::AssemblyRef() const
+    inline auto AssemblyRefProcessor::AssemblyRef() const
     {
         return get_target_row<reader::AssemblyRef>(3);
     }
 
-    auto ClassLayout::Parent() const
+    inline auto ClassLayout::Parent() const
     {
         return get_target_row<TypeDef>(2);
     }

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 
-add_subdirectory(compare)
+add_subdirectory(cpp)
 add_subdirectory(dump)
 add_subdirectory(idl)
-add_subdirectory(cpp)
+
+if (WIN32)
+    add_subdirectory(compare)
+endif()

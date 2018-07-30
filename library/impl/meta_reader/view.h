@@ -154,12 +154,17 @@ namespace xlang::meta::reader
         {
             if (*this)
             {
+#if XLANG_PLATFORM_WINDOWS
                 UnmapViewOfFile(begin());
+#else
+                munmap(const_cast<void*>(reinterpret_cast<void const*>(begin())), size());
+#endif
             }
         }
 
     private:
 
+#if XLANG_PLATFORM_WINDOWS
         struct handle
         {
             HANDLE value{};
@@ -177,16 +182,28 @@ namespace xlang::meta::reader
                 return value != 0;
             }
         };
+#endif 
 
         struct file_handle
         {
-            HANDLE value{ INVALID_HANDLE_VALUE };
+#if XLANG_PLATFORM_WINDOWS
+            using handle_type = HANDLE;
+#else
+            using handle_type = int;
+            static constexpr handle_type INVALID_HANDLE_VALUE = -1;
+#endif
+
+            handle_type value{ INVALID_HANDLE_VALUE };
 
             ~file_handle() noexcept
             {
                 if (value != INVALID_HANDLE_VALUE)
                 {
+#if XLANG_PLATFORM_WINDOWS
                     CloseHandle(value);
+#else
+                    close(value);
+#endif
                 }
             }
 
@@ -198,6 +215,7 @@ namespace xlang::meta::reader
 
         static byte_view open_file(std::string_view const& path)
         {
+#if XLANG_PLATFORM_WINDOWS
             file_handle file{ CreateFileA(c_str(path), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
 
             if (!file)
@@ -222,6 +240,32 @@ namespace xlang::meta::reader
 
             auto const first{ static_cast<uint8_t const*>(MapViewOfFile(mapping.value, FILE_MAP_READ, 0, 0, 0)) };
             return{ first, first + size.QuadPart };
+#else
+            file_handle file {open(c_str(path), O_RDONLY, 0)};
+            if (!file)
+            {
+                throw_invalid("Could not open file '", path, "'");
+            }
+
+            struct stat st;
+            int ret = fstat(file.value, &st);
+            if (ret < 0)
+            {
+                throw_invalid("Could not open file '", path, "'");
+            }
+            if (!st.st_size)
+            {
+                return{};
+            }
+
+            auto const first = static_cast<uint8_t const*>(mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, file.value, 0));
+            if (first == MAP_FAILED)
+            {
+                throw_invalid("Could not open file '", path, "'");
+            }
+
+            return{ first, first + st.st_size };
+#endif
         }
     };
 }

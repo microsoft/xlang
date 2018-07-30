@@ -1,4 +1,8 @@
-Param ([ValidateSet('Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel')] $buildType = "Debug")
+Param (
+    [ValidateSet('Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel')] $buildType = "Debug",
+    [switch] $forceCMake,
+    [switch] $clean
+)
 
 if (-not (test-path env:VSINSTALLDIR)) {
     throw "windows build script must be run from a VS CMD prompt"
@@ -13,9 +17,10 @@ $vsInstallPath = & $vswherepath -latest -property installationPath
 $cmakePath = join-path $vsInstallPath "Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
 $ninjaPath = join-path $vsInstallPath "Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
 
-if (-not (test-path (join-path $buildPath CMakeCache.txt))) 
+if ($forceCMake -or (-not (test-path (join-path $buildPath CMakeCache.txt)))) 
 {
     & $cmakePath "$rootPath" "-B$buildPath" -G Ninja -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_MAKE_PROGRAM="$ninjaPath"
 }
 
-& $ninjaPath -C "$buildPath" -v
+$ninjaArgs = if ($clean) { "clean" } else { "-v" }
+& $ninjaPath -C "$buildPath" $ninjaArgs

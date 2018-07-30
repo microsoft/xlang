@@ -4,7 +4,7 @@
 
 namespace fs = std::experimental::filesystem;
 
-#if defined(DEBUG)
+#if XLANG_PLATFORM_WINDOWS && defined(DEBUG)
 
 #define NOMINMAX
 #include <Windows.h>
@@ -116,7 +116,7 @@ void print_value(bool value)
 
 void print_value(char16_t value)
 {
-    printf("%#0hx", value);
+    printf("%" PRIuLEAST32, value);
 }
 
 void print_value(int8_t value)
@@ -151,12 +151,12 @@ void print_value(uint32_t value)
 
 void print_value(int64_t value)
 {
-    printf("%lld", value);
+    printf("%" PRId64, value);
 }
 
 void print_value(uint64_t value)
 {
-    printf("%#0llx", value);
+    printf("%" PRIu64, value);
 }
 
 void print_value(float value)
