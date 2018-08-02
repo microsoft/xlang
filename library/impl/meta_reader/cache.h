@@ -32,9 +32,9 @@ namespace xlang::meta::reader
                 }
             }
 
-            for (auto&& [namespace_name, members] : m_namespaces)
+            for (auto&&[namespace_name, members] : m_namespaces)
             {
-                for (auto&& [name, type] : members.types)
+                for (auto&&[name, type] : members.types)
                 {
                     auto const flags = type.Flags();
 
@@ -62,7 +62,7 @@ namespace xlang::meta::reader
 
                     if (extends_name == "ValueType"sv && extends_namespace == "System"sv)
                     {
-                        if (type.has_attribute("Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv))
+                        if (type.get_attribute("Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv))
                         {
                             members.contracts.push_back(type);
                             continue;

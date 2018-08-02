@@ -226,7 +226,7 @@ namespace xlang::meta::reader
         Final = 0x0020,
         Virtual = 0x0040,
         HideBySig = 0x0080,
-        
+
         VtableLayoutMask = 0x0100,
         ReuseSlot = 0x0000, // Method reuses existing slot in a vtable
         NewSlot = 0x0100,   // Method always gets a new slot in the vtable
@@ -295,7 +295,7 @@ namespace xlang::meta::reader
         SpecialName = 0x0200,
 
         PInvokeImpl = 0x2000,
-        
+
         RTSpecialName = 0x0400,
         HasFieldMarshall = 0x1000,
         HasDefault = 0x8000,

@@ -13,4 +13,5 @@
 #include "impl/meta_reader/column.h"
 #include "impl/meta_reader/key.h"
 #include "impl/meta_reader/cache.h"
+#include "impl/meta_reader/filter.h"
 #include "impl/meta_reader/custom_attribute.h"

@@ -187,7 +187,7 @@ namespace xlang::text
     };
 
     template <auto F, typename... Args>
-    auto bind(Args const&... args)
+    auto bind(Args&&... args)
     {
         return [&](auto& writer)
         {
@@ -196,7 +196,7 @@ namespace xlang::text
     }
 
     template <auto F, typename Args>
-    auto bind_each(Args const& args)
+    auto bind_each(Args&& args)
     {
         return [&](auto& writer)
         {

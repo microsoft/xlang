@@ -241,7 +241,7 @@ namespace xlang::meta::reader
             auto const first{ static_cast<uint8_t const*>(MapViewOfFile(mapping.value, FILE_MAP_READ, 0, 0, 0)) };
             return{ first, first + size.QuadPart };
 #else
-            file_handle file {open(c_str(path), O_RDONLY, 0)};
+            file_handle file{ open(c_str(path), O_RDONLY, 0) };
             if (!file)
             {
                 throw_invalid("Could not open file '", path, "'");

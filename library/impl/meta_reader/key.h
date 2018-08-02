@@ -69,7 +69,7 @@ namespace xlang::meta::reader
         return get_row<reader::Event>();
     }
 
-    inline bool TypeDef::has_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const
+    inline std::optional<CustomAttribute> TypeDef::get_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const
     {
         for (auto&& attribute : CustomAttribute())
         {
@@ -79,7 +79,7 @@ namespace xlang::meta::reader
 
                 if (type_name == type.TypeName() && type_namespace == type.TypeNamespace())
                 {
-                    return true;
+                    return attribute;
                 }
             }
             else
@@ -89,7 +89,7 @@ namespace xlang::meta::reader
             }
         }
 
-        return false;
+        return {};
     }
 
     inline bool TypeDef::is_enum() const

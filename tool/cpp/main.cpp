@@ -269,7 +269,7 @@ struct writer : writer_base<writer>
     void write(MethodDef const& method)
     {
         auto signature{ method.Signature() };
-        
+
         auto param = begin(method.ParamList());
 
         if (method.Signature().ReturnType().Type() && param.Sequence() == 0)
@@ -504,7 +504,7 @@ void write_forward(writer& w, TypeDef const& type)
 
 void write_enum_flag(writer& w, TypeDef const& type)
 {
-    if (type.has_attribute("System", "FlagsAttribute"))
+    if (type.get_attribute("System", "FlagsAttribute"))
     {
         w.write("template<> struct is_enum_flag<@::%> : std::true_type {};\n",
             type.TypeNamespace(),
@@ -527,6 +527,34 @@ void write_name(writer& w, TypeDef const& type)
 
     w.write("template <> struct name<@::%>{ static constexpr auto & value{ L\"%.%\" }; };\n",
         ns, name, ns, name);
+}
+
+void write_guid_value(writer& w, std::vector<FixedArgSig> const& args)
+{
+    using std::get;
+
+    w.write_printf("0x%08X,0x%04X,0x%04X,{ 0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X }",
+        get<uint32_t>(get<ElemSig>(args[0].value).value),
+        get<uint16_t>(get<ElemSig>(args[1].value).value),
+        get<uint16_t>(get<ElemSig>(args[2].value).value),
+        get<uint8_t>(get<ElemSig>(args[3].value).value),
+        get<uint8_t>(get<ElemSig>(args[4].value).value),
+        get<uint8_t>(get<ElemSig>(args[5].value).value),
+        get<uint8_t>(get<ElemSig>(args[6].value).value),
+        get<uint8_t>(get<ElemSig>(args[7].value).value),
+        get<uint8_t>(get<ElemSig>(args[8].value).value),
+        get<uint8_t>(get<ElemSig>(args[9].value).value),
+        get<uint8_t>(get<ElemSig>(args[10].value).value));
+}
+
+void write_guid(writer& w, TypeDef const& type)
+{
+    auto attribute = type.get_attribute("Windows.Foundation.Metadata", "GuidAttribute").value();
+
+    w.write("template <> struct guid_storage<@::%>{ static constexpr guid value{ % }; };\n",
+        type.TypeNamespace(),
+        type.TypeName(),
+        bind<write_guid_value>(attribute.Value().FixedArgs()));
 }
 
 void write_field_types(writer& w, TypeDef const& type)
@@ -734,7 +762,7 @@ auto get_in(reader const& args)
         }
     };
 
-    for (auto&& path : args.values("in"))
+    for (auto&& path : args.values("input"))
     {
         if (is_directory(path))
         {
@@ -763,7 +791,7 @@ auto get_in(reader const& args)
 
 auto get_out(reader const& args)
 {
-    auto out{ absolute(args.value("out", "idl")) };
+    auto out{ absolute(args.value("output", "idl")) };
     create_directories(out / "impl");
     out += path::preferred_separator;
     return out.string();
@@ -785,8 +813,10 @@ int main(int const argc, char** argv)
         std::vector<option> options
         {
             // name, min, max
-            { "in", 1 },
-            { "out", 0, 1 },
+            { "input", 1 },
+            { "output", 0, 1 },
+            { "include", 0 },
+            { "exclude", 0 },
             { "verbose", 0, 0 },
         };
 
@@ -801,6 +831,10 @@ int main(int const argc, char** argv)
         cache c{ get_in(args) };
         auto const out = get_out(args);
         bool const verbose = args.exists("verbose");
+
+        filter f;
+        f.include(args.values("include"));
+        f.exclude(args.values("exclude"));
 
         if (verbose)
         {
@@ -819,75 +853,74 @@ int main(int const argc, char** argv)
         {
             group.add([&]
             {
-                writer w;
-                write_meta_namespace(w, ns.first);
-                w.write_each<write_enum>(ns.second.enums);
-                w.write_each<write_forward>(ns.second.interfaces);
-                w.write_each<write_forward>(ns.second.classes);
-                w.write_each<write_forward>(ns.second.structs);
-                w.write_each<write_forward>(ns.second.delegates);
-                write_close_namespace(w);
-                write_impl_namespace(w);
-                w.write_each<write_enum_flag>(ns.second.enums);
+                {
+                    writer w;
+                    write_meta_namespace(w, ns.first);
+                    w.write_each<write_enum>(ns.second.enums);
+                    w.write_each<write_forward>(ns.second.interfaces);
+                    w.write_each<write_forward>(ns.second.classes);
+                    w.write_each<write_forward>(ns.second.structs);
+                    w.write_each<write_forward>(ns.second.delegates);
+                    write_close_namespace(w);
+                    write_impl_namespace(w);
+                    w.write_each<write_enum_flag>(ns.second.enums);
 
-                w.write_each<write_category>(ns.second.interfaces, "interface_category");
-                w.write_each<write_category>(ns.second.classes, "class_category");
-                w.write_each<write_category>(ns.second.enums, "enum_category");
-                w.write_each<write_struct_category>(ns.second.structs);
-                w.write_each<write_category>(ns.second.delegates, "delegate_category");
+                    w.write_each<write_category>(ns.second.interfaces, "interface_category");
+                    w.write_each<write_category>(ns.second.classes, "class_category");
+                    w.write_each<write_category>(ns.second.enums, "enum_category");
+                    w.write_each<write_struct_category>(ns.second.structs);
+                    w.write_each<write_category>(ns.second.delegates, "delegate_category");
 
-                w.write_each<write_name>(ns.second.interfaces);
-                w.write_each<write_name>(ns.second.classes);
-                w.write_each<write_name>(ns.second.enums);
-                w.write_each<write_name>(ns.second.structs);
-                w.write_each<write_name>(ns.second.delegates);
+                    w.write_each<write_name>(ns.second.interfaces);
+                    w.write_each<write_name>(ns.second.classes);
+                    w.write_each<write_name>(ns.second.enums);
+                    w.write_each<write_name>(ns.second.structs);
+                    w.write_each<write_name>(ns.second.delegates);
 
-                auto filename{ out };
-                filename += "impl";
-                filename += static_cast<char>(path::preferred_separator);
-                filename += ns.first;
-                filename += ".0.h";
-                w.flush_to_file(filename);
-            });
+                    w.write_each<write_guid>(ns.second.interfaces);
+                    w.write_each<write_guid>(ns.second.delegates);
 
-            group.add([&]
-            {
-                writer w;
+                    auto filename{ out };
+                    filename += "impl";
+                    filename += static_cast<char>(path::preferred_separator);
+                    filename += ns.first;
+                    filename += ".0.h";
+                    w.flush_to_file(filename);
+                }
+                {
+                    writer w;
 
-                w.write(".1");
+                    w.write(".1");
 
-                auto filename{ out };
-                filename += "impl";
-                filename += static_cast<char>(path::preferred_separator);
-                filename += ns.first;
-                filename += ".1.h";
-                w.flush_to_file(filename);
-            });
+                    auto filename{ out };
+                    filename += "impl";
+                    filename += static_cast<char>(path::preferred_separator);
+                    filename += ns.first;
+                    filename += ".1.h";
+                    w.flush_to_file(filename);
+                }
+                {
+                    writer w;
 
-            group.add([&]
-            {
-                writer w;
+                    w.write(".2");
 
-                w.write(".2");
+                    auto filename{ out };
+                    filename += "impl";
+                    filename += static_cast<char>(path::preferred_separator);
+                    filename += ns.first;
+                    filename += ".2.h";
+                    w.flush_to_file(filename);
+                }
+                {
+                    writer w;
 
-                auto filename{ out };
-                filename += "impl";
-                filename += static_cast<char>(path::preferred_separator);
-                filename += ns.first;
-                filename += ".2.h";
-                w.flush_to_file(filename);
-            });
+                    w.write("top");
 
-            group.add([&]
-            {
-                writer w;
-
-                w.write("top");
-
-                auto filename{ out };
-                filename += ns.first;
-                filename += ".h";
-                w.flush_to_file(filename);
+                    auto filename{ out };
+                    filename += ns.first;
+                    filename += ".h";
+                    w.flush_to_file(filename);
+                }
             });
         }
 
@@ -895,7 +928,7 @@ int main(int const argc, char** argv)
 
         if (verbose)
         {
-            w.write("time: %ms\n", static_cast<int64_t>(duration_cast<milliseconds>(high_resolution_clock::now() - start).count()));
+            w.write("time: %ms\n", duration_cast<duration<int64_t, std::milli>>(high_resolution_clock::now() - start).count());
         }
     }
     catch (std::exception const& e)

@@ -76,7 +76,7 @@ namespace xlang::meta::reader
         auto EventList() const;
         auto MethodImplList() const;
 
-        bool has_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const;
+        std::optional<reader::CustomAttribute> get_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const;
         bool is_enum() const;
         auto get_enum_definition() const;
     };

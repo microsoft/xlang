@@ -264,7 +264,7 @@ struct writer : writer_base<writer>
     void write(MethodDef const& method)
     {
         auto signature{ method.Signature() };
-        
+
         auto param = begin(method.ParamList());
 
         if (method.Signature().ReturnType().Type() && param.Sequence() == 0)
@@ -354,7 +354,7 @@ struct writer : writer_base<writer>
                 throw_invalid("Non-integral enumerator encountered");
             }
         };
-        
+
         for (auto const& field : arg.type.m_typedef.FieldList())
         {
             if (auto const& constant = field.Constant())
@@ -598,7 +598,7 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
         }
         auto const& property = target.Property();
         auto const& accessors = property.MethodSemantic();
-        
+
         if (distance(accessors) < 1 || 2 < distance(accessors))
         {
             xlang::throw_invalid("Properties can only have 1 or 2 accessors");
@@ -830,7 +830,7 @@ auto get_in(reader const& args)
         }
     };
 
-    for (auto&& path : args.values("in"))
+    for (auto&& path : args.values("input"))
     {
         if (is_directory(path))
         {
@@ -859,7 +859,7 @@ auto get_in(reader const& args)
 
 auto get_out(reader const& args)
 {
-    auto out{ absolute(args.value("out", "idl")) };
+    auto out{ absolute(args.value("output", "idl")) };
     create_directories(out);
     out += path::preferred_separator;
     return out.string();
@@ -881,8 +881,10 @@ int main(int const argc, char** argv)
         std::vector<option> options
         {
             // name, min, max
-            { "in", 1 },
-            { "out", 0, 1 },
+            { "input", 1 },
+            { "output", 0, 1 },
+            { "include", 0 },
+            { "exclude", 0 },
             { "verbose", 0, 0 },
         };
 
@@ -897,6 +899,10 @@ int main(int const argc, char** argv)
         cache c{ get_in(args) };
         auto const out = get_out(args);
         bool const verbose = args.exists("verbose");
+
+        filter f;
+        f.include(args.values("include"));
+        f.exclude(args.values("exclude"));
 
         if (verbose)
         {
@@ -915,16 +921,21 @@ int main(int const argc, char** argv)
         {
             group.add([&]
             {
+                if (!f.match(ns.second))
+                {
+                    return;
+                }
+
                 writer w;
                 w.current = ns.first;
 
                 w.write("\nnamespace %\n{%%%%%}\n",
                     w.current,
-                    bind_each<write_enum>(ns.second.enums),
-                    bind_each<write_struct>(ns.second.structs),
-                    bind_each<write_delegate>(ns.second.delegates),
-                    bind_each<write_interface>(ns.second.interfaces),
-                    bind_each<write_class>(ns.second.classes));
+                    f.bind_each<write_enum>(ns.second.enums),
+                    f.bind_each<write_struct>(ns.second.structs),
+                    f.bind_each<write_delegate>(ns.second.delegates),
+                    f.bind_each<write_interface>(ns.second.interfaces),
+                    f.bind_each<write_class>(ns.second.classes));
 
                 auto filename{ out };
                 filename += w.current;
@@ -937,7 +948,7 @@ int main(int const argc, char** argv)
 
         if (verbose)
         {
-            w.write("time: %ms\n", static_cast<int64_t>(duration_cast<milliseconds>(high_resolution_clock::now() - start).count()));
+            w.write("time: %ms\n", duration_cast<duration<int64_t, std::milli>>(high_resolution_clock::now() - start).count());
         }
     }
     catch (std::exception const& e)

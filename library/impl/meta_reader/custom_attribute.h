@@ -288,7 +288,7 @@ namespace xlang::meta::reader
             {
                 throw_invalid("NamedArg must be either FIELD or PROPERTY");
             }
-            
+
             auto type = read<ElementType>(data);
             switch (type)
             {
