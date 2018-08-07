@@ -265,37 +265,17 @@ struct writer : writer_base<writer>
     {
         auto signature{ method.Signature() };
 
-        auto param = begin(method.ParamList());
+        auto param_list = method.ParamList();
+        Param param;
 
-        if (method.Signature().ReturnType().Type() && param.Sequence() == 0)
+        if (method.Signature().ReturnType() && !empty(param_list) && param_list.first.Sequence() == 0)
         {
-            ++param;
+            param = param_list.first + 1;
         }
-
-        auto is_const = [](ParamSig const& param) -> bool
+        else
         {
-            for (auto const& cmod : param.CustomMod())
-            {
-                switch (cmod.Type().type())
-                {
-                case TypeDefOrRef::TypeRef:
-                {
-                    auto const& type = cmod.Type().TypeRef();
-                    return type.TypeNamespace() == "System.Runtime.CompilerServices" && type.TypeName() == "IsConst";
-                }
-                case TypeDefOrRef::TypeDef:
-                {
-                    auto const& type = cmod.Type().TypeDef();
-                    return type.TypeNamespace() == "System.Runtime.CompilerServices" && type.TypeName() == "IsConst";
-                }
-                case TypeDefOrRef::TypeSpec:
-                {
-                    throw_invalid("TypeDefOrRef::TypeSpec not supported for CustomMod");
-                }
-                }
-            }
-            return false;
-        };
+            param = param_list.first;
+        }
 
         bool first{ true };
 
@@ -327,9 +307,9 @@ struct writer : writer_base<writer>
 
     void write(RetTypeSig const& signature)
     {
-        if (auto type = signature.Type())
+        if (signature)
         {
-            write(*type);
+            write(signature.Type());
         }
         else
         {
@@ -359,7 +339,7 @@ struct writer : writer_base<writer>
         {
             if (auto const& constant = field.Constant())
             {
-                uint64_t const enumerator_value = std::visit(get_enumerator_value, constant->Value());
+                uint64_t const enumerator_value = std::visit(get_enumerator_value, constant.Value());
                 if (enumerator_value == original_value)
                 {
                     result.assign(1, field);
@@ -517,7 +497,7 @@ void write_enum_field(writer& w, Field const& field)
     {
         w.write("\n        % = %,",
             field.Name(),
-            *constant);
+            constant);
     }
 }
 
@@ -747,7 +727,7 @@ void write_interface_methods(writer& w, TypeDef const& type)
     auto const& properties = type.PropertyList();
     auto const& events = type.EventList();
 
-    auto method_semantic = [&properties, &events](MethodDef const& method) -> std::optional<MethodSemantics>
+    auto method_semantic = [&properties, &events](MethodDef const& method) -> MethodSemantics
     {
         for (auto const& prop : properties)
         {
@@ -777,7 +757,7 @@ void write_interface_methods(writer& w, TypeDef const& type)
         auto const& semantic = method_semantic(method);
         if (semantic)
         {
-            write_method_semantic(w, *semantic, method);
+            write_method_semantic(w, semantic, method);
         }
         else
         {

@@ -206,7 +206,7 @@ namespace xlang::meta::reader
     inline auto Field::Constant() const
     {
         auto const range = equal_range(get_database().Constant, coded_index<HasConstant>());
-        std::optional<reader::Constant> result;
+        reader::Constant result;
         if (range.second != range.first)
         {
             XLANG_ASSERT(range.second - range.first == 1);
@@ -218,7 +218,7 @@ namespace xlang::meta::reader
     inline auto Param::Constant() const
     {
         auto const range = equal_range(get_database().Constant, coded_index<HasConstant>());
-        std::optional<reader::Constant> result;
+        reader::Constant result;
         if (range.second != range.first)
         {
             XLANG_ASSERT(range.second - range.first == 1);
@@ -230,7 +230,7 @@ namespace xlang::meta::reader
     inline auto Property::Constant() const
     {
         auto const range = equal_range(get_database().Constant, coded_index<HasConstant>());
-        std::optional<reader::Constant> result;
+        reader::Constant result;
         if (range.second != range.first)
         {
             XLANG_ASSERT(range.second - range.first == 1);

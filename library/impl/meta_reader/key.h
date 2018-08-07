@@ -69,29 +69,6 @@ namespace xlang::meta::reader
         return get_row<reader::Event>();
     }
 
-    inline std::optional<CustomAttribute> TypeDef::get_attribute(std::string_view const& type_namespace, std::string_view const& type_name) const
-    {
-        for (auto&& attribute : CustomAttribute())
-        {
-            if (attribute.Type().type() == CustomAttributeType::MemberRef)
-            {
-                auto type = attribute.Type().MemberRef().Class().TypeRef();
-
-                if (type_name == type.TypeName() && type_namespace == type.TypeNamespace())
-                {
-                    return attribute;
-                }
-            }
-            else
-            {
-                XLANG_ASSERT(attribute.Type().type() == CustomAttributeType::MethodDef);
-                // TODO: Resolve method parent (TypeDef)
-            }
-        }
-
-        return {};
-    }
-
     inline bool TypeDef::is_enum() const
     {
         auto base = Extends().TypeRef();
@@ -121,5 +98,24 @@ namespace xlang::meta::reader
     inline auto TypeDef::get_enum_definition() const
     {
         return EnumDefinition{ *this };
+    }
+
+    template <typename T>
+    CustomAttribute get_attribute(T const& row, std::string_view const& type_namespace, std::string_view const& type_name)
+    {
+        for (auto&& attribute : row.CustomAttribute())
+        {
+            if (attribute.Type().type() == CustomAttributeType::MemberRef)
+            {
+                auto type = attribute.Type().MemberRef().Class().TypeRef();
+
+                if (type_name == type.TypeName() && type_namespace == type.TypeNamespace())
+                {
+                    return attribute;
+                }
+            }
+        }
+
+        return {};
     }
 }

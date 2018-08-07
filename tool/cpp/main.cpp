@@ -15,6 +15,11 @@ struct writer : writer_base<writer>
 {
     using writer_base<writer>::write;
 
+    bool abi_types{};
+    bool abi_definitions{};
+    bool param_types{};
+    bool async_types{};
+
     std::vector<std::pair<GenericParam, GenericParam>> generic_param_stack;
 
     struct generic_param_guard
@@ -42,8 +47,13 @@ struct writer : writer_base<writer>
 
     generic_param_guard push_generic_params(std::pair<GenericParam, GenericParam>&& arg)
     {
-        generic_param_stack.push_back(std::move(arg));
-        return generic_param_guard{ this };
+        if (!empty(arg))
+        {
+            generic_param_stack.push_back(std::move(arg));
+            return generic_param_guard{ this };
+        }
+
+        return generic_param_guard{ nullptr };
     }
 
     void write_value(bool value)
@@ -119,6 +129,10 @@ struct writer : writer_base<writer>
             {
                 write("::");
             }
+            else if (c == '`')
+            {
+                return;
+            }
             else
             {
                 write(c);
@@ -177,12 +191,12 @@ struct writer : writer_base<writer>
 
     void write(TypeDef const& type)
     {
-        write("%.%", type.TypeNamespace(), type.TypeName());
+        write("@::%", type.TypeNamespace(), type.TypeName());
     }
 
     void write(TypeRef const& type)
     {
-        write("%.%", type.TypeNamespace(), type.TypeName());
+        write("@::%", type.TypeNamespace(), type.TypeName());
     }
 
     void write(TypeSpec const& type)
@@ -195,6 +209,7 @@ struct writer : writer_base<writer>
         switch (type.type())
         {
         case TypeDefOrRef::TypeDef:
+
             write(type.TypeDef());
             break;
 
@@ -210,9 +225,78 @@ struct writer : writer_base<writer>
 
     void write(GenericTypeInstSig const& type)
     {
-        write("%<%>",
-            type.GenericType(),
-            bind_list(", ", type.GenericArgs()));
+        if (abi_types)
+        {
+            write("void*");
+        }
+        else if (param_types)
+        {
+            static constexpr std::string_view optional("Windows.Foundation.IReference"sv);
+            static constexpr std::string_view iterable("Windows.Foundation.Collections.IIterable"sv);
+            static constexpr std::string_view vector_view("Windows.Foundation.Collections.IVectorView"sv);
+            static constexpr std::string_view map_view("Windows.Foundation.Collections.IMapView"sv);
+            static constexpr std::string_view vector("Windows.Foundation.Collections.IVector"sv);
+            static constexpr std::string_view map("Windows.Foundation.Collections.IMap"sv);
+
+            auto name = write_temp("%<%>", type.GenericType(), bind_list(", ", type.GenericArgs()));
+
+            if (starts_with(name, optional))
+            {
+                write("optional@", name.substr(optional.size()));
+            }
+            else if (starts_with(name, iterable))
+            {
+                if (async_types)
+                {
+                    write("param::async_iterable@", name.substr(iterable.size()));
+                }
+                else
+                {
+                    write("param::iterable@", name.substr(iterable.size()));
+                }
+            }
+            else if (starts_with(name, vector_view))
+            {
+                if (async_types)
+                {
+                    write("param::async_vector_view@", name.substr(vector_view.size()));
+                }
+                else
+                {
+                    write("param::vector_view@", name.substr(vector_view.size()));
+                }
+            }
+
+            else if (starts_with(name, map_view))
+            {
+                if (async_types)
+                {
+                    write("param::async_map_view@", name.substr(map_view.size()));
+                }
+                else
+                {
+                    write("param::map_view@", name.substr(map_view.size()));
+                }
+            }
+            else if (starts_with(name, vector))
+            {
+                write("param::vector@", name.substr(vector.size()));
+            }
+            else if (starts_with(name, map))
+            {
+                write("param::map@", name.substr(vector.size()));
+            }
+            else
+            {
+                write(name);
+            }
+        }
+        else
+        {
+            write("%<%>",
+                type.GenericType(),
+                bind_list(", ", type.GenericArgs()));
+        }
     }
 
     void write(TypeSig const& signature)
@@ -221,32 +305,47 @@ struct writer : writer_base<writer>
             {
                 [&](ElementType type)
                 {
-                    if (type <= ElementType::String)
+                    if (type == ElementType::Boolean) { write("bool");   }
+                    else if (type == ElementType::Char) { write("char16_t");  }
+                    else if (type == ElementType::I1) { write("int8_t");   }
+                    else if (type == ElementType::U1) { write("uint8_t");  }
+                    else if (type == ElementType::I2) { write("int16_t");  }
+                    else if (type == ElementType::U2) { write("uint16_t"); }
+                    else if (type == ElementType::I4) { write("int32_t");  }
+                    else if (type == ElementType::U4) { write("uint32_t"); }
+                    else if (type == ElementType::I8) { write("int64_t");  }
+                    else if (type == ElementType::U8) { write("uint64_t"); }
+                    else if (type == ElementType::R4) { write("float");    }
+                    else if (type == ElementType::R8) { write("double");   }
+                    else if (type == ElementType::String)
                     {
-                        static constexpr const char* primitives[]
+                        if (abi_types)
                         {
-                            "end",
-                            "void",
-                            "boolean",
-                            "char",
-                            "int8",
-                            "uint8",
-                            "int16",
-                            "uint16",
-                            "int32_t",
-                            "uint32_t",
-                            "int64",
-                            "uint64",
-                            "single",
-                            "double",
-                            "string"
-                        };
-
-                        write(primitives[static_cast<uint32_t>(type)]);
+                            write("void*");
+                        }
+                        else if (param_types)
+                        {
+                            write("param::hstring");
+                        }
+                        else
+                        {
+                            write("hstring");
+                        }
                     }
                     else if (type == ElementType::Object)
                     {
-                        write("Object");
+                        if (abi_types)
+                        {
+                            write("void*");
+                        }
+                        else
+                        {
+                            write("Windows::Foundation::IInspectable");
+                        }
+                    }
+                    else
+                    {
+                        XLANG_ASSERT(false);
                     }
                 },
                 [&](GenericTypeIndex var)
@@ -264,82 +363,6 @@ struct writer : writer_base<writer>
     void write(InterfaceImpl const& impl)
     {
         write(impl.Interface());
-    }
-
-    void write(MethodDef const& method)
-    {
-        auto signature{ method.Signature() };
-
-        auto param = begin(method.ParamList());
-
-        if (method.Signature().ReturnType().Type() && param.Sequence() == 0)
-        {
-            ++param;
-        }
-
-        auto is_const = [](ParamSig const& param) -> bool
-        {
-            for (auto const& cmod : param.CustomMod())
-            {
-                switch (cmod.Type().type())
-                {
-                case TypeDefOrRef::TypeRef:
-                {
-                    auto const& type = cmod.Type().TypeRef();
-                    return type.TypeNamespace() == "System.Runtime.CompilerServices" && type.TypeName() == "IsConst";
-                }
-                case TypeDefOrRef::TypeDef:
-                {
-                    auto const& type = cmod.Type().TypeDef();
-                    return type.TypeNamespace() == "System.Runtime.CompilerServices" && type.TypeName() == "IsConst";
-                }
-                case TypeDefOrRef::TypeSpec:
-                {
-                    throw_invalid("TypeDefOrRef::TypeSpec not supported for CustomMod");
-                }
-                }
-            }
-            return false;
-        };
-
-        bool first{ true };
-
-        for (auto&& arg : signature.Params())
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                write(", ");
-            }
-
-            if (arg.ByRef())
-            {
-                write("ref ");
-            }
-
-            if (is_const(arg))
-            {
-                write("const ");
-            }
-
-            write("% %", arg.Type(), param.Name());
-            ++param;
-        }
-    }
-
-    void write(RetTypeSig const& signature)
-    {
-        if (auto type = signature.Type())
-        {
-            write(*type);
-        }
-        else
-        {
-            write("void");
-        }
     }
 
     void write(FixedArgSig const& arg)
@@ -366,73 +389,138 @@ struct writer : writer_base<writer>
         write(arg.value);
     }
 
-    void write_uuid(CustomAttributeSig const& arg)
+    void write(RetTypeSig const& value)
     {
-        auto const& args = arg.FixedArgs();
-
-        write_printf("\n    [Windows.Foundation.Metadata.GuidAttribute(%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X)]"
-            , std::get<uint32_t>(std::get<ElemSig>(args[0].value).value)
-            , std::get<uint16_t>(std::get<ElemSig>(args[1].value).value)
-            , std::get<uint16_t>(std::get<ElemSig>(args[2].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[3].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[4].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[5].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[6].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[7].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[8].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[9].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[10].value).value)
-        );
-    }
-
-    void write(CustomAttribute const& attr)
-    {
-        auto const& name = attr.TypeNamespaceAndName();
-        auto const& sig = attr.Value();
-
-        if (name.first == "Windows.Foundation.Metadata"sv && name.second == "GuidAttribute"sv)
+        if (value)
         {
-            write_uuid(sig);
-            return;
-        }
-
-        write("\n    [%.%", name.first, name.second);
-
-        bool first = true;
-        for (auto const& fixed_arg : sig.FixedArgs())
-        {
-            if (first)
-            {
-                first = false;
-                write("(%", fixed_arg);
-            }
-            else
-            {
-                write(", %", fixed_arg);
-            }
-        }
-        for (auto const& named_arg : sig.NamedArgs())
-        {
-            if (first)
-            {
-                first = false;
-                write("(%", named_arg);
-            }
-            else
-            {
-                write(", %", named_arg);
-            }
-        }
-        if (first)
-        {
-            write("]");
+            write(value.Type());
         }
         else
         {
-            write(")]");
+            write("void");
         }
     }
 };
+
+struct separator
+{
+    writer& w;
+    bool first{ true };
+
+    void operator()()
+    {
+        if (first)
+        {
+            first = false;
+        }
+        else
+        {
+            w.write(", ");
+        }
+    }
+};
+
+struct method_signature
+{
+    explicit method_signature(MethodDef const& method) :
+        m_method(method.Signature()),
+        m_params(method.ParamList())
+    {
+        if (m_method.ReturnType() && m_params.first != m_params.second && m_params.first.Sequence() == 0)
+        {
+            m_return = m_params.first;
+            ++m_params.first;
+        }
+
+        XLANG_ASSERT(meta::reader::size(m_params) == m_method.Params().size());
+    }
+
+    generator<std::pair<Param const&, ParamSig const&>> params() const noexcept
+    {
+        for (uint32_t i{}; i != m_method.Params().size(); ++i)
+        {
+            co_yield{ m_params.first + i, m_method.Params()[i] };
+        }
+    }
+
+    auto const& return_signature() const noexcept
+    {
+        return m_method.ReturnType();
+    }
+
+    auto const& return_param() const noexcept
+    {
+        return m_return;
+    }
+
+private:
+
+    MethodDefSig m_method;
+    std::pair<Param, Param> m_params;
+    Param m_return;
+};
+
+InterfaceImpl get_default_interface(TypeDef const& type)
+{
+    auto impls = type.InterfaceImpl();
+
+    for (auto&& impl : impls)
+    {
+        if (get_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
+        {
+            return impl;
+        }
+    }
+
+    if (impls.first != impls.second)
+    {
+        return impls.first;
+    }
+
+    return {};
+}
+
+bool is_in(Param const& param)
+{
+    return enum_mask(param.Flags(), ParamAttributes::In) == ParamAttributes::In;
+}
+
+bool is_out(Param const& param)
+{
+    return enum_mask(param.Flags(), ParamAttributes::Out) == ParamAttributes::Out;
+}
+
+auto get_abi_name(MethodDef const& method)
+{
+    std::string_view name;
+
+    if (auto overload = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute"))
+    {
+        return std::get<std::string_view>(std::get<ElemSig>(overload.Value().FixedArgs()[0].value).value);
+    }
+    else
+    {
+        return method.Name();
+    }
+}
+
+auto get_name(MethodDef const& method)
+{
+    auto name = method.Name();
+
+    if (enum_mask(method.Flags(), MethodAttributes::SpecialName) == MethodAttributes::SpecialName)
+    {
+        return name.substr(name.find('_') + 1);
+    }
+
+    return name;
+}
+
+bool is_noexcept(MethodDef const& method)
+{
+    return (enum_mask(method.Flags(), MethodAttributes::SpecialName) == MethodAttributes::SpecialName && starts_with(method.Name(), "remove_")) ||
+        get_attribute(method, "Experimental.Windows.Foundation.Metadata", "NoExceptAttribute");
+}
 
 void write_impl_namespace(writer& w)
 {
@@ -454,28 +542,6 @@ void write_close_namespace(writer& w)
     w.write("\n}\n");
 }
 
-void write_type_name(writer& w, std::string_view const& name)
-{
-    w.write(name);
-    bool found = false;
-    for (auto const& param : w.generic_param_stack.back())
-    {
-        if (found)
-        {
-            w.write(", %", param.Name());
-        }
-        else
-        {
-            found = true;
-            w.write("<%", param.Name());
-        }
-    }
-    if (found)
-    {
-        w.write(">");
-    }
-}
-
 void write_enum_field(writer& w, Field const& field)
 {
     if (auto const& constant = field.Constant())
@@ -491,7 +557,12 @@ void write_enum(writer& w, TypeDef const& type)
     Field const& field{ *type.FieldList().first };
     auto name = field.Name();
 
-    w.write("\nenum class % : %\n{%\n};\n",
+    w.write(
+R"(
+enum class % : %
+{%
+};
+)",
         type.TypeName(),
         field.Signature().Type(),
         bind_each<write_enum_field>(type.FieldList()));
@@ -499,12 +570,12 @@ void write_enum(writer& w, TypeDef const& type)
 
 void write_forward(writer& w, TypeDef const& type)
 {
-    w.write("struct %;\n", type.TypeName());
+    w.write("struct @;\n", type.TypeName());
 }
 
 void write_enum_flag(writer& w, TypeDef const& type)
 {
-    if (type.get_attribute("System", "FlagsAttribute"))
+    if (get_attribute(type, "System", "FlagsAttribute"))
     {
         w.write("template<> struct is_enum_flag<@::%> : std::true_type {};\n",
             type.TypeNamespace(),
@@ -514,9 +585,8 @@ void write_enum_flag(writer& w, TypeDef const& type)
 
 void write_category(writer& w, TypeDef const& type, std::string_view const& category)
 {
-    w.write("template <> struct category<@::%>{ using type = %; };\n",
-        type.TypeNamespace(),
-        type.TypeName(),
+    w.write("template <> struct category<%>{ using type = %; };\n",
+        type,
         category);
 }
 
@@ -549,28 +619,30 @@ void write_guid_value(writer& w, std::vector<FixedArgSig> const& args)
 
 void write_guid(writer& w, TypeDef const& type)
 {
-    auto attribute = type.get_attribute("Windows.Foundation.Metadata", "GuidAttribute").value();
+    auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
 
-    w.write("template <> struct guid_storage<@::%>{ static constexpr guid value{ % }; };\n",
-        type.TypeNamespace(),
-        type.TypeName(),
+    w.write("template <> struct guid_storage<%>{ static constexpr guid value{ % }; };\n",
+        type,
         bind<write_guid_value>(attribute.Value().FixedArgs()));
+}
+
+void write_default_interface(writer& w, TypeDef const& type)
+{
+    if (auto default_interface = get_default_interface(type))
+    {
+        w.write("template <> struct default_interface<%>{ using type = %; };\n",
+            type,
+            default_interface);
+    }
 }
 
 void write_field_types(writer& w, TypeDef const& type)
 {
-    bool first{ true };
+    separator s{ w };
 
     for (auto&& field : type.FieldList())
     {
-        if (first)
-        {
-            first = false;
-        }
-        else
-        {
-            w.write(", ");
-        }
+        s();
 
         w.write(field.Signature().Type());
     }
@@ -578,173 +650,275 @@ void write_field_types(writer& w, TypeDef const& type)
 
 void write_struct_category(writer& w, TypeDef const& type)
 {
-    w.write("template <> struct category<@::%>{ using type = struct_category<%>; };\n",
-        type.TypeNamespace(),
-        type.TypeName(),
+    w.write("template <> struct category<%>{ using type = struct_category<%>; };\n",
+        type,
         bind<write_field_types>(type));
 }
 
-void write_struct_field(writer& w, Field const& field)
+void write_array_size_name(writer& w, Param const& param)
 {
-    w.write("\n        % %;",
-        field.Signature().Type(),
-        field.Name());
+    if (w.abi_definitions)
+    {
+        w.write(" __%Size", param.Name());
+    }
 }
 
-void write_struct(writer& w, TypeDef const& type)
+void write_abi_params(writer& w, MethodDef const& method)
 {
-    for (auto const& attr : type.CustomAttribute())
+    separator s{ w };
+    method_signature method_signature{ method };
+
+    for (auto&&[param, param_signature] : method_signature.params())
     {
-        w.write(attr);
+        s();
+
+        if (param_signature.Type().is_szarray())
+        {
+            std::string_view format;
+
+            if (is_in(param))
+            {
+                format = "uint32_t%, %*";
+            }
+            else if (param_signature.ByRef())
+            {
+                format = "uint32_t*%, %**";
+            }
+            else
+            {
+                format = "uint32_t%, %*";
+            }
+
+            w.write(format, bind<write_array_size_name>(param), param_signature.Type());
+        }
+        else
+        {
+            w.write(param_signature.Type());
+
+            if (is_in(param))
+            {
+                XLANG_ASSERT(!is_out(param));
+
+                if (is_const(param_signature))
+                {
+                    w.write(" const&");
+                }
+            }
+            else
+            {
+                XLANG_ASSERT(!is_in(param));
+                XLANG_ASSERT(is_out(param));
+
+                w.write('*');
+            }
+        }
+
+        if (w.abi_definitions)
+        {
+            w.write(" %", param.Name());
+        }
     }
 
-    w.write("\n    struct %\n    {%\n    };\n",
-        type.TypeName(),
-        bind_each<write_struct_field>(type.FieldList()));
+    if (auto return_signature = method_signature.return_signature())
+    {
+        s();
+
+        auto const& type = return_signature.Type();
+
+        if (type.is_szarray())
+        {
+            w.write("uint32_t, %*", type);
+        }
+        else
+        {
+            w.write("%*", type);
+        }
+
+        if (w.abi_definitions)
+        {
+            w.write(" %", method_signature.return_param().Name());
+        }
+    }
 }
 
-void write_delegate(writer& w, TypeDef const& type)
+void write_abi_declaration(writer& w, MethodDef const& method)
+{
+    w.write("    virtual int32_t WINRT_CALL %(%) noexcept = 0;\n",
+        get_abi_name(method),
+        bind<write_abi_params>(method));
+}
+
+void write_interface_abi(writer& w, TypeDef const& type)
 {
     auto guard{ w.push_generic_params(type.GenericParam()) };
-    auto methods = type.MethodList();
 
-    auto method = std::find_if(begin(methods), end(methods), [](auto&& method)
-    {
-        return method.Name() == "Invoke";
-    });
-
-    if (method == end(methods))
-    {
-        throw_invalid("Delegate's Invoke method not found");
-    }
-
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
-
-    w.write("\n    delegate % %(%);\n", method.Signature().ReturnType(), bind<write_type_name>(type.TypeName()), method);
+    w.write(
+R"(
+template <> struct abi<%>{ struct type : IInspectable
+{
+%};};
+)",
+        type,
+        bind_each<write_abi_declaration>(type.MethodList()));
 }
 
-void write_method(writer& w, MethodDef const& method)
+//void write_delegate_abi(writer& w, TypeDef const& type)
+//{
+//
+//}
+
+void write_consume_params(writer& w, method_signature const& method_signature)
 {
-    for (auto const& attr : method.CustomAttribute())
+    separator s{ w };
+
+    for (auto&&[param, param_signature] : method_signature.params())
     {
-        w.write(attr);
-    }
+        s();
 
-    w.write("\n        % %(%);", method.Signature().ReturnType(), method.Name(), method);
-}
+        if (is_in(param))
+        {
+            XLANG_ASSERT(!is_out(param));
 
-void write_method_semantic(writer& w, MethodSemantics const& method)
-{
-    switch (method.Semantic())
-    {
-    case MethodSemanticsAttributes::Getter:
-        w.write("\n        % % { get; };", method.Association().Property().Type().Type(), method.Association().Property().Name());
-        break;
+            w.param_types = true;
+            w.write("% const&", param_signature.Type());
+            w.param_types = false;
+        }
+        else
+        {
+            XLANG_ASSERT(!is_in(param));
+            XLANG_ASSERT(is_out(param));
 
-    case MethodSemanticsAttributes::Setter:
-        w.write("\n        % % { set; };", method.Association().Property().Type().Type(), method.Association().Property().Name());
-        break;
+            w.write("%&", param_signature.Type());
+        }
 
-    case MethodSemanticsAttributes::AddOn:
-        w.write("\n        % % { add; };", method.Association().Event().EventType(), method.Association().Event().Name());
-        break;
-
-    case MethodSemanticsAttributes::RemoveOn:
-        w.write("\n        % % { remove; };", method.Association().Event().EventType(), method.Association().Event().Name());
-        break;
-
-    default:
-        throw_invalid("Invalid method semantic encountered");
+        w.write(" %", param.Name());
     }
 }
 
-void write_required(writer& w, std::string_view const& requires, TypeDef const& type)
+void write_consume_declaration(writer& w, MethodDef const& method)
 {
-    auto interfaces{ type.InterfaceImpl() };
+    method_signature signature{ method };
 
-    if (begin(interfaces) == end(interfaces))
+    w.write("    % %(%) const%;\n",
+        signature.return_signature(),
+        get_name(method),
+        bind<write_consume_params>(signature),
+        is_noexcept(method) ? " noexcept" : "");
+}
+
+void write_impl_name(writer& w, TypeDef const& type)
+{
+    for (auto&& c : type.TypeNamespace())
+    {
+        w.write(c == '.' ? '_' : c);
+    }
+
+    w.write('_');
+
+    for (auto&& c : type.TypeName())
+    {
+        w.write(c == '.' ? '_' : c);
+    }
+}
+
+void write_consume(writer& w, TypeDef const& type)
+{
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+
+    w.write(
+R"(
+template <typename D>\nstruct consume_%
+{
+%%};
+template <> struct consume<%> { template <typename D> using type = consume_%<D>; };
+)",
+        bind<write_impl_name>(type),
+        bind_each<write_consume_declaration>(type.MethodList()),
+        "", // extensions?
+        type,
+        bind<write_impl_name>(type));
+}
+
+void append_requires(writer& w, std::set<std::string>& names, std::pair<InterfaceImpl, InterfaceImpl> const& requires)
+{
+    for (auto&& type : requires)
+    {
+        auto base = type.Interface();
+        names.insert(w.write_temp("%", base));
+
+        switch (base.type())
+        {
+        case TypeDefOrRef::TypeDef:
+        {
+            append_requires(w, names, base.TypeDef().InterfaceImpl());
+            break;
+        }
+        case TypeDefOrRef::TypeRef:
+        {
+            auto definition = find(base.TypeRef());
+
+            if (!definition)
+            {
+                throw_invalid("Required interface '", base.TypeRef().TypeNamespace(), ".", base.TypeRef().TypeName(), "' could not be resolved");
+            }
+
+            append_requires(w, names, definition.InterfaceImpl());
+            break;
+        }
+        case TypeDefOrRef::TypeSpec:
+        {
+            //auto signature = base.TypeSpec().Signature().GenericTypeInst();
+            //XLANG_ASSERT(signature.GenericType().type() == TypeDefOrRef::TypeRef);
+            //auto definition = find(signature.GenericType().TypeRef());
+            //append_requires(w, names, definition.InterfaceImpl());
+            break;
+        }
+        }
+    }
+}
+
+void write_interface_requires(writer& w, TypeDef const& type)
+{
+    auto interfaces = type.InterfaceImpl();
+
+    if (empty(interfaces))
     {
         return;
     }
 
-    w.write(" %\n        %", requires, bind_list(",\n        ", interfaces));
-}
+    std::set<std::string> names;
+    append_requires(w, names, interfaces);
 
-void write_interface_methods(writer& w, TypeDef const& type)
-{
-    auto const& methods = type.MethodList();
-    auto const& properties = type.PropertyList();
-    auto const& events = type.EventList();
+    w.write(",\n    impl::require<%", type.TypeName());
 
-    auto method_semantic = [&properties, &events](MethodDef const& method) -> std::optional<MethodSemantics>
+    for (auto&& name : names)
     {
-        for (auto const& prop : properties)
-        {
-            for (auto const& semantic : prop.MethodSemantic())
-            {
-                if (semantic.Method() == method)
-                {
-                    return semantic;
-                }
-            }
-        }
-        for (auto const& event : events)
-        {
-            for (auto const& semantic : event.MethodSemantic())
-            {
-                if (semantic.Method() == method)
-                {
-                    return semantic;
-                }
-            }
-        }
-        return {};
-    };
-
-    for (auto const& method : methods)
-    {
-        auto const& semantic = method_semantic(method);
-        if (semantic)
-        {
-            write_method_semantic(w, *semantic);
-        }
-        else
-        {
-            write_method(w, method);
-        }
+        w.write(", %", name);
     }
+
+    w.write('>');
 }
 
 void write_interface(writer& w, TypeDef const& type)
 {
-    auto guard = w.push_generic_params(type.GenericParam());
+    auto type_name = type.TypeName();
 
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
+    auto guard{ w.push_generic_params(type.GenericParam()) };
 
-    w.write("\n    interface %%\n    {%\n    };\n",
-        bind<write_type_name>(type.TypeName()),
-        bind<write_required>("requires", type),
-        bind<write_interface_methods>(type));
-}
-
-void write_class(writer& w, TypeDef const& type)
+    w.write(
+R"(
+struct WINRT_EBO % :
+    Windows::Foundation::IInspectable,
+    impl::consume_t<%>%
 {
-    auto guard = w.push_generic_params(type.GenericParam());
-
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
-
-    w.write("\n    runtimeclass %%\n    {\n    };\n",
-        bind<write_type_name>(type.TypeName()),
-        bind<write_required>(":", type));
+    %(std::nullptr_t = nullptr) noexcept {}
+%};
+)",
+        type_name,
+        type_name,
+        bind<write_interface_requires>(type),
+        type_name,
+        "<usings>");
 }
 
 auto get_in(reader const& args)
@@ -791,7 +965,7 @@ auto get_in(reader const& args)
 
 auto get_out(reader const& args)
 {
-    auto out{ absolute(args.value("output", "idl")) };
+    auto out{ absolute(args.value("output", "winrt")) };
     create_directories(out / "impl");
     out += path::preferred_separator;
     return out.string();
@@ -853,6 +1027,11 @@ int main(int const argc, char** argv)
         {
             group.add([&]
             {
+                if (!f.match(ns.second))
+                {
+                    return;
+                }
+
                 {
                     writer w;
                     write_meta_namespace(w, ns.first);
@@ -879,6 +1058,15 @@ int main(int const argc, char** argv)
 
                     w.write_each<write_guid>(ns.second.interfaces);
                     w.write_each<write_guid>(ns.second.delegates);
+                    w.write_each<write_default_interface>(ns.second.classes);
+
+                    w.abi_types = true;
+                    w.write_each<write_interface_abi>(ns.second.interfaces);
+                    //w.write_each<write_delegate_abi>(ns.second.delegates);
+                    w.abi_types = false;
+
+                    w.write_each<write_consume>(ns.second.interfaces);
+                    write_close_namespace(w);
 
                     auto filename{ out };
                     filename += "impl";
@@ -889,8 +1077,9 @@ int main(int const argc, char** argv)
                 }
                 {
                     writer w;
-
-                    w.write(".1");
+                    write_meta_namespace(w, ns.first);
+                    w.write_each<write_interface>(ns.second.interfaces);
+                    write_close_namespace(w);
 
                     auto filename{ out };
                     filename += "impl";

@@ -15,3 +15,4 @@
 #include "impl/meta_reader/cache.h"
 #include "impl/meta_reader/filter.h"
 #include "impl/meta_reader/custom_attribute.h"
+#include "impl/meta_reader/helpers.h"

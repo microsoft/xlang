@@ -313,9 +313,9 @@ namespace xlang::meta::reader
         template <typename T>
         table<T> const& get_table() const noexcept;
 
-        cache const* get_cache() const noexcept
+        cache const& get_cache() const noexcept
         {
-            return m_cache;
+            return *m_cache;
         }
 
         std::string_view path() const noexcept

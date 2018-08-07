@@ -301,9 +301,14 @@ namespace xlang::meta::reader
             return m_byref;
         }
 
-        std::optional<TypeSig> const& Type() const noexcept
+        TypeSig const& Type() const noexcept
         {
-            return m_type;
+            return *m_type;
+        }
+
+        explicit operator bool() const noexcept
+        {
+            return m_type.has_value();
         }
 
     private:
@@ -342,9 +347,9 @@ namespace xlang::meta::reader
             return m_ret_type;
         }
 
-        auto Params() const noexcept
+        auto const& Params() const noexcept
         {
-            return std::pair{ m_params.cbegin(), m_params.cend() };
+            return m_params;
         }
 
     private:

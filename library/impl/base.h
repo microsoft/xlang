@@ -28,8 +28,15 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include <experimental/coroutine>
+#include "generator.h"
 
+#if defined(_DEBUG)
+#define XLANG_DEBUG
 #define XLANG_ASSERT assert
+#else
+#define XLANG_ASSERT(expression) ((void)0)
+#endif
 
 namespace xlang
 {
@@ -56,5 +63,10 @@ namespace xlang
         }
 
         return view.data();
+    }
+
+    inline bool starts_with(std::string_view const& value, std::string_view const& match) noexcept
+    {
+        return 0 == value.compare(0, match.size(), match);
     }
 }

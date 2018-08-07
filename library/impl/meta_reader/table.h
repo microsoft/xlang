@@ -362,6 +362,11 @@ namespace xlang::meta::reader
             return static_cast<const_reference>(*this);
         }
 
+        explicit operator bool() const noexcept
+        {
+            return m_table != nullptr;
+        }
+
     protected:
 
         row_base() noexcept = default;

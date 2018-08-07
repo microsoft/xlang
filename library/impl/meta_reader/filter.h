@@ -114,11 +114,6 @@ namespace xlang::meta::reader
             return starts_with(type_name, match.substr(type_namespace.size() + 1));
         }
 
-        static bool starts_with(std::string_view const& value, std::string_view const& match) noexcept
-        {
-            return 0 == value.compare(0, match.size(), match);
-        }
-
         std::vector<std::string> m_includes;
         std::vector<std::string> m_excludes;
     };

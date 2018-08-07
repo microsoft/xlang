@@ -62,7 +62,7 @@ namespace xlang::meta::reader
 
                     if (extends_name == "ValueType"sv && extends_namespace == "System"sv)
                     {
-                        if (type.get_attribute("Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv))
+                        if (get_attribute(type, "Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv))
                         {
                             members.contracts.push_back(type);
                             continue;
@@ -83,26 +83,26 @@ namespace xlang::meta::reader
             }
         }
 
-        std::optional<TypeDef> find(std::string_view const& type_namespace, std::string_view const& type_name) const noexcept
+        TypeDef find(std::string_view const& type_namespace, std::string_view const& type_name) const noexcept
         {
             auto ns = m_namespaces.find(type_namespace);
 
             if (ns == m_namespaces.end())
             {
-                return std::nullopt;
+                return {};
             }
 
             auto type = ns->second.types.find(type_name);
 
             if (type == ns->second.types.end())
             {
-                return std::nullopt;
+                return {};
             }
 
             return type->second;
         }
 
-        std::optional<TypeDef> find(std::string_view const& type_string) const noexcept
+        TypeDef find(std::string_view const& type_string) const noexcept
         {
             auto pos = type_string.rfind('.');
             if (pos == std::string_view::npos)

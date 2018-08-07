@@ -90,10 +90,10 @@ namespace xlang::meta::reader
                             return type_index->TypeDef();
                         }
                         auto const& typeref = type_index->TypeRef();
-                        auto const& resolved_type = db.get_cache()->find(typeref.TypeNamespace(), typeref.TypeName());
-                        if (resolved_type.has_value())
+                        auto const& resolved_type = db.get_cache().find(typeref.TypeNamespace(), typeref.TypeName());
+                        if (resolved_type)
                         {
-                            return *resolved_type;
+                            return resolved_type;
                         }
                         else
                         {
@@ -300,17 +300,17 @@ namespace xlang::meta::reader
             {
                 auto type_string = read<std::string_view>(data);
                 name = read<std::string_view>(data);
-                auto type_def = db.get_cache()->find(type_string);
-                if (!type_def.has_value())
+                auto type_def = db.get_cache().find(type_string);
+                if (!type_def)
                 {
                     throw_invalid("CustomAttribute named param referenced unresolved enum type");
                 }
-                if (!type_def->is_enum())
+                if (!type_def.is_enum())
                 {
                     throw_invalid("CustomAttribute named param referenced non-enum type");
                 }
 
-                return FixedArgSig{ type_def->get_enum_definition(), data };
+                return FixedArgSig{ type_def.get_enum_definition(), data };
             }
 
             default:

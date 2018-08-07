@@ -22,7 +22,11 @@ namespace xlang
         template <typename T>
         void add(T&& callback)
         {
+#if defined(XLANG_DEBUG)
+            callback();
+#else
             m_tasks.push_back(std::async(std::forward<T>(callback)));
+#endif
         }
 
         void get()

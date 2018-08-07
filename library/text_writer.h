@@ -22,11 +22,32 @@ namespace xlang::text
             write_segment(value, args...);
         }
 
+        template <typename... Args>
+        std::string write_temp(std::string_view const& value, Args const&... args)
+        {
+#if defined(XLANG_DEBUG)
+            bool restore_debug_trace = debug_trace;
+            debug_trace = false;
+#endif
+            auto const size = m_buffer.size();
+
+            assert(count_placeholders(value) == sizeof...(Args));
+            write_segment(value, args...);
+
+            std::string result{ m_buffer.data() + size, m_buffer.size() - size };
+            m_buffer.resize(size);
+
+#if defined(XLANG_DEBUG)
+            debug_trace = restore_debug_trace;
+#endif
+            return result;
+        }
+
         void write(std::string_view const& value)
         {
             m_buffer.insert(m_buffer.end(), value.begin(), value.end());
 
-#if defined(DEBUG)
+#if defined(XLANG_DEBUG)
             if (debug_trace)
             {
                 ::printf("%.*s", static_cast<int>(value.size()), value.data());
@@ -38,7 +59,7 @@ namespace xlang::text
         {
             m_buffer.push_back(value);
 
-#if defined(DEBUG)
+#if defined(XLANG_DEBUG)
             if (debug_trace)
             {
                 ::printf("%c", value);
@@ -103,7 +124,7 @@ namespace xlang::text
             m_buffer.clear();
         }
 
-#if defined(DEBUG)
+#if defined(XLANG_DEBUG)
         bool debug_trace{};
 #endif
 
