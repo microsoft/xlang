@@ -122,6 +122,62 @@ namespace xlang::meta::reader
             return m_namespaces;
         }
 
+        void remove_legacy_cppwinrt_foundation_types()
+        {
+            // TODO: remove this function once cpp.exe generates these base types (soon)...
+
+            auto remove = [&](auto&& ns, auto&& name)
+            {
+                auto& members = m_namespaces[ns];
+
+                auto remove = [&](auto&& collection, auto&& name)
+                {
+                    auto pos = std::find_if(collection.begin(), collection.end(), [&](auto&& type)
+                    {
+                        return type.TypeName() == name;
+                    });
+
+                    if (pos != collection.end())
+                    {
+                        collection.erase(pos);
+                    }
+                };
+
+                remove(members.interfaces, name);
+                remove(members.classes, name);
+                remove(members.enums, name);
+                remove(members.structs, name);
+                remove(members.delegates, name);
+                remove(members.classes, name);
+            };
+
+            remove("Windows.Foundation", "IAsyncInfo");
+            remove("Windows.Foundation", "IAsyncAction");
+            remove("Windows.Foundation", "IAsyncActionWithProgress`1");
+            remove("Windows.Foundation", "IAsyncOperation`1");
+            remove("Windows.Foundation", "IAsyncOperationWithProgress`2");
+            remove("Windows.Foundation", "IReference`1");
+            remove("Windows.Foundation", "IReferenceArray`1");
+
+            remove("Windows.Foundation", "AsyncStatus");
+            remove("Windows.Foundation", "DateTime");
+            remove("Windows.Foundation", "EventRegistrationToken");
+            remove("Windows.Foundation", "HResult");
+            remove("Windows.Foundation", "Point");
+            remove("Windows.Foundation", "Rect");
+            remove("Windows.Foundation", "Size");
+            remove("Windows.Foundation", "TimeSpan");
+
+            remove("Windows.Foundation", "AsyncActionCompletedHandler");
+            remove("Windows.Foundation", "AsyncActionProgressHandler`1");
+            remove("Windows.Foundation", "AsyncActionWithProgressCompletedHandler`1");
+            remove("Windows.Foundation", "AsyncOperationCompletedHandler`1");
+            remove("Windows.Foundation", "AsyncOperationProgressHandler`2");
+            remove("Windows.Foundation", "AsyncOperationWithProgressCompletedHandler`2");
+            remove("Windows.Foundation", "EventHandler`1");
+            remove("Windows.Foundation", "TypedEventHandler`2");
+        }
+
         struct namespace_members
         {
             std::map<std::string_view, TypeDef> types;

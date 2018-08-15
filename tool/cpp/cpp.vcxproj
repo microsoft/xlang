@@ -142,6 +142,70 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="strings.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="strings.h" />
+    <ClInclude Include="strings\base_abi.h" />
+    <ClInclude Include="strings\base_activation.h" />
+    <ClInclude Include="strings\base_agile_ref.h" />
+    <ClInclude Include="strings\base_array.h" />
+    <ClInclude Include="strings\base_await.h" />
+    <ClInclude Include="strings\base_chrono.h" />
+    <ClInclude Include="strings\base_collections.h" />
+    <ClInclude Include="strings\base_collections_base.h" />
+    <ClInclude Include="strings\base_collections_input_iterable.h" />
+    <ClInclude Include="strings\base_collections_input_map.h" />
+    <ClInclude Include="strings\base_collections_input_map_view.h" />
+    <ClInclude Include="strings\base_collections_input_vector.h" />
+    <ClInclude Include="strings\base_collections_input_vector_view.h" />
+    <ClInclude Include="strings\base_collections_map.h" />
+    <ClInclude Include="strings\base_collections_vector.h" />
+    <ClInclude Include="strings\base_composable.h" />
+    <ClInclude Include="strings\base_com_ptr.h" />
+    <ClInclude Include="strings\base_consume.h" />
+    <ClInclude Include="strings\base_delegate.h" />
+    <ClInclude Include="strings\base_dependencies.h" />
+    <ClInclude Include="strings\base_diagnostics.h" />
+    <ClInclude Include="strings\base_error.h" />
+    <ClInclude Include="strings\base_events.h" />
+    <ClInclude Include="strings\base_extern.h" />
+    <ClInclude Include="strings\base_forward.h" />
+    <ClInclude Include="strings\base_foundation.h" />
+    <ClInclude Include="strings\base_handle.h" />
+    <ClInclude Include="strings\base_identity.h" />
+    <ClInclude Include="strings\base_implements.h" />
+    <ClInclude Include="strings\base_lock.h" />
+    <ClInclude Include="strings\base_macros.h" />
+    <ClInclude Include="strings\base_marshaler.h" />
+    <ClInclude Include="strings\base_meta.h" />
+    <ClInclude Include="strings\base_natvis.h" />
+    <ClInclude Include="strings\base_produce.h" />
+    <ClInclude Include="strings\base_reference_produce.h" />
+    <ClInclude Include="strings\base_reflect.h" />
+    <ClInclude Include="strings\base_resume_foreground.h" />
+    <ClInclude Include="strings\base_security.h" />
+    <ClInclude Include="strings\base_shims.h" />
+    <ClInclude Include="strings\base_std_async_action.h" />
+    <ClInclude Include="strings\base_std_async_action_with_progress.h" />
+    <ClInclude Include="strings\base_std_async_operation.h" />
+    <ClInclude Include="strings\base_std_async_operation_with_progress.h" />
+    <ClInclude Include="strings\base_std_fire_and_forget.h" />
+    <ClInclude Include="strings\base_std_hash.h" />
+    <ClInclude Include="strings\base_string.h" />
+    <ClInclude Include="strings\base_string_input.h" />
+    <ClInclude Include="strings\base_string_operators.h" />
+    <ClInclude Include="strings\base_traits.h" />
+    <ClInclude Include="strings\base_types.h" />
+    <ClInclude Include="strings\base_version.h" />
+    <ClInclude Include="strings\base_weak_ref.h" />
+    <ClInclude Include="strings\base_windows.h" />
+    <ClInclude Include="strings\base_xaml_typename.h" />
+    <ClInclude Include="version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="version.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,7 @@
 namespace xlang::meta::reader
 {
     struct database;
+    struct cache;
 
     struct table_base
     {
@@ -264,6 +265,11 @@ namespace xlang::meta::reader
         database const& get_database() const noexcept
         {
             return m_table->get_database();
+        }
+
+        cache const& get_cache() const noexcept
+        {
+            return get_database().get_cache();
         }
 
         reference operator++() noexcept

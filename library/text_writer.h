@@ -12,7 +12,7 @@ namespace xlang::text
 
         writer_base()
         {
-            m_buffer.reserve(16 * 1024);
+            m_first.reserve(16 * 1024);
         }
 
         template <typename... Args>
@@ -29,13 +29,13 @@ namespace xlang::text
             bool restore_debug_trace = debug_trace;
             debug_trace = false;
 #endif
-            auto const size = m_buffer.size();
+            auto const size = m_first.size();
 
             assert(count_placeholders(value) == sizeof...(Args));
             write_segment(value, args...);
 
-            std::string result{ m_buffer.data() + size, m_buffer.size() - size };
-            m_buffer.resize(size);
+            std::string result{ m_first.data() + size, m_first.size() - size };
+            m_first.resize(size);
 
 #if defined(XLANG_DEBUG)
             debug_trace = restore_debug_trace;
@@ -45,7 +45,7 @@ namespace xlang::text
 
         void write(std::string_view const& value)
         {
-            m_buffer.insert(m_buffer.end(), value.begin(), value.end());
+            m_first.insert(m_first.end(), value.begin(), value.end());
 
 #if defined(XLANG_DEBUG)
             if (debug_trace)
@@ -57,7 +57,7 @@ namespace xlang::text
 
         void write(char const value)
         {
-            m_buffer.push_back(value);
+            m_first.push_back(value);
 
 #if defined(XLANG_DEBUG)
             if (debug_trace)
@@ -76,6 +76,11 @@ namespace xlang::text
         void write(F const& f)
         {
             f(*static_cast<T*>(this));
+        }
+
+        void write(int32_t const value)
+        {
+            write(std::to_string(value));
         }
 
         void write(int64_t const value)
@@ -108,11 +113,18 @@ namespace xlang::text
                 F(*static_cast<T*>(this), item, args...);
             }
         }
+        
+        void swap() noexcept
+        {
+            std::swap(m_second, m_first);
+        }
 
         void flush_to_console() noexcept
         {
-            printf("%.*s", static_cast<int>(m_buffer.size()), m_buffer.data());
-            m_buffer.clear();
+            printf("%.*s", static_cast<int>(m_first.size()), m_first.data());
+            printf("%.*s", static_cast<int>(m_second.size()), m_second.data());
+            m_first.clear();
+            m_second.clear();
         }
 
         void flush_to_file(std::string const& filename)
@@ -120,8 +132,10 @@ namespace xlang::text
             std::ofstream file{ filename, std::ios::out | std::ios::binary };
             std::array<uint8_t, 3> bom{ 0xEF, 0xBB, 0xBF };
             file.write(reinterpret_cast<char*>(bom.data()), bom.size());
-            file.write(m_buffer.data(), m_buffer.size());
-            m_buffer.clear();
+            file.write(m_first.data(), m_first.size());
+            file.write(m_second.data(), m_second.size());
+            m_first.clear();
+            m_second.clear();
         }
 
 #if defined(XLANG_DEBUG)
@@ -204,7 +218,8 @@ namespace xlang::text
             }
         }
 
-        std::vector<char> m_buffer;
+        std::vector<char> m_second;
+        std::vector<char> m_first;
     };
 
     template <auto F, typename... Args>
@@ -216,14 +231,14 @@ namespace xlang::text
         };
     }
 
-    template <auto F, typename Args>
-    auto bind_each(Args&& args)
+    template <auto F, typename List, typename... Args>
+    auto bind_each(List const& list, Args const&... args)
     {
         return [&](auto& writer)
         {
-            for (auto&& arg : args)
+            for (auto&& item : list)
             {
-                F(writer, arg);
+                F(writer, item, args...);
             }
         };
     }

@@ -1,6 +1,23 @@
 
 namespace xlang::meta::reader
 {
+    template <typename T>
+    bool empty(std::pair<T, T> const& range) noexcept
+    {
+        return range.first == range.second;
+    }
+
+    template <typename T>
+    auto size(std::pair<T, T> const& range) noexcept
+    {
+        return range.second - range.first;
+    }
+
+    inline auto find(TypeRef const& type)
+    {
+        return type.get_database().get_cache().find(type.TypeNamespace(), type.TypeName());
+    }
+
     inline bool is_const(ParamSig const& param)
     {
         auto is_type_const = [](auto&& type)
@@ -31,20 +48,41 @@ namespace xlang::meta::reader
         return false;
     };
 
-    template <typename T>
-    bool empty(std::pair<T, T> const& range) noexcept
+    enum class category
     {
-        return range.first == range.second;
-    }
+        interface_type,
+        class_type,
+        enum_type,
+        struct_type,
+        delegate_type
+    };
 
-    template <typename T>
-    std::size_t size(std::pair<T, T> const& range) noexcept
+    inline category get_category(TypeDef const& type)
     {
-        return range.second - range.first;
-    }
+        if (enum_mask(type.Flags(), TypeAttributes::Interface) == TypeAttributes::Interface)
+        {
+            return category::interface_type;
+        }
 
-    inline auto find(TypeRef const& type)
-    {
-        return type.get_database().get_cache().find(type.TypeNamespace(), type.TypeName());
+        auto const extends = type.Extends().TypeRef();
+        auto extends_name = extends.TypeName();
+        auto extends_namespace = extends.TypeNamespace();
+
+        if (extends_name == "Enum"sv && extends_namespace == "System"sv)
+        {
+            return category::enum_type;
+        }
+
+        if (extends_name == "ValueType"sv && extends_namespace == "System"sv)
+        {
+            return category::struct_type;
+        }
+
+        if (extends_name == "MulticastDelegate"sv && extends_namespace == "System"sv)
+        {
+            return category::delegate_type;
+        }
+
+        return category::class_type;
     }
 }
