@@ -5692,7 +5692,7 @@ WINRT_EXPORT namespace winrt
     template <typename I>
     struct event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(event_token);
+        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(int64_t);
 
         event_revoker() noexcept = default;
         event_revoker(event_revoker const&) = delete;
@@ -5747,7 +5747,7 @@ WINRT_EXPORT namespace winrt
     template <typename I>
     struct factory_event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(event_token);
+        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(int64_t);
 
         factory_event_revoker() noexcept = default;
         factory_event_revoker(factory_event_revoker const&) = delete;
@@ -5802,7 +5802,7 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(event_token)>
+    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(int64_t)>
     struct event_revoker
     {
         event_revoker() noexcept = default;
@@ -9320,10 +9320,16 @@ namespace winrt::impl
         using type = T;
     };
 
-    template <typename T>
+    template <typename T, typename Enable = void>
     struct abi
     {
         using type = T;
+    };
+
+    template <typename T>
+    struct abi<T, std::enable_if_t<std::is_enum_v<T>>>
+    {
+        using type = std::underlying_type_t<T>;
     };
 
     template <typename T>

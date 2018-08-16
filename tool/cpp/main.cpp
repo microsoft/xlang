@@ -8,7 +8,6 @@ using namespace std::string_view_literals;
 using namespace xlang;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
-using namespace xlang::cmd;
 
 template <typename...T> struct overloaded : T... { using T::operator()...; };
 template <typename...T> overloaded(T...)->overloaded<T...>;
@@ -41,8 +40,8 @@ struct writer : writer_base<writer>
     std::string_view relative_folder;
     std::string type_namespace;
     bool abi_types{};
-    bool abi_definitions{};
-    bool param_types{};
+    bool param_names{};
+    bool consume_types{};
     bool async_types{};
     std::map<std::string_view, std::set<TypeDef>> depends;
 
@@ -323,7 +322,7 @@ struct writer : writer_base<writer>
             auto name = generic_type.TypeName();
             name.remove_suffix(name.size() - name.rfind('`'));
 
-            if (param_types)
+            if (consume_types)
             {
                 //debug_trace = true;
 
@@ -334,9 +333,9 @@ struct writer : writer_base<writer>
                 static constexpr std::string_view vector("Windows::Foundation::Collections::IVector"sv);
                 static constexpr std::string_view map("Windows::Foundation::Collections::IMap"sv);
 
-                param_types = false;
+                consume_types = false;
                 auto full_name = write_temp("@::%<%>", ns, name, bind_list(", ", type.GenericArgs()));
-                param_types = true;
+                consume_types = true;
 
                 if (starts_with(full_name, optional))
                 {
@@ -420,7 +419,7 @@ struct writer : writer_base<writer>
                         {
                             write("void*");
                         }
-                        else if (param_types)
+                        else if (consume_types)
                         {
                             write("param::hstring");
                         }
@@ -605,6 +604,11 @@ struct method_signature
         }
 
         return name;
+    }
+
+    bool has_params() const noexcept
+    {
+        return m_method.Params().size();
     }
 
 private:
@@ -833,7 +837,7 @@ void write_struct_category(writer& w, TypeDef const& type)
 
 void write_array_size_name(writer& w, Param const& param)
 {
-    if (w.abi_definitions)
+    if (w.param_names)
     {
         w.write(" __%Size", param.Name());
     }
@@ -888,7 +892,7 @@ void write_abi_params(writer& w, method_signature const& method_signature)
             }
         }
 
-        if (w.abi_definitions)
+        if (w.param_names)
         {
             w.write(" %", param.Name());
         }
@@ -909,11 +913,31 @@ void write_abi_params(writer& w, method_signature const& method_signature)
             w.write("%*", type);
         }
 
-        if (w.abi_definitions)
+        if (w.param_names)
         {
             w.write(" %", method_signature.return_param_name());
         }
     }
+}
+
+bool wrap_abi(TypeSig const& signature)
+{
+    bool wrap{};
+
+    std::visit(overloaded
+        {
+            [&](ElementType type)
+            {
+                wrap = type == ElementType::String || type == ElementType::Object;
+            },
+            [&](auto&&)
+            {
+                wrap = true;
+            }
+        },
+        signature.Type());
+
+    return wrap;
 }
 
 void write_abi_args(writer& w, method_signature const& method_signature)
@@ -950,14 +974,28 @@ void write_abi_args(writer& w, method_signature const& method_signature)
             {
                 XLANG_ASSERT(!is_out(param));
 
-                w.write("get_abi(%)", param_name);
+                if (wrap_abi(param_signature.Type()))
+                {
+                    w.write("get_abi(%)", param_name);
+                }
+                else
+                {
+                    w.write(param_name);
+                }
             }
             else
             {
                 XLANG_ASSERT(!is_in(param));
                 XLANG_ASSERT(is_out(param));
 
-                w.write("put_abi(%)", param_name);
+                if (wrap_abi(param_signature.Type()))
+                {
+                    w.write("put_abi(%)", param_name);
+                }
+                else
+                {
+                    w.write("&%", param_name);
+                }
             }
         }
     }
@@ -985,7 +1023,14 @@ void write_abi_args(writer& w, method_signature const& method_signature)
         }
         else
         {
-            w.write("put_abi(%)", param_name);
+            if (wrap_abi(method_signature.return_signature().Type()))
+            {
+                w.write("put_abi(%)", param_name);
+            }
+            else
+            {
+                w.write("&%", param_name);
+            }
         }
     }
 }
@@ -1128,7 +1173,7 @@ void write_consume_params(writer& w, method_signature const& method_signature)
             if (is_in(param))
             {
                 XLANG_ASSERT(!is_out(param));
-                w.param_types = true;
+                w.consume_types = true;
 
                 auto param_type = std::get_if<ElementType>(&param_signature.Type().Type());
 
@@ -1141,7 +1186,7 @@ void write_consume_params(writer& w, method_signature const& method_signature)
                     w.write("% const&", param_signature.Type());
                 }
 
-                w.param_types = false;
+                w.consume_types = false;
             }
             else
             {
@@ -1153,6 +1198,66 @@ void write_consume_params(writer& w, method_signature const& method_signature)
         }
 
         w.write(" %", param.Name());
+    }
+}
+
+void write_implementation_params(writer& w, method_signature const& method_signature)
+{
+    separator s{ w };
+
+    for (auto&&[param, param_signature] : method_signature.params())
+    {
+        s();
+
+        if (param_signature.Type().is_szarray())
+        {
+            std::string_view format;
+
+            if (is_in(param))
+            {
+                format = "array_view<% const>";
+            }
+            else if (param_signature.ByRef())
+            {
+                format = "com_array<%>&";
+            }
+            else
+            {
+                format = "array_view<%>";
+            }
+
+            w.write(format, param_signature.Type());
+        }
+        else
+        {
+            if (is_in(param))
+            {
+                XLANG_ASSERT(!is_out(param));
+
+                auto param_type = std::get_if<ElementType>(&param_signature.Type().Type());
+
+                if (param_type && *param_type != ElementType::String && *param_type != ElementType::Object)
+                {
+                    w.write("%", param_signature.Type());
+                }
+                else
+                {
+                    w.write("% const&", param_signature.Type());
+                }
+            }
+            else
+            {
+                XLANG_ASSERT(!is_in(param));
+                XLANG_ASSERT(is_out(param));
+
+                w.write("%&", param_signature.Type());
+            }
+        }
+
+        if (w.param_names)
+        {
+            w.write(" %", param.Name());
+        }
     }
 }
 
@@ -1330,10 +1435,10 @@ template <> struct consume<%> { template <typename D> using type = consume_%<D>;
 void write_produce_params(writer& w, method_signature const& signature)
 {
     w.abi_types = true;
-    w.abi_definitions = true;
+    w.param_names = true;
     write_abi_params(w, signature);
     w.abi_types = false;
-    w.abi_definitions = false;
+    w.param_names = false;
 }
 
 void write_produce_cleanup_param(writer& w, TypeSig const& signature, std::string_view const& param_name)
@@ -1346,8 +1451,48 @@ void write_produce_cleanup_param(writer& w, TypeSig const& signature, std::strin
             *% = nullptr;)",
             param_name,
             param_name);
+
+        return;
     }
-    else if (!std::holds_alternative<ElementType>(signature.Type()))
+
+    bool clear{};
+
+    std::visit(overloaded
+        {
+            [&](ElementType type)
+            {
+                clear = type == ElementType::String || type == ElementType::Object;
+            },
+            [&](coded_index<TypeDefOrRef> const& index)
+            {
+                XLANG_ASSERT(index.type() == TypeDefOrRef::TypeDef || index.type() == TypeDefOrRef::TypeRef);
+
+                TypeDef type;
+
+                if (index.type() == TypeDefOrRef::TypeDef)
+                {
+                    type = index.TypeDef();
+                }
+                else if (index.type() == TypeDefOrRef::TypeRef)
+                {
+                    type = find(index.TypeRef());
+                }
+
+                if (type)
+                {
+                    auto category = get_category(type);
+
+                    clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
+                }
+            },
+            [&](auto&&)
+            {
+                clear = true;
+            }
+        },
+        signature.Type());
+
+    if (clear)
     {
         w.write("\n            *% = nullptr;", param_name);
     }
@@ -1376,9 +1521,21 @@ void write_produce_optional_definitions(writer&, method_signature const& signatu
 
 }
 
-void write_produce_assert(writer&, method_signature const& signature)
+void write_produce_assert_params(writer& w, method_signature const& method_signature)
 {
+    if (method_signature.has_params())
+    {
+        w.write(", ");
+        write_implementation_params(w, method_signature);
+    }
+}
 
+void write_produce_assert(writer& w, MethodDef const& method, method_signature const& signature)
+{
+    w.write("WINRT_ASSERT_DECLARATION(%, WINRT_WRAP(%)%);",
+        get_name(method),
+        signature.return_signature(),
+        bind<write_produce_assert_params>(signature));
 }
 
 void write_produce_args(writer& w, method_signature const& method_signature)
@@ -1427,9 +1584,16 @@ void write_produce_args(writer& w, method_signature const& method_signature)
             {
                 XLANG_ASSERT(!is_out(param));
 
-                w.write("*reinterpret_cast<% const*>(&%)",
-                    param_type,
-                    param_name);
+                if (wrap_abi(param_signature.Type()))
+                {
+                    w.write("*reinterpret_cast<% const*>(&%)",
+                        param_type,
+                        param_name);
+                }
+                else
+                {
+                    w.write(param_name);
+                }
             }
             // TODO: else if optional out
             else
@@ -1437,9 +1601,16 @@ void write_produce_args(writer& w, method_signature const& method_signature)
                 XLANG_ASSERT(!is_in(param));
                 XLANG_ASSERT(is_out(param));
 
-                w.write("*reinterpret_cast<@*>(%)",
-                    param_type,
-                    param_name);
+                if (wrap_abi(param_signature.Type()))
+                {
+                    w.write("*reinterpret_cast<@*>(%)",
+                        param_type,
+                        param_name);
+                }
+                else
+                {
+                    w.write(param_name);
+                }
             }
         }
     }
@@ -1551,7 +1722,7 @@ R"(
         bind<write_produce_params>(signature),
         bind<write_produce_cleanup>(signature),
         bind<write_produce_optional_definitions>(signature),
-        bind<write_produce_assert>(signature),
+        bind<write_produce_assert>(method, signature),
         bind<write_produce_upcall>(method, signature),
         bind<write_produce_optional_results>(signature));
 }
@@ -1928,6 +2099,53 @@ void write_constructor_declarations(writer& w, TypeDef const& type)
     }
 }
 
+void write_constructor_definition(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
+{
+    method_signature signature{ method };
+
+    auto format = R"(
+inline %::%(%) :
+    %(impl::call_factory<%, @::%>([&](auto&& f) { return f.%(%); }))
+{}
+)";
+
+    w.write(format,
+        type_name,
+        type_name,
+        bind<write_consume_params>(signature),
+        type_name,
+        type_name,
+        factory.TypeNamespace(), factory.TypeName(),
+        get_name(method),
+        bind<write_consume_args>(signature));
+}
+
+void write_constructor_definitions(writer& w, TypeDef const& type)
+{
+    auto type_name = type.TypeName();
+
+    for (auto&& factory : get_activatable_factories(type))
+    {
+        if (!factory)
+        {
+            w.write(R"(
+inline %::%() :
+    %(impl::call_factory<%>([](auto&& f) { return f.template ActivateInstance<%>(); }))
+{}
+)",
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name);
+        }
+        else
+        {
+            w.write_each<write_constructor_definition>(factory.MethodList(), type_name, factory);
+        }
+    }
+}
+
 void write_static_declaration(writer& w, MethodDef const& method)
 {
     method_signature signature{ method };
@@ -1943,6 +2161,39 @@ void write_static_declarations(writer& w, TypeDef const& type)
     for (auto&& factory : get_static_factories(type))
     {
         w.write_each<write_static_declaration>(factory.MethodList());
+    }
+}
+
+void write_static_definition(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
+{
+    method_signature signature{ method };
+    auto method_name = get_name(method);
+
+    auto format = R"(
+inline % %::%(%)
+{
+    %impl::call_factory<%, @::%>([&](auto&& f) { return f.%(%); });
+}
+)";
+
+    w.write(format,
+        signature.return_signature(),
+        type_name,
+        method_name,
+        bind<write_consume_params>(signature),
+        signature.return_signature() ? "return " : "",
+        type_name,
+        factory.TypeNamespace(), factory.TypeName(),
+        method_name,
+        bind<write_consume_args>(signature));
+
+}
+
+void write_static_definitions(writer& w, TypeDef const& type)
+{
+    for (auto&& factory : get_static_factories(type))
+    {
+        w.write_each<write_static_definition>(factory.MethodList(), type.TypeName(), factory);
     }
 }
 
@@ -1979,7 +2230,6 @@ struct WINRT_EBO % :
     {
         w.write(
             R"(
-
 struct %
 {
     %() = delete;
@@ -1991,7 +2241,7 @@ struct %
     }
 }
 
-auto get_in(reader const& args)
+auto get_in(cmd::reader const& args)
 {
     std::vector<std::string> files;
 
@@ -2033,7 +2283,7 @@ auto get_in(reader const& args)
     return files;
 }
 
-auto get_output(reader const& args)
+auto get_output(cmd::reader const& args)
 {
     auto output{ absolute(args.value("output", "winrt")) };
     create_directories(output / "impl");
@@ -2054,7 +2304,7 @@ int main(int const argc, char** argv)
     {
         auto start = high_resolution_clock::now();
 
-        std::vector<option> options
+        std::vector<cmd::option> options
         {
             // name, min, max
             { "input", 1 },
@@ -2064,7 +2314,7 @@ int main(int const argc, char** argv)
             { "verbose", 0, 0 },
         };
 
-        reader args{ argc, argv, options };
+        cmd::reader args{ argc, argv, options };
 
         if (!args)
         {
@@ -2283,11 +2533,13 @@ int main(int const argc, char** argv)
                     w.write_each<write_consume_definitions>(ns.second.interfaces);
                     w.write_each<write_delegate_implementation>(ns.second.delegates);
                     w.write_each<write_produce>(ns.second.interfaces);
+                    write_close_namespace(w);
 
-                    // write delegate implementations
-                    // write produce
-
-
+                    write_type_namespace(w, ns.first);
+                    w.write_each<write_constructor_definitions>(ns.second.classes);
+                    // write composable constructors
+                    w.write_each<write_static_definitions>(ns.second.classes);
+                    write_close_namespace(w);
                     w.save_header();
                 }
             });

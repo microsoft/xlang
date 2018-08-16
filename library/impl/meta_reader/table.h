@@ -250,6 +250,7 @@ namespace xlang::meta::reader
         template <typename T>
         T get_value(uint32_t const column) const
         {
+            XLANG_ASSERT(*this);
             return m_table->get_value<T>(m_index, column);
         }
 

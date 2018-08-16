@@ -10,10 +10,16 @@ namespace winrt::impl
         using type = T;
     };
 
-    template <typename T>
+    template <typename T, typename Enable = void>
     struct abi
     {
         using type = T;
+    };
+
+    template <typename T>
+    struct abi<T, std::enable_if_t<std::is_enum_v<T>>>
+    {
+        using type = std::underlying_type_t<T>;
     };
 
     template <typename T>

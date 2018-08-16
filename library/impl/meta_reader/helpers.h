@@ -8,7 +8,7 @@ namespace xlang::meta::reader
     }
 
     template <typename T>
-    auto size(std::pair<T, T> const& range) noexcept
+    std::size_t size(std::pair<T, T> const& range) noexcept
     {
         return range.second - range.first;
     }
