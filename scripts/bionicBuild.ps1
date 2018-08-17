@@ -1,7 +1,8 @@
 Param (
     [ValidateSet('Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel')] $buildType = "Debug",
     [switch] $forceCMake,
-    [switch] $clean
+    [switch] $verbose,
+    [string] $target
 )
 
 $rootPath = (split-path $PSScriptRoot)
@@ -15,5 +16,4 @@ if ($forceCMake -or (-not (test-path (join-path $buildPath CMakeCache.txt))))
     ubuntu1804 run cmake "$wslRootPath" "-B$wslBuildPath" -GNinja -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang
 }
 
-$ninjaArgs = if ($clean) { "clean" } else { "-v" }
-ubuntu1804 run ninja -C "$wslBuildPath" $ninjaArgs
+ubuntu1804 run ninja -C "$wslBuildPath" $(if ($verbose) { "-v" }) $target

@@ -1,7 +1,8 @@
 Param (
     [ValidateSet('Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel')] $buildType = "Debug",
     [switch] $forceCMake,
-    [switch] $clean
+    [switch] $verbose,
+    [string] $target
 )
 
 if (-not (test-path env:VSINSTALLDIR)) {
@@ -22,5 +23,4 @@ if ($forceCMake -or (-not (test-path (join-path $buildPath CMakeCache.txt))))
     & $cmakePath "$rootPath" "-B$buildPath" -G Ninja -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_MAKE_PROGRAM="$ninjaPath"
 }
 
-$ninjaArgs = if ($clean) { "clean" } else { "-v" }
-& $ninjaPath -C "$buildPath" $ninjaArgs
+& $ninjaPath -C "$buildPath" $(if ($verbose) { "-v" }) $target

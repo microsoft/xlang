@@ -1,1 +1,0 @@
-powershell -noprofile -ExecutionPolicy RemoteSigned -file %~dp0\windowsBuild.ps1 %*
