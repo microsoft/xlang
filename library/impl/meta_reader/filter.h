@@ -3,35 +3,40 @@ namespace xlang::meta::reader
 {
     struct filter
     {
-        filter() noexcept = default;
         filter(filter const&) = delete;
         filter& operator=(filter const&) = delete;
 
-        void include(std::vector<std::string> const& values)
+        filter(std::vector<std::string> const& includes, std::vector<std::string> const& excludes)
         {
-            m_includes = values;
+            for (auto&& include : includes)
+            {
+                m_rules.push_back({ include, true });
+            }
+            for (auto&& exclude : excludes)
+            {
+                m_rules.push_back({ exclude, false });
+            }
+            std::sort(m_rules.begin(), m_rules.end(), [](auto const& lhs, auto const& rhs)
+            {
+                return lhs.first.size() > rhs.first.size();
+            });
         }
 
-        void exclude(std::vector<std::string> const& values)
+        bool includes(TypeDef const& type) const
         {
-            m_excludes = values;
+            return includes(type.TypeNamespace(), type.TypeName());
         }
 
-        bool match(TypeDef const& type) const
+        bool includes(cache::namespace_members const& members) const
         {
-            return match(type.TypeNamespace(), type.TypeName());
-        }
-
-        bool match(cache::namespace_members const& members) const
-        {
-            if (m_includes.empty() && m_excludes.empty())
+            if (m_rules.empty())
             {
                 return true;
             }
 
             for (auto&& type : members.types)
             {
-                if (match(type.second.TypeNamespace(), type.second.TypeName()))
+                if (includes(type.second.TypeNamespace(), type.second.TypeName()))
                 {
                     return true;
                 }
@@ -47,7 +52,7 @@ namespace xlang::meta::reader
             {
                 for (auto&& type : types)
                 {
-                    if (match(type))
+                    if (includes(type))
                     {
                         F(writer, type);
                     }
@@ -57,41 +62,22 @@ namespace xlang::meta::reader
 
     private:
 
-        bool match(std::string_view const& type_namespace, std::string_view const& type_name) const noexcept
+        bool includes(std::string_view const& type_namespace, std::string_view const& type_name) const noexcept
         {
-            if (m_includes.empty() && m_excludes.empty())
+            if (m_rules.empty())
             {
                 return true;
             }
 
-            if (!m_includes.empty())
+            for (auto&& rule : m_rules)
             {
-                bool included{};
-
-                for (auto&& include : m_includes)
+                if (match(type_namespace, type_name, rule.first))
                 {
-                    if (match(type_namespace, type_name, include))
-                    {
-                        included = true;
-                        break;
-                    }
-                }
-
-                if (!included)
-                {
-                    return false;
+                    return rule.second;
                 }
             }
 
-            for (auto&& exclude : m_excludes)
-            {
-                if (match(type_namespace, type_name, exclude))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return false;
         }
 
         static bool match(std::string_view const& type_namespace, std::string_view const& type_name, std::string_view const& match) noexcept
@@ -114,7 +100,6 @@ namespace xlang::meta::reader
             return starts_with(type_name, match.substr(type_namespace.size() + 1));
         }
 
-        std::vector<std::string> m_includes;
-        std::vector<std::string> m_excludes;
+        std::vector<std::pair<std::string, bool>> m_rules;
     };
 }

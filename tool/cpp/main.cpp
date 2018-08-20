@@ -2329,9 +2329,7 @@ int main(int const argc, char** argv)
 
         auto relative_folder = path{ output_folder.substr(0, output_folder.size() - 1) }.filename().string();
 
-        filter f;
-        f.include(args.values("include"));
-        f.exclude(args.values("exclude"));
+        filter f(args.values("include"), args.values("exclude"));
 
         if (verbose)
         {
@@ -2414,7 +2412,7 @@ int main(int const argc, char** argv)
         {
             group.add([&]
             {
-                if (!f.match(ns.second))
+                if (!f.includes(ns.second))
                 {
                     return;
                 }
