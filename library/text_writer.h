@@ -138,10 +138,15 @@ namespace xlang::text
             m_second.clear();
         }
 
+        char back()
+        {
+            return m_first.back();
+        }
+
 #if defined(XLANG_DEBUG)
         bool debug_trace{};
 #endif
-
+        
     private:
 
         static constexpr uint32_t count_placeholders(std::string_view const& format) noexcept
