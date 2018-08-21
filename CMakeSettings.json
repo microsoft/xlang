@@ -7,8 +7,8 @@
             "inheritEnvironments": [
                 "msvc_x86"
             ],
-            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "buildRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Debug",
+            "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Debug\\Install",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": ""
@@ -20,8 +20,8 @@
             "inheritEnvironments": [
                 "msvc_x86"
             ],
-            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "buildRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Release",
+            "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Release\\Install",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": ""
@@ -33,8 +33,8 @@
             "inheritEnvironments": [
                 "msvc_x64_x64"
             ],
-            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "buildRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Debug",
+            "installRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Debug\\Install",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": ""
@@ -46,11 +46,11 @@
             "inheritEnvironments": [
                 "msvc_x64_x64"
             ],
-            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "buildRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Release",
+            "installRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Release\\Install",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": ""
         }
-]
+    ]
 }
