@@ -795,48 +795,6 @@ void write_class(writer& w, TypeDef const& type)
         bind<write_required>(":", type));
 }
 
-auto get_in(reader const& args)
-{
-    std::vector<std::string> files;
-
-    auto add_directory = [&](auto&& path)
-    {
-        for (auto&& file : directory_iterator(path))
-        {
-            if (is_regular_file(file))
-            {
-                files.push_back(file.path().string());
-            }
-        }
-    };
-
-    for (auto&& path : args.values("input"))
-    {
-        if (is_directory(path))
-        {
-            add_directory(path);
-        }
-        else if (is_regular_file(path))
-        {
-            files.push_back(path);
-        }
-#if XLANG_PLATFORM_WINDOWS
-        else if (path == "local")
-        {
-            std::array<char, MAX_PATH> local{};
-            ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
-            add_directory(local.data());
-        }
-#endif
-        else
-        {
-            throw_invalid("Path '", path, "' is not a file or directory");
-        }
-    }
-
-    return files;
-}
-
 auto get_out(reader const& args)
 {
     auto out{ absolute(args.value("output", "idl")) };
@@ -876,7 +834,7 @@ int main(int const argc, char** argv)
             return 0;
         }
 
-        cache c{ get_in(args) };
+        cache c{ args.values("input") };
         auto const out = get_out(args);
         bool const verbose = args.exists("verbose");
 

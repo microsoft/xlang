@@ -6,9 +6,9 @@ namespace xlang::meta::reader
         cache(cache const&) = delete;
         cache& operator=(cache const&) = delete;
 
-        explicit cache(std::vector<std::string> const& files)
+        explicit cache(std::vector<std::string> const& args)
         {
-            for (auto&& file : files)
+            for (auto&& file : expand(args))
             {
                 auto& db = m_databases.emplace_back(file, this);
 
@@ -81,6 +81,10 @@ namespace xlang::meta::reader
                     members.classes.push_back(type);
                 }
             }
+        }
+
+        explicit cache(std::string const& file) : cache{ std::vector<std::string>{ file } }
+        {
         }
 
         TypeDef find(std::string_view const& type_namespace, std::string_view const& type_name) const noexcept
@@ -193,6 +197,50 @@ namespace xlang::meta::reader
         using namespace_type = std::pair<std::string_view const, namespace_members> const&;
 
     private:
+
+        static std::vector<std::string> expand(std::vector<std::string> const& args)
+        {
+            std::vector<std::string> files;
+
+            auto add_directory = [&](auto&& path)
+            {
+                for (auto&& file : std::experimental::filesystem::directory_iterator(path))
+                {
+                    if (std::experimental::filesystem::is_regular_file(file))
+                    {
+                        files.push_back(file.path().string());
+                    }
+                }
+            };
+
+            for (auto&& path : args)
+            {
+                auto absolute = std::experimental::filesystem::absolute(path);
+
+                if (std::experimental::filesystem::is_directory(absolute))
+                {
+                    add_directory(absolute);
+                }
+                else if (std::experimental::filesystem::is_regular_file(absolute))
+                {
+                    files.push_back(absolute.string());
+                }
+#if XLANG_PLATFORM_WINDOWS
+                else if (path == "local")
+                {
+                    std::array<char, MAX_PATH> local{};
+                    ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+                    add_directory(local.data());
+                }
+#endif
+                else
+                {
+                    throw_invalid("Path '", path, "' is not a file or directory");
+                }
+            }
+
+            return files;
+        }
 
         std::list<database> m_databases;
         std::map<std::string_view, namespace_members> m_namespaces;
