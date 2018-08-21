@@ -1516,7 +1516,7 @@ void write_produce_cleanup(writer& w, method_signature const& method_signature)
     }
 }
 
-void write_produce_optional_definitions(writer&, method_signature const& signature)
+void write_produce_optional_definitions(writer&, method_signature const&)
 {
 
 }
@@ -1675,7 +1675,7 @@ void write_delegate_upcall(writer& w, method_signature const& method_signature)
     }
 }
 
-void write_produce_optional_results(writer&, method_signature const& signature)
+void write_produce_optional_results(writer&, method_signature const&)
 {
 
 }
@@ -1894,7 +1894,7 @@ template <> struct delegate<@::%>
         "");
 }
 
-bool has_reference(TypeDef const& type)
+bool has_reference(TypeDef const&)
 {
     return false;
 }
@@ -2014,12 +2014,12 @@ inline bool operator!=(% const& left, % const& right)%
     }
 }
 
-void write_class_base(writer& w, TypeDef const& type)
+void write_class_base(writer&, TypeDef const&)
 {
 
 }
 
-void write_class_requires(writer& w, TypeDef const& type)
+void write_class_requires(writer&, TypeDef const&)
 {
 
 }
@@ -2197,7 +2197,7 @@ void write_static_definitions(writer& w, TypeDef const& type)
     }
 }
 
-void write_class_usings(writer& w, TypeDef const& type)
+void write_class_usings(writer&, TypeDef const&)
 {
 
 }
@@ -2469,11 +2469,11 @@ int main(int const argc, char** argv)
                     w.write_include_guard();
                     w.write_depends("base");
 
-                    for (auto&& ns : w.depends)
+                    for (auto&& depends : w.depends)
                     {
-                        write_type_namespace(w, ns.first);
+                        write_type_namespace(w, depends.first);
                         w.write("\n");
-                        w.write_each<write_forward>(ns.second);
+                        w.write_each<write_forward>(depends.second);
                         write_close_namespace(w);
                     }
 
@@ -2493,9 +2493,9 @@ int main(int const argc, char** argv)
                     w.write_license();
                     w.write_include_guard();
 
-                    for (auto&& ns : w.depends)
+                    for (auto&& depends : w.depends)
                     {
-                        w.write_depends(ns.first, '0');
+                        w.write_depends(depends.first, '0');
                     }
 
                     w.write_depends(w.type_namespace, '0');
