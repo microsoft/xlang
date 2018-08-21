@@ -638,16 +638,6 @@ InterfaceImpl get_default_interface(TypeDef const& type)
     return {};
 }
 
-bool is_in(Param const& param)
-{
-    return enum_mask(param.Flags(), ParamAttributes::In) == ParamAttributes::In;
-}
-
-bool is_out(Param const& param)
-{
-    return enum_mask(param.Flags(), ParamAttributes::Out) == ParamAttributes::Out;
-}
-
 auto get_abi_name(MethodDef const& method)
 {
     std::string_view name;
@@ -666,7 +656,7 @@ auto get_name(MethodDef const& method)
 {
     auto name = method.Name();
 
-    if (enum_mask(method.Flags(), MethodAttributes::SpecialName) == MethodAttributes::SpecialName)
+    if (method.SpecialName())
     {
         return name.substr(name.find('_') + 1);
     }
@@ -674,19 +664,14 @@ auto get_name(MethodDef const& method)
     return name;
 }
 
-bool has_special_name(MethodDef const& method)
-{
-    return enum_mask(method.Flags(), MethodAttributes::SpecialName) == MethodAttributes::SpecialName;
-}
-
 bool is_remove_overload(MethodDef const& method)
 {
-    return has_special_name(method) && starts_with(method.Name(), "remove_");
+    return method.SpecialName() && starts_with(method.Name(), "remove_");
 }
 
 bool is_add_overload(MethodDef const& method)
 {
-    return has_special_name(method) && starts_with(method.Name(), "add_");
+    return method.SpecialName() && starts_with(method.Name(), "add_");
 }
 
 bool is_noexcept(MethodDef const& method)
@@ -855,7 +840,7 @@ void write_abi_params(writer& w, method_signature const& method_signature)
         {
             std::string_view format;
 
-            if (is_in(param))
+            if (param.Flags().In())
             {
                 format = "uint32_t%, %*";
             }
@@ -874,9 +859,9 @@ void write_abi_params(writer& w, method_signature const& method_signature)
         {
             w.write(param_signature.Type());
 
-            if (is_in(param))
+            if (param.Flags().In())
             {
-                XLANG_ASSERT(!is_out(param));
+                XLANG_ASSERT(!param.Flags().Out());
 
                 if (is_const(param_signature))
                 {
@@ -885,8 +870,8 @@ void write_abi_params(writer& w, method_signature const& method_signature)
             }
             else
             {
-                XLANG_ASSERT(!is_in(param));
-                XLANG_ASSERT(is_out(param));
+                XLANG_ASSERT(!param.Flags().In());
+                XLANG_ASSERT(param.Flags().Out());
 
                 w.write('*');
             }
@@ -953,7 +938,7 @@ void write_abi_args(writer& w, method_signature const& method_signature)
         {
             std::string_view format;
 
-            if (is_in(param))
+            if (param.Flags().In())
             {
                 format = "%.size(), get_abi(%)";
             }
@@ -970,9 +955,9 @@ void write_abi_args(writer& w, method_signature const& method_signature)
         }
         else
         {
-            if (is_in(param))
+            if (param.Flags().In())
             {
-                XLANG_ASSERT(!is_out(param));
+                XLANG_ASSERT(!param.Flags().Out());
 
                 if (wrap_abi(param_signature.Type()))
                 {
@@ -985,8 +970,8 @@ void write_abi_args(writer& w, method_signature const& method_signature)
             }
             else
             {
-                XLANG_ASSERT(!is_in(param));
-                XLANG_ASSERT(is_out(param));
+                XLANG_ASSERT(!param.Flags().In());
+                XLANG_ASSERT(param.Flags().Out());
 
                 if (wrap_abi(param_signature.Type()))
                 {
@@ -1153,7 +1138,7 @@ void write_consume_params(writer& w, method_signature const& method_signature)
         {
             std::string_view format;
 
-            if (is_in(param))
+            if (param.Flags().In())
             {
                 format = "array_view<% const>";
             }
@@ -1170,9 +1155,9 @@ void write_consume_params(writer& w, method_signature const& method_signature)
         }
         else
         {
-            if (is_in(param))
+            if (param.Flags().In())
             {
-                XLANG_ASSERT(!is_out(param));
+                XLANG_ASSERT(!param.Flags().Out());
                 w.consume_types = true;
 
                 auto param_type = std::get_if<ElementType>(&param_signature.Type().Type());
@@ -1190,8 +1175,8 @@ void write_consume_params(writer& w, method_signature const& method_signature)
             }
             else
             {
-                XLANG_ASSERT(!is_in(param));
-                XLANG_ASSERT(is_out(param));
+                XLANG_ASSERT(!param.Flags().In());
+                XLANG_ASSERT(param.Flags().Out());
 
                 w.write("%&", param_signature.Type());
             }
@@ -1213,7 +1198,7 @@ void write_implementation_params(writer& w, method_signature const& method_signa
         {
             std::string_view format;
 
-            if (is_in(param))
+            if (param.Flags().In())
             {
                 format = "array_view<% const>";
             }
@@ -1230,9 +1215,9 @@ void write_implementation_params(writer& w, method_signature const& method_signa
         }
         else
         {
-            if (is_in(param))
+            if (param.Flags().In())
             {
-                XLANG_ASSERT(!is_out(param));
+                XLANG_ASSERT(!param.Flags().Out());
 
                 auto param_type = std::get_if<ElementType>(&param_signature.Type().Type());
 
@@ -1247,8 +1232,8 @@ void write_implementation_params(writer& w, method_signature const& method_signa
             }
             else
             {
-                XLANG_ASSERT(!is_in(param));
-                XLANG_ASSERT(is_out(param));
+                XLANG_ASSERT(!param.Flags().In());
+                XLANG_ASSERT(param.Flags().Out());
 
                 w.write("%&", param_signature.Type());
             }
@@ -1502,7 +1487,7 @@ void write_produce_cleanup(writer& w, method_signature const& method_signature)
 {
     for (auto&&[param, param_signature] : method_signature.params())
     {
-        if (is_in(param))
+        if (param.Flags().In())
         {
             continue;
         }
@@ -1550,7 +1535,7 @@ void write_produce_args(writer& w, method_signature const& method_signature)
 
         if (param_signature.Type().is_szarray())
         {
-            if (is_in(param))
+            if (param.Flags().In())
             {
                 w.write("array_view<@ const>(reinterpret_cast<@ const *>(%), reinterpret_cast<@ const *>(%) + __%Size)",
                     param_type,
@@ -1580,9 +1565,9 @@ void write_produce_args(writer& w, method_signature const& method_signature)
         }
         else
         {
-            if (is_in(param))
+            if (param.Flags().In())
             {
-                XLANG_ASSERT(!is_out(param));
+                XLANG_ASSERT(!param.Flags().Out());
 
                 if (wrap_abi(param_signature.Type()))
                 {
@@ -1598,8 +1583,8 @@ void write_produce_args(writer& w, method_signature const& method_signature)
             // TODO: else if optional out
             else
             {
-                XLANG_ASSERT(!is_in(param));
-                XLANG_ASSERT(is_out(param));
+                XLANG_ASSERT(!param.Flags().In());
+                XLANG_ASSERT(param.Flags().Out());
 
                 if (wrap_abi(param_signature.Type()))
                 {

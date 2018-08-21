@@ -83,7 +83,7 @@ namespace xlang::meta::reader
             XLANG_ASSERT(type.is_enum());
             for (auto field : type.FieldList())
             {
-                if (!field.is_literal() && !field.is_static())
+                if (!field.Flags().Literal() && !field.Flags().Static())
                 {
                     XLANG_ASSERT(m_underlying_type == ElementType::End);
                     m_underlying_type = std::get<ElementType>(field.Signature().Type().Type());

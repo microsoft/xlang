@@ -5,6 +5,7 @@
 #include "impl/meta_reader/view.h"
 #include "impl/meta_reader/enum.h"
 #include "impl/meta_reader/enum_traits.h"
+#include "impl/meta_reader/flags.h"
 #include "impl/meta_reader/table.h"
 #include "impl/meta_reader/index.h"
 #include "impl/meta_reader/signature.h"

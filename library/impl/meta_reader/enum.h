@@ -140,10 +140,19 @@ namespace xlang::meta::reader
     template <>
     struct coded_index_bits<TypeOrMethodDef> : std::integral_constant<uint32_t, 1> {};
 
-    enum class TypeAttributes : uint32_t
+    enum class MemberAccess : uint16_t
     {
-        // Visibility
-        VisibilityMask = 0x00000007,
+        CompilerControlled = 0x0000, // Member not referenceable
+        Private = 0x0001,
+        FamAndAssem = 0x0002,        // Accessible by subtypes only in this Assembly
+        Assembly = 0x0003,           // Accessible by anyone in this Assembly
+        Family = 0x0004,             // aka Protected
+        FamOrAssem = 0x0005,         // Accessible by subtypes anywhere, plus anyone in this Assembly
+        Public = 0x0006,
+    };
+
+    enum class TypeVisibility : uint32_t
+    {
         NotPublic = 0x00000000,
         Public = 0x00000001,
         NestedPublic = 0x00000002,
@@ -152,164 +161,59 @@ namespace xlang::meta::reader
         NestedAssembly = 0x00000005,
         NestedFamANDAssem = 0x00000006,
         NestedFamORAssem = 0x00000007,
+    };
 
-        // Class layout
-        LayoutMask = 0x00000018,
+    enum class TypeLayout : uint32_t
+    {
         AutoLayout = 0x00000000,
         SequentialLayout = 0x00000008,
         ExplicitLayout = 0x00000010,
+    };
 
-        // Class semantics
-        ClassSemanticsMask = 0x00000020,
+    enum class TypeSemantics : uint32_t
+    {
         Class = 0x00000000,
         Interface = 0x00000020,
+    };
 
-        // Special semantics
-        Abstract = 0x00000080,
-        Sealed = 0x00000100,
-        SpecialName = 0x00000400,
-
-        // Implementation
-        Import = 0x00001000,
-        Serializable = 0x00002000,
-        WindowsRuntime = 0x00004000,
-
-        // String formatting
-        StringFormatMask = 0x00030000,
+    enum class StringFormat : uint32_t
+    {
         AnsiClass = 0x00000000,
         UnicodeClass = 0x00010000,
         AutoClass = 0x00020000,
         CustomFormatClass = 0x00030000,
         CustomFormatMask = 0x00C00000,
-
-        // Additional
-        BeforeFieldInit = 0x00100000,
-        RTSpecialName = 0x00000800,
-        HasSecurity = 0x00040000,
-        IsTypeForwarder = 0x00200000,
-        ReservedMask = 0x00040800,
     };
 
-    enum class MethodImplAttributes : uint16_t
+    enum class CodeType : uint16_t
     {
-        CodeTypeMask = 0x0003,
         IL = 0x0000,      // Method impl is CIL
         Native = 0x0001,  // Method impl is native
         OPTIL = 0x0002,   // Reserved: shall be zero in conforming implementations
         Runtime = 0x0003, // Method impl is provided by the runtime
+    };
 
-        ManagedMask = 0x0004,
+    enum class Managed : uint16_t
+    {
         Unmanaged = 0x0004,
         Managed = 0x0000,
-
-        ForwardRef = 0x0010, // Method is defined; used primarily in merge scenarios
-        PreserveSig = 0x0080, // Reserved
-        InternalCall = 0x1000, // Reserved
-        Synchronized = 0x0020, // Method is single threaded through the body
-        NoInlining = 0x0008, // Method cannot be inlined
-        MaxMethodImplVal = 0xffff, // Range check value
-        NoOptimization = 0x0040, // Method will not be optimized when generatinv native code
     };
 
-    enum class MethodAttributes : uint16_t
+    enum class VtableLayout : uint16_t
     {
-        MemberAccessMask = 0x0007,
-        CompilerControlled = 0x0000, // Member not referenceable
-        Private = 0x0001,
-        FamAndAssem = 0x0002,        // Accessible by subtypes only in this Assembly
-        Assembly = 0x0003,           // Accessible by anyone in this Assembly
-        Family = 0x0004,             // aka Protected
-        FamOrAssem = 0x0005,         // Accessible by subtypes anywhere, plus anyone in this Assembly
-        Public = 0x0006,
-
-        Static = 0x0010,
-        Final = 0x0020,
-        Virtual = 0x0040,
-        HideBySig = 0x0080,
-
-        VtableLayoutMask = 0x0100,
         ReuseSlot = 0x0000, // Method reuses existing slot in a vtable
         NewSlot = 0x0100,   // Method always gets a new slot in the vtable
-
-        Strict = 0x0200,
-        Abstract = 0x0400,
-        SpecialName = 0x0800,
-
-        PInvokeImpl = 0x2000, // Implementation is forwarded through PInvoke
-        UnmanagedExport = 0x0008, // Reerved: shall be zero for conforming implementations
-
-        RTSpecialName = 0x1000,
-        HasSecurity = 0x4000,
-        RequireSecObject = 0x8000,
     };
 
-    enum class ParamAttributes : uint16_t
+    enum class GenericParamVariance : uint16_t
     {
-        In = 0x0001,
-        Out = 0x0002,
-        Optional = 0x0010,
-        HasDefault = 0x1000, // Param has default value
-        HasFieldMarshal = 0x2000,
-        Unused = 0xcfe0, // Reserved
-    };
-
-    enum class EventAttributes : uint16_t
-    {
-        SpecialName = 0x0200,
-        RTSpecialName = 0x0400,
-    };
-
-    enum class MethodSemanticsAttributes : uint16_t
-    {
-        Setter = 0x0001, // Setter for property
-        Getter = 0x0002, // Getter for property
-        Other = 0x0004, // Other method for property or event
-        AddOn = 0x0008, // AddOn method for event
-        RemoveOn = 0x0010, // RemoveOn method for event
-        Fire = 0x0020, // Optional fire method for event
-    };
-
-    enum class PropertyAttributes : uint16_t
-    {
-        SpecialName = 0x0200,
-        RTSpecialName = 0x0400,
-        HasDefault = 0x1000,
-        Unused = 0xe9ff,
-    };
-
-    enum class FieldAttributes : uint16_t
-    {
-        FieldAccessMask = 0x0007,
-        CompilerControlled = 0x0000, // Member not referenceable
-        Private = 0x0001,
-        FamAndAssem = 0x0002,        // Accessible by subtypes only in this Assembly
-        Assembly = 0x0003,           // Accessible by anyone in this Assembly
-        Family = 0x0004,             // aka Protected
-        FamOrAssem = 0x0005,         // Accessible by subtypes anywhere, plus anyone in this Assembly
-        Public = 0x0006,
-
-        Static = 0x0010,
-        InitOnly = 0x0020,
-        Literal = 0x0040,
-        NotSerialized = 0x0080,
-        SpecialName = 0x0200,
-
-        PInvokeImpl = 0x2000,
-
-        RTSpecialName = 0x0400,
-        HasFieldMarshall = 0x1000,
-        HasDefault = 0x8000,
-        HasFieldRVA = 0x0100,
-    };
-
-    enum class GenericParamAttributes : uint16_t
-    {
-        VarianceMask = 0x0003,
         None = 0x0000,
         Covariant = 0x0001,
-        Contravariant = 0x0002,
+        Contravariant = 0x0002
+    };
 
-        SpecialConstraintMask = 0x001c,
+    enum class GenericParamSpecialConstraint : uint16_t
+    {
         ReferenceTypeConstraint = 0x0004,
         NotNullableValueTypeConstraint = 0x0008,
         DefaultConstructorConstraint = 0x0010

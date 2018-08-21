@@ -59,7 +59,7 @@ namespace xlang::meta::reader
 
     inline category get_category(TypeDef const& type)
     {
-        if (enum_mask(type.Flags(), TypeAttributes::Interface) == TypeAttributes::Interface)
+        if (type.Flags().Semantics() == TypeSemantics::Interface)
         {
             return category::interface_type;
         }

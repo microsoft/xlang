@@ -508,7 +508,7 @@ void write_method_decl(writer& w, MethodDef const& method, method_signature cons
         if (target.type() == HasSemantics::Property)
         {
             auto const& property = target.Property();
-            if (semantic.Semantic() == MethodSemanticsAttributes::Getter)
+            if (semantic.Semantic().Getter())
             {
                 w.write_indented("^@property\ndef %(%):\n", property.Name(), self_name);
             }

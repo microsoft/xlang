@@ -48,7 +48,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<TypeAttributes>(0);
+            return TypeAttributes{ get_value<uint32_t>(0) };
         }
 
         auto TypeName() const
@@ -91,12 +91,12 @@ namespace xlang::meta::reader
 
         auto ImplFlags() const
         {
-            return get_value<MethodImplAttributes>(1);
+            return MethodImplAttributes{ get_value<uint16_t>(1) };
         }
 
         auto Flags() const
         {
-            return get_value<MethodAttributes>(2);
+            return MethodAttributes{ get_value<uint16_t>(2) };
         }
 
         auto Name() const
@@ -113,6 +113,11 @@ namespace xlang::meta::reader
         auto ParamList() const;
         auto CustomAttribute() const;
         auto Parent() const;
+
+        bool SpecialName() const
+        {
+            return Flags().SpecialName();
+        }
     };
 
     struct MemberRef : row_base<MemberRef>
@@ -156,7 +161,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<FieldAttributes>(0);
+            return FieldAttributes{ get_value<uint16_t>(0) };
         }
 
         auto Name() const
@@ -173,15 +178,6 @@ namespace xlang::meta::reader
         auto CustomAttribute() const;
         auto Constant() const;
         auto Parent() const;
-        bool is_static() const
-        {
-            return enum_mask(Flags(), FieldAttributes::Static) == FieldAttributes::Static;
-        }
-
-        bool is_literal() const
-        {
-            return enum_mask(Flags(), FieldAttributes::Literal) == FieldAttributes::Literal;
-        }
     };
 
     struct Param : row_base<Param>
@@ -190,7 +186,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<ParamAttributes>(0);
+            return ParamAttributes{ get_value<uint16_t>(0) };
         }
 
         auto Sequence() const
@@ -321,7 +317,7 @@ namespace xlang::meta::reader
 
         auto EventFlags() const
         {
-            return get_value<EventAttributes>(0);
+            return EventAttributes{ get_value<uint16_t>(0) };
         }
 
         auto Name() const
@@ -353,7 +349,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<PropertyAttributes>(0);
+            return PropertyAttributes{ get_value<uint16_t>(0) };
         }
 
         auto Name() const
@@ -379,7 +375,7 @@ namespace xlang::meta::reader
 
         auto Semantic() const
         {
-            return get_value<MethodSemanticsAttributes>(0);
+            return MethodSemanticsAttributes{ get_value<uint16_t>(0) };
         }
 
         auto Method() const;
@@ -387,26 +383,6 @@ namespace xlang::meta::reader
         auto Association() const
         {
             return get_coded_index<HasSemantics>(2);
-        }
-
-        bool PropertyGetter() const
-        {
-            return enum_mask(Semantic(), MethodSemanticsAttributes::Getter) == MethodSemanticsAttributes::Getter;
-        }
-
-        bool PropertySetter() const
-        {
-            return enum_mask(Semantic(), MethodSemanticsAttributes::Setter) == MethodSemanticsAttributes::Setter;
-        }
-
-        bool EventAdder() const
-        {
-            return enum_mask(Semantic(), MethodSemanticsAttributes::AddOn) == MethodSemanticsAttributes::AddOn;
-        }
-
-        bool EventRemover() const
-        {
-            return enum_mask(Semantic(), MethodSemanticsAttributes::RemoveOn) == MethodSemanticsAttributes::RemoveOn;
         }
     };
 
@@ -613,7 +589,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<ParamAttributes>(1);
+            return GenericParamAttributes{ get_value<uint16_t>(1) };
         }
 
         auto Owner() const

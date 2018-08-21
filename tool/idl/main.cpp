@@ -572,7 +572,7 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
 
     if (target.type() == HasSemantics::Property)
     {
-        if (semantic != MethodSemanticsAttributes::Getter && semantic != MethodSemanticsAttributes::Setter)
+        if (!semantic.Getter() && !semantic.Setter())
         {
             xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
         }
@@ -597,11 +597,11 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                 }
             }
 
-            if (semantic == MethodSemanticsAttributes::Getter)
+            if (semantic.Getter())
             {
                 if (method + 1 == other_method)
                 {
-                    if (other_method_semantic.Semantic() != MethodSemanticsAttributes::Setter)
+                    if (!other_method_semantic.Semantic().Setter())
                     {
                         xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
                     }
@@ -610,13 +610,13 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                 }
                 else
                 {
-                    XLANG_ASSERT(semantic == MethodSemanticsAttributes::Getter);
+                    XLANG_ASSERT(semantic.Getter());
                     w.write("\n        % % { get; };", property.Type().Type(), property.Name());
                 }
             }
             else
             {
-                XLANG_ASSERT(semantic == MethodSemanticsAttributes::Setter);
+                XLANG_ASSERT(semantic.Setter());
                 w.write("\n        % % { set; };", property.Type().Type(), property.Name());
             }
         }
@@ -627,20 +627,20 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
             {
                 w.write(attr);
             }
-            if (semantic == MethodSemanticsAttributes::Getter)
+            if (semantic.Getter())
             {
                 w.write("\n        % % { get; };", property.Type().Type(), property.Name());
             }
             else
             {
-                XLANG_ASSERT(semantic == MethodSemanticsAttributes::Setter);
+                XLANG_ASSERT(semantic.Setter());
                 w.write("\n        % % { set; };", property.Type().Type(), property.Name());
             }
         }
     }
     else
     {
-        if (semantic != MethodSemanticsAttributes::AddOn && semantic != MethodSemanticsAttributes::RemoveOn)
+        if (!semantic.AddOn() && !semantic.RemoveOn())
         {
             xlang::throw_invalid("Invalid semantic: events can only have an add and/or remove");
         }
@@ -665,11 +665,11 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                 }
             }
 
-            if (semantic == MethodSemanticsAttributes::AddOn)
+            if (semantic.AddOn())
             {
                 if (method + 1 == other_method)
                 {
-                    if (other_method_semantic.Semantic() != MethodSemanticsAttributes::RemoveOn)
+                    if (!other_method_semantic.Semantic().RemoveOn())
                     {
                         xlang::throw_invalid("Invalid semantic: events can only have a add and/or remove");
                     }
@@ -678,13 +678,13 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                 }
                 else
                 {
-                    XLANG_ASSERT(semantic == MethodSemanticsAttributes::AddOn);
+                    XLANG_ASSERT(semantic.AddOn());
                     w.write("\n        % % { add; };", event.EventType(), event.Name());
                 }
             }
             else
             {
-                XLANG_ASSERT(semantic == MethodSemanticsAttributes::RemoveOn);
+                XLANG_ASSERT(semantic.RemoveOn());
                 w.write("\n        % % { remove; };", event.EventType(), event.Name());
             }
         }
@@ -695,13 +695,13 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
             {
                 w.write(attr);
             }
-            if (semantic == MethodSemanticsAttributes::AddOn)
+            if (semantic.AddOn())
             {
                 w.write("\n        % % { add; };", event.EventType(), event.Name());
             }
             else
             {
-                XLANG_ASSERT(semantic == MethodSemanticsAttributes::RemoveOn);
+                XLANG_ASSERT(semantic.RemoveOn());
                 w.write("\n        % % { remove; };", event.EventType(), event.Name());
             }
         }

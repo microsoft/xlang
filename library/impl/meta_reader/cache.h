@@ -14,9 +14,7 @@ namespace xlang::meta::reader
 
                 for (auto&& type : db.TypeDef)
                 {
-                    auto const flags = type.Flags();
-
-                    if (enum_mask(flags, TypeAttributes::WindowsRuntime) != TypeAttributes::WindowsRuntime)
+                    if (!type.Flags().WindowsRuntime())
                     {
                         continue;
                     }
@@ -36,9 +34,7 @@ namespace xlang::meta::reader
             {
                 for (auto&&[name, type] : members.types)
                 {
-                    auto const flags = type.Flags();
-
-                    if (enum_mask(flags, TypeAttributes::Interface) == TypeAttributes::Interface)
+                    if (type.Flags().Semantics() == TypeSemantics::Interface)
                     {
                         members.interfaces.push_back(type);
                         continue;
