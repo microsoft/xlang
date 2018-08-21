@@ -40,15 +40,7 @@ namespace xlang::meta::reader
             }
         };
         auto const& map = get_database().template get_table<T>();
-        auto iter = std::lower_bound(map.begin(), map.end(), index() + 1, compare{});
-        if (iter.template get_value<uint32_t>(ParentColumn) == index() + 1)
-        {
-            return iter;
-        }
-        else
-        {
-            return iter - 1;
-        }
+        return std::upper_bound(map.begin(), map.end(), index() + 1, compare{}) - 1;
     }
 
     inline auto TypeDef::GenericParam() const

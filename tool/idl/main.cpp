@@ -880,9 +880,7 @@ int main(int const argc, char** argv)
         auto const out = get_out(args);
         bool const verbose = args.exists("verbose");
 
-        filter f;
-        f.include(args.values("include"));
-        f.exclude(args.values("exclude"));
+        filter f{ args.values("include"), args.values("exclude") };
 
         if (verbose)
         {
@@ -901,7 +899,7 @@ int main(int const argc, char** argv)
         {
             group.add([&]
             {
-                if (!f.match(ns.second))
+                if (!f.includes(ns.second))
                 {
                     return;
                 }
