@@ -17,6 +17,16 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
+    template <> struct abi<Windows::Foundation::TimeSpan>
+    {
+        using type = int64_t;
+    };
+
+    template <> struct abi<Windows::Foundation::DateTime>
+    {
+        using type = int64_t;
+    };
+
     template <> struct name<Windows::Foundation::TimeSpan>
     {
         static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };

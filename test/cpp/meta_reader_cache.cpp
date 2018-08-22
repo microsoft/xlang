@@ -9,4 +9,5 @@ TEST_CASE("meta_reader_cache")
     auto type = c.find("Test.IStringable");
     REQUIRE(type.TypeName() == "IStringable");
     REQUIRE(type.TypeNamespace() == "Test");
+    REQUIRE(type.Flags().Semantics() == TypeSemantics::Interface);
 }

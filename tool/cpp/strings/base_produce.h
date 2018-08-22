@@ -816,23 +816,23 @@ namespace winrt::impl
 
     template <typename D, typename K, typename V> struct produce<D, wfc::IObservableMap<K, V>> : produce_base<D, wfc::IObservableMap<K, V>>
     {
-        int32_t WINRT_CALL add_MapChanged(void* handler, event_token* token) noexcept final
+        int32_t WINRT_CALL add_MapChanged(void* handler, int64_t* token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                *token = this->shim().MapChanged(*reinterpret_cast<wfc::MapChangedEventHandler<K, V> const*>(&handler));
+                *token = detach_from<event_token>(this->shim().MapChanged(*reinterpret_cast<wfc::MapChangedEventHandler<K, V> const*>(&handler)));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL remove_MapChanged(event_token token) noexcept final
+        int32_t WINRT_CALL remove_MapChanged(int64_t token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().MapChanged(token);
+                this->shim().MapChanged(event_token{ token });
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -842,7 +842,7 @@ namespace winrt::impl
     template <typename D, typename T>
     struct produce<D, wfc::IObservableVector<T>> : produce_base<D, wfc::IObservableVector<T>>
     {
-        int32_t WINRT_CALL add_VectorChanged(void* handler, event_token* token) noexcept final
+        int32_t WINRT_CALL add_VectorChanged(void* handler, int64_t* token) noexcept final
         {
             try
             {
@@ -853,12 +853,12 @@ namespace winrt::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL remove_VectorChanged(event_token token) noexcept final
+        int32_t WINRT_CALL remove_VectorChanged(int64_t token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().VectorChanged(token);
+                this->shim().VectorChanged(event_token{ token });
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

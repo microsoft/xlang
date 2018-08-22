@@ -176,6 +176,29 @@ namespace xlang::meta::reader
             remove("Windows.Foundation", "AsyncOperationWithProgressCompletedHandler`2");
             remove("Windows.Foundation", "EventHandler`1");
             remove("Windows.Foundation", "TypedEventHandler`2");
+
+            remove("Windows.Foundation.Collections", "IIterable`1");
+            remove("Windows.Foundation.Collections", "IIterator`1");
+            remove("Windows.Foundation.Collections", "IKeyValuePair`2");
+            remove("Windows.Foundation.Collections", "IMapChangedEventArgs`1");
+            remove("Windows.Foundation.Collections", "IMapView`2");
+            remove("Windows.Foundation.Collections", "IMap`2");
+            remove("Windows.Foundation.Collections", "IObservableMap`2");
+            remove("Windows.Foundation.Collections", "IObservableVector`1");
+            remove("Windows.Foundation.Collections", "IVectorChangedEventArgs");
+            remove("Windows.Foundation.Collections", "IVectorView`1");
+            remove("Windows.Foundation.Collections", "IVector`1");
+            remove("Windows.Foundation.Collections", "MapChangedEventHandler`2");
+            remove("Windows.Foundation.Collections", "VectorChangedEventHandler`1");
+            remove("Windows.Foundation.Collections", "CollectionChange");
+
+            remove("Windows.Foundation.Numerics", "Matrix3x2");
+            remove("Windows.Foundation.Numerics", "Matrix4x4");
+            remove("Windows.Foundation.Numerics", "Plane");
+            remove("Windows.Foundation.Numerics", "Quaternion");
+            remove("Windows.Foundation.Numerics", "Vector2");
+            remove("Windows.Foundation.Numerics", "Vector3");
+            remove("Windows.Foundation.Numerics", "Vector4");
         }
 
         struct namespace_members

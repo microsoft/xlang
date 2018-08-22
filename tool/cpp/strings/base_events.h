@@ -142,6 +142,11 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
+    template <> struct abi<event_token>
+    {
+        using type = int64_t;
+    };
+
     template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(int64_t)>
     struct event_revoker
     {

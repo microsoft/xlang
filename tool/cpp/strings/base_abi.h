@@ -320,8 +320,8 @@ namespace winrt::impl
     {
         struct WINRT_NOVTABLE type : IInspectable
         {
-            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, event_token*  token) noexcept = 0;
-            virtual int32_t WINRT_CALL remove_VectorChanged(event_token token) noexcept = 0;
+            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, int64_t*  token) noexcept = 0;
+            virtual int32_t WINRT_CALL remove_VectorChanged(int64_t token) noexcept = 0;
         };
     };
 
@@ -363,8 +363,8 @@ namespace winrt::impl
     {
         struct WINRT_NOVTABLE type : IInspectable
         {
-            virtual int32_t WINRT_CALL add_MapChanged(void* handler, event_token* token) noexcept = 0;
-            virtual int32_t WINRT_CALL remove_MapChanged(event_token token) noexcept = 0;
+            virtual int32_t WINRT_CALL add_MapChanged(void* handler, int64_t* token) noexcept = 0;
+            virtual int32_t WINRT_CALL remove_MapChanged(int64_t token) noexcept = 0;
         };
     };
 

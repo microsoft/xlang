@@ -246,7 +246,18 @@ struct writer : writer_base<writer>
             }
             else if (category == category::struct_type)
             {
-                write("struct struct_%", get_impl_name(type));
+                if ((name == "DateTime" || name == "TimeSpan") && ns == "Windows.Foundation")
+                {
+                    write("int64_t");
+                }
+                else if ((name == "Point" || name == "Size" || name == "Rect") && ns == "Windows.Foundation")
+                {
+                    write("@::%", ns, name);
+                }
+                else
+                {
+                    write("struct struct_%", get_impl_name(type));
+                }
             }
             else if (category == category::enum_type)
             {
@@ -521,6 +532,25 @@ struct writer : writer_base<writer>
         }
     }
 
+    void write_parent_depends(cache const& c)
+    {
+        auto pos = type_namespace.rfind('.');
+
+        if (pos == std::string::npos)
+        {
+            return;
+        }
+
+        auto parent = type_namespace.substr(0, pos);
+
+        if (c.namespaces().find(parent) == c.namespaces().end())
+        {
+            return;
+        }
+
+        write("#include \"%/%.h\"\n", relative_folder, parent);
+    }
+
     void save_header(char impl = 0)
     {
         auto filename{ output_folder };
@@ -726,15 +756,21 @@ enum class % : %
 
 void write_forward(writer& w, TypeDef const& type)
 {
+    auto type_namespace = type.TypeNamespace();
+    auto type_name = type.TypeName();
     auto category = get_category(type);
 
     if (category == category::enum_type)
     {
-        w.write("enum class % : %;\n", type.TypeName(), type.FieldList().first.Signature().Type());
+        w.write("enum class % : %;\n", type_name, type.FieldList().first.Signature().Type());
+    }
+    else if ((type_name == "DateTime" || type_name == "TimeSpan") && type_namespace == "Windows.Foundation")
+    {
+        // Don't forward declare these since they're not structs.
     }
     else
     {
-        w.write("struct %;\n", type.TypeName());
+        w.write("struct %;\n", type_name);
     }
 }
 
@@ -1246,10 +1282,11 @@ void write_implementation_params(writer& w, method_signature const& method_signa
     }
 }
 
-void write_consume_declaration(writer& w, MethodDef const& method, TypeDef const& type)
+void write_consume_declaration(writer& w, MethodDef const& method)
 {
     method_signature signature{ method };
     auto method_name = get_name(method);
+    auto type = method.Parent();
 
     w.write("    % %(%) const%;\n",
         signature.return_signature(),
@@ -1327,10 +1364,11 @@ void write_consume_args(writer& w, method_signature const& method_signature)
     }
 }
 
-void write_consume_definition(writer& w, MethodDef const& method, TypeDef const& type)
+void write_consume_definition(writer& w, MethodDef const& method)
 {
     auto method_name = get_name(method);
     method_signature signature{ method };
+    auto type = method.Parent();
     auto type_impl_name = get_impl_name(type);
 
     // TODO: something wrong with Parent that it doesn't always return the correct TypeDef.
@@ -1394,7 +1432,7 @@ void write_consume_definitions(writer& w, TypeDef const& type)
 {
     auto guard{ w.push_generic_params(type.GenericParam()) };
 
-    w.write_each<write_consume_definition>(type.MethodList(), type);
+    w.write_each<write_consume_definition>(type.MethodList());
 }
 
 void write_consume(writer& w, TypeDef const& type)
@@ -1411,7 +1449,7 @@ struct consume_%
 template <> struct consume<%> { template <typename D> using type = consume_%<D>; };
 )",
         impl_name,
-        bind_each<write_consume_declaration>(type.MethodList(), type),
+        bind_each<write_consume_declaration>(type.MethodList()),
         "", // extensions?
         type,
         impl_name);
@@ -1879,6 +1917,64 @@ template <> struct delegate<@::%>
         "");
 }
 
+void write_delegate_definition(writer& w, TypeDef const& type)
+{
+    auto type_name = type.TypeName();
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+    method_signature signature{ get_delegate_method(type) };
+
+    w.write(
+ R"(
+template <typename L> %::%(L handler) :
+    %(impl::make_delegate<%>(std::forward<L>(handler)))
+{}
+
+template <typename F> %::%(F* handler) :
+    %([=](auto&&... args) { return handler(args...); })
+{}
+
+template <typename O, typename M> %::%(O* object, M method) :
+    %([=](auto&&... args) { return ((*object).*(method))(args...); })
+{}
+
+template <typename O, typename M> %::%(com_ptr<O>&& object, M method) :
+    %([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+{}
+
+template <typename O, typename M> %::%(weak_ref<O>&& object, M method) :
+    %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+{}
+
+inline % %::operator()(%) const
+{%
+    check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
+}
+)",
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        type_name,
+        signature.return_signature(),
+        type_name,
+        bind<write_consume_params>(signature),
+        bind<write_consume_return_type>(signature),
+        type_name,
+        bind<write_abi_args>(signature),
+        bind<write_consume_return_statement>(signature));
+}
+
 bool has_reference(TypeDef const&)
 {
     return false;
@@ -2134,11 +2230,28 @@ inline %::%() :
 void write_static_declaration(writer& w, MethodDef const& method)
 {
     method_signature signature{ method };
+    auto method_name = get_name(method);
+    auto type = method.Parent();
 
     w.write("    static % %(%);\n",
         signature.return_signature(),
-        get_name(method),
+        method_name,
         bind<write_consume_params>(signature));
+
+    if (is_add_overload(method))
+    {
+        w.write(
+R"(    using %_revoker = impl::factory_event_revoker<%, &impl::abi_t<%>::remove_%>;
+    static %_revoker %(auto_revoke_t, %);
+)",
+            method_name,
+            type,
+            type,
+            method_name,
+            method_name,
+            method_name,
+            bind<write_consume_params>(signature));
+    }
 }
 
 void write_static_declarations(writer& w, TypeDef const& type)
@@ -2450,15 +2563,24 @@ int main(int const argc, char** argv)
                     w.output_folder = output_folder;
                     w.relative_folder = relative_folder;
 
-                    w.write_license();
-                    w.write_include_guard();
-                    w.write_depends(w.type_namespace, '1');
                     write_type_namespace(w, ns.first);
                     w.write_each<write_delegate>(ns.second.delegates);
                     write_structs(w, ns.second.structs);
                     w.write_each<write_class>(ns.second.classes);
                     // write interface overrides
                     write_close_namespace(w);
+
+                    w.swap();
+                    w.write_license();
+                    w.write_include_guard();
+
+                    for (auto&& depends : w.depends)
+                    {
+                        w.write_depends(depends.first, '1');
+                    }
+
+                    w.write_depends(w.type_namespace, '1');
+
                     w.save_header('2');
                 }
                 {
@@ -2467,9 +2589,6 @@ int main(int const argc, char** argv)
                     w.output_folder = output_folder;
                     w.relative_folder = relative_folder;
 
-                    w.write_license();
-                    w.write_include_guard();
-                    w.write_depends(w.type_namespace, '2');
                     write_impl_namespace(w);
                     w.write_each<write_consume_definitions>(ns.second.interfaces);
                     w.write_each<write_delegate_implementation>(ns.second.delegates);
@@ -2480,7 +2599,20 @@ int main(int const argc, char** argv)
                     w.write_each<write_constructor_definitions>(ns.second.classes);
                     // write composable constructors
                     w.write_each<write_static_definitions>(ns.second.classes);
+                    w.write_each<write_delegate_definition>(ns.second.delegates);
                     write_close_namespace(w);
+
+                    w.swap();
+                    w.write_license();
+                    w.write_include_guard();
+
+                    for (auto&& depends : w.depends)
+                    {
+                        w.write_depends(depends.first, '2');
+                    }
+
+                    w.write_depends(w.type_namespace, '2');
+                    w.write_parent_depends(c);
                     w.save_header();
                 }
             });
