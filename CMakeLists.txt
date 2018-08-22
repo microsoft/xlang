@@ -4,20 +4,27 @@ set(XLANG_SCRIPTS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
 
 function(TARGET_CONFIG_MSVC_PCH target pch_cpp pch_header)
-    GET_TARGET_PROPERTY(sources ${target} SOURCES)
+
+    set(pch_output_file "\"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pch\"")
+
+    get_target_property(sources ${target} SOURCES)
     foreach(file ${sources})
         if (${file} STREQUAL ${pch_cpp})
-            SET_SOURCE_FILES_PROPERTIES(${file}
+            set_source_files_properties(${file}
                 PROPERTIES
-                COMPILE_FLAGS " /Yc${pch_header} /Fp\"${CMAKE_CURRENT_BINARY_DIR}\\${PROJECT_NAME}.pch\""
+                COMPILE_FLAGS " /Yc${pch_header} /Fp${pch_output_file}"
                 OBJECT_OUTPUTS ${PROJECT_NAME}.pch)
         else()
-            SET_SOURCE_FILES_PROPERTIES(${file}
+            set_source_files_properties(${file}
                 PROPERTIES
-                COMPILE_FLAGS " /Yu${pch_header} /Fp\"${CMAKE_CURRENT_BINARY_DIR}\\${PROJECT_NAME}.pch\""
+                COMPILE_FLAGS " /Yu${pch_header} /Fp${pch_output_file}"
                 OBJECT_DEPENDS ${PROJECT_NAME}.pch)
         endif()
     endforeach()
+
+    set_target_properties(${target} PROPERTIES PCH_OUTPUT_FILE ${pch_output_file})
+    set_property(GLOBAL APPEND PROPERTY PCH_OUTPUT_FILES ${pch_output_file})
+
 endfunction(TARGET_CONFIG_MSVC_PCH)
 
 function(GENERATE_STRING_LITERAL_FILES glob_expression output_filename namespace target)
@@ -31,8 +38,7 @@ function(GENERATE_STRING_LITERAL_FILES glob_expression output_filename namespace
     add_custom_command(
         OUTPUT  ${output_files}
         DEPENDS ${input_files}
-        COMMAND
-            ${CMAKE_COMMAND} \"-Dglob_expression=${glob_expression}\" \"-Dout_h=${out_h}\" \"-Dout_cpp=${out_cpp}\" \"-Dnamespace=${namespace}\" -P \"${XLANG_SCRIPTS_PATH}/genStringLiteralFiles.cmake\"
+        COMMAND ${CMAKE_COMMAND} \"-Dglob_expression=${glob_expression}\" \"-Dout_h=${out_h}\" \"-Dout_cpp=${out_cpp}\" \"-Dnamespace=${namespace}\" -P \"${XLANG_SCRIPTS_PATH}/genStringLiteralFiles.cmake\"
     )
 
     set(gen_target_name "generated_${target}_${output_filename}")
@@ -40,6 +46,11 @@ function(GENERATE_STRING_LITERAL_FILES glob_expression output_filename namespace
     add_dependencies(${target} ${gen_target_name})
 
 endfunction()
+
+
+add_custom_target(scorch 
+    COMMAND ${CMAKE_COMMAND} \"-Dfolder=${CMAKE_CURRENT_BINARY_DIR}\" -P \"${XLANG_SCRIPTS_PATH}/scorch.cmake\")
+
 
 
 if (WIN32)
