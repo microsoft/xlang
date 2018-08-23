@@ -27,7 +27,7 @@ auto get_dotted_name_segments(std::string_view ns)
     } while (true);
 };
 
-MethodSemantics get_method_semantic(TypeDef const& type, MethodDef const& method)
+MethodSemantics get_method_semantics(TypeDef const& type, MethodDef const& method)
 {
     for (auto const& prop : type.PropertyList())
     {
@@ -53,11 +53,6 @@ MethodSemantics get_method_semantic(TypeDef const& type, MethodDef const& method
 
     return {};
 };
-
-auto get_method_semantic(MethodDef const& method)
-{
-    return get_method_semantic(method.Parent(), method);
-}
 
 struct method_signature
 {
@@ -121,6 +116,11 @@ private:
     Param m_return;
 };
 
+bool is_exclusive_to(TypeDef const& type)
+{
+    return bool{ get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute") };
+}
+
 template <typename...T> struct overloaded : T... { using T::operator()...; };
 template <typename...T> overloaded(T...)->overloaded<T...>;
 
@@ -128,6 +128,7 @@ struct writer : writer_base<writer>
 {
     using writer_base<writer>::write;
 
+    std::string type_namespace;
     int32_t indent{ 0 };
 
     struct indent_guard
@@ -173,25 +174,29 @@ struct writer : writer_base<writer>
         }
         else
         {
-            auto spaces = indent * 4;
-            std::string value_{ value };
-
-            auto pos = value_.find_last_of('\n');
-            while (pos != std::string::npos)
-            {
-                if (pos != value_.size() - 1)
-                {
-                    value_.insert(pos + 1, spaces, ' ');
-                }
-                pos = value_.find_last_of('\n', pos - 1);
-            }
-
+            auto indentation = std::string(indent * 4, ' ');
             if (back() == '\n')
             {
-                value_.insert(value_.begin(), spaces, ' ');
+                write(indentation);
             }
 
-            write(value_, args...);
+            auto pos = value.find_last_of('\n', value.size() - 2);
+            if (pos == std::string_view::npos)
+            {
+                write(value, args...);
+            }
+            else
+            {
+                std::string value_{ value };
+
+                while (pos != std::string::npos)
+                {
+                    value_.insert(pos + 1, indentation);
+                    pos = value_.find_last_of('\n', pos - 1);
+                }
+
+                write(value_, args...);
+            }
         }
     }
 
@@ -320,6 +325,18 @@ struct writer : writer_base<writer>
 
 void write_comment_typesig(writer& w, TypeSig const& sig)
 {
+    auto write_type_name = [&w](std::string_view const& ns, std::string_view const& name)
+    {
+        if (w.type_namespace == ns)
+        {
+            w.write(name);
+        }
+        else
+        {
+            w.write("%.%", ns, name);
+        }
+    };
+
     std::visit(overloaded{
         [&](ElementType type) {
             switch (type)
@@ -367,7 +384,7 @@ void write_comment_typesig(writer& w, TypeSig const& sig)
                 w.write("Object");
                 break;
             default:
-                throw_invalid("element type not impl");
+                throw_invalid("write_comment_typesig element type not impl");
             }
         },
         [&](coded_index<TypeDefOrRef> type) {
@@ -376,13 +393,13 @@ void write_comment_typesig(writer& w, TypeSig const& sig)
             case TypeDefOrRef::TypeDef:
             {
                 auto td = type.TypeDef();
-                w.write("%.%", td.TypeNamespace(), td.TypeName());
+                write_type_name(td.TypeNamespace(), td.TypeName());
                 break;
             }
             case TypeDefOrRef::TypeRef:
             {
                 auto tr = type.TypeRef();
-                w.write("%.%", tr.TypeNamespace(), tr.TypeName());
+                write_type_name(tr.TypeNamespace(), tr.TypeName());
                 break;
             }
             case TypeDefOrRef::TypeSpec:
@@ -395,9 +412,11 @@ void write_comment_typesig(writer& w, TypeSig const& sig)
 
 }
 
-void write_method_signature_comment(writer& w, method_signature const& signature)
+void write_method_signature_comment(writer& w, MethodDef const& method)
 {
-    w.write_indented("# (");
+    method_signature signature{ method };
+
+    w.write_indented("# %(", method.Name());
 
     auto first = true;
     for (auto&& p : signature.params())
@@ -445,12 +464,12 @@ void write_guid(writer& w, TypeDef const& type)
         get<uint8_t>(get<ElemSig>(args[10].value).value));
 }
 
-void write_abi_method_param(writer& w, ParamSig const& sig)
+void write_abi_function_param(writer& w, ParamSig const& sig)
 {
     w.write(", %", sig);
 }
 
-void write_abi_method_return(writer& w, RetTypeSig const& sig)
+void write_abi_function_return(writer& w, RetTypeSig const& sig)
 {
     if (sig)
     {
@@ -458,68 +477,69 @@ void write_abi_method_return(writer& w, RetTypeSig const& sig)
     }
 }
 
-void write_abi_method(writer& w, MethodDef const& method, int32_t offset)
+void write_abi_function(writer& w, MethodDef const& method, int32_t offset)
 {
     w.write_indented("__% = _ct.WINFUNCTYPE(_ct.HRESULT%%)(%, '%')\n",
         method.Name(),
-        bind_each<write_abi_method_param>(method.Signature().Params()),
-        bind<write_abi_method_return>(method.Signature().ReturnType()),
+        bind_each<write_abi_function_param>(method.Signature().Params()),
+        bind<write_abi_function_return>(method.Signature().ReturnType()),
         offset,
         method.Name());
 }
 
-void write_abi_interface(writer& w, TypeDef const& type)
+void write_abi_interface(writer& w, TypeDef const& type, std::string_view iid_name)
 {
-    w.write_indented("__iid_% = %\n", type.TypeName(), bind<write_guid>(type));
+    w.write_indented("% = %\n", iid_name, bind<write_guid>(type));
 
-    // can't use bind_each here because offset needs to be updated for each method
+    // can't use bind_each here because offset needs to be updated for each function
     int32_t offset = 6;
     for (auto&& method : type.MethodList())
     {
-        write_abi_method(w, method, offset++);
+        write_abi_function(w, method, offset++);
     }
     w.write("\n");
 }
 
-
-
-
-
-
-void write_method_decl_param(writer& w, method_signature::param_t const& p)
+void write_method_def_param(writer& w, method_signature::param_t const& p)
 {
     w.write(", ");
     w.write(p.first.Name());
 }
 
-void write_method_decl(writer& w, MethodDef const& method, method_signature const& signature, bool class_method)
+void write_method_def(writer& w, MethodDef const& method, MethodSemantics const& semantics, method_signature const& signature, bool class_method = false)
 {
-    auto const& semantic = get_method_semantic(method);
     auto self_name = class_method ? "cls" : "self";
 
-    if (semantic)
+    if (semantics)
     {
-        if (class_method)
-        {
-            throw_invalid("class method semantics not impl");
-        }
+        auto const& target = semantics.Association();
+        auto const& semantic = semantics.Semantic();
 
-        auto const& target = semantic.Association();
         if (target.type() == HasSemantics::Property)
         {
             auto const& property = target.Property();
-            if (semantic.Semantic().Getter())
+
+            if (semantic.Getter())
             {
-                w.write_indented("^@property\ndef %(%):\n", property.Name(), self_name);
+                w.write_indented("^@%property\ndef %(%%):\n", 
+                    class_method ? "_rt.class" : "",
+                    property.Name(), 
+                    self_name, 
+                    bind_each<write_method_def_param>(signature.params()));
+            }
+            else if (semantic.Setter())
+            {
+                w.write_indented("^@%.setter\ndef %(%%):\n", property.Name(), property.Name(), self_name, bind_each<write_method_def_param>(signature.params()));
             }
             else
             {
-                throw_invalid("property setter not impl");
+                throw_invalid("write_method_def invalid property semantic");
             }
         }
-        else
+
+        if (target.type() == HasSemantics::Event)
         {
-            throw_invalid("event semantics not impl");
+            throw_invalid("write_method_def event semantic not impl");
         }
     }
     else
@@ -529,10 +549,10 @@ void write_method_decl(writer& w, MethodDef const& method, method_signature cons
             w.write_indented("@classmethod\n");
         }
 
-        w.write_indented("def %(%%):\n",
-            method.Name(),
-            self_name,
-            bind_each<write_method_decl_param>(signature.params()));
+        w.write_indented("def %(%%):\n", 
+            method.Name(), 
+            self_name, 
+            bind_each<write_method_def_param>(signature.params()));
     }
 }
 
@@ -540,9 +560,7 @@ void write_method_decl(writer& w, MethodDef const& method, method_signature cons
 
 
 
-
-
-void write_abi_method_invoke_params(writer& w, method_signature const& signature)
+void write_method_invoke_params(writer& w, method_signature const& signature)
 {
     for (auto&& p : signature.params())
     {
@@ -551,14 +569,12 @@ void write_abi_method_invoke_params(writer& w, method_signature const& signature
 
     if (signature.return_signature())
     {
-        w.write(", _ct.byref(_retval)");
+        w.write(", _ct.byref(__retval)");
     }
 }
 
-void write_class_method_param_variable(writer& w, method_signature::param_t const& param)
+void write_method_param_variable(writer& w, method_signature::param_t const& param)
 {
-    //w.write_indented("_% = %(%)\n", param.first.Name(), param.second, param.first.Name());
-
     w.write_indented("_% = ", param.first.Name());
 
     std::visit(overloaded{
@@ -590,13 +606,14 @@ void write_class_method_param_variable(writer& w, method_signature::param_t cons
             case TypeDefOrRef::TypeDef:
             {
                 auto td = type.TypeDef();
-                w.write_indented("%._%__default_interface # TD %.%\n", param.first.Name(), td.TypeName(), td.TypeNamespace(), td.TypeName());
+                w.write_indented("%._%__interface # TD %.%\n", param.first.Name(), td.TypeName(), td.TypeNamespace(), td.TypeName());
                 break;
             }
             case TypeDefOrRef::TypeRef:
             {
                 auto tr = type.TypeRef();
-                w.write_indented("%._%__default_interface # TR %.%\n", param.first.Name(), tr.TypeName(), tr.TypeNamespace(), tr.TypeName());
+                auto td = tr.get_cache().find(tr.TypeNamespace(), tr.TypeName());
+                w.write_indented("%._%__interface # TD from TR %.%\n", param.first.Name(), td.TypeName(), tr.TypeNamespace(), tr.TypeName());
                 break;
             }
             case TypeDefOrRef::TypeSpec:
@@ -609,16 +626,29 @@ void write_class_method_param_variable(writer& w, method_signature::param_t cons
 
 }
 
-void write_class_method_return_variable(writer& w, RetTypeSig const& return_sig)
+void write_method_return_variable(writer& w, RetTypeSig const& return_sig)
 {
     if (return_sig)
     {
-        w.write_indented("_retval = %()\n", return_sig);
+        w.write_indented("__retval = %()\n", return_sig);
     }
 }
 
-void write_class_method_return(writer& w, RetTypeSig const& return_sig)
+void write_method_return(writer& w, RetTypeSig const& return_sig)
 {
+    auto write_typedef_return = [&w](TypeDef const& type)
+    {
+        if (w.type_namespace == type.TypeNamespace())
+        {
+            w.write_indented("return %(__retval)\n", type.TypeName());
+        }
+        else
+        {
+            w.write_indented("from % import % as __%\n", type.TypeNamespace(), type.TypeName(), type.TypeName());
+            w.write_indented("return __%(__retval)\n", type.TypeName());
+        }
+    };
+
     if (return_sig)
     {
         std::visit(overloaded{
@@ -637,10 +667,10 @@ void write_class_method_return(writer& w, RetTypeSig const& return_sig)
                 case ElementType::U8:
                 case ElementType::R4:
                 case ElementType::R8:
-                    w.write_indented("return _retval.value\n");
+                    w.write_indented("return __retval.value\n");
                     break;
                 case ElementType::String:
-                    w.write_indented("return str(_retval)\n");
+                    w.write_indented("return str(__retval)\n");
                     break;
                 default:
                     throw_invalid("element type not impl");
@@ -651,14 +681,14 @@ void write_class_method_return(writer& w, RetTypeSig const& return_sig)
                 {
                 case TypeDefOrRef::TypeDef:
                 {
-                    auto td = type.TypeDef();
-                    w.write_indented("return %(_retval) # TD %.%\n", td.TypeName(), td.TypeNamespace(), td.TypeName());
+                    write_typedef_return(type.TypeDef());
                     break;
                 }
                 case TypeDefOrRef::TypeRef:
                 {
                     auto tr = type.TypeRef();
-                    w.write_indented("return %(_retval) # TR %.%\n", tr.TypeName(), tr.TypeNamespace(), tr.TypeName());
+                    auto td = tr.get_cache().find(tr.TypeNamespace(), tr.TypeName());
+                    write_typedef_return(td);
                     break;
                 }
                 case TypeDefOrRef::TypeSpec:
@@ -673,37 +703,22 @@ void write_class_method_return(writer& w, RetTypeSig const& return_sig)
     w.write("\n");
 }
 
-void write_class_method(writer& w, MethodDef const& method, bool class_method)
+void write_invoke_method_body(writer& w, method_signature const& signature, std::string_view const& function_name, std::string_view const& variable_name)
 {
-    method_signature signature{ method };
-
-    write_method_signature_comment(w, signature);
-    write_method_decl(w, method, signature, class_method);
-    writer::indent_guard g{ w };
-
-    if (class_method)
-    {
-        w.write_indented("_ptr = cls.__get_activation_factory(cls.__iid_%)\n", method.Parent().TypeName());
-    }
-    else
-    {
-        w.write_indented("cls = type(self)\n_ptr = self.__get_instance_interface(cls.__iid_%)\n", method.Parent().TypeName());
-    }
-
     for (auto&& param : signature.params())
     {
-        write_class_method_param_variable(w, param);
+        write_method_param_variable(w, param);
     }
     auto const& return_signature = signature.return_signature();
-
-    write_class_method_return_variable(w, return_signature);
-
-    w.write_indented("cls.__%(_ptr%)\n", method.Name(), bind<write_abi_method_invoke_params>(signature));
-
-    write_class_method_return(w, return_signature);
+    
+    write_method_return_variable(w, return_signature);
+    
+    w.write_indented("%(%%)\n", function_name, variable_name, bind<write_method_invoke_params>(signature));
+    
+    write_method_return(w, return_signature);
 }
 
-void write_class_activatable_attribute(writer& w, TypeDef const& type, CustomAttribute const& attr)
+void write_class_activation(writer& w, CustomAttribute const& attr)
 {
     auto const& sig = attr.Value();
     auto const& args = sig.FixedArgs();
@@ -711,14 +726,33 @@ void write_class_activatable_attribute(writer& w, TypeDef const& type, CustomAtt
 
     if (arg0)
     {
-        auto const& iface = type.get_database().get_cache().find(arg0->name);
+        auto const& iface = attr.get_database().get_cache().find(arg0->name);
+
+        if (!is_exclusive_to(iface))
+        {
+            throw_invalid("non exclusive activation interface not supported");
+        }
 
         w.write_indented("# custom activation %.%\n", iface.TypeNamespace(), iface.TypeName());
-        write_abi_interface(w, iface);
+
+        auto iid_name = w.write_temp("__iid_%", iface.TypeName());
+        write_abi_interface(w, iface, iid_name);
 
         for (auto&& method : iface.MethodList())
         {
-            write_class_method(w, method, true);
+            method_signature signature{ method };
+            write_method_signature_comment(w, method);
+
+            w.write_indented("^@classmethod\ndef %(cls%):\n",
+                method.Name(),
+                bind_each<write_method_def_param>(signature.params()));
+            writer::indent_guard g{ w };
+
+            w.write_indented("with cls.__get_factory(cls.%) as __ptr:\n", iid_name);
+            writer::indent_guard gg{ w };
+
+            auto function_name = w.write_temp("cls.__%", method.Name());
+            write_invoke_method_body(w, signature, function_name, "__ptr");
         }
     }
     else
@@ -727,38 +761,109 @@ void write_class_activatable_attribute(writer& w, TypeDef const& type, CustomAtt
     }
 }
 
-void write_class_static_attribute(writer& w, TypeDef const& type, CustomAttribute const& attr)
+void write_class_static_interface(writer& w, CustomAttribute const& attr)
 {
     auto const& sig = attr.Value();
     auto const& args = sig.FixedArgs();
     auto const& arg0 = std::get<ElemSig::SystemType>(std::get<ElemSig>(args[0].value).value);
-    auto const& iface = type.get_database().get_cache().find(arg0.name);
+    auto const& iface = attr.get_database().get_cache().find(arg0.name);
+
+    if (!is_exclusive_to(iface))
+    {
+        throw_invalid("non exclusive static interface not supported");
+    }
 
     w.write_indented("# static %\n", arg0.name);
 
-    write_abi_interface(w, iface);
+    auto iid_name = w.write_temp("__iid_%", iface.TypeName());
+    write_abi_interface(w, iface, iid_name);
 
     for (auto&& method : iface.MethodList())
     {
-        write_class_method(w, method, true);
+        auto const& semantics = get_method_semantics(iface, method);
+        method_signature signature{ method };
+
+        write_method_signature_comment(w, method);
+
+        write_method_def(w, method, semantics, signature, true);
+        writer::indent_guard g{ w };
+
+        auto function_name = w.write_temp("cls.__%", method.Name());
+
+        w.write_indented("with cls.__get_factory(cls.%) as __ptr:\n", iid_name);
+        writer::indent_guard gg{ w };
+
+        write_invoke_method_body(w, signature, function_name, "__ptr");
     }
 }
 
-void write_class_interface_impl(writer& w, TypeDef const& /*type*/, InterfaceImpl const& iface_impl)
+void write_class_interface(writer& w, InterfaceImpl const& iface_impl)
 {
-    auto default_attribute = get_attribute(iface_impl, "Windows.Foundation.Metadata", "DefaultAttribute");
+    auto is_default_interface = get_attribute(iface_impl, "Windows.Foundation.Metadata", "DefaultAttribute");
 
     auto const& iface = find(iface_impl.Interface().TypeRef());
+    auto is_exclusive_interface = is_exclusive_to(iface);
 
     w.write_indented("# %instance interface %.%\n",
-        default_attribute ? "default " : "",
+        is_default_interface ? "default " : "",
         iface.TypeNamespace(), iface.TypeName());
 
-    write_abi_interface(w, iface);
+    auto iid_name = is_default_interface ? "__iid" : w.write_temp("__iid_%", iface.TypeName());
+
+    if (is_exclusive_interface)
+    {
+        write_abi_interface(w, iface, iid_name);
+    }
 
     for (auto&& method : iface.MethodList())
     {
-        write_class_method(w, method, false);
+        auto const& semantics = get_method_semantics(iface, method);
+        method_signature signature{ method };
+
+        write_method_signature_comment(w, method);
+
+        write_method_def(w, method, semantics, signature);
+        writer::indent_guard g{ w };
+
+        if (is_exclusive_interface)
+        {
+            w.write_indented("__cls = type(self)\n");
+
+            if (is_default_interface)
+            {
+                w.write_indented("with self.__get_interface() as __ptr:\n");
+            }
+            else
+            {
+                w.write_indented("with self.__get_interface(__cls.%) as __ptr:\n", iid_name);
+            }
+           
+            writer::indent_guard gg{ w };
+
+            auto function_name = w.write_temp("__cls.__%", method.Name());
+            write_invoke_method_body(w, signature, function_name, "__ptr");
+        }
+        else
+        {
+            // TODO: DRY this out
+            if (w.type_namespace == iface.TypeNamespace())
+            {
+                w.write_indented("with self.__get_interface(%._iid) as __ptr:\n", iface.TypeName());
+                writer::indent_guard gg{ w };
+
+                w.write_indented("return %._invoke_%(__ptr%)\n", iface.TypeName(), method.Name(),
+                    bind_each<write_method_def_param>(signature.params()));
+            }
+            else
+            {
+                w.write_indented("from % import % as %", iface.TypeNamespace(), iface.TypeName(), iface.TypeName());
+                w.write_indented("with self.__get_interface(__%._iid) as __ptr:\n", iface.TypeName());
+                writer::indent_guard gg{ w };
+
+                w.write_indented("return __%._invoke_%(__ptr%)\n", iface.TypeName(), method.Name(),
+                    bind_each<write_method_def_param>(signature.params()));
+            }
+        }
     }
 }
 
@@ -771,20 +876,12 @@ void write_class(writer& w, TypeDef const& type)
     }
 
     w.write_indented("class %():\n", type.TypeName());
-
     writer::indent_guard g{ w };
 
-    w.write_indented(R"(^@classmethod
-def __get_activation_factory(cls, iid):
-    return _rt.get_activation_factory('%.%', iid)
-
-def __get_instance_interface(self, iid):
-    return _rt.query_interface(self.__default_interface, iid)
-
-def __init__(self, default_interface):
-    self.__default_interface = default_interface
-
-)", type.TypeNamespace(), type.TypeName());
+    w.write_indented(strings::class_get_factory, type.TypeNamespace(), type.TypeName());
+    w.write_indented(strings::class_get_interface);
+    w.write_indented(strings::class_new);
+    w.write_indented(strings::class_init);
 
     for (auto&& attr : type.CustomAttribute())
     {
@@ -793,20 +890,65 @@ def __init__(self, default_interface):
         {
             if (name.second == "StaticAttribute"sv)
             {
-                write_class_static_attribute(w, type, attr);
+                write_class_static_interface(w, attr);
             }
 
             if (name.second == "ActivatableAttribute"sv)
             {
-                write_class_activatable_attribute(w, type, attr);
+                write_class_activation(w, attr);
             }
         }
     }
 
     for (auto&& iface : type.InterfaceImpl())
     {
-        write_class_interface_impl(w, type, iface);
+        write_class_interface(w, iface);
     }
+
+    w.write("\n");
+}
+
+void write_interface(writer& w, TypeDef const& type)
+{
+    if (is_exclusive_to(type))
+    {
+        return;
+    }
+
+    w.write_indented("class %():\n", type.TypeName());
+    writer::indent_guard g{ w };
+
+    w.write_indented(strings::class_new);
+    w.write_indented(strings::class_init);
+
+    write_abi_interface(w, type, "_iid");
+    for (auto&& method : type.MethodList())
+    {
+        method_signature signature{ method };
+        auto const& semantics = get_method_semantics(type, method);
+
+        write_method_signature_comment(w, method);
+
+        {
+            w.write_indented("^@classmethod\ndef _invoke_%(cls, ptr%):\n", 
+                method.Name(), 
+                bind_each<write_method_def_param>(signature.params()));
+            writer::indent_guard gg{ w };
+
+            auto function_name = w.write_temp("cls.__%", method.Name());
+
+            write_invoke_method_body(w, signature, function_name, "ptr");
+        }
+
+        {
+            write_method_def(w, method, semantics, signature);
+            writer::indent_guard gg{ w };
+
+            w.write_indented("return type(self)._invoke_%(self.__interface%)\n\n", method.Name(), bind_each<write_method_def_param>(signature.params()));
+        }
+    }
+
+    w.write("\n");
 }
 
 auto get_in(reader const& args)
@@ -932,16 +1074,19 @@ int main(int const argc, char** argv)
                 create_directories(ns_path);
 
                 writer w;
-                w.debug_trace = true;
+                w.type_namespace = ns.first;
+                //w.debug_trace = true;
 
                 w.write(R"(
 import ctypes as _ct
 import winrt as _rt
+import contextlib as _ctx
 from hstring import HSTRING as _HSTRING
 from guid import GUID as _GUID
 
 )");
-                w.write("%",
+                w.write("%%",
+                    f.bind_each<write_interface>(ns.second.interfaces),
                     f.bind_each<write_class>(ns.second.classes));
 
                 w.flush_to_file((ns_path / "__init__.py").string());
