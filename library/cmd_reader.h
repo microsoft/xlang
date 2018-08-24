@@ -13,7 +13,8 @@ namespace xlang::cmd
 
     struct reader
     {
-        reader(int const argc, char** argv, std::vector<option> const& options)
+        template <typename C, typename V>
+        reader(C const argc, V argv, std::vector<option> const& options)
         {
             if (argc < 2)
             {

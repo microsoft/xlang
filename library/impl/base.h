@@ -30,7 +30,6 @@
 #include <vector>
 #include <experimental/filesystem>
 #include <experimental/coroutine>
-#include "generator.h"
 
 #if defined(_DEBUG)
 #define XLANG_DEBUG

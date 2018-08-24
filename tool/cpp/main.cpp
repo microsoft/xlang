@@ -9,8 +9,13 @@ using namespace xlang;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
 
-template <typename...T> struct overloaded : T... { using T::operator()...; };
-template <typename...T> overloaded(T...)->overloaded<T...>;
+template <typename...T> struct visit_overload : T... { using T::operator()...; };
+
+template <typename V, typename...C>
+void visit(V&& variant, C&&...call)
+{
+    std::visit(visit_overload<C...>{ std::forward<C>(call)... }, std::forward<V>(variant));
+}
 
 template <typename T>
 auto get_impl_name(T const& type)
@@ -45,18 +50,8 @@ struct writer : writer_base<writer>
     bool async_types{};
     std::map<std::string_view, std::set<TypeDef>> depends;
 
-    void add_depends(TypeDef const& type)
-    {
-        XLANG_ASSERT(!type_namespace.empty());
-        auto ns = type.TypeNamespace();
-
-        if (ns != type_namespace)
-        {
-            depends[ns].insert(type);
-        }
-    }
-
-    std::vector<std::pair<GenericParam, GenericParam>> generic_param_stack;
+    // TODO: this may need to be a std::vector or std::variant of GenericParam/TypeSig so that we can later inspect those types if needed
+    std::vector<std::vector<std::string>> generic_param_stack;
 
     struct generic_param_guard
     {
@@ -81,15 +76,46 @@ struct writer : writer_base<writer>
         writer* owner;
     };
 
-    generic_param_guard push_generic_params(std::pair<GenericParam, GenericParam>&& arg)
+    void add_depends(TypeDef const& type)
     {
-        if (!empty(arg))
+        XLANG_ASSERT(!type_namespace.empty());
+        auto ns = type.TypeNamespace();
+
+        if (ns != type_namespace)
         {
-            generic_param_stack.push_back(std::move(arg));
-            return generic_param_guard{ this };
+            depends[ns].insert(type);
+        }
+    }
+
+    auto push_generic_params(std::pair<GenericParam, GenericParam>&& params)
+    {
+        if (empty(params))
+        {
+            return generic_param_guard{ nullptr };
         }
 
-        return generic_param_guard{ nullptr };
+        std::vector<std::string> names;
+
+        for (auto&& param : params)
+        {
+            names.push_back(std::string{ param.Name() });
+        }
+
+        generic_param_stack.push_back(std::move(names));
+        return generic_param_guard{ this };
+    }
+
+    auto push_generic_params(GenericTypeInstSig const& signature)
+    {
+        std::vector<std::string> names;
+
+        for (auto&& arg : signature.GenericArgs())
+        {
+            names.push_back(write_temp("%", arg));
+        }
+
+        generic_param_stack.push_back(std::move(names));
+        return generic_param_guard{ this };
     }
 
     void write_value(bool value)
@@ -225,16 +251,13 @@ struct writer : writer_base<writer>
         }
     }
 
-    //void write_struct_abi(std::string_view const& ns, std::string_view const& name)
-    //{
-    //    write("struct struct_%")
-    //}
-
     void write(TypeDef const& type)
     {
         auto ns = type.TypeNamespace();
         auto name = type.TypeName();
         add_depends(type);
+
+        // TODO: get rid of all these renames once parity with cppwinrt.exe has been reached...
 
         if (abi_types)
         {
@@ -273,6 +296,22 @@ struct writer : writer_base<writer>
             if (name == "EventRegistrationToken" && ns == "Windows.Foundation")
             {
                 write("winrt::event_token");
+            }
+            else if (name == "HResult" && ns == "Windows.Foundation")
+            {
+                write("winrt::hresult");
+            }
+            else if (ns == "Windows.Foundation.Numerics")
+            {
+                if (name == "Matrix3x2") { name = "float3x2"; }
+                else if (name == "Matrix4x4") { name = "float4x4"; }
+                else if (name == "Plane") { name = "plane"; }
+                else if (name == "Quaternion") { name = "quaternion"; }
+                else if (name == "Vector2") { name = "float2"; }
+                else if (name == "Vector3") { name = "float3"; }
+                else if (name == "Vector4") { name = "float4"; }
+
+                write("@::%", ns, name);
             }
             else
             {
@@ -335,8 +374,6 @@ struct writer : writer_base<writer>
 
             if (consume_types)
             {
-                //debug_trace = true;
-
                 static constexpr std::string_view optional("Windows::Foundation::IReference"sv);
                 static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable"sv);
                 static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView"sv);
@@ -408,63 +445,60 @@ struct writer : writer_base<writer>
 
     void write(TypeSig const& signature)
     {
-        std::visit(overloaded
+        visit(signature.Type(),
+            [&](ElementType type)
             {
-                [&](ElementType type)
+                if (type == ElementType::Boolean) { write("bool"); }
+                else if (type == ElementType::Char) { write("char16_t"); }
+                else if (type == ElementType::I1) { write("int8_t"); }
+                else if (type == ElementType::U1) { write("uint8_t"); }
+                else if (type == ElementType::I2) { write("int16_t"); }
+                else if (type == ElementType::U2) { write("uint16_t"); }
+                else if (type == ElementType::I4) { write("int32_t"); }
+                else if (type == ElementType::U4) { write("uint32_t"); }
+                else if (type == ElementType::I8) { write("int64_t"); }
+                else if (type == ElementType::U8) { write("uint64_t"); }
+                else if (type == ElementType::R4) { write("float"); }
+                else if (type == ElementType::R8) { write("double"); }
+                else if (type == ElementType::String)
                 {
-                    if (type == ElementType::Boolean) { write("bool");   }
-                    else if (type == ElementType::Char) { write("char16_t");  }
-                    else if (type == ElementType::I1) { write("int8_t");   }
-                    else if (type == ElementType::U1) { write("uint8_t");  }
-                    else if (type == ElementType::I2) { write("int16_t");  }
-                    else if (type == ElementType::U2) { write("uint16_t"); }
-                    else if (type == ElementType::I4) { write("int32_t");  }
-                    else if (type == ElementType::U4) { write("uint32_t"); }
-                    else if (type == ElementType::I8) { write("int64_t");  }
-                    else if (type == ElementType::U8) { write("uint64_t"); }
-                    else if (type == ElementType::R4) { write("float");    }
-                    else if (type == ElementType::R8) { write("double");   }
-                    else if (type == ElementType::String)
+                    if (abi_types)
                     {
-                        if (abi_types)
-                        {
-                            write("void*");
-                        }
-                        else if (consume_types)
-                        {
-                            write("param::hstring");
-                        }
-                        else
-                        {
-                            write("hstring");
-                        }
+                        write("void*");
                     }
-                    else if (type == ElementType::Object)
+                    else if (consume_types)
                     {
-                        if (abi_types)
-                        {
-                            write("void*");
-                        }
-                        else
-                        {
-                            write("Windows::Foundation::IInspectable");
-                        }
+                        write("param::hstring");
                     }
                     else
                     {
-                        XLANG_ASSERT(false);
+                        write("hstring");
                     }
-                },
-                [&](GenericTypeIndex var)
+                }
+                else if (type == ElementType::Object)
                 {
-                    write("%", begin(generic_param_stack.back())[var.index].Name());
-                },
-                [&](auto&& type)
+                    if (abi_types)
+                    {
+                        write("void*");
+                    }
+                    else
+                    {
+                        write("Windows::Foundation::IInspectable");
+                    }
+                }
+                else
                 {
-                    write(type);
+                    XLANG_ASSERT(false);
                 }
             },
-            signature.Type());
+            [&](GenericTypeIndex var)
+            {
+                write("%", generic_param_stack.back()[var.index]);
+            },
+            [&](auto&& type)
+            {
+                write(type);
+            });
     }
 
     void write(InterfaceImpl const& impl)
@@ -474,21 +508,19 @@ struct writer : writer_base<writer>
 
     void write(FixedArgSig const& arg)
     {
-        std::visit(overloaded{
-            [this](ElemSig::SystemType arg)
-        {
-            write(arg.name);
-        },
-            [this](ElemSig::EnumValue arg)
-        {
-            // TODO: Map the integer value to an enumerator
-            std::visit([this](auto&& value) { write_value(value); }, arg.value);
-        },
-            [this](auto&& arg)
-        {
-            write_value(arg);
-        }
-            }, std::get<ElemSig>(arg.value).value);
+        visit(std::get<ElemSig>(arg.value).value,
+            [&](ElemSig::SystemType arg)
+            {
+                write(arg.name);
+            },
+            [&](ElemSig::EnumValue arg)
+            {
+                visit(arg.value, [&](auto&& value) { write_value(value); });
+            },
+            [&](auto&& arg)
+            {
+                write_value(arg);
+            });
     }
 
     void write(NamedArgSig const& arg)
@@ -607,12 +639,16 @@ struct method_signature
         XLANG_ASSERT(meta::reader::size(m_params) == m_method.Params().size());
     }
 
-    generator<std::pair<Param const&, ParamSig const&>> params() const noexcept
+    std::vector<std::pair<Param, ParamSig const&>> params() const noexcept
     {
+        std::vector<std::pair<Param, ParamSig const&>> result;
+
         for (uint32_t i{}; i != m_method.Params().size(); ++i)
         {
-            co_yield{ m_params.first + i, m_method.Params()[i] };
+            result.emplace_back(m_params.first + i, m_method.Params()[i]);
         }
+
+        return result;
     }
 
     auto const& return_signature() const noexcept
@@ -704,6 +740,11 @@ bool is_add_overload(MethodDef const& method)
     return method.SpecialName() && starts_with(method.Name(), "add_");
 }
 
+bool is_put_overload(MethodDef const& method)
+{
+    return method.SpecialName() && starts_with(method.Name(), "put_");
+}
+
 bool is_noexcept(MethodDef const& method)
 {
     return is_remove_overload(method) || get_attribute(method, "Experimental.Windows.Foundation.Metadata", "NoExceptAttribute");
@@ -741,14 +782,15 @@ void write_enum_field(writer& w, Field const& field)
 
 void write_enum(writer& w, TypeDef const& type)
 {
-    auto fields = type.FieldList();
-
-    w.write(
-R"(
+    auto format = R"(
 enum class % : %
 {%
 };
-)",
+)";
+
+    auto fields = type.FieldList();
+
+    w.write(format,
         type.TypeName(),
         fields.first.Signature().Type(),
         bind_each<write_enum_field>(fields));
@@ -866,6 +908,7 @@ void write_array_size_name(writer& w, Param const& param)
 
 void write_abi_params(writer& w, method_signature const& method_signature)
 {
+    w.abi_types = true;
     separator s{ w };
 
     for (auto&&[param, param_signature] : method_signature.params())
@@ -945,18 +988,15 @@ bool wrap_abi(TypeSig const& signature)
 {
     bool wrap{};
 
-    std::visit(overloaded
+    visit(signature.Type(),
+        [&](ElementType type)
         {
-            [&](ElementType type)
-            {
-                wrap = type == ElementType::String || type == ElementType::Object;
-            },
-            [&](auto&&)
-            {
-                wrap = true;
-            }
+            wrap = type == ElementType::String || type == ElementType::Object;
         },
-        signature.Type());
+        [&](auto&&)
+        {
+            wrap = true;
+        });
 
     return wrap;
 }
@@ -1058,6 +1098,7 @@ void write_abi_args(writer& w, method_signature const& method_signature)
 
 void write_abi_declaration(writer& w, MethodDef const& method)
 {
+    w.param_names = false;
     method_signature signature{ method };
 
     w.write("    virtual int32_t WINRT_CALL %(%) noexcept = 0;\n",
@@ -1067,14 +1108,15 @@ void write_abi_declaration(writer& w, MethodDef const& method)
 
 void write_interface_abi(writer& w, TypeDef const& type)
 {
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-
-    w.write(
-R"(
+    auto format = R"(
 template <> struct abi<@::%>{ struct type : IInspectable
 {
 %};};
-)",
+)";
+
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+
+    w.write(format,
         type.TypeNamespace(),
         type.TypeName(),
         bind_each<write_abi_declaration>(type.MethodList()));
@@ -1099,14 +1141,15 @@ auto get_delegate_method(TypeDef const& type)
 
 void write_delegate_abi(writer& w, TypeDef const& type)
 {
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-
-    w.write(
-R"(
+    auto format = R"(
 template <> struct abi<@::%>{ struct type : IUnknown
 {
 %};};
-)",
+)";
+
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+
+    w.write(format,
         type.TypeNamespace(),
         type.TypeName(),
         bind<write_abi_declaration>(get_delegate_method(type)));
@@ -1145,15 +1188,18 @@ void write_field_abi(writer& w, Field const& field)
 
 void write_struct_abi(writer& w, TypeDef const& type)
 {
-    auto impl_name = get_impl_name(type);
-    
-    w.write(
-R"(
+    w.abi_types = true;
+
+    auto format = R"(
 struct struct_%
 {
 %};
 template <> struct abi<@::%>{ using type = struct_%; };
-)",
+)";
+
+    auto impl_name = get_impl_name(type);
+
+    w.write(format,
         impl_name,
         bind_each<write_field_abi>(type.FieldList()),
         type.TypeNamespace(),
@@ -1222,6 +1268,41 @@ void write_consume_params(writer& w, method_signature const& method_signature)
     }
 }
 
+bool is_async(MethodDef const& method, method_signature const& method_signature)
+{
+    if (is_put_overload(method))
+    {
+        return true;
+    }
+
+    if (!method_signature.return_signature())
+    {
+        return false;
+    }
+
+    bool async{};
+
+    visit(method_signature.return_signature().Type().Type(),
+        [&](GenericTypeInstSig const& type)
+        {
+            auto generic_type = type.GenericType().TypeRef();
+
+            if (generic_type.TypeNamespace() == "Windows.Foundation")
+            {
+                auto type_name = generic_type.TypeName();
+
+                async =
+                    type_name == "IAsyncAction" ||
+                    type_name == "IAsyncOperation`1" ||
+                    type_name == "IAsyncActionWithProgress`1" ||
+                    type_name == "IAsyncOperationWithProgress`2";
+            }
+        },
+        [](auto&&) {});
+
+    return async;
+}
+
 void write_implementation_params(writer& w, method_signature const& method_signature)
 {
     separator s{ w };
@@ -1257,7 +1338,7 @@ void write_implementation_params(writer& w, method_signature const& method_signa
 
                 auto param_type = std::get_if<ElementType>(&param_signature.Type().Type());
 
-                if (param_type && *param_type != ElementType::String && *param_type != ElementType::Object)
+                if (w.async_types || (param_type && *param_type != ElementType::String && *param_type != ElementType::Object))
                 {
                     w.write("%", param_signature.Type());
                 }
@@ -1285,6 +1366,7 @@ void write_implementation_params(writer& w, method_signature const& method_signa
 void write_consume_declaration(writer& w, MethodDef const& method)
 {
     method_signature signature{ method };
+    w.async_types = is_async(method, signature);
     auto method_name = get_name(method);
     auto type = method.Parent();
 
@@ -1296,10 +1378,11 @@ void write_consume_declaration(writer& w, MethodDef const& method)
 
     if (is_add_overload(method))
     {
-        w.write(
-R"(    using %_revoker = impl::event_revoker<%, &impl::abi_t<%>::remove_%>;
+        auto format = R"(    using %_revoker = impl::event_revoker<%, &impl::abi_t<%>::remove_%>;
     %_revoker %(auto_revoke_t, %) const;
-)",
+)";
+
+        w.write(format,
             method_name,
             type,
             type,
@@ -1378,8 +1461,7 @@ void write_consume_definition(writer& w, MethodDef const& method)
 
     if (is_noexcept(method))
     {
-        format =
-R"(
+        format = R"(
 template <typename D> % consume_%<D>::%(%) const noexcept
 {%
     WINRT_VERIFY_(0, WINRT_SHIM(%)->%(%));%
@@ -1388,8 +1470,7 @@ template <typename D> % consume_%<D>::%(%) const noexcept
     }
     else
     {
-        format =
-            R"(
+        format = R"(
 template <typename D> % consume_%<D>::%(%) const
 {%
     check_hresult(WINRT_SHIM(%)->%(%));%
@@ -1410,13 +1491,14 @@ template <typename D> % consume_%<D>::%(%) const
 
     if (is_add_overload(method))
     {
-        w.write(
-R"(
+        format = R"(
 template <typename D> typename consume_%<D>::%_revoker consume_%<D>::%(auto_revoke_t, %) const
 {
     return impl::make_event_revoker<D, %_revoker>(this, %(%));
 }
-)",
+)";
+
+        w.write(format,
             type_impl_name,
             method_name,
             type_impl_name,
@@ -1437,17 +1519,19 @@ void write_consume_definitions(writer& w, TypeDef const& type)
 
 void write_consume(writer& w, TypeDef const& type)
 {
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-    auto impl_name = get_impl_name(type);
-
-    w.write(
-R"(
+    auto format = R"(
 template <typename D>
 struct consume_%
 {
 %%};
 template <> struct consume<%> { template <typename D> using type = consume_%<D>; };
-)",
+)";
+
+    w.abi_types = false;
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+    auto impl_name = get_impl_name(type);
+
+    w.write(format,
         impl_name,
         bind_each<write_consume_declaration>(type.MethodList()),
         "", // extensions?
@@ -1457,21 +1541,19 @@ template <> struct consume<%> { template <typename D> using type = consume_%<D>;
 
 void write_produce_params(writer& w, method_signature const& signature)
 {
-    w.abi_types = true;
     w.param_names = true;
     write_abi_params(w, signature);
-    w.abi_types = false;
-    w.param_names = false;
 }
 
 void write_produce_cleanup_param(writer& w, TypeSig const& signature, std::string_view const& param_name)
 {
     if (signature.is_szarray())
     {
-        w.write(
-            R"(
+        auto format = R"(
             *__%Size = 0;
-            *% = nullptr;)",
+            *% = nullptr;)";
+
+        w.write(format,
             param_name,
             param_name);
 
@@ -1480,40 +1562,38 @@ void write_produce_cleanup_param(writer& w, TypeSig const& signature, std::strin
 
     bool clear{};
 
-    std::visit(overloaded
+    visit(signature.Type(),
+        [&](ElementType type)
         {
-            [&](ElementType type)
+            clear = type == ElementType::String || type == ElementType::Object;
+        },
+        [&](coded_index<TypeDefOrRef> const& index)
+        {
+            XLANG_ASSERT(index.type() == TypeDefOrRef::TypeDef || index.type() == TypeDefOrRef::TypeRef);
+
+            TypeDef type;
+
+            if (index.type() == TypeDefOrRef::TypeDef)
             {
-                clear = type == ElementType::String || type == ElementType::Object;
-            },
-            [&](coded_index<TypeDefOrRef> const& index)
+                type = index.TypeDef();
+            }
+            else if (index.type() == TypeDefOrRef::TypeRef)
             {
-                XLANG_ASSERT(index.type() == TypeDefOrRef::TypeDef || index.type() == TypeDefOrRef::TypeRef);
+                type = find(index.TypeRef());
+            }
 
-                TypeDef type;
-
-                if (index.type() == TypeDefOrRef::TypeDef)
-                {
-                    type = index.TypeDef();
-                }
-                else if (index.type() == TypeDefOrRef::TypeRef)
-                {
-                    type = find(index.TypeRef());
-                }
-
-                if (type)
-                {
-                    auto category = get_category(type);
-
-                    clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
-                }
-            },
-            [&](auto&&)
+            if (type)
             {
-                clear = true;
+                auto category = get_category(type);
+
+                clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
             }
         },
-        signature.Type());
+        [&](GenericTypeInstSig const&)
+        {
+            clear = true;
+        },
+        [](auto&&) {});
 
     if (clear)
     {
@@ -1555,6 +1635,9 @@ void write_produce_assert_params(writer& w, method_signature const& method_signa
 
 void write_produce_assert(writer& w, MethodDef const& method, method_signature const& signature)
 {
+    w.abi_types = false;
+    w.param_names = false;
+
     w.write("WINRT_ASSERT_DECLARATION(%, WINRT_WRAP(%)%);",
         get_name(method),
         signature.return_signature(),
@@ -1672,6 +1755,8 @@ void write_produce_upcall(writer& w, MethodDef const& method, method_signature c
 
 void write_delegate_upcall(writer& w, method_signature const& method_signature)
 {
+    w.abi_types = false;
+
     if (method_signature.return_signature())
     {
         auto name = method_signature.return_param_name();
@@ -1705,12 +1790,17 @@ void write_produce_optional_results(writer&, method_signature const&)
 
 void write_produce_method(writer& w, MethodDef const& method)
 {
+    bool stop = false;
+    if (method.Name() == "Create" && method.Parent().TypeName() == "IDeferralFactory")
+    {
+        stop = true;
+    }
+
     std::string_view format;
 
     if (is_noexcept(method))
     {
-        format =
-R"(
+        format = R"(
     int32_t WINRT_CALL %(%) noexcept final
     {%
         typename D::abi_guard guard(this->shim());%
@@ -1722,8 +1812,7 @@ R"(
     }
     else
     {
-        format =
-R"(
+        format = R"(
     int32_t WINRT_CALL %(%) noexcept final
     {
         try
@@ -1739,6 +1828,7 @@ R"(
     }
 
     method_signature signature{ method };
+    w.async_types = is_async(method, signature);
 
     w.write(format,
         get_abi_name(method),
@@ -1752,69 +1842,112 @@ R"(
 
 void write_produce(writer& w, TypeDef const& type)
 {
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-
-    w.write(
-R"(
+    auto format = R"(
 template <typename D>
 struct produce<D, %> : produce_base<D, %>
 {%};
-)",
+)";
+
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+
+    w.write(format,
         type,
         type,
         bind_each<write_produce_method>(type.MethodList()));
 }
 
-void append_requires(writer& w, std::set<std::string>& names, std::pair<InterfaceImpl, InterfaceImpl> const& requires)
+void write_dispatch_overridable(writer&, TypeDef const&)
 {
-    for (auto&& type : requires)
+    // for each of the class's direct overridable interfaces call write_interface_dispatch_overridable
+}
+
+void write_interface_override_methods(writer&, TypeDef const&)
+{
+    // for each of the class's direct overridable interfaces call write_interface_override_method_definitions
+}
+
+void write_class_override(writer&, TypeDef const&)
+{
+    // If the class has no composable constructors then return doing nothing
+
+    // write the class override e.g. TypeT
+}
+
+void insert_interface_names(writer& w, std::set<std::string>& names, InterfaceImpl const& impl, bool skip_default = false);
+
+void insert_interface_names(writer& w, std::set<std::string>& names, std::pair<InterfaceImpl, InterfaceImpl> const& interfaces, bool skip_default = false)
+{
+    for (auto&& impl : interfaces)
     {
-        auto base = type.Interface();
-        names.insert(w.write_temp("%", base));
-
-        switch (base.type())
-        {
-        case TypeDefOrRef::TypeDef:
-        {
-            append_requires(w, names, base.TypeDef().InterfaceImpl());
-            break;
-        }
-        case TypeDefOrRef::TypeRef:
-        {
-            auto definition = find(base.TypeRef());
-
-            if (!definition)
-            {
-                throw_invalid("Required interface '", base.TypeRef().TypeNamespace(), ".", base.TypeRef().TypeName(), "' could not be resolved");
-            }
-
-            w.add_depends(definition);
-            append_requires(w, names, definition.InterfaceImpl());
-            break;
-        }
-        case TypeDefOrRef::TypeSpec:
-        {
-            //auto signature = base.TypeSpec().Signature().GenericTypeInst();
-            //XLANG_ASSERT(signature.GenericType().type() == TypeDefOrRef::TypeRef);
-            //auto definition = find(signature.GenericType().TypeRef());
-            //append_requires(w, names, definition.InterfaceImpl());
-            break;
-        }
-        }
+        insert_interface_names(w, names, impl, skip_default);
     }
 }
 
-void write_interface_requires(writer& w, TypeDef const& type)
+void insert_interface_names(writer& w, std::set<std::string>& names, InterfaceImpl const& impl, bool skip_default)
 {
-    auto interfaces = type.InterfaceImpl();
-
-    if (empty(interfaces))
+    if (skip_default && get_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
     {
         return;
     }
 
+    auto base = impl.Interface();
+    names.insert(w.write_temp("%", base));
+
+    switch (base.type())
+    {
+    case TypeDefOrRef::TypeDef:
+    {
+        insert_interface_names(w, names, base.TypeDef().InterfaceImpl());
+        break;
+    }
+    case TypeDefOrRef::TypeRef:
+    {
+        auto definition = find(base.TypeRef());
+
+        if (!definition)
+        {
+            throw_invalid("Required interface '", base.TypeRef().TypeNamespace(), ".", base.TypeRef().TypeName(), "' could not be resolved");
+        }
+
+        w.add_depends(definition);
+        insert_interface_names(w, names, definition.InterfaceImpl());
+        break;
+    }
+    case TypeDefOrRef::TypeSpec:
+    {
+        auto guard{ w.push_generic_params(base.TypeSpec().Signature().GenericTypeInst()) };
+
+        auto signature = base.TypeSpec().Signature().GenericTypeInst();
+        XLANG_ASSERT(signature.GenericType().type() == TypeDefOrRef::TypeRef);
+        auto definition = find(signature.GenericType().TypeRef());
+        insert_interface_names(w, names, definition.InterfaceImpl());
+        break;
+    }
+    }
+}
+
+std::set<std::string> get_interface_names(writer& w, TypeDef const& type, bool skip_default = false)
+{
     std::set<std::string> names;
-    append_requires(w, names, interfaces);
+    insert_interface_names(w, names, type.InterfaceImpl(), skip_default);
+    return names;
+}
+
+std::set<std::string> get_interface_names(writer& w, InterfaceImpl const& impl)
+{
+    std::set<std::string> names;
+    insert_interface_names(w, names, impl);
+    return names;
+}
+
+void write_interface_requires(writer& w, TypeDef const& type)
+{
+    auto names = get_interface_names(w, type);
+
+    if (names.empty())
+    {
+        return;
+    }
 
     w.write(",\n    impl::require<%", type.TypeName());
 
@@ -1828,19 +1961,20 @@ void write_interface_requires(writer& w, TypeDef const& type)
 
 void write_interface(writer& w, TypeDef const& type)
 {
-    auto type_name = type.TypeName();
-
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-
-    w.write(
-R"(
+    auto format = R"(
 struct WINRT_EBO % :
     Windows::Foundation::IInspectable,
     impl::consume_t<%>%
 {
     %(std::nullptr_t = nullptr) noexcept {}
 %};
-)",
+)";
+
+    auto type_name = type.TypeName();
+
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+
+    w.write(format,
         type_name,
         type_name,
         bind<write_interface_requires>(type),
@@ -1850,12 +1984,7 @@ struct WINRT_EBO % :
 
 void write_delegate(writer& w, TypeDef const& type)
 {
-    auto type_name = type.TypeName();
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-    method_signature signature{ get_delegate_method(type) };
-
-    w.write(
-R"(
+    auto format = R"(
 struct % : Windows::Foundation::IUnknown
 {
     %(std::nullptr_t = nullptr) noexcept {}
@@ -1866,7 +1995,13 @@ struct % : Windows::Foundation::IUnknown
     template <typename O, typename M> %(weak_ref<O>&& object, M method);
     % operator()(%) const;
 };
-)",
+)";
+
+    auto type_name = type.TypeName();
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+    method_signature signature{ get_delegate_method(type) };
+
+    w.write(format,
         type_name,
         type_name,
         type_name,
@@ -1880,13 +2015,7 @@ struct % : Windows::Foundation::IUnknown
 
 void write_delegate_implementation(writer& w, TypeDef const& type)
 {
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-    auto type_name = type.TypeName();
-    auto type_namespace = type.TypeNamespace();
-    method_signature signature{ get_delegate_method(type) };
-
-    w.write(
-R"(
+    auto format = R"(
 template <> struct delegate<@::%>
 {
     template <typename H>
@@ -1908,7 +2037,15 @@ template <> struct delegate<@::%>
         }
     };
 };
-)",
+)";
+
+    w.param_names = true;
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+    auto type_name = type.TypeName();
+    auto type_namespace = type.TypeNamespace();
+    method_signature signature{ get_delegate_method(type) };
+
+    w.write(format,
         type_namespace, type_name,
         type_namespace, type_name,
         type_namespace, type_name,
@@ -1919,12 +2056,7 @@ template <> struct delegate<@::%>
 
 void write_delegate_definition(writer& w, TypeDef const& type)
 {
-    auto type_name = type.TypeName();
-    auto guard{ w.push_generic_params(type.GenericParam()) };
-    method_signature signature{ get_delegate_method(type) };
-
-    w.write(
- R"(
+    auto format = R"(
 template <typename L> %::%(L handler) :
     %(impl::make_delegate<%>(std::forward<L>(handler)))
 {}
@@ -1949,7 +2081,13 @@ inline % %::operator()(%) const
 {%
     check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
 }
-)",
+)";
+
+    auto type_name = type.TypeName();
+    auto guard{ w.push_generic_params(type.GenericParam()) };
+    method_signature signature{ get_delegate_method(type) };
+
+    w.write(format,
         type_name,
         type_name,
         type_name,
@@ -2002,6 +2140,22 @@ void write_struct_equality(writer& w, std::vector<std::pair<std::string_view, st
 
 void write_structs(writer& w, std::vector<TypeDef> const& types)
 {
+    auto format = R"(
+struct %
+{
+%};
+
+inline bool operator==(% const& left, % const& right)%
+{
+    return%;
+}
+
+inline bool operator!=(% const& left, % const& right)%
+{
+    return !(left == right);
+}
+)";
+
     if (types.empty())
     {
         return;
@@ -2067,22 +2221,7 @@ void write_structs(writer& w, std::vector<TypeDef> const& types)
         auto name = type.type.TypeName();
         std::string_view is_noexcept = type.is_noexcept ? " noexcept" : "";
 
-        w.write(
-R"(
-struct %
-{
-%};
-
-inline bool operator==(% const& left, % const& right)%
-{
-    return%;
-}
-
-inline bool operator!=(% const& left, % const& right)%
-{
-    return !(left == right);
-}
-)",
+        w.write(format,
             name,
             bind_each<write_struct_field>(type.fields),
             name,
@@ -2100,9 +2239,33 @@ void write_class_base(writer&, TypeDef const&)
 
 }
 
-void write_class_requires(writer&, TypeDef const&)
+void write_class_requires(writer& w, TypeDef const& type)
 {
+    auto names = get_interface_names(w, type, true);
 
+    if (names.empty())
+    {
+        return;
+    }
+
+    for (auto&& remove : get_interface_names(w, get_default_interface(type)))
+    {
+        names.erase(remove);
+    }
+
+    if (names.empty())
+    {
+        return;
+    }
+
+    w.write(",\n    impl::require<%", type.TypeName());
+
+    for (auto&& name : names)
+    {
+        w.write(", %", name);
+    }
+
+    w.write('>');
 }
 
 TypeDef get_system_type(CustomAttribute const& attribute)
@@ -2209,11 +2372,13 @@ void write_constructor_definitions(writer& w, TypeDef const& type)
     {
         if (!factory)
         {
-            w.write(R"(
+            auto format = R"(
 inline %::%() :
     %(impl::call_factory<%>([](auto&& f) { return f.template ActivateInstance<%>(); }))
 {}
-)",
+)";
+
+            w.write(format,
                 type_name,
                 type_name,
                 type_name,
@@ -2240,10 +2405,11 @@ void write_static_declaration(writer& w, MethodDef const& method)
 
     if (is_add_overload(method))
     {
-        w.write(
-R"(    using %_revoker = impl::factory_event_revoker<%, &impl::abi_t<%>::remove_%>;
+        auto format = R"(    using %_revoker = impl::factory_event_revoker<%, &impl::abi_t<%>::remove_%>;
     static %_revoker %(auto_revoke_t, %);
-)",
+)";
+
+        w.write(format,
             method_name,
             type,
             type,
@@ -2295,6 +2461,14 @@ void write_static_definitions(writer& w, TypeDef const& type)
     }
 }
 
+void write_class_definitions(writer& w, TypeDef const& type)
+{
+    // This function is only needed to produce consistent output with cppwinrt - remove once we have parity and stabilize.
+
+    write_constructor_definitions(w, type);
+    write_static_definitions(w, type);
+}
+
 void write_class_usings(writer&, TypeDef const&)
 {
 
@@ -2307,14 +2481,15 @@ void write_class(writer& w, TypeDef const& type)
 
     if (auto default_interface = get_default_interface(type))
     {
-        w.write(
-R"(
+        auto format = R"(
 struct WINRT_EBO % :
     %%%
 {
     %(std::nullptr_t) noexcept {}
 %%%};
-)",
+)";
+
+        w.write(format,
             type_name,
             default_interface,
             bind<write_class_base>(type),
@@ -2326,17 +2501,25 @@ struct WINRT_EBO % :
     }
     else
     {
-        w.write(
-            R"(
+        auto format = R"(
 struct %
 {
     %() = delete;
 %};
-)",
+)";
+
+        w.write(format,
             type_name,
             type_name,
             bind<write_static_declarations>(type));
     }
+}
+
+void write_std_hash(writer& w, TypeDef const& type)
+{
+    w.write("template<> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
+        type,
+        type);
 }
 
 auto get_output(cmd::reader const& args)
@@ -2481,14 +2664,12 @@ int main(int const argc, char** argv)
 
                     write_type_namespace(w, ns.first);
                     w.write_each<write_enum>(ns.second.enums);
-                    w.write("\n");
                     w.write_each<write_forward>(ns.second.interfaces);
                     w.write_each<write_forward>(ns.second.classes);
                     w.write_each<write_forward>(ns.second.structs);
                     w.write_each<write_forward>(ns.second.delegates);
                     write_close_namespace(w);
                     write_impl_namespace(w);
-                    w.write("\n");
                     w.write_each<write_enum_flag>(ns.second.enums);
                     w.write_each<write_category>(ns.second.interfaces, "interface_category");
                     w.write_each<write_category>(ns.second.classes, "class_category");
@@ -2506,18 +2687,12 @@ int main(int const argc, char** argv)
                     w.write_each<write_guid>(ns.second.delegates);
                     w.write_each<write_default_interface>(ns.second.classes);
 
-                    w.abi_types = true;
                     w.write_each<write_interface_abi>(ns.second.interfaces);
                     w.write_each<write_delegate_abi>(ns.second.delegates);
-                    w.abi_types = false;
 
                     w.write_each<write_consume>(ns.second.interfaces);
 
-                    // TODO: Move to the abi_types group above after validation against cppwinrt.exe
-                    w.abi_types = true;
                     w.write_each<write_struct_abi>(ns.second.structs);
-                    w.abi_types = false;
-
                     write_close_namespace(w);
 
                     w.swap();
@@ -2528,7 +2703,6 @@ int main(int const argc, char** argv)
                     for (auto&& depends : w.depends)
                     {
                         write_type_namespace(w, depends.first);
-                        w.write("\n");
                         w.write_each<write_forward>(depends.second);
                         write_close_namespace(w);
                     }
@@ -2567,7 +2741,7 @@ int main(int const argc, char** argv)
                     w.write_each<write_delegate>(ns.second.delegates);
                     write_structs(w, ns.second.structs);
                     w.write_each<write_class>(ns.second.classes);
-                    // write interface overrides
+                    // write_interface_overrides
                     write_close_namespace(w);
 
                     w.swap();
@@ -2580,7 +2754,6 @@ int main(int const argc, char** argv)
                     }
 
                     w.write_depends(w.type_namespace, '1');
-
                     w.save_header('2');
                 }
                 {
@@ -2593,13 +2766,26 @@ int main(int const argc, char** argv)
                     w.write_each<write_consume_definitions>(ns.second.interfaces);
                     w.write_each<write_delegate_implementation>(ns.second.delegates);
                     w.write_each<write_produce>(ns.second.interfaces);
+                    w.write_each<write_dispatch_overridable>(ns.second.classes);
                     write_close_namespace(w);
 
                     write_type_namespace(w, ns.first);
-                    w.write_each<write_constructor_definitions>(ns.second.classes);
-                    // write composable constructors
-                    w.write_each<write_static_definitions>(ns.second.classes);
+                    w.write_each<write_class_definitions>(ns.second.classes);
                     w.write_each<write_delegate_definition>(ns.second.delegates);
+                    w.write_each<write_interface_override_methods>(ns.second.classes);
+                    w.write_each<write_class_override>(ns.second.classes);
+                    write_close_namespace(w);
+
+                    // write_namespace_special
+
+                    //if (settings::component)
+                    //{
+                    //    write_reflections(out, namespace_types);
+                    //}
+
+                    write_std_namespace(w);
+                    w.write_each<write_std_hash>(ns.second.interfaces);
+                    w.write_each<write_std_hash>(ns.second.classes);
                     write_close_namespace(w);
 
                     w.swap();
