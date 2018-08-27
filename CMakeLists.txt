@@ -67,6 +67,7 @@ if (WIN32)
     
     add_compile_options(/await)
     add_compile_options(/permissive-)
+    string(APPEND CMAKE_CXX_FLAGS_DEBUG " /JMC")
 
     # Explicitly configure _DEBUG preprocessor macro 
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " /D_DEBUG")
