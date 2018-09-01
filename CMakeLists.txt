@@ -51,11 +51,10 @@ endfunction()
 add_custom_target(scorch 
     COMMAND ${CMAKE_COMMAND} \"-Dfolder=${CMAKE_CURRENT_BINARY_DIR}\" -P \"${XLANG_SCRIPTS_PATH}/scorch.cmake\")
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
-if (WIN32)
-    add_compile_options(/std:c++17)
-
+if (MSVC)
     # change the warning level to 4
     string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
@@ -63,6 +62,10 @@ if (WIN32)
     string(REPLACE "/MDd" "/MTd" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
     foreach(build_type RELEASE MINSIZEREL RELWITHDEBINFO)
         string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_${build_type} "${CMAKE_CXX_FLAGS_${build_type}}")
+        string(APPEND CMAKE_CXX_FLAGS_${build_type} " /GL")
+
+        string(REPLACE "/INCREMENTAL" "" CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${build_type}}")
+        string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
     endforeach()
     
     add_compile_options(/await)
@@ -72,7 +75,6 @@ if (WIN32)
     # Explicitly configure _DEBUG preprocessor macro 
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " /D_DEBUG")
 else()
-    add_compile_options(-std=c++17)
     add_compile_options(-stdlib=libc++)
     add_compile_options(-fcoroutines-ts)
 
