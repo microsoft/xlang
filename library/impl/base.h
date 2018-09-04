@@ -69,4 +69,12 @@ namespace xlang
     {
         return 0 == value.compare(0, match.size(), match);
     }
+
+    template <typename...T> struct visit_overload : T... { using T::operator()...; };
+
+    template <typename V, typename...C>
+    void visit(V&& variant, C&&...call)
+    {
+        std::visit(visit_overload<C...>{ std::forward<C>(call)... }, std::forward<V>(variant));
+    }
 }

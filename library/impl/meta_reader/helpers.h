@@ -18,6 +18,18 @@ namespace xlang::meta::reader
         return type.get_database().get_cache().find(type.TypeNamespace(), type.TypeName());
     }
 
+    inline auto find_required(TypeRef const& type)
+    {
+        auto definition = find(type);
+
+        if (!definition)
+        {
+            throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' could not be found");
+        }
+
+        return definition;
+    }
+
     inline bool is_const(ParamSig const& param)
     {
         auto is_type_const = [](auto&& type)
