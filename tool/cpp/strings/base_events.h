@@ -16,23 +16,13 @@ WINRT_EXPORT namespace winrt
         return left.value == right.value;
     }
 
-    inline auto get_abi(event_token const& token) noexcept
-    {
-        return token.value;
-    }
-
-    inline auto put_abi(event_token& token) noexcept
-    {
-        return &token.value;
-    }
-
     struct auto_revoke_t {};
     inline constexpr auto_revoke_t auto_revoke{};
 
     template <typename I>
     struct event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(int64_t);
+        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
 
         event_revoker() noexcept = default;
         event_revoker(event_revoker const&) = delete;
@@ -87,7 +77,7 @@ WINRT_EXPORT namespace winrt
     template <typename I>
     struct factory_event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(int64_t);
+        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
 
         factory_event_revoker() noexcept = default;
         factory_event_revoker(factory_event_revoker const&) = delete;
@@ -142,12 +132,7 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-    template <> struct abi<event_token>
-    {
-        using type = int64_t;
-    };
-
-    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(int64_t)>
+    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(winrt::event_token)>
     struct event_revoker
     {
         event_revoker() noexcept = default;
@@ -208,7 +193,7 @@ namespace winrt::impl
         event_token m_token{};
     };
 
-    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(int64_t)>
+    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(winrt::event_token)>
     struct factory_event_revoker
     {
         factory_event_revoker() noexcept = default;

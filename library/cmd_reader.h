@@ -23,7 +23,7 @@ namespace xlang::cmd
 
             auto last{ options.end() };
 
-            for (int i = 1; i < argc; ++i)
+            for (C i = 1; i < argc; ++i)
             {
                 std::string_view arg{ argv[i] };
 
