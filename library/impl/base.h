@@ -28,6 +28,7 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include <set>
 #include <experimental/filesystem>
 #include <experimental/coroutine>
 

@@ -6,16 +6,19 @@ namespace xlang::meta::reader
         filter(filter const&) = delete;
         filter& operator=(filter const&) = delete;
 
-        filter(std::vector<std::string> const& includes, std::vector<std::string> const& excludes)
+        template <typename T>
+        filter(T const& includes, T const& excludes)
         {
             for (auto&& include : includes)
             {
                 m_rules.push_back({ include, true });
             }
+
             for (auto&& exclude : excludes)
             {
                 m_rules.push_back({ exclude, false });
             }
+
             std::sort(m_rules.begin(), m_rules.end(), [](auto const& lhs, auto const& rhs)
             {
                 return lhs.first.size() > rhs.first.size();
@@ -58,6 +61,11 @@ namespace xlang::meta::reader
                     }
                 }
             };
+        }
+
+        bool empty() const noexcept
+        {
+            return m_rules.empty();
         }
 
     private:

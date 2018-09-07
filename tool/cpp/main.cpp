@@ -7,42 +7,114 @@
 #include "code_writers.h"
 #include "file_writers.h"
 
-namespace xlang::settings
-{
-    std::string output_folder;
-    std::string component_folder;
-    std::string root_folder{ "winrt" };
-    std::string root_namespace{ "winrt" };
-    std::string pch{ "pch.h" };
-}
-
 namespace xlang
 {
-    using namespace std::chrono;
+    settings_type settings;
 
-    void print_usage()
+    struct usage_exception {};
+
+    void process_args(int const argc, char** argv)
     {
-        puts("Usage...");
+        std::vector<cmd::option> options
+        {
+            { "input", 1 },
+            { "reference", 0 },
+            { "output", 0, 1 },
+            { "component", 0, 1 },
+            { "filter", 0 },
+            { "name", 0, 1 },
+            { "verbose", 0, 0 },
+            { "overwrite", 0, 0 },
+            { "prefix", 0, 0 },
+            { "license", 0, 0 },
+            { "pch", 0, 1 },
+            { "include", 0 },
+            { "exclude", 0 },
+            { "root", 0, 1 },
+            { "base", 0, 0 }
+        };
+
+        cmd::reader args{ argc, argv, options };
+
+        if (!args)
+        {
+            throw usage_exception{};
+        }
+
+        settings.verbose = args.exists("verbose");
+        settings.root = args.value("root", "winrt");
+        settings.input = args.files("input");
+        settings.reference = args.files("reference");
+        settings.component = args.exists("component");
+        settings.base = args.exists("base");
+
+        auto output_folder = absolute(args.value("output"));
+        create_directories(output_folder / settings.root / "impl");
+        output_folder += '/';
+        settings.output_folder = output_folder.string();
+
+        for (auto && include : args.values("include"))
+        {
+            settings.include.insert(include);
+        }
+
+        for (auto && include : args.values("filter"))
+        {
+            settings.include.insert(include);
+        }
+
+        for (auto && exclude : args.values("exclude"))
+        {
+            settings.exclude.insert(exclude);
+        }
+
+        if (settings.component)
+        {
+            settings.component_name = args.value("name");
+            settings.component_pch = args.value("pch");
+            auto component = args.value("component");
+
+            if (!component.empty())
+            {
+                auto component_folder = absolute(component);
+                create_directories(component_folder);
+                component_folder += '/';
+                settings.component_folder = component_folder.string();
+            }
+        }
     }
 
-    void prepare_usage(cmd::reader const& args)
+    auto get_files_to_cache()
     {
-        settings::root_folder = args.value("root_folder", "winrt");
-        settings::root_namespace = args.value("root_namespace", "winrt");
+        std::vector<std::string> files;
+        files.insert(files.end(), settings.input.begin(), settings.input.end());
+        files.insert(files.end(), settings.reference.begin(), settings.reference.end());
+        return files;
+    }
 
-        auto path{ absolute(args.value("output")) };
-        create_directories(path / settings::root_folder / "impl");
-        path += path::preferred_separator;
-        settings::output_folder = path.string();
-
-        auto component = args.value("component");
-
-        if (!component.empty())
+    void supplement_includes(cache const& c)
+    {
+        if (settings.reference.empty() || !settings.include.empty())
         {
-            path = absolute(component);
-            create_directories(path);
-            path += path::preferred_separator;
-            settings::component_folder = path.string();
+            return;
+        }
+
+        for (auto file : settings.input)
+        {
+            auto db = std::find_if(c.databases().begin(), c.databases().end(), [&](auto&& db)
+            {
+                return db.path() == file;
+            });
+
+            for (auto&& type : db->TypeDef)
+            {
+                if (!type.Flags().WindowsRuntime())
+                {
+                    continue;
+                }
+
+                settings.include.insert(std::string{ type.TypeNamespace() });
+            }
         }
     }
 
@@ -53,42 +125,25 @@ namespace xlang
         try
         {
             auto start = get_start_time();
-
-            std::vector<cmd::option> options
-            {
-                // name, min, max
-                { "input", 1 },
-                { "output", 0, 1 },
-                { "include", 0 },
-                { "exclude", 0 },
-                { "verbose", 0, 0 },
-                { "component", 0, 1 },
-            };
-
-            cmd::reader args{ argc, argv, options };
-
-            if (!args)
-            {
-                print_usage();
-                return;
-            }
-
-            prepare_usage(args);
-
-            cache c{ args.values("input") };
+            process_args(argc, argv);
+            cache c{ get_files_to_cache() };
             c.remove_legacy_cppwinrt_foundation_types();
+            supplement_includes(c);
+            filter f{ settings.include, settings.exclude };
 
-            bool const verbose = args.exists("verbose");
-            filter f(args.values("include"), args.values("exclude"));
-
-            if (verbose)
+            if (settings.verbose)
             {
-                for (auto&& db : c.databases())
+                for (auto&& file : settings.input)
                 {
-                    w.write("input: %\n", db.path());
+                    w.write("input: %\n", file);
                 }
 
-                w.write("output: %\n", settings::output_folder);
+                for (auto&& file : settings.reference)
+                {
+                    w.write("reference: %\n", file);
+                }
+
+                w.write("output: %\n", settings.output_folder);
             }
 
             w.flush_to_console();
@@ -112,10 +167,12 @@ namespace xlang
 
             group.add([&]
             {
-                // TODO: if ? don't write base.h
-                write_base_h();
+                if (f.empty() || settings.base)
+                {
+                    write_base_h();
+                }
 
-                if (args.exists("component"))
+                if (settings.component)
                 {
                     std::vector<TypeDef> classes;
 
@@ -130,23 +187,30 @@ namespace xlang
                         }
                     }
 
-                    write_component_g_cpp(classes);
-
-                    for (auto&& type : classes)
+                    if (!classes.empty())
                     {
-                        write_component_g_h(type);
-                        write_component_h(type);
-                        write_component_cpp(type);
+                        write_component_g_cpp(classes);
+
+                        for (auto&& type : classes)
+                        {
+                            write_component_g_h(type);
+                            write_component_h(type);
+                            write_component_cpp(type);
+                        }
                     }
                 }
             });
 
             group.get();
 
-            if (verbose)
+            if (settings.verbose)
             {
                 w.write("time: %ms\n", get_elapsed_time(start));
             }
+        }
+        catch (usage_exception const&)
+        {
+            w.write("Usage...");
         }
         catch (std::exception const& e)
         {

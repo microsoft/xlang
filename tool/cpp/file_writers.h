@@ -63,7 +63,7 @@ namespace xlang
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
-        w.flush_to_file(settings::output_folder + settings::root_folder + "/base.h");
+        w.flush_to_file(settings.output_folder + settings.root + "/base.h");
     }
 
     inline void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)
@@ -186,7 +186,7 @@ namespace xlang
         w.write_each<write_class_override>(members.classes);
         write_close_namespace(w);
 
-        //if (settings::component)
+        //if (settings.component)
         //{
         //    write_reflections(out, namespace_types);
         //}
@@ -213,24 +213,25 @@ namespace xlang
     inline void write_component_g_cpp(std::vector<TypeDef> const& classes)
     {
         writer w;
-        w.flush_to_file(settings::output_folder + "module.g.cpp");
-
+        write_component_g_cpp(w, classes);
+        w.flush_to_file(settings.output_folder + "module.g.cpp");
     }
 
     inline void write_component_g_h(TypeDef const& type)
     {
         writer w;
-        w.flush_to_file(settings::output_folder + get_component_filename(type) + ".g.h");
+        write_component_g_h(w, type);
+        w.flush_to_file(settings.output_folder + get_component_filename(type) + ".g.h");
     }
 
     inline void write_component_h(TypeDef const& type)
     {
-        if (settings::component_folder.empty())
+        if (settings.component_folder.empty())
         {
             return;
         }
 
-        auto path = settings::component_folder + get_component_filename(type) + ".h";
+        auto path = settings.component_folder + get_component_filename(type) + ".h";
 
         if (exists(path))
         {
@@ -238,17 +239,18 @@ namespace xlang
         }
 
         writer w;
+        write_component_h(w, type);
         w.flush_to_file(path);
     }
 
     inline void write_component_cpp(TypeDef const& type)
     {
-        if (settings::component_folder.empty())
+        if (settings.component_folder.empty())
         {
             return;
         }
 
-        auto path = settings::component_folder + get_component_filename(type) + ".cpp";
+        auto path = settings.component_folder + get_component_filename(type) + ".cpp";
 
         if (exists(path))
         {
@@ -256,6 +258,7 @@ namespace xlang
         }
 
         writer w;
+        write_component_cpp(w, type);
         w.flush_to_file(path);
     }
 }

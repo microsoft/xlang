@@ -4,10 +4,12 @@ using namespace xlang::meta::reader;
 
 TEST_CASE("meta_reader_cache")
 {
-    cache c{ R"(test\il\meta_reader_cache.winmd)" };
+    auto current = std::experimental::filesystem::current_path();
 
-    auto type = c.find("Test.IStringable");
+    cache c{ R"(simple.winmd)" };
+
+    auto type = c.find("Simple.IStringable");
     REQUIRE(type.TypeName() == "IStringable");
-    REQUIRE(type.TypeNamespace() == "Test");
+    REQUIRE(type.TypeNamespace() == "Simple");
     REQUIRE(type.Flags().Semantics() == TypeSemantics::Interface);
 }

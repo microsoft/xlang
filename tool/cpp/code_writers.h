@@ -116,6 +116,11 @@ enum class % : %
     {
         auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
 
+        if (!attribute)
+        {
+            throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+        }
+
         w.write("template <> struct guid_storage<%>{ static constexpr guid value{ % }; };\n",
             type,
             bind<write_guid_value>(attribute.Value().FixedArgs()));
@@ -492,7 +497,10 @@ template <> struct abi<@::%>{ using type = struct_%; };
                 }
             }
 
-            w.write(" %", param.Name());
+            if (w.param_names)
+            {
+                w.write(" %", param.Name());
+            }
         }
     }
 
@@ -536,14 +544,16 @@ template <> struct abi<@::%>{ using type = struct_%; };
 
             if (return_type)
             {
-                XLANG_ASSERT(return_type->type() == TypeDefOrRef::TypeRef);
-
-                auto ns = return_type->TypeRef().TypeNamespace();
-                auto name = return_type->TypeRef().TypeName();
-
-                if (auto definition = find(return_type->TypeRef()))
+                if (return_type->type() == TypeDefOrRef::TypeRef)
                 {
-                    is_class = get_category(definition) == category::class_type;
+                    if (auto definition = find(return_type->TypeRef()))
+                    {
+                        is_class = get_category(definition) == category::class_type;
+                    }
+                }
+                else if (return_type->type() == TypeDefOrRef::TypeDef)
+                {
+                    is_class = get_category(return_type->TypeDef()) == category::class_type;
                 }
             }
 
@@ -773,6 +783,8 @@ template <> struct consume<@::%> { template <typename D> using type = consume_%<
 
     inline void write_produce_assert_params(writer& w, method_signature const& method_signature)
     {
+        w.param_names = false;
+
         if (method_signature.has_params())
         {
             w.write(", ");
@@ -1942,12 +1954,112 @@ struct %
         {
             if (c == '`')
             {
-                w.write(settings::root_namespace);
+                w.write(settings.root);
             }
             else
             {
                 w.write(c);
             }
         }
+    }
+
+    inline void write_component_include(writer& w, TypeDef const& type)
+    {
+        if (get_factories(type).empty())
+        {
+            return;
+        }
+
+        w.write("#include \"%.h\"\n", get_component_filename(type));
+    }
+
+    inline void write_component_activation(writer& w, TypeDef const& type)
+    {
+        if (get_factories(type).empty())
+        {
+            return;
+        }
+
+        auto format = R"(
+        if (requal(name, L"@::%"))
+        {
+            *factory = winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
+            return 0;
+        }
+)";
+
+        auto type_name = type.TypeName();
+        auto type_namespace = type.TypeNamespace();
+
+        w.write(format,
+            type_namespace,
+            type_name,
+            type_namespace,
+            type_name);
+    }
+
+    inline void write_component_g_cpp(writer& w, std::vector<TypeDef> const& classes)
+    {
+        auto format = R"(%
+int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
+{
+#ifdef _WRL_MODULE_H_
+    if (!::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().Terminate())
+    {
+        return 1;
+    }
+#endif
+
+    if (winrt::get_module_lock())
+    {
+        return 1;
+    }
+
+    winrt::clear_factory_cache();
+    return 0;
+}
+
+int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept
+{
+    try
+    {
+        *factory = nullptr;
+        uint32_t length{};
+        wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
+        std::wstring_view const name{ buffer, length };
+
+        auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
+        {
+            return std::equal(left.rbegin(), left.rend(), right.rbegin(), right.rend());
+        };
+%
+#ifdef _WRL_MODULE_H_
+        return ::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().GetActivationFactory(static_cast<HSTRING>(classId), reinterpret_cast<::IActivationFactory**>(factory));
+#else
+        return winrt::hresult_class_not_available(name).to_abi();
+#endif
+    }
+    catch (...) { return winrt::to_hresult(); }
+}
+)";
+
+        w.write(format,
+            bind_each<write_component_include>(classes),
+            bind_each<write_component_activation>(classes));
+    }
+
+    inline void write_component_g_h(writer& w, TypeDef const& type)
+    {
+
+    }
+
+    inline void write_component_h(writer& w, TypeDef const& type)
+    {
+
+    }
+
+    inline void write_component_cpp(writer& w, TypeDef const& type)
+    {
+
     }
 }

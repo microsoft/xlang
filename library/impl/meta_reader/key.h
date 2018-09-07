@@ -105,14 +105,11 @@ namespace xlang::meta::reader
     {
         for (auto&& attribute : row.CustomAttribute())
         {
-            if (attribute.Type().type() == CustomAttributeType::MemberRef)
-            {
-                auto type = attribute.Type().MemberRef().Class().TypeRef();
+            auto pair = attribute.TypeNamespaceAndName();
 
-                if (type_name == type.TypeName() && type_namespace == type.TypeNamespace())
-                {
-                    return attribute;
-                }
+            if (pair.first == type_namespace && pair.second == type_name)
+            {
+                return attribute;
             }
         }
 

@@ -30,11 +30,7 @@ namespace xlang::cmd
                 if (arg[0] == '-')
                 {
                     arg.remove_prefix(1);
-
-                    last = std::find_if(options.begin(), options.end(), [&](auto&& option)
-                    {
-                        return option.name == arg;
-                    });
+                    last = find(options, arg);
 
                     if (last == options.end())
                     {
@@ -104,7 +100,7 @@ namespace xlang::cmd
         {
             auto result = m_options.find(name);
 
-            if (result == m_options.end())
+            if (result == m_options.end() || result->second.empty())
             {
                 return std::string{ default_value };
             }
@@ -112,7 +108,64 @@ namespace xlang::cmd
             return result->second.front();
         }
 
+        auto files(std::string_view const& name) const
+        {
+            std::set<std::string> files;
+
+            auto add_directory = [&](auto&& path)
+            {
+                for (auto&& file : std::experimental::filesystem::directory_iterator(path))
+                {
+                    if (std::experimental::filesystem::is_regular_file(file))
+                    {
+                        files.insert(file.path().string());
+                    }
+                }
+            };
+
+            for (auto&& path : values(name))
+            {
+                auto absolute = std::experimental::filesystem::absolute(path);
+
+                if (std::experimental::filesystem::is_directory(absolute))
+                {
+                    add_directory(absolute);
+                }
+                else if (std::experimental::filesystem::is_regular_file(absolute))
+                {
+                    files.insert(absolute.string());
+                }
+#if XLANG_PLATFORM_WINDOWS
+                else if (path == "local")
+                {
+                    std::array<char, MAX_PATH> local{};
+                    ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+                    add_directory(local.data());
+                }
+#endif
+                else
+                {
+                    throw_invalid("Path '", path, "' is not a file or directory");
+                }
+            }
+
+            return files;
+        }
+
     private:
+
+        auto find(std::vector<option> const& options, std::string_view const& arg)
+        {
+            for (auto current = options.begin(); current != options.end(); ++current)
+            {
+                if (starts_with(current->name, arg))
+                {
+                    return current;
+                }
+            }
+
+            return options.end();
+        }
 
         std::map<std::string_view, std::vector<std::string>> m_options;
     };

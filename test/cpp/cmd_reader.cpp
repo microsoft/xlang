@@ -80,4 +80,28 @@ TEST_CASE("cmd_reader")
         REQUIRE(r.values("key") == std::vector<std::string>{ "v1", "v2", "v3", "v4" });
     }
 
+    {
+        // Matching options that start with arg
+
+        std::array<char const*, 7> args
+        {
+            "program.exe",
+            "-in", "input-value",
+            "-o", "output-value",
+            "-include", "include-value"
+        };
+
+        std::vector<cmd::option> options
+        {
+            { "input", 1, 1 },
+            { "output", 1, 1 },
+            { "include", 1, 1 }
+        };
+
+        cmd::reader r{ args.size(), args.data(), options };
+        REQUIRE(r);
+        REQUIRE(r.value("input") == "input-value");
+        REQUIRE(r.value("output") == "output-value");
+        REQUIRE(r.value("include") == "include-value");
+    }
 }

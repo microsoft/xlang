@@ -6,9 +6,9 @@ namespace xlang::meta::reader
         cache(cache const&) = delete;
         cache& operator=(cache const&) = delete;
 
-        explicit cache(std::vector<std::string> const& args)
+        explicit cache(std::vector<std::string> const& files)
         {
-            for (auto&& file : expand(args))
+            for (auto&& file : files)
             {
                 auto& db = m_databases.emplace_back(file, this);
 
@@ -24,7 +24,6 @@ namespace xlang::meta::reader
 
                     if (insert.second == false)
                     {
-                        // TODO: test with MIDL as we may need to support winmd files generated with duplicate TypeDef rows.
                         throw_invalid("Duplicate type indicates invalid combination of metadata files");
                     }
                 }
@@ -102,7 +101,7 @@ namespace xlang::meta::reader
             return type->second;
         }
 
-        TypeDef find(std::string_view const& type_string) const noexcept
+        TypeDef find(std::string_view const& type_string) const
         {
             auto pos = type_string.rfind('.');
             if (pos == std::string_view::npos)
@@ -110,6 +109,25 @@ namespace xlang::meta::reader
                 throw_invalid("Type name is missing namespace separator");
             }
             return find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
+        }
+
+        TypeDef find_required(std::string_view const& type_string) const
+        {
+            auto pos = type_string.rfind('.');
+
+            if (pos == std::string_view::npos)
+            {
+                throw_invalid("Type name is missing namespace separator");
+            }
+
+            auto definition = find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
+
+            if (!definition)
+            {
+                throw_invalid("Type '", type_string, "' could not be found");
+            }
+
+            return definition;
         }
 
         auto const& databases() const noexcept
@@ -216,50 +234,6 @@ namespace xlang::meta::reader
         using namespace_type = std::pair<std::string_view const, namespace_members> const&;
 
     private:
-
-        static std::vector<std::string> expand(std::vector<std::string> const& args)
-        {
-            std::vector<std::string> files;
-
-            auto add_directory = [&](auto&& path)
-            {
-                for (auto&& file : std::experimental::filesystem::directory_iterator(path))
-                {
-                    if (std::experimental::filesystem::is_regular_file(file))
-                    {
-                        files.push_back(file.path().string());
-                    }
-                }
-            };
-
-            for (auto&& path : args)
-            {
-                auto absolute = std::experimental::filesystem::absolute(path);
-
-                if (std::experimental::filesystem::is_directory(absolute))
-                {
-                    add_directory(absolute);
-                }
-                else if (std::experimental::filesystem::is_regular_file(absolute))
-                {
-                    files.push_back(absolute.string());
-                }
-#if XLANG_PLATFORM_WINDOWS
-                else if (path == "local")
-                {
-                    std::array<char, MAX_PATH> local{};
-                    ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
-                    add_directory(local.data());
-                }
-#endif
-                else
-                {
-                    throw_invalid("Path '", path, "' is not a file or directory");
-                }
-            }
-
-            return files;
-        }
 
         std::list<database> m_databases;
         std::map<std::string_view, namespace_members> m_namespaces;

@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.9)
 project(test_cpp)
 
 add_executable(test_cpp "")
-target_sources(test_cpp PUBLIC pch.cpp meta_reader_filter.cpp meta_reader_cache.cpp cmd_reader.cpp)
-target_include_directories(test_cpp PUBLIC ${XLANG_LIBRARY_PATH})
+target_sources(test_cpp PUBLIC pch.cpp meta_reader_filter.cpp meta_reader_cache.cpp cmd_reader.cpp simple.cpp)
+target_include_directories(test_cpp PUBLIC ${XLANG_LIBRARY_PATH} ..\\output\\foundation ..\\output\\simple)
 
 if (WIN32)
     TARGET_CONFIG_MSVC_PCH(test_cpp pch.cpp pch.h)

@@ -309,19 +309,6 @@ namespace xlang
         return result;
     }
 
-    inline auto get_system_type(cache const& c, CustomAttributeSig const& signature) -> TypeDef
-    {
-        for (auto&& arg : signature.FixedArgs())
-        {
-            if (auto type_param = std::get_if<ElemSig::SystemType>(&std::get<ElemSig>(arg.value).value))
-            {
-                return c.find(type_param->name);
-            }
-        }
-
-        return {};
-    };
-
     struct factory_type
     {
         TypeDef type;
@@ -333,6 +320,19 @@ namespace xlang
 
     inline auto get_factories(TypeDef const& type)
     {
+        auto get_system_type = [&](auto&& signature) -> TypeDef
+        {
+            for (auto&& arg : signature.FixedArgs())
+            {
+                if (auto type_param = std::get_if<ElemSig::SystemType>(&std::get<ElemSig>(arg.value).value))
+                {
+                    return type.get_cache().find_required(type_param->name);
+                }
+            }
+
+            return {};
+        };
+
         std::vector<factory_type> factories;
 
         for (auto&& attribute : type.CustomAttribute())
@@ -345,11 +345,11 @@ namespace xlang
 
                 if (name.second == "ActivatableAttribute")
                 {
-                    factories.push_back({ get_system_type(type.get_cache(), signature), true, false });
+                    factories.push_back({ get_system_type(signature), true, false });
                 }
                 else if (name.second == "StaticAttribute")
                 {
-                    factories.push_back({ get_system_type(type.get_cache(), signature), false, true });
+                    factories.push_back({ get_system_type(signature), false, true });
                 }
                 else if (name.second == "ComposableAttribute")
                 {
@@ -364,7 +364,7 @@ namespace xlang
                         }
                     }
 
-                    factories.push_back({ get_system_type(type.get_cache(), signature), false, false, true, visible });
+                    factories.push_back({ get_system_type(signature), false, false, true, visible });
                 }
             }
         }

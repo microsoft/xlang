@@ -534,11 +534,11 @@ namespace xlang
         {
             if (impl)
             {
-                write("#include \"%/impl/%.%.h\"\n", settings::root_folder, ns, impl);
+                write("#include \"%/impl/%.%.h\"\n", settings.root, ns, impl);
             }
             else
             {
-                write("#include \"%/%.h\"\n", settings::root_folder, ns);
+                write("#include \"%/%.h\"\n", settings.root, ns);
             }
         }
 
@@ -558,12 +558,12 @@ namespace xlang
                 return;
             }
 
-            write("#include \"%/%.h\"\n", settings::root_folder, parent);
+            write("#include \"%/%.h\"\n", settings.root, parent);
         }
 
         void save_header(char impl = 0)
         {
-            auto filename{ settings::output_folder + settings::root_folder + "/" };
+            auto filename{ settings.output_folder + settings.root + "/" };
 
             if (impl)
             {
