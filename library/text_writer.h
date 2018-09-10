@@ -138,6 +138,11 @@ namespace xlang::text
             m_second.clear();
         }
 
+        void flush_to_file(std::experimental::filesystem::path const& filename)
+        {
+            flush_to_file(filename.string());
+        }
+
         char back()
         {
             return m_first.back();
@@ -244,6 +249,29 @@ namespace xlang::text
             for (auto&& item : list)
             {
                 F(writer, item, args...);
+            }
+        };
+    }
+
+    template <auto F, typename T>
+    auto bind_list(std::string_view const& delimiter, T const& list)
+    {
+        return [&](auto& writer)
+        {
+            bool first{ true };
+
+            for (auto&& item : list)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    writer.write(delimiter);
+                }
+
+                F(writer, item);
             }
         };
     }
