@@ -484,13 +484,13 @@ The direction of the array parameter is directly encoded in metadata. The
 direction of the array length parameter may be inferred as follows:
 
 -   If the array parameter is an in parameter, the array length parameter must
-    also be an in parameter
+    also be an in parameter. This represents the *PassArray* pattern.
 
 -   If the array parameter is an out parameter and is not carrying the BYREF
-    marker, the array length is an in parameter.
+    marker, the array length is an in parameter. This represents the *FillArray* pattern.
 
 -   If the array parameter is an out parameter and carries the BYREF marker, the
-    array length is an out parameter.
+    array length is an out parameter. This represents the *ReceiveArray* pattern.
 
 #### Methods
 

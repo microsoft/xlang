@@ -21,7 +21,7 @@ Overview
 --------
 Langworthy language projections depend on language-agnostic functionality that is provided by the underlying platform. Activating types, allocating shared cross-module memory and strings all require some built in functionality that's provided for app code and/or language projections.
 
-The C language binding will be the lingua franca for all other language projections and interop.
+The C language binding will be the lingua franca for the ABI underpinning all other language projections and interop.
 In this document, therefore, function syntax will be declared in the C language.
 
 Types and conventions
