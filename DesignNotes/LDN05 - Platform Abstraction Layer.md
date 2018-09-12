@@ -13,10 +13,6 @@ status: draft
 
 This design note documents the platform abstraction layer (or PAL) for Langworthy.
 
-## Revisions
- * 2018-09-06, First Draft created by Ryan Shepherd
-
-
 Overview
 --------
 Langworthy language projections depend on language-agnostic functionality that is provided by the underlying platform. Activating types, allocating shared cross-module memory and strings all require some built in functionality that's provided for app code and/or language projections.

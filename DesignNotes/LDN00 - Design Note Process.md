@@ -13,9 +13,6 @@ status: draft
 
 This Design Note describes the process for making and disseminating architecturally important design decisions through Design Notes in Project Langworthy (cross-platform Windows Runtime). 
 
-## Revisions
- * 2018-06-13, First Draft created from 1ES design note docs by Harry Pierson
-
 ## 1. The Purpose
 In any project, the process for making and documenting decisions defines the character of the endeavor.  Project Langworthy is small now, but is likely to grow and become a collaborative effort across multiple divisions of Microsoft as well as the open source community.
 

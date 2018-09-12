@@ -15,9 +15,6 @@ This Design Note describes how Langworthy types are encoded in metadata files.
 
 > Note, this document is 1/2 of the original WinRT Consolidated Reference and has not yet been updated to use cross-platfrom terminology
 
-## Revisions
- * 2018-07-03, First Draft created from WinRT Consolidated Reference by Harry Pierson
-
 Overview
 --------
 

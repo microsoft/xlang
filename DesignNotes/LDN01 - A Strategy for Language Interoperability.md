@@ -15,12 +15,6 @@ Abstract
 
 This design note describes the goals and guiding principles of the Langworthy project. This document is aspirational: It describes the project and its features as it has been envisioned, and may include references to features or characteristics that have not yet been implemented.
 
-Revisions
----------
-
--   2018-07-05, First Draft by Harry Pierson
--   2018-09-11, Clarifications and additional text by Ben Kuhn
-
 Overview
 --------
 
