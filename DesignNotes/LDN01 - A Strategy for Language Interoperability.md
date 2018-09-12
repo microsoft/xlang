@@ -13,7 +13,7 @@ Title: ​LDN01 - A Strategy for Language Interoperability
 Abstract
 --------
 
-This design note describes the goals and guiding principles of the Langworthy project. This document is aspirational: It describes the project and its features as it has been envisioned, and may include references to features or characteristics that have not yet been realized in source.
+This design note describes the goals and guiding principles of the Langworthy project. This document is aspirational: It describes the project and its features as it has been envisioned, and may include references to features or characteristics that have not yet been implemented.
 
 Revisions
 ---------
