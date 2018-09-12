@@ -5,7 +5,7 @@ author: ryansh@microsoft.com
 status: draft
 ---
 
-# Title: ​LDN05 - Platform Abstraction Layer
+# Title: ​LDN05 - Platform Abstraction Layer & Abstract Binary Interface
 * Author: Ryan Shepherd (ryansh@microsoft.com)
 * Status: Draft
 
