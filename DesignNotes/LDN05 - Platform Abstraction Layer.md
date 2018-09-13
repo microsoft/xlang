@@ -36,6 +36,8 @@ Note that at this time, no guarantees are being made regarding cross-process sha
 
 ### XlangMemAlloc
 Allocates a block of memory.
+
+This function is thread-safe: it behaves as though only accessing the memory locations visible through its argument, and not any static storage. In other words, the same thread safety guarantees as malloc in C11 and C++11.
 #### Syntax:
     void* __stdcall XlangMemAlloc(size_t count);
 #### Parameters:
@@ -45,6 +47,8 @@ If the function succeeds, it returns the allocated memory block. Otherwise, it r
 
 ### XlangMemFree
 Frees a block of memory.
+
+This function is thread-safe: it behaves as though only accessing the memory locations visible through its argument, and not any static storage. In other words, the same thread safety guarantees as free in C11 and C++11.
 #### Syntax:
     void __stdcall XlangMemFree(void* ptr);
 #### Parameters:
