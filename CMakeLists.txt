@@ -47,6 +47,16 @@ function(GENERATE_STRING_LITERAL_FILES glob_expression output_filename namespace
 
 endfunction()
 
+function(CONSUME_PAL target)
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:pal>
+        $<TARGET_FILE_DIR:${target}>
+    )
+
+    target_link_libraries(${target} pal)
+endfunction()
+
 
 add_custom_target(scorch 
     COMMAND ${CMAKE_COMMAND} \"-Dfolder=${CMAKE_CURRENT_BINARY_DIR}\" -P \"${XLANG_SCRIPTS_PATH}/scorch.cmake\")
@@ -82,5 +92,10 @@ else()
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " -D_DEBUG")
 endif()
 
+if (WIN32)
+    add_definitions(-DNOMINMAX)
+endif()
+
 add_subdirectory(tool)
 add_subdirectory(test)
+add_subdirectory(platform)

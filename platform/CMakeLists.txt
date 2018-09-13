@@ -1,23 +1,13 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9)
 
-message(FATAL_ERROR "platform adaptation layer not building for langworthy yet")
+project(pal)
 
-# if (WIN32)
-#     message(SEND_ERROR "platform adaptation layer not needed for Windows")
-# endif()
+if (WIN32)
+    set(sources win32_strings.cpp win32_exports.def)
+else()
+    set(sources common_memory.cpp)
+endif()
 
-# set(sources
-#     runtime.cpp
-#     strings.cpp)
-
-# add_library(WinRT.PAL.Static STATIC ${sources})
-# add_library(WinRT.PAL.Shared SHARED ${sources})
-
-# include_directories(../library)
-
-# set_target_properties(WinRT.PAL.Shared PROPERTIES OUTPUT_NAME WinRT_PAL)
-# set_target_properties(WinRT.PAL.Static PROPERTIES OUTPUT_NAME WinRT_PAL_static)
-
-# if (NOT WIN32)
-#     target_link_libraries(WinRT.PAL.Shared c++)
-# endif()
+add_library(pal SHARED ${sources})
+target_include_directories(pal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_definitions(-DXLANG_PAL_EXPORTS)

@@ -1,0 +1,4 @@
+LIBRARY PAL
+EXPORTS
+    XlangMemAlloc=ole32.CoTaskMemAlloc
+    XlangMemFree=ole32.CoTaskMemFree
