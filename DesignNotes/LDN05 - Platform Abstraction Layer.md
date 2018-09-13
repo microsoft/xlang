@@ -22,7 +22,7 @@ In this document, therefore, function syntax will be declared in the C language.
 
 Types and conventions
 --------
-See the [ABI design notes](./LDN05 - Application Binary Interface.md)
+See the [ABI design notes](LDN06%20-%20Application%20Binary%20Interface.md)
 
 Shared memory
 --------
