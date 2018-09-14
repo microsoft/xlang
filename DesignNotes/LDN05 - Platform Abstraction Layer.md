@@ -24,6 +24,7 @@ Types and conventions
 --------
 See the [ABI design notes](LDN06%20-%20Application%20Binary%20Interface.md)
 
+--------
 Shared memory
 --------
 Langworthy code will, at times, require some memory to be dynamically allocated and passed between in-process components. *ReceiveArray* method parameters are a common example of this pattern.
@@ -39,19 +40,58 @@ Allocates a block of memory.
 
 This function is thread-safe: it behaves as though only accessing the memory locations visible through its argument, and not any static storage. In other words, the same thread safety guarantees as malloc in C11 and C++11.
 #### Syntax:
-    void* __stdcall XlangMemAlloc(size_t count);
+```C
+void* __stdcall XlangMemAlloc(size_t count);
+```
 #### Parameters:
 * count - The size of the memory block to be allocated, in bytes.
 #### Return value:
 If the function succeeds, it returns the allocated memory block. Otherwise, it returns **NULL**.
+#### Remarks:
+If count is 0, XlangMemAlloc allocates a zero-length item and returns a valid pointer to that item.
+
+To free this memory, call [XLangMemFree](#xlangmemfree).
 
 ### XlangMemFree
 Frees a block of memory.
 
 This function is thread-safe: it behaves as though only accessing the memory locations visible through its argument, and not any static storage. In other words, the same thread safety guarantees as free in C11 and C++11.
 #### Syntax:
-    void __stdcall XlangMemFree(void* ptr);
+```C
+void __stdcall XlangMemFree(void* ptr);
+```
 #### Parameters:
 * ptr - A pointer to the memory block to be freed. If this parameter is **NULL**, the function has no effect.
 #### Return value:
 This function does not return a value.
+
+--------
+String functions
+--------
+Passing and sharing strings across components presents some of same challenges as dynamically allocated memory, with respect to matching allocation and deallocation.
+Therefore, Langworthy has support for allocating strings for cross-component interop.
+
+Langworthy strings are immutable and hidden behind an opaque handle: **XlangString**. The underlying string data can only be accessed through Langworthy string APIs via this handle.
+
+Call [XlangCreateString](#xlangcreatestring) to create a new XlangString, and call [XlangDeleteString](#xlangdeletestring) to release the reference to the backing memory.
+
+Copy an XlangString by calling [XlangDuplicateString](#xlangduplicatestring).
+
+The underlying character data can be accessed by calling [XlangGetStringRawBuffer](#xlanggetstringrawbuffer).
+
+Call [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer) to allocate a mutable string buffer that you can use to create an immutable XlangString.
+When you have finished populating the buffer, you can call [XlangPromoteStringBuffer](#xlangpromotestringbuffer) to convert that buffer into an immutable XlangString, or call [XlangDeleteStringBuffer](#xlangdeletestringbuffer) to discard it prior to promotion.
+
+### XlangCreateString
+Creates a string.
+
+### XlangDeleteString
+Deletes a string.
+
+### XlangDuplicateString
+
+### XlangGetStringRawBuffer
+
+### XlangPreallocateStringBuffer
+
+### XlangPromoteStringBuffer
