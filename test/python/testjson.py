@@ -42,6 +42,16 @@ class TestXlangJson(unittest.TestCase):
         a = _xlang.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
         self.assertEqual(a.ValueType, 4)
         self.assertEqual(a.Size, 7)
+        self.assertTrue(a.GetBooleanAt(0))
+        self.assertFalse(a.GetBooleanAt(1))
+        self.assertEqual(a.GetNumberAt(2), 42)
+        self.assertEqual(a.GetStringAt(6), "plugh")
+
+        a2 = a.GetArrayAt(4)
+        self.assertEqual(a2.Size, 0)
+        o = a.GetObjectAt(5)
+        self.assertEqual(o.Size, 0)
+
 
     def test_JsonValue_boolean(self):
         t = _xlang.JsonValue.CreateBooleanValue(True)
@@ -52,16 +62,23 @@ class TestXlangJson(unittest.TestCase):
         self.assertEqual(f.ValueType, 1)
         self.assertFalse(f.GetBoolean())
 
-    # running this test causes the script to hang for 6 seconds on shutdown.
-    # for reasons I don't yet understand
-    # def test_JsonValue_null(self):
-    #     n = _xlang.JsonValue.CreateNullValue()
-    #     self.assertEqual(n.ValueType, 0)
+    def test_JsonValue_null(self):
+        n = _xlang.JsonValue.CreateNullValue()
+        self.assertEqual(n.ValueType, 0)
 
     def test_JsonValue_number(self):
         t = _xlang.JsonValue.CreateNumberValue(42)
         self.assertEqual(t.ValueType, 2)
         self.assertEqual(t.GetNumber(), 42)
+
+    # def test_JsonArray(self):
+    #     a = _xlang.JsonArray()
+    #     v = _xlang.JsonValue.CreateNumberValue(3)
+    #     a.InsertAt(0, _xlang.JsonValue.CreateNumberValue(3))
+    #     a.InsertAt(0, _xlang.JsonValue.CreateNumberValue(2))
+    #     a.InsertAt(0, _xlang.JsonValue.CreateNumberValue(1))
+
+
 
     def test_JsonValue_string(self):
         t = _xlang.JsonValue.CreateStringValue("Plugh")
@@ -81,22 +98,14 @@ class TestXlangJson(unittest.TestCase):
         self.assertEqual(s.ValueType, 3)
         self.assertEqual(s.GetString(), "plugh")
 
-    # def test_invalid_param_count_instance(self):
-    #     a = _xlang.JsonArray()
-    #     with self.assertRaises(RuntimeError):
-    #         a.Append(10, 20)
+    def test_invalid_param_count_instance(self):
+        a = _xlang.JsonArray()
+        with self.assertRaises(RuntimeError):
+            a.Append(10, 20)
 
-    # def test_invalid_param_count_static(self):
-    #     with self.assertRaises(RuntimeError):
-    #         _xlang.JsonArray.Parse(10, 20)
-
-    # def test_jsonarray_parse(self):
-    #     a = _xlang.JsonArray.Parse("[true,2,3]")
-    #     self.assertEqual(a.ValueType, 4)
-
-    #     self.assertEqual(a.Size, 3)
-    #     # self.assertEqual(a.GetStringAt(0), "one")
-    #     self.assertEqual(a.GetNumberAt(2), 3)
+    def test_invalid_param_count_static(self):
+        with self.assertRaises(RuntimeError):
+            _xlang.JsonArray.Parse(10, 20)
 
 if __name__ == '__main__':
     _xlang.init_apartment()
