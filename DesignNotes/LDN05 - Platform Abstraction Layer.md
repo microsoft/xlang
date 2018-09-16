@@ -211,6 +211,25 @@ This function decrements the reference count of the backing buffer.
 If the reference count reaches 0, the buffer will be deallocated.
 
 ### XlangDeleteStringBuffer
+Discards a preallocated string buffer if it was not promoted to a **XlangString**.
+#### Syntax
+```C
+XlangResult XlangDeleteStringBuffer(
+    XlangStringBuffer bufferHandle
+);
+```
+#### Parameters
+* bufferHandle - The buffer to discard. 
+#### Return value
+| Return code              | Description                       |
+|--------------------------|-----------------------------------|
+| XLANG_OK                 | The buffer was discarded succesfully. |
+| XLANG_POINTER            | *bufferHandle* is **NULL**.
+| XLANG_INVALID_ARG        | *bufferHandle* was not created by [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer).
+#### Remarks
+Call this function to discard a string buffer that was created by [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer), but has not been promoted to an **XlangString** by the [XlangPromoteStringBuffer](#xlangpromotestringbuffer) function.
+
+Calling **XlangPromoteStringBuffer** after calling **XlangDeleteStringBuffer** is undefined.
 
 ### XlangDuplicateString
 Creates a copy of the specified string.
@@ -302,4 +321,31 @@ If the buffer has already been promoted by a call to **XlangPromoteStringBuffer*
 If **XlangPromoteStringBuffer** fails, you can call **XlangDeleteStringBuffer** to discard the buffer.
 
 ### XlangPromoteStringBuffer
+Creates a **XlangString** from the specified **XlangStringBuffer**.
+#### Syntax
+```C
+XlangResult XlangPromoteStringBuffer(
+    XlangStringBuffer bufferHandle,
+    XlangString* string,
+    uint32_t length
+);
+```
+#### Parameters
+* bufferHandle - The buffer to use for the new string.
+You must call [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer) to create this.
+* string - The newly created XlangString that contains the contents of *bufferHandle*.
+* length - The length of the string in *bufferHandle*, not counting the null terminator.
+This value must be less than or equal to the length passed to [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer). 
+#### Return value
+#### Return value
+| Return code              | Description                       |
+|--------------------------|-----------------------------------|
+| XLANG_OK                 | Success.             |
+| XLANG_POINTER            | *string* was **NULL**. |
+| XLANG_INVALID_ARG        | *bufferHandle* was not created by calling [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer), or the caller has overwritten the terminating null character in *bufferHandle*, or *length* is greater than the *length* the buffer was created with.
+#### Remarks
+Calling this function converts the mutable buffer to an immutable **XlangString**.
 
+If this function fails, you can use [XlangDeleteStringBuffer](#xlangstringbuffer) to discard the mutable buffer.
+
+Each call to **XlangPromoteStringBuffer** must be matched with a corresponding call to [XlangDeleteString](#xlangdeletestring).
