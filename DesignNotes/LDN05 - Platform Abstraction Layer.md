@@ -46,7 +46,15 @@ typedef struct XlangStringHeader
 ```
 
 #### XStringBuffer
-
+This type holds a preallocated string buffer for subsequent promotion into a **XlangString**.
+This type is the size of a pointer, but distinct from other pointer types, as if defined as:
+```C
+typedef struct XlangStringBuffer__
+{
+    int unused;
+} XlangStringBuffer__;
+typedef XlangStringBuffer__* XlangStringBuffer;
+```
 --------
 Shared memory
 --------
