@@ -11,11 +11,11 @@ status: draft
 
 ## Abstract
 
-This design note documents the platform abstraction layer (or PAL) for Langworthy.
+This design note documents the platform abstraction layer (or PAL) for Xlang.
 
 Overview
 --------
-Langworthy language projections depend on language-agnostic functionality that is provided by the underlying platform. Activating types, allocating shared cross-module memory and strings all require some built in functionality that's provided for app code and/or language projections.
+Xlang language projections depend on language-agnostic functionality that is provided by the underlying platform. Activating types, allocating shared cross-module memory and strings all require some built in functionality that's provided for app code and/or language projections.
 
 The C language binding will be the lingua franca for the ABI underpinning all other language projections and interop.
 In this document, therefore, function syntax will be declared in the C language.
@@ -58,9 +58,9 @@ typedef XlangStringBuffer__* XlangStringBuffer;
 --------
 Shared memory
 --------
-Langworthy code will, at times, require some memory to be dynamically allocated and passed between in-process components. *ReceiveArray* method parameters are a common example of this pattern.
+Xlang code will, at times, require some memory to be dynamically allocated and passed between in-process components. *ReceiveArray* method parameters are a common example of this pattern.
 
-Because these components may use different different allocators, runtime heaps, or even different language projections, Langworthy provides a dedicated facility to guarantee these allocations and deallocations are performed in a consistent manner.
+Because these components may use different different allocators, runtime heaps, or even different language projections, Xlang provides a dedicated facility to guarantee these allocations and deallocations are performed in a consistent manner.
 
 This also precludes the possibility of statically-linking the PAL, as each component carrying a statically-linked PAL would defeat the purpose of having a dedicated, single module managing this memory.
 
@@ -99,12 +99,12 @@ This function is thread-safe: it behaves as though only accessing the memory loc
 String functions
 --------
 Passing and sharing strings across components presents some of same challenges as dynamically allocated memory, with respect to matching allocation and deallocation.
-Therefore, Langworthy has support for allocating strings for cross-component interop.
+Therefore, Xlang has support for allocating strings for cross-component interop.
 
-Langworthy strings can be encoded in either UTF-8 or UTF-16, using C's char or char16_t, respectively.
+Xlang strings can be encoded in either UTF-8 or UTF-16, using C's char or char16_t, respectively.
 Functions that accept and/or return character data will \*U8 or \*U16 suffixes to disambiguate the two "flavors" of function call.
 
-Langworthy strings are immutable and hidden behind an opaque handle: **XlangString**. The underlying string data can only be accessed through Langworthy string APIs via this handle.
+Xlang strings are immutable and hidden behind an opaque handle: **XlangString**. The underlying string data can only be accessed through Xlang string APIs via this handle.
 
 Call [XlangCreateString](#xlangcreatestring) to create a new **XlangString**, and call [XlangDeleteString](#xlangdeletestring) to release the reference to the backing memory.
 
@@ -116,9 +116,9 @@ Call [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer) to allocate a
 When you have finished populating the buffer, you can call [XlangPromoteStringBuffer](#xlangpromotestringbuffer) to convert that buffer into an immutable **XlangString**, or call [XlangDeleteStringBuffer](#xlangdeletestringbuffer) to discard it prior to promotion.
 This two-phase construction has similar functionality to a "string builer" found in other libraries.
 
-Langworthy also supports creating "fast pass" strings by calling [XlangCreateStringReference](#xlangcreatestringreference).
+Xlang also supports creating "fast pass" strings by calling [XlangCreateStringReference](#xlangcreatestringreference).
 In this case, the memory containing the backing string data is owned by the caller, and not allocated on the heap.
-Therefore, Langworthy relies upon the caller to maintain the backing string data, unchanged, for the duration of the string's lifetime.
+Therefore, Xlang relies upon the caller to maintain the backing string data, unchanged, for the duration of the string's lifetime.
 
 Semantically, a **XlangString** containing the value **NULL** represents the empty string, which consists of zero content characters and a terminating null character.
 Calling [XlangCreateString](#xlangcreatestring) with zero characters will produce the value **NULL**.
@@ -155,7 +155,7 @@ Must be 0 if *sourceString* is **NULL**.
 | XLANG_POINTER            | *sourceString* was **NULL** and *length* was non-zero. |
 | XLANG_MEM_INVALID_SIZE   | The requested allocation size was too large. |
 #### Remarks
-Langworthy copies *length* elements from *sourceString* to the backing buffer of the new **XlangString**, plus a null-terminator.
+Xlang copies *length* elements from *sourceString* to the backing buffer of the new **XlangString**, plus a null-terminator.
 
 Call [XlangDeleteString](#xlangdeletestring) to deallocate the string.
 Each call to **XlangCreateString** must be matched by a call to **XlangDeleteString**.
@@ -186,7 +186,7 @@ XlangResult XlangCreateStringReferenceU16(
 #### Parameters
 * sourceString - A null-terminated string to use as the source. **NULL** represents the empty string if *length* is 0.
 * length - The length of the string in code units. Must be 0 if *sourceString* is **NULL**. Otherwise, *sourceString* must have a terminating null character.
-* header - A pointer to a [XlangStringHeader](#xlangstringheader) structure that Langworthy uses to identify *string* as a *fast-pass* string.
+* header - A pointer to a [XlangStringHeader](#xlangstringheader) structure that Xlang uses to identify *string* as a *fast-pass* string.
 * string - A pointer to the newly created string, or **NULL** if an error occurrs. This string will be a *fast-pass* string.
 #### Return value
 | Return code              | Description                       |
@@ -197,7 +197,7 @@ XlangResult XlangCreateStringReferenceU16(
 | XLANG_POINTER            | *sourceString* was **NULL** and *length* was non-zero. |
 #### Remarks
 Use this function to create a *fast-pass* string.
-Unlike a string created by [XlangCreateString](#xlangcreatestring), the lifetime of the backing buffer is not managed by Langworthy.
+Unlike a string created by [XlangCreateString](#xlangcreatestring), the lifetime of the backing buffer is not managed by Xlang.
 The caller allocates *sourceString* on the stack frame, together with an uninitialized [XlangStringHeader](#xlangstringheader), to avoid a heap allocation.
 The caller must ensure that *sourceString* and the contents of *header* remain unchanged during the lifetime of the attached **XlangString**.
 
@@ -262,7 +262,7 @@ Use this function to copy a **XlangString**.
 
 If *string* was created by calling [XlangCreateString](#xlangcreatestring), the reference count of the backing buffer is incremented, and *newString* uses the same backing buffer.
 
-If *string* was created by calling [XlangCreateStringReference](#xlangcreatestringreference), (implying it is a *fast-pass* string), Langworthy copies the source string to a new buffer with a new reference count.
+If *string* was created by calling [XlangCreateStringReference](#xlangcreatestringreference), (implying it is a *fast-pass* string), Xlang copies the source string to a new buffer with a new reference count.
 The resulting copy has its own backing buffer and is not a *fast-pass* string.
 
 Each call to **XlangDuplicateString** must be matched with a corresponding call to [XlangDeleteString](#xlangdeletestring).
