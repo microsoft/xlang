@@ -28,24 +28,9 @@ The ABI design notes also have XlangResult values used by the PAL, and ABI defin
 #### XlangStringHeader
 This is a structure used to track the lifetime of *fast-pass* XlangStrings. See [XlangCreateStringReference](#xlangcreatestringreference) for more details.
 
-This structure has the same alignment as the native pointer type, and is 24 or 20 bytes in size, on 64-bit or 32-bit platforms, respectively.
-In C language terms, it behaves as if defined as:
-```C
-typedef struct XlangStringHeader
-{
-  union
-  {
-    void* Reserved1;
-#if 64_BIT_PLATFORM
-    char Reserved2[24];
-#else
-    char Reserved2[20];
-#endif
-  } Reserved;
-};
-```
+Its layout and size is platform-defined.
 
-#### XStringBuffer
+#### XlangStringBuffer
 This type holds a preallocated string buffer for subsequent promotion into a **XlangString**.
 This type is the size of a pointer, but distinct from other pointer types, as if defined as:
 ```C
@@ -95,15 +80,35 @@ This function does not return a value.
 #### Remarks
 This function is thread-safe: it behaves as though only accessing the memory locations visible through its argument, and not any static storage. In other words, the same thread safety guarantees as free in C11 and C++11.
 
+### XlangStringEncoding
+This is an enum representing the possible character encodings in a given XlangString.
+Its underlying type is an unsigned 32-bit integer.
+
+This is a "flags" enum, meaning that an instance of this type is meant to hold some combination of value bitwise or'ed together.
+
+#### Syntax
+```C
+enum XlangStringEncoding
+{
+    ENCODING_UTF8 = 0x1,
+    ENCODING_UTF16 = 0x2
+};
+```
+
 --------
 String functions
 --------
 Passing and sharing strings across components presents some of same challenges as dynamically allocated memory, with respect to matching allocation and deallocation.
 Therefore, Xlang has support for allocating strings for cross-component interop.
 
+#### Encoding
 Xlang strings can be encoded in either UTF-8 or UTF-16, using C's char or char16_t, respectively.
-Functions that accept and/or return character data will \*U8 or \*U16 suffixes to disambiguate the two "flavors" of function call.
+Functions that accept and/or return character data will have \*U8 or \*U16 suffixes to disambiguate the two "flavors" of function call.
 
+If a string is created with one encoding, and then the underlying buffer data for a different encoding is requested, the PAL will automatically perform a conversion.
+Callers wishing to avoid the overhead of the conversion can query the encoding state of the string and retrieve data in an encoding that would not require a conversion.
+
+#### API overview
 Xlang strings are immutable and hidden behind an opaque handle: **XlangString**. The underlying string data can only be accessed through Xlang string APIs via this handle.
 
 Call [XlangCreateString](#xlangcreatestring) to create a new **XlangString**, and call [XlangDeleteString](#xlangdeletestring) to release the reference to the backing memory.
@@ -114,7 +119,7 @@ The underlying character data can be accessed by calling [XlangGetStringRawBuffe
 
 Call [XlangPreallocateStringBuffer](#xlangpreallocatestringbuffer) to allocate a mutable string buffer that you can then promote into an immutable **XlangString**.
 When you have finished populating the buffer, you can call [XlangPromoteStringBuffer](#xlangpromotestringbuffer) to convert that buffer into an immutable **XlangString**, or call [XlangDeleteStringBuffer](#xlangdeletestringbuffer) to discard it prior to promotion.
-This two-phase construction has similar functionality to a "string builer" found in other libraries.
+This two-phase construction has similar functionality to a "string builder" found in other libraries.
 
 Xlang also supports creating "fast pass" strings by calling [XlangCreateStringReference](#xlangcreatestringreference).
 In this case, the memory containing the backing string data is owned by the caller, and not allocated on the heap.
@@ -201,7 +206,7 @@ Unlike a string created by [XlangCreateString](#xlangcreatestring), the lifetime
 The caller allocates *sourceString* on the stack frame, together with an uninitialized [XlangStringHeader](#xlangstringheader), to avoid a heap allocation.
 The caller must ensure that *sourceString* and the contents of *header* remain unchanged during the lifetime of the attached **XlangString**.
 
-Strings created with this function do not need to be deallocated with [XlangDeleteString](#xlangdeletestring).
+Strings created with this function need to be deleted with [XlangDeleteString](#xlangdeletestring).
 
 ### XlangDeleteString
 Deletes a XlangString.
@@ -267,6 +272,19 @@ The resulting copy has its own backing buffer and is not a *fast-pass* string.
 
 Each call to **XlangDuplicateString** must be matched with a corresponding call to [XlangDeleteString](#xlangdeletestring).
 
+### XlangGetStringEncoding
+Get the encodings present in a **XlangString**.
+#### Syntax
+```C
+XlangStringEncoding XlangGetStringEncoding(
+    XlangString string
+);
+```
+#### Parameters
+* string - The string to be queried.
+#### Return value
+A combination of one or more of the values of the XlangStringEncoding enum.
+
 ### XlangGetStringRawBuffer
 Get the backing buffer for the specified string.
 #### Syntax
@@ -292,6 +310,8 @@ XlangResult XlangGetStringRawBufferU16(
 | XLANG_OK                 | Success.             |
 | XLANG_OUTOFMEMORY        | Failed to allocate memory for the new buffer. |
 #### Remarks
+If the string doesn't currently have backing data in the requested encoding (for example, UTF-16 data requested from a string originally created from UTF-8 data), a conversion will be performed on demand at this time.
+
 Do not change the contents of the buffer.
 
 ### XlangPreallocateStringBuffer
