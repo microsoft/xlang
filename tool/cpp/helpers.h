@@ -206,16 +206,12 @@ namespace xlang
                 return{};
             }
 
-            auto base = extends.TypeRef();
-            auto type_name = base.TypeName();
-            auto type_namespace = base.TypeNamespace();
-
-            if (type_name == "Object" && type_namespace == "System")
+            if(extends_type(derived, "System"sv, "Object"sv))
             {
                 return {};
             }
 
-            return find_required(base);
+            return find_required(extends.TypeRef());
         };
 
         for (auto base = get_base_class(type); base; base = get_base_class(base))

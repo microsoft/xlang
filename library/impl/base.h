@@ -7,7 +7,6 @@
 #endif
 
 #if XLANG_PLATFORM_WINDOWS 
-#define NOMINMAX
 #include <windows.h>
 #else
 #include <sys/stat.h>

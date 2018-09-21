@@ -3,6 +3,7 @@ namespace xlang::meta::reader
 {
     struct cache
     {
+        cache() = default;
         cache(cache const&) = delete;
         cache& operator=(cache const&) = delete;
 
@@ -33,47 +34,34 @@ namespace xlang::meta::reader
             {
                 for (auto&&[name, type] : members.types)
                 {
-                    if (type.Flags().Semantics() == TypeSemantics::Interface)
+                    switch (get_category(type))
                     {
+                    case category::interface_type:
                         members.interfaces.push_back(type);
                         continue;
-                    }
-
-                    auto const extends = type.Extends().TypeRef();
-                    auto extends_name = extends.TypeName();
-                    auto extends_namespace = extends.TypeNamespace();
-
-                    if (extends_name == "Attribute"sv && extends_namespace == "System"sv)
-                    {
-                        members.attributes.push_back(type);
+                    case category::class_type:
+                        if (extends_type(type, "System"sv, "Attribute"sv))
+                        {
+                            members.attributes.push_back(type);
+                            continue;
+                        }
+                        members.classes.push_back(type);
                         continue;
-                    }
-
-                    if (extends_name == "Enum"sv && extends_namespace == "System"sv)
-                    {
+                    case category::enum_type:
                         members.enums.push_back(type);
                         continue;
-                    }
-
-                    if (extends_name == "ValueType"sv && extends_namespace == "System"sv)
-                    {
+                    case category::struct_type:
                         if (get_attribute(type, "Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv))
                         {
                             members.contracts.push_back(type);
                             continue;
                         }
-
                         members.structs.push_back(type);
                         continue;
-                    }
-
-                    if (extends_name == "MulticastDelegate"sv && extends_namespace == "System"sv)
-                    {
+                    case category::delegate_type:
                         members.delegates.push_back(type);
                         continue;
                     }
-
-                    members.classes.push_back(type);
                 }
             }
         }
