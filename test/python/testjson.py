@@ -52,6 +52,28 @@ class TestXlangJson(unittest.TestCase):
         o = a.GetObjectAt(5)
         self.assertEqual(o.Size, 0)
 
+    def test_JsonArray_GetView(self):
+        a = _xlang.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+        view = a.GetView()
+
+        self.assertEqual(view.Size, 7)
+        v0 = view.GetAt(0)
+        self.assertTrue(v0.GetBoolean())
+        v1 = view.GetAt(1)
+        self.assertFalse(v1.GetBoolean())
+        v2 = view.GetAt(2)
+        self.assertEqual(v2.GetNumber(), 42)
+        v6 = view.GetAt(6)
+        self.assertEqual(v6.GetString(), "plugh")
+
+        v4 = view.GetAt(4)
+        a4 = v4.GetArray()
+        self.assertEqual(a4.Size, 0)
+
+        v5 = view.GetAt(5)
+        o5 = v5.GetObject()
+        self.assertEqual(o5.Size, 0)
+
 
     def test_JsonValue_boolean(self):
         t = _xlang.JsonValue.CreateBooleanValue(True)
@@ -106,6 +128,7 @@ class TestXlangJson(unittest.TestCase):
     def test_invalid_param_count_static(self):
         with self.assertRaises(RuntimeError):
             _xlang.JsonArray.Parse(10, 20)
+
 
 if __name__ == '__main__':
     _xlang.init_apartment()
