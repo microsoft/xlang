@@ -7,6 +7,7 @@ Param (
 
 if (-not (test-path env:VSINSTALLDIR)) {
     throw "windows build script must be run from a VS CMD prompt"
+    exit 1
 }
 
 $rootPath = (split-path $PSScriptRoot)
@@ -21,6 +22,8 @@ $ninjaPath = join-path $vsInstallPath "Common7\IDE\CommonExtensions\Microsoft\CM
 if ($forceCMake -or (-not (test-path (join-path $buildPath CMakeCache.txt)))) 
 {
     & $cmakePath "$rootPath" "-B$buildPath" -G Ninja -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_MAKE_PROGRAM="$ninjaPath"
+    if(! $?) { exit $LASTEXITCODE }
 }
 
 & $ninjaPath -C "$buildPath" $(if ($verbose) { "-v" }) $target
+if(! $?) { exit $LASTEXITCODE }
