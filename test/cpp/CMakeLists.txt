@@ -15,3 +15,4 @@ else()
 endif()
 
 target_sources(test_cpp PUBLIC main.cpp)
+add_dependencies(test_cpp test_il)

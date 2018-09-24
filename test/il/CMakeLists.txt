@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-set(cpp_exe ${CMAKE_CURRENT_SOURCE_DIR}/../../_build/Windows/$ENV{VSCMD_ARG_TGT_ARCH}/Debug/tool/cpp/cpp.exe)
+set(cpp_exe ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cpp.exe)
 
 get_filename_component(output_dir ${CMAKE_CURRENT_SOURCE_DIR}/../output REALPATH)
 
@@ -52,4 +52,5 @@ add_custom_command(OUTPUT ${component_h}
   DEPENDS ${component_winmd} ${foundation_winmd}
 )
   
-add_custom_target(make_projection ALL DEPENDS ${projection_headers})
+add_custom_target(test_il ALL DEPENDS ${projection_headers})
+add_dependencies(test_il cpp)
