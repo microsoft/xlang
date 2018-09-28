@@ -1132,10 +1132,127 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
     }
 
 
+    //void write_event_token_converter(writer& w)
+    //{
+    //    w.write_indented("template<>\nstruct converter<winrt::event_token>\n{\n");
+    //    {
+    //        writer::indent_guard g{ w };
+    //        w.write_indented("static PyObject* convert(winrt::event_token const& value) noexcept\n{\n");
+    //        {
+    //            writer::indent_guard g2{ w };
+    //            w.write_indented("return converter<int64_t>::convert(value);\n");
+    //        }
+    //        w.write_indented("}\n\n");
+
+    //        w.write_indented("static winrt::event_token convert_to(PyObject* value)\n{\n");
+    //        {
+    //            writer::indent_guard g2{ w };
+    //            w.write_indented("return converter<int64_t>::convert_to(value);\n");
+    //        }
+    //        w.write_indented("}\n");
+    //    }
+    //    w.write_indented("};\n\n");
+    //}
+
+    void write_datetime_converter(writer& w)
+    {
+        auto format = R"(    template<>
+    struct converter<winrt::Windows::Foundation::DateTime>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::DateTime const& value) noexcept
+        {
+            return converter<int64_t>::convert(value.time_since_epoch().count());
+        }
+        
+        static winrt::Windows::Foundation::DateTime convert_to(PyObject* value)
+        {
+            winrt::Windows::Foundation::TimeSpan ts(converter<int64_t>::convert_to(value));
+            return winrt::Windows::Foundation::DateTime(ts);
+        }
+    };
+
+)";
+        w.write(format);
+    }
+
+    void write_timespan_converter(writer& w)
+    {
+        auto format = R"(    template<>
+    struct converter<winrt::Windows::Foundation::TimeSpan>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::TimeSpan const& value) noexcept
+        {
+            return converter<int64_t>::convert(value.count());
+        }
+        
+        static winrt::Windows::Foundation::TimeSpan convert_to(PyObject* value)
+        {
+            return winrt::Windows::Foundation::TimeSpan(converter<int64_t>::convert_to(value));
+        }
+    };
+
+)";
+        w.write(format);
+    }
 
 
 
+    void write_struct_converter(writer& w, TypeDef const& type)
+    {
+        // C++/WinRT doesn't project EventRegistrationToken or HR
+        if (type.TypeNamespace() == "Windows.Foundation")
+        {
+            auto name = type.TypeName();
+            if (name == "DateTime")
+            {
+                write_datetime_converter(w);
+                return;
+            }
+            else if (name == "TimeSpan")
+            {
+                write_timespan_converter(w);
+                return;
+            }
+            else if (name == "EventRegistrationToken" || name == "HResult")
+            {
+                return;
+            }
+        }
 
+        w.write_indented("template<>\nstruct converter<%>\n{\n", type);
+        {
+            writer::indent_guard g{ w };
+            w.write_indented("static PyObject* convert(% const& value) noexcept\n{\n", type);
+            {
+                writer::indent_guard g2{ w };
+                for (auto&& field : type.FieldList())
+                {
+                    w.write_indented("PyObject* py% = converter<%>::convert(value.%);\n",
+                        field.Name(),
+                        field.Signature().Type(),
+                        field.Name());
+                }
+
+                if (distance(type.FieldList()) == 1)
+                {
+                    w.write_indented("return py%;\n", type.FieldList().first.Name());
+                }
+                else
+                {
+                    w.write_indented("PyErr_SetNone(PyExc_NotImplementedError);\nreturn nullptr;\n");
+                }
+            }
+            w.write_indented("}\n\n");
+
+            w.write_indented("static % convert_to(PyObject* value)\n{\n", type);
+            {
+                writer::indent_guard g2{ w };
+                w.write_indented("throw winrt::hresult_not_implemented();\n");
+            }
+            w.write_indented("}\n");
+        }
+        w.write_indented("};\n\n");
+    }
 
 
 

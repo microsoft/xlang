@@ -27,8 +27,12 @@ namespace xlang
         f.bind_each<write_pinterface_impl>(members.interfaces)(w);
 
         w.write("\nnamespace py\n{\n");
-        f.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
-        f.bind_each<write_delegate_type_mapper>(members.delegates)(w);
+        {
+            writer::indent_guard g{ w };
+            f.bind_each<write_struct_converter>(members.structs)(w);
+            f.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
+            f.bind_each<write_delegate_type_mapper>(members.delegates)(w);
+        }
         w.write("}\n");
 
         w.swap();

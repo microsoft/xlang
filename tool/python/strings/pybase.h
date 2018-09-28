@@ -417,7 +417,7 @@ namespace py
         {
             return convert_enum(instance);
         }
-        else if constexpr (is_basic_category_v<T>)
+        else if constexpr (is_basic_category_v<T> || is_struct_category_v<T>)
         {
             return converter<T>::convert(instance);
         }
