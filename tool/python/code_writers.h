@@ -4,7 +4,9 @@ namespace xlang
 {
     void write_include(writer& w, std::string_view const& ns)
     {
+        w.write("#if __has_include(\"py.%.h\")\n", ns);
         w.write("#include \"py.%.h\"\n", ns);
+        w.write("#endif\n");
     }
 
     void write_ns_init_function_name(writer& w, std::string_view const& ns)
@@ -261,6 +263,28 @@ static PyType_Spec @_Type_spec =
     }
 )";
         w.write(format, self, prop_name);
+    }
+
+    void write_property_set_body(writer& w, std::string_view const& self, std::string_view const& prop_name, TypeSig const& signature)
+    {
+        auto format = R"(    if (value == nullptr)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "property delete not supported");
+        return -1;
+    }
+    
+    try
+    {
+        auto param0 = py::convert_to<%>(value);
+        %.%(param0);
+        return 0;
+    }
+    catch (...)
+    {
+        return -1;
+    }
+)";
+        w.write(format, signature, self, prop_name);
     }
 
 
@@ -636,30 +660,13 @@ static PyObject* @_%(%* self, void* /*unused*/)
             auto format = R"(
 static int @_%(%* self, PyObject* value, void* /*unused*/)
 {
-    if (value == nullptr)
-    {
-        PyErr_SetString(PyExc_RuntimeError, "property delete not supported");
-        return -1;
-    }
-    
-    try
-    {
-        auto param0 = py::convert_to<%>(value);
-        self->obj.%(param0);
-        return 0;
-    }
-    catch (...)
-    {
-        return -1;
-    }
-}
+%}
 )";
             w.write(format,
                 prop.Parent().TypeName(),
                 property_methods.set.Name(),
                 bind<write_winrt_wrapper>(prop.Parent()),
-                prop.Type().Type(),
-                prop.Name());
+                bind<write_property_set_body>("self->obj", prop.Name(), prop.Type().Type()));
         }
     }
 
@@ -715,7 +722,8 @@ static void @_dealloc(%* self)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- % class --------------------\n", type.TypeName());
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", type);        
+        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", type);
+        
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
         write_class_methods(w, type);
@@ -821,12 +829,12 @@ static PyObject* @_%(%* self, void* /*unused*/)
             auto format = R"(
 static int @_%(%* self, PyObject* value, void* /*unused*/)
 {
-    return self->obj->%();
+    return self->obj->%(value);
 }
 )";
             w.write(format,
                 prop.Parent().TypeName(),
-                property_methods.get.Name(),
+                property_methods.set.Name(),
                 bind<write_winrt_wrapper>(prop.Parent()),
                 property_methods.set.Name());
         }
@@ -859,6 +867,7 @@ static int @_%(%* self, PyObject* value, void* /*unused*/)
 
         w.write("\nstruct py@\n{\n", type.TypeName());
         w.write("    virtual ~py@() {};\n", type.TypeName());
+        w.write("    virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
         w.write("    virtual std::size_t hash() = 0;\n\n");
             
         for (auto&& method : get_methods(type))
@@ -882,7 +891,7 @@ static int @_%(%* self, PyObject* value, void* /*unused*/)
         w.write("};\n");
     }
 
-    void write_pinterface_method_decl(writer& w, TypeDef const& type, std::vector<MethodDef> const& methods)
+    void write_pinterface_method_decl(writer& w, TypeDef const&, std::vector<MethodDef> const& methods)
     {
         auto method = *methods.begin();
         w.write("\nPyObject* %(PyObject* args) override\n{\n", method.Name());
@@ -898,6 +907,7 @@ static int @_%(%* self, PyObject* value, void* /*unused*/)
         w.write("\ntemplate<%>\nstruct py@Impl : public py@\n{\n", bind_list<write_pinterface_type_args>(", ", type.GenericParam()), type.TypeName(), type.TypeName());
 
         w.write("py@Impl(%<%> o) : obj(o) {}\n", type.TypeName(), type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+        w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return obj; }\n");
         w.write("std::size_t hash() override { return py::get_instance_hash(obj); }\n");
 
         write_type_methods<write_pinterface_method_decl>(w, type);
@@ -916,7 +926,13 @@ PyObject* %() override
             }
             if (prop_methods.set)
             {
-                w.write("    int set_%(PyObject* arg) override { return -1; }; // pinterface prop set not impl \n", prop.Name());
+                auto format = R"(
+int %(PyObject* value) override
+{
+%}
+)";
+
+                w.write(format, prop_methods.set.Name(), bind<write_property_set_body>("obj", prop.Name(), prop.Type().Type()));
             }
         }
 
@@ -1020,6 +1036,100 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 
 
 
+
+
+
+    void write_delegate_param(writer& w, Param const& p)
+    {
+        w.write("auto param%", p.Sequence());
+    }
+
+    void write_delegate(writer& w, TypeDef const& type)
+    {
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        MethodDef invoke;
+        for (auto&& m : type.MethodList())
+        {
+            if (m.Name() == "Invoke")
+            {
+                invoke = m;
+                break;
+            }
+        }
+
+        w.write("\n");
+
+        if (is_ptype(type))
+        {
+            w.write("template <%>\n", bind_list<write_pinterface_type_args>(", ", type.GenericParam()));
+        }
+
+        auto format = R"(struct py@
+{
+    static % get(PyObject* callable)
+    {
+        if (PyFunction_Check(callable) == 0)
+        {
+            throw winrt::hresult_invalid_argument();
+        }
+
+        // TODO: How do I manage callable lifetime here?
+        return [callable](%)
+        {
+)";
+        w.write(format, 
+            type.TypeName(),
+            bind<write_full_type>(type),
+            bind_list<write_delegate_param>(", ", invoke.ParamList()));
+
+        for (auto&& p : invoke.ParamList())
+        {
+            w.write("            PyObject* pyObj% = py::convert(param%);\n", p.Sequence(), p.Sequence());
+        }
+
+        w.write("\n            PyObject* args = PyTuple_Pack(%", distance(invoke.ParamList()));
+        for (auto&& p : invoke.ParamList())
+        {
+            w.write(", pyObj%", p.Sequence());
+        }
+        w.write(R"();
+
+            // TODO: RAII for GILState
+            PyGILState_STATE gstate;
+            gstate = PyGILState_Ensure();
+            PyObject_CallObject(callable, args);
+            PyGILState_Release(gstate);
+        };
+    }
+};
+)");
+    }
+
+    void write_python_delegate_type(writer& w, TypeDef const& type)
+    {
+        w.write("::py@", type.TypeName());
+
+        if (is_ptype(type))
+        {
+            w.write("<%>", bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+        }
+    }
+
+    void write_delegate_type_mapper(writer& w, TypeDef const& type)
+    {
+        auto format = R"(    template <%>
+    struct delegate_python_type<%>
+    {
+        using type = %;
+    };
+
+)";
+        w.write(format,
+            bind_list<write_pinterface_type_args>(", ", type.GenericParam()),
+            bind<write_full_type>(type),
+            bind<write_python_delegate_type>(type));
+    }
 
 
 

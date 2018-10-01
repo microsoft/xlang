@@ -8,6 +8,13 @@
 
 #include <winrt/base.h>
 
+namespace winrt::impl
+{
+    // Bug 19167653: C++/WinRT missing category for AsyncStatus. 
+    // The following line can be removed after 19167653 is fixed
+    template <> struct category<winrt::Windows::Foundation::AsyncStatus> { using type = enum_category; };
+}
+
 namespace py
 {
     template <typename Category>
@@ -22,10 +29,29 @@ namespace py
         static constexpr bool value = true;
     };
 
+    template <typename Category>
+    struct struct_checker
+    {
+        static constexpr bool value = false;
+    };
+
+    template <typename... Args>
+    struct struct_checker<winrt::impl::struct_category<Args...>>
+    {
+        static constexpr bool value = true;
+    };
+
     template <typename T>
     struct pinterface_python_type
     {
         using abstract = void;
+        using concrete = void;
+    };
+
+    template <typename T>
+    struct delegate_python_type
+    {
+        using type = void;
     };
 
     template<typename T>
@@ -35,36 +61,62 @@ namespace py
     constexpr bool is_class_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::class_category>;
 
     template<typename T>
+    constexpr bool is_delegate_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::delegate_category>;
+
+    template<typename T>
+    constexpr bool is_enum_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::enum_category>;
+
+    template<typename T>
     constexpr bool is_interface_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::interface_category>;
 
     template<typename T>
     constexpr bool is_pinterface_category_v = pinterface_checker<typename winrt::impl::category<T>::type>::value;
 
     template<typename T>
-    constexpr bool is_enum_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::enum_category>;
+    constexpr bool is_struct_category_v = struct_checker<typename winrt::impl::category<T>::type>::value;
 
-    // TODO: only enable py::winrt_wrapper for WinRT classes, interfaces
-    template<typename T>
-    struct winrt_wrapper
+    struct winrt_wrapper_base
     {
-        PyObject_HEAD
+        PyObject_HEAD;
+
+        // PyObject_New doesn't call type's constructor, so manually manage the "virtual" get_unknown function
+        winrt::Windows::Foundation::IUnknown const&(*get_unknown)(winrt_wrapper_base* self);
+    };
+
+    template<typename T>
+    struct winrt_wrapper : winrt_wrapper_base
+    {
         T obj{ nullptr };
+
+        static winrt::Windows::Foundation::IUnknown const& fetch_unknown(winrt_wrapper_base* self)
+        {
+            return reinterpret_cast<winrt_wrapper<T>*>(self)->obj;
+        }
     };
 
-    // TODO: only enable py::winrt_pinterface_wrapper for WinRT parameterized interfaces
     template<typename T>
-    struct winrt_pinterface_wrapper
+    struct winrt_pinterface_wrapper : winrt_wrapper_base
     {
-        PyObject_HEAD
         std::unique_ptr<T> obj{ nullptr };
+
+        static winrt::Windows::Foundation::IUnknown const& fetch_unknown(winrt_wrapper_base* self)
+        {
+            return reinterpret_cast<winrt_pinterface_wrapper<T>*>(self)->obj->get_unknown();
+        }
     };
+
+    template<typename To>
+    To as(winrt_wrapper_base* wrapper)
+    {
+        return wrapper->get_unknown(wrapper).as<To>();
+    }
 
     struct winrt_base;
 
     template<typename T>
     struct winrt_type { static PyTypeObject* python_type; };
 
-    inline WINRT_NOINLINE PyObject* to_PyErr() noexcept
+    inline __declspec(noinline) PyObject* to_PyErr() noexcept
     {
         try
         {
@@ -98,9 +150,9 @@ namespace py
     PyObject* wrapped_instance(std::size_t key);
 
     template<typename T>
-    inline auto get_instance_hash(T instance)
+    inline auto get_instance_hash(T const& instance)
     {
-        return std::hash<winrt::Windows::Foundation::IInspectable>{}(instance);
+        return std::hash<winrt::Windows::Foundation::IUnknown>{}(instance);
     }
 
     template<typename T>
@@ -120,6 +172,7 @@ namespace py
         }
 
         // PyObject_New doesn't call type's constructor, so manually initialize the wrapper's fields
+        py_instance->get_unknown = &winrt_wrapper<T>::fetch_unknown;
         std::memset(&(py_instance->obj), 0, sizeof(py_instance->obj));
         py_instance->obj = instance;
 
@@ -149,8 +202,9 @@ namespace py
         }
 
         // PyObject_New doesn't call type's constructor, so manually initialize the wrapper's fields
+        py_instance->get_unknown = &winrt_pinterface_wrapper<ptype::abstract>::fetch_unknown;
         std::memset(&(py_instance->obj), 0, sizeof(py_instance->obj));
-        py_instance->obj = std::unique_ptr<ptype::abstract>{ new typename ptype::concrete(instance) };
+        py_instance->obj = std::make_unique<ptype::concrete>(instance);
 
         wrapped_instance(get_instance_hash(instance), reinterpret_cast<PyObject*>(py_instance));
 
@@ -160,13 +214,6 @@ namespace py
     template<typename T>
     PyObject* wrap(T instance)
     {
-        auto existing_instance = wrapped_instance(get_instance_hash(instance));
-        if (existing_instance)
-        {
-            Py_INCREF(existing_instance);
-            return existing_instance;
-        }
-
         if constexpr (is_class_category_v<T> || is_interface_category_v<T>)
         {
             return wrap<T>(instance, winrt_type<T>::python_type);
@@ -405,12 +452,36 @@ namespace py
                 return reinterpret_cast<winrt_wrapper<T>*>(arg)->obj;
             }
 
-            if (PyObject_IsInstance(arg, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::python_type)) != 1)
+            if (PyObject_IsInstance(arg, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::python_type)) == 0)
             {
                 throw winrt::hresult_invalid_argument();
             }
 
-            return reinterpret_cast<winrt_wrapper<winrt::Windows::Foundation::IInspectable>*>(arg)->obj.as<T>();
+            auto wrapper = reinterpret_cast<winrt_wrapper_base*>(arg);
+            return as<T>(wrapper);
+        }
+        else if constexpr (is_pinterface_category_v<T>)
+        {
+            if constexpr (std::is_base_of_v<winrt::Windows::Foundation::IInspectable, T>)
+            {
+                // pinterface
+                auto wrapper = reinterpret_cast<winrt_wrapper_base*>(arg);
+                return as<T>(wrapper);
+            }
+            else
+            {
+                // pdelegate
+                return delegate_python_type<T>::type::get(arg);
+            }
+        }
+        else if constexpr (is_delegate_category_v<T>)
+        {
+            return delegate_python_type<T>::type::get(arg);
+        }
+        else if constexpr (is_struct_category_v<T>)
+        {
+            throw winrt::hresult_not_implemented();
+            return T{};
         }
         else if constexpr (is_enum_category_v<T>)
         {

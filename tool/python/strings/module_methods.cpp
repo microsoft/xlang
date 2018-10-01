@@ -23,28 +23,31 @@ std::unordered_map<std::size_t, PyObject*> instance_map{};
 void py::wrapped_instance(std::size_t key, PyObject* obj)
 {
     // if obj is null, remove from instance_map
-    if (obj)
-    {
-        // TODO: insert will fail if key is already registered. 
-        //       Should this function raise some kind of error in that case?
-        instance_map.insert({ key, obj });
-    }
-    else
-    {
-        // TODO: clean up the wrapped WinRT object. Currently leaking
-        instance_map.extract(key);
-    }
+    //if (obj)
+    //{
+    //    auto insert = instance_map.try_emplace(key, obj);
+
+    //    if (insert.second == false)
+    //    {
+    //        throw winrt::hresult_invalid_argument(L"wrapped WinRT object already cached");
+    //    }
+    //}
+    //else
+    //{
+    //    // TODO: clean up the wrapped WinRT object. Currently leaking
+    //    instance_map.extract(key);
+    //}
 }
 
 PyObject* py::wrapped_instance(std::size_t key)
 {
-    auto const it = instance_map.find(key);
-    if (it == instance_map.end())
+    //auto const it = instance_map.find(key);
+    //if (it == instance_map.end())
     {
         return nullptr;
     }
 
-    return it->second;
+    //return it->second;
 }
 
 static PyObject* init_apartment(PyObject* /*unused*/, PyObject* /*unused*/)
