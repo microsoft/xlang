@@ -14,6 +14,16 @@ class TestXlangGeolocation(unittest.TestCase):
         self.assertEqual(type(info), _pyrt.IAsyncInfo)
         info.Cancel()
 
+    def test_geocircle(self):
+        basic_pos = {"Latitude":47.1, "Longitude":-122.1, "Altitude": 0.0}
+        geocircle = _pyrt.Geocircle(basic_pos, 10)
+        self.assertEqual(10, geocircle.Radius)
+        center = geocircle.Center
+
+        for x in ["Latitude", "Longitude", "Altitude"]:
+            self.assertEqual(basic_pos[x], center[x])
+
+
     def test_GetGeopositionAsync(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
@@ -46,6 +56,7 @@ class TestXlangGeolocation(unittest.TestCase):
             basic_pos = coord.Point.Position
             lat = basic_pos['Latitude']
             self.assertEqual(type(lat), float)
+            print(basic_pos['Latitude'], basic_pos['Longitude'])
 
         loop.run_until_complete(async_test())
 
