@@ -37,11 +37,12 @@ class TestXlangGeolocation(unittest.TestCase):
             op.Completed = callback
 
             pos = await future
+            self.assertEqual(type(pos), _pyrt.Geoposition)
 
             coord = pos.Coordinate
             ts = coord.Timestamp
             self.assertEqual(type(ts), int)
-            
+
             basic_pos = coord.Point.Position
             lat = basic_pos['Latitude']
             self.assertEqual(type(lat), float)
