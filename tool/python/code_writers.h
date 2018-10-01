@@ -1161,13 +1161,14 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
     {
         static PyObject* convert(winrt::Windows::Foundation::DateTime const& value) noexcept
         {
-            return converter<int64_t>::convert(value.time_since_epoch().count());
+            return converter<int64_t>::convert(winrt::get_abi(value));
         }
         
         static winrt::Windows::Foundation::DateTime convert_to(PyObject* value)
         {
-            winrt::Windows::Foundation::TimeSpan ts(converter<int64_t>::convert_to(value));
-            return winrt::Windows::Foundation::DateTime(ts);
+            winrt::Windows::Foundation::DateTime dt;
+            *put_abi(dt) = converter<int64_t>::convert_to(value);
+            return dt;
         }
     };
 
@@ -1182,12 +1183,14 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
     {
         static PyObject* convert(winrt::Windows::Foundation::TimeSpan const& value) noexcept
         {
-            return converter<int64_t>::convert(value.count());
+            return converter<int64_t>::convert(winrt::get_abi(value));
         }
         
         static winrt::Windows::Foundation::TimeSpan convert_to(PyObject* value)
         {
-            return winrt::Windows::Foundation::TimeSpan(converter<int64_t>::convert_to(value));
+            winrt::Windows::Foundation::TimeSpan ts;
+            *put_abi(ts) = converter<int64_t>::convert_to(value);
+            return ts;
         }
     };
 
@@ -1205,12 +1208,12 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             auto name = type.TypeName();
             if (name == "DateTime")
             {
-                write_datetime_converter(w);
+                //write_datetime_converter(w);
                 return;
             }
             else if (name == "TimeSpan")
             {
-                write_timespan_converter(w);
+                //write_timespan_converter(w);
                 return;
             }
             else if (name == "EventRegistrationToken" || name == "HResult")
@@ -1231,23 +1234,38 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
                         field.Name(),
                         field.Signature().Type(),
                         field.Name());
+
+                    w.write_indented("if (!py%) { return nullptr; }\n", field.Name());
+                }
+                w.write("\n");
+                w.write_indented("PyObject* dict = PyDict_New();\nif (!dict) { return nullptr; }\n\n");
+
+                for (auto&& field : type.FieldList())
+                {
+                    w.write_indented("if (PyDict_SetItemString(dict, \"%\", py%) != 0) { return nullptr; }\n", field.Name(), field.Name());
                 }
 
-                if (distance(type.FieldList()) == 1)
-                {
-                    w.write_indented("return py%;\n", type.FieldList().first.Name());
-                }
-                else
-                {
-                    w.write_indented("PyErr_SetNone(PyExc_NotImplementedError);\nreturn nullptr;\n");
-                }
+                w.write_indented("return dict;\n");
             }
             w.write_indented("}\n\n");
 
             w.write_indented("static % convert_to(PyObject* value)\n{\n", type);
             {
                 writer::indent_guard g2{ w };
-                w.write_indented("throw winrt::hresult_not_implemented();\n");
+
+                w.write_indented("if (!PyDict_CheckExact(value)) { throw winrt::hresult_invalid_argument(); }\n\n");
+
+                w.write_indented("% new_value{};\n", type);
+
+                for (auto&& field : type.FieldList())
+                {
+                    w.write_indented("new_value.% = converter<%>::convert_to(PyDict_GetItemString(value, \"%\"));\n",
+                        field.Name(),
+                        field.Signature().Type(),
+                        field.Name());
+                }
+
+                w.write_indented("return new_value;\n");
             }
             w.write_indented("}\n");
         }
