@@ -15,22 +15,32 @@ class TestXlangGeolocation(unittest.TestCase):
         info.Cancel()
 
     def test_GetGeopositionAsync(self):
-        locator = _pyrt.Geolocator()
-        
-        loop = asyncio.get_event_loop()
-        future = loop.create_future()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
 
-        def callback(operation, status):
-            self.assertEqual(status, 1)
-            result = operation.GetResults()
-            loop.call_soon_threadsafe(asyncio.Future.set_result, future, result)
+        async def async_test():
+            future = loop.create_future()
+            
+            def callback(operation, status):
+                if status == 1:
+                    result = operation.GetResults()
+                    loop.call_soon_threadsafe(asyncio.Future.set_result, future, result)
+                elif status == 2:
+                    loop.call_soon_threadsafe(asyncio.Future.set_exception, future, asyncio.CancelledError())
+                elif status == 3:
+                    loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("AsyncOp failed"))
+                else:
+                    loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("Unexpected AsyncStatus"))
+            
+            locator = _pyrt.Geolocator()
+            op = locator.GetGeopositionAsync()
+            op.Completed = callback
+            pos = await future
+            basic_pos = pos.Coordinate.Point.Position
+            lat = basic_pos['Latitude']
+            self.assertEqual(type(lat), float)
 
-        op = locator.GetGeopositionAsync()
-        op.Completed = callback
-
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(future)
-        loop.close()
+        loop.run_until_complete(async_test())
 
 if __name__ == '__main__':
     _pyrt.init_apartment()
