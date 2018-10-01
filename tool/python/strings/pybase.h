@@ -311,6 +311,48 @@ namespace py
     };
 
     template <>
+    struct converter<int64_t>
+    {
+        static PyObject* convert(int64_t value) noexcept
+        {
+            return PyLong_FromLongLong(value);
+        }
+
+        static int64_t convert_to(PyObject* obj)
+        {
+            auto result = PyLong_AsLongLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return result;
+        }
+    };
+
+    template <>
+    struct converter<uint64_t>
+    {
+        static PyObject* convert(uint64_t value) noexcept
+        {
+            return PyLong_FromUnsignedLongLong(value);
+        }
+
+        static uint64_t convert_to(PyObject* obj)
+        {
+            auto result = PyLong_AsUnsignedLongLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return result;
+        }
+    };
+
+    template <>
     struct converter<double>
     {
         static PyObject* convert(double value) noexcept
@@ -328,6 +370,34 @@ namespace py
             }
 
             return result;
+        }
+    };
+
+    template <>
+    struct converter<winrt::Windows::Foundation::DateTime>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::DateTime value) noexcept
+        {
+            return converter<int64_t>::convert(value.time_since_epoch().count());
+        }
+
+        static winrt::Windows::Foundation::DateTime convert_to(PyObject* obj)
+        {
+            return winrt::Windows::Foundation::DateTime{};
+        }
+    };
+
+    template <>
+    struct converter<winrt::Windows::Foundation::TimeSpan>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::TimeSpan value) noexcept
+        {
+            return converter<int64_t>::convert(value.count());
+        }
+
+        static winrt::Windows::Foundation::TimeSpan convert_to(PyObject* obj)
+        {
+            return winrt::Windows::Foundation::TimeSpan{};
         }
     };
 
@@ -478,16 +548,11 @@ namespace py
         {
             return delegate_python_type<T>::type::get(arg);
         }
-        else if constexpr (is_struct_category_v<T>)
-        {
-            throw winrt::hresult_not_implemented();
-            return T{};
-        }
         else if constexpr (is_enum_category_v<T>)
         {
             return static_cast<T>(convert_to<std::underlying_type_t<T>>(arg));
         }
-        else if constexpr (is_basic_category_v<T>)
+        else if constexpr (is_basic_category_v<T> || is_struct_category_v<T>)
         {
             return converter<T>::convert_to(arg);
         }

@@ -35,8 +35,14 @@ class TestXlangGeolocation(unittest.TestCase):
             locator = _pyrt.Geolocator()
             op = locator.GetGeopositionAsync()
             op.Completed = callback
+
             pos = await future
-            basic_pos = pos.Coordinate.Point.Position
+
+            coord = pos.Coordinate
+            ts = coord.Timestamp
+            self.assertEqual(type(ts), int)
+            
+            basic_pos = coord.Point.Position
             lat = basic_pos['Latitude']
             self.assertEqual(type(lat), float)
 

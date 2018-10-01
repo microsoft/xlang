@@ -1131,92 +1131,13 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             bind<write_python_delegate_type>(type));
     }
 
-
-    //void write_event_token_converter(writer& w)
-    //{
-    //    w.write_indented("template<>\nstruct converter<winrt::event_token>\n{\n");
-    //    {
-    //        writer::indent_guard g{ w };
-    //        w.write_indented("static PyObject* convert(winrt::event_token const& value) noexcept\n{\n");
-    //        {
-    //            writer::indent_guard g2{ w };
-    //            w.write_indented("return converter<int64_t>::convert(value);\n");
-    //        }
-    //        w.write_indented("}\n\n");
-
-    //        w.write_indented("static winrt::event_token convert_to(PyObject* value)\n{\n");
-    //        {
-    //            writer::indent_guard g2{ w };
-    //            w.write_indented("return converter<int64_t>::convert_to(value);\n");
-    //        }
-    //        w.write_indented("}\n");
-    //    }
-    //    w.write_indented("};\n\n");
-    //}
-
-    void write_datetime_converter(writer& w)
-    {
-        auto format = R"(    template<>
-    struct converter<winrt::Windows::Foundation::DateTime>
-    {
-        static PyObject* convert(winrt::Windows::Foundation::DateTime const& value) noexcept
-        {
-            return converter<int64_t>::convert(winrt::get_abi(value));
-        }
-        
-        static winrt::Windows::Foundation::DateTime convert_to(PyObject* value)
-        {
-            winrt::Windows::Foundation::DateTime dt;
-            *put_abi(dt) = converter<int64_t>::convert_to(value);
-            return dt;
-        }
-    };
-
-)";
-        w.write(format);
-    }
-
-    void write_timespan_converter(writer& w)
-    {
-        auto format = R"(    template<>
-    struct converter<winrt::Windows::Foundation::TimeSpan>
-    {
-        static PyObject* convert(winrt::Windows::Foundation::TimeSpan const& value) noexcept
-        {
-            return converter<int64_t>::convert(winrt::get_abi(value));
-        }
-        
-        static winrt::Windows::Foundation::TimeSpan convert_to(PyObject* value)
-        {
-            winrt::Windows::Foundation::TimeSpan ts;
-            *put_abi(ts) = converter<int64_t>::convert_to(value);
-            return ts;
-        }
-    };
-
-)";
-        w.write(format);
-    }
-
-
+    const std::set<std::string_view> custom_structs = { "DateTime", "TimeSpan", "EventRegistrationToken", "HResult" };
 
     void write_struct_converter(writer& w, TypeDef const& type)
     {
-        // C++/WinRT doesn't project EventRegistrationToken or HR
         if (type.TypeNamespace() == "Windows.Foundation")
         {
-            auto name = type.TypeName();
-            if (name == "DateTime")
-            {
-                //write_datetime_converter(w);
-                return;
-            }
-            else if (name == "TimeSpan")
-            {
-                //write_timespan_converter(w);
-                return;
-            }
-            else if (name == "EventRegistrationToken" || name == "HResult")
+            if (custom_structs.find(type.TypeName()) != custom_structs.end())
             {
                 return;
             }
