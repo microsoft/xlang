@@ -7,7 +7,7 @@
 
 extern "C"
 {
-    void* XLANG_CALL XlangMemAlloc(size_t count)
+    void* XLANG_CALL xlang_mem_alloc(size_t count)
     {
         if (count == 0)
         {
@@ -16,7 +16,7 @@ extern "C"
         return ::malloc(count);
     }
 
-    void XLANG_CALL XlangMemFree(void* ptr)
+    void XLANG_CALL xlang_mem_free(void* ptr)
     {
         ::free(ptr);
     }
