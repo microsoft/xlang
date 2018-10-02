@@ -1170,17 +1170,19 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             }
             w.write_indented("}\n\n");
 
-            w.write_indented("static % convert_to(PyObject* value)\n{\n", type);
+            w.write_indented("static % convert_to(PyObject* obj)\n{\n", type);
             {
                 writer::indent_guard g2{ w };
 
-                w.write_indented("if (!PyDict_CheckExact(value)) { throw winrt::hresult_invalid_argument(); }\n\n");
+                w.write_indented("if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }\n\n");
 
                 w.write_indented("% new_value{};\n", type);
 
                 for (auto&& field : type.FieldList())
                 {
-                    w.write_indented("new_value.% = converter<%>::convert_to(PyDict_GetItemString(value, \"%\"));\n",
+                    w.write_indented("PyObject* py% = PyDict_GetItemString(obj, \"%\");\n", field.Name(), field.Name());
+                    w.write_indented("if (!py%) { throw winrt::hresult_invalid_argument(); }\n", field.Name());
+                    w.write_indented("new_value.% = converter<%>::convert_to(py%);\n",
                         field.Name(),
                         field.Signature().Type(),
                         field.Name());

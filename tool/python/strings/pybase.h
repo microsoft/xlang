@@ -378,12 +378,24 @@ namespace py
     {
         static PyObject* convert(winrt::Windows::Foundation::DateTime value) noexcept
         {
-            return converter<int64_t>::convert(value.time_since_epoch().count());
+            PyObject* pyUniversalTime = converter<int64_t>::convert(value.time_since_epoch().count());
+            if (!pyUniversalTime) { return nullptr; }
+
+            PyObject* dict = PyDict_New();
+            if (!dict) { return nullptr; }
+
+            if (PyDict_SetItemString(dict, "UniversalTime", pyUniversalTime) != 0) { return nullptr; }
+            return dict;
         }
 
         static winrt::Windows::Foundation::DateTime convert_to(PyObject* obj)
         {
-            return winrt::Windows::Foundation::DateTime{};
+            if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
+
+            PyObject* pyUniversalTime = PyDict_GetItemString(obj, "UniversalTime");
+            if (!pyUniversalTime) { throw winrt::hresult_invalid_argument(); }
+            auto universal_time = converter<int64_t>::convert_to(pyUniversalTime);
+            return winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ universal_time } };
         }
     };
 
@@ -392,12 +404,24 @@ namespace py
     {
         static PyObject* convert(winrt::Windows::Foundation::TimeSpan value) noexcept
         {
-            return converter<int64_t>::convert(value.count());
+            PyObject* pyDuration = converter<int64_t>::convert(value.count());
+            if (!pyDuration) { return nullptr; }
+
+            PyObject* dict = PyDict_New();
+            if (!dict) { return nullptr; }
+
+            if (PyDict_SetItemString(dict, "Duration", pyDuration) != 0) { return nullptr; }
+            return dict;
         }
 
         static winrt::Windows::Foundation::TimeSpan convert_to(PyObject* obj)
         {
-            return winrt::Windows::Foundation::TimeSpan{};
+            if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
+
+            PyObject* pyDuration = PyDict_GetItemString(obj, "Duration");
+            if (!pyDuration) { throw winrt::hresult_invalid_argument(); }
+            auto duration = converter<int64_t>::convert_to(pyDuration);
+            return winrt::Windows::Foundation::TimeSpan{ duration };
         }
     };
 

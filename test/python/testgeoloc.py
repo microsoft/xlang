@@ -50,13 +50,12 @@ class TestXlangGeolocation(unittest.TestCase):
             self.assertEqual(type(pos), _pyrt.Geoposition)
 
             coord = pos.Coordinate
-            ts = coord.Timestamp
-            self.assertEqual(type(ts), int)
+            ut = coord.Timestamp['UniversalTime']
+            self.assertEqual(type(ut), int)
 
             basic_pos = coord.Point.Position
             lat = basic_pos['Latitude']
             self.assertEqual(type(lat), float)
-            print(basic_pos['Latitude'], basic_pos['Longitude'])
 
         loop.run_until_complete(async_test())
 
