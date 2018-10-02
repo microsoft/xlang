@@ -84,6 +84,13 @@ namespace py
     };
 
     template<typename T>
+    struct winrt_struct_wrapper
+    {
+        PyObject_HEAD;
+        T obj{ };
+    };
+
+    template<typename T>
     struct winrt_wrapper : winrt_wrapper_base
     {
         T obj{ nullptr };
@@ -153,6 +160,29 @@ namespace py
     inline auto get_instance_hash(T const& instance)
     {
         return std::hash<winrt::Windows::Foundation::IUnknown>{}(instance);
+    }
+
+    template<typename T>
+    PyObject* wrap_struct(T instance, PyTypeObject* type_object)
+    {
+        if (type_object == nullptr)
+        {
+            PyErr_SetNone(PyExc_NotImplementedError);
+            return nullptr;
+        }
+
+        auto py_instance = PyObject_New(py::winrt_struct_wrapper<T>, type_object);
+
+        if (!py_instance)
+        {
+            return nullptr;
+        }
+
+        // PyObject_New doesn't call type's constructor, so manually initialize the wrapper's fields
+        std::memset(&(py_instance->obj), 0, sizeof(py_instance->obj));
+        py_instance->obj = instance;
+
+        return reinterpret_cast<PyObject*>(py_instance);
     }
 
     template<typename T>
@@ -376,18 +406,6 @@ namespace py
     template <>
     struct converter<winrt::Windows::Foundation::DateTime>
     {
-        static PyObject* convert(winrt::Windows::Foundation::DateTime value) noexcept
-        {
-            PyObject* pyUniversalTime = converter<int64_t>::convert(value.time_since_epoch().count());
-            if (!pyUniversalTime) { return nullptr; }
-
-            PyObject* dict = PyDict_New();
-            if (!dict) { return nullptr; }
-
-            if (PyDict_SetItemString(dict, "UniversalTime", pyUniversalTime) != 0) { return nullptr; }
-            return dict;
-        }
-
         static winrt::Windows::Foundation::DateTime convert_to(PyObject* obj)
         {
             if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
@@ -402,18 +420,6 @@ namespace py
     template <>
     struct converter<winrt::Windows::Foundation::TimeSpan>
     {
-        static PyObject* convert(winrt::Windows::Foundation::TimeSpan value) noexcept
-        {
-            PyObject* pyDuration = converter<int64_t>::convert(value.count());
-            if (!pyDuration) { return nullptr; }
-
-            PyObject* dict = PyDict_New();
-            if (!dict) { return nullptr; }
-
-            if (PyDict_SetItemString(dict, "Duration", pyDuration) != 0) { return nullptr; }
-            return dict;
-        }
-
         static winrt::Windows::Foundation::TimeSpan convert_to(PyObject* obj)
         {
             if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
@@ -511,7 +517,11 @@ namespace py
         {
             return convert_enum(instance);
         }
-        else if constexpr (is_basic_category_v<T> || is_struct_category_v<T>)
+        else if constexpr (is_struct_category_v<T>)
+        {
+            return wrap_struct<T>(instance, winrt_type<T>::python_type);
+        }
+        else if constexpr (is_basic_category_v<T>)
         {
             return converter<T>::convert(instance);
         }
@@ -576,7 +586,21 @@ namespace py
         {
             return static_cast<T>(convert_to<std::underlying_type_t<T>>(arg));
         }
-        else if constexpr (is_basic_category_v<T> || is_struct_category_v<T>)
+        else if constexpr (is_struct_category_v<T>)
+        {
+            if (Py_TYPE(arg) == winrt_type<T>::python_type)
+            {
+                return reinterpret_cast<winrt_struct_wrapper<T>*>(arg)->obj;
+            }
+
+            if (PyDict_Check(arg))
+            { 
+                return converter<T>::convert_to(arg);
+            }
+
+            throw winrt::hresult_invalid_argument();
+        }
+        else if constexpr (is_basic_category_v<T>)
         {
             return converter<T>::convert_to(arg);
         }

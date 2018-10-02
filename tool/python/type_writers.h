@@ -141,6 +141,10 @@ namespace xlang
                     while (pos != std::string::npos)
                     {
                         value_.insert(pos + 1, indentation);
+                        if (pos == 0)
+                        {
+                            break;
+                        }
                         pos = value_.find_last_of('\n', pos - 1);
                     }
 

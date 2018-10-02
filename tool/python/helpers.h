@@ -30,6 +30,100 @@ namespace xlang
         }
     };
 
+    template <typename T>
+    struct signature_handler_base
+    {
+        void handle_class(TypeDef const& /*type*/) {}
+        void handle_delegate(TypeDef const& /*type*/) {}
+        void handle_enum(TypeDef const& /*type*/) {}
+        void handle_guid(TypeRef const& /*type*/) {}
+        void handle_interface(TypeDef const& /*type*/) {}
+        void handle_struct(TypeDef const& /*type*/) {}
+
+        void handle(TypeRef const& type)
+        {
+            auto ns = type.TypeNamespace();
+            auto name = type.TypeName();
+
+            if (name == "Guid" && ns == "System")
+            {
+                static_cast<T*>(this)->handle_guid(type);
+            }
+            else
+            {
+                static_cast<T*>(this)->handle(find_required(type));
+            }
+        }
+
+        void handle(TypeDef const& type)
+        {
+            switch (get_category(type))
+            {
+            case category::class_type:
+                static_cast<T*>(this)->handle_class(type);
+                break;
+            case category::delegate_type:
+                static_cast<T*>(this)->handle_delegate(type);
+                break;
+            case category::interface_type:
+                static_cast<T*>(this)->handle_interface(type);
+                break;
+            case category::enum_type:
+                static_cast<T*>(this)->handle_enum(type);
+                break;
+            case category::struct_type:
+                static_cast<T*>(this)->handle_struct(type);
+                break;
+            }
+        }
+
+        void handle(coded_index<TypeDefOrRef> const& type)
+        {
+            switch (type.type())
+            {
+            case TypeDefOrRef::TypeDef:
+                static_cast<T*>(this)->handle(type.TypeDef());
+                break;
+
+            case TypeDefOrRef::TypeRef:
+                static_cast<T*>(this)->handle(type.TypeRef());
+                break;
+
+            case TypeDefOrRef::TypeSpec:
+                static_cast<T*>(this)->handle(type.TypeSpec().Signature().GenericTypeInst());
+                break;
+            }
+        }
+
+        void handle_start_generic() {}
+
+        void handle_end_generic() {}
+
+        void handle(GenericTypeInstSig const& type)
+        {
+            handle(type.GenericType());
+            static_cast<T*>(this)->handle_start_generic();
+            for (auto&& arg : type.GenericArgs())
+            {
+                handle(arg);
+            }
+            static_cast<T*>(this)->handle_end_generic();
+        }
+
+        void handle(ElementType /*type*/) {}
+
+        void handle(GenericTypeIndex /*var*/) { }
+
+        void handle(TypeSig const& signature)
+        {
+            visit(signature.Type(),
+                [&](auto&& type)
+            {
+                static_cast<T*>(this)->handle(type);
+            });
+        }
+    };
+
     struct method_signature
     {
         using param_t = std::pair<Param, ParamSig const*>;
@@ -305,7 +399,9 @@ namespace xlang
 
     bool has_getsets(TypeDef const& type)
     {
-        return get_instance_properties(type).size() > 0 || get_instance_events(type).size() > 0;
+        return get_instance_properties(type).size() > 0 
+            || get_instance_events(type).size() > 0 
+            || distance(type.FieldList()) > 0;
     }
 
     bool has_dealloc(TypeDef const& type)

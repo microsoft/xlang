@@ -21,11 +21,11 @@ class TestXlangJson(unittest.TestCase):
         self.assertEqual(o.Stringify(), "{}")
 
     def test_cant_activate_JsonError(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             e = _pyrt.JsonError()
 
     def test_cant_activate_JsonValue(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             v = _pyrt.JsonValue()
 
     def test_JsonArray_parse(self):

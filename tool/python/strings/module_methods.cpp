@@ -1,6 +1,9 @@
 
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
+// not sure why I need this:
+PyTypeObject* py::winrt_type<winrt::hresult>::python_type;
+
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
 
 static PyType_Slot winrt_base_Type_slots[] =

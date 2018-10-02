@@ -87,6 +87,10 @@ namespace xlang
         {
             w.write("py::winrt_pinterface_wrapper<py@>", type.TypeName());
         }
+        else if (get_category(type) == category::struct_type)
+        {
+            w.write("py::winrt_struct_wrapper<%>", type);
+        }
         else
         {
             w.write("py::winrt_wrapper<%>", type);
@@ -111,6 +115,17 @@ namespace xlang
             setter);
     }
 
+    void write_getset_table_field_row(writer& w, Field const& field)
+    {
+        // TODO: remove const_cast once pywinrt is updated to target Python 3.7. 
+        //       pywinrt currently targeting 3.6 because that's the version that ships with VS 2017 v15.8
+        //       https://github.com/python/cpython/commit/007d7ff73f4e6e65cfafd512f9c23f7b7119b803
+        w.write("    { const_cast<char*>(\"%\"), (getter)@_get_%, (setter)@_set_%, nullptr, nullptr },\n",
+            field.Name(),
+            field.Parent().TypeName(), field.Name(),
+            field.Parent().TypeName(), field.Name());
+    }
+
     //void write_getset_table_row_event(writer& w, Event const& event)
     //{
     //    // TODO: remove const_cast once pywinrt is updated to target Python 3.7. 
@@ -129,6 +144,7 @@ namespace xlang
             w.write_each<write_getset_table_prop_row>(get_instance_properties(type));
             //w.write_each<write_class_getset_table_row_event>(get_instance_events(type));
 
+            w.write_each< write_getset_table_field_row>(type.FieldList());
             w.write("    { nullptr }\n};\n");
         }
     }
@@ -179,18 +195,15 @@ namespace xlang
 
     void write_type_slot_table(writer& w, TypeDef const& type)
     {
-        auto format = R"(
-static PyType_Slot @_Type_slots[] = 
-{
-    { Py_tp_base, nullptr }, // filled out in module init
-    { Py_tp_new, @_new },
-)";
-        w.write(format, type.TypeName(), type.TypeName());
+        w.write("\nstatic PyType_Slot @_Type_slots[] = \n{\n", type.TypeName());
 
         if (has_dealloc(type))
         {
+            w.write("    { Py_tp_base, nullptr }, // filled out in module init\n");
             w.write("    { Py_tp_dealloc, @_dealloc },\n", type.TypeName());
         }
+
+        w.write("    { Py_tp_new, @_new },\n", type.TypeName());
 
         if (has_methods(type))
         {
@@ -200,11 +213,6 @@ static PyType_Slot @_Type_slots[] =
         if (has_getsets(type))
         {
             w.write("    { Py_tp_getset, @_getset },\n", type.TypeName());
-        }
-
-        if (distance(type.FieldList()) > 0)
-        {
-            w.write("    { Py_tp_members, @_members },\n", type.TypeName());
         }
 
         w.write("    { 0, nullptr },\n};\n");
@@ -616,7 +624,7 @@ static PyType_Spec @_Type_spec =
         auto constructors = get_constructors(type);
         if (type.Flags().Abstract() || constructors.size() == 0)
         {
-            auto format = R"(    PyErr_SetString(PyExc_RuntimeError, "% is not activatable");
+            auto format = R"(    PyErr_SetString(PyExc_TypeError, "% is not activatable");
     return nullptr;
 )";
             w.write(format, type.TypeName());
@@ -625,7 +633,7 @@ static PyType_Spec @_Type_spec =
         {
             w.write(R"(    if (kwds != nullptr)
     {
-        PyErr_SetString(PyExc_RuntimeError, "keyword arguments not supported");
+        PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
         return nullptr;
     }
 
@@ -1146,29 +1154,29 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         w.write_indented("template<>\nstruct converter<%>\n{\n", type);
         {
             writer::indent_guard g{ w };
-            w.write_indented("static PyObject* convert(% const& value) noexcept\n{\n", type);
-            {
-                writer::indent_guard g2{ w };
-                for (auto&& field : type.FieldList())
-                {
-                    w.write_indented("PyObject* py% = converter<%>::convert(value.%);\n",
-                        field.Name(),
-                        field.Signature().Type(),
-                        field.Name());
+            //w.write_indented("static PyObject* convert(% const& value) noexcept\n{\n", type);
+            //{
+            //    writer::indent_guard g2{ w };
+            //    for (auto&& field : type.FieldList())
+            //    {
+            //        w.write_indented("PyObject* py% = converter<%>::convert(value.%);\n",
+            //            field.Name(),
+            //            field.Signature().Type(),
+            //            field.Name());
 
-                    w.write_indented("if (!py%) { return nullptr; }\n", field.Name());
-                }
-                w.write("\n");
-                w.write_indented("PyObject* dict = PyDict_New();\nif (!dict) { return nullptr; }\n\n");
+            //        w.write_indented("if (!py%) { return nullptr; }\n", field.Name());
+            //    }
+            //    w.write("\n");
+            //    w.write_indented("PyObject* dict = PyDict_New();\nif (!dict) { return nullptr; }\n\n");
 
-                for (auto&& field : type.FieldList())
-                {
-                    w.write_indented("if (PyDict_SetItemString(dict, \"%\", py%) != 0) { return nullptr; }\n", field.Name(), field.Name());
-                }
+            //    for (auto&& field : type.FieldList())
+            //    {
+            //        w.write_indented("if (PyDict_SetItemString(dict, \"%\", py%) != 0) { return nullptr; }\n", field.Name(), field.Name());
+            //    }
 
-                w.write_indented("return dict;\n");
-            }
-            w.write_indented("}\n\n");
+            //    w.write_indented("return dict;\n");
+            //}
+            //w.write_indented("}\n\n");
 
             w.write_indented("static % convert_to(PyObject* obj)\n{\n", type);
             {
@@ -1198,191 +1206,233 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 
 
 
+    struct struct_ctor_format_writer : public signature_handler_base<struct_ctor_format_writer>
+    {
+        using signature_handler_base<struct_ctor_format_writer>::handle;
 
+        writer& w;
 
+        struct_ctor_format_writer(writer& wr) : w(wr)
+        {
+        }
 
+        void handle(GenericTypeIndex) { throw_invalid("struct_ctor_format_writer GenericTypeIndex not supported"); }
+        void handle(GenericTypeInstSig const&) { throw_invalid("struct_ctor_format_writer GenericTypeInstSig not supported"); }
+        void handle(TypeDef const&) { throw_invalid("struct_ctor_format_writer TypeDef not impl"); }
+        void handle(TypeRef const&) { throw_invalid("struct_ctor_format_writer TypeRef not impl"); }
 
+        void handle(ElementType type)
+        {
+            switch (type)
+            {
+            case ElementType::Boolean:
+                w.write("p");
+                break;
+            //case ElementType::Char:
+            //    w.write("wchar_t");
+            //    break;
+            case ElementType::I1:
+                w.write("int8_t");
+                break;
+            case ElementType::U1:
+                w.write("uint8_t");
+                break;
+            case ElementType::I2:
+                w.write("h");
+                break;
+            case ElementType::U2:
+                w.write("H");
+                break;
+            case ElementType::I4:
+                w.write("i");
+                break;
+            case ElementType::U4:
+                w.write("I");
+                break;
+            case ElementType::I8:
+                w.write("L");
+                break;
+            case ElementType::U8:
+                w.write("K");
+                break;
+            case ElementType::R4:
+                w.write("f");
+                break;
+            case ElementType::R8:
+                w.write("d");
+                break;
+            //case ElementType::String:
+            //    w.write("winrt::hstring");
+            //    break;
+            //case ElementType::Object:
+            //    w.write("winrt::Windows::Foundation::IInspectable");
+            //    break;
+            default:
+                throw_invalid("struct_ctor_format_writer element type not impl");
+            }
+        }
+    };
 
+    void write_struct_field_name(writer& w, Field const& field)
+    {
+        w.write("_%", field.Name());
+    }
 
+    void write_struct_field_format(writer& w, Field const& field)
+    {
+        struct_ctor_format_writer format_writer{ w };
+        format_writer.handle(field.Signature().Type());
+    }
 
+    void write_struct_field_keyword(writer& w, Field const& field)
+    {
+        w.write("\"%\", ", field.Name());
+    }
 
-//    void write_struct_constructor(writer& w, TypeDef const& type)
-//    {
-//        // TODO: replace stub constructor with real code
-//        auto format = R"(
-//PyObject* %_constructor(PyTypeObject* type, PyObject* args, PyObject* kwds)
-//{
-//    if (kwds != nullptr)
-//    {
-//        PyErr_SetString(PyExc_RuntimeError, "keyword arguments not supported");
-//        return nullptr;
-//    }
-//
-//    Py_ssize_t arg_count = PyTuple_Size(args);
-//
-//    if (arg_count == 0)
-//    {
-//        //auto py_instance = PyObject_New(%, reinterpret_cast<PyTypeObject*>(py::winrt_type<%>::python_type));
-//
-//        //if (!py_instance)
-//        //{
-//        //    return nullptr;
-//        //}
-//
-//        //// PyObject_New doesn't call type's constructor, so manually initialize the contained struct
-//        //std::memset(&(py_instance->value), 0, sizeof(%));
-//        //return reinterpret_cast<PyObject*>(py_instance);
-//
-//        PyErr_SetNone(PyExc_NotImplementedError);
-//        return nullptr;
-//    }
-//    else if (arg_count == -1)
-//    {
-//        return nullptr; 
-//    }
-//
-//    PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
-//    return nullptr;
-//}
-//)";
-//        w.write(format, type.TypeName(), type.TypeName(), type, type);
-//    }
-//
-//    void write_struct_type(writer& w, FieldSig const& signature)
-//    {
-//        auto process_typedef = [&](TypeDef const& type)
-//        {
-//            auto category = get_category(type);
-//            if (category == category::enum_type)
-//            {
-//                if (is_flags_enum(type))
-//                {
-//                    w.write("T_UINT");
-//                }
-//                else
-//                {
-//                    w.write("T_INT");
-//                }
-//            }
-//            else if (category == category::struct_type)
-//            {
-//                throw_invalid("struct hierarchy not impl");
-//            }
-//            else
-//            {
-//                throw_invalid("invalid struct member");
-//            }
-//        };
-//
-//        return visit(signature.Type().Type(),
-//            [&](coded_index<TypeDefOrRef> const& index)
-//        {
-//            switch (index.type())
-//            {
-//            case TypeDefOrRef::TypeDef:
-//                return process_typedef(index.TypeDef());
-//            case TypeDefOrRef::TypeRef:
-//            {
-//                auto tr = index.TypeRef();
-//                if (tr.TypeNamespace() == "System" & tr.TypeName() == "Guid")
-//                {
-//                    throw_invalid("struct guid not impl");
-//                }
-//                if (tr.TypeNamespace() == "Windows.Foundation")
-//                {
-//                    if (tr.TypeName() == "DateTime" || tr.TypeName() == "TimeSpan")
-//                    {
-//                        w.write("T_LONGLONG");
-//                        return;
-//                    }
-//                }
-//                return process_typedef(find(tr));
-//            }
-//            case TypeDefOrRef::TypeSpec:
-//                throw_invalid("struct TypeSpec not supported");
-//            }
-//        },
-//            [&](ElementType type)
-//        {
-//            switch (type)
-//            {
-//            case ElementType::I2:
-//                w.write("T_SHORT");
-//                break;
-//            case ElementType::U2:
-//                w.write("T_USHORT");
-//                break;
-//            case ElementType::I4:
-//                w.write("T_INT");
-//                break;
-//            case ElementType::U4:
-//                w.write("T_UINT");
-//                break;
-//            case ElementType::I8:
-//                w.write("T_LONGLONG");
-//                break;
-//            case ElementType::U8:
-//                w.write("T_ULONGLONG");
-//                break;
-//            case ElementType::R4:
-//                w.write("T_FLOAT");
-//                break;
-//            case ElementType::R8:
-//                w.write("T_DOUBLE");
-//                break;
-//            default:
-//                throw_invalid("struct element type not impl");
-//            }
-//        },
-//            [&](GenericTypeInstSig const&) { throw_invalid("struct GenericTypeInstSig not supported"); },
-//            [&](GenericTypeIndex) { throw_invalid("struct GenericTypeIndex not supported"); });
-//    }
-//
-//    void write_struct(writer& w, TypeDef const& type)
-//    {
-//        auto guard{ w.push_generic_params(type.GenericParam()) };
-//
-//        w.write("\n// ----- % struct --------------------\n", type.TypeName());
-//
-//        auto format = R"(
-//struct %
-//{
-//    PyObject_HEAD
-//    % value{};
-//};
-//)";
-//        w.write(format, type.TypeName(), type);
-//
-//        write_struct_constructor(w, type);
-//
-//        w.write("\nstatic PyMemberDef %_members[] = {\n", type.TypeName());
-//
-//        // TODO: remove const_cast once pywinrt is updated to target Python 3.7. 
-//        //       pywinrt currently targeting 3.6 because that's the version that ships with VS 2017 v15.8
-//        //       https://github.com/python/cpython/commit/007d7ff73f4e6e65cfafd512f9c23f7b7119b803
-//
-//        for (auto&& field : type.FieldList())
-//        {
-//            w.write("    { const_cast<char*>(\"%\"), %, offsetof(%, value.%), 0, nullptr },\n", field.Name(), bind<write_struct_type>(field.Signature()), type.TypeName(), field.Name());
-//        }
-//
-//        w.write("    { nullptr },\n};\n");
-//
-//        write_type_slot_table(w, type);
-//        write_type_spec(w, type);
-//    }
-//
-//    void write_delegate(writer& w, TypeDef const& type)
-//    {
-//        auto guard{ w.push_generic_params(type.GenericParam()) };
-//
-//        w.write("\n// ----- % delegate --------------------\n", type.TypeName());
-//    }
-//void write_enum(writer& w, TypeDef const& type)
-//{
-//    auto guard{ w.push_generic_params(type.GenericParam()) };
-//    w.write("\n// ----- % enum --------------------\n", type.TypeName());
-//}
+    void write_struct_field_parameter(writer& w, Field const& field)
+    {
+        w.write(", &%", bind<write_struct_field_name>(field));
+    }
+
+    void write_struct_constructor(writer& w, TypeDef const& type)
+    {
+        w.write_indented("PyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+
+            auto format = R"(if ((PyTuple_Size(args) == 0) && (kwds == nullptr))
+{
+    try
+    {
+        % instance{};
+        return py::wrap_struct(instance, type);
+    }
+    catch (...)
+    {
+        return py::to_PyErr();
+    }
+}
+
+)";
+            w.write_indented(format, type);
+
+            for (auto&& field : type.FieldList())
+            {
+                w.write_indented("% %{};\n", field.Signature().Type(), bind<write_struct_field_name>(field));
+            }
+
+            w.write_indented("static char* kwlist[] = {%nullptr};\n\n", bind_each<write_struct_field_keyword>(type.FieldList()));
+
+            w.write_indented("if (!PyArg_ParseTupleAndKeywords(args, kwds, \"%\", kwlist%))\n{\n    return nullptr;\n}\n",
+                bind_each<write_struct_field_format>(type.FieldList()),
+                bind_each<write_struct_field_parameter>(type.FieldList()));
+
+            w.write_indented("\ntry\n{\n");
+            {
+                writer::indent_guard gg{ w };
+                w.write_indented("% instance{ % };\n", type, bind_list<write_struct_field_name>(", ", type.FieldList()));
+                w.write_indented("return py::wrap_struct(instance, type);\n");
+            }
+            w.write_indented(R"(}
+catch (...)
+{
+    return py::to_PyErr();
+}
+)");
+
+        }
+        w.write_indented("}\n");
+    }
+
+    void write_struct_property(writer& w, Field const& field)
+    {
+        {
+            auto format = R"(
+static PyObject* @_get_%(%* self, void* /*unused*/)
+{
+    try
+    {
+        return py::convert(self->obj.%);
+    }
+    catch (...)
+    {
+        return py::to_PyErr();
+    }
+}
+)";
+            w.write(format,
+                field.Parent().TypeName(),
+                field.Name(),
+                bind<write_winrt_wrapper>(field.Parent()),
+                field.Name());
+        }
+
+        {
+            auto format = R"(
+static int @_set_%(%* self, PyObject* value, void* /*unused*/)
+{
+    if (value == nullptr)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "property delete not supported");
+        return -1;
+    }
+    
+    try
+    {
+        self->obj.% = py::convert_to<%>(value);
+        return 0;
+    }
+    catch (...)
+    {
+        return -1;
+    }
+}
+)";
+            w.write(format,
+                field.Parent().TypeName(),
+                field.Name(),
+                bind<write_winrt_wrapper>(field.Parent()),
+                field.Name(), 
+                field.Signature().Type());
+        }
+    }
+
+    void write_struct(writer& w, TypeDef const& type)
+    {
+        auto ns = type.TypeNamespace();
+        auto name = type.TypeName();
+        if (ns == "Windows.Foundation")
+        {
+            if (name == "EventRegistrationToken" || name == "HResult")
+            {
+                return;
+            }
+        }
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        w.write_indented("\n// ----- % struct --------------------\n", type.TypeName());
+        w.write_indented("PyTypeObject* py::winrt_type<%>::python_type;\n\n", type);
+
+        if (ns == "Windows.Foundation" && name == "DateTime")
+        {
+            w.write(strings::wfDateTime);
+        }
+        else if (ns == "Windows.Foundation" && name == "TimeSpan")
+        {
+            w.write(strings::wfTimeSpan);
+        }
+        else
+        {
+            write_struct_constructor(w, type);
+            w.write_each<write_struct_property>(type.FieldList());
+        }
+
+        write_getset_table(w, type);
+        write_type_slot_table(w, type);
+        write_type_spec(w, type);
+    }
+
 
 
 
@@ -1403,25 +1453,37 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             return;
         }
 
+        if (type.TypeNamespace() == "Windows.Foundation")
+        {
+            auto name = type.TypeName();
+            if (name == "EventRegistrationToken" || name == "HResult")
+            {
+                return;
+            }
+        }
+
         auto winrt_type_param = is_ptype(type)
             ? w.write_temp("py@", type.TypeName())
             : w.write_temp("%", type);
 
-        auto format = R"(
-    @_Type_slots[0].pfunc = py::winrt_type<py::winrt_base>::python_type;
-    type_object = PyType_FromSpec(&@_Type_spec);
-    if (type_object == nullptr)
-    {
-        return -1;
-    }
-    if (PyModule_AddObject(module, "@", type_object) != 0)
-    {
-        return -1;
-    }
-    py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
+        w.write("\n");
+        if (has_dealloc(type))
+        {
+            w.write_indented("@_Type_slots[0].pfunc = py::winrt_type<py::winrt_base>::python_type;\n", type.TypeName());
+        }
+
+        auto format = R"(type_object = PyType_FromSpec(&@_Type_spec);
+if (type_object == nullptr)
+{
+    return -1;
+}
+if (PyModule_AddObject(module, "@", type_object) != 0)
+{
+    return -1;
+}
+py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
 )";
-        w.write(format, 
-            type.TypeName(), 
+        w.write_indented(format,
             type.TypeName(), 
             type.TypeName(),
             winrt_type_param);
