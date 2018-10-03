@@ -1,3 +1,13 @@
+winrt::Windows::Foundation::DateTime py::converter<winrt::Windows::Foundation::DateTime>::convert_to(PyObject* obj)
+{
+    if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
+
+    PyObject* pyUniversalTime = PyDict_GetItemString(obj, "UniversalTime");
+    if (!pyUniversalTime) { throw winrt::hresult_invalid_argument(); }
+    auto universal_time = converter<int64_t>::convert_to(pyUniversalTime);
+    return winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ universal_time } };
+}
+
 PyObject* DateTime_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     if ((PyTuple_Size(args) == 0) && (kwds == nullptr))

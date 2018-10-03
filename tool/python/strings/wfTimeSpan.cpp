@@ -1,3 +1,13 @@
+winrt::Windows::Foundation::TimeSpan py::converter<winrt::Windows::Foundation::TimeSpan>::convert_to(PyObject* obj)
+{
+    if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
+
+    PyObject* pyDuration = PyDict_GetItemString(obj, "Duration");
+    if (!pyDuration) { throw winrt::hresult_invalid_argument(); }
+    auto duration = converter<int64_t>::convert_to(pyDuration);
+    return winrt::Windows::Foundation::TimeSpan{ duration };
+}
+
 PyObject* TimeSpan_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     if ((PyTuple_Size(args) == 0) && (kwds == nullptr))

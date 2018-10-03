@@ -29,6 +29,25 @@ class TestXlangNumerics(unittest.TestCase):
         self.assertEqual(v.Y, 2.0)
         self.assertEqual(v.Z, 3.0)
 
+    def test_plane(self):
+        v = _pyrt.Vector3(1.0, 2.0, 3.0)
+        p = _pyrt.Plane(v, 4.0)
+        n = p.Normal
+
+        self.assertEqual(n.X, 1.0)
+        self.assertEqual(n.Y, 2.0)
+        self.assertEqual(n.Z, 3.0)
+        self.assertEqual(p.D, 4.0)
+    
+    def test_plane_dict(self):
+        p = _pyrt.Plane({"X":1.0, "Y":2.0, "Z":3.0}, 4.0)
+        n = p.Normal
+
+        self.assertEqual(n.X, 1.0)
+        self.assertEqual(n.Y, 2.0)
+        self.assertEqual(n.Z, 3.0)
+        self.assertEqual(p.D, 4.0)
+
 if __name__ == '__main__':
     _pyrt.init_apartment()
     unittest.main()

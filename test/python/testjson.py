@@ -83,15 +83,6 @@ class TestXlangJson(unittest.TestCase):
         self.assertEqual(t.ValueType, 2)
         self.assertEqual(t.GetNumber(), 42)
 
-    # def test_JsonArray(self):
-    #     a = _pyrt.JsonArray()
-    #     v = _pyrt.JsonValue.CreateNumberValue(3)
-    #     a.InsertAt(0, _pyrt.JsonValue.CreateNumberValue(3))
-    #     a.InsertAt(0, _pyrt.JsonValue.CreateNumberValue(2))
-    #     a.InsertAt(0, _pyrt.JsonValue.CreateNumberValue(1))
-
-
-
     def test_JsonValue_string(self):
         t = _pyrt.JsonValue.CreateStringValue("Plugh")
         self.assertEqual(t.ValueType, 3)

@@ -424,34 +424,6 @@ namespace py
         }
     };
 
-    template <>
-    struct converter<winrt::Windows::Foundation::DateTime>
-    {
-        static winrt::Windows::Foundation::DateTime convert_to(PyObject* obj)
-        {
-            if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
-
-            PyObject* pyUniversalTime = PyDict_GetItemString(obj, "UniversalTime");
-            if (!pyUniversalTime) { throw winrt::hresult_invalid_argument(); }
-            auto universal_time = converter<int64_t>::convert_to(pyUniversalTime);
-            return winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ universal_time } };
-        }
-    };
-
-    template <>
-    struct converter<winrt::Windows::Foundation::TimeSpan>
-    {
-        static winrt::Windows::Foundation::TimeSpan convert_to(PyObject* obj)
-        {
-            if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }
-
-            PyObject* pyDuration = PyDict_GetItemString(obj, "Duration");
-            if (!pyDuration) { throw winrt::hresult_invalid_argument(); }
-            auto duration = converter<int64_t>::convert_to(pyDuration);
-            return winrt::Windows::Foundation::TimeSpan{ duration };
-        }
-    };
-
     struct pystring
     {
         wchar_t* buffer{ nullptr };
