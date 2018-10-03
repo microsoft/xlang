@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 project(test_platform)
 
 add_executable(test_platform "")
-target_sources(test_platform PUBLIC pch.cpp memory.cpp)
+target_sources(test_platform PUBLIC pch.cpp memory.cpp string.cpp)
 
 CONSUME_PAL(test_platform)
 
