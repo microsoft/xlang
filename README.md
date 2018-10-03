@@ -3,7 +3,7 @@
 ## Overview
 Xlang is a system that enables a component written in any supported language to be callable from any other supported language using object-oriented programming constructs.  
 
-For details on project structure and build process, please see [Project Structure](project.md).
+For details on project structure and build process, please see [Project Readme](./src/readme.md).
 
 For technical design details, please see the [Design Notes](./DesignNotes).
 

@@ -55,13 +55,37 @@ The **/script** folder contains the scripts and tools used to build and bootstra
 
 **bionicRunDump.cmd / windowsRunDump.cmd** runs the dump application from the _build folder for Ubuntu 18.04 on WSL and Windows respectively.
 
-## CMake
+## Building
 
-xlang uses CMake instead of vcxproj in order to support cross platform build. 
+### Prerequisites
+
+Xlang currently requires the following to be installed
+* [Visual Studio 15.8.6](https://visualstudio.microsoft.com/downloads/) (or later)
+* [Windows SDK 17663](http://go.microsoft.com/fwlink/?LinkID=2023014) (or later)
+* [CMake 3.5](http://cmake.org/) (or later) 
+* [Ninja build](https://ninja-build.org/)
+
+
+### Known Issues
+
+The following build failures indicate using outdated tools:
+
+> xlang\platform\string_base.h(74): error C2327: 'xlang::impl::string_storage_base::alternate_form': is not a type name, static, or enumerator
+
+    Solution: upgrade to Visual Studio 15.8.6 or later
+
+> C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\cppwinrt\winrt\base.h(2185): error C3861: 'from_abi': identifier not found
+
+    Solution: upgrade to Windows SDK 17663 or later
+
+
+### CMake
+
+xlang uses CMake instead of vcxproj in order to support cross platform builds. 
 
 ### Visual Studio 2017
 
-Visual Studio 2017 has built in CMake support. For best results, use the latest update (15.7.4 as of this writing).
+Visual Studio 2017 has built in CMake support. For best results, use the latest update.
 
 1. Select File -> Open -> CMake... from the main menu, navigate to the root of this repo and select the CMakeLists.txt file.
 2. Wait a bit for VS to parse the CMake files. 
@@ -70,10 +94,9 @@ Visual Studio 2017 has built in CMake support. For best results, use the latest 
 4. To enable F5 debugging, you can right-click on main.cpp in solution explorer and choose Set as Startup Item. You can also select dump.exe from the Select Startup Item dropdown on the standard toolbar in VS (i.e. the one with the big green arrow). 
     * You can also debug a specific app in the repo by right clicking a source file in Solution Explorer and selecting Debug from the context menu. For example, right clicking on tool/dump/main.cpp and selecting Debug will launch dump.exe under the debugger.
 
-## Command Line
-
-To build from the command line, you will need Visual Studio 2017, [CMake 3.5](http://cmake.org/) (or later) and [Ninja build](https://ninja-build.org/) installed. 
+### Command Line
 
 Using CMake is a two step process - you must generate the build files and then build. The build scripts described above execute both steps every time they are run, though re-running cmake is redundant. 
 
 CMake must generate build files into a folder other than where the source files are located. As described above, VS generates the build files into a folder under %USERPROFILE%\CMakeBuilds. The command line scripts generate the build files into the _build subdirectory. This repo has configured git to ignore the _build subfolder.
+
