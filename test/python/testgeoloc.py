@@ -54,14 +54,14 @@ class TestXlangGeolocation(unittest.TestCase):
             self.assertEqual(type(pos), _pyrt.Geoposition)
 
             coord = pos.Coordinate
-            # ut = coord.Timestamp['UniversalTime']
-            # self.assertEqual(type(ut), int)
+            self.assertEqual(type(pos.Coordinate.Timestamp.UniversalTime), int)
 
             basic_pos = coord.Point.Position
             lat = basic_pos.Latitude
             self.assertEqual(type(lat), float)
 
         loop.run_until_complete(async_test())
+        loop.close()
 
 if __name__ == '__main__':
     _pyrt.init_apartment()
