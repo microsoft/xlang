@@ -11,48 +11,30 @@ status: draft
 
 ## Abstract
 
-This Design Note describes the Langworthy type system.
+This Design Note describes the xlang type system.
 
-> Note, this document is 1/2 of the original WinRT Consolidated Reference and has not yet been updated to use cross-platfrom terminology 
+*Open Issue*: This specification was adapted from the Windows Runtime specification,and still refers to fundamental interfaces that are part of the Windows Runtime and to various COM constructs. As equivalent xlang constructs are defined, this specification needs to be updated to remove COM concepts & references and instead reflect the equivalent xlang concepts.
 
 General Notes
 -------------
 
-All types, except for the fundamental types, must be contained within a
-namespace. No types in the global namespace are allowed
+All types must be contained within a namespace. No types in the global namespace 
+are allowed
 
-Types provided by Windows are all contained under the Windows.\* namespace.
-WinRT types that are not provided by Windows - including WinRT types that are
-provided by other parts of Microsoft – must live in a namespace other than
-Windows.\*
-
-Except for interfaces, all WinRT types must have public visibility. WinRT
-interfaces may optionally have private visibility. All other user-defined WinRT
+Except for interfaces, all xlang types must have public visibility. xlang
+interfaces may optionally have private visibility. All other user-defined xlang
 types (structs, classes, enums, delegates, attributes) must have public
 visibility.
 
-WinRT does not support nested types. No WinRT type can enclose another type. No
-WinRT type can be nested inside another type
+xlang does not support nested types. No xlang type can enclose another type. No
+xlang type can be nested inside another type
 
-Not all aspects of this WinRT type system are available to third party
-developers in Win8. In particular:
+xlang namespaces and type names are case preserving but insensitive. This means 
+that you cannot have namespaces or type names that vary only by case. For 
+example: you cannot have Foo.SomeType and foo.AnotherType nor can you have 
+Foo.SomeType and Foo.someType.
 
--   WinRT supports parameterization of interfaces and delegates. However, in
-    this release WinRT does not support definition of parameterized types by 3rd
-    parties. Only the parameterized types included in the system in the
-    Windows.\* namespace are supported
-
--   WinRT support class composition as a runtime inheritance mechanism. However,
-    in this release WinRT does not support definition of a root composable
-    class. Only the root composable classes included in the system in the
-    Windows.\* namespace are supported.
-
-WinRT namespaces and type names are case preserving but insensitive, similar to
-the Windows File System and Registry. This means that you cannot have namespaces
-or type names that vary only by case. For example: you cannot have Foo.SomeType
-and foo.AnotherType nor can you have Foo.SomeType and Foo.someType.
-
-WinRT identifiers must conform to the following grammar. Note, only characters
+xlang identifiers must conform to the following grammar. Note, only characters
 defined in Unicode 3.0 and earlier are supported.
 
 ```
@@ -94,7 +76,7 @@ formatting-character:
 Parameterized Types
 -------------------
 
-WinRT supports type parameterization of interfaces and delegates. The
+xlang supports type parameterization of interfaces and delegates. The
 parameterized types permit a family of interfaces to be defined that may be
 processed polymorphically in programming languages that support parametric
 polymorphism.
@@ -104,7 +86,7 @@ with an argument list of types in a type context, such as a method parameter
 position. For example, "HRESULT foo(X\<Y\> x)" instantiates the parameterized
 type named by "X" with the type “Y" as its first and only type argument.
 
-Unparameterized WinRT interfaces and delegates are assigned GUIDs to uniquely
+Unparameterized xlang interfaces and delegates are assigned GUIDs to uniquely
 identify the underlying interface from other interfaces on the same object.
 Parameterized interfaces (eg IVector\<T\>) and delegates (eg EventHandler\<T\>)
 are instead assigned a parameterized interface ID (PIID) - a GUID uniquely
@@ -113,20 +95,20 @@ generating IIDs for parameterized type instances (eg IVector\<int\>).
 
 ### Parameterized Types Arguments
 
-The following windows runtime types are permitted to appear in a parameterized
+The following xlang types are permitted to appear in a parameterized
 type argument list:
 
--   WinRT fundamental types (eg, Boolean, Int32, String, Guid, etc)
+-   xlang fundamental types (eg, Boolean, Int32, String, Guid, etc)
 
--   WinRT enums
+-   xlang enums
 
--   WinRT structs
+-   xlang structs
 
--   WinRT interfaces
+-   xlang interfaces
 
--   WinRT delegates
+-   xlang delegates
 
--   WinRT Runtime Classes
+-   xlang Runtime Classes
 
 -   other parameterized type instantiations (eg, IVector\<IVector\<int\>\>)
 
@@ -259,19 +241,15 @@ The following names are used for base types when they appear:
 The above names are case sensitive. Other than for String, the type name uses a
 single character to suggest the kind of data, followed by its size in bytes.
 These names where chosen to be concise (to avoid large sizes in struct type
-signatures), not appear confusingly similar to either the WinRT name, RIDL name,
+signatures), not appear confusingly similar to either the xlang name, RIDL name,
 or language projection name for any type, and still remain roughtly human
-readable. Consult the [Windows Runtime API
-Guidelines](http://windows/windows8/DevX/rex/Shared%20Documents/Windows%20Runtime%20API%20Design%20Guidelines.docx)
-for how to map these names to RIDL or REXPP input languages.
+readable.
 
 For enum_type_signature, the only valid ‘underlying_type’ value is that of Int32
 or UInt32.
 
 For struct_type_signature, args is an in-order list of type_signatures for the
-fields of the struct. As presently
-[spec’d](http://windows/windows8/docs/Windows%208%20Feature%20Documents/Developer%20Experience%20(DEVX)/Runtime%20Experience%20(REX)/Web/Metadata%20Format%20and%20Object%20Model%20M1%20Functional%20Spec.docm),
-these may be base types, or other struct types.
+fields of the struct. These may be base types or other struct types.
 
 Struct_name and enum_name are namespace qualified, using period “.” as
 delimiters. Eg, “namespace X { struct A{ int; }; }” becomes “struct(X.A;i4)”
@@ -286,30 +264,32 @@ marshaling.
 Versioning
 ----------
 
-All WinRT types except fundamental types must have a version attribute. Language
+All xlang types except fundamental types must have a version attribute. Language
 projections use the version attribute info to enable back compatibility and
 light up scenarios. 3rd party types must include version attribute, but it must
-be ignored by language projections. 3rd party WinRT components are exclusively
+be ignored by language projections. 3rd party xlang components are exclusively
 packaged in the app, so can never change versions independently of the app
 itself.
 
 The version attribute may optionally be applied to interface members (methods,
 properties and events). This is intended for high-level class authoring in
-C\#/VB and C++/CX. Version attributes on interface members, even Windows system
-interface members, must be ignored at runtime by language projections.
+projections. Version attributes on interface members must be ignored at runtime 
+by language projections.
 
 The Version attribute includes an unsigned 32-bit integer constructor parameter.
-For Windows WinRT types, this value is the NTDDI value for the version of
-Windows the associated type construct was first defined. For 3rd party types,
-the meaning of this value is up to the type’s author.
+For binary compatibility, the value must increase each time new types are added.
+The specific sequencing is up to the type author. The first version does not need
+to be 1 or 0, and future versions can be any value greater than the previous as 
+the author deems appropriate.
 
-Windows system structs, delegates and interfaces are immutable once defined.
-They may never be modified in any subsequent Windows release.
+If a component intends to maintain binary compatibility, structs, delegates and 
+interfaces are immutable once defined. They may never be modified in any subsequent
+version.
 
-Windows system enums and runtime classes are additively versionable. Enums may
-add new enum values in subsequent Windows releases. Classes may add new
+Enums and runtime classes are additively versionable. Enums may
+add new enum values in subsequent versions. Classes may add new
 implemented interfaces (including static, activation factory, composition
-factory, overridable and protected interfaces) in subsequent Windows releases.
+factory, overridable and protected interfaces) in subsequent versions.
 Further details on additive versioning are included in the sections for enums
 and runtime classes.
 
@@ -317,16 +297,16 @@ Namespaces
 ----------
 
 A namespace is a naming scope used to organize code and avoid naming collisions.
-All named types in the WinRT type system (enums, structs, delegates, interfaces,
+All named types in the xlang type system (enums, structs, delegates, interfaces,
 and runtime classes) live in a namespace. Namespaces can contain other
 namespaces.
 
 Fundamental Types
 -----------------
 
-The WinRT Type system includes a core set of built-in primitive types
+The xlang Type system includes a core set of built-in primitive types.
 
-| WinRT Type | Type Description                                           |
+| xlang Type | Type Description                                           |
 |------------|------------------------------------------------------------|
 | Int16      | a 16 bit signed integer                                    |
 | Int32      | a 32 bit signed integer                                    |
@@ -348,7 +328,7 @@ Enums
 An enum type is a distinct value type with a set of named constants.
 
 Each enum type has a corresponding integral type called the underlying type of
-the enum type. The only legal enum underlying types in WinRT are Int32 and
+the enum type. The only legal enum underlying types in xlang are Int32 and
 UInt32.
 
 Enums with an underlying type of UInt32 must carry the FlagsAttribute. Enums
@@ -392,21 +372,21 @@ generate an IID for a specific parameterized interface instance via the
 algorithm specified in section *1.2.3*.
 
 Interfaces may have public or private visibility. This reflects the fact that
-some interfaces represent shared contracts implemented by multiple WinRT classes
-while other interfaces represent members implemented by a single WinRT class.
-Private visibility interfaces must specify the WinRT class they are exclusive to
+some interfaces represent shared contracts implemented by multiple xlang classes
+while other interfaces represent members implemented by a single xlang class.
+Private visibility interfaces must specify the xlang class they are exclusive to
 via the ExclusiveToAttribute. Private interfaces may only be implemented by the
-WinRT class specified in the ExclusiveToAttribute.
+xlang class specified in the ExclusiveToAttribute.
 
 ### IInspectable and IUnknown
 
-All WinRT interfaces must inherit directly from IInspectable, which in turn
+All xlang interfaces must inherit directly from IInspectable, which in turn
 inherits from IUnknown. IUnknown defines three methods: QueryInterface, AddRef
 and Release as per traditional COM usage. IInspectable defines three methods in
 addition to the IUnknown methods: GetIids, GetRuntimeClassName and
 GetTrustLevel. These three methods allow the object’s client to retrieve
 information about the object. In particular, IInspectable.GetRuntimeClassName
-enables an object’s client to retrieve a WinRT type name that can be resolved in
+enables an object’s client to retrieve an xlang type name that can be resolved in
 metadata to enable language projection.
 
 ### Interface Requires
@@ -431,19 +411,16 @@ method, property or event) of a parameterized interface may reference a type
 from the parameterized interface’s type arguments list. (eq.
 IVector\<T\>.SetAt([in] UInt32 index, [in] T value).
 
-In Windows 8, 3rd parties cannot define parameterized interfaces. Only the
-parameterized interfaces defined by the system are supported.
-
 Delegates
 ---------
 
-Delegates are WinRT types that act as a type-safe function pointer. They are
-essentially a simple WinRT object that exposes a single interface that inherits
+Delegates are xlang types that act as a type-safe function pointer. They are
+essentially a simple xlang object that exposes a single interface that inherits
 from IUnknown and defines of a single method named Invoke. Invoking the delegate
 in turn invokes the method it references. Delegates are often (but not
-exclusively) used for defining WinRT events.
+exclusively) used for defining xlang events.
 
-WinRT delegates are named types and define a method signature. Delegate method
+xlang delegates are named types and define a method signature. Delegate method
 signatures follow the same rules for parameters as interface methods do. The
 signature and parameter names of the Invoke method must match the definition of
 the delegate.
@@ -459,7 +436,7 @@ Delegates must have public visibility.
 
 ### IUnknown
 
-Note that unlike WinRT interfaces, delegates do not implement IInspectable, only
+Note that unlike xlang interfaces, delegates do not implement IInspectable, only
 IUnknown. This means that they cannot be inspected for type information at
 runtime.
 
@@ -470,18 +447,15 @@ specifies a type parameter list in addition to the traditional method signature
 as specified above. In the method signature, any parameter may be specified as
 one of the types from the parameterized delegates’ type arguments list.
 
-In Windows 8, 3rd parties cannot define parameterized delegates. Only the
-parameterized delegates defined by the system are supported.
-
 Interface Members
 -----------------
 
-WinRT interfaces support three types of members: methods, properties and events.
+xlang interfaces support three types of members: methods, properties and events.
 Interfaces may not have data fields.
 
 ### Methods
 
-WinRT interfaces support methods which take zero or more parameters and return
+xlang interfaces support methods which take zero or more parameters and return
 an HRESULT indicating the success or failure of the method call. Methods may
 optionally indicate a single out parameter to be projected as the return value
 in exception based languages. The return value out parameter, if specified, must
@@ -511,7 +485,7 @@ type instances (eg IVector\<int\>) as the parameter type.
 All method parameters must be exclusively in or out parameters, In/out
 parameters are not supported.
 
-While all methods on WinRT interfaces must return an HRESULT, methods may
+While all methods on xlang interfaces must return an HRESULT, methods may
 optionally indicate that their final out parameter is intended to be used as the
 return value when the method is projected into exception based languages. Such
 parameters are known as [out,retval] parameters after the MIDL syntax used to
@@ -523,12 +497,12 @@ other ordering requirements for out parameters.
 
 #### Array Parameters
 
-WinRT methods support conformant array parameters. Arrays can never be used
+xlang methods support conformant array parameters. Arrays can never be used
 except as parameters. They cannot be stand-alone named types and they cannot be
 used as a struct field type. Array parameters can be used as in, out and retval
 parameters.
 
-WinRT supports array parameters of most WinRT types including fundamental types
+xlang supports array parameters of most xlang types including fundamental types
 (including string and guid), structs, enums, delegates, interfaces and runtime
 classes. Arrays of other arrays are not allowed.
 
@@ -536,7 +510,7 @@ Because they are conformant, arrays parameters must always be immediately
 preceded in the parameter list by a parameter for the array size. The array size
 parameter must be a UInt32. The array size parameter does not have a name.
 
-WinRT supports three different array passing styles:
+xlang supports three different array passing styles:
 
 -   PassArray – this style is used when the caller is providing an array to the
     method. In this style, both the array size parameter and array parameter are
@@ -555,7 +529,7 @@ WinRT supports three different array passing styles:
     is passed by ref (i.e. ArrayType\*\* rather than ArrayType\*).
 
 -   Note, the combination of out array size parameter and in array parameter is
-    not valid in WinRT.
+    not valid in xlang.
 
 When an array parameter is used as an [out,retval] parameter, the array length
 parameter must be an [out] parameter – that is, only the ReceiveArray style is
@@ -578,9 +552,9 @@ Within the scope of a single interface, more than one method may have the same
 name. Methods with the same name on an interface must have unique signatures.
 Properties and Events cannot be overloaded
 
-WinRT supports overloading on parameter types but favors overloading on the
+xlang supports overloading on parameter types but favors overloading on the
 number of input parameters – aka the method’s arity. This is done in order to
-support dynamic, weakly typed languages (aka JavaScript).
+support dynamic, weakly typed languages (aka JavaScript & Python).
 
 When an interface has multiple methods of the same name and number of input
 parameters, exactly one of those methods must be marked as the default. Of all
@@ -600,7 +574,7 @@ Default overloaded methods carry the DefaultOverloadAttribute.
 
 #### Operator Overloading
 
-WinRT does not support operator overloading. Methods may not be named using the
+xlang does not support operator overloading. Methods may not be named using the
 special operator names such as op_Addition that are specified in the ECMA 335
 CLI spec, partition I, section 10.3.
 
@@ -631,9 +605,9 @@ something of interest happens.
 Events and their add/remove listener methods must have public visibility.
 
 An event add listener method has a single parameter of the event delegate type
-and returns a Windows.Foundation.EventRegistrationToken. An event remove
+and returns an xlang.Foundation.EventRegistrationToken. An event remove
 listener method has a single parameter of the
-Windows.Foundation.EventRegistrationToken type and returns void.
+Xlang.Foundation.EventRegistrationToken type and returns void.
 
 Events may not be parameterized. Events from parameterized interfaces may use
 type parameters of the containing type as the event delegate type.
@@ -641,7 +615,7 @@ type parameters of the containing type as the event delegate type.
 Runtime Classes
 ---------------
 
-WinRT allows you to define a class. A class must implement one or more
+xlang allows you to define a class. A class must implement one or more
 interfaces. A class cannot implement type members directly (i.e. they can’t
 define their own methods, properties or events). A class must provide an
 implementation all the members of all the interfaces it implements.
@@ -689,7 +663,7 @@ implement zero member interfaces do not specify a default interface.
 
 ### Static Interfaces
 
-WinRT classes may implement specify zero or more static interfaces. Static
+xlang classes may implement specify zero or more static interfaces. Static
 interfaces enable classes to expose functionality that’s associated with the
 class itself rather than with specific instances of the class.
 
@@ -711,7 +685,7 @@ Runtime classes optionally support activation – the ability of the system to
 produce instances of a specified class. Classes must implement at least one
 member interface in order to support activation.
 
-WinRT defines three activation mechanisms: direct activation (with no
+xlang defines three activation mechanisms: direct activation (with no
 constructor parameters) and factory activation (with one or more constructor
 parameters) and Composition activation. Non composable classes may support
 either direct and/or factory activation. Composable classes only support
@@ -747,9 +721,9 @@ ComposableAttribute. Details on composition to follow.
 
 Runtime classes optionally support composition – the ability for multiple class
 instances to be combined into what appears to be a single object from the
-outside. WinRT uses composition as a form of runtime class inheritance.
+outside. xlang uses composition as a form of runtime class inheritance.
 
-WinRT classes can optionally compose a single composable base class, which in
+xlang classes can optionally compose a single composable base class, which in
 turn may compose a single composable base class, etc. A class does not itself
 need to be composable in order to compose a composable base class. Classes may
 only compose with a composable class as a base class. A composable class is not
@@ -757,7 +731,7 @@ required to compose another composable class (i.e. it may be the root of the
 hierarchy). Circular graphs of composition (aka A composes B which composes A)
 are not allowed.
 
-At runtime, a composing class is an aggregation of WinRT objects – one for each
+At runtime, a composing class is an aggregation of xlang objects – one for each
 object in the composition chain. These aggregated objects delegate identity and
 lifetime to the originally activated object in the composition chain (called the
 controlling object). Every object in the chain holds a non-delegating
@@ -787,14 +761,6 @@ controlling object activation or not as well as version information. Details on
 composition factory interfaces and versioning to follow. Classes can be marked
 with multiple ComposableAttributes – one for every composition factory interface
 implemented by the classes’ activation factory.
-
-The JavaScript language projection does not support class composition in Win8.
-As such, composable classes and classes that compose composable classes should
-be marked with the WebHostHiddenAttribute indicating that JavaScript should not
-attempt to project these types.
-
-In Win8, 3rd parties can only define classes that compose other composable
-classes. They may not define their own composable root class.
 
 #### Composable Activation
 
@@ -922,7 +888,7 @@ interface.
 Runtime classes optionally have an activation factory. Runtime classes must have
 an activation factory if the class is activatable, composable or has static
 interfaces. The activation factory for a class can be retrieved from the system
-at runtime via the RoGetActivationFactory Win32 function.
+at runtime via the xlang PAL.
 
 Activation Factories must implement the IActivationFactory interface. However,
 only classes that support direct activation provide an implementation of
@@ -935,13 +901,13 @@ composition factory interfaces and static interfaces defined on the runtime
 class.
 
 There is no guarantee that language projections maintain a single activation
-factory instance for the lifetime of the factory. WinRT class authors that need
+factory instance for the lifetime of the factory. xlang class authors that need
 to save long-lived information for static member access need to store it
 somewhere outside of the activation factory.
 
 ### Class Based Projection
 
-While WinRT is primarily an interface based programming model under the hood,
+While xlang is primarily an interface based programming model under the hood,
 runtime classes provide a class based programming model that is better aligned
 to modern, mainstream, OO programming languages. Language projections are
 expected to project a runtime class as a single entity, rather than as a bag of
@@ -1023,7 +989,7 @@ versions of a given runtime class may implement additional static interfaces,
 even if the class had never implemented static interfaces previously.
 
 The StaticAttribute includes a UInt32 parameter for version number, which
-defines the version of Windows that added that activation support.
+defines the version that added that activation support.
 
 #### Activation Versioning
 
@@ -1038,7 +1004,7 @@ interfaces. Classes that previously only supported factory activation may add
 direct activation support as well as new factory activation interfaces.
 
 The ActivatableAttribute includes a UInt32 parameter for version number. The
-version number for the ActivatableAttribute defines the version of Windows that
+version number for the ActivatableAttribute defines the version that
 added that activation support.
 
 #### Composition Versioning
@@ -1049,26 +1015,26 @@ composition mechanisms, provided the class was defined as composable when it was
 created. Composable classes may not add activation support.
 
 The ComposableAttribute includes a UInt32 parameter for version number. The
-version number for the ComposableAttribute defines the version of Windows that
+version number for the ComposableAttribute defines the version that
 added that composition support.
 
 Custom Attributes
 -----------------
 
-WinRT supports the definition of custom metadata attributes. All constructs in
-the WinRT type system can carry custom metadata attributes. This includes all
+xlang supports the definition of custom metadata attributes. All constructs in
+the xlang type system can carry custom metadata attributes. This includes all
 named types (enums, structs, delegates, interfaces, classes, etc.) as well as
 individual elements contained within type constructs (such as methods,
 parameters, etc).
 
-Custom attributes are named like other WinRT types. However, they are not
+Custom attributes are named like other xlang types. However, they are not
 activatable. They are a purely data construct.
 
 Custom attributes define a data schema of either positional parameters or named
 fields. A custom attribute may not use both positional parameters and named
 fields – they must choose one or the other. The types of a custom attribute’s
-parameters and fields are limited to the WinRT fundamental types, enums and
-references to other WinRT types. No other parameter or field type is allowed.
+parameters and fields are limited to the xlang fundamental types, enums and
+references to other xlang types. No other parameter or field type is allowed.
 
 Custom attributes that use positional parameters must define one or more valid
 sets of positional parameters. Each set must specify zero or more positional
@@ -1085,9 +1051,6 @@ An attribute may have neither positional parameters nor named fields.
 
 Custom attributes must have public visibility.
 
-Attributes may specify the types of WinRT type constructs they may be associated
+Attributes may specify the types of xlang type constructs they may be associated
 with via the AttributeUsageAttribute.
-
-In Windows 8, 3rd parties cannot define custom attributes. Only the custom
-attributes defined by the system are supported.
 

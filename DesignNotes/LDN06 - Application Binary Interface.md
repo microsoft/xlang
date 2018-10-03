@@ -21,7 +21,7 @@ The C programming language is the lingua franca for describing this interface. T
 
 Types and conventions
 --------
-The following fundamental Langworthy types map to C types as follows:
+The following fundamental Langworthy types map to C types as follows. These correspond to the fundamental types specified in LDN03. 
 
 | Langworthy Type | C type |
 |-----------------|------- |
@@ -35,7 +35,7 @@ The following fundamental Langworthy types map to C types as follows:
 | Single          | float |
 | Double          | double |
 | Char16          | char16_t |
-| Boolean          | uint8_t (C99 does not guarantee _Bool to be 8 bits) |
+| Boolean         | uint8_t (C99 does not guarantee _Bool to be 8 bits) |
 
 * void* - A native pointer type to "unknown type".
 This implies that the pointer size is sufficient to address arbitrary memory on the target architecture - 32 bits in 32-bit code, 64 bits in 64-bit code.
