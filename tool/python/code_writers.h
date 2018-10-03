@@ -1142,13 +1142,14 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
     const std::set<std::string_view> custom_structs = { "DateTime", "TimeSpan", "EventRegistrationToken", "HResult" };
     const std::set<std::string_view> numerics_structs = { "Matrix3x2", "Matrix4x4", "Plane", "Quaternion", "Vector2", "Vector3", "Vector4" };
 
-    std::string get_field_name(TypeDef const& type, Field const& field)
+    std::string get_cpp_field_name(Field const& field)
     {
+        auto type = field.Parent();
         std::string name{ field.Name() };
         
         if ((type.TypeNamespace() == "Windows.Foundation.Numerics") && (numerics_structs.find(type.TypeName()) != numerics_structs.end()))
         {
-            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+            std::transform(name.begin(), name.end(), name.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
         }
 
         return std::move(name);
@@ -1178,7 +1179,7 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 
                 for (auto&& field : type.FieldList())
                 {
-                    auto field_name = get_field_name(type, field);
+                    auto field_name = get_cpp_field_name(field);
 
                     w.write_indented("PyObject* py% = PyDict_GetItemString(obj, \"%\");\n", field_name, field.Name());
                     w.write_indented("if (!py%) { throw winrt::hresult_invalid_argument(); }\n", field_name);
@@ -1343,7 +1344,7 @@ catch (...)
 
     void write_struct_property(writer& w, Field const& field)
     {
-        auto field_name = get_field_name(field.Parent(), field);
+        auto field_name = get_cpp_field_name(field);
 
         {
             auto format = R"(
