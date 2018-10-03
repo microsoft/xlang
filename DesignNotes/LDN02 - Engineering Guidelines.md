@@ -13,7 +13,7 @@ Title: ​LDN02 - Engineering Guidelines
 Abstract
 --------
 
-The xlang project involves many components written in a variety of
+The Xlang Project involves many components written in a variety of
 programming languages. This document describes coding guidelines for
 each language.
 

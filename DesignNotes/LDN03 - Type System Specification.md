@@ -11,9 +11,9 @@ status: draft
 
 ## Abstract
 
-This Design Note describes the xlang type system.
+This Design Note describes the Xlang type system.
 
-*Open Issue*: This specification was adapted from the Windows Runtime specification,and still refers to fundamental interfaces that are part of the Windows Runtime and to various COM constructs. As equivalent xlang constructs are defined, this specification needs to be updated to remove COM concepts & references and instead reflect the equivalent xlang concepts.
+*Open Issue*: This specification was adapted from the Windows Runtime specification,and still refers to fundamental interfaces that are part of the Windows Runtime and to various COM constructs. As equivalent Xlang constructs are defined, this specification needs to be updated to remove COM concepts & references and instead reflect the equivalent Xlang concepts.
 
 General Notes
 -------------
@@ -21,20 +21,20 @@ General Notes
 All types must be contained within a namespace. No types in the global namespace 
 are allowed
 
-Except for interfaces, all xlang types must have public visibility. xlang
-interfaces may optionally have private visibility. All other user-defined xlang
+Except for interfaces, all Xlang types must have public visibility. Xlang
+interfaces may optionally have private visibility. All other user-defined Xlang
 types (structs, classes, enums, delegates, attributes) must have public
 visibility.
 
-xlang does not support nested types. No xlang type can enclose another type. No
-xlang type can be nested inside another type
+Xlang does not support nested types. No Xlang type can enclose another type. No
+Xlang type can be nested inside another type
 
-xlang namespaces and type names are case preserving but insensitive. This means 
+Xlang namespaces and type names are case preserving but insensitive. This means 
 that you cannot have namespaces or type names that vary only by case. For 
 example: you cannot have Foo.SomeType and foo.AnotherType nor can you have 
 Foo.SomeType and Foo.someType.
 
-xlang identifiers must conform to the following grammar. Note, only characters
+Xlang identifiers must conform to the following grammar. Note, only characters
 defined in Unicode 3.0 and earlier are supported.
 
 ```
@@ -76,7 +76,7 @@ formatting-character:
 Parameterized Types
 -------------------
 
-xlang supports type parameterization of interfaces and delegates. The
+Xlang supports type parameterization of interfaces and delegates. The
 parameterized types permit a family of interfaces to be defined that may be
 processed polymorphically in programming languages that support parametric
 polymorphism.
@@ -86,7 +86,7 @@ with an argument list of types in a type context, such as a method parameter
 position. For example, "HRESULT foo(X\<Y\> x)" instantiates the parameterized
 type named by "X" with the type “Y" as its first and only type argument.
 
-Unparameterized xlang interfaces and delegates are assigned GUIDs to uniquely
+Unparameterized Xlang interfaces and delegates are assigned GUIDs to uniquely
 identify the underlying interface from other interfaces on the same object.
 Parameterized interfaces (eg IVector\<T\>) and delegates (eg EventHandler\<T\>)
 are instead assigned a parameterized interface ID (PIID) - a GUID uniquely
@@ -95,20 +95,20 @@ generating IIDs for parameterized type instances (eg IVector\<int\>).
 
 ### Parameterized Types Arguments
 
-The following xlang types are permitted to appear in a parameterized
+The following Xlang types are permitted to appear in a parameterized
 type argument list:
 
--   xlang fundamental types (eg, Boolean, Int32, String, Guid, etc)
+-   Xlang fundamental types (eg, Boolean, Int32, String, Guid, etc)
 
--   xlang enums
+-   Xlang enums
 
--   xlang structs
+-   Xlang structs
 
--   xlang interfaces
+-   Xlang interfaces
 
--   xlang delegates
+-   Xlang delegates
 
--   xlang Runtime Classes
+-   Xlang Runtime Classes
 
 -   other parameterized type instantiations (eg, IVector\<IVector\<int\>\>)
 
@@ -241,7 +241,7 @@ The following names are used for base types when they appear:
 The above names are case sensitive. Other than for String, the type name uses a
 single character to suggest the kind of data, followed by its size in bytes.
 These names where chosen to be concise (to avoid large sizes in struct type
-signatures), not appear confusingly similar to either the xlang name, RIDL name,
+signatures), not appear confusingly similar to either the Xlang name, RIDL name,
 or language projection name for any type, and still remain roughtly human
 readable.
 
@@ -264,10 +264,10 @@ marshaling.
 Versioning
 ----------
 
-All xlang types except fundamental types must have a version attribute. Language
+All Xlang types except fundamental types must have a version attribute. Language
 projections use the version attribute info to enable back compatibility and
 light up scenarios. 3rd party types must include version attribute, but it must
-be ignored by language projections. 3rd party xlang components are exclusively
+be ignored by language projections. 3rd party Xlang components are exclusively
 packaged in the app, so can never change versions independently of the app
 itself.
 
@@ -297,16 +297,16 @@ Namespaces
 ----------
 
 A namespace is a naming scope used to organize code and avoid naming collisions.
-All named types in the xlang type system (enums, structs, delegates, interfaces,
+All named types in the Xlang type system (enums, structs, delegates, interfaces,
 and runtime classes) live in a namespace. Namespaces can contain other
 namespaces.
 
 Fundamental Types
 -----------------
 
-The xlang Type system includes a core set of built-in primitive types.
+The Xlang Type system includes a core set of built-in primitive types.
 
-| xlang Type | Type Description                                           |
+| Xlang Type | Type Description                                           |
 |------------|------------------------------------------------------------|
 | Int16      | a 16 bit signed integer                                    |
 | Int32      | a 32 bit signed integer                                    |
@@ -328,7 +328,7 @@ Enums
 An enum type is a distinct value type with a set of named constants.
 
 Each enum type has a corresponding integral type called the underlying type of
-the enum type. The only legal enum underlying types in xlang are Int32 and
+the enum type. The only legal enum underlying types in Xlang are Int32 and
 UInt32.
 
 Enums with an underlying type of UInt32 must carry the FlagsAttribute. Enums
@@ -372,21 +372,21 @@ generate an IID for a specific parameterized interface instance via the
 algorithm specified in section *1.2.3*.
 
 Interfaces may have public or private visibility. This reflects the fact that
-some interfaces represent shared contracts implemented by multiple xlang classes
-while other interfaces represent members implemented by a single xlang class.
-Private visibility interfaces must specify the xlang class they are exclusive to
+some interfaces represent shared contracts implemented by multiple Xlang classes
+while other interfaces represent members implemented by a single Xlang class.
+Private visibility interfaces must specify the Xlang class they are exclusive to
 via the ExclusiveToAttribute. Private interfaces may only be implemented by the
-xlang class specified in the ExclusiveToAttribute.
+Xlang class specified in the ExclusiveToAttribute.
 
 ### IInspectable and IUnknown
 
-All xlang interfaces must inherit directly from IInspectable, which in turn
+All Xlang interfaces must inherit directly from IInspectable, which in turn
 inherits from IUnknown. IUnknown defines three methods: QueryInterface, AddRef
 and Release as per traditional COM usage. IInspectable defines three methods in
 addition to the IUnknown methods: GetIids, GetRuntimeClassName and
 GetTrustLevel. These three methods allow the object’s client to retrieve
 information about the object. In particular, IInspectable.GetRuntimeClassName
-enables an object’s client to retrieve an xlang type name that can be resolved in
+enables an object’s client to retrieve an Xlang type name that can be resolved in
 metadata to enable language projection.
 
 ### Interface Requires
@@ -414,13 +414,13 @@ IVector\<T\>.SetAt([in] UInt32 index, [in] T value).
 Delegates
 ---------
 
-Delegates are xlang types that act as a type-safe function pointer. They are
-essentially a simple xlang object that exposes a single interface that inherits
+Delegates are Xlang types that act as a type-safe function pointer. They are
+essentially a simple Xlang object that exposes a single interface that inherits
 from IUnknown and defines of a single method named Invoke. Invoking the delegate
 in turn invokes the method it references. Delegates are often (but not
-exclusively) used for defining xlang events.
+exclusively) used for defining Xlang events.
 
-xlang delegates are named types and define a method signature. Delegate method
+Xlang delegates are named types and define a method signature. Delegate method
 signatures follow the same rules for parameters as interface methods do. The
 signature and parameter names of the Invoke method must match the definition of
 the delegate.
@@ -436,7 +436,7 @@ Delegates must have public visibility.
 
 ### IUnknown
 
-Note that unlike xlang interfaces, delegates do not implement IInspectable, only
+Note that unlike Xlang interfaces, delegates do not implement IInspectable, only
 IUnknown. This means that they cannot be inspected for type information at
 runtime.
 
@@ -450,12 +450,12 @@ one of the types from the parameterized delegates’ type arguments list.
 Interface Members
 -----------------
 
-xlang interfaces support three types of members: methods, properties and events.
+Xlang interfaces support three types of members: methods, properties and events.
 Interfaces may not have data fields.
 
 ### Methods
 
-xlang interfaces support methods which take zero or more parameters and return
+Xlang interfaces support methods which take zero or more parameters and return
 an HRESULT indicating the success or failure of the method call. Methods may
 optionally indicate a single out parameter to be projected as the return value
 in exception based languages. The return value out parameter, if specified, must
@@ -485,7 +485,7 @@ type instances (eg IVector\<int\>) as the parameter type.
 All method parameters must be exclusively in or out parameters, In/out
 parameters are not supported.
 
-While all methods on xlang interfaces must return an HRESULT, methods may
+While all methods on Xlang interfaces must return an HRESULT, methods may
 optionally indicate that their final out parameter is intended to be used as the
 return value when the method is projected into exception based languages. Such
 parameters are known as [out,retval] parameters after the MIDL syntax used to
@@ -497,12 +497,12 @@ other ordering requirements for out parameters.
 
 #### Array Parameters
 
-xlang methods support conformant array parameters. Arrays can never be used
+Xlang methods support conformant array parameters. Arrays can never be used
 except as parameters. They cannot be stand-alone named types and they cannot be
 used as a struct field type. Array parameters can be used as in, out and retval
 parameters.
 
-xlang supports array parameters of most xlang types including fundamental types
+Xlang supports array parameters of most Xlang types including fundamental types
 (including string and guid), structs, enums, delegates, interfaces and runtime
 classes. Arrays of other arrays are not allowed.
 
@@ -510,7 +510,7 @@ Because they are conformant, arrays parameters must always be immediately
 preceded in the parameter list by a parameter for the array size. The array size
 parameter must be a UInt32. The array size parameter does not have a name.
 
-xlang supports three different array passing styles:
+Xlang supports three different array passing styles:
 
 -   PassArray – this style is used when the caller is providing an array to the
     method. In this style, both the array size parameter and array parameter are
@@ -529,7 +529,7 @@ xlang supports three different array passing styles:
     is passed by ref (i.e. ArrayType\*\* rather than ArrayType\*).
 
 -   Note, the combination of out array size parameter and in array parameter is
-    not valid in xlang.
+    not valid in Xlang.
 
 When an array parameter is used as an [out,retval] parameter, the array length
 parameter must be an [out] parameter – that is, only the ReceiveArray style is
@@ -552,7 +552,7 @@ Within the scope of a single interface, more than one method may have the same
 name. Methods with the same name on an interface must have unique signatures.
 Properties and Events cannot be overloaded
 
-xlang supports overloading on parameter types but favors overloading on the
+Xlang supports overloading on parameter types but favors overloading on the
 number of input parameters – aka the method’s arity. This is done in order to
 support dynamic, weakly typed languages (aka JavaScript & Python).
 
@@ -574,7 +574,7 @@ Default overloaded methods carry the DefaultOverloadAttribute.
 
 #### Operator Overloading
 
-xlang does not support operator overloading. Methods may not be named using the
+Xlang does not support operator overloading. Methods may not be named using the
 special operator names such as op_Addition that are specified in the ECMA 335
 CLI spec, partition I, section 10.3.
 
@@ -605,7 +605,7 @@ something of interest happens.
 Events and their add/remove listener methods must have public visibility.
 
 An event add listener method has a single parameter of the event delegate type
-and returns an xlang.Foundation.EventRegistrationToken. An event remove
+and returns an Xlang.Foundation.EventRegistrationToken. An event remove
 listener method has a single parameter of the
 Xlang.Foundation.EventRegistrationToken type and returns void.
 
@@ -615,7 +615,7 @@ type parameters of the containing type as the event delegate type.
 Runtime Classes
 ---------------
 
-xlang allows you to define a class. A class must implement one or more
+Xlang allows you to define a class. A class must implement one or more
 interfaces. A class cannot implement type members directly (i.e. they can’t
 define their own methods, properties or events). A class must provide an
 implementation all the members of all the interfaces it implements.
@@ -663,7 +663,7 @@ implement zero member interfaces do not specify a default interface.
 
 ### Static Interfaces
 
-xlang classes may implement specify zero or more static interfaces. Static
+Xlang classes may implement specify zero or more static interfaces. Static
 interfaces enable classes to expose functionality that’s associated with the
 class itself rather than with specific instances of the class.
 
@@ -685,7 +685,7 @@ Runtime classes optionally support activation – the ability of the system to
 produce instances of a specified class. Classes must implement at least one
 member interface in order to support activation.
 
-xlang defines three activation mechanisms: direct activation (with no
+Xlang defines three activation mechanisms: direct activation (with no
 constructor parameters) and factory activation (with one or more constructor
 parameters) and Composition activation. Non composable classes may support
 either direct and/or factory activation. Composable classes only support
@@ -721,9 +721,9 @@ ComposableAttribute. Details on composition to follow.
 
 Runtime classes optionally support composition – the ability for multiple class
 instances to be combined into what appears to be a single object from the
-outside. xlang uses composition as a form of runtime class inheritance.
+outside. Xlang uses composition as a form of runtime class inheritance.
 
-xlang classes can optionally compose a single composable base class, which in
+Xlang classes can optionally compose a single composable base class, which in
 turn may compose a single composable base class, etc. A class does not itself
 need to be composable in order to compose a composable base class. Classes may
 only compose with a composable class as a base class. A composable class is not
@@ -731,7 +731,7 @@ required to compose another composable class (i.e. it may be the root of the
 hierarchy). Circular graphs of composition (aka A composes B which composes A)
 are not allowed.
 
-At runtime, a composing class is an aggregation of xlang objects – one for each
+At runtime, a composing class is an aggregation of Xlang objects – one for each
 object in the composition chain. These aggregated objects delegate identity and
 lifetime to the originally activated object in the composition chain (called the
 controlling object). Every object in the chain holds a non-delegating
@@ -888,7 +888,7 @@ interface.
 Runtime classes optionally have an activation factory. Runtime classes must have
 an activation factory if the class is activatable, composable or has static
 interfaces. The activation factory for a class can be retrieved from the system
-at runtime via the xlang PAL.
+at runtime via the Xlang PAL.
 
 Activation Factories must implement the IActivationFactory interface. However,
 only classes that support direct activation provide an implementation of
@@ -901,13 +901,13 @@ composition factory interfaces and static interfaces defined on the runtime
 class.
 
 There is no guarantee that language projections maintain a single activation
-factory instance for the lifetime of the factory. xlang class authors that need
+factory instance for the lifetime of the factory. Xlang class authors that need
 to save long-lived information for static member access need to store it
 somewhere outside of the activation factory.
 
 ### Class Based Projection
 
-While xlang is primarily an interface based programming model under the hood,
+While Xlang is primarily an interface based programming model under the hood,
 runtime classes provide a class based programming model that is better aligned
 to modern, mainstream, OO programming languages. Language projections are
 expected to project a runtime class as a single entity, rather than as a bag of
@@ -1021,20 +1021,20 @@ added that composition support.
 Custom Attributes
 -----------------
 
-xlang supports the definition of custom metadata attributes. All constructs in
-the xlang type system can carry custom metadata attributes. This includes all
+Xlang supports the definition of custom metadata attributes. All constructs in
+the Xlang type system can carry custom metadata attributes. This includes all
 named types (enums, structs, delegates, interfaces, classes, etc.) as well as
 individual elements contained within type constructs (such as methods,
 parameters, etc).
 
-Custom attributes are named like other xlang types. However, they are not
+Custom attributes are named like other Xlang types. However, they are not
 activatable. They are a purely data construct.
 
 Custom attributes define a data schema of either positional parameters or named
 fields. A custom attribute may not use both positional parameters and named
 fields – they must choose one or the other. The types of a custom attribute’s
-parameters and fields are limited to the xlang fundamental types, enums and
-references to other xlang types. No other parameter or field type is allowed.
+parameters and fields are limited to the Xlang fundamental types, enums and
+references to other Xlang types. No other parameter or field type is allowed.
 
 Custom attributes that use positional parameters must define one or more valid
 sets of positional parameters. Each set must specify zero or more positional
@@ -1051,6 +1051,6 @@ An attribute may have neither positional parameters nor named fields.
 
 Custom attributes must have public visibility.
 
-Attributes may specify the types of xlang type constructs they may be associated
+Attributes may specify the types of Xlang type constructs they may be associated
 with via the AttributeUsageAttribute.
 

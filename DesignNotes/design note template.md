@@ -11,7 +11,7 @@ status: template
 
 ## Abstract
 
-This document is a template for Project Langworthy Design Notes. All major features and behaviors of project Langworthy are documented in a Design Note submitted to the repository.
+This document is a template for Xlang Project Design Notes. All major features and behaviors of the Xlang Project are documented in a Design Note submitted to the repository.
 
 ## Specification Section 1
 

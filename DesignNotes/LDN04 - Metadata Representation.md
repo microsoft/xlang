@@ -11,75 +11,75 @@ status: draft
 
 ## Abstract
 
-This Design Note describes how xlang types are encoded in metadata files.
+This Design Note describes how Xlang types are encoded in metadata files.
 
 *Open Issue*: this document is derived from the WinRT Consolidated Reference and has not yet been updated to use cross-platfrom terminology. Types referenced in the Xlang.* namespace are placeholders subject to change.
 
 *Open Issue*: The .xlmeta is a placeholder extension and subject to change.
 
-*Open Issue*: tdWindowsRuntime flag needs replaced with an xlang equivalent.
+*Open Issue*: tdWindowsRuntime flag needs replaced with an Xlang equivalent.
 
 Overview
 --------
 
-xlang APIs are described in machine readable metadata files with the extension
-.xlmeta (aka xlang Metadata). These metadata files are used by tools and
+Xlang APIs are described in machine readable metadata files with the extension
+.xlmeta (aka Xlang Metadata). These metadata files are used by tools and
 language projections in order to enable language projection.
 
 General Notes
 -------------
 
-The xlang runtime provides C-style APIs to aid language projections in the
+The Xlang runtime provides C-style APIs to aid language projections in the
 resolution of namespaces and types that need this metadata at runtime.
 
-All public types in a xlang metadata file must be xlang types and must carry the
-tdWindowsRuntime flag (details on type flags to follow). xlang metadata files may include
-metadata for non-xlang types. Any non-xlang types in a xlang metadata file must not be
-public. Semantics for non-xlang types are implementation defined and outside the
+All public types in a Xlang metadata file must be Xlang types and must carry the
+tdWindowsRuntime flag (details on type flags to follow). Xlang metadata files may include
+metadata for non-Xlang types. Any non-Xlang types in a Xlang metadata file must not be
+public. Semantics for non-Xlang types are implementation defined and outside the
 scope of this document.
 
-All public interface members (methods, properties, events) on xlang types must
-be xlang interface members. xlang types may include metadata for non-xlang
-interface members. Any non-xlang interface members may not be public. Semantics
-for non-xlang interface members are implementation defined and outside the scope
+All public interface members (methods, properties, events) on Xlang types must
+be Xlang interface members. Xlang types may include metadata for non-Xlang
+interface members. Any non-Xlang interface members may not be public. Semantics
+for non-Xlang interface members are implementation defined and outside the scope
 of this document.
 
-xlang metadata Files
+Xlang metadata Files
 -----------
 
-### xlang metadata File Format
+### Xlang metadata File Format
 
-xlang metadata files use the same physical file format as CLR assemblies as defined by
+Xlang metadata files use the same physical file format as CLR assemblies as defined by
 the ECMA-335 specification. However, while the physical file format is the same,
-the rules for valid combinations of data are different for xlang metadata files and CLR
-assemblies. This document lists the deltas between xlang metadata files and CLR
+the rules for valid combinations of data are different for Xlang metadata files and CLR
+assemblies. This document lists the deltas between Xlang metadata files and CLR
 assemblies.
 
-System provided xlang metadata files are pure metadata. 3rd party xlang metadata files may contain
-code. In particular, managed xlang metadata files include MSIL code, just like
+System provided Xlang metadata files are pure metadata. 3rd party Xlang metadata files may contain
+code. In particular, managed Xlang metadata files include MSIL code, just like
 traditional CLR assemblies do.
 
-Every xlang metadata file contains the definitions of zero or more xlang types. Empty
-xlang metadata files are valid, if not particularly useful
+Every Xlang metadata file contains the definitions of zero or more Xlang types. Empty
+Xlang metadata files are valid, if not particularly useful
 
-There are no specific xlang restrictions on PEKind or machine architecture
-listed in a xlang metadata
+There are no specific Xlang restrictions on PEKind or machine architecture
+listed in a Xlang metadata
 
-xlang metadata version String must contain "xlang runtime 1.2”
+Xlang metadata version String must contain "Xlang runtime 1.2”
 
-### xlang metadata File Name
+### Xlang metadata File Name
 
-The name without extension of a xlang metadata file must be a case-insensitive match to
-the name column of the assembly table inside the xlang metadata file. For example, the
+The name without extension of a Xlang metadata file must be a case-insensitive match to
+the name column of the assembly table inside the Xlang metadata file. For example, the
 "Foo.Bar.xlmeta" file must have "Foo.Bar" in the name column of the assembly
 table. Because the file system is case insensitive, the case of the file name
 may differ from the assembly table name column value
 
-All of the xlang types in a given xlang metadata file must be under a namespace that
-matches the name of the xlang metadata file and the assembly table name column value.
+All of the Xlang types in a given Xlang metadata file must be under a namespace that
+matches the name of the Xlang metadata file and the assembly table name column value.
 Because the file system is case insensitive, the case of the file may differ
-from the namespace of all the xlang types in a given xlang metadata file. The namespace
-of all the xlang types in a given xlang metadata must match the assembly table name
+from the namespace of all the Xlang types in a given Xlang metadata file. The namespace
+of all the Xlang types in a given Xlang metadata must match the assembly table name
 column value exactly (i.e. case sensitive). For example, all of the types in the
 file with “Foo.Bar” in the assembly table’s name column must be in the Foo.Bar
 namespace. The types may be either direct children of the this namespace (aka
@@ -88,14 +88,14 @@ Foo.Bar.Baz.MyType). The name of the file must be “Foo.Bar.xlmeta”, but may 
 in case – that is, “foo.bar.xlmeta” and “FOO.BAR.XLMETA would also be permitted
 as file names for this metadata file.
 
-### xlang metadata Composition
+### Xlang metadata Composition
 
 The metadata for all the types in the system is spread across multiple .xlmeta
 files. An AppX package can include zero or more .xlmeta files describing 3rd
-party xlang components that are included in the application package.
+party Xlang components that are included in the application package.
 
 Across all the .xlmeta files provided by the system or included with a given app,
-every xlang type's metadata must be stored in the xlang metadata file with the longest
+every Xlang type's metadata must be stored in the Xlang metadata file with the longest
 name matching the namespace of the type. All types that are direct children of a
 given namespace must be located in the same file. For example, if an AppX
 package includes Foo.xlmeta and Foo.Bar.xlmeta files, the Foo.Bar.Baz.MyType type
@@ -117,12 +117,12 @@ Type System Encoding
 --------------------
 
 All types in this document from the System namespace from the mscorlib assembly
-are used as markers by xlang. These types are used to indicate information about
+are used as markers by Xlang. These types are used to indicate information about
 types and should never be resolved. This includes but is not limited to
 System.Object, System.Guid, System.ValueType, System.Enum,
 System.MulticastDelegate and System.Attribute Note, these names were chosen for
 compatibility with CLR. CLR's definition of these types is part of their type
-system and has nothing to do with xlang.
+system and has nothing to do with Xlang.
 
 Note that many of the constructs described here use C\# syntax, this is simply
 because it is convenient to represent certain CLI metadata constructs using C\#
@@ -130,7 +130,7 @@ syntax. The actual constructs will be pure CLI metadata constructs.
 
 ### Namespace
 
-xlang encodes a type’s namespace and local name in a single period delimited
+Xlang encodes a type’s namespace and local name in a single period delimited
 string. For example, the type defined in the following snippet of code is
 “Example.Foundation.ISimpleInterface”.
 
@@ -153,11 +153,11 @@ TypeDef props exposes only the type name.
 
 ### Fundamental Types
 
-All the xlang fundamental types except Guid have explicit constant values for
+All the Xlang fundamental types except Guid have explicit constant values for
 use in CLI Metadata blobs and other type references. These constant values are
 described in Partion 2, Section 23.1.16 of the CLI specification
 
-| xlang Type | CLI Element Type Name | CLI Element Type Value |
+| Xlang Type | CLI Element Type Name | CLI Element Type Value |
 |------------|-----------------------|------------------------|
 | Int16      | ELEMENT_TYPE_I2       | 0x06                   |
 | Int32      | ELEMENT_TYPE_I4       | 0x08                   |
@@ -211,7 +211,7 @@ type are as follows:
 
 -   Signature: an index into the blob heap containing a FieldSig blob (ECMA
     II.23.2.4) where the Type is set to either ELEMENT_TYPE_I4 or
-    ELEMENT_TYPE_U4 as xlang enum values must be signed or unsigned 32 bit
+    ELEMENT_TYPE_U4 as Xlang enum values must be signed or unsigned 32 bit
     integers.
 
 After the enum value definition comes a field definition for each of the values
@@ -305,8 +305,8 @@ Delegates TypeDef rows must have a GuidAttribute.
 
 Delegates have exactly a two MethodDef table entries. The first defines a
 constructor. This constructor is a compatibility marker, which is why it uses
-non xlang constructs like native int and parameters that are neither in nor out.
-xlang Delegates have no such constructor method.
+non Xlang constructs like native int and parameters that are neither in nor out.
+Xlang Delegates have no such constructor method.
 
 -   RVA: 0 (this is an abstract construct)
 
@@ -422,8 +422,8 @@ the columns set as follows:
 
 Interfaces TypeDef rows must have a GuidAttribute as well as a VersionAttribute.
 
-Any xlang interface with private visibility must have a single
-ExclusiveToAttribute. Any xlang interface with public visibility must not have
+Any Xlang interface with private visibility must have a single
+ExclusiveToAttribute. Any Xlang interface with public visibility must not have
 an ExclusiveToAttribute. If present, the ExclusiveToAttribute must reference a
 runtime class.
 
@@ -913,6 +913,6 @@ CustomAttribute table (ECMA II.22.10) with the columns set as follows:
     to the constructor of the attribute type
 
 -   Value: index into the blob heap that contains positional and named attribute
-    parameters (ECMA II.23.2). Note, since xlang custom attributes are not
+    parameters (ECMA II.23.2). Note, since Xlang custom attributes are not
     allowed to have properties, the custom attribute blob will never contain
     PROPERTY style named arguments.
