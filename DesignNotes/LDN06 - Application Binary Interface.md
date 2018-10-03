@@ -11,19 +11,19 @@ status: draft
 
 ## Abstract
 
-This design note documents the Application Binary Interface (or ABI) for Langworthy.
+This design note documents the Application Binary Interface (or ABI) for Xlang.
 
 Overview
 --------
-Langworthy language projections depend on a stable binary interface for both interacting with the Platform Abstraction Layer (PAL) and other components.
+Xlang language projections depend on a stable binary interface for both interacting with the Platform Abstraction Layer (PAL) and other components.
 
-The C programming language is the lingua franca for describing this interface. This document describes how the Langworthy type system maps to C types.
+The C programming language is the lingua franca for describing this interface. This document describes how the Xlang type system maps to C types.
 
 Types and conventions
 --------
-The following fundamental Langworthy types map to C types as follows. These correspond to the fundamental types specified in LDN03. 
+The following fundamental Xlang types map to C types as follows. These correspond to the fundamental types specified in LDN03. 
 
-| Langworthy Type | C type |
+| Xlang Type | C type |
 |-----------------|------- |
 | Int16           | int16_t |
 | Int32           | int32_t |

@@ -11,10 +11,10 @@ status: draft
 
 ## Abstract
 
-This Design Note describes the process for making and disseminating architecturally important design decisions through Design Notes in Project Langworthy (cross-platform Windows Runtime). 
+This Design Note describes the process for making and disseminating architecturally important design decisions through Design Notes in the Xlang Project (cross-platform Windows Runtime). 
 
 ## 1. The Purpose
-In any project, the process for making and documenting decisions defines the character of the endeavor.  Project Langworthy is small now, but is likely to grow and become a collaborative effort across multiple divisions of Microsoft as well as the open source community.
+In any project, the process for making and documenting decisions defines the character of the endeavor.  The XLang Project  is small now, but is likely to grow and become a collaborative effort across multiple divisions of Microsoft as well as the open source community.
 
 To foster collaboration, the decision closure process used within our project should have four qualities; it should be:
 
@@ -33,7 +33,7 @@ The design note process is directed toward producing progress collaboratively in
 
 Participants in the design note process include: 
 
-  * The ***Community***: everyone using or otherwise interested in the development of Project Langworthy. 
+  * The ***Community***: everyone using or otherwise interested in the development of the Xlang Project. 
 
   * The ***Design Note Author***: person who volunteers to write a design note on a particular topic of interest. 
 
@@ -41,23 +41,23 @@ Participants in the design note process include:
 
   * The ***Design Note Moderator***: person who oversees the process of vetting design notes for formal acceptance as part of the plan of record. The moderator schedules and announces formal design note reviews, moderates discussions during the reviews to ensure that all viewpoints are expressed, judges consensus in reviews, and publishes the outcomes of formal design note reviews. 
 
-> Note: A formal moderator for Project Langworthy has not been chosen. For now, please contact [Ben Kuhn](mailto:benkuhn@microsoft.com) and [Harry Pierson](mailto:hpierson@microsoft.com).
+> Note: A formal moderator for the Xlang Project has not been chosen. For now, please contact [Ben Kuhn](mailto:benkuhn@microsoft.com) and [Harry Pierson](mailto:hpierson@microsoft.com).
 
-  * The ***Design Note Review Committee***: a small body of representatives chosen from the larger community. Members of the review committee are chosen to represent all of the major engineering groups participating in Project Langworthy. As a body, the review committee has the final say of whether or not a design note becomes an accepted part of the plan of record. 
+  * The ***Design Note Review Committee***: a small body of representatives chosen from the larger community. Members of the review committee are chosen to represent all of the major engineering groups participating in the Xlang Project. As a body, the review committee has the final say of whether or not a design note becomes an accepted part of the plan of record. 
 
-Design notes are used to communicate design decisions and information that should be shared with a wide audience of contributors to Project Langworthy.  The design note process is also used to gather input when complex or potential controversial decisions must be made.  In general, narrowly scoped issues with few interested parties will not be documented through the design note process.  For example much of the content of an implementation specification or a usage guide would not be appropriate for a design note. On the other hand, a decision such how to support UTF-8 strings should be included in a design note as it 1) has wide-ranging implications, and 2) would benefit from the wisdom of the crowd. 
+Design notes are used to communicate design decisions and information that should be shared with a wide audience of contributors to the Xlang Project.  The design note process is also used to gather input when complex or potential controversial decisions must be made.  In general, narrowly scoped issues with few interested parties will not be documented through the design note process.  For example much of the content of an implementation specification or a usage guide would not be appropriate for a design note. On the other hand, a decision such how to support UTF-8 strings should be included in a design note as it 1) has wide-ranging implications, and 2) would benefit from the wisdom of the crowd. 
 
 The steps of the design note process are as follows: 
 
 1. **An individual announces the desire to produce a design note (and form a working group) on a specific topic**.  This self-chosen author can make an informal announcement at a work stream meeting or via an email to an appropriate mailing list (to gauge interest).  A best practice is to send an announcement email with a description of the question the working group intends to address. A design note author should attempt to identify and include all relevant subject-matter experts.  
 
-> Note, a Project Langworthy mailing lists have not been established yet. 
+> Note, a the Xlang Project mailing lists have not been established yet. 
 
 2. **Individuals volunteer to participate in the working group by sending email to the design note author**.  The cost of admission to a working group is a commitment to actively contribute to progress and to reaching consensus.  Conversely, by abstaining from a working group, community members implicitly give the working group their permission to draft a design note as they see fit.  
 
 3. **The design note author leads discussions to draft a design note**.  These discussions will often gather feedback from the community via email and refine ideas through small group meetings filtered to committed contributors.  
 
-4. **The working group writes a design note using the design note template**.  The design note template is available in the specifications folder of the Project Langworthy git repo.  Design note numbers are assigned sequentially in order of request by placing the first draft of the design note in the git repo (either directly or through the moderator) using the next available number.  Design note drafts are marked with “Draft” status to encourage interested parties to read them.  The working group may circulate early drafts of the design note via email or other collaboration tools to help interested parties track the design note evolution.   
+4. **The working group writes a design note using the design note template**.  The design note template is available in the specifications folder of the the Xlang Project git repo.  Design note numbers are assigned sequentially in order of request by placing the first draft of the design note in the git repo (either directly or through the moderator) using the next available number.  Design note drafts are marked with “Draft” status to encourage interested parties to read them.  The working group may circulate early drafts of the design note via email or other collaboration tools to help interested parties track the design note evolution.   
 
 5. **A formal design note review is scheduled through the moderator when the working group has completed its draft**.  The moderator selects a date and schedules a review meeting with the review committee.  The moderate announces the schedule for the review via an email to the appropriate mailing lists.
 
@@ -75,12 +75,12 @@ The steps of the design note process are as follows:
     
     5) **The moderator calls for a vote on the design note at the end of the meeting**.  The review committee may decide to approve a design note, approve it subject to edits, or return the design note to the working group for further work.  Strictly speaking, a majority vote is sufficient for approval of a design note; however, in practice, the design note review process is intended to produce a widely accepted consensus decision. 
 
-8. **After acceptance, the final design note is published**.  The design note is archived in the Design Notes of the Project Langworthy repo with its status changed to “Adopted”.  The moderator sends email with the design note’s URL to the appropriate mailing lists announcing that the Design Note is complete and adopted.  If the design note replaces or invalidates earlier adopted design notes, their status is changed to “Deprecated”. 
+8. **After acceptance, the final design note is published**.  The design note is archived in the Design Notes of the the Xlang Project repo with its status changed to “Adopted”.  The moderator sends email with the design note’s URL to the appropriate mailing lists announcing that the Design Note is complete and adopted.  If the design note replaces or invalidates earlier adopted design notes, their status is changed to “Deprecated”. 
 
 ## 3. The Decisions 
-The design note process is most effective when individual participants recognize that design notes are Project Langworthy's primary process for decision making and learning. 
+The design note process is most effective when individual participants recognize that design notes are the Xlang Project's primary process for decision making and learning. 
 
-To you as an individual, the design note process gives well defined points at which you can influence the evolution and architecture of Project Langworthy.  You can choose which decision points to exercise based on the relevance of a particular issue to your personal and professional interests and agenda.  In summary, the decision points available to you are as follows: 
+To you as an individual, the design note process gives well defined points at which you can influence the evolution and architecture of the Xlang Project.  You can choose which decision points to exercise based on the relevance of a particular issue to your personal and professional interests and agenda.  In summary, the decision points available to you are as follows: 
 
 * **Formation of a working group**.  You can propose the formation of a new working group.  You can also vote with your feet to join or abstain from a working group. 
 * **Working group discussions**.  You can contribute to working group discussions.  You should especially do so if the topic is an area of importance to you. 

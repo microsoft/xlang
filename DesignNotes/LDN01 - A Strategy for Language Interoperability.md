@@ -13,12 +13,12 @@ Title: ​LDN01 - A Strategy for Language Interoperability
 Abstract
 --------
 
-This design note describes the goals and guiding principles of the xlang project. This document is aspirational: It describes the project and its features as it has been envisioned, and may describe to features or characteristics that have not yet been implemented.
+This design note describes the goals and guiding principles of the Xlang Project. This document is aspirational: It describes the project and its features as it has been envisioned, and may describe to features or characteristics that have not yet been implemented.
 
 Overview
 --------
 
-Xlang is a system that enable a component written in any supported language to be
+Xlang is a system that enables a component written in any supported language to be
 callable from any other supported language using object oriented programming constructs. 
 Components are written using natural and familiar code in the implementation language and 
 clients invoke those components using constructs familiar to the language that they are 
@@ -44,7 +44,7 @@ of programming languages within a process.
 
 Components are written using the type system of the implementation
 language and accessed using the type system of the consuming language. As such,
-the xlang type system is designed to interoperate with modern object-oriented
+the Xlang type system is designed to interoperate with modern object-oriented
 programming languages. This includes both static (such as C\#) and dynamic (such
 as Python) object-oriented languages as well as strongly typed (such as C++) and
 weakly typed (such as JavaScript) languages. 
@@ -58,7 +58,7 @@ LDN03 describes the type system in detail.
 
 ### Application Programming Interface (API) Metadata
 
-All xlang APIs are described in machine-readable metadata stored in an
+All Xlang APIs are described in machine-readable metadata stored in an
 industry standard format. This metadata is used by both the consuming &
 producing projections. The data may be build time or run time, depending
 on the nature of the projection. The metadata is the definitive description
@@ -121,7 +121,7 @@ most successful form, the project would deliver documentation, libraries and
 tests that enable a motivated developer to create a new language binding, and
 the set of bindings would grow well beyond the scope of what Microsoft builds
 in-house. Of course, Microsoft will do more than simply lay out a concept. As
-we’ve done with the Windows Runtime, our investments in xlang would include
+we’ve done with the Windows Runtime, our investments in Xlang would include
 a solid foundation of tools, libraries, and projections for others to use and
 build upon.
 
