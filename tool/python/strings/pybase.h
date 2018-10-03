@@ -383,6 +383,27 @@ namespace py
     };
 
     template <>
+    struct converter<float>
+    {
+        static PyObject* convert(float value) noexcept
+        {
+            return PyFloat_FromDouble(value);
+        }
+
+        static float convert_to(PyObject* obj)
+        {
+            auto result = PyFloat_AsDouble(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<float>(result);
+        }
+    };
+
+    template <>
     struct converter<double>
     {
         static PyObject* convert(double value) noexcept

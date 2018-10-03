@@ -1140,6 +1140,19 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
     }
 
     const std::set<std::string_view> custom_structs = { "DateTime", "TimeSpan", "EventRegistrationToken", "HResult" };
+    const std::set<std::string_view> numerics_structs = { "Matrix3x2", "Matrix4x4", "Plane", "Quaternion", "Vector2", "Vector3", "Vector4" };
+
+    std::string get_field_name(TypeDef const& type, Field const& field)
+    {
+        std::string name{ field.Name() };
+        
+        if ((type.TypeNamespace() == "Windows.Foundation.Numerics") && (numerics_structs.find(type.TypeName()) != numerics_structs.end()))
+        {
+            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+        }
+
+        return std::move(name);
+    }
 
     void write_struct_converter(writer& w, TypeDef const& type)
     {
@@ -1154,29 +1167,6 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         w.write_indented("template<>\nstruct converter<%>\n{\n", type);
         {
             writer::indent_guard g{ w };
-            //w.write_indented("static PyObject* convert(% const& value) noexcept\n{\n", type);
-            //{
-            //    writer::indent_guard g2{ w };
-            //    for (auto&& field : type.FieldList())
-            //    {
-            //        w.write_indented("PyObject* py% = converter<%>::convert(value.%);\n",
-            //            field.Name(),
-            //            field.Signature().Type(),
-            //            field.Name());
-
-            //        w.write_indented("if (!py%) { return nullptr; }\n", field.Name());
-            //    }
-            //    w.write("\n");
-            //    w.write_indented("PyObject* dict = PyDict_New();\nif (!dict) { return nullptr; }\n\n");
-
-            //    for (auto&& field : type.FieldList())
-            //    {
-            //        w.write_indented("if (PyDict_SetItemString(dict, \"%\", py%) != 0) { return nullptr; }\n", field.Name(), field.Name());
-            //    }
-
-            //    w.write_indented("return dict;\n");
-            //}
-            //w.write_indented("}\n\n");
 
             w.write_indented("static % convert_to(PyObject* obj)\n{\n", type);
             {
@@ -1188,12 +1178,14 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 
                 for (auto&& field : type.FieldList())
                 {
-                    w.write_indented("PyObject* py% = PyDict_GetItemString(obj, \"%\");\n", field.Name(), field.Name());
-                    w.write_indented("if (!py%) { throw winrt::hresult_invalid_argument(); }\n", field.Name());
+                    auto field_name = get_field_name(type, field);
+
+                    w.write_indented("PyObject* py% = PyDict_GetItemString(obj, \"%\");\n", field_name, field.Name());
+                    w.write_indented("if (!py%) { throw winrt::hresult_invalid_argument(); }\n", field_name);
                     w.write_indented("new_value.% = converter<%>::convert_to(py%);\n",
-                        field.Name(),
+                        field_name,
                         field.Signature().Type(),
-                        field.Name());
+                        field_name);
                 }
 
                 w.write_indented("return new_value;\n");
@@ -1216,10 +1208,15 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         {
         }
 
+        void handle_guid(TypeRef const& /*type*/) { throw_invalid("struct_ctor_format_writer handle_guid not implemented"); }
+
         void handle(GenericTypeIndex) { throw_invalid("struct_ctor_format_writer GenericTypeIndex not supported"); }
         void handle(GenericTypeInstSig const&) { throw_invalid("struct_ctor_format_writer GenericTypeInstSig not supported"); }
-        void handle(TypeDef const&) { throw_invalid("struct_ctor_format_writer TypeDef not impl"); }
-        void handle(TypeRef const&) { throw_invalid("struct_ctor_format_writer TypeRef not impl"); }
+        void handle(TypeDef const& type) 
+        { 
+            auto msg = w.write_temp("struct_ctor_format_writer %.@ TypeDef not impl", type.TypeNamespace(), type.TypeName());
+            throw_invalid(msg);
+        }
 
         void handle(ElementType type)
         {
@@ -1346,6 +1343,8 @@ catch (...)
 
     void write_struct_property(writer& w, Field const& field)
     {
+        auto field_name = get_field_name(field.Parent(), field);
+
         {
             auto format = R"(
 static PyObject* @_get_%(%* self, void* /*unused*/)
@@ -1364,7 +1363,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
                 field.Parent().TypeName(),
                 field.Name(),
                 bind<write_winrt_wrapper>(field.Parent()),
-                field.Name());
+                field_name);
         }
 
         {
@@ -1392,7 +1391,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
                 field.Parent().TypeName(),
                 field.Name(),
                 bind<write_winrt_wrapper>(field.Parent()),
-                field.Name(), 
+                field_name,
                 field.Signature().Type());
         }
     }
