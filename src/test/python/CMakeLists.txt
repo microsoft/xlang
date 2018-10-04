@@ -25,8 +25,6 @@ set(excluded_namespaces
     Windows.Foundation.PropertyValue
     Windows.Foundation.Metadata
     Windows.Foundation.Diagnostics
-    Windows.Foundation.Numerics
-    Windows.Devices.Geolocation.Geofencing
 )
 
 set(cmdline "-output ${output_dir}")

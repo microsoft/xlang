@@ -1,7 +1,6 @@
 
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
-// not sure why I need this:
 PyTypeObject* py::winrt_type<winrt::hresult>::python_type;
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
@@ -25,6 +24,8 @@ std::unordered_map<std::size_t, PyObject*> instance_map{};
 
 void py::wrapped_instance(std::size_t key, PyObject* obj)
 {
+    // TODO: re-enable instance wrapper caching 
+
     // if obj is null, remove from instance_map
     //if (obj)
     //{

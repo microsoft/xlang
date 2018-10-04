@@ -10,7 +10,8 @@ winrt::Windows::Foundation::DateTime py::converter<winrt::Windows::Foundation::D
 
 PyObject* DateTime_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    if ((PyTuple_Size(args) == 0) && (kwds == nullptr))
+    auto tuple_size = PyTuple_Size(args);
+    if ((tuple_size == 0) && (kwds == nullptr))
     {
         try
         {
@@ -20,6 +21,23 @@ PyObject* DateTime_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         catch (...)
         {
             return py::to_PyErr();
+        }
+    }
+
+    if ((tuple_size == 1) && (kwds == nullptr))
+    {
+        auto arg = PyTuple_GetItem(args, 0);
+        if (PyDict_Check(arg))
+        {
+            try
+            {
+                auto instance = py::converter<winrt::Windows::Foundation::DateTime>::convert_to(arg);
+                return py::wrap_struct(instance, type);
+            }
+            catch (...)
+            {
+                return py::to_PyErr();
+            }
         }
     }
 

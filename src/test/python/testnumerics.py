@@ -22,6 +22,12 @@ class TestXlangNumerics(unittest.TestCase):
         self.assertEqual(r.Numerator, 3)
         self.assertEqual(r.Denominator, 6)
 
+    def test_struct_ctor_dict(self):
+        r = _pyrt.Rational({"Denominator":2, "Numerator":4})
+
+        self.assertEqual(r.Numerator, 4)
+        self.assertEqual(r.Denominator, 2)
+
     def test_vec3(self):
         v = _pyrt.Vector3(1.0, 2.0, 3.0)
 

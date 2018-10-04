@@ -1359,7 +1359,8 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         {
             writer::indent_guard g{ w };
 
-            auto format = R"(if ((PyTuple_Size(args) == 0) && (kwds == nullptr))
+            auto format = R"(auto tuple_size = PyTuple_Size(args);
+if ((tuple_size == 0) && (kwds == nullptr))
 {
     try
     {
@@ -1372,8 +1373,25 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
     }
 }
 
+if ((tuple_size == 1) && (kwds == nullptr))
+{
+    auto arg = PyTuple_GetItem(args, 0);
+    if (PyDict_Check(arg))
+    {
+        try
+        {
+            auto instance = py::converter<%>::convert_to(arg); 
+            return py::wrap_struct(instance, type);
+        }
+        catch (...)
+        {
+            return py::to_PyErr();
+        }
+    }
+}
+
 )";
-            w.write_indented(format, type);
+            w.write_indented(format, type, type);
 
             for (auto&& field : type.FieldList())
             {
