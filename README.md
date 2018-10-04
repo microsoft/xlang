@@ -1,5 +1,16 @@
+# Xlang
 
-# Contributing
+## Overview
+Xlang is a system that enables a component written in any supported language to be callable from any other supported language using object-oriented programming constructs.  
+
+For details on project structure and build process, please see [Project Readme](./src/readme.md).
+
+For technical design details, please see the [Design Notes](./DesignNotes).
+
+## License
+Code licensed under the [MIT License](LICENSE).
+
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
