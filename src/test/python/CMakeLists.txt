@@ -54,6 +54,7 @@ set(pybase_h ${output_dir}/pybase.h)
 message(${pybase_h})
 add_custom_command(
   OUTPUT ${pybase_h} 
+  DEPENDS ${pywinrt_exe}
   COMMAND ${pywinrt_exe} ${cmdline}
 )
 

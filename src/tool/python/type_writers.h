@@ -141,6 +141,10 @@ namespace xlang
                     while (pos != std::string::npos)
                     {
                         value_.insert(pos + 1, indentation);
+                        if (pos == 0)
+                        {
+                            break;
+                        }
                         pos = value_.find_last_of('\n', pos - 1);
                     }
 
@@ -300,11 +304,25 @@ namespace xlang
         void write(TypeDef const& type)
         {
             auto ns = type.TypeNamespace();
+            auto name = type.TypeName();
+
             if (ns != current_namespace)
             {
                 needed_namespaces.emplace(ns);
             }
-            write("winrt::@::@", type.TypeNamespace(), type.TypeName());
+
+            if (ns == "Windows.Foundation.Numerics")
+            {
+                if (name == "Matrix3x2") { name = "float3x2"; }
+                else if (name == "Matrix4x4") { name = "float4x4"; }
+                else if (name == "Plane") { name = "plane"; }
+                else if (name == "Quaternion") { name = "quaternion"; }
+                else if (name == "Vector2") { name = "float2"; }
+                else if (name == "Vector3") { name = "float3"; }
+                else if (name == "Vector4") { name = "float4"; }
+            }
+
+            write("winrt::@::@", ns, name);
         }
 
         void write(coded_index<TypeDefOrRef> const& type)

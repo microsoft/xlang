@@ -5,7 +5,7 @@ Param (
     [string] $target
 )
 
-$rootPath = (split-path $PSScriptRoot)
+$rootPath = split-path (split-path $PSScriptRoot)
 $buildPath = join-path $rootPath "_build/Ubuntu_18.04/$buildType"
 
 $wslRootPath = ubuntu1804 run wslpath ($rootPath.replace('\', '/'))
