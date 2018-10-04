@@ -311,18 +311,37 @@ namespace xlang
                 needed_namespaces.emplace(ns);
             }
 
-            if (ns == "Windows.Foundation.Numerics")
+            if ((ns == "Windows.Foundation") && (name == "HResult"))
             {
-                if (name == "Matrix3x2") { name = "float3x2"; }
-                else if (name == "Matrix4x4") { name = "float4x4"; }
-                else if (name == "Plane") { name = "plane"; }
-                else if (name == "Quaternion") { name = "quaternion"; }
-                else if (name == "Vector2") { name = "float2"; }
-                else if (name == "Vector3") { name = "float3"; }
-                else if (name == "Vector4") { name = "float4"; }
+                write("winrt::hresult");
             }
+            else if ((ns == "Windows.Foundation") && (name == "EventRegistrationToken"))
+            {
+                write("winrt::event_token");
+            }
+            else
+            {
+                if (ns == "Windows.Foundation.Numerics")
+                {
+                    static const std::map<std::string_view, std::string_view> custom_numerics = {
+                        { "Matrix3x2", "float3x2" },
+                        { "Matrix4x4", "float4x4" },
+                        { "Plane", "plane" },
+                        { "Quaternion", "quaternion" },
+                        { "Vector2", "float2"},
+                        { "Vector3", "float3" },
+                        { "Vector4", "float4" }
+                    };
 
-            write("winrt::@::@", ns, name);
+                    auto custom_numeric = custom_numerics.find(name);
+                    if (custom_numeric != custom_numerics.end())
+                    {
+                        name = custom_numeric->second;
+                    }
+                }
+
+                write("winrt::@::@", ns, name);
+            }
         }
 
         void write(coded_index<TypeDefOrRef> const& type)

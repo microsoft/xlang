@@ -1139,15 +1139,14 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             bind<write_python_delegate_type>(type));
     }
 
-    const std::set<std::string_view> custom_structs = { "EventRegistrationToken", "HResult" };
-    const std::set<std::string_view> numerics_structs = { "Matrix3x2", "Matrix4x4", "Plane", "Quaternion", "Vector2", "Vector3", "Vector4" };
-
     std::string get_cpp_field_name(Field const& field)
     {
         auto type = field.Parent();
         std::string name{ field.Name() };
         
-        if ((type.TypeNamespace() == "Windows.Foundation.Numerics") && (numerics_structs.find(type.TypeName()) != numerics_structs.end()))
+        static const std::set<std::string_view> custom_numerics = { "Matrix3x2", "Matrix4x4", "Plane", "Quaternion", "Vector2", "Vector3", "Vector4" };
+
+        if ((type.TypeNamespace() == "Windows.Foundation.Numerics") && (custom_numerics.find(type.TypeName()) != custom_numerics.end()))
         {
             std::transform(name.begin(), name.end(), name.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
         }
@@ -1157,14 +1156,6 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 
     void write_struct_converter_decl(writer& w, TypeDef const& type)
     {
-        if (type.TypeNamespace() == "Windows.Foundation")
-        {
-            if (custom_structs.find(type.TypeName()) != custom_structs.end())
-            {
-                return;
-            }
-        }
-
         w.write_indented("template<>\nstruct converter<%>\n{\n", type);
         {
             writer::indent_guard g{ w };
@@ -1174,16 +1165,15 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         w.write_indented("};\n\n");
     }
 
+    static const std::map<std::string_view, std::string_view> custom_foundation_convert_to = {
+        { "DateTime", "new_value = winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan { converter<int64_t>::convert_to(pyUniversalTime) } };\n" },
+        { "EventRegistrationToken", "new_value.value = converter<int64_t>::convert_to(pyValue);\n" },
+        { "HResult", "new_value = converter<int32_t>::convert_to(pyValue);\n" },
+        { "TimeSpan", "new_value = winrt::Windows::Foundation::TimeSpan { converter<int64_t>::convert_to(pyDuration) };\n" }
+    };
+
     void write_struct_convert_to(writer& w, TypeDef const& type)
     {
-        if (type.TypeNamespace() == "Windows.Foundation")
-        {
-            if (custom_structs.find(type.TypeName()) != custom_structs.end())
-            {
-                return;
-            }
-        }
-
         w.write_indented("% py::converter<%>::convert_to(PyObject* obj)\n{\n", type, type);
         {
             writer::indent_guard g{ w };
@@ -1198,6 +1188,17 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 
                 w.write_indented("PyObject* py% = PyDict_GetItemString(obj, \"%\");\n", field_name, field.Name());
                 w.write_indented("if (!py%) { throw winrt::hresult_invalid_argument(); }\n", field_name);
+
+                if (type.TypeNamespace() == "Windows.Foundation")
+                {
+                    auto convert_to = custom_foundation_convert_to.find(type.TypeName());
+                    if (convert_to != custom_foundation_convert_to.end())
+                    {
+                        w.write_indented(convert_to->second);
+                        continue;
+                    }
+                }
+
                 w.write_indented("new_value.% = converter<%>::convert_to(py%);\n",
                     field_name,
                     field.Signature().Type(),
@@ -1331,7 +1332,7 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             w.write("py::convert_to<%>(%)", type, bind<write_struct_field_name>(field));
         }
 
-        void handle(ElementType type)
+        void handle(ElementType)
         {
             write_struct_field_name(w, field);
         }
@@ -1407,7 +1408,14 @@ if ((tuple_size == 1) && (kwds == nullptr))
             w.write_indented("\ntry\n{\n");
             {
                 writer::indent_guard gg{ w };
-                w.write_indented("% instance{ % };\n", type, bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
+                if (type.TypeNamespace() == "Windows.Foundation" && type.TypeName() == "DateTime")
+                {
+                    w.write_indented("winrt::Windows::Foundation::DateTime instance{ winrt::Windows::Foundation::TimeSpan{ _UniversalTime } };\n");
+                }
+                else
+                {
+                    w.write_indented("% instance{ % };\n", type, bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
+                }
                 w.write_indented("return py::wrap_struct(instance, type);\n");
             }
             w.write_indented(R"(}
@@ -1421,6 +1429,75 @@ catch (...)
         w.write_indented("}\n");
     }
 
+    static const std::map<std::string_view, std::string_view> custom_foundation_get_variable = {
+        { "DateTime", "self->obj.time_since_epoch().count()" },
+        { "EventRegistrationToken", "self->obj.value" },
+        { "HResult", "self->obj"} ,
+        { "TimeSpan", "self->obj.count()" }
+    };
+
+    void write_struct_property_get_variable(writer& w, Field const& field)
+    {
+        auto parent = field.Parent();
+        if (parent.TypeNamespace() == "Windows.Foundation")
+        {
+            auto custom_var = custom_foundation_get_variable.find(parent.TypeName());
+            if (custom_var != custom_foundation_get_variable.end())
+            {
+                w.write(custom_var->second);
+                return;
+            }
+        }
+
+        auto field_name = get_cpp_field_name(field);
+        w.write("self->obj.%", field_name);
+    }
+
+    static const std::map<std::string_view, std::string_view> custom_foundation_set_variable = {
+        { "DateTime", "self->obj" },
+        { "EventRegistrationToken", "self->obj.value" },
+        { "HResult", "self->obj"} ,
+        { "TimeSpan", "self->obj" }
+    };
+
+    void write_struct_property_set_variable(writer& w, Field const& field)
+    {
+        auto parent = field.Parent();
+        if (parent.TypeNamespace() == "Windows.Foundation")
+        {
+            auto custom_var = custom_foundation_set_variable.find(parent.TypeName());
+            if (custom_var != custom_foundation_set_variable.end())
+            {
+                w.write(custom_var->second);
+                return;
+            }
+        }
+
+        auto field_name = get_cpp_field_name(field);
+        w.write("self->obj.%", field_name);
+    }
+
+    static const std::map<std::string_view, std::string_view> custom_foundation_set_convert = {
+        { "DateTime", "winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ py::convert_to<int64_t>(value) } }" },
+        { "TimeSpan", "winrt::Windows::Foundation::TimeSpan{ py::convert_to<int64_t>(value) }" }
+    };
+
+    void write_struct_property_set_convert(writer& w, Field const& field)
+    {
+        auto parent = field.Parent();
+        if (parent.TypeNamespace() == "Windows.Foundation")
+        {
+            auto custom_convert = custom_foundation_set_convert.find(parent.TypeName());
+            if (custom_convert != custom_foundation_set_convert.end())
+            {
+                w.write(custom_convert->second);
+                return;
+            }
+        }
+
+        w.write("py::convert_to<%>(value)", field.Signature().Type());
+    }
+
     void write_struct_property(writer& w, Field const& field)
     {
         auto field_name = get_cpp_field_name(field);
@@ -1431,7 +1508,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
 {
     try
     {
-        return py::convert(self->obj.%);
+        return py::convert(%);
     }
     catch (...)
     {
@@ -1443,7 +1520,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
                 field.Parent().TypeName(),
                 field.Name(),
                 bind<write_winrt_wrapper>(field.Parent()),
-                field_name);
+                bind<write_struct_property_get_variable>(field));
         }
 
         {
@@ -1458,7 +1535,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
     
     try
     {
-        self->obj.% = py::convert_to<%>(value);
+        % = %;
         return 0;
     }
     catch (...)
@@ -1471,44 +1548,21 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
                 field.Parent().TypeName(),
                 field.Name(),
                 bind<write_winrt_wrapper>(field.Parent()),
-                field_name,
-                field.Signature().Type());
+                bind<write_struct_property_set_variable>(field),
+                bind<write_struct_property_set_convert>(field));
         }
     }
 
     void write_struct(writer& w, TypeDef const& type)
     {
-        auto ns = type.TypeNamespace();
-        auto name = type.TypeName();
-        if (ns == "Windows.Foundation")
-        {
-            if (name == "EventRegistrationToken" || name == "HResult")
-            {
-                return;
-            }
-        }
-
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write_indented("\n// ----- % struct --------------------\n", type.TypeName());
         w.write_indented("PyTypeObject* py::winrt_type<%>::python_type;\n\n", type);
 
-        if (ns == "Windows.Foundation" && name == "DateTime")
-        {
-            w.write(strings::wfDateTime);
-        }
-        else if (ns == "Windows.Foundation" && name == "TimeSpan")
-        {
-            w.write(strings::wfTimeSpan);
-        }
-        else
-        {
-            write_struct_convert_to(w, type);
-            write_struct_constructor(w, type);
-            w.write_each<write_struct_property>(type.FieldList());
-        }
-
-
+        write_struct_convert_to(w, type);
+        write_struct_constructor(w, type);
+        w.write_each<write_struct_property>(type.FieldList());
         write_getset_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
@@ -1532,15 +1586,6 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
         if (is_exclusive_to(type))
         {
             return;
-        }
-
-        if (type.TypeNamespace() == "Windows.Foundation")
-        {
-            auto name = type.TypeName();
-            if (name == "EventRegistrationToken" || name == "HResult")
-            {
-                return;
-            }
         }
 
         auto winrt_type_param = is_ptype(type)
