@@ -21,11 +21,11 @@ class TestXlangJson(unittest.TestCase):
         self.assertEqual(o.Stringify(), "{}")
 
     def test_cant_activate_JsonError(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             e = _pyrt.JsonError()
 
     def test_cant_activate_JsonValue(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             v = _pyrt.JsonValue()
 
     def test_JsonArray_parse(self):
@@ -82,15 +82,6 @@ class TestXlangJson(unittest.TestCase):
         t = _pyrt.JsonValue.CreateNumberValue(42)
         self.assertEqual(t.ValueType, 2)
         self.assertEqual(t.GetNumber(), 42)
-
-    # def test_JsonArray(self):
-    #     a = _pyrt.JsonArray()
-    #     v = _pyrt.JsonValue.CreateNumberValue(3)
-    #     a.InsertAt(0, _pyrt.JsonValue.CreateNumberValue(3))
-    #     a.InsertAt(0, _pyrt.JsonValue.CreateNumberValue(2))
-    #     a.InsertAt(0, _pyrt.JsonValue.CreateNumberValue(1))
-
-
 
     def test_JsonValue_string(self):
         t = _pyrt.JsonValue.CreateStringValue("Plugh")
