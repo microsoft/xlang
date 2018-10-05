@@ -20,7 +20,7 @@ The **/library** folder contains the C++ header libraries provided by Xlang for 
 
 The **/platform** folder contains the declaration and implementations of the common and minimal C API (and platform-specific implementations) used to support Xlang on different platforms (otherwise known as the PAL or Platform Adaptation Layer).
 
-Eventually, we plan to break out the PAL into seperate folder based on underlying platform (Windows, Linux, Android, etc). For now, we only have Windows implementations.
+Eventually, source in the PAL will be split into seperate folders based on underlying platform (Windows, Linux, Android, etc). For now, the PAL only has a Windows implementation.
 
 * **published/pal.h** contains the delaration of the PAL surface area
 
