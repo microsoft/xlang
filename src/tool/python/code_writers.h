@@ -126,6 +126,7 @@ namespace xlang
             field.Parent().TypeName(), field.Name());
     }
 
+    // TODO WinRT Event support
     //void write_getset_table_row_event(writer& w, Event const& event)
     //{
     //    // TODO: remove const_cast once pywinrt is updated to target Python 3.7. 
@@ -183,6 +184,7 @@ namespace xlang
                 throw_invalid("static events not impl");
             }
 
+            // TODO: WinRT Event Support
             //for (auto&& event : get_static_events(type))
             //{
             //    w.write("    { \"%\", (PyCFunction)%_%, METH_VARARGS | METH_STATIC, nullptr },\n",
@@ -236,11 +238,6 @@ namespace xlang
         {
             w.write("sizeof(%)", bind<write_winrt_wrapper>(type));
         }
-
-        //if (category == category::struct_type)
-        //{
-        //    w.write("sizeof(%)", type.TypeName());
-        //}
     }
 
     void write_type_spec(writer& w, TypeDef const& type)
@@ -678,33 +675,6 @@ static int @_%(%* self, PyObject* value, void* /*unused*/)
         }
     }
 
-//    void write_class_event(writer& w, Event const& event)
-//    {
-//        auto format = R"(
-//static PyObject* @_event_%(%* self, void* /*unused*/)
-//{
-//    try
-//    {
-//        // TODO: event handling
-//        throw winrt::hresult_not_implemented();
-//    }
-//    catch (...)
-//    {
-//        return py::to_PyErr();
-//    }
-//}
-//)";
-//        w.write(format,
-//            event.Parent().TypeName(),
-//            event.Name(),
-//            bind<write_winrt_wrapper>(event.Parent()));
-//    }
-//
-//    void write_class_events(writer& w, TypeDef const& type)
-//    {
-//        w.write_each<write_class_event>(get_instance_events(type));
-//    }
-
     void write_class_dealloc(writer& w, TypeDef const& type)
     {
         XLANG_ASSERT(!is_ptype(type));
@@ -736,7 +706,6 @@ static void @_dealloc(%* self)
         write_class_dealloc(w, type);
         write_class_methods(w, type);
         w.write_each<write_class_property>(get_instance_properties(type));
-        //write_class_events(w, type);
         write_method_table(w, type);
         write_getset_table(w, type);
         write_type_slot_table(w, type);
@@ -859,7 +828,6 @@ static int @_%(%* self, PyObject* value, void* /*unused*/)
         write_pinterface_dealloc(w, type);
         write_pinterface_methods(w, type);
         w.write_each<write_pinterface_property>(get_instance_properties(type));
-        //write_class_events(w, type);
         write_method_table(w, type);
         write_getset_table(w, type);
         write_type_slot_table(w, type);
@@ -1033,7 +1001,6 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         write_class_dealloc(w, type);
         write_class_methods(w, type);
         w.write_each<write_class_property>(get_instance_properties(type));
-        //write_class_events(w, type);
         write_method_table(w, type);
         write_getset_table(w, type);
         write_type_slot_table(w, type);
@@ -1260,6 +1227,7 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             case ElementType::Boolean:
                 w.write("p");
                 break;
+            // TODO: char struct support 
             //case ElementType::Char:
             //    w.write("wchar_t");
             //    break;
@@ -1293,12 +1261,12 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             case ElementType::R8:
                 w.write("d");
                 break;
+            // TODO: string  struct support 
             //case ElementType::String:
             //    w.write("winrt::hstring");
             //    break;
-            //case ElementType::Object:
-            //    w.write("winrt::Windows::Foundation::IInspectable");
-            //    break;
+            case ElementType::Object:
+                throw_invalid("structs cannot contain ElementType::Object");
             default:
                 throw_invalid("struct_ctor_format_writer element type not impl");
             }
