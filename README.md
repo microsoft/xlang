@@ -7,7 +7,7 @@ Xlang is a system that enables a component written in any supported language to 
 
 For details on project structure and build process, please see [Project Readme](./src/readme.md).
 
-For technical design details, please see the [Design Notes](./DesignNotes).
+For technical design details, please see the [Design Notes](./design_notes).
 
 ## License
 Code licensed under the [MIT License](LICENSE).
