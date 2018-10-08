@@ -17,16 +17,23 @@ This document describes how the Platform Abstraction Layer (PAL) supports and in
 
 As described in the Type System Specification, a class that is activatable, composable, and/or has static methods requires an activation factory.
 
-Components implementing these runtime classes will provide these factories via an exported method.
-The PAL will provide functionality to map class names to components (to route factory requests to the correct component), and to request instances of factories from those components.
+When consuming code needs an instance of a factory, it should not require knowledge of which component implements that factory, nor should it be responsible for dynamically loading that module and searching for exports.
+
+For that reason, consuming code will request factories through the PAL.
+The PAL will consult its mapping of class names to component libraries, load (if neccessary) the library, and then call the exported method on the library, returning the result to the caller.
+
+This implies three pieces of functionality that work together to support activation:
+* A function exported by the PAL for client code to request factories.
+* A function exported by components to retrieve instances of its factories.
+* A scheme for the PAL to build a mapping of class names to component libraries.
 
 ## Exporting factories from components
 
-For the PAL to retrieve factories, xlang components must implement and export a method, **xlang_lib_get_activation_factory**, which accepts a class name in string form, and returns the newly created class factory.
-Components providing factories are expected to correctly handle calls to this method from multiple threads concurrently.
+For the PAL to retrieve factories, xlang components must implement and export a function, **xlang_lib_get_activation_factory**, which accepts a class name in string form and the GUID of the requested interface, and returns the newly created class factory.
+Components providing factories are expected to correctly handle calls to this function from multiple threads concurrently.
 
 For components providing class factories, it is risky to have factories with state that depends on other components.
-Because factories are requested and initialized in response to requests to construct a runtime class, a dependency cycle between components' factories could easily lead to their initialization methods being callsed reentrantly.
+Because factories are requested and initialized in response to requests to construct a runtime class, a dependency cycle between components' factories could easily lead to their initialization methods being called reentrantly.
 This problem is easily avoided, and correct multithreaded behavior is simpler, if class factories are stateless.
 
 ## Retrieving factory interfaces
@@ -37,13 +44,13 @@ Upon success, the output is the requested interface.
 This function may fail if:
 * The PAL can not map the class name to a component.
 * The PAL can not load the mapped component.
-* The PAL loads the component, but can not locate the exported **xlang_lib_get_activation_factory** method to retrieve the component's factories.
+* The PAL loads the component, but can not locate the exported **xlang_lib_get_activation_factory** function to retrieve the component's factories.
 * The component itself fails to return the requested factory.
 
 ## Mapping classes to components
 
-The PAL provides a method **xlang_load_component_metadata**, that maps the class factories defined in a metadata file (passed as a string), to a component dynamic/shared library file (passed as a string).
-This method will iterate over every class factory defined in the metadata and associate each one with the provided component file name.
+The PAL provides a function **xlang_map_component_factories**, that maps the class factories defined in a metadata file (passed as a string), to a component dynamic/shared library file (passed as a string).
+This function will iterate over every class factory defined in the metadata and associate each one with the provided component file name.
 
 This function will not attempt to immediately load the component library - it will be loaded on demand when an appropriate class factory is requested. It will fail if it is requested to map a class name that is already associated with a different component.
 
