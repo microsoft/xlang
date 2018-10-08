@@ -309,7 +309,7 @@ static PyType_Spec @_Type_spec =
             }
         };
 
-        visit(param.second->Type().Type(),
+        xlang::visit(param.second->Type().Type(),
             [&](coded_index<TypeDefOrRef> const& index)
         {
             switch (index.type())

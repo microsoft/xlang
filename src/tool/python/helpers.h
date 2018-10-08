@@ -116,7 +116,7 @@ namespace xlang
 
         void handle(TypeSig const& signature)
         {
-            visit(signature.Type(),
+            xlang::visit(signature.Type(),
                 [&](auto&& type)
             {
                 static_cast<T*>(this)->handle(type);
