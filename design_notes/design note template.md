@@ -1,11 +1,11 @@
 ---
-id: LDNxx
+id: XDNxx
 title: Template for Design Notes 
 author: benkuhn@microsoft.com
 status: template
 ---
 
-# Title: LDNxx - Template for Design Notes 
+# Title: XDNxx - Template for Design Notes 
 * Author: Ben Kuhn (benkuhn@microsoft.com)
 * Status: Template
 
@@ -13,7 +13,7 @@ status: template
 
 This document is a template for Xlang Project Design Notes. All major features and behaviors of the Xlang Project are documented in a Design Note submitted to the repository.
 
-## Specification Section 1
+## Design Note Section 1
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vehicula lorem vitae leo lobortis, et fermentum nulla semper. Sed auctor elementum ligula quis tristique. Vestibulum id metus a sapien eleifend mollis at a diam. Vivamus pharetra elit non fringilla aliquet. Suspendisse et rutrum urna, nec rutrum nisl. Praesent eu ligula eu tellus blandit commodo. Etiam odio est, pharetra ac tincidunt eget, imperdiet a diam. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur commodo dui in egestas vehicula. Donec nec odio diam. Quisque ac consectetur nulla. Nunc non urna vitae nisl iaculis varius. Pellentesque sit amet ante et justo gravida consectetur. Nulla ipsum sapien, volutpat sit amet aliquet a, dignissim eget enim. Quisque ex risus, euismod vel sapien id, sagittis scelerisque sem. 
 
@@ -33,7 +33,7 @@ Curabitur vestibulum tempor tortor laoreet tempor. Vivamus malesuada eros vitae 
 
 Praesent mi nibh, malesuada vel suscipit non, tincidunt ac turpis. Aliquam ut quam a elit tempus facilisis. Suspendisse sit amet risus eu mauris dictum mattis quis sed risus. Etiam lectus urna, venenatis in ullamcorper in, ultrices sit amet tellus. Vestibulum ullamcorper justo et lacus maximus sollicitudin. In volutpat vehicula aliquet. Integer a faucibus lorem, et fringilla ante. Etiam in quam libero. 
 
-## Specification Section 2
+## Design Note Section 2
 
 Quisque finibus posuere metus, in suscipit enim ultrices id. Pellentesque eu lobortis libero. Integer in gravida ex, nec accumsan ex. Nunc nec risus in nunc consectetur ullamcorper vitae bibendum est. Etiam at sem maximus, gravida arcu sed, pretium risus. Duis facilisis odio vitae lectus elementum, at pellentesque mauris vehicula. Vivamus maximus lectus in laoreet venenatis. Vivamus leo lacus, lacinia at nibh eu, facilisis pretium diam. Duis interdum est nec tortor sagittis, at aliquam magna lacinia. Nunc sed consectetur quam, quis hendrerit libero. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis cursus metus ut pharetra congue. Ut vitae mauris libero. Proin a scelerisque nunc, ac sagittis ipsum. 
 

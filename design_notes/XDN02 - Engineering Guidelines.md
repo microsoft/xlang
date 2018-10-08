@@ -1,31 +1,25 @@
 ---
-title: A Strategy for Language Interoperability
+id: XDN02
+title: Engineering Guidelines
 author: "benkuhn@microsoft.com"
+status: draft
 ---
 
-Title: ​LDN02 - Engineering Guidelines
-=======================================================
+# Title: XLDN02 - Engineering Guidelines
+* Ben Kuhn (benkuhn\@microsoft.com)
+* Status: Draft
 
--   Author: Ben Kuhn (benkuhn\@microsoft.com)
+## Abstract
 
--   Status: Draft
+The Xlang Project involves many components written in a variety of programming languages. This document describes coding guidelines for each language.
 
-Abstract
---------
-
-The Xlang Project involves many components written in a variety of
-programming languages. This document describes coding guidelines for
-each language.
-
-
-Coding Guidelines
------------------
+## Coding Guidelines
 
 This project adopts industry standard guidelines where one exists. As new language support is added to the project, this list will be expanded to include applicable standards. 
 
 The project references these as guidelines, not laws. Thoughtful deviation is allowed if it aids readability of the specific code in question or is necessary for a technical reason. However, guidelines should not be ignored because of a disagreement with the guideline itself. 
 
-Due to the nature of language interoperability, types expressed using the xlang type system will adhere to naming guidelines in some languages and deviate from others. Naming conventions of the xlang type system take precedence over language-specific guidelines where applicable.
+Due to the nature of language interoperability, types expressed using the Xlang type system will adhere to naming guidelines in some languages and deviate from others. Naming conventions of the Xlang type system take precedence over language-specific guidelines where applicable.
 
 ### References by language
 
