@@ -22,6 +22,8 @@ std::unordered_map<std::size_t, PyObject*> instance_map{};
 
 void py::wrapped_instance(std::size_t key, PyObject* obj)
 {
+    // TODO: re-enable instance wrapper caching 
+
     // if obj is null, remove from instance_map
     //if (obj)
     //{

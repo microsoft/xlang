@@ -25,8 +25,6 @@ set(excluded_namespaces
     Windows.Foundation.PropertyValue
     Windows.Foundation.Metadata
     Windows.Foundation.Diagnostics
-    Windows.Foundation.Numerics
-    Windows.Devices.Geolocation.Geofencing
 )
 
 set(cmdline "-output ${output_dir}")
@@ -54,6 +52,7 @@ set(pybase_h ${output_dir}/pybase.h)
 message(${pybase_h})
 add_custom_command(
   OUTPUT ${pybase_h} 
+  DEPENDS ${pywinrt_exe}
   COMMAND ${pywinrt_exe} ${cmdline}
 )
 

@@ -10,8 +10,8 @@ if (-not (test-path env:VSINSTALLDIR)) {
     exit 1
 }
 
-$rootPath = (split-path $PSScriptRoot)
-$buildPath = join-path $rootPath "_build/Windows/$env:VSCMD_ARG_TGT_ARCH/$buildType"
+$rootPath = split-path $PSScriptRoot
+$buildPath = join-path (split-path $rootPath) "_build/Windows/$env:VSCMD_ARG_TGT_ARCH/$buildType"
 
 $vswherePath = join-path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 $vsInstallPath = & $vswherepath -latest -property installationPath

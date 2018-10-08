@@ -141,6 +141,10 @@ namespace xlang
                     while (pos != std::string::npos)
                     {
                         value_.insert(pos + 1, indentation);
+                        if (pos == 0)
+                        {
+                            break;
+                        }
                         pos = value_.find_last_of('\n', pos - 1);
                     }
 
@@ -300,11 +304,44 @@ namespace xlang
         void write(TypeDef const& type)
         {
             auto ns = type.TypeNamespace();
+            auto name = type.TypeName();
+
             if (ns != current_namespace)
             {
                 needed_namespaces.emplace(ns);
             }
-            write("winrt::@::@", type.TypeNamespace(), type.TypeName());
+
+            if ((ns == "Windows.Foundation") && (name == "HResult"))
+            {
+                write("winrt::hresult");
+            }
+            else if ((ns == "Windows.Foundation") && (name == "EventRegistrationToken"))
+            {
+                write("winrt::event_token");
+            }
+            else
+            {
+                if (ns == "Windows.Foundation.Numerics")
+                {
+                    static const std::map<std::string_view, std::string_view> custom_numerics = {
+                        { "Matrix3x2", "float3x2" },
+                        { "Matrix4x4", "float4x4" },
+                        { "Plane", "plane" },
+                        { "Quaternion", "quaternion" },
+                        { "Vector2", "float2"},
+                        { "Vector3", "float3" },
+                        { "Vector4", "float4" }
+                    };
+
+                    auto custom_numeric = custom_numerics.find(name);
+                    if (custom_numeric != custom_numerics.end())
+                    {
+                        name = custom_numeric->second;
+                    }
+                }
+
+                write("winrt::@::@", ns, name);
+            }
         }
 
         void write(coded_index<TypeDefOrRef> const& type)
