@@ -1,19 +1,19 @@
 ---
-id: LDN03
+id: XSPEC01
 title: Type System Specification 
 author: hpierson@microsoft.com
 status: draft
 ---
 
-# Title: ​LDN03 - Type System Specification
+# Title: XSPEC01 - Type System Specification
 * Author: Harry Pierson (hpierson@microsoft.com)
 * Status: Draft
 
 ## Abstract
 
-This Design Note describes the Xlang type system.
+This document describes the Xlang type system.
 
-*Open Issue*: This specification was adapted from the Windows Runtime specification,and still refers to fundamental interfaces that are part of the Windows Runtime and to various COM constructs. As equivalent Xlang constructs are defined, this specification needs to be updated to remove COM concepts & references and instead reflect the equivalent Xlang concepts.
+*Open Issue*: This specification was adapted from Windows Runtime specifications and still refers to fundamental interfaces that are part of the Windows Runtime and to various Windows-specific constructs. As equivalent Xlang constructs are defined, this specification needs to be updated to remove Windows-specific concepts & references and instead reflect the Xlang equivalents.
 
 General Notes
 -------------

@@ -11,7 +11,7 @@ status: draft
 
 ## Abstract
 
-This design note documents the platform abstraction layer (or PAL) for Xlang.
+This document describes the platform abstraction layer (or PAL) for Xlang.
 
 Overview
 --------

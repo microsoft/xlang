@@ -11,13 +11,13 @@ status: draft
 
 ## Abstract
 
-This Design Note describes how Xlang types are encoded in metadata files.
+This document describes how Xlang types are encoded in metadata files.
 
-*Open Issue*: this document is derived from the WinRT Consolidated Reference and has not yet been updated to use cross-platfrom terminology. Types referenced in the Xlang.* namespace are placeholders subject to change.
+> *Note*: this document is derived from Windows Runtime specifications and has not yet been updated to use cross-platfrom terminology. Types referenced in the Xlang.* namespace are placeholders subject to change.
 
-*Open Issue*: The .xlmeta is a placeholder extension and subject to change.
+> *Open Issue*: The .xlmeta is a placeholder extension and subject to change.
 
-*Open Issue*: tdWindowsRuntime flag needs replaced with an Xlang equivalent.
+> *Open Issue*: tdWindowsRuntime flag needs replaced with an Xlang equivalent.
 
 Overview
 --------

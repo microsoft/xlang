@@ -1,4 +1,4 @@
----
+XSPEC01---
 id: LDN06
 title: Application Binary Interface
 author: ryansh@microsoft.com
@@ -11,7 +11,7 @@ status: draft
 
 ## Abstract
 
-This design note documents the Application Binary Interface (or ABI) for Xlang.
+This document describes the Application Binary Interface (or ABI) for Xlang.
 
 Overview
 --------
