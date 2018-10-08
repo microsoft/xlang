@@ -149,12 +149,9 @@ namespace xlang
             w.flush_to_console();
             task_group group;
 
-            for (auto&& ns_pair : c.namespaces())
+            for (auto&& [ns, members] : c.namespaces())
             {
-                auto const& ns = ns_pair.first;
-                auto const& members = ns_pair.second;
-
-                group.add([&]
+                group.add([&, &ns = ns, &members = members]
                 {
                     if (!f.includes(members))
                     {
