@@ -216,16 +216,9 @@ namespace xlang
         return distance(type.GenericParam()) > 0;
     }
 
-    inline auto get_name(MethodDef const& method)
+    bool is_constructor(MethodDef const& method)
     {
-        auto name = method.Name();
-
-        if (method.SpecialName())
-        {
-            return name.substr(name.find('_') + 1);
-        }
-
-        return name;
+        return method.Flags().RTSpecialName() && method.Name() == ".ctor";
     }
 
     struct property_type
@@ -299,75 +292,6 @@ namespace xlang
         XLANG_ASSERT(add_method.Flags().Static() == remove_method.Flags().Static());
 
         return { add_method, remove_method };
-    }
-
-    auto get_constructors(TypeDef const& type)
-    {
-        std::vector<MethodDef> constructors{};
-
-        for (auto&& method : type.MethodList())
-        {
-            if (method.Flags().RTSpecialName() && method.Name() == ".ctor")
-            {
-                constructors.push_back(method);
-            }
-        }
-
-        return std::move(constructors);
-    }
-
-    auto get_properties(TypeDef const& type, bool static_props)
-    {
-        std::vector<Property> properties{};
-
-        for (auto&& prop : type.PropertyList())
-        {
-            auto prop_methods = get_property_methods(prop);
-            if (prop_methods.get.Flags().Static() == static_props)
-            {
-                properties.push_back(prop);
-            }
-        }
-
-        return std::move(properties);
-    }
-
-    auto get_instance_properties(TypeDef const& type)
-    {
-        return get_properties(type, false);
-    }
-
-    auto get_static_properties(TypeDef const& type)
-    {
-        return get_properties(type, true);
-    }
-
-    auto get_methods(TypeDef const& type)
-    {
-        std::vector<MethodDef> methods{};
-
-        for (auto&& method : type.MethodList())
-        {
-            if (!(method.SpecialName() || method.Flags().RTSpecialName()))
-            {
-                methods.push_back(method);
-            }
-        }
-
-        return std::move(methods);
-    }
-
-    bool has_methods(TypeDef const& type)
-    {
-        return get_methods(type).size() > 0
-            || get_static_properties(type).size() > 0
-            || distance(type.EventList()) > 0;
-    }
-
-    bool has_getsets(TypeDef const& type)
-    {
-        return get_instance_properties(type).size() > 0 
-            || distance(type.FieldList()) > 0;
     }
 
     bool has_dealloc(TypeDef const& type)

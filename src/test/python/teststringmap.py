@@ -12,7 +12,7 @@ class TestStringMap(unittest.TestCase):
 
         self.assertTrue(m.HasKey("hello"))
         self.assertFalse(m.HasKey("world"))
-        self.assertEqual(m.Size, 1)
+        self.assertEqual(m.get_Size(), 1)
         self.assertEqual(m.Lookup("hello"), "world")
 
 
@@ -24,8 +24,8 @@ class TestStringMap(unittest.TestCase):
             future = loop.create_future()
 
             def onMapChanged(sender, args): 
-                self.assertEqual(args.CollectionChange, 1)
-                self.assertEqual(args.Key, "dr")
+                self.assertEqual(args.get_CollectionChange(), 1)
+                self.assertEqual(args.get_Key(), "dr")
                 future.set_result(None)
 
             m = _pyrt.StringMap()
