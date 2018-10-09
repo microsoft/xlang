@@ -4,7 +4,7 @@ import _pyrt
 import unittest
 import asyncio
 
-class TestXlangGeolocation(unittest.TestCase):
+class TestGeolocation(unittest.TestCase):
 
     def test_pinterface_qi(self):
         locator = _pyrt.Geolocator()

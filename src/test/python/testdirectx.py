@@ -3,7 +3,7 @@ import find_projection
 import _pyrt
 import unittest
 
-class TestXlangDirectX(unittest.TestCase):
+class TestDirectX(unittest.TestCase):
 
     def test_struct_containing_enum_pos(self):
         msd = _pyrt.Direct3DMultisampleDescription(1, 2)

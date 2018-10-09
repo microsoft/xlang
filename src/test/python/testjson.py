@@ -3,7 +3,7 @@ import find_projection
 import _pyrt
 import unittest
 
-class TestXlangJson(unittest.TestCase):
+class TestJson(unittest.TestCase):
 
     def test_activate_JsonArray(self):
         a = _pyrt.JsonArray()

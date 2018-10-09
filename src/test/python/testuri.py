@@ -3,7 +3,7 @@ import find_projection
 import _pyrt
 import unittest
 
-class TestXlangJson(unittest.TestCase):
+class TestUri(unittest.TestCase):
 
     def test_activate_uri(self):
         u = _pyrt.Uri("http://microsoft.com")
