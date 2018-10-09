@@ -99,6 +99,8 @@ namespace xlang
 
     void write_getset_table_prop_row(writer& w, Property const& prop)
     {
+        // TODO: project properties as get and set methods, do the stitching into Python properties at the Python layer
+
         auto property_methods = get_property_methods(prop);
 
         auto getter = w.write_temp("(getter)@_%", prop.Parent().TypeName(), property_methods.get.Name());
@@ -126,18 +128,10 @@ namespace xlang
             field.Parent().TypeName(), field.Name());
     }
 
-    // TODO WinRT Event support
-    //void write_getset_table_row_event(writer& w, Event const& event)
-    //{
-    //    // TODO: remove const_cast once pywinrt is updated to target Python 3.7. 
-    //    //       pywinrt currently targeting 3.6 because that's the version that ships with VS 2017 v15.8
-    //    //       https://github.com/python/cpython/commit/007d7ff73f4e6e65cfafd512f9c23f7b7119b803
-    //    w.write("    { const_cast<char*>(\"%\"), (getter)@_event_%, nullptr, nullptr, nullptr },\n", event.Name(),
-    //        event.Parent().TypeName(), event.Name());
-    //}
-
     void write_getset_table(writer& w, TypeDef const& type)
     {
+        // TODO: project properties as get and set methods, do the stitching into Python properties at the Python layer
+
         if (has_getsets(type))
         {
             w.write("\nstatic PyGetSetDef @_getset[] = {\n", type.TypeName());
@@ -173,23 +167,29 @@ namespace xlang
                 }
             }
 
+            // TODO: project properties as get and set methods, do the stitching into Python properties at the Python layer
             for (auto&& prop : get_static_properties(type))
             {
                 w.write("    { \"%\", (PyCFunction)@_%, METH_VARARGS | METH_STATIC, nullptr },\n",
                     prop.Name(), type.TypeName(), prop.Name());
             }
 
-            if (get_static_events(type).size() > 0)
+            for (auto&& event : type.EventList())
             {
-                throw_invalid("static events not impl");
-            }
+                auto event_methods = get_event_methods(event);
 
-            // TODO: WinRT Event Support
-            //for (auto&& event : get_static_events(type))
-            //{
-            //    w.write("    { \"%\", (PyCFunction)%_%, METH_VARARGS | METH_STATIC, nullptr },\n",
-            //        event.Name(), type.TypeName(), event.Name());
-            //}
+                w.write("    { \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
+                    event_methods.add.Name(), 
+                    type.TypeName(), 
+                    event_methods.add.Name(), 
+                    event_methods.add.Flags().Static() ? " | METH_STATIC" : "");
+
+                w.write("    { \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
+                    event_methods.remove.Name(),
+                    type.TypeName(),
+                    event_methods.remove.Name(),
+                    event_methods.remove.Flags().Static() ? " | METH_STATIC" : "");
+            }
 
             w.write("    { nullptr }\n};\n");
         }
@@ -594,6 +594,19 @@ static PyType_Spec @_Type_spec =
             bind_method_overloads<write_class_method_overload>(w, methods);
             w.write("}\n");
         }
+
+        for (auto&& event : type.EventList())
+        {
+            auto event_methods = get_event_methods(event);
+
+            write_class_method_decl(w, type, { event_methods.add });
+            bind_method_overloads<write_class_method_overload>(w, { event_methods.add });
+            w.write("}\n");
+
+            write_class_method_decl(w, type, { event_methods.remove });
+            bind_method_overloads<write_class_method_overload>(w, { event_methods.remove });
+            w.write("}\n");
+        }
     }
 
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
@@ -705,6 +718,7 @@ static void @_dealloc(%* self)
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
         write_class_methods(w, type);
+        // TODO: project properties as get and set methods, do the stitching into Python properties at the Python layer
         w.write_each<write_class_property>(get_instance_properties(type));
         write_method_table(w, type);
         write_getset_table(w, type);
@@ -760,24 +774,42 @@ static void @_dealloc(%* self)
 
         std::set<std::string_view> method_set{};
 
+        auto format = R"(
+static PyObject* @_%(%* self, PyObject* args)
+{
+    return self->obj->%(args);
+}
+)";
+
         for (auto&& method : get_methods(type))
         {
             if (method_set.find(method.Name()) == method_set.end())
             {
                 method_set.emplace(method.Name());
 
-                auto format = R"(
-static PyObject* @_%(%* self, PyObject* args)
-{
-    return self->obj->%(args);
-}
-)";
                 w.write(format,
                     type.TypeName(),
                     method.Name(),
                     bind<write_winrt_wrapper>(type),
                     method.Name());
             }
+        }
+
+        for (auto&& event : type.EventList())
+        {
+            auto event_methods = get_event_methods(event);
+
+            w.write(format,
+                type.TypeName(),
+                event_methods.add.Name(),
+                bind<write_winrt_wrapper>(type),
+                event_methods.add.Name());
+
+            w.write(format,
+                type.TypeName(),
+                event_methods.remove.Name(),
+                bind<write_winrt_wrapper>(type),
+                event_methods.remove.Name());
         }
     }
 
@@ -862,7 +894,13 @@ static int @_%(%* self, PyObject* value, void* /*unused*/)
             }
         }
 
-        // TODO interface events
+        for (auto&& event: type.EventList())
+        {
+            auto event_methods = get_event_methods(event);
+
+            w.write("    virtual PyObject* %(PyObject* arg) = 0;\n", event_methods.add.Name());
+            w.write("    virtual PyObject* %(PyObject* arg) = 0;\n", event_methods.remove.Name());
+        }
 
         w.write("};\n");
     }
@@ -912,7 +950,18 @@ int %(PyObject* value) override
             }
         }
 
-        // TODO interface events
+        for (auto&& event : type.EventList())
+        {
+            auto event_methods = get_event_methods(event);
+
+            w.write("\nPyObject* %(PyObject* args) override\n{\n", event_methods.add.Name());
+            bind_method_overloads<write_class_method_overload>(w, { event_methods.add });
+            w.write("}\n");
+
+            w.write("\nPyObject* %(PyObject* args) override\n{\n", event_methods.remove.Name());
+            bind_method_overloads<write_class_method_overload>(w, { event_methods.remove });
+            w.write("}\n");
+        }
 
         w.write("\n    %<%> obj{ nullptr };\n};\n", type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
     }
@@ -1105,6 +1154,14 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             bind<write_full_type>(type),
             bind<write_python_delegate_type>(type));
     }
+
+
+
+
+
+
+
+
 
     std::string get_cpp_field_name(Field const& field)
     {

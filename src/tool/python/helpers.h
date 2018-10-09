@@ -228,26 +228,6 @@ namespace xlang
         return name;
     }
 
-    auto get_dotted_name_segments(std::string_view ns)
-    {
-        std::vector<std::string_view> segments;
-        size_t pos = 0;
-
-        do
-        {
-            auto new_pos = ns.find('.', pos);
-
-            if (new_pos == std::string_view::npos)
-            {
-                segments.push_back(ns.substr(pos));
-                return std::move(segments);
-            }
-
-            segments.push_back(ns.substr(pos, new_pos - pos));
-            pos = new_pos + 1;
-        } while (true);
-    };
-
     struct property_type
     {
         MethodDef get;
@@ -362,33 +342,6 @@ namespace xlang
         return get_properties(type, true);
     }
 
-    auto get_events(TypeDef const& type, bool static_events)
-    {
-        std::vector<Event> events{};
-
-        for (auto&& event : type.EventList())
-        {
-            auto event_methods = get_event_methods(event);
-
-            if (event_methods.add.Flags().Static() == static_events)
-            {
-                events.push_back(event);
-            }
-        }
-
-        return std::move(events);
-    }
-
-    auto get_instance_events(TypeDef const& type)
-    {
-        return get_events(type, false);
-    }
-
-    auto get_static_events(TypeDef const& type)
-    {
-        return get_events(type, true);
-    }
-
     auto get_methods(TypeDef const& type)
     {
         std::vector<MethodDef> methods{};
@@ -401,19 +354,19 @@ namespace xlang
             }
         }
 
-        // TODO: static events
         return std::move(methods);
     }
 
     bool has_methods(TypeDef const& type)
     {
-        return get_methods(type).size() > 0 || get_static_properties(type).size() > 0 || get_static_events(type).size() > 0;
+        return get_methods(type).size() > 0
+            || get_static_properties(type).size() > 0
+            || distance(type.EventList()) > 0;
     }
 
     bool has_getsets(TypeDef const& type)
     {
         return get_instance_properties(type).size() > 0 
-            || get_instance_events(type).size() > 0 
             || distance(type.FieldList()) > 0;
     }
 

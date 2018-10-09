@@ -10,9 +10,10 @@
 
 namespace winrt::impl
 {
-    // Bug 19167653: C++/WinRT missing category for AsyncStatus. 
-    // The following line can be removed after 19167653 is fixed
+    // Bug 19167653: C++/WinRT missing category for AsyncStatus and CollectionChange. 
+    // The following lines can be removed after 19167653 is fixed
     template <> struct category<winrt::Windows::Foundation::AsyncStatus> { using type = enum_category; };
+    template <> struct category<winrt::Windows::Foundation::Collections::CollectionChange> { using type = enum_category; };
 }
 
 namespace py
