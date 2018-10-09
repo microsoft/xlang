@@ -1227,16 +1227,16 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             case ElementType::Boolean:
                 w.write("p");
                 break;
-            // TODO: char struct support 
+            // TODO: char, sbyte and byte struct support 
             //case ElementType::Char:
             //    w.write("wchar_t");
             //    break;
-            case ElementType::I1:
-                w.write("int8_t");
-                break;
-            case ElementType::U1:
-                w.write("uint8_t");
-                break;
+            //case ElementType::I1:
+            //    w.write("int8_t");
+            //    break;
+            //case ElementType::U1:
+            //    w.write("uint8_t");
+            //    break;
             case ElementType::I2:
                 w.write("h");
                 break;
@@ -1261,7 +1261,7 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             case ElementType::R8:
                 w.write("d");
                 break;
-            // TODO: string  struct support 
+            // TODO: string struct support 
             //case ElementType::String:
             //    w.write("winrt::hstring");
             //    break;
@@ -1293,6 +1293,11 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 
         struct_ctor_var_init_writer(writer& wr, Field const& f) : w(wr), field(f)
         {
+        }
+
+        void handle_enum(TypeDef const& type)
+        {
+            w.write("static_cast<%>(%)", type, bind<write_struct_field_name>(field));
         }
 
         void handle_struct(TypeDef const& type)

@@ -30,15 +30,28 @@ namespace xlang
         }
     };
 
+    bool is_flags_enum(TypeDef const& type);
+
     template <typename T>
     struct signature_handler_base
     {
         void handle_class(TypeDef const& /*type*/) { throw_invalid("handle_class not implemented"); }
         void handle_delegate(TypeDef const& /*type*/) { throw_invalid("handle_delegate not implemented"); }
-        void handle_enum(TypeDef const& /*type*/) { throw_invalid("handle_enum not implemented"); }
         void handle_guid(TypeRef const& /*type*/) { throw_invalid("handle_guid not implemented"); }
         void handle_interface(TypeDef const& /*type*/) { throw_invalid("handle_interface not implemented"); }
         void handle_struct(TypeDef const& /*type*/) { throw_invalid("handle_struct not implemented"); }
+
+        void handle_enum(TypeDef const& type)
+        {
+            if (is_flags_enum(type))
+            {
+                static_cast<T*>(this)->handle(ElementType::U4);
+            }
+            else
+            {
+                static_cast<T*>(this)->handle(ElementType::I4);
+            }
+        }
 
         void handle(TypeRef const& type)
         {
