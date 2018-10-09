@@ -1,21 +1,22 @@
 ---
 id: XDN01
 title: A Strategy for Language Interoperability
-author: "hpierson@microsoft.com"
+author: hpierson@microsoft.com
 status: draft
 ---
 
 # XDN01 - A Strategy for Language Interoperability
-* Harry Pierson (hpierson\@microsoft.com)
-* Status: Draft
+
+- Harry Pierson (hpierson\@microsoft.com)
+- Status: Draft
 
 ## Abstract
 
-This design note describes the goals and guiding principles of the Xlang project. This document is aspirational: It describes the project and its features as it has been envisioned. Some of the features or characteristics described have not yet been implemented yet. 
+This design note describes the goals and guiding principles of the Xlang project. This document is aspirational: It describes the project and its features as it has been envisioned. Some of the features or characteristics described have not yet been implemented yet.
 
 ## Overview
 
-Xlang is a system that enables a component written in any supported language to be callable from any other supported language using object oriented programming constructs. Components are written using natural and familiar code in the implementation language and clients invoke those components using constructs familiar to the language that they are consuming the component from. Xlang projections use metadata that describes the component's inteface to translate from one language to another using a common binary interface. 
+Xlang is a system that enables a component written in any supported language to be callable from any other supported language using object oriented programming constructs. Components are written using natural and familiar code in the implementation language and clients invoke those components using constructs familiar to the language that they are consuming the component from. Xlang projections use metadata that describes the component's inteface to translate from one language to another using a common binary interface.
 
 This project is based on an approach originally developed for Windows 8 called the Windows Runtime. The project adopts many concepts from that work, enabling language interoperability on numerous operating systems beyond the Windows family.
 
@@ -27,10 +28,9 @@ In Xlang, langage interoperability is achieved via a combination of language ind
 
 ### Common Type System
 
-Components are written using the type system of the implementation language and accessed using the type system of the consuming language. As such,
-the Xlang type system is designed to interoperate with modern object-oriented programming languages. This includes both static (such as C\#) and dynamic (such as Python) object-oriented languages as well as strongly typed (such as C++) and weakly typed (such as JavaScript) languages. 
+Components are written using the type system of the implementation language\ and accessed using the type system of the consuming language. As such, the Xlang type system is designed to interoperate with modern object-oriented programming languages. This includes both static (such as C#) and dynamic (such as Python) object-oriented languages as well as strongly typed (such as C++) and weakly typed (such as JavaScript) languages.
 
-Xlang’s type system is *not* designed to be accessed directly, except by language projections. The underlying type system includes concepts such as resource ownership semantics, error propagation semantics, and binary-stable interfaces that component authors and consumers do not need to be aware of.
+Xlang's type system is _not_ designed to be accessed directly, except by language projections. The underlying type system includes concepts such as resource ownership semantics, error propagation semantics, and binary-stable interfaces that component authors and consumers do not need to be aware of.
 
 ### Application Programming Interface (API) Metadata
 
@@ -44,8 +44,7 @@ While the ABI is critical to enable interoperability among languages, most devel
 
 ### Language Projections
 
-A projection converts calls made in using familiar concepts in one programming language into a calls that, on the machine’s call stack and in machine
-registers, conforms to the abstract binary interface. On the other side of the call, another projection converts those calls into a call tailored to the language that the library was implemented in. As a simple example, this means that you could call an API in C\# using a System.String, and the C++ implementation would receive a std::string_view.
+A projection converts calls made in using familiar concepts in one programming language into a calls that, on the machine's call stack and in machine registers, conforms to the abstract binary interface. On the other side of the call, another projection converts those calls into a call tailored to the language that the library was implemented in. As a simple example, this means that you could call an API in C# using a System.String, and the C++ implementation would receive a std::string_view.
 
 In some compiled languages, this translation may involve a few simple type conversions, or potentially no work at all. In interpreted languages, this can sometimes involve more complex transformations. For example, JavaScript has a very different notion of numbers than most other languages. However, the ABI is specifically tailored to minimize the cost and data loss in these conversions.
 
