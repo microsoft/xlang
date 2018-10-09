@@ -1,23 +1,27 @@
 ---
-id: LDN04
-title: Metadata Representation 
-author: hpierson@microsoft.com
-status: draft
+title: Metadata Representation
+author: "hpierson@microsoft.com"
 ---
 
-# Title: ​LDN04 - Metadata Representation
-* Author: Harry Pierson (hpierson@microsoft.com)
-* Status: Draft
+Title: ​XSPEC02 - Metadata Representation
+========================================
 
-## Abstract
+-   Author: Harry Pierson (hpierson\@microsoft.com)
+
+-   Status: Draft
+
+Abstract
+--------
 
 This document describes how Xlang types are encoded in metadata files.
 
-> *Note*: this document is derived from Windows Runtime specifications and has not yet been updated to use cross-platfrom terminology. Types referenced in the Xlang.* namespace are placeholders subject to change.
+>   *Note*: this document is derived from Windows Runtime specifications and has
+>   not yet been updated to use cross-platfrom terminology. Types referenced in
+>   the Xlang.\* namespace are placeholders subject to change.
 
-> *Open Issue*: The .xlmeta is a placeholder extension and subject to change.
+>   *Open Issue*: The .xlmeta is a placeholder extension and subject to change.
 
-> *Open Issue*: tdWindowsRuntime flag needs replaced with an Xlang equivalent.
+>   *Open Issue*: tdWindowsRuntime flag needs replaced with an Xlang equivalent.
 
 Overview
 --------
@@ -33,10 +37,10 @@ The Xlang runtime provides C-style APIs to aid language projections in the
 resolution of namespaces and types that need this metadata at runtime.
 
 All public types in a Xlang metadata file must be Xlang types and must carry the
-tdWindowsRuntime flag (details on type flags to follow). Xlang metadata files may include
-metadata for non-Xlang types. Any non-Xlang types in a Xlang metadata file must not be
-public. Semantics for non-Xlang types are implementation defined and outside the
-scope of this document.
+tdWindowsRuntime flag (details on type flags to follow). Xlang metadata files
+may include metadata for non-Xlang types. Any non-Xlang types in a Xlang
+metadata file must not be public. Semantics for non-Xlang types are
+implementation defined and outside the scope of this document.
 
 All public interface members (methods, properties, events) on Xlang types must
 be Xlang interface members. Xlang types may include metadata for non-Xlang
@@ -45,22 +49,22 @@ for non-Xlang interface members are implementation defined and outside the scope
 of this document.
 
 Xlang metadata Files
------------
+--------------------
 
 ### Xlang metadata File Format
 
-Xlang metadata files use the same physical file format as CLR assemblies as defined by
-the ECMA-335 specification. However, while the physical file format is the same,
-the rules for valid combinations of data are different for Xlang metadata files and CLR
-assemblies. This document lists the deltas between Xlang metadata files and CLR
-assemblies.
+Xlang metadata files use the same physical file format as CLR assemblies as
+defined by the ECMA-335 specification. However, while the physical file format
+is the same, the rules for valid combinations of data are different for Xlang
+metadata files and CLR assemblies. This document lists the deltas between Xlang
+metadata files and CLR assemblies.
 
-System provided Xlang metadata files are pure metadata. 3rd party Xlang metadata files may contain
-code. In particular, managed Xlang metadata files include MSIL code, just like
-traditional CLR assemblies do.
+System provided Xlang metadata files are pure metadata. 3rd party Xlang metadata
+files may contain code. In particular, managed Xlang metadata files include MSIL
+code, just like traditional CLR assemblies do.
 
-Every Xlang metadata file contains the definitions of zero or more Xlang types. Empty
-Xlang metadata files are valid, if not particularly useful
+Every Xlang metadata file contains the definitions of zero or more Xlang types.
+Empty Xlang metadata files are valid, if not particularly useful
 
 There are no specific Xlang restrictions on PEKind or machine architecture
 listed in a Xlang metadata
@@ -69,24 +73,24 @@ Xlang metadata version String must contain "Xlang runtime 1.2”
 
 ### Xlang metadata File Name
 
-The name without extension of a Xlang metadata file must be a case-insensitive match to
-the name column of the assembly table inside the Xlang metadata file. For example, the
-"Foo.Bar.xlmeta" file must have "Foo.Bar" in the name column of the assembly
-table. Because the file system is case insensitive, the case of the file name
-may differ from the assembly table name column value
+The name without extension of a Xlang metadata file must be a case-insensitive
+match to the name column of the assembly table inside the Xlang metadata file.
+For example, the "Foo.Bar.xlmeta" file must have "Foo.Bar" in the name column of
+the assembly table. Because the file system is case insensitive, the case of the
+file name may differ from the assembly table name column value
 
-All of the Xlang types in a given Xlang metadata file must be under a namespace that
-matches the name of the Xlang metadata file and the assembly table name column value.
-Because the file system is case insensitive, the case of the file may differ
-from the namespace of all the Xlang types in a given Xlang metadata file. The namespace
-of all the Xlang types in a given Xlang metadata must match the assembly table name
-column value exactly (i.e. case sensitive). For example, all of the types in the
-file with “Foo.Bar” in the assembly table’s name column must be in the Foo.Bar
-namespace. The types may be either direct children of the this namespace (aka
-Foo.Bar.MyType) or in subnamespaces of the this namespace (aka
-Foo.Bar.Baz.MyType). The name of the file must be “Foo.Bar.xlmeta”, but may vary
-in case – that is, “foo.bar.xlmeta” and “FOO.BAR.XLMETA would also be permitted
-as file names for this metadata file.
+All of the Xlang types in a given Xlang metadata file must be under a namespace
+that matches the name of the Xlang metadata file and the assembly table name
+column value. Because the file system is case insensitive, the case of the file
+may differ from the namespace of all the Xlang types in a given Xlang metadata
+file. The namespace of all the Xlang types in a given Xlang metadata must match
+the assembly table name column value exactly (i.e. case sensitive). For example,
+all of the types in the file with “Foo.Bar” in the assembly table’s name column
+must be in the Foo.Bar namespace. The types may be either direct children of the
+this namespace (aka Foo.Bar.MyType) or in subnamespaces of the this namespace
+(aka Foo.Bar.Baz.MyType). The name of the file must be “Foo.Bar.xlmeta”, but may
+vary in case – that is, “foo.bar.xlmeta” and “FOO.BAR.XLMETA would also be
+permitted as file names for this metadata file.
 
 ### Xlang metadata Composition
 
@@ -94,13 +98,14 @@ The metadata for all the types in the system is spread across multiple .xlmeta
 files. An AppX package can include zero or more .xlmeta files describing 3rd
 party Xlang components that are included in the application package.
 
-Across all the .xlmeta files provided by the system or included with a given app,
-every Xlang type's metadata must be stored in the Xlang metadata file with the longest
-name matching the namespace of the type. All types that are direct children of a
-given namespace must be located in the same file. For example, if an AppX
-package includes Foo.xlmeta and Foo.Bar.xlmeta files, the Foo.Bar.Baz.MyType type
-must be located in the Foo.Bar.xlmeta file, since that is the file with the
-longest namespace-matching filename to the type in the package.
+Across all the .xlmeta files provided by the system or included with a given
+app, every Xlang type's metadata must be stored in the Xlang metadata file with
+the longest name matching the namespace of the type. All types that are direct
+children of a given namespace must be located in the same file. For example, if
+an AppX package includes Foo.xlmeta and Foo.Bar.xlmeta files, the
+Foo.Bar.Baz.MyType type must be located in the Foo.Bar.xlmeta file, since that
+is the file with the longest namespace-matching filename to the type in the
+package.
 
 ### TypeDef Redirection
 
@@ -134,7 +139,7 @@ Xlang encodes a type’s namespace and local name in a single period delimited
 string. For example, the type defined in the following snippet of code is
 “Example.Foundation.ISimpleInterface”.
 
-```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 namespace Example 
 {
   namespace Foundation 
@@ -145,7 +150,7 @@ namespace Example
     };
   };
 };
-```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Presumably for space optimization, the TypeDef table in CLI metadata provides
 separate columns for type name and namespace name. However, at the API level the
@@ -479,10 +484,12 @@ direction of the array length parameter may be inferred as follows:
     also be an in parameter. This represents the *PassArray* pattern.
 
 -   If the array parameter is an out parameter and is not carrying the BYREF
-    marker, the array length is an in parameter. This represents the *FillArray* pattern.
+    marker, the array length is an in parameter. This represents the *FillArray*
+    pattern.
 
 -   If the array parameter is an out parameter and carries the BYREF marker, the
-    array length is an out parameter. This represents the *ReceiveArray* pattern.
+    array length is an out parameter. This represents the *ReceiveArray*
+    pattern.
 
 #### Methods
 

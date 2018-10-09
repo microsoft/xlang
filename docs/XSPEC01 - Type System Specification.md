@@ -1,24 +1,31 @@
 ---
-id: XSPEC01
-title: Type System Specification 
-author: hpierson@microsoft.com
-status: draft
+title: Type System Specification
+author: "hpierson@microsoft.com"
 ---
 
-# Title: XSPEC01 - Type System Specification
-* Author: Harry Pierson (hpierson@microsoft.com)
-* Status: Draft
+Title: XSPEC01 - Type System Specification
+==========================================
 
-## Abstract
+-   Author: Harry Pierson (hpierson\@microsoft.com)
+
+-   Status: Draft
+
+Abstract
+--------
 
 This document describes the Xlang type system.
 
-*Open Issue*: This specification was adapted from Windows Runtime specifications and still refers to fundamental interfaces that are part of the Windows Runtime and to various Windows-specific constructs. As equivalent Xlang constructs are defined, this specification needs to be updated to remove Windows-specific concepts & references and instead reflect the Xlang equivalents.
+>   *Note*: This specification was adapted from Windows Runtime specifications
+>   and still refers to fundamental interfaces that are part of the Windows
+>   Runtime and to various Windows-specific constructs. As equivalent Xlang
+>   constructs are defined, this specification needs to be updated to remove
+>   Windows-specific concepts & references and instead reflect the Xlang
+>   equivalents.
 
 General Notes
 -------------
 
-All types must be contained within a namespace. No types in the global namespace 
+All types must be contained within a namespace. No types in the global namespace
 are allowed
 
 Except for interfaces, all Xlang types must have public visibility. Xlang
@@ -29,15 +36,15 @@ visibility.
 Xlang does not support nested types. No Xlang type can enclose another type. No
 Xlang type can be nested inside another type
 
-Xlang namespaces and type names are case preserving but insensitive. This means 
-that you cannot have namespaces or type names that vary only by case. For 
-example: you cannot have Foo.SomeType and foo.AnotherType nor can you have 
+Xlang namespaces and type names are case preserving but insensitive. This means
+that you cannot have namespaces or type names that vary only by case. For
+example: you cannot have Foo.SomeType and foo.AnotherType nor can you have
 Foo.SomeType and Foo.someType.
 
 Xlang identifiers must conform to the following grammar. Note, only characters
 defined in Unicode 3.0 and earlier are supported.
 
-```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 identifier-or-keyword:
     identifier-start-character identifier-continuation-characters*
 
@@ -71,7 +78,7 @@ connecting-character:
 formatting-character:
     Zero Width Non-Joiner (U+200C)
     Zero Width Joiner (U+200D)
-```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameterized Types
 -------------------
@@ -95,8 +102,8 @@ generating IIDs for parameterized type instances (eg IVector\<int\>).
 
 ### Parameterized Types Arguments
 
-The following Xlang types are permitted to appear in a parameterized
-type argument list:
+The following Xlang types are permitted to appear in a parameterized type
+argument list:
 
 -   Xlang fundamental types (eg, Boolean, Int32, String, Guid, etc)
 
@@ -171,9 +178,10 @@ The instantiation algorithm is as follows:
 4.  The type signature for a delegate that is not a p-delegate instance is the
     string “delegate” and the IID as with interfaces. Detailed grammar follows.
 
-5.  The guid for a parameterized type is computed via UUID rfc 4122, using a string generated via the following  grammar:
+5.  The guid for a parameterized type is computed via UUID rfc 4122, using a
+    string generated via the following grammar:
 
-```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 signature_octets => guid_to_octets(wrt_pinterface_namespace)  
 string_to_utf8_octets(ptype_instance_signature)
 
@@ -217,9 +225,9 @@ dashed_hex is the format uuidgen writes in when passed no arguments:
     dashed_hex => hex{8} "-" hex{4} "-" hex{4} "-" hex{4} "-" hex{12}
 
 hex => [0-9a-f]
-```
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-6.  When a p-type instantiation is passed as an argument to anther pinterface,
+1.  When a p-type instantiation is passed as an argument to anther pinterface,
     the signature computed by step 3.a is used as the type signature in grammar
     element 'pinterface_instance_signature' or ‘pdelegate_instance_signature’,
     as appropriate
@@ -227,15 +235,25 @@ hex => [0-9a-f]
 The following names are used for base types when they appear:
 
 -   UInt8 maps to “u1”
+
 -   Int32 maps to “i4”
+
 -   UInt32 maps to “u4”
+
 -   Int64 maps to “i8”
+
 -   UInt64 maps to “u8”
+
 -   Single maps to “f4”
+
 -   Double maps to “f8”
+
 -   Boolean maps to “b1”
+
 -   Char16 maps to “c2”
+
 -   String maps to “string”
+
 -   Guid maps to “g16”
 
 The above names are case sensitive. Other than for String, the type name uses a
@@ -273,25 +291,24 @@ itself.
 
 The version attribute may optionally be applied to interface members (methods,
 properties and events). This is intended for high-level class authoring in
-projections. Version attributes on interface members must be ignored at runtime 
+projections. Version attributes on interface members must be ignored at runtime
 by language projections.
 
 The Version attribute includes an unsigned 32-bit integer constructor parameter.
 For binary compatibility, the value must increase each time new types are added.
-The specific sequencing is up to the type author. The first version does not need
-to be 1 or 0, and future versions can be any value greater than the previous as 
-the author deems appropriate.
+The specific sequencing is up to the type author. The first version does not
+need to be 1 or 0, and future versions can be any value greater than the
+previous as the author deems appropriate.
 
-If a component intends to maintain binary compatibility, structs, delegates and 
-interfaces are immutable once defined. They may never be modified in any subsequent
-version.
+If a component intends to maintain binary compatibility, structs, delegates and
+interfaces are immutable once defined. They may never be modified in any
+subsequent version.
 
-Enums and runtime classes are additively versionable. Enums may
-add new enum values in subsequent versions. Classes may add new
-implemented interfaces (including static, activation factory, composition
-factory, overridable and protected interfaces) in subsequent versions.
-Further details on additive versioning are included in the sections for enums
-and runtime classes.
+Enums and runtime classes are additively versionable. Enums may add new enum
+values in subsequent versions. Classes may add new implemented interfaces
+(including static, activation factory, composition factory, overridable and
+protected interfaces) in subsequent versions. Further details on additive
+versioning are included in the sections for enums and runtime classes.
 
 Namespaces
 ----------
@@ -386,8 +403,8 @@ and Release as per traditional COM usage. IInspectable defines three methods in
 addition to the IUnknown methods: GetIids, GetRuntimeClassName and
 GetTrustLevel. These three methods allow the object’s client to retrieve
 information about the object. In particular, IInspectable.GetRuntimeClassName
-enables an object’s client to retrieve an Xlang type name that can be resolved in
-metadata to enable language projection.
+enables an object’s client to retrieve an Xlang type name that can be resolved
+in metadata to enable language projection.
 
 ### Interface Requires
 
@@ -605,9 +622,9 @@ something of interest happens.
 Events and their add/remove listener methods must have public visibility.
 
 An event add listener method has a single parameter of the event delegate type
-and returns an Xlang.Foundation.EventRegistrationToken. An event remove
-listener method has a single parameter of the
-Xlang.Foundation.EventRegistrationToken type and returns void.
+and returns an Xlang.Foundation.EventRegistrationToken. An event remove listener
+method has a single parameter of the Xlang.Foundation.EventRegistrationToken
+type and returns void.
 
 Events may not be parameterized. Events from parameterized interfaces may use
 type parameters of the containing type as the event delegate type.
@@ -679,7 +696,7 @@ actually not implemented on class instances themselves. Rather, they are
 implemented on the class’s activation factory. Details on activation factories
 to follow.
 
-### Activation 
+### Activation
 
 Runtime classes optionally support activation – the ability of the system to
 produce instances of a specified class. Classes must implement at least one
@@ -1004,8 +1021,8 @@ interfaces. Classes that previously only supported factory activation may add
 direct activation support as well as new factory activation interfaces.
 
 The ActivatableAttribute includes a UInt32 parameter for version number. The
-version number for the ActivatableAttribute defines the version that
-added that activation support.
+version number for the ActivatableAttribute defines the version that added that
+activation support.
 
 #### Composition Versioning
 
@@ -1015,8 +1032,8 @@ composition mechanisms, provided the class was defined as composable when it was
 created. Composable classes may not add activation support.
 
 The ComposableAttribute includes a UInt32 parameter for version number. The
-version number for the ComposableAttribute defines the version that
-added that composition support.
+version number for the ComposableAttribute defines the version that added that
+composition support.
 
 Custom Attributes
 -----------------
@@ -1053,4 +1070,3 @@ Custom attributes must have public visibility.
 
 Attributes may specify the types of Xlang type constructs they may be associated
 with via the AttributeUsageAttribute.
-
