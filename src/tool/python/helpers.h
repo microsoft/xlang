@@ -221,6 +221,26 @@ namespace xlang
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";
     }
 
+    inline bool is_get_method(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "get_");
+    }
+
+    inline bool is_put_method(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "put_");
+    }
+
+    inline bool is_add_method(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "add_");
+    }
+
+    inline bool is_remove_method(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "remove_");
+    }
+
     struct property_type
     {
         MethodDef get;

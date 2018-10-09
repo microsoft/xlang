@@ -117,6 +117,27 @@ namespace xlang
         w.write("    { nullptr }\n};\n");
     }
 
+    void write_method_flags(writer& w, MethodDef const& method)
+    {
+        if (is_get_method(method))
+        {
+            w.write("METH_NOARGS");
+        }
+        else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
+        {
+            w.write("METH_O");
+        }
+        else
+        {
+            w.write("METH_VARARGS");
+        }
+
+        if (method.Flags().Static())
+        {
+            w.write(" | METH_STATIC");
+        }
+    }
+
     void write_method_table(writer& w, TypeDef const& type)
     {
         XLANG_ASSERT((get_category(type) == category::class_type) || (get_category(type) == category::interface_type));
@@ -140,8 +161,8 @@ namespace xlang
             {
                 set.emplace(method.Name());
 
-                w.write("    { \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
-                    method.Name(), type.TypeName(), method.Name(), is_static_method ? " | METH_STATIC" : "");
+                w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
+                    method.Name(), type.TypeName(), method.Name(), bind<write_method_flags>(method));
             }
         }
 
@@ -238,14 +259,23 @@ static PyType_Spec @_Type_spec =
         writer.handle(param.second->Type());
     }
 
-    void write_param_declaration(writer& w, method_signature::param_t const& param)
+    void write_param_declaration(writer& w, MethodDef const& method, method_signature::param_t const& param)
     {
         auto sequence = param.first.Sequence() - 1;
 
         switch (get_param_category(param))
         {
         case param_category::in:
-            w.write("            auto param% = py::convert_to<%>(args, %);\n", sequence, param.second->Type(), sequence);
+            // if method is special (i.e. get/put/add/remove) but not RTSpecial (i.e. ctor)
+            // treat the args value as a single value, not as a tuple
+            if (method.SpecialName() && !method.Flags().RTSpecialName()) 
+            {
+                w.write("            auto param% = py::convert_to<%>(args);\n", sequence, param.second->Type());
+            }
+            else
+            {
+                w.write("            auto param% = py::convert_to<%>(args, %);\n", sequence, param.second->Type(), sequence);
+            }
             break;
         case param_category::out:
             w.write("            % param% { % };\n", param.second->Type(), sequence, bind<write_out_param_init>(param));
@@ -309,7 +339,10 @@ static PyType_Spec @_Type_spec =
     void write_class_method_overload(writer& w, MethodDef const& method, method_signature const& signature)
     {
         w.write("        try\n        {\n");
-        w.write_each<write_param_declaration>(signature.params());
+        for (auto&& param : signature.params())
+        {
+            write_param_declaration(w, method, param);
+        }
 
         if (signature.has_params())
         {
@@ -387,38 +420,59 @@ static PyType_Spec @_Type_spec =
     }
 
 
+    template <auto F>
+    auto bind_special_name_method(writer& w, MethodDef const& method)
+    {
+        if (is_get_method(method))
+        {
+            w.write(R"(    if (args != nullptr)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "arguments not supported for get methods");
+        return nullptr;
+    }
+)");
+        }
 
+        method_signature signature{ method };
+        F(w, method, signature);
+    }
 
     template <auto F>
     auto bind_method_overloads(writer& w, std::vector<MethodDef> const& methods)
     {
-        w.write("    Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
-
-        bool first{ true };
-        for (auto&& m : methods)
+        if (methods.size() == 1 && methods[0].SpecialName())
         {
-            method_signature signature{ m };
+            bind_special_name_method<F>(w, methods[0]);
+        }
+        else
+        {
+            w.write("    Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
 
-            w.write("    ");
-
-            if (first)
+            bool first{ true };
+            for (auto&& m : methods)
             {
-                first = false;
-            }
-            else
-            {
-                w.write("else ");
-            }
+                method_signature signature{ m };
 
-            auto format = R"(if (arg_count == %)
+                w.write("    ");
+
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    w.write("else ");
+                }
+
+                auto format = R"(if (arg_count == %)
     {
 )";
-            w.write(format, count_in_param(signature.params()));
-            F(w, m, signature);
-            w.write("    }\n");
-        }
+                w.write(format, count_in_param(signature.params()));
+                F(w, m, signature);
+                w.write("    }\n");
+            }
 
-        w.write(R"(    else if (arg_count == -1)
+            w.write(R"(    else if (arg_count == -1)
     {
         return nullptr; 
     }
@@ -426,6 +480,7 @@ static PyType_Spec @_Type_spec =
     PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
     return nullptr;
 )");
+        }
     }
 
     template <auto F>
@@ -476,22 +531,25 @@ static PyType_Spec @_Type_spec =
         }
     }
     
-    void write_class_method_decl(writer& w, TypeDef const& type, std::vector<MethodDef> const& methods)
+    void write_class_method_decl_self_type(writer& w, MethodDef const& method)
     {
-        auto method = *methods.begin();
         if (method.Flags().Static())
         {
-            w.write("\nstatic PyObject* @_%(PyObject* /*unused*/, PyObject* args)\n{ \n", 
-                type.TypeName(), 
-                method.Name());
+            w.write("PyObject* /*unused*/");
         }
         else
         {
-            w.write("\nstatic PyObject* @_%(%* self, PyObject* args)\n{ \n", 
-                type.TypeName(), 
-                method.Name(), 
-                bind<write_winrt_wrapper>(type));
+            w.write("%* self", bind<write_winrt_wrapper>(method.Parent()));
         }
+    }
+
+    void write_class_method_decl(writer& w, TypeDef const& type, std::vector<MethodDef> const& methods)
+    {
+        auto method = *methods.begin();
+        w.write("\nstatic PyObject* @_%(%, PyObject* args)\n{ \n",
+            type.TypeName(),
+            method.Name(),
+            bind<write_class_method_decl_self_type>(method));
     }
 
     void write_class_methods(writer& w, TypeDef const& type)
@@ -504,8 +562,10 @@ static PyType_Spec @_Type_spec =
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
     {
         w.write("        try\n        {\n");
-
-        w.write_each<write_param_declaration>(signature.params());
+        for (auto&& param : signature.params())
+        {
+            write_param_declaration(w, method, param);
+        }
 
         auto format = R"(            % instance{ % };
             return py::wrap(instance, type);
