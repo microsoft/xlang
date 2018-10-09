@@ -49,13 +49,13 @@ This type holds a preallocated string buffer for subsequent promotion into a
 **XlangString**. This type is the size of a pointer, but distinct from other
 pointer types, as if defined as:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 typedef struct XlangStringBuffer__
 {
     int unused;
 } XlangStringBuffer__;
 typedef XlangStringBuffer__* XlangStringBuffer;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 Shared memory
 -------------
@@ -82,9 +82,9 @@ Allocates a block of memory.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 void* __stdcall XlangMemAlloc(size_t count);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -111,9 +111,9 @@ Frees a block of memory that was allocated by [XlangMemAlloc](#Xlangmemalloc)
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 void __stdcall XlangMemFree(void* ptr);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -140,13 +140,13 @@ some combination of value bitwise or'ed together.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 enum XlangStringEncoding
 {
     ENCODING_UTF8 = 0x1,
     ENCODING_UTF16 = 0x2
 };
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 String functions
 ----------------
@@ -212,7 +212,7 @@ Creates a new XlangString.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangResult XlangCreateStringU8(
     char const* sourceString,
     uint32_t length,
@@ -224,7 +224,7 @@ XlangResult XlangCreateStringU16(
     uint32_t length,
     XlangString* string
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -272,20 +272,21 @@ Create a *fast-pass* string based on the supplied string data.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangResult XlangCreateStringReferenceU8(
     char const* sourceString,
     uint32_t length,
     XlangStringHeader* header,
     XlangString* string
 );
+
 XlangResult XlangCreateStringReferenceU16(
     char16_t const* sourceString,
     uint32_t length,
     XlangStringHeader* header,
     XlangString* string
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -330,9 +331,9 @@ Deletes a XlangString.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 void XlangDeleteString(XlangString string);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -358,11 +359,11 @@ Discards a preallocated string buffer if it was not promoted to a
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangResult XlangDeleteStringBuffer(
     XlangStringBuffer bufferHandle
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -392,12 +393,12 @@ Creates a copy of the specified string.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangResult XlangDuplicateString(
     XlangString string,
     XlangString* newString
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -436,11 +437,11 @@ Get the encodings present in a **XlangString**.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangStringEncoding XlangGetStringEncoding(
     XlangString string
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -456,18 +457,19 @@ Get the backing buffer for the specified string.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangResult XlangGetStringRawBufferU8(
     XlangString string,
     char const* * buffer,
     uint32_t* length
 );
+
 XlangResult XlangGetStringRawBufferU16(
     XlangString string,
     char16_t const* * buffer,
     uint32_t* length
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -500,7 +502,7 @@ Allocates a mutable character buffer for use in string creation.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangResult XlangPreallocateStringBufferU8(
     uint32_t length,
     char** charBuffer,
@@ -512,7 +514,7 @@ XlangResult XlangPreallocateStringBufferU16(
     char16_t** charBuffer,
     XlangStringBuffer* bufferHandle
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 
@@ -553,13 +555,13 @@ Creates a **XlangString** from the specified **XlangStringBuffer**.
 
 #### Syntax
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 XlangResult XlangPromoteStringBuffer(
     XlangStringBuffer bufferHandle,
     XlangString* string,
     uint32_t length
 );
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 #### Parameters
 

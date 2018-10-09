@@ -58,13 +58,13 @@ correspond to the fundamental types specified in
 Strings are represented by an opaque handle type. This type is the size of a
 pointer, but distinct from other pointer types, as if defined as:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````C
 typedef struct XlangString__
 {
     int unused;
 } XlangString__;
 typedef XlangString__* XlangString;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+````
 
 ### Calling conventions
 
