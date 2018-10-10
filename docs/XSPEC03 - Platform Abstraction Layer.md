@@ -470,3 +470,57 @@ Calling this function converts the mutable buffer to an immutable **XlangString*
 If this function fails, you can use [XlangDeleteStringBuffer](#Xlangstringbuffer) to discard the mutable buffer.
 
 Each call to **XlangPromoteStringBuffer** must be matched with a corresponding call to [XlangDeleteString](#Xlangdeletestring).
+
+## Activation
+
+The PAL exports one function **xlang_get_activation_factory** for apps to request activation factories for classes.
+
+Components implementing factories are expected to export a single function **xlang_lib_get_activation_factory** which the PAL will call to retrieve said factories, as described in the Activation Design Note.
+This behavior and signature of this function is documented here as well, even though it's not actually a function exported by the PAL.
+
+### xlang_get_activation_factory
+
+Retrieves an activation factory from the platform or from another component.
+
+#### Syntax
+```c
+xlang_result __stdcall xlang_get_activation_factory(
+    xlang_string class_name,
+    GUID const& iid,
+    void** factory
+);
+```
+
+#### Parameters
+- class_name - The name of the class.
+- iid - The unique identifier (GUID) of the factory interface being requested.
+- factory - The out parameter receiving the factory
+
+#### Return value
+If the function succeeds, it returns **xlang_error_ok**.
+
+#### Remarks
+When this function is called, the PAL will attempt to find and load the library implementing the factory, and call **xlang_lib_get_activation_factory** on that library to retrieve the requested factory.
+
+### xlang_lib_get_activation_factory
+
+The PAL does not implement this function. This function is implemented in a library/component, and is called by the PAL.
+
+Retrieves the activation factory from a library that implements the specified class.
+
+#### Syntax
+```c
+xlang_result __stdcall xlang_lib_get_activation_factory(
+    xlang_string class_name,
+    GUID const& iid,
+    void** factory
+);
+```
+
+#### Parameters
+- class_name - The name of the class.
+- iid - The unique identifier (GUID) of the factory interface being requested.
+- factory - The out parameter receiving the factory
+- 
+#### Return value
+If the function succeeds, it returns **xlang_error_ok**.
