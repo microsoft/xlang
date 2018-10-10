@@ -58,8 +58,8 @@ function(CONSUME_PAL target)
 endfunction()
 
 
-add_custom_target(scorch 
-    COMMAND ${CMAKE_COMMAND} \"-Dfolder=${CMAKE_CURRENT_BINARY_DIR}\" -P \"${XLANG_SCRIPTS_PATH}/scorch.cmake\")
+add_custom_target(scorch COMMAND ${CMAKE_COMMAND} \"-Dfolder=${CMAKE_CURRENT_BINARY_DIR}\" -P \"${XLANG_SCRIPTS_PATH}/scorch.cmake\")
+set_target_properties(scorch PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
