@@ -5,7 +5,12 @@
 
 #ifdef _DEBUG
 
+#if XLANG_COMPILER_MSVC
 #define XLANG_ASSERT _ASSERTE
+#else
+#include <cassert>
+#define XLANG_ASSERT assert
+#endif
 #define XLANG_VERIFY XLANG_ASSERT
 #define XLANG_VERIFY_(result, expression) XLANG_ASSERT(result == expression)
 
@@ -30,6 +35,11 @@ namespace xlang
         throw xlang_error{ result };
     }
 
+#if XLANG_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexceptions"
+#endif
+
     inline xlang_result to_result() noexcept
     {
         try
@@ -45,4 +55,8 @@ namespace xlang
             return xlang_error_out_of_memory;
         }
     }
+
+#if XLANG_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
 }

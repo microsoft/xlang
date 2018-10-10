@@ -425,7 +425,7 @@ namespace xlang
 
         void write(TypeSig const& signature)
         {
-            visit(signature.Type(),
+            xlang::visit(signature.Type(),
                 [&](auto&& type)
             {
                 write(type);
