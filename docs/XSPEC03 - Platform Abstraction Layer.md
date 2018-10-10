@@ -521,6 +521,6 @@ xlang_result __stdcall xlang_lib_get_activation_factory(
 - class_name - The name of the class.
 - iid - The unique identifier (GUID) of the factory interface being requested.
 - factory - The out parameter receiving the factory
-- 
+
 #### Return value
 If the function succeeds, it returns **xlang_error_ok**.

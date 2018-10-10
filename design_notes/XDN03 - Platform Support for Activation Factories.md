@@ -51,7 +51,7 @@ This function may fail if:
 
 This functionality is expected to evolve as xlang's application model matures, with new behaviors and abstractions being added as appropriate.
 
-Upon the first request for an activation factory, or in other words, the first time a class name is passed to **xlang_get_activation_factory**, the PAL will attempt to load the owning component in the following manner:
+Upon a request fo an activation factory, or in other words, when a class name is passed to **xlang_get_activation_factory**, the PAL will attempt to load the owning component in the following manner:
 * Obtain the innermost namespace scope from the class name
 * Look for a library in the application's current directory with a matching file name (minus extension).
 * If it exists:
