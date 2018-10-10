@@ -1,0 +1,19 @@
+# See https://help.github.com/articles/about-codeowners/
+
+# * @BenJKuhn @BrentRe @DefaultRyan @devhawk @dunhor @kennykerr @loarabia @manodasanW @Scottj1s 
+
+* @BenJKuhn @DefaultRyan @devhawk @kennykerr @Scottj1s 
+
+/src/library/ @kennykerr  
+/src/test/cpp/ @kennykerr
+/src/tool/cpp/ @kennykerr
+/src/tool/idl/ @kennykerr
+
+/src/platform/ @DefaultRyan 
+/src/test/platform/ @DefaultRyan 
+
+/src/scripts/ @devhawk  
+/src/test/python/ @devhawk  
+/src/tool/python/ @devhawk  
+
+/src/tool/python/ @Scottj1s
