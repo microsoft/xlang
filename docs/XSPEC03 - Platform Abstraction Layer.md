@@ -173,7 +173,7 @@ XlangResult XlangCreateStringU16(
 
 Return code            | Description
 ---------------------- | ------------------------------------------------------
-Xlang_OK               | The XlangString was created succesfully.
+Xlang_OK               | The XlangString was created successfully.
 Xlang_INVALID_ARG      | _string_ was **NULL**.
 Xlang_OUTOFMEMORY      | Failed to allocate memory for the new XlangString.
 Xlang_POINTER          | _sourceString_ was **NULL** and _length_ was non-zero.
@@ -221,13 +221,13 @@ XlangResult XlangCreateStringReferenceU16(
 
 - header - A pointer to a [XlangStringHeader](#Xlangstringheader) structure that Xlang uses to identify _string_ as a _fast-pass_ string.
 
-- string - A pointer to the newly created string, or **NULL** if an error occurrs. This string will be a _fast-pass_ string.
+- string - A pointer to the newly created string, or **NULL** if an error occurs. This string will be a _fast-pass_ string.
 
 #### Return value
 
 Return code                      | Description
 -------------------------------- | --------------------------------------------------------
-Xlang_OK                         | The _fast-pass_ **XlangString** was created succesfully.
+Xlang_OK                         | The _fast-pass_ **XlangString** was created successfully.
 Xlang_INVALID_ARG                | Either _string_ or _header_ was **NULL**.
 Xlang_STRING_NOT_NULL_TERMINATED | _string_ was not null-terminated.
 Xlang_POINTER                    | _sourceString_ was **NULL** and _length_ was non-zero.
@@ -282,7 +282,7 @@ XlangResult XlangDeleteStringBuffer(
 
 Return code       | Description
 ----------------- | ------------------------------------------------------------------------------------------------
-Xlang_OK          | The buffer was discarded succesfully.
+Xlang_OK          | The buffer was discarded successfully.
 Xlang_POINTER     | _bufferHandle_ is **NULL**.
 Xlang_INVALID_ARG | _bufferHandle_ was not created by [XlangPreallocateStringBuffer](#Xlangpreallocatestringbuffer).
 
@@ -315,7 +315,7 @@ XlangResult XlangDuplicateString(
 
 Return code       | Description
 ----------------- | ------------------------------------------------------
-Xlang_OK          | The **XlangString** was copied succesfully.
+Xlang_OK          | The **XlangString** was copied successfully.
 Xlang_INVALID_ARG | _newString_ was **NULL**.
 Xlang_OUTOFMEMORY | Failed to allocate memory for the new **XlangString**.
 
