@@ -13,7 +13,7 @@ author: hpierson@microsoft.com
 
 This document describes how Xlang types are encoded in metadata files.
 
-> _Note_: this document is derived from Windows Runtime specifications and has not yet been updated to use cross-platfrom terminology. Types referenced in the Xlang.* namespace are placeholders subject to change.
+> _Note_: this document is derived from Windows Runtime specifications and has not yet been updated to use cross-platform terminology. Types referenced in the Xlang.* namespace are placeholders subject to change.
 
 > _Open Issue_: The .xlmeta is a placeholder extension and subject to change.
 
@@ -90,7 +90,7 @@ Presumably for space optimization, the TypeDef table in CLI metadata provides se
 
 ### Fundamental Types
 
-All the Xlang fundamental types except Guid have explicit constant values for use in CLI Metadata blobs and other type references. These constant values are described in Partion 2, Section 23.1.16 of the CLI specification
+All the Xlang fundamental types except Guid have explicit constant values for use in CLI Metadata blobs and other type references. These constant values are described in Partition 2, Section 23.1.16 of the CLI specification
 
 Xlang Type | CLI Element Type Name | CLI Element Type Value
 ---------- | --------------------- | ----------------------
@@ -405,11 +405,11 @@ The MethodDef rows for the property contain the following:
 
 - ParamList: an index into the Param table (ECMA II.22.33) containing the first in a run of Param rows associated with this method. Values in the Param table are as specified under methods above.
 
-Each MethodDef row for the property will have an associated row in the MethodSemantics table conitaining the following information:
+Each MethodDef row for the property will have an associated row in the MethodSemantics table containing the following information:
 
 - Semantics: Getter or Setter as appropriate
 
-- Method: Index into the MethodDef table containing the the getter or setter method
+- Method: Index into the MethodDef table containing the getter or setter method
 
 - Association: Index into the Property table containing the property
 
@@ -456,7 +456,7 @@ Both MethodDef rows for the event will have an associated row in the MethodSeman
 
 - Semantics: AddOn or RemoveOn as appropriate
 
-- Method: Index into the MethodDef table containing the the add or remove listener method
+- Method: Index into the MethodDef table containing the add or remove listener method
 
 - Associateion: Index into the Event table containing the event
 
