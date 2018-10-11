@@ -1,29 +1,24 @@
 [![Build Status](https://microsoft.visualstudio.com/Dart/_apis/build/status/Xlang%20GitHub%20Daily%20Build)](https://microsoft.visualstudio.com/Dart/_build/latest?definitionId=31784)
 
-# Xlang
+# xlang
 
 ## Overview
 The xlang project enables developers to take existing shared libraries,
-implemented in one programming language,
-and make that library's APIs available to client code using a different programming language.
-Thus the name "xlang," for cross-language.
+implemented in one programming language and make that library's APIs available to client code using a different programming language. Thus the name "xlang," for cross-language.
 
-Additionally, all of the xlang tooling will be platform-agnostic therefore will work on your favorite operating system.
-This means that if your shared library is platform-agnostic (i.e. portable to various operating systems),
+Additionally, the xlang toolset will be available on multiple operating systems.
+This means that if your shared library is portable to various operating systems,
 then you can use the xlang tooling to make that shared library available to various client programming language on those various platforms.
 
-A *hypothetical* example might be taking the Python numpy library and making it available to C# applications running on Linux.
+More succinctly, you can take a library written in language A and make it available to language B applications running on platform C. The set of supported languages and platforms will expand as the project progresses.
 
-We're a *long* way was achieving that ultimate goal. We are in the very, very early stages of starting the project.
-However, we want and encourage community feedback and contributions. As such, we decided to do *all* of the project development in the open on GitHub.
-We look forward to your thoughts on the project.
+The xlang project is in a very, very early stage of development.
+The project wants and encourages community feedback and contributions. As such, the xlang team is doing *all* xlang project development in the open on GitHub. 
 
 ## What xlang is NOT
 
 * The xlang project is not a port of the Windows Runtime, COM, DCOM or related technology.
-  * That said, many of the Microsoft members of the xlang team designed the Windows Runtime. As a result, we hope to incorporate many of the learnings from that prior project.
-* The xlang project will not port any of the Windows Runtime APIs.
-  * In fact, the xlang project is not delivering *any* shared libraries as part of this effort. We will leave the selection of interesting libraries that provide xlang support to the community.
+* The xlang project will not port the Windows Runtime APIs.
 
 ## Project details
 
@@ -48,3 +43,4 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
