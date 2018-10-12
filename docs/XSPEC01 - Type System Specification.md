@@ -23,7 +23,7 @@ Except for interfaces, all Xlang types must have public visibility. Xlang interf
 
 Xlang does not support nested types. No Xlang type can enclose another type. No Xlang type can be nested inside another type
 
-Xlang namespaces and type names are case preserving but insensitive. This means that you cannot have namespaces or type names that vary only by case. For example: you cannot have Foo.SomeType and foo.AnotherType nor can you have Foo.SomeType and Foo.someType.
+Xlang namespaces and type names are case preserving but insensitive. This means that you cannot have namespaces or type names that vary only by case. For example: you cannot have Foo.SomeType and foo.SomeType nor can you have Foo.SomeType and Foo.someType; however, you can have Foo.SomeType and foo.AnotherType, as they are considered part of the same namespace.
 
 Xlang identifiers must conform to the following grammar. Note, only characters defined in Unicode 3.0 and earlier are supported.
 
