@@ -419,30 +419,47 @@ static PyType_Spec @_Type_spec =
 )");
     }
 
-
     template <auto F>
-    auto bind_special_name_method(writer& w, MethodDef const& method)
+    void write_type_method(writer& w, TypeDef const& type, std::string_view const& method_name)
     {
-        if (is_get_method(method))
+        std::vector<MethodDef> methods{};
+
+        for (auto&& method : type.MethodList())
         {
-            w.write(R"(    if (args != nullptr)
+            if (method.Name() == method_name)
+            {
+                methods.push_back(method);
+            }
+        }
+
+        XLANG_ASSERT(methods.size() > 0);
+        bool static_method = methods[0].Flags().Static();
+
+        if (methods.size() > 1)
+        {
+            // ensure all the methods found match the static flag of the first method
+            XLANG_ASSERT(std::all_of(methods.begin(), methods.end(),
+                [static_method](MethodDef const& m) { return m.Flags().Static() == static_method; }));
+        }
+
+        F(w, type, methods);
+
+        if (methods.size() == 1 && methods[0].SpecialName())
+        {
+            auto method = methods[0];
+
+            if (is_get_method(method))
+            {
+                w.write(R"(    if (args != nullptr)
     {
         PyErr_SetString(PyExc_RuntimeError, "arguments not supported for get methods");
         return nullptr;
     }
 )");
-        }
+            }
 
-        method_signature signature{ method };
-        F(w, method, signature);
-    }
-
-    template <auto F>
-    auto bind_method_overloads(writer& w, std::vector<MethodDef> const& methods)
-    {
-        if (methods.size() == 1 && methods[0].SpecialName())
-        {
-            bind_special_name_method<F>(w, methods[0]);
+            method_signature signature{ method };
+            write_class_method_overload(w, method, signature);
         }
         else
         {
@@ -468,7 +485,7 @@ static PyType_Spec @_Type_spec =
     {
 )";
                 w.write(format, count_in_param(signature.params()));
-                F(w, m, signature);
+                write_class_method_overload(w, m, signature);
                 w.write("    }\n");
             }
 
@@ -481,33 +498,7 @@ static PyType_Spec @_Type_spec =
     return nullptr;
 )");
         }
-    }
 
-    template <auto F>
-    void write_type_method(writer& w, TypeDef const& type, std::string_view const& method_name)
-    {
-        std::vector<MethodDef> methods{};
-
-        for (auto&& method : type.MethodList())
-        {
-            if (method.Name() == method_name)
-            {
-                methods.push_back(method);
-            }
-        }
-
-        XLANG_ASSERT(methods.size() > 0);
-        bool static_method = methods[0].Flags().Static();
-
-        if (methods.size() > 1)
-        {
-            // ensure all the methods found match the static flag of the first method
-            XLANG_ASSERT(std::all_of(methods.begin(), methods.end(),
-                [static_method](MethodDef const& m) { return m.Flags().Static() == static_method; }));
-        }
-
-        F(w, type, methods);
-        bind_method_overloads<write_class_method_overload>(w, methods);
         w.write("}\n");
     }
 
@@ -608,7 +599,40 @@ static PyType_Spec @_Type_spec =
     }
 
 )");
-            bind_method_overloads<write_class_constructor_overload>(w, constructors);
+            w.write("    Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
+
+            bool first{ true };
+            for (auto&& m : constructors)
+            {
+                method_signature signature{ m };
+
+                w.write("    ");
+
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    w.write("else ");
+                }
+
+                auto format = R"(if (arg_count == %)
+    {
+)";
+                w.write(format, count_in_param(signature.params()));
+                write_class_constructor_overload(w, m, signature);
+                w.write("    }\n");
+            }
+
+            w.write(R"(    else if (arg_count == -1)
+    {
+        return nullptr; 
+    }
+
+    PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
+    return nullptr;
+)");
         }
 
         w.write("}\n");
