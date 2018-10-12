@@ -24,7 +24,7 @@ This is an open source project that welcomes community contributions. See the li
 
 ## Conceptual Model
 
-In Xlang, langage interoperability is achieved via a combination of language independent metadata, binary interface standards, language-specific projections, and a shared runtime. The interoperability enables bidirectional control & data flow among any number of programming languages within a process.
+In Xlang, language interoperability is achieved via a combination of language independent metadata, binary interface standards, language-specific projections, and a shared runtime. The interoperability enables bidirectional control & data flow among any number of programming languages within a process.
 
 ### Common Type System
 
@@ -50,7 +50,7 @@ In some compiled languages, this translation may involve a few simple type conve
 
 ### Platform Adaptation Layer
 
-The ABI is defined in terms of specific machine layout of call data, including the binary formats of data types. However, a few specific operations and types are intentionally opaque and implemented in the platfrom adaptation layer. This enables contextual optimizations of the behavior of those types, hides details that might be system-dependent and provides canonical implementations of behavior that might otherwise be implementation dependent for a specific language or tool chain. The runtime handles ownership and primitive operations such as cross-language string representation, thread management, object activation, error origination, and shared memory lifetime management. The runtime itself is exposed as flat C APIs. All components that interoperate with each other must share the same platform adaptation layer.
+The ABI is defined in terms of specific machine layout of call data, including the binary formats of data types. However, a few specific operations and types are intentionally opaque and implemented in the platform adaptation layer. This enables contextual optimizations of the behavior of those types, hides details that might be system-dependent and provides canonical implementations of behavior that might otherwise be implementation dependent for a specific language or tool chain. The runtime handles ownership and primitive operations such as cross-language string representation, thread management, object activation, error origination, and shared memory lifetime management. The runtime itself is exposed as flat C APIs. All components that interoperate with each other must share the same platform adaptation layer.
 
 ### Developer Tools
 

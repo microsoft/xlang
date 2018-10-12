@@ -56,7 +56,7 @@ Design notes are used to communicate design decisions and information that shoul
 
 The steps of the design note process are as follows:
 
-1. **An individual announces the desire to produce a design note (and form aworking group) on a specific topic**. This self-chosen author can make an informal announcement at a work stream meeting or via an email to an appropriate mailing list (to gauge interest). A best practice is to send an announcement email with a description of the question the working group intends to address. A design note author should attempt to identify and include all relevant subject-matter experts.
+1. **An individual announces the desire to produce a design note (and form a working group) on a specific topic**. This self-chosen author can make an informal announcement at a work stream meeting or via an email to an appropriate mailing list (to gauge interest). A best practice is to send an announcement email with a description of the question the working group intends to address. A design note author should attempt to identify and include all relevant subject-matter experts.
 
 2. **Individuals volunteer to participate in the working group by sending email to the design note author**. The cost of admission to a working group is a commitment to actively contribute to progress and to reaching consensus. Conversely, by abstaining from a working group, community members implicitly give the working group their permission to draft a design note as they see fit.
 
@@ -108,7 +108,7 @@ An individual design note has three roles:
 
 1. The design note **drives understanding** of a topic
 2. The design note **drives a set of decisions** on a particular topic
-3. The design note **provides documentation of the decisison** to allow later readers to understand both the outcome and motivation for the decision.
+3. The design note **provides documentation of the decision** to allow later readers to understand both the outcome and motivation for the decision.
 
 Ideally design notes are concise, clear, and definitive. A design note should be short enough to be read in a single sitting; 3 to 6 pages of body is a good rule of thumb. A design note should be clear enough that it can be read by a general audience (or at least as general an audience as needs to be informed of the decisions discussed). Finally, a design note should clearly define a set of decisions.
 

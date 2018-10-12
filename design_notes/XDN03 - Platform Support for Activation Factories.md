@@ -20,7 +20,7 @@ As described in the Type System Specification, a class that is activatable, comp
 When consuming code needs an instance of a factory, it should not require knowledge of which component implements that factory, nor should it be responsible for dynamically loading that module and searching for exports.
 
 For that reason, consuming code will request factories through the PAL.
-The PAL will consult its mapping of class names to component libraries, load (if neccessary) the library, and then call the exported method on the library, returning the result to the caller.
+The PAL will consult its mapping of class names to component libraries, load (if necessary) the library, and then call the exported method on the library, returning the result to the caller.
 
 This implies three pieces of functionality that work together to support activation:
 * A function exported by the PAL for client code to request factories.
