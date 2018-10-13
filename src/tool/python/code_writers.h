@@ -138,7 +138,7 @@ namespace xlang
         }
     }
 
-    void write_method_table(writer& w, TypeDef const& type)
+    void write_class_method_table(writer& w, TypeDef const& type)
     {
         XLANG_ASSERT((get_category(type) == category::class_type) || (get_category(type) == category::interface_type));
         
@@ -668,7 +668,7 @@ static void @_dealloc(%* self)
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
         write_class_methods(w, type);
-        write_method_table(w, type);
+        write_class_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
@@ -685,114 +685,35 @@ static void @_dealloc(%* self)
 
 
 
-    void write_pinterface_constructor(writer& w, TypeDef const& type)
-    {
-        XLANG_ASSERT(get_category(type) == category::interface_type);
-        XLANG_ASSERT(is_ptype(type));
 
-        auto format = R"(
-PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
-{
-    // TODO implement QI in this pinterface constructor
-    PyErr_SetString(PyExc_RuntimeError, "@ is not activatable");
-    return nullptr;
-}
-)";
-        w.write(format, type.TypeName(), type.TypeName());
-    }
+//    void write_pinterface_methods(writer& w, TypeDef const& type)
+//    {
+//        XLANG_ASSERT(is_ptype(type));
+//
+//        std::set<std::string_view> method_set{};
+//
+//        auto format = R"(
+//static PyObject* @_%(%* self, PyObject* args)
+//{
+//    return self->obj->%(args);
+//}
+//)";
+//
+//        for (auto&& method : type.MethodList())
+//        {
+//            if (method_set.find(method.Name()) == method_set.end())
+//            {
+//                method_set.emplace(method.Name());
+//
+//                w.write(format,
+//                    type.TypeName(),
+//                    method.Name(),
+//                    bind<write_winrt_wrapper>(type),
+//                    method.Name());
+//            }
+//        }
+//    }
 
-    void write_pinterface_dealloc(writer& w, TypeDef const& type)
-    {
-        XLANG_ASSERT(has_dealloc(type));
-        XLANG_ASSERT(is_ptype(type));
-        auto format = R"(
-static void @_dealloc(%* self)
-{
-    py::wrapped_instance(self->obj->hash(), nullptr);
-    self->obj.release();
-}
-)";
-        w.write(format, type.TypeName(), bind<write_winrt_wrapper>(type));
-    }
-
-    void write_pinterface_methods(writer& w, TypeDef const& type)
-    {
-        XLANG_ASSERT(is_ptype(type));
-
-        std::set<std::string_view> method_set{};
-
-        auto format = R"(
-static PyObject* @_%(%* self, PyObject* args)
-{
-    return self->obj->%(args);
-}
-)";
-
-        for (auto&& method : type.MethodList())
-        {
-            if (method_set.find(method.Name()) == method_set.end())
-            {
-                method_set.emplace(method.Name());
-
-                w.write(format,
-                    type.TypeName(),
-                    method.Name(),
-                    bind<write_winrt_wrapper>(type),
-                    method.Name());
-            }
-        }
-    }
-
-    void write_pinterface_property(writer& w, Property const& prop)
-    {
-        XLANG_ASSERT(is_ptype(prop.Parent()));
-
-        auto property_methods = get_property_methods(prop);
-
-        {
-            auto format = R"(
-static PyObject* @_%(%* self, void* /*unused*/)
-{
-    return self->obj->%();
-}
-)";
-            w.write(format,
-                prop.Parent().TypeName(),
-                property_methods.get.Name(),
-                bind<write_winrt_wrapper>(prop.Parent()),
-                property_methods.get.Name());
-        }
-
-        if (property_methods.set)
-        {
-            auto format = R"(
-static int @_%(%* self, PyObject* value, void* /*unused*/)
-{
-    return self->obj->%(value);
-}
-)";
-            w.write(format,
-                prop.Parent().TypeName(),
-                property_methods.set.Name(),
-                bind<write_winrt_wrapper>(prop.Parent()),
-                property_methods.set.Name());
-        }
-    }
-
-    void write_pinterface(writer& w, TypeDef const& type)
-    {
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-
-        w.write("\n// ----- @ parameterized interface --------------------\n", type.TypeName());
-        w.write("PyTypeObject* py::winrt_type<py@>::python_type;\n", type.TypeName());
-
-        write_pinterface_constructor(w, type);
-        write_pinterface_dealloc(w, type);
-        write_pinterface_methods(w, type);
-        write_method_table(w, type);
-        write_type_slot_table(w, type);
-        write_type_spec(w, type);
-    }
 
     void write_pinterface_decl(writer& w, TypeDef const& type)
     {
@@ -863,42 +784,101 @@ static int @_%(%* self, PyObject* value, void* /*unused*/)
     void write_interface_constructor(writer& w, TypeDef const& type)
     {
         XLANG_ASSERT(get_category(type) == category::interface_type);
-        XLANG_ASSERT(!is_ptype(type));
 
         auto format = R"(
 PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    if (kwds != nullptr)
-    {
-        PyErr_SetString(PyExc_RuntimeError, "keyword arguments not supported");
-        return nullptr;
-    }
-
-    Py_ssize_t arg_count = PyTuple_Size(args);
-
-    if (arg_count == 1)
-    {
-        try
-        {
-            auto param0 = py::convert_to<%>(args, 0);
-            return py::wrap(param0, type);
-        }
-        catch (...)
-        {
-            return py::to_PyErr();
-        }
-    }
-    else if (arg_count == -1)
-    {
-        return nullptr; 
-    }
-
-    PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
+    PyErr_SetString(PyExc_RuntimeError, "@ is not activatable");
     return nullptr;
 }
 )";
-        w.write(format, type.TypeName(), type);
+        w.write(format, type.TypeName(), type.TypeName());
     }
+
+    void write_interface_dealloc(writer& w, TypeDef const& type)
+    {
+        XLANG_ASSERT(get_category(type) == category::interface_type);
+
+        auto format = R"(
+static void @_dealloc(%* self)
+{
+    auto hash_value = %;
+    py::wrapped_instance(hash_value, nullptr);
+    self->obj%;
+}
+)";
+        w.write(format, type.TypeName(), bind<write_winrt_wrapper>(type), 
+            is_ptype(type)
+            ? "self->obj->hash()"
+            : "std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj)",
+            is_ptype(type) ? ".release()" : " = nullptr");
+    }
+
+    void write_interface_pytypeobject(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type))
+        {
+            w.write("py@", type.TypeName());
+        }
+        else
+        {
+            w.write("%", type);
+        }
+    }
+
+    void write_interface_methods(writer& w, TypeDef const& type)
+    {
+
+    }
+
+    auto get_methods(coded_index<TypeDefOrRef> index)
+    {
+        switch (index.type())
+        {
+        case TypeDefOrRef::TypeDef:
+            return index.TypeDef().MethodList();
+        case TypeDefOrRef::TypeRef:
+            return find_required(index.TypeRef()).MethodList();
+        case TypeDefOrRef::TypeSpec:
+            return get_methods(index.TypeSpec().Signature().GenericTypeInst().GenericType());
+        }
+
+        throw_invalid("invalid TypeDefOrRef");
+    }
+
+    void write_interface_method_table_row(writer& w, std::set<std::string_view>& method_set, std::string_view const& type_name, MethodDef const& method)
+    {
+        if (method_set.find(method.Name()) == method_set.end())
+        {
+            method_set.emplace(method.Name());
+
+            w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
+                method.Name(), type_name, method.Name(), bind<write_method_flags>(method));
+        }
+    }
+
+    void write_interface_method_table(writer& w, TypeDef const& type)
+    {
+        w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
+
+        std::set<std::string_view> method_set{};
+
+        for (auto&& method : get_methods(type.coded_index<TypeDefOrRef>()))
+        {
+            write_interface_method_table_row(w, method_set, type.TypeName(), method);
+        }
+
+        for (auto&& ii : type.InterfaceImpl())
+        {
+            for (auto&& method : get_methods(ii.Interface()))
+            {
+                write_interface_method_table_row(w, method_set, type.TypeName(), method);
+            }
+        }
+
+        w.write("    { nullptr }\n};\n");
+    }
+
 
     void write_interface(writer& w, TypeDef const& type)
     {
@@ -907,21 +887,17 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
             return;
         }
 
-        if (is_ptype(type))
-        {
-            write_pinterface(w, type);
-            return;
-        }
-
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- @ interface --------------------\n", type.TypeName());
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", type);
+
+        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n",
+            bind<write_interface_pytypeobject>(type));
 
         write_interface_constructor(w, type);
-        write_class_dealloc(w, type);
-        write_class_methods(w, type);
-        write_method_table(w, type);
+        write_interface_dealloc(w, type);
+        write_interface_methods(w, type);
+        write_interface_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
