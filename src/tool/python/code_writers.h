@@ -826,7 +826,7 @@ static void @_dealloc(%* self)
         }
     }
 
-    void write_interface_methods(writer& w, TypeDef const& type)
+    void write_interface_methods(writer& w, TypeDef const& type, std::map<std::string_view, std::vector<method_info>> const& methods)
     {
 
     }
@@ -846,39 +846,55 @@ static void @_dealloc(%* self)
         throw_invalid("invalid TypeDefOrRef");
     }
 
-    void write_interface_method_table_row(writer& w, std::set<std::string_view>& method_set, std::string_view const& type_name, MethodDef const& method)
+    void write_method_flags2(writer& w, std::vector<method_info> const& methods)
     {
-        if (method_set.find(method.Name()) == method_set.end())
-        {
-            method_set.emplace(method.Name());
+        XLANG_ASSERT(methods.size() > 0);
 
-            w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
-                method.Name(), type_name, method.Name(), bind<write_method_flags>(method));
+        if (methods.size() == 1)
+        {
+            auto method = methods[0].method;
+
+            if (is_get_method(method))
+            {
+                w.write("METH_NOARGS");
+            }
+            else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
+            {
+                w.write("METH_O");
+            }
+            else
+            {
+                w.write("METH_VARARGS");
+            }
+
+            if (method.Flags().Static())
+            {
+                w.write(" | METH_STATIC");
+            }
+        }
+        else
+        {
+            w.write("METH_VARARGS");
+        
+            if (methods[0].method.Flags().Static())
+            {
+                w.write(" | METH_STATIC");
+            }
         }
     }
 
-    void write_interface_method_table(writer& w, TypeDef const& type)
+    void write_interface_method_table(writer& w, TypeDef const& type, std::map<std::string_view, std::vector<method_info>> const& methods)
     {
         w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
 
-        std::set<std::string_view> method_set{};
-
-        for (auto&& method : get_methods(type.coded_index<TypeDefOrRef>()))
+        for (auto&& method : methods)
         {
-            write_interface_method_table_row(w, method_set, type.TypeName(), method);
-        }
-
-        for (auto&& ii : type.InterfaceImpl())
-        {
-            for (auto&& method : get_methods(ii.Interface()))
-            {
-                write_interface_method_table_row(w, method_set, type.TypeName(), method);
-            }
+            w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
+                method.first, type.TypeName(), method.first, bind<write_method_flags2>(method.second));
         }
 
         w.write("    { nullptr }\n};\n");
     }
-
 
     void write_interface(writer& w, TypeDef const& type)
     {
@@ -888,6 +904,7 @@ static void @_dealloc(%* self)
         }
 
         auto guard{ w.push_generic_params(type.GenericParam()) };
+        auto methods = get_methods(type);
 
         w.write("\n// ----- @ interface --------------------\n", type.TypeName());
 
@@ -896,8 +913,8 @@ static void @_dealloc(%* self)
 
         write_interface_constructor(w, type);
         write_interface_dealloc(w, type);
-        write_interface_methods(w, type);
-        write_interface_method_table(w, type);
+        write_interface_methods(w, type, methods);
+        write_interface_method_table(w, type, methods);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }

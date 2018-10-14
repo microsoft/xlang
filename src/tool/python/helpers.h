@@ -302,6 +302,55 @@ namespace xlang
         return std::move(interfaces);
     }
 
+    struct method_info
+    {
+        MethodDef method;
+        std::vector<std::string> type_arguments;
+    };
+
+    auto get_methods(TypeDef const& type)
+    {
+        std::map<std::string_view, std::vector<method_info>> method_map{};
+        auto category = get_category(type);
+
+        if (category == category::class_type)
+        {
+            for (auto&& method : type.MethodList())
+            {
+                method_map[method.Name()].push_back(method_info{ method, std::vector<std::string> {} });
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            for (auto&& info : get_required_interfaces(type))
+            {
+                for (auto&& method : info.type.MethodList())
+                {
+                    //method_map.try_emplace(method.Name(), std::vector<method_info> {});
+                    method_map[method.Name()].push_back(method_info{ method, info.type_arguments });
+                }
+            }
+        }
+        else
+        {
+            throw_invalid("only classes and interfaces have methods");
+        }
+
+#ifdef XLANG_DEBUG
+        for (auto&&[name, method_infos] : method_map)
+        {
+            XLANG_ASSERT(method_infos.size() > 0);
+            auto static_method = method_infos[0].method.Flags().Static();
+            for (auto&& info : method_infos)
+            {
+                XLANG_ASSERT(info.method.Flags().Static() == static_method);
+            }
+        }
+#endif
+
+        return std::move(method_map);
+    }
+
     bool is_exclusive_to(TypeDef const& type)
     {
         return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
