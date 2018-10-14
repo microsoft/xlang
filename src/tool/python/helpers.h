@@ -308,6 +308,8 @@ namespace xlang
         std::vector<std::string> type_arguments;
     };
 
+    bool is_constructor(MethodDef const& method);
+
     auto get_methods(TypeDef const& type)
     {
         std::map<std::string_view, std::vector<method_info>> method_map{};
@@ -317,6 +319,11 @@ namespace xlang
         {
             for (auto&& method : type.MethodList())
             {
+                if (is_constructor(method))
+                {
+                    continue;
+                }
+
                 method_map[method.Name()].push_back(method_info{ method, std::vector<std::string> {} });
             }
         }
