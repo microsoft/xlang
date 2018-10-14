@@ -201,6 +201,107 @@ namespace xlang
         Param m_return;
     };
 
+    struct interface_info
+    {
+        TypeDef type;
+        std::vector<std::string> type_arguments;
+    };
+
+    void push_interface_info(std::vector<interface_info>& interfaces, interface_info&& info)
+    {
+        auto iter = std::find_if(interfaces.begin(), interfaces.end(), [&info](auto i)
+        {
+            return i.type == info.type;
+        });
+
+        if (iter == interfaces.end())
+        {
+            interfaces.push_back(std::move(info));
+        }
+    }
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index);
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, TypeDef const& type)
+    {
+        interface_info info;
+        info.type = type;
+        for (auto&& gp : type.GenericParam())
+        {
+            info.type_arguments.push_back(std::string{ gp.Name() });
+        }
+
+        push_interface_info(interfaces, std::move(info));
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+        for (auto&& ii : type.InterfaceImpl())
+        {
+            collect_required_interfaces(w, interfaces, ii.Interface());
+        }
+    }
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, GenericTypeInstSig const& sig)
+    {
+        TypeDef type{};
+        switch (sig.GenericType().type())
+        {
+        case TypeDefOrRef::TypeDef:
+            type = sig.GenericType().TypeDef();
+            break;
+        case TypeDefOrRef::TypeRef:
+            type = find_required(sig.GenericType().TypeRef());
+            break;
+        case TypeDefOrRef::TypeSpec:
+            throw_invalid("collect_required_interfaces");
+        }
+
+        interface_info info;
+        info.type = type;
+
+        for (auto&& gp : sig.GenericArgs())
+        {
+            auto q = w.write_temp("%", gp);
+            info.type_arguments.push_back(q);
+        }
+
+        push_interface_info(interfaces, std::move(info));
+
+        auto guard{ w.push_generic_params(sig) };
+        for (auto&& ii : type.InterfaceImpl())
+        {
+            collect_required_interfaces(w, interfaces, ii.Interface());
+        }
+    }
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index)
+    {
+        switch (index.type())
+        {
+        case TypeDefOrRef::TypeDef:
+            collect_required_interfaces(w, sigs, index.TypeDef());
+            break;
+        case TypeDefOrRef::TypeRef:
+            collect_required_interfaces(w, sigs, find_required(index.TypeRef()));
+            break;
+        case TypeDefOrRef::TypeSpec:
+            collect_required_interfaces(w, sigs, index.TypeSpec().Signature().GenericTypeInst());
+            break;
+        }
+    }
+
+    auto get_required_interfaces(TypeDef const& type)
+    {
+        writer w;
+        w.debug_trace = true;
+        std::vector<interface_info> interfaces;
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        collect_required_interfaces(w, interfaces, type);
+
+        return std::move(interfaces);
+    }
+
     bool is_exclusive_to(TypeDef const& type)
     {
         return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
