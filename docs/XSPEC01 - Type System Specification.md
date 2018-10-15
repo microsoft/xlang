@@ -23,7 +23,7 @@ Except for interfaces, all Xlang types must have public visibility. Xlang interf
 
 Xlang does not support nested types. No Xlang type can enclose another type. No Xlang type can be nested inside another type
 
-Xlang namespaces and type names are case preserving but insensitive. This means that you cannot have namespaces or type names that vary only by case. For example: you cannot have Foo.SomeType and foo.AnotherType nor can you have Foo.SomeType and Foo.someType.
+Xlang namespaces and type names are case preserving but insensitive. This means that you cannot have namespaces or type names that vary only by case. For example: you cannot have Foo.SomeType and foo.SomeType nor can you have Foo.SomeType and Foo.someType; however, you can have Foo.SomeType and foo.AnotherType, as they are considered part of the same namespace.
 
 Xlang identifiers must conform to the following grammar. Note, only characters defined in Unicode 3.0 and earlier are supported.
 
@@ -117,7 +117,7 @@ Remark: It is not permitted for a parameterized type to be instantiated with the
 
 The instantiation algorithm is as follows:
 
-1. Each parameterized type is assigned a parameterized interface ID by its author – abreviated PIID. (Remark: PIIDs are not IIDs, are not passed to QI as arguments, etc). The author must ensure that the PIID is unique to that p-type.
+1. Each parameterized type is assigned a parameterized interface ID by its author – abbreviated PIID. (Remark: PIIDs are not IIDs, are not passed to QI as arguments, etc). The author must ensure that the PIID is unique to that p-type.
 
 2. The type signature for a base type is an ASCII octet string, table appearing bellow. Eg, Int32 is "i4".
 
@@ -199,7 +199,7 @@ The following names are used for base types when they appear:
 
 - Guid maps to "g16"
 
-The above names are case sensitive. Other than for String, the type name uses a single character to suggest the kind of data, followed by its size in bytes. These names where chosen to be concise (to avoid large sizes in struct type signatures), not appear confusingly similar to either the Xlang name, RIDL name, or language projection name for any type, and still remain roughtly human readable.
+The above names are case sensitive. Other than for String, the type name uses a single character to suggest the kind of data, followed by its size in bytes. These names where chosen to be concise (to avoid large sizes in struct type signatures), not appear confusingly similar to either the Xlang name, RIDL name, or language projection name for any type, and still remain roughly human readable.
 
 For enum_type_signature, the only valid 'underlying_type' value is that of Int32 or UInt32.
 
@@ -475,7 +475,7 @@ Composition factory interfaces are used to create composable instances of the cl
 
 Composable classes declare if the factory methods on a given composition factory interface can be used to activate the class directly as a controlling object or not. Composable factory interfaces marked as public may be used to directly activate a class as a controlling object as well as indirectly to activate a class as a composed object. Composable factory interfaces marked protected may only be used to indirectly activate a class as a composed object. Composable classes can always be activated as composed objects.
 
-Composition factory interfaces must be exclusiveto the runtime class they are implemented by.
+Composition factory interfaces must be exclusive to the runtime class they are implemented by.
 
 Like activation factory methods, composition factory methods must return an instance of the composable class. Additionally, composition factory methods have two additional parameters: the controlling IInspectable \[in] parameter and the non-delegating IInspectable* \[out] parameter. Composition factory methods may optionally have additional in parameters. If specified, the additional in parameters must occur at the beginning of the method signature, before the mandated parameters listed previously. Composition factory methods may not have any additional out parameters beyond the non-delegating IInspectable and the return value parameters.
 
@@ -499,7 +499,7 @@ Composable classes may declare zero or more of its member interfaces to be overr
 
 At runtime, any composable class code that leverages the overridable interface must QI for the interface via the controlling IInspectable* pointer that is used for identity and lifetime delegation. This pointer will return the implementation of the overridable interface earliest in the composition chain (i.e. closest to the controlling class instance). Classes that wish to access the overridable interfaces of the class they compose may do so via the non-delegating reference that composable classes hold to their composed class.
 
-Example: If UIElement declares an overridable interface IUIElementOverridable, then classes that derive from UIELement, including both direct (Control) and indirect (Button) derivation, would be allowed to implement it. If code in UIElement needed to access functionality in IUIElementOverridable, then UIElement would query the controlling IInspectable to get the earliest implementation in the compositon chain. If Control and Button both implemented IUIElementOverridable, then the Button implementation would be returned when the controlling IINspectable was queried. If Button wants to access its composed class functionality, it can use the non-delegating IInspectable that was returned from the composition factory method to query the base class for that interface.
+Example: If UIElement declares an overridable interface IUIElementOverridable, then classes that derive from UIELement, including both direct (Control) and indirect (Button) derivation, would be allowed to implement it. If code in UIElement needed to access functionality in IUIElementOverridable, then UIElement would query the controlling IInspectable to get the earliest implementation in the composition chain. If Control and Button both implemented IUIElementOverridable, then the Button implementation would be returned when the controlling IINspectable was queried. If Button wants to access its composed class functionality, it can use the non-delegating IInspectable that was returned from the composition factory method to query the base class for that interface.
 
 ### Activation Factories
 

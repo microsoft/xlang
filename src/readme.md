@@ -20,19 +20,19 @@ The **/library** folder contains the C++ header libraries provided by Xlang for 
 
 The **/platform** folder contains the declaration and implementations of the common and minimal C API (and platform-specific implementations) used to support Xlang on different platforms (otherwise known as the PAL or Platform Adaptation Layer).
 
-Eventually, source in the PAL will be split into seperate folders based on underlying platform (Windows, Linux, Android, etc). For now, the PAL only has a Windows implementation.
+Eventually, source in the PAL will be split into separate folders based on underlying platform (Windows, Linux, Android, etc). For now, the PAL only has a Windows implementation.
 
-* **published/pal.h** contains the delaration of the PAL surface area
+* **published/pal.h** contains the declaration of the PAL surface area
 
 ### /Tool
 
 The **/tool** folder contains the tools provided in support of Xlang development. This includes tools for working with idl and winmd files as well as for generating language projections.
 
-* **/tool/cpp** implements the tool that generates the C++ 17 language projection. Currently, the generated projection is Windows only, but the tool will be updated to generate cross-plaform compatible code.
+* **/tool/cpp** implements the tool that generates the C++ 17 language projection. Currently, the generated projection is Windows only, but the tool will be updated to generate cross-platform compatible code.
 
 * **/tool/idl** implements a tool that generates [MIDL 3](http://docs.microsoft.com/en-us/uwp/midl-3/) files from ECMA-335 metadata.
 
-* **/tool/natviz** implements a [Natvis visualization](http://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects) of C++/WinRT componetns for the Visual Studio debugger 2017. Over time, this tool will be updated to support visualization of Xlang components.
+* **/tool/natviz** implements a [Natvis visualization](http://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects) of C++/WinRT components for the Visual Studio debugger 2017. Over time, this tool will be updated to support visualization of Xlang components.
 
 * **/tool/python** implements the tool that generates the Python language projection. Currently, this tool is in pre-alpha state and builds on C++/WinRT projection from the Windows SDK rather than Xlang. The tool will be updated to generate cross-platform compatible code.
 
@@ -89,7 +89,7 @@ Visual Studio 2017 has built in CMake support. For best results, use the latest 
     * the src/CMakeSettings.json file is configured to generate the build files into the _build folder of the repo. Under the _build folder, build files and artifacts are generated under the *Platform*/*Architecture*/*Configuration* subfolder (for example, _build/Windows/x86/Debug)
 3. To build, you can do any of the following
     * Select CMake -> Build All to build everything
-    * Select CMake -> Build Only -> *Build Target* to build a specific target and its depenencies. 
+    * Select CMake -> Build Only -> *Build Target* to build a specific target and its dependencies.
     * Select a target executable from the Startup Item dropdown (with the green arrow) and use Visual Studio's build and debug hotkeys (Ctrl-Shift-B to build, F5 to build and debug, Shift-F5 to build and run)
 
 ### Command Line
