@@ -5,10 +5,10 @@ project(pal)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-set(sources string_abi.cpp string_base.cpp)
+set(sources string_abi.cpp string_base.cpp activation_abi.cpp)
 
 if (WIN32)
-    set(sources ${sources} win32_memory.cpp win32_string_convert.cpp)
+    set(sources ${sources} win32_memory.cpp win32_string_convert.cpp win32_activation.cpp)
 else()
     set(sources ${sources} common_memory.cpp)
 endif()

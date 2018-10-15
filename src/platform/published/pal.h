@@ -98,6 +98,14 @@ extern "C"
         char reserved2[16];
     };
 
+    struct xlang_guid
+    {
+        uint32_t Data1;
+        uint16_t Data2;
+        uint16_t Data3;
+        uint8_t  Data4[8];
+    };
+
 #ifdef __cplusplus
     enum class xlang_string_encoding
     {
@@ -207,6 +215,15 @@ extern "C"
         xlang_string* string,
         uint32_t length
     ) XLANG_NOEXCEPT;
+
+    XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_get_activation_factory(
+        xlang_string class_name,
+        xlang_guid const& iid,
+        void** factory
+    ) XLANG_NOEXCEPT;
+
+    typedef xlang_result(XLANG_CALL * xlang_pfn_lib_get_activation_factory)(xlang_string, xlang_guid const&, void **);
+
 
 #ifdef __cplusplus
 }
