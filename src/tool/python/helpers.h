@@ -358,6 +358,36 @@ namespace xlang
         return std::move(method_map);
     }
 
+    auto get_constructors(TypeDef const& type)
+    {
+        std::vector<MethodDef> constructors;
+
+        for (auto&& method : type.MethodList())
+        {
+            if (is_constructor(method))
+            {
+                constructors.push_back(method);
+            }
+        }
+
+        return std::move(constructors);
+    }
+
+    auto get_delegate_invoke(TypeDef const& type)
+    {
+        XLANG_ASSERT(get_category(type) == category::delegate_type);
+
+        for (auto&& method : type.MethodList())
+        {
+            if (method.SpecialName() && (method.Name() == "Invoke"))
+            {
+                return method;
+            }
+        }
+
+        throw_invalid("Invoke method not found");
+    }
+
     bool is_exclusive_to(TypeDef const& type)
     {
         return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");

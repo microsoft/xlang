@@ -117,53 +117,51 @@ namespace xlang
         w.write("    { nullptr }\n};\n");
     }
 
-    void write_method_flags(writer& w, MethodDef const& method)
+    void write_method_table_flags(writer& w, std::vector<method_info> const& methods)
     {
-        if (is_get_method(method))
+        XLANG_ASSERT(methods.size() > 0);
+
+        if (methods.size() == 1)
         {
-            w.write("METH_NOARGS");
-        }
-        else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
-        {
-            w.write("METH_O");
+            auto method = methods[0].method;
+
+            if (is_get_method(method))
+            {
+                w.write("METH_NOARGS");
+            }
+            else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
+            {
+                w.write("METH_O");
+            }
+            else
+            {
+                w.write("METH_VARARGS");
+            }
+
+            if (method.Flags().Static())
+            {
+                w.write(" | METH_STATIC");
+            }
         }
         else
         {
             w.write("METH_VARARGS");
-        }
 
-        if (method.Flags().Static())
-        {
-            w.write(" | METH_STATIC");
+            if (methods[0].method.Flags().Static())
+            {
+                w.write(" | METH_STATIC");
+            }
         }
     }
 
-    void write_class_method_table(writer& w, TypeDef const& type)
+    void write_method_table(writer& w, TypeDef const& type)
     {
-        XLANG_ASSERT((get_category(type) == category::class_type) || (get_category(type) == category::interface_type));
-        
-        std::set<std::string_view> instance_methods{};
-        std::set<std::string_view> static_methods{};
-
         w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
 
-        for (auto&& method : type.MethodList())
+        for (auto&&[name, overloads] : get_methods(type))
         {
-            if (is_constructor(method))
-            {
-                continue;
-            }
-
-            auto is_static_method = method.Flags().Static();
-            auto& set = is_static_method ? static_methods : instance_methods;
-
-            if (set.find(method.Name()) == set.end())
-            {
-                set.emplace(method.Name());
-
-                w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
-                    method.Name(), type.TypeName(), method.Name(), bind<write_method_flags>(method));
-            }
+            w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
+                name, type.TypeName(), name, bind<write_method_table_flags>(overloads));
         }
 
         w.write("    { nullptr }\n};\n");
@@ -547,14 +545,7 @@ static PyType_Spec @_Type_spec =
     {
         w.write("\nPyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
 
-        std::vector<MethodDef> constructors;
-        for (auto&& method : type.MethodList())
-        {
-            if (is_constructor(method))
-            {
-                constructors.push_back(method);
-            }
-        }
+        auto constructors = get_constructors(type);
 
         if (type.Flags().Abstract() || constructors.size() == 0)
         {
@@ -641,7 +632,7 @@ static void @_dealloc(%* self)
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
         write_class_methods(w, type);
-        write_class_method_table(w, type);
+        write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
@@ -803,71 +794,6 @@ static void @_dealloc(%* self)
         write_type_methods<write_class_method_decl>(w, type);
     }
 
-    auto get_methods(coded_index<TypeDefOrRef> index)
-    {
-        switch (index.type())
-        {
-        case TypeDefOrRef::TypeDef:
-            return index.TypeDef().MethodList();
-        case TypeDefOrRef::TypeRef:
-            return find_required(index.TypeRef()).MethodList();
-        case TypeDefOrRef::TypeSpec:
-            return get_methods(index.TypeSpec().Signature().GenericTypeInst().GenericType());
-        }
-
-        throw_invalid("invalid TypeDefOrRef");
-    }
-
-    void write_method_flags2(writer& w, std::vector<method_info> const& methods)
-    {
-        XLANG_ASSERT(methods.size() > 0);
-
-        if (methods.size() == 1)
-        {
-            auto method = methods[0].method;
-
-            if (is_get_method(method))
-            {
-                w.write("METH_NOARGS");
-            }
-            else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
-            {
-                w.write("METH_O");
-            }
-            else
-            {
-                w.write("METH_VARARGS");
-            }
-
-            if (method.Flags().Static())
-            {
-                w.write(" | METH_STATIC");
-            }
-        }
-        else
-        {
-            w.write("METH_VARARGS");
-        
-            if (methods[0].method.Flags().Static())
-            {
-                w.write(" | METH_STATIC");
-            }
-        }
-    }
-
-    void write_interface_method_table(writer& w, TypeDef const& type)
-    {
-        w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
-
-        for (auto&& method : get_methods(type))
-        {
-            w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
-                method.first, type.TypeName(), method.first, bind<write_method_flags2>(method.second));
-        }
-
-        w.write("    { nullptr }\n};\n");
-    }
-
     void write_interface(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type))
@@ -885,7 +811,7 @@ static void @_dealloc(%* self)
         write_interface_constructor(w, type);
         write_interface_dealloc(w, type);
         write_class_methods(w, type);
-        write_interface_method_table(w, type);
+        write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
@@ -906,15 +832,7 @@ static void @_dealloc(%* self)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
-        MethodDef invoke;
-        for (auto&& m : type.MethodList())
-        {
-            if (m.Name() == "Invoke")
-            {
-                invoke = m;
-                break;
-            }
-        }
+        auto invoke = get_delegate_invoke(type);
 
         w.write("\n");
 
