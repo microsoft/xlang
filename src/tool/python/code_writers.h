@@ -507,6 +507,11 @@ static PyType_Spec @_Type_spec =
 
     void write_class_method_decl(writer& w, std::string_view const& type_name, method_info const& info)
     {
+        if (type_name == "IAsyncActionWithProgress`1")
+        {
+            int i = 0;
+        }
+
         w.write("\nstatic PyObject* @_%(%, PyObject* args)\n{ \n",
             type_name,
             info.method.Name(),
@@ -515,8 +520,6 @@ static PyType_Spec @_Type_spec =
 
     void write_class_methods(writer& w, TypeDef const& type)
     {
-        XLANG_ASSERT(!is_ptype(type));
-
         write_type_methods<write_class_method_decl>(w, type);
     }
 
@@ -697,9 +700,9 @@ static void @_dealloc(%* self)
         w.write("    virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
         w.write("    virtual std::size_t hash() = 0;\n\n");
             
-        for (auto&& method : type.MethodList())
+        for (auto&& [method_name, overloads] : get_methods(type))
         {
-            w.write("    virtual PyObject* %(PyObject* args) = 0;\n", method.Name());
+            w.write("    virtual PyObject* %(PyObject* args) = 0;\n", method_name);
         }
 
         w.write("};\n");
@@ -795,12 +798,9 @@ static void @_dealloc(%* self)
         }
     }
 
-    void write_interface_methods(writer& w, TypeDef const& type, std::map<std::string_view, std::vector<method_info>> const& /*methods*/)
+    void write_interface_methods(writer& w, TypeDef const& type)
     {
-        if (!is_ptype(type))
-        {
-            write_type_methods<write_class_method_decl>(w, type);
-        }
+        write_type_methods<write_class_method_decl>(w, type);
     }
 
     auto get_methods(coded_index<TypeDefOrRef> index)
@@ -855,11 +855,11 @@ static void @_dealloc(%* self)
         }
     }
 
-    void write_interface_method_table(writer& w, TypeDef const& type, std::map<std::string_view, std::vector<method_info>> const& methods)
+    void write_interface_method_table(writer& w, TypeDef const& type)
     {
         w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
 
-        for (auto&& method : methods)
+        for (auto&& method : get_methods(type))
         {
             w.write("    { \"%\", (PyCFunction)@_%, %, nullptr },\n",
                 method.first, type.TypeName(), method.first, bind<write_method_flags2>(method.second));
@@ -876,7 +876,6 @@ static void @_dealloc(%* self)
         }
 
         auto guard{ w.push_generic_params(type.GenericParam()) };
-        auto methods = get_methods(type);
 
         w.write("\n// ----- @ interface --------------------\n", type.TypeName());
 
@@ -885,8 +884,8 @@ static void @_dealloc(%* self)
 
         write_interface_constructor(w, type);
         write_interface_dealloc(w, type);
-        write_interface_methods(w, type, methods);
-        write_interface_method_table(w, type, methods);
+        write_class_methods(w, type);
+        write_interface_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
