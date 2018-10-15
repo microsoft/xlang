@@ -10,9 +10,7 @@ class TestGeolocation(unittest.TestCase):
         locator = _pyrt.Geolocator()
         op = locator.GetGeopositionAsync()
         self.assertEqual(type(op), _pyrt.IAsyncOperation)
-        info = _pyrt.IAsyncInfo(op)
-        self.assertEqual(type(info), _pyrt.IAsyncInfo)
-        info.Cancel()
+        op.Cancel()
 
     def test_struct_ctor(self):
         basic_pos = _pyrt.BasicGeoposition(Latitude = 47.1, Longitude = -122.1, Altitude = 0.0)

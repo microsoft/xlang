@@ -171,9 +171,9 @@ namespace xlang
     {
         auto category = get_category(type);
 
-        XLANG_ASSERT((get_category(type) == category::class_type) 
-            || (get_category(type) == category::interface_type)
-            || (get_category(type) == category::struct_type));
+        XLANG_ASSERT((category == category::class_type)
+            || (category == category::interface_type)
+            || (category == category::struct_type));
 
         w.write("\nstatic PyType_Slot @_Type_slots[] = \n{\n", type.TypeName());
 
@@ -202,9 +202,9 @@ namespace xlang
     {
         auto category = get_category(type);
 
-        XLANG_ASSERT((get_category(type) == category::class_type)
-            || (get_category(type) == category::interface_type)
-            || (get_category(type) == category::struct_type));
+        XLANG_ASSERT((category == category::class_type)
+            || (category == category::interface_type)
+            || (category == category::struct_type));
 
         if (category == category::class_type && type.Flags().Abstract())
         {
@@ -289,7 +289,7 @@ static PyType_Spec @_Type_spec =
         }
     }
 
-    void write_class_method_overload_return(writer& w, method_signature const& signature)
+    void write_method_overload_return(writer& w, method_signature const& signature)
     {
         if (signature.return_signature())
         {
@@ -306,9 +306,9 @@ static PyType_Spec @_Type_spec =
 
 
 
-    void write_class_method_overload_invoke_context(writer& w, MethodDef const& method)
+    void write_method_overload_invoke_context(writer& w, TypeDef const& type, MethodDef const& method)
     {
-        if (is_ptype(method.Parent()))
+        if (is_ptype(type))
         {
             w.write("obj.");
         }
@@ -334,7 +334,7 @@ static PyType_Spec @_Type_spec =
         return name;
     }
 
-    void write_class_method_overload(writer& w, method_info const& info, method_signature signature)
+    void write_method_overload_body(writer& w, TypeDef const& type, method_info const& info, method_signature signature)
     {
         auto guard{ w.push_generic_params(info.type_arguments) };
 
@@ -350,8 +350,8 @@ static PyType_Spec @_Type_spec =
         }
 
         w.write("            %%%(%);\n",
-            bind<write_class_method_overload_return>(signature),
-            bind<write_class_method_overload_invoke_context>(info.method),
+            bind<write_method_overload_return>(signature),
+            bind<write_method_overload_invoke_context>(type, info.method),
             get_cpp_method_name(info.method),
             bind_list<write_param_name>(", ", signature.params()));
 
@@ -420,9 +420,9 @@ static PyType_Spec @_Type_spec =
     }
 
     template <auto F>
-    void write_type_method(writer& w, std::string_view const& type_name, std::string_view const& /*method_name*/, std::vector<method_info> const& overloads)
+    void write_method_overload(writer& w, TypeDef const& type, std::vector<method_info> const& overloads)
     {
-        F(w, type_name, overloads[0]);
+        F(w, type, overloads[0]);
 
         if (overloads.size() == 1 && overloads[0].method.SpecialName())
         {
@@ -439,7 +439,7 @@ static PyType_Spec @_Type_spec =
             }
 
             method_signature signature{ overloads[0].method };
-            write_class_method_overload(w, overloads[0], signature);
+            write_method_overload_body(w, type, overloads[0], signature);
         }
         else
         {
@@ -465,7 +465,7 @@ static PyType_Spec @_Type_spec =
     {
 )";
                 w.write(format, count_in_param(signature.params()));
-                write_class_method_overload(w, overload, signature);
+                write_method_overload_body(w, type, overload, signature);
                 w.write("    }\n");
             }
 
@@ -483,15 +483,15 @@ static PyType_Spec @_Type_spec =
     }
 
     template <auto F>
-    void write_type_methods(writer& w, TypeDef const& type)
+    void write_methods(writer& w, TypeDef const& type)
     {
         for (auto&& [name, overloads]: get_methods(type))
         {   
-            write_type_method<F>(w, type.TypeName(), name, overloads);
+            write_method_overload<F>(w, type, overloads);
         }
     }
     
-    void write_class_method_decl_self_type(writer& w, MethodDef const& method)
+    void write_type_method_decl_self_type(writer& w, TypeDef const& type, MethodDef const& method)
     {
         if (method.Flags().Static())
         {
@@ -499,26 +499,32 @@ static PyType_Spec @_Type_spec =
         }
         else
         {
-            w.write("%* self", bind<write_winrt_wrapper>(method.Parent()));
+            w.write("%* self", bind<write_winrt_wrapper>(type));
         }
     }
 
-    void write_class_method_decl(writer& w, std::string_view const& type_name, method_info const& info)
+    void write_type_function_decl(writer& w, TypeDef const& type, method_info const& info)
     {
-        if (type_name == "IAsyncActionWithProgress`1")
-        {
-            int i = 0;
-        }
-
         w.write("\nstatic PyObject* @_%(%, PyObject* args)\n{ \n",
-            type_name,
+            type.TypeName(),
             info.method.Name(),
-            bind<write_class_method_decl_self_type>(info.method));
+            bind<write_type_method_decl_self_type>(type, info.method));
     }
 
-    void write_class_methods(writer& w, TypeDef const& type)
+    void write_type_functions(writer& w, TypeDef const& type)
     {
-        write_type_methods<write_class_method_decl>(w, type);
+        if (is_ptype(type))
+        {
+            for (auto&&[name, overloads] : get_methods(type))
+            {
+                write_type_function_decl(w, type, overloads[0]);
+                w.write("    return self->obj->%(args);\n}\n", name);
+            }
+        }
+        else
+        {
+            write_methods<write_type_function_decl>(w, type);
+        }
     }
 
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
@@ -631,7 +637,7 @@ static void @_dealloc(%* self)
         
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
-        write_class_methods(w, type);
+        write_type_functions(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
@@ -650,33 +656,7 @@ static void @_dealloc(%* self)
 
 
 
-//    void write_pinterface_methods(writer& w, TypeDef const& type)
-//    {
-//        XLANG_ASSERT(is_ptype(type));
-//
-//        std::set<std::string_view> method_set{};
-//
-//        auto format = R"(
-//static PyObject* @_%(%* self, PyObject* args)
-//{
-//    return self->obj->%(args);
-//}
-//)";
-//
-//        for (auto&& method : type.MethodList())
-//        {
-//            if (method_set.find(method.Name()) == method_set.end())
-//            {
-//                method_set.emplace(method.Name());
-//
-//                w.write(format,
-//                    type.TypeName(),
-//                    method.Name(),
-//                    bind<write_winrt_wrapper>(type),
-//                    method.Name());
-//            }
-//        }
-//    }
+
 
 
     void write_pinterface_decl(writer& w, TypeDef const& type)
@@ -699,7 +679,7 @@ static void @_dealloc(%* self)
         w.write("};\n");
     }
 
-    void write_pinterface_method_decl(writer& w, std::string_view const&, method_info const& info)
+    void write_pinterface_method_decl(writer& w, TypeDef const&, method_info const& info)
     {
         w.write("\nPyObject* %(PyObject* args) override\n{\n", info.method.Name());
     }
@@ -717,7 +697,7 @@ static void @_dealloc(%* self)
         w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return obj; }\n");
         w.write("std::size_t hash() override { return py::get_instance_hash(obj); }\n");
 
-        write_type_methods<write_pinterface_method_decl>(w, type);
+        write_methods<write_pinterface_method_decl>(w, type);
 
         w.write("\n    %<%> obj{ nullptr };\n};\n", type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
     }
@@ -789,11 +769,6 @@ static void @_dealloc(%* self)
         }
     }
 
-    void write_interface_methods(writer& w, TypeDef const& type)
-    {
-        write_type_methods<write_class_method_decl>(w, type);
-    }
-
     void write_interface(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type))
@@ -810,7 +785,7 @@ static void @_dealloc(%* self)
 
         write_interface_constructor(w, type);
         write_interface_dealloc(w, type);
-        write_class_methods(w, type);
+        write_type_functions(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
