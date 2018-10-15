@@ -728,14 +728,54 @@ static void @_dealloc(%* self)
     {
         XLANG_ASSERT(get_category(type) == category::interface_type);
 
-        auto format = R"(
+        if (is_ptype(type))
+        {
+            auto format = R"(
 PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    PyErr_SetString(PyExc_RuntimeError, "@ is not activatable");
+    PyErr_SetString(PyExc_RuntimeError, "parameterized interface @ is not activatable");
     return nullptr;
 }
 )";
-        w.write(format, type.TypeName(), type.TypeName());
+            w.write(format, type.TypeName(), type.TypeName());
+        }
+        else
+        {
+            auto format = R"(
+PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
+{
+    if (kwds != nullptr)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "keyword arguments not supported");
+        return nullptr;
+    }
+
+    Py_ssize_t arg_count = PyTuple_Size(args);
+
+    if (arg_count == 1)
+    {
+        try
+        {
+            auto param0 = py::convert_to<%>(args, 0);
+            return py::wrap(param0, type);
+        }
+        catch (...)
+        {
+            return py::to_PyErr();
+        }
+    }
+    else if (arg_count == -1)
+    {
+        return nullptr; 
+    }
+
+    PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
+    return nullptr;
+}
+)";
+
+            w.write(format, type.TypeName(), type);
+        }
     }
 
     void write_interface_dealloc(writer& w, TypeDef const& type)
