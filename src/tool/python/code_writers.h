@@ -336,12 +336,14 @@ static PyType_Spec @_Type_spec =
         return name;
     }
 
-    void write_class_method_overload(writer& w, MethodDef const& method, method_signature const& signature)
+    void write_class_method_overload(writer& w, method_info const& info, method_signature signature)
     {
+        auto guard{ w.push_generic_params(info.type_arguments) };
+
         w.write("        try\n        {\n");
         for (auto&& param : signature.params())
         {
-            write_param_declaration(w, method, param);
+            write_param_declaration(w, info.method, param);
         }
 
         if (signature.has_params())
@@ -351,8 +353,8 @@ static PyType_Spec @_Type_spec =
 
         w.write("            %%%(%);\n",
             bind<write_class_method_overload_return>(signature),
-            bind<write_class_method_overload_invoke_context>(method),
-            get_cpp_method_name(method),
+            bind<write_class_method_overload_invoke_context>(info.method),
+            get_cpp_method_name(info.method),
             bind_list<write_param_name>(", ", signature.params()));
 
         if (signature.return_signature())
@@ -439,7 +441,7 @@ static PyType_Spec @_Type_spec =
             }
 
             method_signature signature{ overloads[0].method };
-            write_class_method_overload(w, overloads[0].method, signature);
+            write_class_method_overload(w, overloads[0], signature);
         }
         else
         {
@@ -465,7 +467,7 @@ static PyType_Spec @_Type_spec =
     {
 )";
                 w.write(format, count_in_param(signature.params()));
-                write_class_method_overload(w, overload.method, signature);
+                write_class_method_overload(w, overload, signature);
                 w.write("    }\n");
             }
 
@@ -793,9 +795,12 @@ static void @_dealloc(%* self)
         }
     }
 
-    void write_interface_methods(writer& /*w*/, TypeDef const& /*type*/, std::map<std::string_view, std::vector<method_info>> const& /*methods*/)
+    void write_interface_methods(writer& w, TypeDef const& type, std::map<std::string_view, std::vector<method_info>> const& /*methods*/)
     {
-
+        if (!is_ptype(type))
+        {
+            write_type_methods<write_class_method_decl>(w, type);
+        }
     }
 
     auto get_methods(coded_index<TypeDefOrRef> index)
