@@ -4,7 +4,7 @@ import _pyrt
 import unittest
 import asyncio
 
-class TestStringMap(unittest.TestCase):
+class TestCollections(unittest.TestCase):
 
     def test_stringmap(self):
         m = _pyrt.StringMap()
@@ -19,25 +19,32 @@ class TestStringMap(unittest.TestCase):
     def test_stringmap_changed_event(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)
-
-        async def event_test():
+        
+        async def async_test():
             future = loop.create_future()
 
             def onMapChanged(sender, args): 
                 self.assertEqual(args.get_CollectionChange(), 1)
                 self.assertEqual(args.get_Key(), "dr")
-                future.set_result(None)
+
+                self.assertEqual(sender.get_Size(), 2)
+                self.assertTrue(sender.HasKey("dr"))
+                self.assertTrue(sender.HasKey("hello"))
+                
+                loop.call_soon_threadsafe(asyncio.Future.set_result, future, True)
 
             m = _pyrt.StringMap()
             m.Insert("hello", "world")
-
             token = m.add_MapChanged(onMapChanged)
             m.Insert("dr", "who")
-        
-            await future
-        
-        loop.run_until_complete(event_test())
+            m.remove_MapChanged(token)
+
+            called = await future
+            self.assertTrue(called)
+
+        loop.run_until_complete(async_test())
         loop.close()
+
 
 if __name__ == '__main__':
     _pyrt.init_apartment()
