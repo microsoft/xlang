@@ -432,7 +432,7 @@ static PyType_Spec @_Type_spec =
             {
                 w.write(R"(    if (args != nullptr)
     {
-        PyErr_SetString(PyExc_RuntimeError, "arguments not supported for get methods");
+        PyErr_SetString(PyExc_TypeError, "arguments not supported for get methods");
         return nullptr;
     }
 )");
@@ -474,7 +474,7 @@ static PyType_Spec @_Type_spec =
         return nullptr; 
     }
 
-    PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
+    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
     return nullptr;
 )");
         }
@@ -600,7 +600,7 @@ static PyType_Spec @_Type_spec =
         return nullptr; 
     }
 
-    PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
+    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
     return nullptr;
 )");
         }
@@ -733,7 +733,7 @@ static void @_dealloc(%* self)
             auto format = R"(
 PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    PyErr_SetString(PyExc_RuntimeError, "parameterized interface @ is not activatable");
+    PyErr_SetString(PyExc_TypeError, "parameterized interface @ is not activatable");
     return nullptr;
 }
 )";
@@ -746,7 +746,7 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     if (kwds != nullptr)
     {
-        PyErr_SetString(PyExc_RuntimeError, "keyword arguments not supported");
+        PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
         return nullptr;
     }
 
@@ -769,7 +769,7 @@ PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
         return nullptr; 
     }
 
-    PyErr_SetString(PyExc_RuntimeError, "Invalid parameter count");
+    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
     return nullptr;
 }
 )";
@@ -1326,7 +1326,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
 {
     if (value == nullptr)
     {
-        PyErr_SetString(PyExc_RuntimeError, "property delete not supported");
+        PyErr_SetString(PyExc_TypeError, "property delete not supported");
         return -1;
     }
     
