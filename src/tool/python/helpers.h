@@ -292,11 +292,9 @@ namespace xlang
     auto get_required_interfaces(TypeDef const& type)
     {
         writer w;
-        w.debug_trace = true;
-        std::vector<interface_info> interfaces;
-
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
+        std::vector<interface_info> interfaces;
         collect_required_interfaces(w, interfaces, type);
 
         return std::move(interfaces);
@@ -333,7 +331,6 @@ namespace xlang
             {
                 for (auto&& method : info.type.MethodList())
                 {
-                    //method_map.try_emplace(method.Name(), std::vector<method_info> {});
                     method_map[method.Name()].push_back(method_info{ method, info.type_arguments });
                 }
             }

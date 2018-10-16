@@ -103,11 +103,11 @@ class TestJson(unittest.TestCase):
 
     def test_invalid_param_count_instance(self):
         a = _pyrt.JsonArray()
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             a.Append(10, 20)
 
     def test_invalid_param_count_static(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             _pyrt.JsonArray.Parse(10, 20)
 
 
