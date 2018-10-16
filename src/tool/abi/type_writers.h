@@ -3,6 +3,7 @@
 #include "abi_writer.h"
 #include "generic_arg_stack.h"
 #include "meta_reader.h"
+#include "sha1.h"
 #include "text_writer.h"
 
 inline constexpr std::string_view type_prefix(xlang::meta::reader::category typeCategory) noexcept
@@ -69,7 +70,10 @@ inline void write_namespace_close(writer& w)
     }
 }
 
-inline void write_generic_type_guid(writer& w, xlang::meta::reader::GenericTypeInstSig const& type);
+inline void write_generic_type_guid(
+    writer& w,
+    xlang::meta::reader::GenericTypeInstSig const& type,
+    generic_arg_stack const& genericArgs = generic_arg_stack::empty());
 
 inline void write_type_guid(writer& w, xlang::meta::reader::TypeDef const& type)
 {
@@ -114,7 +118,10 @@ inline void write_type_guid(writer& w, xlang::meta::reader::TypeDef const& type)
 }
 
 template <type_format Format>
-inline void write_type(writer& w, xlang::meta::reader::TypeDef const& type, generic_arg_stack const& /*genericArgs*/)
+inline void write_type(writer& w, xlang::meta::reader::TypeSig const& type, generic_arg_stack const& genericArgs);
+
+template <type_format Format>
+inline void write_type(writer& w, xlang::meta::reader::TypeDef const& type, generic_arg_stack const& genericArgs)
 {
     using namespace xlang::meta::reader;
     using namespace xlang::text;
@@ -140,11 +147,19 @@ inline void write_type(writer& w, xlang::meta::reader::TypeDef const& type, gene
             break;
 
         case category::enum_type:
-            w.write("enum(%.%;TODO_TYPE)", type.TypeNamespace(), type.TypeName());
+            w.write("enum(%.%;", type.TypeNamespace(), type.TypeName());
+            write_type<Format>(w, type.FieldList().first.Signature().Type(), genericArgs);
+            w.write(")");
             break;
 
         case category::struct_type:
-            w.write("struct(%.%;TODO_MEMBERS)", type.TypeNamespace(), type.TypeName());
+            w.write("struct(%.%", type.TypeNamespace(), type.TypeName());
+            for (auto const& field : type.FieldList())
+            {
+                w.write(";");
+                write_type<Format>(w, field.Signature().Type(), genericArgs);
+            }
+            w.write(")");
             break;
 
         case category::delegate_type:
@@ -228,7 +243,7 @@ inline void write_type(writer& w, xlang::meta::reader::TypeDef const& type, gene
             }
         };
 
-        // Generics get "__F" as a prefix instead of the namespace
+        // Generics get "__F" as a prefix instead of the namespace. This also bypasses any ABI prefix
         if (isGenericType)
         {
             w.write("__F");
@@ -288,7 +303,7 @@ inline void write_type(writer& w, xlang::meta::reader::ElementType type, generic
         break;
 
     case ElementType::I1:
-        XLANG_ASSERT(false); // TODO?
+        XLANG_ASSERT(false); // TODO? This type seems to be a lie
         break;
 
     case ElementType::U1:
@@ -444,7 +459,36 @@ inline void write_generic_type_inst_sig(
     write_type<Format>(w, type, genericArgs);
 }
 
-inline void write_generic_type_guid(writer& w, xlang::meta::reader::GenericTypeInstSig const& type)
+inline void write_generic_type_guid(
+    writer& w,
+    xlang::meta::reader::GenericTypeInstSig const& type,
+    generic_arg_stack const& genericArgs)
 {
+    using namespace xlang::text;
 
+    // For generic types, we need to take the SHA1 hash of the type's signature, and use that for the GUID
+    sha1 hash;
+
+    // NOTE: The type namespace GUID needs to get processed as big endian values
+    static constexpr std::uint8_t namespaceGuidBytes[] =
+    {
+        0x11, 0xf4, 0x7a, 0xd5,
+        0x7b, 0x73,
+        0x42, 0xc0,
+        0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee
+    };
+    hash.append(namespaceGuidBytes, std::size(namespaceGuidBytes));
+
+    auto const strSignature = w.write_temp("%", bind<write_generic_type_inst_sig<type_format::signature>>(type, genericArgs));
+    hash.append(reinterpret_cast<const std::uint8_t*>(strSignature.c_str()), strSignature.length());
+
+    // Hash gives us 20 bytes, but GUID only takes 16; discard the 4 "low" bytes. We also need to encode a version
+    // number in the high nibble of 'Data3' as well as set the variant field
+    auto const hashValues = hash.finalize();
+    w.write_printf("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+        hashValues[0], hashValues[1], hashValues[2], hashValues[3],
+        hashValues[4], hashValues[5],
+        ((hashValues[6] & 0x0F) | 0x50), hashValues[7],
+        ((hashValues[8] & 0x3F) | 0x80), hashValues[9],
+        hashValues[10], hashValues[11], hashValues[12], hashValues[13], hashValues[14], hashValues[15]);
 }

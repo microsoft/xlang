@@ -619,15 +619,13 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
     auto typeName = typeDef.TypeName();
     typeName = typeName.substr(0, typeName.find('`'));
     write(R"^-^(template <>
-struct __declspec(uuid("TODO"))
+struct __declspec(uuid("%"))
 % : %%_impl<)^-^",
+        bind<write_generic_type_guid>(type, m_genericArgStack),
         bind<write_generic_type_inst_sig<type_format::cpp | type_format::ignore_namespace>>(type, m_genericArgStack),
         type_prefix(get_category(typeDef)), typeName);
 
-    std::cout << write_temp("%:\n    %\n",
-        bind<write_generic_type_inst_sig<type_format::cpp>>(type, m_genericArgStack),
-        bind<write_generic_type_inst_sig<type_format::signature>>(type, m_genericArgStack));
-
+    // TODO: Template argument(s)
     // For all generic arguments,
     // for (auto const& sig : type.GenericArgs())
     // {
@@ -645,8 +643,6 @@ struct __declspec(uuid("TODO"))
     //             // Either ElementType or GenericTypeIndex
     //         });
     // }
-
-
 
     write(R"^-^(>
 {

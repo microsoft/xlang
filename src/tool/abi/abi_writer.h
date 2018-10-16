@@ -6,7 +6,6 @@
 
 #include "common.h"
 #include "generic_arg_stack.h"
-#include "guid.h"
 #include "meta_reader.h"
 #include "namespace_iterator.h"
 #include "text_writer.h"

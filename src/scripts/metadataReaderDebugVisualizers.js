@@ -133,7 +133,20 @@ function __typeFromAddress(type, address, context)
     throw new Error("Type '" + type + "' does not exist in any loaded module");
 }
 
-var __TypeDefOrRef = {
+function __enumToString(value, enumValues)
+{
+    for (var property in enumValues)
+    {
+        if (enumValues.hasOwnProperty(property) && (value === enumValues[property]))
+        {
+            return property;
+        }
+    }
+
+    return "UNKNOWN (" + value + ")";
+}
+
+var __TypeDefOrRef = Object.freeze({
     TypeDef: 0,
     TypeRef: 1,
     TypeSpec: 2,
@@ -155,9 +168,9 @@ var __TypeDefOrRef = {
 
     Name: "TypeDefOrRef",
     CodedIndexBits: 2,
-};
+});
 
-var __HasCustomAttribute = {
+var __HasCustomAttribute = Object.freeze({
     MethodDef: 0,
     Field: 1,
     TypeRef: 2,
@@ -274,9 +287,9 @@ var __HasCustomAttribute = {
 
     Name: "HasCustomAttribute",
     CodedIndexBits: 5,
-};
+});
 
-var __CustomAttributeType = {
+var __CustomAttributeType = Object.freeze({
     MethodDef: 2,
     MemberRef: 3,
 
@@ -299,9 +312,9 @@ var __CustomAttributeType = {
 
     Name: "CustomAttributeType",
     CodedIndexBits: 3,
-};
+});
 
-var __MemberRefParent = {
+var __MemberRefParent = Object.freeze({
     TypeDef: 0,
     TypeRef: 1,
     ModuleRef: 2,
@@ -333,47 +346,47 @@ var __MemberRefParent = {
 
     Name: "MemberRef",
     CodedIndexBits: 3,
-};
+});
 
-var __TypeOrMethodDef = {
+var __TypeOrMethodDef = Object.freeze({
     TypeDef: 0,
     MethodDef: 1,
 
     Values: [
         {
             Valid: true,
-            Table: "TypeDef"
+            Table: "TypeDef",
         },
         {
             Valid: true,
-            Table: "MethodDef"
+            Table: "MethodDef",
         },
     ],
 
     Name: "TypeOrMethodDef",
     CodedIndexBits: 1,
-}
+});
 
-var __MethodDefOrRef = {
+var __MethodDefOrRef = Object.freeze({
     MethodDef: 0,
     MemberRef: 1,
 
     Values: [
         {
             Valid: true,
-            Table: "MethodDef"
+            Table: "MethodDef",
         },
         {
             Valid: true,
-            Table: "MemberRef"
+            Table: "MemberRef",
         },
     ],
 
     Name: "MethodDefOrRef",
     CodedIndexBits: 1,
-};
+});
 
-var __HasConstant = {
+var __HasConstant = Object.freeze({
     Field: 0,
     Param: 1,
     Property: 2,
@@ -381,23 +394,23 @@ var __HasConstant = {
     Values: [
         {
             Valid: true,
-            Table: "Field"
+            Table: "Field",
         },
         {
             Valid: true,
-            Table: "Param"
+            Table: "Param",
         },
         {
             Valid: true,
-            Table: "Property"
+            Table: "Property",
         },
     ],
 
     Name: "HasConstant",
     CodedIndexBits: 2,
-};
+});
 
-var __HasSemantics = {
+var __HasSemantics = Object.freeze({
     Event: 0,
     Property: 1,
 
@@ -413,8 +426,8 @@ var __HasSemantics = {
     ],
 
     Name: "HasSemantics",
-    CodedIndexBits: 1
-};
+    CodedIndexBits: 1,
+});
 
 function __codedValueType(value, codedEnum)
 {
@@ -482,10 +495,20 @@ class __Blob
 
 class __BlobStream
 {
-    constructor(blob)
+    constructor(blob, initialPos)
     {
         this.__blob = blob;
-        this.__cursor = 0;
+        this.__cursor = initialPos || 0;
+    }
+
+    copy(offset)
+    {
+        return new __BlobStream(this.__blob, this.__cursor + initialPos);
+    }
+
+    seek(delta)
+    {
+        this.__cursor += delta;
     }
 
     consumeValue(dataSize)
@@ -503,6 +526,47 @@ class __BlobStream
         }
 
         return this.__blob.ReadValue(dataSize, this.__cursor);
+    }
+
+    consumeUnsigned()
+    {
+        var result = this.peekUnsigned();
+        this.__cursor += result.length;
+        return result.value;
+    }
+
+    peekUnsigned()
+    {
+        var initialByte = this.__blob.ReadValue(1, this.__cursor);
+        var length;
+        if ((initialByte & 0x80) == 0)
+        {
+            length = 0;
+        }
+        else if ((initialByte & 0xC0) == 0x80)
+        {
+            length = 2;
+            initialByte = initialByte & 0x3F;
+        }
+        else if ((initialByte & 0xE0) == 0xC0)
+        {
+            length = 4;
+            initialByte = initialByte & 0x1F;
+        }
+        else
+        {
+            throw new Error("Invalid compressed integer in blob");
+        }
+
+        for (var i = 1; i < length; ++i)
+        {
+            initialByte = (initialByte << 8) | this.__blob.ReadValue(1, this.__cursor + i);
+        }
+
+        return {
+            value: initialByte,
+            length: length,
+        }
     }
 }
 
@@ -623,22 +687,22 @@ class __DatabaseVisualizer
 
     get FieldMarshal()
     {
-        return this.FieldMarshal;
+        return this.FieldMarshal; // TODO: Visualize
     }
 
     get DeclSecurity()
     {
-        return this.DeclSecurity;
+        return this.DeclSecurity; // TODO: Visualize
     }
 
     get ClassLayout()
     {
-        return this.ClassLayout;
+        return this.ClassLayout; // TODO: Visualize
     }
 
     get FieldLayout()
     {
-        return this.FieldLayout;
+        return this.FieldLayout; // TODO: Visualize
     }
 
     get StandAloneSig()
@@ -683,12 +747,12 @@ class __DatabaseVisualizer
 
     get ImplMap()
     {
-        return this.ImplMap;
+        return this.ImplMap; // TODO: Visualize
     }
 
     get FieldRVA()
     {
-        return this.FieldRVA;
+        return this.FieldRVA; // TODO: Visualize
     }
 
     get Assembly()
@@ -698,12 +762,12 @@ class __DatabaseVisualizer
 
     get AssemblyProcessor()
     {
-        return this.AssemblyProcessor;
+        return this.AssemblyProcessor; // TODO: Visualize
     }
 
     get AssemblyOS()
     {
-        return this.AssemblyOS;
+        return this.AssemblyOS; // TODO: Visualize
     }
 
     get AssemblyRef()
@@ -713,12 +777,12 @@ class __DatabaseVisualizer
 
     get AssemblyRefProcessor()
     {
-        return this.AssemblyRefProcessor;
+        return this.AssemblyRefProcessor; // TODO: Visualize
     }
 
     get AssemblyRefOS()
     {
-        return this.AssemblyRefOS;
+        return this.AssemblyRefOS; // TODO: Visualize
     }
 
     get File()
@@ -738,7 +802,7 @@ class __DatabaseVisualizer
 
     get NestedClass()
     {
-        return this.NestedClass;
+        return this.NestedClass; // TODO: Visualize
     }
 
     get GenericParam()
@@ -876,10 +940,9 @@ function __MakeTableVisualizer(type)
             return new __TableRange(this, begin, end);
         }
 
-        __getCodedIndex(row, col, codedEnum)
+        __fromCodedIndex(codedIndex, codedEnum)
         {
-            var intValue = this.getValue(row, col);
-            var typeIndex = __codedValueType(intValue, codedEnum);
+            var typeIndex = __codedValueType(codedIndex, codedEnum);
             if (typeIndex >= codedEnum.Values.length)
             {
                 throw new RangeError("Invalid " + codedEnum.Name + " coded index: " + typeIndex);
@@ -892,13 +955,18 @@ function __MakeTableVisualizer(type)
             }
 
             var table = this.Database[target.Table];
-            var row = __codedValueIndex(intValue, codedEnum);
-            if (row == 0)
+            var row = __codedValueIndex(codedIndex, codedEnum);
+            if (row == -1)
             {
                 return null;
             }
 
             return eval("new __" + target.Table + "Visualizer(table, row)");
+        }
+
+        __getCodedIndex(row, col, codedEnum)
+        {
+            return this.__fromCodedIndex(this.getValue(row, col), codedEnum);
         }
 
         __getList(tableName, row, col)
@@ -1393,7 +1461,10 @@ class __FieldVisualizer extends __RowBase
         return this.__getString(1);
     }
 
-    // Signature
+    get Signature()
+    {
+        return new __FieldSig(this.__Table, new __BlobStream(this.__getBlob(2)));
+    }
 
     get CustomAttribute()
     {
@@ -1963,7 +2034,7 @@ class __EventMapVisualizer extends __RowBase
 
 // Blob Storage Types
 
-var __ElementType = {
+var __ElementType = Object.freeze({ // ELEMENT_TYPE enum; one byte in size
     End: 0x00,
     Void: 0x01,
     Boolean: 0x02,
@@ -2004,7 +2075,228 @@ var __ElementType = {
     Field: 0x53,
     Property: 0x54,
     Enum: 0x55,
-};
+});
+function __consumeElementType(stream)
+{
+    return stream.consumeValue(1);
+}
+function __peekElementType(stream)
+{
+    return stream.peekValue(1);
+}
+
+var __CallingConvention = Object.freeze({
+    Default: 0x00,
+    VarArg: 0x05,
+    Field: 0x06,
+    LocalSig: 0x07,
+    Property: 0x08,
+    GenericInst: 0x10,
+    Mask: 0x0f,
+
+    HasThis: 0x20,
+    ExplicitThis: 0x40,
+    Generic: 0x10,
+});
+function __consumeCallingConvention(stream)
+{
+    return stream.consumeValue(1);
+}
+function __callingConventionToString(value)
+{
+    // TODO: Others?
+    return __enumToString(value & __CallingConvention.Mask, __CallingConvention);
+}
+
+function __consumeCodedIndex(stream, table, codedEnum)
+{
+    return table.__fromCodedIndex(stream.consumeUnsigned(), codedEnum);
+}
+
+function __consumeSzArray(stream)
+{
+    if (__peekElementType(stream) == __ElementType.SZArray)
+    {
+        stream.seek(1);
+        return true;
+    }
+
+    return false;
+}
+
+class __CustomModSig
+{
+    constructor(table, stream)
+    {
+        this.__elementType = __consumeElementType(stream);
+        if ((this.__elementType != __ElementType.CModOpt) || (this.__elementType != __ElementType.CModReqd))
+        {
+            throw new Error("Invalid CustomMod signature element type: " + __enumToString(this.__elementType, __ElementType));
+        }
+
+        this.__type = __consumeCodedIndex(stream, table, __TypeDefOrRef);
+    }
+
+    toString()
+    {
+        return this.Type.toString();
+    }
+
+    get Type()
+    {
+        return this.__type;
+    }
+
+    get ElementType()
+    {
+        return __enumToString(this.__elementType, __ElementType);
+    }
+}
+
+function __consumeCustomMods(table, stream)
+{
+    var result = new Array();
+
+    // Continue until we read something other than ELEMENT_TYPE_CMOD_OPT or ELEMENT_TYPE_CMOD_REQD
+    for (var type = __peekElementType(stream); (type == __ElementType.CModOpt) || (type == __ElementType.CModReqd); type = __peekElementType(stream))
+    {
+        result.concat(new __CustomModSig(table, stream));
+    }
+
+    return result;
+}
+
+class __TypeSig
+{
+    constructor(table, stream)
+    {
+        this.__isSzArray = __consumeSzArray(stream);
+        this.__customMods = __consumeCustomMods(table, stream);
+
+        var type = __consumeElementType(stream);
+        switch (type)
+        {
+        case __ElementType.Boolean:
+        case __ElementType.Char:
+        case __ElementType.I1:
+        case __ElementType.U1:
+        case __ElementType.I2:
+        case __ElementType.U2:
+        case __ElementType.I4:
+        case __ElementType.U4:
+        case __ElementType.I8:
+        case __ElementType.U8:
+        case __ElementType.R4:
+        case __ElementType.R8:
+        case __ElementType.String:
+        case __ElementType.Object:
+        case __ElementType.U:
+        case __ElementType.I:
+            this.__type = __enumToString(type, __ElementType);
+            break;
+
+        case __ElementType.Class:
+        case __ElementType.ValueType:
+            this.__type = __consumeCodedIndex(stream, table, __TypeDefOrRef);
+            break;
+
+        case __ElementType.GenericInst:
+            this.__type = __GenericTypeInstSig(table, stream);
+            break;
+
+        case ElementType.Var:
+            this.__type = __GenericTypeIndex(stream);
+            break;
+
+        default:
+            throw new Error("Unknown or invalid ELEMENT_TYPE: " + type);
+        }
+    }
+
+    toString()
+    {
+        return this.Type.toString() + (this.IsSzArray ? "[]" : "");
+    }
+
+    get Type()
+    {
+        return this.__type;
+    }
+
+    get IsSzArray()
+    {
+        return this.__isSzArray;
+    }
+
+    get CustomMod()
+    {
+        return this.__customMods;
+    }
+}
+
+class __FieldSig
+{
+    constructor(table, stream)
+    {
+        this.__callingConvention = stream.consumeValue(1);
+        if (this.__callingConvention & __CallingConvention.Mask != __CallingConvention.Field)
+        {
+            throw new Error("Invalid Field signature calling convention: " + this.__callingConvention);
+        }
+
+        this.__customMods = __consumeCustomMods(table, stream);
+        this.__type = new __TypeSig(table, stream);
+    }
+
+    toString()
+    {
+        return this.Type.toString();
+    }
+
+    get Type()
+    {
+        return this.__type;
+    }
+
+    get CallingConvention()
+    {
+        return __callingConventionToString(this.__callingConvention);
+    }
+
+    get CustomMod()
+    {
+        return this.__customMods;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+class __GenericTypeIndex
+{
+    constructor(stream)
+    {
+        this.__index = stream.consumeUnsigned();
+    }
+
+    toString()
+    {
+        return "GenericTypeIndex: " + this.__index;
+    }
+
+    get Index()
+    {
+        return this.__index;
+    }
+}
 
 class __TypeSpecSignature
 {
@@ -2049,7 +2341,7 @@ class __TypeSpecSignature
     }
 }
 
-class __GenericTypeInstSig
+class __GenericTypeInstSig // TODO
 {
     constructor(table, stream)
     {
