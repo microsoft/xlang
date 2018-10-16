@@ -71,7 +71,10 @@ namespace xlang
         if (settings.component)
         {
             settings.component_name = args.value("name");
-            settings.component_pch = args.value("pch");
+            if (args.exists("pch"))
+            {
+                settings.component_pch = args.value("pch");
+            }
             auto component = args.value("component");
 
             if (!component.empty())

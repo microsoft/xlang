@@ -1998,9 +1998,18 @@ struct %
             type_name);
     }
 
+    inline void write_component_pch_include(writer& w)
+    {
+        if (settings.component_pch.empty())
+        {
+            return;
+        }
+        w.write("#include \"%\"\n", settings.component_pch);
+    }
+
     inline void write_component_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
-        auto format = R"(%
+        auto format = R"(%%
 int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
 {
 #ifdef _WRL_MODULE_H_
@@ -2044,6 +2053,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 )";
 
         w.write(format,
+            bind<write_component_pch_include>(),
             bind_each<write_component_include>(classes),
             bind_each<write_component_activation>(classes));
     }
