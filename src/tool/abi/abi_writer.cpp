@@ -616,10 +616,9 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
 
     push_generic_namespace(typeDef.TypeNamespace());
 
-    // TODO: REMOVE
-    // std::cout << write_temp("%", bind<write_generictype_cpp>(type, m_genericArgStack)) <<
-    //     "\n    " << write_temp("%", bind<write_generic_type_inst_sig<type_format::signature>>(type, m_genericArgStack)) <<
-    //     "\n    " << write_temp("%", bind<write_generic_type_guid>(type, m_genericArgStack)) << '\n';
+    std::cout << write_temp("%\n", bind<write_generictype_cpp>(type, m_genericArgStack, format_flags::none));
+    std::cout << "    " << write_temp("%\n", [&](writer& w) { write_type_signature(w, type, m_genericArgStack); });
+    std::cout << "    " << write_temp("%\n", bind<write_generic_type_guid>(type, m_genericArgStack));
 
     auto typeName = typeDef.TypeName();
     typeName = typeName.substr(0, typeName.find('`'));

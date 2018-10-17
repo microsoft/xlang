@@ -392,7 +392,7 @@ inline void write_type_cpp(
         [&](GenericTypeIndex const& typeIndex)
         {
             auto [sig, newStack] = genericArgs.lookup(typeIndex.index);
-            write_type_cpp(w, sig, newStack);
+            write_type_cpp(w, sig, newStack, flags);
         },
         [&](auto const& t)
         {
@@ -559,7 +559,7 @@ inline void write_type_mangled(
         [&](GenericTypeIndex const& typeIndex)
         {
             auto [sig, newStack] = genericArgs.lookup(typeIndex.index);
-            write_type_mangled(w, sig, newStack);
+            write_type_mangled(w, sig, newStack, flags);
         },
         [&](auto const& t)
         {
@@ -600,6 +600,33 @@ inline void write_type_signature(
     using namespace xlang::meta::reader;
     using namespace xlang::text;
 
+    auto const typeCategory = get_category(type);
+    bool const writeCategory = flags_set(flags, format_flags::generic_param) && (typeCategory != category::interface_type);
+    if (writeCategory)
+    {
+        switch (typeCategory)
+        {
+        case category::class_type:
+            w.write("rc(");
+            break;
+
+        case category::enum_type:
+            w.write("enum(");
+            break;
+
+        case category::struct_type:
+            w.write("struct(");
+            break;
+
+        case category::delegate_type:
+            w.write("delegate(");
+            break;
+
+        default:
+            XLANG_ASSERT(false);
+        }
+    }
+
     switch (get_category(type))
     {
     case category::interface_type:
@@ -607,35 +634,31 @@ inline void write_type_signature(
         break;
 
     case category::class_type:
-        w.write("rc(%.%;{%})", type.TypeNamespace(), type.TypeName(), bind<write_type_guid>(type));
+        w.write("%.%;{%}", type.TypeNamespace(), type.TypeName(), bind<write_type_guid>(type));
         break;
 
     case category::enum_type:
-        w.write("enum(%.%;", type.TypeNamespace(), type.TypeName());
+        w.write("%.%;", type.TypeNamespace(), type.TypeName());
         write_type_signature(w, type.FieldList().first.Signature().Type(), genericArgs, flags);
-        w.write(")");
         break;
 
     case category::struct_type:
-        w.write("struct(%.%", type.TypeNamespace(), type.TypeName());
+        w.write("%.%", type.TypeNamespace(), type.TypeName());
         for (auto const& field : type.FieldList())
         {
             w.write(";");
             write_type_signature(w, field.Signature().Type(), genericArgs, flags);
         }
-        w.write(")");
         break;
 
     case category::delegate_type:
-        if (!flags_set(flags, format_flags::generic_param))
-        {
-            w.write("delegate({%})", bind<write_type_guid>(type));
-        }
-        else
-        {
-            w.write("{%}", bind<write_type_guid>(type));
-        }
+        w.write("{%}", bind<write_type_guid>(type));
         break;
+    }
+
+    if (writeCategory)
+    {
+        w.write(")");
     }
 }
 
@@ -707,7 +730,7 @@ inline void write_type_signature(
         [&](GenericTypeIndex const& typeIndex)
         {
             auto [sig, newStack] = genericArgs.lookup(typeIndex.index);
-            write_type_signature(w, sig, newStack);
+            write_type_signature(w, sig, newStack, flags);
         },
         [&](auto const& t)
         {
@@ -724,7 +747,7 @@ inline void write_type_signature(
     using namespace std::literals;
 
     w.write("pinterface(");
-    write_type_signature(w, type.GenericType(), genericArgs, flags);
+    write_type_signature(w, type.GenericType(), genericArgs, clear_flags(flags, format_flags::generic_param));
 
     auto const genericFlags = flags | format_flags::generic_param;
     for (auto const& param : type.GenericArgs())
@@ -734,6 +757,8 @@ inline void write_type_signature(
     }
     w.write(')');
 }
+
+
 
 inline void write_type_guid(writer& w, xlang::meta::reader::TypeDef const& type)
 {
