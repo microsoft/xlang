@@ -547,6 +547,18 @@ namespace xlang
         }
     }
 
+    auto get_param_category(RetTypeSig const& sig)
+    {
+        if (sig.Type().is_szarray())
+        {
+            return param_category::receive_array;
+        }
+        else
+        {
+            return param_category::out;
+        }
+    }
+
     bool is_in_param(method_signature::param_t const& param)
     {
         auto category = get_param_category(param);

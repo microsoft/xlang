@@ -350,6 +350,14 @@ static PyType_Spec @_Type_spec =
     {
         auto guard{ w.push_generic_params(info.type_arguments) };
 
+        if (get_param_category(signature.return_signature()) == param_category::receive_array)
+        {
+            w.write(R"(        // returning a ReceiveArray not impl
+        return nullptr;
+)");
+            return;
+        }
+
         w.write("        try\n        {\n");
         for (auto&& param : signature.params())
         {
