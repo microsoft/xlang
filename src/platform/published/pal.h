@@ -35,19 +35,19 @@
 #define XLANG_CALL
 #endif
 
+#if XLANG_PLATFORM_WINDOWS
+# define XLANG_EXPORT_DECL __declspec(dllexport)
+# define XLANG_IMPORT_DECL __declspec(dllimport)
+#else
+# define XLANG_EXPORT_DECL __attribute__ ((visibility ("default")))
+# define XLANG_IMPORT_DECL 
+#endif
+
 #ifndef XLANG_PAL_EXPORT
-# if XLANG_PLATFORM_WINDOWS
-#  ifdef XLANG_PAL_EXPORTS
-#   define XLANG_PAL_EXPORT __declspec(dllexport)
-#  else
-#   define XLANG_PAL_EXPORT __declspec(dllimport)
-#  endif
+# ifdef XLANG_PAL_EXPORTS
+#  define XLANG_PAL_EXPORT XLANG_EXPORT_DECL
 # else
-#  ifdef XLANG_PAL_EXPORTS
-#    define XLANG_PAL_EXPORT __attribute__ ((visibility ("default")))
-#  else
-#    define XLANG_PAL_EXPORT 
-#  endif
+#  define XLANG_PAL_EXPORT XLANG_IMPORT_DECL
 # endif
 #endif
 

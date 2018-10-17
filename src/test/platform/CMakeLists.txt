@@ -7,7 +7,7 @@ target_sources(test_platform
     PUBLIC pch.cpp memory.cpp string.cpp activation.cpp)
 
 target_include_directories(test_platform
-    PUBLIC ${XLANG_LIBRARY_PATH}  ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
+    PUBLIC ${XLANG_LIBRARY_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
 
 CONSUME_PAL(test_platform)
 
