@@ -238,6 +238,7 @@ inline constexpr xlang_result xlang_error_sadness{ 0x80004005 };
 inline constexpr xlang_result xlang_error_out_of_memory{ 0x8007000e };
 inline constexpr xlang_result xlang_error_invalid_arg{ 0x80070057 };
 inline constexpr xlang_result xlang_error_untranslatable_string{ 0x80070459 };
+inline constexpr xlang_result xlang_error_class_not_available{ 0x80040111 };
 #endif
 
 #endif

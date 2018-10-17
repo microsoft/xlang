@@ -1,23 +1,16 @@
-#include <Windows.h>
-#include <experimental/filesystem>
+#include "win32_pal_internal.h"
 #include "platform_activation.h"
-
-#if !XLANG_PLATFORM_WINDOWS
-#error "This file is only for targeting Windows"
-#endif
-
-using namespace std::experimental::filesystem;
 
 namespace xlang::impl
 {
     xlang_pfn_lib_get_activation_factory try_get_activation_func(
-        std::basic_string_view<wchar_t> module_name)
+        std::basic_string_view<wchar_t> module_namespace)
     {
-        wchar_t exe_filename[MAX_PATH];
-        ::GetModuleFileNameW(nullptr, exe_filename, MAX_PATH);
-
-        path p{ exe_filename };
-
+        HMODULE module = ::LoadLibraryW(module_namespace.data());
+        if (module)
+        {
+            return reinterpret_cast<xlang_pfn_lib_get_activation_factory>(::GetProcAddress(module, activation_fn_name.data()));
+        }
         return nullptr;
     }
 }

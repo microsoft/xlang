@@ -1,7 +1,7 @@
 #include "pal.h"
 #include <objbase.h>
 
-#ifndef _WIN32
+#if !XLANG_PLATFORM_WINDOWS
 #error "This file is only for targeting Windows"
 #endif
 

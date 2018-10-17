@@ -1,6 +1,6 @@
-#include <experimental/filesystem>
 #include "pal_internal.h"
 #include "opaque_string_wrapper.h"
+#include "platform_activation.h"
 
 namespace xlang::impl
 {
@@ -9,17 +9,26 @@ namespace xlang::impl
         xlang_string class_name,
         xlang_guid const& iid)
     {
-        auto current_namespace = to_string_view<char_type>(class_name);
-        
-        for (auto separator_pos = current_namespace.rfind('.');
-            separator_pos != current_namespace.npos;
-            separator_pos = current_namespace.rfind('.'))
+        for (auto current_namespace = enclosing_namespace(to_string_view<filesystem_char_type>(class_name));
+            !current_namespace.empty();
+            current_namespace = enclosing_namespace(current_namespace))
         {
-            current_namespace = current_namespace.substr(0, separator_pos);
-            xlang_pfn_lib_get_activation_factory pfn = nullptr;
+            xlang_pfn_lib_get_activation_factory pfn = try_get_activation_func(current_namespace);
+            if (pfn)
+            {
+                void* factory{};
+                xlang_result result = (*pfn)(class_name, iid, &factory);
+                if (result == xlang_error_ok)
+                {
+                    return factory;
+                }
+                else if (result != xlang_error_class_not_available)
+                {
+                    throw_result(result);
+                }
+            }
         }
-
-        throw_result(-1);
+        throw_result(xlang_error_class_not_available);
     }
 }
 
@@ -38,7 +47,7 @@ try
     }
 
     // Use the platform's preferred filename encoding
-    *factory = get_activation_factory<std::experimental::filesystem::path::value_type>(class_name, iid);
+    *factory = get_activation_factory<filesystem_char_type>(class_name, iid);
 
     return xlang_error_ok;
 }
