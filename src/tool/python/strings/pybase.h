@@ -122,7 +122,24 @@ namespace py
     struct winrt_base;
 
     template<typename T>
-    struct winrt_type { static PyTypeObject* python_type; };
+    struct winrt_type 
+    { 
+        static PyTypeObject* get_python_type()
+        {
+            return nullptr;
+        }
+    };
+
+    template<>
+    struct winrt_type<winrt_base>
+    {
+        static PyTypeObject* python_type;
+
+        static PyTypeObject* get_python_type()
+        {
+            return python_type;
+        }
+    };
 
     inline __declspec(noinline) PyObject* to_PyErr() noexcept
     {
@@ -217,7 +234,7 @@ namespace py
     {
         using ptype = pinterface_python_type<T>;
 
-        PyTypeObject* type_object = winrt_type<ptype::abstract>::python_type;
+        PyTypeObject* type_object = winrt_type<ptype::abstract>::get_python_type();
 
         if (type_object == nullptr)
         {
@@ -247,7 +264,7 @@ namespace py
     {
         if constexpr (is_class_category_v<T> || is_interface_category_v<T>)
         {
-            return wrap<T>(instance, winrt_type<T>::python_type);
+            return wrap<T>(instance, winrt_type<T>::get_python_type());
         }
         else
         {
@@ -513,7 +530,7 @@ namespace py
         }
         else if constexpr (is_struct_category_v<T>)
         {
-            return wrap_struct<T>(instance, winrt_type<T>::python_type);
+            return wrap_struct<T>(instance, winrt_type<T>::get_python_type());
         }
         else if constexpr (is_basic_category_v<T>)
         {
@@ -536,7 +553,7 @@ namespace py
 
         if constexpr (is_class_category_v<T>)
         {
-            if (Py_TYPE(arg) != winrt_type<T>::python_type)
+            if (Py_TYPE(arg) != winrt_type<T>::get_python_type())
             {
                 throw winrt::hresult_invalid_argument();
             }
@@ -545,12 +562,12 @@ namespace py
         }
         else if constexpr (is_interface_category_v<T>)
         {
-            if (Py_TYPE(arg) == winrt_type<T>::python_type)
+            if (Py_TYPE(arg) == winrt_type<T>::get_python_type())
             {
                 return reinterpret_cast<winrt_wrapper<T>*>(arg)->obj;
             }
 
-            if (PyObject_IsInstance(arg, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::python_type)) == 0)
+            if (PyObject_IsInstance(arg, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::get_python_type())) == 0)
             {
                 throw winrt::hresult_invalid_argument();
             }
@@ -582,7 +599,7 @@ namespace py
         }
         else if constexpr (is_struct_category_v<T>)
         {
-            if (Py_TYPE(arg) == winrt_type<T>::python_type)
+            if (Py_TYPE(arg) == winrt_type<T>::get_python_type())
             {
                 return reinterpret_cast<winrt_struct_wrapper<T>*>(arg)->obj;
             }

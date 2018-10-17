@@ -4,9 +4,18 @@ namespace xlang
 {
     void write_include(writer& w, std::string_view const& ns)
     {
-        w.write("#if __has_include(\"py.%.h\")\n", ns);
-        w.write("#include \"py.%.h\"\n", ns);
-        w.write("#endif\n");
+        if (w.current_namespace != ns)
+        {
+            auto format = R"(#if __has_include("py.%.h")
+#include "py.%.h"
+#endif
+)";
+            w.write(format, ns, ns);
+        }
+        else
+        {
+            w.write("#include \"py.%.h\"\n", ns);
+        }
     }
 
     void write_ns_init_function_name(writer& w, std::string_view const& ns)
@@ -530,6 +539,40 @@ static PyType_Spec @_Type_spec =
         }
     }
 
+    void write_winrt_type_specialization_native_type(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type))
+        {
+            w.write("py@", type.TypeName());
+        }
+        else
+        {
+            w.write("%", type);
+        }
+    }
+
+    void write_winrt_type_specialization(writer& w, TypeDef const& type)
+    {
+        auto format = R"(    template<>
+    struct winrt_type<%>
+    {
+        static PyTypeObject* python_type;
+
+        static PyTypeObject* get_python_type()
+        {
+            return python_type;
+        }
+    };
+
+)";
+        w.write(format, bind<write_winrt_type_specialization_native_type>(type));
+    }
+
+    void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
+    {
+        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_winrt_type_specialization_native_type>(type));
+    }
+
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
     {
         w.write("        try\n        {\n");
@@ -636,8 +679,7 @@ static void @_dealloc(%* self)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- % class --------------------\n", type.TypeName());
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", type);
-        
+        write_winrt_type_specialization_storage(w, type);
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
         write_type_functions(w, type);
@@ -822,10 +864,7 @@ static void @_dealloc(%* self)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- @ interface --------------------\n", type.TypeName());
-
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n",
-            bind<write_interface_pytypeobject>(type));
-
+        write_winrt_type_specialization_storage(w, type);
         write_interface_constructor(w, type);
         write_interface_dealloc(w, type);
         write_type_functions(w, type);
@@ -1358,8 +1397,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write_indented("\n// ----- % struct --------------------\n", type.TypeName());
-        w.write_indented("PyTypeObject* py::winrt_type<%>::python_type;\n\n", type);
-
+        write_winrt_type_specialization_storage(w, type);
         write_struct_convert_to(w, type);
         write_struct_constructor(w, type);
         w.write_each<write_struct_property>(type.FieldList());
@@ -1367,7 +1405,6 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
-
 
 
 
