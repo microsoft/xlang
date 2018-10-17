@@ -17,3 +17,5 @@ add_definitions(-DXLANG_PAL_EXPORTS)
 add_library(pal SHARED ${sources})
 target_include_directories(pal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(pal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/published)
+
+install(TARGETS pal DESTINATION "test_platform")

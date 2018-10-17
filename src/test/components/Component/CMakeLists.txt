@@ -10,3 +10,5 @@ target_include_directories(Component
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../output/component/source)
 
 CONSUME_PAL(Component)
+
+install(TARGETS Component DESTINATION "test_platform")
