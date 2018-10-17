@@ -1088,10 +1088,10 @@ static void @_dealloc(%* self)
             case ElementType::R8:
                 w.write("d");
                 break;
-            // TODO: string struct support 
-            //case ElementType::String:
-            //    w.write("winrt::hstring");
-            //    break;
+            // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
+            case ElementType::String:
+               w.write("u");
+               break;
             case ElementType::Object:
                 throw_invalid("structs cannot contain ElementType::Object");
             default:
