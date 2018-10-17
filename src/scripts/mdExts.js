@@ -8,6 +8,111 @@ function initializeScript()
         new host.typeSignatureRegistration(__MakeTableVisualizer("undefined"), "xlang::meta::reader::table<*>"),
 
         // row_base derived types
+        new host.typeSignatureRegistration(__AssemblyVisualizer, "xlang::meta::reader::Assembly"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Assembly>"),
+
+        new host.typeSignatureRegistration(__AssemblyOSVisualizer, "xlang::meta::reader::AssemblyOS"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyOSVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyOS>"),
+
+        new host.typeSignatureRegistration(__AssemblyProcessorVisualizer, "xlang::meta::reader::AssemblyProcessor"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyProcessorVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyProcessor>"),
+
+        new host.typeSignatureRegistration(__AssemblyRefVisualizer, "xlang::meta::reader::AssemblyRef"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyRef>"),
+
+        new host.typeSignatureRegistration(__AssemblyRefOSVisualizer, "xlang::meta::reader::AssemblyRefOS"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyRefOSVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyRefOS>"),
+
+        new host.typeSignatureRegistration(__AssemblyRefProcessorVisualizer, "xlang::meta::reader::AssemblyRefProcessor"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyRefProcessorVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyRefProcessor>"),
+
+        new host.typeSignatureRegistration(__ClassLayoutVisualizer, "xlang::meta::reader::ClassLayout"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ClassLayoutVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ClassLayout>"),
+
+        new host.typeSignatureRegistration(__ConstantVisualizer, "xlang::meta::reader::Constant"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ConstantVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Constant>"),
+
+        new host.typeSignatureRegistration(__CustomAttributeVisualizer, "xlang::meta::reader::CustomAttribute"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__CustomAttributeVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::CustomAttribute>"),
+
+        new host.typeSignatureRegistration(__DeclSecurityVisualizer, "xlang::meta::reader::DeclSecurity"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__DeclSecurityVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::DeclSecurity>"),
+
+        new host.typeSignatureRegistration(__EventMapVisualizer, "xlang::meta::reader::EventMap"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__EventMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::EventMap>"),
+
+        new host.typeSignatureRegistration(__EventVisualizer, "xlang::meta::reader::Event"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__EventVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Event>"),
+
+        new host.typeSignatureRegistration(__ExportedTypeVisualizer, "xlang::meta::reader::ExportedType"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ExportedTypeVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ExportedType>"),
+
+        new host.typeSignatureRegistration(__FieldVisualizer, "xlang::meta::reader::Field"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Field>"),
+
+        new host.typeSignatureRegistration(__FieldLayoutVisualizer, "xlang::meta::reader::FieldLayout"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldLayoutVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::FieldLayout>"),
+
+        new host.typeSignatureRegistration(__FieldMarshalVisualizer, "xlang::meta::reader::FieldMarshal"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldMarshalVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::FieldMarshal>"),
+
+        new host.typeSignatureRegistration(__FieldRVAVisualizer, "xlang::meta::reader::FieldRVA"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldRVAVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::FieldRVA>"),
+
+        new host.typeSignatureRegistration(__FileVisualizer, "xlang::meta::reader::File"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__FileVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::File>"),
+
+        new host.typeSignatureRegistration(__GenericParamVisualizer, "xlang::meta::reader::GenericParam"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__GenericParamVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::GenericParam>"),
+
+        new host.typeSignatureRegistration(__GenericParamConstraintVisualizer, "xlang::meta::reader::GenericParamConstraint"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__GenericParamConstraintVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::GenericParamConstraint>"),
+
+        new host.typeSignatureRegistration(__ImplMapVisualizer, "xlang::meta::reader::ImplMap"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ImplMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ImplMap>"),
+
+        new host.typeSignatureRegistration(__InterfaceImplVisualizer, "xlang::meta::reader::InterfaceImpl"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__InterfaceImplVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::InterfaceImpl>"),
+
+        new host.typeSignatureRegistration(__ManifestResourceVisualizer, "xlang::meta::reader::ManifestResource"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ManifestResourceVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ManifestResource>"),
+
+        new host.typeSignatureRegistration(__MemberRefVisualizer, "xlang::meta::reader::MemberRef"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__MemberRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MemberRef>"),
+
+        new host.typeSignatureRegistration(__MethodDefVisualizer, "xlang::meta::reader::MethodDef"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodDefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodDef>"),
+
+        new host.typeSignatureRegistration(__MethodImplVisualizer, "xlang::meta::reader::MethodImpl"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodImplVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodImpl>"),
+
+        new host.typeSignatureRegistration(__MethodSemanticsVisualizer, "xlang::meta::reader::MethodSemantics"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodSemanticsVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodSemantics>"),
+
+        new host.typeSignatureRegistration(__MethodSpecVisualizer, "xlang::meta::reader::MethodSpec"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodSpecVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodSpec>"),
+
+        new host.typeSignatureRegistration(__ModuleVisualizer, "xlang::meta::reader::Module"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ModuleVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Module>"),
+
+        new host.typeSignatureRegistration(__ModuleRefVisualizer, "xlang::meta::reader::ModuleRef"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ModuleRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ModuleRef>"),
+
+        new host.typeSignatureRegistration(__NestedClassVisualizer, "xlang::meta::reader::NestedClass"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__NestedClassVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::NestedClass>"),
+
+        new host.typeSignatureRegistration(__ParamVisualizer, "xlang::meta::reader::Param"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__ParamVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Param>"),
+
+        new host.typeSignatureRegistration(__PropertyVisualizer, "xlang::meta::reader::Property"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__PropertyVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Property>"),
+
+        new host.typeSignatureRegistration(__PropertyMapVisualizer, "xlang::meta::reader::PropertyMap"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__PropertyMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::PropertyMap>"),
+
+        new host.typeSignatureRegistration(__StandAloneSigVisualizer, "xlang::meta::reader::StandAloneSig"),
+        new host.typeSignatureRegistration(__MakeTableVisualizer("__StandAloneSigVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::StandAloneSig>"),
+
         new host.typeSignatureRegistration(__TypeDefVisualizer, "xlang::meta::reader::TypeDef"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__TypeDefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::TypeDef>"),
 
@@ -17,120 +122,23 @@ function initializeScript()
         new host.typeSignatureRegistration(__TypeSpecVisualizer, "xlang::meta::reader::TypeSpec"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__TypeSpecVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::TypeSpec>"),
 
-        new host.typeSignatureRegistration(__CustomAttributeVisualizer, "xlang::meta::reader::CustomAttribute"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__CustomAttributeVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::CustomAttribute>"),
+        // coded_index types
+        new host.typeSignatureRegistration(__TypeDefOrRefCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef>"),
+        new host.typeSignatureRegistration(__HasConstantCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::HasConstant>"),
+        new host.typeSignatureRegistration(__HasCustomAttributeCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::HasCustomAttribute>"),
+        new host.typeSignatureRegistration(__HasFieldMarshalCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::HasFieldMarshal>"),
+        new host.typeSignatureRegistration(__HasDeclSecurityCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::HasDeclSecurity>"),
+        new host.typeSignatureRegistration(__MemberRefParentCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::MemberRefParent>"),
+        new host.typeSignatureRegistration(__HasSemanticsCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::HasSemantics>"),
+        new host.typeSignatureRegistration(__MethodDefOrRefCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::MethodDefOrRef>"),
+        new host.typeSignatureRegistration(__MemberForwardedCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::MemberForwarded>"),
+        new host.typeSignatureRegistration(__ImplementationCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::Implementation>"),
+        new host.typeSignatureRegistration(__CustomAttributeTypeCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::CustomAttributeType>"),
+        new host.typeSignatureRegistration(__ResolutionScopeCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::ResolutionScope>"),
+        new host.typeSignatureRegistration(__TypeOrMethodDefCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::TypeOrMethodDef>"),
 
-        new host.typeSignatureRegistration(__MethodDefVisualizer, "xlang::meta::reader::MethodDef"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodDefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodDef>"),
-
-        new host.typeSignatureRegistration(__MemberRefVisualizer, "xlang::meta::reader::MemberRef"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__MemberRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MemberRef>"),
-
-        new host.typeSignatureRegistration(__FieldVisualizer, "xlang::meta::reader::Field"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Field>"),
-
-        new host.typeSignatureRegistration(__ParamVisualizer, "xlang::meta::reader::Param"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__ParamVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Param>"),
-
-        new host.typeSignatureRegistration(__InterfaceImplVisualizer, "xlang::meta::reader::InterfaceImpl"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__InterfaceImplVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::InterfaceImpl>"),
-
-        new host.typeSignatureRegistration(__ModuleVisualizer, "xlang::meta::reader::Module"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__ModuleVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Module>"),
-
-        // TODO? Permission
-
-        new host.typeSignatureRegistration(__PropertyVisualizer, "xlang::meta::reader::Property"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__PropertyVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Property>"),
-
-        new host.typeSignatureRegistration(__EventVisualizer, "xlang::meta::reader::Event"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__EventVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Event>"),
-
-        new host.typeSignatureRegistration(__StandAloneSigVisualizer, "xlang::meta::reader::StandAloneSig"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__StandAloneSigVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::StandAloneSig>"),
-
-        new host.typeSignatureRegistration(__ModuleRefVisualizer, "xlang::meta::reader::ModuleRef"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__ModuleRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ModuleRef>"),
-
-        new host.typeSignatureRegistration(__AssemblyVisualizer, "xlang::meta::reader::Assembly"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Assembly>"),
-
-        new host.typeSignatureRegistration(__AssemblyRefVisualizer, "xlang::meta::reader::AssemblyRef"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyRef>"),
-
-        new host.typeSignatureRegistration(__FileVisualizer, "xlang::meta::reader::File"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__FileVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::File>"),
-
-        new host.typeSignatureRegistration(__ExportedTypeVisualizer, "xlang::meta::reader::ExportedType"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__ExportedTypeVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ExportedType>"),
-
-        new host.typeSignatureRegistration(__ManifestResourceVisualizer, "xlang::meta::reader::ManifestResource"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__ManifestResourceVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ManifestResource>"),
-
-        new host.typeSignatureRegistration(__GenericParamVisualizer, "xlang::meta::reader::GenericParam"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__GenericParamVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::GenericParam>"),
-
-        new host.typeSignatureRegistration(__GenericParamConstraintVisualizer, "xlang::meta::reader::GenericParamConstraint"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__GenericParamConstraintVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::GenericParamConstraint>"),
-
-        new host.typeSignatureRegistration(__MethodSpecVisualizer, "xlang::meta::reader::MethodSpec"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodSpecVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodSpec>"),
-
-        new host.typeSignatureRegistration(__MethodImplVisualizer, "xlang::meta::reader::MethodImpl"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodImplVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodImpl>"),
-
-        new host.typeSignatureRegistration(__ConstantVisualizer, "xlang::meta::reader::Constant"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__ConstantVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Constant>"),
-
-        new host.typeSignatureRegistration(__MethodSemanticsVisualizer, "xlang::meta::reader::MethodSemantics"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodSemanticsVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodSemantics>"),
-
-        new host.typeSignatureRegistration(__PropertyMapVisualizer, "xlang::meta::reader::PropertyMap"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__PropertyMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::PropertyMap>"),
-
-        new host.typeSignatureRegistration(__EventMapVisualizer, "xlang::meta::reader::EventMap"),
-        new host.typeSignatureRegistration(__MakeTableVisualizer("__EventMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::EventMap>"),
+        // Signature types
     ]
-}
-
-function __processFromContext(context)
-{
-    return host.namespace.Debugger.Sessions.getValueAt(context).Processes.getValueAt(context);
-}
-
-function __stripPath(moduleName)
-{
-    var index = moduleName.lastIndexOf("\\");
-    if (index > 0)
-    {
-        return moduleName.substring(index + 1);
-    }
-
-    return moduleName;
-}
-
-function __modulePathFromModule(debuggerModule)
-{
-    return __stripPath(debuggerModule.Name);
-}
-
-function __typeFromAddress(type, address, context)
-{
-    // Try all modules
-    var process = __processFromContext(context);
-    for (var mod of process.Modules)
-    {
-        try
-        {
-            var result = host.createTypedObject(address, __modulePathFromModule(mod), type, context);
-            return result;
-        }
-        catch (exception)
-        {
-        }
-    }
-
-    throw new Error("Type '" + type + "' does not exist in any loaded module");
 }
 
 function __enumToString(value, enumValues)
@@ -143,7 +151,34 @@ function __enumToString(value, enumValues)
         }
     }
 
-    return "UNKNOWN (" + value + ")";
+    return "Unknown (" + value + ")";
+}
+
+function __enumFlagsToString(value, enumValues)
+{
+    if (value === 0)
+    {
+        return "None";
+    }
+
+    var prefix = "";
+    var result = "";
+    for (var property in enumValues)
+    {
+        if (enumValues.hasOwnProperty(property) && ((value & enumValues[property]) == enumValues[property]))
+        {
+            result += prefix + property;
+            value = value & ~enumValues[property];
+            prefix = " | ";
+        }
+    }
+
+    if (value != 0)
+    {
+        result += prefix + value;
+    }
+
+    return result;
 }
 
 var __TypeDefOrRef = Object.freeze({
@@ -152,21 +187,27 @@ var __TypeDefOrRef = Object.freeze({
     TypeSpec: 2,
 
     Values: [
-        {
-            Valid: true,
-            Table: "TypeDef",
-        },
-        {
-            Valid: true,
-            Table: "TypeRef",
-        },
-        {
-            Valid: true,
-            Table: "TypeSpec",
-        },
+        "TypeDef",
+        "TypeRef",
+        "TypeSpec",
     ],
 
     Name: "TypeDefOrRef",
+    CodedIndexBits: 2,
+});
+
+var __HasConstant = Object.freeze({
+    Field: 0,
+    Param: 1,
+    Property: 2,
+
+    Values: [
+        "Field",
+        "Param",
+        "Property",
+    ],
+
+    Name: "HasConstant",
     CodedIndexBits: 2,
 });
 
@@ -195,123 +236,60 @@ var __HasCustomAttribute = Object.freeze({
     MethodSpec: 21,
 
     Values: [
-        {
-            Valid: true,
-            Table: "MethodDef",
-        },
-        {
-            Valid: true,
-            Table: "Field",
-        },
-        {
-            Valid: true,
-            Table: "TypeRef",
-        },
-        {
-            Valid: true,
-            Table: "TypeDef",
-        },
-        {
-            Valid: true,
-            Table: "Param",
-        },
-        {
-            Valid: true,
-            Table: "InterfaceImpl",
-        },
-        {
-            Valid: true,
-            Table: "MemberRef",
-        },
-        {
-            Valid: true,
-            Table: "Module",
-        },
-        {
-            Valid: true,
-            Table: "Permission",
-        },
-        {
-            Valid: true,
-            Table: "Property",
-        },
-        {
-            Valid: true,
-            Table: "Event",
-        },
-        {
-            Valid: true,
-            Table: "StandAloneSig",
-        },
-        {
-            Valid: true,
-            Table: "ModuleRef",
-        },
-        {
-            Valid: true,
-            Table: "TypeSpec",
-        },
-        {
-            Valid: true,
-            Table: "Assembly",
-        },
-        {
-            Valid: true,
-            Table: "AssemblyRef",
-        },
-        {
-            Valid: true,
-            Table: "File",
-        },
-        {
-            Valid: true,
-            Table: "ExportedType",
-        },
-        {
-            Valid: true,
-            Table: "ManifestResource",
-        },
-        {
-            Valid: true,
-            Table: "GenericParam",
-        },
-        {
-            Valid: true,
-            Table: "GenericParamConstraint",
-        },
-        {
-            Valid: true,
-            Table: "MethodSpec",
-        },
+        "MethodDef",
+        "Field",
+        "TypeRef",
+        "TypeDef",
+        "Param",
+        "InterfaceImpl",
+        "MemberRef",
+        "Module",
+        "Permission",
+        "Property",
+        "Event",
+        "StandAloneSig",
+        "ModuleRef",
+        "TypeSpec",
+        "Assembly",
+        "AssemblyRef",
+        "File",
+        "ExportedType",
+        "ManifestResource",
+        "GenericParam",
+        "GenericParamConstraint",
+        "MethodSpec",
     ],
 
     Name: "HasCustomAttribute",
     CodedIndexBits: 5,
 });
 
-var __CustomAttributeType = Object.freeze({
-    MethodDef: 2,
-    MemberRef: 3,
+var __HasFieldMarshal = Object.freeze({
+    Field: 0,
+    Param: 1,
 
     Values: [
-        {
-            Valid: false,
-        },
-        {
-            Valid: false,
-        },
-        {
-            Valid: true,
-            Table: "MethodDef",
-        },
-        {
-            Valid: true,
-            Table: "MemberRef",
-        },
+        "Field",
+        "Param",
     ],
 
-    Name: "CustomAttributeType",
-    CodedIndexBits: 3,
+    Name: "HasFieldMarshal",
+    CodedIndexBits: 1,
+});
+
+var __HasDeclSecurity = Object.freeze({
+    TypeDef: 0,
+    MethodDef: 1,
+    Assembly: 2,
+
+    Values: [
+        "TypeDef",
+        "MethodDef",
+        "Assembly",
+    ],
+
+    Name: "HasDeclSecurity",
+    CodedIndexBits: 2,
 });
 
 var __MemberRefParent = Object.freeze({
@@ -322,48 +300,27 @@ var __MemberRefParent = Object.freeze({
     TypeSpec: 4,
 
     Values: [
-        {
-            Valid: true,
-            Table: "TypeDef",
-        },
-        {
-            Valid: true,
-            Table: "TypeRef",
-        },
-        {
-            Valid: true,
-            Table: "ModuleRef",
-        },
-        {
-            Valid: true,
-            Table: "MethodDef",
-        },
-        {
-            Valid: true,
-            Table: "TypeSpec",
-        },
+        "TypeDef",
+        "TypeRef",
+        "ModuleRef",
+        "MethodDef",
+        "TypeSpec",
     ],
 
     Name: "MemberRef",
     CodedIndexBits: 3,
 });
 
-var __TypeOrMethodDef = Object.freeze({
-    TypeDef: 0,
-    MethodDef: 1,
+var __HasSemantics = Object.freeze({
+    Event: 0,
+    Property: 1,
 
     Values: [
-        {
-            Valid: true,
-            Table: "TypeDef",
-        },
-        {
-            Valid: true,
-            Table: "MethodDef",
-        },
+        "Event",
+        "Property",
     ],
 
-    Name: "TypeOrMethodDef",
+    Name: "HasSemantics",
     CodedIndexBits: 1,
 });
 
@@ -372,60 +329,85 @@ var __MethodDefOrRef = Object.freeze({
     MemberRef: 1,
 
     Values: [
-        {
-            Valid: true,
-            Table: "MethodDef",
-        },
-        {
-            Valid: true,
-            Table: "MemberRef",
-        },
+        "MethodDef",
+        "MemberRef",
     ],
 
     Name: "MethodDefOrRef",
     CodedIndexBits: 1,
 });
 
-var __HasConstant = Object.freeze({
+var __MemberForwarded = Object.freeze({
     Field: 0,
-    Param: 1,
-    Property: 2,
+    MethodDef: 1,
 
     Values: [
-        {
-            Valid: true,
-            Table: "Field",
-        },
-        {
-            Valid: true,
-            Table: "Param",
-        },
-        {
-            Valid: true,
-            Table: "Property",
-        },
+        "Field",
+        "MethodDef",
     ],
 
-    Name: "HasConstant",
+    Name: "MemberForwarded",
+    CodedIndexBits: 1,
+});
+
+var __Implementation = Object.freeze({
+    File: 0,
+    AssemblyRef: 1,
+    ExportedType: 2,
+
+    Values: [
+        "File",
+        "AssemblyRef",
+        "ExportedType",
+    ],
+
+    Name: "Implementation",
     CodedIndexBits: 2,
 });
 
-var __HasSemantics = Object.freeze({
-    Event: 0,
-    Property: 1,
+
+var __CustomAttributeType = Object.freeze({
+    MethodDef: 2,
+    MemberRef: 3,
 
     Values: [
-        {
-            Valid: true,
-            Table: "Event",
-        },
-        {
-            Valid: true,
-            Table: "Property",
-        },
+        null,
+        null,
+        "MethodDef",
+        "MemberRef",
     ],
 
-    Name: "HasSemantics",
+    Name: "CustomAttributeType",
+    CodedIndexBits: 3,
+});
+
+var __ResolutionScope = Object.freeze({
+    Module: 0,
+    ModuleRef: 1,
+    AssemblyRef: 2,
+    TypeRef: 3,
+
+    Values: [
+        "Module",
+        "ModuleRef",
+        "AssemblyRef",
+        "TypeRef",
+    ],
+
+    Name: "ResolutionScope",
+    CodedIndexBits: 2,
+});
+
+var __TypeOrMethodDef = Object.freeze({
+    TypeDef: 0,
+    MethodDef: 1,
+
+    Values: [
+        "TypeDef",
+        "MethodDef",
+    ],
+
+    Name: "TypeOrMethodDef",
     CodedIndexBits: 1,
 });
 
@@ -444,6 +426,17 @@ function __makeCodedValue(index, type, codedEnum)
     return ((index + 1) << codedEnum.CodedIndexBits) | type;
 }
 
+function __valueToHex(value, bytes)
+{
+    var result = value.toString(16);
+    while (result.length < (bytes * 2))
+    {
+        result = "0" + result;
+    }
+
+    return result;
+}
+
 class __Blob
 {
     constructor(data, size)
@@ -460,14 +453,8 @@ class __Blob
         for (var value of data)
         {
             result += prefix;
+            result += __valueToHex(value, 1);
             prefix = " ";
-
-            var strValue = value.toString(16);
-            for (var i = 0; i < 2 - strValue.length; ++i)
-            {
-                result += "0";
-            }
-            result += strValue;
         }
 
         return result;
@@ -570,6 +557,27 @@ class __BlobStream
     }
 }
 
+class __Guid
+{
+    constructor(data0, data1, data2, data3)
+    {
+        this.__data0 = data0;
+        this.__data1 = data1;
+        this.__data2 = data2;
+        this.__data3 = data3;
+    }
+
+    toString()
+    {
+        return __valueToHex(this.__data0, 4) + "-" +
+            __valueToHex(this.__data1, 2) + "-" +
+            __valueToHex(this.__data2, 2) + "-" +
+            __valueToHex(this.__data3[0], 1) + __valueToHex(this.__data3[1], 1) + "-" +
+            __valueToHex(this.__data3[2], 1) + __valueToHex(this.__data3[3], 1) + __valueToHex(this.__data3[4], 1) +
+            __valueToHex(this.__data3[5], 1) + __valueToHex(this.__data3[6], 1) + __valueToHex(this.__data3[7], 1);
+    }
+}
+
 class __DatabaseVisualizer
 {
     getString(index)
@@ -623,6 +631,16 @@ class __DatabaseVisualizer
         }
 
         return new __Blob(ptr.add(1), blobSize);
+    }
+
+    getGuid(index)
+    {
+        var ptr = this.m_guids.m_first.add(index - 1);
+        return new __Guid(
+            host.memory.readMemoryValues(ptr.address, 1, 4)[0],
+            host.memory.readMemoryValues(ptr.add(4).address, 1, 2)[0],
+            host.memory.readMemoryValues(ptr.add(6).address, 1, 2)[0],
+            host.memory.readMemoryValues(ptr.add(8).address, 8, 1));
     }
 
     get TypeRef()
@@ -687,22 +705,22 @@ class __DatabaseVisualizer
 
     get FieldMarshal()
     {
-        return this.FieldMarshal; // TODO: Visualize
+        return this.FieldMarshal;
     }
 
     get DeclSecurity()
     {
-        return this.DeclSecurity; // TODO: Visualize
+        return this.DeclSecurity;
     }
 
     get ClassLayout()
     {
-        return this.ClassLayout; // TODO: Visualize
+        return this.ClassLayout;
     }
 
     get FieldLayout()
     {
-        return this.FieldLayout; // TODO: Visualize
+        return this.FieldLayout;
     }
 
     get StandAloneSig()
@@ -747,12 +765,12 @@ class __DatabaseVisualizer
 
     get ImplMap()
     {
-        return this.ImplMap; // TODO: Visualize
+        return this.ImplMap;
     }
 
     get FieldRVA()
     {
-        return this.FieldRVA; // TODO: Visualize
+        return this.FieldRVA;
     }
 
     get Assembly()
@@ -762,12 +780,12 @@ class __DatabaseVisualizer
 
     get AssemblyProcessor()
     {
-        return this.AssemblyProcessor; // TODO: Visualize
+        return this.AssemblyProcessor;
     }
 
     get AssemblyOS()
     {
-        return this.AssemblyOS; // TODO: Visualize
+        return this.AssemblyOS;
     }
 
     get AssemblyRef()
@@ -777,12 +795,12 @@ class __DatabaseVisualizer
 
     get AssemblyRefProcessor()
     {
-        return this.AssemblyRefProcessor; // TODO: Visualize
+        return this.AssemblyRefProcessor;
     }
 
     get AssemblyRefOS()
     {
-        return this.AssemblyRefOS; // TODO: Visualize
+        return this.AssemblyRefOS;
     }
 
     get File()
@@ -802,7 +820,7 @@ class __DatabaseVisualizer
 
     get NestedClass()
     {
-        return this.NestedClass; // TODO: Visualize
+        return this.NestedClass;
     }
 
     get GenericParam()
@@ -869,11 +887,7 @@ function __MakeTableVisualizer(type)
 
         getValue(row, col)
         {
-            if (row == 0)
-            {
-                return null;
-            }
-            else if (row >= this.m_row_count)
+            if (row >= this.m_row_count)
             {
                 throw new RangeError("Row index out of range: " + row);
             }
@@ -953,19 +967,19 @@ function __MakeTableVisualizer(type)
             }
 
             var target = codedEnum.Values[typeIndex];
-            if (!target.Valid)
+            if (target === null)
             {
                 throw new RangeError("Invalid " + codedEnum.Name + " coded index: " + typeIndex);
             }
 
-            var table = this.Database[target.Table];
+            var table = this.Database[target];
             var row = __codedValueIndex(codedIndex, codedEnum);
             if (row == -1)
             {
                 return null;
             }
 
-            return eval("new __" + target.Table + "Visualizer(table, row)");
+            return eval("new __" + target + "Visualizer(table, row)");
         }
 
         __getCodedIndex(row, col, codedEnum)
@@ -1088,6 +1102,11 @@ class __RowBase
         return this.__Table.Database.getBlob(this.__getValue(col));
     }
 
+    __getGuid(col)
+    {
+        return this.__Table.Database.getGuid(this.__getValue(col));
+    }
+
     __equalRange(tableName, col, codedEnum)
     {
         // We're looking for range of elements in a different table that correspond to the row in this table. This is
@@ -1138,12 +1157,1442 @@ class __RowBase
     }
 }
 
+
+
 // Table Row Types
+
+var __AssemblyHashAlgorithm = Object.freeze({
+    None: 0x0000,
+    Reserved_MD5: 0x8003,
+    SHA1: 0x8004,
+});
+
+var __AssemblyFlags = Object.freeze({
+    PublicKey: 0x0001,
+    Retargetable: 0x0100,
+    WindowsRuntime: 0x0200,
+    DisableJITcompileOptimizer: 0x4000,
+    EnableJITcompileTracking: 0x8000,
+});
+
+class __AssemblyVersion
+{
+    constructor(value)
+    {
+        // 64-bit value
+        this.MajorVersion = value.bitwiseAnd(0xFFFF).asNumber();
+        this.MinorVersion = value.bitwiseShiftRight(16).bitwiseAnd(0xFFFF).asNumber();
+        this.BuildNumber = value.bitwiseShiftRight(32).bitwiseAnd(0xFFFF).asNumber();
+        this.RevisionNumber = value.bitwiseShiftRight(48).bitwiseAnd(0xFFFF).asNumber();
+    }
+
+    toString()
+    {
+        return this.MajorVersion + "." + this.MinorVersion + "." + this.BuildNumber + "." + this.RevisionNumber;
+    }
+}
+
+class __AssemblyVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "Assembly";
+    }
+
+    get HashAlgId()
+    {
+        return __enumToString(this.__getValue(0), __AssemblyHashAlgorithm);
+    }
+
+    get Version()
+    {
+        return new __AssemblyVersion(this.__getValue(1));
+    }
+
+    get Flags()
+    {
+        return __enumFlagsToString(this.__getValue(2), __AssemblyFlags);
+    }
+
+    get PublicKey()
+    {
+        this.__getBlob(3);
+    }
+
+    get Name()
+    {
+        return this.__getString(4);
+    }
+
+    get Culture()
+    {
+        return this.__getString(5);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __AssemblyOSVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "AssemblyOS";
+    }
+
+    get OSPlatformId()
+    {
+        return this.__getValue(0);
+    }
+
+    get OSMajorVersion()
+    {
+        return this.__getValue(1);
+    }
+
+    get OSMinorVersion()
+    {
+        return this.__getValue(2);
+    }
+}
+
+class __AssemblyProcessorVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Processor;
+    }
+
+    get TableName()
+    {
+        return "AssemblyProcessor";
+    }
+
+    get Processor()
+    {
+        return this.__getValue(0);
+    }
+}
+
+class __AssemblyRefVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "AssemblyRef";
+    }
+
+    get Flags()
+    {
+        return __enumFlagsToString(this.__getValue(1), __AssemblyFlags);
+    }
+
+    get Version()
+    {
+        return new __AssemblyVersion(this.__getValue(0));
+    }
+
+    get PublicKeyOrToken()
+    {
+        return this.__getBlob(2);
+    }
+
+    get Name()
+    {
+        return this.__getString(3);
+    }
+
+    get Culture()
+    {
+        return this.__getString(4);
+    }
+
+    get HashValue()
+    {
+        return this.__getString(5);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __AssemblyRefOSVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.AssemblyRef.toString();
+    }
+
+    get TableName()
+    {
+        return "AssemblyRefOS";
+    }
+
+    get OSPlatformId()
+    {
+        return this.__getValue(0);
+    }
+
+    get OSMajorVersion()
+    {
+        return this.__getValue(1);
+    }
+
+    get OSMinorVersion()
+    {
+        return this.__getValue(2);
+    }
+
+    get AssemblyRef()
+    {
+        return this.__getTargetRow("AssemblyRef", 3);
+    }
+}
+
+class __AssemblyRefProcessorVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.AssemblyRef.toString();
+    }
+
+    get TableName()
+    {
+        return "AssemblyRefProcessor";
+    }
+
+    get Processor()
+    {
+        return this.__getValue(0);
+    }
+
+    get AssemblyRef()
+    {
+        return this.__getTargetRow("AssemblyRef", 1);
+    }
+}
+
+class __ClassLayoutVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "ClassLayout";
+    }
+
+    get PackingSize()
+    {
+        return this.__getValue(0);
+    }
+
+    get ClassSize()
+    {
+        return this.__getValue(1);
+    }
+
+    get Parent()
+    {
+        return this.__getTargetRow("TypeDef", 2);
+    }
+};
+
+class __ConstantVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Type + "(" + this.Value + ")";
+    }
+
+    get TableName()
+    {
+        return "Constant";
+    }
+
+    get Type()
+    {
+        switch (this.__getValue(0))
+        {
+        case 2: return "Boolean";
+        case 3: return "Char";
+        case 4: return "Int8";
+        case 5: return "UInt8";
+        case 6: return "Int16";
+        case 7: return "UInt16";
+        case 8: return "Int32";
+        case 9: return "UInt32";
+        case 10: return "Int64";
+        case 11: return "UInt64";
+        case 12: return "Float32";
+        case 13: return "Float64";
+        case 14: return "String";
+        case 18: return "Class";
+        default: throw new Error("Unknown type: " + this.__getValue(0));
+        }
+    }
+
+    get Parent()
+    {
+        return this.__getCodedIndex(1, __HasConstant);
+    }
+
+    get Value()
+    {
+        var blob = this.__getBlob(2);
+        switch (this.__getValue(0))
+        {
+            case 2: return blob.ReadValue(1) == 1 ? true : false;
+            case 3: return 'a' + blob.ReadValue(2) - 'a';
+            case 4:
+            case 5: return blob.ReadValue(1);
+            case 6:
+            case 7: return blob.ReadValue(2);
+            case 8:
+            case 9: return blob.ReadValue(4);
+            case 10:
+            case 11: return blob.ReadValue(8);
+            case 12:
+            case 13: return "Floating Point; not yet supported";
+            case 14: return blob.ReadString();
+            case 18: return "Class; not yet supported";
+            default: throw new Error("Unknown type");
+        }
+    }
+}
+
+class __CustomAttributeVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Type.toString(); // TODO: Value?
+    }
+
+    get TableName()
+    {
+        return "CustomAttribute";
+    }
+
+    get Parent()
+    {
+        return this.__getCodedIndex(0, __HasCustomAttribute);
+    }
+
+    get Type()
+    {
+        return this.__getCodedIndex(1, __CustomAttributeType);
+    }
+
+    get Value()
+    {
+        var sig;
+        if (this.Type.TableName == "MemberRef")
+        {
+            sig = this.Type.MethodSignature;
+        }
+        else
+        {
+            sig = this.Type.Signature;
+        }
+
+        var cursor = this.__getBlob(2);
+        return new __CustomAttributeSig(this.__Table, cursor); // TODO: Validate
+        // return CustomAttributeSig{ get_table(), cursor, method_sig };
+    }
+}
+
+var __SecurityAction = Object.freeze({
+    Assert: 3,
+    Demand: 2,
+    Deny: 4,
+    InheritanceDemand: 7,
+    LinkDemand: 6,
+    PermitOnly: 5,
+    RequestMinimum: 8,
+    RequestOptional: 9,
+    RequestRefuse: 10,
+});
+
+class __DeclSecurityVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "DeclSecurity";
+    }
+
+    get Action()
+    {
+        return __enumToString(this.__getValue(0), __SecurityAction);
+    }
+
+    get Parent()
+    {
+        return this.__getCodedIndex(1, __HasDeclSecurity);
+    }
+
+    get PermissionSet()
+    {
+        return this.__getBlob(2); // TODO: Type?
+    }
+}
+
+class __EventMapVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "EventMap";
+    }
+
+    get Parent()
+    {
+        return this.__getTargetRow("TypeDef", 0);
+    }
+
+    get EventList()
+    {
+        return this.__getList("Event", 1);
+    }
+}
+
+var __EventAttributes = Object.freeze({
+    SpecialName: 0x0200,
+    RTSpecialName: 0x0400,
+});
+
+class __EventVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "Event";
+    }
+
+    get EventFlags()
+    {
+        return __enumFlagsToString(this.__getValue(0), __EventAttributes);
+    }
+
+    get Name()
+    {
+        return this.__getString(1);
+    }
+
+    get EventType()
+    {
+        return this.__getCodedIndex(2, __TypeDefOrRef);
+    }
+
+    get MethodSemantic()
+    {
+        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
+    }
+
+    get Parent()
+    {
+        return this.__getParentRow("EventMap", 1).Parent;
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+var __MemberAccess = Object.freeze({
+    // FieldAccessMask: 0x0007 - These 3 bits contain one of the following values:
+    CompilerControlled: 0x0000,
+    Private: 0x0001,
+    FamANDAssem: 0x0002,
+    Assembly: 0x0003,
+    Family: 0x0004,
+    FamORAssem: 0x0005,
+    Public: 0x0006,
+});
+
+var __FieldAttributesFlags = Object.freeze({
+    Static: 0x0010,
+    InitOnly: 0x0020,
+    Literal: 0x0040,
+    NotSerialized: 0x0080,
+    SpecialName: 0x0200,
+
+    // Interop Attributes
+    PInvokeImpl: 0x2000,
+
+    // Additional flags
+    RTSpecialName: 0x0400,
+    HasFieldMarshal: 0x1000,
+    HasDefault: 0x8000,
+    HasFieldRVA: 0x0100,
+});
+
+class __FieldAttributes
+{
+    constructor(value)
+    {
+        this.__value = value;
+    }
+
+    toString()
+    {
+        var accessPart = this.__value & 0x0007;
+        var flagsPart = this.__value & ~0x0007;
+
+        var result = __enumToString(accessPart, __MemberAccess);
+        if (flagsPart != 0)
+        {
+            result += " | " + __enumFlagsToString(flagsPart, __FieldAttributesFlags);
+        }
+
+        return result;
+    }
+
+    get Value()
+    {
+        return this.__value;
+    }
+}
+
+class __ExportedTypeVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.TypeNamespace + "." + this.TypeName;
+    }
+
+    get TableName()
+    {
+        return "ExportedType";
+    }
+
+    get Flags()
+    {
+        return new __FieldAttributes(this.__getValue(0));
+    }
+
+    get TypeDefId()
+    {
+        return this.__getValue(1);
+    }
+
+    get TypeName()
+    {
+        return this.__getString(2);
+    }
+
+    get TypeNamespace()
+    {
+        return this.__getString(3);
+    }
+
+    get Implementation()
+    {
+        return this.__getCodedIndex(4, __Implementation);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __FieldVisualizer extends __RowBase
+{
+    toString()
+    {
+        if (this.Constant == null)
+        {
+            return this.Name;
+        }
+        else
+        {
+            return this.Name + " = " + this.Constant.toString();
+        }
+    }
+
+    get TableName()
+    {
+        return "Field";
+    }
+
+    get Flags()
+    {
+        return new __FieldAttributes(this.__getValue(0));
+    }
+
+    get Name()
+    {
+        return this.__getString(1);
+    }
+
+    get Signature()
+    {
+        return new __FieldSig(this.__Table, new __BlobStream(this.__getBlob(2)));
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+
+    get Constant()
+    {
+        return this.__findConstant();
+    }
+
+    get Parent()
+    {
+        return this.__getParentRow("TypeDef", 4);
+    }
+}
+
+class __FieldLayoutVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Field.toString();
+    }
+
+    get TableName()
+    {
+        return "FieldLayout";
+    }
+
+    get Offset()
+    {
+        return this.__getValue(0);
+    }
+
+    get Field()
+    {
+        return this.__getTargetRow("Field", 1);
+    }
+}
+
+class __FieldMarshalVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "FieldMarshal";
+    }
+
+    get Parent()
+    {
+        return this.__getCodedIndex(0, __HasFieldMarshal);
+    }
+
+    get NativeType()
+    {
+        return this.__getBlob(1); // TODO: Type?
+    }
+}
+
+class __FieldRVAVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Field.toString();
+    }
+
+    get TableName()
+    {
+        return "FieldRVA";
+    }
+
+    get RVA()
+    {
+        return this.__getValue(0);
+    }
+
+    get Field()
+    {
+        return this.__getTargetRow("Field", 1);
+    }
+}
+
+var __FileAttributes = Object.freeze({
+    ContainsMetaData: 0x0000,
+    ContainsNoMetadata: 0x0001,
+});
+
+class __FileVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "File";
+    }
+
+    get Flags()
+    {
+        return __enumToString(this.__getValue(0), __FileAttributes);
+    }
+
+    get Name()
+    {
+        return this.__getString(1);
+    }
+
+    get HashValue()
+    {
+        return this.__getBlob(2);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+var __GenericParamAttributes = Object.freeze({
+    Covariant: 0x0001,
+    Contravariant: 0x0002,
+    ReferenceTypeConstraint: 0x0004,
+    NotNullableValueTypeConstraint: 0x0008,
+    DefaultConstructorConstraint: 0x0010,
+});
+
+class __GenericParamVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "GenericParam";
+    }
+
+    get Number()
+    {
+        return this.__getValue(0);
+    }
+
+    get Flags()
+    {
+        return __enumFlagsToString(this.__getValue(1), __GenericParamAttributes);
+    }
+
+    get Owner()
+    {
+        return this.__getCodedIndex(2, __TypeOrMethodDef);
+    }
+
+    get Name()
+    {
+        return this.__getString(3);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __GenericParamConstraintVisualizer extends __RowBase
+{
+    toString()
+    {
+        return "where " + this.Owner.toString() + " : " + this.Constraint.toString();
+    }
+
+    get TableName()
+    {
+        return "GenericParamConstraint";
+    }
+
+    get Owner()
+    {
+        return this.__getTargetRow("GenericParam", 0);
+    }
+
+    get Constraint()
+    {
+        return this.__getCodedIndex(1, __TypeDefOrRef);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+var __CharSet = Object.freeze({
+    CharSetNotSpec: 0x0000,
+    CharSetAnsi: 0x0002,
+    CharSetUnicode: 0x0004,
+    CharSetAuto: 0x0006,
+});
+
+var __CallConv = Object.freeze({
+    CallConvPlatformapi: 0x0100,
+    CallConvCdecl: 0x0200,
+    CallConvStdcall: 0x0300,
+    CallConvThiscall: 0x0400,
+    CallConvFastcall: 0x0500,
+});
+
+var __PInvokeAttributesFlags = Object.freeze({
+    NoMangle: 0x0001,
+    SupportsLastError: 0x0040,
+});
+
+class __PInvokeAttributes
+{
+    constructor(value)
+    {
+        this.__value = value;
+    }
+
+    toString()
+    {
+        var charSetPart = this.__value & 0x0006;
+        var callConvPart = this.__value & 0x0700;
+        var flagsPart = this.__value & ~0x0706;
+        var result = __enumToString(charSetPart, __CharSet);
+        result += " | " + __enumToString(callConvPart, __CallConv);
+        if (flagsPart != 0)
+        {
+            result += " | " + __enumFlagsToString(flagsPart, __PInvokeAttributesFlags);
+        }
+
+        return result;
+    }
+
+    get Value()
+    {
+        return this.__value;
+    }
+}
+
+class __ImplMapVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.ImportName;
+    }
+
+    get TableName()
+    {
+        return "ImplMap";
+    }
+
+    get MappingFlags()
+    {
+        return new __PInvokeAttributes(this.__getValue(0));
+    }
+
+    get MemberForwarded()
+    {
+        return this.__getCodedIndex(1, __MemberForwarded);
+    }
+
+    get ImportName()
+    {
+        return this.__getString(2);
+    }
+
+    get ImportScope()
+    {
+        return this.__getTargetRow("ModuleRef", 3);
+    }
+}
+
+class __InterfaceImplVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Interface.toString();
+    }
+
+    get TableName()
+    {
+        return "InterfaceImpl";
+    }
+
+    get Class()
+    {
+        return this.__getTargetRow("TypeDef", 0);
+    }
+
+    get Interface()
+    {
+        return this.__getCodedIndex(1, __TypeDefOrRef);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+var __ManifestResourceAttributes = Object.freeze({
+    Public: 0x0001,
+    Private: 0x0002,
+});
+
+class __ManifestResourceVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "ManifestResource";
+    }
+
+    get Offset()
+    {
+        return this.__getValue(0);
+    }
+
+    get Flags()
+    {
+        return __enumToString(this.__getValue(1), __ManifestResourceAttributes);
+    }
+
+    get Name()
+    {
+        return this.__getString(2);
+    }
+
+    get Implementation()
+    {
+        return this.__getCodedIndex(3, __Implementation);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __MemberRefVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Class.toString();
+    }
+
+    get TableName()
+    {
+        return "MemberRef";
+    }
+
+    get Class()
+    {
+        return this.__getCodedIndex(0, __MemberRefParent);
+    }
+
+    get Name()
+    {
+        return this.__getString(1);
+    }
+
+    get MethodSignature()
+    {
+        return this.__getBlob(2); // TODO: Type
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+var __CodeType = Object.freeze({
+    IL: 0x0000,
+    Native: 0x0001,
+    OPTIL: 0x0002,
+    Runtime: 0x0003,
+});
+
+var __ManagedType = Object.freeze({
+    Managed: 0x0000,
+    Unmanaged: 0x0004,
+});
+
+var __MethodImplAttributesFlags = Object.freeze({
+    ForwardRef: 0x0010,
+    PreserveSig: 0x0080,
+    InternalCall: 0x1000,
+    Synchronized: 0x0020,
+    NoInlining: 0x0008,
+    NoOptimization: 0x0040,
+});
+
+class __MethodImplAttributes
+{
+    constructor(value)
+    {
+        this.__value = value;
+    }
+
+    toString()
+    {
+        var codeTypePart = this.__value & 0x0003;
+        var managedTypePart = this.__value & 0x0004;
+        var flagsPart = this.__value & ~0x0007;
+        var result = __enumToString(codeTypePart, __CodeType);
+        result += " | " + __enumToString(managedTypePart, __ManagedType);
+        if (flagsPart != 0)
+        {
+            result += " | " + __enumFlagsToString(flagsPart, __MethodImplAttributesFlags);
+        }
+
+        return result;
+    }
+
+    get Value()
+    {
+        return this.__value;
+    }
+}
+
+var __VtableLayout = Object.freeze({
+    ReuseSlot: 0x0000,
+    NewSlot: 0x0100,
+});
+
+var __MethodAttributesFlags = Object.freeze({
+    Static: 0x0010,
+    Final: 0x0020,
+    Virtual: 0x0040,
+    HideBySig: 0x0080,
+    Strict: 0x0200,
+    Abstract: 0x0400,
+    SpecialName: 0x0800,
+    PInvokeImpl: 0x2000,
+    UnmanagedExport: 0x0008,
+    RTSpecialName: 0x1000,
+    HasSecurity: 0x4000,
+    RequireSecObject: 0x8000,
+});
+
+class __MethodAttributes
+{
+    constructor(value)
+    {
+        this.__value = value;
+    }
+
+    toString()
+    {
+        var accessPart = this.__value & 0x0007;
+        var vtablePart = this.__value & 0x0100;
+        var flagsPart = this.__value & ~0x0107;
+        var result = __enumToString(accessPart, __MemberAccess);
+        result += " | " + __enumToString(vtablePart, __VtableLayout);
+        if (flagsPart != 0)
+        {
+            result += " | " + __enumFlagsToString(flagsPart, __MethodAttributesFlags);
+        }
+
+        return result;
+    }
+
+    get Value()
+    {
+        return this.__value;
+    }
+}
+
+class __MethodDefVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "MethodDef";
+    }
+
+    get RVA()
+    {
+        return this.__getValue(0);
+    }
+
+    get ImplFlags()
+    {
+        return new __MethodImplAttributes(this.__getValue(1));
+    }
+
+    get Flags()
+    {
+        return new __MethodAttributes(this.__getValue(2));
+    }
+
+    get Name()
+    {
+        return this.__getString(3);
+    }
+
+    get Signature()
+    {
+        return new __MethodDefSig(this.__Table, this.__getBlob(4));
+    }
+
+    get ParamList()
+    {
+        return this.__getList("Param", 5);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+
+    get Parent()
+    {
+        return this.__getParentRow("TypeDef", 5);
+    }
+}
+
+class __MethodImplVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.MethodBody.toString();
+    }
+
+    get TableName()
+    {
+        return "MethodImpl";
+    }
+
+    get Class()
+    {
+        return this.__getTargetRow("TypeDef", 0);
+    }
+
+    get MethodBody()
+    {
+        return this.__getCodedIndex(1, __MethodDefOrRef);
+    }
+
+    get MethodDeclaration()
+    {
+        return this.__getCodedIndex(2, __MethodDefOrRef);
+    }
+}
+
+var __MethodSemanticsAttributes = Object.freeze({
+    Setter: 0x0001,
+    Getter: 0x0002,
+    Other: 0x0004,
+    AddOn: 0x0008,
+    RemoveOn: 0x0010,
+    Fire: 0x0020,
+});
+
+class __MethodSemanticsVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Method.toString();
+    }
+
+    get TableName()
+    {
+        return "MethodSemantics";
+    }
+
+    get Semantic()
+    {
+        return __enumFlagsToString(this.__getValue(0), __MethodSemanticsAttributes);
+    }
+
+    get Method()
+    {
+        return this.__getTargetRow("MethodDef", 1);
+    }
+
+    get Association()
+    {
+        return this.__getCodedIndex(2, __HasSemantics);
+    }
+}
+
+class __MethodSpecVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Method.toString();
+    }
+
+    get TableName()
+    {
+        return "MethodSpec";
+    }
+
+    get Method()
+    {
+        return this.__getCodedIndex(0, __MethodDefOrRef);
+    }
+
+    get Instantiation()
+    {
+        return this.__getBlob(1); // TODO: Type
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __ModuleVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "Module";
+    }
+
+    get Generation()
+    {
+        return this.__getValue(0);
+    }
+
+    get Name()
+    {
+        return this.__getString(1);
+    }
+
+    get Mvid()
+    {
+        return this.__getGuid(2);
+    }
+
+    get EncId()
+    {
+        return this.__getGuid(3);
+    }
+
+    get EncBaseId()
+    {
+        return this.__getGuid(4);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __ModuleRefVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "ModuleRef";
+    }
+
+    get Name()
+    {
+        return this.__getString(0);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __NestedClassVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "NestedClass";
+    }
+
+    get NestedClass()
+    {
+        return this.__getTargetRow("TypeDef", 0);
+    }
+
+    get EnclosingClass()
+    {
+        return this.__getTargetRow("TypeDef", 1);
+    }
+}
+
+var __ParamAttributes = Object.freeze({
+    In: 0x0001,
+    Out: 0x0002,
+    Optional: 0x0010,
+    HasDefault: 0x1000,
+    HasFieldMarshal: 0x2000,
+});
+
+class __ParamVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "Param";
+    }
+
+    get Flags()
+    {
+        return __enumFlagsToString(this.__getValue(0), __ParamAttributes);
+    }
+
+    get Sequence()
+    {
+        return this.__getValue(1);
+    }
+
+    get Name()
+    {
+        return this.__getString(2);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+
+    get Constant()
+    {
+        return this.__findConstant();
+    }
+}
+
+var __PropertyAttributes = Object.freeze({
+    SpecialName: 0x0200,
+    RTSpecialName: 0x0400,
+    HasDefault: 0x1000,
+});
+
+class __PropertyVisualizer extends __RowBase
+{
+    toString()
+    {
+        return this.Name;
+    }
+
+    get TableName()
+    {
+        return "Property";
+    }
+
+    get Flags()
+    {
+        return __enumFlagsToString(this.__getValue(0), __PropertyAttributes);
+    }
+
+    get Name()
+    {
+        return this.__getString(1);
+    }
+
+    get Type()
+    {
+        return this.__getBlob(2); // TODO: Type
+    }
+
+    get MethodSemantic()
+    {
+        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
+    }
+
+    get Parent()
+    {
+        return this.__getParentRow("PropertyMap", 1).Parent;
+    }
+
+    get Constant()
+    {
+        return this.__findConstant();
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+class __PropertyMapVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "PropertyMap";
+    }
+
+    get Parent()
+    {
+        return this.__getTargetRow("TypeDef", 0);
+    }
+
+    get PropertyList()
+    {
+        return this.__getList("Property", 1);
+    }
+}
+
+class __StandAloneSigVisualizer extends __RowBase
+{
+    get TableName()
+    {
+        return "StandAloneSig";
+    }
+
+    get Signature()
+    {
+        return this.__getBlob(0); // TODO: Type
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
 
 class __TypeDefVisualizer extends __RowBase
 {
     toString()
     {
+        if (this.TypeNamespace == null)
+        {
+            return this.TypeName;
+        }
+
         return this.TypeNamespace + "." + this.TypeName;
     }
 
@@ -1154,7 +2603,7 @@ class __TypeDefVisualizer extends __RowBase
 
     get Flags()
     {
-        return this.__getValue(0); // TODO: Type support?
+        return this.__getValue(0); // TODO: Not a mask; need proper support
     }
 
     get TypeName()
@@ -1197,7 +2646,7 @@ class __TypeDefVisualizer extends __RowBase
         return this.__equalRange("GenericParam", 2, __TypeOrMethodDef);
     }
 
-    get PropertyList()
+    GetPropertyList()
     {
         var table = this.__Table.Database.PropertyMap;
         var index = this.__Index + 1;
@@ -1218,7 +2667,7 @@ class __TypeDefVisualizer extends __RowBase
         return table[i].PropertyList;
     }
 
-    get EventList()
+    GetEventList()
     {
         var table = this.__Table.Database.EventMap;
         var index = this.__Index + 1;
@@ -1259,7 +2708,7 @@ class __TypeRefVisualizer extends __RowBase
 
     get ResolutionScope()
     {
-        return this.__getValue(0); // TODO: Type support?
+        return this.__getCodedIndex(0, __ResolutionScope);
     }
 
     get TypeName()
@@ -1341,700 +2790,127 @@ class __TypeSpecVisualizer extends __RowBase
     }
 }
 
-class __CustomAttributeVisualizer extends __RowBase
+
+
+// coded_index<T> Types
+class __CodedIndexBase
 {
     toString()
     {
         return this.Type.toString();
     }
 
-    get TableName()
-    {
-        return "CustomAttribute";
-    }
-
-    get Parent()
-    {
-        return this.__getCodedIndex(0, __HasCustomAttribute);
-    }
-
     get Type()
     {
-        return this.__getCodedIndex(1, __CustomAttributeType);
+        return this.m_table.__fromCodedIndex(this.m_value, this.__Mapping);
     }
-
-    // Value
 }
 
-class __MethodDefVisualizer extends __RowBase
+class __TypeDefOrRefCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        return this.Name;
-    }
-
-    get TableName()
-    {
-        return "MethodDef";
-    }
-
-    get RVA()
-    {
-        return this.__getValue(0);
-    }
-
-    // ImplFlags
-    // Flags
-
-    get Name()
-    {
-        return this.__getString(3);
-    }
-
-    // Signature
-
-    get ParamList()
-    {
-        return this.__getList("Param", 5);
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-
-    get Parent()
-    {
-        return this.__getParentRow("TypeDef", 5);
+        return __TypeDefOrRef;
     }
 }
 
-class __MemberRefVisualizer extends __RowBase
+class __HasConstantCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        return this.Class.toString();
-    }
-
-    get TableName()
-    {
-        return "MemberRef";
-    }
-
-    get Class()
-    {
-        return this.__getCodedIndex(0, __MemberRefParent);
-    }
-
-    get Name()
-    {
-        return this.__getString(1);
-    }
-
-    // MethodSignature
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __HasConstant;
     }
 }
 
-class __FieldVisualizer extends __RowBase
+class __HasCustomAttributeCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        if (this.Constant == null)
-        {
-            return this.Name;
-        }
-        else
-        {
-            return this.Name + " = " + this.Constant.toString();
-        }
-    }
-
-    get TableName()
-    {
-        return "Field";
-    }
-
-    // Flags
-
-    get Name()
-    {
-        return this.__getString(1);
-    }
-
-    get Signature()
-    {
-        return new __FieldSig(this.__Table, new __BlobStream(this.__getBlob(2)));
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-
-    get Constant()
-    {
-        return this.__findConstant();
-    }
-
-    get Parent()
-    {
-        return this.__getParentRow("TypeDef", 4);
+        return __HasCustomAttribute;
     }
 }
 
-class __ParamVisualizer extends __RowBase
+class __HasFieldMarshalCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        return this.Name;
-    }
-
-    get TableName()
-    {
-        return "Param";
-    }
-
-    // Flags
-
-    get Sequence()
-    {
-        return this.__getValue(1);
-    }
-
-    get Name()
-    {
-        return this.__getString(2);
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-
-    get Constant()
-    {
-        return this.__findConstant();
+        return __HasFieldMarshal;
     }
 }
 
-class __InterfaceImplVisualizer extends __RowBase
+class __HasDeclSecurityCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        return this.Interface.toString();
-    }
-
-    get TableName()
-    {
-        return "InterfaceImpl";
-    }
-
-    get Class()
-    {
-        return this.__getTargetRow("TypeDef", 0);
-    }
-
-    get Interface()
-    {
-        return this.__getCodedIndex(1, __TypeDefOrRef);
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __HasDeclSecurity;
     }
 }
 
-class __ModuleVisualizer extends __RowBase
+class __MemberRefParentCodedIndexVisualizer extends __CodedIndexBase
 {
-    get TableName()
+    get __Mapping()
     {
-        return "Module";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __MemberRefParent;
     }
 }
 
-class __PermissionVisualizer extends __RowBase
+class __HasSemanticsCodedIndexVisualizer extends __CodedIndexBase
 {
-    get TableName()
+    get __Mapping()
     {
-        return "Permission";
+        return __HasSemantics;
     }
-
-    // TODO?
 }
 
-class __PropertyVisualizer extends __RowBase
+class __MethodDefOrRefCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        return this.Name;
-    }
-
-    get TableName()
-    {
-        return "Property";
-    }
-
-    // Flags
-
-    get Name()
-    {
-        return this.__getString(1);
-    }
-
-    // Type
-
-    get MethodSemantic()
-    {
-        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
-    }
-
-    get Parent()
-    {
-        return this.__getParentRow("PropertyMap", 1); // TODO: .Parent()
-    }
-
-    get Constant()
-    {
-        return this.__findConstant();
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __MethodDefOrRef;
     }
 }
 
-class __EventVisualizer extends __RowBase
+class __MemberForwardedCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        return this.Name;
-    }
-
-    get TableName()
-    {
-        return "Event";
-    }
-
-    // EventFlags
-
-    get Name()
-    {
-        return this.__getString(1);
-    }
-
-    get EventType()
-    {
-        return this.__getCodedIndex(2, __TypeDefOrRef);
-    }
-
-    get MethodSemantic()
-    {
-        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
-    }
-
-    get Parent()
-    {
-        return this.__getParentRow("EventMap", 1); // TODO: .Parent()
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __MemberForwarded;
     }
 }
 
-class __StandAloneSigVisualizer extends __RowBase
+class __ImplementationCodedIndexVisualizer extends __CodedIndexBase
 {
-    get TableName()
+    get __Mapping()
     {
-        return "StandAloneSig";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __Implementation;
     }
 }
 
-class __ModuleRefVisualizer extends __RowBase
+class __CustomAttributeTypeCodedIndexVisualizer extends __CodedIndexBase
 {
-    get TableName()
+    get __Mapping()
     {
-        return "ModuleRef";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __CustomAttributeType;
     }
 }
 
-class __AssemblyVersion
+class __ResolutionScopeCodedIndexVisualizer extends __CodedIndexBase
 {
-    constructor(value)
+    get __Mapping()
     {
-        // 64-bit value
-        this.MajorVersion = value.bitwiseAnd(0xFFFF).asNumber();
-        this.MinorVersion = value.bitwiseShiftRight(16).bitwiseAnd(0xFFFF).asNumber();
-        this.BuildNumber = value.bitwiseShiftRight(32).bitwiseAnd(0xFFFF).asNumber();
-        this.RevisionNumber = value.bitwiseShiftRight(48).bitwiseAnd(0xFFFF).asNumber();
-    }
-
-    toString()
-    {
-        return this.MajorVersion + "." + this.MinorVersion + "." + this.BuildNumber + "." + this.RevisionNumber;
+        return __ResolutionScope;
     }
 }
 
-class __AssemblyVisualizer extends __RowBase
+class __TypeOrMethodDefCodedIndexVisualizer extends __CodedIndexBase
 {
-    toString()
+    get __Mapping()
     {
-        return this.Name;
-    }
-
-    get TableName()
-    {
-        return "Assembly";
-    }
-
-    // HashAlgId
-
-    get Version()
-    {
-        return new __AssemblyVersion(this.__getValue(1));
-    }
-
-    // Flags
-
-    get PublicKey()
-    {
-        this.__getBlob(3);
-    }
-
-    get Name()
-    {
-        return this.__getString(4);
-    }
-
-    get Culture()
-    {
-        return this.__getString(5);
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+        return __TypeOrMethodDef;
     }
 }
 
-class __AssemblyRefVisualizer extends __RowBase
-{
-    toString()
-    {
-        return this.Name;
-    }
 
-    get TableName()
-    {
-        return "AssemblyRef";
-    }
-
-    get Version()
-    {
-        return new __AssemblyVersion(this.__getValue(1));
-    }
-
-    // Flags
-
-    get PublicKeyOrToken()
-    {
-        return this.__getBlob(2);
-    }
-
-    get Name()
-    {
-        return this.__getString(3);
-    }
-
-    get Culture()
-    {
-        return this.__getString(4);
-    }
-
-    get HashValue()
-    {
-        return this.__getString(5);
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-}
-
-class __FileVisualizer extends __RowBase
-{
-    get TableName()
-    {
-        return "File";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-}
-
-class __ExportedTypeVisualizer extends __RowBase
-{
-    get TableName()
-    {
-        return "ExportedType";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-}
-
-class __ManifestResourceVisualizer extends __RowBase
-{
-    get TableName()
-    {
-        return "ManifestResource";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-}
-
-class __GenericParamVisualizer extends __RowBase
-{
-    toString()
-    {
-        return this.Name;
-    }
-
-    get TableName()
-    {
-        return "GenericParam";
-    }
-
-    get Number()
-    {
-        return this.__getValue(0);
-    }
-
-    // Flags
-
-    get Owner()
-    {
-        return this.__getCodedIndex(2, __TypeOrMethodDef);
-    }
-
-    get Name()
-    {
-        return this.__getString(3);
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-}
-
-class __GenericParamConstraintVisualizer extends __RowBase
-{
-    get TableName()
-    {
-        return "GenericParamConstraint";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-}
-
-class __MethodSpecVisualizer extends __RowBase
-{
-    get TableName()
-    {
-        return "MethodSpec";
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-}
-
-class __MethodImplVisualizer extends __RowBase
-{
-    toString()
-    {
-        return this.MethodBody.toString();
-    }
-
-    get TableName()
-    {
-        return "MethodImpl";
-    }
-
-    get Class()
-    {
-        return this.__getTargetRow("TypeDef", 0);
-    }
-
-    get MethodBody()
-    {
-        return this.__getCodedIndex(1, __MethodDefOrRef);
-    }
-
-    get MethodDeclaration()
-    {
-        return this.__getCodedIndex(2, __MethodDefOrRef);
-    }
-}
-
-class __ConstantVisualizer extends __RowBase
-{
-    toString()
-    {
-        return this.Type + "(" + this.Value + ")";
-    }
-
-    get TableName()
-    {
-        return "Constant";
-    }
-
-    get Type()
-    {
-        switch (this.__getValue(0))
-        {
-        case 2: return "Boolean";
-        case 3: return "Char";
-        case 4: return "Int8";
-        case 5: return "UInt8";
-        case 6: return "Int16";
-        case 7: return "UInt16";
-        case 8: return "Int32";
-        case 9: return "UInt32";
-        case 10: return "Int64";
-        case 11: return "UInt64";
-        case 12: return "Float32";
-        case 13: return "Float64";
-        case 14: return "String";
-        case 18: return "Class";
-        default: throw new Error("Unknown type: " + this.__getValue(0));
-        }
-    }
-
-    get Parent()
-    {
-        return this.__getCodedIndex(1, __HasConstant);
-    }
-
-    get Value()
-    {
-        var blob = this.__getBlob(2);
-        switch (this.__getValue(0))
-        {
-            case 2: return blob.ReadValue(1) == 1 ? true : false;
-            case 3: return 'a' + blob.ReadValue(2) - 'a';
-            case 4:
-            case 5: return blob.ReadValue(1);
-            case 6:
-            case 7: return blob.ReadValue(2);
-            case 8:
-            case 9: return blob.ReadValue(4);
-            case 10:
-            case 11: return blob.ReadValue(8);
-            case 12:
-            case 13: return "Floating Point; not yet supported";
-            case 14: return blob.ReadString();
-            case 18: return "Class; not yet supported";
-            default: throw new Error("Unknown type");
-        }
-    }
-}
-
-class __MethodSemanticsVisualizer extends __RowBase
-{
-    toString()
-    {
-        return this.Method.toString();
-    }
-
-    get TableName()
-    {
-        return "MethodSemantics";
-    }
-
-    // Semantic
-
-    get Method()
-    {
-        return this.__getTargetRow("MethodDef", 1);
-    }
-
-    get Association()
-    {
-        return this.__getCodedIndex(2, __HasSemantics);
-    }
-}
-
-class __PropertyMapVisualizer extends __RowBase
-{
-    get TableName()
-    {
-        return "PropertyMap";
-    }
-
-    get Parent()
-    {
-        return this.__getTargetRow("TypeDef", 0);
-    }
-
-    get PropertyList()
-    {
-        return this.__getList("Property", 1);
-    }
-}
-
-class __EventMapVisualizer extends __RowBase
-{
-    get TableName()
-    {
-        return "EventMap";
-    }
-
-    get Parent()
-    {
-        return this.__getTargetRow("TypeDef", 0);
-    }
-
-    get EventList()
-    {
-        return this.__getList("Event", 1);
-    }
-}
 
 // Blob Storage Types
 
@@ -2127,6 +3003,8 @@ function __consumeSzArray(stream)
 
     return false;
 }
+
+
 
 class __CustomModSig
 {
