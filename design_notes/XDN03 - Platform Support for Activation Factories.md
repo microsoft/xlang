@@ -61,7 +61,7 @@ Upon a request for an activation factory, or in other words, when a class name i
 * If an attempt at the top level namespace fails to produce a factory, fail and return null.
 
 As an illustrative example, imagine an app requests a factory for the class *MyComponent.Feature.Widget*. A possible sequence of events would be:
-* The PAL searches for the library *MyComponent.Feature.Foo.(dll/so)* (on Windows/Linux, respectively).
+* The PAL searches for the library *MyComponent.Feature.Widget.(dll/so)* (on Windows/Linux, respectively).
 * This library is not found in the application's directory, so it moves up one namespace level and:
 * The PAL then searches for the library *MyComponent.Feature.(dll/so)*. This library exists, and so the PAL loads it, calls **xlang_lib_get_activation_factory**, passing the string *"MyComponent.Feature.Widget"*.
 * This call succeeds, and the PAL returns the resulting factory.
