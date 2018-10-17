@@ -20,12 +20,8 @@ set(included_namespaces
 )
 
 set(excluded_namespaces
-    Windows.Foundation.Deferral
     Windows.Foundation.Diagnostics
-    Windows.Foundation.IPropertyValue
-    Windows.Foundation.IRef
     Windows.Foundation.Metadata
-    Windows.Foundation.PropertyValue
 )
 
 set(cmdline "-output ${output_dir}")
@@ -50,7 +46,6 @@ endforeach()
 get_filename_component(output_dir ${CMAKE_CURRENT_SOURCE_DIR}/output REALPATH)
 set(pybase_h ${output_dir}/pybase.h)
 
-message(${pybase_h})
 add_custom_command(
   OUTPUT ${pybase_h} 
   DEPENDS ${pywinrt_exe}

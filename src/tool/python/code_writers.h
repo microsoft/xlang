@@ -279,10 +279,13 @@ static PyType_Spec @_Type_spec =
             w.write("            % param% { % };\n", param.second->Type(), sequence, bind<write_out_param_init>(param));
             break;
         case param_category::pass_array:
-            w.write("            /*p*/ winrt::array_view<% const> param% {}; //= py::convert_to<winrt::array_view<% const>>(args, %);\n", param.second->Type(), sequence, param.second->Type(), sequence);
+            w.write("            /*p*/ winrt::array_view<% const> param% { };\n // TODO: Convert incoming python parameter", param.second->Type(), sequence);
+            break;
+        case param_category::fill_array:
+            w.write("            /*f*/ winrt::array_view<%> param% { };\n // TODO: Convert incoming python parameter", param.second->Type(), sequence);
             break;
         case param_category::receive_array:
-            w.write("            /*r*/ winrt::array_view<%> param% { };\n", param.second->Type(), sequence);
+            w.write("            /*r*/ winrt::com_array<%> param% { };\n", param.second->Type(), sequence);
             break;
         default:
             throw_invalid("write_param_conversion not impl");

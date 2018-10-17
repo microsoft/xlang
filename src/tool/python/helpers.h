@@ -524,12 +524,12 @@ namespace xlang
             else if (param.second->ByRef())
             {
                 XLANG_ASSERT(param.first.Flags().Out());
-                return param_category::fill_array;
+                return param_category::receive_array;
             }
             else
             {
                 XLANG_ASSERT(param.first.Flags().Out());
-                return param_category::receive_array;
+                return param_category::fill_array;
             }
         }
         else
@@ -551,12 +551,16 @@ namespace xlang
     {
         auto category = get_param_category(param);
 
-        if (category == param_category::fill_array)
-        {
-            throw_invalid("fill aray param not impl");
-        }
+        return (category == param_category::in 
+             || category == param_category::pass_array 
+             || category == param_category::fill_array);
+    }
 
-        return (category == param_category::in || category == param_category::pass_array);
+    bool is_out_param(method_signature::param_t const& param)
+    {
+        auto category = get_param_category(param);
+
+        return (category == param_category::out || category == param_category::receive_array);
     }
 
     int count_in_param(std::vector<method_signature::param_t> const& params)
@@ -580,7 +584,7 @@ namespace xlang
 
         for (auto&& param : params)
         {
-            if (!is_in_param(param))
+            if (is_out_param(param))
             {
                 count++;
             }
