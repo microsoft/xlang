@@ -442,6 +442,26 @@ namespace py
         }
     };
 
+    template <>
+    struct converter<winrt::Windows::Foundation::IInspectable>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::IInspectable value) noexcept
+        {
+            return wrap<winrt::Windows::Foundation::IInspectable>(value, winrt_type<winrt_base>::python_type);
+        }
+
+        static winrt::Windows::Foundation::IInspectable convert_to(PyObject* obj)
+        {
+            if (PyObject_IsInstance(obj, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::python_type)) == 0)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            auto wrapper = reinterpret_cast<winrt_wrapper_base*>(obj);
+            return as<winrt::Windows::Foundation::IInspectable>(wrapper);
+        }
+    };
+
     struct pystring
     {
         wchar_t* buffer{ nullptr };
