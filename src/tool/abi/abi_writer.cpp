@@ -373,7 +373,7 @@ void writer::pop_contract_guard(std::size_t count)
 
 std::pair<bool, std::string_view> writer::should_declare(TypeDef const& type)
 {
-    auto mangledName = write_temp("%", bind<write_type_def<type_format::mangled>>(type, m_genericArgStack));
+    auto mangledName = write_temp("%", bind<write_typedef_mangled>(type, m_genericArgStack, format_flags::none));
     if (auto [itr, inserted] = m_typeDeclarations.emplace(std::move(mangledName)); inserted)
     {
         return { true, *itr };
@@ -384,7 +384,7 @@ std::pair<bool, std::string_view> writer::should_declare(TypeDef const& type)
 
 std::pair<bool, std::string_view> writer::should_declare(GenericTypeInstSig const& type)
 {
-    auto mangledName = write_temp("%", bind<write_generic_type_inst_sig<type_format::mangled>>(type, m_genericArgStack));
+    auto mangledName = write_temp("%", bind<write_generictype_mangled>(type, m_genericArgStack, format_flags::none));
     if (auto [itr, inserted] = m_typeDeclarations.emplace(std::move(mangledName)); inserted)
     {
         return { true, *itr };
@@ -616,33 +616,26 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
 
     push_generic_namespace(typeDef.TypeNamespace());
 
+    // TODO: REMOVE
+    // std::cout << write_temp("%", bind<write_generictype_cpp>(type, m_genericArgStack)) <<
+    //     "\n    " << write_temp("%", bind<write_generic_type_inst_sig<type_format::signature>>(type, m_genericArgStack)) <<
+    //     "\n    " << write_temp("%", bind<write_generic_type_guid>(type, m_genericArgStack)) << '\n';
+
     auto typeName = typeDef.TypeName();
     typeName = typeName.substr(0, typeName.find('`'));
     write(R"^-^(template <>
 struct __declspec(uuid("%"))
 % : %%_impl<)^-^",
         bind<write_generic_type_guid>(type, m_genericArgStack),
-        bind<write_generic_type_inst_sig<type_format::cpp | type_format::ignore_namespace>>(type, m_genericArgStack),
+        bind<write_generictype_cpp>(type, m_genericArgStack, format_flags::ignore_namespace),
         type_prefix(get_category(typeDef)), typeName);
 
-    // TODO: Template argument(s)
-    // For all generic arguments,
-    // for (auto const& sig : type.GenericArgs())
-    // {
-    //     xlang::visit(sig.Type(),
-    //         [&](coded_index<TypeDefOrRef> const& t)
-    //         {
-    //             handle_typedef_or_ref(t);
-    //         },
-    //         [&](GenericTypeInstSig const& t)
-    //         {
-
-    //         },
-    //         [](auto const&)
-    //         {
-    //             // Either ElementType or GenericTypeIndex
-    //         });
-    // }
+    std::string_view prefix;
+    for (auto const& sig : type.GenericArgs())
+    {
+        write("%%", prefix, bind<write_generic_impl_param>(sig, m_genericArgStack));
+        prefix = ", ";
+    }
 
     write(R"^-^(>
 {
@@ -657,8 +650,8 @@ struct __declspec(uuid("%"))
 typedef % %_t;
 #define % %%_t%
 )^-^",
-        bind<write_generic_type_inst_sig<type_format::clr>>(type, m_genericArgStack),
-        bind<write_generic_type_inst_sig<type_format::cpp | type_format::ignore_namespace>>(type, m_genericArgStack),
+        bind<write_generictype_clr>(type, m_genericArgStack, format_flags::none),
+        bind<write_generictype_cpp>(type, m_genericArgStack, format_flags::ignore_namespace),
         mangledName,
         mangledName,
         bind<write_namespace_open>(typeDef.TypeNamespace()),

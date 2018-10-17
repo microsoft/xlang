@@ -869,7 +869,11 @@ function __MakeTableVisualizer(type)
 
         getValue(row, col)
         {
-            if (row >= this.m_row_count)
+            if (row == 0)
+            {
+                return null;
+            }
+            else if (row >= this.m_row_count)
             {
                 throw new RangeError("Row index out of range: " + row);
             }

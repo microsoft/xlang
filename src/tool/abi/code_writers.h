@@ -79,7 +79,7 @@ inline void write_forward_declaration(
             w.write(R"^-^(#define % %
 
 #endif // __%_FWD_DEFINED__
-)^-^", mangledName, bind<write_type_def<type_format::cpp>>(type, genericArgs), mangledName);
+)^-^", mangledName, bind<write_typedef_cpp>(type, genericArgs, format_flags::none), mangledName);
         }
 
         w.write("\n");

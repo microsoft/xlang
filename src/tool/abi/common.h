@@ -20,6 +20,8 @@ constexpr std::string_view contract_version_attribute = "ContractVersionAttribut
 constexpr std::string_view default_attribute = "DefaultAttribute";
 constexpr std::string_view guid_attribute = "GuidAttribute";
 
+constexpr std::string_view internal_namespace = "Windows.Foundation.Internal";
+
 enum class ns_prefix
 {
     always,
