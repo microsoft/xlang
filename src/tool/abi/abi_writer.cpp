@@ -675,6 +675,11 @@ void writer::write_type_definitions()
     {
         write_interface_definition(*this, i);
     }
+
+    for (auto const& c : m_members.classes)
+    {
+        write_class_name_definition(*this, c);
+    }
 }
 
 

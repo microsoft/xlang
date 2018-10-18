@@ -924,8 +924,6 @@ function __MakeTableVisualizer(type)
 
         getDimensionality()
         {
-            // TODO: Seems like we can't do this? Nor would we want to?
-            // return (type == "undefined") ? this.m_columns.Count() : 1;
             return 1;
         }
 
@@ -969,10 +967,6 @@ function __MakeTableVisualizer(type)
             {
                 throw new RangeError("Column index out of range: " + col);
             }
-
-            // TODO: Probably best not to do it this way since we specialize 'getValueAt' depending on whether or not
-            //       we know the underlying type
-            //return this.getValueAt(row)[col];
 
             var dataSize = this.m_columns[col].size;
             var ptr = this.m_data.add(row * this.m_row_size + this.m_columns[col].offset);
@@ -1141,6 +1135,34 @@ class __RowBase
         this.__index = index;
     }
 
+    get TableName()
+    {
+        var result;
+        if (this.targetType)
+        {
+            // C++ name; may also be a template argument
+            result = this.targetType.name;
+            var pos = result.lastIndexOf("::");
+            if (pos != -1)
+            {
+                result = result.substr(pos + 2);
+            }
+
+            pos = result.indexOf(">");
+            if (pos != -1)
+            {
+                result = result.substr(0, pos);
+            }
+        }
+        else
+        {
+            result = this.constructor.name;
+            result = result.substr(2, result.length - 12);
+        }
+
+        return result;
+    }
+
     get __Table()
     {
         return this.m_table || this.__table;
@@ -1273,11 +1295,6 @@ class __AssemblyVisualizer extends __RowBase
         return this.Name;
     }
 
-    get TableName()
-    {
-        return "Assembly";
-    }
-
     get Name()
     {
         return this.__getString(4);
@@ -1316,11 +1333,6 @@ class __AssemblyVisualizer extends __RowBase
 
 class __AssemblyOSVisualizer extends __RowBase
 {
-    get TableName()
-    {
-        return "AssemblyOS";
-    }
-
     get OSPlatformId()
     {
         return this.__getValue(0);
@@ -1344,11 +1356,6 @@ class __AssemblyProcessorVisualizer extends __RowBase
         return this.Processor;
     }
 
-    get TableName()
-    {
-        return "AssemblyProcessor";
-    }
-
     get Processor()
     {
         return this.__getValue(0);
@@ -1360,11 +1367,6 @@ class __AssemblyRefVisualizer extends __RowBase
     toString()
     {
         return this.Name;
-    }
-
-    get TableName()
-    {
-        return "AssemblyRef";
     }
 
     get Name()
@@ -1410,11 +1412,6 @@ class __AssemblyRefOSVisualizer extends __RowBase
         return this.AssemblyRef.toString();
     }
 
-    get TableName()
-    {
-        return "AssemblyRefOS";
-    }
-
     get OSPlatformId()
     {
         return this.__getValue(0);
@@ -1443,11 +1440,6 @@ class __AssemblyRefProcessorVisualizer extends __RowBase
         return this.AssemblyRef.toString();
     }
 
-    get TableName()
-    {
-        return "AssemblyRefProcessor";
-    }
-
     get Processor()
     {
         return this.__getValue(0);
@@ -1461,11 +1453,6 @@ class __AssemblyRefProcessorVisualizer extends __RowBase
 
 class __ClassLayoutVisualizer extends __RowBase
 {
-    get TableName()
-    {
-        return "ClassLayout";
-    }
-
     get PackingSize()
     {
         return this.__getValue(0);
@@ -1487,11 +1474,6 @@ class __ConstantVisualizer extends __RowBase
     toString()
     {
         return this.Type + "(" + this.Value + ")";
-    }
-
-    get TableName()
-    {
-        return "Constant";
     }
 
     get Type()
@@ -1549,12 +1531,16 @@ class __CustomAttributeVisualizer extends __RowBase
 {
     toString()
     {
-        return this.Type.toString(); // TODO: Value?
-    }
+        var result = this.Type.toString() + "(";
+        var args = this.Value.FixedArgs;
+        var prefix = "";
+        for (var i = 0; i < args.length; ++i)
+        {
+            result += prefix + args[i].toString();
+            prefix = ", ";
+        }
 
-    get TableName()
-    {
-        return "CustomAttribute";
+        return result + ")";
     }
 
     get Parent()
@@ -1570,13 +1556,14 @@ class __CustomAttributeVisualizer extends __RowBase
     get Value()
     {
         var sig;
-        if (this.Type.TableName == "MemberRef")
+        var type = this.Type;
+        if (type.TableName == "MemberRef")
         {
-            sig = this.Type.MethodSignature;
+            sig = type.MethodSignature;
         }
         else
         {
-            sig = this.Type.Signature;
+            sig = type.Signature;
         }
 
         return new __CustomAttributeSig(this.__Table, new __BlobStream(this.__getBlob(2)), sig);
@@ -1597,11 +1584,6 @@ var __SecurityAction = Object.freeze({
 
 class __DeclSecurityVisualizer extends __RowBase
 {
-    get TableName()
-    {
-        return "DeclSecurity";
-    }
-
     get Action()
     {
         return __enumToString(this.__getValue(0), __SecurityAction);
@@ -1626,11 +1608,6 @@ class __EventMapVisualizer extends __RowBase
         return this.Parent.toString();
     }
 
-    get TableName()
-    {
-        return "EventMap";
-    }
-
     get Parent()
     {
         return this.__getTargetRow("TypeDef", 0);
@@ -1652,11 +1629,6 @@ class __EventVisualizer extends __RowBase
     toString()
     {
         return this.Parent.toString() + "::" + this.Name;
-    }
-
-    get TableName()
-    {
-        return "Event";
     }
 
     get Name()
@@ -1752,11 +1724,6 @@ class __ExportedTypeVisualizer extends __RowBase
         return this.TypeNamespace + "." + this.TypeName;
     }
 
-    get TableName()
-    {
-        return "ExportedType";
-    }
-
     get Flags()
     {
         return new __FieldAttributes(this.__getValue(0));
@@ -1802,11 +1769,6 @@ class __FieldVisualizer extends __RowBase
         }
     }
 
-    get TableName()
-    {
-        return "Field";
-    }
-
     get Name()
     {
         return this.__getString(1);
@@ -1845,11 +1807,6 @@ class __FieldLayoutVisualizer extends __RowBase
         return this.Field.toString();
     }
 
-    get TableName()
-    {
-        return "FieldLayout";
-    }
-
     get Offset()
     {
         return this.__getValue(0);
@@ -1863,11 +1820,6 @@ class __FieldLayoutVisualizer extends __RowBase
 
 class __FieldMarshalVisualizer extends __RowBase
 {
-    get TableName()
-    {
-        return "FieldMarshal";
-    }
-
     get Parent()
     {
         return this.__getCodedIndex(0, __HasFieldMarshal);
@@ -1885,11 +1837,6 @@ class __FieldRVAVisualizer extends __RowBase
     toString()
     {
         return this.Field.toString();
-    }
-
-    get TableName()
-    {
-        return "FieldRVA";
     }
 
     get RVA()
@@ -1913,11 +1860,6 @@ class __FileVisualizer extends __RowBase
     toString()
     {
         return this.Name;
-    }
-
-    get TableName()
-    {
-        return "File";
     }
 
     get Flags()
@@ -1956,11 +1898,6 @@ class __GenericParamVisualizer extends __RowBase
         return this.Name;
     }
 
-    get TableName()
-    {
-        return "GenericParam";
-    }
-
     get Name()
     {
         return this.__getString(3);
@@ -1992,11 +1929,6 @@ class __GenericParamConstraintVisualizer extends __RowBase
     toString()
     {
         return "where " + this.Owner.toString() + " : " + this.Constraint.toString();
-    }
-
-    get TableName()
-    {
-        return "GenericParamConstraint";
     }
 
     get Owner()
@@ -2070,11 +2002,6 @@ class __ImplMapVisualizer extends __RowBase
         return this.ImportName;
     }
 
-    get TableName()
-    {
-        return "ImplMap";
-    }
-
     get MappingFlags()
     {
         return new __PInvokeAttributes(this.__getValue(0));
@@ -2103,11 +2030,6 @@ class __InterfaceImplVisualizer extends __RowBase
         return this.Interface.toString();
     }
 
-    get TableName()
-    {
-        return "InterfaceImpl";
-    }
-
     get Class()
     {
         return this.__getTargetRow("TypeDef", 0);
@@ -2134,11 +2056,6 @@ class __ManifestResourceVisualizer extends __RowBase
     toString()
     {
         return this.Name;
-    }
-
-    get TableName()
-    {
-        return "ManifestResource";
     }
 
     get Offset()
@@ -2172,11 +2089,6 @@ class __MemberRefVisualizer extends __RowBase
     toString()
     {
         return this.Class.toString() + "::" + this.Name;
-    }
-
-    get TableName()
-    {
-        return "MemberRef";
     }
 
     get Name()
@@ -2304,11 +2216,6 @@ class __MethodDefVisualizer extends __RowBase
         return this.Parent.toString() + "::" + this.Name;
     }
 
-    get TableName()
-    {
-        return "MethodDef";
-    }
-
     get Name()
     {
         return this.__getString(3);
@@ -2357,11 +2264,6 @@ class __MethodImplVisualizer extends __RowBase
         return this.MethodBody.toString();
     }
 
-    get TableName()
-    {
-        return "MethodImpl";
-    }
-
     get Class()
     {
         return this.__getTargetRow("TypeDef", 0);
@@ -2394,11 +2296,6 @@ class __MethodSemanticsVisualizer extends __RowBase
         return this.Method.toString();
     }
 
-    get TableName()
-    {
-        return "MethodSemantics";
-    }
-
     get Semantic()
     {
         return __enumFlagsToString(this.__getValue(0), __MethodSemanticsAttributes);
@@ -2420,11 +2317,6 @@ class __MethodSpecVisualizer extends __RowBase
     toString()
     {
         return this.Method.toString();
-    }
-
-    get TableName()
-    {
-        return "MethodSpec";
     }
 
     get Method()
@@ -2449,11 +2341,6 @@ class __ModuleVisualizer extends __RowBase
     toString()
     {
         return this.Name;
-    }
-
-    get TableName()
-    {
-        return "Module";
     }
 
     get Generation()
@@ -2494,11 +2381,6 @@ class __ModuleRefVisualizer extends __RowBase
         return this.Name;
     }
 
-    get TableName()
-    {
-        return "ModuleRef";
-    }
-
     get Name()
     {
         return this.__getString(0);
@@ -2512,11 +2394,6 @@ class __ModuleRefVisualizer extends __RowBase
 
 class __NestedClassVisualizer extends __RowBase
 {
-    get TableName()
-    {
-        return "NestedClass";
-    }
-
     get NestedClass()
     {
         return this.__getTargetRow("TypeDef", 0);
@@ -2541,11 +2418,6 @@ class __ParamVisualizer extends __RowBase
     toString()
     {
         return this.Name;
-    }
-
-    get TableName()
-    {
-        return "Param";
     }
 
     get Name()
@@ -2585,11 +2457,6 @@ class __PropertyVisualizer extends __RowBase
     toString()
     {
         return this.Parent.toString() + "::" + this.Name;
-    }
-
-    get TableName()
-    {
-        return "Property";
     }
 
     get Name()
@@ -2635,11 +2502,6 @@ class __PropertyMapVisualizer extends __RowBase
         return this.Parent.toString();
     }
 
-    get TableName()
-    {
-        return "PropertyMap";
-    }
-
     get Parent()
     {
         return this.__getTargetRow("TypeDef", 0);
@@ -2653,11 +2515,6 @@ class __PropertyMapVisualizer extends __RowBase
 
 class __StandAloneSigVisualizer extends __RowBase
 {
-    get TableName()
-    {
-        return "StandAloneSig";
-    }
-
     get Signature()
     {
         // NOTE: Table seems to be unused by WinMD, so leaving unimplemented for now
@@ -2750,17 +2607,27 @@ class __TypeDefVisualizer extends __RowBase
 {
     toString()
     {
-        if (this.TypeNamespace == null)
+        var result = this.TypeName;
+
+        if (this.TypeNamespace != null)
         {
-            return this.TypeName;
+            result = this.TypeNamespace + "." + result;
         }
 
-        return this.TypeNamespace + "." + this.TypeName;
-    }
+        var genericParams = this.GenericParam;
+        if (genericParams.Size != 0)
+        {
+            result += "<";
+            var prefix = "";
+            for (var i = 0; i < genericParams.Size; ++i)
+            {
+                result += prefix + genericParams.getValueAt(i).Name;
+                prefix = ", ";
+            }
+            result += ">";
+        }
 
-    get TableName()
-    {
-        return "TypeDef";
+        return result;
     }
 
     get TypeName()
@@ -2873,11 +2740,6 @@ class __TypeRefVisualizer extends __RowBase
         return this.TypeNamespace + "." + this.TypeName;
     }
 
-    get TableName()
-    {
-        return "TypeRef";
-    }
-
     get TypeName()
     {
         return this.__getString(1);
@@ -2936,11 +2798,6 @@ class __TypeSpecVisualizer extends __RowBase
     toString()
     {
         return this.Signature.toString();
-    }
-
-    get TableName()
-    {
-        return "TypeSpec";
     }
 
     get Signature()
@@ -3130,6 +2987,24 @@ function __peekElementType(stream)
     return stream.peekValue(1);
 }
 
+class __ElementTypeVisualizer
+{
+    constructor(value)
+    {
+        this.__value = value;
+    }
+
+    toString()
+    {
+        return __enumToString(this.__value, __ElementType);
+    }
+
+    get Value()
+    {
+        return this.__value;
+    }
+}
+
 var __CallingConvention = Object.freeze({
     Default: 0x00,
     VarArg: 0x05,
@@ -3239,7 +3114,7 @@ function __consumeCustomMods(table, stream)
     // Continue until we read something other than ELEMENT_TYPE_CMOD_OPT or ELEMENT_TYPE_CMOD_REQD
     for (var type = __peekElementType(stream); (type == __ElementType.CModOpt) || (type == __ElementType.CModReqd); type = __peekElementType(stream))
     {
-        result.concat(new __CustomModSig(table, stream));
+        result.push(new __CustomModSig(table, stream));
     }
 
     return result;
@@ -3375,7 +3250,7 @@ class __TypeSig
         case __ElementType.Object:
         case __ElementType.U:
         case __ElementType.I:
-            this.__type = __enumToString(type, __ElementType);
+            this.__type = new __ElementTypeVisualizer(type);
             break;
 
         case __ElementType.Class:
@@ -3418,14 +3293,14 @@ class __TypeSig
         return this.__Type.toString() + (this.IsSzArray ? "[]" : "");
     }
 
-    get Type()
-    {
-        return this.__Type;
-    }
-
     get IsSzArray()
     {
         return this.__IsSzArray;
+    }
+
+    get Type()
+    {
+        return this.__Type;
     }
 
     get CustomMod()
@@ -3469,11 +3344,6 @@ class __ParamSig
         return result;
     }
 
-    get CustomMod()
-    {
-        return this.__CustomMods;
-    }
-
     get ByRef()
     {
         return this.__ByRef;
@@ -3482,6 +3352,11 @@ class __ParamSig
     get Type()
     {
         return this.__Type;
+    }
+
+    get CustomMod()
+    {
+        return this.__CustomMods;
     }
 }
 
@@ -3530,14 +3405,14 @@ class __RetTypeSig
         }
     }
 
-    get CustomMod()
-    {
-        return this.__CustomMods;
-    }
-
     get ByRef()
     {
         return this.__ByRef;
+    }
+
+    get IsVoid()
+    {
+        return this.__Type == null;
     }
 
     get Type()
@@ -3545,9 +3420,9 @@ class __RetTypeSig
         return this.__Type;
     }
 
-    get IsVoid()
+    get CustomMod()
     {
-        return this.__Type == null;
+        return this.__CustomMods;
     }
 }
 
@@ -3797,14 +3672,14 @@ class __CustomAttributeSig
         this.__fixedArgs = new Array();
         for (var param of methodDefSig.Params)
         {
-            this.__fixedArgs.concat(new __FixedArgSig(table.Database, param, stream));
+            this.__fixedArgs.push(new __FixedArgSig(table.Database, param, stream));
         }
 
         var namedArgsCount = stream.consumeValue(2);
         this.__namedArgs = new Array();
         for (var i = 0; i < namedArgsCount; ++i)
         {
-            this.__namedArgs.concat(new __NamedArgSig(table.Database, stream));
+            this.__namedArgs.push(new __NamedArgSig(table.Database, stream));
         }
     }
 
@@ -3831,24 +3706,24 @@ class __FixedArgSig
             {
                 for (var i = 0; i < size; ++i)
                 {
-                    this.__value.concat(new __ElemSig(database, param, stream));
+                    this.__value.push(__ElemSig.__fromParam(param, stream));
                 }
             }
         }
         else
         {
-            this.__value = new __ElemSig(database, param, stream);
+            this.__value = __ElemSig.__fromParam(param, stream);
         }
+    }
+
+    toString()
+    {
+        return this.Value.toString();
     }
 
     get Value()
     {
-        return this.value || this.__value;
-    }
-
-    static __createFromSystemType()
-    {
-
+        return (this.value || this.__value).Value;
     }
 }
 
@@ -3856,27 +3731,7 @@ class __NamedArgSig
 {
     constructor(database, stream)
     {
-        var fieldOrProp = __consumeElementType(stream);
-        if ((fieldOrProp != __ElementType.Field) && (fieldOrProp != __ElementType.Property))
-        {
-            throw new Error("NamedArg must be either FIELD or PROPERTY");
-        }
-
-        var type = __consumeElementType(stream);
-        switch (type)
-        {
-        case __ElementType.Type:
-            this.__value = new __FixedArgSig();
-            break;
-
-        case __ElementType.Enum:
-            // TODO
-            break;
-
-        default:
-            // TODO
-            break;
-        }
+        // NOTE: Appears unused by WinMD, so left unimplemented for now
     }
 }
 
@@ -3885,15 +3740,22 @@ class __EnumDefinition
     constructor(typeDef)
     {
         this.__typeDef = typeDef;
-        for (var field in typeDef.FieldList)
+        var fields = typeDef.FieldList;
+        for (var i = 0; i < fields.Size; ++i)
         {
-            var isLiteral = field.Flags.Value & __FieldAttributesFlags.Literal == __FieldAttributesFlags.Literal;
-            var isStatic = field.Flags.Value & __FieldAttributesFlags.Static == __FieldAttributesFlags.Static;
+            var field = fields.getValueAt(i);
+            var isLiteral = (field.Flags.Value & __FieldAttributesFlags.Literal) == __FieldAttributesFlags.Literal;
+            var isStatic = (field.Flags.Value & __FieldAttributesFlags.Static) == __FieldAttributesFlags.Static;
             if (!isLiteral && !isStatic)
             {
                 this.__underlyingType = field.Signature.Type.Type;
             }
         }
+    }
+
+    toString()
+    {
+        return this.TypeDef.toString();
     }
 
     get TypeDef()
@@ -3921,7 +3783,7 @@ class __SystemType
 
     get Name()
     {
-        return this.name || this.__name;
+        return "System.Type(" + (this.name || this.__name) + ")";
     }
 }
 
@@ -3931,6 +3793,27 @@ class __EnumValue
     {
         this.__type = type;
         this.__value = value;
+    }
+
+    toString()
+    {
+        // We ideally want the string value of the enum value
+        var type = this.Type.TypeDef;
+        var fields = type.FieldList;
+        for (var i = 0; i < fields.Size; ++i)
+        {
+            var field = fields.getValueAt(i);
+            if ((field.Flags.Value & __FieldAttributesFlags.Literal) == __FieldAttributesFlags.Literal &&
+                (field.Flags.Value & __FieldAttributesFlags.Static) == __FieldAttributesFlags.Static)
+            {
+                if (field.Constant.Value == this.Value)
+                {
+                    return this.Type.toString() + "::" + field.Name;
+                }
+            }
+        }
+
+        return this.Type.toString() + "(" + this.Value.toString() + ")";
     }
 
     get Type()
@@ -3946,9 +3829,24 @@ class __EnumValue
 
 class __ElemSig
 {
-    static __fromParam(database, param, stream)
+    static __fromParam(param, stream)
     {
-        // TODO: read_element
+        var type = param.Type.Type;
+        if (type.constructor.name == "__ElementTypeVisualizer")
+        {
+            return __ElemSig.__fromElementType(type.Value, stream);
+        }
+
+        if (type.constructor.name == "__TypeRefVisualizer" || type.constructor.name == "__TypeDefVisualizer")
+        {
+            if (type.TypeNamespace == "System" && type.TypeName == "Type")
+            {
+                return __ElemSig.__fromSystemType(stream.consumeString());
+            }
+        }
+
+        // Should be an enum
+        return __ElemSig.__fromEnumDefinition(new __EnumDefinition(type.FindDefinition()), stream);
     }
 
     static __fromSystemType(name)
@@ -3958,17 +3856,94 @@ class __ElemSig
 
     static __fromEnumDefinition(def, stream)
     {
-        return new __ElemSig(new __EnumValue(def, TODO_read_enum));
+        var value;
+        switch (def.UnderlyingType.Value)
+        {
+        case __ElementType.Boolean:
+            value = stream.consumeValue(1) == 0 ? false : true;
+            break;
+
+        case __ElementType.I1:
+        case __ElementType.U1:
+            value = stream.consumeValue(1);
+            break;
+
+        case __ElementType.Char:
+        case __ElementType.I2:
+        case __ElementType.U2:
+            value = stream.consumeValue(2);
+            break;
+
+        case __ElementType.I4:
+        case __ElementType.U4:
+            value = stream.consumeValue(4);
+            break;
+
+        case __ElementType.I8:
+        case __ElementType.U8:
+            value = stream.consumeValue(8);
+            break;
+
+        default:
+            throw new Error("Invalid underling enum type encountered: " + def.UnderlyingType);
+        }
+
+        return new __ElemSig(new __EnumValue(def, value), stream);
     }
 
-    static __fromElementType(type, data)
+    static __fromElementType(type, stream)
     {
-        // TODO: read_primitive
+        var value;
+        switch (type)
+        {
+        case __ElementType.Boolean:
+            value = stream.consumeValue(1) == 0 ? false : true;
+            break;
+
+        case __ElementType.I1:
+        case __ElementType.U1:
+            value = stream.consumeValue(1);
+            break;
+
+        case __ElementType.Char:
+        case __ElementType.I2:
+        case __ElementType.U2:
+            value = stream.consumeValue(2);
+            break;
+
+        case __ElementType.I4:
+        case __ElementType.U4:
+            value = stream.consumeValue(4);
+            break;
+
+        case __ElementType.I8:
+        case __ElementType.U8:
+            value = stream.consumeValue(8);
+            break;
+
+        case __ElementType.R4:
+        case __ElementType.R8:
+            throw new Error("Floating point element types not yet supported");
+
+        case __ElementType.String:
+            value = stream.consumeString();
+            break;
+
+        default:
+            throw new Error("Non-primitive type encountered: " + __enumToString(type, __ElementType));
+        }
+
+        return new __ElemSig(value);
     }
 
     constructor(value)
     {
         this.__value = value;
+    }
+
+    toString()
+    {
+        return this.Value.toString();
     }
 
     get Value()

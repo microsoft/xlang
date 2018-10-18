@@ -191,11 +191,7 @@ inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef
 )^-^", contractName, bind<write_contract_version>(contractVersion));
     }
 
-    if (typeCategory == category::class_type)
-    {
-        // TODO
-    }
-    else if (typeCategory == category::interface_type)
+    if (typeCategory == category::interface_type)
     {
         if (auto exclusiveAttr = get_attribute(type, metadata_namespace, exclusive_to_attribute))
         {
@@ -209,7 +205,41 @@ inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef
 )^-^", sysType.name);
         }
 
-        // TODO: Required interfaces
+        auto requiredInterfaces = type.InterfaceImpl();
+        if (requiredInterfaces.first != requiredInterfaces.second)
+        {
+            w.write(R"^-^( *
+ * Any object which implements this interface must also implement the following interfaces:
+)^-^");
+            for (auto const& iface : requiredInterfaces)
+            {
+                w.write(" *     ");
+                write_type_clr(w, iface.Interface(), generic_arg_stack::empty(), format_flags::none);
+                w.write('\n');
+            }
+        }
+    }
+    else if (typeCategory == category::class_type)
+    {
+        // TODO: Activation Comment
+        // TODO: Static Methods Comment
+
+        auto requiredInterfaces = type.InterfaceImpl();
+        if (requiredInterfaces.first != requiredInterfaces.second)
+        {
+            w.write(R"^-^( *
+ * Class implements the following interfaces:
+)^-^");
+            for (auto const& iface : requiredInterfaces)
+            {
+                w.write(" *     ");
+                write_type_clr(w, iface.Interface(), generic_arg_stack::empty(), format_flags::none);
+                w.write('\n');
+            }
+        }
+
+        // TODO: Threading model Comment
+        // TODO: Marshaling behavior Comment
     }
 
     w.write(R"^-^( *
@@ -359,6 +389,15 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
     bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none),
     bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none));
 
+    if (typeCategory == category::interface_type)
+    {
+        w.write(R"^-^(extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] = L"%";
+)^-^",
+            bind_list("_", namespace_range{ ns }),
+            name,
+            bind<write_typedef_clr>(type, generic_arg_stack::empty(), format_flags::none));
+    }
+
     w.push_namespace(ns);
     w.write(R"^-^(%MIDL_INTERFACE("%")
 %%% : public %
@@ -391,4 +430,25 @@ EXTERN_C const IID IID_%;
 )^-^",
     bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none),
     bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none));
+}
+
+inline void write_class_name_definition(writer& w, xlang::meta::reader::TypeDef const& type)
+{
+    using namespace xlang::text;
+    auto const ns = type.TypeNamespace();
+    auto const name = type.TypeName();
+
+    write_type_definition_banner(w, type);
+    w.write(R"^-^(#ifndef RUNTIMECLASS_%_%_DEFINED
+#define RUNTIMECLASS_%_%_DEFINED
+extern const __declspec(selectany) _Null_terminated_ WCHAR RuntimeClass_%_%[] = L"%";
+#endif
+)^-^",
+        bind_list("_", namespace_range{ ns }),
+        name,
+        bind_list("_", namespace_range{ ns }),
+        name,
+        bind_list("_", namespace_range{ ns }),
+        name,
+        bind<write_typedef_clr>(type, generic_arg_stack::empty(), format_flags::none));
 }

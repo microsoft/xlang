@@ -108,7 +108,16 @@ inline void write_type_signature(writer& w, xlang::meta::reader::GenericTypeInst
 inline void write_type_guid(writer& w, xlang::meta::reader::TypeDef const& type);
 inline void write_generic_type_guid(writer& w, xlang::meta::reader::GenericTypeInstSig const& type, generic_arg_stack const& genericArgs);
 
-// Functions specialized for bind<...>(...)
+// Functions specialized for use with bind<...>(...)
+inline void write_typedef_clr(
+    writer& w,
+    xlang::meta::reader::TypeDef const& type,
+    generic_arg_stack const& genericArgs,
+    format_flags flags = format_flags::none)
+{
+    write_type_clr(w, type, genericArgs, flags);
+}
+
 inline void write_generictype_clr(
     writer& w,
     xlang::meta::reader::GenericTypeInstSig const& type,
@@ -298,7 +307,7 @@ inline void write_type_clr(
 inline void write_type_cpp(
     writer& w,
     xlang::meta::reader::TypeDef const& type,
-    generic_arg_stack const& /*genericArgs*/,
+    generic_arg_stack const& genericArgs,
     format_flags flags)
 {
     using namespace xlang::meta::reader;
@@ -307,24 +316,35 @@ inline void write_type_cpp(
     bool const genericParam = flags_set(flags, format_flags::generic_param);
     bool const functionParam = flags_set(flags, format_flags::function_param);
     bool const ignoreNamespace = flags_set(flags, format_flags::ignore_namespace);
-    auto const typeCategory = get_category(type);
+    auto typeCategory = get_category(type);
 
     // Types used as either function or generic parameters get mangled, so we shouldn't ever make it this far
     XLANG_ASSERT(!genericParam || (distance(type.GenericParam()) == 0));
     XLANG_ASSERT(!functionParam || (distance(type.GenericParam()) == 0));
 
-    if (genericParam)
+    // Function parameters must be ABI types
+    if (functionParam && (typeCategory == category::class_type))
     {
-        switch (typeCategory)
-        {
-        case category::struct_type:
-            w.write("struct ");
-            break;
+        XLANG_ASSERT(!genericParam); // We should be mangling these names
+        write_type_cpp(w, default_interface(type), genericArgs, flags);
+        return;
+    }
 
-        case category::enum_type:
-            w.write(w.config().enum_class ? "MIDL_ENUM " : "enum ");
-            break;
+    switch (typeCategory)
+    {
+    case category::struct_type:
+        if (genericParam || functionParam)
+        {
+            w.write("struct ");
         }
+        break;
+
+    case category::enum_type:
+        if (genericParam)
+        {
+            w.write(w.config().enum_class ? "MIDL_ENUM " : "enum ");
+        }
+        break;
     }
 
     if (!ignoreNamespace)
