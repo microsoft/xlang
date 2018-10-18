@@ -1019,7 +1019,7 @@ static void @_dealloc(%* self)
         w.write_indented("PyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
         {
             writer::indent_guard g{ w };
-            w.write_indented("return py::wrap_struct<%>(instance, py::winrt_type<%>::get_python_type());\n", type, type);
+            w.write_indented("return py::wrap_struct<%>(instance, py::get_python_type<%>());\n", type, type);
         }
         w.write_indented("}\n\n");
 
@@ -1027,7 +1027,7 @@ static void @_dealloc(%* self)
         {
             writer::indent_guard g{ w };
             w.write_indented("throw_if_pyobj_null(obj);\n");
-            w.write_indented(R"(if (Py_TYPE(obj) == py::winrt_type<%>::get_python_type())
+            w.write_indented(R"(if (Py_TYPE(obj) == py::get_python_type<%>())
 {
     return reinterpret_cast<py::winrt_struct_wrapper<%>*>(obj)->obj;
 }
