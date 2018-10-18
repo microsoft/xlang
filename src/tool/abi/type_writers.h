@@ -48,6 +48,9 @@ enum class format_flags
     none = 0x00,
     generic_param = 0x01,       // Generic params often get handled differently (e.g. pointers, mangled names, etc.)
     ignore_namespace = 0x02,    // Only write type the type name
+    function_param = 0x04,      // Function params get handled similarly, but not identically, to generic params
+
+    generic_or_function_param = generic_param | function_param,
 };
 inline constexpr format_flags operator&(format_flags lhs, format_flags rhs) { return static_cast<format_flags>(static_cast<int>(lhs) & static_cast<int>(rhs)); }
 inline constexpr format_flags operator|(format_flags lhs, format_flags rhs) { return static_cast<format_flags>(static_cast<int>(lhs) | static_cast<int>(rhs)); }
@@ -56,6 +59,11 @@ inline constexpr format_flags operator~(format_flags value) { return static_cast
 constexpr bool flags_set(format_flags flags, format_flags mask)
 {
     return (flags & mask) == mask;
+}
+
+constexpr bool any_flag_set(format_flags flags, format_flags mask)
+{
+    return (flags & mask) != format_flags::none;
 }
 
 constexpr bool flags_clear(format_flags flags, format_flags mask)
@@ -119,6 +127,15 @@ inline void write_typedef_cpp(
     write_type_cpp(w, type, genericArgs, flags);
 }
 
+inline void write_typesig_cpp(
+    writer& w,
+    xlang::meta::reader::TypeSig const& type,
+    generic_arg_stack const& genericArgs,
+    format_flags flags = format_flags::none)
+{
+    return write_type_cpp(w, type, genericArgs, flags);
+}
+
 inline void write_generictype_cpp(
     writer& w,
     xlang::meta::reader::GenericTypeInstSig const& type,
@@ -170,7 +187,21 @@ inline void write_type_clr(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    write_type_clr(w, find_required(ref), genericArgs, flags);
+    if (ref.TypeNamespace() == system_namespace)
+    {
+        if (ref.TypeName() == "Guid")
+        {
+            w.write("Guid");
+        }
+        else
+        {
+            XLANG_ASSERT(false);
+        }
+    }
+    else
+    {
+        write_type_clr(w, find_required(ref), genericArgs, flags);
+    }
 }
 
 inline void write_type_clr(
@@ -188,7 +219,6 @@ inline void write_type_clr(
         {
         case ElementType::Boolean: return "Boolean"sv;
         case ElementType::Char: return "Char16"sv;
-        case ElementType::I1: XLANG_ASSERT(false); return ""sv; // TODO? This type seems to be a lie
         case ElementType::U1: return "UInt8"sv;
         case ElementType::I2: return "Int16"sv;
         case ElementType::U2: return "UInt16"sv;
@@ -275,11 +305,13 @@ inline void write_type_cpp(
     using namespace xlang::text;
 
     bool const genericParam = flags_set(flags, format_flags::generic_param);
+    bool const functionParam = flags_set(flags, format_flags::function_param);
     bool const ignoreNamespace = flags_set(flags, format_flags::ignore_namespace);
     auto const typeCategory = get_category(type);
 
-    // TODO: Figure out this comment
+    // Types used as either function or generic parameters get mangled, so we shouldn't ever make it this far
     XLANG_ASSERT(!genericParam || (distance(type.GenericParam()) == 0));
+    XLANG_ASSERT(!functionParam || (distance(type.GenericParam()) == 0));
 
     if (genericParam)
     {
@@ -305,7 +337,7 @@ inline void write_type_cpp(
     name = name.substr(0, name.find('`'));
     w.write("%%", type_prefix(typeCategory), name);
 
-    if (genericParam)
+    if (genericParam || functionParam)
     {
         switch (typeCategory)
         {
@@ -329,7 +361,21 @@ inline void write_type_cpp(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    write_type_cpp(w, find_required(ref), genericArgs, flags);
+    if (ref.TypeNamespace() == system_namespace)
+    {
+        if (ref.TypeName() == "Guid")
+        {
+            w.write("GUID");
+        }
+        else
+        {
+            XLANG_ASSERT(false);
+        }
+    }
+    else
+    {
+        write_type_cpp(w, find_required(ref), genericArgs, flags);
+    }
 }
 
 inline void write_type_cpp(
@@ -346,16 +392,15 @@ inline void write_type_cpp(
     switch (type)
     {
         case ElementType::Void: return "void"sv;
-        case ElementType::Boolean: return flags_set(flags, format_flags::generic_param) ? "bool"sv : "boolean"sv;
+        case ElementType::Boolean: return flags_set(flags, format_flags::generic_param) ? "bool"sv : "::boolean"sv;
         case ElementType::Char: return "wchar_t"sv;
-        case ElementType::I1: XLANG_ASSERT(false); return ""sv; // TODO? This type seems to be a lie
         case ElementType::U1: return "::byte"sv;
         case ElementType::I2: return "short"sv;
-        case ElementType::U2: return "UINT16"sv;
+        case ElementType::U2: return flags_set(flags, format_flags::generic_param) ? "UINT16"sv : "unsigned short"sv;
         case ElementType::I4: return "int"sv;
-        case ElementType::U4: return "UINT32"sv;
+        case ElementType::U4: return flags_set(flags, format_flags::generic_param) ? "UINT32"sv : "unsigned int"sv;
         case ElementType::I8: return "__int64"sv;
-        case ElementType::U8: return "UINT64"sv;
+        case ElementType::U8: return flags_set(flags, format_flags::generic_param) ? "UINT64"sv : "unsigned __int64"sv;
         case ElementType::R4: return "float"sv;
         case ElementType::R8: return "double"sv;
         case ElementType::String: return "HSTRING"sv;
@@ -408,9 +453,9 @@ inline void write_type_cpp(
 {
     using namespace std::literals;
 
-    if (flags_set(flags, format_flags::generic_param))
+    if (any_flag_set(flags, format_flags::generic_or_function_param))
     {
-        // Generics get mangled when supplied as template arguments
+        // Generics get mangled when supplied as function or template arguments
         write_type_mangled(w, type, genericArgs, flags);
         w.write('*');
     }
@@ -497,7 +542,21 @@ inline void write_type_mangled(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    write_type_mangled(w, find_required(ref), genericArgs, flags);
+    if (ref.TypeNamespace() == system_namespace)
+    {
+        if (ref.TypeName() == "Guid")
+        {
+            w.write("GUID");
+        }
+        else
+        {
+            XLANG_ASSERT(false);
+        }
+    }
+    else
+    {
+        write_type_mangled(w, find_required(ref), genericArgs, flags);
+    }
 }
 
 inline void write_type_mangled(
@@ -515,7 +574,6 @@ inline void write_type_mangled(
         {
         case ElementType::Boolean: return "boolean"sv;
         case ElementType::Char: return "wchar__zt"sv;
-        case ElementType::I1: XLANG_ASSERT(false); return ""sv; // TODO? This type seems to be a lie
         case ElementType::U1: return "byte"sv;
         case ElementType::I2: return "short"sv;
         case ElementType::U2: return "UINT16"sv;
@@ -668,7 +726,21 @@ inline void write_type_signature(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    write_type_signature(w, find_required(ref), genericArgs, flags);
+    if (ref.TypeNamespace() == system_namespace)
+    {
+        if (ref.TypeName() == "Guid")
+        {
+            w.write("g16");
+        }
+        else
+        {
+            XLANG_ASSERT(false);
+        }
+    }
+    else
+    {
+        write_type_signature(w, find_required(ref), genericArgs, flags);
+    }
 }
 
 inline void write_type_signature(
@@ -686,7 +758,6 @@ inline void write_type_signature(
         {
         case ElementType::Boolean: return "b1"sv;
         case ElementType::Char: return "c2"sv;
-        case ElementType::I1: XLANG_ASSERT(false); return ""sv; // TODO? This type seems to be a lie
         case ElementType::U1: return "u1"sv;
         case ElementType::I2: return "i2"sv;
         case ElementType::U2: return "u2"sv;
@@ -863,24 +934,38 @@ inline void write_generic_impl_param(
                 },
                 [&](auto const& defOrRef)
                 {
-                    auto&& def = find_required(defOrRef);
-                    switch (get_category(def))
+                    if (defOrRef.TypeNamespace() == system_namespace)
                     {
-                    case category::class_type:
+                        if (defOrRef.TypeName() == "Guid")
+                        {
+                            w.write("GUID");
+                        }
+                        else
+                        {
+                            XLANG_ASSERT(false);
+                        }
+                    }
+                    else
                     {
-                        // Only class types get aggregated
-                        auto iface = default_interface(def);
-                        write_aggregate_type(w,
-                            bind<write_typedef_cpp>(def, genericArgs, format_flags::generic_param),
-                            [&](auto& w) { write_type_cpp(w, iface, genericArgs, format_flags::generic_param); });
-                    }   break;
+                        auto&& def = find_required(defOrRef);
+                        switch (get_category(def))
+                        {
+                        case category::class_type:
+                        {
+                            // Only class types get aggregated
+                            auto iface = default_interface(def);
+                            write_aggregate_type(w,
+                                bind<write_typedef_cpp>(def, genericArgs, format_flags::generic_param),
+                                [&](auto& w) { write_type_cpp(w, iface, genericArgs, format_flags::generic_param); });
+                        }   break;
 
-                    case category::interface_type:
-                    case category::enum_type:
-                    case category::struct_type:
-                    case category::delegate_type:
-                        write_type_cpp(w, def, genericArgs, format_flags::generic_param);
-                        break;
+                        case category::interface_type:
+                        case category::enum_type:
+                        case category::struct_type:
+                        case category::delegate_type:
+                            write_type_cpp(w, def, genericArgs, format_flags::generic_param);
+                            break;
+                        }
                     }
                 }});
         },

@@ -39,6 +39,25 @@ struct type_name
             return name < other.name;
         }
     }
+
+    // So that this type can be used in contexts that call 'TypeName' and 'TypeNamespace'
+    auto TypeNamespace() { return this->ns; }
+    auto TypeName() { return this->name; }
+};
+
+struct typename_compare
+{
+    template <typename LhsT, typename RhsT>
+    bool operator()(LhsT const& lhs, RhsT const& rhs) const noexcept
+    {
+        auto cmp = lhs.TypeNamespace().compare(rhs.TypeNamespace());
+        if (cmp == 0)
+        {
+            cmp = lhs.TypeName().compare(rhs.TypeName());
+        }
+
+        return cmp < 0;
+    }
 };
 
 struct writer : xlang::text::writer_base<writer>
@@ -124,6 +143,121 @@ struct writer : xlang::text::writer_base<writer>
         }
     }
 
+    void write_value(bool value)
+    {
+        write(value ? "TRUE" : "FALSE");
+    }
+
+    void write_value(char16_t value)
+    {
+        write_printf("%#0hx", value);
+    }
+
+    void write_value(int8_t value)
+    {
+        write_printf("%hhd", value);
+    }
+
+    void write_value(uint8_t value)
+    {
+        write_printf("%#0hhx", value);
+    }
+
+    void write_value(int16_t value)
+    {
+        write_printf("%hd", value);
+    }
+
+    void write_value(uint16_t value)
+    {
+        write_printf("%#0hx", value);
+    }
+
+    void write_value(int32_t value)
+    {
+        write_printf("%d", value);
+    }
+
+    void write_value(uint32_t value)
+    {
+        write_printf("%#0x", value);
+    }
+
+    void write_value(int64_t value)
+    {
+        write_printf("%lld", value);
+    }
+
+    void write_value(uint64_t value)
+    {
+        write_printf("%#0llx", value);
+    }
+
+    void write_value(float value)
+    {
+        write_printf("%f", value);
+    }
+
+    void write_value(double value)
+    {
+        write_printf("%f", value);
+    }
+
+    void write_value(std::string_view value)
+    {
+        write("\"%\"", value);
+    }
+
+    void write(xlang::meta::reader::Constant const& value)
+    {
+        using namespace xlang::meta::reader;
+        switch (value.Type())
+        {
+        case ConstantType::Boolean:
+            write_value(value.ValueBoolean());
+            break;
+        case ConstantType::Char:
+            write_value(value.ValueChar());
+            break;
+        case ConstantType::Int8:
+            write_value(value.ValueInt8());
+            break;
+        case ConstantType::UInt8:
+            write_value(value.ValueUInt8());
+            break;
+        case ConstantType::Int16:
+            write_value(value.ValueInt16());
+            break;
+        case ConstantType::UInt16:
+            write_value(value.ValueUInt16());
+            break;
+        case ConstantType::Int32:
+            write_value(value.ValueInt32());
+            break;
+        case ConstantType::UInt32:
+            write_value(value.ValueUInt32());
+            break;
+        case ConstantType::Int64:
+            write_value(value.ValueInt64());
+            break;
+        case ConstantType::UInt64:
+            write_value(value.ValueUInt64());
+            break;
+        case ConstantType::Float32:
+            write_value(value.ValueFloat32());
+            break;
+        case ConstantType::Float64:
+            write_value(value.ValueFloat64());
+            break;
+        case ConstantType::String:
+            write_value(value.ValueString());
+            break;
+        case ConstantType::Class:
+            write("null");
+            break;
+        }
+    }
+
     void push_namespace(std::string_view ns);
     void push_generic_namespace(std::string_view ns);
     void pop_namespace();
@@ -144,6 +278,9 @@ struct writer : xlang::text::writer_base<writer>
     void write_includes();
     void write_interface_forward_declarations();
     void write_generics_definitions();
+    void write_type_dependencies();
+    void write_type_declarations();
+    void write_type_definitions();
 
 private:
 
@@ -169,6 +306,7 @@ private:
     std::set<std::string> m_typeDeclarations;
 
     std::set<std::string_view> m_dependentNamespaces;
+    std::set<xlang::meta::reader::TypeDef, typename_compare> m_dependencies;
     std::map<type_name, std::vector<xlang::meta::reader::GenericTypeInstSig>> m_genericReferences;
 
     generic_arg_stack::type m_genericArgStack;

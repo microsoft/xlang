@@ -9,117 +9,155 @@ function initializeScript()
 
         // row_base derived types
         new host.typeSignatureRegistration(__AssemblyVisualizer, "xlang::meta::reader::Assembly"),
+        new host.typeSignatureRegistration(__AssemblyVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::Assembly>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Assembly>"),
 
         new host.typeSignatureRegistration(__AssemblyOSVisualizer, "xlang::meta::reader::AssemblyOS"),
+        new host.typeSignatureRegistration(__AssemblyOSVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::AssemblyOS>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyOSVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyOS>"),
 
         new host.typeSignatureRegistration(__AssemblyProcessorVisualizer, "xlang::meta::reader::AssemblyProcessor"),
+        new host.typeSignatureRegistration(__AssemblyProcessorVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::AssemblyProcessor>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyProcessorVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyProcessor>"),
 
         new host.typeSignatureRegistration(__AssemblyRefVisualizer, "xlang::meta::reader::AssemblyRef"),
+        new host.typeSignatureRegistration(__AssemblyRefVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::AssemblyRef>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyRef>"),
 
         new host.typeSignatureRegistration(__AssemblyRefOSVisualizer, "xlang::meta::reader::AssemblyRefOS"),
+        new host.typeSignatureRegistration(__AssemblyRefOSVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::AssemblyRefOS>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyRefOSVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyRefOS>"),
 
         new host.typeSignatureRegistration(__AssemblyRefProcessorVisualizer, "xlang::meta::reader::AssemblyRefProcessor"),
+        new host.typeSignatureRegistration(__AssemblyRefProcessorVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::AssemblyRefProcessor>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__AssemblyRefProcessorVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::AssemblyRefProcessor>"),
 
         new host.typeSignatureRegistration(__ClassLayoutVisualizer, "xlang::meta::reader::ClassLayout"),
+        new host.typeSignatureRegistration(__ClassLayoutVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::ClassLayout>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ClassLayoutVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ClassLayout>"),
 
         new host.typeSignatureRegistration(__ConstantVisualizer, "xlang::meta::reader::Constant"),
+        new host.typeSignatureRegistration(__ConstantVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::Constant>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ConstantVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Constant>"),
 
         new host.typeSignatureRegistration(__CustomAttributeVisualizer, "xlang::meta::reader::CustomAttribute"),
+        new host.typeSignatureRegistration(__CustomAttributeVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::CustomAttribute>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__CustomAttributeVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::CustomAttribute>"),
 
         new host.typeSignatureRegistration(__DeclSecurityVisualizer, "xlang::meta::reader::DeclSecurity"),
+        new host.typeSignatureRegistration(__DeclSecurityVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::DeclSecurity>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__DeclSecurityVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::DeclSecurity>"),
 
         new host.typeSignatureRegistration(__EventMapVisualizer, "xlang::meta::reader::EventMap"),
+        new host.typeSignatureRegistration(__EventMapVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::EventMap>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__EventMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::EventMap>"),
 
         new host.typeSignatureRegistration(__EventVisualizer, "xlang::meta::reader::Event"),
+        new host.typeSignatureRegistration(__EventVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::Event>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__EventVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Event>"),
 
         new host.typeSignatureRegistration(__ExportedTypeVisualizer, "xlang::meta::reader::ExportedType"),
+        new host.typeSignatureRegistration(__ExportedTypeVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::ExportedType>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ExportedTypeVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ExportedType>"),
 
         new host.typeSignatureRegistration(__FieldVisualizer, "xlang::meta::reader::Field"),
+        new host.typeSignatureRegistration(__FieldVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::Field>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Field>"),
 
         new host.typeSignatureRegistration(__FieldLayoutVisualizer, "xlang::meta::reader::FieldLayout"),
+        new host.typeSignatureRegistration(__FieldLayoutVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::FieldLayout>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldLayoutVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::FieldLayout>"),
 
         new host.typeSignatureRegistration(__FieldMarshalVisualizer, "xlang::meta::reader::FieldMarshal"),
+        new host.typeSignatureRegistration(__FieldMarshalVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::FieldMarshal>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldMarshalVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::FieldMarshal>"),
 
         new host.typeSignatureRegistration(__FieldRVAVisualizer, "xlang::meta::reader::FieldRVA"),
+        new host.typeSignatureRegistration(__FieldRVAVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::FieldRVA>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__FieldRVAVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::FieldRVA>"),
 
         new host.typeSignatureRegistration(__FileVisualizer, "xlang::meta::reader::File"),
+        new host.typeSignatureRegistration(__FileVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::File>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__FileVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::File>"),
 
         new host.typeSignatureRegistration(__GenericParamVisualizer, "xlang::meta::reader::GenericParam"),
+        new host.typeSignatureRegistration(__GenericParamVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::GenericParam>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__GenericParamVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::GenericParam>"),
 
         new host.typeSignatureRegistration(__GenericParamConstraintVisualizer, "xlang::meta::reader::GenericParamConstraint"),
+        new host.typeSignatureRegistration(__GenericParamConstraintVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::GenericParamConstraint>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__GenericParamConstraintVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::GenericParamConstraint>"),
 
         new host.typeSignatureRegistration(__ImplMapVisualizer, "xlang::meta::reader::ImplMap"),
+        new host.typeSignatureRegistration(__ImplMapVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::ImplMap>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ImplMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ImplMap>"),
 
         new host.typeSignatureRegistration(__InterfaceImplVisualizer, "xlang::meta::reader::InterfaceImpl"),
+        new host.typeSignatureRegistration(__InterfaceImplVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::InterfaceImpl>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__InterfaceImplVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::InterfaceImpl>"),
 
         new host.typeSignatureRegistration(__ManifestResourceVisualizer, "xlang::meta::reader::ManifestResource"),
+        new host.typeSignatureRegistration(__ManifestResourceVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::ManifestResource>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ManifestResourceVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ManifestResource>"),
 
         new host.typeSignatureRegistration(__MemberRefVisualizer, "xlang::meta::reader::MemberRef"),
+        new host.typeSignatureRegistration(__MemberRefVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::MemberRef>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__MemberRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MemberRef>"),
 
         new host.typeSignatureRegistration(__MethodDefVisualizer, "xlang::meta::reader::MethodDef"),
+        new host.typeSignatureRegistration(__MethodDefVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::MethodDef>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodDefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodDef>"),
 
         new host.typeSignatureRegistration(__MethodImplVisualizer, "xlang::meta::reader::MethodImpl"),
+        new host.typeSignatureRegistration(__MethodImplVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::MethodImpl>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodImplVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodImpl>"),
 
         new host.typeSignatureRegistration(__MethodSemanticsVisualizer, "xlang::meta::reader::MethodSemantics"),
+        new host.typeSignatureRegistration(__MethodSemanticsVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::MethodSemantics>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodSemanticsVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodSemantics>"),
 
         new host.typeSignatureRegistration(__MethodSpecVisualizer, "xlang::meta::reader::MethodSpec"),
+        new host.typeSignatureRegistration(__MethodSpecVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::MethodSpec>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__MethodSpecVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::MethodSpec>"),
 
         new host.typeSignatureRegistration(__ModuleVisualizer, "xlang::meta::reader::Module"),
+        new host.typeSignatureRegistration(__ModuleVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::Module>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ModuleVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Module>"),
 
         new host.typeSignatureRegistration(__ModuleRefVisualizer, "xlang::meta::reader::ModuleRef"),
+        new host.typeSignatureRegistration(__ModuleRefVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::ModuleRef>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ModuleRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::ModuleRef>"),
 
         new host.typeSignatureRegistration(__NestedClassVisualizer, "xlang::meta::reader::NestedClass"),
+        new host.typeSignatureRegistration(__NestedClassVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::NestedClass>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__NestedClassVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::NestedClass>"),
 
         new host.typeSignatureRegistration(__ParamVisualizer, "xlang::meta::reader::Param"),
+        new host.typeSignatureRegistration(__ParamVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::Param>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__ParamVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Param>"),
 
         new host.typeSignatureRegistration(__PropertyVisualizer, "xlang::meta::reader::Property"),
+        new host.typeSignatureRegistration(__PropertyVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::Property>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__PropertyVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::Property>"),
 
         new host.typeSignatureRegistration(__PropertyMapVisualizer, "xlang::meta::reader::PropertyMap"),
+        new host.typeSignatureRegistration(__PropertyMapVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::PropertyMap>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__PropertyMapVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::PropertyMap>"),
 
         new host.typeSignatureRegistration(__StandAloneSigVisualizer, "xlang::meta::reader::StandAloneSig"),
+        new host.typeSignatureRegistration(__StandAloneSigVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::StandAloneSig>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__StandAloneSigVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::StandAloneSig>"),
 
         new host.typeSignatureRegistration(__TypeDefVisualizer, "xlang::meta::reader::TypeDef"),
+        new host.typeSignatureRegistration(__TypeDefVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::TypeDef>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__TypeDefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::TypeDef>"),
 
         new host.typeSignatureRegistration(__TypeRefVisualizer, "xlang::meta::reader::TypeRef"),
+        new host.typeSignatureRegistration(__TypeRefVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::TypeRef>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__TypeRefVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::TypeRef>"),
 
         new host.typeSignatureRegistration(__TypeSpecVisualizer, "xlang::meta::reader::TypeSpec"),
+        new host.typeSignatureRegistration(__TypeSpecVisualizer, "xlang::meta::reader::row_base<xlang::meta::reader::TypeSpec>"),
         new host.typeSignatureRegistration(__MakeTableVisualizer("__TypeSpecVisualizer"), "xlang::meta::reader::table<xlang::meta::reader::TypeSpec>"),
 
         // coded_index types
@@ -138,6 +176,25 @@ function initializeScript()
         new host.typeSignatureRegistration(__TypeOrMethodDefCodedIndexVisualizer, "xlang::meta::reader::coded_index<xlang::meta::reader::TypeOrMethodDef>"),
 
         // Signature types
+        new host.typeSignatureRegistration(__CustomModSig, "xlang::meta::reader::CustomModSig"),
+        new host.typeSignatureRegistration(__GenericTypeInstSig, "xlang::meta::reader::GenericTypeInstSig"),
+        new host.typeSignatureRegistration(__GenericTypeIndex, "xlang::meta::reader::GenericTypeIndex"),
+        new host.typeSignatureRegistration(__TypeSig, "xlang::meta::reader::TypeSig"),
+        new host.typeSignatureRegistration(__ParamSig, "xlang::meta::reader::ParamSig"),
+        new host.typeSignatureRegistration(__RetTypeSig, "xlang::meta::reader::RetTypeSig"),
+        new host.typeSignatureRegistration(__MethodDefSig, "xlang::meta::reader::MethodDefSig"),
+        new host.typeSignatureRegistration(__FieldSig, "xlang::meta::reader::FieldSig"),
+        new host.typeSignatureRegistration(__PropertySig, "xlang::meta::reader::PropertySig"),
+        new host.typeSignatureRegistration(__TypeSpecSig, "xlang::meta::reader::TypeSpecSig"),
+        new host.typeSignatureRegistration(__CustomAttributeSig, "xlang::meta::reader::CustomAttributeSig"),
+        new host.typeSignatureRegistration(__FixedArgSig, "xlang::meta::reader::FixedArgSig"),
+        new host.typeSignatureRegistration(__NamedArgSig, "xlang::meta::reader::NamedArgSig"),
+        new host.typeSignatureRegistration(__ElemSig, "xlang::meta::reader::ElemSig"),
+
+        // Other
+        new host.typeSignatureRegistration(__EnumDefinition, "xlang::meta::reader::EnumDefinition"),
+        new host.typeSignatureRegistration(__SystemType, "xlang::meta::reader::ElemSig::SystemType"),
+        new host.typeSignatureRegistration(__EnumValue, "xlang::meta::reader::ElemSig::EnumValue"),
     ]
 }
 
@@ -528,7 +585,7 @@ class __BlobStream
         var length;
         if ((initialByte & 0x80) == 0)
         {
-            length = 0;
+            length = 1;
         }
         else if ((initialByte & 0xC0) == 0x80)
         {
@@ -554,6 +611,23 @@ class __BlobStream
             value: initialByte,
             length: length,
         }
+    }
+
+    consumeString()
+    {
+        var result = this.peekString();
+        this.__cursor += result.length;
+        return result.value;
+    }
+
+    peekString()
+    {
+        var lenInfo = this.peekUnsigned();
+        var str = this.__blob.ReadString(lenInfo.value, this.__cursor + lenInfo.length);
+        return {
+            value: str,
+            length: lenInfo.length + lenInfo.value
+        };
     }
 }
 
@@ -1204,6 +1278,11 @@ class __AssemblyVisualizer extends __RowBase
         return "Assembly";
     }
 
+    get Name()
+    {
+        return this.__getString(4);
+    }
+
     get HashAlgId()
     {
         return __enumToString(this.__getValue(0), __AssemblyHashAlgorithm);
@@ -1222,11 +1301,6 @@ class __AssemblyVisualizer extends __RowBase
     get PublicKey()
     {
         this.__getBlob(3);
-    }
-
-    get Name()
-    {
-        return this.__getString(4);
     }
 
     get Culture()
@@ -1293,6 +1367,11 @@ class __AssemblyRefVisualizer extends __RowBase
         return "AssemblyRef";
     }
 
+    get Name()
+    {
+        return this.__getString(3);
+    }
+
     get Flags()
     {
         return __enumFlagsToString(this.__getValue(1), __AssemblyFlags);
@@ -1306,11 +1385,6 @@ class __AssemblyRefVisualizer extends __RowBase
     get PublicKeyOrToken()
     {
         return this.__getBlob(2);
-    }
-
-    get Name()
-    {
-        return this.__getString(3);
     }
 
     get Culture()
@@ -1442,11 +1516,6 @@ class __ConstantVisualizer extends __RowBase
         }
     }
 
-    get Parent()
-    {
-        return this.__getCodedIndex(1, __HasConstant);
-    }
-
     get Value()
     {
         var blob = this.__getBlob(2);
@@ -1468,6 +1537,11 @@ class __ConstantVisualizer extends __RowBase
             case 18: return "Class; not yet supported";
             default: throw new Error("Unknown type");
         }
+    }
+
+    get Parent()
+    {
+        return this.__getCodedIndex(1, __HasConstant);
     }
 }
 
@@ -1505,9 +1579,7 @@ class __CustomAttributeVisualizer extends __RowBase
             sig = this.Type.Signature;
         }
 
-        var cursor = this.__getBlob(2);
-        return new __CustomAttributeSig(this.__Table, cursor); // TODO: Validate
-        // return CustomAttributeSig{ get_table(), cursor, method_sig };
+        return new __CustomAttributeSig(this.__Table, new __BlobStream(this.__getBlob(2)), sig);
     }
 }
 
@@ -1542,12 +1614,18 @@ class __DeclSecurityVisualizer extends __RowBase
 
     get PermissionSet()
     {
-        return this.__getBlob(2); // TODO: Type?
+        // NOTE: Table seems to be unused by WinMD, so leaving unimplemented for now
+        return this.__getBlob(2);
     }
 }
 
 class __EventMapVisualizer extends __RowBase
 {
+    toString()
+    {
+        return this.Parent.toString();
+    }
+
     get TableName()
     {
         return "EventMap";
@@ -1573,7 +1651,7 @@ class __EventVisualizer extends __RowBase
 {
     toString()
     {
-        return this.Name;
+        return this.Parent.toString() + "::" + this.Name;
     }
 
     get TableName()
@@ -1581,14 +1659,14 @@ class __EventVisualizer extends __RowBase
         return "Event";
     }
 
-    get EventFlags()
-    {
-        return __enumFlagsToString(this.__getValue(0), __EventAttributes);
-    }
-
     get Name()
     {
         return this.__getString(1);
+    }
+
+    get EventFlags()
+    {
+        return __enumFlagsToString(this.__getValue(0), __EventAttributes);
     }
 
     get EventType()
@@ -1596,14 +1674,14 @@ class __EventVisualizer extends __RowBase
         return this.__getCodedIndex(2, __TypeDefOrRef);
     }
 
-    get MethodSemantic()
-    {
-        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
-    }
-
     get Parent()
     {
         return this.__getParentRow("EventMap", 1).Parent;
+    }
+
+    get MethodSemantic()
+    {
+        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
     }
 
     get CustomAttribute()
@@ -1729,24 +1807,9 @@ class __FieldVisualizer extends __RowBase
         return "Field";
     }
 
-    get Flags()
-    {
-        return new __FieldAttributes(this.__getValue(0));
-    }
-
     get Name()
     {
         return this.__getString(1);
-    }
-
-    get Signature()
-    {
-        return new __FieldSig(this.__Table, new __BlobStream(this.__getBlob(2)));
-    }
-
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
     }
 
     get Constant()
@@ -1754,9 +1817,24 @@ class __FieldVisualizer extends __RowBase
         return this.__findConstant();
     }
 
+    get Flags()
+    {
+        return new __FieldAttributes(this.__getValue(0));
+    }
+
+    get Signature()
+    {
+        return new __FieldSig(this.__Table, new __BlobStream(this.__getBlob(2)));
+    }
+
     get Parent()
     {
         return this.__getParentRow("TypeDef", 4);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
     }
 }
 
@@ -1797,7 +1875,8 @@ class __FieldMarshalVisualizer extends __RowBase
 
     get NativeType()
     {
-        return this.__getBlob(1); // TODO: Type?
+        // NOTE: Table seems to be unused by WinMD, so leaving unimplemented for now
+        return this.__getBlob(1);
     }
 }
 
@@ -1882,6 +1961,11 @@ class __GenericParamVisualizer extends __RowBase
         return "GenericParam";
     }
 
+    get Name()
+    {
+        return this.__getString(3);
+    }
+
     get Number()
     {
         return this.__getValue(0);
@@ -1895,11 +1979,6 @@ class __GenericParamVisualizer extends __RowBase
     get Owner()
     {
         return this.__getCodedIndex(2, __TypeOrMethodDef);
-    }
-
-    get Name()
-    {
-        return this.__getString(3);
     }
 
     get CustomAttribute()
@@ -2092,7 +2171,7 @@ class __MemberRefVisualizer extends __RowBase
 {
     toString()
     {
-        return this.Class.toString();
+        return this.Class.toString() + "::" + this.Name;
     }
 
     get TableName()
@@ -2100,19 +2179,19 @@ class __MemberRefVisualizer extends __RowBase
         return "MemberRef";
     }
 
-    get Class()
-    {
-        return this.__getCodedIndex(0, __MemberRefParent);
-    }
-
     get Name()
     {
         return this.__getString(1);
     }
 
+    get Class()
+    {
+        return this.__getCodedIndex(0, __MemberRefParent);
+    }
+
     get MethodSignature()
     {
-        return this.__getBlob(2); // TODO: Type
+        return new __MethodDefSig(this.__Table, new __BlobStream(this.__getBlob(2)));
     }
 
     get CustomAttribute()
@@ -2222,12 +2301,17 @@ class __MethodDefVisualizer extends __RowBase
 {
     toString()
     {
-        return this.Name;
+        return this.Parent.toString() + "::" + this.Name;
     }
 
     get TableName()
     {
         return "MethodDef";
+    }
+
+    get Name()
+    {
+        return this.__getString(3);
     }
 
     get RVA()
@@ -2245,14 +2329,14 @@ class __MethodDefVisualizer extends __RowBase
         return new __MethodAttributes(this.__getValue(2));
     }
 
-    get Name()
-    {
-        return this.__getString(3);
-    }
-
     get Signature()
     {
-        return new __MethodDefSig(this.__Table, this.__getBlob(4));
+        return new __MethodDefSig(this.__Table, new __BlobStream(this.__getBlob(4)));
+    }
+
+    get Parent()
+    {
+        return this.__getParentRow("TypeDef", 5);
     }
 
     get ParamList()
@@ -2263,11 +2347,6 @@ class __MethodDefVisualizer extends __RowBase
     get CustomAttribute()
     {
         return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-
-    get Parent()
-    {
-        return this.__getParentRow("TypeDef", 5);
     }
 }
 
@@ -2355,7 +2434,8 @@ class __MethodSpecVisualizer extends __RowBase
 
     get Instantiation()
     {
-        return this.__getBlob(1); // TODO: Type
+        // NOTE: Table seems to be unused by WinMD, so leaving unimplemented for now
+        return this.__getBlob(1);
     }
 
     get CustomAttribute()
@@ -2468,6 +2548,11 @@ class __ParamVisualizer extends __RowBase
         return "Param";
     }
 
+    get Name()
+    {
+        return this.__getString(2);
+    }
+
     get Flags()
     {
         return __enumFlagsToString(this.__getValue(0), __ParamAttributes);
@@ -2478,19 +2563,14 @@ class __ParamVisualizer extends __RowBase
         return this.__getValue(1);
     }
 
-    get Name()
+    get Constant()
     {
-        return this.__getString(2);
+        return this.__findConstant();
     }
 
     get CustomAttribute()
     {
         return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-
-    get Constant()
-    {
-        return this.__findConstant();
     }
 }
 
@@ -2504,7 +2584,7 @@ class __PropertyVisualizer extends __RowBase
 {
     toString()
     {
-        return this.Name;
+        return this.Parent.toString() + "::" + this.Name;
     }
 
     get TableName()
@@ -2512,24 +2592,19 @@ class __PropertyVisualizer extends __RowBase
         return "Property";
     }
 
-    get Flags()
-    {
-        return __enumFlagsToString(this.__getValue(0), __PropertyAttributes);
-    }
-
     get Name()
     {
         return this.__getString(1);
     }
 
-    get Type()
+    get Flags()
     {
-        return this.__getBlob(2); // TODO: Type
+        return __enumFlagsToString(this.__getValue(0), __PropertyAttributes);
     }
 
-    get MethodSemantic()
+    get Type()
     {
-        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
+        return new __PropertySig(this.__Table, new __BlobStream(this.__getBlob(2)));
     }
 
     get Parent()
@@ -2542,6 +2617,11 @@ class __PropertyVisualizer extends __RowBase
         return this.__findConstant();
     }
 
+    get MethodSemantic()
+    {
+        return this.__equalRange("MethodSemantics", 2, __HasSemantics);
+    }
+
     get CustomAttribute()
     {
         return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
@@ -2550,6 +2630,11 @@ class __PropertyVisualizer extends __RowBase
 
 class __PropertyMapVisualizer extends __RowBase
 {
+    toString()
+    {
+        return this.Parent.toString();
+    }
+
     get TableName()
     {
         return "PropertyMap";
@@ -2575,12 +2660,89 @@ class __StandAloneSigVisualizer extends __RowBase
 
     get Signature()
     {
-        return this.__getBlob(0); // TODO: Type
+        // NOTE: Table seems to be unused by WinMD, so leaving unimplemented for now
+        return this.__getBlob(0);
     }
 
     get CustomAttribute()
     {
         return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
+    }
+}
+
+var __TypeVisibility = Object.freeze({
+    NotPublic: 0x00000000,
+    Public: 0x00000001,
+    NestedPublic: 0x00000002,
+    NestedPrivate: 0x00000003,
+    NestedFamily: 0x00000004,
+    NestedAssembly: 0x00000005,
+    NestedFamANDAssem: 0x00000006,
+    NestedFamORAssem: 0x00000007,
+});
+
+var __TypeLayout = Object.freeze({
+    AutoLayout: 0x00000000,
+    SequentialLayout: 0x00000008,
+    ExplicitLayout: 0x00000010,
+});
+
+var __TypeSemantics = Object.freeze({
+    Class: 0x00000000,
+    Interface: 0x00000020,
+});
+
+var __StringFormat = Object.freeze({
+    AnsiClass: 0x00000000,
+    UnicodeClass: 0x00010000,
+    AutoClass: 0x00020000,
+    CustomFormatClass: 0x00030000,
+});
+
+var __TypeAttributesFlags = Object.freeze({
+    Abstract: 0x00000080,
+    Sealed: 0x00000100,
+    SpecialName: 0x00000400,
+    Import: 0x00001000,
+    Serializable: 0x00002000,
+    WindowsRuntime: 0x00004000,
+
+    BeforeFieldInit: 0x00100000,
+    RTSpecialName: 0x00000800,
+    HasSecurity: 0x00040000,
+    IsTypeForwarder: 0x00200000,
+});
+
+class __TypeAttributes
+{
+    constructor(value)
+    {
+        this.__value = value;
+    }
+
+    toString()
+    {
+        var visibilityPart = this.__value & 0x00000007;
+        var layoutPart = this.__value & 0x00000018;
+        var semanticsPart = this.__value & 0x00000020;
+        var stringFormatPart = this.__value & 0x00030000;
+        var flagsPart = this.__value & ~0x0003003F;
+
+        var result = __enumToString(visibilityPart, __TypeVisibility);
+        result += " | " + __enumToString(layoutPart, __TypeLayout);
+        result += " | " + __enumToString(semanticsPart, __TypeSemantics);
+        result += " | " + __enumToString(stringFormatPart, __StringFormat);
+        if (flagsPart != 0)
+        {
+            result += " | " + __enumFlagsToString(flagsPart, __TypeAttributesFlags);
+        }
+
+        return result;
+    }
+
+    get Value()
+    {
+        return this.__value;
     }
 }
 
@@ -2601,9 +2763,19 @@ class __TypeDefVisualizer extends __RowBase
         return "TypeDef";
     }
 
+    get TypeName()
+    {
+        return this.__getString(1);
+    }
+
+    get TypeNamespace()
+    {
+        return this.__getString(2);
+    }
+
     get Flags()
     {
-        return this.__getValue(0); // TODO: Not a mask; need proper support
+        return new __TypeAttributes(this.__getValue(0));
     }
 
     get TypeName()
@@ -2631,11 +2803,6 @@ class __TypeDefVisualizer extends __RowBase
         return this.__getList("MethodDef", 5);
     }
 
-    get CustomAttribute()
-    {
-        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
-    }
-
     get InterfaceImpl()
     {
         return this.__equalRange("InterfaceImpl", 0);
@@ -2644,6 +2811,16 @@ class __TypeDefVisualizer extends __RowBase
     get GenericParam()
     {
         return this.__equalRange("GenericParam", 2, __TypeOrMethodDef);
+    }
+
+    get MethodImplList()
+    {
+        return this.__equalRange("MethodImpl", 0);
+    }
+
+    get CustomAttribute()
+    {
+        return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
     }
 
     GetPropertyList()
@@ -2687,11 +2864,6 @@ class __TypeDefVisualizer extends __RowBase
 
         return table[i].EventList;
     }
-
-    get MethodImplList()
-    {
-        return this.__equalRange("MethodImpl", 0);
-    }
 }
 
 class __TypeRefVisualizer extends __RowBase
@@ -2706,11 +2878,6 @@ class __TypeRefVisualizer extends __RowBase
         return "TypeRef";
     }
 
-    get ResolutionScope()
-    {
-        return this.__getCodedIndex(0, __ResolutionScope);
-    }
-
     get TypeName()
     {
         return this.__getString(1);
@@ -2721,6 +2888,11 @@ class __TypeRefVisualizer extends __RowBase
         return this.__getString(2);
     }
 
+    get ResolutionScope()
+    {
+        return this.__getCodedIndex(0, __ResolutionScope);
+    }
+
     get CustomAttribute()
     {
         return this.__equalRange("CustomAttribute", 0, __HasCustomAttribute);
@@ -2728,8 +2900,7 @@ class __TypeRefVisualizer extends __RowBase
 
     FindDefinition()
     {
-        var typeNamespace = this.TypeNamespace;
-        var typeName = this.TypeName;
+        var searchString = this.TypeNamespace + "." + this.TypeName;
 
         // Search for a TypeDef instance of the same name
         var table = this.__Table.Database.TypeDef;
@@ -2739,29 +2910,19 @@ class __TypeRefVisualizer extends __RowBase
         {
             var mid = Math.floor((min + max) / 2);
             var def = table.getValueAt(mid);
-            if ((def.TypeNamespace < typeNamespace))
+
+            var testString = def.TypeNamespace + "." + def.TypeName;
+            if (searchString < testString)
+            {
+                max = mid;
+            }
+            else if (searchString > testString)
             {
                 min = mid + 1;
             }
-            else if (def.TypeNamespace == typeNamespace)
-            {
-                if (def.TypeName < typeName)
-                {
-                    min = mid + 1;
-                }
-                else if (def.TypeName == typeName)
-                {
-                    // We've found it
-                    return def;
-                }
-                else
-                {
-                    max = mid;
-                }
-            }
             else
             {
-                max = mid;
+                return def;
             }
         }
 
@@ -2772,7 +2933,10 @@ class __TypeRefVisualizer extends __RowBase
 
 class __TypeSpecVisualizer extends __RowBase
 {
-    // toString()
+    toString()
+    {
+        return this.Signature.toString();
+    }
 
     get TableName()
     {
@@ -2781,7 +2945,7 @@ class __TypeSpecVisualizer extends __RowBase
 
     get Signature()
     {
-        return new __TypeSpecSignature(this.__Table, new __BlobStream(this.__getBlob(0)));
+        return new __TypeSpecSig(this.__Table, new __BlobStream(this.__getBlob(0)));
     }
 
     get CustomAttribute()
@@ -2914,7 +3078,8 @@ class __TypeOrMethodDefCodedIndexVisualizer extends __CodedIndexBase
 
 // Blob Storage Types
 
-var __ElementType = Object.freeze({ // ELEMENT_TYPE enum; one byte in size
+// ELEMENT_TYPE enum; one byte in size
+var __ElementType = Object.freeze({
     End: 0x00,
     Void: 0x01,
     Boolean: 0x02,
@@ -2973,19 +3138,30 @@ var __CallingConvention = Object.freeze({
     Property: 0x08,
     GenericInst: 0x10,
     Mask: 0x0f,
+});
 
+var __CallingConventionFlags = Object.freeze({
     HasThis: 0x20,
     ExplicitThis: 0x40,
     Generic: 0x10,
 });
+
 function __consumeCallingConvention(stream)
 {
     return stream.consumeValue(1);
 }
 function __callingConventionToString(value)
 {
-    // TODO: Others?
-    return __enumToString(value & __CallingConvention.Mask, __CallingConvention);
+    var typePart = value & 0x0F;
+    var flagsPart = value & ~0x0F;
+
+    var result = __enumToString(typePart, __CallingConvention);
+    if (flagsPart != 0)
+    {
+        result = __enumFlagsToString(flagsPart, __CallingConventionFlags) + " | " + result;
+    }
+
+    return result
 }
 
 function __consumeCodedIndex(stream, table, codedEnum)
@@ -2996,6 +3172,17 @@ function __consumeCodedIndex(stream, table, codedEnum)
 function __consumeSzArray(stream)
 {
     if (__peekElementType(stream) == __ElementType.SZArray)
+    {
+        stream.seek(1);
+        return true;
+    }
+
+    return false;
+}
+
+function __consumeIsByRef(stream)
+{
+    if (__peekElementType(stream) == __ElementType.ByRef)
     {
         stream.seek(1);
         return true;
@@ -3019,6 +3206,16 @@ class __CustomModSig
         this.__type = __consumeCodedIndex(stream, table, __TypeDefOrRef);
     }
 
+    get __ElementType()
+    {
+        return this.m_cmod || this.__elementType;
+    }
+
+    get __Type()
+    {
+        return this.m_type || this.__type;
+    }
+
     toString()
     {
         return this.Type.toString();
@@ -3026,12 +3223,12 @@ class __CustomModSig
 
     get Type()
     {
-        return this.__type;
+        return this.__Type;
     }
 
     get ElementType()
     {
-        return __enumToString(this.__elementType, __ElementType);
+        return __enumToString(this.__ElementType, __ElementType);
     }
 }
 
@@ -3046,6 +3243,110 @@ function __consumeCustomMods(table, stream)
     }
 
     return result;
+}
+
+class __GenericTypeInstSig
+{
+    constructor(table, stream)
+    {
+        this.__type = stream.consumeValue(1);
+        if ((this.__type != __ElementType.Class) && (this.__type != __ElementType.ValueType))
+        {
+            throw new Error("Generic type instance signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
+        }
+
+        this.__type = __consumeCodedIndex(stream, table, __TypeDefOrRef);
+
+        var argCount = stream.consumeUnsigned();
+        this.__genericArgs = new Array(argCount);
+        for (var i = 0; i < argCount; ++i)
+        {
+            this.__genericArgs[i] = new __TypeSig(table, stream);
+        }
+    }
+
+    toString()
+    {
+        var result = this.GenericType.toString() + "<";
+        var prefix = "";
+
+        // Handling STL types can get somewhat complicated...
+        if (this.m_generic_args)
+        {
+            for (var i = 0; i < this.m_generic_args.Count(); ++i)
+            {
+                var type = this.m_generic_args[i].Type;
+                var index = type.index();
+                for (var j = 0; j < index; ++j)
+                {
+                    type = type._Tail;
+                }
+
+                result += prefix + type._Head.toString();
+                prefix = ", ";
+            }
+        }
+        else
+        {
+            for (var arg of this.__genericArgs)
+            {
+                result += prefix + arg.toString();
+                prefix = ", ";
+            }
+        }
+        result += ">";
+
+        return result;
+    }
+
+    get __ClassOrValue()
+    {
+        return this.m_class_or_value || this.__type;
+    }
+
+    get __Type()
+    {
+        return this.m_type || this.__type;
+    }
+
+    get __GenericArgs()
+    {
+        // NOTE: m_generic_args is std::vector
+        return this.m_generic_args || this.__genericArgs;
+    }
+
+    get ClassOrValueType()
+    {
+        return __enumToString(this.__ClassOrValue, __ElementType);
+    }
+
+    get GenericType()
+    {
+        return this.__Type;
+    }
+
+    get GenericArgs()
+    {
+        return this.__GenericArgs;
+    }
+}
+
+class __GenericTypeIndex
+{
+    constructor(stream)
+    {
+        this.__index = stream.consumeUnsigned();
+    }
+
+    toString()
+    {
+        return this.Index.toString();
+    }
+
+    get Index()
+    {
+        return (this.index === undefined) ? this.__index : this.index;
+    }
 }
 
 class __TypeSig
@@ -3083,11 +3384,11 @@ class __TypeSig
             break;
 
         case __ElementType.GenericInst:
-            this.__type = __GenericTypeInstSig(table, stream);
+            this.__type = new __GenericTypeInstSig(table, stream);
             break;
 
-        case ElementType.Var:
-            this.__type = __GenericTypeIndex(stream);
+        case __ElementType.Var:
+            this.__type = new __GenericTypeIndex(stream);
             break;
 
         default:
@@ -3095,24 +3396,234 @@ class __TypeSig
         }
     }
 
+    get __IsSzArray()
+    {
+        return this.m_is_szarray || this.__isSzArray;
+    }
+
+    get __CustomMods()
+    {
+        // NOTE: m_cmod is std::vector
+        return this.m_cmod || this.__customMods;
+    }
+
+    get __Type()
+    {
+        // NOTE: m_type is std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>
+        return this.m_type || this.__type;
+    }
+
     toString()
     {
-        return this.Type.toString() + (this.IsSzArray ? "[]" : "");
+        return this.__Type.toString() + (this.IsSzArray ? "[]" : "");
     }
 
     get Type()
     {
-        return this.__type;
+        return this.__Type;
     }
 
     get IsSzArray()
     {
-        return this.__isSzArray;
+        return this.__IsSzArray;
     }
 
     get CustomMod()
     {
-        return this.__customMods;
+        return this.__CustomMods;
+    }
+}
+
+class __ParamSig
+{
+    constructor(table, stream)
+    {
+        this.__customMods = __consumeCustomMods(table, stream);
+        this.__byRef = __consumeIsByRef(stream);
+        this.__type = new __TypeSig(table, stream);
+    }
+
+    get __CustomMods()
+    {
+        return this.m_cmod || this.__customMods;
+    }
+
+    get __ByRef()
+    {
+        return this.m_byref || this.__byRef;
+    }
+
+    get __Type()
+    {
+        return this.m_type || this.__type;
+    }
+
+    toString()
+    {
+        var result = this.Type.toString();
+        if (this.__ByRef)
+        {
+            result += "&";
+        }
+
+        return result;
+    }
+
+    get CustomMod()
+    {
+        return this.__CustomMods;
+    }
+
+    get ByRef()
+    {
+        return this.__ByRef;
+    }
+
+    get Type()
+    {
+        return this.__Type;
+    }
+}
+
+class __RetTypeSig
+{
+    constructor(table, stream)
+    {
+        this.__customMods = __consumeCustomMods(table, stream);
+        this.__byRef = __consumeIsByRef(stream);
+
+        if (__peekElementType(stream) == __ElementType.Void)
+        {
+            stream.seek(1);
+        }
+        else
+        {
+            this.__type = new __TypeSig(table, stream);
+        }
+    }
+
+    get __CustomMods()
+    {
+        return this.m_cmod || this.__customMods;
+    }
+
+    get __ByRef()
+    {
+        return this.m_byref || this.__byRef;
+    }
+
+    get __Type()
+    {
+        // NOTE: m_type is std::optional
+        return this.m_type || this.__type || null;
+    }
+
+    toString()
+    {
+        if (this.__Type)
+        {
+            return this.__Type.toString();
+        }
+        else
+        {
+            return "void";
+        }
+    }
+
+    get CustomMod()
+    {
+        return this.__CustomMods;
+    }
+
+    get ByRef()
+    {
+        return this.__ByRef;
+    }
+
+    get Type()
+    {
+        return this.__Type;
+    }
+
+    get IsVoid()
+    {
+        return this.__Type == null;
+    }
+}
+
+class __MethodDefSig
+{
+    constructor(table, stream)
+    {
+        this.__callingConvention = __consumeCallingConvention(stream);
+
+        this.__genericParamCount = 0;
+        if (this.__callingConvention & __CallingConventionFlags.Generic == __CallingConventionFlags.Generic)
+        {
+            this.__genericParamCount = stream.consumeUnsigned();
+        }
+
+        var paramCount = stream.consumeUnsigned();
+        this.__retType = new __RetTypeSig(table, stream);
+
+        this.__params = new Array(paramCount);
+        for (var i = 0; i < paramCount; ++i)
+        {
+            this.__params[i] = new __ParamSig(table, stream);
+        }
+    }
+
+    get __CallingConvention()
+    {
+        return this.m_calling_convention || this.__callingConvention;
+    }
+
+    get __GenericParamCount()
+    {
+        return this.m_generic_param_count || this.__genericParamCount;
+    }
+
+    get __ReturnType()
+    {
+        return this.m_ret_type || this.__retType;
+    }
+
+    get __Params()
+    {
+        // NOTE: m_params is std::vector
+        return this.m_params || this.__params;
+    }
+
+    toString()
+    {
+        var result = this.ReturnType.toString() + "(";
+        var prefix = "";
+        for (var param of this.Params)
+        {
+            result += prefix + param.toString();
+            prefix = ", ";
+        }
+        return result + ")";
+    }
+
+    get CallingConvention()
+    {
+        return __callingConventionToString(this.__CallingConvention);
+    }
+
+    get GenericParamCount()
+    {
+        return this.__GenericParamCount;
+    }
+
+    get ReturnType()
+    {
+        return this.__ReturnType;
+    }
+
+    get Params()
+    {
+        return this.__Params;
     }
 }
 
@@ -3120,71 +3631,125 @@ class __FieldSig
 {
     constructor(table, stream)
     {
-        this.__callingConvention = stream.consumeValue(1);
+        this.__callingConvention = __consumeCallingConvention(stream);
         if (this.__callingConvention & __CallingConvention.Mask != __CallingConvention.Field)
         {
-            throw new Error("Invalid Field signature calling convention: " + this.__callingConvention);
+            throw new Error("Invalid Field signature calling convention: " + __callingConventionToString(this.__callingConvention));
         }
 
         this.__customMods = __consumeCustomMods(table, stream);
         this.__type = new __TypeSig(table, stream);
     }
 
+    get __CallingConvention()
+    {
+        return this.m_calling_convention || this.__callingConvention;
+    }
+
+    get __CustomMods()
+    {
+        // NOTE: m_cmod is std::vector
+        return this.m_cmod || this.__customMods;
+    }
+
+    get __Type()
+    {
+        return this.m_type || this.__type;
+    }
+
     toString()
     {
-        return this.Type.toString();
+        return this.__Type.toString();
     }
 
     get Type()
     {
-        return this.__type;
+        return this.__Type;
     }
 
     get CallingConvention()
     {
-        return __callingConventionToString(this.__callingConvention);
+        return __callingConventionToString(this.__CallingConvention);
     }
 
     get CustomMod()
     {
-        return this.__customMods;
+        return this.__CustomMods;
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-class __GenericTypeIndex
+class __PropertySig
 {
-    constructor(stream)
+    constructor(table, stream)
     {
-        this.__index = stream.consumeUnsigned();
+        this.__callingConvention = __consumeCallingConvention(stream);
+        if (this.__callingConvention & __CallingConvention.Property != __CallingConvention.Property)
+        {
+            throw new Error("Invalid Property signature calling convention: " + __callingConventionToString(this.__callingConvention));
+        }
+
+        var paramCount = stream.consumeUnsigned();
+        this.__customMods = __consumeCustomMods(table, stream);
+        this.__type = new __TypeSig(table, stream);
+
+        this.__params = new Array(paramCount);
+        for (var i = 0; i < paramCount; ++i)
+        {
+            this.__params[i] = new __ParamSig(table, stream);
+        }
+    }
+
+    get __CallingConvention()
+    {
+        return this.m_calling_convention || this.__callingConvention;
+    }
+
+    get __CustomMods()
+    {
+        return this.m_cmod || this.__customMods;
+    }
+
+    get __Type()
+    {
+        return this.m_type || this.__type;
+    }
+
+    get __Params()
+    {
+        return this.m_params || this.__params;
     }
 
     toString()
     {
-        return "GenericTypeIndex: " + this.__index;
+        return this.__Type.toString();
     }
 
-    get Index()
+    get Type()
     {
-        return this.__index;
+        return this.__Type;
+    }
+
+    get CallingConvention()
+    {
+        return this.__CallingConvention;
+    }
+
+    get Params()
+    {
+        return this.__Params;
+    }
+
+    get CustomMod()
+    {
+        return this.__CustomMods;
     }
 }
 
-class __TypeSpecSignature
+class __TypeSpecSig
 {
     constructor(table, stream)
     {
-        var type = stream.consumeValue(1);
+        var type = __consumeElementType(stream);
         switch (type)
         {
         case __ElementType.Ptr:
@@ -3200,13 +3765,7 @@ class __TypeSpecSignature
             throw new Error("ELEMENT_TYPE_SZARRAY is not currently supported");
 
         case __ElementType.GenericInst:
-            this.__genericInst = new __GenericTypeInstSig(table, stream);
-            Object.defineProperty(this, "GenericTypeInstSig", {
-                get: function()
-                {
-                    return this.__genericInst;
-                }
-            });
+            this.__type = new __GenericTypeInstSig(table, stream);
             break;
 
         default:
@@ -3216,33 +3775,204 @@ class __TypeSpecSignature
 
     toString()
     {
-        if (this.__genericInst)
+        return this.Type.toString();
+    }
+
+    get Type()
+    {
+        return this.m_type || this.__type;
+    }
+}
+
+class __CustomAttributeSig
+{
+    constructor(table, stream, methodDefSig)
+    {
+        var prolog = stream.consumeValue(2);
+        if (prolog != 0x0001)
         {
-            return this.__genericInst.toString();
+            throw new Error("CustomAttribute blobs must start with prolog of 0x0001");
+        }
+
+        this.__fixedArgs = new Array();
+        for (var param of methodDefSig.Params)
+        {
+            this.__fixedArgs.concat(new __FixedArgSig(table.Database, param, stream));
+        }
+
+        var namedArgsCount = stream.consumeValue(2);
+        this.__namedArgs = new Array();
+        for (var i = 0; i < namedArgsCount; ++i)
+        {
+            this.__namedArgs.concat(new __NamedArgSig(table.Database, stream));
+        }
+    }
+
+    get FixedArgs()
+    {
+        return this.m_fixed_args || this.__fixedArgs;
+    }
+
+    get NamedArgs()
+    {
+        return this.m_named_args || this.__namedArgs;
+    }
+}
+
+class __FixedArgSig
+{
+    constructor(database, param, stream)
+    {
+        if (param.Type.IsSzArray)
+        {
+            this.__value = new Array();
+            var size = stream.consumeValue(4);
+            if (size != 0xFFFFFFFF)
+            {
+                for (var i = 0; i < size; ++i)
+                {
+                    this.__value.concat(new __ElemSig(database, param, stream));
+                }
+            }
+        }
+        else
+        {
+            this.__value = new __ElemSig(database, param, stream);
+        }
+    }
+
+    get Value()
+    {
+        return this.value || this.__value;
+    }
+
+    static __createFromSystemType()
+    {
+
+    }
+}
+
+class __NamedArgSig
+{
+    constructor(database, stream)
+    {
+        var fieldOrProp = __consumeElementType(stream);
+        if ((fieldOrProp != __ElementType.Field) && (fieldOrProp != __ElementType.Property))
+        {
+            throw new Error("NamedArg must be either FIELD or PROPERTY");
+        }
+
+        var type = __consumeElementType(stream);
+        switch (type)
+        {
+        case __ElementType.Type:
+            this.__value = new __FixedArgSig();
+            break;
+
+        case __ElementType.Enum:
+            // TODO
+            break;
+
+        default:
+            // TODO
+            break;
         }
     }
 }
 
-class __GenericTypeInstSig // TODO
+class __EnumDefinition
 {
-    constructor(table, stream)
+    constructor(typeDef)
     {
-        this.__type = stream.consumeValue(1);
-        if ((this.__type != __ElementType.Class) && (this.__type != __ElementType.ValueType))
+        this.__typeDef = typeDef;
+        for (var field in typeDef.FieldList)
         {
-            throw new Error("Generic type instance signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
+            var isLiteral = field.Flags.Value & __FieldAttributesFlags.Literal == __FieldAttributesFlags.Literal;
+            var isStatic = field.Flags.Value & __FieldAttributesFlags.Static == __FieldAttributesFlags.Static;
+            if (!isLiteral && !isStatic)
+            {
+                this.__underlyingType = field.Signature.Type.Type;
+            }
         }
-
-        var typeDefOrRef = stream.ConsumeValue(4);
     }
 
-    get ElementType()
+    get TypeDef()
     {
-        return this.__type;
+        return this.m_typedef || this.__typeDef;
     }
 
-    get GenericType()
+    get UnderlyingType()
     {
+        return this.m_underlying_type || this.__underlyingType;
+    }
+}
 
+class __SystemType
+{
+    constructor(name)
+    {
+        this.__name = name;
+    }
+
+    toString()
+    {
+        return this.Name.toString();
+    }
+
+    get Name()
+    {
+        return this.name || this.__name;
+    }
+}
+
+class __EnumValue
+{
+    constructor(type, value)
+    {
+        this.__type = type;
+        this.__value = value;
+    }
+
+    get Type()
+    {
+        return this.type || this.__type;
+    }
+
+    get Value()
+    {
+        return this.value || this.__value;
+    }
+}
+
+class __ElemSig
+{
+    static __fromParam(database, param, stream)
+    {
+        // TODO: read_element
+    }
+
+    static __fromSystemType(name)
+    {
+        return new __ElemSig(new __SystemType(name));
+    }
+
+    static __fromEnumDefinition(def, stream)
+    {
+        return new __ElemSig(new __EnumValue(def, TODO_read_enum));
+    }
+
+    static __fromElementType(type, data)
+    {
+        // TODO: read_primitive
+    }
+
+    constructor(value)
+    {
+        this.__value = value;
+    }
+
+    get Value()
+    {
+        return this.value || this.__value;
     }
 }

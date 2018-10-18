@@ -18,7 +18,9 @@ constexpr std::string_view metadata_namespace = "Windows.Foundation.Metadata";
 constexpr std::string_view api_contract_attribute = "ApiContractAttribute";
 constexpr std::string_view contract_version_attribute = "ContractVersionAttribute";
 constexpr std::string_view default_attribute = "DefaultAttribute";
+constexpr std::string_view exclusive_to_attribute = "ExclusiveToAttribute";
 constexpr std::string_view guid_attribute = "GuidAttribute";
+constexpr std::string_view overload_attribute = "OverloadAttribute";
 
 constexpr std::string_view internal_namespace = "Windows.Foundation.Internal";
 

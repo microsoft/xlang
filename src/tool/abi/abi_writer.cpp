@@ -15,48 +15,6 @@ using namespace xlang;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
 
-static std::pair<std::string_view, uint32_t> contract_attribute(TypeDef const& type)
-{
-    auto attr = get_attribute(type, metadata_namespace, contract_version_attribute);
-    if (!attr)
-    {
-        return {};
-    }
-
-    auto sig = attr.Value();
-    auto const& fixedArgs = sig.FixedArgs();
-
-    // NOTE: Definitions of the API contracts themselves also have a ContractVersionAttribute, but with a single value
-    //       used for the constructor (the current version of the contract). This function is not intended to be used
-    //       with API contract types and will assert here
-    if (fixedArgs.size() != 2)
-    {
-        XLANG_ASSERT(false);
-        return {};
-    }
-
-    // ContractVersionAttribute(System.Type, UInt32) OR ContractVersionAttribute(System.String, UInt32)
-    auto elemSig = std::get<ElemSig>(fixedArgs[0].value);
-    std::string_view resultName;
-    xlang::visit(elemSig.value,
-        [&](ElemSig::SystemType type)
-        {
-            resultName = type.name;
-        },
-        [&](std::string_view name)
-        {
-            resultName = name;
-        },
-        [](auto&&)
-        {
-            XLANG_ASSERT(false);
-        });
-
-    auto contractVersion = std::get<uint32_t>(std::get<ElemSig>(fixedArgs[1].value).value);
-
-    return { resultName, contractVersion };
-}
-
 void writer::initialize_dependencies()
 {
     // Calculate a list of all types/namespaces referenced by the current namespace so that we know which files to
@@ -73,11 +31,6 @@ void writer::initialize_dependencies()
 
 void writer::initialize_dependencies(TypeDef const& type)
 {
-#ifdef XLANG_DEBUG
-    [[maybe_unused]] auto typeName = type.TypeName();
-    [[maybe_unused]] auto typeNamespace = type.TypeNamespace();
-#endif
-
     // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
     // trip us up since it's a definition, not a use
     if (!get_attribute(type, metadata_namespace, api_contract_attribute))
@@ -98,10 +51,6 @@ void writer::initialize_dependencies(TypeDef const& type)
 
     for (auto const& method : type.MethodList())
     {
-#ifdef XLANG_DEBUG
-        [[maybe_unused]] auto methodName = method.Name();
-#endif
-
         auto sig = method.Signature();
         add_dependency(sig.ReturnType().Type());
 
@@ -142,20 +91,18 @@ void writer::add_dependency(coded_index<TypeDefOrRef> const& type)
         },
         [&](auto const& defOrRef)
         {
-#ifdef XLANG_DEBUG
-            [[maybe_unused]] auto typeName = defOrRef.TypeName();
-#endif
-            auto typeNamespace = defOrRef.TypeNamespace();
-            m_dependentNamespaces.emplace(typeNamespace);
+            if (defOrRef.TypeNamespace() != system_namespace)
+            {
+                m_dependencies.emplace(find_required(defOrRef));
+                m_dependentNamespaces.emplace(defOrRef.TypeNamespace());
+            }
         }});
 }
 
 void writer::add_dependency(GenericTypeInstSig const& type)
 {
-    auto ref = type.GenericType().TypeRef();
-    auto typeNamespace = ref.TypeNamespace();
-    auto typeName = ref.TypeName();
-    m_dependentNamespaces.emplace(typeNamespace);
+    auto def = find_required(type.GenericType().TypeRef());
+    m_dependentNamespaces.emplace(def.TypeNamespace());
 
     // Dependencies propagate out to all generic arguments
     for (auto const& arg : type.GenericArgs())
@@ -167,12 +114,12 @@ void writer::add_dependency(GenericTypeInstSig const& type)
     // them), we need to treat this type the same as we treat other types in this namespace. Since the CLR does not have
     // the same concept of specialization that C++ has, we only need to do this once on a per-generic type basis.
     auto [itr, added] = m_genericReferences.emplace(std::piecewise_construct,
-        std::forward_as_tuple(type_name{ typeNamespace, typeName }),
+        std::forward_as_tuple(type_name{ def.TypeNamespace(), def.TypeName() }),
         std::forward_as_tuple());
     if (added)
     {
         // Only process each generic type once
-        initialize_dependencies(find_required(ref));
+        initialize_dependencies(def);
     }
 
     // Only take note of the fully specialized generic instances; we'll walk the dependency tree later
@@ -540,7 +487,10 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
             },
             [&](auto const& defOrRef)
             {
-                write_forward_declaration(*this, find_required(defOrRef), m_genericArgStack);
+                if (defOrRef.TypeNamespace() != system_namespace)
+                {
+                    write_forward_declaration(*this, find_required(defOrRef), m_genericArgStack);
+                }
             }});
     };
 
@@ -616,10 +566,6 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
 
     push_generic_namespace(typeDef.TypeNamespace());
 
-    std::cout << write_temp("%\n", bind<write_generictype_cpp>(type, m_genericArgStack, format_flags::none));
-    std::cout << "    " << write_temp("%\n", [&](writer& w) { write_type_signature(w, type, m_genericArgStack); });
-    std::cout << "    " << write_temp("%\n", bind<write_generic_type_guid>(type, m_genericArgStack));
-
     auto typeName = typeDef.TypeName();
     typeName = typeName.substr(0, typeName.find('`'));
     write(R"^-^(template <>
@@ -669,26 +615,82 @@ typedef % %_t;
     pop_contract_guard(contractDepth);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-static void write_include_guard(writer& w, std::string_view ns)
+void writer::write_type_dependencies()
 {
-    bind_list<writer::write_lowercase>("2E", namespace_range{ ns })(w);
+    for (auto const& type : m_dependencies)
+    {
+        if (type.TypeNamespace() != m_namespace)
+        {
+            write_forward_declaration(*this, type, m_genericArgStack);
+
+            // For classes, we also need to declare the type's default interface
+            if (get_category(type) == category::class_type)
+            {
+                ::visit(default_interface(type), xlang::visit_overload{
+                    [](GenericTypeInstSig const&)
+                    {
+                        // Generic type; should have been defined already
+                    },
+                    [&](auto const& defOrRef)
+                    {
+                        write_forward_declaration(*this, find_required(defOrRef), m_genericArgStack);
+                    }
+                });
+            }
+        }
+    }
 }
+
+void writer::write_type_declarations()
+{
+    for (auto const& e : m_members.enums)
+    {
+        write_forward_declaration(*this, e, m_genericArgStack);
+    }
+
+    for (auto const& c : m_members.classes)
+    {
+        write_forward_declaration(*this, c, m_genericArgStack);
+    }
+}
+
+void writer::write_type_definitions()
+{
+    for (auto const& e : m_members.enums)
+    {
+        write_enum_definition(*this, e);
+    }
+
+    for (auto const& s : m_members.structs)
+    {
+        write_struct_definition(*this, s);
+    }
+
+    for (auto const& d : m_members.delegates)
+    {
+        write_interface_definition(*this, d);
+    }
+
+    for (auto const& i : m_members.interfaces)
+    {
+        write_interface_definition(*this, i);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void write_abi_header(std::string_view ns, cache const& c, cache::namespace_members const& members, abi_configuration const& config)
 {
@@ -727,6 +729,9 @@ void write_abi_header(std::string_view ns, cache const& c, cache::namespace_memb
 
     w.write_interface_forward_declarations();
     w.write_generics_definitions();
+    w.write_type_dependencies();
+    w.write_type_declarations();
+    w.write_type_definitions();
 
     // C interface
     w.write("#else // !defined(__cplusplus)\n");
