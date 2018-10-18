@@ -277,7 +277,7 @@ static PyType_Spec @_Type_spec =
             // treat the args value as a single value, not as a tuple
             if (method.SpecialName() && !method.Flags().RTSpecialName()) 
             {
-                w.write("            auto param% = py::convert_to<%>(args);\n", sequence, param.second->Type());
+                w.write("            auto param% = py::converter<%>::convert_to(args);\n", sequence, param.second->Type());
             }
             else
             {
@@ -380,7 +380,7 @@ static PyType_Spec @_Type_spec =
             if (count_out_param(signature.params()) == 0)
             {
                 auto format = R"(
-            return py::convert(return_value);
+            return py::converter<decltype(return_value)>::convert(return_value);
 )";
                 w.write(format);
             }
@@ -388,7 +388,7 @@ static PyType_Spec @_Type_spec =
             {
                 {
                     auto format = R"(
-            PyObject* out_return_value = py::convert(return_value);
+            PyObject* out_return_value = py::converter<decltype(return_value)>::convert(return_value);
             if (!out_return_value) 
             { 
                 return nullptr;
@@ -413,14 +413,14 @@ static PyType_Spec @_Type_spec =
                     tuple_pack_param.append(", ");
                     tuple_pack_param.append(w.write_temp("out%", sequence));
 
-                    auto format = R"(            PyObject* out% = py::convert(param%);
+                    auto format = R"(            PyObject* out% = py::converter<decltype(param%)>::convert(param%);
             if (!out%) 
             {
                 return nullptr;
             }
 
 )";
-                    w.write(format, sequence, sequence, sequence);
+                    w.write(format, sequence, sequence, sequence, sequence);
                 }
 
                 w.write("            return PyTuple_Pack(%, out_return_value%);\n", out_param_count, tuple_pack_param);
@@ -578,7 +578,7 @@ static PyType_Spec @_Type_spec =
 
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
     {
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_winrt_type_specialization_native_type>(type));
+        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n\n", bind<write_winrt_type_specialization_native_type>(type));
     }
 
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
@@ -926,7 +926,7 @@ static void @_dealloc(%* self)
 
         for (auto&& p : invoke.ParamList())
         {
-            w.write("            PyObject* pyObj% = py::convert(param%);\n", p.Sequence(), p.Sequence());
+            w.write("            PyObject* pyObj% = py::converter<decltype(param%)>::convert(param%);\n", p.Sequence(), p.Sequence(), p.Sequence());
         }
 
         w.write("\n            PyObject* args = PyTuple_Pack(%", distance(invoke.ParamList()));
@@ -1000,6 +1000,7 @@ static void @_dealloc(%* self)
         w.write_indented("template<>\nstruct converter<%>\n{\n", type);
         {
             writer::indent_guard g{ w };
+            w.write_indented("static PyObject* convert(% instance) noexcept;\n", type);
             w.write_indented("static % convert_to(PyObject* obj);\n", type);
         }
 
@@ -1013,13 +1014,32 @@ static void @_dealloc(%* self)
         { "TimeSpan", "new_value = winrt::Windows::Foundation::TimeSpan { converter<int64_t>::convert_to(pyDuration) };\n" }
     };
 
-    void write_struct_convert_to(writer& w, TypeDef const& type)
+    void write_struct_convert_functions(writer& w, TypeDef const& type)
     {
+        w.write_indented("PyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
+        {
+            writer::indent_guard g{ w };
+            w.write_indented("return py::wrap_struct<%>(instance, py::winrt_type<%>::get_python_type());\n", type, type);
+        }
+        w.write_indented("}\n\n");
+
         w.write_indented("% py::converter<%>::convert_to(PyObject* obj)\n{\n", type, type);
         {
             writer::indent_guard g{ w };
+            w.write_indented("throw_if_pyobj_null(obj);\n");
+            w.write_indented(R"(if (Py_TYPE(obj) == py::winrt_type<%>::get_python_type())
+{
+    return reinterpret_cast<py::winrt_struct_wrapper<%>*>(obj)->obj;
+}
 
-            w.write_indented("if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }\n\n");
+)", type, type);
+
+            w.write_indented(R"(if (!PyDict_Check(obj))
+{
+    throw winrt::hresult_invalid_argument();
+}
+
+)");
 
             w.write_indented("% new_value{};\n", type);
 
@@ -1176,7 +1196,7 @@ static void @_dealloc(%* self)
 
         void handle_struct(TypeDef const& type)
         {
-            w.write("py::convert_to<%>(%)", type, bind<write_struct_field_name>(field));
+            w.write("py::converter<%>::convert_to(%)", type, bind<write_struct_field_name>(field));
         }
 
         void handle(ElementType)
@@ -1325,8 +1345,8 @@ catch (...)
     }
 
     static const std::map<std::string_view, std::string_view> custom_foundation_set_convert = {
-        { "DateTime", "winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ py::convert_to<int64_t>(value) } }" },
-        { "TimeSpan", "winrt::Windows::Foundation::TimeSpan{ py::convert_to<int64_t>(value) }" }
+        { "DateTime", "winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ py::converter<int64_t>::convert_to(value) } }" },
+        { "TimeSpan", "winrt::Windows::Foundation::TimeSpan{ py::converter<int64_t>::convert_to(value) }" }
     };
 
     void write_struct_property_set_convert(writer& w, Field const& field)
@@ -1342,7 +1362,7 @@ catch (...)
             }
         }
 
-        w.write("py::convert_to<%>(value)", field.Signature().Type());
+        w.write("py::converter<%>::convert_to(value)", field.Signature().Type());
     }
 
     void write_struct_property(writer& w, Field const& field)
@@ -1355,7 +1375,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
 {
     try
     {
-        return py::convert(%);
+        return py::converter<decltype(%)>::convert(%);
     }
     catch (...)
     {
@@ -1367,6 +1387,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
                 field.Parent().TypeName(),
                 field.Name(),
                 bind<write_winrt_wrapper>(field.Parent()),
+                bind<write_struct_property_get_variable>(field),
                 bind<write_struct_property_get_variable>(field));
         }
 
@@ -1406,7 +1427,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
 
         w.write_indented("\n// ----- % struct --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
-        write_struct_convert_to(w, type);
+        write_struct_convert_functions(w, type);
         write_struct_constructor(w, type);
         w.write_each<write_struct_property>(type.FieldList());
         write_getset_table(w, type);
