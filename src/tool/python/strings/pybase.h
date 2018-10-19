@@ -653,8 +653,8 @@ namespace py
                         return {};
                     }
                 }
-                
-                return std::move(converter<T>::convert_to(next));
+
+                return std::move(std::optional<T>{ converter<T>::convert_to(next) });
             }
 
             iterator(PyObject* i) : _iterator(i)
@@ -693,7 +693,7 @@ namespace py
 
     // TODO: specalization for Python Sequence Protocol -> IVector[View]
     // TODO: specalization for Python Mapping Protocol -> IMap[View]
-    
+
     template <typename T>
     std::optional<T> convert_interface_to(PyObject* obj)
     {
