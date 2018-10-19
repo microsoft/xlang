@@ -7,9 +7,7 @@ file(TO_NATIVE_PATH "$ENV{WindowsSdkDir}References/$ENV{WindowsSDKVersion}" REFE
 
 set(winmd_files
     Windows.Foundation.FoundationContract
-    Windows.Devices.DevicesLowLevelContract
     Windows.Foundation.UniversalApiContract
-    Windows.AI.MachineLearning.MachineLearningContract
 )
 
 set(included_namespaces
