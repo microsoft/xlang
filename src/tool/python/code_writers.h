@@ -518,18 +518,20 @@ static PyType_Spec @_Type_spec =
 
     void write_type_query_interface(writer& w, TypeDef const& type)
     {
-        if (is_ptype(type))
+        if (is_ptype(type) || type.Flags().Abstract())
         {
             return;
         }
 
         auto format = R"(
-static PyObject* %__query_interface(PyObject* /*unused*/, PyObject* args)
+static PyObject* %__query_interface(PyObject* /*unused*/, PyObject* arg)
 {
-    return nullptr;
+    auto instance = py::converter<winrt::Windows::Foundation::IInspectable>::convert_to(arg);
+    return py::converter<%>::convert(instance.as<%>());
 }
 )";
-        w.write(format, type.TypeName());
+
+        w.write(format, type.TypeName(), type, type);
     }
     
     void write_type_method_decl_self_type(writer& w, TypeDef const& type, MethodDef const& method)
