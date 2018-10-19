@@ -173,6 +173,11 @@ namespace xlang
                 name, type.TypeName(), name, bind<write_method_table_flags>(overloads));
         }
 
+        if (!is_ptype(type))
+        {
+            w.write("    { \"_query_interface\", (PyCFunction)@__query_interface, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+        }
+
         w.write("    { nullptr }\n};\n");
     }
 
@@ -510,6 +515,22 @@ static PyType_Spec @_Type_spec =
             write_method_overload<F>(w, type, overloads);
         }
     }
+
+    void write_type_query_interface(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type))
+        {
+            return;
+        }
+
+        auto format = R"(
+static PyObject* %__query_interface(PyObject* /*unused*/, PyObject* args)
+{
+    return nullptr;
+}
+)";
+        w.write(format, type.TypeName());
+    }
     
     void write_type_method_decl_self_type(writer& w, TypeDef const& type, MethodDef const& method)
     {
@@ -690,6 +711,7 @@ static void @_dealloc(%* self)
         write_winrt_type_specialization_storage(w, type);
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
+        write_type_query_interface(w, type);
         write_type_functions(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
@@ -875,6 +897,7 @@ static void @_dealloc(%* self)
         write_winrt_type_specialization_storage(w, type);
         write_interface_constructor(w, type);
         write_interface_dealloc(w, type);
+        write_type_query_interface(w, type);
         write_type_functions(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
