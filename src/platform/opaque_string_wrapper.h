@@ -30,13 +30,4 @@ namespace xlang::impl
     {
         return from_handle(handle)->ensure_buffer<char_type>();
     }
-
-#ifdef XLANG_PLATFORM_WINDOWS
-    template <>
-    inline std::basic_string_view<wchar_t> to_string_view<wchar_t>(xlang_string handle)
-    {
-        auto const temp{ to_string_view<char16_t>(handle) };
-        return { reinterpret_cast<wchar_t const*>(temp.data()), temp.size() };
-    }
-#endif
 }

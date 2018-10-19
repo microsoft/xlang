@@ -1,21 +1,14 @@
 #pragma once
 
-#include "Class.g.h"
-
-namespace winrt::Component::implementation
-{
-    struct Class : ClassT<Class>
-    {
-        Class() = default;
-
-        hstring GetValue() const noexcept;
-    };
-}
+#include <winrt/base.h>
 
 namespace winrt::Component::factory_implementation
 {
-    struct Class : ClassT<Class, implementation::Class>
+    struct Class : implements<Class, Windows::Foundation::IActivationFactory>
     {
-
+        Windows::Foundation::IInspectable ActivateInstance() const
+        {
+            throw hresult_not_implemented{};
+        }
     };
 }

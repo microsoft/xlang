@@ -9,7 +9,7 @@ namespace xlang::impl
         xlang_string class_name,
         xlang_guid const& iid)
     {
-        for (auto current_namespace = enclosing_namespace(to_string_view<filesystem_char_type>(class_name));
+        for (auto current_namespace = enclosing_namespace(to_string_view<char_type>(class_name));
             !current_namespace.empty();
             current_namespace = enclosing_namespace(current_namespace))
         {
@@ -46,8 +46,19 @@ try
         xlang::throw_result(xlang_error_invalid_arg);
     }
 
-    // Use the platform's preferred filename encoding
-    *factory = get_activation_factory<filesystem_char_type>(class_name, iid);
+    auto const encoding = xlang_get_string_encoding(class_name);
+    if (encoding == (xlang_string_encoding::utf8 | xlang_string_encoding::utf16))
+    {
+        *factory = get_activation_factory<filesystem_char_type>(class_name, iid);
+    }
+    else if (encoding == xlang_string_encoding::utf8)
+    {
+        *factory = get_activation_factory<xlang_char8>(class_name, iid);
+    }
+    else
+    {
+        *factory = get_activation_factory<char16_t>(class_name, iid);
+    }
 
     return xlang_error_ok;
 }

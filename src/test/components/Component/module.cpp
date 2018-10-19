@@ -1,4 +1,3 @@
-#include <winrt/Component.h>
 #include <pal.h>
 #include "Class.h"
 
