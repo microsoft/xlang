@@ -400,6 +400,11 @@ namespace xlang
         return distance(type.GenericParam()) > 0;
     }
 
+    bool is_static_class(TypeDef const& type)
+    {
+        return get_category(type) == category::class_type && type.Flags().Abstract();
+    }
+
     bool is_constructor(MethodDef const& method)
     {
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";

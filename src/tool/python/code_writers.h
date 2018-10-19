@@ -173,9 +173,9 @@ namespace xlang
                 name, type.TypeName(), name, bind<write_method_table_flags>(overloads));
         }
 
-        if (!is_ptype(type))
+        if (!(is_ptype(type) || is_static_class(type)))
         {
-            w.write("    { \"_query_interface\", (PyCFunction)@__query_interface, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+            w.write("    { \"_as\", (PyCFunction)@__as, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
         }
 
         w.write("    { nullptr }\n};\n");
@@ -220,7 +220,7 @@ namespace xlang
             || (category == category::interface_type)
             || (category == category::struct_type));
 
-        if (category == category::class_type && type.Flags().Abstract())
+        if (is_static_class(type))
         {
             w.write("0");
         }
@@ -518,16 +518,23 @@ static PyType_Spec @_Type_spec =
 
     void write_type_query_interface(writer& w, TypeDef const& type)
     {
-        if (is_ptype(type) || type.Flags().Abstract())
+        if (is_ptype(type) || is_static_class(type))
         {
             return;
         }
 
         auto format = R"(
-static PyObject* %__query_interface(PyObject* /*unused*/, PyObject* arg)
+static PyObject* %__as(PyObject* /*unused*/, PyObject* arg)
 {
-    auto instance = py::converter<winrt::Windows::Foundation::IInspectable>::convert_to(arg);
-    return py::converter<%>::convert(instance.as<%>());
+    try
+    {
+        auto instance = py::converter<winrt::Windows::Foundation::IInspectable>::convert_to(arg);
+        return py::converter<%>::convert(instance.as<%>());
+    }
+    catch (...)
+    {
+        return py::to_PyErr();
+    }
 }
 )";
 
@@ -630,7 +637,7 @@ static PyObject* %__query_interface(PyObject* /*unused*/, PyObject* arg)
 
         auto constructors = get_constructors(type);
 
-        if (type.Flags().Abstract() || constructors.size() == 0)
+        if (is_static_class(type) || constructors.size() == 0)
         {
             auto format = R"(    PyErr_SetString(PyExc_TypeError, "% is not activatable");
     return nullptr;
@@ -805,54 +812,14 @@ static void @_dealloc(%* self)
     {
         XLANG_ASSERT(get_category(type) == category::interface_type);
 
-        if (is_ptype(type))
-        {
-            auto format = R"(
+        auto format = R"(
 PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    PyErr_SetString(PyExc_TypeError, "parameterized interface @ is not activatable");
+    PyErr_SetString(PyExc_TypeError, "@ interface is not activatable");
     return nullptr;
 }
 )";
-            w.write(format, type.TypeName(), type.TypeName());
-        }
-        else
-        {
-            auto format = R"(
-PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
-{
-    if (kwds != nullptr)
-    {
-        PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
-        return nullptr;
-    }
-
-    Py_ssize_t arg_count = PyTuple_Size(args);
-
-    if (arg_count == 1)
-    {
-        try
-        {
-            auto param0 = py::convert_to<%>(args, 0);
-            return py::wrap(param0, type);
-        }
-        catch (...)
-        {
-            return py::to_PyErr();
-        }
-    }
-    else if (arg_count == -1)
-    {
-        return nullptr; 
-    }
-
-    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
-    return nullptr;
-}
-)";
-
-            w.write(format, type.TypeName(), type);
-        }
+        w.write(format, type.TypeName(), type.TypeName());
     }
 
     void write_interface_dealloc(writer& w, TypeDef const& type)

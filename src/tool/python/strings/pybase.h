@@ -691,9 +691,6 @@ namespace py
         };
     };
 
-    // TODO: specalization for Python Sequence Protocol -> IVector[View]
-    // TODO: specalization for Python Mapping Protocol -> IMap[View]
-
     template <typename T>
     std::optional<T> convert_interface_to(PyObject* obj)
     {
@@ -712,6 +709,9 @@ namespace py
 
         return {};
     }
+
+    // TODO: specalization for Python Sequence Protocol -> IVector[View]
+    // TODO: specalization for Python Mapping Protocol -> IMap[View]
 
     template <typename TItem>
     struct converter<winrt::Windows::Foundation::Collections::IIterable<TItem>>
