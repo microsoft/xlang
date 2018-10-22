@@ -232,19 +232,7 @@ std::size_t writer::push_contract_guards(TypeDef const& type)
     XLANG_ASSERT(distance(type.GenericParam()) == 0);
     if (auto vers = contract_attributes(type))
     {
-        auto [ns, name] = decompose_type(vers->type_name);
-        write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers->version });
-        for (auto const& prev : vers->previous_contracts)
-        {
-            auto [prevNs, prevName] = decompose_type(prev.type_name);
-            write(" || \\\n    % >= % && % < %",
-                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.low_version },
-                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.high_version });
-        }
-        write('\n');
-
-        m_contractGuardStack.emplace_back(std::move(*vers));
-        return 1;
+        return push_contract_guards(*vers);
     }
 
     return 0;
@@ -307,6 +295,33 @@ std::size_t writer::push_contract_guards(GenericTypeInstSig const& type)
     }
 
     return result;
+}
+
+std::size_t writer::push_contract_guards(xlang::meta::reader::Field const& field)
+{
+    if (auto vers = contract_attributes(field))
+    {
+        return push_contract_guards(*vers);
+    }
+
+    return 0;
+}
+
+std::size_t writer::push_contract_guards(contract_version& vers)
+{
+    auto [ns, name] = decompose_type(vers.type_name);
+    write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.version });
+    for (auto const& prev : vers.previous_contracts)
+    {
+        auto [prevNs, prevName] = decompose_type(prev.type_name);
+        write(" || \\\n    % >= % && % < %",
+            bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.low_version },
+            bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.high_version });
+    }
+    write('\n');
+
+    m_contractGuardStack.emplace_back(std::move(vers));
+    return 1;
 }
 
 void writer::pop_contract_guards(std::size_t count)

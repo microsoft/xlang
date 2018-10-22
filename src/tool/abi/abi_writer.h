@@ -231,6 +231,7 @@ struct writer : xlang::text::writer_base<writer>
     std::size_t push_contract_guards(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type);
     std::size_t push_contract_guards(xlang::meta::reader::TypeSig const& type);
     std::size_t push_contract_guards(xlang::meta::reader::GenericTypeInstSig const& type);
+    std::size_t push_contract_guards(xlang::meta::reader::Field const& field);
     void pop_contract_guards(std::size_t count);
 
     std::pair<bool, std::string_view> should_declare(xlang::meta::reader::TypeDef const& type);
@@ -252,6 +253,7 @@ private:
     void add_dependency(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type);
     void add_dependency(xlang::meta::reader::GenericTypeInstSig const& type);
 
+    std::size_t push_contract_guards(contract_version& vers);
     std::pair<bool, std::string_view> should_declare(std::string mangledName);
 
     void write_generic_definition(xlang::meta::reader::GenericTypeInstSig const& type);

@@ -199,11 +199,12 @@ struct contract_version
 
 // NOTE: While theoretically possible for a type to have previous contract version attribute(s) but no contract version
 //       attribute, it would be rather silly to have '#if true || ...' so ignore
-inline std::optional<contract_version> contract_attributes(xlang::meta::reader::TypeDef const& type)
+template <typename T>
+inline std::optional<contract_version> contract_attributes(T const& value)
 {
     using namespace xlang::meta::reader;
 
-    auto contractAttr = get_attribute(type, metadata_namespace, contract_version_attribute);
+    auto contractAttr = get_attribute(value, metadata_namespace, contract_version_attribute);
     if (!contractAttr)
     {
         return std::nullopt;
@@ -237,9 +238,9 @@ inline std::optional<contract_version> contract_attributes(xlang::meta::reader::
 
     auto const& elemSig = std::get<ElemSig>(fixedArgs[0].value);
     xlang::visit(elemSig.value,
-        [&](ElemSig::SystemType type)
+        [&](ElemSig::SystemType t)
         {
-            result.type_name = type.name;
+            result.type_name = t.name;
         },
         [&](std::string_view name)
         {
@@ -252,7 +253,7 @@ inline std::optional<contract_version> contract_attributes(xlang::meta::reader::
 
     result.version = read_version(std::get<ElemSig>(fixedArgs[1].value).value);
 
-    for (auto const& attr : type.CustomAttribute())
+    for (auto const& attr : value.CustomAttribute())
     {
         auto [ns, name] = attr.TypeNamespaceAndName();
         if ((ns == metadata_namespace) && (name == previous_contract_version_attribute))

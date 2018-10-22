@@ -328,6 +328,8 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
     {
         if (auto value = field.Constant())
         {
+            auto fieldContractDepth = w.push_contract_guards(field);
+
             w.write("%%_%", indent{ 1 }, name, field.Name());
             if (auto info = is_deprecated(field))
             {
@@ -341,6 +343,7 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
             }
 
             w.write("= %,\n", value);
+            w.pop_contract_guards(fieldContractDepth);
         }
     }
 
