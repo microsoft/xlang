@@ -10,7 +10,7 @@ Additionally, the xlang toolset will be available on multiple operating systems.
 This means that if your shared library is portable to various operating systems,
 then you can use the xlang tooling to make that shared library available to various client programming language on those various platforms.
 
-More succinctly, you can take a library written in language A and make it available to language B applications running on platform C. The set of supported languages and platforms will expand as the project progresses.
+More successfully, you can take a library written in language A and make it available to language B applications running on platform C. The set of supported languages and platforms will expand as the project progresses.
 
 The xlang project is in a very, very early stage of development.
 The project wants and encourages community feedback and contributions. As such, the xlang team is doing *all* xlang project development in the open on GitHub. 
