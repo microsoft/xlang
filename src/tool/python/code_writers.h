@@ -175,7 +175,7 @@ namespace xlang
 
         if (!(is_ptype(type) || is_static_class(type)))
         {
-            w.write("    { \"_as\", (PyCFunction)@__as, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+            w.write("    { \"_from\", (PyCFunction)@__from, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
         }
 
         w.write("    { nullptr }\n};\n");
@@ -524,7 +524,7 @@ static PyType_Spec @_Type_spec =
         }
 
         auto format = R"(
-static PyObject* %__as(PyObject* /*unused*/, PyObject* arg)
+static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
 {
     try
     {

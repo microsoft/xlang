@@ -8,7 +8,7 @@ class TestQueryInterface(unittest.TestCase):
         propset.Insert("strmap", _pyrt.StringMap())
         self.assertTrue(propset.HasKey("strmap"))
         o = propset.Lookup("strmap")
-        strmap = _pyrt.StringMap._as(o)
+        strmap = _pyrt.StringMap._from(o)
         self.assertEqual(type(strmap), _pyrt.StringMap)
 
 if __name__ == '__main__':
