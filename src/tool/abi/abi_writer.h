@@ -20,45 +20,7 @@ struct format_hex
 template <typename Int>
 format_hex(Int) -> format_hex<Int>;
 
-struct indent {};
-
-struct type_name
-{
-    std::string_view ns;
-    std::string_view name;
-
-    bool operator<(type_name const& other) const
-    {
-        if (auto cmp = ns.compare(other.ns); cmp != 0)
-        {
-            return cmp < 0;
-        }
-        else
-        {
-            // Same namespace
-            return name < other.name;
-        }
-    }
-
-    // So that this type can be used in contexts that call 'TypeName' and 'TypeNamespace'
-    auto TypeNamespace() { return this->ns; }
-    auto TypeName() { return this->name; }
-};
-
-struct typename_compare
-{
-    template <typename LhsT, typename RhsT>
-    bool operator()(LhsT const& lhs, RhsT const& rhs) const noexcept
-    {
-        auto cmp = lhs.TypeNamespace().compare(rhs.TypeNamespace());
-        if (cmp == 0)
-        {
-            cmp = lhs.TypeName().compare(rhs.TypeName());
-        }
-
-        return cmp < 0;
-    }
-};
+struct indent { std::size_t additional_indentation = 0; };
 
 struct writer : xlang::text::writer_base<writer>
 {
@@ -106,6 +68,7 @@ struct writer : xlang::text::writer_base<writer>
     template <typename Int>
     void write(format_hex<Int> val)
     {
+        // TODO: write_printf?
         using unsigned_type = std::make_unsigned_t<Int>;
 
         auto shift = (8 * sizeof(Int)) - 4;
@@ -135,9 +98,9 @@ struct writer : xlang::text::writer_base<writer>
         }
     }
 
-    void write(indent)
+    void write(indent value)
     {
-        for (std::size_t i = 0; i < m_indentation; ++i)
+        for (std::size_t i = 0; i < (m_indentation + value.additional_indentation); ++i)
         {
             write("    ");
         }
@@ -263,13 +226,12 @@ struct writer : xlang::text::writer_base<writer>
     void pop_namespace();
     void pop_generic_namespace();
 
-    void push_contract_guard(std::string_view contractTypeName, uint32_t version);
     std::size_t push_contract_guards(xlang::meta::reader::TypeDef const& type);
     std::size_t push_contract_guards(xlang::meta::reader::TypeRef const& ref);
     std::size_t push_contract_guards(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type);
     std::size_t push_contract_guards(xlang::meta::reader::TypeSig const& type);
     std::size_t push_contract_guards(xlang::meta::reader::GenericTypeInstSig const& type);
-    void pop_contract_guard(std::size_t count);
+    void pop_contract_guards(std::size_t count);
 
     std::pair<bool, std::string_view> should_declare(xlang::meta::reader::TypeDef const& type);
     std::pair<bool, std::string_view> should_declare(xlang::meta::reader::GenericTypeInstSig const& type);
@@ -290,6 +252,8 @@ private:
     void add_dependency(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type);
     void add_dependency(xlang::meta::reader::GenericTypeInstSig const& type);
 
+    std::pair<bool, std::string_view> should_declare(std::string mangledName);
+
     void write_generic_definition(xlang::meta::reader::GenericTypeInstSig const& type);
 
     std::string_view m_namespace;
@@ -300,7 +264,7 @@ private:
     std::size_t m_indentation = 0;
     std::vector<std::string_view> m_namespaceStack;
 
-    std::vector<std::pair<std::string_view, uint32_t>> m_contractGuardStack;
+    std::vector<contract_version> m_contractGuardStack;
 
     // A set of already declared (or in the case of generics, defined) types
     std::set<std::string> m_typeDeclarations;

@@ -172,8 +172,6 @@ inline void write_generictype_mangled(
     return write_type_mangled(w, type, genericArgs, flags);
 }
 
-
-
 inline void write_type_clr(
     writer& w,
     xlang::meta::reader::TypeDef const& type,
@@ -204,7 +202,7 @@ inline void write_type_clr(
         }
         else
         {
-            XLANG_ASSERT(false);
+            xlang::throw_invalid("Unrecognized type in 'System' namespace: ", ref.TypeName());
         }
     }
     else
@@ -239,9 +237,7 @@ inline void write_type_clr(
         case ElementType::R8: return "Double"sv;
         case ElementType::String: return "String"sv;
         case ElementType::Object: return "Object"sv;
-        default:
-            XLANG_ASSERT(false);
-            return ""sv;
+        default: xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
         }
     }();
     w.write(str);
@@ -253,7 +249,6 @@ inline void write_type_clr(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    using namespace xlang::meta::reader;
     visit(type, [&](auto const& t)
         {
             write_type_clr(w, t, genericArgs, flags);
@@ -302,8 +297,6 @@ inline void write_type_clr(
     w.write('>');
 }
 
-
-
 inline void write_type_cpp(
     writer& w,
     xlang::meta::reader::TypeDef const& type,
@@ -315,7 +308,7 @@ inline void write_type_cpp(
 
     bool const genericParam = flags_set(flags, format_flags::generic_param);
     bool const functionParam = flags_set(flags, format_flags::function_param);
-    bool const ignoreNamespace = flags_set(flags, format_flags::ignore_namespace);
+    bool ignoreNamespace = flags_set(flags, format_flags::ignore_namespace);
     auto typeCategory = get_category(type);
 
     // Types used as either function or generic parameters get mangled, so we shouldn't ever make it this far
@@ -328,6 +321,12 @@ inline void write_type_cpp(
         XLANG_ASSERT(!genericParam); // We should be mangling these names
         write_type_cpp(w, default_interface(type), genericArgs, flags);
         return;
+    }
+
+    auto [mapped, typeName] = w.config().map_type(type.TypeNamespace(), type.TypeName());
+    if (typeName.ns.empty())
+    {
+        ignoreNamespace = true;
     }
 
     switch (typeCategory)
@@ -349,13 +348,12 @@ inline void write_type_cpp(
 
     if (!ignoreNamespace)
     {
-        write_namespace_open(w, type.TypeNamespace());
+        write_namespace_open(w, typeName.ns);
     }
 
     // C++ names don't carry the tick mark
-    auto name = type.TypeName();
-    name = name.substr(0, name.find('`'));
-    w.write("%%", type_prefix(typeCategory), name);
+    typeName.name = typeName.name.substr(0, typeName.name.find('`'));
+    w.write("%%", type_prefix(typeCategory), typeName.name);
 
     if (genericParam || functionParam)
     {
@@ -389,7 +387,7 @@ inline void write_type_cpp(
         }
         else
         {
-            XLANG_ASSERT(false);
+            xlang::throw_invalid("Unrecognized type in 'System' namespace: ", ref.TypeName());
         }
     }
     else
@@ -425,9 +423,7 @@ inline void write_type_cpp(
         case ElementType::R8: return "double"sv;
         case ElementType::String: return "HSTRING"sv;
         case ElementType::Object: return "IInspectable*"sv;
-        default:
-            XLANG_ASSERT(false);
-            return ""sv;
+        default: xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
         }
     }();
     w.write(str);
@@ -439,7 +435,6 @@ inline void write_type_cpp(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    using namespace xlang::meta::reader;
     visit(type, [&](auto const& t)
         {
             write_type_cpp(w, t, genericArgs, flags);
@@ -497,8 +492,6 @@ inline void write_type_cpp(
     }
 }
 
-
-
 inline void write_type_mangled(
     writer& w,
     xlang::meta::reader::TypeDef const& type,
@@ -507,6 +500,8 @@ inline void write_type_mangled(
 {
     using namespace xlang::meta::reader;
     using namespace xlang::text;
+
+    auto [mapped, typeName] = w.config().map_type(type.TypeNamespace(), type.TypeName());
 
     auto writeName = [&](std::string_view name)
     {
@@ -548,12 +543,15 @@ inline void write_type_mangled(
             }
         }
 
-        writeName(type.TypeNamespace());
-        w.write(flags_set(flags, format_flags::generic_param) ? "__C" : "_C");
+        if (!typeName.ns.empty())
+        {
+            writeName(typeName.ns);
+            w.write(flags_set(flags, format_flags::generic_param) ? "__C" : "_C");
+        }
     }
 
     w.write(type_prefix(get_category(type)));
-    writeName(type.TypeName());
+    writeName(typeName.name);
 }
 
 inline void write_type_mangled(
@@ -570,7 +568,7 @@ inline void write_type_mangled(
         }
         else
         {
-            XLANG_ASSERT(false);
+            xlang::throw_invalid("Unrecognized type in 'System' namespace: ", ref.TypeName());
         }
     }
     else
@@ -605,9 +603,7 @@ inline void write_type_mangled(
         case ElementType::R8: return "double"sv;
         case ElementType::String: return "HSTRING"sv;
         case ElementType::Object: return "IInspectable"sv;
-        default:
-            XLANG_ASSERT(false);
-            return ""sv;
+        default: xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
         }
     }();
     w.write(str);
@@ -619,7 +615,6 @@ inline void write_type_mangled(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    using namespace xlang::meta::reader;
     visit(type, [&](auto const& t)
         {
             write_type_mangled(w, t, genericArgs, flags);
@@ -654,20 +649,13 @@ inline void write_type_mangled(
     using namespace std::literals;
 
     write_type_mangled(w, type.GenericType(), genericArgs, flags);
-    w.write('_');
-
-    std::string_view prefix;
     auto const genericFlags = clear_flags(flags, format_flags::ignore_namespace) | format_flags::generic_param;
     for (auto const& param : type.GenericArgs())
     {
-        w.write(prefix);
+        w.write('_');
         write_type_mangled(w, param, genericArgs, genericFlags);
-        prefix = "_"sv;
     }
 }
-
-
-
 
 inline void write_type_signature(
     writer& w,
@@ -705,14 +693,16 @@ inline void write_type_signature(
         }
     }
 
-    switch (get_category(type))
+    switch (typeCategory)
     {
     case category::interface_type:
+    case category::delegate_type:
         w.write("{%}", bind<write_type_guid>(type));
         break;
 
     case category::class_type:
-        w.write("%.%;{%}", type.TypeNamespace(), type.TypeName(), bind<write_type_guid>(type));
+        w.write("%.%;", type.TypeNamespace(), type.TypeName());
+        write_type_signature(w, default_interface(type), genericArgs, flags);
         break;
 
     case category::enum_type:
@@ -727,10 +717,6 @@ inline void write_type_signature(
             w.write(";");
             write_type_signature(w, field.Signature().Type(), genericArgs, flags);
         }
-        break;
-
-    case category::delegate_type:
-        w.write("{%}", bind<write_type_guid>(type));
         break;
     }
 
@@ -754,7 +740,7 @@ inline void write_type_signature(
         }
         else
         {
-            XLANG_ASSERT(false);
+            xlang::throw_invalid("Unrecognized type in 'System' namespace: ", ref.TypeName());
         }
     }
     else
@@ -789,9 +775,7 @@ inline void write_type_signature(
         case ElementType::R8: return "f8"sv;
         case ElementType::String: return "string"sv;
         case ElementType::Object: return "cinterface(IInspectable)"sv;
-        default:
-            XLANG_ASSERT(false);
-            return ""sv;
+        default: xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
         }
     }();
     w.write(str);
@@ -803,7 +787,6 @@ inline void write_type_signature(
     generic_arg_stack const& genericArgs,
     format_flags flags)
 {
-    using namespace xlang::meta::reader;
     visit(type, [&](auto const& t)
         {
             write_type_signature(w, t, genericArgs, flags);
@@ -843,13 +826,11 @@ inline void write_type_signature(
     auto const genericFlags = flags | format_flags::generic_param;
     for (auto const& param : type.GenericArgs())
     {
-        w.write(";");
+        w.write(';');
         write_type_signature(w, param, genericArgs, genericFlags);
     }
     w.write(')');
 }
-
-
 
 inline void write_type_guid(writer& w, xlang::meta::reader::TypeDef const& type)
 {
@@ -921,94 +902,4 @@ inline void write_generic_type_guid(writer& w, xlang::meta::reader::GenericTypeI
         ((hashValues[6] & 0x0F) | 0x50), hashValues[7],
         ((hashValues[8] & 0x3F) | 0x80), hashValues[9],
         hashValues[10], hashValues[11], hashValues[12], hashValues[13], hashValues[14], hashValues[15]);
-}
-
-template <typename LogicT, typename AbiT>
-inline void write_aggregate_type(writer& w, LogicT&& logical, AbiT&& abi)
-{
-    using namespace xlang::text;
-    w.write("%%%<%, %>",
-        bind<write_namespace_open>(internal_namespace),
-        "AggregateType",
-        bind<write_namespace_close>(),
-        logical,
-        abi);
-}
-
-inline void write_generic_impl_param(
-    writer& w,
-    xlang::meta::reader::TypeSig const& type,
-    generic_arg_stack const& genericArgs)
-{
-    using namespace xlang::meta::reader;
-    using namespace xlang::text;
-
-    xlang::visit(type.Type(),
-        [&](coded_index<TypeDefOrRef> const& t)
-        {
-            visit(t, xlang::visit_overload{
-                [&](GenericTypeInstSig const& sig)
-                {
-                    // Generic types never get aggregated
-                    write_type_cpp(w, sig, genericArgs, format_flags::generic_param);
-                },
-                [&](auto const& defOrRef)
-                {
-                    if (defOrRef.TypeNamespace() == system_namespace)
-                    {
-                        if (defOrRef.TypeName() == "Guid")
-                        {
-                            w.write("GUID");
-                        }
-                        else
-                        {
-                            XLANG_ASSERT(false);
-                        }
-                    }
-                    else
-                    {
-                        auto&& def = find_required(defOrRef);
-                        switch (get_category(def))
-                        {
-                        case category::class_type:
-                        {
-                            // Only class types get aggregated
-                            auto iface = default_interface(def);
-                            write_aggregate_type(w,
-                                bind<write_typedef_cpp>(def, genericArgs, format_flags::generic_param),
-                                [&](auto& w) { write_type_cpp(w, iface, genericArgs, format_flags::generic_param); });
-                        }   break;
-
-                        case category::interface_type:
-                        case category::enum_type:
-                        case category::struct_type:
-                        case category::delegate_type:
-                            write_type_cpp(w, def, genericArgs, format_flags::generic_param);
-                            break;
-                        }
-                    }
-                }});
-        },
-        [&](GenericTypeInstSig const& t)
-        {
-            // Generic types never get aggregated
-            write_type_cpp(w, t, genericArgs, format_flags::generic_param);
-        },
-        [&](ElementType t)
-        {
-            // The only element type that gets mapped is 'bool', which becomes 'boolean'
-            if (t == ElementType::Boolean)
-            {
-                write_aggregate_type(w, "bool", "boolean");
-            }
-            else
-            {
-                write_type_cpp(w, t, genericArgs, format_flags::generic_param);
-            }
-        },
-        [&](GenericTypeIndex t)
-        {
-            auto [sig, newStack] = genericArgs.lookup(t.index);
-            write_generic_impl_param(w, sig, newStack);
-        });
 }

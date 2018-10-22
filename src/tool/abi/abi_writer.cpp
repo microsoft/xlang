@@ -35,19 +35,20 @@ void writer::initialize_dependencies(TypeDef const& type)
     // trip us up since it's a definition, not a use
     if (!get_attribute(type, metadata_namespace, api_contract_attribute))
     {
-        if (auto [contractTypeName, contractVersion] = contract_attribute(type); !contractTypeName.empty())
+        if (auto contractInfo = contract_attributes(type))
         {
-            m_dependentNamespaces.emplace(decompose_type(contractTypeName).first);
+            m_dependentNamespaces.emplace(decompose_type(contractInfo->type_name).first);
+            for (auto const& prevContract : contractInfo->previous_contracts)
+            {
+                m_dependentNamespaces.emplace(decompose_type(prevContract.type_name).first);
+            }
         }
     }
 
-    // TODO: This is useful/necessary for generics, but must it be done for all types?
     for (auto const& iface : type.InterfaceImpl())
     {
         add_dependency(iface.Interface());
     }
-
-    // TODO: type.Extends()? Possibly needed for fast ABI for Xaml?
 
     for (auto const& method : type.MethodList())
     {
@@ -155,18 +156,16 @@ void writer::push_generic_namespace(std::string_view ns)
 {
     XLANG_ASSERT(m_namespaceStack.empty());
 
-    char const* prefix = " ";
+    std::string_view prefix;
     if (m_config.ns_prefix_state == ns_prefix::always)
     {
         write("namespace ABI {");
+        prefix = " ";
     }
     else if (m_config.ns_prefix_state == ns_prefix::optional)
     {
         write("ABI_NAMESPACE_BEGIN");
-    }
-    else
-    {
-        prefix = "";
+        prefix = " ";
     }
 
     for (auto nsPart : namespace_range{ ns })
@@ -228,20 +227,23 @@ void writer::pop_generic_namespace()
     }
 }
 
-void writer::push_contract_guard(std::string_view contractTypeName, uint32_t version)
-{
-    auto [ns, name] = decompose_type(contractTypeName);
-    write("#if % >= %\n", bind<write_contract_macro>(ns, name), format_hex{ version });
-
-    m_contractGuardStack.emplace_back(contractTypeName, version);
-}
-
 std::size_t writer::push_contract_guards(TypeDef const& type)
 {
     XLANG_ASSERT(distance(type.GenericParam()) == 0);
-    if (auto [contractName, contractVersion] = contract_attribute(type); !contractName.empty())
+    if (auto vers = contract_attributes(type))
     {
-        push_contract_guard(contractName, contractVersion);
+        auto [ns, name] = decompose_type(vers->type_name);
+        write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers->version });
+        for (auto const& prev : vers->previous_contracts)
+        {
+            auto [prevNs, prevName] = decompose_type(prev.type_name);
+            write(" || \\\n    % >= % && % < %",
+                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.low_version },
+                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.high_version });
+        }
+        write('\n');
+
+        m_contractGuardStack.emplace_back(std::move(*vers));
         return 1;
     }
 
@@ -252,7 +254,7 @@ std::size_t writer::push_contract_guards(TypeRef const& ref)
 {
     if (ref.TypeNamespace() != system_namespace)
     {
-        return push_contract_guards(find_required(ref)); // TODO: Necessary to find?
+        return push_contract_guards(find_required(ref));
     }
 
     return 0;
@@ -307,13 +309,21 @@ std::size_t writer::push_contract_guards(GenericTypeInstSig const& type)
     return result;
 }
 
-void writer::pop_contract_guard(std::size_t count)
+void writer::pop_contract_guards(std::size_t count)
 {
     while (count--)
     {
-        auto const& pair = m_contractGuardStack.back();
-        auto [ns, name] = decompose_type(pair.first);
-        write("#endif // % >= %\n", bind<write_contract_macro>(ns, name), format_hex{ pair.second });
+        auto const& vers = m_contractGuardStack.back();
+        auto [ns, name] = decompose_type(vers.type_name);
+        write("#endif // % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.version });
+        for (auto const& prev : vers.previous_contracts)
+        {
+            auto [prevNs, prevName] = decompose_type(prev.type_name);
+            write(" || \\\n       // % >= % && % < %",
+                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.low_version},
+                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.high_version });
+        }
+        write('\n');
         m_contractGuardStack.pop_back();
     }
 }
@@ -321,17 +331,17 @@ void writer::pop_contract_guard(std::size_t count)
 std::pair<bool, std::string_view> writer::should_declare(TypeDef const& type)
 {
     auto mangledName = write_temp("%", bind<write_typedef_mangled>(type, m_genericArgStack, format_flags::none));
-    if (auto [itr, inserted] = m_typeDeclarations.emplace(std::move(mangledName)); inserted)
-    {
-        return { true, *itr };
-    }
-
-    return { false, {} };
+    return should_declare(std::move(mangledName));
 }
 
 std::pair<bool, std::string_view> writer::should_declare(GenericTypeInstSig const& type)
 {
     auto mangledName = write_temp("%", bind<write_generictype_mangled>(type, m_genericArgStack, format_flags::none));
+    return should_declare(std::move(mangledName));
+}
+
+std::pair<bool, std::string_view> writer::should_declare(std::string mangledName)
+{
     if (auto [itr, inserted] = m_typeDeclarations.emplace(std::move(mangledName)); inserted)
     {
         return { true, *itr };
@@ -442,8 +452,7 @@ void writer::write_interface_forward_declarations()
     bool const isFoundationNamespace = m_namespace == foundation_namespace;
     for (auto const& type : m_members.interfaces)
     {
-        // TODO: What on earth is up with IAsyncInfo?
-        if ((distance(type.GenericParam()) == 0) && (!isFoundationNamespace || (type.TypeName() != "IAsyncInfo")))
+        if ((distance(type.GenericParam()) == 0) && !m_config.map_type(type.TypeNamespace(), type.TypeName()).first)
         {
             write_forward_declaration(*this, type, m_genericArgStack);
         }
@@ -478,20 +487,31 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
 
     // Before we can write the definition for the type, we must first write any definitions/declarations for any generic
     // parameters, required interface(s), and function return/argument types
-    auto handle_typedef_or_ref = [&](coded_index<TypeDefOrRef> const& t)
+    auto handle_typedef_or_ref = [&](coded_index<TypeDefOrRef> t)
     {
-        visit(t, xlang::visit_overload{
-            [&](GenericTypeInstSig const& sig)
-            {
-                write_generic_definition(sig);
-            },
-            [&](auto const& defOrRef)
-            {
-                if (defOrRef.TypeNamespace() != system_namespace)
+        while (t)
+        {
+            auto current = t;
+            t = {};
+            ::visit(current, xlang::visit_overload{
+                [&](GenericTypeInstSig const& sig)
                 {
-                    write_forward_declaration(*this, find_required(defOrRef), m_genericArgStack);
-                }
-            }});
+                    write_generic_definition(sig);
+                },
+                [&](auto const& defOrRef)
+                {
+                    if (defOrRef.TypeNamespace() != system_namespace)
+                    {
+                        auto const& def = find_required(defOrRef);
+                        write_forward_declaration(*this, def, m_genericArgStack);
+
+                        if (get_category(def) == category::class_type)
+                        {
+                            t = default_interface(def);
+                        }
+                    }
+                }});
+        }
     };
 
     auto handle_type_sig = [&](TypeSig const& t)
@@ -612,7 +632,7 @@ typedef % %_t;
 
 )^-^", mangledName);
 
-    pop_contract_guard(contractDepth);
+    pop_contract_guards(contractDepth);
 }
 
 void writer::write_type_dependencies()
@@ -621,9 +641,7 @@ void writer::write_type_dependencies()
     {
         if (type.TypeNamespace() != m_namespace)
         {
-            write_forward_declaration(*this, type, m_genericArgStack);
-
-            // For classes, we also need to declare the type's default interface
+            // For classes, we need to declare the type's default interface instead
             if (get_category(type) == category::class_type)
             {
                 ::visit(default_interface(type), xlang::visit_overload{
@@ -636,6 +654,10 @@ void writer::write_type_dependencies()
                         write_forward_declaration(*this, find_required(defOrRef), m_genericArgStack);
                     }
                 });
+            }
+            else
+            {
+                write_forward_declaration(*this, type, m_genericArgStack);
             }
         }
     }

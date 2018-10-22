@@ -1,51 +1,9 @@
 #pragma once
 
+#include <optional>
+
 #include "abi_writer.h"
 #include "type_writers.h"
-
-static std::pair<std::string_view, uint32_t> contract_attribute(xlang::meta::reader::TypeDef const& type)
-{
-    using namespace xlang::meta::reader;
-
-    auto attr = get_attribute(type, metadata_namespace, contract_version_attribute);
-    if (!attr)
-    {
-        return {};
-    }
-
-    auto sig = attr.Value();
-    auto const& fixedArgs = sig.FixedArgs();
-
-    // NOTE: Definitions of the API contracts themselves also have a ContractVersionAttribute, but with a single value
-    //       used for the constructor (the current version of the contract). This function is not intended to be used
-    //       with API contract types and will assert here
-    if (fixedArgs.size() != 2)
-    {
-        XLANG_ASSERT(false);
-        return {};
-    }
-
-    // ContractVersionAttribute(System.Type, UInt32) OR ContractVersionAttribute(System.String, UInt32)
-    auto elemSig = std::get<ElemSig>(fixedArgs[0].value);
-    std::string_view resultName;
-    xlang::visit(elemSig.value,
-        [&](ElemSig::SystemType type)
-        {
-            resultName = type.name;
-        },
-        [&](std::string_view name)
-        {
-            resultName = name;
-        },
-        [](auto&&)
-        {
-            XLANG_ASSERT(false);
-        });
-
-    auto contractVersion = std::get<uint32_t>(std::get<ElemSig>(fixedArgs[1].value).value);
-
-    return { resultName, contractVersion };
-}
 
 inline void write_include_guard(writer& w, std::string_view ns)
 {
@@ -58,22 +16,6 @@ inline void write_contract_macro(writer& w, std::string_view contractNamespace, 
     w.write("%_%_VERSION",
         bind_list<writer::write_uppercase>("_", namespace_range{ contractNamespace }),
         bind<writer::write_uppercase>(contractTypeName));
-}
-
-inline void write_contract_guard_begin(writer& w, std::string_view contractName, unsigned int version)
-{
-    using namespace xlang::text;
-
-    auto [ns, name] = decompose_type(contractName);
-    w.write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ version });
-}
-
-inline void write_contract_guard_end(writer& w, std::string_view contractName, unsigned int version)
-{
-    using namespace xlang::text;
-
-    auto [ns, name] = decompose_type(contractName);
-    w.write("#endif // % >= %", bind<write_contract_macro>(ns, name), format_hex{ version });
 }
 
 inline void write_forward_declaration(
@@ -91,12 +33,9 @@ inline void write_forward_declaration(
     auto typeName = type.TypeName();
 
     // Some types are "projected" and therefore should not get forward declared
-    if (typeNamespace == foundation_namespace)
+    if (auto [mapped, name] = w.config().map_type(typeNamespace, typeName); mapped)
     {
-        if ((typeName == async_info) || (typeName == async_status))
-        {
-            return;
-        }
+        return;
     }
 
     if (auto [shouldDeclare, mangledName] = w.should_declare(type); shouldDeclare)
@@ -151,6 +90,96 @@ inline void write_forward_declaration(
     }
 }
 
+template <typename LogicT, typename AbiT>
+inline void write_aggregate_type(writer& w, LogicT&& logical, AbiT&& abi)
+{
+    using namespace xlang::text;
+    w.write("%%%<%, %>",
+        bind<write_namespace_open>(internal_namespace),
+        "AggregateType",
+        bind<write_namespace_close>(),
+        logical,
+        abi);
+}
+
+inline void write_generic_impl_param(
+    writer& w,
+    xlang::meta::reader::TypeSig const& type,
+    generic_arg_stack const& genericArgs)
+{
+    using namespace xlang::meta::reader;
+    using namespace xlang::text;
+
+    xlang::visit(type.Type(),
+        [&](coded_index<TypeDefOrRef> const& t)
+        {
+            visit(t, xlang::visit_overload{
+                [&](GenericTypeInstSig const& sig)
+                {
+                    // Generic types never get aggregated
+                    write_type_cpp(w, sig, genericArgs, format_flags::generic_param);
+                },
+                [&](auto const& defOrRef)
+                {
+                    if (defOrRef.TypeNamespace() == system_namespace)
+                    {
+                        if (defOrRef.TypeName() == "Guid")
+                        {
+                            w.write("GUID");
+                        }
+                        else
+                        {
+                            xlang::throw_invalid("Unrecognized type in 'System' namespace: ", defOrRef.TypeName());
+                        }
+                    }
+                    else
+                    {
+                        auto&& def = find_required(defOrRef);
+                        switch (get_category(def))
+                        {
+                        case category::class_type:
+                        {
+                            // Only class types get aggregated
+                            auto iface = default_interface(def);
+                            write_aggregate_type(w,
+                                bind<write_typedef_cpp>(def, genericArgs, format_flags::generic_param),
+                                [&](auto& w) { write_type_cpp(w, iface, genericArgs, format_flags::generic_param); });
+                        }   break;
+
+                        case category::interface_type:
+                        case category::enum_type:
+                        case category::struct_type:
+                        case category::delegate_type:
+                            write_type_cpp(w, def, genericArgs, format_flags::generic_param);
+                            break;
+                        }
+                    }
+                }});
+        },
+        [&](GenericTypeInstSig const& t)
+        {
+            // Generic types never get aggregated
+            write_type_cpp(w, t, genericArgs, format_flags::generic_param);
+        },
+        [&](ElementType t)
+        {
+            // The only element type that gets mapped is 'bool', which becomes 'boolean'
+            if (t == ElementType::Boolean)
+            {
+                write_aggregate_type(w, "bool", "boolean");
+            }
+            else
+            {
+                write_type_cpp(w, t, genericArgs, format_flags::generic_param);
+            }
+        },
+        [&](GenericTypeIndex t)
+        {
+            auto [sig, newStack] = genericArgs.lookup(t.index);
+            write_generic_impl_param(w, sig, newStack);
+        });
+}
+
 inline void write_contract_version(writer& w, unsigned int value)
 {
     auto versionHigh = static_cast<int>((value & 0xFFFF0000) >> 16);
@@ -183,12 +212,11 @@ inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef
  * % %.%
 )^-^", categoryString, type.TypeNamespace(), type.TypeName());
 
-    auto [contractName, contractVersion] = contract_attribute(type);
-    if (!contractName.empty())
+    if (auto contractInfo = contract_attributes(type))
     {
         w.write(R"^-^( *
  * Introduced to % in version %
-)^-^", contractName, bind<write_contract_version>(contractVersion));
+)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
     }
 
     if (typeCategory == category::interface_type)
@@ -247,6 +275,24 @@ inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef
 )^-^");
 }
 
+inline void write_deprecation_message(
+    writer& w,
+    deprecation_info const& info,
+    std::size_t additionalIndentation = 0,
+    std::string_view deprecationMacro = "DEPRECATED")
+{
+    using namespace xlang::text;
+
+    auto [ns, name] = decompose_type(info.contract_type);
+    w.write(R"^-^(#if % >= %
+%%("%")
+#endif // % >= %
+)^-^",
+        bind<write_contract_macro>(ns, name), format_hex{ info.version },
+        indent{ additionalIndentation }, deprecationMacro, info.message,
+        bind<write_contract_macro>(ns, name), format_hex{ info.version });
+}
+
 inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const& type)
 {
     using namespace xlang::text;
@@ -254,33 +300,49 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
     auto const name = type.TypeName();
 
     write_type_definition_banner(w, type);
-
-    auto [contractName, contractVersion] = contract_attribute(type);
-    if (!contractName.empty())
-    {
-        w.write("%\n", bind<write_contract_guard_begin>(contractName, contractVersion));
-    }
+    auto contractDepth = w.push_contract_guards(type);
 
     w.push_namespace(ns);
-    w.write(R"^-^(%enum % : int
+    w.write("%enum", indent{});
+    if (auto info = is_deprecated(type))
+    {
+        w.write("\n");
+        write_deprecation_message(w, *info);
+        w.write("%", indent{});
+    }
+    else
+    {
+        w.write(' ');
+    }
+
+    w.write(R"^-^(% : int
 %{
-)^-^", indent{}, name, indent{});
+)^-^", name, indent{});
 
     for (auto const& field : type.FieldList())
     {
         if (auto value = field.Constant())
         {
-            w.write("%    %_% = %,\n", indent{}, name, field.Name(), value);
+            w.write("%%_%", indent{ 1 }, name, field.Name());
+            if (auto info = is_deprecated(field))
+            {
+                w.write("\n");
+                write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
+                w.write("%", indent{ 1 });
+            }
+            else
+            {
+                w.write(' ');
+            }
+
+            w.write("= %,\n", value);
         }
     }
 
     w.write("%};\n", indent{});
     w.pop_namespace();
 
-    if (!contractName.empty())
-    {
-        w.write("%\n", bind<write_contract_guard_end>(contractName, contractVersion));
-    }
+    w.pop_contract_guards(contractDepth);
     w.write('\n');
 }
 
@@ -291,14 +353,32 @@ inline void write_struct_definition(writer& w, xlang::meta::reader::TypeDef cons
     auto const name = type.TypeName();
 
     write_type_definition_banner(w, type);
+    auto contractDepth = w.push_contract_guards(type);
 
     w.push_namespace(ns);
-    w.write(R"^-^(%struct %
+    w.write("%struct", indent{});
+    if (auto info = is_deprecated(type))
+    {
+        w.write("\n");
+        write_deprecation_message(w, *info);
+        w.write("%", indent{});
+    }
+    else
+    {
+        w.write(' ');
+    }
+
+    w.write(R"^-^(%
 %{
-)^-^", indent{}, name, indent{});
+)^-^", name, indent{});
 
     for (auto const& field : type.FieldList())
     {
+        if (auto info = is_deprecated(field))
+        {
+            write_deprecation_message(w, *info, 1);
+        }
+
         w.write("%    % %;\n",
             indent{},
             bind<write_typesig_cpp>(field.Signature().Type(), generic_arg_stack::empty(), format_flags::none),
@@ -307,6 +387,8 @@ inline void write_struct_definition(writer& w, xlang::meta::reader::TypeDef cons
 
     w.write("%};\n", indent{});
     w.pop_namespace();
+
+    w.pop_contract_guards(contractDepth);
     w.write('\n');
 }
 
@@ -383,6 +465,8 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
     auto const baseType = (typeCategory == category::delegate_type) ? "IUnknown"sv : "IInspectable"sv;
 
     write_type_definition_banner(w, type);
+    auto contractDepth = w.push_contract_guards(type);
+
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
 )^-^",
@@ -400,10 +484,17 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
 
     w.push_namespace(ns);
     w.write(R"^-^(%MIDL_INTERFACE("%")
-%%% : public %
+)^-^", indent{}, bind<write_type_guid>(type));
+
+    if (auto info = is_deprecated(type))
+    {
+        write_deprecation_message(w, *info);
+    }
+
+    w.write(R"^-^(%%% : public %
 %{
 %public:
-)^-^", indent{}, bind<write_type_guid>(type), indent{}, typePrefix, name, baseType, indent{}, indent{});
+)^-^", indent{}, typePrefix, name, baseType, indent{}, indent{});
 
     for (auto const& methodDef : type.MethodList())
     {
@@ -412,6 +503,11 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
         {
             XLANG_ASSERT(typeCategory == category::delegate_type);
             continue;
+        }
+
+        if (auto info = is_deprecated(methodDef))
+        {
+            write_deprecation_message(w, *info, 1);
         }
 
         write_interface_function_declaration(w, methodDef);
@@ -426,10 +522,12 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
     w.write(R"^-^(
 EXTERN_C const IID IID_%;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-
 )^-^",
-    bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none),
-    bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none));
+        bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none),
+        bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none));
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
 }
 
 inline void write_class_name_definition(writer& w, xlang::meta::reader::TypeDef const& type)
@@ -439,16 +537,23 @@ inline void write_class_name_definition(writer& w, xlang::meta::reader::TypeDef 
     auto const name = type.TypeName();
 
     write_type_definition_banner(w, type);
+    auto contractDepth = w.push_contract_guards(type);
+
     w.write(R"^-^(#ifndef RUNTIMECLASS_%_%_DEFINED
 #define RUNTIMECLASS_%_%_DEFINED
-extern const __declspec(selectany) _Null_terminated_ WCHAR RuntimeClass_%_%[] = L"%";
+)^-^", bind_list("_", namespace_range{ ns }), name, bind_list("_", namespace_range{ ns }), name);
+
+    if (auto info = is_deprecated(type))
+    {
+        write_deprecation_message(w, *info);
+    }
+
+    w.write(R"^-^(extern const __declspec(selectany) _Null_terminated_ WCHAR RuntimeClass_%_%[] = L"%";
 #endif
 )^-^",
         bind_list("_", namespace_range{ ns }),
         name,
-        bind_list("_", namespace_range{ ns }),
-        name,
-        bind_list("_", namespace_range{ ns }),
-        name,
         bind<write_typedef_clr>(type, generic_arg_stack::empty(), format_flags::none));
+
+    w.pop_contract_guards(contractDepth);
 }

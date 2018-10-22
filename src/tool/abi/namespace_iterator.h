@@ -11,13 +11,15 @@ struct namespace_iterator
     using difference_type = std::ptrdiff_t;
     using value_type = std::string_view;
     using reference = value_type;
+
+    // Proxy type for operator->
     struct pointer
     {
         std::string_view value;
         std::string_view* operator->() { return &value; }
     };
 
-    namespace_iterator(std::string_view ns, std::string_view::size_type index) :
+    constexpr namespace_iterator(std::string_view ns, std::string_view::size_type index) noexcept :
         m_fullNamespace(ns),
         m_index(index)
     {
@@ -27,63 +29,63 @@ struct namespace_iterator
         }
     }
 
-    reference operator*() const noexcept
+    constexpr reference operator*() const noexcept
     {
         XLANG_ASSERT(valid());
         return m_currentNamespace;
     }
 
-    pointer operator->() const noexcept
+    constexpr pointer operator->() const noexcept
     {
         XLANG_ASSERT(valid());
         return pointer{ m_currentNamespace };
     }
 
-    namespace_iterator& operator++() noexcept
+    constexpr namespace_iterator& operator++() noexcept
     {
         advance_forward();
         return *this;
     }
 
-    namespace_iterator operator++(int) noexcept
+    constexpr namespace_iterator operator++(int) noexcept
     {
         auto copy = *this;
         advance_forward();
         return copy;
     }
 
-    namespace_iterator& operator--() noexcept
+    constexpr namespace_iterator& operator--() noexcept
     {
         advance_backward();
         return *this;
     }
 
-    namespace_iterator operator--(int) noexcept
+    constexpr namespace_iterator operator--(int) noexcept
     {
         auto copy = *this;
         advance_backward();
         return copy;
     }
 
-    friend bool operator==(const namespace_iterator& lhs, const namespace_iterator& rhs) noexcept
+    friend constexpr bool operator==(const namespace_iterator& lhs, const namespace_iterator& rhs) noexcept
     {
         assert(lhs.m_fullNamespace.data() == rhs.m_fullNamespace.data());
         return lhs.m_index == rhs.m_index;
     }
 
-    friend bool operator!=(const namespace_iterator& lhs, const namespace_iterator& rhs) noexcept
+    friend constexpr bool operator!=(const namespace_iterator& lhs, const namespace_iterator& rhs) noexcept
     {
         return !(lhs == rhs);
     }
 
 private:
 
-    bool valid() const noexcept
+    constexpr bool valid() const noexcept
     {
         return m_index != std::string_view::npos;
     }
 
-    void initialize_current() noexcept
+    constexpr void initialize_current() noexcept
     {
         XLANG_ASSERT(valid() && (m_index < m_fullNamespace.length()));
 
@@ -94,7 +96,7 @@ private:
         m_currentNamespace = m_fullNamespace.substr(m_index, length);
     }
 
-    void advance_forward() noexcept
+    constexpr void advance_forward() noexcept
     {
         XLANG_ASSERT(valid());
         m_index += m_currentNamespace.length();
@@ -110,7 +112,7 @@ private:
         }
     }
 
-    void advance_backward() noexcept
+    constexpr void advance_backward() noexcept
     {
         XLANG_ASSERT(m_index != 0);
 
@@ -143,42 +145,42 @@ struct namespace_range
 
     std::string_view ns;
 
-    const_iterator begin() const noexcept
+    constexpr const_iterator begin() const noexcept
     {
         return const_iterator{ ns, 0 };
     }
 
-    const_iterator cbegin() const noexcept
+    constexpr const_iterator cbegin() const noexcept
     {
         return begin();
     }
 
-    const_iterator end() const noexcept
+    constexpr const_iterator end() const noexcept
     {
         return const_iterator{ ns, std::string_view::npos };
     }
 
-    const_iterator cend() const noexcept
+    constexpr const_iterator cend() const noexcept
     {
         return end();
     }
 
-    const_reverse_iterator rbegin() const noexcept
+    constexpr const_reverse_iterator rbegin() const noexcept
     {
         return const_reverse_iterator{ end() };
     }
 
-    const_reverse_iterator crbegin() const noexcept
+    constexpr const_reverse_iterator crbegin() const noexcept
     {
         return rbegin();
     }
 
-    const_reverse_iterator rend() const noexcept
+    constexpr const_reverse_iterator rend() const noexcept
     {
         return const_reverse_iterator{ begin() };
     }
 
-    const_reverse_iterator crend() const noexcept
+    constexpr const_reverse_iterator crend() const noexcept
     {
         return rend();
     }
@@ -191,22 +193,22 @@ struct reverse_namespace_range
 
     std::string_view ns;
 
-    const_iterator begin() const noexcept
+    constexpr const_iterator begin() const noexcept
     {
         return const_iterator{ namespace_iterator{ ns, std::string_view::npos } };
     }
 
-    const_iterator cbegin() const noexcept
+    constexpr const_iterator cbegin() const noexcept
     {
         return begin();
     }
 
-    const_iterator end() const noexcept
+    constexpr const_iterator end() const noexcept
     {
         return const_iterator{ namespace_iterator{ ns, 0 } };
     }
 
-    const_iterator cend() const noexcept
+    constexpr const_iterator cend() const noexcept
     {
         return end();
     }

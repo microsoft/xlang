@@ -6,7 +6,7 @@
 #include <string_view>
 
 template <typename T>
-inline constexpr std::uint8_t* bigendian_copy(T value, std::uint8_t* target)
+inline constexpr std::uint8_t* bigendian_copy(T value, std::uint8_t* target) noexcept
 {
     std::size_t shift = (sizeof(T) - 1) * 8;
     T mask = static_cast<T>(0xFF) << shift;
@@ -24,7 +24,7 @@ struct sha1
 {
     static constexpr std::size_t chunk_size_bits = 512;
     static constexpr std::size_t chunk_size_bytes = chunk_size_bits / 8;
-    static constexpr std::size_t chunk_size_ints = chunk_size_bits / 32;
+    static constexpr std::size_t chunk_size_ints = chunk_size_bytes / 4;
 
     constexpr void reset() noexcept
     {
@@ -37,7 +37,7 @@ struct sha1
     {
         while (count > 0)
         {
-            auto bytesToCopy = std::min(count, chunk_size_bytes - m_nextChunkByte);
+            auto bytesToCopy = (std::min)(count, chunk_size_bytes - m_nextChunkByte);
             for (std::size_t i = 0; i < bytesToCopy; ++i)
             {
                 append_byte(data[i]);
@@ -58,14 +58,14 @@ struct sha1
         auto const sizeBits = m_sizeBytes * 8;
         append_byte(0x80);
 
-        // We need to append the length to the very end, which means that we may need to process a mostly empty
-        // additional chunk
         constexpr auto sizeOffset = chunk_size_bytes - 8;
         while (m_nextChunkByte < sizeOffset)
         {
             append_byte(0);
         }
 
+        // We need to append the length to the very end, which means that we may need to process a mostly empty
+        // additional chunk
         if (m_nextChunkByte > sizeOffset)
         {
             while (m_nextChunkByte < chunk_size_bytes)
@@ -93,7 +93,7 @@ struct sha1
 
 private:
 
-    constexpr void append_byte(std::uint8_t byte)
+    constexpr void append_byte(std::uint8_t byte) noexcept
     {
         auto index = m_nextChunkByte / 4;
         auto pos = m_nextChunkByte % 4;
@@ -155,7 +155,7 @@ private:
     }
 
     template <typename T>
-    static constexpr T lrot(T value, std::size_t count)
+    static constexpr T lrot(T value, std::size_t count) noexcept
     {
         using U = std::make_unsigned_t<T>;
         auto result = value << count;
