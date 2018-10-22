@@ -629,10 +629,10 @@ typedef % %_t;
 #endif // !defined(RO_NO_TEMPLATE_NAME)
 #endif /* DEF_%_USE */
 
-
 )^-^", mangledName);
 
     pop_contract_guards(contractDepth);
+    write("\n\n");
 }
 
 void writer::write_type_dependencies()

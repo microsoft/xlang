@@ -258,10 +258,15 @@ inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef
             w.write(R"^-^( *
  * Class implements the following interfaces:
 )^-^");
+            auto defaultInterface = default_interface(type);
             for (auto const& iface : requiredInterfaces)
             {
-                w.write(" *     ");
+                w.write(" *    ");
                 write_type_clr(w, iface.Interface(), generic_arg_stack::empty(), format_flags::none);
+                if (iface.Interface() == defaultInterface)
+                {
+                    w.write(" ** Default Interface **");
+                }
                 w.write('\n');
             }
         }
@@ -556,4 +561,5 @@ inline void write_class_name_definition(writer& w, xlang::meta::reader::TypeDef 
         bind<write_typedef_clr>(type, generic_arg_stack::empty(), format_flags::none));
 
     w.pop_contract_guards(contractDepth);
+    w.write('\n');
 }
