@@ -139,7 +139,11 @@ namespace xlang::cmd
                 else if (path == "local")
                 {
                     std::array<char, MAX_PATH> local{};
+#ifdef _WIN64
                     ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+#else
+                    ExpandEnvironmentStringsA("%windir%\\SysNative\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+#endif
                     add_directory(local.data());
                 }
 #endif

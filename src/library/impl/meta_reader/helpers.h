@@ -20,14 +20,7 @@ namespace xlang::meta::reader
 
     inline auto find_required(TypeRef const& type)
     {
-        auto definition = find(type);
-
-        if (!definition)
-        {
-            throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' could not be found");
-        }
-
-        return definition;
+        return type.get_database().get_cache().find_required(type.TypeNamespace(), type.TypeName());
     }
 
     inline bool is_const(ParamSig const& param)

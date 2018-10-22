@@ -99,6 +99,18 @@ namespace xlang::meta::reader
             return find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
         }
 
+        TypeDef find_required(std::string_view const& type_namespace, std::string_view const& type_name) const
+        {
+            auto definition = find(type_namespace, type_name);
+            
+            if (!definition)
+            {
+                throw_invalid("Type '", type_namespace, ".", type_name, "' could not be found");
+            }
+
+            return definition;
+        }
+
         TypeDef find_required(std::string_view const& type_string) const
         {
             auto pos = type_string.rfind('.');
@@ -108,14 +120,7 @@ namespace xlang::meta::reader
                 throw_invalid("Type name is missing namespace separator");
             }
 
-            auto definition = find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
-
-            if (!definition)
-            {
-                throw_invalid("Type '", type_string, "' could not be found");
-            }
-
-            return definition;
+            return find_required(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
         }
 
         auto const& databases() const noexcept

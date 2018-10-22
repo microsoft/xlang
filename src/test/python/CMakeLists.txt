@@ -7,24 +7,25 @@ file(TO_NATIVE_PATH "$ENV{WindowsSdkDir}References/$ENV{WindowsSDKVersion}" REFE
 
 set(winmd_files
     Windows.Foundation.FoundationContract
-    Windows.Foundation.UniversalApiContract
     Windows.Devices.DevicesLowLevelContract
+    Windows.Foundation.UniversalApiContract
     Windows.AI.MachineLearning.MachineLearningContract
 )
 
 set(included_namespaces
     Windows.Data.Json
-    Windows.Foundation
     Windows.Devices.Geolocation
+    Windows.Foundation
+    Windows.Graphics.DirectX
 )
 
 set(excluded_namespaces
     Windows.Foundation.Deferral
-    Windows.Foundation.IRef
-    Windows.Foundation.IPropertyValue
-    Windows.Foundation.PropertyValue
-    Windows.Foundation.Metadata
     Windows.Foundation.Diagnostics
+    Windows.Foundation.IPropertyValue
+    Windows.Foundation.IRef
+    Windows.Foundation.Metadata
+    Windows.Foundation.PropertyValue
 )
 
 set(cmdline "-output ${output_dir}")

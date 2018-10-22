@@ -30,15 +30,28 @@ namespace xlang
         }
     };
 
+    bool is_flags_enum(TypeDef const& type);
+
     template <typename T>
     struct signature_handler_base
     {
         void handle_class(TypeDef const& /*type*/) { throw_invalid("handle_class not implemented"); }
         void handle_delegate(TypeDef const& /*type*/) { throw_invalid("handle_delegate not implemented"); }
-        void handle_enum(TypeDef const& /*type*/) { throw_invalid("handle_enum not implemented"); }
         void handle_guid(TypeRef const& /*type*/) { throw_invalid("handle_guid not implemented"); }
         void handle_interface(TypeDef const& /*type*/) { throw_invalid("handle_interface not implemented"); }
         void handle_struct(TypeDef const& /*type*/) { throw_invalid("handle_struct not implemented"); }
+
+        void handle_enum(TypeDef const& type)
+        {
+            if (is_flags_enum(type))
+            {
+                static_cast<T*>(this)->handle(ElementType::U4);
+            }
+            else
+            {
+                static_cast<T*>(this)->handle(ElementType::I4);
+            }
+        }
 
         void handle(TypeRef const& type)
         {
@@ -188,6 +201,190 @@ namespace xlang
         Param m_return;
     };
 
+    struct interface_info
+    {
+        TypeDef type;
+        std::vector<std::string> type_arguments;
+    };
+
+    void push_interface_info(std::vector<interface_info>& interfaces, interface_info&& info)
+    {
+        auto iter = std::find_if(interfaces.begin(), interfaces.end(), [&info](auto i)
+        {
+            return i.type == info.type;
+        });
+
+        if (iter == interfaces.end())
+        {
+            interfaces.push_back(std::move(info));
+        }
+    }
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index);
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, TypeDef const& type)
+    {
+        interface_info info;
+        info.type = type;
+        for (auto&& gp : type.GenericParam())
+        {
+            info.type_arguments.push_back(std::string{ gp.Name() });
+        }
+
+        push_interface_info(interfaces, std::move(info));
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+        for (auto&& ii : type.InterfaceImpl())
+        {
+            collect_required_interfaces(w, interfaces, ii.Interface());
+        }
+    }
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, GenericTypeInstSig const& sig)
+    {
+        TypeDef type{};
+        switch (sig.GenericType().type())
+        {
+        case TypeDefOrRef::TypeDef:
+            type = sig.GenericType().TypeDef();
+            break;
+        case TypeDefOrRef::TypeRef:
+            type = find_required(sig.GenericType().TypeRef());
+            break;
+        case TypeDefOrRef::TypeSpec:
+            throw_invalid("collect_required_interfaces");
+        }
+
+        interface_info info;
+        info.type = type;
+
+        for (auto&& gp : sig.GenericArgs())
+        {
+            auto q = w.write_temp("%", gp);
+            info.type_arguments.push_back(q);
+        }
+
+        push_interface_info(interfaces, std::move(info));
+
+        auto guard{ w.push_generic_params(sig) };
+        for (auto&& ii : type.InterfaceImpl())
+        {
+            collect_required_interfaces(w, interfaces, ii.Interface());
+        }
+    }
+
+    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index)
+    {
+        switch (index.type())
+        {
+        case TypeDefOrRef::TypeDef:
+            collect_required_interfaces(w, sigs, index.TypeDef());
+            break;
+        case TypeDefOrRef::TypeRef:
+            collect_required_interfaces(w, sigs, find_required(index.TypeRef()));
+            break;
+        case TypeDefOrRef::TypeSpec:
+            collect_required_interfaces(w, sigs, index.TypeSpec().Signature().GenericTypeInst());
+            break;
+        }
+    }
+
+    auto get_required_interfaces(TypeDef const& type)
+    {
+        writer w;
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        std::vector<interface_info> interfaces;
+        collect_required_interfaces(w, interfaces, type);
+
+        return std::move(interfaces);
+    }
+
+    struct method_info
+    {
+        MethodDef method;
+        std::vector<std::string> type_arguments;
+    };
+
+    bool is_constructor(MethodDef const& method);
+
+    auto get_methods(TypeDef const& type)
+    {
+        std::map<std::string_view, std::vector<method_info>> method_map{};
+        auto category = get_category(type);
+
+        if (category == category::class_type)
+        {
+            for (auto&& method : type.MethodList())
+            {
+                if (is_constructor(method))
+                {
+                    continue;
+                }
+
+                method_map[method.Name()].push_back(method_info{ method, std::vector<std::string> {} });
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            for (auto&& info : get_required_interfaces(type))
+            {
+                for (auto&& method : info.type.MethodList())
+                {
+                    method_map[method.Name()].push_back(method_info{ method, info.type_arguments });
+                }
+            }
+        }
+        else
+        {
+            throw_invalid("only classes and interfaces have methods");
+        }
+
+#ifdef XLANG_DEBUG
+        for (auto&&[name, method_infos] : method_map)
+        {
+            XLANG_ASSERT(method_infos.size() > 0);
+            auto static_method = method_infos[0].method.Flags().Static();
+            for (auto&& info : method_infos)
+            {
+                XLANG_ASSERT(info.method.Flags().Static() == static_method);
+            }
+        }
+#endif
+
+        return std::move(method_map);
+    }
+
+    auto get_constructors(TypeDef const& type)
+    {
+        std::vector<MethodDef> constructors;
+
+        for (auto&& method : type.MethodList())
+        {
+            if (is_constructor(method))
+            {
+                constructors.push_back(method);
+            }
+        }
+
+        return std::move(constructors);
+    }
+
+    auto get_delegate_invoke(TypeDef const& type)
+    {
+        XLANG_ASSERT(get_category(type) == category::delegate_type);
+
+        for (auto&& method : type.MethodList())
+        {
+            if (method.SpecialName() && (method.Name() == "Invoke"))
+            {
+                return method;
+            }
+        }
+
+        throw_invalid("Invoke method not found");
+    }
+
     bool is_exclusive_to(TypeDef const& type)
     {
         return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
@@ -203,37 +400,30 @@ namespace xlang
         return distance(type.GenericParam()) > 0;
     }
 
-    inline auto get_name(MethodDef const& method)
+    bool is_constructor(MethodDef const& method)
     {
-        auto name = method.Name();
-
-        if (method.SpecialName())
-        {
-            return name.substr(name.find('_') + 1);
-        }
-
-        return name;
+        return method.Flags().RTSpecialName() && method.Name() == ".ctor";
     }
 
-    auto get_dotted_name_segments(std::string_view ns)
+    inline bool is_get_method(MethodDef const& method)
     {
-        std::vector<std::string_view> segments;
-        size_t pos = 0;
+        return method.SpecialName() && starts_with(method.Name(), "get_");
+    }
 
-        do
-        {
-            auto new_pos = ns.find('.', pos);
+    inline bool is_put_method(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "put_");
+    }
 
-            if (new_pos == std::string_view::npos)
-            {
-                segments.push_back(ns.substr(pos));
-                return std::move(segments);
-            }
+    inline bool is_add_method(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "add_");
+    }
 
-            segments.push_back(ns.substr(pos, new_pos - pos));
-            pos = new_pos + 1;
-        } while (true);
-    };
+    inline bool is_remove_method(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "remove_");
+    }
 
     struct property_type
     {
@@ -306,102 +496,6 @@ namespace xlang
         XLANG_ASSERT(add_method.Flags().Static() == remove_method.Flags().Static());
 
         return { add_method, remove_method };
-    }
-
-    auto get_constructors(TypeDef const& type)
-    {
-        std::vector<MethodDef> constructors{};
-
-        for (auto&& method : type.MethodList())
-        {
-            if (method.Flags().RTSpecialName() && method.Name() == ".ctor")
-            {
-                constructors.push_back(method);
-            }
-        }
-
-        return std::move(constructors);
-    }
-
-    auto get_properties(TypeDef const& type, bool static_props)
-    {
-        std::vector<Property> properties{};
-
-        for (auto&& prop : type.PropertyList())
-        {
-            auto prop_methods = get_property_methods(prop);
-            if (prop_methods.get.Flags().Static() == static_props)
-            {
-                properties.push_back(prop);
-            }
-        }
-
-        return std::move(properties);
-    }
-
-    auto get_instance_properties(TypeDef const& type)
-    {
-        return get_properties(type, false);
-    }
-
-    auto get_static_properties(TypeDef const& type)
-    {
-        return get_properties(type, true);
-    }
-
-    auto get_events(TypeDef const& type, bool static_events)
-    {
-        std::vector<Event> events{};
-
-        for (auto&& event : type.EventList())
-        {
-            auto event_methods = get_event_methods(event);
-
-            if (event_methods.add.Flags().Static() == static_events)
-            {
-                events.push_back(event);
-            }
-        }
-
-        return std::move(events);
-    }
-
-    auto get_instance_events(TypeDef const& type)
-    {
-        return get_events(type, false);
-    }
-
-    auto get_static_events(TypeDef const& type)
-    {
-        return get_events(type, true);
-    }
-
-    auto get_methods(TypeDef const& type)
-    {
-        std::vector<MethodDef> methods{};
-
-        for (auto&& method : type.MethodList())
-        {
-            if (!(method.SpecialName() || method.Flags().RTSpecialName()))
-            {
-                methods.push_back(method);
-            }
-        }
-
-        // TODO: static events
-        return std::move(methods);
-    }
-
-    bool has_methods(TypeDef const& type)
-    {
-        return get_methods(type).size() > 0 || get_static_properties(type).size() > 0 || get_static_events(type).size() > 0;
-    }
-
-    bool has_getsets(TypeDef const& type)
-    {
-        return get_instance_properties(type).size() > 0 
-            || get_instance_events(type).size() > 0 
-            || distance(type.FieldList()) > 0;
     }
 
     bool has_dealloc(TypeDef const& type)

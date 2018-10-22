@@ -90,15 +90,7 @@ namespace xlang::meta::reader
                             return type_index->TypeDef();
                         }
                         auto const& typeref = type_index->TypeRef();
-                        auto const& resolved_type = db.get_cache().find(typeref.TypeNamespace(), typeref.TypeName());
-                        if (resolved_type)
-                        {
-                            return resolved_type;
-                        }
-                        else
-                        {
-                            throw_invalid("Unresolved type in CustomAttribute blob");
-                        }
+                        return db.get_cache().find_required(typeref.TypeNamespace(), typeref.TypeName());
                     };
                     TypeDef const& enum_type = resolve_type();
                     if (!enum_type.is_enum())

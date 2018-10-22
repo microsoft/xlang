@@ -94,6 +94,25 @@ namespace xlang
             generic_param_stack.push_back(std::move(names));
             return generic_param_guard{ this };
         }
+
+        [[nodiscard]] auto push_generic_params(std::vector<std::string> const& type_arguments)
+        {
+            if (type_arguments.size() == 0)
+            {
+                return generic_param_guard{ nullptr };
+            }
+
+            std::vector<std::string> names;
+
+            for (auto&& type_argument : type_arguments)
+            {
+                names.push_back(type_argument);
+            }
+
+            generic_param_stack.push_back(std::move(names));
+            return generic_param_guard{ this };
+        }
+
 #pragma endregion
 
         int32_t indent{ 0 };

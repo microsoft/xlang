@@ -3,7 +3,7 @@ import find_projection
 import _pyrt
 import unittest
 
-class TestXlangNumerics(unittest.TestCase):
+class TestNumerics(unittest.TestCase):
     def test_struct_ctor_pos(self):
         r = _pyrt.Rational(2, 4)
 
