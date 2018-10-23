@@ -98,8 +98,4 @@ endif()
 
 add_subdirectory(tool)
 add_subdirectory(test)
-
-# TODO: enable platform compiling on Ubuntu
-if (WIN32)
 add_subdirectory(platform)
-endif()

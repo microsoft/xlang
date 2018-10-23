@@ -2,7 +2,10 @@
 
 #include <atomic>
 #include <type_traits>
+#include <algorithm>
 #include "pal_internal.h"
+#include "cache_string.h"
+#include "string_traits.h"
 
 namespace xlang::impl
 {
@@ -78,30 +81,6 @@ namespace xlang::impl
             // Points to a UTF-16 or UTF-8 string buffer
             void const* string_ref{ nullptr };
         };
-    };
-
-    struct cache_string;
-
-    template <typename char_type>
-    struct alternate_type;
-
-    template <>
-    struct alternate_type<xlang_char8>
-    {
-        using result_type = char16_t;
-    };
-
-    template <>
-    struct alternate_type<char16_t>
-    {
-        using result_type = xlang_char8;
-    };
-
-    template <typename char_type>
-    struct buffer_info
-    {
-        char_type const* buffer;
-        uint32_t length;
     };
 
     // String objects are represented by a set of classes that all derive from string_base. The
