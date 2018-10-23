@@ -49,6 +49,7 @@ enum class format_flags
     generic_param = 0x01,       // Generic params often get handled differently (e.g. pointers, mangled names, etc.)
     ignore_namespace = 0x02,    // Only write type the type name
     function_param = 0x04,      // Function params get handled similarly, but not identically, to generic params
+    no_prefix = 0x08,           // Does not write the '__x_' or '__x_ABI_C' prefix for mangled names
 
     generic_or_function_param = generic_param | function_param,
 };
@@ -355,6 +356,11 @@ inline void write_type_cpp(
     typeName.name = typeName.name.substr(0, typeName.name.find('`'));
     w.write("%%", type_prefix(typeCategory), typeName.name);
 
+    if (!ignoreNamespace)
+    {
+        write_namespace_close(w);
+    }
+
     if (genericParam || functionParam)
     {
         switch (typeCategory)
@@ -365,11 +371,6 @@ inline void write_type_cpp(
             w.write('*');
             break;
         }
-    }
-
-    if (!ignoreNamespace)
-    {
-        write_namespace_close(w);
     }
 }
 
@@ -539,7 +540,7 @@ inline void write_type_mangled(
     }
     else
     {
-        if (flags_clear(flags, format_flags::generic_param))
+        if (flags_clear(flags, format_flags::generic_param | format_flags::no_prefix))
         {
             w.write("__x_");
             if (w.config().ns_prefix_state == ns_prefix::always)

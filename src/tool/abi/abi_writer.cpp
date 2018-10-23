@@ -640,15 +640,33 @@ struct __declspec(uuid("%"))
 // This allows code which uses the mangled name for the parameterized interface to access the
 // correct parameterized interface specialization.
 typedef % %_t;
-#define % %%_t%
 )^-^",
         bind<write_generictype_clr>(type, m_genericArgStack, format_flags::none),
         bind<write_generictype_cpp>(type, m_genericArgStack, format_flags::ignore_namespace),
-        mangledName,
-        mangledName,
-        bind<write_namespace_open>(typeDef.TypeNamespace()),
-        mangledName,
-        bind<write_namespace_close>());
+        mangledName);
+
+    if (m_config.ns_prefix_state == ns_prefix::optional)
+    {
+        write(R"^-^(#if defined(MIDL_NS_PREFIX)
+#define % ABI::@::%_t
+#else
+#define % @::%_t
+#endif // MIDL_NS_PREFIX
+)^-^",
+            mangledName,
+            typeDef.TypeNamespace(), mangledName,
+            mangledName,
+            typeDef.TypeNamespace(), mangledName);
+    }
+    else
+    {
+        write(R"^-^(#define % %%_t%
+)^-^",
+            mangledName,
+            bind<write_namespace_open>(typeDef.TypeNamespace()),
+            mangledName,
+            bind<write_namespace_close>());
+    }
 
     pop_generic_namespace();
 

@@ -617,11 +617,23 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
 )^-^", indent{}, indent{}, typePrefix, name, typePrefix, name);
     w.pop_namespace();
 
+    auto writeIid = [&](writer& w)
+    {
+        if (w.config().ns_prefix_state == ns_prefix::optional)
+        {
+            w.write("C_IID(%)", bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::no_prefix));
+        }
+        else
+        {
+            w.write("IID_%", bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none));
+        }
+    };
+
     w.write(R"^-^(
-EXTERN_C const IID IID_%;
+EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
 )^-^",
-        bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none),
+        writeIid,
         bind<write_typedef_mangled>(type, generic_arg_stack::empty(), format_flags::none));
 
     w.pop_contract_guards(contractDepth);
