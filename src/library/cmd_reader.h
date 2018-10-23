@@ -13,6 +13,23 @@ namespace xlang::cmd
 
     struct reader
     {
+    private:
+        auto find(std::vector<option> const& options, std::string_view const& arg)
+        {
+            for (auto current = options.begin(); current != options.end(); ++current)
+            {
+                if (starts_with(current->name, arg))
+                {
+                    return current;
+                }
+            }
+
+            return options.end();
+        }
+
+        std::map<std::string_view, std::vector<std::string>> m_options;
+        
+    public:
         template <typename C, typename V>
         reader(C const argc, V argv, std::vector<option> const& options)
         {
@@ -155,22 +172,5 @@ namespace xlang::cmd
 
             return files;
         }
-
-    private:
-
-        auto find(std::vector<option> const& options, std::string_view const& arg)
-        {
-            for (auto current = options.begin(); current != options.end(); ++current)
-            {
-                if (starts_with(current->name, arg))
-                {
-                    return current;
-                }
-            }
-
-            return options.end();
-        }
-
-        std::map<std::string_view, std::vector<std::string>> m_options;
     };
 }
