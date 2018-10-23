@@ -49,7 +49,7 @@ Xlang metadata version String must contain "Xlang runtime 1.2"
 
 The name without extension of a Xlang metadata file must be a case-insensitive match to the name column of the assembly table inside the Xlang metadata file. For example, the "Foo.Bar.xlmeta" file must have "Foo.Bar" in the name column of the assembly table. Because the file system is case insensitive, the case of the file name may differ from the assembly table name column value
 
-All of the Xlang types in a given Xlang metadata file must be under a namespace that matches the name of the Xlang metadata file and the assembly table name column value. Because the file system is case insensitive, the case of the file may differ from the namespace of all the Xlang types in a given Xlang metadata file. The namespace of all the Xlang types in a given Xlang metadata must match the assembly table name column value exactly (i.e. case sensitive). For example, all of the types in the file with "Foo.Bar" in the assembly table's name column must be in the Foo.Bar namespace. The types may be either direct children of the this namespace (aka Foo.Bar.MyType) or in subnamespaces of the this namespace (aka Foo.Bar.Baz.MyType). The name of the file must be "Foo.Bar.xlmeta", but may vary in case – that is, "foo.bar.xlmeta" and "FOO.BAR.XLMETA would also be permitted as file names for this metadata file.
+All of the Xlang types in a given Xlang metadata file must be under a namespace that matches the name of the Xlang metadata file and the assembly table name column value. Because the file system is case insensitive, the case of the file may differ from the namespace of all the Xlang types in a given Xlang metadata file. The namespace of all the Xlang types in a given Xlang metadata must match the assembly table name column value exactly (i.e. case sensitive). For example, all of the types in the file with "Foo.Bar" in the assembly table's name column must be in the Foo.Bar namespace. The types may be either direct children of this namespace (aka Foo.Bar.MyType) or in subnamespaces of this namespace (aka Foo.Bar.Baz.MyType). The name of the file must be "Foo.Bar.xlmeta", but may vary in case – that is, "foo.bar.xlmeta" and "FOO.BAR.XLMETA would also be permitted as file names for this metadata file.
 
 ### Xlang metadata Composition
 
@@ -452,7 +452,7 @@ The MethodDef rows for the event contains the following:
 
 - ParamList: an index into the Param table (ECMA II.22.33) containing the first in a run of Param rows associated with the method. Values in the Param table are as specified under methods above.
 
-Both MethodDef rows for the event will have an associated row in the MethodSemantics table conitaining the following information:
+Both MethodDef rows for the event will have an associated row in the MethodSemantics table containing the following information:
 
 - Semantics: AddOn or RemoveOn as appropriate
 
