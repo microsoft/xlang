@@ -230,6 +230,13 @@ void writer::pop_generic_namespace()
 std::size_t writer::push_contract_guards(TypeDef const& type)
 {
     XLANG_ASSERT(distance(type.GenericParam()) == 0);
+
+    // Mapped types don't carry contracts with them
+    if (auto [isMapped, mappedName] = m_config.map_type(type.TypeNamespace(), type.TypeName()); isMapped)
+    {
+        return 0;
+    }
+
     if (auto vers = contract_attributes(type))
     {
         return push_contract_guards(*vers);
@@ -411,8 +418,13 @@ void writer::write_includes()
 #include "AsyncInfo.h"
 #include "EventToken.h"
 #include "windowscontracts.h"
-#include "Windows.Foundation.h"
 )^-^");
+
+    if (m_namespace != "Windows.Foundation"sv)
+    {
+        write(R"^-^(#include "Windows.Foundation.h"
+)^-^");
+    }
 
     bool hasCollectionsDependency = false;
     for (auto ns : m_dependentNamespaces)
@@ -666,13 +678,13 @@ void writer::write_type_dependencies()
                     },
                     [&](auto const& defOrRef)
                     {
-                        write_forward_declaration(*this, find_required(defOrRef), m_genericArgStack);
+                        write_forward_declaration(*this, find_required(defOrRef), generic_arg_stack::empty());
                     }
                 });
             }
             else
             {
-                write_forward_declaration(*this, type, m_genericArgStack);
+                write_forward_declaration(*this, type, generic_arg_stack::empty());
             }
         }
     }
@@ -682,17 +694,17 @@ void writer::write_type_declarations()
 {
     for (auto const& e : m_members.enums)
     {
-        write_forward_declaration(*this, e, m_genericArgStack);
+        write_forward_declaration(*this, e, generic_arg_stack::empty());
     }
 
     for (auto const& s : m_members.structs)
     {
-        write_forward_declaration(*this, s, m_genericArgStack);
+        write_forward_declaration(*this, s, generic_arg_stack::empty());
     }
 
     for (auto const& c : m_members.classes)
     {
-        write_forward_declaration(*this, c, m_genericArgStack);
+        write_forward_declaration(*this, c, generic_arg_stack::empty());
     }
 }
 
