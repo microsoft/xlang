@@ -332,7 +332,7 @@ inline void write_type_cpp(
     switch (typeCategory)
     {
     case category::struct_type:
-        if (genericParam || (!mapped && functionParam))
+        if (!mapped && (genericParam || functionParam))
         {
             w.write("struct ");
         }

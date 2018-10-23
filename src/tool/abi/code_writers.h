@@ -47,6 +47,7 @@ inline void write_forward_declaration(
     xlang::meta::reader::TypeDef const& type,
     generic_arg_stack const& genericArgs = generic_arg_stack::empty())
 {
+    using namespace std::literals;
     using namespace xlang::meta::reader;
     using namespace xlang::text;
 
@@ -87,8 +88,10 @@ inline void write_forward_declaration(
             break;
 
         case category::enum_type:
-            w.write("%typedef enum % : % %;\n", indent{}, typeName, bind<write_underlying_enum_type>(type), typeName);
-            break;
+        {
+            auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
+            w.write("%typedef % % : % %;\n", indent{}, enumStr, typeName, bind<write_underlying_enum_type>(type), typeName);
+        }   break;
 
         case category::struct_type:
             w.write("%typedef struct % %;\n", indent{}, typeName, typeName);
@@ -336,7 +339,7 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
     auto contractDepth = w.push_contract_guards(type);
 
     w.push_namespace(ns);
-    w.write("%enum", indent{});
+    w.write(w.config().enum_class ? "%MIDL_ENUM" : "%enum", indent{});
     if (auto info = is_deprecated(type))
     {
         w.write("\n");
@@ -358,7 +361,13 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
         {
             auto fieldContractDepth = w.push_contract_guards(field);
 
-            w.write("%%_%", indent{ 1 }, name, field.Name());
+            w.write("%", indent{ 1 });
+            if (!w.config().enum_class)
+            {
+                w.write("%_", name);
+            }
+            w.write(field.Name());
+
             if (auto info = is_deprecated(field))
             {
                 w.write("\n");
@@ -380,6 +389,18 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
     if (is_flags_enum(type))
     {
         w.write("\n%DEFINE_ENUM_FLAG_OPERATORS(%)\n", indent{}, name);
+    }
+
+    if (w.config().enum_class)
+    {
+        w.write('\n');
+        for (auto const& field : type.FieldList())
+        {
+            if (field.Constant())
+            {
+                w.write("%const % %_% = %::%;\n", indent{}, name, name, field.Name(), name, field.Name());
+            }
+        }
     }
 
     w.pop_namespace();
