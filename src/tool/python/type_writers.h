@@ -394,7 +394,7 @@ namespace xlang
                 write("bool");
                 break;
             case ElementType::Char:
-                write("wchar_t");
+                write("char16_t");
                 break;
             case ElementType::I1:
                 write("int8_t");
