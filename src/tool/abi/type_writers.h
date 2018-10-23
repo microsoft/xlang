@@ -332,7 +332,7 @@ inline void write_type_cpp(
     switch (typeCategory)
     {
     case category::struct_type:
-        if (genericParam || functionParam)
+        if (genericParam || (!mapped && functionParam))
         {
             w.write("struct ");
         }
@@ -458,6 +458,11 @@ inline void write_type_cpp(
         {
             write_type_cpp(w, t, genericArgs, flags);
         });
+
+    if (type.is_szarray())
+    {
+        w.write('*');
+    }
 }
 
 inline void write_type_cpp(
@@ -714,7 +719,7 @@ inline void write_type_signature(
         w.write("%.%", type.TypeNamespace(), type.TypeName());
         for (auto const& field : type.FieldList())
         {
-            w.write(";");
+            w.write(';');
             write_type_signature(w, field.Signature().Type(), genericArgs, flags);
         }
         break;
@@ -722,7 +727,7 @@ inline void write_type_signature(
 
     if (writeCategory)
     {
-        w.write(")");
+        w.write(')');
     }
 }
 

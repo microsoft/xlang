@@ -18,6 +18,30 @@ inline void write_contract_macro(writer& w, std::string_view contractNamespace, 
         bind<writer::write_uppercase>(contractTypeName));
 }
 
+inline void write_underlying_enum_type(writer& w, xlang::meta::reader::TypeDef const& type)
+{
+    using namespace xlang::meta::reader;
+
+    auto sig = type.FieldList().first.Signature();
+    xlang::visit(sig.Type().Type(),
+        [&](ElementType elem)
+        {
+            if (elem == ElementType::U4)
+            {
+                w.write("unsigned int");
+            }
+            else
+            {
+                XLANG_ASSERT(elem == ElementType::I4);
+                w.write("int");
+            }
+        },
+        [](auto const&)
+        {
+            XLANG_ASSERT(false);
+        });
+}
+
 inline void write_forward_declaration(
     writer& w,
     xlang::meta::reader::TypeDef const& type,
@@ -63,8 +87,7 @@ inline void write_forward_declaration(
             break;
 
         case category::enum_type:
-            // TODO: More than just int?
-            w.write("%typedef enum % : int %;\n", indent{}, typeName, typeName);
+            w.write("%typedef enum % : % %;\n", indent{}, typeName, bind<write_underlying_enum_type>(type), typeName);
             break;
 
         case category::struct_type:
@@ -304,6 +327,11 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
     auto const ns = type.TypeNamespace();
     auto const name = type.TypeName();
 
+    if (auto [isMapped, mappedName] = w.config().map_type(ns, name); isMapped)
+    {
+        return;
+    }
+
     write_type_definition_banner(w, type);
     auto contractDepth = w.push_contract_guards(type);
 
@@ -320,9 +348,9 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
         w.write(' ');
     }
 
-    w.write(R"^-^(% : int
+    w.write(R"^-^(% : %
 %{
-)^-^", name, indent{});
+)^-^", name, bind<write_underlying_enum_type>(type), indent{});
 
     for (auto const& field : type.FieldList())
     {
@@ -348,6 +376,12 @@ inline void write_enum_definition(writer& w, xlang::meta::reader::TypeDef const&
     }
 
     w.write("%};\n", indent{});
+
+    if (is_flags_enum(type))
+    {
+        w.write("\n%DEFINE_ENUM_FLAG_OPERATORS(%)\n", indent{}, name);
+    }
+
     w.pop_namespace();
 
     w.pop_contract_guards(contractDepth);
@@ -359,6 +393,12 @@ inline void write_struct_definition(writer& w, xlang::meta::reader::TypeDef cons
     using namespace xlang::text;
     auto const ns = type.TypeNamespace();
     auto const name = type.TypeName();
+
+
+    if (auto [isMapped, mappedName] = w.config().map_type(ns, name); isMapped)
+    {
+        return;
+    }
 
     write_type_definition_banner(w, type);
     auto contractDepth = w.push_contract_guards(type);
@@ -387,8 +427,8 @@ inline void write_struct_definition(writer& w, xlang::meta::reader::TypeDef cons
             write_deprecation_message(w, *info, 1);
         }
 
-        w.write("%    % %;\n",
-            indent{},
+        w.write("%% %;\n",
+            indent{ 1 },
             bind<write_typesig_cpp>(field.Signature().Type(), generic_arg_stack::empty(), format_flags::none),
             field.Name());
     }
@@ -415,7 +455,7 @@ inline void write_interface_function_declaration(writer& w, xlang::meta::reader:
         fnName = std::get<std::string_view>(std::get<ElemSig>(fixedArgs[0].value).value);
     }
 
-    w.write("%    virtual HRESULT STDMETHODCALLTYPE %(", indent{}, fnName);
+    w.write("%virtual HRESULT STDMETHODCALLTYPE %(", indent{ 1 }, fnName);
 
     auto paramNames = methodDef.ParamList();
     auto fnSig = methodDef.Signature();
@@ -431,10 +471,21 @@ inline void write_interface_function_declaration(writer& w, xlang::meta::reader:
     std::string_view prefix = "\n";
     for (auto const& param : fnSig.Params())
     {
-        w.write("%%        % %",
+        std::string_view constMod = is_const(param) ? "const " : "";
+        std::string_view refMod = param.ByRef() ? "*" : "";
+
+        if (param.Type().is_szarray())
+        {
+            w.write("%%unsigned int% %Length", prefix, indent{ 2 }, refMod, paramRange.first.Name());
+            prefix = ",\n";
+        }
+
+        w.write("%%%%% %",
             prefix,
-            indent{},
+            indent{ 2 },
+            constMod,
             bind<write_typesig_cpp>(param.Type(), generic_arg_stack::empty(), format_flags::function_param),
+            refMod,
             paramRange.first.Name());
         ++paramRange.first;
         prefix = ",\n";
@@ -443,9 +494,15 @@ inline void write_interface_function_declaration(writer& w, xlang::meta::reader:
     if (retType)
     {
         auto retName = (paramNames.first != paramRange.first) ? paramNames.first.Name() : "value";
-        w.write("%%        %* %",
+        if (retType.Type().is_szarray())
+        {
+            w.write("%%unsigned int* %Length", prefix, indent{ 2 }, retName);
+            prefix = ",\n";
+        }
+
+        w.write("%%%* %",
             prefix,
-            indent{},
+            indent{ 2 },
             bind<write_typesig_cpp>(retType.Type(), generic_arg_stack::empty(), format_flags::function_param),
             retName);
     }
@@ -456,7 +513,7 @@ inline void write_interface_function_declaration(writer& w, xlang::meta::reader:
     }
     else
     {
-        w.write("\n%        ) = 0;\n", indent{});
+        w.write("\n%) = 0;\n", indent{ 2 });
     }
 }
 
@@ -465,8 +522,20 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
     using namespace std::literals;
     using namespace xlang::meta::reader;
     using namespace xlang::text;
+
     auto const ns = type.TypeNamespace();
     auto const name = type.TypeName();
+
+    if (auto [isMapped, mappedName] = w.config().map_type(ns, name); isMapped)
+    {
+        return;
+    }
+
+    // Generics don't get generated definitions
+    if (distance(type.GenericParam()) != 0)
+    {
+        return;
+    }
 
     auto const typeCategory = get_category(type);
     auto const typePrefix = type_prefix(typeCategory);

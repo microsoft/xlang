@@ -94,7 +94,7 @@ struct writer : xlang::text::writer_base<writer>
         if (!printZeros)
         {
             XLANG_ASSERT(val.value == 0);
-            write("0");
+            write('0');
         }
     }
 

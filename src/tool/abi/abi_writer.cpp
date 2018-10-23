@@ -685,6 +685,11 @@ void writer::write_type_declarations()
         write_forward_declaration(*this, e, m_genericArgStack);
     }
 
+    for (auto const& s : m_members.structs)
+    {
+        write_forward_declaration(*this, s, m_genericArgStack);
+    }
+
     for (auto const& c : m_members.classes)
     {
         write_forward_declaration(*this, c, m_genericArgStack);
@@ -718,21 +723,6 @@ void writer::write_type_definitions()
         write_class_name_definition(*this, c);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void write_abi_header(std::string_view ns, cache const& c, cache::namespace_members const& members, abi_configuration const& config)
 {

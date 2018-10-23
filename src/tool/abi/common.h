@@ -7,6 +7,7 @@
 #include "namespace_iterator.h"
 
 constexpr std::string_view system_namespace = "System";
+constexpr std::string_view flags_attribute = "FlagsAttribute";
 
 constexpr std::string_view foundation_namespace = "Windows.Foundation";
 
@@ -104,11 +105,35 @@ struct abi_configuration
                 isMapped = true;
                 typeNamespace = {};
             }
+            else if (typeName == "HResult"sv)
+            {
+                // Windows.Foundation.HResult -> HRESULT
+                isMapped = true;
+                typeNamespace = {};
+                typeName = "HRESULT"sv;
+            }
         }
 
         return { isMapped, { typeNamespace, typeName } };
     }
 };
+
+namespace xlang
+{
+    template <typename... T> visit_overload(T...) -> visit_overload<T...>;
+}
+
+template <typename Visitor>
+inline auto visit(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type, Visitor&& visitor)
+{
+    using namespace xlang::meta::reader;
+    switch (type.type())
+    {
+    case TypeDefOrRef::TypeDef: return visitor(type.TypeDef()); break;
+    case TypeDefOrRef::TypeRef: return visitor(type.TypeRef()); break;
+    case TypeDefOrRef::TypeSpec: return visitor(type.TypeSpec().Signature().GenericTypeInst()); break;
+    }
+}
 
 inline constexpr std::pair<std::string_view, std::string_view> decompose_type(std::string_view typeName) noexcept
 {
@@ -163,23 +188,6 @@ inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> defau
     }
 
     xlang::throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
-}
-
-namespace xlang
-{
-    template <typename... T> visit_overload(T...) -> visit_overload<T...>;
-}
-
-template <typename Visitor>
-inline void visit(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type, Visitor&& visitor)
-{
-    using namespace xlang::meta::reader;
-    switch (type.type())
-    {
-    case TypeDefOrRef::TypeDef: visitor(type.TypeDef()); break;
-    case TypeDefOrRef::TypeRef: visitor(type.TypeRef()); break;
-    case TypeDefOrRef::TypeSpec: visitor(type.TypeSpec().Signature().GenericTypeInst()); break;
-    }
 }
 
 struct previous_contract
@@ -317,4 +325,9 @@ inline std::optional<deprecation_info> is_deprecated(T const& type)
         std::get<std::uint32_t>(std::get<ElemSig>(fixedArgs[2].value).value),
         std::get<std::string_view>(std::get<ElemSig>(fixedArgs[0].value).value)
     };
+}
+
+inline bool is_flags_enum(xlang::meta::reader::TypeDef const& type)
+{
+    return static_cast<bool>(get_attribute(type, system_namespace, flags_attribute));
 }
