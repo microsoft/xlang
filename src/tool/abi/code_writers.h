@@ -7,7 +7,14 @@
 
 inline void write_include_guard(writer& w, std::string_view ns)
 {
-    xlang::text::bind_list<writer::write_lowercase>("2E", namespace_range{ ns })(w);
+    if (w.config().lowercase_include_guard)
+    {
+        xlang::text::bind_list<writer::write_lowercase>("2E", namespace_range{ ns })(w);
+    }
+    else
+    {
+        xlang::text::bind_list("2E", namespace_range{ ns })(w);
+    }
 }
 
 inline void write_contract_macro(writer& w, std::string_view contractNamespace, std::string_view contractTypeName)

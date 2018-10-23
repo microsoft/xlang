@@ -77,6 +77,7 @@ struct abi_configuration
     bool verbose = false;
     ns_prefix ns_prefix_state = ns_prefix::always;
     bool enum_class = false;
+    bool lowercase_include_guard = false;
 
     std::string output_directory;
 

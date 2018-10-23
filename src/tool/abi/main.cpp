@@ -44,6 +44,7 @@ int main(int const argc, char** argv)
             { "verbose", 0, 0 },
             { "ns-prefix", 0, 1 },
             { "enum-class", 0, 0 },
+            { "lowercase-include-guard", 0, 0 },
         };
 
         reader args{ argc, argv, options };
@@ -57,6 +58,7 @@ int main(int const argc, char** argv)
         config.verbose = args.exists("verbose");
         config.output_directory = output_directory(args);
         config.enum_class = args.exists("enum-class");
+        config.lowercase_include_guard = args.exists("lowercase-include-guard");
 
         if (args.exists("ns-prefix"))
         {
