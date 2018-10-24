@@ -334,5 +334,7 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder
 .mfractor/
 
-# Test output
+# ignore test output
 src/test/output/
+src/test/python/output/
+src/test/python/__pycache__/

@@ -24,7 +24,6 @@
 
 namespace xlang
 {
-    // TODO:
     struct xlang_error
     {
         xlang_result result;
