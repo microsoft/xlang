@@ -2461,17 +2461,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
             return m_ptr->QueryInterface(id, result);
         }
 
-        void attach_abi(void* ptr) noexcept
-        {
-            release_ref();
-            m_ptr = static_cast<impl::unknown_abi*>(ptr);
-        }
-
-        void* detach_abi() noexcept
-        {
-            return std::exchange(m_ptr, nullptr);
-        }
-
         friend void swap(IUnknown& left, IUnknown& right) noexcept
         {
             std::swap(left.m_ptr, right.m_ptr);
@@ -2504,37 +2493,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     };
 }
 
-namespace winrt::impl
-{
-    template <typename T>
-    struct put_abi_type
-    {
-        put_abi_type(T& object) noexcept : m_object(object)
-        {
-        }
-
-        operator void**() noexcept
-        {
-            return &m_ptr;
-        }
-
-        void*& operator *() noexcept
-        {
-            return m_ptr;
-        }
-
-        ~put_abi_type() noexcept
-        {
-            m_object.attach_abi(m_ptr);
-        }
-
-    private:
-
-        T& m_object;
-        void* m_ptr;
-    };
-}
-
 WINRT_EXPORT namespace winrt
 {
     inline void* get_abi(Windows::Foundation::IUnknown const& object) noexcept
@@ -2542,28 +2500,30 @@ WINRT_EXPORT namespace winrt
         return *(void**)(&object);
     }
 
-    template <typename T, std::enable_if_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>>* = nullptr>
-    auto put_abi(T& object) noexcept
+    inline void** put_abi(Windows::Foundation::IUnknown& object) noexcept
     {
-        return impl::put_abi_type<T>{ object };
+        WINRT_ASSERT(get_abi(object) == nullptr);
+        return reinterpret_cast<void**>(&object);
     }
 
-    template <typename T>
-    auto attach_abi(T& object, void* value) noexcept -> std::enable_if_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>>
+    inline void attach_abi(Windows::Foundation::IUnknown& object, void* value) noexcept
     {
-        object.attach_abi(value);
+        object = nullptr;
+        *put_abi(object) = value;
     }
 
-    template <typename T>
-    auto detach_abi(T& object) noexcept -> std::enable_if_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, void*>
+    inline void* detach_abi(Windows::Foundation::IUnknown& object) noexcept
     {
-        return object.detach_abi();
+        void* temp = get_abi(object);
+        *reinterpret_cast<void**>(&object) = nullptr;
+        return temp;
     }
 
-    template <typename T>
-    auto detach_abi(T&& object) noexcept -> std::enable_if_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, void*>
+    inline void* detach_abi(Windows::Foundation::IUnknown&& object) noexcept
     {
-        return object.detach_abi();
+        void* temp = get_abi(object);
+        *reinterpret_cast<void**>(&object) = nullptr;
+        return temp;
     }
 
     constexpr void* detach_abi(std::nullptr_t) noexcept
