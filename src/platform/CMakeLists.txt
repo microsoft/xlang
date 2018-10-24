@@ -10,7 +10,7 @@ set(sources string_abi.cpp string_base.cpp activation_abi.cpp)
 if (WIN32)
     set(sources ${sources} win32_memory.cpp win32_string_convert.cpp win32_activation.cpp)
 else()
-    set(sources ${sources} common_memory.cpp)
+    set(sources ${sources} common_memory.cpp common_string_convert.cpp common_activation.cpp)
 endif()
 
 add_definitions(-DXLANG_PAL_EXPORTS)

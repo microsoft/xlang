@@ -1,4 +1,7 @@
 #include "pch.h"
+
+// TODO: enable xplat activation test
+#if XLANG_PLATFORM_WINDOWS
 #include "winrt_helpers.h"
 
 TEST_CASE("Simple activation")
@@ -22,3 +25,5 @@ TEST_CASE("Simple activation")
     // For now, simply check that we got a valid object back.
     REQUIRE(factory != nullptr);
 }
+
+#endif

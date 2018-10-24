@@ -35,6 +35,20 @@ class TestGeolocation(unittest.TestCase):
         for x in ["Latitude", "Longitude", "Altitude"]:
             self.assertEqual(basic_pos[x], getattr(center, x))
 
+    
+    def test_iiterable_wraping(self):
+        basic_pos1 = _pyrt.BasicGeoposition(47.1, -122.1, 0.0)
+        basic_pos2 = _pyrt.BasicGeoposition(47.2, -122.2, 0.0)
+
+        box = _pyrt.GeoboundingBox.TryCompute([basic_pos1, basic_pos2])
+        nw = box.get_NorthwestCorner()
+        se = box.get_SoutheastCorner()
+
+        self.assertAlmostEqual(nw.Latitude, basic_pos2.Latitude)
+        self.assertAlmostEqual(nw.Longitude, basic_pos2.Longitude)
+        self.assertAlmostEqual(se.Latitude, basic_pos1.Latitude)
+        self.assertAlmostEqual(se.Longitude, basic_pos1.Longitude)
+
     def test_GetGeopositionAsync(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(None)

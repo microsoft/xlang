@@ -129,7 +129,7 @@ namespace xlang
 
         void handle(TypeSig const& signature)
         {
-            visit(signature.Type(),
+            xlang::visit(signature.Type(),
                 [&](auto&& type)
             {
                 static_cast<T*>(this)->handle(type);
@@ -400,6 +400,11 @@ namespace xlang
         return distance(type.GenericParam()) > 0;
     }
 
+    bool is_static_class(TypeDef const& type)
+    {
+        return get_category(type) == category::class_type && type.Flags().Abstract();
+    }
+
     bool is_constructor(MethodDef const& method)
     {
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";
@@ -524,12 +529,12 @@ namespace xlang
             else if (param.second->ByRef())
             {
                 XLANG_ASSERT(param.first.Flags().Out());
-                return param_category::fill_array;
+                return param_category::receive_array;
             }
             else
             {
                 XLANG_ASSERT(param.first.Flags().Out());
-                return param_category::receive_array;
+                return param_category::fill_array;
             }
         }
         else
@@ -547,16 +552,32 @@ namespace xlang
         }
     }
 
+    auto get_param_category(RetTypeSig const& sig)
+    {
+        if (sig.Type().is_szarray())
+        {
+            return param_category::receive_array;
+        }
+        else
+        {
+            return param_category::out;
+        }
+    }
+
     bool is_in_param(method_signature::param_t const& param)
     {
         auto category = get_param_category(param);
 
-        if (category == param_category::fill_array)
-        {
-            throw_invalid("fill aray param not impl");
-        }
+        return (category == param_category::in 
+             || category == param_category::pass_array 
+             || category == param_category::fill_array);
+    }
 
-        return (category == param_category::in || category == param_category::pass_array);
+    bool is_out_param(method_signature::param_t const& param)
+    {
+        auto category = get_param_category(param);
+
+        return (category == param_category::out || category == param_category::receive_array);
     }
 
     int count_in_param(std::vector<method_signature::param_t> const& params)
@@ -580,7 +601,7 @@ namespace xlang
 
         for (auto&& param : params)
         {
-            if (!is_in_param(param))
+            if (is_out_param(param))
             {
                 count++;
             }

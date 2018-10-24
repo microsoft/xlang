@@ -13,7 +13,7 @@ namespace xlang::impl
         static string_reference* create(
             char_type const* source_string,
             uint32_t length,
-            string_storage_base* header
+            string_reference* header
         ) noexcept;
 
         // Read the ptr, but don't create it. May be null.
@@ -38,12 +38,13 @@ namespace xlang::impl
 
     // string references initialize in the space allocated by xlang_string_header. Size must match.
     static_assert(sizeof(string_reference) == sizeof(xlang_string_header), "size mismatch");
+    static_assert(sizeof(string_reference) == sizeof(string_storage_base), "size mismatch");
 
     template <typename char_type>
     inline string_reference* string_reference::create(
         char_type const* source_string,
         uint32_t length,
-        string_storage_base* header
+        string_reference* header
     ) noexcept
     {
         return (new (header) string_reference{ source_string, length });

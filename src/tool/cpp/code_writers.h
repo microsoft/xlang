@@ -706,7 +706,7 @@ template <> struct consume<@::%> { template <typename D> using type = consume_%<
         bool clear{};
         bool optional{};
 
-        visit(signature.Type(),
+        xlang::visit(signature.Type(),
             [&](ElementType type)
         {
             if (out && type == ElementType::Object)
