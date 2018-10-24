@@ -238,18 +238,18 @@ namespace winrt::impl
             explicit count_guard(size_t& count) noexcept : m_count(count)
             {
 #ifdef _WIN64
-            _InterlockedIncrement64((int64_t*)&m_count);
+                _InterlockedIncrement64((int64_t*)&m_count);
 #else
-            _InterlockedIncrement((long*)&m_count);
+                _InterlockedIncrement((long*)&m_count);
 #endif
             }
 
             ~count_guard() noexcept
             {
 #ifdef _WIN64
-            _InterlockedDecrement64((int64_t*)&m_count);
+                _InterlockedDecrement64((int64_t*)&m_count);
 #else
-            _InterlockedDecrement((long*)&m_count);
+                _InterlockedDecrement((long*)&m_count);
 #endif
             }
 
