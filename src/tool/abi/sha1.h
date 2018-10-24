@@ -33,7 +33,7 @@ struct sha1
         m_state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
     }
 
-    constexpr void append(std::uint8_t const* data, std::size_t count) noexcept
+    constexpr void append(std::uint8_t const* data, std::uint64_t count) noexcept
     {
         while (count > 0)
         {
@@ -95,7 +95,7 @@ private:
 
     constexpr void append_byte(std::uint8_t byte) noexcept
     {
-        auto index = m_nextChunkByte / 4;
+        auto index = static_cast<std::size_t>(m_nextChunkByte / 4);
         auto pos = m_nextChunkByte % 4;
         auto shift = (3 - pos) * 8;
         m_currentChunk[index] |= (byte << shift);
