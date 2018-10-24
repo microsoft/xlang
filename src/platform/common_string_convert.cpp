@@ -3,21 +3,20 @@
 
 namespace xlang::impl
 {
-    uint32_t get_converted_length(char16_t const* input_str, uint32_t input_length)
+    uint32_t get_converted_length(std::basic_string_view<char16_t> input_str)
     {
-        return convert_string(input_str, input_length, nullptr, 0);
+        return convert_string(input_str, nullptr, 0);
     }
 
-    uint32_t get_converted_length(xlang_char8 const* input_str, uint32_t input_length)
+    uint32_t get_converted_length(std::basic_string_view<xlang_char8> input_str)
     {
-        return convert_string(input_str, input_length, nullptr, 0);
+        return convert_string(input_str, nullptr, 0);
     }
 
     uint32_t convert_string(
-        char16_t const* input_str,
-        uint32_t input_length,
+        std::basic_string_view<char16_t> input_str,
         xlang_char8* output_buffer,
-        uint32_t buffer_length)
+        uint32_t buffer_size)
     {
         static_assert(sizeof(xlang_char8) == sizeof(char));
  
@@ -26,10 +25,9 @@ namespace xlang::impl
     }
     
     uint32_t convert_string(
-        xlang_char8 const* input_str,
-        uint32_t input_length,
+        std::basic_string_view<xlang_char8> input_str,
         char16_t* output_buffer,
-        uint32_t buffer_length)
+        uint32_t buffer_size)
     {
         static_assert(sizeof(xlang_char8) == sizeof(char));
 

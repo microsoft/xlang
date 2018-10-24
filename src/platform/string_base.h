@@ -109,7 +109,7 @@ namespace xlang::impl
         uint32_t get_length() const noexcept;
 
         template <typename char_type>
-        buffer_info<char_type> ensure_buffer();
+        std::basic_string_view<char_type> ensure_buffer();
 
         template <typename char_type>
         char_type const* get_buffer() const noexcept;
@@ -145,7 +145,7 @@ namespace xlang::impl
 
     private:
         template <typename my_char_type, typename requested_char_type>
-        buffer_info<requested_char_type> ensure_buffer_impl();
+        std::basic_string_view<requested_char_type> ensure_buffer_impl();
     };
 
     // This class is a wrapper, need to be able to up-cast safely, which means layout can't change.
@@ -231,7 +231,7 @@ namespace xlang::impl
     }
 
     template <typename char_type>
-    inline buffer_info<char_type> string_base::ensure_buffer()
+    inline std::basic_string_view<char_type> string_base::ensure_buffer()
     {
         if (is_utf8())
         {
@@ -244,7 +244,7 @@ namespace xlang::impl
     }
 
     template <typename my_char_type, typename requested_char_type>
-    inline buffer_info<requested_char_type> string_base::ensure_buffer_impl()
+    inline std::basic_string_view<requested_char_type> string_base::ensure_buffer_impl()
     {
         if constexpr (std::is_same_v<my_char_type, requested_char_type>)
         {
