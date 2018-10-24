@@ -6,16 +6,20 @@
 #include "sha1.h"
 #include "text_writer.h"
 
-inline constexpr std::string_view type_prefix(xlang::meta::reader::category typeCategory) noexcept
+inline std::string_view type_prefix(xlang::meta::reader::TypeDef const& def) noexcept
 {
     using namespace xlang::meta::reader;
-    switch (typeCategory)
+    switch (get_category(def))
     {
     case category::delegate_type:
         // Delegates are actually interfaces, but aren't represented that way in the metadata, so we need to prefix each
-        // type name with an 'I'
-        return "I";
+        // type name with an 'I' _unless_ it's a part of the Collections namespace
+        if (def.TypeNamespace() != collections_namespace)
+        {
+            return "I";
+        }
 
+        [[fallthrough]];
     default:
         return "";
     }
@@ -354,7 +358,7 @@ inline void write_type_cpp(
 
     // C++ names don't carry the tick mark
     typeName.name = typeName.name.substr(0, typeName.name.find('`'));
-    w.write("%%", type_prefix(typeCategory), typeName.name);
+    w.write("%%", type_prefix(type), typeName.name);
 
     if (!ignoreNamespace)
     {
@@ -556,7 +560,7 @@ inline void write_type_mangled(
         }
     }
 
-    w.write(type_prefix(get_category(type)));
+    w.write(type_prefix(type));
     writeName(typeName.name);
 }
 

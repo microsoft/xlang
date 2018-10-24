@@ -619,7 +619,7 @@ struct __declspec(uuid("%"))
 % : %%_impl<)^-^",
         bind<write_generic_type_guid>(type, m_genericArgStack),
         bind<write_generictype_cpp>(type, m_genericArgStack, format_flags::ignore_namespace),
-        type_prefix(get_category(typeDef)), typeName);
+        type_prefix(typeDef), typeName);
 
     std::string_view prefix;
     for (auto const& sig : type.GenericArgs())

@@ -676,7 +676,7 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
     }
 
     auto const typeCategory = get_category(type);
-    auto const typePrefix = type_prefix(typeCategory);
+    auto const typePrefix = type_prefix(type);
     auto const baseType = (typeCategory == category::delegate_type) ? "IUnknown"sv : "IInspectable"sv;
 
     write_type_definition_banner(w, type);

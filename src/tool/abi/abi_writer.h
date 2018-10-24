@@ -10,7 +10,7 @@
 #include "namespace_iterator.h"
 #include "text_writer.h"
 
-struct console_writer : xlang::text::writer_base<console_writer> {};
+struct basic_writer : xlang::text::writer_base<basic_writer> {};
 
 template <typename Int>
 struct format_hex

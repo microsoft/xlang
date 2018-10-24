@@ -27,7 +27,7 @@ void print_usage()
 
 int main(int const argc, char** argv)
 {
-    console_writer w;
+    basic_writer w;
 
     try
     {
@@ -148,12 +148,6 @@ int main(int const argc, char** argv)
 
         for (auto const& [ns, members] : c.namespaces())
         {
-            if (ns == collections_namespace)
-            {
-                // TODO: What to do with these?
-                continue;
-            }
-
             if (f.includes(members))
             {
                 group.add([&]()
@@ -162,6 +156,45 @@ int main(int const argc, char** argv)
                 });
             }
         }
+
+        // Write the 'Windows.Foundation.Collections.h' file. Note that we would generate them, however several of the
+        // classes have unpredictable names as a part of the public interface (e.g. 'TArgs_complex' for the
+        // 'ITypedEventHandler_impl' type even though the generic parameter name is 'TResult' in metadata)
+        group.add([&]()
+        {
+            std::string_view nsBegin, nsEnd;
+            if (config.ns_prefix_state == ns_prefix::always)
+            {
+                nsBegin = "\nnamespace ABI {";
+                nsEnd = "} // ABI\n";
+            }
+            else if (config.ns_prefix_state == ns_prefix::optional)
+            {
+                nsBegin = R"^-^(
+#if defined(MIDL_NS_PREFIX)
+namespace ABI {
+#endif // defined(MIDL_NS_PREFIX))^-^";
+                nsEnd = R"^-^(#if defined(MIDL_NS_PREFIX)
+} // ABI
+#endif // defined(MIDL_NS_PREFIX)
+)^-^";
+            }
+
+            basic_writer w;
+            w.write(strings::generics_begin);
+            w.write(nsBegin);
+            w.write(strings::generics_meta);
+            w.write(strings::generics_foundation);
+            w.write(strings::generics_collections);
+            w.write(strings::generics_async);
+            w.write(nsEnd);
+            w.write(strings::generics_vector_begin);
+            w.write(nsBegin);
+            w.write(strings::generics_vector);
+            w.write(nsEnd);
+            w.write(strings::generics_end);
+            w.flush_to_file(config.output_directory / "Windows.Foundation.Collections.h");
+        });
 
         group.get();
 
