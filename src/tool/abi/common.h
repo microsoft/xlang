@@ -192,14 +192,14 @@ struct contract_version
     std::vector<previous_contract> previous_contracts;
 };
 
-// NOTE: While theoretically possible for a type to have previous contract version attribute(s) but no contract version
-//       attribute, it would be rather silly to have '#if true || ...' so ignore
 template <typename T>
 inline std::optional<contract_version> contract_attributes(T const& value)
 {
     using namespace std::literals;
     using namespace xlang::meta::reader;
 
+    // NOTE: While theoretically possible for a type to have previous contract version attribute(s) but no contract
+    //       version attribute, it would be rather silly to have '#if true || ...' so ignore
     auto contractAttr = get_attribute(value, metadata_namespace, "ContractVersionAttribute"sv);
     if (!contractAttr)
     {

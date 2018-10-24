@@ -801,8 +801,7 @@ void write_abi_header(std::string_view ns, cache const& c, cache::namespace_memb
 
     // C interface
     w.write("#else // !defined(__cplusplus)\n");
-    // TODO: C Interface
-    // TODO: Need to clear declaration cache
+    w.write("// C interface not currently generated\n");
     w.write("#endif // defined(__cplusplus)");
 
     w.write(strings::constexpr_end_definitions);
