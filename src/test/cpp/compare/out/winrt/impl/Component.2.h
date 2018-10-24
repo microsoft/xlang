@@ -6,7 +6,7 @@ namespace winrt::Component
     struct WINRT_EBO Result : Component::IResult
     {
         Result(std::nullptr_t) noexcept {}
-        Result(construct_from_abi_t, void* ptr) noexcept : Component::IResult(construct_from_abi, ptr) {}
+        Result(take_ownership_from_abi_t, void* ptr) noexcept : Component::IResult(take_ownership_from_abi, ptr) {}
         Result();
     };
 }

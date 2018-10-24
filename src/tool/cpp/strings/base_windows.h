@@ -38,9 +38,8 @@ WINRT_EXPORT namespace winrt
         return result;
     }
 
-    // TODO: take_ownership_from_abi ?
-    struct construct_from_abi_t {};
-    inline constexpr construct_from_abi_t construct_from_abi{};
+    struct take_ownership_from_abi_t {};
+    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 }
 
 namespace winrt::impl
@@ -86,13 +85,13 @@ namespace winrt::impl
         {
             void* result;
             check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-            return { construct_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
+            return { take_ownership_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
         }
         else
         {
             void* result;
             check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-            return { construct_from_abi, result };
+            return { take_ownership_from_abi, result };
         }
     }
 
@@ -108,13 +107,13 @@ namespace winrt::impl
         {
             void* result;
             ptr->QueryInterface(guid_of<To>(), &result);
-            return { construct_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
+            return { take_ownership_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
         }
         else
         {
             void* result;
             ptr->QueryInterface(guid_of<To>(), &result);
-            return { construct_from_abi, result };
+            return { take_ownership_from_abi, result };
         }
     }
 
@@ -142,7 +141,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IUnknown(std::nullptr_t) noexcept {}
         void* operator new(size_t) = delete;
 
-        IUnknown(construct_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
+        IUnknown(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
         {
         }
 
@@ -417,6 +416,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct IInspectable : IUnknown
     {
         IInspectable(std::nullptr_t = nullptr) noexcept {}
-        IInspectable(construct_from_abi_t, void* ptr) noexcept : IUnknown(construct_from_abi, ptr) {}
+        IInspectable(take_ownership_from_abi_t, void* ptr) noexcept : IUnknown(take_ownership_from_abi, ptr) {}
     };
 }

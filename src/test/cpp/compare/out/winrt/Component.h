@@ -8,7 +8,7 @@ namespace winrt::impl
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::INotExclusive)->NotExclusive(&result));
-        return { construct_from_abi, result };
+        return { take_ownership_from_abi, result };
     }
     template <typename D> int32_t consume_Component_IResult<D>::GetInt32() const
     {
@@ -20,25 +20,25 @@ namespace winrt::impl
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::IResult)->GetString(&result));
-        return { construct_from_abi, result };
+        return { take_ownership_from_abi, result };
     }
     template <typename D> Component::Fast::FastClass consume_Component_IResult<D>::GetFastClass() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::IResult)->GetFastClass(&result));
-        return { construct_from_abi, result };
+        return { take_ownership_from_abi, result };
     }
     template <typename D> Component::Fast::SlowClass consume_Component_IResult<D>::GetSlowClass() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::IResult)->GetSlowClass(&result));
-        return { construct_from_abi, result };
+        return { take_ownership_from_abi, result };
     }
     template <typename D> Component::INotExclusive consume_Component_IResult<D>::GetInterface() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::IResult)->GetInterface(&result));
-        return { construct_from_abi, result };
+        return { take_ownership_from_abi, result };
     }
     template <typename D>
     struct produce<D, Component::INotExclusive> : produce_base<D, Component::INotExclusive>

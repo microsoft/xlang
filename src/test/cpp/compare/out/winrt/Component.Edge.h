@@ -18,7 +18,7 @@ namespace winrt::impl
     {
         void* value;
         check_hresult(WINRT_SHIM(Component::Edge::IOneClassFactory)->CreateInstance(a, &value));
-        return { construct_from_abi, value };
+        return { take_ownership_from_abi, value };
     }
     template <typename D> void consume_Component_Edge_IOneClassStatics<D>::StaticMethod(int32_t a) const
     {
@@ -54,7 +54,7 @@ namespace winrt::impl
     {
         void* value;
         check_hresult(WINRT_SHIM(Component::Edge::IThreeClassFactory)->CreateInstance(a, b, c, &value));
-        return { construct_from_abi, value };
+        return { take_ownership_from_abi, value };
     }
     template <typename D> void consume_Component_Edge_IThreeClassStatics<D>::StaticMethod(int32_t a, int32_t b, int32_t c) const
     {
@@ -80,7 +80,7 @@ namespace winrt::impl
     {
         void* value;
         check_hresult(WINRT_SHIM(Component::Edge::ITwoClassFactory)->CreateInstance(a, b, &value));
-        return { construct_from_abi, value };
+        return { take_ownership_from_abi, value };
     }
     template <typename D> void consume_Component_Edge_ITwoClassStatics<D>::StaticMethod(int32_t a, int32_t b) const
     {

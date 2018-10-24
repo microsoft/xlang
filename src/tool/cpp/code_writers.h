@@ -740,7 +740,7 @@ namespace xlang
 
         if (can_take_ownership_of_return_type(signature))
         {
-            w.write("\n        return { construct_from_abi, % };", signature.return_param_name());
+            w.write("\n        return { take_ownership_from_abi, % };", signature.return_param_name());
         }
         else
         {
@@ -1625,7 +1625,7 @@ protected:
         impl::consume_t<%>%
     {
         %(std::nullptr_t = nullptr) noexcept {}
-        %(construct_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(construct_from_abi, ptr) {}
+        %(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
     %};
 )";
 
@@ -2168,7 +2168,7 @@ protected:
         auto format = R"(    struct WINRT_EBO % : %%%
     {
         %(std::nullptr_t) noexcept {}
-        %(construct_from_abi_t, void* ptr) noexcept : %(construct_from_abi, ptr) {}
+        %(take_ownership_from_abi_t, void* ptr) noexcept : %(take_ownership_from_abi, ptr) {}
 %%%    };
 )";
 
@@ -2203,7 +2203,7 @@ protected:
         auto format = R"(    struct WINRT_EBO % : %%%
     {
         %(std::nullptr_t) noexcept {}
-        %(construct_from_abi_t, void* ptr) noexcept : %(construct_from_abi, ptr) {}
+        %(take_ownership_from_abi_t, void* ptr) noexcept : %(take_ownership_from_abi, ptr) {}
 %%%%    };
 )";
 

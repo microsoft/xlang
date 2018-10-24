@@ -70,7 +70,7 @@ WINRT_EXPORT namespace winrt
 
         hstring() noexcept = default;
 
-        hstring(construct_from_abi_t, void* ptr) noexcept : m_handle(ptr)
+        hstring(take_ownership_from_abi_t, void* ptr) noexcept : m_handle(ptr)
         {
         }
 

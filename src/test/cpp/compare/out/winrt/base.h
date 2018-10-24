@@ -2276,9 +2276,8 @@ WINRT_EXPORT namespace winrt
         return result;
     }
 
-    // TODO: take_ownership_from_abi ?
-    struct construct_from_abi_t {};
-    inline constexpr construct_from_abi_t construct_from_abi{};
+    struct take_ownership_from_abi_t {};
+    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 }
 
 namespace winrt::impl
@@ -2324,13 +2323,13 @@ namespace winrt::impl
         {
             void* result;
             check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-            return { construct_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
+            return { take_ownership_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
         }
         else
         {
             void* result;
             check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-            return { construct_from_abi, result };
+            return { take_ownership_from_abi, result };
         }
     }
 
@@ -2346,13 +2345,13 @@ namespace winrt::impl
         {
             void* result;
             ptr->QueryInterface(guid_of<To>(), &result);
-            return { construct_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
+            return { take_ownership_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
         }
         else
         {
             void* result;
             ptr->QueryInterface(guid_of<To>(), &result);
-            return { construct_from_abi, result };
+            return { take_ownership_from_abi, result };
         }
     }
 
@@ -2380,7 +2379,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IUnknown(std::nullptr_t) noexcept {}
         void* operator new(size_t) = delete;
 
-        IUnknown(construct_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
+        IUnknown(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
         {
         }
 
@@ -2655,7 +2654,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct IInspectable : IUnknown
     {
         IInspectable(std::nullptr_t = nullptr) noexcept {}
-        IInspectable(construct_from_abi_t, void* ptr) noexcept : IUnknown(construct_from_abi, ptr) {}
+        IInspectable(take_ownership_from_abi_t, void* ptr) noexcept : IUnknown(take_ownership_from_abi, ptr) {}
     };
 }
 
@@ -2730,7 +2729,7 @@ WINRT_EXPORT namespace winrt
 
         hstring() noexcept = default;
 
-        hstring(construct_from_abi_t, void* ptr) noexcept : m_handle(ptr)
+        hstring(take_ownership_from_abi_t, void* ptr) noexcept : m_handle(ptr)
         {
         }
 
@@ -3877,7 +3876,7 @@ WINRT_EXPORT namespace winrt
 
         com_ptr(std::nullptr_t = nullptr) noexcept {}
 
-        com_ptr(construct_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<type*>(ptr))
+        com_ptr(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<type*>(ptr))
         {
         }
 
@@ -6659,7 +6658,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         impl::consume_t<IAsyncInfo>
     {
         IAsyncInfo(std::nullptr_t = nullptr) noexcept {}
-        IAsyncInfo(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IAsyncInfo(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     struct WINRT_EBO IAsyncAction :
@@ -6668,7 +6667,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         impl::require<IAsyncAction, IAsyncInfo>
     {
         IAsyncAction(std::nullptr_t = nullptr) noexcept {}
-        IAsyncAction(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IAsyncAction(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename TProgress>
@@ -6679,7 +6678,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         IAsyncActionWithProgress(std::nullptr_t = nullptr) noexcept {}
-        IAsyncActionWithProgress(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IAsyncActionWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename TResult>
@@ -6690,7 +6689,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         IAsyncOperation(std::nullptr_t = nullptr) noexcept {}
-        IAsyncOperation(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IAsyncOperation(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename TResult, typename TProgress>
@@ -6702,7 +6701,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         IAsyncOperationWithProgress(std::nullptr_t = nullptr) noexcept {}
-        IAsyncOperationWithProgress(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IAsyncOperationWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
@@ -6980,7 +6979,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         IMapChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
-        IMapChangedEventArgs(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IMapChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
@@ -6990,7 +6989,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IIterator(std::nullptr_t = nullptr) noexcept {}
-        IIterator(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IIterator(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
 
         using iterator_category = std::input_iterator_tag;
         using value_type = T;
@@ -7006,7 +7005,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IIterable(std::nullptr_t = nullptr) noexcept {}
-        IIterable(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IIterable(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
@@ -7017,7 +7016,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IVectorView(std::nullptr_t = nullptr) noexcept {}
-        IVectorView(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IVectorView(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
@@ -7028,7 +7027,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IVector(std::nullptr_t = nullptr) noexcept {}
-        IVector(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IVector(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
@@ -7039,7 +7038,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IObservableVector(std::nullptr_t = nullptr) noexcept {}
-        IObservableVector(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IObservableVector(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
@@ -7050,7 +7049,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IKeyValuePair(std::nullptr_t = nullptr) noexcept {}
-        IKeyValuePair(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IKeyValuePair(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
@@ -7062,7 +7061,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMapView(std::nullptr_t = nullptr) noexcept {}
-        IMapView(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IMapView(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
@@ -7074,7 +7073,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMap(std::nullptr_t = nullptr) noexcept {}
-        IMap(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IMap(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
@@ -7086,7 +7085,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IObservableMap(std::nullptr_t = nullptr) noexcept {}
-        IObservableMap(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IObservableMap(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     struct WINRT_EBO IVectorChangedEventArgs :
@@ -7094,7 +7093,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         impl::consume_t<IVectorChangedEventArgs>
     {
         IVectorChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
-        IVectorChangedEventArgs(construct_from_abi_t, void* ptr) noexcept : IInspectable(construct_from_abi, ptr) {}
+        IVectorChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>

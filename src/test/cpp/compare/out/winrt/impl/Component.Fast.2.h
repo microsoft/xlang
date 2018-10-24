@@ -8,7 +8,7 @@ namespace winrt::Component::Fast
         impl::require<FastClass, Component::INotExclusive>
     {
         FastClass(std::nullptr_t) noexcept {}
-        FastClass(construct_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(construct_from_abi, ptr) {}
+        FastClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
         FastClass();
         static hstring StaticMethod();
         hstring First() const;
@@ -20,7 +20,7 @@ namespace winrt::Component::Fast
         impl::require<SlowClass, Component::Fast::ISlowClass2, Component::INotExclusive>
     {
         SlowClass(std::nullptr_t) noexcept {}
-        SlowClass(construct_from_abi_t, void* ptr) noexcept : Component::Fast::ISlowClass(construct_from_abi, ptr) {}
+        SlowClass(take_ownership_from_abi_t, void* ptr) noexcept : Component::Fast::ISlowClass(take_ownership_from_abi, ptr) {}
         SlowClass();
         static hstring StaticMethod();
     };
