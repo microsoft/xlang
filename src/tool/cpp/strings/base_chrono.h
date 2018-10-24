@@ -68,7 +68,7 @@ WINRT_EXPORT namespace winrt
 
         operator FILETIME() const noexcept
         {
-            return { value & 0xFFFFFFFF, (value >> 32) };
+            return { static_cast<DWORD>(value & 0xFFFFFFFF), static_cast<DWORD>(value >> 32) };
         }
 #endif
     };

@@ -1,10 +1,11 @@
 
 namespace xlang::meta::reader
 {
-    inline uint32_t uncompress_unsigned(byte_view& cursor, uint32_t& length)
+    inline uint32_t uncompress_unsigned(byte_view& cursor)
     {
         auto data = cursor.begin();
         uint32_t value;
+        uint32_t length;
         if ((*data & 0x80) == 0x00)
         {
             length = 1;
@@ -32,60 +33,12 @@ namespace xlang::meta::reader
         return value;
     }
 
-    inline uint32_t uncompress_unsigned(byte_view& cursor)
-    {
-        uint32_t length_ignored;
-        return uncompress_unsigned(cursor, length_ignored);
-    }
-
-    inline int32_t uncompress_signed(byte_view& cursor, uint32_t length)
-    {
-        static constexpr uint32_t sign_mask_one_byte{ 0xffffffc0 };
-        static constexpr uint32_t sign_mask_two_byte{ 0xffffe000 };
-        static constexpr uint32_t sign_mask_four_byte{ 0xf0000000 };
-
-        auto unsigned_data = uncompress_signed(cursor, length);
-        const bool negative = (unsigned_data & 0x01) != 0x00;
-        unsigned_data >>= 1;
-        if (negative)
-        {
-            switch (length)
-            {
-            case 1:
-                unsigned_data |= sign_mask_one_byte;
-                break;
-
-            case 2:
-                unsigned_data |= sign_mask_two_byte;
-                break;
-
-            default:
-                XLANG_ASSERT(length == 4);
-                unsigned_data |= sign_mask_four_byte;
-                break;
-            }
-        }
-        return static_cast<int32_t>(unsigned_data);
-    }
-
-    inline int32_t uncompress_signed(byte_view& cursor)
-    {
-        uint32_t length_ignored;
-        return uncompress_signed(cursor, length_ignored);
-    }
-
     template <typename T>
     T uncompress_enum(byte_view& cursor)
     {
         static_assert(std::is_enum_v<T>);
-        if constexpr (std::is_signed_v<std::underlying_type_t<T>>)
-        {
-            return static_cast<T>(uncompress_signed(cursor));
-        }
-        else
-        {
-            return static_cast<T>(uncompress_unsigned(cursor));
-        }
+        static_assert(!std::is_signed_v<std::underlying_type_t<T>>);
+        return static_cast<T>(uncompress_unsigned(cursor));
     }
 
     template <typename T>

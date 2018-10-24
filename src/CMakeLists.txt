@@ -78,9 +78,12 @@ if (MSVC)
         string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
     endforeach()
     
-    add_compile_options(/await)
     add_compile_options(/permissive-)
-    string(APPEND CMAKE_CXX_FLAGS_DEBUG " /JMC")
+
+    if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
+        add_compile_options(-Wno-delete-non-virtual-dtor)
+        add_compile_options(-mcx16 -fno-delayed-template-parsing -Xclang -flto-visibility-public-std)
+    endif()
 
     # Explicitly configure _DEBUG preprocessor macro 
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " /D_DEBUG")

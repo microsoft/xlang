@@ -32,6 +32,7 @@
 #endif
 
 #define WINRT_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
+// #define WINRT_FAST_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 
 #ifndef WINRT_EXTERNAL_CATCH_CLAUSE
 #define WINRT_EXTERNAL_CATCH_CLAUSE
@@ -71,46 +72,5 @@ namespace winrt::impl
     using hresult_type = int32_t;
     using ref_count_type = uint32_t;
 }
-
-#endif
-
-#if defined(_DEBUG) && defined(_MSC_VER) && !defined(__clang__)
-
-namespace winrt::impl
-{
-    template <typename L, typename T, typename...Args>
-    using invoker_t = decltype(std::declval<L>()(std::declval<T>(), std::declval<Args>()...));
-}
-
-#define WINRT_WRAP(...) __VA_ARGS__
-
-#define WINRT_ASSERT_DECLARATION(M, R, ...) WINRT_ASSERT_DECLARATION_(M, R, __VA_ARGS__)
-
-#define WINRT_ASSERT_DECLARATION_(M, R, ...) \
-{ \
-    auto invocation = [](auto&& d, auto&&... params) -> decltype((R)d.M(params...)) {}; \
-    static_assert(winrt::impl::is_detected_v<winrt::impl::invoker_t, decltype(invocation), D, __VA_ARGS__>, \
-        "\n\n\tC++/WinRT: Could not find method in implementation class:\n\t\t" #R " " #M "(" #__VA_ARGS__ ");\n"); \
-}
-
-#else
-
-#define WINRT_ASSERT_DECLARATION(...) ((void)0)
-
-#endif
-
-#if defined(__clang__) 
-
-#define WINRT_WARNING_PUSH \
-_Pragma("clang diagnostic push") \
-_Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
-
-#define WINRT_WARNING_POP \
-_Pragma("clang diagnostic pop")
-
-#else
-
-#define WINRT_WARNING_PUSH
-#define WINRT_WARNING_POP
 
 #endif
