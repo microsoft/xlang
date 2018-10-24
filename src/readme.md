@@ -17,7 +17,7 @@ Building xlang for Windows requires the following to be installed:
 * [Ninja](https://ninja-build.org/), version 1.8 or later
   * Visual Studio's Desktop Development with C++ workload includes Ninja 1.8.2
 
-Building xlang for Linux requires the following to be installed. The [configureBionic.sh](/scripts/configureBionic.sh) script will automatically install these depenencies via [apt](https://en.wikipedia.org/wiki/APT_(Debian)).
+Building xlang for Linux requires the following to be installed. The [configureBionic.sh](/src/scripts/configureBionic.sh) script will automatically install these depenencies via [apt](https://en.wikipedia.org/wiki/APT_(Debian)).
 
 * [Clang](http://clang.llvm.org/), version 6.0 or later.
 * LLVM [libc++](http://libcxx.llvm.org/) and [libc++ ABI](http://libcxxabi.llvm.org/), release 60 or later.
@@ -42,7 +42,7 @@ Visual Studio 2017 has built in CMake support. For best results, use Visual Stud
 
 Building xlang (or any CMake based project) from the command line is a two step process - First the build files are generated using [CMake](http://cmake.org/) and then build is execute via [Ninja](http://ninja-build.org). Both of these tools are installed as part of the Visual C++ tools for CMake component.
 
-The [windowsBuild.ps1](/scripts/windowsBuild.ps1) build script automates the process of running CMake and Ninja. It generates build files and artifacts into the same folder structure Visual Studio uses (described above). You must run windowsBuild.ps1 from a VS 2017 Developer command prompt. Open a Developer Command Prompt, navigate to the root of your cloned xlang repo and execute the following:
+The [windowsBuild.ps1](/src/scripts/windowsBuild.ps1) build script automates the process of running CMake and Ninja. It generates build files and artifacts into the same folder structure Visual Studio uses (described above). You must run windowsBuild.ps1 from a VS 2017 Developer command prompt. Open a Developer Command Prompt, navigate to the root of your cloned xlang repo and execute the following:
 
 ``` shell
 powershell -noprofile -command "& {src\scripts\windowsBuild.ps1}"
@@ -57,9 +57,9 @@ windowsBuild.ps1 supports the following command line parameters:
 
 ### Building for Linux on the Command Line
 
-> Note, xlang is a young project. While we have aspirations to support mutiple platforms (detailed in [XDN01](../design_notes/XDN01 - A Strategy for Language Interoperability.md) ), we are a long way from realizing that dream. In particular, while both the C++ and Python projection tools in the /tools directory can be compiled for Windows and Linux, today they both generate Windows specific code. As the xlang [Platform Adaptation Layer (aka PAL)](/platform) comes online, we will be updating all of our code to work with it, enabling us to target platforms beyond just Windows.
+> Note, xlang is a young project. While we have aspirations to support mutiple platforms (detailed in [XDN01](/design_notes/XDN01 - A Strategy for Language Interoperability.md) ), we are a long way from realizing that dream. In particular, while both the C++ and Python projection tools in the /tools directory can be compiled for Windows and Linux, today they both generate Windows specific code. As the xlang [Platform Adaptation Layer (aka PAL)](/src/platform) comes online, we will be updating all of our code to work with it, enabling us to target platforms beyond just Windows.
 
-Building for Linux on the command line is similar to building for Windows on the command line. The [bionicBuild.sh](/scripts/bionicBuild.sh) script automates the process of running CMake and Ninja to produce a build. Similar to building on Windows, bionicBuild.sh generates build artifacts into the _build/*Platform*/*Configuration* folder. Note, only x64 builds are supported at this time, so the build script does not add an *Architecture* folder to the build path.
+Building for Linux on the command line is similar to building for Windows on the command line. The [bionicBuild.sh](/src/scripts/bionicBuild.sh) script automates the process of running CMake and Ninja to produce a build. Similar to building on Windows, bionicBuild.sh generates build artifacts into the _build/*Platform*/*Configuration* folder. Note, only x64 builds are supported at this time, so the build script does not add an *Architecture* folder to the build path.
 
 Command line arguments for bionicBuild.sh closely mirror the command line arguments for windowsBuild.ps1
 
