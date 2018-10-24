@@ -24,7 +24,7 @@ The pywinrt_output folder contains code for a native Python extension module, ge
 
 To build the Python native extension module, open a VS 2017 developer command prompt, change to the /pywinrt_output directory and execute the following command:
 
-``` cmd
+``` shell
 C:\Users\user\Source\xlang\samples\python\winml_tutorial\pywinrt_output>py setup.py build
 ```
 
@@ -96,7 +96,7 @@ model = load_model(os.path.abspath("./winml_content/SqueezeNet.onnx"))
 
 Running this code from Python now should result in something similar to the following (the time it takes to load the model will vary).
 
-``` cmd
+``` shell
 C:\Users\user\Source\xlang\samples\python\winml_tutorial>py winml_tutorial.py
 
 Starting load_model
@@ -201,7 +201,7 @@ run_async_code(async_main)
 
 Running this code from Python now should result in something similar to the following (again, timings will vary).
 
-``` cmd
+``` shell
 Starting load_model
 load_model took 0.7183248 seconds
 Starting load_image_file
@@ -244,7 +244,7 @@ async def async_main():
 
 Running this code with Python now should result in something similar to the following.
 
-``` cmd
+``` shell
 Starting load_model
 load_model took 0.7168329999999999 seconds
 Starting load_image_file
@@ -290,7 +290,7 @@ async def async_main():
 
 Running this code with Python now should result in something similar to the following.
 
-``` cmd
+``` shell
 Starting load_model
 load_model took 0.7029269 seconds
 Starting load_image_file
@@ -356,7 +356,7 @@ async def async_main():
 
 Executing this code with Python one final time should reveal the results of the model evaluation, predicting that the image is a tabby cat.
 
-``` cmd
+``` shell
 Starting load_model
 load_model took 0.7041156000000001 seconds
 Starting load_image_file
