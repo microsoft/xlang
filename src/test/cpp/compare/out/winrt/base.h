@@ -7480,57 +7480,7 @@ namespace winrt::impl
             }
         }
 
-        void lock() noexcept
-        {
-            {
-                increment(m_value.count);
-
-                if (m_value.object)
-                {
-                    return;
-                }
-
-                decrement(m_value.count);
-            }
-
-            auto object = get_activation_factory<Interface>(name_of<Class>());
-            WINRT_ASSERT(object.template try_as<IAgileObject>());
-
-            {
-                increment(m_value.count);
-
-                if (nullptr == _InterlockedCompareExchangePointer((void**)&m_value.object, get_abi(object), nullptr))
-                {
-                    detach_abi(object);
-                    get_factory_cache().add(reinterpret_cast<factory_cache_typeless_entry*>(this));
-                }
-            }
-        }
-
-        void unlock() noexcept
-        {
-            decrement(m_value.count);
-        }
-
     private:
-
-        static void increment(size_t& count) noexcept
-        {
-#ifdef _WIN64
-            _InterlockedIncrement64((int64_t*)&count);
-#else
-            _InterlockedIncrement((long*)&count);
-#endif
-        }
-
-        static void decrement(size_t& count) noexcept
-        {
-#ifdef _WIN64
-            _InterlockedDecrement64((int64_t*)&count);
-#else
-            _InterlockedDecrement((long*)&count);
-#endif
-        }
 
         struct count_guard
         {
@@ -7539,12 +7489,20 @@ namespace winrt::impl
 
             explicit count_guard(size_t& count) noexcept : m_count(count)
             {
-                increment(m_count);
+#ifdef _WIN64
+            _InterlockedIncrement64((int64_t*)&m_count);
+#else
+            _InterlockedIncrement((long*)&m_count);
+#endif
             }
 
             ~count_guard() noexcept
             {
-                decrement(m_count);
+#ifdef _WIN64
+            _InterlockedDecrement64((int64_t*)&m_count);
+#else
+            _InterlockedDecrement((long*)&m_count);
+#endif
             }
 
         private:
