@@ -479,7 +479,7 @@ namespace winrt::impl
     template <typename T> struct guid_storage<fast_interface<T>>
     {
 #pragma warning(suppress: 4307)
-        static constexpr guid value{ generate_guid(combine("fastabi(", to_array<char>(guid_of<fast_version<T>::type>()), ")")) };
+        static constexpr guid value{ generate_guid(combine("fastabi(", to_array<char>(guid_of<typename fast_version<T>::type>()), ")")) };
     };
 
     constexpr size_t to_utf8_size(wchar_t const value) noexcept

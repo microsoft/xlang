@@ -1188,7 +1188,7 @@ namespace winrt::impl
     template <typename T> struct guid_storage<fast_interface<T>>
     {
 #pragma warning(suppress: 4307)
-        static constexpr guid value{ generate_guid(combine("fastabi(", to_array<char>(guid_of<fast_version<T>::type>()), ")")) };
+        static constexpr guid value{ generate_guid(combine("fastabi(", to_array<char>(guid_of<typename fast_version<T>::type>()), ")")) };
     };
 
     constexpr size_t to_utf8_size(wchar_t const value) noexcept
@@ -7490,18 +7490,18 @@ namespace winrt::impl
             explicit count_guard(size_t& count) noexcept : m_count(count)
             {
 #ifdef _WIN64
-            _InterlockedIncrement64((int64_t*)&m_count);
+                _InterlockedIncrement64((int64_t*)&m_count);
 #else
-            _InterlockedIncrement((long*)&m_count);
+                _InterlockedIncrement((long*)&m_count);
 #endif
             }
 
             ~count_guard() noexcept
             {
 #ifdef _WIN64
-            _InterlockedDecrement64((int64_t*)&m_count);
+                _InterlockedDecrement64((int64_t*)&m_count);
 #else
-            _InterlockedDecrement((long*)&m_count);
+                _InterlockedDecrement((long*)&m_count);
 #endif
             }
 

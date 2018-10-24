@@ -837,7 +837,6 @@ namespace xlang
         }
 
         auto type_name = type.TypeName();
-        auto type_namespace = type.TypeNamespace();
 
         for (auto&& info : get_fast_interfaces(w, type))
         {
@@ -2647,7 +2646,6 @@ namespace winrt::@::implementation
                 for (auto&& method : factory.type.MethodList())
                 {
                     method_signature signature{ method };
-                    auto method_name = get_name(method);
 
                     w.write("        %(%);\n",
                         type_name,
