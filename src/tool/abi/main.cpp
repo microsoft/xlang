@@ -163,6 +163,8 @@ int main(int const argc, char** argv)
             }
         }
 
+        group.get();
+
         if (config.verbose)
         {
             w.write("time: %ms\n", duration_cast<milliseconds>((high_resolution_clock::now() - start)).count());

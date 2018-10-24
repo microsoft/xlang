@@ -233,7 +233,7 @@ inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef
     {
         case category::interface_type: return "Interface"sv;
         case category::class_type: return "Class"sv;
-        case category::enum_type: // TODO: return "Enum"sv; ??? 'Struct' is what MIDL does...
+        case category::enum_type: // NOTE: MIDL writes 'Struct' for enums, so we will too
         case category::struct_type: return "Struct"sv;
         case category::delegate_type: return "Delegate"sv;
         default: XLANG_ASSERT(false); return ""sv;
@@ -531,7 +531,6 @@ inline void write_struct_definition(writer& w, xlang::meta::reader::TypeDef cons
     using namespace xlang::text;
     auto const ns = type.TypeNamespace();
     auto const name = type.TypeName();
-
 
     if (auto [isMapped, mappedName] = w.config().map_type(ns, name); isMapped)
     {

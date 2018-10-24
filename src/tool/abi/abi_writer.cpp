@@ -2,7 +2,6 @@
 
 #include <cctype>
 #include <cstring>
-#include <iostream> // TODO: REMOVE
 
 #include "abi_writer.h"
 #include "code_writers.h"
@@ -31,8 +30,6 @@ void writer::initialize_dependencies()
 
 void writer::initialize_dependencies(TypeDef const& type)
 {
-    using namespace std::literals;
-
     // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
     // trip us up since it's a definition, not a use
     if (!get_attribute(type, metadata_namespace, "ApiContractAttribute"sv))
@@ -162,19 +159,19 @@ void writer::push_generic_namespace(std::string_view ns)
     if (m_config.ns_prefix_state == ns_prefix::always)
     {
         write("namespace ABI {");
-        prefix = " ";
+        prefix = " "sv;
     }
     else if (m_config.ns_prefix_state == ns_prefix::optional)
     {
         write("ABI_NAMESPACE_BEGIN");
-        prefix = " ";
+        prefix = " "sv;
     }
 
     for (auto nsPart : namespace_range{ ns })
     {
         write("%namespace % {", prefix, nsPart);
         m_namespaceStack.emplace_back(nsPart);
-        prefix = " ";
+        prefix = " "sv;
     }
 
     write('\n');
@@ -207,12 +204,12 @@ void writer::pop_generic_namespace()
 {
     XLANG_ASSERT(!m_namespaceStack.empty());
 
-    char const* prefix = "";
+    std::string_view prefix;
     while (!m_namespaceStack.empty())
     {
         write("%/* % */ }", prefix, m_namespaceStack.back());
         m_namespaceStack.pop_back();
-        prefix = " ";
+        prefix = " "sv;
     }
 
     if (m_config.ns_prefix_state == ns_prefix::always)
@@ -480,7 +477,6 @@ void writer::write_interface_forward_declarations()
         }
     }
 
-    bool const isFoundationNamespace = m_namespace == foundation_namespace;
     for (auto const& type : m_members.interfaces)
     {
         if ((distance(type.GenericParam()) == 0) && !m_config.map_type(type.TypeNamespace(), type.TypeName()).first)
@@ -572,7 +568,6 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
             },
             [&](GenericTypeInstSig const& t)
             {
-                // TODO: push?
                 write_generic_definition(t);
             },
             [](auto const&)
@@ -630,7 +625,7 @@ struct __declspec(uuid("%"))
     for (auto const& sig : type.GenericArgs())
     {
         write("%%", prefix, bind<write_generic_impl_param>(sig, m_genericArgStack));
-        prefix = ", ";
+        prefix = ", "sv;
     }
 
     write(R"^-^(>
