@@ -332,3 +332,22 @@ inline bool is_flags_enum(xlang::meta::reader::TypeDef const& type)
 {
     return static_cast<bool>(get_attribute(type, system_namespace, flags_attribute));
 }
+
+template <typename T, typename Func>
+inline void for_each_attribute(
+    T const& type,
+    std::string_view namespaceFilter,
+    std::string_view typeNameFilter,
+    Func&& func)
+{
+    bool first = true;
+    for (auto const& attr : type.CustomAttribute())
+    {
+        auto [ns, name] = attr.TypeNamespaceAndName();
+        if ((ns == namespaceFilter) && (name == typeNameFilter))
+        {
+            func(first, attr);
+            first = false;
+        }
+    }
+}
