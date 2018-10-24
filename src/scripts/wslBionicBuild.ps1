@@ -5,15 +5,13 @@ Param (
     [string] $target
 )
 
-$rootPath = split-path $PSScriptRoot
-$buildPath = join-path (split-path $rootPath) "_build/Ubuntu_18.04/$buildType"
+$bionicBuildPath = join-path $PSScriptRoot "bionicBuild.sh"
+$wslBionicBuildPath = ubuntu1804 run wslpath ($bionicBuildPath.replace('\', '/'))
 
-$wslRootPath = ubuntu1804 run wslpath ($rootPath.replace('\', '/'))
-$wslBuildPath = ubuntu1804 run wslpath ($buildPath.replace('\', '/'))
+$args = "--build-type $buildType"
+if ($forceCMake) { $args += " --force-cmake" }
+if ($verbose) { $args += " --verbose" }
+if (-not [string]::IsNullOrEmpty($target)) { $args += " --target $target" }
 
-if ($forceCMake -or (-not (test-path (join-path $buildPath CMakeCache.txt)))) 
-{
-    ubuntu1804 run cmake "$wslRootPath" "-B$wslBuildPath" -GNinja -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang
-}
-
-ubuntu1804 run ninja -C "$wslBuildPath" $(if ($verbose) { "-v" }) $target
+Write-Output "bash $wslBionicBuildPath $args"
+ubuntu1804 run "bash $wslBionicBuildPath $args"
