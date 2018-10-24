@@ -7,24 +7,9 @@
 #include "namespace_iterator.h"
 
 constexpr std::string_view system_namespace = "System";
-constexpr std::string_view flags_attribute = "FlagsAttribute";
-
 constexpr std::string_view foundation_namespace = "Windows.Foundation";
-
 constexpr std::string_view collections_namespace = "Windows.Foundation.Collections";
-
 constexpr std::string_view metadata_namespace = "Windows.Foundation.Metadata";
-constexpr std::string_view api_contract_attribute = "ApiContractAttribute";
-constexpr std::string_view contract_version_attribute = "ContractVersionAttribute";
-constexpr std::string_view default_attribute = "DefaultAttribute";
-constexpr std::string_view deprecated_attribute = "DeprecatedAttribute";
-constexpr std::string_view exclusive_to_attribute = "ExclusiveToAttribute";
-constexpr std::string_view guid_attribute = "GuidAttribute";
-constexpr std::string_view marshaling_behavior_attribute = "MarshalingBehaviorAttribute";
-constexpr std::string_view overload_attribute = "OverloadAttribute";
-constexpr std::string_view previous_contract_version_attribute = "PreviousContractVersionAttribute";
-constexpr std::string_view threading_attribute = "ThreadingAttribute";
-
 constexpr std::string_view internal_namespace = "Windows.Foundation.Internal";
 
 struct type_name
@@ -177,12 +162,13 @@ inline bool is_fully_specialized(xlang::meta::reader::GenericTypeInstSig const& 
 inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> default_interface(
     xlang::meta::reader::TypeDef const& type)
 {
+    using namespace std::literals;
     using namespace xlang::meta::reader;
     XLANG_ASSERT(get_category(type) == category::class_type);
 
     for (auto const& iface : type.InterfaceImpl())
     {
-        if (get_attribute(iface, metadata_namespace, default_attribute))
+        if (get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
         {
             return iface.Interface();
         }
@@ -211,9 +197,10 @@ struct contract_version
 template <typename T>
 inline std::optional<contract_version> contract_attributes(T const& value)
 {
+    using namespace std::literals;
     using namespace xlang::meta::reader;
 
-    auto contractAttr = get_attribute(value, metadata_namespace, contract_version_attribute);
+    auto contractAttr = get_attribute(value, metadata_namespace, "ContractVersionAttribute"sv);
     if (!contractAttr)
     {
         return std::nullopt;
@@ -265,7 +252,7 @@ inline std::optional<contract_version> contract_attributes(T const& value)
     for (auto const& attr : value.CustomAttribute())
     {
         auto [ns, name] = attr.TypeNamespaceAndName();
-        if ((ns == metadata_namespace) && (name == previous_contract_version_attribute))
+        if ((ns == metadata_namespace) && (name == "PreviousContractVersionAttribute"sv))
         {
             auto prevSig = attr.Value();
             auto const& prevArgs = prevSig.FixedArgs();
@@ -296,9 +283,10 @@ struct deprecation_info
 template <typename T>
 inline std::optional<deprecation_info> is_deprecated(T const& type)
 {
+    using namespace std::literals;
     using namespace xlang::meta::reader;
 
-    auto attr = get_attribute(type, metadata_namespace, deprecated_attribute);
+    auto attr = get_attribute(type, metadata_namespace, "DeprecatedAttribute"sv);
     if (!attr)
     {
         return std::nullopt;
@@ -330,7 +318,8 @@ inline std::optional<deprecation_info> is_deprecated(T const& type)
 
 inline bool is_flags_enum(xlang::meta::reader::TypeDef const& type)
 {
-    return static_cast<bool>(get_attribute(type, system_namespace, flags_attribute));
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(type, system_namespace, "FlagsAttribute"sv));
 }
 
 template <typename T, typename Func>

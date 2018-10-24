@@ -840,6 +840,7 @@ inline void write_type_signature(
 
 inline void write_type_guid(writer& w, xlang::meta::reader::TypeDef const& type)
 {
+    using namespace std::literals;
     using namespace xlang::meta::reader;
 
     if (get_category(type) == category::class_type)
@@ -857,7 +858,7 @@ inline void write_type_guid(writer& w, xlang::meta::reader::TypeDef const& type)
         return;
     }
 
-    auto attr = get_attribute(type, metadata_namespace, guid_attribute);
+    auto attr = get_attribute(type, metadata_namespace, "GuidAttribute"sv);
     if (!attr)
     {
         xlang::throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");

@@ -254,7 +254,7 @@ inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef
 
     if (typeCategory == category::interface_type)
     {
-        if (auto exclusiveAttr = get_attribute(type, metadata_namespace, exclusive_to_attribute))
+        if (auto exclusiveAttr = get_attribute(type, metadata_namespace, "ExclusiveToAttribute"sv))
         {
             auto sig = exclusiveAttr.Value();
             auto const& fixedArgs = sig.FixedArgs();
@@ -580,12 +580,13 @@ inline void write_struct_definition(writer& w, xlang::meta::reader::TypeDef cons
 
 inline void write_interface_function_declaration(writer& w, xlang::meta::reader::MethodDef const& methodDef)
 {
+    using namespace std::literals;
     using namespace xlang::meta::reader;
     using namespace xlang::text;
 
     // If this is an overload, use the unique name
     auto fnName = methodDef.Name();
-    if (auto overloadAttr = get_attribute(methodDef, metadata_namespace, overload_attribute))
+    if (auto overloadAttr = get_attribute(methodDef, metadata_namespace, "OverloadAttribute"sv))
     {
         auto sig = overloadAttr.Value();
         auto const& fixedArgs = sig.FixedArgs();

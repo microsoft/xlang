@@ -31,9 +31,11 @@ void writer::initialize_dependencies()
 
 void writer::initialize_dependencies(TypeDef const& type)
 {
+    using namespace std::literals;
+
     // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
     // trip us up since it's a definition, not a use
-    if (!get_attribute(type, metadata_namespace, api_contract_attribute))
+    if (!get_attribute(type, metadata_namespace, "ApiContractAttribute"sv))
     {
         if (auto contractInfo = contract_attributes(type))
         {
@@ -374,6 +376,8 @@ std::pair<bool, std::string_view> writer::should_declare(std::string mangledName
 
 void writer::write_api_contract_definitions()
 {
+    using namespace std::literals;
+
     write(R"^-^(
 //  API Contract Inclusion Definitions
 #if !defined(SPECIFIC_API_CONTRACT_DEFINITIONS)
@@ -387,7 +391,7 @@ void writer::write_api_contract_definitions()
             for (auto const& contract : itr->second.contracts)
             {
                 // Contract versions are attributes on the contract type itself
-                auto attr = get_attribute(contract, metadata_namespace, contract_version_attribute);
+                auto attr = get_attribute(contract, metadata_namespace, "ContractVersionAttribute"sv);
                 XLANG_ASSERT(attr);
                 XLANG_ASSERT(attr.Value().FixedArgs().size() == 1);
                 auto version = std::get<uint32_t>(std::get<ElemSig>(attr.Value().FixedArgs()[0].value).value);
