@@ -4,6 +4,7 @@ dirname = "lib.{2}-{0}.{1}".format(vi.major, vi.minor, "win-amd64" if sys.maxsiz
 test_module_path = "./pywinrt_output/build/" + dirname
 sys.path.append(str(test_module_path))
 
+import _pyrt
 import asyncio
 
 def timed_op(fun):
@@ -30,8 +31,6 @@ def timed_op(fun):
         return ret
 
     return async_wrapper if asyncio.iscoroutinefunction(fun) else sync_wrapper
-
-import _pyrt
 
 async def wrap_async_op(op):
     loop = asyncio.get_event_loop()
