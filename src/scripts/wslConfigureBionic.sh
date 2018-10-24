@@ -1,6 +1,12 @@
 # run this in script in Ubuntu 18.04 for WSL
 #   sudo bash wslConfigBionic.sh 
 
+# Note, in order to run in WSL, this file *MUST* have Unix-style LF line endings.
+#       If you get errors like "'\r': command not found", this file has been mistakenly
+#       updated to have Windows-style CRLF line endings.
+#       .gitattributes file in this repo has been updated to ensure all .sh files 
+#       have LF only line endings.
+
 # update APT packages
 sudo apt update 
 sudo apt upgrade -y
