@@ -15,6 +15,7 @@ struct console_writer : xlang::text::writer_base<console_writer> {};
 template <typename Int>
 struct format_hex
 {
+    static_assert(std::is_unsigned_v<Int>);
     Int value;
 };
 template <typename Int>
@@ -68,34 +69,7 @@ struct writer : xlang::text::writer_base<writer>
     template <typename Int>
     void write(format_hex<Int> val)
     {
-        // TODO: write_printf?
-        using unsigned_type = std::make_unsigned_t<Int>;
-
-        auto shift = (8 * sizeof(Int)) - 4;
-        auto mask = static_cast<unsigned_type>(0xF) << shift;
-
-        write("0x");
-        bool printZeros = false;
-        while (mask)
-        {
-            constexpr char digits[] = "0123456789ABCDEF";
-
-            auto value = static_cast<unsigned_type>(val.value & mask) >> shift;
-            if (value || printZeros)
-            {
-                write(digits[value]);
-                printZeros = true;
-            }
-
-            mask >>= 4;
-            shift -= 4;
-        }
-
-        if (!printZeros)
-        {
-            XLANG_ASSERT(val.value == 0);
-            write('0');
-        }
+        write_value(val.value);
     }
 
     void write(indent value)
