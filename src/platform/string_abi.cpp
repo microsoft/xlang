@@ -71,8 +71,8 @@ namespace xlang::impl
         if (string)
         {
             auto const result = from_handle(string)->ensure_buffer<char_type>();
-            *buffer = result.buffer;
-            return result.length;
+            *buffer = result.data();
+            return static_cast<uint32_t>(result.size());
         }
         else
         {

@@ -24,4 +24,10 @@ namespace xlang::impl
     {
         return reinterpret_cast<xlang_string_buffer>(str);
     }
+
+    template <typename char_type>
+    inline std::basic_string_view<char_type> to_string_view(xlang_string handle)
+    {
+        return from_handle(handle)->ensure_buffer<char_type>();
+    }
 }
