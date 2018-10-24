@@ -71,7 +71,7 @@ From the root of your xlang repo, you can invoke pywinrt with the following comm
 _build\Windows\x86\Debug\tool\python\pywinrt.exe -input "%WindowsSdkDir%\References\10.0.17763.0\Windows.Foundation.FoundationContract/3.0.0.0/Windows.Foundation.FoundationContract.winmd" -input "%WindowsSdkDir%\References\10.0.17763.0\Windows.Foundation.UniversalApiContract/7.0.0.0/Windows.Foundation.UniversalApiContract.winmd" -input "%WindowsSdkDir%\References\10.0.17763.0\Windows.AI.MachineLearning.MachineLearningContract/1.0.0.0/Windows.AI.MachineLearning.MachineLearningContract.winmd" -include Windows.Foundation -include Windows.AI.MachineLearning -include Windows.Graphics.Imaging -include Windows.Media -include Windows.Storage -exclude Windows.Media.PlayTo
 ```
 
-This command will generate the Python projection for the Windows.Foundation, Windows.AI.MachineLearning, Windows.Graphics.Imaging, Windows.Media (except for Windows.Media.PlayTo) and Windows.Storage namespaces into the /output subdirectory. 
+This command will generate the Python projection for the Windows.Foundation, Windows.AI.MachineLearning, Windows.Graphics.Imaging, Windows.Media (except for Windows.Media.PlayTo) and Windows.Storage namespaces into the /output subdirectory.
 
 > Note, Python/WinRT currently flattens WinRT namespaces. Both Windows.Media and Windows.Media.PlayTo namespaces have a type named PlaybackRateChangeRequestedEventArgs. If the Windows.Media.PlayTo namespace is not excluded, the generated file will not compile since PlaybackRateChangeRequestedEventArgs will be specified twice. Hence, we need to exclude Windows.Media.Playto for now. Namespace support is coming in a future update to Python/WinRT.
 
