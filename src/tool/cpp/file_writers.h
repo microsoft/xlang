@@ -179,7 +179,6 @@ namespace xlang
 
         if (settings.component && !settings.uniform)
         {
-            // TODO: uniform should only apply to classes actually implemented by this component
             w.write_each<write_fast_definitions>(members.classes);
         }
 

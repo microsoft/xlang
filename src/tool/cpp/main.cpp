@@ -169,8 +169,7 @@ namespace xlang
 
             for (auto&&[ns, members] : c.namespaces())
             {
-                // TODO: make sure members is not copied here...
-                group.add([&, ns = ns, members = members]
+                group.add([&, &ns = ns, &members = members]
                 {
                     if (members.types.empty() || !f.includes(members))
                     {
