@@ -3,9 +3,9 @@
 #include <memory>
 #include "pal_internal.h"
 #include "atomic_ref_count.h"
-#include "string_base.h"
 #include "string_allocate.h"
 #include "string_convert.h"
+#include "string_traits.h"
 
 namespace xlang::impl
 {
@@ -54,7 +54,7 @@ namespace xlang::impl
     }
 
     template <typename char_type>
-    static std::unique_ptr<cache_string, xlang_mem_deleter> cache_string::create(char_type const* source_string, uint32_t length)
+    std::unique_ptr<cache_string, xlang_mem_deleter> cache_string::create(char_type const* source_string, uint32_t length)
     {
         static_assert(std::disjunction_v<std::is_same<char_type, xlang_char8>, std::is_same<char_type, char16_t>>, "char_t must be either xlang_char8 or char16_t");
         using alternate_char_type = typename alternate_type<char_type>::result_type;

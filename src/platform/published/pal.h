@@ -19,7 +19,7 @@
 #ifdef _MSC_VER
 #define XLANG_COMPILER_CLANG 0
 #define XLANG_COMPILER_MSVC 1
-#elif
+#elif defined(__clang__)
 #define XLANG_COMPILER_CLANG 1
 #define XLANG_COMPILER_MSVC 0
 #else
@@ -118,6 +118,12 @@ extern "C"
         return static_cast<xlang_string_encoding>(static_cast<int_t>(lhs) & static_cast<int_t>(rhs));
     }
 
+// TODO: rework operator |= and &= to avoid return-type-c-linkage linkage warning on clang
+#if XLANG_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+#endif
+
     inline constexpr xlang_string_encoding& operator|=(xlang_string_encoding& lhs, xlang_string_encoding rhs) noexcept
     {
         lhs = lhs | rhs;
@@ -129,6 +135,11 @@ extern "C"
         lhs = lhs & rhs;
         return lhs;
     }
+
+#if XLANG_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
+
 #else
     enum xlang_string_encoding
     {

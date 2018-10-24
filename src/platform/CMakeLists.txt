@@ -10,7 +10,7 @@ set(sources string_abi.cpp string_base.cpp)
 if (WIN32)
     set(sources ${sources} win32_memory.cpp win32_string_convert.cpp)
 else()
-    set(sources ${sources} common_memory.cpp)
+    set(sources ${sources} common_memory.cpp common_string_convert.cpp)
 endif()
 
 add_definitions(-DXLANG_PAL_EXPORTS)
