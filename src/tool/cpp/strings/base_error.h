@@ -101,8 +101,6 @@ WINRT_EXPORT namespace winrt
             }
             else
             {
-                WINRT_VERIFY_(impl::error_ok, m_info->GetReference(m_debug_reference.put()));
-
                 if (auto info2 = m_info.try_as<impl::ILanguageExceptionErrorInfo2>())
                 {
                     WINRT_VERIFY_(impl::error_ok, info2->CapturePropagationContext(nullptr));
@@ -177,8 +175,6 @@ WINRT_EXPORT namespace winrt
             WINRT_VERIFY_(impl::error_ok, WINRT_GetRestrictedErrorInfo(m_info.put_void()));
         }
 
-        impl::bstr_handle m_debug_reference;
-        uint32_t const m_debug_magic{ 0xAABBCCDD };
         hresult m_code{ impl::error_fail };
         com_ptr<impl::IRestrictedErrorInfo> m_info;
     };

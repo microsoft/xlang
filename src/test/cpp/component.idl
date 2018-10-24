@@ -1,0 +1,126 @@
+namespace Component
+{
+    enum Signed
+    {
+        First = -1,
+        Second = 0,
+        Third = 1
+    };
+
+    [flags]
+    enum Unsigned
+    {
+        First = 0,
+        Second = 1,
+        Third = 2
+    };
+
+    interface INotExclusive
+    {
+        String NotExclusive();
+    }
+
+    namespace Edge
+    {
+        [default_interface]
+        runtimeclass EmptyClass
+        {
+        }
+
+        static runtimeclass StaticClass
+        {
+            static void StaticMethod();
+        }
+
+        runtimeclass ZeroClass
+        {
+            ZeroClass();
+            void Method();
+            static void StaticMethod();
+        }
+
+        runtimeclass OneClass
+        {
+            OneClass(Int32 a);
+            void Method(Int32 a);
+            static void StaticMethod(Int32 a);
+
+            Int32 First();
+        }
+
+        runtimeclass TwoClass
+        {
+            TwoClass(Int32 a, Int32 b);
+            void Method(Int32 a, Int32 b);
+            static void StaticMethod(Int32 a, Int32 b);
+
+            Int32 First();
+            Int32 Second();
+        }
+
+        runtimeclass ThreeClass
+        {
+            ThreeClass(Int32 a, Int32 b, Int32 c);
+            void Method(Int32 a, Int32 b, Int32 c);
+            static void StaticMethod(Int32 a, Int32 b, Int32 c);
+
+            Int32 First();
+            Int32 Second();
+            Int32 Third();
+        }
+    }
+
+    namespace Fast
+    {
+        [exclusiveto(FastClass)]
+        interface IFastClass
+        {
+            String First();
+            String Second();
+        }
+
+        [exclusiveto(FastClass)]
+        interface IFastClass2
+        {
+            String Third();
+            String Fourth();
+        }
+
+        [exclusiveto(SlowClass)]
+        interface ISlowClass
+        {
+            String First();
+            String Second();
+        }
+
+        [exclusiveto(SlowClass)]
+        interface ISlowClass2
+        {
+            String Third();
+            String Fourth();
+        }
+
+        runtimeclass SlowClass : [default] ISlowClass, ISlowClass2, Component.INotExclusive
+        {
+            SlowClass();
+            static String StaticMethod();
+        }
+
+        [Windows.Foundation.Metadata.FastAbiAttribute]
+        runtimeclass FastClass : [default] IFastClass, IFastClass2, Component.INotExclusive
+        {
+            FastClass();
+            static String StaticMethod();
+        }
+    }
+
+    runtimeclass Result
+    {
+        Result();
+        Int32 GetInt32();
+        String GetString();
+        Component.Fast.FastClass GetFastClass();
+        Component.Fast.SlowClass GetSlowClass();
+        INotExclusive GetInterface();
+    }
+}

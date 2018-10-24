@@ -70,6 +70,10 @@ WINRT_EXPORT namespace winrt
 
         hstring() noexcept = default;
 
+        hstring(construct_from_abi_t, void* ptr) noexcept : m_handle(ptr)
+        {
+        }
+
         hstring(hstring const& value) :
             m_handle(impl::duplicate_string(value.m_handle.get()))
         {}
@@ -199,7 +203,7 @@ WINRT_EXPORT namespace winrt
 
         bool empty() const noexcept
         {
-            return 0 == size();
+            return !m_handle;
         }
 
         size_type size() const noexcept
