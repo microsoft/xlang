@@ -1,0 +1,68 @@
+@echo off
+SETLOCAL
+
+REM https://stackoverflow.com/a/45070967
+
+goto :init
+
+:usage
+    echo xlang windows build
+    echo.
+    echo USAGE:
+    echo   build.cmd [flags] "build target" 
+    echo.
+    echo.  -?, --help               shows this help
+    echo.  -v, --verbose            shows detailed output
+    echo.  -f, --force-cmake        forces re-run of CMake
+    echo.  -b, --build-type value   specify build type (Debug, Release, RelWithDebInfo, MinSizeRel)
+    goto :eof
+
+:init
+    set "OPT_HELP="
+    set "OPT_VERBOSE="
+    set "OPT_FORCE_CMAKE="
+    set "BUILD_TYPE=Debug"
+    set "BUILD_TARGET="
+
+    pushd %~dp0..\..\..\
+    set "REPO_ROOT_PATH=%CD%"
+    popd
+
+:parse
+    if "%~1"=="" goto :main
+
+    if /i "%~1"=="/?"         call :usage "%~2" & goto :end
+    if /i "%~1"=="-?"         call :usage "%~2" & goto :end
+    if /i "%~1"=="--help"     call :usage "%~2" & goto :end
+
+    if /i "%~1"=="/v"         set "OPT_VERBOSE=-v"  & shift & goto :parse
+    if /i "%~1"=="-v"         set "OPT_VERBOSE=-v"  & shift & goto :parse
+    if /i "%~1"=="--verbose"  set "OPT_VERBOSE=-v"  & shift & goto :parse
+
+    if /i "%~1"=="/f"               set "OPT_FORCE_CMAKE=yes"  & shift & goto :parse
+    if /i "%~1"=="-f"               set "OPT_FORCE_CMAKE=yes"  & shift & goto :parse
+    if /i "%~1"=="--force-cmake"    set "OPT_FORCE_CMAKE=yes"  & shift & goto :parse
+
+    if /i "%~1"=="-b"               set "BUILD_TYPE=%~2"   & shift & shift & goto :parse
+    if /i "%~1"=="--build-type"     set "BUILD_TYPE=%~2"   & shift & shift & goto :parse
+
+    if not defined Target           set "BUILD_TARGET=%~1"     & shift & goto :parse
+
+    shift
+    goto :parse
+
+:main
+
+    set SRC_PATH=%REPO_ROOT_PATH%\src
+    set BUILD_PATH=%REPO_ROOT_PATH%\_build\Windows\%VSCMD_ARG_TGT_ARCH%\%BUILD_TYPE%
+
+    set "RUN_CMAKE="
+    if defined OPT_FORCE_CMAKE                  set "RUN_CMAKE=yes"
+    if not exist "%BUILD_PATH%/CMakeCache.txt"  set "RUN_CMAKE=yes"
+
+    if defined RUN_CMAKE (
+        cmake "%SRC_PATH%" "-B%BUILD_PATH%" -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
+    )
+
+    ninja -C "%BUILD_PATH%" %OPT_VERBOSE% %BUILD_TARGET%
+
