@@ -70,7 +70,7 @@ then
     echo USAGE:
     echo   bash build.sh [flags] "build target" 
     echo
-    echo  -?, --help               shows this help
+    echo  -h, --help               shows this help
     echo  -v, --verbose            shows detailed output
     echo  -f, --force-cmake        forces re-run of CMake
     echo  -b, --build-type value   specify build type "(Debug, Release, RelWithDebInfo, MinSizeRel)"
@@ -80,7 +80,8 @@ fi
 SRC_SCRIPTS_PATH="$(dirname "$CURRENT_DIR")"
 SRC_PATH="$(dirname "$SRC_SCRIPTS_PATH")"
 REPO_ROOT_PATH="$(dirname "$SRC_PATH")"
-BUILD_PATH="$REPO_ROOT_PATH/_build/Ubuntu_18.04/$buildType/"
+# TODO: stop using hardcoded architecture in path
+BUILD_PATH="$REPO_ROOT_PATH/_build/Ubuntu_18.04/x86_64/$buildType/"
 
 if $force || ! [ -e "$BUILD_PATH/CMakeCache.txt" ]
 then
