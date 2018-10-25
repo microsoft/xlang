@@ -83,15 +83,12 @@ if (MSVC)
     if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
         add_compile_options(-Wno-delete-non-virtual-dtor)
         add_compile_options(-mcx16 -fno-delayed-template-parsing -Xclang -flto-visibility-public-std)
-    else()
-        add_compile_options(/await)
     endif()
 
     # Explicitly configure _DEBUG preprocessor macro 
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " /D_DEBUG")
 else()
     add_compile_options(-stdlib=libc++)
-    add_compile_options(-fcoroutines-ts)
 
     # Add _DEBUG preprocessor macro for compatibility with MSVC
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " -D_DEBUG")
