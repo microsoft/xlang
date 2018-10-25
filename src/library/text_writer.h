@@ -23,7 +23,7 @@ namespace xlang::text
         }
 
         template <typename... Args>
-        std::string write_temp(std::string_view const& value, Args const&... args)
+        [[nodiscard]] std::string write_temp(std::string_view const& value, Args const&... args)
         {
 #if defined(XLANG_DEBUG)
             bool restore_debug_trace = debug_trace;
