@@ -11,7 +11,7 @@ goto :init
     echo USAGE:
     echo   build.cmd [flags] "build target" 
     echo.
-    echo.  -?, --help               shows this help
+    echo.  -h, --help               shows this help
     echo.  -v, --verbose            shows detailed output
     echo.  -f, --force-cmake        forces re-run of CMake
     echo.  -b, --build-type value   specify build type (Debug, Release, RelWithDebInfo, MinSizeRel)
@@ -31,8 +31,8 @@ goto :init
 :parse
     if "%~1"=="" goto :main
 
-    if /i "%~1"=="/?"         call :usage "%~2" & goto :end
-    if /i "%~1"=="-?"         call :usage "%~2" & goto :end
+    if /i "%~1"=="/h"         call :usage "%~2" & goto :end
+    if /i "%~1"=="-h"         call :usage "%~2" & goto :end
     if /i "%~1"=="--help"     call :usage "%~2" & goto :end
 
     if /i "%~1"=="/v"         set "OPT_VERBOSE=-v"  & shift & goto :parse
@@ -66,3 +66,6 @@ goto :init
 
     ninja -C "%BUILD_PATH%" %OPT_VERBOSE% %BUILD_TARGET%
 
+
+:end
+    exit /B

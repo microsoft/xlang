@@ -2,7 +2,7 @@
 
 The xlang project contains the tools and components to support the cross-language and cross-platform runtime by Microsoft.
 
-## Building for Windows
+## Building xlang
 
 xlang uses CMake instead of vcxproj in order to support cross platform builds.
 
@@ -17,7 +17,7 @@ Building xlang for Windows requires the following to be installed:
 * [Ninja](https://ninja-build.org/), version 1.8 or later
   * Visual Studio's Desktop Development with C++ workload includes Ninja 1.8.2
 
-Building xlang for Linux requires the following to be installed. The [configureBionic.sh](/src/scripts/configureBionic.sh) script will automatically install these depenencies via [apt](https://en.wikipedia.org/wiki/APT_(Debian)).
+Building xlang for Linux requires the following to be installed. The [ubuntu/configure.sh](/src/scripts/ubuntu/configure.sh) script will automatically install these depenencies via [apt](https://en.wikipedia.org/wiki/APT_(Debian)).
 
 * [Clang](http://clang.llvm.org/), version 6.0 or later.
 * LLVM [libc++](http://libcxx.llvm.org/) and [libc++ ABI](http://libcxxabi.llvm.org/), release 60 or later.
@@ -42,31 +42,31 @@ Visual Studio 2017 has built in CMake support. For best results, use Visual Stud
 
 Building xlang (or any CMake based project) from the command line is a two step process - First the build files are generated using [CMake](http://cmake.org/) and then build is execute via [Ninja](http://ninja-build.org). Both of these tools are installed as part of the Visual C++ tools for CMake component.
 
-The [windowsBuild.ps1](/src/scripts/windowsBuild.ps1) build script automates the process of running CMake and Ninja. It generates build files and artifacts into the same folder structure Visual Studio uses (described above). You must run windowsBuild.ps1 from a VS 2017 Developer command prompt. Open a Developer Command Prompt, navigate to the root of your cloned xlang repo and execute the following:
+The [windows/build.cmd](/src/scripts/windows/build.cmd) build script automates the process of running CMake and Ninja. It generates build files and artifacts into the same folder structure Visual Studio uses (described above). You must run build.cmd from a VS 2017 Developer command prompt. Open a Developer Command Prompt, navigate to the root of your cloned xlang repo and execute the following:
 
 ``` shell
-powershell -noprofile -command "& {src\scripts\windowsBuild.ps1}"
+.\src\scripts\windows\build.cmd
 ```
 
-windowsBuild.ps1 supports the following command line parameters:
+build.cmd supports the following command line parameters:
 
-* -target **target name** specifies the target to build. Defaults to build all if not specified.
-* -buildType **build type** specifies the build type (one of CMake's four standard build types: Debug, Release, RelWithDebInfo or MinSizeRel). Defaults to Debug if not specified.
-* -forceCMake switch forces script to rerun CMake. Typically, CMake is only run if CMakeCache.txt doesn't exist in the build folder.
-* $verbose switch runs Ninja build step in verbose mode
+| | | |
+|-|-|-|
+| -h, --help| shows help method |
+| -v, --verbose | shows detailed build output |
+| -f, --force-cmake | forces re-run of CMake |
+| -b, --build-type **value** | specify build type (Debug, Release, RelWithDebInfo, MinSizeRel). Defaults to Debug. |
+| **build target** | specify build target. Defaults to build all |
 
 ### Building for Linux on the Command Line
 
 > Note, xlang is a young project. While we have aspirations to support mutiple platforms (detailed in [XDN01](/design_notes/XDN01%20-%20A%20Strategy%20for%20Language%20Interoperability.md)), we are a long way from realizing that dream. In particular, while both the C++ and Python projection tools in the [/tool](/src/tool) directory can be compiled for Windows and Linux, today they both generate Windows specific code. As the xlang [Platform Adaptation Layer (aka PAL)](/src/platform) comes online, we will be updating all of our code to work with it, enabling us to target platforms beyond just Windows.
 
-Building for Linux on the command line is similar to building for Windows on the command line. The [bionicBuild.sh](/src/scripts/bionicBuild.sh) script automates the process of running CMake and Ninja to produce a build. Similar to building on Windows, bionicBuild.sh generates build artifacts into the _build/*Platform*/*Configuration* folder. Note, only x64 builds are supported at this time, so the build script does not add an *Architecture* folder to the build path.
+Building for Linux on the command line is similar to building for Windows on the command line. The [ubuntu/build.sh](/src/scripts/ubuntu/build.sh) script automates the process of running CMake and Ninja to produce a build. Similar to building on Windows, build.sh generates build artifacts into the _build/*Platform*/*Architecture*/*Configuration* folder.
 
-Command line arguments for bionicBuild.sh closely mirror the command line arguments for windowsBuild.ps1
+> Note, only x86_64 builds are supported on Linux at this time, so build.sh hard codes this segment of the build path.
 
-* -t|--target **target name** specifies the target to build. Defaults to build all if not specified.
-* -b|--build-type **build type** specifies the build type (one of CMake's four standard build types: Debug, Release, RelWithDebInfo or MinSizeRel). Defaults to Debug if not specified.
-* -f|--force-cmake switch forces script to rerun cmake. Typically, Cmake is only run if CMakeCache.txt doesn't exist in the build folder.
-* -v|--verbose switch runs Ninja build step in verbose mode
+Command line arguments for ubuntu/build.sh are  identical to the command line arguments for windows/build.cmd described above.
 
 ### Known Issues
 
@@ -88,9 +88,9 @@ The **/library** folder contains the C++ header libraries provided by xlang for 
 
 * **cmd_reader.h** parses command line arguments.
 
-* **meta_reader.h** parses [ECMA-335 metadata](http://www.ecma-international.org/publications/standards/Ecma-335.htm), similar to [Windows's metadata APIs](http://docs.microsoft.com/en-us/windows/desktop/api/rometadataapi/) but working directly against the metadata tables and written almost entirely in standard C++. 
+* **meta_reader.h** parses [ECMA-335 metadata](http://www.ecma-international.org/publications/standards/Ecma-335.htm), similar to [Windows's metadata APIs](http://docs.microsoft.com/en-us/windows/desktop/api/rometadataapi/) but working directly against the metadata tables and written almost entirely in standard C++.
 
-* **task_group.h** executes tasks in parallel for release builds but one at a time in debug builds. 
+* **task_group.h** executes tasks in parallel for release builds but one at a time in debug builds.
 
 * **text_writer.h** writes formatted text output.
 
@@ -122,11 +122,11 @@ The **/test** folder contains the unit tests for testing the libraries, platform
 
 The **/script** folder contains the scripts and tools used to build and bootstrap the various projects and language projections.
 
-* **windowsBuild.ps1** builds xlang for Windows. Note, this must be run from a VS 2017 command prompt. 
+* **windows/build.cmd** builds xlang for Windows. Note, this must be run from a VS 2017 command prompt.
 
-* **bionicBuild.cmd** builds xlang for Ubuntu 18.04 (aka "Bionic Beaver") via Windows Subsystem for Linux.
+* **ubuntu/build.sh** bash script to build xlang for Ubuntu 18.04. Works on both native Ubuntu and in Windows Subsystem for Linux.
 
-* **wslConfigBionic.sh** bash script to configure Ubuntu 18.04 with the tools needed for xlang.
+* **ubuntu/configure.sh** bash script to configure Ubuntu 18.04 with the tools needed for xlang.
 
 * **scorch.cmake** cmake function to delete build artifacts not automatically removed by the clean target.
 
