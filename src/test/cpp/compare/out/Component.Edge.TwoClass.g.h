@@ -25,7 +25,7 @@ namespace winrt::Component::Edge::implementation
 namespace winrt::Component::Edge::factory_implementation
 {
     template <typename D, typename T, typename... I>
-    struct WINRT_EBO TwoClassT : implements<D, Windows::Foundation::IActivationFactory, Component::Edge::ITwoClassStatics, Component::Edge::ITwoClassFactory, I...>
+    struct WINRT_EBO TwoClassT : implements<D, Windows::Foundation::IActivationFactory, Component::Edge::ITwoClassFactory, Component::Edge::ITwoClassStatics, I...>
     {
         using instance_type = Component::Edge::TwoClass;
 
@@ -33,13 +33,13 @@ namespace winrt::Component::Edge::factory_implementation
         {
             return L"Component.Edge.TwoClass";
         }
-        void StaticMethod(int32_t a, int32_t b)
-        {
-            return T::StaticMethod(a, b);
-        }
         Component::Edge::TwoClass CreateInstance(int32_t a, int32_t b)
         {
             return make<T>(a, b);
+        }
+        void StaticMethod(int32_t a, int32_t b)
+        {
+            return T::StaticMethod(a, b);
         }
         [[noreturn]] Windows::Foundation::IInspectable ActivateInstance() const
         {

@@ -10,11 +10,4 @@ namespace winrt::Component
         INotExclusive(std::nullptr_t = nullptr) noexcept {}
         INotExclusive(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
     };
-    struct WINRT_EBO IResult :
-        Windows::Foundation::IInspectable,
-        impl::consume_t<IResult>
-    {
-        IResult(std::nullptr_t = nullptr) noexcept {}
-        IResult(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
-    };
 }

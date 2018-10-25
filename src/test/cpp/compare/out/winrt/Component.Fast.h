@@ -250,13 +250,13 @@ namespace winrt::impl
 }
 namespace winrt::Component::Fast
 {
-    inline FastClass::FastClass() :
-        FastClass(impl::call_factory<FastClass>([](auto&& f) { return f.template ActivateInstance<FastClass>(); }))
-    {
-    }
     inline hstring FastClass::StaticMethod()
     {
         return impl::call_factory<FastClass, Component::Fast::IFastClassStatics>([&](auto&& f) { return f.StaticMethod(); });
+    }
+    inline FastClass::FastClass() :
+        FastClass(impl::call_factory<FastClass>([](auto&& f) { return f.template ActivateInstance<FastClass>(); }))
+    {
     }
     inline SlowClass::SlowClass() :
         SlowClass(impl::call_factory<SlowClass>([](auto&& f) { return f.template ActivateInstance<SlowClass>(); }))

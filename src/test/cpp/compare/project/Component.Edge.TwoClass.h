@@ -7,8 +7,8 @@ namespace winrt::Component::Edge::implementation
     {
         TwoClass() = default;
 
-        static void StaticMethod(int32_t, int32_t);
         TwoClass(int32_t, int32_t);
+        static void StaticMethod(int32_t, int32_t);
         void Method(int32_t, int32_t);
         int32_t First();
         int32_t Second();

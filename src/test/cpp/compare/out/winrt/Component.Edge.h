@@ -344,21 +344,21 @@ namespace winrt::Component::Edge
     {
         impl::call_factory<StaticClass, Component::Edge::IStaticClassStatics>([&](auto&& f) { return f.StaticMethod(); });
     }
+    inline ThreeClass::ThreeClass(int32_t a, int32_t b, int32_t c) :
+        ThreeClass(impl::call_factory<ThreeClass, Component::Edge::IThreeClassFactory>([&](auto&& f) { return f.CreateInstance(a, b, c); }))
+    {
+    }
     inline void ThreeClass::StaticMethod(int32_t a, int32_t b, int32_t c)
     {
         impl::call_factory<ThreeClass, Component::Edge::IThreeClassStatics>([&](auto&& f) { return f.StaticMethod(a, b, c); });
     }
-    inline ThreeClass::ThreeClass(int32_t a, int32_t b, int32_t c) :
-        ThreeClass(impl::call_factory<ThreeClass, Component::Edge::IThreeClassFactory>([&](auto&& f) { return f.CreateInstance(a, b, c); }))
+    inline TwoClass::TwoClass(int32_t a, int32_t b) :
+        TwoClass(impl::call_factory<TwoClass, Component::Edge::ITwoClassFactory>([&](auto&& f) { return f.CreateInstance(a, b); }))
     {
     }
     inline void TwoClass::StaticMethod(int32_t a, int32_t b)
     {
         impl::call_factory<TwoClass, Component::Edge::ITwoClassStatics>([&](auto&& f) { return f.StaticMethod(a, b); });
-    }
-    inline TwoClass::TwoClass(int32_t a, int32_t b) :
-        TwoClass(impl::call_factory<TwoClass, Component::Edge::ITwoClassFactory>([&](auto&& f) { return f.CreateInstance(a, b); }))
-    {
     }
     inline ZeroClass::ZeroClass() :
         ZeroClass(impl::call_factory<ZeroClass>([](auto&& f) { return f.template ActivateInstance<ZeroClass>(); }))

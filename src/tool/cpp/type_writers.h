@@ -70,6 +70,13 @@ namespace xlang
         {
             auto ns = type.TypeNamespace();
 
+            // TODO: temporarily disable depending on Windows.Foundation since the types we're testing against
+            // are all defined in base.h ...
+            if (starts_with(ns, "Windows.Foundation"))
+            {
+                return;
+            }
+
             if (ns != type_namespace)
             {
                 depends[ns].insert(type);

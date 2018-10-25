@@ -114,13 +114,31 @@ namespace Component
         }
     }
 
-    runtimeclass Result
+    namespace Result
     {
-        Result();
-        Int32 GetInt32();
-        String GetString();
-        Component.Fast.FastClass GetFastClass();
-        Component.Fast.SlowClass GetSlowClass();
-        INotExclusive GetInterface();
+        static runtimeclass Class
+        {
+            static Int32 GetInt32();
+            static String GetString();
+            static Component.Fast.FastClass GetFastClass();
+            static Component.Fast.SlowClass GetSlowClass();
+            static Component.INotExclusive GetInterface();
+        }
+    }
+
+    namespace Async
+    {
+        static runtimeclass Class
+        {
+            static Windows.Foundation.IAsyncAction Action();
+            static Windows.Foundation.IAsyncActionWithProgress<Int32> ActionWithProgress();
+            static Windows.Foundation.IAsyncOperation<String> Operation();
+            static Windows.Foundation.IAsyncOperationWithProgress<String, Int32> OperationWithProgress();
+        }
+    }
+
+    namespace Collections
+    {
+        
     }
 }

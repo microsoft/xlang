@@ -25,7 +25,7 @@ namespace winrt::Component::Edge::implementation
 namespace winrt::Component::Edge::factory_implementation
 {
     template <typename D, typename T, typename... I>
-    struct WINRT_EBO ThreeClassT : implements<D, Windows::Foundation::IActivationFactory, Component::Edge::IThreeClassStatics, Component::Edge::IThreeClassFactory, I...>
+    struct WINRT_EBO ThreeClassT : implements<D, Windows::Foundation::IActivationFactory, Component::Edge::IThreeClassFactory, Component::Edge::IThreeClassStatics, I...>
     {
         using instance_type = Component::Edge::ThreeClass;
 
@@ -33,13 +33,13 @@ namespace winrt::Component::Edge::factory_implementation
         {
             return L"Component.Edge.ThreeClass";
         }
-        void StaticMethod(int32_t a, int32_t b, int32_t c)
-        {
-            return T::StaticMethod(a, b, c);
-        }
         Component::Edge::ThreeClass CreateInstance(int32_t a, int32_t b, int32_t c)
         {
             return make<T>(a, b, c);
+        }
+        void StaticMethod(int32_t a, int32_t b, int32_t c)
+        {
+            return T::StaticMethod(a, b, c);
         }
         [[noreturn]] Windows::Foundation::IInspectable ActivateInstance() const
         {
