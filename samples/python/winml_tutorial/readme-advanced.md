@@ -41,7 +41,7 @@ In Visual Studio, select Open -> Folder... (Ctrl-Shift-Alt-O) and then select th
 From the command line, you can build Python/WinRT from a developer command prompt. From the start menu, select "Developer Command Prompt for VS 2017". Change directory to the root of your cloned repo, and execute the following command.
 
 ``` shell
-powershell -noprofile -command "& {src\scripts\windowsBuild.ps1 -target pywinrt}"
+.\src\scripts\windows\build.cmd pywinrt
 ```
 
 After building, the Python/WinRT tool will be available at  _build\Windows\x86\Debug\tool\python\pywinrt.exe (relative to the root of your xlang repo). Both Visual Studio and the windowsBuild.ps1 script are configured to build into the same location.
@@ -60,7 +60,7 @@ pywinrt.exe has a set of command line parameters which are not yet documented. H
 * -include - specifies a string for fully namespace qualified types to include in the extension module. If no -include arguments are specified, defaults to all the types in all the input metadata files. Zero or more include arguments are allowed.
   * Example: `-include Windows.Foundation`
 * -exclude - specifies a string of fully namespace qualified types to exclude in the extension module. If no -exclude arguments are specified, pywinrt defaults to all the types in all the input metadata files. Zero or more exclude arguments are allowed.
-  * Example: `-include Windows.Foundation.Metadata`
+  * Example: `-exclude Windows.Foundation.Metadata`
 * -module - specifies the name of the Python extension module. Defaults to "pyrt". At most one module argument is allowed
   * Note, the native extension module uses an underscore prefix to the extension module name (i.e. _pyrt). Eventually, Python/WinRT will also produce a non-native Python module to provide a pythonic developer experience, but that is not implemented yet.
 * -verbose - specifies to produce more command line information during projection generation. At most one module argument is allowed
