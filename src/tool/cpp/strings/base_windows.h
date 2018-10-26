@@ -55,12 +55,6 @@ namespace winrt::impl
     {
     };
 
-    template <typename T, typename = std::void_t<>>
-    struct has_fast_class_type : std::false_type {};
-
-    template <typename T>
-    struct has_fast_class_type<T, std::void_t<typename T::fast_class_type>> : std::true_type {};
-
     template <typename D, typename Enable = void>
     struct get_self_abi
     {
