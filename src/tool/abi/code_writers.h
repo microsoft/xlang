@@ -604,7 +604,7 @@ inline void write_interface_function_declaration(writer& w, xlang::meta::reader:
     {
         ++paramRange.first;
     }
-    XLANG_ASSERT(xlang::meta::reader::distance(paramRange) == fnSig.Params().size());
+    XLANG_ASSERT(xlang::meta::reader::distance(paramRange) == static_cast<std::ptrdiff_t>(fnSig.Params().size()));
 
     std::string_view prefix = "\n";
     for (auto const& param : fnSig.Params())
