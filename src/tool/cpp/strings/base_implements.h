@@ -173,7 +173,7 @@ WINRT_EXPORT namespace winrt
     template <typename D, typename I>
     D* get_self(I const& from) noexcept
     {
-        return &static_cast<typename impl::get_self_type<D, I>::type*>(get_abi(from))->shim();
+        return &static_cast<impl::produce<D, default_interface<I>>*>(get_abi(from))->shim();
     }
 
     template <typename D, typename I>
