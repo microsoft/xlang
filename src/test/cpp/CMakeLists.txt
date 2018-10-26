@@ -5,9 +5,7 @@ target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${
 target_sources(cpp_test PUBLIC pch.cpp activation.cpp test/Async.cpp test/Collections.cpp test/Edge.cpp test/Fast.cpp "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp")
 
 if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
-target_compile_options(cpp_test PUBLIC -fcoroutines-ts)
-else()
-target_compile_options(cpp_test PUBLIC /await)
+target_include_directories(cpp_test BEFORE PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/inc/clang")
 endif()
 
 if (MSVC)
