@@ -74,8 +74,10 @@ if (MSVC)
         string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_${build_type} "${CMAKE_CXX_FLAGS_${build_type}}")
         string(APPEND CMAKE_CXX_FLAGS_${build_type} " /GL")
 
-        string(REPLACE "/INCREMENTAL" "" CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${build_type}}")
-        string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
+        # TODO: replacing /INCREMENTAL leaves ":NO" on the command line, which screws up the link
+        #       Figure out the best way to make these changes to the build and linker flags
+        # string(REPLACE "/INCREMENTAL" "" CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${build_type}}")
+        # string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
     endforeach()
     
     add_compile_options(/permissive-)
