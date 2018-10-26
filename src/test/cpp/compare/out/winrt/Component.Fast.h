@@ -250,21 +250,21 @@ namespace winrt::impl
 }
 namespace winrt::Component::Fast
 {
-    inline hstring FastClass::StaticMethod()
-    {
-        return impl::call_factory<FastClass, Component::Fast::IFastClassStatics>([&](auto&& f) { return f.StaticMethod(); });
-    }
     inline FastClass::FastClass() :
         FastClass(impl::call_factory<FastClass>([](auto&& f) { return f.template ActivateInstance<FastClass>(); }))
     {
     }
-    inline SlowClass::SlowClass() :
-        SlowClass(impl::call_factory<SlowClass>([](auto&& f) { return f.template ActivateInstance<SlowClass>(); }))
+    inline hstring FastClass::StaticMethod()
     {
+        return impl::call_factory<FastClass, Component::Fast::IFastClassStatics>([&](auto&& f) { return f.StaticMethod(); });
     }
     inline hstring SlowClass::StaticMethod()
     {
         return impl::call_factory<SlowClass, Component::Fast::ISlowClassStatics>([&](auto&& f) { return f.StaticMethod(); });
+    }
+    inline SlowClass::SlowClass() :
+        SlowClass(impl::call_factory<SlowClass>([](auto&& f) { return f.template ActivateInstance<SlowClass>(); }))
+    {
     }
     inline hstring FastClass::First() const
     {

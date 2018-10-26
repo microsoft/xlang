@@ -139,6 +139,15 @@ namespace Component
 
     namespace Collections
     {
-        
+        static runtimeclass Class
+        {
+            static Windows.Foundation.Collections.IIterable<String> Iterable();
+            static Windows.Foundation.Collections.IVectorView<String> VectorView();
+            static Windows.Foundation.Collections.IVector<String> Vector();
+
+            static Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Int32> > IterablePair();
+            static Windows.Foundation.Collections.IMapView<String, Int32> MapView();
+            static Windows.Foundation.Collections.IMap<String, Int32> Map();
+        }
     }
 }
