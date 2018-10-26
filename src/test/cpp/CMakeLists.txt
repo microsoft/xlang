@@ -4,12 +4,6 @@ add_executable(cpp_test)
 target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated")
 target_sources(cpp_test PUBLIC pch.cpp activation.cpp test/Async.cpp test/Collections.cpp test/Edge.cpp test/Fast.cpp "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp")
 
-if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
-target_compile_options(cpp_test PUBLIC -fcoroutines-ts)
-else()
-target_compile_options(cpp_test PUBLIC /await)
-endif()
-
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(cpp_test pch.cpp pch.h)
     target_link_libraries(cpp_test windowsapp)

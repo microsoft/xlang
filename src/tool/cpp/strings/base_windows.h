@@ -55,22 +55,22 @@ namespace winrt::impl
     {
     };
 
-    template <typename T, typename = std::void_t<>>
-    struct has_fast_class_type : std::false_type {};
-
-    template <typename T>
-    struct has_fast_class_type<T, std::void_t<typename T::fast_class_type>> : std::true_type {};
-
-    template <typename D, typename I, typename Enable = void>
-    struct get_self_type
+    template <typename D, typename Enable = void>
+    struct get_self_abi
     {
-        using type = produce<D, typename default_interface<I>::type>;
+        static void* value(void* result) noexcept
+        {
+            return result;
+        }
     };
 
-    template <typename D, typename I>
-    struct get_self_type<D, I, std::enable_if_t<has_fast_class_type<D>::value>>
+    template <typename D>
+    struct get_self_abi<D, std::enable_if_t<is_implements_v<D>>>
     {
-        using type = produce<D, Windows::Foundation::IInspectable>;
+        static void* value(void* result) noexcept
+        {
+            return &static_cast<produce<D, typename default_interface<D>::type>*>(result)->shim();
+        }
     };
 
     template <typename To>
@@ -81,18 +81,9 @@ namespace winrt::impl
             return nullptr;
         }
 
-        if constexpr (is_implements_v<To>)
-        {
-            void* result;
-            check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-            return { take_ownership_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
-        }
-        else
-        {
-            void* result;
-            check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-            return { take_ownership_from_abi, result };
-        }
+        void* result;
+        check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
+        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
     }
 
     template <typename To>
@@ -103,18 +94,9 @@ namespace winrt::impl
             return nullptr;
         }
 
-        if constexpr (is_implements_v<To>)
-        {
-            void* result;
-            ptr->QueryInterface(guid_of<To>(), &result);
-            return { take_ownership_from_abi, &static_cast<typename get_self_type<To, winrt::default_interface<To>>::type*>(result)->shim() };
-        }
-        else
-        {
-            void* result;
-            ptr->QueryInterface(guid_of<To>(), &result);
-            return { take_ownership_from_abi, result };
-        }
+        void* result;
+        ptr->QueryInterface(guid_of<To>(), &result);
+        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
     }
 
     template <typename T>
