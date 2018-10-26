@@ -340,7 +340,14 @@ namespace xlang
 
             if (type_def->type() == TypeDefOrRef::TypeRef)
             {
-                category = get_category(find(type_def->TypeRef()));
+                auto type_ref = type_def->TypeRef();
+
+                if (type_ref.TypeName() == "Guid" && type_ref.TypeNamespace() == "System")
+                {
+                    return false;
+                }
+
+                category = get_category(find_required(type_ref));
             }
             else if (type_def->type() == TypeDefOrRef::TypeDef)
             {
