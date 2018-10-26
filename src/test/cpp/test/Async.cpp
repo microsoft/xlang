@@ -10,12 +10,12 @@ TEST_CASE("Async")
     IAsyncAction a = Async::Class::Action();
     a.get();
 
-    IAsyncActionWithProgress<int32> b = Async::Class::ActionWithProgress();
+    IAsyncActionWithProgress<int32_t> b = Async::Class::ActionWithProgress();
     b.get();
 
     IAsyncOperation<hstring> c = Async::Class::Operation();
     REQUIRE(c.get() == L"Operation");
 
-    IAsyncOperationWithProgress<hstring, int32> c = Async::Class::OperationWithProgress();
-    REQUIRE(c.get() == L"OperationWithProgress");
+    IAsyncOperationWithProgress<hstring, int32_t> d = Async::Class::OperationWithProgress();
+    REQUIRE(d.get() == L"OperationWithProgress");
 }
