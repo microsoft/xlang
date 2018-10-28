@@ -9,13 +9,14 @@ xlang uses CMake instead of vcxproj in order to support cross platform builds.
 ### Prerequisites
 
 Building xlang for Windows requires the following to be installed:
-
 * [Visual Studio 2017](https://developer.microsoft.com/windows/downloads), version 15.8.7 or later.
   * Visual Studio's Desktop Development with C++ workload installation is required.
 * [CMake](https://cmake.org/), version 3.9 or later
   * Visual Studio's Desktop Development with C++ workload includes CMake 3.11
 * [Ninja](https://ninja-build.org/), version 1.8 or later
   * Visual Studio's Desktop Development with C++ workload includes Ninja 1.8.2
+* [Windows 10 SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk), Version 1809 or later
+  * Visual Studio does not install this by defualt with  version 15.8.7 or 15.8.8
 
 Building xlang for Linux requires the following to be installed. The [ubuntu/configure.sh](/src/scripts/ubuntu/configure.sh) script will automatically install these depenencies via [apt](https://en.wikipedia.org/wiki/APT_(Debian)).
 
