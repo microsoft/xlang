@@ -23,7 +23,6 @@ metadata_cache::metadata_cache(cache const& c)
             initialize_namespace(target, members);
         });
     }
-
     group.get();
 
     // Now that all types have been converted, process dependencies and generic instances
@@ -34,7 +33,6 @@ metadata_cache::metadata_cache(cache const& c)
             nsCache.process_dependencies();
         });
     }
-
     group.get();
 }
 
@@ -90,6 +88,7 @@ void namespace_cache::process_dependencies()
     for (auto const& [nsName, type] : types)
     {
         process_dependencies(type.type_def, state);
+        XLANG_ASSERT(state.generic_param_stack.empty());
     }
 }
 
@@ -134,33 +133,112 @@ void namespace_cache::process_dependencies(TypeDef const& type, init_state& stat
     }
 }
 
-void namespace_cache::process_dependency(TypeSig const& type, init_state& state)
+static type_ref make_ref(type_cache const& type)
 {
+    return type_ref{
+        type.clr_name,
+        type.mangled_name,
+        type.generic_param_mangled_name
+    };
+}
+
+static type_ref make_ref(ElementType type)
+{
+    switch (type)
+    {
+    case ElementType::Void:
+        return type_ref{ "INVALID"sv, "void"sv, "INVALID"sv, "INVALID"sv };
+
+    case ElementType::Boolean:
+        // TODO: 'bool' vs 'boolean'
+        return type_ref{ "Boolean"sv, "bool"sv, "INVALID"sv, "boolean"sv };
+
+    case ElementType::Char:
+        return type_ref{ "Char16"sv, "wchar_t"sv, "INVALID"sv, "wchar__zt"sv };
+
+    case ElementType::U1:
+        return type_ref{ "UInt8"sv, "::byte"sv, "INVALID"sv, "byte"sv };
+
+    case ElementType::I2:
+        return type_ref{ "Int16"sv, "short"sv, "INVALID"sv, "short"sv };
+
+    case ElementType::U2:
+        return type_ref{ "UInt16"sv, "UINT16"sv, "INVALID"sv, "UINT16"sv };
+
+    case ElementType::I4:
+        return type_ref{ "Int32"sv, "int"sv, "INVALID"sv, "int"sv };
+
+    case ElementType::U4:
+        return type_ref{ "UInt32"sv, "UINT32"sv, "INVALID"sv, "UINT32"sv };
+
+    case ElementType::I8:
+        return type_ref{ "Int64"sv, "__int64"sv, "INVALID"sv, "__z__zint64"sv };
+
+    case ElementType::U8:
+        return type_ref{ "UInt64"sv, "UINT64"sv, "INVALID"sv, "UINT64"sv };
+
+    case ElementType::R4:
+        return type_ref{ "Single"sv, "float"sv, "INVALID"sv, "float"sv };
+
+    case ElementType::R8:
+        return type_ref{ "Double"sv, "double"sv, "INVALID"sv, "double"sv };
+
+    case ElementType::String:
+        return type_ref{ "String"sv, "HSTRING"sv, "INVALID"sv, "HSTRING"sv };
+
+    case ElementType::Object:
+        return type_ref{ "Object"sv, "IInspectable*"sv, "INVALID"sv, "IInspectable"sv };
+    }
+
+    xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
+}
+
+static type_ref make_system_ref(TypeRef const& ref)
+{
+    XLANG_ASSERT(ref.TypeNamespace() == system_namespace);
+    if (ref.TypeName() == "Guid"sv)
+    {
+        return type_ref{ "Guid"sv, "GUID"sv, "INVALID"sv, "GUID"sv };
+    }
+
+    xlang::throw_invalid("Unknown type '", ref.TypeName(), "' in System namespace");
+}
+
+type_ref namespace_cache::process_dependency(TypeSig const& type, init_state& state)
+{
+    type_ref result;
+
     xlang::visit(type.Type(),
-        [&](ElementType const&)
+        [&](ElementType t)
         {
             // Does not impact the dependency graph
+            result = make_ref(t);
         },
         [&](coded_index<TypeDefOrRef> const& t)
         {
-            process_dependency(t, state);
+            result = process_dependency(t, state);
         },
         [&](GenericTypeIndex const&)
         {
             // This is referencing a generic parameter from an earlier generic argument and thus carries no new dependencies
+            // TODO: result
         },
         [&](GenericTypeInstSig const& t)
         {
-            process_dependency(t, state);
+            result = process_dependency(t, state);
         });
+
+    return result;
 }
 
-void namespace_cache::process_dependency(coded_index<TypeDefOrRef> const& type, init_state& state)
+type_ref namespace_cache::process_dependency(coded_index<TypeDefOrRef> const& type, init_state& state)
 {
+    type_ref result;
+
     visit(type, xlang::visit_overload{
         [&](GenericTypeInstSig const& t)
         {
-            process_dependency(t, state);
+            result = process_dependency(t, state);
         },
         [&](auto const& defOrRef)
         {
@@ -169,49 +247,75 @@ void namespace_cache::process_dependency(coded_index<TypeDefOrRef> const& type, 
             if (ns == system_namespace)
             {
                 // All types in the System namespace are projected
-            }
-            else if (ns == name)
-            {
-                internal_dependencies.emplace(find(name));
+                if constexpr (std::is_same_v<std::decay_t<decltype(defOrRef)>, TypeRef>)
+                {
+                    result = make_system_ref(defOrRef);
+                }
+                else
+                {
+                    XLANG_ASSERT(false);
+                }
             }
             else
             {
-                external_dependencies.emplace(m_cache->find(ns, name));
-                dependent_namespaces.emplace(defOrRef.TypeNamespace());
+                auto const& def = m_cache->find(ns, name);
+                result = make_ref(def);
+
+                if (ns == name)
+                {
+                    internal_dependencies.emplace(def);
+                }
+                else
+                {
+                    external_dependencies.emplace(def);
+                    dependent_namespaces.emplace(ns);
+                }
             }
         }});
+
+    return result;
 }
 
-void namespace_cache::process_dependency(GenericTypeInstSig const& type, init_state& state)
+type_ref namespace_cache::process_dependency(GenericTypeInstSig const& type, init_state& state)
 {
     auto const& ref = type.GenericType().TypeRef();
-    dependent_namespaces.emplace(ref.TypeNamespace());
+    auto const& def = m_cache->find(ref.TypeNamespace(), ref.TypeName());
 
+    generic_instantiation inst{ type };
+    inst.clr_name = def.clr_name;
+    inst.clr_name.push_back('<');
+    inst.mangled_name = def.mangled_name;
 
-
-
-
-
-
-
-    // Dependencies propagate out to all generic arguments
+    std::string_view prefix;
     auto genericArgs = type.GenericArgs();
-    state.generic_param_stack.emplace_back(genericArgs.first, genericArgs.second);
     for (auto const& arg : genericArgs)
     {
-        process_dependency(arg, state);
-    }
-    state.generic_param_stack.pop_back();
+        XLANG_ASSERT(!std::holds_alternative<GenericTypeInstSig>(arg.Type()));
+        auto ref = process_dependency(arg, state);
 
-    // Since we have to define any template specializations for generic types, we need to treat this type the same as we
-    // treat other types in this namespace
-    // TODO: ???
-    auto const& def = m_cache->find(ref.TypeNamespace(), ref.TypeName());
-    if (auto [itr, added] = state.generic_types.emplace(def.clr_name); added)
+        inst.clr_name += prefix;
+        inst.clr_name += ref.clr_name;
+        prefix = ", "sv;
+
+        inst.mangled_name.push_back('_');
+        inst.mangled_name += ref.generic_param_mangled_name;
+    }
+    inst.clr_name.push_back('>');
+
+    auto [itr, added] = generic_instantiations.emplace(inst.clr_name, std::move(inst));
+    if (added)
     {
+        // First time processing this specialization
+        dependent_namespaces.emplace(ref.TypeNamespace());
+
+        state.generic_param_stack.emplace_back(genericArgs.first, genericArgs.second);
         process_dependencies(def.type_def, state);
+        state.generic_param_stack.pop_back();
     }
 
-    // We need to calculate the full CLR name for the generic instantiation in order to determine uniqueness
-
+    return type_ref{
+        itr->second.clr_name,
+        itr->second.mangled_name,
+        itr->second.mangled_name
+    };
 }

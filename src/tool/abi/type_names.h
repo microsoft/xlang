@@ -31,22 +31,6 @@ namespace details
     }
 }
 
-inline std::string cpp_name(xlang::meta::reader::TypeDef const& type)
-{
-    std::string result;
-
-    for (auto nsPart : namespace_range{ type.TypeNamespace() })
-    {
-        result += nsPart;
-        result += "::";
-    }
-
-    details::write_type_prefix(result, type);
-    result += type.TypeName();
-
-    return result;
-}
-
 namespace details
 {
     template <bool IsGenericParam>

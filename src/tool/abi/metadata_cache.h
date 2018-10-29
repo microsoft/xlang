@@ -14,15 +14,21 @@ struct generic_instantiation;
 struct namespace_cache;
 struct metadata_cache;
 
+// The set of information needed to forward declare a non-generic type and define a generic type
+struct type_ref
+{
+    std::string_view clr_name;
+    std::string_view cpp_name;
+    std::string_view mangled_name;
+    std::string_view generic_param_mangled_name;
+};
+
 struct type_cache
 {
     xlang::meta::reader::TypeDef type_def;
 
     // Used for sorting and class/interface strings
     std::string clr_name;
-
-    // Used for function/generic arguments
-    std::string cpp_name;
 
     // Used for macros and C names
     std::string mangled_name;
@@ -33,7 +39,6 @@ struct type_cache
     type_cache(xlang::meta::reader::TypeDef const& def) :
         type_def(def),
         clr_name(::clr_name(def)),
-        cpp_name(::cpp_name(def)),
         mangled_name(::mangled_name<false>(def)),
         generic_param_mangled_name(::mangled_name<true>(def))
     {
@@ -44,11 +49,6 @@ inline bool operator<(type_cache const& lhs, type_cache const& rhs) noexcept
 {
     return lhs.clr_name < rhs.clr_name;
 }
-
-struct generic_param
-{
-
-};
 
 struct generic_instantiation
 {
@@ -72,6 +72,7 @@ struct namespace_cache
 
     // Dependencies of this namespace
     std::set<std::string_view> dependent_namespaces;
+    std::map<std::string_view, generic_instantiation> generic_instantiations;
     std::set<std::reference_wrapper<type_cache const>> external_dependencies;
     std::set<std::reference_wrapper<type_cache const>> internal_dependencies;
 
@@ -107,15 +108,14 @@ private:
 
     struct init_state
     {
-        std::set<std::string_view> generic_types;
         std::vector<std::vector<xlang::meta::reader::TypeSig>> generic_param_stack;
     };
 
     void process_dependencies();
     void process_dependencies(xlang::meta::reader::TypeDef const& type, init_state& state);
-    void process_dependency(xlang::meta::reader::TypeSig const& type, init_state& state);
-    void process_dependency(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type, init_state& state);
-    void process_dependency(xlang::meta::reader::GenericTypeInstSig const& type, init_state& state);
+    type_ref process_dependency(xlang::meta::reader::TypeSig const& type, init_state& state);
+    type_ref process_dependency(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type, init_state& state);
+    type_ref process_dependency(xlang::meta::reader::GenericTypeInstSig const& type, init_state& state);
 
     metadata_cache const* m_cache;
 };
