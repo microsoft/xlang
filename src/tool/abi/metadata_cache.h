@@ -9,23 +9,21 @@
 #include "task_group.h"
 #include "type_names.h"
 
-struct type_cache;
+struct type_def;
 struct generic_instantiation;
-struct namespace_cache;
+struct type_cache;
 struct metadata_cache;
 
-// The set of information needed to forward declare a non-generic type and define a generic type
 struct type_ref
 {
     std::string_view clr_name;
-    std::string_view cpp_name;
     std::string_view mangled_name;
     std::string_view generic_param_mangled_name;
 };
 
-struct type_cache
+struct type_def
 {
-    xlang::meta::reader::TypeDef type_def;
+    xlang::meta::reader::TypeDef type;
 
     // Used for sorting and class/interface strings
     std::string clr_name;
@@ -36,8 +34,8 @@ struct type_cache
     // Used for constructing names when used as a generic parameter
     std::string generic_param_mangled_name;
 
-    type_cache(xlang::meta::reader::TypeDef const& def) :
-        type_def(def),
+    type_def(xlang::meta::reader::TypeDef const& def) :
+        type(def),
         clr_name(::clr_name(def)),
         mangled_name(::mangled_name<false>(def)),
         generic_param_mangled_name(::mangled_name<true>(def))
@@ -45,7 +43,7 @@ struct type_cache
     }
 };
 
-inline bool operator<(type_cache const& lhs, type_cache const& rhs) noexcept
+inline bool operator<(type_def const& lhs, type_def const& rhs) noexcept
 {
     return lhs.clr_name < rhs.clr_name;
 }
@@ -58,31 +56,28 @@ struct generic_instantiation
     std::string mangled_name;
 };
 
-struct namespace_cache
+struct type_cache
 {
-    std::string_view name;
-
     // Types defined in this namespace
-    std::map<std::string_view, type_cache> types;
-    std::vector<std::reference_wrapper<type_cache const>> enums;
-    std::vector<std::reference_wrapper<type_cache const>> structs;
-    std::vector<std::reference_wrapper<type_cache const>> delegates;
-    std::vector<std::reference_wrapper<type_cache const>> interfaces;
-    std::vector<std::reference_wrapper<type_cache const>> classes;
+    std::map<std::string_view, type_def> types;
+    std::vector<std::reference_wrapper<type_def const>> enums;
+    std::vector<std::reference_wrapper<type_def const>> structs;
+    std::vector<std::reference_wrapper<type_def const>> delegates;
+    std::vector<std::reference_wrapper<type_def const>> interfaces;
+    std::vector<std::reference_wrapper<type_def const>> classes;
 
     // Dependencies of this namespace
     std::set<std::string_view> dependent_namespaces;
     std::map<std::string_view, generic_instantiation> generic_instantiations;
-    std::set<std::reference_wrapper<type_cache const>> external_dependencies;
-    std::set<std::reference_wrapper<type_cache const>> internal_dependencies;
+    std::set<std::reference_wrapper<type_def const>> external_dependencies;
+    std::set<std::reference_wrapper<type_def const>> internal_dependencies;
 
-    namespace_cache(metadata_cache const* cache, std::string_view name) :
-        m_cache(cache),
-        name(name)
+    type_cache(metadata_cache const* cache) :
+        m_cache(cache)
     {
     }
 
-    type_cache const* try_find(std::string_view typeName) const noexcept
+    type_def const* try_find(std::string_view typeName) const noexcept
     {
         auto itr = types.find(typeName);
         if (itr != types.end())
@@ -93,14 +88,14 @@ struct namespace_cache
         return nullptr;
     }
 
-    type_cache const& find(std::string_view typeName) const
+    type_def const& find(std::string_view typeName) const
     {
         if (auto ptr = try_find(typeName))
         {
             return *ptr;
         }
 
-        xlang::throw_invalid("Could not find type '", typeName, "' in namespace '", name, "'");
+        xlang::throw_invalid("Could not find type '", typeName, "'");
     }
 
 private:
@@ -108,7 +103,7 @@ private:
 
     struct init_state
     {
-        std::vector<std::vector<xlang::meta::reader::TypeSig>> generic_param_stack;
+        std::vector<std::vector<type_ref>> prev_param_stack;
     };
 
     void process_dependencies();
@@ -122,11 +117,11 @@ private:
 
 struct metadata_cache
 {
-    std::map<std::string_view, namespace_cache> namespaces;
+    std::map<std::string_view, type_cache> namespaces;
 
     metadata_cache(xlang::meta::reader::cache const& c);
 
-    type_cache const* try_find(std::string_view ns, std::string_view name) const noexcept
+    type_def const* try_find(std::string_view ns, std::string_view name) const noexcept
     {
         auto itr = namespaces.find(ns);
         if (itr != namespaces.end())
@@ -137,7 +132,7 @@ struct metadata_cache
         return nullptr;
     }
 
-    type_cache const& find(std::string_view ns, std::string_view name) const
+    type_def const& find(std::string_view ns, std::string_view name) const
     {
         if (auto ptr = try_find(ns, name))
         {
@@ -149,5 +144,5 @@ struct metadata_cache
 
 private:
 
-    static void initialize_namespace(namespace_cache& target, xlang::meta::reader::cache::namespace_members const& members);
+    static void initialize_namespace(type_cache& target, xlang::meta::reader::cache::namespace_members const& members);
 };

@@ -98,6 +98,22 @@ int main(int const argc, char** argv)
         auto const& inputFiles = args.values("input");
         auto const& referenceFiles = args.values("reference");
 
+        if (config.verbose)
+        {
+            for (auto const& in : inputFiles)
+            {
+                w.write("in: %\n", in);
+            }
+
+            for (auto const& ref : referenceFiles)
+            {
+                w.write("ref: %\n", ref);
+            }
+
+            w.write("out: %\n", config.output_directory);
+        }
+        w.flush_to_console();
+
         std::vector<std::string> filesToRead;
         filesToRead.reserve(inputFiles.size() + referenceFiles.size());
         filesToRead.insert(filesToRead.end(), inputFiles.begin(), inputFiles.end());
@@ -138,24 +154,116 @@ int main(int const argc, char** argv)
         }
 
         filter f{ include, args.values("exclude") };
+        task_group group;
 
-        if (config.verbose)
+        auto filter_includes = [&](type_cache const& nsCache)
         {
-            for (auto const& in : inputFiles)
+            for (auto const& [name, type] : nsCache.types)
             {
-                w.write("in: %\n", in);
+                if (f.includes(type.type))
+                {
+                    return true;
+                }
             }
 
-            for (auto const& ref : referenceFiles)
-            {
-                w.write("ref: %\n", ref);
-            }
+            return false;
+        };
 
-            w.write("out: %\n", config.output_directory);
+        bool foundationDependency = false;
+        for (auto const& [ns, nsCache] : mdCache.namespaces)
+        {
+            if (filter_includes(nsCache))
+            {
+                if ((ns == foundation_namespace) || (ns == collections_namespace))
+                {
+                    foundationDependency = true;
+                }
+                else
+                {
+                    group.add([&nsCache]()
+                    {
+
+                    });
+                }
+            }
         }
 
-        w.flush_to_console();
+        if (foundationDependency)
+        {
+            group.add([&]()
+            {
+                // Write the 'Windows.Foundation.h' header. This is a merge of the 'Windows.Foundation' and the
+                // 'Windows.Foundation.Collections' namespacess
+                auto foundationItr = mdCache.namespaces.find(foundation_namespace);
+                auto collectionsItr = mdCache.namespaces.find(collections_namespace);
+                if (foundationItr == mdCache.namespaces.end())
+                {
+                    XLANG_ASSERT(false);
+                    w.write("WARNING: Dependency on the 'Windows.Foundation.Collections' identified, but the "
+                        "'Windows.Foundation' namespace could not be found. Skipping...");
+                    w.flush_to_console();
+                }
+                else if (collectionsItr == mdCache.namespaces.end())
+                {
+                    XLANG_ASSERT(false);
+                    w.write("WARNING: Dependency on the 'Windows.Foundation' identified, but the "
+                        "'Windows.Foundation.Collections' namespace could not be found. Skipping...");
+                    w.flush_to_console();
+                }
+                else
+                {
 
+                }
+            });
+
+            group.add([&]()
+            {
+                // Write the 'Windows.Foundation.Collections.h' header
+                basic_writer w;
+                w.write(strings::generics_begin);
+
+                if (config.ns_prefix_state == ns_prefix::always)
+                {
+                    w.write("\nnamespace ABI {");
+                }
+                else if (config.ns_prefix_state == ns_prefix::optional)
+                {
+                    w.write(R"^-^(
+#if defined(MIDL_NS_PREFIX)
+namespace ABI {
+#endif // defined(MIDL_NS_PREFIX))^-^");
+                }
+
+                w.write(strings::generics_meta);
+                w.write(strings::generics_foundation);
+                w.write(strings::generics_collections);
+                w.write(strings::generics_async);
+                w.write(strings::generics_vector);
+
+                if (config.ns_prefix_state == ns_prefix::always)
+                {
+                    w.write("} // ABI\n");
+                }
+                else if (config.ns_prefix_state == ns_prefix::optional)
+                {
+                    w.write(R"^-^(#if defined(MIDL_NS_PREFIX)
+} // ABI
+#endif // defined(MIDL_NS_PREFIX)
+)^-^");
+                }
+
+                w.write(strings::generics_end);
+                w.flush_to_file(config.output_directory / "Windows.Foundation.Collections.h");
+            });
+        }
+
+        group.get();
+
+
+
+
+
+#if 0
         task_group group;
         bool foundationDependency = false;
         for (auto const& [ns, members] : c.namespaces())
@@ -200,48 +308,10 @@ int main(int const argc, char** argv)
                     w.flush_to_console();
                 }
             });
-
-            group.add([&]()
-            {
-                basic_writer w;
-                w.write(strings::generics_begin);
-
-                if (config.ns_prefix_state == ns_prefix::always)
-                {
-                    w.write("\nnamespace ABI {");
-                }
-                else if (config.ns_prefix_state == ns_prefix::optional)
-                {
-                    w.write(R"^-^(
-#if defined(MIDL_NS_PREFIX)
-namespace ABI {
-#endif // defined(MIDL_NS_PREFIX))^-^");
-                }
-
-                w.write(strings::generics_meta);
-                w.write(strings::generics_foundation);
-                w.write(strings::generics_collections);
-                w.write(strings::generics_async);
-                w.write(strings::generics_vector);
-
-                if (config.ns_prefix_state == ns_prefix::always)
-                {
-                    w.write("} // ABI\n");
-                }
-                else if (config.ns_prefix_state == ns_prefix::optional)
-                {
-                    w.write(R"^-^(#if defined(MIDL_NS_PREFIX)
-} // ABI
-#endif // defined(MIDL_NS_PREFIX)
-)^-^");
-                }
-
-                w.write(strings::generics_end);
-                w.flush_to_file(config.output_directory / "Windows.Foundation.Collections.h");
-            });
         }
 
         group.get();
+#endif
 
         if (config.verbose)
         {

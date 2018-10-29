@@ -15,7 +15,7 @@ metadata_cache::metadata_cache(cache const& c)
     {
         auto [itr, added] = namespaces.emplace(std::piecewise_construct,
             std::forward_as_tuple(ns),
-            std::forward_as_tuple(this, ns));
+            std::forward_as_tuple(this));
         XLANG_ASSERT(added);
 
         group.add([&, &target = itr->second]()
@@ -36,10 +36,8 @@ metadata_cache::metadata_cache(cache const& c)
     group.get();
 }
 
-void metadata_cache::initialize_namespace(namespace_cache& target, cache::namespace_members const& members)
+void metadata_cache::initialize_namespace(type_cache& target, cache::namespace_members const& members)
 {
-    XLANG_ASSERT(!target.name.empty());
-
     target.enums.reserve(members.enums.size());
     for (auto const& e : members.enums)
     {
@@ -81,18 +79,18 @@ void metadata_cache::initialize_namespace(namespace_cache& target, cache::namesp
     }
 }
 
-void namespace_cache::process_dependencies()
+void type_cache::process_dependencies()
 {
     // NOTE: Dependencies come from: contract attributes, required interfaces, fields, and function arguments/return types
     init_state state;
-    for (auto const& [nsName, type] : types)
+    for (auto const& [nsName, def] : types)
     {
-        process_dependencies(type.type_def, state);
-        XLANG_ASSERT(state.generic_param_stack.empty());
+        process_dependencies(def.type, state);
+        XLANG_ASSERT(state.prev_param_stack.empty());
     }
 }
 
-void namespace_cache::process_dependencies(TypeDef const& type, init_state& state)
+void type_cache::process_dependencies(TypeDef const& type, init_state& state)
 {
     // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
     // trip us up since it's a definition, not a use and therefore specifies no type name
@@ -118,8 +116,16 @@ void namespace_cache::process_dependencies(TypeDef const& type, init_state& stat
 
     for (auto const& method : type.MethodList())
     {
+        if (method.Name() == ".ctor"sv)
+        {
+            continue;
+        }
+
         auto sig = method.Signature();
-        process_dependency(sig.ReturnType().Type(), state);
+        if (auto retType = sig.ReturnType())
+        {
+            process_dependency(retType.Type(), state);
+        }
 
         for (const auto& param : sig.Params())
         {
@@ -133,7 +139,7 @@ void namespace_cache::process_dependencies(TypeDef const& type, init_state& stat
     }
 }
 
-static type_ref make_ref(type_cache const& type)
+static type_ref make_ref(type_def const& type)
 {
     return type_ref{
         type.clr_name,
@@ -146,48 +152,20 @@ static type_ref make_ref(ElementType type)
 {
     switch (type)
     {
-    case ElementType::Void:
-        return type_ref{ "INVALID"sv, "void"sv, "INVALID"sv, "INVALID"sv };
-
-    case ElementType::Boolean:
-        // TODO: 'bool' vs 'boolean'
-        return type_ref{ "Boolean"sv, "bool"sv, "INVALID"sv, "boolean"sv };
-
-    case ElementType::Char:
-        return type_ref{ "Char16"sv, "wchar_t"sv, "INVALID"sv, "wchar__zt"sv };
-
-    case ElementType::U1:
-        return type_ref{ "UInt8"sv, "::byte"sv, "INVALID"sv, "byte"sv };
-
-    case ElementType::I2:
-        return type_ref{ "Int16"sv, "short"sv, "INVALID"sv, "short"sv };
-
-    case ElementType::U2:
-        return type_ref{ "UInt16"sv, "UINT16"sv, "INVALID"sv, "UINT16"sv };
-
-    case ElementType::I4:
-        return type_ref{ "Int32"sv, "int"sv, "INVALID"sv, "int"sv };
-
-    case ElementType::U4:
-        return type_ref{ "UInt32"sv, "UINT32"sv, "INVALID"sv, "UINT32"sv };
-
-    case ElementType::I8:
-        return type_ref{ "Int64"sv, "__int64"sv, "INVALID"sv, "__z__zint64"sv };
-
-    case ElementType::U8:
-        return type_ref{ "UInt64"sv, "UINT64"sv, "INVALID"sv, "UINT64"sv };
-
-    case ElementType::R4:
-        return type_ref{ "Single"sv, "float"sv, "INVALID"sv, "float"sv };
-
-    case ElementType::R8:
-        return type_ref{ "Double"sv, "double"sv, "INVALID"sv, "double"sv };
-
-    case ElementType::String:
-        return type_ref{ "String"sv, "HSTRING"sv, "INVALID"sv, "HSTRING"sv };
-
-    case ElementType::Object:
-        return type_ref{ "Object"sv, "IInspectable*"sv, "INVALID"sv, "IInspectable"sv };
+    case ElementType::Void: return type_ref{ "INVALID"sv, "INVALID"sv, "INVALID"sv };
+    case ElementType::Boolean: return type_ref{ "Boolean"sv, "INVALID"sv, "boolean"sv };
+    case ElementType::Char: return type_ref{ "Char16"sv, "INVALID"sv, "wchar__zt"sv };
+    case ElementType::U1: return type_ref{ "UInt8"sv, "INVALID"sv, "byte"sv };
+    case ElementType::I2: return type_ref{ "Int16"sv, "INVALID"sv, "short"sv };
+    case ElementType::U2: return type_ref{ "UInt16"sv, "INVALID"sv, "UINT16"sv };
+    case ElementType::I4: return type_ref{ "Int32"sv, "INVALID"sv, "int"sv };
+    case ElementType::U4: return type_ref{ "UInt32"sv, "INVALID"sv, "UINT32"sv };
+    case ElementType::I8: return type_ref{ "Int64"sv, "INVALID"sv, "__z__zint64"sv };
+    case ElementType::U8: return type_ref{ "UInt64"sv, "INVALID"sv, "UINT64"sv };
+    case ElementType::R4: return type_ref{ "Single"sv, "INVALID"sv, "float"sv };
+    case ElementType::R8: return type_ref{ "Double"sv, "INVALID"sv, "double"sv };
+    case ElementType::String: return type_ref{ "String"sv, "INVALID"sv, "HSTRING"sv };
+    case ElementType::Object: return type_ref{ "Object"sv, "INVALID"sv, "IInspectable"sv };
     }
 
     xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
@@ -198,13 +176,13 @@ static type_ref make_system_ref(TypeRef const& ref)
     XLANG_ASSERT(ref.TypeNamespace() == system_namespace);
     if (ref.TypeName() == "Guid"sv)
     {
-        return type_ref{ "Guid"sv, "GUID"sv, "INVALID"sv, "GUID"sv };
+        return type_ref{ "Guid"sv, "INVALID"sv, "GUID"sv };
     }
 
     xlang::throw_invalid("Unknown type '", ref.TypeName(), "' in System namespace");
 }
 
-type_ref namespace_cache::process_dependency(TypeSig const& type, init_state& state)
+type_ref type_cache::process_dependency(TypeSig const& type, init_state& state)
 {
     type_ref result;
 
@@ -218,10 +196,20 @@ type_ref namespace_cache::process_dependency(TypeSig const& type, init_state& st
         {
             result = process_dependency(t, state);
         },
-        [&](GenericTypeIndex const&)
+        [&](GenericTypeIndex i)
         {
-            // This is referencing a generic parameter from an earlier generic argument and thus carries no new dependencies
-            // TODO: result
+            if (state.prev_param_stack.empty())
+            {
+                // We're processing the definition of a generic type and therefore have no instantiation to reference.
+                // Leave the result empty, which we will assert on if we find ourselves in this code path in unexpected
+                // scenarios.
+            }
+            else
+            {
+                // This is referencing a generic parameter from an earlier generic argument and thus carries no new dependencies
+                XLANG_ASSERT(i.index < state.prev_param_stack.back().size());
+                result = state.prev_param_stack.back()[i.index];
+            }
         },
         [&](GenericTypeInstSig const& t)
         {
@@ -231,7 +219,7 @@ type_ref namespace_cache::process_dependency(TypeSig const& type, init_state& st
     return result;
 }
 
-type_ref namespace_cache::process_dependency(coded_index<TypeDefOrRef> const& type, init_state& state)
+type_ref type_cache::process_dependency(coded_index<TypeDefOrRef> const& type, init_state& state)
 {
     type_ref result;
 
@@ -276,7 +264,7 @@ type_ref namespace_cache::process_dependency(coded_index<TypeDefOrRef> const& ty
     return result;
 }
 
-type_ref namespace_cache::process_dependency(GenericTypeInstSig const& type, init_state& state)
+type_ref type_cache::process_dependency(GenericTypeInstSig const& type, init_state& state)
 {
     auto const& ref = type.GenericType().TypeRef();
     auto const& def = m_cache->find(ref.TypeNamespace(), ref.TypeName());
@@ -286,21 +274,27 @@ type_ref namespace_cache::process_dependency(GenericTypeInstSig const& type, ini
     inst.clr_name.push_back('<');
     inst.mangled_name = def.mangled_name;
 
-    std::string_view prefix;
     auto genericArgs = type.GenericArgs();
+
+    std::string_view prefix;
+    std::vector<type_ref> currentRefs;
     for (auto const& arg : genericArgs)
     {
-        XLANG_ASSERT(!std::holds_alternative<GenericTypeInstSig>(arg.Type()));
-        auto ref = process_dependency(arg, state);
+        currentRefs.emplace_back(process_dependency(arg, state));
+        auto& argRef = currentRefs.back();
 
+        XLANG_ASSERT(!inst.clr_name.empty());
         inst.clr_name += prefix;
-        inst.clr_name += ref.clr_name;
+        inst.clr_name += argRef.clr_name;
         prefix = ", "sv;
 
+        XLANG_ASSERT(!inst.mangled_name.empty());
         inst.mangled_name.push_back('_');
-        inst.mangled_name += ref.generic_param_mangled_name;
+        inst.mangled_name += argRef.generic_param_mangled_name;
     }
     inst.clr_name.push_back('>');
+
+    state.prev_param_stack.emplace_back(std::move(currentRefs));
 
     auto [itr, added] = generic_instantiations.emplace(inst.clr_name, std::move(inst));
     if (added)
@@ -308,10 +302,10 @@ type_ref namespace_cache::process_dependency(GenericTypeInstSig const& type, ini
         // First time processing this specialization
         dependent_namespaces.emplace(ref.TypeNamespace());
 
-        state.generic_param_stack.emplace_back(genericArgs.first, genericArgs.second);
-        process_dependencies(def.type_def, state);
-        state.generic_param_stack.pop_back();
+        process_dependencies(def.type, state);
     }
+
+    state.prev_param_stack.pop_back();
 
     return type_ref{
         itr->second.clr_name,

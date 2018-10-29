@@ -3086,11 +3086,6 @@ class __CustomModSig
         return this.m_cmod || this.__elementType;
     }
 
-    get __Type()
-    {
-        return this.m_type || this.__type;
-    }
-
     toString()
     {
         return this.Type.toString();
@@ -3098,7 +3093,7 @@ class __CustomModSig
 
     get Type()
     {
-        return this.__Type;
+        return this.m_type || this.__type;
     }
 
     get ElementType()
@@ -3140,6 +3135,11 @@ class __GenericTypeInstSig
         }
     }
 
+    get __ClassOrValue()
+    {
+        return this.m_class_or_value || this.__type;
+    }
+
     toString()
     {
         var result = this.GenericType.toString() + "<";
@@ -3157,7 +3157,16 @@ class __GenericTypeInstSig
                     type = type._Tail;
                 }
 
-                result += prefix + type._Head.toString();
+                // For whatever reason, this approach has issues printing out ElementType values...
+                if (index == 0)
+                {
+                    result += prefix + __enumToString(type._Head, __ElementType);
+                }
+                else
+                {
+                    result += prefix + type._Head.toString();
+                }
+
                 prefix = ", ";
             }
         }
@@ -3174,22 +3183,6 @@ class __GenericTypeInstSig
         return result;
     }
 
-    get __ClassOrValue()
-    {
-        return this.m_class_or_value || this.__type;
-    }
-
-    get __Type()
-    {
-        return this.m_type || this.__type;
-    }
-
-    get __GenericArgs()
-    {
-        // NOTE: m_generic_args is std::vector
-        return this.m_generic_args || this.__genericArgs;
-    }
-
     get ClassOrValueType()
     {
         return __enumToString(this.__ClassOrValue, __ElementType);
@@ -3197,12 +3190,13 @@ class __GenericTypeInstSig
 
     get GenericType()
     {
-        return this.__Type;
+        return this.m_type || this.__type;
     }
 
     get GenericArgs()
     {
-        return this.__GenericArgs;
+        // NOTE: m_generic_args is std::vector
+        return this.m_generic_args || this.__genericArgs;
     }
 }
 
@@ -3220,7 +3214,7 @@ class __GenericTypeIndex
 
     get Index()
     {
-        return (this.index === undefined) ? this.__index : this.index;
+        return this.index || this.__index;
     }
 }
 
@@ -3271,41 +3265,26 @@ class __TypeSig
         }
     }
 
-    get __IsSzArray()
+    toString()
+    {
+        return this.Type.toString() + (this.IsSzArray ? "[]" : "");
+    }
+
+    get IsSzArray()
     {
         return this.m_is_szarray || this.__isSzArray;
     }
 
-    get __CustomMods()
-    {
-        // NOTE: m_cmod is std::vector
-        return this.m_cmod || this.__customMods;
-    }
-
-    get __Type()
+    get Type()
     {
         // NOTE: m_type is std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>
         return this.m_type || this.__type;
     }
 
-    toString()
-    {
-        return this.__Type.toString() + (this.IsSzArray ? "[]" : "");
-    }
-
-    get IsSzArray()
-    {
-        return this.__IsSzArray;
-    }
-
-    get Type()
-    {
-        return this.__Type;
-    }
-
     get CustomMod()
     {
-        return this.__CustomMods;
+        // NOTE: m_cmod is std::vector
+        return this.m_cmod || this.__customMods;
     }
 }
 
@@ -3318,25 +3297,10 @@ class __ParamSig
         this.__type = new __TypeSig(table, stream);
     }
 
-    get __CustomMods()
-    {
-        return this.m_cmod || this.__customMods;
-    }
-
-    get __ByRef()
-    {
-        return this.m_byref || this.__byRef;
-    }
-
-    get __Type()
-    {
-        return this.m_type || this.__type;
-    }
-
     toString()
     {
         var result = this.Type.toString();
-        if (this.__ByRef)
+        if (this.ByRef)
         {
             result += "&";
         }
@@ -3346,17 +3310,17 @@ class __ParamSig
 
     get ByRef()
     {
-        return this.__ByRef;
+        return this.m_byref || this.__byRef;
     }
 
     get Type()
     {
-        return this.__Type;
+        return this.m_type || this.__type;
     }
 
     get CustomMod()
     {
-        return this.__CustomMods;
+        return this.m_cmod || this.__customMods;
     }
 }
 
@@ -3377,27 +3341,11 @@ class __RetTypeSig
         }
     }
 
-    get __CustomMods()
-    {
-        return this.m_cmod || this.__customMods;
-    }
-
-    get __ByRef()
-    {
-        return this.m_byref || this.__byRef;
-    }
-
-    get __Type()
-    {
-        // NOTE: m_type is std::optional
-        return this.m_type || this.__type || null;
-    }
-
     toString()
     {
-        if (this.__Type)
+        if (this.Type)
         {
-            return this.__Type.toString();
+            return this.Type.toString();
         }
         else
         {
@@ -3407,22 +3355,23 @@ class __RetTypeSig
 
     get ByRef()
     {
-        return this.__ByRef;
+        return this.m_byref || this.__byRef;
     }
 
     get IsVoid()
     {
-        return this.__Type == null;
+        return this.Type == null;
     }
 
     get Type()
     {
-        return this.__Type;
+        // NOTE: m_type is std::optional
+        return this.m_type || this.__type || null;
     }
 
     get CustomMod()
     {
-        return this.__CustomMods;
+        return this.m_cmod || this.__customMods;
     }
 }
 
@@ -3453,22 +3402,6 @@ class __MethodDefSig
         return this.m_calling_convention || this.__callingConvention;
     }
 
-    get __GenericParamCount()
-    {
-        return this.m_generic_param_count || this.__genericParamCount;
-    }
-
-    get __ReturnType()
-    {
-        return this.m_ret_type || this.__retType;
-    }
-
-    get __Params()
-    {
-        // NOTE: m_params is std::vector
-        return this.m_params || this.__params;
-    }
-
     toString()
     {
         var result = this.ReturnType.toString() + "(";
@@ -3488,17 +3421,18 @@ class __MethodDefSig
 
     get GenericParamCount()
     {
-        return this.__GenericParamCount;
+        return this.m_generic_param_count || this.__genericParamCount;
     }
 
     get ReturnType()
     {
-        return this.__ReturnType;
+        return this.m_ret_type || this.__retType;
     }
 
     get Params()
     {
-        return this.__Params;
+        // NOTE: m_params is std::vector
+        return this.m_params || this.__params;
     }
 }
 
@@ -3521,25 +3455,14 @@ class __FieldSig
         return this.m_calling_convention || this.__callingConvention;
     }
 
-    get __CustomMods()
-    {
-        // NOTE: m_cmod is std::vector
-        return this.m_cmod || this.__customMods;
-    }
-
-    get __Type()
-    {
-        return this.m_type || this.__type;
-    }
-
     toString()
     {
-        return this.__Type.toString();
+        return this.Type.toString();
     }
 
     get Type()
     {
-        return this.__Type;
+        return this.m_type || this.__type;
     }
 
     get CallingConvention()
@@ -3549,7 +3472,8 @@ class __FieldSig
 
     get CustomMod()
     {
-        return this.__CustomMods;
+        // NOTE: m_cmod is std::vector
+        return this.m_cmod || this.__customMods;
     }
 }
 
@@ -3579,44 +3503,29 @@ class __PropertySig
         return this.m_calling_convention || this.__callingConvention;
     }
 
-    get __CustomMods()
-    {
-        return this.m_cmod || this.__customMods;
-    }
-
-    get __Type()
-    {
-        return this.m_type || this.__type;
-    }
-
-    get __Params()
-    {
-        return this.m_params || this.__params;
-    }
-
     toString()
     {
-        return this.__Type.toString();
+        return this.Type.toString();
     }
 
     get Type()
     {
-        return this.__Type;
+        return this.m_type || this.__type;
     }
 
     get CallingConvention()
     {
-        return this.__CallingConvention;
+        return __callingConventionToString(this.__CallingConvention);
     }
 
     get Params()
     {
-        return this.__Params;
+        return this.m_params || this.__params;
     }
 
     get CustomMod()
     {
-        return this.__CustomMods;
+        return this.m_cmod || this.__customMods;
     }
 }
 
