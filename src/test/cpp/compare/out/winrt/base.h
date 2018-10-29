@@ -2311,8 +2311,8 @@ namespace winrt::impl
         }
     };
 
-    template <typename To>
-    com_ref<To> as(unknown_abi* ptr)
+    template <typename To, typename From>
+    com_ref<To> as(From* ptr)
     {
         if (!ptr)
         {
@@ -2324,8 +2324,8 @@ namespace winrt::impl
         return { take_ownership_from_abi, get_self_abi<To>::value(result) };
     }
 
-    template <typename To>
-    com_ref<To> try_as(unknown_abi* ptr) noexcept
+    template <typename To, typename From>
+    com_ref<To> try_as(From* ptr) noexcept
     {
         if (!ptr)
         {

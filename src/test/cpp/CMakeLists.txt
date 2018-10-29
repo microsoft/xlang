@@ -12,7 +12,7 @@ else()
     target_link_libraries(cpp_test -lpthread)
 endif()
 
-target_sources(cpp_test PUBLIC main.cpp)
+target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cpp.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
