@@ -59,7 +59,7 @@ struct generic_instantiation
 struct type_cache
 {
     // Types defined in this namespace
-    std::map<std::string_view, type_def> types;
+    std::set<std::reference_wrapper<type_def const>> types;
     std::vector<std::reference_wrapper<type_def const>> enums;
     std::vector<std::reference_wrapper<type_def const>> structs;
     std::vector<std::reference_wrapper<type_def const>> delegates;
@@ -77,26 +77,7 @@ struct type_cache
     {
     }
 
-    type_def const* try_find(std::string_view typeName) const noexcept
-    {
-        auto itr = types.find(typeName);
-        if (itr != types.end())
-        {
-            return &itr->second;
-        }
-
-        return nullptr;
-    }
-
-    type_def const& find(std::string_view typeName) const
-    {
-        if (auto ptr = try_find(typeName))
-        {
-            return *ptr;
-        }
-
-        xlang::throw_invalid("Could not find type '", typeName, "'");
-    }
+    type_cache merge(type_cache const& other) const;
 
 private:
     friend struct metadata_cache;
@@ -123,10 +104,14 @@ struct metadata_cache
 
     type_def const* try_find(std::string_view ns, std::string_view name) const noexcept
     {
-        auto itr = namespaces.find(ns);
-        if (itr != namespaces.end())
+        auto nsItr = m_types.find(ns);
+        if (nsItr != m_types.end())
         {
-            return itr->second.try_find(name);
+            auto nameItr = nsItr->second.find(name);
+            if (nameItr != nsItr->second.end())
+            {
+                return &nameItr->second;
+            }
         }
 
         return nullptr;
@@ -144,5 +129,10 @@ struct metadata_cache
 
 private:
 
-    static void initialize_namespace(type_cache& target, xlang::meta::reader::cache::namespace_members const& members);
+    static void initialize_namespace(
+        type_cache& target,
+        std::map<std::string_view, type_def>& typeMap,
+        xlang::meta::reader::cache::namespace_members const& members);
+
+    std::map<std::string_view, std::map<std::string_view, type_def>> m_types;
 };

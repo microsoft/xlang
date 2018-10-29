@@ -18,9 +18,14 @@ metadata_cache::metadata_cache(cache const& c)
             std::forward_as_tuple(this));
         XLANG_ASSERT(added);
 
-        group.add([&, &target = itr->second]()
+        auto [typesItr, typesAdded] = m_types.emplace(std::piecewise_construct,
+            std::forward_as_tuple(ns),
+            std::forward_as_tuple());
+        XLANG_ASSERT(typesAdded);
+
+        group.add([&, &target = itr->second, &types = typesItr->second]()
         {
-            initialize_namespace(target, members);
+            initialize_namespace(target, types, members);
         });
     }
     group.get();
@@ -36,45 +41,53 @@ metadata_cache::metadata_cache(cache const& c)
     group.get();
 }
 
-void metadata_cache::initialize_namespace(type_cache& target, cache::namespace_members const& members)
+void metadata_cache::initialize_namespace(
+    type_cache& target,
+    std::map<std::string_view, type_def>& typeMap,
+    cache::namespace_members const& members)
 {
     target.enums.reserve(members.enums.size());
     for (auto const& e : members.enums)
     {
-        auto [itr, added] = target.types.emplace(e.TypeName(), e);
+        auto [itr, added] = typeMap.emplace(e.TypeName(), type_def{ e });
         XLANG_ASSERT(added);
+        target.types.emplace(itr->second);
         target.enums.emplace_back(itr->second);
     }
 
     target.structs.reserve(members.structs.size());
     for (auto const& s : members.structs)
     {
-        auto [itr, added] = target.types.emplace(s.TypeName(), s);
+        auto [itr, added] = typeMap.emplace(s.TypeName(), type_def{ s });
         XLANG_ASSERT(added);
+        target.types.emplace(itr->second);
         target.structs.emplace_back(itr->second);
     }
 
     target.delegates.reserve(members.delegates.size());
     for (auto const& d : members.delegates)
     {
-        auto [itr, added] = target.types.emplace(d.TypeName(), d);
+        auto [itr, added] = typeMap.emplace(d.TypeName(), type_def{ d });
         XLANG_ASSERT(added);
+        target.types.emplace(itr->second);
         target.delegates.emplace_back(itr->second);
     }
 
     target.interfaces.reserve(members.interfaces.size());
     for (auto const& i : members.interfaces)
     {
-        auto [itr, added] = target.types.emplace(i.TypeName(), i);
+        auto [itr, added] = typeMap.emplace(i.TypeName(), type_def{ i });
         XLANG_ASSERT(added);
+        target.types.emplace(itr->second);
         target.interfaces.emplace_back(itr->second);
     }
 
     target.classes.reserve(members.classes.size());
     for (auto const& c : members.classes)
     {
-        auto [itr, added] = target.types.emplace(c.TypeName(), c);
+        auto [itr, added] = typeMap.emplace(c.TypeName(), type_def{ c });
         XLANG_ASSERT(added);
+        target.types.emplace(itr->second);
         target.classes.emplace_back(itr->second);
     }
 }
@@ -83,9 +96,9 @@ void type_cache::process_dependencies()
 {
     // NOTE: Dependencies come from: contract attributes, required interfaces, fields, and function arguments/return types
     init_state state;
-    for (auto const& [nsName, def] : types)
+    for (auto const& def : types)
     {
-        process_dependencies(def.type, state);
+        process_dependencies(def.get().type, state);
         XLANG_ASSERT(state.prev_param_stack.empty());
     }
 }
@@ -312,4 +325,30 @@ type_ref type_cache::process_dependency(GenericTypeInstSig const& type, init_sta
         itr->second.mangled_name,
         itr->second.mangled_name
     };
+}
+
+type_cache type_cache::merge(type_cache const& other) const
+{
+    type_cache result{ m_cache };
+
+    result.types = types;
+    result.types.insert(other.types.begin(), other.types.end());
+
+    result.external_dependencies = external_dependencies;
+    result.external_dependencies.insert(other.external_dependencies.begin(), other.external_dependencies.end());
+
+    result.internal_dependencies = internal_dependencies;
+    result.internal_dependencies.insert(other.internal_dependencies.begin(), other.internal_dependencies.end());
+
+    result.generic_instantiations = generic_instantiations;
+    result.generic_instantiations.insert(other.generic_instantiations.begin(), other.generic_instantiations.end());
+
+    // NOTE: We really want 'std::set_union', but since we should only be merging unique sets, merge is more efficient
+    std::merge(enums.begin(), enums.end(), other.enums.begin(), other.enums.end(), std::back_inserter(result.enums));
+    std::merge(structs.begin(), structs.end(), other.structs.begin(), other.structs.end(), std::back_inserter(result.structs));
+    std::merge(delegates.begin(), delegates.end(), other.delegates.begin(), other.delegates.end(), std::back_inserter(result.delegates));
+    std::merge(interfaces.begin(), interfaces.end(), other.interfaces.begin(), other.interfaces.end(), std::back_inserter(result.interfaces));
+    std::merge(classes.begin(), classes.end(), other.classes.begin(), other.classes.end(), std::back_inserter(result.classes));
+
+    return result;
 }

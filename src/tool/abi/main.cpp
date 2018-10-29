@@ -2,7 +2,6 @@
 
 #include "abi_writer.h"
 #include "common.h"
-#include "dependencies.h"
 #include "metadata_cache.h"
 #include "strings.h"
 
@@ -158,9 +157,9 @@ int main(int const argc, char** argv)
 
         auto filter_includes = [&](type_cache const& nsCache)
         {
-            for (auto const& [name, type] : nsCache.types)
+            for (auto const& type : nsCache.types)
             {
-                if (f.includes(type.type))
+                if (f.includes(type.get().type))
                 {
                     return true;
                 }

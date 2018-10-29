@@ -6,35 +6,13 @@
 
 #include "meta_reader.h"
 #include "namespace_iterator.h"
+#include "type_name.h"
 
 constexpr std::string_view system_namespace = "System";
 constexpr std::string_view foundation_namespace = "Windows.Foundation";
 constexpr std::string_view collections_namespace = "Windows.Foundation.Collections";
 constexpr std::string_view metadata_namespace = "Windows.Foundation.Metadata";
 constexpr std::string_view internal_namespace = "Windows.Foundation.Internal";
-
-struct type_name
-{
-    std::string_view ns;
-    std::string_view name;
-
-    bool operator<(type_name const& other) const
-    {
-        if (auto cmp = ns.compare(other.ns); cmp != 0)
-        {
-            return cmp < 0;
-        }
-        else
-        {
-            // Same namespace
-            return name < other.name;
-        }
-    }
-
-    // So that this type can be used in contexts that call 'TypeName' and 'TypeNamespace'
-    auto TypeNamespace() { return this->ns; }
-    auto TypeName() { return this->name; }
-};
 
 struct typename_compare
 {
