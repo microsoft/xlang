@@ -1469,7 +1469,6 @@ if (PyModule_AddObject(module, "@", type_object) != 0)
     return -1;
 }
 py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
-//Py_DECREF(type_object);
 type_object = nullptr;
 )";
         w.write_indented(format,
@@ -1518,17 +1517,19 @@ return 0;
             auto format = R"(
 static int module_exec(PyObject* module)
 {
-    PyObject* type_object{ nullptr };
-    type_object = PyType_FromSpec(&winrt_base_Type_spec);
+    PyObject* type_object = PyType_FromSpec(&winrt_base_Type_spec);
     if (type_object == nullptr)
     {
         return -1;
     }
     if (PyModule_AddObject(module, "_winrt_base", type_object) != 0)
     {
+        Py_DECREF(type_object);
         return -1;
     }
     py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
+    type_object = nullptr;
+
 )";
             w.write(format);
         }
