@@ -4322,10 +4322,19 @@ WINRT_EXPORT namespace winrt
             WINRT_VERIFY_(impl::error_ok, WINRT_GetRestrictedErrorInfo(m_info.put_void()));
         }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
+
         impl::bstr_handle m_debug_reference;
         uint32_t const m_debug_magic{ 0xAABBCCDD };
         hresult m_code{ impl::error_fail };
         com_ptr<impl::IRestrictedErrorInfo> m_info;
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     };
 
     struct hresult_access_denied : hresult_error
