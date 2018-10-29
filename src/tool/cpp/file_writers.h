@@ -16,7 +16,6 @@ namespace xlang
         w.write(strings::base_identity);
         w.write(strings::base_handle);
         w.write(strings::base_lock);
-        w.write(strings::base_diagnostics);
         w.write(strings::base_abi);
         w.write(strings::base_windows);
         w.write(strings::base_string);
