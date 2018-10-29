@@ -2285,6 +2285,14 @@ protected:
         {
             w.write(strings::base_reference_produce);
         }
+        else if (namespace_name == "Windows.UI.Xaml.Interop")
+        {
+            w.write(strings::base_xaml_typename);
+        }
+        else if (namespace_name == "Windows.UI.Core")
+        {
+            w.write(strings::base_resume_foreground);
+        }
     }
 
     void write_base_fragment(writer& w, std::string_view const& value)
