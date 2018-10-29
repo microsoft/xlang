@@ -4,6 +4,7 @@
 #include <string_view>
 #include <utility>
 
+#include "meta_reader.h"
 #include "namespace_iterator.h"
 
 constexpr std::string_view system_namespace = "System";

@@ -18,9 +18,12 @@ void writer::initialize_dependencies()
 {
     // Calculate a list of all types/namespaces referenced by the current namespace so that we know which files to
     // include, contracts to forward declare, etc.
-    for (auto const& [name, type] : m_members.types)
+    for (auto const& ref : m_namespaces)
     {
-        initialize_dependencies(type);
+        for (auto const& [name, type] : ref.members->types)
+        {
+            initialize_dependencies(type);
+        }
     }
 
     // NOTE: MIDLRT will declare any generic type that references a type in this namespace, even if no function in this
@@ -421,7 +424,7 @@ void writer::write_includes()
 #include "windowscontracts.h"
 )^-^");
 
-    if (m_namespace != "Windows.Foundation"sv)
+    if (!includes_namespace(foundation_namespace))
     {
         write(R"^-^(#include "Windows.Foundation.h"
 )^-^");
@@ -443,7 +446,7 @@ void writer::write_includes()
         {
             // The "System" namespace a lie
         }
-        else if (ns == m_namespace)
+        else if (includes_namespace(ns))
         {
             // Don't include ourself
         }
@@ -466,22 +469,29 @@ void writer::write_includes()
 
 void writer::write_interface_forward_declarations()
 {
-    // NOTE: Delegates are, for all intents and purposes, interfaces
     write("/* Forward Declarations */\n");
-    for (auto const& type : m_members.delegates)
+
+    for (auto const& ref : m_namespaces)
     {
-        // Generics require definitions
-        if (distance(type.GenericParam()) == 0)
+        // NOTE: Delegates are, for all intents and purposes, interfaces
+        for (auto const& type : ref.members->delegates)
         {
-            write_forward_declaration(*this, type, m_genericArgStack);
+            // Generics require definitions
+            if (distance(type.GenericParam()) == 0)
+            {
+                write_forward_declaration(*this, type, m_genericArgStack);
+            }
         }
     }
 
-    for (auto const& type : m_members.interfaces)
+    for (auto const& ref : m_namespaces)
     {
-        if ((distance(type.GenericParam()) == 0) && !m_config.map_type(type.TypeNamespace(), type.TypeName()).first)
+        for (auto const& type : ref.members->interfaces)
         {
-            write_forward_declaration(*this, type, m_genericArgStack);
+            if ((distance(type.GenericParam()) == 0) && !m_config.map_type(type.TypeNamespace(), type.TypeName()).first)
+            {
+                write_forward_declaration(*this, type, m_genericArgStack);
+            }
         }
     }
 }
@@ -683,9 +693,11 @@ void writer::write_type_dependencies()
 {
     for (auto const& type : m_dependencies)
     {
-        if (type.TypeNamespace() != m_namespace)
+        write_forward_declaration(*this, type, generic_arg_stack::empty());
+
+        if (!includes_namespace(type.TypeNamespace()))
         {
-            // For classes, we need to declare the type's default interface instead
+            // For classes, we also need to declare the type's default interface
             if (get_category(type) == category::class_type)
             {
                 ::visit(default_interface(type), xlang::visit_overload{
@@ -699,70 +711,94 @@ void writer::write_type_dependencies()
                     }
                 });
             }
-            else
-            {
-                write_forward_declaration(*this, type, generic_arg_stack::empty());
-            }
         }
     }
 }
 
 void writer::write_type_declarations()
 {
-    for (auto const& e : m_members.enums)
+    for (auto const& ref : m_namespaces)
     {
-        write_forward_declaration(*this, e, generic_arg_stack::empty());
+        for (auto const& e : ref.members->enums)
+        {
+            write_forward_declaration(*this, e, generic_arg_stack::empty());
+        }
     }
 
-    for (auto const& s : m_members.structs)
+    for (auto const& ref : m_namespaces)
     {
-        write_forward_declaration(*this, s, generic_arg_stack::empty());
+        for (auto const& s : ref.members->structs)
+        {
+            write_forward_declaration(*this, s, generic_arg_stack::empty());
+        }
     }
 
-    for (auto const& c : m_members.classes)
+    for (auto const& ref : m_namespaces)
     {
-        write_forward_declaration(*this, c, generic_arg_stack::empty());
+        for (auto const& c : ref.members->classes)
+        {
+            write_forward_declaration(*this, c, generic_arg_stack::empty());
+        }
     }
 }
 
 void writer::write_type_definitions()
 {
-    for (auto const& e : m_members.enums)
+    for (auto const& ref : m_namespaces)
     {
-        write_enum_definition(*this, e);
+        for (auto const& e : ref.members->enums)
+        {
+            write_enum_definition(*this, e);
+        }
     }
 
-    for (auto const& s : m_members.structs)
+    for (auto const& ref : m_namespaces)
     {
-        write_struct_definition(*this, s);
+        for (auto const& s : ref.members->structs)
+        {
+            write_struct_definition(*this, s);
+        }
     }
 
-    for (auto const& d : m_members.delegates)
+    for (auto const& ref : m_namespaces)
     {
-        write_interface_definition(*this, d);
+        for (auto const& d : ref.members->delegates)
+        {
+            write_interface_definition(*this, d);
+        }
     }
 
-    for (auto const& i : m_members.interfaces)
+    for (auto const& ref : m_namespaces)
     {
-        write_interface_definition(*this, i);
+        for (auto const& i : ref.members->interfaces)
+        {
+            write_interface_definition(*this, i);
+        }
     }
 
-    for (auto const& c : m_members.classes)
+    for (auto const& ref : m_namespaces)
     {
-        write_class_name_definition(*this, c);
+        for (auto const& c : ref.members->classes)
+        {
+            write_class_name_definition(*this, c);
+        }
     }
 }
 
-void write_abi_header(std::string_view ns, cache const& c, cache::namespace_members const& members, abi_configuration const& config)
+void write_abi_header(
+    std::string_view fileName,
+    std::initializer_list<namespace_reference> namespaces,
+    cache const& c,
+    abi_configuration const& config)
 {
-    writer w{ ns, config, c, members };
+    writer w{ namespaces, config, c };
 
     w.write(strings::file_header);
     w.write(strings::include_guard_start,
-        bind<write_include_guard>(ns),
-        bind<write_include_guard>(ns),
-        bind<write_include_guard>(ns),
-        bind<write_include_guard>(ns));
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName));
     w.write(strings::deprecated_header_start);
     w.write(strings::ns_prefix_definitions,
         (config.ns_prefix_state == ns_prefix::always) ? strings::ns_prefix_always :
@@ -805,10 +841,10 @@ void write_abi_header(std::string_view ns, cache const& c, cache::namespace_memb
         w.write(strings::optional_ns_prefix_end_definitions);
     }
     w.write(strings::deprecated_header_end);
-    w.write(strings::include_guard_end, bind<write_include_guard>(ns), bind<write_include_guard>(ns));
+    w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
 
     auto filename{ config.output_directory };
-    filename += ns;
+    filename += fileName;
     filename += ".h";
     w.flush_to_file(filename);
 }

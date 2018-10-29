@@ -1,6 +1,8 @@
 
 namespace Windows { namespace Foundation { namespace Collections
 {
+    struct IVectorChangedEventArgs;
+
     template <class T>
     /*delegate*/ struct VectorChangedEventHandler_impl : IUnknown
     {

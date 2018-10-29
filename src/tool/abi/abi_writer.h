@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "common.h"
+#include "dependencies.h"
 #include "generic_arg_stack.h"
 #include "meta_reader.h"
 #include "namespace_iterator.h"
@@ -26,14 +27,12 @@ struct indent { std::size_t additional_indentation = 0; };
 struct writer : xlang::text::writer_base<writer>
 {
     writer(
-        std::string_view ns,
+        std::initializer_list<namespace_reference> namespaces,
         abi_configuration const& config,
-        xlang::meta::reader::cache const& cache,
-        xlang::meta::reader::cache::namespace_members const& members) :
-        m_namespace(ns),
+        xlang::meta::reader::cache const& cache) :
+        m_namespaces(namespaces),
         m_config(config),
-        m_cache(cache),
-        m_members(members)
+        m_cache(cache)
     {
         initialize_dependencies();
     }
@@ -195,6 +194,14 @@ struct writer : xlang::text::writer_base<writer>
         }
     }
 
+    bool includes_namespace(std::string_view ns) const noexcept
+    {
+        return std::find_if(m_namespaces.begin(), m_namespaces.end(), [&](namespace_reference const& ref)
+        {
+            return ref.full_namespace == ns;
+        }) != m_namespaces.end();
+    }
+
     void push_namespace(std::string_view ns);
     void push_generic_namespace(std::string_view ns);
     void pop_namespace();
@@ -232,10 +239,9 @@ private:
 
     void write_generic_definition(xlang::meta::reader::GenericTypeInstSig const& type);
 
-    std::string_view m_namespace;
+    std::initializer_list<namespace_reference> m_namespaces;
     abi_configuration const& m_config;
     xlang::meta::reader::cache const& m_cache;
-    xlang::meta::reader::cache::namespace_members const& m_members;
 
     std::size_t m_indentation = 0;
     std::vector<std::string_view> m_namespaceStack;
@@ -254,7 +260,7 @@ private:
 };
 
 void write_abi_header(
-    std::string_view ns,
+    std::string_view fileName,
+    std::initializer_list<namespace_reference> namespaces,
     xlang::meta::reader::cache const& c,
-    xlang::meta::reader::cache::namespace_members const& members,
     abi_configuration const& config);

@@ -2,6 +2,8 @@
 
 #include "abi_writer.h"
 #include "common.h"
+#include "dependencies.h"
+#include "metadata_cache.h"
 #include "strings.h"
 
 using namespace std::chrono;
@@ -101,7 +103,16 @@ int main(int const argc, char** argv)
         filesToRead.insert(filesToRead.end(), inputFiles.begin(), inputFiles.end());
         filesToRead.insert(filesToRead.end(), referenceFiles.begin(), referenceFiles.end());
 
+        auto s = high_resolution_clock::now();
         cache c{ filesToRead };
+        auto e = high_resolution_clock::now();
+        w.write("Duration: %\n", duration_cast<milliseconds>(e - s).count());
+        s = high_resolution_clock::now();
+        metadata_cache mdCache{ c };
+        e = high_resolution_clock::now();
+        w.write("Duration: %\n", duration_cast<milliseconds>(e - s).count());
+        w.flush_to_console();
+        ::DebugBreak();
 
         auto include = args.values("include");
         if (include.empty() && !referenceFiles.empty())
@@ -144,57 +155,91 @@ int main(int const argc, char** argv)
         }
 
         w.flush_to_console();
-        task_group group;
 
+        task_group group;
+        bool foundationDependency = false;
         for (auto const& [ns, members] : c.namespaces())
         {
             if (f.includes(members))
             {
-                group.add([&]()
+                if ((ns == foundation_namespace) || (ns == collections_namespace))
                 {
-                    write_abi_header(ns, c, members, config);
-                });
+                    foundationDependency = true;
+                }
+                else
+                {
+                    group.add([&]()
+                    {
+                        write_abi_header(ns, { namespace_reference{ ns, &members } }, c, config);
+                    });
+                }
             }
         }
 
-        // Write the 'Windows.Foundation.Collections.h' file. Note that we would generate them, however several of the
-        // classes have unpredictable names as a part of the public interface (e.g. 'TArgs_complex' for the
-        // 'ITypedEventHandler_impl' type even though the generic parameter name is 'TResult' in metadata)
-        group.add([&]()
+        if (foundationDependency)
         {
-            std::string_view nsBegin, nsEnd;
-            if (config.ns_prefix_state == ns_prefix::always)
+            group.add([&]()
             {
-                nsBegin = "\nnamespace ABI {";
-                nsEnd = "} // ABI\n";
-            }
-            else if (config.ns_prefix_state == ns_prefix::optional)
+                auto const& namespaces = c.namespaces();
+                auto foundationItr = namespaces.find(foundation_namespace);
+                auto collectionsItr = namespaces.find(collections_namespace);
+                if ((foundationItr != namespaces.end()) && (collectionsItr != namespaces.end()))
+                {
+                    auto members =
+                    {
+                        namespace_reference{ collectionsItr->first, &collectionsItr->second },
+                        namespace_reference{ foundationItr->first, &foundationItr->second }
+                    };
+                    write_abi_header(foundation_namespace, members, c, config);
+                }
+                else
+                {
+                    XLANG_ASSERT(false);
+                    w.write("WARNING: Dependency on 'Windows.Foundation' or 'Windows.Foundation.Collections' identified"
+                        " but the other could not be found. Skipping...\n");
+                    w.flush_to_console();
+                }
+            });
+
+            group.add([&]()
             {
-                nsBegin = R"^-^(
+                basic_writer w;
+                w.write(strings::generics_begin);
+
+                if (config.ns_prefix_state == ns_prefix::always)
+                {
+                    w.write("\nnamespace ABI {");
+                }
+                else if (config.ns_prefix_state == ns_prefix::optional)
+                {
+                    w.write(R"^-^(
 #if defined(MIDL_NS_PREFIX)
 namespace ABI {
-#endif // defined(MIDL_NS_PREFIX))^-^";
-                nsEnd = R"^-^(#if defined(MIDL_NS_PREFIX)
+#endif // defined(MIDL_NS_PREFIX))^-^");
+                }
+
+                w.write(strings::generics_meta);
+                w.write(strings::generics_foundation);
+                w.write(strings::generics_collections);
+                w.write(strings::generics_async);
+                w.write(strings::generics_vector);
+
+                if (config.ns_prefix_state == ns_prefix::always)
+                {
+                    w.write("} // ABI\n");
+                }
+                else if (config.ns_prefix_state == ns_prefix::optional)
+                {
+                    w.write(R"^-^(#if defined(MIDL_NS_PREFIX)
 } // ABI
 #endif // defined(MIDL_NS_PREFIX)
-)^-^";
-            }
+)^-^");
+                }
 
-            basic_writer w;
-            w.write(strings::generics_begin);
-            w.write(nsBegin);
-            w.write(strings::generics_meta);
-            w.write(strings::generics_foundation);
-            w.write(strings::generics_collections);
-            w.write(strings::generics_async);
-            w.write(nsEnd);
-            w.write(strings::generics_vector_begin);
-            w.write(nsBegin);
-            w.write(strings::generics_vector);
-            w.write(nsEnd);
-            w.write(strings::generics_end);
-            w.flush_to_file(config.output_directory / "Windows.Foundation.Collections.h");
-        });
+                w.write(strings::generics_end);
+                w.flush_to_file(config.output_directory / "Windows.Foundation.Collections.h");
+            });
+        }
 
         group.get();
 
