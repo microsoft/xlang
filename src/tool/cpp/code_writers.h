@@ -238,7 +238,10 @@ namespace xlang
 
     void write_struct_category(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <> struct category<%>{ using type = struct_category<%>; };
+        auto format = R"(    template <> struct category<%>
+    {
+        using type = struct_category<%>;
+    };
 )";
 
         w.write(format, type, bind_list(", ", type.FieldList()));
@@ -543,7 +546,7 @@ namespace xlang
 
     void write_field_abi(writer& w, Field const& field)
     {
-        w.write("    % %;\n", get_field_abi(w, field), field.Name());
+        w.write("        % %;\n", get_field_abi(w, field), field.Name());
     }
 
     void write_struct_abi(writer& w, TypeDef const& type)
@@ -552,8 +555,11 @@ namespace xlang
 
         auto format = R"(    struct struct_%
     {
-    %};
-    template <> struct abi<@::%>{ using type = struct_%; };
+%    };
+    template <> struct abi<@::%>
+    {
+        using type = struct_%;
+    };
 )";
 
         auto type_name = type.TypeName();
@@ -1778,7 +1784,7 @@ protected:
 
     void write_struct_field(writer& w, std::pair<std::string_view, std::string> const& field)
     {
-        w.write("    @ %;\n",
+        w.write("        @ %;\n",
             field.second,
             field.first);
     }
@@ -1800,14 +1806,12 @@ protected:
     {
         auto format = R"(    struct %
     {
-    %};
-
-    bool operator==(% const& left, % const& right)%
+%    };
+    inline bool operator==(% const& left, % const& right)%
     {
         return%;
     }
-
-    bool operator!=(% const& left, % const& right)%
+    inline bool operator!=(% const& left, % const& right)%
     {
         return !(left == right);
     }

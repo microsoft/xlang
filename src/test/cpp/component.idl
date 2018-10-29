@@ -126,6 +126,17 @@ namespace Component
         }
     }
 
+    namespace Structs
+    {
+        struct Simple
+        {
+            UInt8 A;
+            UInt8 R;
+            UInt8 G;
+            UInt8 B;
+        };
+    }
+
     namespace Async
     {
         static runtimeclass Class
