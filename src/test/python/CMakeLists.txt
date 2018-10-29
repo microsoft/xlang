@@ -8,6 +8,7 @@ file(TO_NATIVE_PATH "$ENV{WindowsSdkDir}References/$ENV{WindowsSDKVersion}" REFE
 set(winmd_files
     Windows.Foundation.FoundationContract
     Windows.Foundation.UniversalApiContract
+    Windows.AI.MachineLearning.MachineLearningContract
 )
 
 set(included_namespaces
@@ -15,11 +16,48 @@ set(included_namespaces
     Windows.Devices.Geolocation
     Windows.Foundation
     Windows.Graphics.DirectX
+
+    Windows.AI.MachineLearning
+    Windows.Graphics.Imaging
+    Windows.Media
+    Windows.Storage    
 )
 
 set(excluded_namespaces
     Windows.Foundation.Diagnostics
     Windows.Foundation.Metadata
+    Windows.Media.Audio
+    Windows.Media.Capture
+    Windows.Media.Casting
+    Windows.Media.ClosedCaptioning
+    Windows.Media.ContentRestrictions
+    Windows.Media.Control
+    Windows.Media.Core
+    Windows.Media.Devices
+    Windows.Media.DialProtocol
+    Windows.Media.Editing
+    Windows.Media.Effects
+    Windows.Media.FaceAnalysis
+    Windows.Media.Import
+    Windows.Media.MediaProperties
+    Windows.Media.Ocr
+    Windows.Media.Playback
+    Windows.Media.Playlists
+    Windows.Media.PlayTo
+    Windows.Media.Protection
+    Windows.Media.Render
+    Windows.Media.SpeechRecognition
+    Windows.Media.SpeechSynthesis
+    Windows.Media.Streaming
+    Windows.Media.Transcoding
+    Windows.Storage.AccessCache
+    Windows.Storage.BulkAccess
+    Windows.Storage.Compression
+    Windows.Storage.FileProperties
+    Windows.Storage.Pickers
+    Windows.Storage.Provider
+    # Windows.Storage.Search
+    # Windows.Storage.Streams
 )
 
 set(cmdline "-output ${output_dir}")
@@ -42,13 +80,13 @@ foreach(ns ${excluded_namespaces})
 endforeach()
 
 get_filename_component(output_dir ${CMAKE_CURRENT_SOURCE_DIR}/output REALPATH)
-set(pybase_h ${output_dir}/pybase.h)
+set(setup_py ${output_dir}/setup.py)
 
 add_custom_command(
-  OUTPUT ${pybase_h} 
+  OUTPUT ${setup_py} 
   DEPENDS ${pywinrt_exe}
   COMMAND ${pywinrt_exe} ${cmdline}
 )
 
-add_custom_target(test_python ALL DEPENDS ${pybase_h})
+add_custom_target(test_python ALL DEPENDS ${setup_py})
 add_dependencies(test_python pywinrt)
