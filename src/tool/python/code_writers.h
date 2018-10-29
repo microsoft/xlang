@@ -1499,6 +1499,36 @@ return 0;
 )");
         }
         w.write_indented("}\n");
+
+        format = R"(
+static PyModuleDef_Slot module_slots[] = {
+    {Py_mod_exec, %},
+    {0, nullptr}
+};
+
+PyDoc_STRVAR(module_doc, "Langworthy projection module.\n");
+
+static struct PyModuleDef module_def = {
+    PyModuleDef_HEAD_INIT,
+    "%",
+    module_doc,
+    0,
+    nullptr,
+    module_slots,
+    nullptr,
+    nullptr,
+    nullptr
+};
+
+PyMODINIT_FUNC
+PyInit_%(void)
+{
+    return PyModuleDef_Init(&module_def);
+}
+)";
+        auto segments = get_dotted_name_segments(ns);
+        auto module_name = w.write_temp("_%_%", settings.module, bind_list("_", segments));
+        w.write_indented(format, bind<write_ns_init_function_name>(ns), module_name, module_name);
     }
 
 
@@ -1531,17 +1561,6 @@ static int module_exec(PyObject* module)
 
 )";
             w.write(format);
-        }
-
-        for (auto&& ns : namespaces)
-        {
-            auto format = R"(    if (%(module) != 0)
-    {
-        return -1;
-    }
-
-)";
-            w.write(format, bind<write_ns_init_function_name>(ns));
         }
 
         w.write("    return 0;\n}\n");

@@ -1,17 +1,19 @@
 import find_projection
-import _pyrt
 import unittest
+
+wfc = find_projection.import_winrt_ns("Windows.Foundation.Collections")
 
 class TestQueryInterface(unittest.TestCase):
     def test_as_function(self):
-        propset = _pyrt.PropertySet()
-        propset.Insert("strmap", _pyrt.StringMap())
+        propset = wfc.PropertySet()
+        propset.Insert("strmap", wfc.StringMap())
         self.assertTrue(propset.HasKey("strmap"))
         o = propset.Lookup("strmap")
-        strmap = _pyrt.StringMap._from(o)
-        self.assertEqual(type(strmap), _pyrt.StringMap)
+        strmap = wfc.StringMap._from(o)
+        self.assertEqual(type(strmap), wfc.StringMap)
 
 if __name__ == '__main__':
+    import _pyrt
     _pyrt.init_apartment()
     unittest.main()
     _pyrt.uninit_apartment()

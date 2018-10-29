@@ -58,9 +58,8 @@ namespace xlang
             auto format = R"(
 #include <winrt/%.h>
 
-int %(PyObject* module);
 )";
-            w.write(format, ns, bind<write_ns_init_function_name>(ns));
+            w.write(format, ns);
         }
 
         create_directories(folder);
