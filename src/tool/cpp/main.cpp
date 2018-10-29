@@ -32,9 +32,7 @@ namespace xlang
             { "include", 0 },
             { "exclude", 0 },
             { "root", 0, 1 },
-            { "base", 0, 0 },
-            { "prefix", 0, 0 },
-            { "overwrite", 0, 0 }
+            { "base", 0, 0 }
         };
 
         cmd::reader args{ argc, argv, options };
