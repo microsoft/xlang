@@ -72,29 +72,10 @@ int %(PyObject* module);
 
         w.write_license();
         write_include(w, ns);
-
         f.bind_each<write_class>(members.classes)(w);
         f.bind_each<write_interface>(members.interfaces)(w);
         f.bind_each<write_struct>(members.structs)(w);
-
-        w.write("\n// ----- % Initialization --------------------\n", ns);
-        auto format = R"(
-int %(PyObject* module)
-{
-    PyObject* type_object{ nullptr };
-
-)";
-        w.write(format, bind<write_ns_init_function_name>(ns));
-
-        {
-            writer::indent_guard g{ w };
-            f.bind_each<write_type_fromspec>(members.classes)(w);
-            f.bind_each<write_type_fromspec>(members.interfaces)(w);
-            f.bind_each<write_type_fromspec>(members.structs)(w);
-
-            w.write_indented("\nreturn 0;\n");
-        }
-        w.write_indented("}\n");
+        write_namespace_init(w, f, ns, members);
 
         w.flush_to_file(settings.output_folder + filename);
         return std::move(w.needed_namespaces);

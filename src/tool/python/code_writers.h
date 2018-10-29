@@ -193,7 +193,6 @@ namespace xlang
 
         if (has_dealloc(type))
         {
-            w.write("    { Py_tp_base, nullptr }, // filled out in module init\n");
             w.write("    { Py_tp_dealloc, @_dealloc },\n", type.TypeName());
         }
 
@@ -1450,28 +1449,60 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
             ? w.write_temp("py@", type.TypeName())
             : w.write_temp("%", type);
 
-        w.write("\n");
         if (has_dealloc(type))
         {
-            w.write_indented("@_Type_slots[0].pfunc = py::winrt_type<py::winrt_base>::python_type;\n", type.TypeName());
+            w.write_indented("\ntype_object = PyType_FromSpecWithBases(&@_Type_spec, bases);\n", type.TypeName());
+        }
+        else
+        {
+            w.write_indented("\ntype_object = PyType_FromSpec(&@_Type_spec);\n", type.TypeName());
         }
 
-        auto format = R"(type_object = PyType_FromSpec(&@_Type_spec);
-if (type_object == nullptr)
+
+        auto format = R"(if (type_object == nullptr)
 {
     return -1;
 }
 if (PyModule_AddObject(module, "@", type_object) != 0)
 {
+    Py_DECREF(type_object);
     return -1;
 }
 py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
+//Py_DECREF(type_object);
+type_object = nullptr;
 )";
         w.write_indented(format,
-            type.TypeName(), 
             type.TypeName(),
             winrt_type_param);
     }
+
+    void write_namespace_init(writer& w, filter const& f, std::string_view const& ns, cache::namespace_members const& members)
+    {
+        w.write("\n// ----- % Initialization --------------------\n", ns);
+        auto format = R"(
+int %(PyObject* module)
+{
+    PyObject* type_object{ nullptr };
+    PyObject* bases = PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type);
+)";
+
+        w.write_indented(format, bind<write_ns_init_function_name>(ns));
+        {
+            writer::indent_guard g{ w };
+
+            f.bind_each<write_type_fromspec>(members.classes)(w);
+            f.bind_each<write_type_fromspec>(members.interfaces)(w);
+            f.bind_each<write_type_fromspec>(members.structs)(w);
+
+            w.write_indented(R"(
+Py_DECREF(bases);
+return 0;
+)");
+        }
+        w.write_indented("}\n");
+    }
+
 
     void write_python_namespace_includes(writer& w, std::vector<std::string> const& namespaces)
     {
@@ -1498,7 +1529,6 @@ static int module_exec(PyObject* module)
         return -1;
     }
     py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
-
 )";
             w.write(format);
         }
