@@ -84,10 +84,10 @@ namespace xlang
 
         for (auto&& ns : namespaces)
         {
-            w.write("'py.%.cpp', ", ns);
+            w.write("'%/src/py.%.cpp', ", settings.module, ns);
         }
 
-        w.write("'%.cpp'", module_name);
+        w.write("'%/src/%.cpp'", settings.module, module_name);
     }
 
     void write_winrt_wrapper(writer& w, TypeDef const& type)

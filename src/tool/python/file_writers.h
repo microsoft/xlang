@@ -2,14 +2,17 @@
 
 namespace xlang
 {
-    inline void write_pybase_h()
+    namespace stdfs = std::experimental::filesystem;
+
+    inline void write_pybase_h(stdfs::path const& folder)
     {
         writer w;
         w.write(strings::pybase);
-        w.flush_to_file(settings.output_folder + "pybase.h");
+        create_directories(folder);
+        w.flush_to_file(folder / "pybase.h");
     }
 
-    inline void write_namespace_h(std::string_view const& ns, std::set<std::string> const& needed_namespaces, cache::namespace_members const& members)
+    inline void write_namespace_h(stdfs::path const& folder, std::string_view const& ns, std::set<std::string> const& needed_namespaces, cache::namespace_members const& members)
     {
         writer w;
         w.current_namespace = ns;
@@ -60,10 +63,11 @@ int %(PyObject* module);
             w.write(format, ns, bind<write_ns_init_function_name>(ns));
         }
 
-        w.flush_to_file(settings.output_folder + filename);
+        create_directories(folder);
+        w.flush_to_file(folder / filename);
     }
 
-    inline auto write_namespace_cpp(std::string_view const& ns, cache::namespace_members const& members)
+    inline auto write_namespace_cpp(stdfs::path const& folder, std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.current_namespace = ns;
@@ -77,11 +81,12 @@ int %(PyObject* module);
         f.bind_each<write_struct>(members.structs)(w);
         write_namespace_init(w, f, ns, members);
 
-        w.flush_to_file(settings.output_folder + filename);
+        create_directories(folder);
+        w.flush_to_file(folder / filename);
         return std::move(w.needed_namespaces);
     }
 
-    inline void write_module_cpp(std::string_view const& module_name, std::vector<std::string> const& namespaces)
+    inline void write_module_cpp(stdfs::path const& folder, std::string_view const& module_name, std::vector<std::string> const& namespaces)
     {
         writer w;
 
@@ -94,16 +99,16 @@ int %(PyObject* module);
         write_module_init_func(w, module_name);
 
         auto filename = w.write_temp("%.cpp", module_name);
-        w.flush_to_file(settings.output_folder + filename);
+        create_directories(folder);
+        w.flush_to_file(folder / filename);
     }
 
-    inline void write_setup_py(std::string_view const& module_name, std::string_view const& native_module_name, std::vector<std::string> const& namespaces)
+    inline void write_setup_py(stdfs::path const& folder, std::string_view const& module_name, std::string_view const& native_module_name, std::vector<std::string> const& namespaces)
     {
         writer w;
 
         w.write(strings::setup, module_name, native_module_name, bind<write_setup_filenames>(native_module_name, namespaces));
-        w.flush_to_file(settings.output_folder + "setup.py");
+        create_directories(folder);
+        w.flush_to_file(folder / "setup.py");
     }
-
-
 }
