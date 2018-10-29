@@ -384,7 +384,7 @@ static PyType_Spec @_Type_spec =
             if (count_out_param(signature.params()) == 0)
             {
                 auto format = R"(
-            return py::converter<decltype(return_value)>::convert(return_value);
+            return py::convert(return_value);
 )";
                 w.write(format);
             }
@@ -392,7 +392,7 @@ static PyType_Spec @_Type_spec =
             {
                 {
                     auto format = R"(
-            PyObject* out_return_value = py::converter<decltype(return_value)>::convert(return_value);
+            PyObject* out_return_value = py::convert(return_value);
             if (!out_return_value) 
             { 
                 return nullptr;
@@ -417,14 +417,14 @@ static PyType_Spec @_Type_spec =
                     tuple_pack_param.append(", ");
                     tuple_pack_param.append(w.write_temp("out%", sequence));
 
-                    auto format = R"(            PyObject* out% = py::converter<decltype(param%)>::convert(param%);
+                    auto format = R"(            PyObject* out% = py::convert(param%);
             if (!out%) 
             {
                 return nullptr;
             }
 
 )";
-                    w.write(format, sequence, sequence, sequence, sequence);
+                    w.write(format, sequence, sequence, sequence);
                 }
 
                 w.write("            return PyTuple_Pack(%, out_return_value%);\n", out_param_count, tuple_pack_param);
@@ -528,7 +528,7 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
     try
     {
         auto instance = py::converter<winrt::Windows::Foundation::IInspectable>::convert_to(arg);
-        return py::converter<%>::convert(instance.as<%>());
+        return py::convert(instance.as<%>());
     }
     catch (...)
     {
@@ -537,7 +537,7 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
 }
 )";
 
-        w.write(format, type.TypeName(), type, type);
+        w.write(format, type.TypeName(), type);
     }
     
     void write_type_method_decl_self_type(writer& w, TypeDef const& type, MethodDef const& method)
@@ -917,7 +917,7 @@ static void @_dealloc(%* self)
 
         for (auto&& p : invoke.ParamList())
         {
-            w.write("            PyObject* pyObj% = py::converter<decltype(param%)>::convert(param%);\n", p.Sequence(), p.Sequence(), p.Sequence());
+            w.write("            PyObject* pyObj% = py::convert(param%);\n", p.Sequence(), p.Sequence());
         }
 
         w.write("\n            PyObject* args = PyTuple_Pack(%", distance(invoke.ParamList()));
@@ -1366,7 +1366,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
 {
     try
     {
-        return py::converter<decltype(%)>::convert(%);
+        return py::convert(%);
     }
     catch (...)
     {
@@ -1378,7 +1378,6 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
                 field.Parent().TypeName(),
                 field.Name(),
                 bind<write_winrt_wrapper>(field.Parent()),
-                bind<write_struct_property_get_variable>(field),
                 bind<write_struct_property_get_variable>(field));
         }
 
