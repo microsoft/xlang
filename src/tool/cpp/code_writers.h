@@ -196,8 +196,6 @@ namespace xlang
             return;
         }
 
-        // TODO: generate macro that lets you throttle the latest version
-
         auto format = R"(    template <> struct fast_version<%>
     {
         using type = %;
@@ -837,11 +835,6 @@ namespace xlang
         }
     }
 
-    void write_fast_direct_definitions(writer&, TypeDef const&)
-    {
-
-    }
-
     void write_fast_definitions(writer& w, TypeDef const& type)
     {
         if (!is_fast_class(type))
@@ -932,7 +925,7 @@ namespace xlang
         w.write(format,
             impl_name,
             bind_each<write_consume_declaration>(type.MethodList()),
-            "", // TODO: extensions...
+            "",
             type_namespace,
             type_name,
             impl_name);
@@ -2106,7 +2099,6 @@ protected:
     }
 )";
 
-        // TODO: add get_name/get_abi_name/is_async to method_signature
         method_signature signature{ method };
         auto method_name = get_name(method);
         w.async_types = is_async(method, signature);
@@ -2395,16 +2387,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             bind_each<write_component_activation>(classes));
     }
 
-    void write_component_base_type_parameter(writer&, TypeDef const&)
-    {
-
-    }
-
-    void write_component_base_type_argument(writer&, TypeDef const&)
-    {
-
-    }
-
     void write_component_interfaces(writer& w, TypeDef const& type)
     {
         auto interfaces = get_interfaces(w, type);
@@ -2428,11 +2410,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 w.write(", @", interface_name);
             }
         }
-    }
-
-    void write_component_module_lock(writer&, TypeDef const&)
-    {
-
     }
 
     void write_component_constructor_forwarder(writer& w, MethodDef const& method)
@@ -2562,11 +2539,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
             w.write(format,
                 type_namespace,
-                bind<write_component_base_type_parameter>(type),
+                "",
                 type_name,
                 bind<write_component_interfaces>(type),
-                bind<write_component_base_type_argument>(type),
-                bind<write_component_module_lock>(type),
+                "",
+                "",
                 "",
                 bind<write_class_base>(type),
                 bind<write_class_override_defaults>(interfaces),
@@ -2574,12 +2551,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 type_namespace,
                 type_name,
                 type_name,
-                "",//bind<write_component_composable_base_name>(type),
+                "",
                 type_namespace,
                 type_name,
-                //type_name,
-                "",//bind<write_component_override_constructors>(type),
-                "");//bind<write_component_class_override_dispatch_base>(type));
+                "",
+                "");
         }
 
         if (has_factory_members(type))
@@ -2710,8 +2686,6 @@ namespace winrt::@::implementation
         auto type_namespace = type.TypeNamespace();
         auto factories = get_factories(type);
         bool const non_static = !empty(type.InterfaceImpl());
-
-        // TODO: add base include for non-external base
 
         {
             auto format = R"(#include "%.g.h"
