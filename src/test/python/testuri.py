@@ -1,7 +1,7 @@
 import find_projection
 import unittest
 
-wf = find_projection.import_winrt_ns("Windows.Foundation")
+import pyrt.Windows.Foundation as wf
 
 class TestUri(unittest.TestCase):
 
@@ -64,10 +64,6 @@ class TestUri(unittest.TestCase):
         # self.assertEqual(t[1], 0)
 
     
-
-
-
-
 
 if __name__ == '__main__':
     import _pyrt

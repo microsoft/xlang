@@ -1,12 +1,8 @@
 import find_projection
-
 import unittest
 import asyncio
 
-wfc = find_projection.import_winrt_ns("Windows.Foundation.Collections")
-
-# TODO: automatically pull in dependencies
-wf = find_projection.import_winrt_ns("Windows.Foundation")
+import pyrt.Windows.Foundation.Collections as wfc
 
 class TestCollections(unittest.TestCase):
 
@@ -51,7 +47,4 @@ class TestCollections(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import _pyrt
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()

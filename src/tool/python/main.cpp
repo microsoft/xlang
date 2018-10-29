@@ -82,12 +82,14 @@ namespace xlang
             std::vector<std::string> generated_namespaces{};
             task_group group;
 
+            auto native_module = "_" + settings.module;
             auto module_dir = settings.output_folder / settings.module;
             auto src_dir = module_dir / "src";
 
             group.add([&]
             {
                 write_pybase_h(src_dir);
+                write_package_init(module_dir, native_module);
             });
 
             for (auto&& ns : c.namespaces())
@@ -113,7 +115,8 @@ namespace xlang
                     pos = new_pos + 1;
                 } 
 
-                create_directories(ns_dir);
+                write_package_init(module_dir, native_module);
+                write_namespace_init(ns_dir, settings.module, ns.first, ns.second);
 
                 std::string fqns{ ns.first };
                 auto h_filename = "py." + fqns + ".h";
@@ -129,7 +132,6 @@ namespace xlang
 
             group.get();
 
-            auto native_module = "_" + settings.module;
             write_module_cpp(src_dir, native_module, generated_namespaces);
             write_setup_py(settings.output_folder, settings.module, native_module, generated_namespaces);
 

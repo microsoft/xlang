@@ -2,10 +2,8 @@ import find_projection
 import unittest
 import asyncio
 
-wdg = find_projection.import_winrt_ns("Windows.Devices.Geolocation")
-
-# TODO: automatically pull in dependencies
-wf = find_projection.import_winrt_ns("Windows.Foundation")
+import pyrt.Windows.Devices.Geolocation as wdg
+import pyrt.Windows.Foundation as wf
 
 class TestGeolocation(unittest.TestCase):
 

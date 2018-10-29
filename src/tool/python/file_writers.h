@@ -110,4 +110,28 @@ namespace xlang
         create_directories(folder);
         w.flush_to_file(folder / "setup.py");
     }
+
+    inline void write_package_init(stdfs::path const& folder, std::string_view const& module_name)
+    {
+        writer w;
+
+        w.write(strings::package_init, module_name, module_name, module_name, module_name);
+        create_directories(folder);
+        w.flush_to_file(folder / "__init__.py");
+    }
+
+    inline void write_namespace_init(stdfs::path const& folder, std::string_view const& module_name, std::string_view const& ns, cache::namespace_members const& members)
+    {
+        writer w;
+
+        w.write(strings::ns_init, module_name, ns);
+
+        xlang::filter f{ settings.include, settings.exclude };
+        f.bind_each<write_import_type>(members.classes)(w);
+        f.bind_each<write_import_type>(members.interfaces)(w);
+        f.bind_each<write_import_type>(members.structs)(w);
+
+        create_directories(folder);
+        w.flush_to_file(folder / "__init__.py");
+    }
 }

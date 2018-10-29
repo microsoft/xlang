@@ -1,8 +1,10 @@
 import find_projection
 import unittest
 
-wdj = find_projection.import_winrt_ns("Windows.Data.Json")
-wfc = find_projection.import_winrt_ns("Windows.Foundation.Collections")
+import pyrt.Windows.Data.Json as wdj
+
+# TODO: automatically pull in dependencies
+import pyrt.Windows.Foundation.Collections as wfc
 
 class TestJson(unittest.TestCase):
 

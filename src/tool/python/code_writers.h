@@ -2,6 +2,16 @@
 
 namespace xlang
 {
+    void write_import_type(writer& w, TypeDef const& type)
+    {
+        if (is_exclusive_to(type))
+        {
+            return;
+        }
+
+        w.write("@ = _internal.@\n", type.TypeName(), type.TypeName());
+    }
+
     void write_include(writer& w, std::string_view const& ns)
     {
         if (w.current_namespace != ns)
