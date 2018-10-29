@@ -116,7 +116,6 @@ namespace xlang
                 } 
 
                 write_package_init(module_dir, native_module);
-                write_namespace_init(ns_dir, settings.module, ns.first, ns.second);
 
                 std::string fqns{ ns.first };
                 auto h_filename = "py." + fqns + ".h";
@@ -127,6 +126,7 @@ namespace xlang
                 {
                     auto namespaces = write_namespace_cpp(src_dir, ns.first, ns.second);
                     write_namespace_h(src_dir, ns.first, namespaces, ns.second);
+                    write_namespace_init(ns_dir, settings.module, namespaces, ns.first, ns.second);
                 });
             }
 

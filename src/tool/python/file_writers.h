@@ -120,11 +120,20 @@ namespace xlang
         w.flush_to_file(folder / "__init__.py");
     }
 
-    inline void write_namespace_init(stdfs::path const& folder, std::string_view const& module_name, std::string_view const& ns, cache::namespace_members const& members)
+    inline void write_namespace_init(stdfs::path const& folder, std::string_view const& module_name, std::set<std::string> const& needed_namespaces, std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
 
         w.write(strings::ns_init, module_name, ns);
+
+        if (!needed_namespaces.empty())
+        {
+            for (auto&& needed_ns : needed_namespaces)
+            {
+                w.write("import %.%\n", module_name, needed_ns);
+            }
+            w.write("\n");
+        }
 
         xlang::filter f{ settings.include, settings.exclude };
         f.bind_each<write_import_type>(members.classes)(w);

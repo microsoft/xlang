@@ -3,9 +3,6 @@ import unittest
 
 import pyrt.Windows.Data.Json as wdj
 
-# TODO: automatically pull in dependencies
-import pyrt.Windows.Foundation.Collections as wfc
-
 class TestJson(unittest.TestCase):
 
     def test_activate_JsonArray(self):
