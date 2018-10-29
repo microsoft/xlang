@@ -16,9 +16,9 @@ namespace xlang
         std::string component_name;
         std::string component_pch;
         bool component_prefix{};
+        bool component_overwrite{};
 
         bool verbose{};
-        bool overwrite{};
         bool uniform{};
 
         std::set<std::string> include;

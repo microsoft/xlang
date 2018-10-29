@@ -48,7 +48,7 @@ namespace xlang
         settings.reference = args.files("reference");
         settings.component = args.exists("component");
         settings.base = args.exists("base");
-        settings.overwrite = args.exists("overwrite");
+        settings.component_overwrite = args.exists("overwrite");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / settings.root / "impl");

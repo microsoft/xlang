@@ -243,7 +243,7 @@ namespace xlang
 
         auto path = settings.component_folder + get_component_filename(type) + ".h";
 
-        if (!settings.overwrite && exists(path))
+        if (!settings.component_overwrite && exists(path))
         {
             return;
         }
@@ -263,7 +263,7 @@ namespace xlang
 
         auto path = settings.component_folder + get_component_filename(type) + ".cpp";
 
-        if (!settings.overwrite && exists(path))
+        if (!settings.component_overwrite && exists(path))
         {
             return;
         }
