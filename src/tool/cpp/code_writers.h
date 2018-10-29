@@ -196,8 +196,6 @@ namespace xlang
             return;
         }
 
-        // TODO: generate macro that lets you throttle the latest version
-
         auto format = R"(    template <> struct fast_version<%>
     {
         using type = %;
@@ -238,7 +236,10 @@ namespace xlang
 
     void write_struct_category(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <> struct category<%>{ using type = struct_category<%>; };
+        auto format = R"(    template <> struct category<%>
+    {
+        using type = struct_category<%>;
+    };
 )";
 
         w.write(format, type, bind_list(", ", type.FieldList()));
@@ -543,7 +544,7 @@ namespace xlang
 
     void write_field_abi(writer& w, Field const& field)
     {
-        w.write("    % %;\n", get_field_abi(w, field), field.Name());
+        w.write("        % %;\n", get_field_abi(w, field), field.Name());
     }
 
     void write_struct_abi(writer& w, TypeDef const& type)
@@ -552,8 +553,11 @@ namespace xlang
 
         auto format = R"(    struct struct_%
     {
-    %};
-    template <> struct abi<@::%>{ using type = struct_%; };
+%    };
+    template <> struct abi<@::%>
+    {
+        using type = struct_%;
+    };
 )";
 
         auto type_name = type.TypeName();
@@ -831,11 +835,6 @@ namespace xlang
         }
     }
 
-    void write_fast_direct_definitions(writer&, TypeDef const&)
-    {
-
-    }
-
     void write_fast_definitions(writer& w, TypeDef const& type)
     {
         if (!is_fast_class(type))
@@ -926,7 +925,7 @@ namespace xlang
         w.write(format,
             impl_name,
             bind_each<write_consume_declaration>(type.MethodList()),
-            "", // TODO: extensions...
+            "",
             type_namespace,
             type_name,
             impl_name);
@@ -1778,7 +1777,7 @@ protected:
 
     void write_struct_field(writer& w, std::pair<std::string_view, std::string> const& field)
     {
-        w.write("    @ %;\n",
+        w.write("        @ %;\n",
             field.second,
             field.first);
     }
@@ -1800,14 +1799,12 @@ protected:
     {
         auto format = R"(    struct %
     {
-    %};
-
-    bool operator==(% const& left, % const& right)%
+%    };
+    inline bool operator==(% const& left, % const& right)%
     {
         return%;
     }
-
-    bool operator!=(% const& left, % const& right)%
+    inline bool operator!=(% const& left, % const& right)%
     {
         return !(left == right);
     }
@@ -2102,7 +2099,6 @@ protected:
     }
 )";
 
-        // TODO: add get_name/get_abi_name/is_async to method_signature
         method_signature signature{ method };
         auto method_name = get_name(method);
         w.async_types = is_async(method, signature);
@@ -2281,6 +2277,14 @@ protected:
         {
             w.write(strings::base_reference_produce);
         }
+        else if (namespace_name == "Windows.UI.Xaml.Interop")
+        {
+            w.write(strings::base_xaml_typename);
+        }
+        else if (namespace_name == "Windows.UI.Core")
+        {
+            w.write(strings::base_resume_foreground);
+        }
     }
 
     void write_base_fragment(writer& w, std::string_view const& value)
@@ -2383,16 +2387,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             bind_each<write_component_activation>(classes));
     }
 
-    void write_component_base_type_parameter(writer&, TypeDef const&)
-    {
-
-    }
-
-    void write_component_base_type_argument(writer&, TypeDef const&)
-    {
-
-    }
-
     void write_component_interfaces(writer& w, TypeDef const& type)
     {
         auto interfaces = get_interfaces(w, type);
@@ -2416,11 +2410,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 w.write(", @", interface_name);
             }
         }
-    }
-
-    void write_component_module_lock(writer&, TypeDef const&)
-    {
-
     }
 
     void write_component_constructor_forwarder(writer& w, MethodDef const& method)
@@ -2550,11 +2539,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
             w.write(format,
                 type_namespace,
-                bind<write_component_base_type_parameter>(type),
+                "",
                 type_name,
                 bind<write_component_interfaces>(type),
-                bind<write_component_base_type_argument>(type),
-                bind<write_component_module_lock>(type),
+                "",
+                "",
                 "",
                 bind<write_class_base>(type),
                 bind<write_class_override_defaults>(interfaces),
@@ -2562,12 +2551,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 type_namespace,
                 type_name,
                 type_name,
-                "",//bind<write_component_composable_base_name>(type),
+                "",
                 type_namespace,
                 type_name,
-                //type_name,
-                "",//bind<write_component_override_constructors>(type),
-                "");//bind<write_component_class_override_dispatch_base>(type));
+                "",
+                "");
         }
 
         if (has_factory_members(type))
@@ -2698,8 +2686,6 @@ namespace winrt::@::implementation
         auto type_namespace = type.TypeNamespace();
         auto factories = get_factories(type);
         bool const non_static = !empty(type.InterfaceImpl());
-
-        // TODO: add base include for non-external base
 
         {
             auto format = R"(#include "%.g.h"

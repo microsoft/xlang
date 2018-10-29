@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 
 add_executable(cpp_test)
 target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-target_sources(cpp_test PUBLIC pch.cpp activation.cpp test/Async.cpp test/Collections.cpp test/Edge.cpp test/Fast.cpp "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp")
+target_sources(cpp_test PUBLIC pch.cpp activation.cpp test/Async.cpp test/Collections.cpp test/Edge.cpp test/Fast.cpp test/Enum.cpp test/Structs.cpp "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp")
 
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(cpp_test pch.cpp pch.h)
@@ -12,7 +12,7 @@ else()
     target_link_libraries(cpp_test -lpthread)
 endif()
 
-target_sources(cpp_test PUBLIC main.cpp)
+target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cpp.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)

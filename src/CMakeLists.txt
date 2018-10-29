@@ -79,13 +79,11 @@ if (MSVC)
         # string(REPLACE "/INCREMENTAL" "" CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${build_type}}")
         # string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
     endforeach()
-    
-    add_compile_options(/permissive-)
 
     if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
         add_compile_options(-Wno-delete-non-virtual-dtor -mcx16 -fno-delayed-template-parsing -Xclang -fcoroutines-ts)
     else()
-        add_compile_options(/await)
+        add_compile_options(/permissive- /await)
     endif()
 
     # Explicitly configure _DEBUG preprocessor macro 

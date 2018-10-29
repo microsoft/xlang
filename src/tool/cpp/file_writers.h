@@ -16,7 +16,6 @@ namespace xlang
         w.write(strings::base_identity);
         w.write(strings::base_handle);
         w.write(strings::base_lock);
-        w.write(strings::base_diagnostics);
         w.write(strings::base_abi);
         w.write(strings::base_windows);
         w.write(strings::base_string);
@@ -244,7 +243,7 @@ namespace xlang
 
         auto path = settings.component_folder + get_component_filename(type) + ".h";
 
-        if (!settings.overwrite && exists(path))
+        if (!settings.component_overwrite && exists(path))
         {
             return;
         }
@@ -264,7 +263,7 @@ namespace xlang
 
         auto path = settings.component_folder + get_component_filename(type) + ".cpp";
 
-        if (!settings.overwrite && exists(path))
+        if (!settings.component_overwrite && exists(path))
         {
             return;
         }

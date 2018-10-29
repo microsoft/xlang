@@ -1767,90 +1767,6 @@ WINRT_EXPORT namespace winrt
     };
 }
 
-#ifdef WINRT_DIAGNOSTICS
-
-WINRT_EXPORT namespace winrt
-{
-    struct factory_diagnostics_info
-    {
-        bool is_agile{ true };
-        uint32_t requests{ 0 };
-    };
-
-    struct diagnostics_info
-    {
-        std::map<std::wstring_view, uint32_t> queries;
-        std::map<std::wstring_view, factory_diagnostics_info> factories;
-    };
-}
-
-namespace winrt::impl
-{
-    struct diagnostics_info
-    {
-        template <typename T>
-        void add_query()
-        {
-            slim_lock_guard const guard(m_lock);
-            ++m_info.queries[name_of<T>()];
-        }
-
-        template <typename T>
-        void add_factory()
-        {
-            slim_lock_guard const guard(m_lock);
-            factory_diagnostics_info& factory = m_info.factories[name_of<T>()];
-            ++factory.requests;
-        }
-
-        template <typename T>
-        void non_agile_factory()
-        {
-            slim_lock_guard const guard(m_lock);
-            factory_diagnostics_info& factory = m_info.factories[name_of<T>()];
-            factory.is_agile = false;
-        }
-
-        auto get()
-        {
-            slim_lock_guard const guard(m_lock);
-            return m_info;
-        }
-
-        auto detach()
-        {
-            slim_lock_guard const guard(m_lock);
-            return std::move(m_info);
-        }
-
-    private:
-
-        slim_mutex m_lock;
-        winrt::diagnostics_info m_info;
-    };
-
-    inline diagnostics_info& get_diagnostics_info() noexcept
-    {
-        static diagnostics_info info;
-        return info;
-    }
-}
-
-WINRT_EXPORT namespace winrt
-{
-    inline auto get_diagnostics_info()
-    {
-        return impl::get_diagnostics_info().get();
-    }
-
-    inline auto detach_diagnostics_info()
-    {
-        return impl::get_diagnostics_info().detach();
-    }
-}
-
-#endif
-
 namespace winrt::impl
 {
     struct com_callback_args
@@ -2311,8 +2227,8 @@ namespace winrt::impl
         }
     };
 
-    template <typename To>
-    com_ref<To> as(unknown_abi* ptr)
+    template <typename To, typename From>
+    com_ref<To> as(From* ptr)
     {
         if (!ptr)
         {
@@ -2324,8 +2240,8 @@ namespace winrt::impl
         return { take_ownership_from_abi, get_self_abi<To>::value(result) };
     }
 
-    template <typename To>
-    com_ref<To> try_as(unknown_abi* ptr) noexcept
+    template <typename To, typename From>
+    com_ref<To> try_as(From* ptr) noexcept
     {
         if (!ptr)
         {
@@ -4330,6 +4246,8 @@ WINRT_EXPORT namespace winrt
             }
             else
             {
+                WINRT_VERIFY_(impl::error_ok, m_info->GetReference(m_debug_reference.put()));
+
                 if (auto info2 = m_info.try_as<impl::ILanguageExceptionErrorInfo2>())
                 {
                     WINRT_VERIFY_(impl::error_ok, info2->CapturePropagationContext(nullptr));
@@ -4404,6 +4322,8 @@ WINRT_EXPORT namespace winrt
             WINRT_VERIFY_(impl::error_ok, WINRT_GetRestrictedErrorInfo(m_info.put_void()));
         }
 
+        impl::bstr_handle m_debug_reference;
+        uint32_t const m_debug_magic{ 0xAABBCCDD };
         hresult m_code{ impl::error_fail };
         com_ptr<impl::IRestrictedErrorInfo> m_info;
     };

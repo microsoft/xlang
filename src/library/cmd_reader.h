@@ -16,6 +16,18 @@ namespace xlang::cmd
         template <typename C, typename V>
         reader(C const argc, V argv, std::vector<option> const& options)
         {
+#ifdef XLANG_DEBUG
+            {
+                std::set<std::string_view> unique;
+
+                for (auto&& option : options)
+                {
+                    // If this assertion fails it means there are duplicate options.
+                    XLANG_ASSERT(unique.insert(option.name).second);
+                }
+            }
+#endif
+
             if (argc < 2)
             {
                 return;
