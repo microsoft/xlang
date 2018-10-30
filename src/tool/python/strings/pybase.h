@@ -65,13 +65,16 @@ namespace py
     constexpr bool is_delegate_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::delegate_category>;
 
     template<typename T>
+    constexpr bool is_pdelegate_category_v = !std::is_base_of_v<winrt::Windows::Foundation::IInspectable, T> && pinterface_checker<typename winrt::impl::category<T>::type>::value;
+
+    template<typename T>
     constexpr bool is_enum_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::enum_category>;
 
     template<typename T>
     constexpr bool is_interface_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::interface_category>;
 
     template<typename T>
-    constexpr bool is_pinterface_category_v = pinterface_checker<typename winrt::impl::category<T>::type>::value;
+    constexpr bool is_pinterface_category_v = std::is_base_of_v<winrt::Windows::Foundation::IInspectable, T> && pinterface_checker<typename winrt::impl::category<T>::type>::value;
 
     template<typename T>
     constexpr bool is_struct_category_v = struct_checker<typename winrt::impl::category<T>::type>::value;
@@ -122,7 +125,32 @@ namespace py
     struct winrt_base;
 
     template<typename T>
-    struct winrt_type { static PyTypeObject* python_type; };
+    struct winrt_type
+    {
+        static PyTypeObject* get_python_type()
+        {
+            return nullptr;
+        }
+    };
+
+    template<>
+    struct winrt_type<winrt_base>
+    {
+        static PyTypeObject* python_type;
+    };
+
+    template<typename T>
+    PyTypeObject* get_python_type()
+    {
+        if constexpr (is_pinterface_category_v<T>)
+        {
+            return winrt_type<pinterface_python_type<T>::abstract>::get_python_type();
+        }
+        else
+        {
+            return winrt_type<T>::get_python_type();
+        }
+    }
 
     inline __declspec(noinline) PyObject* to_PyErr() noexcept
     {
@@ -217,7 +245,7 @@ namespace py
     {
         using ptype = pinterface_python_type<T>;
 
-        PyTypeObject* type_object = winrt_type<ptype::abstract>::python_type;
+        PyTypeObject* type_object = get_python_type<T>();
 
         if (type_object == nullptr)
         {
@@ -243,11 +271,18 @@ namespace py
     }
 
     template<typename T>
-    PyObject* wrap(T instance)
+    PyObject* wrap(T instance) noexcept
     {
+        if (!instance)
+        {
+            PyErr_SetNone(PyExc_RuntimeError);
+            return nullptr;
+
+        }
+
         if constexpr (is_class_category_v<T> || is_interface_category_v<T>)
         {
-            return wrap<T>(instance, winrt_type<T>::python_type);
+            return wrap<T>(instance, get_python_type<T>());
         }
         else
         {
@@ -263,7 +298,15 @@ namespace py
         }
     }
 
-    template <typename T>
+    inline void throw_if_pyobj_null(PyObject* obj)
+    {
+        if (!obj)
+        {
+            throw winrt::hresult_invalid_argument();
+        }
+    }
+
+    template <typename T, typename = void>
     struct converter
     {
         static PyObject* convert(T value) noexcept
@@ -288,6 +331,8 @@ namespace py
 
         static bool convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             auto result = PyObject_IsTrue(obj);
 
             if (result == -1)
@@ -309,6 +354,8 @@ namespace py
 
         static int32_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             auto result = PyLong_AsLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -330,6 +377,8 @@ namespace py
 
         static uint32_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             auto result = PyLong_AsUnsignedLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -351,6 +400,8 @@ namespace py
 
         static int64_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             auto result = PyLong_AsLongLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -372,6 +423,8 @@ namespace py
 
         static uint64_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             auto result = PyLong_AsUnsignedLongLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -393,6 +446,8 @@ namespace py
 
         static float convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             auto result = PyFloat_AsDouble(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -414,6 +469,8 @@ namespace py
 
         static double convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             auto result = PyFloat_AsDouble(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -422,6 +479,28 @@ namespace py
             }
 
             return result;
+        }
+    };
+
+    template <>
+    struct converter<winrt::Windows::Foundation::IInspectable>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::IInspectable value) noexcept
+        {
+            return wrap<winrt::Windows::Foundation::IInspectable>(value, winrt_type<winrt_base>::python_type);
+        }
+
+        static winrt::Windows::Foundation::IInspectable convert_to(PyObject* obj)
+        {
+            throw_if_pyobj_null(obj);
+
+            if (PyObject_IsInstance(obj, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::python_type)))
+            {
+                auto wrapper = reinterpret_cast<winrt_wrapper_base*>(obj);
+                return as<winrt::Windows::Foundation::IInspectable>(wrapper);
+            }
+
+            throw winrt::hresult_invalid_argument();
         }
     };
 
@@ -482,6 +561,8 @@ namespace py
 
         static pystringview convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             pystringview str{ obj };
 
             if (!str)
@@ -493,120 +574,219 @@ namespace py
         }
     };
 
-    template<typename T>
-    PyObject* convert_enum(T instance) noexcept
+    template <typename T>
+    struct converter<T, typename std::enable_if_t<is_enum_category_v<T>>>
     {
-        using enum_type = std::underlying_type_t<T>;
-        return converter<enum_type>::convert(static_cast<enum_type>(instance));
-    }
+        static PyObject* convert(T instance) noexcept
+        {
+            using enum_type = std::underlying_type_t<T>;
+            return converter<enum_type>::convert(static_cast<enum_type>(instance));
+        }
 
-    template<typename T>
-    PyObject* convert(T instance) noexcept
+        static auto convert_to(PyObject* obj)
+        {
+            using enum_type = std::underlying_type_t<T>;
+            throw_if_pyobj_null(obj);
+            return static_cast<T>(converter<enum_type>::convert_to(obj));
+        }
+    };
+
+    template <typename T>
+    struct converter<T, typename std::enable_if_t<is_class_category_v<T>>>
     {
-        if constexpr (is_class_category_v<T> || is_interface_category_v<T> || is_pinterface_category_v<T>)
+        static PyObject* convert(T instance) noexcept
         {
             return wrap(instance);
         }
-        else if constexpr (is_enum_category_v<T>)
+
+        static auto convert_to(PyObject* obj)
         {
-            return convert_enum(instance);
+            throw_if_pyobj_null(obj);
+
+            if (Py_TYPE(obj) != get_python_type<T>())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return reinterpret_cast<winrt_wrapper<T>*>(obj)->obj;
         }
-        else if constexpr (is_struct_category_v<T>)
+    };
+
+    template <typename T>
+    struct python_iterable final :
+        winrt::implements<python_iterable<T>, winrt::Windows::Foundation::Collections::IIterable<T>>
+    {
+        PyObject* _iterable;
+
+        explicit python_iterable(PyObject* iterable) : _iterable(iterable)
         {
-            return wrap_struct<T>(instance, winrt_type<T>::python_type);
         }
-        else if constexpr (is_basic_category_v<T>)
+
+        auto First() const
         {
-            return converter<T>::convert(instance);
+            return winrt::make<iterator>(PyObject_GetIter(_iterable));
         }
-        else
+
+    private:
+        struct iterator final : winrt::implements<iterator, winrt::Windows::Foundation::Collections::IIterator<T>>
         {
+            PyObject* _iterator;
+            std::optional<T> _current_value;
+
+            static std::optional<T> get_next(PyObject* iterator)
+            {
+                if (iterator == nullptr)
+                {
+                    throw winrt::hresult_invalid_argument();
+                }
+
+                PyObject* next = PyIter_Next(iterator);
+                if (next == nullptr)
+                {
+                    if (PyErr_Occurred())
+                    {
+                        // TODO: propagate Python error
+                        throw winrt::hresult_invalid_argument();
+                    }
+                    else
+                    {
+                        return {};
+                    }
+                }
+
+                return std::move(std::optional<T>{ converter<T>::convert_to(next) });
+            }
+
+            iterator(PyObject* i) : _iterator(i)
+            {
+                if (_iterator == nullptr)
+                {
+                    throw winrt::hresult_invalid_argument();
+                }
+
+                _current_value = get_next(_iterator);
+            }
+
+            auto Current() const
+            {
+                return _current_value.value();
+            }
+
+            bool HasCurrent() const
+            {
+                return _current_value.has_value();
+            }
+
+            bool MoveNext()
+            {
+                _current_value = get_next(_iterator);
+                return _current_value.has_value();
+            }
+
+            uint32_t GetMany(winrt::array_view<T> values)
+            {
+                // TODO: implement GetMany
+                throw winrt::hresult_not_implemented();
+            }
+        };
+    };
+
+    template <typename T>
+    std::optional<T> convert_interface_to(PyObject* obj)
+    {
+        throw_if_pyobj_null(obj);
+
+        if (Py_TYPE(obj) == get_python_type<T>())
+        {
+            return reinterpret_cast<winrt_wrapper<T>*>(obj)->obj;
+        }
+
+        if (PyObject_IsInstance(obj, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::python_type)))
+        {
+            auto wrapper = reinterpret_cast<winrt_wrapper_base*>(obj);
+            return as<T>(wrapper);
+        }
+
+        return {};
+    }
+
+    // TODO: specalization for Python Sequence Protocol -> IVector[View]
+    // TODO: specalization for Python Mapping Protocol -> IMap[View]
+
+    template <typename TItem>
+    struct converter<winrt::Windows::Foundation::Collections::IIterable<TItem>>
+    {
+        static PyObject* convert(TItem instance) noexcept
+        {
+            return wrap(instance);
+        }
+
+        static auto convert_to(PyObject* obj)
+        {
+            using TCollection = winrt::Windows::Foundation::Collections::IIterable<TItem>;
+
+            if (auto result = convert_interface_to<TCollection>(obj))
+            {
+                return result.value();
+            }
+
+            if (PyObject* iterator = PyObject_GetIter(obj))
+            {
+                return winrt::make<python_iterable<TItem>>(obj);
+            }
+
+            throw winrt::hresult_invalid_argument();
+        }
+    };
+
+    template <typename T>
+    struct is_specalized_interface : std::false_type {};
+
+    template <typename T>
+    inline constexpr bool is_specalized_interface_v = is_specalized_interface<T>::value;
+
+    template <typename TItem>
+    struct is_specalized_interface<winrt::Windows::Foundation::Collections::IIterable<TItem>> : std::true_type {};
+
+    template <typename T>
+    struct converter<T, typename std::enable_if_t<(is_interface_category_v<T> || is_pinterface_category_v<T>) && !is_specalized_interface_v<T>>>
+    {
+        static PyObject* convert(T instance) noexcept
+        {
+            return wrap(instance);
+        }
+
+        static auto convert_to(PyObject* obj)
+        {
+            if (auto result = convert_interface_to<T>(obj))
+            {
+                return result.value();
+            }
+
+            throw winrt::hresult_invalid_argument();
+        }
+    };
+
+    template <typename T>
+    struct converter<T, typename std::enable_if_t<is_delegate_category_v<T> || is_pdelegate_category_v<T>>>
+    {
+        static PyObject* convert(T instance) noexcept
+        {
+            // TODO: support converting delegates
             PyErr_SetNone(PyExc_NotImplementedError);
             return nullptr;
         }
-    }
 
-    template<typename T>
-    auto convert_to(PyObject* arg)
-    {
-        if (!arg)
+        static auto convert_to(PyObject* obj)
         {
-            throw winrt::hresult_invalid_argument();
+            throw_if_pyobj_null(obj);
+            return delegate_python_type<T>::type::get(obj);
         }
-
-        if constexpr (is_class_category_v<T>)
-        {
-            if (Py_TYPE(arg) != winrt_type<T>::python_type)
-            {
-                throw winrt::hresult_invalid_argument();
-            }
-
-            return reinterpret_cast<winrt_wrapper<T>*>(arg)->obj;
-        }
-        else if constexpr (is_interface_category_v<T>)
-        {
-            if (Py_TYPE(arg) == winrt_type<T>::python_type)
-            {
-                return reinterpret_cast<winrt_wrapper<T>*>(arg)->obj;
-            }
-
-            if (PyObject_IsInstance(arg, reinterpret_cast<PyObject*>(winrt_type<winrt_base>::python_type)) == 0)
-            {
-                throw winrt::hresult_invalid_argument();
-            }
-
-            auto wrapper = reinterpret_cast<winrt_wrapper_base*>(arg);
-            return as<T>(wrapper);
-        }
-        else if constexpr (is_pinterface_category_v<T>)
-        {
-            if constexpr (std::is_base_of_v<winrt::Windows::Foundation::IInspectable, T>)
-            {
-                // pinterface
-                auto wrapper = reinterpret_cast<winrt_wrapper_base*>(arg);
-                return as<T>(wrapper);
-            }
-            else
-            {
-                // pdelegate
-                return delegate_python_type<T>::type::get(arg);
-            }
-        }
-        else if constexpr (is_delegate_category_v<T>)
-        {
-            return delegate_python_type<T>::type::get(arg);
-        }
-        else if constexpr (is_enum_category_v<T>)
-        {
-            return static_cast<T>(convert_to<std::underlying_type_t<T>>(arg));
-        }
-        else if constexpr (is_struct_category_v<T>)
-        {
-            if (Py_TYPE(arg) == winrt_type<T>::python_type)
-            {
-                return reinterpret_cast<winrt_struct_wrapper<T>*>(arg)->obj;
-            }
-
-            if (PyDict_Check(arg))
-            { 
-                return converter<T>::convert_to(arg);
-            }
-
-            throw winrt::hresult_invalid_argument();
-        }
-        else if constexpr (is_basic_category_v<T>)
-        {
-            return converter<T>::convert_to(arg);
-        }
-        else
-        {
-            throw winrt::hresult_not_implemented();
-        }
-    }
+    };
 
     template<typename T>
     auto convert_to(PyObject* args, int index)
     {
-        return convert_to<T>(PyTuple_GetItem(args, index));
+        return converter<T>::convert_to(PyTuple_GetItem(args, index));
     }
 }

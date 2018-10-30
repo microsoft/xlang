@@ -55,8 +55,8 @@ namespace xlang::impl
 
         if (length != 0)
         {
-            static_assert(sizeof(string_storage_base) == sizeof(xlang_string_header), "xlang_string_header must be same size as string_storage_base");
-            return to_handle(string_reference::create(source_string, length, reinterpret_cast<string_storage_base*>(header)));
+            static_assert(sizeof(string_reference) == sizeof(xlang_string_header), "xlang_string_header must be same size as string_storage_base");
+            return to_handle(string_reference::create(source_string, length, reinterpret_cast<string_reference*>(header)));
         }
 
         return nullptr;
@@ -71,8 +71,8 @@ namespace xlang::impl
         if (string)
         {
             auto const result = from_handle(string)->ensure_buffer<char_type>();
-            *buffer = result.buffer;
-            return result.length;
+            *buffer = result.data();
+            return static_cast<uint32_t>(result.size());
         }
         else
         {

@@ -29,6 +29,9 @@ namespace xlang
         w.write("\nnamespace py\n{\n");
         {
             writer::indent_guard g{ w };
+            f.bind_each<write_winrt_type_specialization>(members.classes)(w);
+            f.bind_each<write_winrt_type_specialization>(members.interfaces)(w);
+            f.bind_each<write_winrt_type_specialization>(members.structs)(w);
             f.bind_each<write_struct_converter_decl>(members.structs)(w);
             f.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
             f.bind_each<write_delegate_type_mapper>(members.delegates)(w);

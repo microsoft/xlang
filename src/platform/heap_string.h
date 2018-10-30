@@ -67,7 +67,7 @@ namespace xlang::impl
     };
 
     template <typename char_type>
-    static heap_string* heap_string::create(
+    heap_string* heap_string::create(
         char_type const* source_string,
         uint32_t length)
     {
@@ -79,7 +79,7 @@ namespace xlang::impl
     }
 
     template <typename char_type>
-    static heap_string* heap_string::create(
+    heap_string* heap_string::create(
         char_type const* source_string,
         uint32_t length,
         cache_string* alternate)
@@ -92,7 +92,7 @@ namespace xlang::impl
     }
 
     template <typename char_type>
-    static heap_string* heap_string::create_preallocated(uint32_t length)
+    heap_string* heap_string::create_preallocated(uint32_t length)
     {
         heap_string* result = heap_string::create_impl<char_type>(nullptr, length, nullptr);
         result->mutable_buffer<char_type>()[length] = 0;

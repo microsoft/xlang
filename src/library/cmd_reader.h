@@ -13,6 +13,23 @@ namespace xlang::cmd
 
     struct reader
     {
+    private:
+        auto find(std::vector<option> const& options, std::string_view const& arg)
+        {
+            for (auto current = options.begin(); current != options.end(); ++current)
+            {
+                if (starts_with(current->name, arg))
+                {
+                    return current;
+                }
+            }
+
+            return options.end();
+        }
+
+        std::map<std::string_view, std::vector<std::string>> m_options;
+        
+    public:
         template <typename C, typename V>
         reader(C const argc, V argv, std::vector<option> const& options)
         {
@@ -139,7 +156,11 @@ namespace xlang::cmd
                 else if (path == "local")
                 {
                     std::array<char, MAX_PATH> local{};
+#ifdef _WIN64
                     ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+#else
+                    ExpandEnvironmentStringsA("%windir%\\SysNative\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+#endif
                     add_directory(local.data());
                 }
 #endif
@@ -151,22 +172,5 @@ namespace xlang::cmd
 
             return files;
         }
-
-    private:
-
-        auto find(std::vector<option> const& options, std::string_view const& arg)
-        {
-            for (auto current = options.begin(); current != options.end(); ++current)
-            {
-                if (starts_with(current->name, arg))
-                {
-                    return current;
-                }
-            }
-
-            return options.end();
-        }
-
-        std::map<std::string_view, std::vector<std::string>> m_options;
     };
 }

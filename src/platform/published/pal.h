@@ -19,7 +19,7 @@
 #ifdef _MSC_VER
 #define XLANG_COMPILER_CLANG 0
 #define XLANG_COMPILER_MSVC 1
-#elif
+#elif defined(__clang__)
 #define XLANG_COMPILER_CLANG 1
 #define XLANG_COMPILER_MSVC 0
 #else
@@ -35,19 +35,19 @@
 #define XLANG_CALL
 #endif
 
+#if XLANG_PLATFORM_WINDOWS
+# define XLANG_EXPORT_DECL __declspec(dllexport)
+# define XLANG_IMPORT_DECL __declspec(dllimport)
+#else
+# define XLANG_EXPORT_DECL __attribute__ ((visibility ("default")))
+# define XLANG_IMPORT_DECL 
+#endif
+
 #ifndef XLANG_PAL_EXPORT
-# if XLANG_PLATFORM_WINDOWS
-#  ifdef XLANG_PAL_EXPORTS
-#   define XLANG_PAL_EXPORT __declspec(dllexport)
-#  else
-#   define XLANG_PAL_EXPORT __declspec(dllimport)
-#  endif
+# ifdef XLANG_PAL_EXPORTS
+#  define XLANG_PAL_EXPORT XLANG_EXPORT_DECL
 # else
-#  ifdef XLANG_PAL_EXPORTS
-#    define XLANG_PAL_EXPORT __attribute__ ((visibility ("default")))
-#  else
-#    define XLANG_PAL_EXPORT 
-#  endif
+#  define XLANG_PAL_EXPORT XLANG_IMPORT_DECL
 # endif
 #endif
 
@@ -98,6 +98,14 @@ extern "C"
         char reserved2[16];
     };
 
+    struct xlang_guid
+    {
+        uint32_t Data1;
+        uint16_t Data2;
+        uint16_t Data3;
+        uint8_t  Data4[8];
+    };
+
 #ifdef __cplusplus
     enum class xlang_string_encoding
     {
@@ -118,6 +126,12 @@ extern "C"
         return static_cast<xlang_string_encoding>(static_cast<int_t>(lhs) & static_cast<int_t>(rhs));
     }
 
+// TODO: rework operator |= and &= to avoid return-type-c-linkage linkage warning on clang
+#if XLANG_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+#endif
+
     inline constexpr xlang_string_encoding& operator|=(xlang_string_encoding& lhs, xlang_string_encoding rhs) noexcept
     {
         lhs = lhs | rhs;
@@ -129,6 +143,11 @@ extern "C"
         lhs = lhs & rhs;
         return lhs;
     }
+
+#if XLANG_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
+
 #else
     enum xlang_string_encoding
     {
@@ -208,6 +227,15 @@ extern "C"
         uint32_t length
     ) XLANG_NOEXCEPT;
 
+    XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_get_activation_factory(
+        xlang_string class_name,
+        xlang_guid const& iid,
+        void** factory
+    ) XLANG_NOEXCEPT;
+
+    typedef xlang_result(XLANG_CALL * xlang_pfn_lib_get_activation_factory)(xlang_string, xlang_guid const&, void **);
+
+
 #ifdef __cplusplus
 }
 #endif
@@ -221,6 +249,7 @@ inline constexpr xlang_result xlang_error_sadness{ 0x80004005 };
 inline constexpr xlang_result xlang_error_out_of_memory{ 0x8007000e };
 inline constexpr xlang_result xlang_error_invalid_arg{ 0x80070057 };
 inline constexpr xlang_result xlang_error_untranslatable_string{ 0x80070459 };
+inline constexpr xlang_result xlang_error_class_not_available{ 0x80040111 };
 #endif
 
 #endif

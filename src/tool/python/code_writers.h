@@ -4,9 +4,18 @@ namespace xlang
 {
     void write_include(writer& w, std::string_view const& ns)
     {
-        w.write("#if __has_include(\"py.%.h\")\n", ns);
-        w.write("#include \"py.%.h\"\n", ns);
-        w.write("#endif\n");
+        if (w.current_namespace != ns)
+        {
+            auto format = R"(#if __has_include("py.%.h")
+#include "py.%.h"
+#endif
+)";
+            w.write(format, ns, ns);
+        }
+        else
+        {
+            w.write("#include \"py.%.h\"\n", ns);
+        }
     }
 
     void write_ns_init_function_name(writer& w, std::string_view const& ns)
@@ -164,6 +173,11 @@ namespace xlang
                 name, type.TypeName(), name, bind<write_method_table_flags>(overloads));
         }
 
+        if (!(is_ptype(type) || is_static_class(type)))
+        {
+            w.write("    { \"_from\", (PyCFunction)@__from, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+        }
+
         w.write("    { nullptr }\n};\n");
     }
 
@@ -206,7 +220,7 @@ namespace xlang
             || (category == category::interface_type)
             || (category == category::struct_type));
 
-        if (category == category::class_type && type.Flags().Abstract())
+        if (is_static_class(type))
         {
             w.write("0");
         }
@@ -268,7 +282,7 @@ static PyType_Spec @_Type_spec =
             // treat the args value as a single value, not as a tuple
             if (method.SpecialName() && !method.Flags().RTSpecialName()) 
             {
-                w.write("            auto param% = py::convert_to<%>(args);\n", sequence, param.second->Type());
+                w.write("            auto param% = py::converter<%>::convert_to(args);\n", sequence, param.second->Type());
             }
             else
             {
@@ -279,10 +293,13 @@ static PyType_Spec @_Type_spec =
             w.write("            % param% { % };\n", param.second->Type(), sequence, bind<write_out_param_init>(param));
             break;
         case param_category::pass_array:
-            w.write("            /*p*/ winrt::array_view<% const> param% {}; //= py::convert_to<winrt::array_view<% const>>(args, %);\n", param.second->Type(), sequence, param.second->Type(), sequence);
+            w.write("            /*p*/ winrt::array_view<% const> param% { }; // TODO: Convert incoming python parameter\n", param.second->Type(), sequence);
+            break;
+        case param_category::fill_array:
+            w.write("            /*f*/ winrt::array_view<%> param% { }; // TODO: Convert incoming python parameter\n", param.second->Type(), sequence);
             break;
         case param_category::receive_array:
-            w.write("            /*r*/ winrt::array_view<%> param% { };\n", param.second->Type(), sequence);
+            w.write("            /*r*/ winrt::com_array<%> param% { };\n", param.second->Type(), sequence);
             break;
         default:
             throw_invalid("write_param_conversion not impl");
@@ -338,6 +355,14 @@ static PyType_Spec @_Type_spec =
     {
         auto guard{ w.push_generic_params(info.type_arguments) };
 
+        if (get_param_category(signature.return_signature()) == param_category::receive_array)
+        {
+            w.write(R"(        // returning a ReceiveArray not impl
+        return nullptr;
+)");
+            return;
+        }
+
         w.write("        try\n        {\n");
         for (auto&& param : signature.params())
         {
@@ -360,7 +385,7 @@ static PyType_Spec @_Type_spec =
             if (count_out_param(signature.params()) == 0)
             {
                 auto format = R"(
-            return py::convert(return_value);
+            return py::converter<decltype(return_value)>::convert(return_value);
 )";
                 w.write(format);
             }
@@ -368,7 +393,7 @@ static PyType_Spec @_Type_spec =
             {
                 {
                     auto format = R"(
-            PyObject* out_return_value = py::convert(return_value);
+            PyObject* out_return_value = py::converter<decltype(return_value)>::convert(return_value);
             if (!out_return_value) 
             { 
                 return nullptr;
@@ -393,14 +418,14 @@ static PyType_Spec @_Type_spec =
                     tuple_pack_param.append(", ");
                     tuple_pack_param.append(w.write_temp("out%", sequence));
 
-                    auto format = R"(            PyObject* out% = py::convert(param%);
+                    auto format = R"(            PyObject* out% = py::converter<decltype(param%)>::convert(param%);
             if (!out%) 
             {
                 return nullptr;
             }
 
 )";
-                    w.write(format, sequence, sequence, sequence);
+                    w.write(format, sequence, sequence, sequence, sequence);
                 }
 
                 w.write("            return PyTuple_Pack(%, out_return_value%);\n", out_param_count, tuple_pack_param);
@@ -490,6 +515,31 @@ static PyType_Spec @_Type_spec =
             write_method_overload<F>(w, type, overloads);
         }
     }
+
+    void write_type_query_interface(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type) || is_static_class(type))
+        {
+            return;
+        }
+
+        auto format = R"(
+static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
+{
+    try
+    {
+        auto instance = py::converter<winrt::Windows::Foundation::IInspectable>::convert_to(arg);
+        return py::converter<%>::convert(instance.as<%>());
+    }
+    catch (...)
+    {
+        return py::to_PyErr();
+    }
+}
+)";
+
+        w.write(format, type.TypeName(), type, type);
+    }
     
     void write_type_method_decl_self_type(writer& w, TypeDef const& type, MethodDef const& method)
     {
@@ -527,6 +577,40 @@ static PyType_Spec @_Type_spec =
         }
     }
 
+    void write_winrt_type_specialization_native_type(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type))
+        {
+            w.write("py@", type.TypeName());
+        }
+        else
+        {
+            w.write("%", type);
+        }
+    }
+
+    void write_winrt_type_specialization(writer& w, TypeDef const& type)
+    {
+        auto format = R"(    template<>
+    struct winrt_type<%>
+    {
+        static PyTypeObject* python_type;
+
+        static PyTypeObject* get_python_type()
+        {
+            return python_type;
+        }
+    };
+
+)";
+        w.write(format, bind<write_winrt_type_specialization_native_type>(type));
+    }
+
+    void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
+    {
+        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n\n", bind<write_winrt_type_specialization_native_type>(type));
+    }
+
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
     {
         w.write("        try\n        {\n");
@@ -553,7 +637,7 @@ static PyType_Spec @_Type_spec =
 
         auto constructors = get_constructors(type);
 
-        if (type.Flags().Abstract() || constructors.size() == 0)
+        if (is_static_class(type) || constructors.size() == 0)
         {
             auto format = R"(    PyErr_SetString(PyExc_TypeError, "% is not activatable");
     return nullptr;
@@ -633,10 +717,10 @@ static void @_dealloc(%* self)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- % class --------------------\n", type.TypeName());
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", type);
-        
+        write_winrt_type_specialization_storage(w, type);
         write_class_constructor(w, type);
         write_class_dealloc(w, type);
+        write_type_query_interface(w, type);
         write_type_functions(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
@@ -728,54 +812,14 @@ static void @_dealloc(%* self)
     {
         XLANG_ASSERT(get_category(type) == category::interface_type);
 
-        if (is_ptype(type))
-        {
-            auto format = R"(
+        auto format = R"(
 PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    PyErr_SetString(PyExc_TypeError, "parameterized interface @ is not activatable");
+    PyErr_SetString(PyExc_TypeError, "@ interface is not activatable");
     return nullptr;
 }
 )";
-            w.write(format, type.TypeName(), type.TypeName());
-        }
-        else
-        {
-            auto format = R"(
-PyObject* @_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
-{
-    if (kwds != nullptr)
-    {
-        PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
-        return nullptr;
-    }
-
-    Py_ssize_t arg_count = PyTuple_Size(args);
-
-    if (arg_count == 1)
-    {
-        try
-        {
-            auto param0 = py::convert_to<%>(args, 0);
-            return py::wrap(param0, type);
-        }
-        catch (...)
-        {
-            return py::to_PyErr();
-        }
-    }
-    else if (arg_count == -1)
-    {
-        return nullptr; 
-    }
-
-    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
-    return nullptr;
-}
-)";
-
-            w.write(format, type.TypeName(), type);
-        }
+        w.write(format, type.TypeName(), type.TypeName());
     }
 
     void write_interface_dealloc(writer& w, TypeDef const& type)
@@ -819,12 +863,10 @@ static void @_dealloc(%* self)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- @ interface --------------------\n", type.TypeName());
-
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n",
-            bind<write_interface_pytypeobject>(type));
-
+        write_winrt_type_specialization_storage(w, type);
         write_interface_constructor(w, type);
         write_interface_dealloc(w, type);
+        write_type_query_interface(w, type);
         write_type_functions(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
@@ -876,7 +918,7 @@ static void @_dealloc(%* self)
 
         for (auto&& p : invoke.ParamList())
         {
-            w.write("            PyObject* pyObj% = py::convert(param%);\n", p.Sequence(), p.Sequence());
+            w.write("            PyObject* pyObj% = py::converter<decltype(param%)>::convert(param%);\n", p.Sequence(), p.Sequence(), p.Sequence());
         }
 
         w.write("\n            PyObject* args = PyTuple_Pack(%", distance(invoke.ParamList()));
@@ -950,6 +992,7 @@ static void @_dealloc(%* self)
         w.write_indented("template<>\nstruct converter<%>\n{\n", type);
         {
             writer::indent_guard g{ w };
+            w.write_indented("static PyObject* convert(% instance) noexcept;\n", type);
             w.write_indented("static % convert_to(PyObject* obj);\n", type);
         }
 
@@ -963,13 +1006,32 @@ static void @_dealloc(%* self)
         { "TimeSpan", "new_value = winrt::Windows::Foundation::TimeSpan { converter<int64_t>::convert_to(pyDuration) };\n" }
     };
 
-    void write_struct_convert_to(writer& w, TypeDef const& type)
+    void write_struct_convert_functions(writer& w, TypeDef const& type)
     {
+        w.write_indented("PyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
+        {
+            writer::indent_guard g{ w };
+            w.write_indented("return py::wrap_struct<%>(instance, py::get_python_type<%>());\n", type, type);
+        }
+        w.write_indented("}\n\n");
+
         w.write_indented("% py::converter<%>::convert_to(PyObject* obj)\n{\n", type, type);
         {
             writer::indent_guard g{ w };
+            w.write_indented("throw_if_pyobj_null(obj);\n");
+            w.write_indented(R"(if (Py_TYPE(obj) == py::get_python_type<%>())
+{
+    return reinterpret_cast<py::winrt_struct_wrapper<%>*>(obj)->obj;
+}
 
-            w.write_indented("if (!PyDict_Check(obj)) { throw winrt::hresult_invalid_argument(); }\n\n");
+)", type, type);
+
+            w.write_indented(R"(if (!PyDict_Check(obj))
+{
+    throw winrt::hresult_invalid_argument();
+}
+
+)");
 
             w.write_indented("% new_value{};\n", type);
 
@@ -1085,10 +1147,10 @@ static void @_dealloc(%* self)
             case ElementType::R8:
                 w.write("d");
                 break;
-            // TODO: string struct support 
-            //case ElementType::String:
-            //    w.write("winrt::hstring");
-            //    break;
+            // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
+            case ElementType::String:
+               w.write("u");
+               break;
             case ElementType::Object:
                 throw_invalid("structs cannot contain ElementType::Object");
             default:
@@ -1126,7 +1188,7 @@ static void @_dealloc(%* self)
 
         void handle_struct(TypeDef const& type)
         {
-            w.write("py::convert_to<%>(%)", type, bind<write_struct_field_name>(field));
+            w.write("py::converter<%>::convert_to(%)", type, bind<write_struct_field_name>(field));
         }
 
         void handle(ElementType)
@@ -1275,8 +1337,8 @@ catch (...)
     }
 
     static const std::map<std::string_view, std::string_view> custom_foundation_set_convert = {
-        { "DateTime", "winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ py::convert_to<int64_t>(value) } }" },
-        { "TimeSpan", "winrt::Windows::Foundation::TimeSpan{ py::convert_to<int64_t>(value) }" }
+        { "DateTime", "winrt::Windows::Foundation::DateTime{ winrt::Windows::Foundation::TimeSpan{ py::converter<int64_t>::convert_to(value) } }" },
+        { "TimeSpan", "winrt::Windows::Foundation::TimeSpan{ py::converter<int64_t>::convert_to(value) }" }
     };
 
     void write_struct_property_set_convert(writer& w, Field const& field)
@@ -1292,7 +1354,7 @@ catch (...)
             }
         }
 
-        w.write("py::convert_to<%>(value)", field.Signature().Type());
+        w.write("py::converter<%>::convert_to(value)", field.Signature().Type());
     }
 
     void write_struct_property(writer& w, Field const& field)
@@ -1305,7 +1367,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
 {
     try
     {
-        return py::convert(%);
+        return py::converter<decltype(%)>::convert(%);
     }
     catch (...)
     {
@@ -1317,6 +1379,7 @@ static PyObject* @_get_%(%* self, void* /*unused*/)
                 field.Parent().TypeName(),
                 field.Name(),
                 bind<write_winrt_wrapper>(field.Parent()),
+                bind<write_struct_property_get_variable>(field),
                 bind<write_struct_property_get_variable>(field));
         }
 
@@ -1355,16 +1418,14 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write_indented("\n// ----- % struct --------------------\n", type.TypeName());
-        w.write_indented("PyTypeObject* py::winrt_type<%>::python_type;\n\n", type);
-
-        write_struct_convert_to(w, type);
+        write_winrt_type_specialization_storage(w, type);
+        write_struct_convert_functions(w, type);
         write_struct_constructor(w, type);
         w.write_each<write_struct_property>(type.FieldList());
         write_getset_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
-
 
 
 
