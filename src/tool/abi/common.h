@@ -119,6 +119,11 @@ inline xlang::meta::reader::TypeDef const& find_required(xlang::meta::reader::Ty
     return type;
 }
 
+inline bool is_generic(xlang::meta::reader::TypeDef const& type) noexcept
+{
+    return distance(type.GenericParam()) != 0;
+}
+
 inline bool is_fully_specialized(xlang::meta::reader::GenericTypeInstSig const& type) noexcept
 {
     using namespace xlang::meta::reader;

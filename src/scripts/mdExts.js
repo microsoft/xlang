@@ -198,6 +198,17 @@ function initializeScript()
     ]
 }
 
+function __getStdVariantValue(value)
+{
+    var index = value.index();
+    for (var j = 0; j < index; ++j)
+    {
+        value = value._Tail;
+    }
+
+    return value._Head;
+}
+
 function __enumToString(value, enumValues)
 {
     for (var property in enumValues)
@@ -3214,7 +3225,7 @@ class __GenericTypeIndex
 
     get Index()
     {
-        return this.index || this.__index;
+        return (this.index === undefined) ? this.__index : this.index;
     }
 }
 
@@ -3267,7 +3278,17 @@ class __TypeSig
 
     toString()
     {
-        return this.Type.toString() + (this.IsSzArray ? "[]" : "");
+        var result;
+        if (this.m_type)
+        {
+            result = __getStdVariantValue(this.m_type).toString();
+        }
+        else
+        {
+            result = this.Type.toString()
+        }
+
+        return result + (this.IsSzArray ? "[]" : "");
     }
 
     get IsSzArray()

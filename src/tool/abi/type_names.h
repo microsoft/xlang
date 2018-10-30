@@ -2,10 +2,11 @@
 
 #include <string>
 
+#include "common.h"
 #include "meta_reader.h"
 #include "namespace_iterator.h"
 
-inline std::string clr_name(xlang::meta::reader::TypeDef const& type)
+inline std::string clr_full_name(xlang::meta::reader::TypeDef const& type)
 {
     std::string result;
     result.reserve(type.TypeNamespace().length() + type.TypeName().length() + 1);
@@ -29,6 +30,14 @@ namespace details
     {
         write_type_prefix(result, xlang::meta::reader::get_category(type));
     }
+}
+
+inline std::string cpp_type_name(xlang::meta::reader::TypeDef const& type)
+{
+    std::string result;
+    details::write_type_prefix(result, type);
+    result += type.TypeName();
+    return result;
 }
 
 namespace details
@@ -63,7 +72,7 @@ template <bool IsGenericParam>
 inline std::string mangled_name(xlang::meta::reader::TypeDef const& type)
 {
     std::string result;
-    if (distance(type.GenericParam()) == 0)
+    if (!is_generic(type))
     {
         details::write_mangled_name<IsGenericParam>(result, type.TypeNamespace());
         result += IsGenericParam ? "__C" : "_C";

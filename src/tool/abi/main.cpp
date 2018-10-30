@@ -158,7 +158,7 @@ int main(int const argc, char** argv)
         {
             for (auto const& type : nsCache.types)
             {
-                if (f.includes(type.get().type))
+                if (f.includes(type.get().type()))
                 {
                     return true;
                 }
@@ -256,60 +256,6 @@ namespace ABI {
         }
 
         group.get();
-
-
-
-
-
-#if 0
-        task_group group;
-        bool foundationDependency = false;
-        for (auto const& [ns, members] : c.namespaces())
-        {
-            if (f.includes(members))
-            {
-                if ((ns == foundation_namespace) || (ns == collections_namespace))
-                {
-                    foundationDependency = true;
-                }
-                else
-                {
-                    group.add([&]()
-                    {
-                        write_abi_header(ns, { namespace_reference{ ns, &members } }, c, config);
-                    });
-                }
-            }
-        }
-
-        if (foundationDependency)
-        {
-            group.add([&]()
-            {
-                auto const& namespaces = c.namespaces();
-                auto foundationItr = namespaces.find(foundation_namespace);
-                auto collectionsItr = namespaces.find(collections_namespace);
-                if ((foundationItr != namespaces.end()) && (collectionsItr != namespaces.end()))
-                {
-                    auto members =
-                    {
-                        namespace_reference{ collectionsItr->first, &collectionsItr->second },
-                        namespace_reference{ foundationItr->first, &foundationItr->second }
-                    };
-                    write_abi_header(foundation_namespace, members, c, config);
-                }
-                else
-                {
-                    XLANG_ASSERT(false);
-                    w.write("WARNING: Dependency on 'Windows.Foundation' or 'Windows.Foundation.Collections' identified"
-                        " but the other could not be found. Skipping...\n");
-                    w.flush_to_console();
-                }
-            });
-        }
-
-        group.get();
-#endif
 
         if (config.verbose)
         {

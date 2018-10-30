@@ -49,9 +49,9 @@ inline void write_api_contract_definitions(writer& w, type_cache const& cache)
 #endif // defined(%)
 
 )^-^",
-                    bind<write_contract_macro>(contract.first.ns, contract.first.name),
-                    bind<write_contract_macro>(contract.first.ns, contract.first.name), format_hex{ contract.second },
-                    bind<write_contract_macro>(contract.first.ns, contract.first.name));
+                    bind<write_contract_macro>(contract.name.ns, contract.name.name),
+                    bind<write_contract_macro>(contract.name.ns, contract.name.name), format_hex{ contract.current_version },
+                    bind<write_contract_macro>(contract.name.ns, contract.name.name));
             }
         }
     }
@@ -83,7 +83,7 @@ inline void write_includes(writer& w, type_cache const& cache)
 )^-^");
     }
 
-    bool hasCollectionsDependency = false;
+    bool hasCollectionsDependency = includes_namespace(collections_namespace);
     for (auto ns : cache.dependent_namespaces)
     {
         if (ns == collections_namespace)
@@ -120,16 +120,17 @@ inline void write_includes(writer& w, type_cache const& cache)
     w.write("\n");
 }
 
-inline void write_mangled_name(writer& w, type_def const& type)
+inline void write_mangled_name(writer& w, metadata_type const& type)
 {
     using namespace std::literals;
     auto const prefix = (w.config().ns_prefix_state == ns_prefix::always) ? "__x_ABI_C"sv : "__x_"sv;
-    w.write("%%", prefix, type.mangled_name);
+    w.write("%%", prefix, type.mangled_name());
 }
 
 inline void write_underlying_enum_type(writer& w, xlang::meta::reader::TypeDef const& type)
 {
     using namespace xlang::meta::reader;
+    XLANG_ASSERT(get_category(type) == category::enum_type);
 
     auto sig = type.FieldList().first.Signature();
     xlang::visit(sig.Type().Type(),
@@ -162,21 +163,20 @@ inline void write_cpp_fully_qualified_type(writer& w, type_def const& type)
         w.write("ABI_PARAMETER(");
     }
 
-    w.write("@::", type.type.TypeNamespace());
-    if (distance(type.type.GenericParam()) == 0)
-    {
-        w.write(type.type.TypeName());
-    }
-    else
-    {
-        w.write(type.mangled_name);
-    }
+    XLANG_ASSERT(!is_generic(type.type()));
+    w.write("@::%", type.clr_namespace(), type.cpp_type_name());
 
     if (w.config().ns_prefix_state == ns_prefix::optional)
     {
         w.write(')');
     }
 }
+
+inline void write_cpp_forward_declaration(
+    writer& w,
+    xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type,
+    metadata_cache const& cache);
+inline void write_cpp_forward_declaration(writer& w, metadata_type const& type);
 
 inline void write_cpp_forward_declaration(writer& w, type_def const& type)
 {
@@ -185,19 +185,13 @@ inline void write_cpp_forward_declaration(writer& w, type_def const& type)
     using namespace xlang::text;
 
     // Generics should be defined, not declared
-    XLANG_ASSERT(distance(type.type.GenericParam()) == 0);
-    auto ns = type.type.TypeNamespace();
-    auto name = type.type.TypeName();
+    XLANG_ASSERT(!is_generic(type.type()));
+    auto ns = type.clr_namespace();
+    auto name = type.cpp_type_name();
 
-    // Some types are "projected" and therefore should not get forward declared. E.g. 'EventRegistrationToken', etc.
-    if (auto [mapped, mappedName] = w.config().map_type(ns, name); mapped)
+    if (w.should_declare(type.mangled_name()))
     {
-        return;
-    }
-
-    if (w.should_declare(type.mangled_name))
-    {
-        auto typeCategory = get_category(type.type);
+        auto typeCategory = get_category(type.type());
 
         // Only interfaces (and therefore delegates) need the include guards/typedef
         if ((typeCategory == category::interface_type) || (typeCategory == category::delegate_type))
@@ -222,7 +216,7 @@ inline void write_cpp_forward_declaration(writer& w, type_def const& type)
         case category::enum_type:
         {
             auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
-            w.write("%typedef % % : % %;\n", indent{}, enumStr, name, bind<write_underlying_enum_type>(type.type), name);
+            w.write("%typedef % % : % %;\n", indent{}, enumStr, name, bind<write_underlying_enum_type>(type.type()), name);
         }   break;
 
         case category::struct_type:
@@ -245,6 +239,12 @@ inline void write_cpp_forward_declaration(writer& w, type_def const& type)
         }
 
         w.write("\n");
+
+        // For class types, we also need to forward declare their default interface
+        if (typeCategory == category::class_type)
+        {
+            write_cpp_forward_declaration(w, default_interface(type.type()), *type.metadata());
+        }
     }
 }
 
@@ -252,7 +252,7 @@ inline void write_cpp_forward_declarations(writer& w, type_cache const& cache)
 {
     for (auto const& type : cache.delegates)
     {
-        if (distance(type.get().type.GenericParam()) == 0)
+        if (!is_generic(type.get().type()))
         {
             write_cpp_forward_declaration(w, type);
         }
@@ -260,34 +260,96 @@ inline void write_cpp_forward_declarations(writer& w, type_cache const& cache)
 
     for (auto const& type : cache.interfaces)
     {
-        if (distance(type.get().type.GenericParam()) == 0)
+        if (!is_generic(type.get().type()))
         {
             write_cpp_forward_declaration(w, type);
         }
     }
 }
 
-inline void write_cpp_generic_definition(writer& w, generic_instantiation const& inst)
+inline void write_cpp_generic_definition(writer& w, generic_inst const& inst)
 {
     using namespace xlang::meta::reader;
-
-    if (!w.should_declare(inst.mangled_name))
+    if (!w.should_declare(inst.mangled_name()))
     {
         return;
     }
 
-    // Forward declare all generic parameters
-    for (auto const& param : inst.generic_params)
+    for (auto paramPtr : inst.generic_params())
     {
-        if (w.should_declare(param.info.mangled_name, true))
-        {
-            // std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>;
-        }
+        write_cpp_forward_declaration(w, *paramPtr);
     }
+    // TODO: Forward declare
+
+    // TODO: Push contract guards
+
+    w.write(R"^-^(#ifndef DEF_%_USE
+#define DEF_%_USE
+#if !defined(RO_NO_TEMPLATE_NAME)
+)^-^", inst.mangled_name(), inst.mangled_name());
+
+    w.push_inline_namespace(inst.clr_namespace());
+
+    w.write(R"^-^(template <>
+struct __declspec(uuid("%"))
+IVectorView<ABI::Windows::AI::MachineLearning::ILearningModelFeatureDescriptor*> : IVectorView_impl<ABI::Windows::AI::MachineLearning::ILearningModelFeatureDescriptor*>
+{
+    static const wchar_t* z_get_rc_name_impl()
+    {
+        return L"%";
+    }
+};
+// Define a typedef for the parameterized interface specialization's mangled name.
+// This allows code which uses the mangled name for the parameterized interface to access the
+// correct parameterized interface specialization.
+typedef IVectorView<ABI::Windows::AI::MachineLearning::ILearningModelFeatureDescriptor*> %_t;
+#define % ABI::Windows::Foundation::Collections::%_t
+)^-^", "TODO_UUID", inst.clr_full_name(), inst.mangled_name(), inst.mangled_name(), inst.mangled_name());
+
+    w.pop_inline_namespace();
+
+    w.write(R"^-^(
+#endif // !defined(RO_NO_TEMPLATE_NAME)
+#endif /* DEF_%_USE */
+
+)^-^", inst.mangled_name());
+
+    // TODO: Pop contract guards
+}
+
+inline void write_cpp_forward_declaration(
+    writer& w,
+    xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type,
+    metadata_cache const& cache)
+{
+    using namespace xlang::meta::reader;
+    visit(type, xlang::visit_overload{
+        [&](GenericTypeInstSig const& sig)
+        {
+            // TODO: Need to find!
+        },
+        [&](auto const& defOrRef)
+        {
+            write_cpp_forward_declaration(w, cache.find(defOrRef.TypeNamespace(), defOrRef.TypeName()));
+        }});
+}
+
+inline void write_cpp_forward_declaration(writer& w, metadata_type const& type)
+{
+    if (auto typePtr = dynamic_cast<type_def const*>(&type))
+    {
+        write_cpp_forward_declaration(w, *typePtr);
+    }
+    else if (auto instPtr = dynamic_cast<generic_inst const*>(&type))
+    {
+        write_cpp_generic_definition(w, *instPtr);
+    }
+    // System type or ElementType; neither needs forward declaring
 }
 
 inline void write_cpp_generic_definitions(writer& w, type_cache const& cache)
 {
+    ::DebugBreak();
     for (auto const& [name, inst] : cache.generic_instantiations)
     {
         write_cpp_generic_definition(w, inst);
@@ -296,29 +358,10 @@ inline void write_cpp_generic_definitions(writer& w, type_cache const& cache)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if 0
+#if 0
+#if 0
+#if 0
 
 template <typename LogicT, typename AbiT>
 inline void write_aggregate_type(writer& w, LogicT&& logical, AbiT&& abi)
@@ -867,7 +910,7 @@ inline void write_interface_definition(writer& w, xlang::meta::reader::TypeDef c
     }
 
     // Generics don't get generated definitions
-    if (distance(type.GenericParam()) != 0)
+    if (is_generic(type))
     {
         return;
     }
@@ -982,3 +1025,4 @@ inline void write_class_name_definition(writer& w, xlang::meta::reader::TypeDef 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
 }
+#endif

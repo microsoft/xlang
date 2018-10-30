@@ -113,7 +113,7 @@ void writer::pop_inline_namespace()
 
 std::size_t writer::push_contract_guards(TypeDef const& type)
 {
-    XLANG_ASSERT(distance(type.GenericParam()) == 0);
+    XLANG_ASSERT(!is_generic(type));
 
     // Mapped types don't carry contracts with them
     if (auto [isMapped, mappedName] = m_config.map_type(type.TypeNamespace(), type.TypeName()); isMapped)
