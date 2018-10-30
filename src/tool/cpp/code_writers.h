@@ -2543,6 +2543,13 @@ inline void* winrt_make_%()
             impl_name,
             type_namespace,
             type_name);
+
+        if (!is_fast_class(type) || !settings.uniform)
+        {
+            return;
+        }
+
+        // TODO: write all constructors and instance methods using make/get_self
     }
 
     void write_component_g_h(writer& w, TypeDef const& type)

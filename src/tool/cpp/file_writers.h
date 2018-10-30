@@ -242,7 +242,6 @@ namespace xlang
 
         w.swap();
         write_license(w);
-        write_include_guard(w);
 
         auto filename = settings.output_folder + get_generated_component_filename(type) + ".m.h";
         path folder = filename;

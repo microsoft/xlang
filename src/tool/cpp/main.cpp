@@ -142,7 +142,7 @@ namespace xlang
             cache c{ get_files_to_cache() };
             c.remove_legacy_cppwinrt_foundation_types();
             supplement_includes(c);
-            filter f{ settings.include, settings.exclude };
+            settings.filter = { settings.include, settings.exclude };
 
             if (settings.verbose)
             {
@@ -173,7 +173,7 @@ namespace xlang
             {
                 group.add([&, &ns = ns, &members = members]
                 {
-                    if (members.types.empty() || !f.includes(members))
+                    if (members.types.empty() || !settings.filter.includes(members))
                     {
                         return;
                     }
@@ -187,7 +187,7 @@ namespace xlang
 
             group.add([&]
             {
-                if (f.empty() || settings.base)
+                if (settings.filter.empty() || settings.base)
                 {
                     write_base_h();
                 }
@@ -200,7 +200,7 @@ namespace xlang
                     {
                         for (auto&& type : members.classes)
                         {
-                            if (f.includes(type))
+                            if (settings.filter.includes(type))
                             {
                                 classes.push_back(type);
                             }
