@@ -4,7 +4,7 @@
 
 ## Overview
 The xlang project enables developers to take existing shared libraries,
-implemented in one programming language and make that library's APIs available to client code using a different programming language. Thus the name "xlang," for cross-language.
+implemented in one programming language and make that library's APIs available to client code using a different programming language. Thus the name "xlang", for cross-language.
 
 Additionally, the xlang toolset will be available on multiple operating systems.
 This means that if your shared library is portable to various operating systems,
