@@ -2526,6 +2526,25 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         }
     }
 
+    void write_component_m_h(writer& w, TypeDef const& type)
+    {
+        auto type_name = type.TypeName();
+        auto type_namespace = type.TypeNamespace();
+        auto impl_name = get_impl_name(type_namespace, type_name);
+
+        auto format = R"(
+inline void* winrt_make_%()
+{
+    return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
+}
+)";
+
+        w.write(format,
+            impl_name,
+            type_namespace,
+            type_name);
+    }
+
     void write_component_g_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();

@@ -175,11 +175,7 @@ namespace xlang
         write_close_namespace(w);
         write_type_namespace(w, ns);
         w.write_each<write_class_definitions>(members.classes);
-
-        if (settings.component && !settings.uniform)
-        {
-            w.write_each<write_fast_definitions>(members.classes);
-        }
+        w.write_each<write_fast_definitions>(members.classes);
 
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
@@ -228,6 +224,27 @@ namespace xlang
         }
 
         auto filename = settings.output_folder + get_generated_component_filename(type) + ".g.h";
+        path folder = filename;
+        folder.remove_filename();
+        create_directories(folder);
+        w.flush_to_file(filename);
+    }
+
+    void write_component_m_h(TypeDef const& type)
+    {
+        if (!has_factory_members(type) || !settings.uniform)
+        {
+            return;
+        }
+
+        writer w;
+        write_component_m_h(w, type);
+
+        w.swap();
+        write_license(w);
+        write_include_guard(w);
+
+        auto filename = settings.output_folder + get_generated_component_filename(type) + ".m.h";
         path folder = filename;
         folder.remove_filename();
         create_directories(folder);

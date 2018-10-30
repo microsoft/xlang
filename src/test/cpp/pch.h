@@ -5,7 +5,7 @@
 
 template<bool B> bool static_require()
 {
-  return B;
+    return B;
 }
 
 #define STATIC_REQUIRE(...) REQUIRE(static_require<__VA_ARGS__>())
