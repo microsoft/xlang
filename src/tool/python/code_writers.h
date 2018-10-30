@@ -600,6 +600,11 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
 
     void write_winrt_type_specialization(writer& w, TypeDef const& type)
     {
+        if (is_exclusive_to(type))
+        {
+            return;
+        }
+
         auto format = R"(    template<>
     struct winrt_type<%>
     {
