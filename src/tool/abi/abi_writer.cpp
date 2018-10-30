@@ -14,124 +14,6 @@ using namespace xlang;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
 
-void writer::initialize_dependencies()
-{
-    // Calculate a list of all types/namespaces referenced by the current namespace so that we know which files to
-    // include, contracts to forward declare, etc.
-    for (auto const& ref : m_namespaces)
-    {
-        for (auto const& [name, type] : ref.members->types)
-        {
-            initialize_dependencies(type);
-        }
-    }
-
-    // NOTE: MIDLRT will declare any generic type that references a type in this namespace, even if no function in this
-    //       namespace references that generic type. We won't replicate that here for simplicity since most, if not all
-    //       consumers that wish to reference such a type will include the header that contains such a function
-}
-
-void writer::initialize_dependencies(TypeDef const& type)
-{
-    // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
-    // trip us up since it's a definition, not a use
-    if (!get_attribute(type, metadata_namespace, "ApiContractAttribute"sv))
-    {
-        if (auto contractInfo = contract_attributes(type))
-        {
-            m_dependentNamespaces.emplace(decompose_type(contractInfo->type_name).first);
-            for (auto const& prevContract : contractInfo->previous_contracts)
-            {
-                m_dependentNamespaces.emplace(decompose_type(prevContract.type_name).first);
-            }
-        }
-    }
-
-    for (auto const& iface : type.InterfaceImpl())
-    {
-        add_dependency(iface.Interface());
-    }
-
-    for (auto const& method : type.MethodList())
-    {
-        auto sig = method.Signature();
-        add_dependency(sig.ReturnType().Type());
-
-        for (const auto& param : sig.Params())
-        {
-            add_dependency(param.Type());
-        }
-    }
-}
-
-void writer::add_dependency(TypeSig const& type)
-{
-    xlang::visit(type.Type(),
-        [&](ElementType const&)
-        {
-            // Does not impact the dependency graph
-        },
-        [&](coded_index<TypeDefOrRef> const& t)
-        {
-            add_dependency(t);
-        },
-        [&](GenericTypeIndex const&)
-        {
-            // This is referencing a generic parameter from an earlier generic argument and thus carries no new dependencies
-        },
-        [&](GenericTypeInstSig const& t)
-        {
-            add_dependency(t);
-        });
-}
-
-void writer::add_dependency(coded_index<TypeDefOrRef> const& type)
-{
-    visit(type, xlang::visit_overload{
-        [&](GenericTypeInstSig const& t)
-        {
-            add_dependency(t);
-        },
-        [&](auto const& defOrRef)
-        {
-            if (defOrRef.TypeNamespace() != system_namespace)
-            {
-                m_dependencies.emplace(find_required(defOrRef));
-                m_dependentNamespaces.emplace(defOrRef.TypeNamespace());
-            }
-        }});
-}
-
-void writer::add_dependency(GenericTypeInstSig const& type)
-{
-    auto def = find_required(type.GenericType().TypeRef());
-    m_dependentNamespaces.emplace(def.TypeNamespace());
-
-    // Dependencies propagate out to all generic arguments
-    for (auto const& arg : type.GenericArgs())
-    {
-        add_dependency(arg);
-    }
-
-    // Since we have to define any template specializations for generic types (as opposed to just forward declaring
-    // them), we need to treat this type the same as we treat other types in this namespace. Since the CLR does not have
-    // the same concept of specialization that C++ has, we only need to do this once on a per-generic type basis.
-    auto [itr, added] = m_genericReferences.emplace(std::piecewise_construct,
-        std::forward_as_tuple(type_name{ def.TypeNamespace(), def.TypeName() }),
-        std::forward_as_tuple());
-    if (added)
-    {
-        // Only process each generic type once
-        initialize_dependencies(def);
-    }
-
-    // Only take note of the fully specialized generic instances; we'll walk the dependency tree later
-    if (is_fully_specialized(type))
-    {
-        itr->second.emplace_back(type);
-    }
-}
-
 void writer::push_namespace(std::string_view ns)
 {
     XLANG_ASSERT(m_namespaceStack.empty());
@@ -154,7 +36,7 @@ void writer::push_namespace(std::string_view ns)
     }
 }
 
-void writer::push_generic_namespace(std::string_view ns)
+void writer::push_inline_namespace(std::string_view ns)
 {
     XLANG_ASSERT(m_namespaceStack.empty());
 
@@ -203,7 +85,7 @@ void writer::pop_namespace()
     XLANG_ASSERT(m_indentation == 0);
 }
 
-void writer::pop_generic_namespace()
+void writer::pop_inline_namespace()
 {
     XLANG_ASSERT(!m_namespaceStack.empty());
 
@@ -241,7 +123,7 @@ std::size_t writer::push_contract_guards(TypeDef const& type)
 
     if (auto vers = contract_attributes(type))
     {
-        return push_contract_guards(*vers);
+        return push_contract_guard(*vers);
     }
 
     return 0;
@@ -310,13 +192,13 @@ std::size_t writer::push_contract_guards(xlang::meta::reader::Field const& field
 {
     if (auto vers = contract_attributes(field))
     {
-        return push_contract_guards(*vers);
+        return push_contract_guard(*vers);
     }
 
     return 0;
 }
 
-std::size_t writer::push_contract_guards(contract_version& vers)
+std::size_t writer::push_contract_guard(contract_version& vers)
 {
     auto [ns, name] = decompose_type(vers.type_name);
     write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.version });
@@ -352,166 +234,73 @@ void writer::pop_contract_guards(std::size_t count)
     }
 }
 
-std::pair<bool, std::string_view> writer::should_declare(TypeDef const& type)
+void write_abi_header(std::string_view fileName, abi_configuration const& config, type_cache const& types)
 {
-    auto mangledName = write_temp("%", bind<write_typedef_mangled>(type, m_genericArgStack, format_flags::none));
-    return should_declare(std::move(mangledName));
-}
+    writer w{ config };
 
-std::pair<bool, std::string_view> writer::should_declare(GenericTypeInstSig const& type)
-{
-    auto mangledName = write_temp("%", bind<write_generictype_mangled>(type, m_genericArgStack, format_flags::none));
-    return should_declare(std::move(mangledName));
-}
-
-std::pair<bool, std::string_view> writer::should_declare(std::string mangledName)
-{
-    if (auto [itr, inserted] = m_typeDeclarations.emplace(std::move(mangledName)); inserted)
+    // All headers begin with a bit of boilerplate
+    w.write(strings::file_header);
+    w.write(strings::include_guard_start,
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName));
+    w.write(strings::deprecated_header_start);
+    w.write(strings::ns_prefix_definitions,
+        (config.ns_prefix_state == ns_prefix::always) ? strings::ns_prefix_always :
+        (config.ns_prefix_state == ns_prefix::optional) ? strings::ns_prefix_optional : strings::ns_prefix_never);
+    if (config.ns_prefix_state == ns_prefix::optional)
     {
-        return { true, *itr };
+        w.write(strings::optional_ns_prefix_definitions);
+    }
+    w.write(strings::constexpr_definitions);
+
+    write_api_contract_definitions(w, types);
+    write_includes(w, types);
+
+    // C++ interface
+    w.write("#if defined(__cplusplus) && !defined(CINTERFACE)\n");
+    if (config.enum_class)
+    {
+        w.write(strings::enum_class);
     }
 
-    return { false, {} };
-}
+    w.write("/* Forward Declarations */\n");
+    write_cpp_forward_declarations(w, types);
 
-void writer::write_api_contract_definitions()
-{
-    using namespace std::literals;
-
-    write(R"^-^(
-//  API Contract Inclusion Definitions
-#if !defined(SPECIFIC_API_CONTRACT_DEFINITIONS)
-)^-^");
-
-    for (auto ns : m_dependentNamespaces)
-    {
-        auto itr = m_cache.namespaces().find(ns);
-        if (itr != m_cache.namespaces().end())
-        {
-            for (auto const& contract : itr->second.contracts)
-            {
-                // Contract versions are attributes on the contract type itself
-                auto attr = get_attribute(contract, metadata_namespace, "ContractVersionAttribute"sv);
-                XLANG_ASSERT(attr);
-                XLANG_ASSERT(attr.Value().FixedArgs().size() == 1);
-                auto version = std::get<uint32_t>(std::get<ElemSig>(attr.Value().FixedArgs()[0].value).value);
-
-                write(R"^-^(#if !defined(%)
-#define % %
-#endif // defined(%)
-
-)^-^",
-                    bind<write_contract_macro>(contract.TypeNamespace(), contract.TypeName()),
-                    bind<write_contract_macro>(contract.TypeNamespace(), contract.TypeName()), format_hex{ version },
-                    bind<write_contract_macro>(contract.TypeNamespace(), contract.TypeName()));
-            }
-        }
-    }
-
-    write(R"^-^(#endif // defined(SPECIFIC_API_CONTRACT_DEFINITIONS)
-
-
-)^-^");
-}
-
-void writer::write_includes()
-{
-    // Forced dependencies
-    write(R"^-^(// Header files for imported files
-#include "inspectable.h"
-#include "AsyncInfo.h"
-#include "EventToken.h"
-#include "windowscontracts.h"
-)^-^");
-
-    if (!includes_namespace(foundation_namespace))
-    {
-        write(R"^-^(#include "Windows.Foundation.h"
-)^-^");
-    }
-
-    bool hasCollectionsDependency = false;
-    for (auto ns : m_dependentNamespaces)
-    {
-        if (ns == collections_namespace)
-        {
-            // The collections header is hand-rolled
-            hasCollectionsDependency = true;
-        }
-        else if (ns == foundation_namespace)
-        {
-            // This is a forced dependency
-        }
-        else if (ns == system_namespace)
-        {
-            // The "System" namespace a lie
-        }
-        else if (includes_namespace(ns))
-        {
-            // Don't include ourself
-        }
-        else
-        {
-            write(R"^-^(#include "%.h"
-)^-^", ns);
-        }
-    }
-
-    if (hasCollectionsDependency)
-    {
-        write(R"^-^(// Importing Collections header
-#include <windows.foundation.collections.h>
-)^-^");
-    }
-
-    write("\n");
-}
-
-void writer::write_interface_forward_declarations()
-{
-    write("/* Forward Declarations */\n");
-
-    for (auto const& ref : m_namespaces)
-    {
-        // NOTE: Delegates are, for all intents and purposes, interfaces
-        for (auto const& type : ref.members->delegates)
-        {
-            // Generics require definitions
-            if (distance(type.GenericParam()) == 0)
-            {
-                write_forward_declaration(*this, type, m_genericArgStack);
-            }
-        }
-    }
-
-    for (auto const& ref : m_namespaces)
-    {
-        for (auto const& type : ref.members->interfaces)
-        {
-            if ((distance(type.GenericParam()) == 0) && !m_config.map_type(type.TypeNamespace(), type.TypeName()).first)
-            {
-                write_forward_declaration(*this, type, m_genericArgStack);
-            }
-        }
-    }
-}
-
-void writer::write_generics_definitions()
-{
-    write(R"^-^(// Parameterized interface forward declarations (C++)
+    w.write(R"^-^(// Parameterized interface forward declarations (C++)
 
 // Collection interface definitions
 )^-^");
+    write_cpp_generic_definitions(w, types);
 
-    for (auto const& [typeName, types] : m_genericReferences)
+    // C interface
+    w.write("#else // !defined(__cplusplus)\n");
+    w.write("// C interface not currently generated\n");
+    w.write("#endif // defined(__cplusplus)");
+
+    w.write(strings::constexpr_end_definitions);
+    if (config.ns_prefix_state == ns_prefix::optional)
     {
-        for (auto const& type : types)
-        {
-            write_generic_definition(type);
-        }
+        w.write(strings::optional_ns_prefix_end_definitions);
     }
+    w.write(strings::deprecated_header_end);
+    w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
+
+    auto filename{ config.output_directory };
+    filename += fileName;
+    filename += ".h";
+    w.flush_to_file(filename);
 }
 
+
+
+
+
+
+#if 0
+#if 0
+#if 0
 void writer::write_generic_definition(GenericTypeInstSig const& type)
 {
     auto [shouldDefine, mangledName] = should_declare(type);
@@ -620,7 +409,7 @@ void writer::write_generic_definition(GenericTypeInstSig const& type)
 #if !defined(RO_NO_TEMPLATE_NAME)
 )^-^", mangledName, mangledName);
 
-    push_generic_namespace(typeDef.TypeNamespace());
+    push_inline_namespace(typeDef.TypeNamespace());
 
     auto typeName = typeDef.TypeName();
     typeName = typeName.substr(0, typeName.find('`'));
@@ -677,7 +466,7 @@ typedef % %_t;
             bind<write_namespace_close>());
     }
 
-    pop_generic_namespace();
+    pop_inline_namespace();
 
     write(R"^-^(
 #endif // !defined(RO_NO_TEMPLATE_NAME)
@@ -848,3 +637,4 @@ void write_abi_header(
     filename += ".h";
     w.flush_to_file(filename);
 }
+#endif

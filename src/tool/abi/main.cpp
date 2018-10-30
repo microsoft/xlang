@@ -127,7 +127,6 @@ int main(int const argc, char** argv)
         e = high_resolution_clock::now();
         w.write("Duration: %\n", duration_cast<milliseconds>(e - s).count());
         w.flush_to_console();
-        ::DebugBreak();
 
         auto include = args.values("include");
         if (include.empty() && !referenceFiles.empty())
@@ -179,9 +178,9 @@ int main(int const argc, char** argv)
                 }
                 else
                 {
-                    group.add([&nsCache]()
+                    group.add([&]()
                     {
-
+                        write_abi_header(ns, config, nsCache);
                     });
                 }
             }

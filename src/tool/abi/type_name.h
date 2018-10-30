@@ -73,7 +73,7 @@ struct type_name
             return 1;
         }
 
-        return *otherPos - *thisPos;
+        return *thisPos - *otherPos;
     }
 
     struct iterator

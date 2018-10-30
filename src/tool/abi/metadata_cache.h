@@ -7,6 +7,7 @@
 
 #include "meta_reader.h"
 #include "task_group.h"
+#include "type_name.h"
 #include "type_names.h"
 
 struct type_def;
@@ -48,9 +49,17 @@ inline bool operator<(type_def const& lhs, type_def const& rhs) noexcept
     return lhs.clr_name < rhs.clr_name;
 }
 
+struct generic_param
+{
+    xlang::meta::reader::TypeSig type;
+    type_ref info;
+};
+
 struct generic_instantiation
 {
     xlang::meta::reader::GenericTypeInstSig signature;
+    std::reference_wrapper<type_def const> generic_type;
+    std::vector<generic_param> generic_params;
 
     std::string clr_name;
     std::string mangled_name;
@@ -58,15 +67,18 @@ struct generic_instantiation
 
 struct type_cache
 {
-    // Types defined in this namespace
+    std::vector<std::string_view> included_namespaces;
+
+    // Types defined in these namespace(s)
     std::set<std::reference_wrapper<type_def const>> types;
     std::vector<std::reference_wrapper<type_def const>> enums;
     std::vector<std::reference_wrapper<type_def const>> structs;
     std::vector<std::reference_wrapper<type_def const>> delegates;
     std::vector<std::reference_wrapper<type_def const>> interfaces;
     std::vector<std::reference_wrapper<type_def const>> classes;
+    std::map<type_name, std::uint32_t> contracts;
 
-    // Dependencies of this namespace
+    // Dependencies of these namespace(s)
     std::set<std::string_view> dependent_namespaces;
     std::map<std::string_view, generic_instantiation> generic_instantiations;
     std::set<std::reference_wrapper<type_def const>> external_dependencies;
@@ -77,6 +89,11 @@ struct type_cache
     {
     }
 
+    metadata_cache const& metadata() const noexcept
+    {
+        return *m_cache;
+    }
+
     type_cache merge(type_cache const& other) const;
 
 private:
@@ -84,7 +101,7 @@ private:
 
     struct init_state
     {
-        std::vector<std::vector<type_ref>> prev_param_stack;
+        std::vector<generic_param> parent_generic_params;
     };
 
     void process_dependencies();
@@ -101,6 +118,11 @@ struct metadata_cache
     std::map<std::string_view, type_cache> namespaces;
 
     metadata_cache(xlang::meta::reader::cache const& c);
+
+    xlang::meta::reader::cache const& cache() const noexcept
+    {
+        return *m_cache;
+    }
 
     type_def const* try_find(std::string_view ns, std::string_view name) const noexcept
     {
@@ -134,5 +156,6 @@ private:
         std::map<std::string_view, type_def>& typeMap,
         xlang::meta::reader::cache::namespace_members const& members);
 
+    xlang::meta::reader::cache const* m_cache;
     std::map<std::string_view, std::map<std::string_view, type_def>> m_types;
 };

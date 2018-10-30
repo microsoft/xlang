@@ -8,6 +8,7 @@
 #include "dependencies.h"
 #include "generic_arg_stack.h"
 #include "meta_reader.h"
+#include "metadata_cache.h"
 #include "namespace_iterator.h"
 #include "text_writer.h"
 
@@ -26,15 +27,9 @@ struct indent { std::size_t additional_indentation = 0; };
 
 struct writer : xlang::text::writer_base<writer>
 {
-    writer(
-        std::initializer_list<namespace_reference> namespaces,
-        abi_configuration const& config,
-        xlang::meta::reader::cache const& cache) :
-        m_namespaces(namespaces),
-        m_config(config),
-        m_cache(cache)
+    writer(abi_configuration const& config) :
+        m_config(config)
     {
-        initialize_dependencies();
     }
 
     using writer_base::write;
@@ -194,18 +189,10 @@ struct writer : xlang::text::writer_base<writer>
         }
     }
 
-    bool includes_namespace(std::string_view ns) const noexcept
-    {
-        return std::find_if(m_namespaces.begin(), m_namespaces.end(), [&](namespace_reference const& ref)
-        {
-            return ref.full_namespace == ns;
-        }) != m_namespaces.end();
-    }
-
     void push_namespace(std::string_view ns);
-    void push_generic_namespace(std::string_view ns);
+    void push_inline_namespace(std::string_view ns);
     void pop_namespace();
-    void pop_generic_namespace();
+    void pop_inline_namespace();
 
     std::size_t push_contract_guards(xlang::meta::reader::TypeDef const& type);
     std::size_t push_contract_guards(xlang::meta::reader::TypeRef const& ref);
@@ -215,33 +202,22 @@ struct writer : xlang::text::writer_base<writer>
     std::size_t push_contract_guards(xlang::meta::reader::Field const& field);
     void pop_contract_guards(std::size_t count);
 
-    std::pair<bool, std::string_view> should_declare(xlang::meta::reader::TypeDef const& type);
-    std::pair<bool, std::string_view> should_declare(xlang::meta::reader::GenericTypeInstSig const& type);
+    bool should_declare(std::string_view mangledName, bool peek = false)
+    {
+        if (peek)
+        {
+            return m_declaredTypes.find(mangledName) == m_declaredTypes.end();
+        }
 
-    void write_api_contract_definitions();
-    void write_includes();
-    void write_interface_forward_declarations();
-    void write_generics_definitions();
-    void write_type_dependencies();
-    void write_type_declarations();
-    void write_type_definitions();
+        auto [itr, added] = m_declaredTypes.emplace(mangledName);
+        return added;
+    }
 
 private:
 
-    void initialize_dependencies();
-    void initialize_dependencies(xlang::meta::reader::TypeDef const& type);
-    void add_dependency(xlang::meta::reader::TypeSig const& type);
-    void add_dependency(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type);
-    void add_dependency(xlang::meta::reader::GenericTypeInstSig const& type);
+    std::size_t push_contract_guard(contract_version& vers);
 
-    std::size_t push_contract_guards(contract_version& vers);
-    std::pair<bool, std::string_view> should_declare(std::string mangledName);
-
-    void write_generic_definition(xlang::meta::reader::GenericTypeInstSig const& type);
-
-    std::initializer_list<namespace_reference> m_namespaces;
     abi_configuration const& m_config;
-    xlang::meta::reader::cache const& m_cache;
 
     std::size_t m_indentation = 0;
     std::vector<std::string_view> m_namespaceStack;
@@ -249,18 +225,10 @@ private:
     std::vector<contract_version> m_contractGuardStack;
 
     // A set of already declared (or in the case of generics, defined) types
-    std::set<std::string> m_typeDeclarations;
-
-    std::set<std::string_view> m_dependentNamespaces;
-    std::set<xlang::meta::reader::TypeDef, typename_compare> m_dependencies;
-    std::map<type_name, std::vector<xlang::meta::reader::GenericTypeInstSig>> m_genericReferences;
+    std::set<std::string_view> m_declaredTypes;
 
     generic_arg_stack::type m_genericArgStack;
     std::size_t m_currentGenericArgIndex = 0;
 };
 
-void write_abi_header(
-    std::string_view fileName,
-    std::initializer_list<namespace_reference> namespaces,
-    xlang::meta::reader::cache const& c,
-    abi_configuration const& config);
+void write_abi_header(std::string_view fileName, abi_configuration const& config, type_cache const& types);

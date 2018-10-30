@@ -6,7 +6,8 @@
 using namespace std::literals;
 using namespace xlang::meta::reader;
 
-metadata_cache::metadata_cache(cache const& c)
+metadata_cache::metadata_cache(xlang::meta::reader::cache const& c) :
+    m_cache(&c)
 {
     xlang::task_group group;
 
@@ -17,6 +18,7 @@ metadata_cache::metadata_cache(cache const& c)
             std::forward_as_tuple(ns),
             std::forward_as_tuple(this));
         XLANG_ASSERT(added);
+        itr->second.included_namespaces.emplace_back(ns);
 
         auto [typesItr, typesAdded] = m_types.emplace(std::piecewise_construct,
             std::forward_as_tuple(ns),
@@ -90,6 +92,18 @@ void metadata_cache::initialize_namespace(
         target.types.emplace(itr->second);
         target.classes.emplace_back(itr->second);
     }
+
+    for (auto const& contract : members.contracts)
+    {
+        // Contract versions are attributes on the contract type itself
+        auto attr = get_attribute(contract, metadata_namespace, "ContractVersionAttribute"sv);
+        XLANG_ASSERT(attr);
+        XLANG_ASSERT(attr.Value().FixedArgs().size() == 1);
+
+        target.contracts.emplace(
+            type_name{ contract.TypeNamespace(), contract.TypeName() },
+            std::get<uint32_t>(std::get<ElemSig>(attr.Value().FixedArgs()[0].value).value));
+    }
 }
 
 void type_cache::process_dependencies()
@@ -99,7 +113,7 @@ void type_cache::process_dependencies()
     for (auto const& def : types)
     {
         process_dependencies(def.get().type, state);
-        XLANG_ASSERT(state.prev_param_stack.empty());
+        XLANG_ASSERT(state.parent_generic_params.empty());
     }
 }
 
@@ -211,7 +225,7 @@ type_ref type_cache::process_dependency(TypeSig const& type, init_state& state)
         },
         [&](GenericTypeIndex i)
         {
-            if (state.prev_param_stack.empty())
+            if (state.parent_generic_params.empty())
             {
                 // We're processing the definition of a generic type and therefore have no instantiation to reference.
                 // Leave the result empty, which we will assert on if we find ourselves in this code path in unexpected
@@ -220,8 +234,8 @@ type_ref type_cache::process_dependency(TypeSig const& type, init_state& state)
             else
             {
                 // This is referencing a generic parameter from an earlier generic argument and thus carries no new dependencies
-                XLANG_ASSERT(i.index < state.prev_param_stack.back().size());
-                result = state.prev_param_stack.back()[i.index];
+                XLANG_ASSERT(i.index < state.parent_generic_params.size());
+                result = state.parent_generic_params[i.index].info;
             }
         },
         [&](GenericTypeInstSig const& t)
@@ -282,7 +296,7 @@ type_ref type_cache::process_dependency(GenericTypeInstSig const& type, init_sta
     auto const& ref = type.GenericType().TypeRef();
     auto const& def = m_cache->find(ref.TypeNamespace(), ref.TypeName());
 
-    generic_instantiation inst{ type };
+    generic_instantiation inst{ type, def };
     inst.clr_name = def.clr_name;
     inst.clr_name.push_back('<');
     inst.mangled_name = def.mangled_name;
@@ -290,11 +304,10 @@ type_ref type_cache::process_dependency(GenericTypeInstSig const& type, init_sta
     auto genericArgs = type.GenericArgs();
 
     std::string_view prefix;
-    std::vector<type_ref> currentRefs;
     for (auto const& arg : genericArgs)
     {
-        currentRefs.emplace_back(process_dependency(arg, state));
-        auto& argRef = currentRefs.back();
+        inst.generic_params.emplace_back(generic_param{ arg, process_dependency(arg, state) });
+        auto& argRef = inst.generic_params.back().info;
 
         XLANG_ASSERT(!inst.clr_name.empty());
         inst.clr_name += prefix;
@@ -307,18 +320,16 @@ type_ref type_cache::process_dependency(GenericTypeInstSig const& type, init_sta
     }
     inst.clr_name.push_back('>');
 
-    state.prev_param_stack.emplace_back(std::move(currentRefs));
-
     auto [itr, added] = generic_instantiations.emplace(inst.clr_name, std::move(inst));
     if (added)
     {
         // First time processing this specialization
         dependent_namespaces.emplace(ref.TypeNamespace());
 
+        state.parent_generic_params.swap(itr->second.generic_params);
         process_dependencies(def.type, state);
+        state.parent_generic_params.swap(itr->second.generic_params);
     }
-
-    state.prev_param_stack.pop_back();
 
     return type_ref{
         itr->second.clr_name,
@@ -343,7 +354,11 @@ type_cache type_cache::merge(type_cache const& other) const
     result.generic_instantiations = generic_instantiations;
     result.generic_instantiations.insert(other.generic_instantiations.begin(), other.generic_instantiations.end());
 
+    result.contracts = contracts;
+    result.contracts.insert(other.contracts.begin(), other.contracts.end());
+
     // NOTE: We really want 'std::set_union', but since we should only be merging unique sets, merge is more efficient
+    std::merge(included_namespaces.begin(), included_namespaces.end(), other.included_namespaces.begin(), other.included_namespaces.end(), std::back_inserter(result.included_namespaces));
     std::merge(enums.begin(), enums.end(), other.enums.begin(), other.enums.end(), std::back_inserter(result.enums));
     std::merge(structs.begin(), structs.end(), other.structs.begin(), other.structs.end(), std::back_inserter(result.structs));
     std::merge(delegates.begin(), delegates.end(), other.delegates.begin(), other.delegates.end(), std::back_inserter(result.delegates));
