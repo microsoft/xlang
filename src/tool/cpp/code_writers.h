@@ -2320,11 +2320,11 @@ protected:
             return;
         }
 
-        auto format = R"(        if (requal(name, L"%.%"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
-            return 0;
-        }
+    auto format = R"(
+    if (requal(name, L"%.%"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
+    }
 )";
 
         auto type_name = type.TypeName();
@@ -2340,6 +2340,29 @@ protected:
     void write_component_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
         auto format = R"(%
+// Note: use "-lib example" option to change winrt_xxx to example_xxx to allow multiple libs to be stitched together.
+
+bool WINRT_CALL %_can_unload_now() noexcept
+{
+    if (winrt::get_module_lock())
+    {
+        return false;
+    }
+
+    winrt::clear_factory_cache();
+    return true;
+}
+
+void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
+{
+    auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
+    {
+        return std::equal(left.rbegin(), left.rend(), right.rbegin(), right.rend());
+    };
+%
+    return nullptr;
+}
+
 int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
 {
 #ifdef _WRL_MODULE_H_
@@ -2349,29 +2372,24 @@ int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
     }
 #endif
 
-    if (winrt::get_module_lock())
-    {
-        return 1;
-    }
-
-    winrt::clear_factory_cache();
-    return 0;
+    return %_can_unload_now() ? 0 : 1;
 }
 
 int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept
 {
     try
     {
-        *factory = nullptr;
         uint32_t length{};
         wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
         std::wstring_view const name{ buffer, length };
 
-        auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
+        *factory = %_get_activation_factory(name);
+
+        if (*factory)
         {
-            return std::equal(left.rbegin(), left.rend(), right.rbegin(), right.rend());
-        };
-%
+            return 0;
+        }
+
 #ifdef _WRL_MODULE_H_
         return ::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().GetActivationFactory(static_cast<HSTRING>(classId), reinterpret_cast<::IActivationFactory**>(factory));
 #else
@@ -2384,7 +2402,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         w.write(format,
             bind_each<write_component_include>(classes),
-            bind_each<write_component_activation>(classes));
+            settings.component_lib,
+            settings.component_lib,
+            bind_each<write_component_activation>(classes),
+            settings.component_lib,
+            settings.component_lib);
     }
 
     void write_component_interfaces(writer& w, TypeDef const& type)

@@ -32,7 +32,8 @@ namespace xlang
             { "include", 0 },
             { "exclude", 0 },
             { "root", 0, 1 },
-            { "base", 0, 0 }
+            { "base", 0, 0 },
+            { "lib", 0, 1 },
         };
 
         cmd::reader args{ argc, argv, options };
@@ -48,7 +49,6 @@ namespace xlang
         settings.reference = args.files("reference");
         settings.component = args.exists("component");
         settings.base = args.exists("base");
-        settings.component_overwrite = args.exists("overwrite");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / settings.root / "impl");
@@ -72,9 +72,11 @@ namespace xlang
 
         if (settings.component)
         {
+            settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
+            settings.component_lib = args.value("lib", "winrt");
 
             if (settings.component_pch == ".")
             {

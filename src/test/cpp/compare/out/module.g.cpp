@@ -11,6 +11,79 @@
 #include "Component.Fast.SlowClass.h"
 #include "Component.Result.Class.h"
 
+// Note: use "-lib example" option to change winrt_xxx to example_xxx to allow multiple libs to be stitched together.
+
+bool WINRT_CALL winrt_can_unload_now() noexcept
+{
+    if (winrt::get_module_lock())
+    {
+        return false;
+    }
+
+    winrt::clear_factory_cache();
+    return true;
+}
+
+void* WINRT_CALL winrt_get_activation_factory(std::wstring_view const& name)
+{
+    auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
+    {
+        return std::equal(left.rbegin(), left.rend(), right.rbegin(), right.rend());
+    };
+
+    if (requal(name, L"Component.Async.Class"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Async::factory_implementation::Class>());
+    }
+
+    if (requal(name, L"Component.Collections.Class"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Collections::factory_implementation::Class>());
+    }
+
+    if (requal(name, L"Component.Edge.OneClass"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::OneClass>());
+    }
+
+    if (requal(name, L"Component.Edge.StaticClass"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::StaticClass>());
+    }
+
+    if (requal(name, L"Component.Edge.ThreeClass"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::ThreeClass>());
+    }
+
+    if (requal(name, L"Component.Edge.TwoClass"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::TwoClass>());
+    }
+
+    if (requal(name, L"Component.Edge.ZeroClass"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::ZeroClass>());
+    }
+
+    if (requal(name, L"Component.Fast.FastClass"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Fast::factory_implementation::FastClass>());
+    }
+
+    if (requal(name, L"Component.Fast.SlowClass"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Fast::factory_implementation::SlowClass>());
+    }
+
+    if (requal(name, L"Component.Result.Class"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Result::factory_implementation::Class>());
+    }
+
+    return nullptr;
+}
+
 int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
 {
 #ifdef _WRL_MODULE_H_
@@ -20,76 +93,21 @@ int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
     }
 #endif
 
-    if (winrt::get_module_lock())
-    {
-        return 1;
-    }
-
-    winrt::clear_factory_cache();
-    return 0;
+    return winrt_can_unload_now() ? 0 : 1;
 }
 
 int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept
 {
     try
     {
-        *factory = nullptr;
         uint32_t length{};
         wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
         std::wstring_view const name{ buffer, length };
 
-        auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
+        *factory = winrt_get_activation_factory(name);
+
+        if (*factory)
         {
-            return std::equal(left.rbegin(), left.rend(), right.rbegin(), right.rend());
-        };
-        if (requal(name, L"Component.Async.Class"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Async::factory_implementation::Class>());
-            return 0;
-        }
-        if (requal(name, L"Component.Collections.Class"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Collections::factory_implementation::Class>());
-            return 0;
-        }
-        if (requal(name, L"Component.Edge.OneClass"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::OneClass>());
-            return 0;
-        }
-        if (requal(name, L"Component.Edge.StaticClass"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::StaticClass>());
-            return 0;
-        }
-        if (requal(name, L"Component.Edge.ThreeClass"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::ThreeClass>());
-            return 0;
-        }
-        if (requal(name, L"Component.Edge.TwoClass"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::TwoClass>());
-            return 0;
-        }
-        if (requal(name, L"Component.Edge.ZeroClass"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::ZeroClass>());
-            return 0;
-        }
-        if (requal(name, L"Component.Fast.FastClass"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Fast::factory_implementation::FastClass>());
-            return 0;
-        }
-        if (requal(name, L"Component.Fast.SlowClass"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Fast::factory_implementation::SlowClass>());
-            return 0;
-        }
-        if (requal(name, L"Component.Result.Class"))
-        {
-            *factory = winrt::detach_abi(winrt::make<winrt::Component::Result::factory_implementation::Class>());
             return 0;
         }
 
