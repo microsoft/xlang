@@ -99,7 +99,7 @@ add_custom_command(
   BYPRODUCTS ${module_pdb_path}
   DEPENDS ${setup_py}
   WORKING_DIRECTORY ${generated_files}
-  COMMAND py setup.py build_ext -b build
+  COMMAND py setup.py build_ext -b build # TODO: figure out why modules compiled with --debug don't load
 )
 
 add_custom_target(generate_python_test ALL DEPENDS ${setup_py})
