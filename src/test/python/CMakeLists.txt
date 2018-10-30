@@ -21,15 +21,15 @@ set(winmd_files
 )
 
 set(included_namespaces
-    # Windows.Data.Json
-    # Windows.Devices.Geolocation
+    Windows.Data.Json
+    Windows.Devices.Geolocation
     Windows.Foundation
-    # Windows.Graphics.DirectX
+    Windows.Graphics.DirectX
 
     # Windows.AI.MachineLearning
     # Windows.Graphics.Imaging
-    Windows.Media
-    Windows.Storage
+    # Windows.Media
+    # Windows.Storage
 )
 
 set(excluded_namespaces
@@ -52,7 +52,7 @@ set(excluded_namespaces
     Windows.Media.Ocr.
     Windows.Media.Playback.
     Windows.Media.Playlists.
-    # Windows.Media.PlayTo.
+    Windows.Media.PlayTo.
     Windows.Media.Protection.
     Windows.Media.Render.
     Windows.Media.SpeechRecognition.
