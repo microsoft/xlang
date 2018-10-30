@@ -130,7 +130,12 @@ namespace xlang
         {
             for (auto&& needed_ns : needed_namespaces)
             {
-                w.write("import %.%\n", module_name, needed_ns);
+                auto format = R"(try:
+    import %.%
+except:
+    pass
+)";
+                w.write_indented(format, module_name, needed_ns);
             }
             w.write("\n");
         }
