@@ -30,6 +30,11 @@ WINRT_EXPORT namespace winrt::param
             WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value, static_cast<uint32_t>(wcslen(value)), &m_header, &m_handle));
         }
 
+        operator winrt::hstring const&() const noexcept
+        {
+            return *reinterpret_cast<winrt::hstring const*>(this);
+        }
+
     private:
 
         struct header

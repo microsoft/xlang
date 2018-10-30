@@ -8,7 +8,6 @@
 #include "base_identity.h"
 #include "base_handle.h"
 #include "base_lock.h"
-#include "base_diagnostics.h"
 #include "base_abi.h"
 #include "base_windows.h"
 #include "base_string.h"

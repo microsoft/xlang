@@ -2,12 +2,12 @@
 
 namespace xlang
 {
-    inline auto get_start_time()
+    auto get_start_time()
     {
         return std::chrono::high_resolution_clock::now();
     }
 
-    inline auto get_elapsed_time(std::chrono::time_point<std::chrono::high_resolution_clock> const& start)
+    auto get_elapsed_time(std::chrono::time_point<std::chrono::high_resolution_clock> const& start)
     {
         return std::chrono::duration_cast<std::chrono::duration<int64_t, std::milli>>(std::chrono::high_resolution_clock::now() - start).count();
     }
@@ -56,7 +56,7 @@ namespace xlang
             }
             else
             {
-                name = "winrt_impl_return_value";
+                name = "winrt_impl_result";
             }
 
             return name;
@@ -65,6 +65,11 @@ namespace xlang
         bool has_params() const
         {
             return !m_params.empty();
+        }
+
+        bool has_abi_params() const
+        {
+            return has_params() || return_signature();
         }
 
     private:
@@ -92,13 +97,30 @@ namespace xlang
         }
     };
 
-    inline coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
+    bool is_static_class(TypeDef const& type)
+    {
+        auto impls = type.InterfaceImpl();
+        return impls.first == impls.second;
+    }
+
+    template <typename T>
+    bool has_attribute(T const& row, std::string_view const& type_namespace, std::string_view const& type_name)
+    {
+        return static_cast<bool>(get_attribute(row, type_namespace, type_name));
+    }
+
+    bool is_fast_class(TypeDef const& type)
+    {
+        return has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute");
+    }
+
+    coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
     {
         auto impls = type.InterfaceImpl();
 
         for (auto&& impl : impls)
         {
-            if (get_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
+            if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
             {
                 return impl.Interface();
             }
@@ -106,16 +128,14 @@ namespace xlang
 
         if (impls.first != impls.second)
         {
-            return impls.first.Interface();
+            throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
         }
 
         return {};
     }
 
-    inline auto get_abi_name(MethodDef const& method)
+    auto get_abi_name(MethodDef const& method)
     {
-        std::string_view name;
-
         if (auto overload = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute"))
         {
             return std::get<std::string_view>(std::get<ElemSig>(overload.Value().FixedArgs()[0].value).value);
@@ -126,7 +146,7 @@ namespace xlang
         }
     }
 
-    inline auto get_name(MethodDef const& method)
+    auto get_name(MethodDef const& method)
     {
         auto name = method.Name();
 
@@ -138,27 +158,27 @@ namespace xlang
         return name;
     }
 
-    inline bool is_remove_overload(MethodDef const& method)
+    bool is_remove_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "remove_");
     }
 
-    inline bool is_add_overload(MethodDef const& method)
+    bool is_add_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "add_");
     }
 
-    inline bool is_put_overload(MethodDef const& method)
+    bool is_put_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "put_");
     }
 
-    inline bool is_noexcept(MethodDef const& method)
+    bool is_noexcept(MethodDef const& method)
     {
-        return is_remove_overload(method) || get_attribute(method, "Experimental.Windows.Foundation.Metadata", "NoExceptAttribute");
+        return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptAttribute");
     }
 
-    inline bool is_async(MethodDef const& method, method_signature const& method_signature)
+    bool is_async(MethodDef const& method, method_signature const& method_signature)
     {
         if (is_put_overload(method))
         {
@@ -172,7 +192,7 @@ namespace xlang
 
         bool async{};
 
-        xlang::visit(method_signature.return_signature().Type().Type(),
+        visit(method_signature.return_signature().Type().Type(),
             [&](GenericTypeInstSig const& type)
         {
             auto generic_type = type.GenericType().TypeRef();
@@ -193,26 +213,31 @@ namespace xlang
         return async;
     }
 
-    inline auto get_bases(TypeDef const& type)
+    TypeDef get_base_class(TypeDef const& derived)
+    {
+        auto extends = derived.Extends();
+
+        if (!extends)
+        {
+            return{};
+        }
+
+        auto base = extends.TypeRef();
+        auto type_name = base.TypeName();
+        auto type_namespace = base.TypeNamespace();
+
+        if (type_name == "Object" && type_namespace == "System")
+        {
+            return {};
+        }
+
+        return find_required(base);
+    };
+
+
+    auto get_bases(TypeDef const& type)
     {
         std::vector<TypeDef> bases;
-
-        auto get_base_class = [](TypeDef const& derived) -> TypeDef
-        {
-            auto extends = derived.Extends();
-
-            if (!extends)
-            {
-                return{};
-            }
-
-            if(extends_type(derived, "System"sv, "Object"sv))
-            {
-                return {};
-            }
-
-            return find_required(extends.TypeRef());
-        };
 
         for (auto base = get_base_class(type); base; base = get_base_class(base))
         {
@@ -229,15 +254,17 @@ namespace xlang
         bool defaulted{};
         bool overridable{};
         bool base{};
+        bool exclusive{};
     };
 
-    inline void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::pair<InterfaceImpl, InterfaceImpl>&& children)
+    void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::pair<InterfaceImpl, InterfaceImpl>&& children)
     {
         for (auto&& impl : children)
         {
-            interface_info info{ impl.Interface() };
+            interface_info info;
+            info.type = impl.Interface();
             auto name = w.write_temp("%", info.type);
-            info.defaulted = !base && (defaulted || static_cast<bool>(get_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute")));
+            info.defaulted = !base && (defaulted || has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"));
 
             {
                 // This is for correctness rather than an optimization (but helps performance as well).
@@ -258,7 +285,7 @@ namespace xlang
                 }
             }
 
-            info.overridable = overridable || static_cast<bool>(get_attribute(impl, "Windows.Foundation.Metadata", "OverridableAttribute"));
+            info.overridable = overridable || has_attribute(impl, "Windows.Foundation.Metadata", "OverridableAttribute");
             info.base = base;
             TypeDef definition;
             writer::generic_param_guard guard;
@@ -287,12 +314,13 @@ namespace xlang
             }
 
             info.methods = definition.MethodList();
+            info.exclusive = has_attribute(definition, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
             get_interfaces_impl(w, result, info.defaulted, info.overridable, base, definition.InterfaceImpl());
             result[name] = std::move(info);
         }
     };
 
-    inline auto get_interfaces(writer& w, TypeDef const& type)
+    auto get_interfaces(writer& w, TypeDef const& type)
     {
         std::map<std::string, interface_info> result;
         get_interfaces_impl(w, result, false, false, false, type.InterfaceImpl());
@@ -314,7 +342,7 @@ namespace xlang
         bool visible{};
     };
 
-    inline auto get_factories(TypeDef const& type)
+    auto get_factories(TypeDef const& type)
     {
         auto get_system_type = [&](auto&& signature) -> TypeDef
         {
@@ -368,11 +396,70 @@ namespace xlang
         return factories;
     }
 
-    inline bool wrap_abi(TypeSig const& signature)
+    struct fast_interface_info
+    {
+        std::string name;
+        uint32_t version{};
+        std::pair<MethodDef, MethodDef> methods;
+    };
+
+    auto get_fast_interfaces(writer& w, TypeDef const& type)
+    {
+        w.abi_types = false;
+
+        auto get_version = [](auto&& type)
+        {
+            for (auto&& attribute : type.CustomAttribute())
+            {
+                auto [ns, name] = attribute.TypeNamespaceAndName();
+
+                if (ns == "Windows.Foundation.Metadata")
+                {
+                    if (name == "VersionAttribute")
+                    {
+                        return std::get<uint32_t>(std::get<ElemSig>(attribute.Value().FixedArgs()[0].value).value);
+                    }
+
+                    if (name == "ContractVersionAttribute")
+                    {
+                        return std::get<uint32_t>(std::get<ElemSig>(attribute.Value().FixedArgs()[1].value).value);
+                    }
+                }
+            }
+
+            return 0u;
+        };
+
+        std::vector<fast_interface_info> interfaces;
+
+        for (auto&&[interface_name, interface_info] : get_interfaces(w, type))
+        {
+            if (!interface_info.exclusive)
+            {
+                continue;
+            }
+
+            fast_interface_info info;
+            info.methods = interface_info.methods;
+            info.name = interface_name;
+            info.version = get_version(interface_info.type);
+
+            interfaces.push_back(std::move(info));
+        }
+
+        std::sort(interfaces.begin(), interfaces.end(), [](auto&& left, auto&& right)
+        {
+            return (left.version < right.version || (!(right.version < left.version) && left.name < right.name));
+        });
+
+        return interfaces;
+    }
+
+    bool wrap_abi(TypeSig const& signature)
     {
         bool wrap{};
 
-        xlang::visit(signature.Type(),
+        visit(signature.Type(),
             [&](ElementType type)
         {
             wrap = type == ElementType::String || type == ElementType::Object;
@@ -385,11 +472,11 @@ namespace xlang
         return wrap;
     }
 
-    inline bool is_object(TypeSig const& signature)
+    bool is_object(TypeSig const& signature)
     {
         bool object{};
 
-        xlang::visit(signature.Type(),
+        visit(signature.Type(),
             [&](ElementType type)
         {
             if (type == ElementType::Object)
@@ -402,7 +489,7 @@ namespace xlang
         return object;
     }
 
-    inline auto get_delegate_method(TypeDef const& type)
+    auto get_delegate_method(TypeDef const& type)
     {
         auto methods = type.MethodList();
 
@@ -419,7 +506,7 @@ namespace xlang
         return method;
     }
 
-    inline std::string get_field_abi(writer& w, Field const& field)
+    std::string get_field_abi(writer& w, Field const& field)
     {
         auto signature = field.Signature();
         auto const& type = signature.Type();
@@ -445,14 +532,47 @@ namespace xlang
         return name;
     }
 
-    inline std::string get_component_filename(TypeDef const& type)
+    std::string get_component_filename(TypeDef const& type)
     {
-        // TODO: shorten as needed
-
-        std::string result;
-        result += type.TypeNamespace();
-        result += ".";
+        std::string result{ type.TypeNamespace() };
+        result += '.';
         result += type.TypeName();
+
+        if (!settings.component_name.empty() && starts_with(result, settings.component_name))
+        {
+            result = result.substr(settings.component_name.size());
+
+            if (starts_with(result, "."))
+            {
+                result.erase(result.begin());
+            }
+        }
+
         return result;
+    }
+
+    std::string get_generated_component_filename(TypeDef const& type)
+    {
+        auto result = get_component_filename(type);
+
+        if (!settings.component_prefix)
+        {
+            std::replace(result.begin(), result.end(), '.', '/');
+        }
+
+        return result;
+    }
+
+    bool has_factory_members(TypeDef const& type)
+    {
+        for (auto&& factory : get_factories(type))
+        {
+            if (!factory.type || !empty(factory.type.MethodList()))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
