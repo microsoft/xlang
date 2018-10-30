@@ -21,52 +21,52 @@ set(winmd_files
 )
 
 set(included_namespaces
-    Windows.Data.Json
-    Windows.Devices.Geolocation
+    # Windows.Data.Json
+    # Windows.Devices.Geolocation
     Windows.Foundation
-    Windows.Graphics.DirectX
+    # Windows.Graphics.DirectX
 
     # Windows.AI.MachineLearning
     # Windows.Graphics.Imaging
-    # Windows.Media
-    # Windows.Storage    
+    Windows.Media
+    Windows.Storage
 )
 
 set(excluded_namespaces
-    Windows.Foundation.Diagnostics
-    Windows.Foundation.Metadata
-    Windows.Media.Audio
-    Windows.Media.Capture
-    Windows.Media.Casting
-    Windows.Media.ClosedCaptioning
-    Windows.Media.ContentRestrictions
-    Windows.Media.Control
-    Windows.Media.Core
-    Windows.Media.Devices
-    Windows.Media.DialProtocol
-    Windows.Media.Editing
-    Windows.Media.Effects
-    Windows.Media.FaceAnalysis
-    Windows.Media.Import
-    Windows.Media.MediaProperties
-    Windows.Media.Ocr
-    Windows.Media.Playback
-    Windows.Media.Playlists
-    Windows.Media.PlayTo
-    Windows.Media.Protection
-    Windows.Media.Render
-    Windows.Media.SpeechRecognition
-    Windows.Media.SpeechSynthesis
-    Windows.Media.Streaming
-    Windows.Media.Transcoding
-    Windows.Storage.AccessCache
-    Windows.Storage.BulkAccess
-    Windows.Storage.Compression
-    Windows.Storage.FileProperties
-    Windows.Storage.Pickers
-    Windows.Storage.Provider
-    # Windows.Storage.Search
-    # Windows.Storage.Streams
+    Windows.Foundation.Diagnostics.
+    Windows.Foundation.Metadata.
+    Windows.Media.Audio.
+    Windows.Media.Capture.
+    Windows.Media.Casting.
+    Windows.Media.ClosedCaptioning.
+    Windows.Media.ContentRestrictions.
+    Windows.Media.Control.
+    Windows.Media.Core.
+    Windows.Media.Devices.
+    Windows.Media.DialProtocol.
+    Windows.Media.Editing.
+    Windows.Media.Effects.
+    Windows.Media.FaceAnalysis.
+    Windows.Media.Import.
+    Windows.Media.MediaProperties.
+    Windows.Media.Ocr.
+    Windows.Media.Playback.
+    Windows.Media.Playlists.
+    # Windows.Media.PlayTo.
+    Windows.Media.Protection.
+    Windows.Media.Render.
+    Windows.Media.SpeechRecognition.
+    Windows.Media.SpeechSynthesis.
+    Windows.Media.Streaming.
+    Windows.Media.Transcoding.
+    Windows.Storage.AccessCache.
+    Windows.Storage.BulkAccess.
+    Windows.Storage.Compression.
+    Windows.Storage.FileProperties.
+    Windows.Storage.Pickers.
+    Windows.Storage.Provider.
+    # Windows.Storage.Search.
+    # Windows.Storage.Streams.
 )
 
 set(pywinrt_cmdline "-output ${generated_files} -module ${python_module_name}")
