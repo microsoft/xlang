@@ -2,11 +2,11 @@
 
 namespace xlang
 {
-    inline void write_base_h()
+    void write_base_h()
     {
         writer w;
-        w.write_license();
-        w.write_include_guard();
+        write_license(w);
+        write_include_guard(w);
 
         w.write(strings::base_dependencies);
         w.write(strings::base_macros);
@@ -16,7 +16,6 @@ namespace xlang
         w.write(strings::base_identity);
         w.write(strings::base_handle);
         w.write(strings::base_lock);
-        w.write(strings::base_diagnostics);
         w.write(strings::base_abi);
         w.write(strings::base_windows);
         w.write(strings::base_string);
@@ -57,16 +56,14 @@ namespace xlang
         w.write(strings::base_std_async_action_with_progress);
         w.write(strings::base_std_async_operation);
         w.write(strings::base_std_async_operation_with_progress);
-
         w.write(strings::base_reflect);
-
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
         w.flush_to_file(settings.output_folder + settings.root + "/base.h");
     }
 
-    inline void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)
+    void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -85,28 +82,25 @@ namespace xlang
         w.write_each<write_category>(members.enums, "enum_category");
         w.write_each<write_struct_category>(members.structs);
         w.write_each<write_category>(members.delegates, "delegate_category");
-
         w.write_each<write_name>(members.interfaces);
         w.write_each<write_name>(members.classes);
         w.write_each<write_name>(members.enums);
         w.write_each<write_name>(members.structs);
         w.write_each<write_name>(members.delegates);
-
         w.write_each<write_guid>(members.interfaces);
+        w.write_each<write_fast_version>(members.classes);
         w.write_each<write_guid>(members.delegates);
         w.write_each<write_default_interface>(members.classes);
-
         w.write_each<write_interface_abi>(members.interfaces);
         w.write_each<write_delegate_abi>(members.delegates);
-
+        w.write_each<write_fast_abi>(members.classes);
         w.write_each<write_consume>(members.interfaces);
-
         w.write_each<write_struct_abi>(members.structs);
         write_close_namespace(w);
 
         w.swap();
-        w.write_license();
-        w.write_include_guard();
+        write_license(w);
+        write_include_guard(w);
         w.write_depends("base");
 
         for (auto&& depends : w.depends)
@@ -119,7 +113,7 @@ namespace xlang
         w.save_header('0');
     }
 
-    inline void write_namespace_1_h(std::string_view const& ns, cache::namespace_members const& members)
+    void write_namespace_1_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -129,8 +123,8 @@ namespace xlang
         write_close_namespace(w);
 
         w.swap();
-        w.write_license();
-        w.write_include_guard();
+        write_license(w);
+        write_include_guard(w);
 
         for (auto&& depends : w.depends)
         {
@@ -141,7 +135,7 @@ namespace xlang
         w.save_header('1');
     }
 
-    inline void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members)
+    void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members, cache const& c)
     {
         writer w;
         w.type_namespace = ns;
@@ -152,11 +146,11 @@ namespace xlang
         w.write_each<write_class>(members.classes);
         w.write_each<write_interface_override>(members.classes);
         write_close_namespace(w);
-        write_namespace_special(w, ns);
+        write_namespace_special(w, ns, c);
 
         w.swap();
-        w.write_license();
-        w.write_include_guard();
+        write_license(w);
+        write_include_guard(w);
 
         for (auto&& depends : w.depends)
         {
@@ -167,7 +161,7 @@ namespace xlang
         w.save_header('2');
     }
 
-    inline void write_namespace_h(cache const& c, std::string_view const& ns, cache::namespace_members const& members)
+    void write_namespace_h(cache const& c, std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -176,29 +170,29 @@ namespace xlang
         w.write_each<write_consume_definitions>(members.interfaces);
         w.write_each<write_delegate_implementation>(members.delegates);
         w.write_each<write_produce>(members.interfaces);
+        w.write_each<write_fast_produce>(members.classes);
         w.write_each<write_dispatch_overridable>(members.classes);
         write_close_namespace(w);
-
         write_type_namespace(w, ns);
         w.write_each<write_class_definitions>(members.classes);
+
+        if (settings.component && !settings.uniform)
+        {
+            w.write_each<write_fast_definitions>(members.classes);
+        }
+
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
         w.write_each<write_class_override>(members.classes);
         write_close_namespace(w);
-
-        //if (settings.component)
-        //{
-        //    write_reflections(out, namespace_types);
-        //}
-
         write_std_namespace(w);
         w.write_each<write_std_hash>(members.interfaces);
         w.write_each<write_std_hash>(members.classes);
         write_close_namespace(w);
 
         w.swap();
-        w.write_license();
-        w.write_include_guard();
+        write_license(w);
+        write_include_guard(w);
 
         for (auto&& depends : w.depends)
         {
@@ -210,21 +204,37 @@ namespace xlang
         w.save_header();
     }
 
-    inline void write_component_g_cpp(std::vector<TypeDef> const& classes)
+    void write_component_g_cpp(std::vector<TypeDef> const& classes)
     {
         writer w;
+        write_license(w);
+        write_pch(w);
         write_component_g_cpp(w, classes);
         w.flush_to_file(settings.output_folder + "module.g.cpp");
     }
 
-    inline void write_component_g_h(TypeDef const& type)
+    void write_component_g_h(TypeDef const& type)
     {
         writer w;
         write_component_g_h(w, type);
-        w.flush_to_file(settings.output_folder + get_component_filename(type) + ".g.h");
+
+        w.swap();
+        write_license(w);
+        write_include_guard(w);
+
+        for (auto&& depends : w.depends)
+        {
+            w.write_depends(depends.first);
+        }
+
+        auto filename = settings.output_folder + get_generated_component_filename(type) + ".g.h";
+        path folder = filename;
+        folder.remove_filename();
+        create_directories(folder);
+        w.flush_to_file(filename);
     }
 
-    inline void write_component_h(TypeDef const& type)
+    void write_component_h(TypeDef const& type)
     {
         if (settings.component_folder.empty())
         {
@@ -233,17 +243,18 @@ namespace xlang
 
         auto path = settings.component_folder + get_component_filename(type) + ".h";
 
-        if (exists(path))
+        if (!settings.component_overwrite && exists(path))
         {
             return;
         }
 
         writer w;
+        write_include_guard(w);
         write_component_h(w, type);
         w.flush_to_file(path);
     }
 
-    inline void write_component_cpp(TypeDef const& type)
+    void write_component_cpp(TypeDef const& type)
     {
         if (settings.component_folder.empty())
         {
@@ -252,12 +263,13 @@ namespace xlang
 
         auto path = settings.component_folder + get_component_filename(type) + ".cpp";
 
-        if (exists(path))
+        if (!settings.component_overwrite && exists(path))
         {
             return;
         }
 
         writer w;
+        write_pch(w);
         write_component_cpp(w, type);
         w.flush_to_file(path);
     }

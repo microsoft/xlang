@@ -56,7 +56,7 @@ namespace winrt::impl
     }
 
     template <typename... T>
-    struct WINRT_NOVTABLE variadic_delegate_abi : IUnknown
+    struct WINRT_NOVTABLE variadic_delegate_abi : unknown_abi
     {
         virtual void invoke(T const&...) = 0;
     };
@@ -75,7 +75,7 @@ namespace winrt::impl
         {
             if (is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
             {
-                *result = static_cast<IUnknown*>(this);
+                *result = static_cast<unknown_abi*>(this);
                 AddRef();
                 return error_ok;
             }
