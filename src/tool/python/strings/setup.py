@@ -16,4 +16,4 @@ setuptools.setup(
         include_dirs = ['.'],
         extra_link_args=['/DEBUG'],
         libraries = ['windowsapp']) ],
-    packages = setuptools.find_packages())
+    packages = setuptools.find_namespace_packages())
