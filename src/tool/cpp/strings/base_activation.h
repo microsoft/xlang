@@ -1,6 +1,4 @@
 
-WINRT_WARNING_PUSH
-
 WINRT_EXPORT namespace winrt
 {
     template <typename Interface = Windows::Foundation::IActivationFactory>
@@ -20,6 +18,11 @@ WINRT_EXPORT namespace winrt
         return object;
     }
 }
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 namespace winrt::impl
 {
@@ -53,6 +56,10 @@ namespace winrt::impl
 #error Unsupported architecture
 #endif
     }
+#endif
+
+#ifdef __clang__
+#pragma clang diagnostic pop
 #endif
 
     template <typename T>
@@ -111,7 +118,7 @@ namespace winrt::impl
     {
         struct alignas(sizeof(void*) * 2) object_and_count
         {
-            IUnknown* pointer;
+            unknown_abi* pointer;
             size_t count;
         };
 
@@ -120,7 +127,7 @@ namespace winrt::impl
 
         void clear() noexcept
         {
-            IUnknown* pointer_value = interlocked_read_pointer(&value.pointer);
+            unknown_abi* pointer_value = interlocked_read_pointer(&value.pointer);
 
             if (pointer_value == nullptr)
             {
@@ -192,10 +199,6 @@ namespace winrt::impl
         template <typename F>
         auto call(F&& callback)
         {
-#ifdef WINRT_DIAGNOSTICS
-            get_diagnostics_info().add_factory<Class>();
-#endif
-
             {
                 count_guard const guard(m_value.count);
 
@@ -209,9 +212,6 @@ namespace winrt::impl
 
             if (!object.template try_as<IAgileObject>())
             {
-#ifdef WINRT_DIAGNOSTICS
-                get_diagnostics_info().non_agile_factory<Class>();
-#endif
                 return callback(object);
             }
 
@@ -220,20 +220,11 @@ namespace winrt::impl
 
                 if (nullptr == _InterlockedCompareExchangePointer((void**)&m_value.object, get_abi(object), nullptr))
                 {
-                    // This thread successfully updated the entry to hold the factory object. We thus detach, since the
-                    // factory_cache_entry now owns the reference, and add the entry to the cache list. The callback
-                    // may be safely called using the cached object since the count guard is currently being held.
                     detach_abi(object);
                     get_factory_cache().add(reinterpret_cast<factory_cache_typeless_entry*>(this));
-                    return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
                 }
-                else
-                {
-                    // This thread failed to update the entry since another thread managed to exchange pointers first.
-                    // The callback must still be called and can simply use the temporary factory object before allowing
-                    // it to be released. 
-                    return callback(object);
-                }
+
+                return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
             }
         }
 
@@ -390,5 +381,3 @@ WINRT_EXPORT namespace winrt
         return temp;
     }
 }
-
-WINRT_WARNING_POP

@@ -1,11 +1,11 @@
 
 namespace winrt::impl
 {
-    inline int32_t make_marshaler(IUnknown* outer, void** result) noexcept
+    inline int32_t make_marshaler(unknown_abi* outer, void** result) noexcept
     {
         struct marshaler final : IMarshal
         {
-            marshaler(IUnknown* object) noexcept
+            marshaler(unknown_abi* object) noexcept
             {
                 m_object.copy_from(object);
             }
@@ -104,12 +104,12 @@ namespace winrt::impl
 
             static com_ptr<IMarshal> get_marshaler() noexcept
             {
-                com_ptr<IUnknown> unknown;
+                com_ptr<unknown_abi> unknown;
                 WINRT_VERIFY_(error_ok, WINRT_CoCreateFreeThreadedMarshaler(nullptr, unknown.put_void()));
                 return unknown ? unknown.try_as<IMarshal>() : nullptr;
             }
 
-            com_ptr<IUnknown> m_object;
+            com_ptr<unknown_abi> m_object;
             com_ptr<IMarshal> m_marshaler{ get_marshaler() };
             std::atomic<uint32_t> m_references{ 1 };
         };

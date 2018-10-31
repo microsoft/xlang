@@ -8,6 +8,10 @@ WINRT_EXPORT namespace winrt
 
         com_ptr(std::nullptr_t = nullptr) noexcept {}
 
+        com_ptr(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<type*>(ptr))
+        {
+        }
+
         com_ptr(com_ptr const& other) noexcept : m_ptr(other.m_ptr)
         {
             add_ref();
@@ -131,6 +135,11 @@ WINRT_EXPORT namespace winrt
         {
             to = try_as<impl::wrapped_type_t<To>>();
             return static_cast<bool>(to);
+        }
+
+        hresult as(guid const& id, void** result) const noexcept
+        {
+            return m_ptr->QueryInterface(id, result);
         }
 
         void copy_from(type* other) noexcept
@@ -297,61 +306,4 @@ WINRT_EXPORT namespace winrt
 
     template <typename D, typename I>
     D* get_self(I const& from) noexcept;
-}
-
-namespace winrt::impl
-{
-    template <typename To, typename From>
-    com_ref<To> as(From* ptr)
-    {
-#ifdef WINRT_DIAGNOSTICS
-        get_diagnostics_info().add_query<To>();
-#endif
-
-        com_ref<To> result{ nullptr };
-
-        if (ptr)
-        {
-            if constexpr (is_implements_v<To>)
-            {
-                impl::com_ref<winrt::default_interface<To>> temp;
-                check_hresult(ptr->QueryInterface(guid_of<To>(), put_abi(temp)));
-                attach_abi(result, get_self<To>(temp));
-                detach_abi(temp);
-            }
-            else
-            {
-                check_hresult(ptr->QueryInterface(guid_of<To>(), put_abi(result)));
-            }
-        }
-
-        return result;
-    }
-
-    template <typename To, typename From>
-    com_ref<To> try_as(From* ptr) noexcept
-    {
-#ifdef WINRT_DIAGNOSTICS
-        get_diagnostics_info().add_query<To>();
-#endif
-
-        com_ref<To> result{ nullptr };
-
-        if (ptr)
-        {
-            if constexpr (is_implements_v<To>)
-            {
-                impl::com_ref<winrt::default_interface<To>> temp;
-                ptr->QueryInterface(guid_of<To>(), put_abi(temp));
-                attach_abi(result, get_self<To>(temp));
-                detach_abi(temp);
-            }
-            else
-            {
-                ptr->QueryInterface(guid_of<To>(), put_abi(result));
-            }
-        }
-
-        return result;
-    }
 }
