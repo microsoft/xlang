@@ -1670,7 +1670,7 @@ protected:
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
     {}
 
-    % %::operator()(%) const
+    inline % %::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
     }
@@ -2048,6 +2048,11 @@ protected:
 
     void write_class_definitions(writer& w, TypeDef const& type)
     {
+        if (settings.uniform && settings.filter.includes(type))
+        {
+            return;
+        }
+
         auto type_name = type.TypeName();
 
         for (auto&& factory : get_factories(type))
@@ -2527,24 +2532,167 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         auto type_namespace = type.TypeNamespace();
         auto impl_name = get_impl_name(type_namespace, type_name);
 
-        auto format = R"(
+        if (has_factory_members(type))
+        {
+            auto format = R"(
 void* winrt_make_%()
 {
     return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
 }
 )";
 
-        w.write(format,
-            impl_name,
-            type_namespace,
-            type_name);
+            w.write(format,
+                impl_name,
+                type_namespace,
+                type_name);
+        }
 
-        if (!is_fast_class(type))
+        if (!settings.uniform)
         {
             return;
         }
 
-        // TODO: write all constructors and instance methods using make/get_self
+        write_type_namespace(w, type_namespace);
+
+        for (auto&& factory : get_factories(type))
+        {
+            if (factory.activatable)
+            {
+                if (!factory.type)
+                {
+                    auto format = R"(    %::%() :
+        %(make<@::implementation::%>())
+    {
+    }
+)";
+
+                    w.write(format,
+                        type_name,
+                        type_name,
+                        type_name,
+                        type_namespace,
+                        type_name);
+                }
+                else
+                {
+                    for (auto&& method : factory.type.MethodList())
+                    {
+                        method_signature signature{ method };
+
+                        auto format = R"(    %::%(%) :
+        %(make<@::implementation::%>(%))
+    {
+    }
+)";
+
+                        w.write(format,
+                            type_name,
+                            type_name,
+                            bind<write_consume_params>(signature),
+                            type_name,
+                            type_namespace,
+                            type_name,
+                            bind<write_consume_args>(signature));
+                    }
+                }
+            }
+            else if (factory.composable && factory.visible)
+            {
+                // TODO: fold and replace with direct calls
+                w.write_each<write_composable_constructor_definition>(factory.type.MethodList(), type_name, factory.type);
+            }
+            else if (factory.statics)
+            {
+                for (auto&& method : factory.type.MethodList())
+                {
+                    auto format = R"(    % %::%(%)
+    {
+        return @::implementation::%::%(%);
+    }
+)";
+
+                    method_signature signature{ method };
+                    auto method_name = get_name(method);
+                    w.async_types = is_async(method, signature);
+
+                    w.write(format,
+                        signature.return_signature(),
+                        type_name,
+                        method_name,
+                        bind<write_consume_params>(signature),
+                        type_namespace,
+                        type_name,
+                        method_name,
+                        bind<write_consume_args>(signature));
+                }
+            }
+        }
+
+        if (!is_fast_class(type))
+        {
+            write_close_namespace(w);
+            return;
+        }
+
+        for (auto&& info : get_fast_interfaces(w, type))
+        {
+            for (auto&& method : info.methods)
+            {
+                auto method_name = get_name(method);
+                method_signature signature{ method };
+                w.async_types = is_async(method, signature);
+
+                std::string_view format;
+
+                if (is_noexcept(method))
+                {
+                    format = R"(    % %::%(%) const noexcept
+    {
+        return get_self<@::implementation::%>(*this)->%(%);
+    }
+)";
+                }
+                else
+                {
+                    format = R"(    % %::%(%) const
+    {
+        return get_self<@::implementation::%>(*this)->%(%);
+    }
+)";
+                }
+
+                w.write(format,
+                    signature.return_signature(),
+                    type_name,
+                    method_name,
+                    bind<write_consume_params>(signature),
+                    type_namespace,
+                    type_name,
+                    method_name,
+                    bind<write_consume_args>(signature));
+
+                if (is_add_overload(method))
+                {
+                    format = R"(    %::%_revoker %::%(auto_revoke_t, %) const
+    {
+        return impl::make_event_revoker<%, %_revoker>(this, %(%));
+    }
+)";
+
+                    w.write(format,
+                        type_name,
+                        method_name,
+                        type_name,
+                        method_name,
+                        bind<write_consume_params>(signature),
+                        method_name,
+                        method_name,
+                        bind<write_consume_args>(signature));
+                }
+            }
+        }
+
+        write_close_namespace(w);
     }
 
     void write_component_g_h(writer& w, TypeDef const& type)
