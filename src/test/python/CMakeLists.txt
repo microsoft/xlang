@@ -26,6 +26,7 @@ set(included_namespaces
     Windows.Foundation
     Windows.Graphics.DirectX
 
+    # uncomment out the following to run complete_winml_tutorial.py
     # Windows.AI.MachineLearning
     # Windows.Graphics.Imaging
     # Windows.Media
@@ -99,7 +100,7 @@ add_custom_command(
   BYPRODUCTS ${module_pdb_path}
   DEPENDS ${setup_py}
   WORKING_DIRECTORY ${generated_files}
-  COMMAND py setup.py build_ext -b build # TODO: figure out why modules compiled with --debug don't load
+  COMMAND py setup.py develop
 )
 
 add_custom_target(generate_python_test ALL DEPENDS ${setup_py})
