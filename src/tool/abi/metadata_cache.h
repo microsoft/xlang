@@ -10,22 +10,139 @@
 #include "type_name.h"
 #include "type_names.h"
 
-struct metadata_cache;
-
 struct metadata_type
 {
     virtual std::string_view clr_namespace() const = 0;
     virtual std::string_view clr_full_name() const = 0;
-    virtual std::string_view cpp_type_name() const = 0;
+    virtual std::string_view logical_name() const = 0;
+    virtual std::string_view abi_name() const = 0;
     virtual std::string_view mangled_name() const = 0;
     virtual std::string_view generic_param_mangled_name() const = 0;
 };
 
+struct typedef_base : metadata_type
+{
+    typedef_base(xlang::meta::reader::TypeDef const& type) :
+        m_type(type),
+        m_clrFullName(::clr_full_name(type)),
+        m_mangledName(::mangled_name<false>(type)),
+        m_genericParamMangledName(::mangled_name<true>(type))
+    {
+    }
+
+    virtual std::string_view clr_namespace() const override
+    {
+        return m_type.TypeNamespace();
+    }
+
+    virtual std::string_view clr_full_name() const override
+    {
+        return m_clrFullName;
+    }
+
+    virtual std::string_view mangled_name() const override
+    {
+        return m_mangledName;
+    }
+
+    virtual std::string_view generic_param_mangled_name() const override
+    {
+        // Only generic instantiations should be used as generic params
+        XLANG_ASSERT(!is_generic(m_type));
+        return m_genericParamMangledName;
+    }
+
+    virtual std::string_view logical_name() const override
+    {
+        return m_type.TypeName();
+    }
+
+    virtual std::string_view abi_name() const override
+    {
+        return m_type.TypeName();
+    }
+
+    xlang::meta::reader::TypeDef const& type() const noexcept
+    {
+        return m_type;
+    }
+
+protected:
+
+    xlang::meta::reader::TypeDef m_type;
+
+    // These strings are initialized by the base class
+    std::string m_clrFullName;
+    std::string m_mangledName;
+    std::string m_genericParamMangledName;
+
+    // These strings need to be initialized by the derived class
+};
+
+struct enum_type final : typedef_base
+{
+    enum_type(xlang::meta::reader::TypeDef const& type) :
+        typedef_base(type),
+        m_underlyingType(std::get<xlang::meta::reader::ElementType>(type.FieldList().first.Signature().Type().Type()))
+    {
+    }
+
+    xlang::meta::reader::ElementType underlying_type() const noexcept
+    {
+        return m_underlyingType;
+    }
+
+private:
+
+    xlang::meta::reader::ElementType m_underlyingType;
+};
+
+struct struct_type final : typedef_base
+{
+};
+
+struct delegate_type final : typedef_base
+{
+    delegate_type(xlang::meta::reader::TypeDef const& type) :
+        typedef_base(type)
+    {
+        m_typeName.push_back('I');
+        m_typeName += type.TypeName();
+    }
+
+    virtual std::string_view logical_name() const override
+    {
+        return m_typeName;
+    }
+
+    virtual std::string_view abi_name() const override
+    {
+        return m_typeName;
+    }
+
+private:
+
+    std::string m_typeName;
+};
+
+struct interface_type final : typedef_base
+{
+};
+
+struct class_type final : typedef_base
+{
+};
+
 struct element_type final : metadata_type
 {
-    element_type(std::string_view clrName, std::string_view cppName, std::string_view mangledName) :
+    element_type(
+        std::string_view clrName,
+        std::string_view logicalName,
+        std::string_view abiName,
+        std::string_view mangledName) :
         m_clrName(clrName),
-        m_cppName(cppName),
+        m_logicalName(logicalName),
+        m_abiName(abiName),
         m_mangledName(mangledName)
     {
     }
@@ -40,9 +157,14 @@ struct element_type final : metadata_type
         return m_clrName;
     }
 
-    virtual std::string_view cpp_type_name() const override
+    virtual std::string_view logical_name() const override
     {
-        return m_cppName;
+        return m_logicalName;
+    }
+
+    virtual std::string_view abi_name() const override
+    {
+        return m_abiName;
     }
 
     virtual std::string_view mangled_name() const override
@@ -56,8 +178,11 @@ struct element_type final : metadata_type
     }
 
 private:
+
+    xlang::meta::reader::ElementType m_type;
     std::string_view m_clrName;
-    std::string_view m_cppName;
+    std::string_view m_logicalName;
+    std::string_view m_abiName;
     std::string_view m_mangledName;
 };
 
@@ -77,10 +202,15 @@ struct system_type final : metadata_type
 
     virtual std::string_view clr_full_name() const override
     {
+        return m_clrName;
+    }
+
+    virtual std::string_view logical_name() const override
+    {
         return m_cppName;
     }
 
-    virtual std::string_view cpp_type_name() const override
+    virtual std::string_view abi_name() const override
     {
         return m_cppName;
     }
@@ -97,71 +227,14 @@ struct system_type final : metadata_type
     }
 
 private:
+
     std::string_view m_clrName;
     std::string_view m_cppName;
 };
 
-struct type_def final : metadata_type
-{
-    type_def(metadata_cache const* cache, xlang::meta::reader::TypeDef const& type) :
-        m_cache(cache),
-        m_typeDef(type),
-        m_clrName(::clr_full_name(type)),
-        m_cppTypeName(::cpp_type_name(type)),
-        m_mangledName(::mangled_name<false>(type)),
-        m_genericParamMangledName(::mangled_name<true>(type))
-    {
-    }
 
-    virtual std::string_view clr_namespace() const override
-    {
-        return m_typeDef.TypeNamespace();
-    }
-
-    virtual std::string_view clr_full_name() const override
-    {
-        return m_clrName;
-    }
-
-    virtual std::string_view cpp_type_name() const override
-    {
-        return m_cppTypeName;
-    }
-
-    virtual std::string_view mangled_name() const override
-    {
-        return m_mangledName;
-    }
-
-    virtual std::string_view generic_param_mangled_name() const override
-    {
-        return m_genericParamMangledName;
-    }
-
-    metadata_cache const* metadata() const noexcept
-    {
-        return m_cache;
-    }
-
-    xlang::meta::reader::TypeDef const& type() const noexcept
-    {
-        return m_typeDef;
-    }
-
-private:
-
-    metadata_cache const* m_cache;
-    xlang::meta::reader::TypeDef m_typeDef;
-    std::string m_clrName;
-    std::string m_cppTypeName;
-    std::string m_mangledName;
-    std::string m_genericParamMangledName;
-};
-
-inline bool operator<(type_def const& lhs, type_def const& rhs)
-{
-    return lhs.clr_full_name() < rhs.clr_full_name();
-}
+#if 0
+struct metadata_cache;
 
 struct generic_inst final : metadata_type
 {
@@ -322,3 +395,4 @@ private:
     //xlang::meta::reader::cache const* m_cache;
     std::map<std::string_view, std::map<std::string_view, type_def>> m_types;
 };
+#endif

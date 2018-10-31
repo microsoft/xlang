@@ -8,19 +8,19 @@ using namespace xlang::meta::reader;
 
 static element_type const& get_metadata_type(ElementType type)
 {
-    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv };
-    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar__zt"sv };
-    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "byte"sv };
-    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv };
-    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv };
-    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv };
-    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv };
-    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__z__zint64"sv };
-    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv };
-    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv };
-    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv };
-    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv };
-    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable"sv };
+    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "boolean"sv };
+    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "wchar__zt"sv };
+    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "byte"sv };
+    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "short"sv };
+    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv };
+    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "int"sv };
+    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv };
+    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "__z__zint64"sv };
+    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv };
+    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "float"sv };
+    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "double"sv };
+    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv };
+    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv };
 
     switch (type)
     {
