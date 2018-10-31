@@ -6,7 +6,10 @@ import setuptools
 
 setuptools.setup(
     name = "%",
-    version = "0.1",
+    version = "1.0.alpha",
+    description="Generated Python/WinRT package",
+    license="MIT",
+    url="http://github.com/Microsoft/xlang",
     ext_modules = [ setuptools.Extension('%', 
         sources = [%],
         extra_compile_args = ["/std:c++17", "/await", "/Zi", "/Od"],
