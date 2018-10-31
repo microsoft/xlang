@@ -199,12 +199,12 @@ namespace xlang
         w.save_header();
     }
 
-    void write_component_g_cpp(std::vector<TypeDef> const& classes)
+    void write_module_g_cpp(std::vector<TypeDef> const& classes)
     {
         writer w;
         write_license(w);
         write_pch(w);
-        write_component_g_cpp(w, classes);
+        write_module_g_cpp(w, classes);
         w.flush_to_file(settings.output_folder + "module.g.cpp");
     }
 

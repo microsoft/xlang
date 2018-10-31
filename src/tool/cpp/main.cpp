@@ -209,7 +209,7 @@ namespace xlang
 
                     if (!classes.empty())
                     {
-                        write_component_g_cpp(classes);
+                        write_module_g_cpp(classes);
 
                         for (auto&& type : classes)
                         {

@@ -2337,7 +2337,7 @@ protected:
             type_name);
     }
 
-    void write_component_g_cpp(writer& w, std::vector<TypeDef> const& classes)
+    void write_module_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
         auto format = R"(%
 // Note: use "-lib example" option to change winrt_xxx to example_xxx to allow multiple libs to be stitched together.
