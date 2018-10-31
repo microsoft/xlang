@@ -85,7 +85,7 @@ BUILD_PATH="$REPO_ROOT_PATH/_build/Ubuntu_18.04/x86_64/$buildType/"
 
 if $force || ! [ -e "$BUILD_PATH/CMakeCache.txt" ]
 then
-  cmake "$SRC_PATH" "-B$BUILD_PATH" -GNinja "-DCMAKE_BUILD_TYPE=$buildType" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang
+  cmake "$SRC_PATH" "-B$BUILD_PATH" -GNinja "-DCMAKE_BUILD_TYPE=$buildType" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 fi
 
 ninja -C $BUILD_PATH $verbose $target
