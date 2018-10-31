@@ -2544,7 +2544,7 @@ void* winrt_make_%()
             type_namespace,
             type_name);
 
-        if (!is_fast_class(type) || !settings.uniform)
+        if (!is_fast_class(type))
         {
             return;
         }
