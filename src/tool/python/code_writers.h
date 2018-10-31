@@ -622,7 +622,7 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
 
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
     {
-        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n\n", bind<write_winrt_type_specialization_native_type>(type));
+        w.write("PyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_winrt_type_specialization_native_type>(type));
     }
 
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
@@ -647,7 +647,7 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
 
     void write_class_constructor(writer& w, TypeDef const& type)
     {
-        w.write("\nPyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
+        w.write("\nstatic PyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
 
         auto constructors = get_constructors(type);
 
@@ -1022,7 +1022,7 @@ static void @_dealloc(%* self)
 
     void write_struct_convert_functions(writer& w, TypeDef const& type)
     {
-        w.write_indented("PyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
+        w.write_indented("\nPyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
         {
             writer::indent_guard g{ w };
             w.write_indented("return py::wrap_struct<%>(instance, py::get_python_type<%>());\n", type, type);
