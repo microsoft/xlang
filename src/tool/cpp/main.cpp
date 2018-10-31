@@ -214,7 +214,7 @@ namespace xlang
                         for (auto&& type : classes)
                         {
                             write_component_g_h(type);
-                            write_component_m_h(type);
+                            write_component_g_cpp(type);
                             write_component_h(type);
                             write_component_cpp(type);
                         }

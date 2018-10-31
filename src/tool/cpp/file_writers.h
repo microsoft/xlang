@@ -230,20 +230,20 @@ namespace xlang
         w.flush_to_file(filename);
     }
 
-    void write_component_m_h(TypeDef const& type)
+    void write_component_g_cpp(TypeDef const& type)
     {
-        if (!has_factory_members(type) || !settings.uniform)
+        if (!settings.uniform)
         {
             return;
         }
 
         writer w;
-        write_component_m_h(w, type);
+        write_component_g_cpp(w, type);
 
         w.swap();
         write_license(w);
 
-        auto filename = settings.output_folder + get_generated_component_filename(type) + ".m.h";
+        auto filename = settings.output_folder + get_generated_component_filename(type) + ".g.cpp";
         path folder = filename;
         folder.remove_filename();
         create_directories(folder);
