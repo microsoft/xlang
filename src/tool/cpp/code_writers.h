@@ -2304,44 +2304,73 @@ protected:
 
     void write_component_include(writer& w, TypeDef const& type)
     {
-        auto format = R"(#include "%.h"
+        if (!has_factory_members(type))
+        {
+            return;
+        }
+
+        if (settings.uniform)
+        {
+            auto format = R"(void* winrt_make_%();
 )";
 
-        if (!get_factories(type).empty())
+            w.write(format, get_impl_name(type.TypeNamespace(), type.TypeName()));
+        }
+        else
         {
+            auto format = R"(#include "%.h"
+)";
+
             w.write(format, get_component_filename(type));
         }
     }
 
     void write_component_activation(writer& w, TypeDef const& type)
     {
-        if (get_factories(type).empty())
+        if (!has_factory_members(type))
         {
             return;
         }
 
-    auto format = R"(
+        auto type_name = type.TypeName();
+        auto type_namespace = type.TypeNamespace();
+        auto impl_name = get_impl_name(type_namespace, type_name);
+
+        if (settings.uniform)
+        {
+            auto format = R"(
+    if (requal(name, L"%.%"))
+    {
+        return winrt_make_%();
+    }
+)";
+
+            w.write(format,
+                type_namespace,
+                type_name,
+                impl_name);
+        }
+        else
+        {
+            auto format = R"(
     if (requal(name, L"%.%"))
     {
         return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
     }
 )";
 
-        auto type_name = type.TypeName();
-        auto type_namespace = type.TypeNamespace();
-
-        w.write(format,
-            type_namespace,
-            type_name,
-            type_namespace,
-            type_name);
+            w.write(format,
+                type_namespace,
+                type_name,
+                type_namespace,
+                type_name);
+        }
     }
 
     void write_module_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
-        auto format = R"(%
-// Note: use "-lib example" option to change winrt_xxx to example_xxx to allow multiple libs to be stitched together.
-
+        auto format = R"(#include "winrt/base.h"
+%
 bool WINRT_CALL %_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
