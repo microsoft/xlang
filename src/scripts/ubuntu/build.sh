@@ -80,8 +80,9 @@ fi
 SRC_SCRIPTS_PATH="$(dirname "$CURRENT_DIR")"
 SRC_PATH="$(dirname "$SRC_SCRIPTS_PATH")"
 REPO_ROOT_PATH="$(dirname "$SRC_PATH")"
-# TODO: stop using hardcoded architecture in path
-BUILD_PATH="$REPO_ROOT_PATH/_build/Ubuntu_18.04/x86_64/$buildType/"
+TARGET=$(clang -v 2>&1 | awk '/Target:/ { print $2;}')
+TARGET=${TARGET:-unknown} 
+BUILD_PATH="$REPO_ROOT_PATH/_build/$TARGET/$buildType/"
 
 if $force || ! [ -e "$BUILD_PATH/CMakeCache.txt" ]
 then
