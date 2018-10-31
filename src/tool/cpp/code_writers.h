@@ -835,75 +835,6 @@ namespace xlang
         }
     }
 
-    void write_fast_definitions(writer& w, TypeDef const& type)
-    {
-        if (!is_fast_class(type))
-        {
-            return;
-        }
-
-        auto type_name = type.TypeName();
-
-        for (auto&& info : get_fast_interfaces(w, type))
-        {
-            for (auto&& method : info.methods)
-            {
-                auto method_name = get_name(method);
-                method_signature signature{ method };
-                w.async_types = is_async(method, signature);
-
-                std::string_view format;
-
-                if (is_noexcept(method))
-                {
-                    format = R"(    inline % %::%(%) const noexcept
-    {%
-        WINRT_VERIFY_(0, (*(impl::abi_t<fast_interface<%>>**)this)->%(%));%
-    }
-)";
-                }
-                else
-                {
-                    format = R"(    inline % %::%(%) const
-    {%
-        check_hresult((*(impl::abi_t<fast_interface<%>>**)this)->%(%));%
-    }
-)";
-                }
-
-                w.write(format,
-                    signature.return_signature(),
-                    type_name,
-                    method_name,
-                    bind<write_consume_params>(signature),
-                    bind<write_consume_return_type>(signature),
-                    type_name,
-                    get_abi_name(method),
-                    bind<write_abi_args>(signature),
-                    bind<write_consume_return_statement>(signature));
-
-                if (is_add_overload(method))
-                {
-                    format = R"(    inline %::%_revoker %::%(auto_revoke_t, %) const
-    {
-        return impl::make_event_revoker<%, %_revoker>(this, %(%));
-    }
-)";
-
-                    w.write(format,
-                        type_name,
-                        method_name,
-                        type_name,
-                        method_name,
-                        bind<write_consume_params>(signature),
-                        method_name,
-                        method_name,
-                        bind<write_consume_args>(signature));
-                }
-            }
-        }
-    }
-
     void write_consume(writer& w, TypeDef const& type)
     {
         auto format = R"(    template <typename D>
@@ -2150,6 +2081,70 @@ protected:
             else if (factory.statics)
             {
                 w.write_each<write_static_definitions>(factory.type.MethodList(), type_name, factory.type);
+            }
+        }
+
+        if (!is_fast_class(type))
+        {
+            return;
+        }
+
+        for (auto&& info : get_fast_interfaces(w, type))
+        {
+            for (auto&& method : info.methods)
+            {
+                auto method_name = get_name(method);
+                method_signature signature{ method };
+                w.async_types = is_async(method, signature);
+
+                std::string_view format;
+
+                if (is_noexcept(method))
+                {
+                    format = R"(    inline % %::%(%) const noexcept
+    {%
+        WINRT_VERIFY_(0, (*(impl::abi_t<fast_interface<%>>**)this)->%(%));%
+    }
+)";
+                }
+                else
+                {
+                    format = R"(    inline % %::%(%) const
+    {%
+        check_hresult((*(impl::abi_t<fast_interface<%>>**)this)->%(%));%
+    }
+)";
+                }
+
+                w.write(format,
+                    signature.return_signature(),
+                    type_name,
+                    method_name,
+                    bind<write_consume_params>(signature),
+                    bind<write_consume_return_type>(signature),
+                    type_name,
+                    get_abi_name(method),
+                    bind<write_abi_args>(signature),
+                    bind<write_consume_return_statement>(signature));
+
+                if (is_add_overload(method))
+                {
+                    format = R"(    inline %::%_revoker %::%(auto_revoke_t, %) const
+    {
+        return impl::make_event_revoker<%, %_revoker>(this, %(%));
+    }
+)";
+
+                    w.write(format,
+                        type_name,
+                        method_name,
+                        type_name,
+                        method_name,
+                        bind<write_consume_params>(signature),
+                        method_name,
+                        method_name,
+                        bind<write_consume_args>(signature));
+                }
             }
         }
     }

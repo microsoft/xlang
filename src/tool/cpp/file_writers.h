@@ -175,7 +175,6 @@ namespace xlang
         write_close_namespace(w);
         write_type_namespace(w, ns);
         w.write_each<write_class_definitions>(members.classes);
-        w.write_each<write_fast_definitions>(members.classes);
 
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
