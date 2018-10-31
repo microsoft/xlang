@@ -955,7 +955,7 @@ namespace xlang
         bool clear{};
         bool optional{};
 
-        visit(signature.Type(),
+        xlang::visit(signature.Type(),
             [&](ElementType type)
         {
             if (out && type == ElementType::Object)
