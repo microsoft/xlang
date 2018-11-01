@@ -53,23 +53,19 @@ def run_async_code(code):
     loop.close()
 
 import pyrt.windows.ai.machinelearning as winml 
+import os
 
 @timed_op
 def load_model(model_path):
-    if type(model_path) != str:
-        model_path = str(model_path)
-    return winml.LearningModel.LoadFromFilePath(model_path)
+    return winml.LearningModel.LoadFromFilePath(os.fspath(model_path))
 
 @timed_op
 async def load_image_file(file_path):
-    if type(file_path) != str:
-        file_path = str(file_path)
-
     from pyrt.windows.storage import StorageFile
     from pyrt.windows.graphics.imaging import BitmapDecoder
     from pyrt.windows.media import VideoFrame
 
-    file = await wrap_async_op(StorageFile.GetFileFromPathAsync(file_path))
+    file = await wrap_async_op(StorageFile.GetFileFromPathAsync(os.fspath(file_path)))
     stream = await wrap_async_op(file.OpenAsync(0)) # 0 == FileAccessMode::Read 
     decoder = await wrap_async_op(BitmapDecoder.CreateAsync(stream))
     software_bitmap = await wrap_async_op(decoder.GetSoftwareBitmapAsync())
@@ -94,12 +90,9 @@ def evaluate_model(session, binding):
     return result_tensor.GetAsVectorView()
 
 def load_labels(labels_path):
-    if type(labels_path) != str:
-        labels_path = str(labels_path)
-
     import csv
     labels = dict()
-    with open(labels_path) as labels_file:
+    with open(os.fspath(labels_path)) as labels_file:
         labels_reader = csv.reader(labels_file)
         for label in labels_reader:
             label_text = ', '.join(label[1:])
