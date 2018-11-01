@@ -234,64 +234,58 @@ void writer::pop_contract_guards(std::size_t count)
     }
 }
 
-// void write_abi_header(std::string_view fileName, abi_configuration const& config, type_cache const& types)
-// {
-//     writer w{ config };
+void write_abi_header(std::string_view fileName, abi_configuration const& config, type_cache const& types)
+{
+    writer w{ config };
 
-//     // All headers begin with a bit of boilerplate
-//     w.write(strings::file_header);
-//     w.write(strings::include_guard_start,
-//         bind<write_include_guard>(fileName),
-//         bind<write_include_guard>(fileName),
-//         bind<write_include_guard>(fileName),
-//         bind<write_include_guard>(fileName));
-//     w.write(strings::deprecated_header_start);
-//     w.write(strings::ns_prefix_definitions,
-//         (config.ns_prefix_state == ns_prefix::always) ? strings::ns_prefix_always :
-//         (config.ns_prefix_state == ns_prefix::optional) ? strings::ns_prefix_optional : strings::ns_prefix_never);
-//     if (config.ns_prefix_state == ns_prefix::optional)
-//     {
-//         w.write(strings::optional_ns_prefix_definitions);
-//     }
-//     w.write(strings::constexpr_definitions);
+    // All headers begin with a bit of boilerplate
+    w.write(strings::file_header);
+    w.write(strings::include_guard_start,
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName),
+        bind<write_include_guard>(fileName));
+    w.write(strings::deprecated_header_start);
+    w.write(strings::ns_prefix_definitions,
+        (config.ns_prefix_state == ns_prefix::always) ? strings::ns_prefix_always :
+        (config.ns_prefix_state == ns_prefix::optional) ? strings::ns_prefix_optional : strings::ns_prefix_never);
+    if (config.ns_prefix_state == ns_prefix::optional)
+    {
+        w.write(strings::optional_ns_prefix_definitions);
+    }
+    w.write(strings::constexpr_definitions);
 
-//     write_api_contract_definitions(w, types);
-//     write_includes(w, types);
+    write_api_contract_definitions(w, types);
+    write_includes(w, types);
 
-//     // C++ interface
-//     w.write("#if defined(__cplusplus) && !defined(CINTERFACE)\n");
-//     if (config.enum_class)
-//     {
-//         w.write(strings::enum_class);
-//     }
+    // C++ interface
+    w.write("#if defined(__cplusplus) && !defined(CINTERFACE)\n");
+    if (config.enum_class)
+    {
+        w.write(strings::enum_class);
+    }
 
-//     w.write("/* Forward Declarations */\n");
-//     write_cpp_forward_declarations(w, types);
+    write_cpp_interface_forward_declarations(w, types);
+    write_cpp_generic_definitions(w, types);
 
-//     w.write(R"^-^(// Parameterized interface forward declarations (C++)
+    // C interface
+    w.write("#else // !defined(__cplusplus)\n");
+    w.write("// C interface not currently generated\n");
+    w.write("#endif // defined(__cplusplus)");
 
-// // Collection interface definitions
-// )^-^");
-//     write_cpp_generic_definitions(w, types);
+    w.write(strings::constexpr_end_definitions);
+    if (config.ns_prefix_state == ns_prefix::optional)
+    {
+        w.write(strings::optional_ns_prefix_end_definitions);
+    }
+    w.write(strings::deprecated_header_end);
+    w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
 
-//     // C interface
-//     w.write("#else // !defined(__cplusplus)\n");
-//     w.write("// C interface not currently generated\n");
-//     w.write("#endif // defined(__cplusplus)");
-
-//     w.write(strings::constexpr_end_definitions);
-//     if (config.ns_prefix_state == ns_prefix::optional)
-//     {
-//         w.write(strings::optional_ns_prefix_end_definitions);
-//     }
-//     w.write(strings::deprecated_header_end);
-//     w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
-
-//     auto filename{ config.output_directory };
-//     filename += fileName;
-//     filename += ".h";
-//     w.flush_to_file(filename);
-// }
+    auto filename{ config.output_directory };
+    filename += fileName;
+    filename += ".h";
+    w.flush_to_file(filename);
+}
 
 
 

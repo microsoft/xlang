@@ -1,10 +1,12 @@
 #include "pch.h"
 
+#include "abi_writer.h"
+#include "code_writers.h"
 #include "metadata_cache.h"
-#include "common.h"
 
 using namespace std::literals;
 using namespace xlang::meta::reader;
+using namespace xlang::text;
 
 static void initialize_namespace(
     cache::namespace_members const& members,
@@ -126,11 +128,6 @@ metadata_cache::metadata_cache(xlang::meta::reader::cache const& c)
     group.get();
 }
 
-struct type_cache_init_state
-{
-    type_cache* target;
-};
-
 template <typename T>
 static void merge_into(std::vector<T>& from, std::vector<std::reference_wrapper<T>>& to)
 {
@@ -140,15 +137,10 @@ static void merge_into(std::vector<T>& from, std::vector<std::reference_wrapper<
     to.swap(result);
 }
 
-static void process_type(enum_type& type, type_cache_init_state& state);
-static void process_type(struct_type& type, type_cache_init_state& state);
-static void process_type(delegate_type& type, type_cache_init_state& state);
-static void process_type(interface_type& type, type_cache_init_state& state);
-static void process_type(class_type& type, type_cache_init_state& state);
-
 type_cache metadata_cache::process_namespaces(std::initializer_list<std::string_view> targetNamespaces)
 {
     type_cache result{ this };
+    result.included_namespaces.insert(result.included_namespaces.end(), targetNamespaces.begin(), targetNamespaces.end());
 
     // Merge the type definitions of all namespaces together
     for (auto ns : targetNamespaces)
@@ -167,12 +159,12 @@ type_cache metadata_cache::process_namespaces(std::initializer_list<std::string_
     }
 
     // Process type signatures and calculate dependencies
-    type_cache_init_state state{ &result };
+    type_cache::init_state state;
     auto process_types = [&](auto const& vector)
     {
         for (auto const& type : vector)
         {
-            process_type(type, state);
+            result.process_type(type, state);
         }
     };
     process_types(result.enums);
@@ -185,47 +177,47 @@ type_cache metadata_cache::process_namespaces(std::initializer_list<std::string_
 }
 
 template <typename T>
-static void process_contract_dependencies(T const& type, type_cache_init_state& state)
+void type_cache::process_contract_dependencies(T const& type)
 {
     if (auto attr = contract_attributes(type))
     {
-        state.target->dependent_namespaces.emplace(decompose_type(attr->type_name).first);
+        dependent_namespaces.emplace(decompose_type(attr->type_name).first);
         for (auto const& prevContract : attr->previous_contracts)
         {
-            state.target->dependent_namespaces.emplace(decompose_type(prevContract.type_name).first);
+            dependent_namespaces.emplace(decompose_type(prevContract.type_name).first);
         }
     }
 
     if (auto info = is_deprecated(type))
     {
-        state.target->dependent_namespaces.emplace(decompose_type(info->contract_type).first);
+        dependent_namespaces.emplace(decompose_type(info->contract_type).first);
     }
 }
 
-static void process_type(enum_type& type, type_cache_init_state& state)
+void type_cache::process_type(enum_type& type, type_cache::init_state& /*state*/)
 {
     // There's no pre-processing that we need to do for enums. Just take note of the namespace dependencies that come
     // from contract version(s)/deprecations
-    process_contract_dependencies(type.type(), state);
+    process_contract_dependencies(type.type());
 
     for (auto const& field : type.type().FieldList())
     {
-        process_contract_dependencies(field, state);
+        process_contract_dependencies(field);
     }
 }
 
-static void process_type(struct_type& type, type_cache_init_state& state)
+void type_cache::process_type(struct_type& type, type_cache::init_state& state)
 {
-    process_contract_dependencies(type.type(), state);
+    process_contract_dependencies(type.type());
 
     for (auto const& field : type.type().FieldList())
     {
-        process_contract_dependencies(field, state);
-        type.members.push_back(struct_member{ field, &state.target->find(field.Signature().Type()) });
+        process_contract_dependencies(field);
+        type.members.push_back(struct_member{ field, &find(field.Signature().Type(), state.parent_generic_inst) });
     }
 }
 
-static function_def process_function(MethodDef const& def, type_cache_init_state& state)
+function_def type_cache::process_function(MethodDef const& def, type_cache::init_state& state)
 {
     auto paramNames = def.ParamList();
     auto sig = def.Signature();
@@ -241,23 +233,29 @@ static function_def process_function(MethodDef const& def, type_cache_init_state
             ++paramNames.first;
         }
 
-        return_type = function_return_type{ sig.ReturnType(), name, &state.target->find(sig.ReturnType().Type()) };
+        return_type = function_return_type{ sig.ReturnType(), name, &find(sig.ReturnType().Type(), state.parent_generic_inst) };
     }
 
     std::vector<function_param> params;
     for (auto const& param : sig.Params())
     {
         XLANG_ASSERT(paramNames.first != paramNames.second);
-        params.push_back(function_param{ param, paramNames.first.Name(), &state.target->find(param.Type()) });
+        params.push_back(function_param{ param, paramNames.first.Name(), &find(param.Type(), state.parent_generic_inst) });
         ++paramNames.first;
     }
 
     return function_def{ def, std::move(return_type), std::move(params) };
 }
 
-static void process_type(delegate_type& type, type_cache_init_state& state)
+void type_cache::process_type(delegate_type& type, type_cache::init_state& state)
 {
-    process_contract_dependencies(type.type(), state);
+    process_contract_dependencies(type.type());
+
+    // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
+    if (type.is_generic())
+    {
+        return;
+    }
 
     // Delegates only have a single function - Invoke - that we care about
     for (auto const& method : type.type().MethodList())
@@ -265,44 +263,56 @@ static void process_type(delegate_type& type, type_cache_init_state& state)
         if (method.Name() != ".ctor"sv)
         {
             XLANG_ASSERT(method.Name() == "Invoke"sv);
-            process_contract_dependencies(method, state);
+            process_contract_dependencies(method);
             type.invoke = process_function(method, state);
             break;
         }
     }
 }
 
-static void process_type(interface_type& type, type_cache_init_state& state)
+void type_cache::process_type(interface_type& type, type_cache::init_state& state)
 {
-    process_contract_dependencies(type.type(), state);
+    process_contract_dependencies(type.type());
+
+    // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
+    if (type.is_generic())
+    {
+        return;
+    }
 
     for (auto const& method : type.type().MethodList())
     {
-        process_contract_dependencies(method, state);
+        process_contract_dependencies(method);
         type.functions.push_back(process_function(method, state));
     }
 
     // TODO: Required interfaces? At least the generic ones?
 }
 
-static void process_type(class_type& type, type_cache_init_state& state)
+void type_cache::process_type(class_type& type, type_cache::init_state& state)
 {
-    process_contract_dependencies(type.type(), state);
+    process_contract_dependencies(type.type());
+
+    // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
+    if (type.is_generic())
+    {
+        return;
+    }
 
     // For classes, all we care about is the interfaces and taking note of the default interface, if there is one
     for (auto const& iface : type.type().InterfaceImpl())
     {
-        process_contract_dependencies(iface, state);
+        process_contract_dependencies(iface);
         if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
         {
             XLANG_ASSERT(!type.default_interface);
-            type.default_interface = &state.target->find(iface.Interface());
+            type.default_interface = &find(iface.Interface(), state.parent_generic_inst);
         }
         // TODO: namespace dependency? Process generic types?
     }
 }
 
-metadata_type const* type_cache::try_find(TypeSig const& sig)
+metadata_type const* type_cache::try_find(TypeSig const& sig, generic_inst const* parentGenericInst)
 {
     metadata_type const* result = nullptr;
 
@@ -314,28 +324,36 @@ metadata_type const* type_cache::try_find(TypeSig const& sig)
         },
         [&](coded_index<TypeDefOrRef> const& t)
         {
-            result = try_find(t);
+            result = try_find(t, parentGenericInst);
         },
-        [&](GenericTypeIndex)
+        [&](GenericTypeIndex t)
         {
-            XLANG_ASSERT(false); // TODO?
+            if (parentGenericInst)
+            {
+                XLANG_ASSERT(t.index < parentGenericInst->generic_params().size());
+                result = parentGenericInst->generic_params()[t.index];
+            }
+            else
+            {
+                XLANG_ASSERT(false);
+            }
         },
         [&](GenericTypeInstSig const& t)
         {
-            result = try_find(t);
+            result = try_find(t, parentGenericInst);
         });
 
     return result;
 }
 
-metadata_type const* type_cache::try_find(coded_index<TypeDefOrRef> const& type)
+metadata_type const* type_cache::try_find(coded_index<TypeDefOrRef> const& type, generic_inst const* parentGenericInst)
 {
     metadata_type const* result = nullptr;
 
     visit(type, xlang::visit_overload{
         [&](GenericTypeInstSig const& sig)
         {
-            result = try_find(sig);
+            result = try_find(sig, parentGenericInst);
         },
         [&](auto const& defOrRef)
         {
@@ -345,9 +363,9 @@ metadata_type const* type_cache::try_find(coded_index<TypeDefOrRef> const& type)
     return result;
 }
 
-metadata_type const* type_cache::try_find(GenericTypeInstSig const& sig)
+metadata_type const* type_cache::try_find(GenericTypeInstSig const& sig, generic_inst const* parentGenericInst)
 {
-    metadata_type const* genericType = try_find(sig.GenericType());
+    metadata_type const* genericType = try_find(sig.GenericType(), parentGenericInst);
     if (!genericType)
     {
         return nullptr;
@@ -356,7 +374,7 @@ metadata_type const* type_cache::try_find(GenericTypeInstSig const& sig)
     std::vector<metadata_type const*> genericParams;
     for (auto const& param : sig.GenericArgs())
     {
-        auto ptr = try_find(param);
+        auto ptr = try_find(param, parentGenericInst);
         if (!ptr)
         {
             return nullptr;
@@ -369,13 +387,123 @@ metadata_type const* type_cache::try_find(GenericTypeInstSig const& sig)
     return &itr->second;
 }
 
+void enum_type::write_cpp_forward_declaration(writer& w) const
+{
+    // TODO
+}
+
+void struct_type::write_cpp_forward_declaration(writer& w) const
+{
+    // TODO
+}
+
+void delegate_type::write_cpp_forward_declaration(writer& w) const
+{
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    w.write(R"^-^(#ifndef __%_FWD_DEFINED__
+#define __%_FWD_DEFINED__
+)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+
+    w.push_namespace(clr_abi_namespace());
+    w.write("%interface %;\n", indent{}, m_abiName);
+    w.pop_namespace();
+
+    w.write(R"^-^(#define % @::%
+
+#endif // __%_FWD_DEFINED__
+
+)^-^", bind<write_mangled_name>(m_mangledName), clr_abi_namespace(), m_abiName, bind<write_mangled_name>(m_mangledName));
+}
+
+void interface_type::write_cpp_forward_declaration(writer& w) const
+{
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    w.write(R"^-^(#ifndef __%_FWD_DEFINED__
+#define __%_FWD_DEFINED__
+)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+
+    w.push_namespace(clr_abi_namespace());
+    w.write("%interface %;\n", indent{}, m_type.TypeName());
+    w.pop_namespace();
+
+    w.write(R"^-^(#define % @::%
+
+#endif // __%_FWD_DEFINED__
+
+)^-^", bind<write_mangled_name>(m_mangledName), clr_abi_namespace(), m_type.TypeName(), bind<write_mangled_name>(m_mangledName));
+}
+
+void class_type::write_cpp_forward_declaration(writer& w) const
+{
+    // TODO
+}
+
+void generic_inst::write_cpp_forward_declaration(writer& w) const
+{
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    // First need to make sure that all generic parameters are declared
+    for (auto param : m_genericParams)
+    {
+        param->write_cpp_forward_declaration(w);
+    }
+
+    w.write(R"^-^(#ifndef DEF_%_USE
+#define DEF_%_USE
+#if !defined(RO_NO_TEMPLATE_NAME)
+)^-^", m_mangledName, m_mangledName);
+
+    w.push_inline_namespace(clr_abi_namespace());
+
+    auto const cppName = generic_type_abi_name();
+    w.write(R"^-^(template <>
+struct __declspec(uuid("%"))
+%<)^-^", "TODO_UUID", cppName);
+    // TODO: Generic params
+    w.write("> : %_impl<", cppName);
+    // TODO: Generic params
+
+    w.write(R"^-^(>
+{
+    static const wchar_t* z_get_rc_name_impl()
+    {
+        return L"%";
+    }
+};
+// Define a typedef for the parameterized interface specialization's mangled name.
+// This allows code which uses the mangled name for the parameterized interface to access the
+// correct parameterized interface specialization.
+typedef % %_t;
+#define % ABI::Windows::Foundation::Collections::%_t
+)^-^", m_clrFullName, "TODO_CPPFULLNAME", m_mangledName, m_mangledName, m_mangledName);
+
+    w.pop_inline_namespace();
+
+    w.write(R"^-^(
+#endif // !defined(RO_NO_TEMPLATE_NAME)
+#endif /* DEF_%_USE */
+
+)^-^", m_mangledName);
+}
+
 
 
 
 
 
 #if 0
-void type_cache::process_dependencies(TypeDef const& type, init_state& state)
+void type_cache::process_dependencies(TypeDef const& type, type_cache::init_state& state)
 {
     // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
     // trip us up since it's a definition, not a use and therefore specifies no type name
@@ -424,7 +552,7 @@ void type_cache::process_dependencies(TypeDef const& type, init_state& state)
     }
 }
 
-metadata_type const* type_cache::process_dependency(TypeSig const& type, init_state& state)
+metadata_type const* type_cache::process_dependency(TypeSig const& type, type_cache::init_state& state)
 {
     metadata_type const* result = nullptr;
 
@@ -461,7 +589,7 @@ metadata_type const* type_cache::process_dependency(TypeSig const& type, init_st
     return result;
 }
 
-metadata_type const* type_cache::process_dependency(coded_index<TypeDefOrRef> const& type, init_state& state)
+metadata_type const* type_cache::process_dependency(coded_index<TypeDefOrRef> const& type, type_cache::init_state& state)
 {
     metadata_type const* result = nullptr;
 
@@ -506,7 +634,7 @@ metadata_type const* type_cache::process_dependency(coded_index<TypeDefOrRef> co
     return result;
 }
 
-metadata_type const* type_cache::process_dependency(GenericTypeInstSig const& type, init_state& state)
+metadata_type const* type_cache::process_dependency(GenericTypeInstSig const& type, type_cache::init_state& state)
 {
     auto ref = type.GenericType().TypeRef();
     auto const& def = m_cache->find(ref.TypeNamespace(), ref.TypeName());
@@ -564,19 +692,19 @@ metadata_type const* type_cache::process_dependency(GenericTypeInstSig const& ty
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
 {
-    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "boolean"sv };
-    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "wchar__zt"sv };
-    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "byte"sv };
-    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "short"sv };
-    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv };
-    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "int"sv };
-    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv };
-    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "__z__zint64"sv };
-    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv };
-    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "float"sv };
-    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "double"sv };
-    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv };
-    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv };
+    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "boolean"sv, "b1"sv };
+    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "wchar__zt"sv, "c2"sv };
+    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "byte"sv, "u1"sv };
+    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "short"sv, "i2"sv };
+    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "u2"sv };
+    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "int"sv, "i4"sv };
+    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "u4"sv };
+    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "__z__zint64"sv, "i8"sv };
+    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "u8"sv };
+    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "float"sv, "f4"sv };
+    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "double"sv, "f8"sv };
+    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "string"sv };
+    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv, "cinterface(IInspectable)"sv };
 
     switch (type)
     {
@@ -602,7 +730,7 @@ system_type const& system_type::from_name(std::string_view typeName)
 {
     if (typeName == "Guid"sv)
     {
-        static system_type const guid_type{ "Guid"sv, "GUID"sv };
+        static system_type const guid_type{ "Guid"sv, "GUID"sv, "g16"sv };
         return guid_type;
     }
 
@@ -615,22 +743,22 @@ mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const&
     {
         if (type.TypeName() == "HResult"sv)
         {
-            static mapped_type const hresult_type{ type, "HRESULT"sv };
+            static mapped_type const hresult_type{ type, "HRESULT"sv, "struct(Windows.Foundation.HResult;i4)"sv };
             return &hresult_type;
         }
         else if (type.TypeName() == "EventRegistrationToken"sv)
         {
-            static mapped_type event_token_type{ type, "EventRegistrationToken"sv };
+            static mapped_type event_token_type{ type, "EventRegistrationToken"sv, "struct(Windows.Foundation.EventRegistrationToken;i8)"sv };
             return &event_token_type;
         }
         else if (type.TypeName() == "AsyncStatus"sv)
         {
-            static mapped_type const async_status_type{ type, "AsyncStatus"sv };
+            static mapped_type const async_status_type{ type, "AsyncStatus"sv, "enum(Windows.Foundation.AsyncStatus;i4)"sv };
             return &async_status_type;
         }
         else if (type.TypeName() == "IAsyncInfo"sv)
         {
-            static mapped_type const async_info_type{ type, "IAsyncInfo"sv };
+            static mapped_type const async_info_type{ type, "IAsyncInfo"sv, "{00000036-0000-0000-C000-000000000046}"sv };
             return &async_info_type;
         }
     }

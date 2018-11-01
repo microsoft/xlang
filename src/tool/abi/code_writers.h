@@ -26,10 +26,7 @@ inline void write_contract_macro(writer& w, std::string_view contractNamespace, 
         bind<writer::write_uppercase>(contractTypeName));
 }
 
-#if 0
-#if 0
-#if 0
-inline void write_api_contract_definitions(writer& w, type_cache const& cache)
+inline void write_api_contract_definitions(writer& w, type_cache const& types)
 {
     using namespace std::literals;
     using namespace xlang::meta::reader;
@@ -38,12 +35,12 @@ inline void write_api_contract_definitions(writer& w, type_cache const& cache)
     w.write(R"^-^(
 //  API Contract Inclusion Definitions
 #if !defined(SPECIFIC_API_CONTRACT_DEFINITIONS)
-)^-^");
+)^-^"sv);
 
-    for (auto ns : cache.dependent_namespaces)
+    for (auto ns : types.dependent_namespaces)
     {
-        auto itr = cache.metadata().namespaces.find(ns);
-        if (itr != cache.metadata().namespaces.end())
+        auto itr = types.cache->namespaces.find(ns);
+        if (itr != types.cache->namespaces.end())
         {
             for (auto const& contract : itr->second.contracts)
             {
@@ -51,7 +48,7 @@ inline void write_api_contract_definitions(writer& w, type_cache const& cache)
 #define % %
 #endif // defined(%)
 
-)^-^",
+)^-^"sv,
                     bind<write_contract_macro>(contract.name.ns, contract.name.name),
                     bind<write_contract_macro>(contract.name.ns, contract.name.name), format_hex{ contract.current_version },
                     bind<write_contract_macro>(contract.name.ns, contract.name.name));
@@ -62,10 +59,10 @@ inline void write_api_contract_definitions(writer& w, type_cache const& cache)
     w.write(R"^-^(#endif // defined(SPECIFIC_API_CONTRACT_DEFINITIONS)
 
 
-)^-^");
+)^-^"sv);
 }
 
-inline void write_includes(writer& w, type_cache const& cache)
+inline void write_includes(writer& w, type_cache const& types)
 {
     // Forced dependencies
     w.write(R"^-^(// Header files for imported files
@@ -77,7 +74,7 @@ inline void write_includes(writer& w, type_cache const& cache)
 
     auto includes_namespace = [&](std::string_view ns)
     {
-        return std::binary_search(cache.included_namespaces.begin(), cache.included_namespaces.end(), ns);
+        return std::binary_search(types.included_namespaces.begin(), types.included_namespaces.end(), ns);
     };
 
     if (!includes_namespace(foundation_namespace))
@@ -87,7 +84,7 @@ inline void write_includes(writer& w, type_cache const& cache)
     }
 
     bool hasCollectionsDependency = includes_namespace(collections_namespace);
-    for (auto ns : cache.dependent_namespaces)
+    for (auto ns : types.dependent_namespaces)
     {
         if (ns == collections_namespace)
         {
@@ -123,13 +120,50 @@ inline void write_includes(writer& w, type_cache const& cache)
     w.write("\n");
 }
 
-inline void write_mangled_name(writer& w, metadata_type const& type)
+inline void write_mangled_name(writer& w, std::string_view mangledName)
 {
     using namespace std::literals;
-    auto const prefix = (w.config().ns_prefix_state == ns_prefix::always) ? "__x_ABI_C"sv : "__x_"sv;
-    w.write("%%", prefix, type.mangled_name());
+    auto const fmt = (w.config().ns_prefix_state == ns_prefix::always) ? "__x_ABI_C%"sv : "__x_%"sv;
+    w.write(fmt, mangledName);
 }
 
+inline void write_cpp_interface_forward_declarations(writer& w, type_cache const& types)
+{
+    w.write("/* Forward Declarations */\n");
+
+    for (auto const& type : types.delegates)
+    {
+        if (!type.get().is_generic())
+        {
+            type.get().write_cpp_forward_declaration(w);
+        }
+    }
+
+    for (auto const& type : types.interfaces)
+    {
+        if (!type.get().is_generic())
+        {
+            type.get().write_cpp_forward_declaration(w);
+        }
+    }
+}
+
+inline void write_cpp_generic_definitions(writer& w, type_cache const& types)
+{
+    w.write(R"^-^(// Parameterized interface forward declarations (C++)
+
+// Collection interface definitions
+)^-^");
+
+    for (auto const& [name, inst] : types.generic_instantiations)
+    {
+        inst.write_cpp_forward_declaration(w);
+    }
+}
+
+#if 0
+#if 0
+#if 0
 inline void write_underlying_enum_type(writer& w, xlang::meta::reader::TypeDef const& type)
 {
     using namespace xlang::meta::reader;
@@ -167,7 +201,7 @@ inline void write_cpp_fully_qualified_type(writer& w, type_def const& type)
     }
 
     XLANG_ASSERT(!is_generic(type.type()));
-    w.write("@::%", type.clr_namespace(), type.cpp_type_name());
+    w.write("@::%", type.clr_logical_namespace(), type.cpp_type_name());
 
     if (w.config().ns_prefix_state == ns_prefix::optional)
     {
@@ -189,7 +223,7 @@ inline void write_cpp_forward_declaration(writer& w, type_def const& type)
 
     // Generics should be defined, not declared
     XLANG_ASSERT(!is_generic(type.type()));
-    auto ns = type.clr_namespace();
+    auto ns = type.clr_logical_namespace();
     auto name = type.cpp_type_name();
 
     if (w.should_declare(type.mangled_name()))
@@ -251,25 +285,6 @@ inline void write_cpp_forward_declaration(writer& w, type_def const& type)
     }
 }
 
-inline void write_cpp_forward_declarations(writer& w, type_cache const& cache)
-{
-    for (auto const& type : cache.delegates)
-    {
-        if (!is_generic(type.get().type()))
-        {
-            write_cpp_forward_declaration(w, type);
-        }
-    }
-
-    for (auto const& type : cache.interfaces)
-    {
-        if (!is_generic(type.get().type()))
-        {
-            write_cpp_forward_declaration(w, type);
-        }
-    }
-}
-
 inline void write_cpp_generic_definition(writer& w, generic_inst const& inst)
 {
     using namespace xlang::meta::reader;
@@ -291,7 +306,7 @@ inline void write_cpp_generic_definition(writer& w, generic_inst const& inst)
 #if !defined(RO_NO_TEMPLATE_NAME)
 )^-^", inst.mangled_name(), inst.mangled_name());
 
-    w.push_inline_namespace(inst.clr_namespace());
+    w.push_inline_namespace(inst.clr_logical_namespace());
 
     w.write(R"^-^(template <>
 struct __declspec(uuid("%"))
@@ -348,15 +363,6 @@ inline void write_cpp_forward_declaration(writer& w, metadata_type const& type)
         write_cpp_generic_definition(w, *instPtr);
     }
     // System type or ElementType; neither needs forward declaring
-}
-
-inline void write_cpp_generic_definitions(writer& w, type_cache const& cache)
-{
-    ::DebugBreak();
-    for (auto const& [name, inst] : cache.generic_instantiations)
-    {
-        write_cpp_generic_definition(w, inst);
-    }
 }
 #endif
 

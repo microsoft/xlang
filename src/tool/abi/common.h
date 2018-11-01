@@ -124,6 +124,12 @@ inline bool is_generic(xlang::meta::reader::TypeDef const& type) noexcept
     return distance(type.GenericParam()) != 0;
 }
 
+
+inline xlang::meta::reader::ElementType underlying_enum_type(xlang::meta::reader::TypeDef const& type)
+{
+    return std::get<xlang::meta::reader::ElementType>(type.FieldList().first.Signature().Type().Type());
+}
+
 inline bool is_fully_specialized(xlang::meta::reader::GenericTypeInstSig const& type) noexcept
 {
     using namespace xlang::meta::reader;
