@@ -105,3 +105,6 @@ add_custom_command(
 
 add_custom_target(generate_python_test ALL DEPENDS ${setup_py})
 add_custom_target(python_test ALL DEPENDS ${module_path})
+
+# TODO: include python_test in ALL once issue running python on build system is resolved 
+set_target_properties(python_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
