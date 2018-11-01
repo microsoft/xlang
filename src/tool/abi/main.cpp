@@ -153,24 +153,24 @@ int main(int const argc, char** argv)
 
         filter f{ include, args.values("exclude") };
         task_group group;
-
-        auto filter_includes = [&](type_cache const& nsCache)
+        auto filter_includes = [&](namespace_types const& types)
         {
-            for (auto const& type : nsCache.types)
+            auto includes = [&](auto const& vector)
             {
-                if (f.includes(type.get().type()))
+                return std::find_if(vector.begin(), vector.end(), [&](auto const& t)
                 {
-                    return true;
-                }
-            }
-
-            return false;
+                    return f.includes(t.type());
+                }) != vector.end();;
+            };
+            return includes(types.enums) || includes(types.structs) || includes(types.delegates) ||
+                includes(types.interfaces) || includes(types.classes);
         };
 
         bool foundationDependency = false;
-        for (auto const& [ns, nsCache] : mdCache.namespaces)
+        for (auto const& [ns, nsTypes] : mdCache.namespaces)
         {
-            if (filter_includes(nsCache))
+            // Headers are all or nothing. If the consumer is wanting one type in a namespace, they get everything
+            if (filter_includes(nsTypes))
             {
                 if ((ns == foundation_namespace) || (ns == collections_namespace))
                 {
@@ -180,7 +180,9 @@ int main(int const argc, char** argv)
                 {
                     group.add([&]()
                     {
-                        write_abi_header(ns, config, nsCache);
+                        // TODO
+                        mdCache.process_namespaces({ ns });
+                        //write_abi_header(ns, config, nsCache);
                     });
                 }
             }
@@ -210,7 +212,7 @@ int main(int const argc, char** argv)
                 }
                 else
                 {
-
+                    // TODO
                 }
             });
 

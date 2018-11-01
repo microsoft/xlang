@@ -10,15 +10,26 @@
 #include "type_name.h"
 #include "type_names.h"
 
+struct metadata_cache;
+
 struct metadata_type
 {
     virtual std::string_view clr_namespace() const = 0;
     virtual std::string_view clr_full_name() const = 0;
-    virtual std::string_view logical_name() const = 0;
-    virtual std::string_view abi_name() const = 0;
     virtual std::string_view mangled_name() const = 0;
     virtual std::string_view generic_param_mangled_name() const = 0;
+
+    // NOTE: For easier validation, we try and generate header files as identical to MIDLRT as possible. The primary
+    //       issue there is that the files MIDLRT generates are highly dependent on the structure of the .idl file
+    //       being processed. Thus, it's more accurate to say that we try and mimic WINMDIDL, which orders many things
+    //       alphabetically by its fully qualified "idl name."
+    virtual std::string_view idl_name() const = 0;
 };
+
+inline bool operator<(metadata_type const& lhs, metadata_type const& rhs) noexcept
+{
+    return lhs.idl_name() < rhs.idl_name();
+}
 
 struct typedef_base : metadata_type
 {
@@ -52,16 +63,6 @@ struct typedef_base : metadata_type
         return m_genericParamMangledName;
     }
 
-    virtual std::string_view logical_name() const override
-    {
-        return m_type.TypeName();
-    }
-
-    virtual std::string_view abi_name() const override
-    {
-        return m_type.TypeName();
-    }
-
     xlang::meta::reader::TypeDef const& type() const noexcept
     {
         return m_type;
@@ -75,30 +76,36 @@ protected:
     std::string m_clrFullName;
     std::string m_mangledName;
     std::string m_genericParamMangledName;
-
-    // These strings need to be initialized by the derived class
 };
 
 struct enum_type final : typedef_base
 {
-    enum_type(xlang::meta::reader::TypeDef const& type) :
-        typedef_base(type),
-        m_underlyingType(std::get<xlang::meta::reader::ElementType>(type.FieldList().first.Signature().Type().Type()))
+    using typedef_base::typedef_base;
+
+    virtual std::string_view idl_name() const override
     {
+        // Enum names identically match their CLR name in idl files
+        return m_clrFullName;
     }
+};
 
-    xlang::meta::reader::ElementType underlying_type() const noexcept
-    {
-        return m_underlyingType;
-    }
-
-private:
-
-    xlang::meta::reader::ElementType m_underlyingType;
+struct struct_member
+{
+    xlang::meta::reader::Field field;
+    metadata_type const* type;
 };
 
 struct struct_type final : typedef_base
 {
+    using typedef_base::typedef_base;
+
+    virtual std::string_view idl_name() const override
+    {
+        // Struct names identically match their CLR name in idl files
+        return m_clrFullName;
+    }
+
+    std::vector<struct_member> members;
 };
 
 struct delegate_type final : typedef_base
@@ -106,31 +113,117 @@ struct delegate_type final : typedef_base
     delegate_type(xlang::meta::reader::TypeDef const& type) :
         typedef_base(type)
     {
-        m_typeName.push_back('I');
-        m_typeName += type.TypeName();
+        m_abiName.reserve(1 + type.TypeName().length());
+        m_abiName.push_back('I');
+        m_abiName += type.TypeName();
     }
 
-    virtual std::string_view logical_name() const override
+    virtual std::string_view idl_name() const override
     {
-        return m_typeName;
-    }
-
-    virtual std::string_view abi_name() const override
-    {
-        return m_typeName;
+        return m_abiName;
     }
 
 private:
 
-    std::string m_typeName;
+    std::string m_abiName;
 };
 
 struct interface_type final : typedef_base
 {
+    using typedef_base::typedef_base;
+
+    virtual std::string_view idl_name() const override
+    {
+        // Interface names identically match their CLR name in idl files
+        return m_clrFullName;
+    }
 };
 
 struct class_type final : typedef_base
 {
+    using typedef_base::typedef_base;
+
+    virtual std::string_view idl_name() const override
+    {
+        // Class names identically match their CLR name in idl files
+        return m_clrFullName;
+    }
+};
+
+struct generic_inst final : metadata_type
+{
+    generic_inst(metadata_type const* genericType, std::vector<metadata_type const*> genericParams) :
+        m_genericType(genericType),
+        m_genericParams(std::move(genericParams))
+    {
+        m_clrFullName = genericType->clr_full_name();
+        m_clrFullName.push_back('<');
+
+        m_mangledName = genericType->mangled_name();
+
+        m_idlName = genericType->idl_name();
+        m_idlName.push_back('<');
+
+        std::string_view prefix;
+        for (auto param : genericParams)
+        {
+            m_clrFullName += prefix;
+            m_clrFullName += param->clr_full_name();
+
+            m_mangledName.push_back('_');
+            m_mangledName += param->generic_param_mangled_name();
+
+            m_idlName += prefix;
+            m_idlName += param->idl_name();
+            prefix = ", ";
+        }
+
+        m_clrFullName.push_back('>');
+        m_idlName.push_back('>');
+    }
+
+    virtual std::string_view clr_namespace() const override
+    {
+        return m_genericType->clr_namespace();
+    }
+
+    virtual std::string_view clr_full_name() const override
+    {
+        return m_clrFullName;
+    }
+
+    virtual std::string_view mangled_name() const override
+    {
+        return m_mangledName;
+    }
+
+    virtual std::string_view generic_param_mangled_name() const override
+    {
+        return m_mangledName;
+    }
+
+    metadata_type const* generic_type() const noexcept
+    {
+        return m_genericType;
+    }
+
+    std::vector<metadata_type const*> const& generic_params() const noexcept
+    {
+        return m_genericParams;
+    }
+
+    virtual std::string_view idl_name() const override
+    {
+        return m_idlName;
+    }
+
+private:
+
+    metadata_type const* m_genericType;
+    std::vector<metadata_type const*> m_genericParams;
+    std::string m_clrFullName;
+    std::string m_mangledName;
+    std::string m_idlName;
 };
 
 struct element_type final : metadata_type
@@ -147,6 +240,8 @@ struct element_type final : metadata_type
     {
     }
 
+    static element_type const& from_type(xlang::meta::reader::ElementType type);
+
     virtual std::string_view clr_namespace() const override
     {
         return {};
@@ -157,16 +252,6 @@ struct element_type final : metadata_type
         return m_clrName;
     }
 
-    virtual std::string_view logical_name() const override
-    {
-        return m_logicalName;
-    }
-
-    virtual std::string_view abi_name() const override
-    {
-        return m_abiName;
-    }
-
     virtual std::string_view mangled_name() const override
     {
         xlang::throw_invalid("ElementType values don't have mangled names");
@@ -175,6 +260,12 @@ struct element_type final : metadata_type
     virtual std::string_view generic_param_mangled_name() const override
     {
         return m_mangledName;
+    }
+
+    virtual std::string_view idl_name() const override
+    {
+        // TODO: Not 100% accurate... E.g. many things are uppercase (DOUBLE, FLOAT, etc.) and INT64 vs. __int64
+        return m_abiName;
     }
 
 private:
@@ -194,6 +285,8 @@ struct system_type final : metadata_type
     {
     }
 
+    static system_type const& from_name(std::string_view typeName);
+
     virtual std::string_view clr_namespace() const override
     {
         // Currently all mapped types from the System namespace have no namespace
@@ -203,16 +296,6 @@ struct system_type final : metadata_type
     virtual std::string_view clr_full_name() const override
     {
         return m_clrName;
-    }
-
-    virtual std::string_view logical_name() const override
-    {
-        return m_cppName;
-    }
-
-    virtual std::string_view abi_name() const override
-    {
-        return m_cppName;
     }
 
     virtual std::string_view mangled_name() const override
@@ -226,71 +309,56 @@ struct system_type final : metadata_type
         return m_cppName;
     }
 
+    virtual std::string_view idl_name() const override
+    {
+        return m_cppName;
+    }
+
 private:
 
     std::string_view m_clrName;
     std::string_view m_cppName;
 };
 
-
-#if 0
-struct metadata_cache;
-
-struct generic_inst final : metadata_type
+struct mapped_type final : metadata_type
 {
-    generic_inst(
-        metadata_type const* genericType,
-        std::vector<metadata_type const*> genericParams,
-        std::string clrName,
-        std::string mangledName) :
-        m_genericType(genericType),
-        m_genericParams(std::move(genericParams)),
-        m_clrName(std::move(clrName)),
-        m_mangledName(std::move(mangledName))
+    mapped_type(xlang::meta::reader::TypeDef const& type) :
+        m_type(type),
+        m_clrFullName(::clr_full_name(type))
     {
     }
 
     virtual std::string_view clr_namespace() const override
     {
-        return m_genericType->clr_namespace();
+        return m_type.TypeNamespace();
     }
 
     virtual std::string_view clr_full_name() const override
     {
-        return m_clrName;
-    }
-
-    virtual std::string_view cpp_type_name() const override
-    {
-        return m_mangledName;
+        return m_clrFullName;
     }
 
     virtual std::string_view mangled_name() const override
     {
-        return m_mangledName;
+        // Currently no mapped type names have any characters that would make it so that the mangled name would be
+        // different than the type name (i.e. no underscore, etc.)
+        return m_type.TypeName();
     }
 
     virtual std::string_view generic_param_mangled_name() const override
     {
-        return m_mangledName;
+        return m_type.TypeName();
     }
 
-    metadata_type const& generic_type() const noexcept
+    virtual std::string_view idl_name() const override
     {
-        return *m_genericType;
-    }
-
-    std::vector<metadata_type const*> const& generic_params() const noexcept
-    {
-        return m_genericParams;
+        return m_type.TypeName();
     }
 
 private:
 
-    metadata_type const* m_genericType;
-    std::vector<metadata_type const*> m_genericParams;
-    std::string m_clrName;
-    std::string m_mangledName;
+    xlang::meta::reader::TypeDef m_type;
+    std::string m_clrFullName;
 };
 
 struct api_contract
@@ -306,66 +374,49 @@ inline bool operator<(api_contract const& lhs, api_contract const& rhs)
 
 struct type_cache
 {
-    // The namespace(s) that this object incorporates
-    std::vector<std::string_view> included_namespaces;
+    // Definitions
+    std::vector<std::reference_wrapper<enum_type>> enums;
+    std::vector<std::reference_wrapper<struct_type>> structs;
+    std::vector<std::reference_wrapper<delegate_type>> delegates;
+    std::vector<std::reference_wrapper<interface_type>> interfaces;
+    std::vector<std::reference_wrapper<class_type>> classes;
 
-    // Types defined in these namespace(s)
-    std::set<std::reference_wrapper<type_def const>> types;
-    std::vector<std::reference_wrapper<type_def const>> enums;
-    std::vector<std::reference_wrapper<type_def const>> structs;
-    std::vector<std::reference_wrapper<type_def const>> delegates;
-    std::vector<std::reference_wrapper<type_def const>> interfaces;
-    std::vector<std::reference_wrapper<type_def const>> classes;
-    std::set<api_contract> contracts;
-
-    // Dependencies of these namespace(s)
+    // Dependencies
     std::set<std::string_view> dependent_namespaces;
     std::map<std::string_view, generic_inst> generic_instantiations;
-    std::set<std::reference_wrapper<type_def const>> external_dependencies;
-    std::set<std::reference_wrapper<type_def const>> internal_dependencies;
+    std::set<std::reference_wrapper<typedef_base const>> external_dependencies;
+    std::set<std::reference_wrapper<typedef_base const>> internal_dependencies;
+};
 
-    type_cache(metadata_cache const* cache) :
-        m_cache(cache)
-    {
-    }
-
-    type_cache merge(type_cache const& other) const;
-
-    metadata_cache const& metadata() const noexcept
-    {
-        return *m_cache;
-    }
-
-private:
-    friend struct metadata_cache;
-
-    struct init_state
-    {
-        // Used for GenericTypeIndex lookup
-        generic_inst const* parent_generic_inst = nullptr;
-    };
-
-    void process_dependencies();
-    void process_dependencies(xlang::meta::reader::TypeDef const& type, init_state& state);
-    metadata_type const* process_dependency(xlang::meta::reader::TypeSig const& type, init_state& state);
-    metadata_type const* process_dependency(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type, init_state& state);
-    metadata_type const* process_dependency(xlang::meta::reader::GenericTypeInstSig const& type, init_state& state);
-
-    metadata_cache const* m_cache;
+struct namespace_types
+{
+    std::vector<enum_type> enums;
+    std::vector<struct_type> structs;
+    std::vector<delegate_type> delegates;
+    std::vector<interface_type> interfaces;
+    std::vector<class_type> classes;
+    std::set<api_contract> contracts;
 };
 
 struct metadata_cache
 {
-    std::map<std::string_view, type_cache> namespaces;
+    std::map<std::string_view, namespace_types> namespaces;
 
     metadata_cache(xlang::meta::reader::cache const& c);
 
-    type_def const* try_find(std::string_view ns, std::string_view name) const noexcept
+    type_cache process_namespaces(std::initializer_list<std::string_view> targetNamespaces);
+
+    metadata_type const* try_find(std::string_view typeNamespace, std::string_view typeName) const
     {
-        auto nsItr = m_types.find(ns);
-        if (nsItr != m_types.end())
+        if (typeNamespace == system_namespace)
         {
-            auto nameItr = nsItr->second.find(name);
+            return &system_type::from_name(typeName);
+        }
+
+        auto nsItr = m_typeTable.find(typeNamespace);
+        if (nsItr != m_typeTable.end())
+        {
+            auto nameItr = nsItr->second.find(typeName);
             if (nameItr != nsItr->second.end())
             {
                 return &nameItr->second;
@@ -375,24 +426,17 @@ struct metadata_cache
         return nullptr;
     }
 
-    type_def const& find(std::string_view ns, std::string_view name) const
+    metadata_type const& find(std::string_view typeNamespace, std::string_view typeName) const
     {
-        if (auto ptr = try_find(ns, name))
+        if (auto ptr = try_find(typeNamespace, typeName))
         {
             return *ptr;
         }
 
-        xlang::throw_invalid("Could not find type '", name, "' in namespace '", ns, "'");
+        xlang::throw_invalid("Could not find type '", typeName, "' in namespace '", typeNamespace, "'");
     }
 
 private:
 
-    void initialize_namespace(
-        type_cache& target,
-        std::map<std::string_view, type_def>& typeMap,
-        xlang::meta::reader::cache::namespace_members const& members);
-
-    //xlang::meta::reader::cache const* m_cache;
-    std::map<std::string_view, std::map<std::string_view, type_def>> m_types;
+    std::map<std::string_view, std::map<std::string_view, metadata_type const&>> m_typeTable;
 };
-#endif

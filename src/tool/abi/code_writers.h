@@ -26,6 +26,9 @@ inline void write_contract_macro(writer& w, std::string_view contractNamespace, 
         bind<writer::write_uppercase>(contractTypeName));
 }
 
+#if 0
+#if 0
+#if 0
 inline void write_api_contract_definitions(writer& w, type_cache const& cache)
 {
     using namespace std::literals;
@@ -355,6 +358,7 @@ inline void write_cpp_generic_definitions(writer& w, type_cache const& cache)
         write_cpp_generic_definition(w, inst);
     }
 }
+#endif
 
 
 
