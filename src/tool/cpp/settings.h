@@ -14,9 +14,12 @@ namespace xlang
         bool component{};
         std::string component_folder;
         std::string component_name;
-        std::string component_pch{ "pch.h" };
+        std::string component_pch;
+        bool component_prefix{};
+        bool component_overwrite{};
 
         bool verbose{};
+        bool uniform{};
 
         std::set<std::string> include;
         std::set<std::string> exclude;

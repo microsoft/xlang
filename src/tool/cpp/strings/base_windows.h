@@ -37,6 +37,9 @@ WINRT_EXPORT namespace winrt
         reinterpret_cast<T&>(result) = std::move(object);
         return result;
     }
+
+    struct take_ownership_from_abi_t {};
+    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 }
 
 namespace winrt::impl
@@ -44,11 +47,57 @@ namespace winrt::impl
     template <typename T>
     using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
 
-    template <typename To, typename From>
-    com_ref<To> as(From* ptr);
+    template <typename D, typename I, typename Enable = void>
+    struct produce_base;
+
+    template <typename D, typename I>
+    struct produce : produce_base<D, I>
+    {
+    };
+
+    template <typename D, typename Enable = void>
+    struct get_self_abi
+    {
+        static void* value(void* result) noexcept
+        {
+            return result;
+        }
+    };
+
+    template <typename D>
+    struct get_self_abi<D, std::enable_if_t<is_implements_v<D>>>
+    {
+        static void* value(void* result) noexcept
+        {
+            return &static_cast<produce<D, typename default_interface<D>::type>*>(result)->shim();
+        }
+    };
 
     template <typename To, typename From>
-    com_ref<To> try_as(From* ptr) noexcept;
+    com_ref<To> as(From* ptr)
+    {
+        if (!ptr)
+        {
+            return nullptr;
+        }
+
+        void* result;
+        check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
+        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
+    }
+
+    template <typename To, typename From>
+    com_ref<To> try_as(From* ptr) noexcept
+    {
+        if (!ptr)
+        {
+            return nullptr;
+        }
+
+        void* result;
+        ptr->QueryInterface(guid_of<To>(), &result);
+        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
+    }
 
     template <typename T>
     struct wrapped_type
@@ -73,6 +122,10 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IUnknown() noexcept = default;
         IUnknown(std::nullptr_t) noexcept {}
         void* operator new(size_t) = delete;
+
+        IUnknown(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
+        {
+        }
 
         IUnknown(IUnknown const& other) noexcept : m_ptr(other.m_ptr)
         {
@@ -147,6 +200,11 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
             return static_cast<bool>(to);
         }
 
+        hresult as(guid const& id, void** result) const noexcept
+        {
+            return m_ptr->QueryInterface(id, result);
+        }
+
         friend void swap(IUnknown& left, IUnknown& right) noexcept
         {
             std::swap(left.m_ptr, right.m_ptr);
@@ -175,7 +233,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
             std::exchange(m_ptr, {})->Release();
         }
 
-        impl::IUnknown* m_ptr{};
+        impl::unknown_abi* m_ptr{};
     };
 }
 
@@ -223,7 +281,7 @@ WINRT_EXPORT namespace winrt
 
         if (value)
         {
-            static_cast<impl::IUnknown*>(value)->AddRef();
+            static_cast<impl::unknown_abi*>(value)->AddRef();
             *put_abi(object) = value;
         }
     }
@@ -235,7 +293,7 @@ WINRT_EXPORT namespace winrt
 
         if (value)
         {
-            static_cast<impl::IUnknown*>(value)->AddRef();
+            static_cast<impl::unknown_abi*>(value)->AddRef();
         }
     }
 
@@ -300,5 +358,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct IInspectable : IUnknown
     {
         IInspectable(std::nullptr_t = nullptr) noexcept {}
+        IInspectable(take_ownership_from_abi_t, void* ptr) noexcept : IUnknown(take_ownership_from_abi, ptr) {}
     };
 }

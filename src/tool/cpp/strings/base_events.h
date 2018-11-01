@@ -470,9 +470,9 @@ WINRT_EXPORT namespace winrt
                     }
                     catch (hresult_error const& e)
                     {
-                        if (e.code() == 0x80010108 /*RPC_E_DISCONNECTED*/ ||
-                            e.code() == 0x800706BA /*HRESULT_FROM_WIN32(RPC_S_SERVER_UNAVAILABLE)*/ ||
-                            e.code() == 0x89020001 /*JSCRIPT_E_CANTEXECUTE*/)
+                        if (e.code() == static_cast<int32_t>(0x80010108) || // RPC_E_DISCONNECTED
+                            e.code() == static_cast<int32_t>(0x800706BA) || // HRESULT_FROM_WIN32(RPC_S_SERVER_UNAVAILABLE)
+                            e.code() ==  static_cast<int32_t>(0x89020001))  // JSCRIPT_E_CANTEXECUTE
                         {
                             remove_delegate = true;
                         }

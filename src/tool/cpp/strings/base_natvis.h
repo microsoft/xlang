@@ -33,9 +33,9 @@ namespace winrt::impl
             guid iid{};
             if (WINRT_IIDFromString(iid_str, &iid) == error_ok)
             {
-                IInspectable* pinsp;
-                typedef int32_t(WINRT_CALL IInspectable::* PropertyAccessor)(void*);
-                if (((IUnknown*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
+                inspectable_abi* pinsp;
+                typedef int32_t(WINRT_CALL inspectable_abi::* PropertyAccessor)(void*);
+                if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
                 {
                     auto vtbl = *(PropertyAccessor**)pinsp;
                     static const int IInspectable_vtbl_size = 6;
@@ -49,7 +49,7 @@ namespace winrt::impl
 
         static auto WINRT_CALL get_val(winrt::Windows::Foundation::IInspectable* object, wchar_t const * iid_str, int method)
         {
-            return abi_val(static_cast<IUnknown*>(get_abi(*object)), iid_str, method);
+            return abi_val(static_cast<unknown_abi*>(get_abi(*object)), iid_str, method);
         }
     };
 }
