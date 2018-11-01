@@ -108,6 +108,27 @@ struct struct_type final : typedef_base
     std::vector<struct_member> members;
 };
 
+struct function_return_type
+{
+    xlang::meta::reader::RetTypeSig signature;
+    std::string_view name;
+    metadata_type const* type;
+};
+
+struct function_param
+{
+    xlang::meta::reader::ParamSig signature;
+    std::string_view name;
+    metadata_type const* type;
+};
+
+struct function_def
+{
+    xlang::meta::reader::MethodDef def;
+    std::optional<function_return_type> return_type;
+    std::vector<function_param> params;
+};
+
 struct delegate_type final : typedef_base
 {
     delegate_type(xlang::meta::reader::TypeDef const& type) :
@@ -123,6 +144,8 @@ struct delegate_type final : typedef_base
         return m_abiName;
     }
 
+    function_def invoke;
+
 private:
 
     std::string m_abiName;
@@ -137,6 +160,8 @@ struct interface_type final : typedef_base
         // Interface names identically match their CLR name in idl files
         return m_clrFullName;
     }
+
+    std::vector<function_def> functions;
 };
 
 struct class_type final : typedef_base
@@ -148,6 +173,8 @@ struct class_type final : typedef_base
         // Class names identically match their CLR name in idl files
         return m_clrFullName;
     }
+
+    metadata_type const* default_interface = nullptr;
 };
 
 struct generic_inst final : metadata_type
@@ -202,6 +229,11 @@ struct generic_inst final : metadata_type
         return m_mangledName;
     }
 
+    virtual std::string_view idl_name() const override
+    {
+        return m_idlName;
+    }
+
     metadata_type const* generic_type() const noexcept
     {
         return m_genericType;
@@ -210,11 +242,6 @@ struct generic_inst final : metadata_type
     std::vector<metadata_type const*> const& generic_params() const noexcept
     {
         return m_genericParams;
-    }
-
-    virtual std::string_view idl_name() const override
-    {
-        return m_idlName;
     }
 
 private:
@@ -322,11 +349,14 @@ private:
 
 struct mapped_type final : metadata_type
 {
-    mapped_type(xlang::meta::reader::TypeDef const& type) :
+    mapped_type(xlang::meta::reader::TypeDef const& type, std::string_view cppName) :
         m_type(type),
-        m_clrFullName(::clr_full_name(type))
+        m_clrFullName(::clr_full_name(type)),
+        m_cppName(cppName)
     {
     }
+
+    static mapped_type const* from_typedef(xlang::meta::reader::TypeDef const& type);
 
     virtual std::string_view clr_namespace() const override
     {
@@ -342,23 +372,24 @@ struct mapped_type final : metadata_type
     {
         // Currently no mapped type names have any characters that would make it so that the mangled name would be
         // different than the type name (i.e. no underscore, etc.)
-        return m_type.TypeName();
+        return m_cppName;
     }
 
     virtual std::string_view generic_param_mangled_name() const override
     {
-        return m_type.TypeName();
+        return m_cppName;
     }
 
     virtual std::string_view idl_name() const override
     {
-        return m_type.TypeName();
+        return m_cppName;
     }
 
 private:
 
     xlang::meta::reader::TypeDef m_type;
     std::string m_clrFullName;
+    std::string_view m_cppName;
 };
 
 struct api_contract
@@ -374,6 +405,8 @@ inline bool operator<(api_contract const& lhs, api_contract const& rhs)
 
 struct type_cache
 {
+    metadata_cache const* cache;
+
     // Definitions
     std::vector<std::reference_wrapper<enum_type>> enums;
     std::vector<std::reference_wrapper<struct_type>> structs;
@@ -386,6 +419,40 @@ struct type_cache
     std::map<std::string_view, generic_inst> generic_instantiations;
     std::set<std::reference_wrapper<typedef_base const>> external_dependencies;
     std::set<std::reference_wrapper<typedef_base const>> internal_dependencies;
+
+    metadata_type const* try_find(xlang::meta::reader::TypeSig const& sig);
+    metadata_type const* try_find(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type);
+    metadata_type const* try_find(xlang::meta::reader::GenericTypeInstSig const& sig);
+
+    metadata_type const& find(xlang::meta::reader::TypeSig const& sig)
+    {
+        if (auto ptr = try_find(sig))
+        {
+            return *ptr;
+        }
+
+        xlang::throw_invalid("Could not find referenced type");
+    }
+
+    metadata_type const& find(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type)
+    {
+        if (auto ptr = try_find(type))
+        {
+            return *ptr;
+        }
+
+        xlang::throw_invalid("Could not find referenced type");
+    }
+
+    metadata_type const& find(xlang::meta::reader::GenericTypeInstSig const& sig)
+    {
+        if (auto ptr = try_find(sig))
+        {
+            return *ptr;
+        }
+
+        xlang::throw_invalid("Failed to resolve dependency of generic type");
+    }
 };
 
 struct namespace_types

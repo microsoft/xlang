@@ -11,9 +11,23 @@ static void initialize_namespace(
     namespace_types& target,
     std::map<std::string_view, metadata_type const&>& table)
 {
+    // Mapped types are only in the 'Windows.Foundation' namespace, so pre-compute
+    bool isFoundationNamespace = members.types.begin()->second.TypeNamespace() == foundation_namespace;
+
     target.enums.reserve(members.enums.size());
     for (auto const& e : members.enums)
     {
+        // 'AsyncStatus' is an enum
+        if (isFoundationNamespace)
+        {
+            if (auto ptr = mapped_type::from_typedef(e))
+            {
+                auto [itr, added] = table.emplace(e.TypeName(), *ptr);
+                XLANG_ASSERT(added);
+                continue;
+            }
+        }
+
         target.enums.emplace_back(e);
         auto [itr, added] = table.emplace(e.TypeName(), target.enums.back());
         XLANG_ASSERT(added);
@@ -22,6 +36,17 @@ static void initialize_namespace(
     target.structs.reserve(members.structs.size());
     for (auto const& s : members.structs)
     {
+        // 'EventRegistrationToken' and 'HResult' are structs
+        if (isFoundationNamespace)
+        {
+            if (auto ptr = mapped_type::from_typedef(s))
+            {
+                auto [itr, added] = table.emplace(s.TypeName(), *ptr);
+                XLANG_ASSERT(added);
+                continue;
+            }
+        }
+
         target.structs.emplace_back(s);
         auto [itr, added] = table.emplace(s.TypeName(), target.structs.back());
         XLANG_ASSERT(added);
@@ -38,6 +63,17 @@ static void initialize_namespace(
     target.interfaces.reserve(members.interfaces.size());
     for (auto const& i : members.interfaces)
     {
+        // 'IAsyncInfo' is an interface
+        if (isFoundationNamespace)
+        {
+            if (auto ptr = mapped_type::from_typedef(i))
+            {
+                auto [itr, added] = table.emplace(i.TypeName(), *ptr);
+                XLANG_ASSERT(added);
+                continue;
+            }
+        }
+
         target.interfaces.emplace_back(i);
         auto [itr, added] = table.emplace(i.TypeName(), target.interfaces.back());
         XLANG_ASSERT(added);
@@ -92,7 +128,6 @@ metadata_cache::metadata_cache(xlang::meta::reader::cache const& c)
 
 struct type_cache_init_state
 {
-    metadata_cache const* cache;
     type_cache* target;
 };
 
@@ -113,7 +148,7 @@ static void process_type(class_type& type, type_cache_init_state& state);
 
 type_cache metadata_cache::process_namespaces(std::initializer_list<std::string_view> targetNamespaces)
 {
-    type_cache result;
+    type_cache result{ this };
 
     // Merge the type definitions of all namespaces together
     for (auto ns : targetNamespaces)
@@ -132,7 +167,7 @@ type_cache metadata_cache::process_namespaces(std::initializer_list<std::string_
     }
 
     // Process type signatures and calculate dependencies
-    type_cache_init_state state{ this, &result };
+    type_cache_init_state state{ &result };
     auto process_types = [&](auto const& vector)
     {
         for (auto const& type : vector)
@@ -186,23 +221,152 @@ static void process_type(struct_type& type, type_cache_init_state& state)
     for (auto const& field : type.type().FieldList())
     {
         process_contract_dependencies(field, state);
-        type.members.push_back(struct_member{ field });
+        type.members.push_back(struct_member{ field, &state.target->find(field.Signature().Type()) });
     }
+}
+
+static function_def process_function(MethodDef const& def, type_cache_init_state& state)
+{
+    auto paramNames = def.ParamList();
+    auto sig = def.Signature();
+    XLANG_ASSERT(sig.GenericParamCount() == 0);
+
+    std::optional<function_return_type> return_type;
+    if (sig.ReturnType())
+    {
+        std::string_view name = "value"sv;
+        if ((paramNames.first != paramNames.second) && (paramNames.first.Sequence() == 0))
+        {
+            name = paramNames.first.Name();
+            ++paramNames.first;
+        }
+
+        return_type = function_return_type{ sig.ReturnType(), name, &state.target->find(sig.ReturnType().Type()) };
+    }
+
+    std::vector<function_param> params;
+    for (auto const& param : sig.Params())
+    {
+        XLANG_ASSERT(paramNames.first != paramNames.second);
+        params.push_back(function_param{ param, paramNames.first.Name(), &state.target->find(param.Type()) });
+        ++paramNames.first;
+    }
+
+    return function_def{ def, std::move(return_type), std::move(params) };
 }
 
 static void process_type(delegate_type& type, type_cache_init_state& state)
 {
+    process_contract_dependencies(type.type(), state);
 
+    // Delegates only have a single function - Invoke - that we care about
+    for (auto const& method : type.type().MethodList())
+    {
+        if (method.Name() != ".ctor"sv)
+        {
+            XLANG_ASSERT(method.Name() == "Invoke"sv);
+            process_contract_dependencies(method, state);
+            type.invoke = process_function(method, state);
+            break;
+        }
+    }
 }
 
 static void process_type(interface_type& type, type_cache_init_state& state)
 {
+    process_contract_dependencies(type.type(), state);
 
+    for (auto const& method : type.type().MethodList())
+    {
+        process_contract_dependencies(method, state);
+        type.functions.push_back(process_function(method, state));
+    }
+
+    // TODO: Required interfaces? At least the generic ones?
 }
 
 static void process_type(class_type& type, type_cache_init_state& state)
 {
+    process_contract_dependencies(type.type(), state);
 
+    // For classes, all we care about is the interfaces and taking note of the default interface, if there is one
+    for (auto const& iface : type.type().InterfaceImpl())
+    {
+        process_contract_dependencies(iface, state);
+        if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
+        {
+            XLANG_ASSERT(!type.default_interface);
+            type.default_interface = &state.target->find(iface.Interface());
+        }
+        // TODO: namespace dependency? Process generic types?
+    }
+}
+
+metadata_type const* type_cache::try_find(TypeSig const& sig)
+{
+    metadata_type const* result = nullptr;
+
+    // std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>;
+    xlang::visit(sig.Type(),
+        [&](ElementType t)
+        {
+            result = &element_type::from_type(t);
+        },
+        [&](coded_index<TypeDefOrRef> const& t)
+        {
+            result = try_find(t);
+        },
+        [&](GenericTypeIndex)
+        {
+            XLANG_ASSERT(false); // TODO?
+        },
+        [&](GenericTypeInstSig const& t)
+        {
+            result = try_find(t);
+        });
+
+    return result;
+}
+
+metadata_type const* type_cache::try_find(coded_index<TypeDefOrRef> const& type)
+{
+    metadata_type const* result = nullptr;
+
+    visit(type, xlang::visit_overload{
+        [&](GenericTypeInstSig const& sig)
+        {
+            result = try_find(sig);
+        },
+        [&](auto const& defOrRef)
+        {
+            result = cache->try_find(defOrRef.TypeNamespace(), defOrRef.TypeName());
+        }});
+
+    return result;
+}
+
+metadata_type const* type_cache::try_find(GenericTypeInstSig const& sig)
+{
+    metadata_type const* genericType = try_find(sig.GenericType());
+    if (!genericType)
+    {
+        return nullptr;
+    }
+
+    std::vector<metadata_type const*> genericParams;
+    for (auto const& param : sig.GenericArgs())
+    {
+        auto ptr = try_find(param);
+        if (!ptr)
+        {
+            return nullptr;
+        }
+        genericParams.push_back(ptr);
+    }
+
+    generic_inst inst{ genericType, std::move(genericParams) };
+    auto [itr, added] = generic_instantiations.emplace(inst.clr_full_name(), std::move(inst));
+    return &itr->second;
 }
 
 
@@ -211,16 +375,6 @@ static void process_type(class_type& type, type_cache_init_state& state)
 
 
 #if 0
-void type_cache::process_dependencies()
-{
-    init_state state;
-    for (auto const& def : types)
-    {
-        process_dependencies(def.get().type(), state);
-        XLANG_ASSERT(state.parent_generic_inst == nullptr);
-    }
-}
-
 void type_cache::process_dependencies(TypeDef const& type, init_state& state)
 {
     // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
@@ -406,69 +560,6 @@ metadata_type const* type_cache::process_dependency(GenericTypeInstSig const& ty
 
     return nullptr;
 }
-
-type_cache type_cache::merge(type_cache const& other) const
-{
-    type_cache result{ m_cache };
-
-    result.types = types;
-    result.types.insert(other.types.begin(), other.types.end());
-
-    result.external_dependencies = external_dependencies;
-    result.external_dependencies.insert(other.external_dependencies.begin(), other.external_dependencies.end());
-
-    result.internal_dependencies = internal_dependencies;
-    result.internal_dependencies.insert(other.internal_dependencies.begin(), other.internal_dependencies.end());
-
-    result.generic_instantiations = generic_instantiations;
-    result.generic_instantiations.insert(other.generic_instantiations.begin(), other.generic_instantiations.end());
-
-    // NOTE: We really want 'std::set_union', but since we should only be merging unique sets, merge is more efficient
-    std::merge(included_namespaces.begin(), included_namespaces.end(), other.included_namespaces.begin(), other.included_namespaces.end(), std::back_inserter(result.included_namespaces));
-    std::merge(enums.begin(), enums.end(), other.enums.begin(), other.enums.end(), std::back_inserter(result.enums));
-    std::merge(structs.begin(), structs.end(), other.structs.begin(), other.structs.end(), std::back_inserter(result.structs));
-    std::merge(delegates.begin(), delegates.end(), other.delegates.begin(), other.delegates.end(), std::back_inserter(result.delegates));
-    std::merge(interfaces.begin(), interfaces.end(), other.interfaces.begin(), other.interfaces.end(), std::back_inserter(result.interfaces));
-    std::merge(classes.begin(), classes.end(), other.classes.begin(), other.classes.end(), std::back_inserter(result.classes));
-
-    return result;
-}
-
-static element_type const& get_metadata_type(ElementType type)
-{
-    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "boolean"sv };
-    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "wchar__zt"sv };
-    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "byte"sv };
-    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "short"sv };
-    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv };
-    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "int"sv };
-    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv };
-    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "__z__zint64"sv };
-    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv };
-    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "float"sv };
-    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "double"sv };
-    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv };
-    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv };
-
-    switch (type)
-    {
-    case ElementType::Boolean: return boolean_type;
-    case ElementType::Char: return char_type;
-    case ElementType::U1: return u1_type;
-    case ElementType::I2: return i2_type;
-    case ElementType::U2: return u2_type;
-    case ElementType::I4: return i4_type;
-    case ElementType::U4: return u4_type;
-    case ElementType::I8: return i8_type;
-    case ElementType::U8: return u8_type;
-    case ElementType::R4: return r4_type;
-    case ElementType::R8: return r8_type;
-    case ElementType::String: return string_type;
-    case ElementType::Object: return object_type;
-    }
-
-    xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
-}
 #endif
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
@@ -516,4 +607,33 @@ system_type const& system_type::from_name(std::string_view typeName)
     }
 
     xlang::throw_invalid("Unknown type '", typeName, "' in System namespace");
+}
+
+mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const& type)
+{
+    if (type.TypeNamespace() == foundation_namespace)
+    {
+        if (type.TypeName() == "HResult"sv)
+        {
+            static mapped_type const hresult_type{ type, "HRESULT"sv };
+            return &hresult_type;
+        }
+        else if (type.TypeName() == "EventRegistrationToken"sv)
+        {
+            static mapped_type event_token_type{ type, "EventRegistrationToken"sv };
+            return &event_token_type;
+        }
+        else if (type.TypeName() == "AsyncStatus"sv)
+        {
+            static mapped_type const async_status_type{ type, "AsyncStatus"sv };
+            return &async_status_type;
+        }
+        else if (type.TypeName() == "IAsyncInfo"sv)
+        {
+            static mapped_type const async_info_type{ type, "IAsyncInfo"sv };
+            return &async_info_type;
+        }
+    }
+
+    return nullptr;
 }
