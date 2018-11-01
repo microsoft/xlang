@@ -1,6 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <string_view>
 
 namespace xlang::impl
 {
