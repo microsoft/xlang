@@ -1,7 +1,7 @@
 import find_projection
 import unittest
 
-import pyrt.Windows.Data.Json as wdj
+import pyrt.windows.data.json as wdj
 
 class TestJson(unittest.TestCase):
 

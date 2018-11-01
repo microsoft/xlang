@@ -1,7 +1,7 @@
 import find_projection
 import unittest
 
-import pyrt.Windows.Foundation as wf
+import pyrt.windows.foundation as wf
 
 class TestUri(unittest.TestCase):
 

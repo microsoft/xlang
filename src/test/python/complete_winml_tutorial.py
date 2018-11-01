@@ -52,7 +52,7 @@ def run_async_code(code):
     loop.run_until_complete(code())
     loop.close()
 
-import pyrt.Windows.AI.MachineLearning as winml 
+import pyrt.windows.ai.machinelearning as winml 
 
 @timed_op
 def load_model(model_path):
@@ -65,9 +65,9 @@ async def load_image_file(file_path):
     if type(file_path) != str:
         file_path = str(file_path)
 
-    from pyrt.Windows.Storage import StorageFile
-    from pyrt.Windows.Graphics.Imaging import BitmapDecoder
-    from pyrt.Windows.Media import VideoFrame
+    from pyrt.windows.storage import StorageFile
+    from pyrt.windows.graphics.imaging import BitmapDecoder
+    from pyrt.windows.media import VideoFrame
 
     file = await wrap_async_op(StorageFile.GetFileFromPathAsync(file_path))
     stream = await wrap_async_op(file.OpenAsync(0)) # 0 == FileAccessMode::Read 

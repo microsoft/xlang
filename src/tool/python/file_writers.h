@@ -92,7 +92,7 @@ namespace xlang
         w.write_license();
         write_python_namespace_includes(w, namespaces);
         w.write(strings::module_methods);
-        write_module_exec(w, namespaces);
+        write_module_exec(w);
         write_module_slots(w);
         write_module_def(w, module_name);
         write_module_init_func(w, module_name);
@@ -130,12 +130,14 @@ namespace xlang
         {
             for (auto&& needed_ns : needed_namespaces)
             {
+                auto ns = needed_ns;
+                std::transform(ns.begin(), ns.end(), ns.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
                 auto format = R"(try:
     import %.%
 except:
     pass
 )";
-                w.write_indented(format, module_name, needed_ns);
+                w.write_indented(format, module_name, ns);
             }
             w.write("\n");
         }

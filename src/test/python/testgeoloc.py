@@ -2,8 +2,8 @@ import find_projection
 import unittest
 import asyncio
 
-import pyrt.Windows.Devices.Geolocation as wdg
-import pyrt.Windows.Foundation as wf
+import pyrt.windows.devices.geolocation as wdg
+import pyrt.windows.foundation as wf
 
 class TestGeolocation(unittest.TestCase):
 

@@ -2,7 +2,7 @@ import find_projection
 import unittest
 import asyncio
 
-import pyrt.Windows.Foundation.Collections as wfc
+import pyrt.windows.foundation.collections as wfc
 
 class TestCollections(unittest.TestCase):
 

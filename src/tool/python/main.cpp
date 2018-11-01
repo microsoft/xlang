@@ -92,41 +92,48 @@ namespace xlang
                 write_package_init(module_dir, native_module);
             });
 
-            for (auto&& ns : c.namespaces())
+            for (auto&&[ns, members] : c.namespaces())
             {
-                if (!f.includes(ns.second))
+                if (!f.includes(members))
                 {
                     continue;
                 }
 
                 auto ns_dir = module_dir;
-                size_t pos{};
                 
+                auto append_dir = [&ns_dir](std::string_view const& ns_segment)
+                {
+                    std::string segment{ ns_segment };
+                    std::transform(segment.begin(), segment.end(), segment.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
+                    ns_dir /= segment;
+                };
+                
+                size_t pos{};
                 while (true)
                 {
-                    auto new_pos = ns.first.find('.', pos);
+                    auto new_pos = ns.find('.', pos);
                     if (new_pos == std::string_view::npos)
-                    {
-                        ns_dir /= std::string{ ns.first.substr(pos) };
+                    { 
+                        append_dir(ns.substr(pos));
                         break;
                     }
 
-                    ns_dir /= std::string{ ns.first.substr(pos, new_pos - pos) };
+                    append_dir(ns.substr(pos, new_pos - pos));
                     pos = new_pos + 1;
                 } 
 
                 write_package_init(module_dir, native_module);
 
-                std::string fqns{ ns.first };
+                std::string fqns{ ns };
                 auto h_filename = "py." + fqns + ".h";
 
-                generated_namespaces.emplace_back(ns.first);
+                generated_namespaces.emplace_back(ns);
 
-                group.add([&]
+                group.add([&, &ns = ns, &members = members]
                 {
-                    auto namespaces = write_namespace_cpp(src_dir, ns.first, ns.second);
-                    write_namespace_h(src_dir, ns.first, namespaces, ns.second);
-                    write_namespace_init(ns_dir, settings.module, namespaces, ns.first, ns.second);
+                    auto namespaces = write_namespace_cpp(src_dir, ns, members);
+                    write_namespace_h(src_dir, ns, namespaces, members);
+                    write_namespace_init(ns_dir, settings.module, namespaces, ns, members);
                 });
             }
 

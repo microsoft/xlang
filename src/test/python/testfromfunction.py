@@ -1,7 +1,7 @@
 import find_projection
 import unittest
 
-import pyrt.Windows.Foundation.Collections as wfc
+import pyrt.windows.foundation.collections as wfc
 
 class TestQueryInterface(unittest.TestCase):
     def test_as_function(self):

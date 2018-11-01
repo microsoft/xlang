@@ -1,7 +1,7 @@
 import find_projection
 import unittest
 
-import pyrt.Windows.Foundation.Numerics as wfn
+import pyrt.windows.foundation.numerics as wfn
 
 class TestNumerics(unittest.TestCase):
     def test_struct_ctor_pos(self):

@@ -1555,7 +1555,7 @@ PyInit_%(void)
         }
     }
     
-    void write_module_exec(writer& w, std::vector<std::string> const& namespaces)
+    void write_module_exec(writer& w)
     {
         {
             auto format = R"(

@@ -1,7 +1,7 @@
 import find_projection
 import unittest
 
-import pyrt.Windows.Graphics.DirectX.Direct3D11 as wgdd
+import pyrt.windows.graphics.directx.direct3d11 as wgdd
 
 class TestDirectX(unittest.TestCase):
 
