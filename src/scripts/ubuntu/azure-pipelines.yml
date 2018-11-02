@@ -9,6 +9,10 @@ pool:
 container: my_container
 
 steps:
-- script: |
-    printenv
-    bash ./src/scripts/ubuntu/build.sh
+- script: bash ./src/scripts/ubuntu/build.sh
+- task: ArchiveFiles@2
+  displayName: 'Archive _build'
+  inputs:
+    rootFolderOrFile: '_build'
+
+
