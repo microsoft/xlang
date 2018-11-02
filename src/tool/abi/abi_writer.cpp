@@ -267,6 +267,8 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
 
     write_cpp_interface_forward_declarations(w, types);
     write_cpp_generic_definitions(w, types);
+    write_cpp_dependency_forward_declarations(w, types);
+    write_cpp_type_definitions(w, types);
 
     // C interface
     w.write("#else // !defined(__cplusplus)\n");
@@ -294,7 +296,35 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
 
 #if 0
 #if 0
-#if 0
+void write_abi_header(
+    std::string_view fileName,
+    std::initializer_list<namespace_reference> namespaces,
+    cache const& c,
+    abi_configuration const& config)
+{
+    w.write_type_dependencies();
+    w.write_type_declarations();
+    w.write_type_definitions();
+
+    // C interface
+    w.write("#else // !defined(__cplusplus)\n");
+    w.write("// C interface not currently generated\n");
+    w.write("#endif // defined(__cplusplus)");
+
+    w.write(strings::constexpr_end_definitions);
+    if (config.ns_prefix_state == ns_prefix::optional)
+    {
+        w.write(strings::optional_ns_prefix_end_definitions);
+    }
+    w.write(strings::deprecated_header_end);
+    w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
+
+    auto filename{ config.output_directory };
+    filename += fileName;
+    filename += ".h";
+    w.flush_to_file(filename);
+}
+
 void writer::write_generic_definition(GenericTypeInstSig const& type)
 {
     auto [shouldDefine, mangledName] = should_declare(type);
@@ -566,69 +596,5 @@ void writer::write_type_definitions()
             write_class_name_definition(*this, c);
         }
     }
-}
-
-void write_abi_header(
-    std::string_view fileName,
-    std::initializer_list<namespace_reference> namespaces,
-    cache const& c,
-    abi_configuration const& config)
-{
-    writer w{ namespaces, config, c };
-
-    w.write(strings::file_header);
-    w.write(strings::include_guard_start,
-        bind<write_include_guard>(fileName),
-        bind<write_include_guard>(fileName),
-        bind<write_include_guard>(fileName),
-        bind<write_include_guard>(fileName));
-    w.write(strings::deprecated_header_start);
-    w.write(strings::ns_prefix_definitions,
-        (config.ns_prefix_state == ns_prefix::always) ? strings::ns_prefix_always :
-        (config.ns_prefix_state == ns_prefix::optional) ? strings::ns_prefix_optional : strings::ns_prefix_never);
-    if (config.ns_prefix_state == ns_prefix::optional)
-    {
-        w.write(strings::optional_ns_prefix_definitions);
-    }
-    w.write(strings::constexpr_definitions);
-
-    w.write_api_contract_definitions();
-    w.write_includes();
-
-    // C++ interface
-    w.write("#if defined(__cplusplus) && !defined(CINTERFACE)\n");
-    if (config.enum_class)
-    {
-        w.write(R"^-^(#if defined(__MIDL_USE_C_ENUM)
-#define MIDL_ENUM enum
-#else
-#define MIDL_ENUM enum class
-#endif
-)^-^");
-    }
-
-    w.write_interface_forward_declarations();
-    w.write_generics_definitions();
-    w.write_type_dependencies();
-    w.write_type_declarations();
-    w.write_type_definitions();
-
-    // C interface
-    w.write("#else // !defined(__cplusplus)\n");
-    w.write("// C interface not currently generated\n");
-    w.write("#endif // defined(__cplusplus)");
-
-    w.write(strings::constexpr_end_definitions);
-    if (config.ns_prefix_state == ns_prefix::optional)
-    {
-        w.write(strings::optional_ns_prefix_end_definitions);
-    }
-    w.write(strings::deprecated_header_end);
-    w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
-
-    auto filename{ config.output_directory };
-    filename += fileName;
-    filename += ".h";
-    w.flush_to_file(filename);
 }
 #endif

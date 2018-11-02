@@ -368,7 +368,10 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, code
             if (auto typeDef = dynamic_cast<typedef_base const*>(result))
             {
                 state.target->dependent_namespaces.insert(result->clr_abi_namespace());
-                state.target->type_dependencies.emplace(*typeDef);
+                if (!typeDef->is_generic())
+                {
+                    state.target->type_dependencies.emplace(*typeDef);
+                }
             }
         }});
 
@@ -380,6 +383,7 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, Gene
     auto genericType = dynamic_cast<typedef_base const*>(&find_dependent_type(state, type.GenericType()));
     if (!genericType)
     {
+        XLANG_ASSERT(false);
         xlang::throw_invalid("Generic types must be TypeDefs");
     }
 
@@ -418,6 +422,7 @@ type_cache metadata_cache::compile_namespaces(std::initializer_list<std::string_
         auto itr = namespaces.find(ns);
         if (itr == namespaces.end())
         {
+            XLANG_ASSERT(false);
             xlang::throw_invalid("Namespace '", ns, "' not found");
         }
 
@@ -448,7 +453,12 @@ type_cache metadata_cache::compile_namespaces(std::initializer_list<std::string_
 
 void enum_type::write_cpp_forward_declaration(writer& w) const
 {
-    (void)w; // TODO
+    w.push_namespace(clr_abi_namespace());
+    auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
+    auto typeStr = underlying_type() == ElementType::I4 ? "int"sv : "unsigned int"sv;
+    w.write("%typedef % % : % %;\n", indent{}, enumStr, cpp_abi_name(), typeStr, cpp_abi_name());
+    w.pop_namespace();
+    w.write('\n');
 }
 
 void enum_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -458,7 +468,10 @@ void enum_type::write_cpp_generic_param_abi_type(writer& w) const
 
 void struct_type::write_cpp_forward_declaration(writer& w) const
 {
-    (void)w; // TODO
+    w.push_namespace(clr_abi_namespace());
+    w.write("%typedef struct % %;\n", indent{}, cpp_abi_name(), cpp_abi_name());
+    w.pop_namespace();
+    w.write('\n');
 }
 
 void struct_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -481,11 +494,14 @@ void delegate_type::write_cpp_forward_declaration(writer& w) const
     w.write("%interface %;\n", indent{}, m_abiName);
     w.pop_namespace();
 
-    w.write(R"^-^(#define % @::%
+    w.write(R"^-^(#define % %
 
 #endif // __%_FWD_DEFINED__
 
-)^-^", bind<write_mangled_name>(m_mangledName), clr_abi_namespace(), m_abiName, bind<write_mangled_name>(m_mangledName));
+)^-^",
+        bind<write_mangled_name>(m_mangledName),
+        bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), m_abiName),
+        bind<write_mangled_name>(m_mangledName));
 }
 
 void delegate_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -525,7 +541,19 @@ void interface_type::write_cpp_generic_param_abi_type(writer& w) const
 
 void class_type::write_cpp_forward_declaration(writer& w) const
 {
-    (void)w; // TODO
+    if (!default_interface)
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Cannot forward declare class '", m_clrFullName, "' since it has no default interface");
+    }
+
+    // We need to declare both the class as well as the default interface
+    w.push_namespace(clr_logical_namespace());
+    w.write("%class %;\n", indent{}, cpp_logical_name());
+    w.pop_namespace();
+    w.write('\n');
+
+    default_interface->write_cpp_forward_declaration(w);
 }
 
 void class_type::write_cpp_generic_param_logical_type(writer& w) const
@@ -535,10 +563,19 @@ void class_type::write_cpp_generic_param_logical_type(writer& w) const
 
 void class_type::write_cpp_generic_param_abi_type(writer& w) const
 {
+    if (!default_interface)
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Class '", m_clrFullName, "' cannot be used as a generic parameter since it has no "
+            "default interface");
+    }
+
+    // The second template argument may look a bit odd, but it is correct. The default interface must be an interface,
+    // which won't be aggregated and this is the simplest way to write generics correctly
     w.write("%<%*, %>",
         bind<write_cpp_fully_qualified_type>("Windows.Foundation.Internal"sv, "AggregateType"sv),
         bind<write_cpp_fully_qualified_type>(clr_logical_namespace(), cpp_logical_name()),
-        [&](writer& w) { default_interface->write_cpp_generic_param_abi_type(w); }); // TODO: Correct???
+        [&](writer& w) { default_interface->write_cpp_generic_param_abi_type(w); });
 }
 
 void generic_inst::write_cpp_forward_declaration(writer& w) const
@@ -726,6 +763,7 @@ system_type const& system_type::from_name(std::string_view typeName)
         return guid_type;
     }
 
+    XLANG_ASSERT(false);
     xlang::throw_invalid("Unknown type '", typeName, "' in System namespace");
 }
 

@@ -175,6 +175,129 @@ inline void write_cpp_generic_definitions(writer& w, type_cache const& types)
     }
 }
 
+inline void write_cpp_dependency_forward_declarations(writer& w, type_cache const& types)
+{
+    for (auto const& type : types.external_dependencies)
+    {
+        type.get().write_cpp_forward_declaration(w);
+    }
+
+    for (auto const& type : types.internal_dependencies)
+    {
+        type.get().write_cpp_forward_declaration(w);
+    }
+}
+
+inline void write_deprecation_message(
+    writer& w,
+    deprecation_info const& info,
+    std::size_t additionalIndentation = 0,
+    std::string_view deprecationMacro = "DEPRECATED")
+{
+    using namespace xlang::text;
+
+    auto [ns, name] = decompose_type(info.contract_type);
+    w.write(R"^-^(#if % >= %
+%%("%")
+#endif // % >= %
+)^-^",
+        bind<write_contract_macro>(ns, name), format_hex{ info.version },
+        indent{ additionalIndentation }, deprecationMacro, info.message,
+        bind<write_contract_macro>(ns, name), format_hex{ info.version });
+}
+
+inline void write_cpp_enum_definition(writer& w, enum_type const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+    using namespace xlang::text;
+    auto name = type.cpp_abi_name();
+
+    // TODO: write_type_definition_banner(w, type);
+    // TODO: Contracts
+
+    w.push_namespace(type.clr_abi_namespace());
+
+    auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
+    w.write("%%", indent{}, enumStr);
+    if (auto info = is_deprecated(type.type()))
+    {
+        w.write("\n");
+        write_deprecation_message(w, *info);
+        w.write("%", indent{});
+    }
+    else
+    {
+        w.write(' ');
+    }
+
+    auto typeStr = type.underlying_type() == ElementType::I4 ? "int"sv : "unsigned int"sv;
+    w.write(R"^-^(% : %
+%{
+)^-^", name, typeStr, indent{});
+
+    for (auto const& field : type.type().FieldList())
+    {
+        if (auto value = field.Constant())
+        {
+            // TODO: Contracts
+
+            w.write("%", indent{ 1 });
+            if (!w.config().enum_class)
+            {
+                w.write("%_", name);
+            }
+            w.write(field.Name());
+
+            if (auto info = is_deprecated(field))
+            {
+                w.write("\n");
+                write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
+                w.write("%", indent{ 1 });
+            }
+            else
+            {
+                w.write(' ');
+            }
+
+            w.write("= %,\n", value);
+        }
+    }
+
+    w.write("%};\n", indent{});
+
+    if (is_flags_enum(type.type()))
+    {
+        w.write("\n%DEFINE_ENUM_FLAG_OPERATORS(%)\n", indent{}, name);
+    }
+
+    if (w.config().enum_class)
+    {
+        w.write('\n');
+        for (auto const& field : type.type().FieldList())
+        {
+            if (field.Constant())
+            {
+                w.write("%const % %_% = %::%;\n", indent{}, name, name, field.Name(), name, field.Name());
+            }
+        }
+    }
+
+    w.pop_namespace();
+    w.write('\n');
+}
+
+inline void write_cpp_type_definitions(writer& w, type_cache const& types)
+{
+    for (auto const& enumType : types.enums)
+    {
+        write_cpp_enum_definition(w, enumType);
+    }
+}
+
+
+
+
 #if 0
 #if 0
 #if 0
