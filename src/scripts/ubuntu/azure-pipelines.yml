@@ -1,0 +1,14 @@
+resources:
+  containers:
+  - container: my_container
+    image: devhawk/xlang-build
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+container: my_container
+
+steps:
+- script: |
+    printenv
+    bash ./src/scripts/ubuntu/build.sh
