@@ -144,29 +144,141 @@ void metadata_cache::process_namespace_dependencies(namespace_cache& target)
 {
     for (auto& enumType : target.enums)
     {
-
+        process_enum_dependencies(target, enumType);
     }
 
     for (auto& structType : target.structs)
     {
-
+        process_struct_dependencies(target, structType);
     }
 
     for (auto& delegateType : target.delegates)
     {
-
+        process_delegate_dependencies(target, delegateType);
     }
 
     for (auto& interfaceType : target.interfaces)
     {
-
+        process_interface_dependencies(target, interfaceType);
     }
 
     for (auto& classType : target.classes)
     {
-
+        process_class_dependencies(target, classType);
     }
 }
+
+template <typename T>
+static void process_contract_dependencies(namespace_cache& target, T const& type)
+{
+    if (auto attr = contract_attributes(type))
+    {
+        target.dependent_namespaces.emplace(decompose_type(attr->type_name).first);
+        for (auto const& prevContract : attr->previous_contracts)
+        {
+            target.dependent_namespaces.emplace(decompose_type(prevContract.type_name).first);
+        }
+    }
+
+    if (auto info = is_deprecated(type))
+    {
+        target.dependent_namespaces.emplace(decompose_type(info->contract_type).first);
+    }
+}
+
+void metadata_cache::process_enum_dependencies(namespace_cache& target, enum_type& type)
+{
+    // There's no pre-processing that we need to do for enums. Just take note of the namespace dependencies that come
+    // from contract version(s)/deprecations
+    process_contract_dependencies(target, type.type());
+
+    for (auto const& field : type.type().FieldList())
+    {
+        process_contract_dependencies(target, field);
+    }
+}
+
+void metadata_cache::process_struct_dependencies(namespace_cache& target, struct_type& type)
+{
+    process_contract_dependencies(target, type.type());
+
+    for (auto const& field : type.type().FieldList())
+    {
+        process_contract_dependencies(target, field);
+        type.members.push_back(struct_member{ field, &find_dependent_type(target, field.Signature().Type()) });
+    }
+}
+
+void metadata_cache::process_delegate_dependencies(namespace_cache& target, delegate_type& type)
+{
+    process_contract_dependencies(target, type.type());
+
+    // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
+    if (type.is_generic())
+    {
+        return;
+    }
+
+    // Delegates only have a single function - Invoke - that we care about
+    for (auto const& method : type.type().MethodList())
+    {
+        if (method.Name() != ".ctor"sv)
+        {
+            XLANG_ASSERT(method.Name() == "Invoke"sv);
+            process_contract_dependencies(target, method);
+            type.invoke = process_function(target, method);
+            break;
+        }
+    }
+
+    XLANG_ASSERT(type.invoke.def);
+}
+
+void metadata_cache::process_interface_dependencies(namespace_cache& target, interface_type& type)
+{
+    process_contract_dependencies(target, type.type());
+}
+
+void metadata_cache::process_class_dependencies(namespace_cache& target, class_type& type)
+{
+    process_contract_dependencies(target, type.type());
+}
+
+metadata_type const& metadata_cache::find_dependent_type(namespace_cache& target, TypeSig const& type)
+{
+
+}
+
+function_def metadata_cache::process_function(namespace_cache& target, MethodDef const& def)
+{
+    auto paramNames = def.ParamList();
+    auto sig = def.Signature();
+    XLANG_ASSERT(sig.GenericParamCount() == 0);
+
+    std::optional<function_return_type> return_type;
+    if (sig.ReturnType())
+    {
+        std::string_view name = "value"sv;
+        if ((paramNames.first != paramNames.second) && (paramNames.first.Sequence() == 0))
+        {
+            name = paramNames.first.Name();
+            ++paramNames.first;
+        }
+
+        return_type = function_return_type{ sig.ReturnType(), name, &find_dependent_type(target, sig.ReturnType().Type()) };
+    }
+
+    std::vector<function_param> params;
+    for (auto const& param : sig.Params())
+    {
+        XLANG_ASSERT(paramNames.first != paramNames.second);
+        params.push_back(function_param{ param, paramNames.first.Name(), &find_dependent_type(target, param.Type()) });
+        ++paramNames.first;
+    }
+
+    return function_def{ def, std::move(return_type), std::move(params) };
+}
+
 
 
 

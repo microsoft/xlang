@@ -778,7 +778,16 @@ private:
         xlang::meta::reader::cache::namespace_members const& members,
         namespace_cache& target,
         std::map<std::string_view, metadata_type const&>& table);
+
     void process_namespace_dependencies(namespace_cache& target);
+    void process_enum_dependencies(namespace_cache& target, enum_type& type);
+    void process_struct_dependencies(namespace_cache& target, struct_type& type);
+    void process_delegate_dependencies(namespace_cache& target, delegate_type& type);
+    void process_interface_dependencies(namespace_cache& target, interface_type& type);
+    void process_class_dependencies(namespace_cache& target, class_type& type);
+
+    metadata_type const& find_dependent_type(namespace_cache& target, xlang::meta::reader::TypeSig const& type);
+    function_def process_function(namespace_cache& target, MethodDef const& def);
 
     std::map<std::string_view, std::map<std::string_view, metadata_type const&>> m_typeTable;
 };
