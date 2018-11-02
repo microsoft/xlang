@@ -448,12 +448,22 @@ type_cache metadata_cache::compile_namespaces(std::initializer_list<std::string_
 
 void enum_type::write_cpp_forward_declaration(writer& w) const
 {
-    // TODO
+    (void)w; // TODO
+}
+
+void enum_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write("enum %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
 
 void struct_type::write_cpp_forward_declaration(writer& w) const
 {
-    // TODO
+    (void)w; // TODO
+}
+
+void struct_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write("struct %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
 
 void delegate_type::write_cpp_forward_declaration(writer& w) const
@@ -478,6 +488,11 @@ void delegate_type::write_cpp_forward_declaration(writer& w) const
 )^-^", bind<write_mangled_name>(m_mangledName), clr_abi_namespace(), m_abiName, bind<write_mangled_name>(m_mangledName));
 }
 
+void delegate_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+}
+
 void interface_type::write_cpp_forward_declaration(writer& w) const
 {
     if (!w.should_declare(m_mangledName))
@@ -493,16 +508,37 @@ void interface_type::write_cpp_forward_declaration(writer& w) const
     w.write("%interface %;\n", indent{}, m_type.TypeName());
     w.pop_namespace();
 
-    w.write(R"^-^(#define % @::%
+    w.write(R"^-^(#define % %
 
 #endif // __%_FWD_DEFINED__
 
-)^-^", bind<write_mangled_name>(m_mangledName), clr_abi_namespace(), m_type.TypeName(), bind<write_mangled_name>(m_mangledName));
+)^-^",
+        bind<write_mangled_name>(m_mangledName),
+        bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), m_type.TypeName()),
+        bind<write_mangled_name>(m_mangledName));
+}
+
+void interface_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
 
 void class_type::write_cpp_forward_declaration(writer& w) const
 {
-    // TODO
+    (void)w; // TODO
+}
+
+void class_type::write_cpp_generic_param_logical_type(writer& w) const
+{
+    w.write("%*", bind<write_cpp_fully_qualified_type>(clr_logical_namespace(), cpp_logical_name()));
+}
+
+void class_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write("%<%*, %>",
+        bind<write_cpp_fully_qualified_type>("Windows.Foundation.Internal"sv, "AggregateType"sv),
+        bind<write_cpp_fully_qualified_type>(clr_logical_namespace(), cpp_logical_name()),
+        [&](writer& w) { default_interface->write_cpp_generic_param_abi_type(w); }); // TODO: Correct???
 }
 
 void generic_inst::write_cpp_forward_declaration(writer& w) const
@@ -550,11 +586,32 @@ struct __declspec(uuid(")^-^");
         iidHash[10], iidHash[11], iidHash[12], iidHash[13], iidHash[14], iidHash[15]);
 
     auto const cppName = generic_type_abi_name();
+    auto write_cpp_name = [&](writer& w)
+    {
+        w.write(cppName);
+        w.write('<');
+
+        std::string_view prefix;
+        for (auto param : m_genericParams)
+        {
+            w.write("%", prefix);
+            param->write_cpp_generic_param_logical_type(w);
+            prefix = ", "sv;
+        }
+
+        w.write('>');
+    };
+
     w.write(R"^-^("))
-%<)^-^", cppName);
-    // TODO: Generic params
-    w.write("> : %_impl<", cppName);
-    // TODO: Generic params
+% : %_impl<)^-^", write_cpp_name, cppName);
+
+    std::string_view prefix;
+    for (auto param : m_genericParams)
+    {
+        w.write("%", prefix);
+        param->write_cpp_generic_param_abi_type(w);
+        prefix = ", "sv;
+    }
 
     w.write(R"^-^(>
 {
@@ -567,8 +624,23 @@ struct __declspec(uuid(")^-^");
 // This allows code which uses the mangled name for the parameterized interface to access the
 // correct parameterized interface specialization.
 typedef % %_t;
+)^-^", m_clrFullName, write_cpp_name, m_mangledName);
+
+    if (w.config().ns_prefix_state == ns_prefix::optional)
+    {
+        w.write(R"^-^(#if defined(MIDL_NS_PREFIX)
 #define % ABI::Windows::Foundation::Collections::%_t
-)^-^", m_clrFullName, "TODO_CPPFULLNAME", m_mangledName, m_mangledName, m_mangledName);
+#else
+#define % Windows::Foundation::Collections::%_t
+#endif // MIDL_NS_PREFIX
+)^-^", m_mangledName, m_mangledName, m_mangledName, m_mangledName);
+    }
+    else
+    {
+        auto nsPrefix = (w.config().ns_prefix_state == ns_prefix::always) ? "ABI::"sv : "";
+        w.write(R"^-^(#define % %@::%_t
+)^-^", m_mangledName, nsPrefix, clr_abi_namespace(), m_mangledName);
+    }
 
     w.pop_inline_namespace();
 
@@ -577,6 +649,17 @@ typedef % %_t;
 #endif /* DEF_%_USE */
 
 )^-^", m_mangledName);
+}
+
+void generic_inst::write_cpp_generic_param_logical_type(writer& w) const
+{
+    // For generic instantiations, logical name == abi name
+    write_cpp_generic_param_abi_type(w);
+}
+
+void generic_inst::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write("%*", m_mangledName);
 }
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
@@ -615,6 +698,26 @@ element_type const& element_type::from_type(xlang::meta::reader::ElementType typ
     xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
 }
 
+void element_type::write_cpp_generic_param_logical_type(writer& w) const
+{
+    w.write(m_logicalName);
+}
+
+void element_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    if (m_logicalName != m_abiName)
+    {
+        w.write("%<%, %>",
+            bind<write_cpp_fully_qualified_type>("Windows.Foundation.Internal"sv, "AggregateType"sv),
+            m_logicalName,
+            m_abiName);
+    }
+    else
+    {
+        w.write(m_abiName);
+    }
+}
+
 system_type const& system_type::from_name(std::string_view typeName)
 {
     if (typeName == "Guid"sv)
@@ -624,6 +727,16 @@ system_type const& system_type::from_name(std::string_view typeName)
     }
 
     xlang::throw_invalid("Unknown type '", typeName, "' in System namespace");
+}
+
+void system_type::write_cpp_generic_param_logical_type(writer& w) const
+{
+    write_cpp_generic_param_abi_type(w);
+}
+
+void system_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write(m_cppName);
 }
 
 mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const& type)
@@ -637,12 +750,12 @@ mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const&
         }
         else if (type.TypeName() == "EventRegistrationToken"sv)
         {
-            static mapped_type event_token_type{ type, "EventRegistrationToken"sv, "struct(Windows.Foundation.EventRegistrationToken;i8)"sv };
+            static mapped_type event_token_type{ type, "struct EventRegistrationToken"sv, "struct(Windows.Foundation.EventRegistrationToken;i8)"sv };
             return &event_token_type;
         }
         else if (type.TypeName() == "AsyncStatus"sv)
         {
-            static mapped_type const async_status_type{ type, "AsyncStatus"sv, "enum(Windows.Foundation.AsyncStatus;i4)"sv };
+            static mapped_type const async_status_type{ type, "enum AsyncStatus"sv, "enum(Windows.Foundation.AsyncStatus;i4)"sv };
             return &async_status_type;
         }
         else if (type.TypeName() == "IAsyncInfo"sv)
@@ -653,4 +766,14 @@ mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const&
     }
 
     return nullptr;
+}
+
+void mapped_type::write_cpp_generic_param_logical_type(writer& w) const
+{
+    write_cpp_generic_param_abi_type(w);
+}
+
+void mapped_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write(m_cppName);
 }

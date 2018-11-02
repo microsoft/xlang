@@ -35,6 +35,8 @@ struct metadata_type
     virtual std::string_view idl_name() const = 0;
 
     virtual void write_cpp_forward_declaration(writer& w) const = 0;
+    virtual void write_cpp_generic_param_logical_type(writer& w) const = 0;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const = 0;
 };
 
 inline bool operator<(metadata_type const& lhs, metadata_type const& rhs) noexcept
@@ -111,6 +113,9 @@ struct element_type final : metadata_type
         // No forward declaration necessary
     }
 
+    virtual void write_cpp_generic_param_logical_type(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
+
 private:
 
     xlang::meta::reader::ElementType m_type;
@@ -186,6 +191,9 @@ struct system_type final : metadata_type
         // No forward declaration necessary
     }
 
+    virtual void write_cpp_generic_param_logical_type(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
+
 private:
 
     std::string_view m_clrName;
@@ -259,6 +267,9 @@ struct mapped_type final : metadata_type
         // No forward declaration necessary
     }
 
+    virtual void write_cpp_generic_param_logical_type(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
+
 private:
 
     xlang::meta::reader::TypeDef m_type;
@@ -317,6 +328,12 @@ struct typedef_base : metadata_type
         return m_genericParamMangledName;
     }
 
+    virtual void write_cpp_generic_param_logical_type(writer& w) const override
+    {
+        // For most types, logical type == abi type, so provide that as the easy default
+        write_cpp_generic_param_abi_type(w);
+    }
+
     xlang::meta::reader::TypeDef const& type() const noexcept
     {
         return m_type;
@@ -361,6 +378,7 @@ struct enum_type final : typedef_base
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
 
     xlang::meta::reader::ElementType underlying_type() const
     {
@@ -402,6 +420,7 @@ struct struct_type final : typedef_base
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
 
     std::vector<struct_member> members;
 };
@@ -464,6 +483,7 @@ struct delegate_type final : typedef_base
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
 
     function_def invoke;
 
@@ -495,6 +515,7 @@ struct interface_type final : typedef_base
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
 
     std::vector<function_def> functions;
 };
@@ -576,6 +597,8 @@ struct class_type final : typedef_base
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
+    virtual void write_cpp_generic_param_logical_type(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
 
     metadata_type const* default_interface = nullptr;
 
@@ -672,6 +695,8 @@ struct generic_inst final : metadata_type
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
+    virtual void write_cpp_generic_param_logical_type(writer& w) const override;
+    virtual void write_cpp_generic_param_abi_type(writer& w) const override;
 
     typedef_base const* generic_type() const noexcept
     {

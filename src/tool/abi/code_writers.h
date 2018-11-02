@@ -115,6 +115,25 @@ inline void write_includes(writer& w, type_cache const& types, std::string_view 
     w.write("\n");
 }
 
+inline void write_cpp_fully_qualified_type(writer& w, std::string_view typeNamespace, std::string_view typeName)
+{
+    if (w.config().ns_prefix_state == ns_prefix::always)
+    {
+        w.write("ABI::");
+    }
+    else if (w.config().ns_prefix_state == ns_prefix::optional)
+    {
+        w.write("ABI_PARAMETER(");
+    }
+
+    w.write("@::%", typeNamespace, typeName);
+
+    if (w.config().ns_prefix_state == ns_prefix::optional)
+    {
+        w.write(')');
+    }
+}
+
 inline void write_mangled_name(writer& w, std::string_view mangledName)
 {
     using namespace std::literals;
