@@ -53,6 +53,11 @@ struct sha1
         }
     }
 
+    void append(std::string_view str) noexcept
+    {
+        append(reinterpret_cast<std::uint8_t const*>(str.data()), str.length());
+    }
+
     constexpr std::array<std::uint8_t, 20> finalize() noexcept
     {
         auto const sizeBits = m_sizeBytes * 8;

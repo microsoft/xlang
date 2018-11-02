@@ -341,3 +341,37 @@ inline void for_each_attribute(
         }
     }
 }
+
+// NOTE: 37 characters for the null terminator; the actual string is 36 characters
+inline std::array<char, 37> type_iid(xlang::meta::reader::TypeDef const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+
+    std::array<char, 37> result;
+
+    auto attr = get_attribute(type, metadata_namespace, "GuidAttribute"sv);
+    if (!attr)
+    {
+        xlang::throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(),
+            ".", type.TypeName(), "' not found");
+    }
+
+    auto value = attr.Value();
+    auto const& args = value.FixedArgs();
+    // 966BE0A7-B765-451B-AAAB-C9C498ED2594
+    std::snprintf(result.data(), result.size(), "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+        std::get<uint32_t>(std::get<ElemSig>(args[0].value).value),
+        std::get<uint16_t>(std::get<ElemSig>(args[1].value).value),
+        std::get<uint16_t>(std::get<ElemSig>(args[2].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[3].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[4].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[5].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[6].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[7].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[8].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[9].value).value),
+        std::get<uint8_t>(std::get<ElemSig>(args[10].value).value));
+
+    return result;
+}

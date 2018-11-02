@@ -377,7 +377,11 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, code
 
 metadata_type const& metadata_cache::find_dependent_type(init_state& state, GenericTypeInstSig const& type)
 {
-    auto genericType = &find_dependent_type(state, type.GenericType());
+    auto genericType = dynamic_cast<typedef_base const*>(&find_dependent_type(state, type.GenericType()));
+    if (!genericType)
+    {
+        xlang::throw_invalid("Generic types must be TypeDefs");
+    }
 
     std::vector<metadata_type const*> genericParams;
     for (auto const& param : type.GenericArgs())
@@ -521,10 +525,33 @@ void generic_inst::write_cpp_forward_declaration(writer& w) const
 
     w.push_inline_namespace(clr_abi_namespace());
 
-    auto const cppName = generic_type_abi_name();
     w.write(R"^-^(template <>
-struct __declspec(uuid("%"))
-%<)^-^", "TODO_UUID", cppName);
+struct __declspec(uuid(")^-^");
+
+    sha1 signatureHash;
+    static constexpr std::uint8_t namespaceGuidBytes[] =
+    {
+        0x11, 0xf4, 0x7a, 0xd5,
+        0x7b, 0x73,
+        0x42, 0xc0,
+        0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee
+    };
+    signatureHash.append(namespaceGuidBytes, std::size(namespaceGuidBytes));
+    append_signature(signatureHash);
+
+    auto iidHash = signatureHash.finalize();
+    iidHash[6] = (iidHash[6] & 0x0F) | 0x50;
+    iidHash[8] = (iidHash[8] & 0x3F) | 0x80;
+    w.write_printf("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+        iidHash[0], iidHash[1], iidHash[2], iidHash[3],
+        iidHash[4], iidHash[5],
+        iidHash[6], iidHash[7],
+        iidHash[8], iidHash[9],
+        iidHash[10], iidHash[11], iidHash[12], iidHash[13], iidHash[14], iidHash[15]);
+
+    auto const cppName = generic_type_abi_name();
+    w.write(R"^-^("))
+%<)^-^", cppName);
     // TODO: Generic params
     w.write("> : %_impl<", cppName);
     // TODO: Generic params

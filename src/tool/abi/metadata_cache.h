@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "meta_reader.h"
+#include "sha1.h"
 #include "task_group.h"
 #include "type_name.h"
 #include "type_names.h"
@@ -18,10 +19,14 @@ struct metadata_type
     virtual std::string_view clr_full_name() const = 0;
     virtual std::string_view clr_abi_namespace() const = 0;
     virtual std::string_view clr_logical_namespace() const = 0;
+
     virtual std::string_view cpp_abi_name() const = 0;
     virtual std::string_view cpp_logical_name() const = 0;
+
     virtual std::string_view mangled_name() const = 0;
     virtual std::string_view generic_param_mangled_name() const = 0;
+
+    virtual void append_signature(sha1& hash) const = 0;
 
     // NOTE: For easier validation, we try and generate header files as identical to MIDLRT as possible. The primary
     //       issue there is that the files MIDLRT generates are highly dependent on the structure of the .idl file
@@ -88,6 +93,11 @@ struct element_type final : metadata_type
     virtual std::string_view generic_param_mangled_name() const override
     {
         return m_mangledName;
+    }
+
+    virtual void append_signature(sha1& hash) const override
+    {
+        hash.append(m_signature);
     }
 
     virtual std::string_view idl_name() const override
@@ -161,6 +171,11 @@ struct system_type final : metadata_type
         return m_cppName;
     }
 
+    virtual void append_signature(sha1& hash) const override
+    {
+        hash.append(m_signature);
+    }
+
     virtual std::string_view idl_name() const override
     {
         return m_cppName;
@@ -227,6 +242,11 @@ struct mapped_type final : metadata_type
     virtual std::string_view generic_param_mangled_name() const override
     {
         return m_cppName;
+    }
+
+    virtual void append_signature(sha1& hash) const override
+    {
+        hash.append(m_signature);
     }
 
     virtual std::string_view idl_name() const override
@@ -324,6 +344,16 @@ struct enum_type final : typedef_base
     {
     }
 
+    virtual void append_signature(sha1& hash) const override
+    {
+        using namespace std::literals;
+        hash.append("enum("sv);
+        hash.append(m_clrFullName);
+        hash.append(";"sv);
+        element_type::from_type(underlying_type()).append_signature(hash);
+        hash.append(")"sv);
+    }
+
     virtual std::string_view idl_name() const override
     {
         // Enum names identically match their CLR name in idl files
@@ -349,6 +379,20 @@ struct struct_type final : typedef_base
     struct_type(xlang::meta::reader::TypeDef const& type) :
         typedef_base(type)
     {
+    }
+
+    virtual void append_signature(sha1& hash) const override
+    {
+        using namespace std::literals;
+        XLANG_ASSERT(members.size() == distance(m_type.FieldList()));
+        hash.append("struct("sv);
+        hash.append(m_clrFullName);
+        for (auto const& member : members)
+        {
+            hash.append(";");
+            member.type->append_signature(hash);
+        }
+        hash.append(")"sv);
     }
 
     virtual std::string_view idl_name() const override
@@ -405,6 +449,15 @@ struct delegate_type final : typedef_base
         return m_abiName;
     }
 
+    virtual void append_signature(sha1& hash) const override
+    {
+        using namespace std::literals;
+        hash.append("delegate({"sv);
+        auto iid = type_iid(m_type);
+        hash.append(std::string_view{ iid.data(), iid.size() - 1 });
+        hash.append("})"sv);
+    }
+
     virtual std::string_view idl_name() const override
     {
         return m_abiName;
@@ -424,6 +477,15 @@ struct interface_type final : typedef_base
     interface_type(xlang::meta::reader::TypeDef const& type) :
         typedef_base(type)
     {
+    }
+
+    virtual void append_signature(sha1& hash) const override
+    {
+        using namespace std::literals;
+        hash.append("{"sv);
+        auto iid = type_iid(m_type);
+        hash.append(std::string_view{ iid.data(), iid.size() - 1 });
+        hash.append("}"sv);
     }
 
     virtual std::string_view idl_name() const override
@@ -491,6 +553,22 @@ struct class_type final : typedef_base
         return default_interface->cpp_abi_name();
     }
 
+    virtual void append_signature(sha1& hash) const override
+    {
+        using namespace std::literals;
+        if (!default_interface)
+        {
+            xlang::throw_invalid("Class type '", clr_full_name(), "' does not have a default interface and therefore "
+                "does not have a signature");
+        }
+
+        hash.append("rc("sv);
+        hash.append(m_clrFullName);
+        hash.append(";"sv);
+        default_interface->append_signature(hash);
+        hash.append(")"sv);
+    }
+
     virtual std::string_view idl_name() const override
     {
         // Class names identically match their CLR name in idl files
@@ -508,7 +586,7 @@ private:
 
 struct generic_inst final : metadata_type
 {
-    generic_inst(metadata_type const* genericType, std::vector<metadata_type const*> genericParams) :
+    generic_inst(typedef_base const* genericType, std::vector<metadata_type const*> genericParams) :
         m_genericType(genericType),
         m_genericParams(std::move(genericParams))
     {
@@ -573,6 +651,21 @@ struct generic_inst final : metadata_type
         return m_mangledName;
     }
 
+    virtual void append_signature(sha1& hash) const override
+    {
+        using namespace std::literals;
+        hash.append("pinterface({"sv);
+        auto iid = type_iid(m_genericType->type());
+        hash.append(std::string_view{ iid.data(), iid.size() - 1 });
+        hash.append("}"sv);
+        for (auto param : m_genericParams)
+        {
+            hash.append(";"sv);
+            param->append_signature(hash);
+        }
+        hash.append(")"sv);
+    }
+
     virtual std::string_view idl_name() const override
     {
         return m_idlName;
@@ -580,7 +673,7 @@ struct generic_inst final : metadata_type
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
 
-    metadata_type const* generic_type() const noexcept
+    typedef_base const* generic_type() const noexcept
     {
         return m_genericType;
     }
@@ -601,7 +694,7 @@ struct generic_inst final : metadata_type
 
 private:
 
-    metadata_type const* m_genericType;
+    typedef_base const* m_genericType;
     std::vector<metadata_type const*> m_genericParams;
     std::string m_clrFullName;
     std::string m_mangledName;
