@@ -40,9 +40,10 @@ metadata_cache::metadata_cache(xlang::meta::reader::cache const& c)
     {
         group.add([&]()
         {
-            process_namespace_dependencies(nsCache, this);
+            process_namespace_dependencies(nsCache);
         });
     }
+    group.get();
 }
 
 void metadata_cache::process_namespace_types(
@@ -142,29 +143,36 @@ void metadata_cache::process_namespace_types(
 
 void metadata_cache::process_namespace_dependencies(namespace_cache& target)
 {
+    init_state state{ &target };
+
     for (auto& enumType : target.enums)
     {
-        process_enum_dependencies(target, enumType);
+        process_enum_dependencies(state, enumType);
+        XLANG_ASSERT(!state.parent_generic_inst);
     }
 
     for (auto& structType : target.structs)
     {
-        process_struct_dependencies(target, structType);
+        process_struct_dependencies(state, structType);
+        XLANG_ASSERT(!state.parent_generic_inst);
     }
 
     for (auto& delegateType : target.delegates)
     {
-        process_delegate_dependencies(target, delegateType);
+        process_delegate_dependencies(state, delegateType);
+        XLANG_ASSERT(!state.parent_generic_inst);
     }
 
     for (auto& interfaceType : target.interfaces)
     {
-        process_interface_dependencies(target, interfaceType);
+        process_interface_dependencies(state, interfaceType);
+        XLANG_ASSERT(!state.parent_generic_inst);
     }
 
     for (auto& classType : target.classes)
     {
-        process_class_dependencies(target, classType);
+        process_class_dependencies(state, classType);
+        XLANG_ASSERT(!state.parent_generic_inst);
     }
 }
 
@@ -186,32 +194,32 @@ static void process_contract_dependencies(namespace_cache& target, T const& type
     }
 }
 
-void metadata_cache::process_enum_dependencies(namespace_cache& target, enum_type& type)
+void metadata_cache::process_enum_dependencies(init_state& state, enum_type& type)
 {
     // There's no pre-processing that we need to do for enums. Just take note of the namespace dependencies that come
     // from contract version(s)/deprecations
-    process_contract_dependencies(target, type.type());
+    process_contract_dependencies(*state.target, type.type());
 
     for (auto const& field : type.type().FieldList())
     {
-        process_contract_dependencies(target, field);
+        process_contract_dependencies(*state.target, field);
     }
 }
 
-void metadata_cache::process_struct_dependencies(namespace_cache& target, struct_type& type)
+void metadata_cache::process_struct_dependencies(init_state& state, struct_type& type)
 {
-    process_contract_dependencies(target, type.type());
+    process_contract_dependencies(*state.target, type.type());
 
     for (auto const& field : type.type().FieldList())
     {
-        process_contract_dependencies(target, field);
-        type.members.push_back(struct_member{ field, &find_dependent_type(target, field.Signature().Type()) });
+        process_contract_dependencies(*state.target, field);
+        type.members.push_back(struct_member{ field, &find_dependent_type(state, field.Signature().Type()) });
     }
 }
 
-void metadata_cache::process_delegate_dependencies(namespace_cache& target, delegate_type& type)
+void metadata_cache::process_delegate_dependencies(init_state& state, delegate_type& type)
 {
-    process_contract_dependencies(target, type.type());
+    process_contract_dependencies(*state.target, type.type());
 
     // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
     if (type.is_generic())
@@ -225,8 +233,8 @@ void metadata_cache::process_delegate_dependencies(namespace_cache& target, dele
         if (method.Name() != ".ctor"sv)
         {
             XLANG_ASSERT(method.Name() == "Invoke"sv);
-            process_contract_dependencies(target, method);
-            type.invoke = process_function(target, method);
+            process_contract_dependencies(*state.target, method);
+            type.invoke = process_function(state, method);
             break;
         }
     }
@@ -234,203 +242,9 @@ void metadata_cache::process_delegate_dependencies(namespace_cache& target, dele
     XLANG_ASSERT(type.invoke.def);
 }
 
-void metadata_cache::process_interface_dependencies(namespace_cache& target, interface_type& type)
+void metadata_cache::process_interface_dependencies(init_state& state, interface_type& type)
 {
-    process_contract_dependencies(target, type.type());
-}
-
-void metadata_cache::process_class_dependencies(namespace_cache& target, class_type& type)
-{
-    process_contract_dependencies(target, type.type());
-}
-
-metadata_type const& metadata_cache::find_dependent_type(namespace_cache& target, TypeSig const& type)
-{
-
-}
-
-function_def metadata_cache::process_function(namespace_cache& target, MethodDef const& def)
-{
-    auto paramNames = def.ParamList();
-    auto sig = def.Signature();
-    XLANG_ASSERT(sig.GenericParamCount() == 0);
-
-    std::optional<function_return_type> return_type;
-    if (sig.ReturnType())
-    {
-        std::string_view name = "value"sv;
-        if ((paramNames.first != paramNames.second) && (paramNames.first.Sequence() == 0))
-        {
-            name = paramNames.first.Name();
-            ++paramNames.first;
-        }
-
-        return_type = function_return_type{ sig.ReturnType(), name, &find_dependent_type(target, sig.ReturnType().Type()) };
-    }
-
-    std::vector<function_param> params;
-    for (auto const& param : sig.Params())
-    {
-        XLANG_ASSERT(paramNames.first != paramNames.second);
-        params.push_back(function_param{ param, paramNames.first.Name(), &find_dependent_type(target, param.Type()) });
-        ++paramNames.first;
-    }
-
-    return function_def{ def, std::move(return_type), std::move(params) };
-}
-
-
-
-
-
-
-
-
-template <typename T>
-static void merge_into(std::vector<T>& from, std::vector<std::reference_wrapper<T>>& to)
-{
-    std::vector<std::reference_wrapper<T>> result;
-    result.reserve(from.size() + to.size());
-    std::merge(from.begin(), from.end(), to.begin(), to.end(), std::back_inserter(result));
-    to.swap(result);
-}
-
-type_cache metadata_cache::process_namespaces(std::initializer_list<std::string_view> targetNamespaces)
-{
-    type_cache result{ this };
-    result.included_namespaces.insert(result.included_namespaces.end(), targetNamespaces.begin(), targetNamespaces.end());
-
-    // Merge the type definitions of all namespaces together
-    for (auto ns : targetNamespaces)
-    {
-        auto itr = namespaces.find(ns);
-        if (itr == namespaces.end())
-        {
-            xlang::throw_invalid("Namespace '", ns, "' not found");
-        }
-
-        merge_into(itr->second.enums, result.enums);
-        merge_into(itr->second.structs, result.structs);
-        merge_into(itr->second.delegates, result.delegates);
-        merge_into(itr->second.interfaces, result.interfaces);
-        merge_into(itr->second.classes, result.classes);
-    }
-
-    // Process type signatures and calculate dependencies
-    type_cache::init_state state;
-    auto process_types = [&](auto const& vector)
-    {
-        for (auto const& type : vector)
-        {
-            result.process_type(type, state);
-        }
-    };
-    process_types(result.enums);
-    process_types(result.structs);
-    process_types(result.delegates);
-    process_types(result.interfaces);
-    process_types(result.classes);
-
-    return result;
-}
-
-template <typename T>
-void type_cache::process_contract_dependencies(T const& type)
-{
-    if (auto attr = contract_attributes(type))
-    {
-        dependent_namespaces.emplace(decompose_type(attr->type_name).first);
-        for (auto const& prevContract : attr->previous_contracts)
-        {
-            dependent_namespaces.emplace(decompose_type(prevContract.type_name).first);
-        }
-    }
-
-    if (auto info = is_deprecated(type))
-    {
-        dependent_namespaces.emplace(decompose_type(info->contract_type).first);
-    }
-}
-
-void type_cache::process_type(enum_type& type, type_cache::init_state& /*state*/)
-{
-    // There's no pre-processing that we need to do for enums. Just take note of the namespace dependencies that come
-    // from contract version(s)/deprecations
-    process_contract_dependencies(type.type());
-
-    for (auto const& field : type.type().FieldList())
-    {
-        process_contract_dependencies(field);
-    }
-}
-
-void type_cache::process_type(struct_type& type, type_cache::init_state& state)
-{
-    process_contract_dependencies(type.type());
-
-    for (auto const& field : type.type().FieldList())
-    {
-        process_contract_dependencies(field);
-        type.members.push_back(struct_member{ field, &find(field.Signature().Type(), state.parent_generic_inst) });
-    }
-}
-
-function_def type_cache::process_function(MethodDef const& def, type_cache::init_state& state)
-{
-    auto paramNames = def.ParamList();
-    auto sig = def.Signature();
-    XLANG_ASSERT(sig.GenericParamCount() == 0);
-
-    std::optional<function_return_type> return_type;
-    if (sig.ReturnType())
-    {
-        std::string_view name = "value"sv;
-        if ((paramNames.first != paramNames.second) && (paramNames.first.Sequence() == 0))
-        {
-            name = paramNames.first.Name();
-            ++paramNames.first;
-        }
-
-        return_type = function_return_type{ sig.ReturnType(), name, &find(sig.ReturnType().Type(), state.parent_generic_inst) };
-    }
-
-    std::vector<function_param> params;
-    for (auto const& param : sig.Params())
-    {
-        XLANG_ASSERT(paramNames.first != paramNames.second);
-        params.push_back(function_param{ param, paramNames.first.Name(), &find(param.Type(), state.parent_generic_inst) });
-        ++paramNames.first;
-    }
-
-    return function_def{ def, std::move(return_type), std::move(params) };
-}
-
-void type_cache::process_type(delegate_type& type, type_cache::init_state& state)
-{
-    process_contract_dependencies(type.type());
-
-    // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
-    if (type.is_generic())
-    {
-        return;
-    }
-
-    // Delegates only have a single function - Invoke - that we care about
-    for (auto const& method : type.type().MethodList())
-    {
-        if (method.Name() != ".ctor"sv)
-        {
-            XLANG_ASSERT(method.Name() == "Invoke"sv);
-            process_contract_dependencies(method);
-            type.invoke = process_function(method, state);
-            break;
-        }
-    }
-}
-
-void type_cache::process_type(interface_type& type, type_cache::init_state& state)
-{
-    process_contract_dependencies(type.type());
+    process_contract_dependencies(*state.target, type.type());
 
     // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
     if (type.is_generic())
@@ -440,16 +254,16 @@ void type_cache::process_type(interface_type& type, type_cache::init_state& stat
 
     for (auto const& method : type.type().MethodList())
     {
-        process_contract_dependencies(method);
-        type.functions.push_back(process_function(method, state));
+        process_contract_dependencies(*state.target, method);
+        type.functions.push_back(process_function(state, method));
     }
 
     // TODO: Required interfaces? At least the generic ones?
 }
 
-void type_cache::process_type(class_type& type, type_cache::init_state& state)
+void metadata_cache::process_class_dependencies(init_state& state, class_type& type)
 {
-    process_contract_dependencies(type.type());
+    process_contract_dependencies(*state.target, type.type());
 
     // We only care about instantiations of generic types, so early exit as we won't be able to resolve references
     if (type.is_generic())
@@ -460,89 +274,172 @@ void type_cache::process_type(class_type& type, type_cache::init_state& state)
     // For classes, all we care about is the interfaces and taking note of the default interface, if there is one
     for (auto const& iface : type.type().InterfaceImpl())
     {
-        process_contract_dependencies(iface);
+        process_contract_dependencies(*state.target, iface);
         if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
         {
             XLANG_ASSERT(!type.default_interface);
-            type.default_interface = &find(iface.Interface(), state.parent_generic_inst);
+            type.default_interface = &find_dependent_type(state, iface.Interface());
         }
         // TODO: namespace dependency? Process generic types?
     }
 }
 
-metadata_type const* type_cache::try_find(TypeSig const& sig, generic_inst const* parentGenericInst)
+function_def metadata_cache::process_function(init_state& state, MethodDef const& def)
 {
-    metadata_type const* result = nullptr;
+    auto paramNames = def.ParamList();
+    auto sig = def.Signature();
+    XLANG_ASSERT(sig.GenericParamCount() == 0);
 
-    // std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>;
-    xlang::visit(sig.Type(),
+    std::optional<function_return_type> return_type;
+    if (sig.ReturnType())
+    {
+        std::string_view name = "value"sv;
+        if ((paramNames.first != paramNames.second) && (paramNames.first.Sequence() == 0))
+        {
+            name = paramNames.first.Name();
+            ++paramNames.first;
+        }
+
+        return_type = function_return_type{ sig.ReturnType(), name, &find_dependent_type(state, sig.ReturnType().Type()) };
+    }
+
+    std::vector<function_param> params;
+    for (auto const& param : sig.Params())
+    {
+        XLANG_ASSERT(paramNames.first != paramNames.second);
+        params.push_back(function_param{ param, paramNames.first.Name(), &find_dependent_type(state, param.Type()) });
+        ++paramNames.first;
+    }
+
+    return function_def{ def, std::move(return_type), std::move(params) };
+}
+
+metadata_type const& metadata_cache::find_dependent_type(init_state& state, TypeSig const& type)
+{
+    metadata_type const* result;
+    xlang::visit(type.Type(),
         [&](ElementType t)
         {
             result = &element_type::from_type(t);
         },
         [&](coded_index<TypeDefOrRef> const& t)
         {
-            result = try_find(t, parentGenericInst);
+            result = &find_dependent_type(state, t);
         },
         [&](GenericTypeIndex t)
         {
-            if (parentGenericInst)
+            if (state.parent_generic_inst)
             {
-                XLANG_ASSERT(t.index < parentGenericInst->generic_params().size());
-                result = parentGenericInst->generic_params()[t.index];
+                if (t.index < state.parent_generic_inst->generic_params().size())
+                {
+                    result = state.parent_generic_inst->generic_params()[t.index];
+                }
+                else
+                {
+                    XLANG_ASSERT(false);
+                    xlang::throw_invalid("GenericTypeIndex out of range");
+                }
             }
             else
             {
                 XLANG_ASSERT(false);
+                xlang::throw_invalid("GenericTypeIndex encountered with no generic instantiation to refer to");
             }
         },
         [&](GenericTypeInstSig const& t)
         {
-            result = try_find(t, parentGenericInst);
+            result = &find_dependent_type(state, t);
         });
 
-    return result;
+    return *result;
 }
 
-metadata_type const* type_cache::try_find(coded_index<TypeDefOrRef> const& type, generic_inst const* parentGenericInst)
+metadata_type const& metadata_cache::find_dependent_type(init_state& state, coded_index<TypeDefOrRef> const& type)
 {
-    metadata_type const* result = nullptr;
-
+    metadata_type const* result;
     visit(type, xlang::visit_overload{
-        [&](GenericTypeInstSig const& sig)
+        [&](GenericTypeInstSig const& t)
         {
-            result = try_find(sig, parentGenericInst);
+            result = &find_dependent_type(state, t);
         },
         [&](auto const& defOrRef)
         {
-            result = cache->try_find(defOrRef.TypeNamespace(), defOrRef.TypeName());
+            result = &find(defOrRef.TypeNamespace(), defOrRef.TypeName());
+            if (auto typeDef = dynamic_cast<typedef_base const*>(result))
+            {
+                state.target->dependent_namespaces.insert(result->clr_abi_namespace());
+                state.target->type_dependencies.emplace(*typeDef);
+            }
         }});
 
-    return result;
+    return *result;
 }
 
-metadata_type const* type_cache::try_find(GenericTypeInstSig const& sig, generic_inst const* parentGenericInst)
+metadata_type const& metadata_cache::find_dependent_type(init_state& state, GenericTypeInstSig const& type)
 {
-    metadata_type const* genericType = try_find(sig.GenericType(), parentGenericInst);
-    if (!genericType)
-    {
-        return nullptr;
-    }
+    auto genericType = &find_dependent_type(state, type.GenericType());
 
     std::vector<metadata_type const*> genericParams;
-    for (auto const& param : sig.GenericArgs())
+    for (auto const& param : type.GenericArgs())
     {
-        auto ptr = try_find(param, parentGenericInst);
-        if (!ptr)
-        {
-            return nullptr;
-        }
-        genericParams.push_back(ptr);
+        genericParams.push_back(&find_dependent_type(state, param));
     }
 
     generic_inst inst{ genericType, std::move(genericParams) };
-    auto [itr, added] = generic_instantiations.emplace(inst.clr_full_name(), std::move(inst));
-    return &itr->second;
+    auto [itr, added] = state.target->generic_instantiations.emplace(inst.clr_full_name(), std::move(inst));
+    return itr->second;
+}
+
+template <typename T>
+static void merge_into(std::vector<T>& from, std::vector<std::reference_wrapper<T const>>& to)
+{
+    std::vector<std::reference_wrapper<T const>> result;
+    result.reserve(from.size() + to.size());
+    std::merge(from.begin(), from.end(), to.begin(), to.end(), std::back_inserter(result));
+    to.swap(result);
+}
+
+type_cache metadata_cache::compile_namespaces(std::initializer_list<std::string_view> targetNamespaces)
+{
+    type_cache result{ this };
+    // TODO: included_namespaces actually useful?
+
+    auto includes_namespace = [&](std::string_view ns)
+    {
+        return std::find(targetNamespaces.begin(), targetNamespaces.end(), ns) != targetNamespaces.end();
+    };
+
+    for (auto ns : targetNamespaces)
+    {
+        auto itr = namespaces.find(ns);
+        if (itr == namespaces.end())
+        {
+            xlang::throw_invalid("Namespace '", ns, "' not found");
+        }
+
+        // Merge the type definitions together
+        merge_into(itr->second.enums, result.enums);
+        merge_into(itr->second.structs, result.structs);
+        merge_into(itr->second.delegates, result.delegates);
+        merge_into(itr->second.interfaces, result.interfaces);
+        merge_into(itr->second.classes, result.classes);
+
+        // Merge the dependencies together
+        result.dependent_namespaces.insert(
+            itr->second.dependent_namespaces.begin(),
+            itr->second.dependent_namespaces.end());
+
+        result.generic_instantiations.insert(itr->second.generic_instantiations.begin(), itr->second.generic_instantiations.end());
+
+        std::partition_copy(
+            itr->second.type_dependencies.begin(),
+            itr->second.type_dependencies.end(),
+            std::inserter(result.internal_dependencies, result.internal_dependencies.end()),
+            std::inserter(result.external_dependencies, result.external_dependencies.end()),
+            [&](auto const& type) { return includes_namespace(type.get().clr_logical_namespace()); });
+    }
+
+    return result;
 }
 
 void enum_type::write_cpp_forward_declaration(writer& w) const
@@ -654,199 +551,6 @@ typedef % %_t;
 
 )^-^", m_mangledName);
 }
-
-
-
-
-
-
-#if 0
-void type_cache::process_dependencies(TypeDef const& type, type_cache::init_state& state)
-{
-    // Ignore contract definitions since they don't introduce any dependencies and their contract version attribute will
-    // trip us up since it's a definition, not a use and therefore specifies no type name
-    if (!get_attribute(type, metadata_namespace, "ApiContractAttribute"sv))
-    {
-        if (auto contractInfo = contract_attributes(type))
-        {
-            // NOTE: Contracts don't becomes real types; all that we really care about is the namespace dependency,
-            //       primarily so that we define the contract version(s) later
-            dependent_namespaces.emplace(decompose_type(contractInfo->type_name).first);
-            for (auto const& prevContract : contractInfo->previous_contracts)
-            {
-                dependent_namespaces.emplace(decompose_type(prevContract.type_name).first);
-            }
-        }
-    }
-
-    // TODO: Only generic required interfaces?
-    for (auto const& iface : type.InterfaceImpl())
-    {
-        process_dependency(iface.Interface(), state);
-    }
-
-    for (auto const& method : type.MethodList())
-    {
-        if (method.Name() == ".ctor"sv)
-        {
-            continue;
-        }
-
-        auto sig = method.Signature();
-        if (auto retType = sig.ReturnType())
-        {
-            process_dependency(retType.Type(), state);
-        }
-
-        for (const auto& param : sig.Params())
-        {
-            process_dependency(param.Type(), state);
-        }
-    }
-
-    for (auto const& field : type.FieldList())
-    {
-        process_dependency(field.Signature().Type(), state);
-    }
-}
-
-metadata_type const* type_cache::process_dependency(TypeSig const& type, type_cache::init_state& state)
-{
-    metadata_type const* result = nullptr;
-
-    xlang::visit(type.Type(),
-        [&](ElementType t)
-        {
-            // Does not impact the dependency graph
-            result = &get_metadata_type(t);
-        },
-        [&](coded_index<TypeDefOrRef> const& t)
-        {
-            result = process_dependency(t, state);
-        },
-        [&](GenericTypeIndex i)
-        {
-            if (!state.parent_generic_inst)
-            {
-                // We're processing the definition of a generic type and therefore have no instantiation to reference.
-                // Leave the result null, which we will assert on if we find ourselves in this code path in unexpected
-                // scenarios.
-            }
-            else
-            {
-                // This is referencing a generic parameter from an earlier generic argument and thus carries no new dependencies
-                XLANG_ASSERT(i.index < state.parent_generic_inst->generic_params().size());
-                result = state.parent_generic_inst->generic_params()[i.index];
-            }
-        },
-        [&](GenericTypeInstSig const& t)
-        {
-            result = process_dependency(t, state);
-        });
-
-    return result;
-}
-
-metadata_type const* type_cache::process_dependency(coded_index<TypeDefOrRef> const& type, type_cache::init_state& state)
-{
-    metadata_type const* result = nullptr;
-
-    visit(type, xlang::visit_overload{
-        [&](GenericTypeInstSig const& t)
-        {
-            result = process_dependency(t, state);
-        },
-        [&](auto const& defOrRef)
-        {
-            auto ns = defOrRef.TypeNamespace();
-            auto name = defOrRef.TypeName();
-            if (ns == system_namespace)
-            {
-                // All types in the System namespace are mapped
-                if constexpr (std::is_same_v<std::decay_t<decltype(defOrRef)>, TypeRef>)
-                {
-                    result = &get_system_metadata_type(defOrRef);
-                }
-                else
-                {
-                    XLANG_ASSERT(false);
-                }
-            }
-            else
-            {
-                auto const& def = m_cache->find(ns, name);
-                result = &def;
-
-                if (ns == name)
-                {
-                    internal_dependencies.emplace(def);
-                }
-                else
-                {
-                    external_dependencies.emplace(def);
-                    dependent_namespaces.emplace(ns);
-                }
-            }
-        }});
-
-    return result;
-}
-
-metadata_type const* type_cache::process_dependency(GenericTypeInstSig const& type, type_cache::init_state& state)
-{
-    auto ref = type.GenericType().TypeRef();
-    auto const& def = m_cache->find(ref.TypeNamespace(), ref.TypeName());
-
-    std::vector<metadata_type const*> genericParams;
-
-    std::string clrName{ def.clr_full_name() };
-    clrName.push_back('<');
-
-    std::string mangledName{ def.mangled_name() };
-
-    std::string_view prefix;
-    for (auto const& arg : type.GenericArgs())
-    {
-        // It may be the case that we're processing the dependencies of a generic type, and _not_ a generic
-        // instantiation, in which case we'll get back null. If that's the case, then we should get back null for _all_
-        // of the generic args
-        auto param = process_dependency(arg, state);
-        if (param)
-        {
-            genericParams.push_back(param);
-
-            clrName += prefix;
-            clrName += param->clr_full_name();
-            prefix = ", "sv;
-
-            mangledName.push_back('_');
-            mangledName += param->generic_param_mangled_name();
-        }
-    }
-    clrName.push_back('>');
-
-    if (genericParams.size() > 0)
-    {
-        XLANG_ASSERT(static_cast<std::size_t>(distance(type.GenericArgs())) == genericParams.size());
-
-        generic_inst inst{ &def, std::move(genericParams), std::move(clrName), std::move(mangledName) };
-        auto [itr, added] = generic_instantiations.emplace(inst.clr_full_name(), std::move(inst));
-        if (added)
-        {
-            // First time processing this specialization
-            dependent_namespaces.emplace(ref.TypeNamespace());
-
-            auto temp = std::exchange(state.parent_generic_inst, &itr->second);
-            process_dependencies(def.type(), state);
-            state.parent_generic_inst = temp;
-        }
-
-        return &itr->second;
-    }
-
-    return nullptr;
-}
-#endif
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
 {

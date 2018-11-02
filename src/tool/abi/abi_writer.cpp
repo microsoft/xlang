@@ -256,7 +256,7 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
     w.write(strings::constexpr_definitions);
 
     write_api_contract_definitions(w, types);
-    write_includes(w, types);
+    write_includes(w, types, fileName);
 
     // C++ interface
     w.write("#if defined(__cplusplus) && !defined(CINTERFACE)\n");

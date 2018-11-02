@@ -149,8 +149,7 @@ inline bool is_fully_specialized(xlang::meta::reader::GenericTypeInstSig const& 
     return true;
 }
 
-inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> default_interface(
-    xlang::meta::reader::TypeDef const& type)
+inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_get_default_interface(xlang::meta::reader::TypeDef const& type)
 {
     using namespace std::literals;
     using namespace xlang::meta::reader;
@@ -164,7 +163,19 @@ inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> defau
         }
     }
 
-    xlang::throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
+    return {};
+}
+
+inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> default_interface(
+    xlang::meta::reader::TypeDef const& type)
+{
+    auto result = try_get_default_interface(type);
+    if (!result)
+    {
+        xlang::throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
+    }
+
+    return result;
 }
 
 struct previous_contract

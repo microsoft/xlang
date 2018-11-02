@@ -62,7 +62,7 @@ inline void write_api_contract_definitions(writer& w, type_cache const& types)
 )^-^"sv);
 }
 
-inline void write_includes(writer& w, type_cache const& types)
+inline void write_includes(writer& w, type_cache const& types, std::string_view fileName)
 {
     // Forced dependencies
     w.write(R"^-^(// Header files for imported files
@@ -72,18 +72,13 @@ inline void write_includes(writer& w, type_cache const& types)
 #include "windowscontracts.h"
 )^-^");
 
-    auto includes_namespace = [&](std::string_view ns)
-    {
-        return std::binary_search(types.included_namespaces.begin(), types.included_namespaces.end(), ns);
-    };
-
-    if (!includes_namespace(foundation_namespace))
+    if (fileName != foundation_namespace)
     {
         w.write(R"^-^(#include "Windows.Foundation.h"
 )^-^");
     }
 
-    bool hasCollectionsDependency = includes_namespace(collections_namespace);
+    bool hasCollectionsDependency = false;
     for (auto ns : types.dependent_namespaces)
     {
         if (ns == collections_namespace)
@@ -99,7 +94,7 @@ inline void write_includes(writer& w, type_cache const& types)
         {
             // The "System" namespace a lie
         }
-        else if (includes_namespace(ns))
+        else if (ns == fileName)
         {
             // Don't include ourself
         }
@@ -157,7 +152,7 @@ inline void write_cpp_generic_definitions(writer& w, type_cache const& types)
 
     for (auto const& [name, inst] : types.generic_instantiations)
     {
-        inst.write_cpp_forward_declaration(w);
+        inst.get().write_cpp_forward_declaration(w);
     }
 }
 

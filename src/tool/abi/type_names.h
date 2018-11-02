@@ -88,6 +88,24 @@ inline std::string mangled_name(xlang::meta::reader::TypeDef const& type)
     return result;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
 inline std::string_view element_type_signature(xlang::meta::reader::ElementType type)
 {
     using namespace std::literals;
@@ -247,3 +265,4 @@ inline std::string interface_signature(xlang::meta::reader::TypeDef const& type)
     result.push_back('}');
     return result;
 }
+#endif

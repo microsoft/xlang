@@ -180,7 +180,7 @@ int main(int const argc, char** argv)
                 {
                     group.add([&]()
                     {
-                        write_abi_header(ns, config, mdCache.process_namespaces({ ns }));
+                        write_abi_header(ns, config, mdCache.compile_namespaces({ ns }));
                     });
                 }
             }
@@ -212,7 +212,7 @@ int main(int const argc, char** argv)
                 {
                     group.add([&]()
                     {
-                        write_abi_header(foundation_namespace, config, mdCache.process_namespaces({ foundation_namespace, collections_namespace }));
+                        write_abi_header(foundation_namespace, config, mdCache.compile_namespaces({ foundation_namespace, collections_namespace }));
                     });
                 }
             });
