@@ -9,14 +9,14 @@ pool:
 container: my_container
 
 steps:
-- script: cmake -B $(Build.BinariesDirectory) -GNinja -DCMAKE_CXX_COMPILER=clang++
-  workingDirectory: src
+- script: cmake ./src -B_build -GNinja -DCMAKE_CXX_COMPILER=clang++
   displayName: 'CMake'
-- script: ninja -C $(Build.BinariesDirectory) -v 
-  workingDirectory: src
+- script: ninja -C _build -v 
   displayName: 'Ninja'
 - task: ArchiveFiles@2
-  displayName: 'Archive $(Build.BinariesDirectory)'
-
+  displayName: 'Archive _build'
+  inputs:
+    rootFolderOrFile: '_build'
+    includeRootFolder: false
 
 
