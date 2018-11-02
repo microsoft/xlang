@@ -8,9 +8,46 @@ using namespace std::literals;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
 
-static void initialize_namespace(
+metadata_cache::metadata_cache(xlang::meta::reader::cache const& c)
+{
+    // We need to initialize in two phases. The first phase creates the collection of all type defs. The second phase
+    // processes dependencies and initializes generic types
+    // NOTE: We may only need to do this for a subset of types, but that would introduce a fair amount of complexity and
+    //       the runtime cost of processing everything is relatively insignificant
+    xlang::task_group group;
+    for (auto const& [ns, members] : c.namespaces())
+    {
+        // We don't do any synchronization of access to this type's data structures, so reserve space on the "main"
+        // thread. Note that set/map iterators are not invalidated on insert/emplace
+        auto [nsItr, nsAdded] = namespaces.emplace(std::piecewise_construct,
+            std::forward_as_tuple(ns),
+            std::forward_as_tuple());
+        XLANG_ASSERT(nsAdded);
+
+        auto [tableItr, tableAdded] = m_typeTable.emplace(std::piecewise_construct,
+            std::forward_as_tuple(ns),
+            std::forward_as_tuple());
+        XLANG_ASSERT(tableAdded);
+
+        group.add([&, &nsTypes = nsItr->second, &table = tableItr->second]()
+        {
+            process_namespace_types(members, nsTypes, table);
+        });
+    }
+    group.get();
+
+    for (auto& [ns, nsCache] : namespaces)
+    {
+        group.add([&]()
+        {
+            process_namespace_dependencies(nsCache, this);
+        });
+    }
+}
+
+void metadata_cache::process_namespace_types(
     cache::namespace_members const& members,
-    namespace_types& target,
+    namespace_cache& target,
     std::map<std::string_view, metadata_type const&>& table)
 {
     // Mapped types are only in the 'Windows.Foundation' namespace, so pre-compute
@@ -103,30 +140,39 @@ static void initialize_namespace(
     }
 }
 
-metadata_cache::metadata_cache(xlang::meta::reader::cache const& c)
+void metadata_cache::process_namespace_dependencies(namespace_cache& target)
 {
-    xlang::task_group group;
-    for (auto const& [ns, members] : c.namespaces())
+    for (auto& enumType : target.enums)
     {
-        // We don't do any synchronization of access to this type's data structures, so reserve space on the "main"
-        // thread. Note that set/map iterators are not invalidated on insert/emplace
-        auto [nsItr, nsAdded] = namespaces.emplace(std::piecewise_construct,
-            std::forward_as_tuple(ns),
-            std::forward_as_tuple());
-        XLANG_ASSERT(nsAdded);
 
-        auto [tableItr, tableAdded] = m_typeTable.emplace(std::piecewise_construct,
-            std::forward_as_tuple(ns),
-            std::forward_as_tuple());
-        XLANG_ASSERT(tableAdded);
-
-        group.add([&, &nsTypes = nsItr->second, &table = tableItr->second]()
-        {
-            initialize_namespace(members, nsTypes, table);
-        });
     }
-    group.get();
+
+    for (auto& structType : target.structs)
+    {
+
+    }
+
+    for (auto& delegateType : target.delegates)
+    {
+
+    }
+
+    for (auto& interfaceType : target.interfaces)
+    {
+
+    }
+
+    for (auto& classType : target.classes)
+    {
+
+    }
 }
+
+
+
+
+
+
 
 template <typename T>
 static void merge_into(std::vector<T>& from, std::vector<std::reference_wrapper<T>>& to)

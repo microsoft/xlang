@@ -153,7 +153,7 @@ int main(int const argc, char** argv)
 
         filter f{ include, args.values("exclude") };
         task_group group;
-        auto filter_includes = [&](namespace_types const& types)
+        auto filter_includes = [&](namespace_cache const& types)
         {
             auto includes = [&](auto const& vector)
             {

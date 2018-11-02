@@ -718,19 +718,25 @@ private:
     }
 };
 
-struct namespace_types
+struct namespace_cache
 {
+    // Definitions
     std::vector<enum_type> enums;
     std::vector<struct_type> structs;
     std::vector<delegate_type> delegates;
     std::vector<interface_type> interfaces;
     std::vector<class_type> classes;
     std::set<api_contract> contracts;
+
+    // Dependencies
+    std::set<std::string_view> dependent_namespaces;
+    std::map<std::string_view, generic_inst> generic_instantiations;
+    std::set<std::reference_wrapper<typedef_base const>> type_dependencies;
 };
 
 struct metadata_cache
 {
-    std::map<std::string_view, namespace_types> namespaces;
+    std::map<std::string_view, namespace_cache> namespaces;
 
     metadata_cache(xlang::meta::reader::cache const& c);
 
@@ -767,6 +773,12 @@ struct metadata_cache
     }
 
 private:
+
+    void process_namespace_types(
+        xlang::meta::reader::cache::namespace_members const& members,
+        namespace_cache& target,
+        std::map<std::string_view, metadata_type const&>& table);
+    void process_namespace_dependencies(namespace_cache& target);
 
     std::map<std::string_view, std::map<std::string_view, metadata_type const&>> m_typeTable;
 };
