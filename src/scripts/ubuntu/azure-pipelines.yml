@@ -18,5 +18,10 @@ steps:
   inputs:
     rootFolderOrFile: '_build'
     includeRootFolder: false
-
-
+    archiveFile: '$(Build.BuildId).zip'
+- task: UniversalPackages@0
+  displayName: 'Universal publish'
+  inputs:
+    command: publish
+    publishDirectory: '_build'
+    vstsFeedPublish: '4ed179e3-04b5-4083-bd87-a7c59b8acf14'
