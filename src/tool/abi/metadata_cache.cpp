@@ -463,6 +463,11 @@ void enum_type::write_cpp_forward_declaration(writer& w) const
 
 void enum_type::write_cpp_generic_param_abi_type(writer& w) const
 {
+    write_cpp_abi_type(w);
+}
+
+void enum_type::write_cpp_abi_type(writer& w) const
+{
     w.write("enum %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
 
@@ -475,6 +480,11 @@ void struct_type::write_cpp_forward_declaration(writer& w) const
 }
 
 void struct_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    write_cpp_abi_type(w);
+}
+
+void struct_type::write_cpp_abi_type(writer& w) const
 {
     w.write("struct %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
@@ -506,6 +516,11 @@ void delegate_type::write_cpp_forward_declaration(writer& w) const
 
 void delegate_type::write_cpp_generic_param_abi_type(writer& w) const
 {
+    write_cpp_abi_type(w);
+}
+
+void delegate_type::write_cpp_abi_type(writer& w) const
+{
     w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
 
@@ -535,6 +550,11 @@ void interface_type::write_cpp_forward_declaration(writer& w) const
 }
 
 void interface_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    write_cpp_abi_type(w);
+}
+
+void interface_type::write_cpp_abi_type(writer& w) const
 {
     w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
@@ -576,6 +596,18 @@ void class_type::write_cpp_generic_param_abi_type(writer& w) const
         bind<write_cpp_fully_qualified_type>("Windows.Foundation.Internal"sv, "AggregateType"sv),
         bind<write_cpp_fully_qualified_type>(clr_logical_namespace(), cpp_logical_name()),
         [&](writer& w) { default_interface->write_cpp_generic_param_abi_type(w); });
+}
+
+void class_type::write_cpp_abi_type(writer& w) const
+{
+    if (!default_interface)
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Class '", m_clrFullName, "' cannot be used as a function argument since it has no "
+            "default interface");
+    }
+
+    default_interface->write_cpp_abi_type(w);
 }
 
 void generic_inst::write_cpp_forward_declaration(writer& w) const
@@ -696,6 +728,11 @@ void generic_inst::write_cpp_generic_param_logical_type(writer& w) const
 
 void generic_inst::write_cpp_generic_param_abi_type(writer& w) const
 {
+    write_cpp_abi_type(w);
+}
+
+void generic_inst::write_cpp_abi_type(writer& w) const
+{
     w.write("%*", m_mangledName);
 }
 
@@ -755,6 +792,11 @@ void element_type::write_cpp_generic_param_abi_type(writer& w) const
     }
 }
 
+void element_type::write_cpp_abi_type(writer& w) const
+{
+    w.write(m_abiName);
+}
+
 system_type const& system_type::from_name(std::string_view typeName)
 {
     if (typeName == "Guid"sv)
@@ -773,6 +815,11 @@ void system_type::write_cpp_generic_param_logical_type(writer& w) const
 }
 
 void system_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write(m_cppName);
+}
+
+void system_type::write_cpp_abi_type(writer& w) const
 {
     w.write(m_cppName);
 }
@@ -812,6 +859,11 @@ void mapped_type::write_cpp_generic_param_logical_type(writer& w) const
 }
 
 void mapped_type::write_cpp_generic_param_abi_type(writer& w) const
+{
+    w.write(m_cppName);
+}
+
+void mapped_type::write_cpp_abi_type(writer& w) const
 {
     w.write(m_cppName);
 }

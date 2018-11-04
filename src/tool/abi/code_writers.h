@@ -214,7 +214,8 @@ inline void write_cpp_enum_definition(writer& w, enum_type const& type)
     auto name = type.cpp_abi_name();
 
     // TODO: write_type_definition_banner(w, type);
-    // TODO: Contracts
+
+    auto contractDepth = w.push_contract_guards(type.type());
 
     w.push_namespace(type.clr_abi_namespace());
 
@@ -240,7 +241,7 @@ inline void write_cpp_enum_definition(writer& w, enum_type const& type)
     {
         if (auto value = field.Constant())
         {
-            // TODO: Contracts
+            auto fieldContractDepth = w.push_contract_guards(field);
 
             w.write("%", indent{ 1 });
             if (!w.config().enum_class)
@@ -261,6 +262,7 @@ inline void write_cpp_enum_definition(writer& w, enum_type const& type)
             }
 
             w.write("= %,\n", value);
+            w.pop_contract_guards(fieldContractDepth);
         }
     }
 
@@ -284,6 +286,207 @@ inline void write_cpp_enum_definition(writer& w, enum_type const& type)
     }
 
     w.pop_namespace();
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
+}
+
+inline void write_cpp_struct_definition(writer& w, struct_type const& type)
+{
+    using namespace xlang::text;
+
+    // TODO: write_type_definition_banner(w, type);
+    auto contractDepth = w.push_contract_guards(type.type());
+    w.push_namespace(type.clr_abi_namespace());
+
+    w.write("%struct", indent{});
+    if (auto info = is_deprecated(type.type()))
+    {
+        w.write('\n');
+        write_deprecation_message(w, *info);
+        w.write("%", indent{});
+    }
+    else
+    {
+        w.write(' ');
+    }
+
+    w.write(R"^-^(%
+%{
+)^-^", type.cpp_abi_name(), indent{});
+
+    for (auto const& member : type.members)
+    {
+        if (auto info = is_deprecated(member.field))
+        {
+            write_deprecation_message(w, *info, 1);
+        }
+
+        w.write("%% %;\n", indent{ 1 }, [&](writer& w) { member.type->write_cpp_abi_type(w); }, member.field.Name());
+    }
+
+    w.write("%};\n", indent{});
+
+    w.pop_namespace();
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
+}
+
+inline void write_function_declaration(writer& w, function_def const& func)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+
+    if (auto info = is_deprecated(func.def))
+    {
+        write_deprecation_message(w, *info, 1);
+    }
+
+    // If this is an overload, use the unique name
+    auto fnName = func.def.Name();
+    if (auto overloadAttr = get_attribute(func.def, metadata_namespace, "OverloadAttribute"sv))
+    {
+        auto sig = overloadAttr.Value();
+        auto const& fixedArgs = sig.FixedArgs();
+        XLANG_ASSERT(fixedArgs.size() == 1);
+        fnName = std::get<std::string_view>(std::get<ElemSig>(fixedArgs[0].value).value);
+    }
+
+    w.write("%virtual HRESULT STDMETHODCALLTYPE %(", indent{ 1 }, fnName);
+
+    std::string_view prefix = "\n"sv;
+    for (auto const& param : func.params)
+    {
+        auto constMod = is_const(param.signature) ? "const "sv : ""sv;
+        auto refMod = param.signature.ByRef() ? "*"sv : ""sv;
+        w.write("%%%%% %",
+            prefix,
+            indent{ 2 },
+            constMod,
+            [&](writer& w) { param.type->write_cpp_abi_type(w); },
+            refMod,
+            param.name);
+        prefix = ",\n";
+    }
+
+    if (func.return_type)
+    {
+        if (func.return_type->signature.Type().is_szarray())
+        {
+            w.write("%%unsigned int* %Length", prefix, indent{ 2 }, func.return_type->name);
+            prefix = ",\n";
+        }
+
+        w.write("%%%* %",
+            prefix,
+            indent{ 2 },
+            [&](writer& w) { func.return_type->type->write_cpp_abi_type(w); },
+            func.return_type->name);
+    }
+
+    if (func.params.empty() && !func.return_type)
+    {
+        w.write("void) = 0;\n");
+    }
+    else
+    {
+        w.write("\n%) = 0;\n", indent{ 2 });
+    }
+}
+
+template <typename T>
+inline void write_cpp_interface_definition(writer& w, T const& type)
+{
+    using namespace std::literals;
+
+    // Generics don't get generated definitions
+    if (type.is_generic())
+    {
+        return;
+    }
+
+    // TODO: write_type_definition_banner(w, type);
+    auto contractDepth = w.push_contract_guards(type.type());
+
+    w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
+#define __%_INTERFACE_DEFINED__
+)^-^", type.mangled_name(), type.mangled_name());
+
+    w.push_namespace(type.clr_abi_namespace());
+
+    auto iidStr = type_iid(type.type());
+    w.write(R"^-^(%MIDL_INTERFACE("%")
+)^-^", indent{}, std::string_view{ iidStr.data(), iidStr.size() - 1 });
+
+    if (auto info = is_deprecated(type.type()))
+    {
+        write_deprecation_message(w, *info);
+    }
+
+    w.write(R"^-^(%% : public IUnknown
+%{
+%public:
+)^-^", indent{}, type.cpp_abi_name(), indent{}, indent{});
+
+    if constexpr (std::is_same_v<T, delegate_type>)
+    {
+        write_function_declaration(w, type.invoke);
+    }
+    else // interface_type
+    {
+        for (auto const& func : type.functions)
+        {
+            write_function_declaration(w, func);
+        }
+    }
+
+    w.write(R"^-^(%};
+
+%extern MIDL_CONST_ID IID& IID_% = _uuidof(%);
+)^-^", indent{}, indent{}, type.cpp_abi_name(), type.cpp_abi_name());
+
+    w.pop_namespace();
+
+    auto const iidFmt = (w.config().ns_prefix_state == ns_prefix::optional) ? "C_IID(%)"sv : "IID_%"sv;
+
+    w.write(R"^-^(
+EXTERN_C const IID %;
+#endif /* !defined(__%_INTERFACE_DEFINED__) */
+)^-^",
+        [&](writer& w) { w.write(iidFmt, type.mangled_name()); },
+        type.mangled_name());
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
+}
+
+inline void write_cpp_class_definition(writer& w, class_type const& type)
+{
+    using namespace xlang::text;
+
+    // TODO: write_type_definition_banner(w, type);
+    auto contractDepth = w.push_contract_guards(type.type());
+
+    w.write(R"^-^(#ifndef RUNTIMECLASS_%_%_DEFINED
+#define RUNTIMECLASS_%_%_DEFINED
+)^-^",
+        bind_list("_", namespace_range{ type.clr_logical_namespace() }),
+        type.cpp_logical_name(),
+        bind_list("_", namespace_range{ type.clr_logical_namespace() }),
+        type.cpp_logical_name());
+
+    if (auto info = is_deprecated(type.type()))
+    {
+        write_deprecation_message(w, *info);
+    }
+
+    w.write(R"^-^(extern const __declspec(selectany) _Null_terminated_ WCHAR RuntimeClass_%_%[] = L"%";
+#endif
+)^-^",
+        bind_list("_", namespace_range{ type.clr_logical_namespace() }),
+        type.cpp_logical_name(),
+        type.clr_full_name());
+
+    w.pop_contract_guards(contractDepth);
     w.write('\n');
 }
 
@@ -292,6 +495,26 @@ inline void write_cpp_type_definitions(writer& w, type_cache const& types)
     for (auto const& enumType : types.enums)
     {
         write_cpp_enum_definition(w, enumType);
+    }
+
+    for (auto const& structType : types.structs)
+    {
+        write_cpp_struct_definition(w, structType);
+    }
+
+    for (auto const& delegateType : types.delegates)
+    {
+        write_cpp_interface_definition(w, delegateType.get());
+    }
+
+    for (auto const& interfaceType : types.interfaces)
+    {
+        write_cpp_interface_definition(w, interfaceType.get());
+    }
+
+    for (auto const& classType : types.classes)
+    {
+        write_cpp_class_definition(w, classType);
     }
 }
 
