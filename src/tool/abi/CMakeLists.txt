@@ -8,6 +8,7 @@ target_sources(abi PUBLIC
     main.cpp
     metadata_cache.cpp
     pch.cpp
+    types.cpp
     "${PROJECT_BINARY_DIR}/strings.cpp")
 target_include_directories(abi PUBLIC ${XLANG_LIBRARY_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
 
