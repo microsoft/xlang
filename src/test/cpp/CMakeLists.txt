@@ -9,17 +9,17 @@ target_sources(cpp_test PUBLIC
     test/Async.cpp
     test/Collections.cpp
     test/Edge.cpp
-    test/Fast.cpp
     test/Enum.cpp
+    test/Fast.cpp
     test/Structs.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
     implementation/Component.Edge.EmptyClass.cpp
-    implementation/Component.Edge.StaticClass.cpp
-    implementation/Component.Edge.ZeroClass.cpp
     implementation/Component.Edge.OneClass.cpp
-    implementation/Component.Edge.TwoClass.cpp
+    implementation/Component.Edge.StaticClass.cpp
     implementation/Component.Edge.ThreeClass.cpp
+    implementation/Component.Edge.TwoClass.cpp
+    implementation/Component.Edge.ZeroClass.cpp
     implementation/Component.Fast.FastClass.cpp
     implementation/Component.Fast.SlowClass.cpp
     implementation/Component.Result.Class.cpp
