@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "common.h"
-#include "dependencies.h"
 #include "generic_arg_stack.h"
 #include "meta_reader.h"
 #include "metadata_cache.h"
@@ -194,12 +193,7 @@ struct writer : xlang::text::writer_base<writer>
     void pop_namespace();
     void pop_inline_namespace();
 
-    std::size_t push_contract_guards(xlang::meta::reader::TypeDef const& type);
-    std::size_t push_contract_guards(xlang::meta::reader::TypeRef const& ref);
-    std::size_t push_contract_guards(xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> const& type);
-    std::size_t push_contract_guards(xlang::meta::reader::TypeSig const& type);
-    std::size_t push_contract_guards(xlang::meta::reader::GenericTypeInstSig const& type);
-    std::size_t push_contract_guards(xlang::meta::reader::Field const& field);
+    void push_contract_guard(contract_version& vers);
     void pop_contract_guards(std::size_t count);
 
     bool should_declare(std::string_view mangledName, bool peek = false)
@@ -214,8 +208,6 @@ struct writer : xlang::text::writer_base<writer>
     }
 
 private:
-
-    std::size_t push_contract_guard(contract_version& vers);
 
     abi_configuration const& m_config;
 

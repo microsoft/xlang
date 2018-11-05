@@ -112,94 +112,7 @@ void writer::pop_inline_namespace()
     }
 }
 
-std::size_t writer::push_contract_guards(TypeDef const& type)
-{
-    XLANG_ASSERT(!is_generic(type));
-
-    // Mapped types don't carry contracts with them
-    if (auto [isMapped, mappedName] = m_config.map_type(type.TypeNamespace(), type.TypeName()); isMapped)
-    {
-        return 0;
-    }
-
-    if (auto vers = contract_attributes(type))
-    {
-        return push_contract_guard(*vers);
-    }
-
-    return 0;
-}
-
-std::size_t writer::push_contract_guards(TypeRef const& ref)
-{
-    if (ref.TypeNamespace() != system_namespace)
-    {
-        return push_contract_guards(find_required(ref));
-    }
-
-    return 0;
-}
-
-std::size_t writer::push_contract_guards(coded_index<xlang::meta::reader::TypeDefOrRef> const& type)
-{
-    std::size_t result = 0;
-    visit(type, [&](auto const& t)
-        {
-            result = push_contract_guards(t);
-        });
-
-    return result;
-}
-
-std::size_t writer::push_contract_guards(TypeSig const& type)
-{
-    std::size_t result = 0;
-
-    xlang::visit(type.Type(),
-        [](ElementType)
-        {
-            // ElementTypes don't have associated contracts
-        },
-        [&](GenericTypeIndex const& t)
-        {
-            XLANG_ASSERT(m_currentGenericArgIndex > 0);
-            --m_currentGenericArgIndex;
-            result = push_contract_guards(m_genericArgStack[m_currentGenericArgIndex][t.index]);
-            ++m_currentGenericArgIndex;
-        },
-        [&](auto const& t)
-        {
-            result = push_contract_guards(t);
-        });
-
-    return result;
-}
-
-std::size_t writer::push_contract_guards(GenericTypeInstSig const& type)
-{
-    std::size_t result = 0;
-
-    // For generics, we'll follow MIDLRT's lead and only output contract guards for the generic arguments and ignore the
-    // generic type itself
-    for (auto const& arg : type.GenericArgs())
-    {
-        result += push_contract_guards(arg);
-    }
-
-    return result;
-}
-
-std::size_t writer::push_contract_guards(xlang::meta::reader::Field const& field)
-{
-    if (auto vers = contract_attributes(field))
-    {
-        return push_contract_guard(*vers);
-    }
-
-    return 0;
-}
-
-std::size_t writer::push_contract_guard(contract_version& vers)
+void writer::push_contract_guard(contract_version& vers)
 {
     auto [ns, name] = decompose_type(vers.type_name);
     write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.version });
@@ -213,7 +126,6 @@ std::size_t writer::push_contract_guard(contract_version& vers)
     write('\n');
 
     m_contractGuardStack.emplace_back(std::move(vers));
-    return 1;
 }
 
 void writer::pop_contract_guards(std::size_t count)

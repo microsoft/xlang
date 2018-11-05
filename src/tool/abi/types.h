@@ -26,6 +26,8 @@ struct metadata_type
     //       alphabetically by its fully qualified "idl name."
     virtual std::string_view idl_name() const = 0;
 
+    virtual std::size_t push_contract_guards(writer& w) const = 0;
+
     virtual void write_cpp_forward_declaration(writer& w) const = 0;
     virtual void write_cpp_generic_param_logical_type(writer& w) const = 0;
     virtual void write_cpp_generic_param_abi_type(writer& w) const = 0;
@@ -97,8 +99,14 @@ struct element_type final : metadata_type
 
     virtual std::string_view idl_name() const override
     {
-        // TODO: Not 100% accurate... E.g. many things are uppercase (DOUBLE, FLOAT, etc.) and INT64 vs. __int64
+        // NOTE: Not 100% accurate... E.g. many things are uppercase (DOUBLE, FLOAT, etc.) and INT64 vs. __int64
         return m_abiName;
+    }
+
+    virtual std::size_t push_contract_guards(writer&) const override
+    {
+        // No contract guards necessary
+        return 0;
     }
 
     virtual void write_cpp_forward_declaration(writer&) const override
@@ -180,6 +188,12 @@ struct system_type final : metadata_type
         return m_cppName;
     }
 
+    virtual std::size_t push_contract_guards(writer&) const override
+    {
+        // No contract guards necessary
+        return 0;
+    }
+
     virtual void write_cpp_forward_declaration(writer&) const override
     {
         // No forward declaration necessary
@@ -198,10 +212,15 @@ private:
 
 struct mapped_type final : metadata_type
 {
-    mapped_type(xlang::meta::reader::TypeDef const& type, std::string_view cppName, std::string_view signature) :
+    mapped_type(
+        xlang::meta::reader::TypeDef const& type,
+        std::string_view cppName,
+        std::string_view mangledName,
+        std::string_view signature) :
         m_type(type),
         m_clrFullName(::clr_full_name(type)),
         m_cppName(cppName),
+        m_mangledName(mangledName),
         m_signature(signature)
     {
     }
@@ -237,14 +256,14 @@ struct mapped_type final : metadata_type
 
     virtual std::string_view mangled_name() const override
     {
-        // Currently no mapped type names have any characters that would make it so that the mangled name would be
-        // different than the type name (i.e. no underscore, etc.)
-        return m_cppName;
+        return m_mangledName;
     }
 
     virtual std::string_view generic_param_mangled_name() const override
     {
-        return m_cppName;
+        // Currently no mapped type names have any characters that would make it so that the mangled name would be
+        // different than the generic param mangled name (i.e. no underscore, etc.)
+        return m_mangledName;
     }
 
     virtual void append_signature(sha1& hash) const override
@@ -254,7 +273,13 @@ struct mapped_type final : metadata_type
 
     virtual std::string_view idl_name() const override
     {
-        return m_cppName;
+        return m_mangledName; // TODO: Comment
+    }
+
+    virtual std::size_t push_contract_guards(writer&) const override
+    {
+        // No contract guards necessary
+        return 0;
     }
 
     virtual void write_cpp_forward_declaration(writer&) const override
@@ -271,6 +296,7 @@ private:
     xlang::meta::reader::TypeDef m_type;
     std::string m_clrFullName;
     std::string_view m_cppName;
+    std::string_view m_mangledName;
     std::string_view m_signature;
 };
 
@@ -323,6 +349,8 @@ struct typedef_base : metadata_type
         XLANG_ASSERT(!is_generic());
         return m_genericParamMangledName;
     }
+
+    virtual std::size_t push_contract_guards(writer& w) const override;
 
     virtual void write_cpp_generic_param_logical_type(writer& w) const override
     {
@@ -456,6 +484,11 @@ struct delegate_type final : typedef_base
         m_abiName.reserve(1 + type.TypeName().length());
         m_abiName.push_back('I');
         m_abiName += type.TypeName();
+
+        m_idlName.reserve(type.TypeNamespace().length() + 1 + m_abiName.length());
+        m_idlName += type.TypeNamespace();
+        m_idlName.push_back('.');
+        m_idlName += m_abiName;
     }
 
     virtual std::string_view cpp_abi_name() const override
@@ -481,7 +514,7 @@ struct delegate_type final : typedef_base
 
     virtual std::string_view idl_name() const override
     {
-        return m_abiName;
+        return m_idlName;
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
@@ -495,6 +528,7 @@ struct delegate_type final : typedef_base
 private:
 
     std::string m_abiName;
+    std::string m_idlName;
 };
 
 struct interface_type final : typedef_base
@@ -525,6 +559,7 @@ struct interface_type final : typedef_base
 
     void write_cpp_definition(writer& w) const;
 
+    std::vector<metadata_type const*> required_interfaces;
     std::vector<function_def> functions;
 };
 
@@ -611,6 +646,7 @@ struct class_type final : typedef_base
 
     void write_cpp_definition(writer& w) const;
 
+    std::vector<metadata_type const*> required_interfaces;
     metadata_type const* default_interface = nullptr;
 
 private:
@@ -705,6 +741,8 @@ struct generic_inst final : metadata_type
         return m_idlName;
     }
 
+    virtual std::size_t push_contract_guards(writer& w) const override;
+
     virtual void write_cpp_forward_declaration(writer& w) const override;
     virtual void write_cpp_generic_param_logical_type(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
@@ -728,6 +766,8 @@ struct generic_inst final : metadata_type
     {
         return m_genericParams;
     }
+
+    std::vector<generic_inst const*> dependencies;
 
 private:
 

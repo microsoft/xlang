@@ -25,6 +25,34 @@ inline bool operator<(api_contract const& lhs, api_contract const& rhs)
 
 struct metadata_cache;
 
+struct category_compare
+{
+    bool operator()(typedef_base const& lhs, typedef_base const& rhs)
+    {
+        using namespace xlang::meta::reader;
+        auto leftCat = get_category(lhs.type());
+        auto rightCat = get_category(rhs.type());
+        if (leftCat == rightCat)
+        {
+            return lhs.idl_name() < rhs.idl_name();
+        }
+
+        auto category_power = [](category cat)
+        {
+            switch (cat)
+            {
+            case category::enum_type: return 0;
+            case category::struct_type: return 1;
+            case category::delegate_type: return 2;
+            case category::interface_type: return 3;
+            case category::class_type: return 4;
+            default: return 100;
+            }
+        };
+        return category_power(leftCat) < category_power(rightCat);
+    }
+};
+
 struct type_cache
 {
     metadata_cache const* cache;
@@ -40,7 +68,7 @@ struct type_cache
     std::set<std::string_view> dependent_namespaces;
     std::map<std::string_view, std::reference_wrapper<generic_inst const>> generic_instantiations;
     std::set<std::reference_wrapper<typedef_base const>> external_dependencies;
-    std::set<std::reference_wrapper<typedef_base const>> internal_dependencies;
+    std::set<std::reference_wrapper<typedef_base const>, category_compare> internal_dependencies;
 };
 
 struct namespace_cache

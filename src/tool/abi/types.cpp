@@ -8,8 +8,31 @@ using namespace std::literals;
 using namespace xlang::meta::reader;
 using namespace xlang::text;
 
+template <typename T>
+static std::size_t push_type_contract_guards(writer& w, T const& type)
+{
+    if (auto vers = contract_attributes(type))
+    {
+        w.push_contract_guard(*vers);
+        return 1;
+    }
+
+    return 0;
+}
+
+std::size_t typedef_base::push_contract_guards(writer& w) const
+{
+    XLANG_ASSERT(!is_generic());
+    return push_type_contract_guards(w, m_type);
+}
+
 void enum_type::write_cpp_forward_declaration(writer& w) const
 {
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
     w.push_namespace(clr_abi_namespace());
     auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
     auto typeStr = underlying_type() == ElementType::I4 ? "int"sv : "unsigned int"sv;
@@ -49,7 +72,7 @@ void enum_type::write_cpp_definition(writer& w) const
  */
 )^-^");
 
-    auto contractDepth = w.push_contract_guards(m_type);
+    auto contractDepth = push_contract_guards(w);
 
     w.push_namespace(clr_abi_namespace());
 
@@ -75,7 +98,7 @@ void enum_type::write_cpp_definition(writer& w) const
     {
         if (auto value = field.Constant())
         {
-            auto fieldContractDepth = w.push_contract_guards(field);
+            auto fieldContractDepth = push_type_contract_guards(w, field);
 
             w.write("%", indent{ 1 });
             if (!w.config().enum_class)
@@ -126,6 +149,11 @@ void enum_type::write_cpp_definition(writer& w) const
 
 void struct_type::write_cpp_forward_declaration(writer& w) const
 {
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
     w.push_namespace(clr_abi_namespace());
     w.write("%typedef struct % %;\n", indent{}, cpp_abi_name(), cpp_abi_name());
     w.pop_namespace();
@@ -160,7 +188,7 @@ void struct_type::write_cpp_definition(writer& w) const
  */
 )^-^");
 
-    auto contractDepth = w.push_contract_guards(m_type);
+    auto contractDepth = push_contract_guards(w);
     w.push_namespace(clr_abi_namespace());
 
     w.write("%struct", indent{});
@@ -253,8 +281,15 @@ inline void write_function_declaration(writer& w, function_def const& func)
     std::string_view prefix = "\n"sv;
     for (auto const& param : func.params)
     {
-        auto constMod = is_const(param.signature) ? "const "sv : ""sv;
         auto refMod = param.signature.ByRef() ? "*"sv : ""sv;
+        if (param.signature.Type().is_szarray())
+        {
+            w.write("%%unsigned int% %Length", prefix, indent{ 2 }, refMod, param.name);
+            refMod = param.signature.ByRef() ? "**"sv : "*"sv;
+            prefix = ",\n";
+        }
+
+        auto constMod = is_const(param.signature) ? "const "sv : ""sv;
         w.write("%%%%% %",
             prefix,
             indent{ 2 },
@@ -267,16 +302,19 @@ inline void write_function_declaration(writer& w, function_def const& func)
 
     if (func.return_type)
     {
+        auto refMod = "*"sv;
         if (func.return_type->signature.Type().is_szarray())
         {
             w.write("%%unsigned int* %Length", prefix, indent{ 2 }, func.return_type->name);
+            refMod = "**"sv;
             prefix = ",\n";
         }
 
-        w.write("%%%* %",
+        w.write("%%%% %",
             prefix,
             indent{ 2 },
             [&](writer& w) { func.return_type->type->write_cpp_abi_type(w); },
+            refMod,
             func.return_type->name);
     }
 
@@ -307,7 +345,7 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
     w.write(R"^-^(/*
  *
  * % %
- )^-^", typeName, type.clr_full_name());
+)^-^", typeName, type.clr_full_name());
 
     if (auto contractInfo = contract_attributes(type.type()))
     {
@@ -316,7 +354,7 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
 )^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
     }
 
-    if (is_interface)
+    if constexpr (is_interface)
     {
         if (auto exclusiveAttr = get_attribute(type.type(), metadata_namespace, "ExclusiveToAttribute"sv))
         {
@@ -330,31 +368,34 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
 )^-^", sysType.name);
         }
 
-        // TODO: We should cache this info
-//         auto requiredInterfaces = type.type().InterfaceImpl();
-//         if (requiredInterfaces.first != requiredInterfaces.second)
-//         {
-//             w.write(R"^-^( *
-//  * Any object which implements this interface must also implement the following interfaces:
-// )^-^");
-//             for (auto const& iface : requiredInterfaces)
-//             {
-//                 w.write(" *     ");
-//                 write_type_clr(w, iface.Interface(), generic_arg_stack::empty(), format_flags::none);
-//                 w.write('\n');
-//             }
-//         }
+        if (!type.required_interfaces.empty())
+        {
+            w.write(R"^-^( *
+ * Any object which implements this interface must also implement the following interfaces:
+)^-^");
+
+            for (auto iface : type.required_interfaces)
+            {
+                w.write(" *     %\n", iface->clr_full_name());
+            }
+        }
     }
 
     w.write(R"^-^( *
  */
 )^-^");
 
-    auto contractDepth = w.push_contract_guards(type.type());
+    auto contractDepth = type.push_contract_guards(w);
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
-)^-^", type.mangled_name(), type.mangled_name());
+)^-^", bind<write_mangled_name>(type.mangled_name()), bind<write_mangled_name>(type.mangled_name()));
+
+    if constexpr (is_interface)
+    {
+        w.write(R"^-^(extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] = L"%";
+)^-^", bind_list("_", namespace_range{ type.clr_abi_namespace() }), type.cpp_abi_name(), type.clr_full_name());
+    }
 
     w.push_namespace(type.clr_abi_namespace());
 
@@ -367,10 +408,11 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
         write_deprecation_message(w, *info);
     }
 
-    w.write(R"^-^(%% : public IUnknown
+    auto baseType = is_delegate ? "IUnknown"sv : "IInspectable"sv;
+    w.write(R"^-^(%% : public %
 %{
 %public:
-)^-^", indent{}, type.cpp_abi_name(), indent{}, indent{});
+)^-^", indent{}, type.cpp_abi_name(), baseType, indent{}, indent{});
 
     if constexpr (std::is_same_v<T, delegate_type>)
     {
@@ -397,8 +439,8 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
 )^-^",
-        [&](writer& w) { w.write(iidFmt, type.mangled_name()); },
-        type.mangled_name());
+        [&](writer& w) { w.write(iidFmt, bind<write_mangled_name>(type.mangled_name())); },
+        bind<write_mangled_name>(type.mangled_name()));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -455,6 +497,11 @@ void class_type::write_cpp_forward_declaration(writer& w) const
     {
         XLANG_ASSERT(false);
         xlang::throw_invalid("Cannot forward declare class '", m_clrFullName, "' since it has no default interface");
+    }
+
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
     }
 
     // We need to declare both the class as well as the default interface
@@ -584,25 +631,18 @@ void class_type::write_cpp_definition(writer& w) const
             std::get<std::string_view>(contractElem.value));
     });
 
-    // TODO: Cache these
-//     auto requiredInterfaces = type.InterfaceImpl();
-//     if (requiredInterfaces.first != requiredInterfaces.second)
-//     {
-//         w.write(R"^-^( *
-//  * Class implements the following interfaces:
-// )^-^");
-//         auto defaultInterface = default_interface(type);
-//         for (auto const& iface : requiredInterfaces)
-//         {
-//             w.write(" *    ");
-//             write_type_clr(w, iface.Interface(), generic_arg_stack::empty(), format_flags::none);
-//             if (iface.Interface() == defaultInterface)
-//             {
-//                 w.write(" ** Default Interface **");
-//             }
-//             w.write('\n');
-//         }
-//     }
+    if (!required_interfaces.empty())
+    {
+        w.write(R"^-^( *
+ * Class implements the following interfaces:
+)^-^");
+
+        for (auto iface : required_interfaces)
+        {
+            auto suffix = iface == default_interface ? " ** Default Interface **" : ""sv;
+            w.write(" *    %%\n", iface->clr_full_name(), suffix);
+        }
+    }
 
     if (auto attr = get_attribute(m_type, metadata_namespace, "ThreadingAttribute"sv))
     {
@@ -654,7 +694,7 @@ void class_type::write_cpp_definition(writer& w) const
  */
 )^-^");
 
-    auto contractDepth = w.push_contract_guards(m_type);
+    auto contractDepth = push_contract_guards(w);
 
     w.write(R"^-^(#ifndef RUNTIMECLASS_%_%_DEFINED
 #define RUNTIMECLASS_%_%_DEFINED
@@ -680,6 +720,18 @@ void class_type::write_cpp_definition(writer& w) const
     w.write('\n');
 }
 
+std::size_t generic_inst::push_contract_guards(writer& w) const
+{
+    // Follow MIDLRT's lead and only write contract guards for the generic parameters
+    std::size_t result = 0;
+    for (auto param : m_genericParams)
+    {
+        result += param->push_contract_guards(w);
+    }
+
+    return result;
+}
+
 void generic_inst::write_cpp_forward_declaration(writer& w) const
 {
     if (!w.should_declare(m_mangledName))
@@ -687,11 +739,20 @@ void generic_inst::write_cpp_forward_declaration(writer& w) const
         return;
     }
 
-    // First need to make sure that all generic parameters are declared
+    // First make sure that any generic requried interface/function argument/return types are declared
+    for (auto dep : dependencies)
+    {
+        dep->write_cpp_forward_declaration(w);
+    }
+
+    // Also need to make sure that all generic parameters are declared
     for (auto param : m_genericParams)
     {
         param->write_cpp_forward_declaration(w);
     }
+
+    auto contractDepth = push_contract_guards(w);
+    w.write('\n');
 
     w.write(R"^-^(#ifndef DEF_%_USE
 #define DEF_%_USE
@@ -788,6 +849,9 @@ typedef % %_t;
 #endif /* DEF_%_USE */
 
 )^-^", m_mangledName);
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
 }
 
 void generic_inst::write_cpp_generic_param_logical_type(writer& w) const
@@ -900,22 +964,22 @@ mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const&
     {
         if (type.TypeName() == "HResult"sv)
         {
-            static mapped_type const hresult_type{ type, "HRESULT"sv, "struct(Windows.Foundation.HResult;i4)"sv };
+            static mapped_type const hresult_type{ type, "HRESULT"sv, "HRESULT"sv, "struct(Windows.Foundation.HResult;i4)"sv };
             return &hresult_type;
         }
         else if (type.TypeName() == "EventRegistrationToken"sv)
         {
-            static mapped_type event_token_type{ type, "struct EventRegistrationToken"sv, "struct(Windows.Foundation.EventRegistrationToken;i8)"sv };
+            static mapped_type event_token_type{ type, "struct EventRegistrationToken"sv, "EventRegistrationToken"sv, "struct(Windows.Foundation.EventRegistrationToken;i8)"sv };
             return &event_token_type;
         }
         else if (type.TypeName() == "AsyncStatus"sv)
         {
-            static mapped_type const async_status_type{ type, "enum AsyncStatus"sv, "enum(Windows.Foundation.AsyncStatus;i4)"sv };
+            static mapped_type const async_status_type{ type, "enum AsyncStatus"sv, "AsyncStatus"sv, "enum(Windows.Foundation.AsyncStatus;i4)"sv };
             return &async_status_type;
         }
         else if (type.TypeName() == "IAsyncInfo"sv)
         {
-            static mapped_type const async_info_type{ type, "IAsyncInfo"sv, "{00000036-0000-0000-C000-000000000046}"sv };
+            static mapped_type const async_info_type{ type, "IAsyncInfo"sv, "IAsyncInfo"sv, "{00000036-0000-0000-c000-000000000046}"sv };
             return &async_info_type;
         }
     }
@@ -930,10 +994,18 @@ void mapped_type::write_cpp_generic_param_logical_type(writer& w) const
 
 void mapped_type::write_cpp_generic_param_abi_type(writer& w) const
 {
-    w.write(m_cppName);
+    write_cpp_abi_type(w);
 }
 
 void mapped_type::write_cpp_abi_type(writer& w) const
 {
     w.write(m_cppName);
+
+    auto typeCategory = get_category(m_type);
+    if ((typeCategory == category::delegate_type) ||
+        (typeCategory == category::interface_type) ||
+        (typeCategory == category::class_type))
+    {
+        w.write('*');
+    }
 }

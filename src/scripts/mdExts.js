@@ -3281,7 +3281,22 @@ class __TypeSig
         var result;
         if (this.m_type)
         {
-            result = __getStdVariantValue(this.m_type).toString();
+            var type = this.m_type;
+            var index = type.index();
+            for (var j = 0; j < index; ++j)
+            {
+                type = type._Tail;
+            }
+
+            // For whatever reason, this approach has issues printing out ElementType values...
+            if (index == 0)
+            {
+                result = __enumToString(type._Head, __ElementType);
+            }
+            else
+            {
+                result = type._Head.toString();
+            }
         }
         else
         {

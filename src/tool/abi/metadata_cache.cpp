@@ -252,13 +252,17 @@ void metadata_cache::process_interface_dependencies(init_state& state, interface
         return;
     }
 
+    for (auto const& iface : type.type().InterfaceImpl())
+    {
+        process_contract_dependencies(*state.target, iface);
+        type.required_interfaces.push_back(&find_dependent_type(state, iface.Interface()));
+    }
+
     for (auto const& method : type.type().MethodList())
     {
         process_contract_dependencies(*state.target, method);
         type.functions.push_back(process_function(state, method));
     }
-
-    // TODO: Required interfaces? At least the generic ones?
 }
 
 void metadata_cache::process_class_dependencies(init_state& state, class_type& type)
@@ -275,12 +279,14 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
     for (auto const& iface : type.type().InterfaceImpl())
     {
         process_contract_dependencies(*state.target, iface);
+        auto ifaceType = &find_dependent_type(state, iface.Interface());
+        type.required_interfaces.push_back(ifaceType);
+
         if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
         {
             XLANG_ASSERT(!type.default_interface);
-            type.default_interface = &find_dependent_type(state, iface.Interface());
+            type.default_interface = ifaceType;
         }
-        // TODO: namespace dependency? Process generic types?
     }
 }
 
@@ -394,7 +400,46 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, Gene
     }
 
     generic_inst inst{ genericType, std::move(genericParams) };
-    auto [itr, added] = state.target->generic_instantiations.emplace(inst.clr_full_name(), std::move(inst));
+    auto [itr, added] = state.target->generic_instantiations.emplace(inst.idl_name(), std::move(inst));
+    if (added)
+    {
+        auto restore = std::exchange(state.parent_generic_inst, &itr->second);
+        auto check_dependency = [&](auto const& t)
+        {
+            auto mdType = &find_dependent_type(state, t);
+            if (auto genericType = dynamic_cast<generic_inst const*>(mdType))
+            {
+                itr->second.dependencies.push_back(genericType);
+            }
+        };
+
+        for (auto const& iface : genericType->type().InterfaceImpl())
+        {
+            check_dependency(iface.Interface());
+        }
+
+        for (auto const& fn : genericType->type().MethodList())
+        {
+            if (fn.Name() == ".ctor"sv)
+            {
+                continue;
+            }
+
+            auto sig = fn.Signature();
+            if (sig.ReturnType())
+            {
+                check_dependency(sig.ReturnType().Type());
+            }
+
+            for (auto const& param : sig.Params())
+            {
+                check_dependency(param.Type());
+            }
+        }
+
+        state.parent_generic_inst = restore;
+    }
+
     return itr->second;
 }
 
