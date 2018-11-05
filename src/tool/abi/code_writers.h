@@ -26,6 +26,13 @@ inline void write_contract_macro(writer& w, std::string_view contractNamespace, 
         bind<writer::write_uppercase>(contractTypeName));
 }
 
+inline void write_contract_version(writer& w, unsigned int value)
+{
+    auto versionHigh = static_cast<int>((value & 0xFFFF0000) >> 16);
+    auto versionLow = static_cast<int>(value & 0x0000FFFF);
+    w.write("%.%", versionHigh, versionLow);
+}
+
 inline void write_api_contract_definitions(writer& w, type_cache const& types)
 {
     using namespace std::literals;
@@ -238,13 +245,6 @@ inline void write_cpp_type_definitions(writer& w, type_cache const& types)
 
 
 #if 0
-inline void write_contract_version(writer& w, unsigned int value)
-{
-    auto versionHigh = static_cast<int>((value & 0xFFFF0000) >> 16);
-    auto versionLow = static_cast<int>(value & 0x0000FFFF);
-    w.write("%.%", versionHigh, versionLow);
-}
-
 inline void write_type_definition_banner(writer& w, xlang::meta::reader::TypeDef const& type)
 {
     using namespace std::literals;

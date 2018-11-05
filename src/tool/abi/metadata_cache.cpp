@@ -410,7 +410,6 @@ static void merge_into(std::vector<T>& from, std::vector<std::reference_wrapper<
 type_cache metadata_cache::compile_namespaces(std::initializer_list<std::string_view> targetNamespaces)
 {
     type_cache result{ this };
-    // TODO: included_namespaces actually useful?
 
     auto includes_namespace = [&](std::string_view ns)
     {

@@ -32,7 +32,22 @@ void enum_type::write_cpp_definition(writer& w) const
 {
     auto name = cpp_abi_name();
 
-    // TODO: write_type_definition_banner(w, type);
+    // NOTE: MIDL writes 'Struct' for enums, so we will, too
+    w.write(R"^-^(/*
+ *
+ * Struct %
+ )^-^", m_clrFullName);
+
+    if (auto contractInfo = contract_attributes(m_type))
+    {
+        w.write(R"^-^( *
+ * Introduced to % in version %
+)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
+    }
+
+    w.write(R"^-^( *
+ */
+)^-^");
 
     auto contractDepth = w.push_contract_guards(m_type);
 
@@ -129,7 +144,22 @@ void struct_type::write_cpp_abi_type(writer& w) const
 
 void struct_type::write_cpp_definition(writer& w) const
 {
-    // TODO: write_type_definition_banner(w, type);
+    w.write(R"^-^(/*
+ *
+ * Struct %
+ )^-^", m_clrFullName);
+
+    if (auto contractInfo = contract_attributes(m_type))
+    {
+        w.write(R"^-^( *
+ * Introduced to % in version %
+)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
+    }
+
+    w.write(R"^-^( *
+ */
+)^-^");
+
     auto contractDepth = w.push_contract_guards(m_type);
     w.push_namespace(clr_abi_namespace());
 
@@ -263,13 +293,63 @@ inline void write_function_declaration(writer& w, function_def const& func)
 template <typename T>
 inline void write_cpp_interface_definition(writer& w, T const& type)
 {
+    constexpr bool is_delegate = std::is_same_v<T, delegate_type>;
+    constexpr bool is_interface = std::is_same_v<T, interface_type>;
+    static_assert(is_delegate || is_interface);
+
     // Generics don't get generated definitions
     if (type.is_generic())
     {
         return;
     }
 
-    // TODO: write_type_definition_banner(w, type);
+    auto typeName = is_delegate ? "Delegate"sv : "Interface"sv;
+    w.write(R"^-^(/*
+ *
+ * % %
+ )^-^", typeName, type.clr_full_name());
+
+    if (auto contractInfo = contract_attributes(type.type()))
+    {
+        w.write(R"^-^( *
+ * Introduced to % in version %
+)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
+    }
+
+    if (is_interface)
+    {
+        if (auto exclusiveAttr = get_attribute(type.type(), metadata_namespace, "ExclusiveToAttribute"sv))
+        {
+            auto sig = exclusiveAttr.Value();
+            auto const& fixedArgs = sig.FixedArgs();
+            XLANG_ASSERT(fixedArgs.size() == 1);
+            auto sysType = std::get<ElemSig::SystemType>(std::get<ElemSig>(fixedArgs[0].value).value);
+
+            w.write(R"^-^( *
+ * Interface is a part of the implementation of type %
+)^-^", sysType.name);
+        }
+
+        // TODO: We should cache this info
+//         auto requiredInterfaces = type.type().InterfaceImpl();
+//         if (requiredInterfaces.first != requiredInterfaces.second)
+//         {
+//             w.write(R"^-^( *
+//  * Any object which implements this interface must also implement the following interfaces:
+// )^-^");
+//             for (auto const& iface : requiredInterfaces)
+//             {
+//                 w.write(" *     ");
+//                 write_type_clr(w, iface.Interface(), generic_arg_stack::empty(), format_flags::none);
+//                 w.write('\n');
+//             }
+//         }
+    }
+
+    w.write(R"^-^( *
+ */
+)^-^");
+
     auto contractDepth = w.push_contract_guards(type.type());
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
@@ -422,7 +502,158 @@ void class_type::write_cpp_abi_type(writer& w) const
 
 void class_type::write_cpp_definition(writer& w) const
 {
-    // TODO: write_type_definition_banner(w, type);
+    w.write(R"^-^(/*
+ *
+ * Class %
+ )^-^", m_clrFullName);
+
+    if (auto contractInfo = contract_attributes(m_type))
+    {
+        w.write(R"^-^( *
+ * Introduced to % in version %
+)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
+    }
+
+    for_each_attribute(m_type, metadata_namespace, "ActivatableAttribute"sv, [&](bool first, CustomAttribute const& attr)
+    {
+        if (first)
+        {
+            w.write(" *\n * RuntimeClass can be activated.\n");
+        }
+
+        // There are 6 constructors for the ActivatableAttribute; we only care about the two that give us contracts
+        auto sig = attr.Value();
+        auto const& fixedArgs = sig.FixedArgs();
+        if (fixedArgs.size() == 2)
+        {
+            auto const& elem0 = std::get<ElemSig>(fixedArgs[0].value);
+            auto const& elem1 = std::get<ElemSig>(fixedArgs[1].value);
+            if (!std::holds_alternative<std::uint32_t>(elem0.value) ||
+                !std::holds_alternative<std::string_view>(elem1.value))
+            {
+                return;
+            }
+
+            w.write(" *   Type can be activated via RoActivateInstance starting with version % of the % API contract\n",
+                bind<write_contract_version>(std::get<std::uint32_t>(elem0.value)),
+                std::get<std::string_view>(elem1.value));
+        }
+        else if (fixedArgs.size() == 3)
+        {
+            auto const& elem0 = std::get<ElemSig>(fixedArgs[0].value);
+            auto const& elem1 = std::get<ElemSig>(fixedArgs[1].value);
+            auto const& elem2 = std::get<ElemSig>(fixedArgs[2].value);
+            if (!std::holds_alternative<ElemSig::SystemType>(elem0.value) ||
+                !std::holds_alternative<std::uint32_t>(elem1.value) ||
+                !std::holds_alternative<std::string_view>(elem2.value))
+            {
+                return;
+            }
+
+            w.write(" *   Type can be activated via the % interface starting with version % of the % API contract\n",
+                std::get<ElemSig::SystemType>(elem0.value).name,
+                bind<write_contract_version>(std::get<std::uint32_t>(elem1.value)),
+                std::get<std::string_view>(elem2.value));
+        }
+    });
+
+    for_each_attribute(m_type, metadata_namespace, "StaticAttribute"sv, [&](bool first, CustomAttribute const& attr)
+    {
+        if (first)
+        {
+            w.write(" *\n * RuntimeClass contains static methods.\n");
+        }
+
+        // There are 3 constructors for the ActivatableAttribute; we only care about one
+        auto sig = attr.Value();
+        auto const& fixedArgs = sig.FixedArgs();
+        if (fixedArgs.size() != 3)
+        {
+            return;
+        }
+
+        auto const& contractElem = std::get<ElemSig>(fixedArgs[2].value);
+        if (!std::holds_alternative<std::string_view>(contractElem.value))
+        {
+            return;
+        }
+
+        w.write(" *   Static Methods exist on the % interface starting with version % of the % API contract\n",
+            std::get<ElemSig::SystemType>(std::get<ElemSig>(fixedArgs[0].value).value).name,
+            bind<write_contract_version>(std::get<std::uint32_t>(std::get<ElemSig>(fixedArgs[1].value).value)),
+            std::get<std::string_view>(contractElem.value));
+    });
+
+    // TODO: Cache these
+//     auto requiredInterfaces = type.InterfaceImpl();
+//     if (requiredInterfaces.first != requiredInterfaces.second)
+//     {
+//         w.write(R"^-^( *
+//  * Class implements the following interfaces:
+// )^-^");
+//         auto defaultInterface = default_interface(type);
+//         for (auto const& iface : requiredInterfaces)
+//         {
+//             w.write(" *    ");
+//             write_type_clr(w, iface.Interface(), generic_arg_stack::empty(), format_flags::none);
+//             if (iface.Interface() == defaultInterface)
+//             {
+//                 w.write(" ** Default Interface **");
+//             }
+//             w.write('\n');
+//         }
+//     }
+
+    if (auto attr = get_attribute(m_type, metadata_namespace, "ThreadingAttribute"sv))
+    {
+        // There's only one constructor for ThreadingAttribute
+        auto sig = attr.Value();
+        auto const& fixedArgs = sig.FixedArgs();
+        XLANG_ASSERT(fixedArgs.size() == 1);
+
+        auto const& enumValue = std::get<ElemSig::EnumValue>(std::get<ElemSig>(fixedArgs[0].value).value);
+
+        std::string_view msg = "";
+        switch (std::get<std::int32_t>(enumValue.value))
+        {
+        case 1: msg = "Single Threaded Apartment"sv; break;
+        case 2: msg = "Multi Threaded Apartment"sv; break;
+        case 3: msg = "Both Single and Multi Threaded Apartment"sv; break;
+        }
+
+        if (!msg.empty())
+        {
+            w.write(" *\n * Class Threading Model:  %\n", msg);
+        }
+    }
+
+    if (auto attr = get_attribute(m_type, metadata_namespace, "MarshalingBehaviorAttribute"sv))
+    {
+        // There's only one constructor for ThreadingAttribute
+        auto sig = attr.Value();
+        auto const& fixedArgs = sig.FixedArgs();
+        XLANG_ASSERT(fixedArgs.size() == 1);
+
+        auto const& enumValue = std::get<ElemSig::EnumValue>(std::get<ElemSig>(fixedArgs[0].value).value);
+
+        std::string_view msg = "";
+        switch (std::get<std::int32_t>(enumValue.value))
+        {
+        case 1: msg = "None - Class cannot be marshaled"sv; break;
+        case 2: msg = "Agile - Class is agile"sv; break;
+        case 3: msg = "Standard - Class marshals using the standard marshaler"sv; break;
+        }
+
+        if (!msg.empty())
+        {
+            w.write(" *\n * Class Marshaling Behavior:  %\n", msg);
+        }
+    }
+
+    w.write(R"^-^( *
+ */
+)^-^");
+
     auto contractDepth = w.push_contract_guards(m_type);
 
     w.write(R"^-^(#ifndef RUNTIMECLASS_%_%_DEFINED
