@@ -231,7 +231,7 @@ namespace xlang
 
     void write_component_g_cpp(TypeDef const& type)
     {
-        if (!settings.uniform)
+        if (!settings.opt)
         {
             return;
         }

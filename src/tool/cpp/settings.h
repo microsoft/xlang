@@ -20,7 +20,7 @@ namespace xlang
         std::string component_lib;
 
         bool verbose{};
-        bool uniform{};
+        bool opt{};
 
         std::set<std::string> include;
         std::set<std::string> exclude;

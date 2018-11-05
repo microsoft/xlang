@@ -34,7 +34,7 @@ namespace xlang
             { "root", 0, 1 },
             { "base", 0, 0 },
             { "lib", 0, 1 },
-            { "uniform", 0, 0 }
+            { "opt", 0, 0 }
         };
 
         cmd::reader args{ argc, argv, options };
@@ -50,7 +50,7 @@ namespace xlang
         settings.reference = args.files("reference");
         settings.component = args.exists("component");
         settings.base = args.exists("base");
-        settings.uniform = args.exists("uniform");
+        settings.opt = args.exists("opt");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / settings.root / "impl");

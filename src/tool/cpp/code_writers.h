@@ -2048,7 +2048,7 @@ protected:
 
     void write_class_definitions(writer& w, TypeDef const& type)
     {
-        if (settings.uniform && settings.filter.includes(type))
+        if (settings.opt && settings.filter.includes(type))
         {
             return;
         }
@@ -2309,7 +2309,7 @@ protected:
             return;
         }
 
-        if (settings.uniform)
+        if (settings.opt)
         {
             auto format = R"(void* winrt_make_%();
 )";
@@ -2336,7 +2336,7 @@ protected:
         auto type_namespace = type.TypeNamespace();
         auto impl_name = get_impl_name(type_namespace, type_name);
 
-        if (settings.uniform)
+        if (settings.opt)
         {
             auto format = R"(
     if (requal(name, L"%.%"))
@@ -2576,7 +2576,7 @@ void* winrt_make_%()
                 type_name);
         }
 
-        if (!settings.uniform)
+        if (!settings.opt)
         {
             return;
         }
