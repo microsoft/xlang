@@ -50,7 +50,6 @@ namespace xlang
         settings.reference = args.files("reference");
         settings.component = args.exists("component");
         settings.base = args.exists("base");
-        settings.opt = args.exists("opt");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / settings.root / "impl");
@@ -79,6 +78,7 @@ namespace xlang
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
             settings.component_lib = args.value("lib", "winrt");
+            settings.component_opt = args.exists("opt");
 
             if (settings.component_pch == ".")
             {

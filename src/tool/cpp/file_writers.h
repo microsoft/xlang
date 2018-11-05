@@ -231,16 +231,14 @@ namespace xlang
 
     void write_component_g_cpp(TypeDef const& type)
     {
-        if (!settings.opt)
+        if (!settings.component_opt)
         {
             return;
         }
 
         writer w;
-        write_component_g_cpp(w, type);
-
-        w.swap();
         write_license(w);
+        write_component_g_cpp(w, type);
 
         auto filename = settings.output_folder + get_generated_component_filename(type) + ".g.cpp";
         path folder = filename;
