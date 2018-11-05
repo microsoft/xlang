@@ -444,7 +444,7 @@ namespace xlang
 
         void write(TypeSig const& signature)
         {
-            xlang::call(signature.Type(),
+            call(signature.Type(),
                 [&](auto&& type)
             {
                 write(type);
