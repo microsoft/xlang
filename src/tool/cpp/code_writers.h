@@ -2845,11 +2845,11 @@ namespace winrt::@::implementation
         }
     }
 
-    void write_component_member_declarations(writer& w, TypeDef const& type, std::vector<factory_type> const& factories)
+    void write_component_member_declarations(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
 
-        for (auto&& factory : factories)
+        for (auto&& factory : get_factories(type))
         {
             if (factory.activatable)
             {
@@ -2898,13 +2898,13 @@ namespace winrt::@::implementation
                     bind<write_implementation_params>(signature),
                     is_noexcept(method) ? " noexcept" : "");
             }
-        }    }
+        }
+    }
 
     void write_component_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
         auto type_namespace = type.TypeNamespace();
-        auto factories = get_factories(type);
         bool const non_static = !empty(type.InterfaceImpl());
 
         {
@@ -2926,7 +2926,7 @@ namespace winrt::@::implementation
                 type_name,
                 bind<write_component_base>(type_name, non_static),
                 type_name,
-                bind<write_component_member_declarations>(type, factories));
+                bind<write_component_member_declarations>(type));
 
         }
 
@@ -2950,6 +2950,57 @@ namespace winrt::@::implementation
 
     void write_component_member_definitions(writer& w, TypeDef const& type)
     {
+        auto type_name = type.TypeName();
+
+        for (auto&& factory : get_factories(type))
+        {
+            if (factory.activatable)
+            {
+                if (!factory.type)
+                {
+                    continue;
+                }
+
+                auto format = R"(    %::%(%)
+    {
+        throw hresult_not_implemented();
+    }
+)";
+
+                for (auto&& method : factory.type.MethodList())
+                {
+                    method_signature signature{ method };
+
+                    w.write(format,
+                        type_name,
+                        type_name,
+                        bind<write_implementation_params>(signature));
+                }
+            }
+            else if (factory.statics)
+            {
+                auto format = R"(    % %::%(%)%;
+    {
+        throw hresult_not_implemented();
+    }
+)";
+
+                for (auto&& method : factory.type.MethodList())
+                {
+                    method_signature signature{ method };
+                    w.async_types = is_async(method, signature);
+                    auto method_name = get_name(method);
+
+                    w.write(format,
+                        signature.return_signature(),
+                        type_name,
+                        method_name,
+                        bind<write_implementation_params>(signature),
+                        is_noexcept(method) ? " noexcept" : "");
+                }
+            }
+        }
+
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
             for (auto&& method : info.methods)
@@ -2966,7 +3017,7 @@ namespace winrt::@::implementation
 
                 w.write(format,
                     signature.return_signature(),
-                    type.TypeName(),
+                    type_name,
                     method_name,
                     bind<write_implementation_params>(signature),
                     is_noexcept(method) ? " noexcept" : "");
