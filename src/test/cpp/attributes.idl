@@ -14,11 +14,3 @@ namespace Windows.Foundation.Metadata
     {
     }
 }
-
-namespace Windows.Foundation.Collections
-{
-    [default_interface]
-    runtimeclass Placeholder
-    {
-    }
-}
