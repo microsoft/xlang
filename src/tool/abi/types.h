@@ -484,7 +484,7 @@ struct delegate_type final : typedef_base
         typedef_base(type)
     {
         m_abiName.reserve(1 + type.TypeName().length());
-        m_abiName.push_back('I');
+        details::write_type_prefix(m_abiName, type);
         m_abiName += type.TypeName();
 
         m_idlName.reserve(type.TypeNamespace().length() + 1 + m_abiName.length());

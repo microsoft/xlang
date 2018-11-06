@@ -59,7 +59,7 @@ void enum_type::write_cpp_definition(writer& w) const
     w.write(R"^-^(/*
  *
  * Struct %
- )^-^", m_clrFullName);
+)^-^", m_clrFullName);
 
     if (auto contractInfo = contract_attributes(m_type))
     {
@@ -175,7 +175,7 @@ void struct_type::write_cpp_definition(writer& w) const
     w.write(R"^-^(/*
  *
  * Struct %
- )^-^", m_clrFullName);
+)^-^", m_clrFullName);
 
     if (auto contractInfo = contract_attributes(m_type))
     {
@@ -552,7 +552,7 @@ void class_type::write_cpp_definition(writer& w) const
     w.write(R"^-^(/*
  *
  * Class %
- )^-^", m_clrFullName);
+)^-^", m_clrFullName);
 
     if (auto contractInfo = contract_attributes(m_type))
     {
@@ -873,7 +873,7 @@ void generic_inst::write_cpp_abi_type(writer& w) const
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
 {
     static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "::boolean"sv, "boolean"sv, "b1"sv };
-    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "wchar_t"sv, "wchar__zt"sv, "c2"sv };
+    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "WCHAR"sv, "wchar__zt"sv, "c2"sv };
     static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "BYTE"sv, "byte"sv, "u1"sv };
     static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "INT16"sv, "short"sv, "i2"sv };
     static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "u2"sv };

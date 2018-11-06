@@ -18,17 +18,15 @@ inline std::string clr_full_name(xlang::meta::reader::TypeDef const& type)
 
 namespace details
 {
-    inline void write_type_prefix(std::string& result, xlang::meta::reader::category typeCategory)
-    {
-        if (typeCategory == xlang::meta::reader::category::delegate_type)
-        {
-            result.push_back('I');
-        }
-    }
-
     inline void write_type_prefix(std::string& result, xlang::meta::reader::TypeDef const& type)
     {
-        write_type_prefix(result, xlang::meta::reader::get_category(type));
+        using namespace xlang::meta::reader;
+        if ((get_category(type) == category::delegate_type) && (type.TypeNamespace() != collections_namespace))
+        {
+            // All delegates except those in the 'Windows.Foundation.Collections' namespace get an 'I' appended to the
+            // front...
+            result.push_back('I');
+        }
     }
 
     template <bool IsGenericParam>
