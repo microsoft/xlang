@@ -1,12 +1,12 @@
 resources:
   containers:
-  - container: my_container
+  - container: build_container
     image: devhawk/xlang-build
 
 pool:
   vmImage: 'ubuntu-16.04'
 
-container: my_container
+container: build_container
 
 steps:
 - script: cmake ./src -B_build -GNinja -DCMAKE_CXX_COMPILER=clang++
