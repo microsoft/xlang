@@ -51,3 +51,4 @@ namespace winrt::Component::Fast::factory_implementation
     {
     };
 }
+

@@ -434,7 +434,7 @@ namespace xlang
 
         void write(TypeSig::value_type const& type)
         {
-            visit(type,
+            call(type,
                 [&](ElementType type)
             {
                 if (type == ElementType::Boolean) { write("bool"); }
