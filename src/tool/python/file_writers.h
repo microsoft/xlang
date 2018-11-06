@@ -22,22 +22,21 @@ namespace xlang
             w.needed_namespaces.insert(needed_ns);
         }
 
-        xlang::filter f{ settings.include, settings.exclude };
         auto filename = w.write_temp("py.%.h", ns);
 
-        f.bind_each<write_delegate>(members.delegates)(w);
-        f.bind_each<write_pinterface_decl>(members.interfaces)(w);
-        f.bind_each<write_pinterface_impl>(members.interfaces)(w);
+        settings.filter.bind_each<write_delegate>(members.delegates)(w);
+        settings.filter.bind_each<write_pinterface_decl>(members.interfaces)(w);
+        settings.filter.bind_each<write_pinterface_impl>(members.interfaces)(w);
 
         w.write("\nnamespace py\n{\n");
         {
             writer::indent_guard g{ w };
-            f.bind_each<write_winrt_type_specialization>(members.classes)(w);
-            f.bind_each<write_winrt_type_specialization>(members.interfaces)(w);
-            f.bind_each<write_winrt_type_specialization>(members.structs)(w);
-            f.bind_each<write_struct_converter_decl>(members.structs)(w);
-            f.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
-            f.bind_each<write_delegate_type_mapper>(members.delegates)(w);
+            settings.filter.bind_each<write_winrt_type_specialization>(members.classes)(w);
+            settings.filter.bind_each<write_winrt_type_specialization>(members.interfaces)(w);
+            settings.filter.bind_each<write_winrt_type_specialization>(members.structs)(w);
+            settings.filter.bind_each<write_struct_converter_decl>(members.structs)(w);
+            settings.filter.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
+            settings.filter.bind_each<write_delegate_type_mapper>(members.delegates)(w);
         }
         w.write("}\n");
 
@@ -70,15 +69,14 @@ namespace xlang
     {
         writer w;
         w.current_namespace = ns;
-        filter f{ settings.include, settings.exclude };
         auto filename = w.write_temp("py.%.cpp", ns);
 
         w.write_license();
         write_include(w, ns);
-        f.bind_each<write_class>(members.classes)(w);
-        f.bind_each<write_interface>(members.interfaces)(w);
-        f.bind_each<write_struct>(members.structs)(w);
-        write_namespace_init(w, f, ns, members);
+        settings.filter.bind_each<write_class>(members.classes)(w);
+        settings.filter.bind_each<write_interface>(members.interfaces)(w);
+        settings.filter.bind_each<write_struct>(members.structs)(w);
+        write_namespace_initialization(w, ns, members);
 
         create_directories(folder);
         w.flush_to_file(folder / filename);
@@ -128,10 +126,9 @@ namespace xlang
 
         if (!needed_namespaces.empty())
         {
-            for (auto&& needed_ns : needed_namespaces)
+            for (std::string needed_ns : needed_namespaces)
             {
-                auto ns = needed_ns;
-                std::transform(ns.begin(), ns.end(), ns.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
+                std::transform(needed_ns.begin(), needed_ns.end(), needed_ns.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
                 auto format = R"(try:
     import %.%
 except:
@@ -142,10 +139,9 @@ except:
             w.write("\n");
         }
 
-        xlang::filter f{ settings.include, settings.exclude };
-        f.bind_each<write_import_type>(members.classes)(w);
-        f.bind_each<write_import_type>(members.interfaces)(w);
-        f.bind_each<write_import_type>(members.structs)(w);
+        settings.filter.bind_each<write_import_type>(members.classes)(w);
+        settings.filter.bind_each<write_import_type>(members.interfaces)(w);
+        settings.filter.bind_each<write_import_type>(members.structs)(w);
 
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");

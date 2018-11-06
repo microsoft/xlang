@@ -894,9 +894,9 @@ static void @_dealloc(%* self)
 
 
 
-    void write_delegate_param(writer& w, Param const& p)
+    void write_delegate_param(writer& w, method_signature::param_t const& p)
     {
-        w.write("auto param%", p.Sequence());
+        w.write("auto param%", p.first.Sequence());
     }
 
     void write_delegate(writer& w, TypeDef const& type)
@@ -904,6 +904,7 @@ static void @_dealloc(%* self)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         auto invoke = get_delegate_invoke(type);
+        method_signature signature{ invoke };
 
         w.write("\n");
 
@@ -928,26 +929,36 @@ static void @_dealloc(%* self)
         w.write(format, 
             type.TypeName(),
             bind<write_full_type>(type),
-            bind_list<write_delegate_param>(", ", invoke.ParamList()));
+            bind_list<write_delegate_param>(", ", signature.params()));
 
-        for (auto&& p : invoke.ParamList())
+        for (auto&& p : signature.params())
         {
-            w.write("            PyObject* pyObj% = py::convert(param%);\n", p.Sequence(), p.Sequence());
+            w.write("            PyObject* pyObj% = py::convert(param%);\n", p.first.Sequence(), p.first.Sequence());
         }
 
-        w.write("\n            PyObject* args = PyTuple_Pack(%", distance(invoke.ParamList()));
-        for (auto&& p : invoke.ParamList())
+        w.write("\n            PyObject* args = PyTuple_Pack(%", static_cast<int>(signature.params().size()));
+        for (auto&& p : signature.params())
         {
-            w.write(", pyObj%", p.Sequence());
+            w.write(", pyObj%", p.first.Sequence());
         }
         w.write(R"();
 
-            // TODO: RAII for GILState
-            PyGILState_STATE gstate;
-            gstate = PyGILState_Ensure();
-            PyObject_CallObject(callable, args);
-            PyGILState_Release(gstate);
-        };
+            winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
+)");
+
+        w.write("            ");
+        if (signature.return_signature())
+        {
+            w.write("PyObject* return_value = ");
+        }
+        w.write("PyObject_CallObject(callable, args);\n");
+
+        if (signature.return_signature())
+        {
+            w.write("            return py::convert<%>(return_value);\n", signature.return_signature().Type());
+        }
+
+        w.write(R"(        };
     }
 };
 )");
@@ -1077,6 +1088,32 @@ static void @_dealloc(%* self)
         w.write_indented("}\n\n");
     }
 
+    auto get_ireference_type(GenericTypeInstSig const& type)
+    {
+        auto get_typedef = [](GenericTypeInstSig const& type)
+        {
+            auto generic_type = type.GenericType();
+            switch (generic_type.type())
+            {
+            case TypeDefOrRef::TypeDef:
+                return generic_type.TypeDef();
+            case TypeDefOrRef::TypeRef:
+                return find_required(generic_type.TypeRef());
+            }
+
+            throw_invalid("Only TypeDef or TypeRef is valid as GenericType of GenericTypeInstSig");
+        };
+
+        auto generic_type = get_typedef(type);
+        if ((generic_type.TypeNamespace() != "Windows.Foundation") || (generic_type.TypeName() != "IReference`1"))
+        {
+            throw_invalid("Only Windows.Foundation.IReference allowed as struct field");
+        }
+
+        XLANG_ASSERT(type.GenericArgCount() == 1);
+
+        return *(type.GenericArgs().first);
+    }
 
     struct struct_ctor_var_type_writer : public signature_handler_base<struct_ctor_var_type_writer>
     {
@@ -1086,6 +1123,11 @@ static void @_dealloc(%* self)
 
         struct_ctor_var_type_writer(writer& wr) : w(wr)
         {
+        }
+
+        void handle(GenericTypeInstSig const& type)
+        {
+            handle(get_ireference_type(type));
         }
 
         void handle_struct(TypeDef const& /*type*/)
@@ -1120,6 +1162,11 @@ static void @_dealloc(%* self)
             w.write("O");
         }
 
+        void handle(GenericTypeInstSig const& type)
+        {
+            handle(get_ireference_type(type));
+        }
+
         void handle(ElementType type)
         {
             switch (type)
@@ -1127,16 +1174,16 @@ static void @_dealloc(%* self)
             case ElementType::Boolean:
                 w.write("p");
                 break;
-            // TODO: char, sbyte and byte struct support 
-            //case ElementType::Char:
-            //    w.write("wchar_t");
-            //    break;
-            //case ElementType::I1:
-            //    w.write("int8_t");
-            //    break;
-            //case ElementType::U1:
-            //    w.write("uint8_t");
-            //    break;
+            // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
+            case ElementType::Char:
+                w.write("u1");
+                break;
+            case ElementType::I1:
+                w.write("y1");
+                break;
+            case ElementType::U1:
+                w.write("y1");
+                break;
             case ElementType::I2:
                 w.write("h");
                 break;
@@ -1180,6 +1227,7 @@ static void @_dealloc(%* self)
 
     void write_struct_field_format(writer& w, Field const& field)
     {
+        //TODO: make IReference fields optional
         struct_ctor_format_writer format_writer{ w };
         format_writer.handle(field.Signature().Type());
     }
@@ -1203,6 +1251,11 @@ static void @_dealloc(%* self)
         void handle_struct(TypeDef const& type)
         {
             w.write("py::converter<%>::convert_to(%)", type, bind<write_struct_field_name>(field));
+        }
+
+        void handle(GenericTypeInstSig const& type)
+        {
+            handle(get_ireference_type(type));
         }
 
         void handle(ElementType)
@@ -1490,7 +1543,7 @@ type_object = nullptr;
             winrt_type_param);
     }
 
-    void write_namespace_init(writer& w, filter const& f, std::string_view const& ns, cache::namespace_members const& members)
+    void write_namespace_initialization(writer& w, std::string_view const& ns, cache::namespace_members const& members)
     {
         w.write("\n// ----- % Initialization --------------------\n", ns);
         auto format = R"(
@@ -1504,9 +1557,9 @@ int %(PyObject* module)
         {
             writer::indent_guard g{ w };
 
-            f.bind_each<write_type_fromspec>(members.classes)(w);
-            f.bind_each<write_type_fromspec>(members.interfaces)(w);
-            f.bind_each<write_type_fromspec>(members.structs)(w);
+            settings.filter.bind_each<write_type_fromspec>(members.classes)(w);
+            settings.filter.bind_each<write_type_fromspec>(members.interfaces)(w);
+            settings.filter.bind_each<write_type_fromspec>(members.structs)(w);
 
             w.write_indented(R"(
 Py_DECREF(bases);

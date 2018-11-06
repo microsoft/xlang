@@ -18,6 +18,21 @@ namespace winrt::impl
 
 namespace py
 {
+    struct gil_state_traits
+    {
+        using type = PyGILState_STATE;
+
+        static void close(type value) noexcept
+        {
+            PyGILState_Release(value);
+        }
+
+        static constexpr type invalid() noexcept
+        {
+            return static_cast<PyGILState_STATE>(0);
+        }
+    };
+
     template <typename Category>
     struct pinterface_checker
     {
@@ -716,15 +731,15 @@ namespace py
     template <typename TItem>
     struct converter<winrt::Windows::Foundation::Collections::IIterable<TItem>>
     {
-        static PyObject* convert(TItem const& instance) noexcept
+        using TCollection = winrt::Windows::Foundation::Collections::IIterable<TItem>;
+
+        static PyObject* convert(TCollection const& instance) noexcept
         {
             return wrap(instance);
         }
 
         static auto convert_to(PyObject* obj)
         {
-            using TCollection = winrt::Windows::Foundation::Collections::IIterable<TItem>;
-
             if (auto result = convert_interface_to<TCollection>(obj))
             {
                 return result.value();

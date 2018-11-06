@@ -65,7 +65,7 @@ namespace xlang
             auto start = get_start_time();
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
-            filter f{ settings.include, settings.exclude };
+            settings.filter = { settings.include, settings.exclude };
 
             if (settings.verbose)
             {
@@ -94,7 +94,7 @@ namespace xlang
 
             for (auto&&[ns, members] : c.namespaces())
             {
-                if (!f.includes(members))
+                if (!settings.filter.includes(members))
                 {
                     continue;
                 }
