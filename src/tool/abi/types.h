@@ -32,6 +32,8 @@ struct metadata_type
     virtual void write_cpp_generic_param_logical_type(writer& w) const = 0;
     virtual void write_cpp_generic_param_abi_type(writer& w) const = 0;
     virtual void write_cpp_abi_type(writer& w) const = 0;
+
+    virtual void write_c_forward_declaration(writer& w) const = 0;
 };
 
 inline bool operator<(metadata_type const& lhs, metadata_type const& rhs) noexcept
@@ -119,6 +121,11 @@ struct element_type final : metadata_type
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
 
+    virtual void write_c_forward_declaration(writer&) const override
+    {
+        // No forward declaration necessary
+    }
+
 private:
 
     xlang::meta::reader::ElementType m_type;
@@ -204,6 +211,11 @@ struct system_type final : metadata_type
     virtual void write_cpp_generic_param_logical_type(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
+
+    virtual void write_c_forward_declaration(writer&) const override
+    {
+        // No forward declaration necessary
+    }
 
 private:
 
@@ -292,6 +304,11 @@ struct mapped_type final : metadata_type
     virtual void write_cpp_generic_param_logical_type(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
+
+    virtual void write_c_forward_declaration(writer&) const override
+    {
+        // No forward declaration necessary
+    }
 
 private:
 
@@ -407,6 +424,8 @@ struct enum_type final : typedef_base
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
 
+    virtual void write_c_forward_declaration(writer& w) const override;
+
     void write_cpp_definition(writer& w) const;
 
     xlang::meta::reader::ElementType underlying_type() const
@@ -451,6 +470,8 @@ struct struct_type final : typedef_base
     virtual void write_cpp_forward_declaration(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
+
+    virtual void write_c_forward_declaration(writer& w) const override;
 
     void write_cpp_definition(writer& w) const;
 
@@ -523,6 +544,8 @@ struct delegate_type final : typedef_base
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
 
+    virtual void write_c_forward_declaration(writer& w) const override;
+
     void write_cpp_definition(writer& w) const;
 
     function_def invoke;
@@ -558,6 +581,8 @@ struct interface_type final : typedef_base
     virtual void write_cpp_forward_declaration(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
+
+    virtual void write_c_forward_declaration(writer& w) const override;
 
     void write_cpp_definition(writer& w) const;
 
@@ -645,6 +670,8 @@ struct class_type final : typedef_base
     virtual void write_cpp_generic_param_logical_type(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
+
+    virtual void write_c_forward_declaration(writer& w) const override;
 
     void write_cpp_definition(writer& w) const;
 
@@ -749,6 +776,8 @@ struct generic_inst final : metadata_type
     virtual void write_cpp_generic_param_logical_type(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
+
+    virtual void write_c_forward_declaration(writer& w) const override;
 
     typedef_base const* generic_type() const noexcept
     {

@@ -51,6 +51,11 @@ void enum_type::write_cpp_abi_type(writer& w) const
     w.write("enum %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
 
+void enum_type::write_c_forward_declaration(writer& w) const
+{
+    w.write("typedef enum % %;\n", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+}
+
 void enum_type::write_cpp_definition(writer& w) const
 {
     auto name = cpp_abi_name();
@@ -168,6 +173,11 @@ void struct_type::write_cpp_generic_param_abi_type(writer& w) const
 void struct_type::write_cpp_abi_type(writer& w) const
 {
     w.write("struct %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+}
+
+void struct_type::write_c_forward_declaration(writer& w) const
+{
+    (void)w; // TODO
 }
 
 void struct_type::write_cpp_definition(writer& w) const
@@ -446,6 +456,27 @@ EXTERN_C const IID %;
     w.write('\n');
 }
 
+void delegate_type::write_c_forward_declaration(writer& w) const
+{
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    w.write(R"^-^(#ifndef __%_FWD_DEFINED__
+#define __%_FWD_DEFINED__
+)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+
+    w.write(R"^-^(typedef interface % %;
+
+#endif // __%_FWD_DEFINED__
+
+)^-^",
+        bind<write_mangled_name>(m_mangledName),
+        bind<write_mangled_name>(m_mangledName),
+        bind<write_mangled_name>(m_mangledName));
+}
+
 void delegate_type::write_cpp_definition(writer& w) const
 {
     write_cpp_interface_definition(w, *this);
@@ -484,6 +515,27 @@ void interface_type::write_cpp_generic_param_abi_type(writer& w) const
 void interface_type::write_cpp_abi_type(writer& w) const
 {
     w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+}
+
+void interface_type::write_c_forward_declaration(writer& w) const
+{
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    w.write(R"^-^(#ifndef __%_FWD_DEFINED__
+#define __%_FWD_DEFINED__
+)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+
+    w.write(R"^-^(typedef interface % %;
+
+#endif // __%_FWD_DEFINED__
+
+)^-^",
+        bind<write_mangled_name>(m_mangledName),
+        bind<write_mangled_name>(m_mangledName),
+        bind<write_mangled_name>(m_mangledName));
 }
 
 void interface_type::write_cpp_definition(writer& w) const
@@ -545,6 +597,11 @@ void class_type::write_cpp_abi_type(writer& w) const
     }
 
     default_interface->write_cpp_abi_type(w);
+}
+
+void class_type::write_c_forward_declaration(writer& w) const
+{
+    (void)w; // TODO
 }
 
 void class_type::write_cpp_definition(writer& w) const
@@ -868,6 +925,50 @@ void generic_inst::write_cpp_generic_param_abi_type(writer& w) const
 void generic_inst::write_cpp_abi_type(writer& w) const
 {
     w.write("%*", m_mangledName);
+}
+
+void generic_inst::write_c_forward_declaration(writer& w) const
+{
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    // First make sure that any generic requried interface/function argument/return types are declared
+    for (auto dep : dependencies)
+    {
+        dep->write_c_forward_declaration(w);
+    }
+
+    // Also need to make sure that all generic parameters are declared
+    for (auto param : m_genericParams)
+    {
+        param->write_c_forward_declaration(w);
+    }
+
+    auto contractDepth = push_contract_guards(w);
+
+    w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
+#define __%_INTERFACE_DEFINED__
+
+typedef interface % %;
+
+//  Declare the parameterized interface IID.
+EXTERN_C const IID IID_%;
+
+typedef struct %Vtbl
+{
+    BEGIN_INTERFACE
+
+)^-^", m_mangledName, m_mangledName, m_mangledName, m_mangledName, m_mangledName, m_mangledName);
+
+
+
+    w.write(R"^-^(    END_INTERFACE
+} %Vtbl;
+)^-^", m_mangledName);
+
+    w.pop_contract_guards(contractDepth);
 }
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)

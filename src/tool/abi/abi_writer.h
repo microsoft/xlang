@@ -206,6 +206,13 @@ struct writer : xlang::text::writer_base<writer>
         return added;
     }
 
+    void begin_c_interface()
+    {
+        XLANG_ASSERT(m_namespaceStack.empty());
+        XLANG_ASSERT(m_contractGuardStack.empty());
+        m_declaredTypes.clear();
+    }
+
 private:
 
     abi_configuration const& m_config;

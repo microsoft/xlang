@@ -241,3 +241,38 @@ inline void write_cpp_type_definitions(writer& w, type_cache const& types)
         classType.get().write_cpp_definition(w);
     }
 }
+
+inline void write_c_interface_forward_declarations(writer& w, type_cache const& types)
+{
+    w.write("/* Forward Declarations */\n");
+
+    for (auto const& type : types.delegates)
+    {
+        if (!type.get().is_generic())
+        {
+            type.get().write_c_forward_declaration(w);
+        }
+    }
+
+    for (auto const& type : types.interfaces)
+    {
+        if (!type.get().is_generic())
+        {
+            type.get().write_c_forward_declaration(w);
+        }
+    }
+}
+
+inline void write_c_generic_definitions(writer& w, type_cache const& types)
+{
+    w.write(R"^-^(// Parameterized interface forward declarations (C)
+
+// Collection interface definitions
+
+)^-^");
+
+    for (auto const& [name, inst] : types.generic_instantiations)
+    {
+        inst.get().write_c_forward_declaration(w);
+    }
+}

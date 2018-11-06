@@ -185,6 +185,11 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
 
     // C interface
     w.write("#else // !defined(__cplusplus)\n");
+    w.begin_c_interface();
+
+    write_c_interface_forward_declarations(w, types);
+    write_c_generic_definitions(w, types);
+
     w.write("// C interface not currently generated\n");
     w.write("#endif // defined(__cplusplus)");
 
