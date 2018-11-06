@@ -284,7 +284,7 @@ inline void write_function_declaration(writer& w, function_def const& func)
         auto refMod = param.signature.ByRef() ? "*"sv : ""sv;
         if (param.signature.Type().is_szarray())
         {
-            w.write("%%unsigned int% %Length", prefix, indent{ 2 }, refMod, param.name);
+            w.write("%%UINT32% %Length", prefix, indent{ 2 }, refMod, param.name);
             refMod = param.signature.ByRef() ? "**"sv : "*"sv;
             prefix = ",\n";
         }
@@ -305,7 +305,7 @@ inline void write_function_declaration(writer& w, function_def const& func)
         auto refMod = "*"sv;
         if (func.return_type->signature.Type().is_szarray())
         {
-            w.write("%%unsigned int* %Length", prefix, indent{ 2 }, func.return_type->name);
+            w.write("%%UINT32* %Length", prefix, indent{ 2 }, func.return_type->name);
             refMod = "**"sv;
             prefix = ",\n";
         }
@@ -872,19 +872,19 @@ void generic_inst::write_cpp_abi_type(writer& w) const
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
 {
-    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "boolean"sv, "b1"sv };
-    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "wchar__zt"sv, "c2"sv };
-    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "byte"sv, "u1"sv };
-    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "short"sv, "i2"sv };
-    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "u2"sv };
-    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "int"sv, "i4"sv };
-    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "u4"sv };
-    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "__z__zint64"sv, "i8"sv };
-    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "u8"sv };
-    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "float"sv, "f4"sv };
-    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "double"sv, "f8"sv };
-    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "string"sv };
-    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv, "cinterface(IInspectable)"sv };
+    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "::boolean"sv, "boolean"sv, "b1"sv };
+    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "wchar_t"sv, "wchar__zt"sv, "c2"sv };
+    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "BYTE"sv, "byte"sv, "u1"sv };
+    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "INT16"sv, "short"sv, "i2"sv };
+    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "u2"sv };
+    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "INT32"sv, "int"sv, "i4"sv };
+    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "u4"sv };
+    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "INT64"sv, "__z__zint64"sv, "i8"sv };
+    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "u8"sv };
+    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "FLOAT"sv, "float"sv, "f4"sv };
+    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "DOUBLE"sv, "double"sv, "f8"sv };
+    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "string"sv };
+    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv, "cinterface(IInspectable)"sv };
 
     switch (type)
     {
@@ -928,7 +928,7 @@ void element_type::write_cpp_generic_param_abi_type(writer& w) const
 
 void element_type::write_cpp_abi_type(writer& w) const
 {
-    w.write(m_abiName);
+    w.write(m_cppName);
 }
 
 system_type const& system_type::from_name(std::string_view typeName)

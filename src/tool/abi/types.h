@@ -45,11 +45,13 @@ struct element_type final : metadata_type
         std::string_view clrName,
         std::string_view logicalName,
         std::string_view abiName,
+        std::string_view cppName,
         std::string_view mangledName,
         std::string_view signature) :
         m_clrName(clrName),
         m_logicalName(logicalName),
         m_abiName(abiName),
+        m_cppName(cppName),
         m_mangledName(mangledName),
         m_signature(signature)
     {
@@ -74,12 +76,12 @@ struct element_type final : metadata_type
 
     virtual std::string_view cpp_abi_name() const override
     {
-        return m_logicalName;
+        return m_abiName;
     }
 
     virtual std::string_view cpp_logical_name() const override
     {
-        return m_abiName;
+        return m_logicalName;
     }
 
     virtual std::string_view mangled_name() const override
@@ -99,7 +101,6 @@ struct element_type final : metadata_type
 
     virtual std::string_view idl_name() const override
     {
-        // NOTE: Not 100% accurate... E.g. many things are uppercase (DOUBLE, FLOAT, etc.) and INT64 vs. __int64
         return m_abiName;
     }
 
@@ -124,6 +125,7 @@ private:
     std::string_view m_clrName;
     std::string_view m_logicalName;
     std::string_view m_abiName;
+    std::string_view m_cppName;
     std::string_view m_mangledName;
     std::string_view m_signature;
 };
