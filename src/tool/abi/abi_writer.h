@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "common.h"
-#include "generic_arg_stack.h"
 #include "meta_reader.h"
 #include "metadata_cache.h"
 #include "namespace_iterator.h"
@@ -218,9 +217,6 @@ private:
 
     // A set of already declared (or in the case of generics, defined) types
     std::set<std::string_view> m_declaredTypes;
-
-    generic_arg_stack::type m_genericArgStack;
-    std::size_t m_currentGenericArgIndex = 0;
 };
 
 void write_abi_header(std::string_view fileName, abi_configuration const& config, type_cache const& types);

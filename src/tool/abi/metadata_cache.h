@@ -9,21 +9,13 @@
 #include "sha1.h"
 #include "task_group.h"
 #include "types.h"
-#include "type_name.h"
 #include "type_names.h"
 
 struct api_contract
 {
-    type_name name;
+    xlang::meta::reader::TypeDef type;
     std::uint32_t current_version;
 };
-
-inline bool operator<(api_contract const& lhs, api_contract const& rhs)
-{
-    return lhs.name < rhs.name;
-}
-
-struct metadata_cache;
 
 struct category_compare
 {
@@ -53,6 +45,8 @@ struct category_compare
     }
 };
 
+struct metadata_cache;
+
 struct type_cache
 {
     metadata_cache const* cache;
@@ -79,7 +73,7 @@ struct namespace_cache
     std::vector<delegate_type> delegates;
     std::vector<interface_type> interfaces;
     std::vector<class_type> classes;
-    std::set<api_contract> contracts;
+    std::vector<api_contract> contracts;
 
     // Dependencies
     std::set<std::string_view> dependent_namespaces;

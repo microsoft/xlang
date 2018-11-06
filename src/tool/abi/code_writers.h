@@ -4,7 +4,6 @@
 
 #include "abi_writer.h"
 #include "metadata_cache.h"
-#include "type_writers.h"
 
 inline void write_include_guard(writer& w, std::string_view ns)
 {
@@ -51,14 +50,16 @@ inline void write_api_contract_definitions(writer& w, type_cache const& types)
         {
             for (auto const& contract : itr->second.contracts)
             {
+                auto contractNamespace = contract.type.TypeNamespace();
+                auto contractName = contract.type.TypeName();
                 w.write(R"^-^(#if !defined(%)
 #define % %
 #endif // defined(%)
 
 )^-^"sv,
-                    bind<write_contract_macro>(contract.name.ns, contract.name.name),
-                    bind<write_contract_macro>(contract.name.ns, contract.name.name), format_hex{ contract.current_version },
-                    bind<write_contract_macro>(contract.name.ns, contract.name.name));
+                    bind<write_contract_macro>(contractNamespace, contractName),
+                    bind<write_contract_macro>(contractNamespace, contractName), format_hex{ contract.current_version },
+                    bind<write_contract_macro>(contractNamespace, contractName));
             }
         }
     }

@@ -7,7 +7,6 @@
 #include "code_writers.h"
 #include "common.h"
 #include "strings.h"
-#include "type_writers.h"
 
 using namespace std::literals;
 using namespace xlang;
@@ -89,6 +88,7 @@ void writer::pop_namespace()
 void writer::pop_inline_namespace()
 {
     XLANG_ASSERT(!m_namespaceStack.empty());
+    XLANG_ASSERT(m_indentation == 0); // Otherwise mixing inline and non-inline
 
     std::string_view prefix;
     while (!m_namespaceStack.empty())

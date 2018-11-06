@@ -134,8 +134,8 @@ void metadata_cache::process_namespace_types(
         XLANG_ASSERT(attr);
         XLANG_ASSERT(attr.Value().FixedArgs().size() == 1);
 
-        target.contracts.insert(api_contract{
-                type_name{ contract.TypeNamespace(), contract.TypeName() },
+        target.contracts.push_back(api_contract{
+                contract,
                 std::get<uint32_t>(std::get<ElemSig>(attr.Value().FixedArgs()[0].value).value)
             });
     }

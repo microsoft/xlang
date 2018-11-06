@@ -6,7 +6,6 @@
 
 #include "meta_reader.h"
 #include "namespace_iterator.h"
-#include "type_name.h"
 
 constexpr std::string_view system_namespace = "System";
 constexpr std::string_view foundation_namespace = "Windows.Foundation";
@@ -44,43 +43,6 @@ struct abi_configuration
     bool lowercase_include_guard = false;
 
     std::string output_directory;
-
-    std::pair<bool, type_name> map_type(std::string_view typeNamespace, std::string_view typeName) const noexcept
-    {
-        using namespace std::literals;
-
-        bool isMapped = false;
-        if (typeNamespace == foundation_namespace)
-        {
-            if (typeName == "EventRegistrationToken"sv)
-            {
-                // Windows.Foundation.EventRegistrationToken -> EventRegistrationToken
-                isMapped = true;
-                typeNamespace = {};
-            }
-            else if (typeName == "IAsyncInfo"sv)
-            {
-                // Windows.Foundation.IAsyncInfo -> IAsyncInfo
-                isMapped = true;
-                typeNamespace = {};
-            }
-            else if (typeName == "AsyncStatus"sv)
-            {
-                // Windows.Foundation.AsyncStatus -> AsyncStatus
-                isMapped = true;
-                typeNamespace = {};
-            }
-            else if (typeName == "HResult"sv)
-            {
-                // Windows.Foundation.HResult -> HRESULT
-                isMapped = true;
-                typeNamespace = {};
-                typeName = "HRESULT"sv;
-            }
-        }
-
-        return { isMapped, { typeNamespace, typeName } };
-    }
 };
 
 namespace xlang
