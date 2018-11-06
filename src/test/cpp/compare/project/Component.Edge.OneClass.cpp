@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "OneClass.h"
+#include "Component.Edge.OneClass.h"
 
 namespace winrt::Component::Edge::implementation
 {

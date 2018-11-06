@@ -8,12 +8,15 @@ target_sources(cpp_test PUBLIC
     activation.cpp
     test/Async.cpp
     test/Collections.cpp
+    test/Composable.cpp
     test/Edge.cpp
     test/Enum.cpp
     test/Fast.cpp
     test/Structs.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
+    implementation/Component.Composable.Base.cpp
+    implementation/Component.Composable.Derived.cpp
     implementation/Component.Edge.EmptyClass.cpp
     implementation/Component.Edge.OneClass.cpp
     implementation/Component.Edge.StaticClass.cpp

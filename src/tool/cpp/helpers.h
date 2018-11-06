@@ -575,4 +575,17 @@ namespace xlang
 
         return false;
     }
+
+    bool has_composable_constructors(TypeDef const& type)
+    {
+        for (auto&& factory : get_factories(type))
+        {
+            if (factory.composable && !empty(factory.type.MethodList()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

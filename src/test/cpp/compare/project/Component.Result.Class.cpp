@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Class.h"
+#include "Component.Result.Class.h"
 
 namespace winrt::Component::Result::implementation
 {

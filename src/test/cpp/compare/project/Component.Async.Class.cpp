@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Class.h"
+#include "Component.Async.Class.h"
 
 namespace winrt::Component::Async::implementation
 {

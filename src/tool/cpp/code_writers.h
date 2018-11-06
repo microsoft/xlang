@@ -1872,6 +1872,32 @@ protected:
         }
     }
 
+    void write_component_class_base(writer& w, TypeDef const& type)
+    {
+        bool first{ true };
+
+        for (auto&& base : get_bases(type))
+        {
+            if (settings.filter.includes(base))
+            {
+                continue;
+            }
+
+            if (first)
+            {
+                first = false;
+                w.write(",\n    impl::base<D");
+            }
+
+            w.write(", %", base);
+        }
+
+        if (!first)
+        {
+            w.write('>');
+        }
+    }
+
     void write_class_base(writer& w, TypeDef const& type)
     {
         bool first{ true };
@@ -2440,15 +2466,13 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
     void write_component_interfaces(writer& w, TypeDef const& type)
     {
-        auto interfaces = get_interfaces(w, type);
-
         if (is_fast_class(type))
         {
             w.write(", fast_interface<@::%>", type.TypeNamespace(), type.TypeName());
 
-            for (auto&&[interface_name, info] : interfaces)
+            for (auto&&[interface_name, info] : get_interfaces(w, type))
             {
-                if (!info.exclusive)
+                if (!info.exclusive && !info.base)
                 {
                     w.write(", @", interface_name);
                 }
@@ -2456,11 +2480,38 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         }
         else
         {
-            for (auto&&[interface_name, info] : interfaces)
+            for (auto&&[interface_name, info] : get_interfaces(w, type))
             {
-                w.write(", @", interface_name);
+                if (!info.base)
+                {
+                    w.write(", @", interface_name);
+                }
             }
         }
+
+        if (has_composable_constructors(type))
+        {
+            w.write(", composable");
+        }
+    }
+
+    void write_component_composable_forwarder(writer& w, MethodDef const& method)
+    {
+        auto format = R"(        % %(%)
+        {
+            return impl::composable_factory<T>::template CreateInstance<%>(%);
+        }
+)";
+
+        method_signature signature{ method };
+        w.param_names = true;
+
+        w.write(format,
+            signature.return_signature(),
+            get_name(method),
+            bind<write_implementation_params>(signature),
+            signature.return_signature(),
+            bind<write_consume_args>(signature));
     }
 
     void write_component_constructor_forwarder(writer& w, MethodDef const& method)
@@ -2529,6 +2580,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             }
             else if (factory.composable)
             {
+                w.write_each<write_component_composable_forwarder>(factory.type.MethodList());
             }
         }
 
@@ -2627,8 +2679,28 @@ void* winrt_make_%()
             }
             else if (factory.composable && factory.visible)
             {
-                // TODO: fold and replace with direct calls
-                w.write_each<write_composable_constructor_definition>(factory.type.MethodList(), type_name, factory.type);
+                for (auto&& method : factory.type.MethodList())
+                {
+                    method_signature signature{ method };
+                    auto& params = signature.params();
+                    params.pop_back();
+                    params.pop_back();
+
+                    auto format = R"(    %::%(%) :
+        %(make<@::implementation::%>(%))
+    {
+    }
+)";
+
+                    w.write(format,
+                        type_name,
+                        type_name,
+                        bind<write_consume_params>(signature),
+                        type_name,
+                        type_namespace,
+                        type_name,
+                        bind<write_consume_args>(signature));
+                }
             }
             else if (factory.statics)
             {
@@ -2757,15 +2829,38 @@ void* winrt_make_%()
 }
 )";
 
+            auto base_type = get_base_class(type);
+            std::string composable_base_name;
+            std::string base_type_parameter;
+            std::string base_type_argument;
+            std::string no_module_lock;
+            bool external_base_type{};
+
+            if (base_type)
+            {
+                external_base_type = !settings.filter.includes(base_type);
+
+                if (external_base_type)
+                {
+                    composable_base_name = w.write_temp("using composable_base = %;", base_type);
+                }
+                else
+                {
+                    base_type_parameter = ", typename B";
+                    base_type_argument = ", B";
+                    no_module_lock = "no_module_lock, ";
+                }
+            }
+
             w.write(format,
                 type_namespace,
-                "",
+                base_type_parameter,
                 type_name,
                 bind<write_component_interfaces>(type),
+                base_type_argument,
+                no_module_lock,
                 "",
-                "",
-                "",
-                bind<write_class_base>(type),
+                bind<write_component_class_base>(type),
                 bind<write_class_override_defaults>(interfaces),
                 type_name,
                 type_namespace,
@@ -2837,9 +2932,25 @@ namespace winrt::@::implementation
         }
     }
 
-    void write_component_base(writer& w, std::string_view const& type_name, bool non_static)
+    void write_component_base(writer& w, TypeDef const& type)
     {
-        if (non_static)
+        if (empty(type.InterfaceImpl()))
+        {
+            return;
+        }
+
+        auto type_name = type.TypeName();
+        auto base_type = get_base_class(type);
+
+        if (base_type && settings.filter.includes(base_type))
+        {
+            w.write(" : %T<%, @::implementation::%>",
+                type_name,
+                type_name,
+                base_type.TypeNamespace(),
+                base_type.TypeName());
+        }
+        else
         {
             w.write(" : %T<%>", type_name, type_name);
         }
@@ -2886,6 +2997,11 @@ namespace winrt::@::implementation
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
+            if (info.base)
+            {
+                continue;
+            }
+
             for (auto&& method : info.methods)
             {
                 method_signature signature{ method };
@@ -2905,11 +3021,20 @@ namespace winrt::@::implementation
     {
         auto type_name = type.TypeName();
         auto type_namespace = type.TypeNamespace();
-        bool const non_static = !empty(type.InterfaceImpl());
+        auto base_type = get_base_class(type);
+        std::string base_include;
+
+        if (base_type)
+        {
+            if (settings.filter.includes(base_type))
+            {
+                base_include = "#include \"" + get_generated_component_filename(base_type) + ".h\"\n";
+            }
+        }
 
         {
             auto format = R"(#include "%.g.h"
-
+%
 namespace winrt::@::implementation
 {
     struct %%
@@ -2922,9 +3047,10 @@ namespace winrt::@::implementation
 
             w.write(format,
                 get_generated_component_filename(type),
+                base_include,
                 type_namespace,
                 type_name,
-                bind<write_component_base>(type_name, non_static),
+                bind<write_component_base>(type),
                 type_name,
                 bind<write_component_member_declarations>(type));
 
@@ -3003,6 +3129,11 @@ namespace winrt::@::implementation
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
+            if (info.base)
+            {
+                continue;
+            }
+
             for (auto&& method : info.methods)
             {
                 auto format = R"(    % %::%(%)%
@@ -3035,7 +3166,7 @@ namespace winrt::@::implementation
 )";
 
         w.write(format,
-            type.TypeName(),
+            get_component_filename(type),
             type.TypeNamespace(),
             bind<write_component_member_definitions>(type));
     }

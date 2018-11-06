@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "SlowClass.h"
+#include "Component.Fast.SlowClass.h"
 
 namespace winrt::Component::Fast::implementation
 {

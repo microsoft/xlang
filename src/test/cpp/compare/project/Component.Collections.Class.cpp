@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Class.h"
+#include "Component.Collections.Class.h"
 
 namespace winrt::Component::Collections::implementation
 {

@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "StaticClass.h"
+#include "Component.Edge.StaticClass.h"
 
 namespace winrt::Component::Edge::implementation
 {

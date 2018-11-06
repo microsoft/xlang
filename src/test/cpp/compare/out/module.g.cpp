@@ -3,6 +3,8 @@
 #include "winrt/base.h"
 #include "Component.Async.Class.h"
 #include "Component.Collections.Class.h"
+#include "Component.Composable.Base.h"
+#include "Component.Composable.Derived.h"
 #include "Component.Edge.OneClass.h"
 #include "Component.Edge.StaticClass.h"
 #include "Component.Edge.ThreeClass.h"
@@ -38,6 +40,16 @@ void* WINRT_CALL winrt_get_activation_factory(std::wstring_view const& name)
     if (requal(name, L"Component.Collections.Class"))
     {
         return winrt::detach_abi(winrt::make<winrt::Component::Collections::factory_implementation::Class>());
+    }
+
+    if (requal(name, L"Component.Composable.Base"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Composable::factory_implementation::Base>());
+    }
+
+    if (requal(name, L"Component.Composable.Derived"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Composable::factory_implementation::Derived>());
     }
 
     if (requal(name, L"Component.Edge.OneClass"))

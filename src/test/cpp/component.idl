@@ -161,4 +161,19 @@ namespace Component
             static Windows.Foundation.Collections.IMap<String, Int32> Map();
         }
     }
+
+    namespace Composable
+    {
+        unsealed runtimeclass Base
+        {
+            Base();
+            String BaseMethod();
+        }
+
+        runtimeclass Derived : Base
+        {
+            Derived();
+            String DerivedMethod();
+        }
+    }
 }
