@@ -1,0 +1,16 @@
+resources:
+  containers:
+  - container: my_container
+    image: devhawk/xlang-win-build
+
+pool:
+  vmImage: 'win1803'
+
+container: my_container
+
+steps:
+- script: cmake ./src -B_build -GNinja
+  displayName: 'CMake'
+- script: ninja -C _build -v 
+  displayName: 'Ninja'
+  
