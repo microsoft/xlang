@@ -6,7 +6,7 @@ namespace xlang
     {
         std::set<std::string> input;
 
-        std::string output_folder;
+        std::experimental::filesystem::path output_folder;
         std::string module{ "pyrt" };
         bool verbose{};
 

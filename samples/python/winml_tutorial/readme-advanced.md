@@ -24,10 +24,13 @@ This tutorial is an adjunct to the [Create a WinML application with Python/WinRT
 
 > Note, xlang is very, very early in its development. Eventually, you will not need to clone the repo and build the Python/WinRT tooling from source.
 
-Currently, Python/WinRT is only distributed as source code. To use it, you'll need to build it. To build it, you'll need to clone the [xlang repo](https://github.com/Microsoft/xlang).
+Currently, Python/WinRT is only distributed as source code. To use it, you'll need to build it. To build it, you'll need to clone the [xlang repo](https://github.com/Microsoft/xlang) and checkout the python-winml-sample-2018-10 tag.
+
+The python-winml-sample-2018-10 tag represents the Python/WinRT projection at the time this document was written. Using that tag ensures the version of Python/WinRT you build matches the code described in the [WinML tutorial](readme.md). This sample will be updated periodically to work with the latest and greatest version of Python/WinRT.
 
 ``` shell
 git clone https://github.com/Microsoft/xlang.git
+git checkout python-winml-sample-2018-10
 ```
 
 ## Build Python/WinRT
