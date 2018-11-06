@@ -134,7 +134,7 @@ namespace xlang
 except:
     pass
 )";
-                w.write_indented(format, module_name, ns);
+                w.write_indented(format, module_name, needed_ns);
             }
             w.write("\n");
         }
