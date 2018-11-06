@@ -425,6 +425,9 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, Gene
                 continue;
             }
 
+            // TODO: Duplicated effort!
+            itr->second.functions.push_back(process_function(state, fn));
+
             auto sig = fn.Signature();
             if (sig.ReturnType())
             {

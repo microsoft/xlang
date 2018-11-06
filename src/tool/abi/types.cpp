@@ -3,6 +3,7 @@
 #include "abi_writer.h"
 #include "code_writers.h"
 #include "types.h"
+#include "type_banners.h"
 
 using namespace std::literals;
 using namespace xlang::meta::reader;
@@ -53,32 +54,21 @@ void enum_type::write_cpp_abi_type(writer& w) const
 
 void enum_type::write_c_forward_declaration(writer& w) const
 {
-    w.write("typedef enum % %;\n", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+    w.write("typedef enum % %;\n\n", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+}
+
+void enum_type::write_c_abi_type(writer& w) const
+{
+    w.write("TODO_ENUM_C_ABI_TYPE");
 }
 
 void enum_type::write_cpp_definition(writer& w) const
 {
     auto name = cpp_abi_name();
 
-    // NOTE: MIDL writes 'Struct' for enums, so we will, too
-    w.write(R"^-^(/*
- *
- * Struct %
-)^-^", m_clrFullName);
-
-    if (auto contractInfo = contract_attributes(m_type))
-    {
-        w.write(R"^-^( *
- * Introduced to % in version %
-)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
-    }
-
-    w.write(R"^-^( *
- */
-)^-^");
+    write_type_banner(w, *this);
 
     auto contractDepth = push_contract_guards(w);
-
     w.push_namespace(clr_abi_namespace());
 
     auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
@@ -152,6 +142,33 @@ void enum_type::write_cpp_definition(writer& w) const
     w.write('\n');
 }
 
+void enum_type::write_c_definition(writer& w) const
+{
+    write_type_banner(w, *this);
+    auto contractDepth = push_contract_guards(w);
+
+    w.write(R"^-^(enum %
+{
+)^-^", bind<write_mangled_name>(m_mangledName));
+
+    for (auto const& field : m_type.FieldList())
+    {
+        if (auto value = field.Constant())
+        {
+            auto fieldContractDepth = push_type_contract_guards(w, field);
+
+            w.write("    %_% = %,\n", cpp_abi_name(), field.Name(), value);
+
+            w.pop_contract_guards(fieldContractDepth);
+        }
+    }
+
+    w.write("};\n");
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
+}
+
 void struct_type::write_cpp_forward_declaration(writer& w) const
 {
     if (!w.should_declare(m_mangledName))
@@ -177,26 +194,17 @@ void struct_type::write_cpp_abi_type(writer& w) const
 
 void struct_type::write_c_forward_declaration(writer& w) const
 {
-    (void)w; // TODO
+    w.write("typedef struct % %;\n\n", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+}
+
+void struct_type::write_c_abi_type(writer& w) const
+{
+    w.write("TODO_STRUCT_C_ABI_TYPE");
 }
 
 void struct_type::write_cpp_definition(writer& w) const
 {
-    w.write(R"^-^(/*
- *
- * Struct %
-)^-^", m_clrFullName);
-
-    if (auto contractInfo = contract_attributes(m_type))
-    {
-        w.write(R"^-^( *
- * Introduced to % in version %
-)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
-    }
-
-    w.write(R"^-^( *
- */
-)^-^");
+    write_type_banner(w, *this);
 
     auto contractDepth = push_contract_guards(w);
     w.push_namespace(clr_abi_namespace());
@@ -234,6 +242,11 @@ void struct_type::write_cpp_definition(writer& w) const
     w.write('\n');
 }
 
+void struct_type::write_c_definition(writer& w) const
+{
+    w.write("TODO_STRUCT_DEF\n");
+}
+
 void delegate_type::write_cpp_forward_declaration(writer& w) const
 {
     if (!w.should_declare(m_mangledName))
@@ -269,16 +282,11 @@ void delegate_type::write_cpp_abi_type(writer& w) const
     w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
 }
 
-inline void write_function_declaration(writer& w, function_def const& func)
+static std::string_view function_name(MethodDef const& def)
 {
-    if (auto info = is_deprecated(func.def))
-    {
-        write_deprecation_message(w, *info, 1);
-    }
-
     // If this is an overload, use the unique name
-    auto fnName = func.def.Name();
-    if (auto overloadAttr = get_attribute(func.def, metadata_namespace, "OverloadAttribute"sv))
+    auto fnName = def.Name();
+    if (auto overloadAttr = get_attribute(def, metadata_namespace, "OverloadAttribute"sv))
     {
         auto sig = overloadAttr.Value();
         auto const& fixedArgs = sig.FixedArgs();
@@ -286,7 +294,17 @@ inline void write_function_declaration(writer& w, function_def const& func)
         fnName = std::get<std::string_view>(std::get<ElemSig>(fixedArgs[0].value).value);
     }
 
-    w.write("%virtual HRESULT STDMETHODCALLTYPE %(", indent{ 1 }, fnName);
+    return fnName;
+}
+
+static void write_cpp_function_declaration(writer& w, function_def const& func)
+{
+    if (auto info = is_deprecated(func.def))
+    {
+        write_deprecation_message(w, *info, 1);
+    }
+
+    w.write("%virtual HRESULT STDMETHODCALLTYPE %(", indent{ 1 }, function_name(func.def));
 
     std::string_view prefix = "\n"sv;
     for (auto const& param : func.params)
@@ -339,7 +357,7 @@ inline void write_function_declaration(writer& w, function_def const& func)
 }
 
 template <typename T>
-inline void write_cpp_interface_definition(writer& w, T const& type)
+static void write_cpp_interface_definition(writer& w, T const& type)
 {
     constexpr bool is_delegate = std::is_same_v<T, delegate_type>;
     constexpr bool is_interface = std::is_same_v<T, interface_type>;
@@ -351,49 +369,7 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
         return;
     }
 
-    auto typeName = is_delegate ? "Delegate"sv : "Interface"sv;
-    w.write(R"^-^(/*
- *
- * % %
-)^-^", typeName, type.clr_full_name());
-
-    if (auto contractInfo = contract_attributes(type.type()))
-    {
-        w.write(R"^-^( *
- * Introduced to % in version %
-)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
-    }
-
-    if constexpr (is_interface)
-    {
-        if (auto exclusiveAttr = get_attribute(type.type(), metadata_namespace, "ExclusiveToAttribute"sv))
-        {
-            auto sig = exclusiveAttr.Value();
-            auto const& fixedArgs = sig.FixedArgs();
-            XLANG_ASSERT(fixedArgs.size() == 1);
-            auto sysType = std::get<ElemSig::SystemType>(std::get<ElemSig>(fixedArgs[0].value).value);
-
-            w.write(R"^-^( *
- * Interface is a part of the implementation of type %
-)^-^", sysType.name);
-        }
-
-        if (!type.required_interfaces.empty())
-        {
-            w.write(R"^-^( *
- * Any object which implements this interface must also implement the following interfaces:
-)^-^");
-
-            for (auto iface : type.required_interfaces)
-            {
-                w.write(" *     %\n", iface->clr_full_name());
-            }
-        }
-    }
-
-    w.write(R"^-^( *
- */
-)^-^");
+    write_type_banner(w, type);
 
     auto contractDepth = type.push_contract_guards(w);
 
@@ -426,13 +402,13 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
 
     if constexpr (std::is_same_v<T, delegate_type>)
     {
-        write_function_declaration(w, type.invoke);
+        write_cpp_function_declaration(w, type.invoke);
     }
     else // interface_type
     {
         for (auto const& func : type.functions)
         {
-            write_function_declaration(w, func);
+            write_cpp_function_declaration(w, func);
         }
     }
 
@@ -446,14 +422,155 @@ inline void write_cpp_interface_definition(writer& w, T const& type)
     auto const iidFmt = (w.config().ns_prefix_state == ns_prefix::optional) ? "C_IID(%)"sv : "IID_%"sv;
 
     w.write(R"^-^(
-EXTERN_C const IID %;
+EXTERN_C const IID )^-^");
+
+    if (w.config().ns_prefix_state == ns_prefix::optional)
+    {
+        w.write("C_IID(%)", type.mangled_name());
+    }
+    else
+    {
+        w.write("IID_%", bind<write_mangled_name>(type.mangled_name()));
+    }
+
+    w.write(R"^-^(;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^",
-        [&](writer& w) { w.write(iidFmt, bind<write_mangled_name>(type.mangled_name())); },
-        bind<write_mangled_name>(type.mangled_name()));
+)^-^", bind<write_mangled_name>(type.mangled_name()));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
+}
+
+static void write_c_iunknown_interface(writer& w, std::string_view interfaceName)
+{
+    w.write(R"^-^(    HRESULT (STDMETHODCALLTYPE* QueryInterface)(%* This,
+        REFIID riid,
+        void** ppvObject);
+    ULONG (STDMETHODCALLTYPE* AddRef)(%* This);
+    ULONG (STDMETHODCALLTYPE* Release)(%* This);
+)^-^", interfaceName, interfaceName, interfaceName);
+}
+
+static void write_c_iunknown_interface_macros(writer& w, std::string_view interfaceName)
+{
+    w.write(R"^-^(#define %_QueryInterface(This,riid,ppvObject) \
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) )
+
+#define %_AddRef(This) \
+    ( (This)->lpVtbl -> AddRef(This) )
+
+#define %_Release(This) \
+    ( (This)->lpVtbl -> Release(This) )
+
+)^-^", interfaceName, interfaceName, interfaceName);
+}
+
+static void write_c_iinspectable_interface(writer& w, std::string_view interfaceName)
+{
+    write_c_iunknown_interface(w, interfaceName);
+    w.write(R"^-^(    HRESULT (STDMETHODCALLTYPE* GetIids)(%* This,
+        ULONG* iidCount,
+        IID** iids);
+    HRESULT (STDMETHODCALLTYPE* GetRuntimeClassName)(%* This,
+        HSTRING* className);
+    HRESULT (STDMETHODCALLTYPE* GetTrustLevel)(%* This,
+        TrustLevel* trustLevel);
+)^-^", interfaceName, interfaceName, interfaceName);
+}
+
+static void write_c_iinspectable_interface_macros(writer& w, std::string_view interfaceName)
+{
+    write_c_iunknown_interface_macros(w, interfaceName);
+    w.write(R"^-^(#define %_GetIids(This,iidCount,iids) \
+    ( (This)->lpVtbl -> GetIids(This,iidCount,iids) )
+
+#define %_GetRuntimeClassName(This,className) \
+    ( (This)->lpVtbl -> GetRuntimeClassName(This,className) )
+
+#define %_GetTrustLevel(This,trustLevel) \
+    ( (This)->lpVtbl -> GetTrustLevel(This,trustLevel) )
+
+)^-^", interfaceName, interfaceName, interfaceName);
+}
+
+static void write_c_function_declaration(writer& w, std::string_view interfaceName, function_def const& func)
+{
+    w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), interfaceName);
+
+    for (auto const& param : func.params)
+    {
+        auto refMod = param.signature.ByRef() ? "*"sv : ""sv;
+        if (param.signature.Type().is_szarray())
+        {
+            w.write(",\n        unsigned int capacity");
+            refMod = param.signature.ByRef() ? "**"sv : "*"sv;
+        }
+
+        auto constMod = is_const(param.signature) ? "const "sv : ""sv;
+        w.write(",\n        %%% %",
+            constMod,
+            [&](writer& w) { param.type->write_c_abi_type(w); },
+            refMod,
+            param.name);
+    }
+
+    if (func.return_type)
+    {
+        auto refMod = "*"sv;
+        if (func.return_type->signature.Type().is_szarray())
+        {
+            w.write(",\n        unsigned int* TODOLength");
+            refMod = "**"sv;
+        }
+
+        w.write(",\n        %% %",
+            [&](writer& w) { func.return_type->type->write_c_abi_type(w); },
+            refMod,
+            func.return_type->name);
+    }
+
+    w.write(");\n");
+}
+
+static void write_c_function_declaration_macro(writer& w, std::string_view interfaceName, function_def const& func)
+{
+    auto fnName = function_name(func.def);
+    w.write("#define %_%(This", interfaceName, fnName);
+
+    for (auto const& param : func.params)
+    {
+        if (param.signature.Type().is_szarray())
+        {
+            w.write(",capacity");
+        }
+
+        w.write(",%", param.name);
+    }
+
+    if (func.return_type)
+    {
+        w.write(",%", func.return_type->name);
+    }
+
+    w.write(R"^-^() \
+    ( (This)->lpVtbl -> %(This)^-^", fnName);
+
+    for (auto const& param : func.params)
+    {
+        if (param.signature.Type().is_szarray())
+        {
+            w.write(",capacity");
+        }
+
+        w.write(",%", param.name);
+    }
+
+    if (func.return_type)
+    {
+        w.write(",%", func.return_type->name);
+    }
+
+    w.write(") )\n\n");
 }
 
 void delegate_type::write_c_forward_declaration(writer& w) const
@@ -477,9 +594,19 @@ void delegate_type::write_c_forward_declaration(writer& w) const
         bind<write_mangled_name>(m_mangledName));
 }
 
+void delegate_type::write_c_abi_type(writer& w) const
+{
+    w.write("TODO_DELEGATE_C_ABI_TYPE");
+}
+
 void delegate_type::write_cpp_definition(writer& w) const
 {
     write_cpp_interface_definition(w, *this);
+}
+
+void delegate_type::write_c_definition(writer& w) const
+{
+    w.write("TODO_DELEGATE_DEF\n");
 }
 
 void interface_type::write_cpp_forward_declaration(writer& w) const
@@ -538,9 +665,19 @@ void interface_type::write_c_forward_declaration(writer& w) const
         bind<write_mangled_name>(m_mangledName));
 }
 
+void interface_type::write_c_abi_type(writer& w) const
+{
+    w.write("%*", bind<write_mangled_name>(m_mangledName));
+}
+
 void interface_type::write_cpp_definition(writer& w) const
 {
     write_cpp_interface_definition(w, *this);
+}
+
+void interface_type::write_c_definition(writer& w) const
+{
+    w.write("TODO_INTERFACE_DEF\n");
 }
 
 void class_type::write_cpp_forward_declaration(writer& w) const
@@ -601,155 +738,30 @@ void class_type::write_cpp_abi_type(writer& w) const
 
 void class_type::write_c_forward_declaration(writer& w) const
 {
-    (void)w; // TODO
+    if (!default_interface)
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Cannot forward declare class '", m_clrFullName, "' since it has no default interface");
+    }
+
+    default_interface->write_c_forward_declaration(w);
+}
+
+void class_type::write_c_abi_type(writer& w) const
+{
+    if (!default_interface)
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Class '", m_clrFullName, "' cannot be used as a function argument since it has no "
+            "default interface");
+    }
+
+    default_interface->write_c_abi_type(w);
 }
 
 void class_type::write_cpp_definition(writer& w) const
 {
-    w.write(R"^-^(/*
- *
- * Class %
-)^-^", m_clrFullName);
-
-    if (auto contractInfo = contract_attributes(m_type))
-    {
-        w.write(R"^-^( *
- * Introduced to % in version %
-)^-^", contractInfo->type_name, bind<write_contract_version>(contractInfo->version));
-    }
-
-    for_each_attribute(m_type, metadata_namespace, "ActivatableAttribute"sv, [&](bool first, CustomAttribute const& attr)
-    {
-        if (first)
-        {
-            w.write(" *\n * RuntimeClass can be activated.\n");
-        }
-
-        // There are 6 constructors for the ActivatableAttribute; we only care about the two that give us contracts
-        auto sig = attr.Value();
-        auto const& fixedArgs = sig.FixedArgs();
-        if (fixedArgs.size() == 2)
-        {
-            auto const& elem0 = std::get<ElemSig>(fixedArgs[0].value);
-            auto const& elem1 = std::get<ElemSig>(fixedArgs[1].value);
-            if (!std::holds_alternative<std::uint32_t>(elem0.value) ||
-                !std::holds_alternative<std::string_view>(elem1.value))
-            {
-                return;
-            }
-
-            w.write(" *   Type can be activated via RoActivateInstance starting with version % of the % API contract\n",
-                bind<write_contract_version>(std::get<std::uint32_t>(elem0.value)),
-                std::get<std::string_view>(elem1.value));
-        }
-        else if (fixedArgs.size() == 3)
-        {
-            auto const& elem0 = std::get<ElemSig>(fixedArgs[0].value);
-            auto const& elem1 = std::get<ElemSig>(fixedArgs[1].value);
-            auto const& elem2 = std::get<ElemSig>(fixedArgs[2].value);
-            if (!std::holds_alternative<ElemSig::SystemType>(elem0.value) ||
-                !std::holds_alternative<std::uint32_t>(elem1.value) ||
-                !std::holds_alternative<std::string_view>(elem2.value))
-            {
-                return;
-            }
-
-            w.write(" *   Type can be activated via the % interface starting with version % of the % API contract\n",
-                std::get<ElemSig::SystemType>(elem0.value).name,
-                bind<write_contract_version>(std::get<std::uint32_t>(elem1.value)),
-                std::get<std::string_view>(elem2.value));
-        }
-    });
-
-    for_each_attribute(m_type, metadata_namespace, "StaticAttribute"sv, [&](bool first, CustomAttribute const& attr)
-    {
-        if (first)
-        {
-            w.write(" *\n * RuntimeClass contains static methods.\n");
-        }
-
-        // There are 3 constructors for the ActivatableAttribute; we only care about one
-        auto sig = attr.Value();
-        auto const& fixedArgs = sig.FixedArgs();
-        if (fixedArgs.size() != 3)
-        {
-            return;
-        }
-
-        auto const& contractElem = std::get<ElemSig>(fixedArgs[2].value);
-        if (!std::holds_alternative<std::string_view>(contractElem.value))
-        {
-            return;
-        }
-
-        w.write(" *   Static Methods exist on the % interface starting with version % of the % API contract\n",
-            std::get<ElemSig::SystemType>(std::get<ElemSig>(fixedArgs[0].value).value).name,
-            bind<write_contract_version>(std::get<std::uint32_t>(std::get<ElemSig>(fixedArgs[1].value).value)),
-            std::get<std::string_view>(contractElem.value));
-    });
-
-    if (!required_interfaces.empty())
-    {
-        w.write(R"^-^( *
- * Class implements the following interfaces:
-)^-^");
-
-        for (auto iface : required_interfaces)
-        {
-            auto suffix = iface == default_interface ? " ** Default Interface **" : ""sv;
-            w.write(" *    %%\n", iface->clr_full_name(), suffix);
-        }
-    }
-
-    if (auto attr = get_attribute(m_type, metadata_namespace, "ThreadingAttribute"sv))
-    {
-        // There's only one constructor for ThreadingAttribute
-        auto sig = attr.Value();
-        auto const& fixedArgs = sig.FixedArgs();
-        XLANG_ASSERT(fixedArgs.size() == 1);
-
-        auto const& enumValue = std::get<ElemSig::EnumValue>(std::get<ElemSig>(fixedArgs[0].value).value);
-
-        std::string_view msg = "";
-        switch (std::get<std::int32_t>(enumValue.value))
-        {
-        case 1: msg = "Single Threaded Apartment"sv; break;
-        case 2: msg = "Multi Threaded Apartment"sv; break;
-        case 3: msg = "Both Single and Multi Threaded Apartment"sv; break;
-        }
-
-        if (!msg.empty())
-        {
-            w.write(" *\n * Class Threading Model:  %\n", msg);
-        }
-    }
-
-    if (auto attr = get_attribute(m_type, metadata_namespace, "MarshalingBehaviorAttribute"sv))
-    {
-        // There's only one constructor for ThreadingAttribute
-        auto sig = attr.Value();
-        auto const& fixedArgs = sig.FixedArgs();
-        XLANG_ASSERT(fixedArgs.size() == 1);
-
-        auto const& enumValue = std::get<ElemSig::EnumValue>(std::get<ElemSig>(fixedArgs[0].value).value);
-
-        std::string_view msg = "";
-        switch (std::get<std::int32_t>(enumValue.value))
-        {
-        case 1: msg = "None - Class cannot be marshaled"sv; break;
-        case 2: msg = "Agile - Class is agile"sv; break;
-        case 3: msg = "Standard - Class marshals using the standard marshaler"sv; break;
-        }
-
-        if (!msg.empty())
-        {
-            w.write(" *\n * Class Marshaling Behavior:  %\n", msg);
-        }
-    }
-
-    w.write(R"^-^( *
- */
-)^-^");
+    write_type_banner(w, *this);
 
     auto contractDepth = push_contract_guards(w);
 
@@ -775,6 +787,11 @@ void class_type::write_cpp_definition(writer& w) const
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
+}
+
+void class_type::write_c_definition(writer& w) const
+{
+    w.write("TODO_CLASS_DEF\n");
 }
 
 std::size_t generic_inst::push_contract_guards(writer& w) const
@@ -886,11 +903,11 @@ typedef % %_t;
     if (w.config().ns_prefix_state == ns_prefix::optional)
     {
         w.write(R"^-^(#if defined(MIDL_NS_PREFIX)
-#define % ABI::Windows::Foundation::Collections::%_t
+#define % ABI::@::%_t
 #else
-#define % Windows::Foundation::Collections::%_t
+#define % @::%_t
 #endif // MIDL_NS_PREFIX
-)^-^", m_mangledName, m_mangledName, m_mangledName, m_mangledName);
+)^-^", m_mangledName, clr_abi_namespace(), m_mangledName, m_mangledName, clr_abi_namespace(), m_mangledName);
     }
     else
     {
@@ -962,30 +979,77 @@ typedef struct %Vtbl
 
 )^-^", m_mangledName, m_mangledName, m_mangledName, m_mangledName, m_mangledName, m_mangledName);
 
+    bool isDelegate = get_category(m_genericType->type()) == category::delegate_type;
+    if (isDelegate)
+    {
+        write_c_iunknown_interface(w, m_mangledName);
+    }
+    else
+    {
+        write_c_iinspectable_interface(w, m_mangledName);
+    }
 
+    for (auto const& func : functions)
+    {
+        write_c_function_declaration(w, m_mangledName, func);
+    }
 
-    w.write(R"^-^(    END_INTERFACE
+    w.write(R"^-^(
+    END_INTERFACE
 } %Vtbl;
+
+interface %
+{
+    CONST_VTBL struct %Vtbl* lpVtbl;
+};
+
+#ifdef COBJMACROS
+
+)^-^", m_mangledName, m_mangledName, m_mangledName);
+
+    if (isDelegate)
+    {
+        write_c_iunknown_interface_macros(w, m_mangledName);
+    }
+    else
+    {
+        write_c_iinspectable_interface_macros(w, m_mangledName);
+    }
+
+    for (auto const& func : functions)
+    {
+        write_c_function_declaration_macro(w, m_mangledName, func);
+    }
+
+    w.write(R"^-^(#endif /* COBJMACROS */
+
+#endif // __%_INTERFACE_DEFINED__
 )^-^", m_mangledName);
 
     w.pop_contract_guards(contractDepth);
+    w.write('\n');
+}
+
+void generic_inst::write_c_abi_type(writer& w) const
+{
+    w.write("%*", m_mangledName);
 }
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
 {
-    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "::boolean"sv, "boolean"sv, "b1"sv };
-    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "WCHAR"sv, "wchar__zt"sv, "c2"sv };
-    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "BYTE"sv, "byte"sv, "u1"sv };
-    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "INT16"sv, "short"sv, "i2"sv };
-    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "u2"sv };
-    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "INT32"sv, "int"sv, "i4"sv };
-    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "u4"sv };
-    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "INT64"sv, "__z__zint64"sv, "i8"sv };
-    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "u8"sv };
-    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "FLOAT"sv, "float"sv, "f4"sv };
-    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "DOUBLE"sv, "double"sv, "f8"sv };
-    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "string"sv };
-    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv, "cinterface(IInspectable)"sv };
+    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "::boolean"sv, "boolean"sv, "boolean"sv, "b1"sv };
+    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "WCHAR"sv, "wchar_t"sv, "wchar__zt"sv, "c2"sv };
+    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "BYTE"sv, "byte"sv, "byte"sv, "u1"sv };
+    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "INT16"sv, "short"sv, "short"sv, "i2"sv };
+    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "unsigned short"sv, "UINT16"sv, "u2"sv };
+    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "INT32"sv, "int"sv, "int"sv, "i4"sv };
+    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "unsigned int"sv, "UINT32"sv, "u4"sv };
+    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "INT64"sv, "__int64"sv, "__z__zint64"sv, "i8"sv };
+    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "unsigned __int64"sv, "UINT64"sv, "u8"sv };
+    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "FLOAT"sv, "float"sv, "float"sv, "f4"sv };
+    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "DOUBLE"sv, "double"sv, "double"sv, "f8"sv };
+    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "string"sv };
+    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv, "cinterface(IInspectable)"sv };
 
     switch (type)
     {
@@ -1032,6 +1096,11 @@ void element_type::write_cpp_abi_type(writer& w) const
     w.write(m_cppName);
 }
 
+void element_type::write_c_abi_type(writer& w) const
+{
+    w.write(m_cName);
+}
+
 system_type const& system_type::from_name(std::string_view typeName)
 {
     if (typeName == "Guid"sv)
@@ -1057,6 +1126,11 @@ void system_type::write_cpp_generic_param_abi_type(writer& w) const
 void system_type::write_cpp_abi_type(writer& w) const
 {
     w.write(m_cppName);
+}
+
+void system_type::write_c_abi_type(writer& w) const
+{
+    w.write("TODO_SYSTEM_C_ABI_TYPE");
 }
 
 mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const& type)
@@ -1099,6 +1173,12 @@ void mapped_type::write_cpp_generic_param_abi_type(writer& w) const
 }
 
 void mapped_type::write_cpp_abi_type(writer& w) const
+{
+    // Currently all mapped types are mapped because the underlying type is a C type
+    write_c_abi_type(w);
+}
+
+void mapped_type::write_c_abi_type(writer& w) const
 {
     w.write(m_cppName);
 
