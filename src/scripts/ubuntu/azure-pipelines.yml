@@ -1,8 +1,8 @@
 resources:
   containers:
   - container: build_container
-    image: msftxlangtemp.azurecr.io/xlang-ubuntu-build
-    endpoint: msftxlangtemp_acr
+    image: msftxlang.azurecr.io/xlang-ubuntu-build
+    endpoint: msftxlang_acr
 
 pool:
   vmImage: 'ubuntu-16.04'
