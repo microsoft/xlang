@@ -32,7 +32,9 @@ namespace xlang
             { "include", 0 },
             { "exclude", 0 },
             { "root", 0, 1 },
-            { "base", 0, 0 }
+            { "base", 0, 0 },
+            { "lib", 0, 1 },
+            { "opt", 0, 0 }
         };
 
         cmd::reader args{ argc, argv, options };
@@ -48,7 +50,6 @@ namespace xlang
         settings.reference = args.files("reference");
         settings.component = args.exists("component");
         settings.base = args.exists("base");
-        settings.component_overwrite = args.exists("overwrite");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / settings.root / "impl");
@@ -72,9 +73,12 @@ namespace xlang
 
         if (settings.component)
         {
+            settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
+            settings.component_lib = args.value("lib", "winrt");
+            settings.component_opt = args.exists("opt");
 
             if (settings.component_pch == ".")
             {
@@ -138,7 +142,7 @@ namespace xlang
             cache c{ get_files_to_cache() };
             c.remove_legacy_cppwinrt_foundation_types();
             supplement_includes(c);
-            filter f{ settings.include, settings.exclude };
+            settings.filter = { settings.include, settings.exclude };
 
             if (settings.verbose)
             {
@@ -169,7 +173,7 @@ namespace xlang
             {
                 group.add([&, &ns = ns, &members = members]
                 {
-                    if (members.types.empty() || !f.includes(members))
+                    if (members.types.empty() || !settings.filter.includes(members))
                     {
                         return;
                     }
@@ -183,7 +187,7 @@ namespace xlang
 
             group.add([&]
             {
-                if (f.empty() || settings.base)
+                if (settings.filter.empty() || settings.base)
                 {
                     write_base_h();
                 }
@@ -196,7 +200,7 @@ namespace xlang
                     {
                         for (auto&& type : members.classes)
                         {
-                            if (f.includes(type))
+                            if (settings.filter.includes(type))
                             {
                                 classes.push_back(type);
                             }
@@ -205,11 +209,12 @@ namespace xlang
 
                     if (!classes.empty())
                     {
-                        write_component_g_cpp(classes);
+                        write_module_g_cpp(classes);
 
                         for (auto&& type : classes)
                         {
                             write_component_g_h(type);
+                            write_component_g_cpp(type);
                             write_component_h(type);
                             write_component_cpp(type);
                         }

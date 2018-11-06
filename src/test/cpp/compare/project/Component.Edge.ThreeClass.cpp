@@ -3,6 +3,14 @@
 
 namespace winrt::Component::Edge::implementation
 {
+    ThreeClass::ThreeClass(int32_t, int32_t, int32_t)
+    {
+        throw hresult_not_implemented();
+    }
+    void ThreeClass::StaticMethod(int32_t, int32_t, int32_t);
+    {
+        throw hresult_not_implemented();
+    }
     void ThreeClass::Method(int32_t, int32_t, int32_t)
     {
         throw hresult_not_implemented();

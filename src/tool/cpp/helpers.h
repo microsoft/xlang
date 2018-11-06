@@ -192,7 +192,7 @@ namespace xlang
 
         bool async{};
 
-        xlang::visit(method_signature.return_signature().Type().Type(),
+        call(method_signature.return_signature().Type().Type(),
             [&](GenericTypeInstSig const& type)
         {
             auto generic_type = type.GenericType().TypeRef();
@@ -459,7 +459,7 @@ namespace xlang
     {
         bool wrap{};
 
-        xlang::visit(signature.Type(),
+        call(signature.Type(),
             [&](ElementType type)
         {
             wrap = type == ElementType::String || type == ElementType::Object;
@@ -476,7 +476,7 @@ namespace xlang
     {
         bool object{};
 
-        xlang::visit(signature.Type(),
+        call(signature.Type(),
             [&](ElementType type)
         {
             if (type == ElementType::Object)

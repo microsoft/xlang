@@ -72,7 +72,7 @@ namespace xlang
     template <typename...T> struct visit_overload : T... { using T::operator()...; };
 
     template <typename V, typename...C>
-    void visit(V&& variant, C&&...call)
+    void call(V&& variant, C&&...call)
     {
         std::visit(visit_overload<C...>{ std::forward<C>(call)... }, std::forward<V>(variant));
     }
