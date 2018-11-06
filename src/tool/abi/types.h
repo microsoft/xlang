@@ -20,12 +20,6 @@ struct metadata_type
 
     virtual void append_signature(sha1& hash) const = 0;
 
-    // NOTE: For easier validation, we try and generate header files as identical to MIDLRT as possible. The primary
-    //       issue there is that the files MIDLRT generates are highly dependent on the structure of the .idl file
-    //       being processed. Thus, it's more accurate to say that we try and mimic WINMDIDL, which orders many things
-    //       alphabetically by its fully qualified "idl name."
-    virtual std::string_view idl_name() const = 0;
-
     virtual std::size_t push_contract_guards(writer& w) const = 0;
 
     virtual void write_cpp_forward_declaration(writer& w) const = 0;
@@ -39,7 +33,7 @@ struct metadata_type
 
 inline bool operator<(metadata_type const& lhs, metadata_type const& rhs) noexcept
 {
-    return lhs.idl_name() < rhs.idl_name();
+    return lhs.clr_full_name() < rhs.clr_full_name();
 }
 
 struct element_type final : metadata_type
@@ -102,11 +96,6 @@ struct element_type final : metadata_type
     virtual void append_signature(sha1& hash) const override
     {
         hash.append(m_signature);
-    }
-
-    virtual std::string_view idl_name() const override
-    {
-        return m_abiName;
     }
 
     virtual std::size_t push_contract_guards(writer&) const override
@@ -198,11 +187,6 @@ struct system_type final : metadata_type
         hash.append(m_signature);
     }
 
-    virtual std::string_view idl_name() const override
-    {
-        return m_cppName;
-    }
-
     virtual std::size_t push_contract_guards(writer&) const override
     {
         // No contract guards necessary
@@ -291,11 +275,6 @@ struct mapped_type final : metadata_type
     virtual void append_signature(sha1& hash) const override
     {
         hash.append(m_signature);
-    }
-
-    virtual std::string_view idl_name() const override
-    {
-        return m_mangledName; // TODO: Comment
     }
 
     virtual std::size_t push_contract_guards(writer&) const override
@@ -424,12 +403,6 @@ struct enum_type final : typedef_base
         hash.append(")"sv);
     }
 
-    virtual std::string_view idl_name() const override
-    {
-        // Enum names identically match their CLR name in idl files
-        return m_clrFullName;
-    }
-
     virtual void write_cpp_forward_declaration(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
@@ -471,12 +444,6 @@ struct struct_type final : typedef_base
             member.type->append_signature(hash);
         }
         hash.append(")"sv);
-    }
-
-    virtual std::string_view idl_name() const override
-    {
-        // Struct names identically match their CLR name in idl files
-        return m_clrFullName;
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
@@ -521,11 +488,6 @@ struct delegate_type final : typedef_base
         m_abiName.reserve(1 + type.TypeName().length());
         details::write_type_prefix(m_abiName, type);
         m_abiName += type.TypeName();
-
-        m_idlName.reserve(type.TypeNamespace().length() + 1 + m_abiName.length());
-        m_idlName += type.TypeNamespace();
-        m_idlName.push_back('.');
-        m_idlName += m_abiName;
     }
 
     virtual std::string_view cpp_abi_name() const override
@@ -549,11 +511,6 @@ struct delegate_type final : typedef_base
         hash.append("})"sv);
     }
 
-    virtual std::string_view idl_name() const override
-    {
-        return m_idlName;
-    }
-
     virtual void write_cpp_forward_declaration(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
     virtual void write_cpp_abi_type(writer& w) const override;
@@ -569,7 +526,6 @@ struct delegate_type final : typedef_base
 private:
 
     std::string m_abiName;
-    std::string m_idlName;
 };
 
 struct interface_type final : typedef_base
@@ -586,12 +542,6 @@ struct interface_type final : typedef_base
         auto iid = type_iid(m_type);
         hash.append(std::string_view{ iid.data(), iid.size() - 1 });
         hash.append("}"sv);
-    }
-
-    virtual std::string_view idl_name() const override
-    {
-        // Interface names identically match their CLR name in idl files
-        return m_clrFullName;
     }
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
@@ -678,12 +628,6 @@ struct class_type final : typedef_base
         hash.append(")"sv);
     }
 
-    virtual std::string_view idl_name() const override
-    {
-        // Class names identically match their CLR name in idl files
-        return m_clrFullName;
-    }
-
     virtual void write_cpp_forward_declaration(writer& w) const override;
     virtual void write_cpp_generic_param_logical_type(writer& w) const override;
     virtual void write_cpp_generic_param_abi_type(writer& w) const override;
@@ -714,9 +658,6 @@ struct generic_inst final : metadata_type
 
         m_mangledName = genericType->mangled_name();
 
-        m_idlName = genericType->idl_name();
-        m_idlName.push_back('<');
-
         std::string_view prefix;
         for (auto param : m_genericParams)
         {
@@ -726,13 +667,10 @@ struct generic_inst final : metadata_type
             m_mangledName.push_back('_');
             m_mangledName += param->generic_param_mangled_name();
 
-            m_idlName += prefix;
-            m_idlName += param->idl_name();
             prefix = ", ";
         }
 
         m_clrFullName.push_back('>');
-        m_idlName.push_back('>');
     }
 
     virtual std::string_view clr_abi_namespace() const override
@@ -785,11 +723,6 @@ struct generic_inst final : metadata_type
         hash.append(")"sv);
     }
 
-    virtual std::string_view idl_name() const override
-    {
-        return m_idlName;
-    }
-
     virtual std::size_t push_contract_guards(writer& w) const override;
 
     virtual void write_cpp_forward_declaration(writer& w) const override;
@@ -828,5 +761,4 @@ private:
     std::vector<metadata_type const*> m_genericParams;
     std::string m_clrFullName;
     std::string m_mangledName;
-    std::string m_idlName;
 };

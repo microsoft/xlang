@@ -26,7 +26,7 @@ struct category_compare
         auto rightCat = get_category(rhs.type());
         if (leftCat == rightCat)
         {
-            return lhs.idl_name() < rhs.idl_name();
+            return lhs.clr_full_name() < rhs.clr_full_name();
         }
 
         auto category_power = [](category cat)

@@ -400,7 +400,7 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, Gene
     }
 
     generic_inst inst{ genericType, std::move(genericParams) };
-    auto [itr, added] = state.target->generic_instantiations.emplace(inst.idl_name(), std::move(inst));
+    auto [itr, added] = state.target->generic_instantiations.emplace(inst.clr_full_name(), std::move(inst));
     if (added)
     {
         auto restore = std::exchange(state.parent_generic_inst, &itr->second);
