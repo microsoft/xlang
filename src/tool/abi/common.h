@@ -11,22 +11,6 @@ constexpr std::string_view system_namespace = "System";
 constexpr std::string_view foundation_namespace = "Windows.Foundation";
 constexpr std::string_view collections_namespace = "Windows.Foundation.Collections";
 constexpr std::string_view metadata_namespace = "Windows.Foundation.Metadata";
-constexpr std::string_view internal_namespace = "Windows.Foundation.Internal";
-
-struct typename_compare
-{
-    template <typename LhsT, typename RhsT>
-    bool operator()(LhsT const& lhs, RhsT const& rhs) const noexcept
-    {
-        auto cmp = lhs.TypeNamespace().compare(rhs.TypeNamespace());
-        if (cmp == 0)
-        {
-            cmp = lhs.TypeName().compare(rhs.TypeName());
-        }
-
-        return cmp < 0;
-    }
-};
 
 enum class ns_prefix
 {
@@ -76,39 +60,14 @@ inline constexpr std::pair<std::string_view, std::string_view> decompose_type(st
     return { typeName.substr(0, pos), typeName.substr(pos + 1) };
 }
 
-inline xlang::meta::reader::TypeDef const& find_required(xlang::meta::reader::TypeDef const& type) noexcept
-{
-    return type;
-}
-
 inline bool is_generic(xlang::meta::reader::TypeDef const& type) noexcept
 {
     return distance(type.GenericParam()) != 0;
 }
 
-
 inline xlang::meta::reader::ElementType underlying_enum_type(xlang::meta::reader::TypeDef const& type)
 {
     return std::get<xlang::meta::reader::ElementType>(type.FieldList().first.Signature().Type().Type());
-}
-
-inline bool is_fully_specialized(xlang::meta::reader::GenericTypeInstSig const& type) noexcept
-{
-    using namespace xlang::meta::reader;
-    for (auto const& arg : type.GenericArgs())
-    {
-        if (std::holds_alternative<GenericTypeIndex>(arg.Type()))
-        {
-            return false;
-        }
-        else if (std::holds_alternative<GenericTypeInstSig>(arg.Type()) &&
-            !is_fully_specialized(std::get<GenericTypeInstSig>(arg.Type())))
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_get_default_interface(xlang::meta::reader::TypeDef const& type)
@@ -126,18 +85,6 @@ inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_g
     }
 
     return {};
-}
-
-inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> default_interface(
-    xlang::meta::reader::TypeDef const& type)
-{
-    auto result = try_get_default_interface(type);
-    if (!result)
-    {
-        xlang::throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
-    }
-
-    return result;
 }
 
 struct previous_contract

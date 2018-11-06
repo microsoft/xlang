@@ -22,7 +22,7 @@ namespace details
     {
         if (typeCategory == xlang::meta::reader::category::delegate_type)
         {
-            result += 'I';
+            result.push_back('I');
         }
     }
 
@@ -30,18 +30,7 @@ namespace details
     {
         write_type_prefix(result, xlang::meta::reader::get_category(type));
     }
-}
 
-inline std::string cpp_type_name(xlang::meta::reader::TypeDef const& type)
-{
-    std::string result;
-    details::write_type_prefix(result, type);
-    result += type.TypeName();
-    return result;
-}
-
-namespace details
-{
     template <bool IsGenericParam>
     void write_mangled_name(std::string& result, std::string_view name)
     {
