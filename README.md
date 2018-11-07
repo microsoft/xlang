@@ -1,8 +1,11 @@
-[![Build Status](https://microsoft.visualstudio.com/Dart/_apis/build/status/Xlang%20GitHub%20Daily%20Build)](https://microsoft.visualstudio.com/Dart/_build/latest?definitionId=31784)
-
 # xlang
 
+| Windows Build | Linux Build |
+|---------------|-------------|
+| [![Build Status](https://microsoft.visualstudio.com/Dart/_apis/build/status/Xlang%20GitHub%20Daily%20Build)](https://microsoft.visualstudio.com/Dart/_build/latest?definitionId=31784) | [![Build Status](https://dev.azure.com/msft-xlang/public/_apis/build/status/xlang-CI-ubuntu)](https://dev.azure.com/msft-xlang/public/_build/latest?definitionId=1) |
+
 ## Overview
+
 The xlang project enables developers to take existing shared libraries,
 implemented in one programming language and make that library's APIs available to client code using a different programming language. Thus the name "xlang", for cross-language.
 
@@ -26,8 +29,8 @@ For details on project structure and build process, please see the [Project Read
 
 For technical design details, please see the [Design Notes](./design_notes).
 
-
 ## License
+
 Code licensed under the [MIT License](LICENSE).
 
 ## Contributing

@@ -2,7 +2,28 @@ cmake_minimum_required(VERSION 3.9)
 
 add_executable(cpp_test)
 target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-target_sources(cpp_test PUBLIC pch.cpp activation.cpp test/Async.cpp test/Collections.cpp test/Edge.cpp test/Fast.cpp test/Enum.cpp test/Structs.cpp "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp")
+target_sources(cpp_test PUBLIC 
+    "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp"
+    pch.cpp
+    activation.cpp
+    test/Async.cpp
+    test/Collections.cpp
+    test/Edge.cpp
+    test/Enum.cpp
+    test/Fast.cpp
+    test/Structs.cpp
+    implementation/Component.Async.Class.cpp
+    implementation/Component.Collections.Class.cpp
+    implementation/Component.Edge.EmptyClass.cpp
+    implementation/Component.Edge.OneClass.cpp
+    implementation/Component.Edge.StaticClass.cpp
+    implementation/Component.Edge.ThreeClass.cpp
+    implementation/Component.Edge.TwoClass.cpp
+    implementation/Component.Edge.ZeroClass.cpp
+    implementation/Component.Fast.FastClass.cpp
+    implementation/Component.Fast.SlowClass.cpp
+    implementation/Component.Result.Class.cpp
+)
 
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(cpp_test pch.cpp pch.h)
@@ -51,7 +72,7 @@ add_custom_command(OUTPUT ${compare_component_h}
 )
 
 add_custom_command(OUTPUT ${mogule_g_cpp}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd ${attributes_winmd} -out ${generated_files} -component -verbose -prefix -base
+    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd ${attributes_winmd} -out ${generated_files} -component -verbose -prefix -base -lib test -opt
     DEPENDS ${component_winmd} ${generated_files} cpp
 )
 

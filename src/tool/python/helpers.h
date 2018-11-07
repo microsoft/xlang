@@ -149,7 +149,7 @@ namespace xlang
 
         void handle(TypeSig const& signature)
         {
-            xlang::visit(signature.Type(),
+            call(signature.Type(),
                 [&](auto&& type)
             {
                 static_cast<T*>(this)->handle(type);

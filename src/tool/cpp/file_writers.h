@@ -176,11 +176,6 @@ namespace xlang
         write_type_namespace(w, ns);
         w.write_each<write_class_definitions>(members.classes);
 
-        if (settings.component && !settings.uniform)
-        {
-            w.write_each<write_fast_definitions>(members.classes);
-        }
-
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
         w.write_each<write_class_override>(members.classes);
@@ -204,12 +199,12 @@ namespace xlang
         w.save_header();
     }
 
-    void write_component_g_cpp(std::vector<TypeDef> const& classes)
+    void write_module_g_cpp(std::vector<TypeDef> const& classes)
     {
         writer w;
         write_license(w);
         write_pch(w);
-        write_component_g_cpp(w, classes);
+        write_module_g_cpp(w, classes);
         w.flush_to_file(settings.output_folder + "module.g.cpp");
     }
 
@@ -228,6 +223,24 @@ namespace xlang
         }
 
         auto filename = settings.output_folder + get_generated_component_filename(type) + ".g.h";
+        path folder = filename;
+        folder.remove_filename();
+        create_directories(folder);
+        w.flush_to_file(filename);
+    }
+
+    void write_component_g_cpp(TypeDef const& type)
+    {
+        if (!settings.component_opt)
+        {
+            return;
+        }
+
+        writer w;
+        write_license(w);
+        write_component_g_cpp(w, type);
+
+        auto filename = settings.output_folder + get_generated_component_filename(type) + ".g.cpp";
         path folder = filename;
         folder.remove_filename();
         create_directories(folder);
