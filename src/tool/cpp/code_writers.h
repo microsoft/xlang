@@ -2545,6 +2545,9 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 )";
 
         method_signature signature{ method };
+        method_signature reordered_method = signature;
+        auto&& params = reordered_method.params();
+        std::rotate(params.begin(), params.end() - 2, params.end());
         w.param_names = true;
 
         w.write(format,
@@ -2552,7 +2555,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             get_name(method),
             bind<write_implementation_params>(signature),
             signature.return_signature(),
-            bind<write_consume_args>(signature));
+            bind<write_consume_args>(reordered_method));
     }
 
     void write_component_constructor_forwarder(writer& w, MethodDef const& method)
