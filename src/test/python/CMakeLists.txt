@@ -88,23 +88,14 @@ add_custom_command(
   DEPENDS ${pywinrt_exe}
   COMMAND ${pywinrt_exe} ${pywinrt_cmdline}
 )
-
 add_custom_target(generate_python_test ALL DEPENDS ${setup_py})
 
-# TODO: re-write python module compile target w/o calling into python
-# file(TO_NATIVE_PATH "${generated_files_folder}/build/_${python_module_name}.${python_version_info}" module_path_no_ext)
-# file(TO_NATIVE_PATH "${module_path_no_ext}.pyd" module_path)
-# file(TO_NATIVE_PATH "${module_path_no_ext}.pdb" module_pdb_path)
-
-# add_custom_command(
-#   OUTPUT ${module_path} 
-#   BYPRODUCTS ${module_pdb_path}
-#   DEPENDS ${setup_py}
-#   WORKING_DIRECTORY ${generated_files_folder}
-#   COMMAND py setup.py develop
-# )
-
-# add_custom_target(python_test ALL DEPENDS ${module_path})
-
+file(TO_NATIVE_PATH "${generated_files_folder}/_${python_module_name}.pyd" module_pyd)
+add_custom_command(
+  OUTPUT ${module_pyd} 
+  DEPENDS ${setup_py}
+  WORKING_DIRECTORY ${generated_files_folder}
+  COMMAND py setup.py develop
+)
 # TODO: include python_test in ALL once issue running python on build system is resolved 
-# set_target_properties(python_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_custom_target(python_test DEPENDS ${module_pyd})
