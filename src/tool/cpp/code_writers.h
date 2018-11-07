@@ -2837,6 +2837,35 @@ void* winrt_make_%()
         write_close_namespace(w);
     }
 
+    void write_component_override_dispatch_base(writer& w, TypeDef const& type)
+    {
+        std::string interfaces;
+
+        for (auto&& [name, info] : get_interfaces(w, type))
+        {
+            if (!info.overridable)
+            {
+                continue;
+            }
+
+            interfaces += ", ";
+            interfaces += name;
+        }
+
+        if (interfaces.empty())
+        {
+            return;
+        }
+
+        auto format = R"(
+    protected:
+        using dispatch = impl::dispatch_to_overridable<D@>;
+        auto overridable() noexcept { return dispatch::overridable(static_cast<D&>(*this)); }
+        )";
+
+        w.write(format, interfaces);
+    }
+
     void write_component_g_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -2911,7 +2940,7 @@ void* winrt_make_%()
                 type_namespace,
                 type_name,
                 "",
-                "");
+                bind<write_component_override_dispatch_base>(type));
         }
 
         if (has_factory_members(type))
