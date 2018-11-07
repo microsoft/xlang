@@ -75,6 +75,12 @@ namespace xlang
         {
             settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
+
+            if (settings.component_name.empty() && settings.input.size() == 1)
+            {
+                settings.component_name = path(*settings.input.begin()).filename().replace_extension().string();
+            }
+
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
             settings.component_lib = args.value("lib", "winrt");
