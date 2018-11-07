@@ -234,12 +234,13 @@ void metadata_cache::process_delegate_dependencies(init_state& state, delegate_t
         {
             XLANG_ASSERT(method.Name() == "Invoke"sv);
             process_contract_dependencies(*state.target, method);
-            type.invoke = process_function(state, method);
+            type.functions.push_back(process_function(state, method));
             break;
         }
     }
 
-    XLANG_ASSERT(type.invoke.def);
+    // Should be exactly one function named 'Invoke'
+    XLANG_ASSERT(type.functions.size() == 1);
 }
 
 void metadata_cache::process_interface_dependencies(init_state& state, interface_type& type)

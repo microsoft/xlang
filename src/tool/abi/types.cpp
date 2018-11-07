@@ -59,7 +59,7 @@ void enum_type::write_c_forward_declaration(writer& w) const
 
 void enum_type::write_c_abi_type(writer& w) const
 {
-    w.write("TODO_ENUM_C_ABI_TYPE");
+    write_c_type_name(w, *this);
 }
 
 void enum_type::write_cpp_definition(writer& w) const
@@ -199,7 +199,7 @@ void struct_type::write_c_forward_declaration(writer& w) const
 
 void struct_type::write_c_abi_type(writer& w) const
 {
-    w.write("TODO_STRUCT_C_ABI_TYPE");
+    write_c_type_name(w, *this);
 }
 
 void struct_type::write_cpp_definition(writer& w) const
@@ -400,16 +400,9 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 %public:
 )^-^", indent{}, type.cpp_abi_name(), baseType, indent{}, indent{});
 
-    if constexpr (std::is_same_v<T, delegate_type>)
+    for (auto const& func : type.functions)
     {
-        write_cpp_function_declaration(w, type.invoke);
-    }
-    else // interface_type
-    {
-        for (auto const& func : type.functions)
-        {
-            write_cpp_function_declaration(w, func);
-        }
+        write_cpp_function_declaration(w, func);
     }
 
     w.write(R"^-^(%};
@@ -441,33 +434,51 @@ EXTERN_C const IID )^-^");
     w.write('\n');
 }
 
-static void write_c_iunknown_interface(writer& w, std::string_view interfaceName)
+template <typename T>
+static void write_c_iunknown_interface(writer& w, T const& type)
 {
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+
     w.write(R"^-^(    HRESULT (STDMETHODCALLTYPE* QueryInterface)(%* This,
         REFIID riid,
         void** ppvObject);
     ULONG (STDMETHODCALLTYPE* AddRef)(%* This);
     ULONG (STDMETHODCALLTYPE* Release)(%* This);
-)^-^", interfaceName, interfaceName, interfaceName);
+)^-^", write_name, write_name, write_name);
 }
 
-static void write_c_iunknown_interface_macros(writer& w, std::string_view interfaceName)
+template <typename T>
+static void write_c_iunknown_interface_macros(writer& w, T const& type)
 {
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+
     w.write(R"^-^(#define %_QueryInterface(This,riid,ppvObject) \
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) )
+    ( (This)->lpVtbl->QueryInterface(This,riid,ppvObject) )
 
 #define %_AddRef(This) \
-    ( (This)->lpVtbl -> AddRef(This) )
+    ( (This)->lpVtbl->AddRef(This) )
 
 #define %_Release(This) \
-    ( (This)->lpVtbl -> Release(This) )
+    ( (This)->lpVtbl->Release(This) )
 
-)^-^", interfaceName, interfaceName, interfaceName);
+)^-^", write_name, write_name, write_name);
 }
 
-static void write_c_iinspectable_interface(writer& w, std::string_view interfaceName)
+template <typename T>
+static void write_c_iinspectable_interface(writer& w, T const& type)
 {
-    write_c_iunknown_interface(w, interfaceName);
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+
+    write_c_iunknown_interface(w, type);
     w.write(R"^-^(    HRESULT (STDMETHODCALLTYPE* GetIids)(%* This,
         ULONG* iidCount,
         IID** iids);
@@ -475,34 +486,46 @@ static void write_c_iinspectable_interface(writer& w, std::string_view interface
         HSTRING* className);
     HRESULT (STDMETHODCALLTYPE* GetTrustLevel)(%* This,
         TrustLevel* trustLevel);
-)^-^", interfaceName, interfaceName, interfaceName);
+)^-^", write_name, write_name, write_name);
 }
 
-static void write_c_iinspectable_interface_macros(writer& w, std::string_view interfaceName)
+template <typename T>
+static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 {
-    write_c_iunknown_interface_macros(w, interfaceName);
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+
+    write_c_iunknown_interface_macros(w, type);
     w.write(R"^-^(#define %_GetIids(This,iidCount,iids) \
-    ( (This)->lpVtbl -> GetIids(This,iidCount,iids) )
+    ( (This)->lpVtbl->GetIids(This,iidCount,iids) )
 
 #define %_GetRuntimeClassName(This,className) \
-    ( (This)->lpVtbl -> GetRuntimeClassName(This,className) )
+    ( (This)->lpVtbl->GetRuntimeClassName(This,className) )
 
 #define %_GetTrustLevel(This,trustLevel) \
-    ( (This)->lpVtbl -> GetTrustLevel(This,trustLevel) )
+    ( (This)->lpVtbl->GetTrustLevel(This,trustLevel) )
 
-)^-^", interfaceName, interfaceName, interfaceName);
+)^-^", write_name, write_name, write_name);
 }
 
-static void write_c_function_declaration(writer& w, std::string_view interfaceName, function_def const& func)
+template <typename T>
+static void write_c_function_declaration(writer& w, T const& type, function_def const& func)
 {
-    w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), interfaceName);
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+
+    w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), write_name);
 
     for (auto const& param : func.params)
     {
         auto refMod = param.signature.ByRef() ? "*"sv : ""sv;
         if (param.signature.Type().is_szarray())
         {
-            w.write(",\n        unsigned int capacity");
+            w.write(",\n        UINT32 %Length", param.name);
             refMod = param.signature.ByRef() ? "**"sv : "*"sv;
         }
 
@@ -519,7 +542,7 @@ static void write_c_function_declaration(writer& w, std::string_view interfaceNa
         auto refMod = "*"sv;
         if (func.return_type->signature.Type().is_szarray())
         {
-            w.write(",\n        unsigned int* TODOLength");
+            w.write(",\n        UINT32* %Length", func.return_type->name);
             refMod = "**"sv;
         }
 
@@ -532,16 +555,22 @@ static void write_c_function_declaration(writer& w, std::string_view interfaceNa
     w.write(");\n");
 }
 
-static void write_c_function_declaration_macro(writer& w, std::string_view interfaceName, function_def const& func)
+template <typename T>
+static void write_c_function_declaration_macro(writer& w, T const& type, function_def const& func)
 {
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+
     auto fnName = function_name(func.def);
-    w.write("#define %_%(This", interfaceName, fnName);
+    w.write("#define %_%(This", write_name, fnName);
 
     for (auto const& param : func.params)
     {
         if (param.signature.Type().is_szarray())
         {
-            w.write(",capacity");
+            w.write(",%Length", param.name);
         }
 
         w.write(",%", param.name);
@@ -553,13 +582,13 @@ static void write_c_function_declaration_macro(writer& w, std::string_view inter
     }
 
     w.write(R"^-^() \
-    ( (This)->lpVtbl -> %(This)^-^", fnName);
+    ( (This)->lpVtbl->%(This)^-^", fnName);
 
     for (auto const& param : func.params)
     {
         if (param.signature.Type().is_szarray())
         {
-            w.write(",capacity");
+            w.write(",%Length", param.name);
         }
 
         w.write(",%", param.name);
@@ -571,6 +600,66 @@ static void write_c_function_declaration_macro(writer& w, std::string_view inter
     }
 
     w.write(") )\n\n");
+}
+
+template <typename T>
+static void write_c_interface_definition(writer& w, T const& type)
+{
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+
+    w.write(R"^-^(typedef struct %Vtbl
+{
+    BEGIN_INTERFACE
+
+)^-^", write_name);
+
+    bool isDelegate = type.category() == category::delegate_type;
+    if (isDelegate)
+    {
+        write_c_iunknown_interface(w, type);
+    }
+    else
+    {
+        write_c_iinspectable_interface(w, type);
+    }
+
+    for (auto const& func : type.functions)
+    {
+        write_c_function_declaration(w, type, func);
+    }
+
+    w.write(R"^-^(
+    END_INTERFACE
+} %Vtbl;
+
+interface %
+{
+    CONST_VTBL struct %Vtbl* lpVtbl;
+};
+
+#ifdef COBJMACROS
+
+)^-^", write_name, write_name, write_name);
+
+    if (isDelegate)
+    {
+        write_c_iunknown_interface_macros(w, type);
+    }
+    else
+    {
+        write_c_iinspectable_interface_macros(w, type);
+    }
+
+    for (auto const& func : type.functions)
+    {
+        write_c_function_declaration_macro(w, type, func);
+    }
+
+    w.write(R"^-^(#endif /* COBJMACROS */
+)^-^");
 }
 
 void delegate_type::write_c_forward_declaration(writer& w) const
@@ -651,17 +740,22 @@ void interface_type::write_c_forward_declaration(writer& w) const
         return;
     }
 
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, *this);
+    };
+
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
-)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
-
-    w.write(R"^-^(typedef interface % %;
+typedef interface % %;
 
 #endif // __%_FWD_DEFINED__
 
 )^-^",
         bind<write_mangled_name>(m_mangledName),
         bind<write_mangled_name>(m_mangledName),
+        write_name,
+        write_name,
         bind<write_mangled_name>(m_mangledName));
 }
 
@@ -677,7 +771,34 @@ void interface_type::write_cpp_definition(writer& w) const
 
 void interface_type::write_c_definition(writer& w) const
 {
-    w.write("TODO_INTERFACE_DEF\n");
+    // Generics don't get generated definitions
+    if (is_generic())
+    {
+        return;
+    }
+
+    write_type_banner(w, *this);
+    auto contractDepth = push_contract_guards(w);
+
+    w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
+#define __%_INTERFACE_DEFINED__
+extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] = L"%";
+)^-^",
+        bind<write_mangled_name>(m_mangledName),
+        bind<write_mangled_name>(m_mangledName),
+        bind_list("_", namespace_range{ clr_abi_namespace() }),
+        cpp_abi_name(),
+        m_clrFullName);
+
+    write_c_interface_definition(w, *this);
+
+    w.write(R"^-^(
+EXTERN_C const IID IID_%;
+#endif /* !defined(__%_INTERFACE_DEFINED__) */
+)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
 }
 
 void class_type::write_cpp_forward_declaration(writer& w) const
@@ -791,7 +912,7 @@ void class_type::write_cpp_definition(writer& w) const
 
 void class_type::write_c_definition(writer& w) const
 {
-    w.write("TODO_CLASS_DEF\n");
+    write_cpp_definition(w);
 }
 
 std::size_t generic_inst::push_contract_guards(writer& w) const
@@ -973,56 +1094,11 @@ typedef interface % %;
 //  Declare the parameterized interface IID.
 EXTERN_C const IID IID_%;
 
-typedef struct %Vtbl
-{
-    BEGIN_INTERFACE
+)^-^", m_mangledName, m_mangledName, m_mangledName, m_mangledName, m_mangledName);
 
-)^-^", m_mangledName, m_mangledName, m_mangledName, m_mangledName, m_mangledName, m_mangledName);
-
-    bool isDelegate = get_category(m_genericType->type()) == category::delegate_type;
-    if (isDelegate)
-    {
-        write_c_iunknown_interface(w, m_mangledName);
-    }
-    else
-    {
-        write_c_iinspectable_interface(w, m_mangledName);
-    }
-
-    for (auto const& func : functions)
-    {
-        write_c_function_declaration(w, m_mangledName, func);
-    }
+    write_c_interface_definition(w, *this);
 
     w.write(R"^-^(
-    END_INTERFACE
-} %Vtbl;
-
-interface %
-{
-    CONST_VTBL struct %Vtbl* lpVtbl;
-};
-
-#ifdef COBJMACROS
-
-)^-^", m_mangledName, m_mangledName, m_mangledName);
-
-    if (isDelegate)
-    {
-        write_c_iunknown_interface_macros(w, m_mangledName);
-    }
-    else
-    {
-        write_c_iinspectable_interface_macros(w, m_mangledName);
-    }
-
-    for (auto const& func : functions)
-    {
-        write_c_function_declaration_macro(w, m_mangledName, func);
-    }
-
-    w.write(R"^-^(#endif /* COBJMACROS */
-
 #endif // __%_INTERFACE_DEFINED__
 )^-^", m_mangledName);
 
@@ -1037,19 +1113,19 @@ void generic_inst::write_c_abi_type(writer& w) const
 
 element_type const& element_type::from_type(xlang::meta::reader::ElementType type)
 {
-    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "::boolean"sv, "boolean"sv, "boolean"sv, "b1"sv };
-    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "WCHAR"sv, "wchar_t"sv, "wchar__zt"sv, "c2"sv };
-    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "BYTE"sv, "byte"sv, "byte"sv, "u1"sv };
-    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "INT16"sv, "short"sv, "short"sv, "i2"sv };
-    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "unsigned short"sv, "UINT16"sv, "u2"sv };
-    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "INT32"sv, "int"sv, "int"sv, "i4"sv };
-    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "unsigned int"sv, "UINT32"sv, "u4"sv };
-    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "INT64"sv, "__int64"sv, "__z__zint64"sv, "i8"sv };
-    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "unsigned __int64"sv, "UINT64"sv, "u8"sv };
-    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "FLOAT"sv, "float"sv, "float"sv, "f4"sv };
-    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "DOUBLE"sv, "double"sv, "double"sv, "f8"sv };
-    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "string"sv };
-    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv, "cinterface(IInspectable)"sv };
+    static element_type const boolean_type{ "Boolean"sv, "bool"sv, "boolean"sv, "boolean"sv, "boolean"sv, "b1"sv };
+    static element_type const char_type{ "Char16"sv, "wchar_t"sv, "wchar_t"sv, "WCHAR"sv, "wchar__zt"sv, "c2"sv };
+    static element_type const u1_type{ "UInt8"sv, "::byte"sv, "::byte"sv, "BYTE"sv, "byte"sv, "u1"sv };
+    static element_type const i2_type{ "Int16"sv, "short"sv, "short"sv, "INT16"sv, "short"sv, "i2"sv };
+    static element_type const u2_type{ "UInt16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "UINT16"sv, "u2"sv };
+    static element_type const i4_type{ "Int32"sv, "int"sv, "int"sv, "INT32"sv, "int"sv, "i4"sv };
+    static element_type const u4_type{ "UInt32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "UINT32"sv, "u4"sv };
+    static element_type const i8_type{ "Int64"sv, "__int64"sv, "__int64"sv, "INT64"sv, "__z__zint64"sv, "i8"sv };
+    static element_type const u8_type{ "UInt64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "UINT64"sv, "u8"sv };
+    static element_type const r4_type{ "Single"sv, "float"sv, "float"sv, "FLOAT"sv, "float"sv, "f4"sv };
+    static element_type const r8_type{ "Double"sv, "double"sv, "double"sv, "DOUBLE"sv, "double"sv, "f8"sv };
+    static element_type const string_type{ "String"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "HSTRING"sv, "string"sv };
+    static element_type const object_type{ "Object"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable*"sv, "IInspectable"sv, "cinterface(IInspectable)"sv };
 
     switch (type)
     {
@@ -1098,7 +1174,7 @@ void element_type::write_cpp_abi_type(writer& w) const
 
 void element_type::write_c_abi_type(writer& w) const
 {
-    w.write(m_cName);
+    w.write(m_cppName);
 }
 
 system_type const& system_type::from_name(std::string_view typeName)

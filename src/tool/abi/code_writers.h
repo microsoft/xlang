@@ -3,7 +3,7 @@
 #include <optional>
 
 #include "abi_writer.h"
-#include "metadata_cache.h"
+#include "types.h"
 
 inline void write_contract_version(writer& w, unsigned int value)
 {
@@ -36,6 +36,26 @@ inline void write_mangled_name(writer& w, std::string_view mangledName)
     using namespace std::literals;
     auto const fmt = (w.config().ns_prefix_state == ns_prefix::always) ? "__x_ABI_C%"sv : "__x_%"sv;
     w.write(fmt, mangledName);
+}
+
+inline void write_c_type_name(writer& w, typedef_base const& type)
+{
+    using namespace std::literals;
+
+    std::string_view fmt;
+    switch (w.config().ns_prefix_state)
+    {
+    case ns_prefix::always: fmt = "__x_ABI_C%"sv; break;
+    case ns_prefix::never: fmt = "__x_%"sv; break;
+    case ns_prefix::optional: fmt = "C_ABI_PARAMETER(%)"sv; break;
+    }
+
+    w.write(fmt, type.mangled_name());
+}
+
+inline void write_c_type_name(writer& w, generic_inst const& type)
+{
+    w.write(type.mangled_name());
 }
 
 inline void write_contract_macro(writer& w, std::string_view contractNamespace, std::string_view contractTypeName)

@@ -43,14 +43,12 @@ struct element_type final : metadata_type
         std::string_view logicalName,
         std::string_view abiName,
         std::string_view cppName,
-        std::string_view cName,
         std::string_view mangledName,
         std::string_view signature) :
         m_clrName(clrName),
         m_logicalName(logicalName),
         m_abiName(abiName),
         m_cppName(cppName),
-        m_cName(cName),
         m_mangledName(mangledName),
         m_signature(signature)
     {
@@ -127,7 +125,6 @@ private:
     std::string_view m_logicalName;
     std::string_view m_abiName;
     std::string_view m_cppName;
-    std::string_view m_cName;
     std::string_view m_mangledName;
     std::string_view m_signature;
 };
@@ -376,6 +373,11 @@ struct typedef_base : metadata_type
         return ::is_generic(m_type);
     }
 
+    xlang::meta::reader::category category() const noexcept
+    {
+        return get_category(m_type);
+    }
+
 protected:
 
     xlang::meta::reader::TypeDef m_type;
@@ -521,7 +523,7 @@ struct delegate_type final : typedef_base
     void write_cpp_definition(writer& w) const;
     void write_c_definition(writer& w) const;
 
-    function_def invoke;
+    std::vector<function_def> functions;
 
 private:
 
@@ -736,6 +738,11 @@ struct generic_inst final : metadata_type
     typedef_base const* generic_type() const noexcept
     {
         return m_genericType;
+    }
+
+    xlang::meta::reader::category category() const noexcept
+    {
+        return m_genericType->category();
     }
 
     std::string_view generic_type_abi_name() const noexcept
