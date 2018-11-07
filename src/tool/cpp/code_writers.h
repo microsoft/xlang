@@ -1333,6 +1333,47 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
+    void write_component_override_defaults(writer& w, TypeDef const& type)
+    {
+        std::vector<std::string> interfaces;
+
+        for (auto&& base : get_bases(type))
+        {
+            if (settings.filter.includes(base))
+            {
+                continue;
+            }
+
+            for (auto&&[name, info] : get_interfaces(w, base))
+            {
+                if (info.base)
+                {
+                    continue;
+                }
+
+                if (info.overridable)
+                {
+                    interfaces.push_back(name);
+                }
+            }
+        }
+
+        bool first{ true };
+
+        for (auto&& name : interfaces)
+        {
+            if (first)
+            {
+                first = false;
+                w.write(",\n        %T<D>", name);
+            }
+            else
+            {
+                w.write(", %T<D>", name);
+            }
+        }
+    }
+
     void write_class_override_bases(writer& w, TypeDef const& type)
     {
         for (auto&& base : get_bases(type))
@@ -2861,7 +2902,7 @@ void* winrt_make_%()
                 no_module_lock,
                 "",
                 bind<write_component_class_base>(type),
-                bind<write_class_override_defaults>(interfaces),
+                bind<write_component_override_defaults>(type),
                 type_name,
                 type_namespace,
                 type_name,
