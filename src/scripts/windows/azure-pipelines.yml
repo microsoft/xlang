@@ -1,7 +1,8 @@
 resources:
   containers:
   - container: build_container
-    image:  microsoft/dotnet-framework:4.7.2-runtime-windowsservercore-1803
+    image:   msftxlang.azurecr.io/xlang-windows-build
+    endpoint: msftxlang_acr
 
 pool:
   vmImage: 'win1803'
