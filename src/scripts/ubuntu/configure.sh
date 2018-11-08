@@ -8,4 +8,4 @@ sudo apt upgrade -y
 sudo apt autoremove -y
 
 # install clang, cmake, ninja and libc++ via APT
-sudo apt install clang cmake ninja-build libc++-dev libc++abi-dev -y
+sudo apt install clang clang-tidy cmake ninja-build libc++-dev libc++abi-dev -y

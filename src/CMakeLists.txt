@@ -93,6 +93,21 @@ else()
 
     # Add _DEBUG preprocessor macro for compatibility with MSVC
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " -D_DEBUG")
+
+    find_program(
+        CLANG_TIDY_EXE
+        NAMES "clang-tidy"
+        DOC "Path to clang-tidy executable"
+    )
+    if (NOT CLANG_TIDY_EXE)
+      message(STATUS "clang-tidy not found.")
+    else ()
+      set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*")
+    endif ()
+
+    if (CLANG_TIDY_EXE)
+      set(CMAKE_CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+    endif()
 endif()
 
 if (WIN32)
