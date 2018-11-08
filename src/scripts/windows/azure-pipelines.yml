@@ -10,5 +10,5 @@ pool:
 container: build_container
 
 steps:
-- script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build -GNinja && ninja -C _build -v cpp && ninja -C _build -v pywinrt
+- script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build -GNinja && ninja -C _build -v
   displayName: 'build'
