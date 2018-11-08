@@ -10,5 +10,8 @@ pool:
 container: build_container
 
 steps:
-- script: systeminfo
-  displayName: 'SystemInfo'
+- script: |
+   C:\BuildTools\Common7\Tools\VsDevCmd.bat
+   cmake ./src -B_build -GNinja
+   ninja -C _build -v 
+  displayName: 'build'
