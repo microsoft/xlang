@@ -52,9 +52,18 @@
 #endif
 
 #ifdef __cplusplus
-#define XLANG_NOEXCEPT noexcept
+# define XLANG_NOEXCEPT noexcept
+# if XLANG_COMPILER_MSVC
+#  define XLANG_EBO __declspec(empty_bases)
+#  define XLANG_NOVTABLE __declspec(novtable)
+# else
+#  define XLANG_EBO
+#  define XLANG_NOVTABLE
+# endif
 #else
-#define XLANG_NOEXCEPT
+# define XLANG_NOEXCEPT
+# define XLANG_EBO
+# define XLANG_NOVTABLE
 #endif
 
 #ifndef XLANG_PAL_HAS_CHAR8_T
@@ -78,6 +87,26 @@ extern "C"
     // Type/handle definitions
     typedef uint32_t xlang_result;
 
+    struct xlang_guid
+    {
+        uint32_t Data1;
+        uint16_t Data2;
+        uint16_t Data3;
+        uint8_t  Data4[8];
+    };
+
+    struct XLANG_NOVTABLE xlang_unknown
+    {
+        virtual int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) XLANG_NOEXCEPT = 0;
+        virtual uint32_t XLANG_CALL AddRef() XLANG_NOEXCEPT = 0;
+        virtual uint32_t XLANG_CALL Release() XLANG_NOEXCEPT = 0;
+    };
+
+    struct XLANG_NOVTABLE xlang_error_info : xlang_unknown
+    {
+        virtual xlang_result error_code() XLANG_NOEXCEPT = 0;
+    };
+
     typedef XLANG_PAL_CHAR8_T xlang_char8;
 
     struct xlang_string__
@@ -96,14 +125,6 @@ extern "C"
     {
         void* reserved1;
         char reserved2[16];
-    };
-
-    struct xlang_guid
-    {
-        uint32_t Data1;
-        uint16_t Data2;
-        uint16_t Data3;
-        uint8_t  Data4[8];
     };
 
 #ifdef __cplusplus
