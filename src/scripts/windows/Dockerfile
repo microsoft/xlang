@@ -8,24 +8,20 @@ FROM microsoft/dotnet-framework@sha256:cfcd42bdc1646318cb8a314c298e8ba0b7e962829
 # Reset the shell.
 SHELL ["cmd", "/S", "/C"]
 
-# Set up environment to collect install errors.
-COPY Install.cmd C:\TEMP\
-ADD https://aka.ms/vscollect.exe C:\TEMP\collect.exe
+# download NodeJS and VS Build tool installers
+# ARG NODE_VERSION=v8.12.0
+ADD https://nodejs.org/dist/v8.12.0/node-v8.12.0-x64.msi https://aka.ms/vs/15/release/vs_buildtools.exe c:\TEMP\
 
-# Install Node.js LTS
-ADD https://nodejs.org/dist/v8.11.3/node-v8.11.3-x64.msi C:\TEMP\node-install.msi
-RUN start /wait msiexec.exe /i C:\TEMP\node-install.msi /l*vx "%TEMP%\MSI-node-install.log" /qn ADDLOCAL=ALL
+# node required for running AzDO tasks
+RUN start /wait msiexec.exe /i C:\TEMP\node-v8.12.0-x64.msi /l*vx "%TEMP%\MSI-node-install.log" /qn ADDLOCAL=ALL
 
-# Download channel for fixed install.
-ARG CHANNEL_URL=https://aka.ms/vs/15/release/channel
-ADD ${CHANNEL_URL} C:\TEMP\VisualStudio.chman
-
-# Download and install Build Tools for Visual Studio 2017 for native desktop workload.
-ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\TEMP\vs_buildtools.exe
-RUN C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
-    --channelUri C:\TEMP\VisualStudio.chman `
-    --installChannelUri C:\TEMP\VisualStudio.chman `
-    --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended`
+# https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2017
+RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
+    --add Microsoft.VisualStudio.Workload.VCTools `
+    --add Microsoft.VisualStudio.Component.VC.CMake.Project `
+    --add Microsoft.VisualStudio.Component.Windows10SDK.17663 `
+    --add Microsoft.VisualStudio.Component.VSSDKBuildTools `
+    --add Microsoft.VisualStudio.Component.VC.ATL `
     --installPath C:\BuildTools
 
 # Use developer command prompt and start PowerShell if no other command specified.
