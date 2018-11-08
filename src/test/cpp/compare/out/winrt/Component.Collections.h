@@ -41,6 +41,10 @@ namespace winrt::impl
         return result;
     }
     template <typename D>
+    struct produce<D, Component::Collections::IClass> : produce_base<D, Component::Collections::IClass>
+    {
+    };
+    template <typename D>
     struct produce<D, Component::Collections::IClassStatics> : produce_base<D, Component::Collections::IClassStatics>
     {
         int32_t WINRT_CALL Iterable(void** result) noexcept final
@@ -137,9 +141,14 @@ namespace winrt::Component::Collections
     {
         return impl::call_factory<Class, Component::Collections::IClassStatics>([&](auto&& f) { return f.Map(); });
     }
+    inline Class::Class() :
+        Class(impl::call_factory<Class>([](auto&& f) { return f.template ActivateInstance<Class>(); }))
+    {
+    }
 }
 namespace std
 {
+    template<> struct hash<winrt::Component::Collections::IClass> : winrt::impl::hash_base<winrt::Component::Collections::IClass> {};
     template<> struct hash<winrt::Component::Collections::IClassStatics> : winrt::impl::hash_base<winrt::Component::Collections::IClassStatics> {};
     template<> struct hash<winrt::Component::Collections::Class> : winrt::impl::hash_base<winrt::Component::Collections::Class> {};
 }

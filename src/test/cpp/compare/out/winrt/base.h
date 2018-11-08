@@ -2088,7 +2088,7 @@ namespace winrt::impl
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token*  token) noexcept = 0;
+            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token* token) noexcept = 0;
             virtual int32_t WINRT_CALL remove_VectorChanged(winrt::event_token token) noexcept = 0;
         };
     };
@@ -9636,7 +9636,7 @@ namespace winrt::impl
 
     template <typename D, typename K, typename V> struct produce<D, wfc::IObservableMap<K, V>> : produce_base<D, wfc::IObservableMap<K, V>>
     {
-        int32_t WINRT_CALL add_MapChanged(void* handler, int64_t* token) noexcept final
+        int32_t WINRT_CALL add_MapChanged(void* handler, winrt::event_token* token) noexcept final
         {
             try
             {
@@ -9647,12 +9647,12 @@ namespace winrt::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL remove_MapChanged(int64_t token) noexcept final
+        int32_t WINRT_CALL remove_MapChanged(winrt::event_token token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().MapChanged(event_token{ token });
+                this->shim().MapChanged(token);
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -9662,7 +9662,7 @@ namespace winrt::impl
     template <typename D, typename T>
     struct produce<D, wfc::IObservableVector<T>> : produce_base<D, wfc::IObservableVector<T>>
     {
-        int32_t WINRT_CALL add_VectorChanged(void* handler, int64_t* token) noexcept final
+        int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token* token) noexcept final
         {
             try
             {
@@ -9673,12 +9673,12 @@ namespace winrt::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL remove_VectorChanged(int64_t token) noexcept final
+        int32_t WINRT_CALL remove_VectorChanged(winrt::event_token token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().VectorChanged(event_token{ token });
+                this->shim().VectorChanged(token);
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

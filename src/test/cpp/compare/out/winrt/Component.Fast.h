@@ -282,13 +282,13 @@ namespace winrt::Component::Fast
         check_hresult((*(impl::abi_t<fast_interface<FastClass>>**)this)->Fourth(&result));
         return { take_ownership_from_abi, result };
     }
-    inline hstring SlowClass::StaticMethod()
-    {
-        return impl::call_factory<SlowClass, Component::Fast::ISlowClassStatics>([&](auto&& f) { return f.StaticMethod(); });
-    }
     inline SlowClass::SlowClass() :
         SlowClass(impl::call_factory<SlowClass>([](auto&& f) { return f.template ActivateInstance<SlowClass>(); }))
     {
+    }
+    inline hstring SlowClass::StaticMethod()
+    {
+        return impl::call_factory<SlowClass, Component::Fast::ISlowClassStatics>([&](auto&& f) { return f.StaticMethod(); });
     }
 }
 namespace std

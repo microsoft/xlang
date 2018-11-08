@@ -3,9 +3,12 @@
 #include "winrt/impl/Component.Collections.1.h"
 namespace winrt::Component::Collections
 {
-    struct Class
+    struct WINRT_EBO Class : Component::Collections::IClass,
+        impl::require<Class, Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, int32_t>>, Windows::Foundation::Collections::IMap<hstring, int32_t>, Windows::Foundation::Collections::IObservableMap<hstring, int32_t>>
     {
-        Class() = delete;
+        Class(std::nullptr_t) noexcept {}
+        Class(take_ownership_from_abi_t, void* ptr) noexcept : Component::Collections::IClass(take_ownership_from_abi, ptr) {}
+        Class();
         static Windows::Foundation::Collections::IIterable<hstring> Iterable();
         static Windows::Foundation::Collections::IVectorView<hstring> VectorView();
         static Windows::Foundation::Collections::IVector<hstring> Vector();

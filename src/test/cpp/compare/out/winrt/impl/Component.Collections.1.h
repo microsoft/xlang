@@ -3,6 +3,13 @@
 #include "winrt/impl/Component.Collections.0.h"
 namespace winrt::Component::Collections
 {
+    struct WINRT_EBO IClass :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<IClass>
+    {
+        IClass(std::nullptr_t = nullptr) noexcept {}
+        IClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+    };
     struct WINRT_EBO IClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<IClassStatics>
