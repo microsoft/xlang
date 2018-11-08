@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-set(python_module_name 
-    pyrt
-)
+set(python_module_name pyrt)
 
 set(winmd_files
     Windows.Foundation.FoundationContract
@@ -88,14 +86,13 @@ add_custom_command(
   DEPENDS ${pywinrt_exe}
   COMMAND ${pywinrt_exe} ${pywinrt_cmdline}
 )
-add_custom_target(generate_python_test ALL DEPENDS ${setup_py})
+add_custom_target(generate_python_test DEPENDS ${setup_py})
 
 file(TO_NATIVE_PATH "${generated_files_folder}/_${python_module_name}.pyd" module_pyd)
 add_custom_command(
   OUTPUT ${module_pyd} 
   DEPENDS ${setup_py}
   WORKING_DIRECTORY ${generated_files_folder}
-  COMMAND py setup.py develop
+  COMMAND py setup.py build
 )
-# TODO: include python_test in ALL once issue running python on build system is resolved 
-add_custom_target(python_test DEPENDS ${module_pyd})
+add_custom_target(build_python_test DEPENDS ${module_pyd})

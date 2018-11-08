@@ -1501,8 +1501,25 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
 
 
 
+    void write_python_enum(writer& w, TypeDef const& type)
+    {
+        w.write_indented("class %(%):\n", type.TypeName(), is_flags_enum(type) ? "enum.Flag" : "enum.Enum");
+        {
+            writer::indent_guard g{ w };
+            
+            for (auto&& field : type.FieldList())
+            {
+                if (field.Flags().Access() != MemberAccess::Public)
+                {
+                    continue;
+                }
 
+                w.write_indented("% = %\n", field.Name(), field.Constant());
+            }
+        }
 
+        w.write_indented("\n");
+    }
 
 
     void write_type_fromspec(writer& w, TypeDef const& type)

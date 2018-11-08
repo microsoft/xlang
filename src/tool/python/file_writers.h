@@ -124,6 +124,11 @@ namespace xlang
 
         w.write(strings::ns_init, module_name, ns);
 
+        if (settings.filter.includes(members.enums))
+        {
+            w.write("import enum\n\n");
+        }
+        
         if (!needed_namespaces.empty())
         {
             for (std::string needed_ns : needed_namespaces)
@@ -139,6 +144,7 @@ except:
             w.write("\n");
         }
 
+        settings.filter.bind_each<write_python_enum>(members.enums)(w);
         settings.filter.bind_each<write_import_type>(members.classes)(w);
         settings.filter.bind_each<write_import_type>(members.interfaces)(w);
         settings.filter.bind_each<write_import_type>(members.structs)(w);
