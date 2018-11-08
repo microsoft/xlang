@@ -1,7 +1,7 @@
 resources:
   containers:
   - container: build_container
-    image:  microsoft/windowsservercore:1803
+    image:  microsoft/dotnet-framework:4.7.2-runtime-windowsservercore-1803
 
 pool:
   vmImage: 'win1803'
