@@ -3075,6 +3075,14 @@ namespace winrt::@::implementation
                 continue;
             }
 
+            writer::generic_param_guard guard;
+
+            if (info.type.type() == TypeDefOrRef::TypeSpec)
+            {
+                auto type_signature = info.type.TypeSpec().Signature();
+                guard = w.push_generic_params(type_signature.GenericTypeInst());
+            }
+
             for (auto&& method : info.methods)
             {
                 method_signature signature{ method };
@@ -3205,6 +3213,14 @@ namespace winrt::@::implementation
             if (info.base)
             {
                 continue;
+            }
+
+            writer::generic_param_guard guard;
+
+            if (info.type.type() == TypeDefOrRef::TypeSpec)
+            {
+                auto type_signature = info.type.TypeSpec().Signature();
+                guard = w.push_generic_params(type_signature.GenericTypeInst());
             }
 
             for (auto&& method : info.methods)
