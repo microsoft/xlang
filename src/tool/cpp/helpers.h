@@ -114,6 +114,11 @@ namespace xlang
         return has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute");
     }
 
+    bool is_exclusive(TypeDef const& type)
+    {
+        return has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+    }
+
     coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
     {
         auto impls = type.InterfaceImpl();
@@ -249,21 +254,20 @@ namespace xlang
 
     struct interface_info
     {
-        coded_index<TypeDefOrRef> type;
-        std::pair<MethodDef, MethodDef> methods;
+        TypeDef type;
         bool defaulted{};
         bool overridable{};
         bool base{};
-        bool exclusive{};
+        std::vector<std::vector<std::string>> generic_param_stack;
     };
 
-    void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::pair<InterfaceImpl, InterfaceImpl>&& children)
+    void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::vector<std::vector<std::string>> const& generic_param_stack, std::pair<InterfaceImpl, InterfaceImpl>&& children)
     {
         for (auto&& impl : children)
         {
             interface_info info;
-            info.type = impl.Interface();
-            auto name = w.write_temp("%", info.type);
+            auto type = impl.Interface();
+            auto name = w.write_temp("%", type);
             info.defaulted = !base && (defaulted || has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"));
 
             {
@@ -287,35 +291,44 @@ namespace xlang
 
             info.overridable = overridable || has_attribute(impl, "Windows.Foundation.Metadata", "OverridableAttribute");
             info.base = base;
-            TypeDef definition;
+            info.generic_param_stack = generic_param_stack;
             writer::generic_param_guard guard;
 
-            switch (info.type.type())
+            switch (type.type())
             {
             case TypeDefOrRef::TypeDef:
             {
-                definition = info.type.TypeDef();
+                info.type = type.TypeDef();
                 break;
             }
             case TypeDefOrRef::TypeRef:
             {
-                definition = find_required(info.type.TypeRef());
-                w.add_depends(definition);
+                info.type = find_required(type.TypeRef());
+                w.add_depends(info.type);
                 break;
             }
             case TypeDefOrRef::TypeSpec:
             {
-                auto type_signature = info.type.TypeSpec().Signature();
+                auto type_signature = type.TypeSpec().Signature();
+
+                std::vector<std::string> names;
+
+                for (auto&& arg : type_signature.GenericTypeInst().GenericArgs())
+                {
+                    names.push_back(w.write_temp("%", arg));
+                }
+
+                info.generic_param_stack.push_back(std::move(names));
+
                 guard = w.push_generic_params(type_signature.GenericTypeInst());
                 auto signature = type_signature.GenericTypeInst();
-                definition = find_required(signature.GenericType().TypeRef());
+                info.type = find_required(signature.GenericType().TypeRef());
+
                 break;
             }
             }
 
-            info.methods = definition.MethodList();
-            info.exclusive = has_attribute(definition, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
-            get_interfaces_impl(w, result, info.defaulted, info.overridable, base, definition.InterfaceImpl());
+            get_interfaces_impl(w, result, info.defaulted, info.overridable, base, info.generic_param_stack, info.type.InterfaceImpl());
             result[name] = std::move(info);
         }
     };
@@ -323,11 +336,11 @@ namespace xlang
     auto get_interfaces(writer& w, TypeDef const& type)
     {
         std::map<std::string, interface_info> result;
-        get_interfaces_impl(w, result, false, false, false, type.InterfaceImpl());
+        get_interfaces_impl(w, result, false, false, false, {}, type.InterfaceImpl());
 
         for (auto&& base : get_bases(type))
         {
-            get_interfaces_impl(w, result, false, false, true, base.InterfaceImpl());
+            get_interfaces_impl(w, result, false, false, true, {}, base.InterfaceImpl());
         }
 
         return result;
@@ -434,13 +447,13 @@ namespace xlang
 
         for (auto&&[interface_name, interface_info] : get_interfaces(w, type))
         {
-            if (!interface_info.exclusive)
+            if (!is_exclusive(interface_info.type))
             {
                 continue;
             }
 
             fast_interface_info info;
-            info.methods = interface_info.methods;
+            info.methods = interface_info.type.MethodList();
             info.name = interface_name;
             info.version = get_version(interface_info.type);
 

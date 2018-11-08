@@ -1238,7 +1238,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 w.write(format,
                     interface_name,
                     interface_name,
-                    bind_each<write_dispatch_overridable_method>(info.methods));
+                    bind_each<write_dispatch_overridable_method>(info.type.MethodList()));
             }
         }
     }
@@ -1270,9 +1270,9 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         {
             if (info.overridable && !info.base)
             {
-                auto name = info.type.TypeRef().TypeName();
+                auto name = info.type.TypeName();
 
-                w.write_each<write_interface_override_method>(info.methods, name);
+                w.write_each<write_interface_override_method>(info.type.MethodList(), name);
             }
         };
     }
@@ -1434,15 +1434,14 @@ public:
         {
             if (info.overridable && !info.base)
             {
-                auto interface_type = find(info.type.TypeRef());
-                auto interface_type_name = interface_type.TypeName();
+                auto interface_type_name = info.type.TypeName();
 
                 w.write(format,
                     interface_type_name,
                     interface_type_name,
-                    interface_type.TypeNamespace(),
+                    info.type.TypeNamespace(),
                     interface_type_name,
-                    bind_each<write_consume_declaration>(interface_type.MethodList()));
+                    bind_each<write_consume_declaration>(info.type.MethodList()));
             }
         }
     }
@@ -1515,12 +1514,12 @@ protected:
     {
         auto type_name = type.TypeName();
         auto interfaces_plus_self = get_interfaces(w, type);
-        interfaces_plus_self[std::string{ type_name }] = interface_info{ type.coded_index<TypeDefOrRef>(), type.MethodList() };
+        interfaces_plus_self[std::string{ type_name }] = interface_info{ type };
         std::map<std::string_view, std::set<std::string>> method_usage;
 
         for (auto&&[interface_name, info] : interfaces_plus_self)
         {
-            for (auto&& method : info.methods)
+            for (auto&& method : info.type.MethodList())
             {
                 method_usage[get_name(method)].insert(interface_name);
             }
@@ -1554,14 +1553,14 @@ protected:
         {
             if (info.defaulted && !info.base)
             {
-                for (auto&& method : info.methods)
+                for (auto&& method : info.type.MethodList())
                 {
                     method_usage[get_name(method)].insert(default_interface_name);
                 }
             }
             else
             {
-                for (auto&& method : info.methods)
+                for (auto&& method : info.type.MethodList())
                 {
                     method_usage[get_name(method)].insert(interface_name);
                 }
@@ -1895,7 +1894,7 @@ protected:
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            if (!info.exclusive && !info.base)
+            if (!is_exclusive(info.type) && !info.base)
             {
                 if (first)
                 {
@@ -2513,7 +2512,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
             for (auto&&[interface_name, info] : get_interfaces(w, type))
             {
-                if (!info.exclusive && !info.base)
+                if (!is_exclusive(info.type) && !info.base)
                 {
                     w.write(", @", interface_name);
                 }
@@ -3075,15 +3074,9 @@ namespace winrt::@::implementation
                 continue;
             }
 
-            writer::generic_param_guard guard;
+            w.generic_param_stack.insert(w.generic_param_stack.end(), info.generic_param_stack.begin(), info.generic_param_stack.end());
 
-            if (info.type.type() == TypeDefOrRef::TypeSpec)
-            {
-                auto type_signature = info.type.TypeSpec().Signature();
-                guard = w.push_generic_params(type_signature.GenericTypeInst());
-            }
-
-            for (auto&& method : info.methods)
+            for (auto&& method : info.type.MethodList())
             {
                 method_signature signature{ method };
                 w.async_types = is_async(method, signature);
@@ -3095,6 +3088,8 @@ namespace winrt::@::implementation
                     bind<write_implementation_params>(signature),
                     is_noexcept(method) ? " noexcept" : "");
             }
+
+            w.generic_param_stack.resize(w.generic_param_stack.size() - info.generic_param_stack.size());
         }
     }
 
@@ -3215,15 +3210,9 @@ namespace winrt::@::implementation
                 continue;
             }
 
-            writer::generic_param_guard guard;
+            w.generic_param_stack.insert(w.generic_param_stack.end(), info.generic_param_stack.begin(), info.generic_param_stack.end());
 
-            if (info.type.type() == TypeDefOrRef::TypeSpec)
-            {
-                auto type_signature = info.type.TypeSpec().Signature();
-                guard = w.push_generic_params(type_signature.GenericTypeInst());
-            }
-
-            for (auto&& method : info.methods)
+            for (auto&& method : info.type.MethodList())
             {
                 auto format = R"(    % %::%(%)%
     {
@@ -3242,6 +3231,8 @@ namespace winrt::@::implementation
                     bind<write_implementation_params>(signature),
                     is_noexcept(method) ? " noexcept" : "");
             }
+
+            w.generic_param_stack.resize(w.generic_param_stack.size() - info.generic_param_stack.size());
         }
     }
 
