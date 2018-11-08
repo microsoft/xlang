@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 execute_process(
     COMMAND py -c "import sys; vi = sys.version_info; print('cp{0}{1}-{2}'.format(vi.major, vi.minor, 'win_amd64' if sys.maxsize > 2**32 else 'win32'))"
     OUTPUT_VARIABLE python_version_info
+    OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 set(python_module_name pyrt)
