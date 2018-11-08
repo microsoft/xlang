@@ -1,8 +1,7 @@
 resources:
   containers:
   - container: build_container
-    image: msftxlang.azurecr.io/xlang-windows-build
-    endpoint: msftxlang_acr
+    image:  microsoft/windowsservercore:1803
 
 pool:
   vmImage: 'win1803'
@@ -10,7 +9,5 @@ pool:
 container: build_container
 
 steps:
-- script: cmake ./src -B_build -GNinja
-  displayName: 'CMake'
-- script: ninja -C _build -v 
-  displayName: 'Ninja'
+- script: systeminfo
+  displayName: 'SystemInfo'
