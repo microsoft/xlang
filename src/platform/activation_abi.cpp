@@ -1,6 +1,7 @@
 #include "pal_internal.h"
 #include "opaque_string_wrapper.h"
 #include "platform_activation.h"
+#include "pal_error.h"
 
 namespace xlang::impl
 {
@@ -17,12 +18,12 @@ namespace xlang::impl
             if (pfn)
             {
                 void* factory{};
-                xlang_result result = (*pfn)(class_name, iid, &factory);
-                if (result == xlang_error_ok)
+                xlang_error_info* result = (*pfn)(class_name, iid, &factory);
+                if (result == nullptr)
                 {
                     return factory;
                 }
-                else if (result != xlang_error_class_not_available)
+                else if (result->error_code() != xlang_error_class_not_available)
                 {
                     throw_result(result);
                 }
@@ -34,7 +35,7 @@ namespace xlang::impl
 
 using namespace xlang::impl;
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_get_activation_factory(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_get_activation_factory(
     xlang_string class_name,
     xlang_guid const& iid,
     void** factory
@@ -60,7 +61,7 @@ try
         *factory = get_activation_factory<char16_t>(class_name, iid);
     }
 
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {

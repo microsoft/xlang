@@ -1,4 +1,5 @@
 #include "pal_internal.h"
+#include "pal_error.h"
 
 #if !XLANG_PLATFORM_WINDOWS
 #error "This file is only for targeting Windows"

@@ -2,6 +2,7 @@
 
 #include <pal.h>
 #include <new>
+#include <algorithm>
 
 #ifdef _DEBUG
 
@@ -22,36 +23,12 @@
 
 #endif
 
-namespace xlang
+inline bool operator==(xlang_guid const& lhs, xlang_guid const& rhs) noexcept
 {
-    struct xlang_error
-    {
-        xlang_result result;
-    };
+    static_assert(sizeof(xlang_guid) % sizeof(size_t) == 0);
+    constexpr size_t count = sizeof(xlang_guid) / sizeof(size_t);
 
-    [[noreturn]] inline void throw_result(xlang_result result)
-    {
-        throw xlang_error{ result };
-    }
-
-    // TODO: Replace with xlang projection methods
-    inline xlang_result to_result() noexcept
-    {
-        try
-        {
-            throw;
-        }
-        catch (xlang_error const& e)
-        {
-            return e.result;
-        }
-        catch (std::bad_alloc const&)
-        {
-            return xlang_error_out_of_memory;
-        }
-        catch (...)
-        {
-            std::terminate();
-        }
-    }
+    auto guid1 = reinterpret_cast<size_t const*>(&lhs);
+    auto guid2 = reinterpret_cast<size_t const*>(&rhs);
+    return std::equal(guid1, guid1 + count, guid2, guid2 + count);
 }

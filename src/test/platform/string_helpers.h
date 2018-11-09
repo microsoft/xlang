@@ -3,7 +3,7 @@
 // template helpers to genericize test code
 
 template <typename char_type>
-xlang_result xlang_create_string(char_type const* source, uint32_t length, xlang_string* str)
+auto xlang_create_string(char_type const* source, uint32_t length, xlang_string* str)
 {
     static_assert(std::disjunction_v<std::is_same<char_type, xlang_char8>, std::is_same<char_type, char16_t>>);
     if constexpr (std::is_same_v<char_type, xlang_char8>)
@@ -17,7 +17,7 @@ xlang_result xlang_create_string(char_type const* source, uint32_t length, xlang
 }
 
 template <typename char_type>
-xlang_result xlang_create_string_reference(char_type const* source, uint32_t length, xlang_string_header* header, xlang_string* str)
+auto xlang_create_string_reference(char_type const* source, uint32_t length, xlang_string_header* header, xlang_string* str)
 {
     static_assert(std::disjunction_v<std::is_same<char_type, xlang_char8>, std::is_same<char_type, char16_t>>);
     if constexpr (std::is_same_v<char_type, xlang_char8>)
@@ -31,7 +31,7 @@ xlang_result xlang_create_string_reference(char_type const* source, uint32_t len
 }
 
 template <typename char_type>
-xlang_result xlang_get_string_raw_buffer(xlang_string str, char_type const* * buffer, uint32_t* length)
+auto xlang_get_string_raw_buffer(xlang_string str, char_type const* * buffer, uint32_t* length)
 {
     static_assert(std::disjunction_v<std::is_same<char_type, xlang_char8>, std::is_same<char_type, char16_t>>);
     if constexpr (std::is_same_v<char_type, xlang_char8>)
@@ -45,7 +45,7 @@ xlang_result xlang_get_string_raw_buffer(xlang_string str, char_type const* * bu
 }
 
 template <typename char_type>
-xlang_result xlang_preallocate_string_buffer(uint32_t length, char_type** char_buffer, xlang_string_buffer* buffer_handle)
+auto xlang_preallocate_string_buffer(uint32_t length, char_type** char_buffer, xlang_string_buffer* buffer_handle)
 {
     static_assert(std::disjunction_v<std::is_same<char_type, xlang_char8>, std::is_same<char_type, char16_t>>);
     if constexpr (std::is_same_v<char_type, xlang_char8>)
