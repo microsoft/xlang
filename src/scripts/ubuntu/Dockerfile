@@ -24,6 +24,7 @@ RUN apt-get update \
 
 RUN apt-get install -y \
         clang \
+        clang-tidy \
         cmake \
         ninja-build \
         libc++-dev \
