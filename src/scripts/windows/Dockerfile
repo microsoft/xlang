@@ -2,8 +2,6 @@
 
 # Dockerfile based on https://github.com/Microsoft/vs-dockerfiles 
 
-# make sure to use base image already cached in azure pipeline build image
-# FROM microsoft/dotnet-framework@sha256:cfcd42bdc1646318cb8a314c298e8ba0b7e962829460c49ba2c609eb125e5e7f
 FROM microsoft/dotnet-framework:4.7.2-runtime-windowsservercore-1803
 
 ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\TEMP\vs_buildtools.exe
