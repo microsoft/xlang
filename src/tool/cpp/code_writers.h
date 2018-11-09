@@ -2868,6 +2868,54 @@ void* winrt_make_%()
         w.write(format, interfaces);
     }
 
+    void write_component_class_override_constructors(writer& w, TypeDef const& type)
+    {
+        auto base_type = get_base_class(type);
+
+        if (!base_type)
+        {
+            return;
+        }
+
+        if (settings.filter.includes(base_type))
+        {
+            return;
+        }
+
+        auto type_name = type.TypeName();
+
+        for (auto&& factory : get_factories(base_type))
+        {
+            if (!factory.composable)
+            {
+                continue;
+            }
+
+            for (auto&& method : factory.type.MethodList())
+            {
+                method_signature signature{ method };
+                auto& params = signature.params();
+                params.resize(params.size() - 2);
+
+                auto format = R"(
+    %_base(%)
+    {
+        impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
+    }
+                )";
+
+                w.write(format,
+                    type_name,
+                    bind<write_consume_params>(signature),
+                    base_type,
+                    factory.type,
+                    get_name(method),
+                    bind<write_consume_args>(signature),
+                    params.empty() ? "" : ", ");
+            }
+        }
+    }
+
     void write_component_g_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -2941,7 +2989,7 @@ void* winrt_make_%()
                 composable_base_name,
                 type_namespace,
                 type_name,
-                "",
+                bind<write_component_class_override_constructors>(type),
                 bind<write_component_override_dispatch_base>(type));
         }
 
