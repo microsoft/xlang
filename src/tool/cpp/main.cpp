@@ -6,6 +6,7 @@
 #include "helpers.h"
 #include "code_writers.h"
 #include "file_writers.h"
+#include "type_writers.h"
 
 namespace xlang
 {
@@ -31,7 +32,9 @@ namespace xlang
             { "include", 0 },
             { "exclude", 0 },
             { "root", 0, 1 },
-            { "base", 0, 0 }
+            { "base", 0, 0 },
+            { "lib", 0, 1 },
+            { "opt", 0, 0 }
         };
 
         cmd::reader args{ argc, argv, options };
@@ -48,7 +51,7 @@ namespace xlang
         settings.component = args.exists("component");
         settings.base = args.exists("base");
 
-        auto output_folder = absolute(args.value("output"));
+        auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / settings.root / "impl");
         output_folder += '/';
         settings.output_folder = output_folder.string();
@@ -70,16 +73,23 @@ namespace xlang
 
         if (settings.component)
         {
+            settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
-            if (args.exists("pch"))
+            settings.component_pch = args.value("pch", "pch.h");
+            settings.component_prefix = args.exists("prefix");
+            settings.component_lib = args.value("lib", "winrt");
+            settings.component_opt = args.exists("opt");
+
+            if (settings.component_pch == ".")
             {
-                settings.component_pch = args.value("pch");
+                settings.component_pch.clear();
             }
+
             auto component = args.value("component");
 
             if (!component.empty())
             {
-                auto component_folder = absolute(component);
+                auto component_folder = canonical(component);
                 create_directories(component_folder);
                 component_folder += '/';
                 settings.component_folder = component_folder.string();
@@ -132,45 +142,52 @@ namespace xlang
             cache c{ get_files_to_cache() };
             c.remove_legacy_cppwinrt_foundation_types();
             supplement_includes(c);
-            filter f{ settings.include, settings.exclude };
+            settings.filter = { settings.include, settings.exclude };
 
             if (settings.verbose)
             {
+                w.write(" tool:  % (C++/WinRT v%)\n", canonical(argv[0]).string(), XLANG_VERSION_STRING);
+
                 for (auto&& file : settings.input)
                 {
-                    w.write("input: %\n", file);
+                    w.write(" in:    %\n", file);
                 }
 
                 for (auto&& file : settings.reference)
                 {
-                    w.write("reference: %\n", file);
+                    w.write(" ref:   %\n", file);
                 }
 
-                w.write("output: %\n", settings.output_folder);
+                w.write(" out:   %\n", settings.output_folder);
+
+                if (!settings.component_folder.empty())
+                {
+                    w.write(" cout:  %\n", settings.component_folder);
+                }
             }
 
             w.flush_to_console();
             task_group group;
 
-            for (auto&& ns : c.namespaces())
+            for (auto&&[ns, members] : c.namespaces())
             {
-                group.add([&, &ns = ns.first, &members = ns.second]
+                group.add([&, &ns = ns, &members = members]
                 {
-                    if (!f.includes(members))
+                    if (members.types.empty() || !settings.filter.includes(members))
                     {
                         return;
                     }
 
                     write_namespace_0_h(ns, members);
                     write_namespace_1_h(ns, members);
-                    write_namespace_2_h(ns, members);
+                    write_namespace_2_h(ns, members, c);
                     write_namespace_h(c, ns, members);
                 });
             }
 
             group.add([&]
             {
-                if (f.empty() || settings.base)
+                if (settings.filter.empty() || settings.base)
                 {
                     write_base_h();
                 }
@@ -183,7 +200,7 @@ namespace xlang
                     {
                         for (auto&& type : members.classes)
                         {
-                            if (f.includes(type))
+                            if (settings.filter.includes(type))
                             {
                                 classes.push_back(type);
                             }
@@ -192,11 +209,12 @@ namespace xlang
 
                     if (!classes.empty())
                     {
-                        write_component_g_cpp(classes);
+                        write_module_g_cpp(classes);
 
                         for (auto&& type : classes)
                         {
                             write_component_g_h(type);
+                            write_component_g_cpp(type);
                             write_component_h(type);
                             write_component_cpp(type);
                         }
@@ -208,7 +226,7 @@ namespace xlang
 
             if (settings.verbose)
             {
-                w.write("time: %ms\n", get_elapsed_time(start));
+                w.write(" time:  %ms\n", get_elapsed_time(start));
             }
         }
         catch (usage_exception const&)
@@ -217,7 +235,7 @@ namespace xlang
         }
         catch (std::exception const& e)
         {
-            w.write("%\n", e.what());
+            w.write(" error: %\n", e.what());
         }
 
         w.flush_to_console();
@@ -227,4 +245,5 @@ namespace xlang
 int main(int const argc, char** argv)
 {
     xlang::run(argc, argv);
+
 }

@@ -24,6 +24,21 @@ namespace xlang::meta::reader
         return get_row<reader::TypeSpec>();
     }
 
+    inline auto typed_index<TypeDefOrRef>::CustomAttribute() const
+    {
+        if (type() == TypeDefOrRef::TypeDef)
+        {
+            return TypeDef().CustomAttribute();
+        }
+
+        if (type() == TypeDefOrRef::TypeRef)
+        {
+            return TypeRef().CustomAttribute();
+        }
+
+        return TypeSpec().CustomAttribute();
+    }
+
     inline auto typed_index<HasConstant>::Field() const
     {
         return get_row<reader::Field>();

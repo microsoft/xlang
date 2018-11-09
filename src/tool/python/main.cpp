@@ -45,10 +45,8 @@ namespace xlang
             settings.exclude.insert(exclude);
         }
 
-        auto output_folder = absolute(args.value("output", "output"));
-        create_directories(output_folder);
-        output_folder += '/';
-        settings.output_folder = output_folder.string();
+        settings.output_folder = absolute(args.value("output", "output"));
+        create_directories(settings.output_folder);
     }
 
     auto get_files_to_cache()
@@ -76,7 +74,7 @@ namespace xlang
                     wc.write("input: %\n", file);
                 }
 
-                wc.write("output: %\n", settings.output_folder);
+                wc.write("output: %\n", settings.output_folder.string());
             }
 
             wc.flush_to_console();
@@ -84,35 +82,65 @@ namespace xlang
             std::vector<std::string> generated_namespaces{};
             task_group group;
 
+            auto native_module = "_" + settings.module;
+            auto module_dir = settings.output_folder / settings.module;
+            auto src_dir = module_dir / "src";
+
             group.add([&]
             {
-                write_pybase_h();
+                write_pybase_h(src_dir);
+                write_package_init(module_dir, native_module);
             });
 
-            for (auto&& ns : c.namespaces())
+            for (auto&&[ns, members] : c.namespaces())
             {
-                if (!f.includes(ns.second))
+                if (!f.includes(members))
                 {
                     continue;
                 }
 
-                std::string fqns{ ns.first };
+                auto ns_dir = module_dir;
+                
+                auto append_dir = [&ns_dir](std::string_view const& ns_segment)
+                {
+                    std::string segment{ ns_segment };
+                    std::transform(segment.begin(), segment.end(), segment.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
+                    ns_dir /= segment;
+                };
+                
+                size_t pos{};
+                while (true)
+                {
+                    auto new_pos = ns.find('.', pos);
+                    if (new_pos == std::string_view::npos)
+                    { 
+                        append_dir(ns.substr(pos));
+                        break;
+                    }
+
+                    append_dir(ns.substr(pos, new_pos - pos));
+                    pos = new_pos + 1;
+                } 
+
+                write_package_init(module_dir, native_module);
+
+                std::string fqns{ ns };
                 auto h_filename = "py." + fqns + ".h";
 
-                generated_namespaces.emplace_back(ns.first);
+                generated_namespaces.emplace_back(ns);
 
-                group.add([&]
+                group.add([&, &ns = ns, &members = members]
                 {
-                    auto namespaces = write_namespace_cpp(ns.first, ns.second);
-                    write_namespace_h(ns.first, namespaces, ns.second);
+                    auto namespaces = write_namespace_cpp(src_dir, ns, members);
+                    write_namespace_h(src_dir, ns, namespaces, members);
+                    write_namespace_init(ns_dir, settings.module, namespaces, ns, members);
                 });
             }
 
             group.get();
 
-            auto native_module = "_" + settings.module;
-            write_module_cpp(native_module, generated_namespaces);
-            write_setup_py(settings.module, native_module, generated_namespaces);
+            write_module_cpp(src_dir, native_module, generated_namespaces);
+            write_setup_py(settings.output_folder, settings.module, native_module, generated_namespaces);
 
             if (settings.verbose)
             {

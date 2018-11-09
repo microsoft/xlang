@@ -485,7 +485,7 @@ namespace py
     template <>
     struct converter<winrt::Windows::Foundation::IInspectable>
     {
-        static PyObject* convert(winrt::Windows::Foundation::IInspectable value) noexcept
+        static PyObject* convert(winrt::Windows::Foundation::IInspectable const& value) noexcept
         {
             return wrap<winrt::Windows::Foundation::IInspectable>(value, winrt_type<winrt_base>::python_type);
         }
@@ -554,7 +554,7 @@ namespace py
     template <>
     struct converter<winrt::hstring>
     {
-        static PyObject* convert(winrt::hstring value) noexcept
+        static PyObject* convert(winrt::hstring const& value) noexcept
         {
             return PyUnicode_FromWideChar(value.c_str(), value.size());
         }
@@ -594,7 +594,7 @@ namespace py
     template <typename T>
     struct converter<T, typename std::enable_if_t<is_class_category_v<T>>>
     {
-        static PyObject* convert(T instance) noexcept
+        static PyObject* convert(T const& instance) noexcept
         {
             return wrap(instance);
         }
@@ -716,7 +716,7 @@ namespace py
     template <typename TItem>
     struct converter<winrt::Windows::Foundation::Collections::IIterable<TItem>>
     {
-        static PyObject* convert(TItem instance) noexcept
+        static PyObject* convert(TItem const& instance) noexcept
         {
             return wrap(instance);
         }
@@ -751,7 +751,7 @@ namespace py
     template <typename T>
     struct converter<T, typename std::enable_if_t<(is_interface_category_v<T> || is_pinterface_category_v<T>) && !is_specalized_interface_v<T>>>
     {
-        static PyObject* convert(T instance) noexcept
+        static PyObject* convert(T const& instance) noexcept
         {
             return wrap(instance);
         }
@@ -770,7 +770,7 @@ namespace py
     template <typename T>
     struct converter<T, typename std::enable_if_t<is_delegate_category_v<T> || is_pdelegate_category_v<T>>>
     {
-        static PyObject* convert(T instance) noexcept
+        static PyObject* convert(T const& instance) noexcept
         {
             // TODO: support converting delegates
             PyErr_SetNone(PyExc_NotImplementedError);
@@ -783,6 +783,12 @@ namespace py
             return delegate_python_type<T>::type::get(obj);
         }
     };
+
+    template<typename T>
+    PyObject* convert(T const& instance)
+    {
+        return converter<T>::convert(instance);
+    }
 
     template<typename T>
     auto convert_to(PyObject* args, int index)

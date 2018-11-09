@@ -12,6 +12,26 @@ namespace xlang
         return std::chrono::duration_cast<std::chrono::duration<int64_t, std::milli>>(std::chrono::high_resolution_clock::now() - start).count();
     }
 
+    auto get_dotted_name_segments(std::string_view ns)
+    {
+        std::vector<std::string_view> segments;
+        size_t pos = 0;
+
+        while (true)
+        {
+            auto new_pos = ns.find('.', pos);
+
+            if (new_pos == std::string_view::npos)
+            {
+                segments.push_back(ns.substr(pos));
+                return std::move(segments);
+            }
+
+            segments.push_back(ns.substr(pos, new_pos - pos));
+            pos = new_pos + 1;
+        };
+    };
+
     struct separator
     {
         writer& w;
@@ -129,7 +149,7 @@ namespace xlang
 
         void handle(TypeSig const& signature)
         {
-            xlang::visit(signature.Type(),
+            call(signature.Type(),
                 [&](auto&& type)
             {
                 static_cast<T*>(this)->handle(type);
