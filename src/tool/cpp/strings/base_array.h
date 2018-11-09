@@ -468,21 +468,21 @@ WINRT_EXPORT namespace winrt
     inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
     {
         hstring value;
-        check_hresult((*(impl::IInspectable**)&object)->GetRuntimeClassName(put_abi(value)));
+        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(put_abi(value)));
         return value;
     }
 
     inline com_array<guid> get_interfaces(Windows::Foundation::IInspectable const& object)
     {
         com_array<guid> value;
-        check_hresult((*(impl::IInspectable**)&object)->GetIids(impl::put_size_abi(value), put_abi(value)));
+        check_hresult((*(impl::inspectable_abi**)&object)->GetIids(impl::put_size_abi(value), put_abi(value)));
         return value;
     }
 
     inline Windows::Foundation::TrustLevel get_trust_level(Windows::Foundation::IInspectable const& object)
     {
         Windows::Foundation::TrustLevel value{};
-        check_hresult((*(impl::IInspectable**)&object)->GetTrustLevel(&value));
+        check_hresult((*(impl::inspectable_abi**)&object)->GetTrustLevel(&value));
         return value;
     }
 }

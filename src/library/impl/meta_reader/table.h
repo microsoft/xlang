@@ -307,7 +307,6 @@ namespace xlang::meta::reader
 
         value_type operator+(difference_type offset) const noexcept
         {
-            row_base temp{ *this };
             return { m_table, m_index + offset };
         }
 

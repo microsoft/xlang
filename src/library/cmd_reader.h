@@ -13,26 +13,21 @@ namespace xlang::cmd
 
     struct reader
     {
-    private:
-        auto find(std::vector<option> const& options, std::string_view const& arg)
-        {
-            for (auto current = options.begin(); current != options.end(); ++current)
-            {
-                if (starts_with(current->name, arg))
-                {
-                    return current;
-                }
-            }
-
-            return options.end();
-        }
-
-        std::map<std::string_view, std::vector<std::string>> m_options;
-        
-    public:
         template <typename C, typename V>
         reader(C const argc, V argv, std::vector<option> const& options)
         {
+#ifdef XLANG_DEBUG
+            {
+                std::set<std::string_view> unique;
+
+                for (auto&& option : options)
+                {
+                    // If this assertion fails it means there are duplicate options.
+                    XLANG_ASSERT(unique.insert(option.name).second);
+                }
+            }
+#endif
+
             if (argc < 2)
             {
                 return;
@@ -135,22 +130,22 @@ namespace xlang::cmd
                 {
                     if (std::experimental::filesystem::is_regular_file(file))
                     {
-                        files.insert(file.path().string());
+                        files.insert(canonical(file.path()).string());
                     }
                 }
             };
 
             for (auto&& path : values(name))
             {
-                auto absolute = std::experimental::filesystem::absolute(path);
+                auto canonical = std::experimental::filesystem::canonical(path);
 
-                if (std::experimental::filesystem::is_directory(absolute))
+                if (std::experimental::filesystem::is_directory(canonical))
                 {
-                    add_directory(absolute);
+                    add_directory(canonical);
                 }
-                else if (std::experimental::filesystem::is_regular_file(absolute))
+                else if (std::experimental::filesystem::is_regular_file(canonical))
                 {
-                    files.insert(absolute.string());
+                    files.insert(canonical.string());
                 }
 #if XLANG_PLATFORM_WINDOWS
                 else if (path == "local")
@@ -172,5 +167,22 @@ namespace xlang::cmd
 
             return files;
         }
+
+    private:
+
+        std::vector<option>::const_iterator find(std::vector<option> const& options, std::string_view const& arg)
+        {
+            for (auto current = options.begin(); current != options.end(); ++current)
+            {
+                if (starts_with(current->name, arg))
+                {
+                    return current;
+                }
+            }
+
+            return options.end();
+        }
+
+        std::map<std::string_view, std::vector<std::string>> m_options;
     };
 }

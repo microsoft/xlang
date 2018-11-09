@@ -1,13 +1,13 @@
 import find_projection
-
-import _pyrt
 import unittest
 import asyncio
+
+import pyrt.windows.foundation.collections as wfc
 
 class TestCollections(unittest.TestCase):
 
     def test_stringmap(self):
-        m = _pyrt.StringMap()
+        m = wfc.StringMap()
         m.Insert("hello", "world")
 
         self.assertTrue(m.HasKey("hello"))
@@ -33,7 +33,7 @@ class TestCollections(unittest.TestCase):
                 
                 loop.call_soon_threadsafe(asyncio.Future.set_result, future, True)
 
-            m = _pyrt.StringMap()
+            m = wfc.StringMap()
             m.Insert("hello", "world")
             token = m.add_MapChanged(onMapChanged)
             m.Insert("dr", "who")
@@ -47,6 +47,4 @@ class TestCollections(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()

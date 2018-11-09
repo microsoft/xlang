@@ -269,9 +269,10 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         impl::require<IReference<T>, IPropertyValue>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        IReference<T>(std::nullptr_t = nullptr) noexcept {}
+        IReference(std::nullptr_t = nullptr) noexcept {}
+        IReference(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
 
-        IReference<T>(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
+        IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
         {
         }
 

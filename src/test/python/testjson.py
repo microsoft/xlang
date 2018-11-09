@@ -1,12 +1,12 @@
 import find_projection
-
-import _pyrt
 import unittest
+
+import pyrt.windows.data.json as wdj
 
 class TestJson(unittest.TestCase):
 
     def test_activate_JsonArray(self):
-        a = _pyrt.JsonArray()
+        a = wdj.JsonArray()
         self.assertEqual(a.get_Size(), 0)
         self.assertEqual(a.get_ValueType(), 4)
         self.assertEqual(a.ToString(), "[]")
@@ -14,7 +14,7 @@ class TestJson(unittest.TestCase):
 
 
     def test_activate_JsonObject(self):
-        o = _pyrt.JsonObject()
+        o = wdj.JsonObject()
         self.assertEqual(o.get_Size(), 0)
         self.assertEqual(o.get_ValueType(), 5)
         self.assertEqual(o.ToString(), "{}")
@@ -22,14 +22,14 @@ class TestJson(unittest.TestCase):
 
     def test_cant_activate_JsonError(self):
         with self.assertRaises(TypeError):
-            e = _pyrt.JsonError()
+            e = wdj.JsonError()
 
     def test_cant_activate_JsonValue(self):
         with self.assertRaises(TypeError):
-            v = _pyrt.JsonValue()
+            v = wdj.JsonValue()
 
     def test_JsonArray_parse(self):
-        a = _pyrt.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
         self.assertEqual(a.get_ValueType(), 4)
         self.assertEqual(a.get_Size(), 7)
         self.assertTrue(a.GetBooleanAt(0))
@@ -43,7 +43,7 @@ class TestJson(unittest.TestCase):
         self.assertEqual(o.get_Size(), 0)
 
     def test_JsonArray_GetView(self):
-        a = _pyrt.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
         view = a.GetView()
 
         self.assertEqual(view.get_Size(), 7)
@@ -66,52 +66,53 @@ class TestJson(unittest.TestCase):
 
 
     def test_JsonValue_boolean(self):
-        t = _pyrt.JsonValue.CreateBooleanValue(True)
+        t = wdj.JsonValue.CreateBooleanValue(True)
         self.assertEqual(t.get_ValueType(), 1)
         self.assertTrue(t.GetBoolean())
 
-        f = _pyrt.JsonValue.CreateBooleanValue(False)
+        f = wdj.JsonValue.CreateBooleanValue(False)
         self.assertEqual(f.get_ValueType(), 1)
         self.assertFalse(f.GetBoolean())
 
     def test_JsonValue_null(self):
-        n = _pyrt.JsonValue.CreateNullValue()
+        n = wdj.JsonValue.CreateNullValue()
         self.assertEqual(n.get_ValueType(), 0)
 
     def test_JsonValue_number(self):
-        t = _pyrt.JsonValue.CreateNumberValue(42)
+        t = wdj.JsonValue.CreateNumberValue(42)
         self.assertEqual(t.get_ValueType(), 2)
         self.assertEqual(t.GetNumber(), 42)
 
     def test_JsonValue_string(self):
-        t = _pyrt.JsonValue.CreateStringValue("Plugh")
+        t = wdj.JsonValue.CreateStringValue("Plugh")
         self.assertEqual(t.get_ValueType(), 3)
         self.assertEqual(t.GetString(), "Plugh")
 
     def test_JsonValue_parse(self):
-        b = _pyrt.JsonValue.Parse("true")
+        b = wdj.JsonValue.Parse("true")
         self.assertEqual(b.get_ValueType(), 1)
         self.assertTrue(b.GetBoolean())
 
-        n = _pyrt.JsonValue.Parse("16")
+        n = wdj.JsonValue.Parse("16")
         self.assertEqual(n.get_ValueType(), 2)
         self.assertEqual(n.GetNumber(), 16)
 
-        s = _pyrt.JsonValue.Parse("\"plugh\"")
+        s = wdj.JsonValue.Parse("\"plugh\"")
         self.assertEqual(s.get_ValueType(), 3)
         self.assertEqual(s.GetString(), "plugh")
 
     def test_invalid_param_count_instance(self):
-        a = _pyrt.JsonArray()
+        a = wdj.JsonArray()
         with self.assertRaises(TypeError):
             a.Append(10, 20)
 
     def test_invalid_param_count_static(self):
         with self.assertRaises(TypeError):
-            _pyrt.JsonArray.Parse(10, 20)
+            wdj.JsonArray.Parse(10, 20)
 
 
 if __name__ == '__main__':
+    import _pyrt
     _pyrt.init_apartment()
     unittest.main()
     _pyrt.uninit_apartment()

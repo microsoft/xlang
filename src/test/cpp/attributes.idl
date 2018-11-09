@@ -1,0 +1,16 @@
+namespace Windows.Foundation.Metadata
+{
+    [attributeusage(target_runtimeclass)]
+    [attributename("fastabi")]
+    [version(1.0)]
+    attribute FastAbiAttribute
+    {
+    }
+
+    [attributeusage(target_method, target_property)]
+    [attributename("noexcept")]
+    [version(1.0)]
+    attribute NoExceptionAttribute
+    {
+    }
+}
