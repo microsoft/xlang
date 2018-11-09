@@ -34,7 +34,7 @@ static std::string_view enum_string(writer& w)
 
 void enum_type::write_cpp_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -61,7 +61,7 @@ void enum_type::write_cpp_abi_type(writer& w) const
 
 void enum_type::write_c_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -205,7 +205,7 @@ void enum_type::write_c_definition(writer& w) const
 
 void struct_type::write_cpp_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -228,7 +228,7 @@ void struct_type::write_cpp_abi_type(writer& w) const
 
 void struct_type::write_c_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -324,7 +324,7 @@ void struct_type::write_c_definition(writer& w) const
 
 void delegate_type::write_cpp_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -749,7 +749,7 @@ interface %
 
 void delegate_type::write_c_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -811,7 +811,7 @@ EXTERN_C const IID %;
 
 void interface_type::write_cpp_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -846,7 +846,7 @@ void interface_type::write_cpp_abi_type(writer& w) const
 
 void interface_type::write_c_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -920,7 +920,7 @@ void class_type::write_cpp_forward_declaration(writer& w) const
         xlang::throw_invalid("Cannot forward declare class '", m_clrFullName, "' since it has no default interface");
     }
 
-    if (!w.should_declare(m_mangledName))
+    if (!w.should_forward_declare(m_mangledName))
     {
         return;
     }
@@ -1040,7 +1040,7 @@ std::size_t generic_inst::push_contract_guards(writer& w) const
 
 void generic_inst::write_cpp_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.begin_declaration(m_mangledName))
     {
         return;
     }
@@ -1158,6 +1158,7 @@ typedef % %_t;
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
+    w.end_declaration(m_mangledName);
 }
 
 void generic_inst::write_cpp_generic_param_logical_type(writer& w) const
@@ -1178,21 +1179,26 @@ void generic_inst::write_cpp_abi_type(writer& w) const
 
 void generic_inst::write_c_forward_declaration(writer& w) const
 {
-    if (!w.should_declare(m_mangledName))
+    if (!w.begin_declaration(m_mangledName))
     {
-        return;
-    }
+        if (w.should_forward_declare(m_mangledName))
+        {
+            w.write("typedef interface % %;\n\n", m_mangledName, m_mangledName);
+        }
 
-    // First make sure that any generic requried interface/function argument/return types are declared
-    for (auto dep : dependencies)
-    {
-        dep->write_c_forward_declaration(w);
+        return;
     }
 
     // Also need to make sure that all generic parameters are declared
     for (auto param : m_genericParams)
     {
         param->write_c_forward_declaration(w);
+    }
+
+    // First make sure that any generic requried interface/function argument/return types are declared
+    for (auto dep : dependencies)
+    {
+        dep->write_c_forward_declaration(w);
     }
 
     auto contractDepth = push_contract_guards(w);
@@ -1215,6 +1221,7 @@ EXTERN_C const IID IID_%;
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
+    w.end_declaration(m_mangledName);
 }
 
 void generic_inst::write_c_abi_type(writer& w) const

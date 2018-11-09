@@ -195,15 +195,30 @@ struct writer : xlang::text::writer_base<writer>
     void push_contract_guard(contract_version& vers);
     void pop_contract_guards(std::size_t count);
 
-    bool should_declare(std::string_view mangledName, bool peek = false)
+    bool begin_declaration(std::string_view mangledName)
     {
-        if (peek)
+        auto [itr, added] = m_declaredTypes.emplace(mangledName, declaration_stage::begin);
+        return added;
+    }
+
+    void end_declaration(std::string_view mangledName)
+    {
+        auto itr = m_declaredTypes.find(mangledName);
+        XLANG_ASSERT(itr != m_declaredTypes.end());
+        XLANG_ASSERT(itr->second != declaration_stage::end);
+        itr->second = declaration_stage::end;
+    }
+
+    bool should_forward_declare(std::string_view mangledName)
+    {
+        auto [itr, added] = m_declaredTypes.emplace(mangledName, declaration_stage::begin);
+        if (itr->second != declaration_stage::begin)
         {
-            return m_declaredTypes.find(mangledName) == m_declaredTypes.end();
+            return false;
         }
 
-        auto [itr, added] = m_declaredTypes.emplace(mangledName);
-        return added;
+        itr->second = declaration_stage::forward;
+        return true;
     }
 
     void begin_c_interface()
@@ -222,8 +237,15 @@ private:
 
     std::vector<contract_version> m_contractGuardStack;
 
+    enum class declaration_stage
+    {
+        begin,
+        forward,
+        end,
+    };
+
     // A set of already declared (or in the case of generics, defined) types
-    std::set<std::string_view> m_declaredTypes;
+    std::map<std::string_view, declaration_stage> m_declaredTypes;
 };
 
 void write_abi_header(std::string_view fileName, abi_configuration const& config, type_cache const& types);
