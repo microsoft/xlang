@@ -143,7 +143,7 @@ inline std::optional<contract_version> contract_attributes(T const& value)
     }
 
     auto const& elemSig = std::get<ElemSig>(fixedArgs[0].value);
-    xlang::visit(elemSig.value,
+    xlang::call(elemSig.value,
         [&](ElemSig::SystemType t)
         {
             result.type_name = t.name;

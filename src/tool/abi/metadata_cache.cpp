@@ -324,7 +324,7 @@ function_def metadata_cache::process_function(init_state& state, MethodDef const
 metadata_type const& metadata_cache::find_dependent_type(init_state& state, TypeSig const& type)
 {
     metadata_type const* result;
-    xlang::visit(type.Type(),
+    xlang::call(type.Type(),
         [&](ElementType t)
         {
             result = &element_type::from_type(t);
