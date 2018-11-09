@@ -589,6 +589,19 @@ namespace xlang
         return false;
     }
 
+    bool is_composable(TypeDef const& type)
+    {
+        for (auto&& factory : get_factories(type))
+        {
+            if (factory.composable)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool has_composable_constructors(TypeDef const& type)
     {
         for (auto&& factory : get_factories(type))

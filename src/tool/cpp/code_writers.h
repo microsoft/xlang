@@ -2841,6 +2841,11 @@ void* winrt_make_%()
 
     void write_component_override_dispatch_base(writer& w, TypeDef const& type)
     {
+        if (!is_composable(type))
+        {
+            return;
+        }
+
         std::string interfaces;
 
         for (auto&& [name, info] : get_interfaces(w, type))
