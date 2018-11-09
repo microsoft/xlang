@@ -300,7 +300,7 @@ function_def metadata_cache::process_function(init_state& state, MethodDef const
     std::optional<function_return_type> return_type;
     if (sig.ReturnType())
     {
-        std::string_view name = "value"sv;
+        std::string_view name = "result"sv;
         if ((paramNames.first != paramNames.second) && (paramNames.first.Sequence() == 0))
         {
             name = paramNames.first.Name();

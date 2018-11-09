@@ -1181,7 +1181,7 @@ class __RowBase
 
     get __Index()
     {
-        return this.m_index || this.__index;
+        return (this.m_index === undefined) ? this.__index : this.m_index;
     }
 
     __getValue(col)
