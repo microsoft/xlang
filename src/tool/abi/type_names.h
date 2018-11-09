@@ -18,7 +18,7 @@ inline std::string clr_full_name(xlang::meta::reader::TypeDef const& type)
 
 namespace details
 {
-    inline void write_type_prefix(std::string& result, xlang::meta::reader::TypeDef const& type)
+    inline void append_type_prefix(std::string& result, xlang::meta::reader::TypeDef const& type)
     {
         using namespace xlang::meta::reader;
         if ((get_category(type) == category::delegate_type) && (type.TypeNamespace() != collections_namespace))
@@ -30,7 +30,7 @@ namespace details
     }
 
     template <bool IsGenericParam>
-    void write_mangled_name(std::string& result, std::string_view name)
+    void append_mangled_name(std::string& result, std::string_view name)
     {
         result.reserve(result.length() + name.length());
         for (auto ch : name)
@@ -61,7 +61,7 @@ inline std::string mangled_name(xlang::meta::reader::TypeDef const& type)
     std::string result;
     if (!is_generic(type))
     {
-        details::write_mangled_name<IsGenericParam>(result, type.TypeNamespace());
+        details::append_mangled_name<IsGenericParam>(result, type.TypeNamespace());
         result += IsGenericParam ? "__C" : "_C";
     }
     else
@@ -70,7 +70,7 @@ inline std::string mangled_name(xlang::meta::reader::TypeDef const& type)
         result += "__F";
     }
 
-    details::write_type_prefix(result, type);
-    details::write_mangled_name<IsGenericParam>(result, type.TypeName());
+    details::append_type_prefix(result, type);
+    details::append_mangled_name<IsGenericParam>(result, type.TypeName());
     return result;
 }

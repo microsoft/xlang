@@ -27,6 +27,11 @@ std::size_t typedef_base::push_contract_guards(writer& w) const
     return push_type_contract_guards(w, m_type);
 }
 
+static std::string_view enum_string(writer& w)
+{
+    return w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
+}
+
 void enum_type::write_cpp_forward_declaration(writer& w) const
 {
     if (!w.should_declare(m_mangledName))
@@ -35,31 +40,43 @@ void enum_type::write_cpp_forward_declaration(writer& w) const
     }
 
     w.push_namespace(clr_abi_namespace());
-    auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
     auto typeStr = underlying_type() == ElementType::I4 ? "int"sv : "unsigned int"sv;
-    w.write("%typedef % % : % %;\n", indent{}, enumStr, cpp_abi_name(), typeStr, cpp_abi_name());
+    w.write("%typedef % % : % %;\n", indent{}, enum_string(w), cpp_abi_name(), typeStr, cpp_abi_name());
     w.pop_namespace();
     w.write('\n');
 }
 
 void enum_type::write_cpp_generic_param_abi_type(writer& w) const
 {
+    w.write("% ", enum_string(w));
     write_cpp_abi_type(w);
 }
 
 void enum_type::write_cpp_abi_type(writer& w) const
 {
-    w.write("enum %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+    // TODO
+    // w.write("enum %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+    write_cpp_fully_qualified_type(w, clr_abi_namespace(), cpp_abi_name());
 }
 
 void enum_type::write_c_forward_declaration(writer& w) const
 {
-    w.write("typedef enum % %;\n\n", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, *this);
+    };
+
+    w.write("typedef enum % %;\n\n", write_name, write_name);
 }
 
 void enum_type::write_c_abi_type(writer& w) const
 {
-    write_c_type_name(w, *this);
+    w.write("enum %", [&](writer& w) { write_c_type_name(w, *this); });
 }
 
 void enum_type::write_cpp_definition(writer& w) const
@@ -71,9 +88,8 @@ void enum_type::write_cpp_definition(writer& w) const
     auto contractDepth = push_contract_guards(w);
     w.push_namespace(clr_abi_namespace());
 
-    auto enumStr = w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
-    w.write("%%", indent{}, enumStr);
-    if (auto info = is_deprecated(m_type))
+    w.write("%%", indent{}, enum_string(w));
+    if (auto info = is_deprecated())
     {
         w.write("\n");
         write_deprecation_message(w, *info);
@@ -102,7 +118,7 @@ void enum_type::write_cpp_definition(writer& w) const
             }
             w.write(field.Name());
 
-            if (auto info = is_deprecated(field))
+            if (auto info = ::is_deprecated(field))
             {
                 w.write("\n");
                 write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
@@ -147,9 +163,20 @@ void enum_type::write_c_definition(writer& w) const
     write_type_banner(w, *this);
     auto contractDepth = push_contract_guards(w);
 
-    w.write(R"^-^(enum %
+    w.write("enum");
+    if (auto info = is_deprecated())
+    {
+        w.write("\n");
+        write_deprecation_message(w, *info);
+    }
+    else
+    {
+        w.write(' ');
+    }
+
+    w.write(R"^-^(%
 {
-)^-^", bind<write_mangled_name>(m_mangledName));
+)^-^", [&](writer& w) { write_c_type_name(w, *this); });
 
     for (auto const& field : m_type.FieldList())
     {
@@ -157,8 +184,15 @@ void enum_type::write_c_definition(writer& w) const
         {
             auto fieldContractDepth = push_type_contract_guards(w, field);
 
-            w.write("    %_% = %,\n", cpp_abi_name(), field.Name(), value);
+            w.write("    %_%", cpp_abi_name(), field.Name());
+            if (auto info = ::is_deprecated(field))
+            {
+                w.write("\n");
+                write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
+                w.write("   ");
+            }
 
+            w.write(" = %,\n", value);
             w.pop_contract_guards(fieldContractDepth);
         }
     }
@@ -194,12 +228,22 @@ void struct_type::write_cpp_abi_type(writer& w) const
 
 void struct_type::write_c_forward_declaration(writer& w) const
 {
-    w.write("typedef struct % %;\n\n", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+    if (!w.should_declare(m_mangledName))
+    {
+        return;
+    }
+
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, *this);
+    };
+
+    w.write("typedef struct % %;\n\n", write_name, write_name);
 }
 
 void struct_type::write_c_abi_type(writer& w) const
 {
-    write_c_type_name(w, *this);
+    w.write("struct %", [&](writer& w) { write_c_type_name(w, *this); });
 }
 
 void struct_type::write_cpp_definition(writer& w) const
@@ -210,7 +254,7 @@ void struct_type::write_cpp_definition(writer& w) const
     w.push_namespace(clr_abi_namespace());
 
     w.write("%struct", indent{});
-    if (auto info = is_deprecated(m_type))
+    if (auto info = is_deprecated())
     {
         w.write('\n');
         write_deprecation_message(w, *info);
@@ -227,7 +271,7 @@ void struct_type::write_cpp_definition(writer& w) const
 
     for (auto const& member : members)
     {
-        if (auto info = is_deprecated(member.field))
+        if (auto info = ::is_deprecated(member.field))
         {
             write_deprecation_message(w, *info, 1);
         }
@@ -244,7 +288,38 @@ void struct_type::write_cpp_definition(writer& w) const
 
 void struct_type::write_c_definition(writer& w) const
 {
-    w.write("TODO_STRUCT_DEF\n");
+    write_type_banner(w, *this);
+    auto contractDepth = push_contract_guards(w);
+
+    w.write("struct");
+    if (auto info = is_deprecated())
+    {
+        w.write('\n');
+        write_deprecation_message(w, *info);
+    }
+    else
+    {
+        w.write(' ');
+    }
+
+    w.write(R"^-^(%
+{
+)^-^", [&](writer& w) { write_c_type_name(w, *this); });
+
+    for (auto const& member : members)
+    {
+        if (auto info = ::is_deprecated(member.field))
+        {
+            write_deprecation_message(w, *info, 1);
+        }
+
+        w.write("    % %;\n", [&](writer& w) { member.type->write_c_abi_type(w); }, member.field.Name());
+    }
+
+    w.write("};\n");
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
 }
 
 void delegate_type::write_cpp_forward_declaration(writer& w) const
@@ -256,7 +331,7 @@ void delegate_type::write_cpp_forward_declaration(writer& w) const
 
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
-)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+)^-^", bind_mangled_name_macro(*this), bind_mangled_name_macro(*this));
 
     w.push_namespace(clr_abi_namespace());
     w.write("%interface %;\n", indent{}, m_abiName);
@@ -415,20 +490,9 @@ static void write_cpp_interface_definition(writer& w, T const& type)
     auto const iidFmt = (w.config().ns_prefix_state == ns_prefix::optional) ? "C_IID(%)"sv : "IID_%"sv;
 
     w.write(R"^-^(
-EXTERN_C const IID )^-^");
-
-    if (w.config().ns_prefix_state == ns_prefix::optional)
-    {
-        w.write("C_IID(%)", type.mangled_name());
-    }
-    else
-    {
-        w.write("IID_%", bind<write_mangled_name>(type.mangled_name()));
-    }
-
-    w.write(R"^-^(;
+EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind<write_mangled_name>(type.mangled_name()));
+)^-^", bind_iid_name(type), bind<write_mangled_name>(type.mangled_name()));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -453,11 +517,6 @@ static void write_c_iunknown_interface(writer& w, T const& type)
 template <typename T>
 static void write_c_iunknown_interface_macros(writer& w, T const& type)
 {
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, type);
-    };
-
     w.write(R"^-^(#define %_QueryInterface(This,riid,ppvObject) \
     ( (This)->lpVtbl->QueryInterface(This,riid,ppvObject) )
 
@@ -467,7 +526,7 @@ static void write_c_iunknown_interface_macros(writer& w, T const& type)
 #define %_Release(This) \
     ( (This)->lpVtbl->Release(This) )
 
-)^-^", write_name, write_name, write_name);
+)^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type), bind_mangled_name_macro(type));
 }
 
 template <typename T>
@@ -492,11 +551,6 @@ static void write_c_iinspectable_interface(writer& w, T const& type)
 template <typename T>
 static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 {
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, type);
-    };
-
     write_c_iunknown_interface_macros(w, type);
     w.write(R"^-^(#define %_GetIids(This,iidCount,iids) \
     ( (This)->lpVtbl->GetIids(This,iidCount,iids) )
@@ -507,7 +561,7 @@ static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 #define %_GetTrustLevel(This,trustLevel) \
     ( (This)->lpVtbl->GetTrustLevel(This,trustLevel) )
 
-)^-^", write_name, write_name, write_name);
+)^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type), bind_mangled_name_macro(type));
 }
 
 template <typename T>
@@ -518,6 +572,11 @@ static void write_c_function_declaration(writer& w, T const& type, function_def 
         write_c_type_name(w, type);
     };
 
+    if (auto info = is_deprecated(func.def))
+    {
+        write_deprecation_message(w, *info, 1);
+    }
+
     w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), write_name);
 
     for (auto const& param : func.params)
@@ -525,7 +584,7 @@ static void write_c_function_declaration(writer& w, T const& type, function_def 
         auto refMod = param.signature.ByRef() ? "*"sv : ""sv;
         if (param.signature.Type().is_szarray())
         {
-            w.write(",\n        UINT32 %Length", param.name);
+            w.write(",\n        UINT32% %Length", refMod, param.name);
             refMod = param.signature.ByRef() ? "**"sv : "*"sv;
         }
 
@@ -558,13 +617,13 @@ static void write_c_function_declaration(writer& w, T const& type, function_def 
 template <typename T>
 static void write_c_function_declaration_macro(writer& w, T const& type, function_def const& func)
 {
-    auto write_name = [&](writer& w)
+    if (auto info = is_deprecated(func.def))
     {
-        write_c_type_name(w, type);
-    };
+        write_deprecation_message(w, *info, 1);
+    }
 
     auto fnName = function_name(func.def);
-    w.write("#define %_%(This", write_name, fnName);
+    w.write("#define %_%(This", bind_mangled_name_macro(type), fnName);
 
     for (auto const& param : func.params)
     {
@@ -578,6 +637,11 @@ static void write_c_function_declaration_macro(writer& w, T const& type, functio
 
     if (func.return_type)
     {
+        if (func.return_type->signature.Type().is_szarray())
+        {
+            w.write(",%Length", func.return_type->name);
+        }
+
         w.write(",%", func.return_type->name);
     }
 
@@ -596,6 +660,11 @@ static void write_c_function_declaration_macro(writer& w, T const& type, functio
 
     if (func.return_type)
     {
+        if (func.return_type->signature.Type().is_szarray())
+        {
+            w.write(",%Length", func.return_type->name);
+        }
+
         w.write(",%", func.return_type->name);
     }
 
@@ -610,11 +679,27 @@ static void write_c_interface_definition(writer& w, T const& type)
         write_c_type_name(w, type);
     };
 
-    w.write(R"^-^(typedef struct %Vtbl
+    auto write_vtbl_name = [&](writer& w)
+    {
+        write_c_type_name(w, type, "Vtbl");
+    };
+
+    w.write("typedef struct");
+    if (auto info = type.is_deprecated())
+    {
+        w.write('\n');
+        write_deprecation_message(w, *info);
+    }
+    else
+    {
+        w.write(' ');
+    }
+
+    w.write(R"^-^(%
 {
     BEGIN_INTERFACE
 
-)^-^", write_name);
+)^-^", write_vtbl_name);
 
     bool isDelegate = type.category() == category::delegate_type;
     if (isDelegate)
@@ -633,16 +718,16 @@ static void write_c_interface_definition(writer& w, T const& type)
 
     w.write(R"^-^(
     END_INTERFACE
-} %Vtbl;
+} %;
 
 interface %
 {
-    CONST_VTBL struct %Vtbl* lpVtbl;
+    CONST_VTBL struct %* lpVtbl;
 };
 
 #ifdef COBJMACROS
 
-)^-^", write_name, write_name, write_name);
+)^-^", write_vtbl_name, write_name, write_vtbl_name);
 
     if (isDelegate)
     {
@@ -669,6 +754,11 @@ void delegate_type::write_c_forward_declaration(writer& w) const
         return;
     }
 
+    auto write_name = [&](writer& w)
+    {
+        write_c_type_name(w, *this);
+    };
+
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
 )^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
@@ -678,14 +768,14 @@ void delegate_type::write_c_forward_declaration(writer& w) const
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        bind<write_mangled_name>(m_mangledName),
-        bind<write_mangled_name>(m_mangledName),
+        write_name,
+        write_name,
         bind<write_mangled_name>(m_mangledName));
 }
 
 void delegate_type::write_c_abi_type(writer& w) const
 {
-    w.write("TODO_DELEGATE_C_ABI_TYPE");
+    w.write("%*", [&](writer& w) { write_c_type_name(w, *this); });
 }
 
 void delegate_type::write_cpp_definition(writer& w) const
@@ -695,7 +785,28 @@ void delegate_type::write_cpp_definition(writer& w) const
 
 void delegate_type::write_c_definition(writer& w) const
 {
-    w.write("TODO_DELEGATE_DEF\n");
+    // Generics don't get generated definitions
+    if (is_generic())
+    {
+        return;
+    }
+
+    write_type_banner(w, *this);
+    auto contractDepth = push_contract_guards(w);
+
+    w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
+#define __%_INTERFACE_DEFINED__
+)^-^",bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+
+    write_c_interface_definition(w, *this);
+
+    w.write(R"^-^(
+EXTERN_C const IID %;
+#endif /* !defined(__%_INTERFACE_DEFINED__) */
+)^-^", bind_iid_name(*this), bind<write_mangled_name>(m_mangledName));
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
 }
 
 void interface_type::write_cpp_forward_declaration(writer& w) const
@@ -761,7 +872,7 @@ typedef interface % %;
 
 void interface_type::write_c_abi_type(writer& w) const
 {
-    w.write("%*", bind<write_mangled_name>(m_mangledName));
+    w.write("%*", [&](writer& w) { write_c_type_name(w, *this); });
 }
 
 void interface_type::write_cpp_definition(writer& w) const
@@ -793,9 +904,9 @@ extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] =
     write_c_interface_definition(w, *this);
 
     w.write(R"^-^(
-EXTERN_C const IID IID_%;
+EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+)^-^", bind_iid_name(*this), bind<write_mangled_name>(m_mangledName));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -894,7 +1005,7 @@ void class_type::write_cpp_definition(writer& w) const
         bind_list("_", namespace_range{ clr_logical_namespace() }),
         cpp_logical_name());
 
-    if (auto info = is_deprecated(m_type))
+    if (auto info = is_deprecated())
     {
         write_deprecation_message(w, *info);
     }
@@ -1206,7 +1317,7 @@ void system_type::write_cpp_abi_type(writer& w) const
 
 void system_type::write_c_abi_type(writer& w) const
 {
-    w.write("TODO_SYSTEM_C_ABI_TYPE");
+    w.write(m_cppName);
 }
 
 mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const& type)
@@ -1220,12 +1331,12 @@ mapped_type const* mapped_type::from_typedef(xlang::meta::reader::TypeDef const&
         }
         else if (type.TypeName() == "EventRegistrationToken"sv)
         {
-            static mapped_type event_token_type{ type, "struct EventRegistrationToken"sv, "EventRegistrationToken"sv, "struct(Windows.Foundation.EventRegistrationToken;i8)"sv };
+            static mapped_type event_token_type{ type, "EventRegistrationToken"sv, "EventRegistrationToken"sv, "struct(Windows.Foundation.EventRegistrationToken;i8)"sv };
             return &event_token_type;
         }
         else if (type.TypeName() == "AsyncStatus"sv)
         {
-            static mapped_type const async_status_type{ type, "enum AsyncStatus"sv, "AsyncStatus"sv, "enum(Windows.Foundation.AsyncStatus;i4)"sv };
+            static mapped_type const async_status_type{ type, "AsyncStatus"sv, "AsyncStatus"sv, "enum(Windows.Foundation.AsyncStatus;i4)"sv };
             return &async_status_type;
         }
         else if (type.TypeName() == "IAsyncInfo"sv)
@@ -1245,6 +1356,17 @@ void mapped_type::write_cpp_generic_param_logical_type(writer& w) const
 
 void mapped_type::write_cpp_generic_param_abi_type(writer& w) const
 {
+    switch (get_category(m_type))
+    {
+    case category::enum_type:
+        w.write ("% ", enum_string(w));
+        break;
+
+    case category::struct_type:
+        w.write("struct ");
+        break;
+    }
+
     write_cpp_abi_type(w);
 }
 

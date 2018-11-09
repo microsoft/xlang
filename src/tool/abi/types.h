@@ -373,6 +373,11 @@ struct typedef_base : metadata_type
         return ::is_generic(m_type);
     }
 
+    auto is_deprecated() const noexcept
+    {
+        return ::is_deprecated(m_type);
+    }
+
     xlang::meta::reader::category category() const noexcept
     {
         return get_category(m_type);
@@ -488,7 +493,7 @@ struct delegate_type final : typedef_base
         typedef_base(type)
     {
         m_abiName.reserve(1 + type.TypeName().length());
-        details::write_type_prefix(m_abiName, type);
+        details::append_type_prefix(m_abiName, type);
         m_abiName += type.TypeName();
     }
 
@@ -743,6 +748,11 @@ struct generic_inst final : metadata_type
     xlang::meta::reader::category category() const noexcept
     {
         return m_genericType->category();
+    }
+
+    auto is_deprecated() const noexcept
+    {
+        return m_genericType->is_deprecated();
     }
 
     std::string_view generic_type_abi_name() const noexcept

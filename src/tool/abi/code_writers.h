@@ -12,50 +12,119 @@ inline void write_contract_version(writer& w, unsigned int value)
     w.write("%.%", versionHigh, versionLow);
 }
 
+inline std::string_view mangled_name_macro_format(writer& w)
+{
+    using namespace std::literals;
+    switch (w.config().ns_prefix_state)
+    {
+    case ns_prefix::always:
+        return "__x_ABI_C%"sv;
+
+    default:
+        return "__x_%"sv;
+    }
+}
+
+inline std::string_view cpp_typename_format(writer& w)
+{
+    using namespace std::literals;
+    switch (w.config().ns_prefix_state)
+    {
+    case ns_prefix::always:
+        return "ABI::%"sv;
+
+    case ns_prefix::optional:
+        return "ABI_PARAMETER(%)"sv;
+
+    default:
+        return "%"sv;
+    }
+}
+
+inline std::string_view c_typename_format(writer& w)
+{
+    using namespace std::literals;
+    switch (w.config().ns_prefix_state)
+    {
+    case ns_prefix::always:
+        return "__x_ABI_C%"sv;
+
+    case ns_prefix::optional:
+        return "C_ABI_PARAMETER(%)"sv;
+
+    default:
+        return "__x_%"sv;
+    }
+}
+
 inline void write_cpp_fully_qualified_type(writer& w, std::string_view typeNamespace, std::string_view typeName)
 {
-    if (w.config().ns_prefix_state == ns_prefix::always)
-    {
-        w.write("ABI::");
-    }
-    else if (w.config().ns_prefix_state == ns_prefix::optional)
-    {
-        w.write("ABI_PARAMETER(");
-    }
-
-    w.write("@::%", typeNamespace, typeName);
-
-    if (w.config().ns_prefix_state == ns_prefix::optional)
-    {
-        w.write(')');
-    }
+    w.write(cpp_typename_format(w), [&](writer& w) { w.write("@::%", typeNamespace, typeName); });
 }
 
 inline void write_mangled_name(writer& w, std::string_view mangledName)
 {
-    using namespace std::literals;
-    auto const fmt = (w.config().ns_prefix_state == ns_prefix::always) ? "__x_ABI_C%"sv : "__x_%"sv;
-    w.write(fmt, mangledName);
+    w.write(mangled_name_macro_format(w), mangledName);
 }
 
-inline void write_c_type_name(writer& w, typedef_base const& type)
+inline void write_mangled_name_macro(writer& w, typedef_base const& type)
 {
-    using namespace std::literals;
-
-    std::string_view fmt;
-    switch (w.config().ns_prefix_state)
-    {
-    case ns_prefix::always: fmt = "__x_ABI_C%"sv; break;
-    case ns_prefix::never: fmt = "__x_%"sv; break;
-    case ns_prefix::optional: fmt = "C_ABI_PARAMETER(%)"sv; break;
-    }
-
-    w.write(fmt, type.mangled_name());
+    w.write(mangled_name_macro_format(w), type.mangled_name());
 }
 
-inline void write_c_type_name(writer& w, generic_inst const& type)
+inline void write_mangled_name_macro(writer& w, generic_inst const& type)
 {
     w.write(type.mangled_name());
+}
+
+template <typename T>
+inline auto bind_mangled_name_macro(T const& type)
+{
+    return [&](writer& w)
+    {
+        write_mangled_name_macro(w, type);
+    };
+}
+
+template <typename T>
+inline void write_iid_name(writer& w, T const& type)
+{
+    using namespace xlang::text;
+    if (w.config().ns_prefix_state == ns_prefix::optional)
+    {
+        w.write("C_IID(%)", type.mangled_name());
+    }
+    else
+    {
+        w.write("IID_%", bind<write_mangled_name>(type.mangled_name()));
+    }
+}
+
+template <typename T>
+inline auto bind_iid_name(T const& type)
+{
+    return [&](writer& w)
+    {
+        write_iid_name(w, type);
+    };
+}
+
+template <typename T>
+inline void write_c_type_name(writer& w, T const& type)
+{
+    write_c_type_name(w, type, "");
+}
+
+template <typename Suffix>
+inline void write_c_type_name(writer& w, typedef_base const& type, Suffix&& suffix)
+{
+    w.write(c_typename_format(w), [&](writer& w) { w.write("%%", type.mangled_name(), suffix); });
+}
+
+template <typename Suffix>
+inline void write_c_type_name(writer& w, generic_inst const& type, Suffix&& suffix)
+{
+    w.write("%%", type.mangled_name(), suffix);
 }
 
 inline void write_contract_macro(writer& w, std::string_view contractNamespace, std::string_view contractTypeName)
