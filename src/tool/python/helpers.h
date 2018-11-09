@@ -375,6 +375,78 @@ namespace xlang
         return std::move(method_map);
     }
 
+    struct property_info
+    {
+        Property property;
+        std::vector<std::string> type_arguments;
+    };
+
+    auto get_properties(TypeDef const& type)
+    {
+        std::vector<property_info> properties{};
+
+        auto category = get_category(type);
+        if (category == category::class_type)
+        {
+            for (auto&& prop : type.PropertyList())
+            {
+                properties.push_back(property_info{ prop, std::vector<std::string> {} });
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            for (auto&& info : get_required_interfaces(type))
+            {
+                for (auto&& prop : info.type.PropertyList())
+                {
+                    properties.push_back(property_info{ prop, info.type_arguments });
+                }
+            }
+        }
+        else
+        {
+            throw_invalid("only classes and interfaces have properties");
+        }
+
+        return std::move(properties);
+    }
+
+    struct event_info
+    {
+        Event event;
+        std::vector<std::string> type_arguments;
+    };
+
+    auto get_events(TypeDef const& type)
+    {
+        std::vector<event_info> events{};
+
+        auto category = get_category(type);
+        if (category == category::class_type)
+        {
+            for (auto&& event : type.EventList())
+            {
+                events.push_back(event_info{ event, std::vector<std::string> {} });
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            for (auto&& info : get_required_interfaces(type))
+            {
+                for (auto&& event : info.type.EventList())
+                {
+                    events.push_back(event_info{ event, info.type_arguments });
+                }
+            }
+        }
+        else
+        {
+            throw_invalid("only classes and interfaces have properties");
+        }
+
+        return std::move(events);
+    }
+
     auto get_constructors(TypeDef const& type)
     {
         std::vector<MethodDef> constructors;
@@ -448,6 +520,11 @@ namespace xlang
     inline bool is_remove_method(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "remove_");
+    }
+
+    inline bool is_static_method(MethodDef const& method)
+    {
+        return method.Flags().Static();
     }
 
     struct property_type

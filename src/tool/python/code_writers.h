@@ -1522,6 +1522,127 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
     }
 
 
+    void write_python_method_args(writer& w, MethodDef const& method)
+    {
+        separator s{ w };
+        if (!is_static_method(method))
+        {
+            s();
+            w.write("self");
+        }
+
+        method_signature signature{ method };
+        for (auto&& p : signature.params())
+        {
+            s();
+            w.write(p.first.Name());
+        }
+    }
+
+    void write_python_property(writer& w, Property const& prop)
+    {
+        auto methods = get_property_methods(prop);
+        if (is_static_method(methods.get))
+        {
+            auto format = R"(^@staticproperty
+def %():
+    return __internal__.%.%())";
+            w.write_indented(format,
+                prop.Name(),
+                prop.Parent().TypeName(),
+                methods.get.Name());
+        }
+        else
+        {
+            auto format = R"(^@property
+def %(self):
+    return self.__instance__.%())";
+            w.write_indented(format,
+                prop.Name(),
+                methods.get.Name());
+        }
+
+        w.write("\n\n");
+
+        if (methods.set)
+        {
+            if (is_static_method(methods.set))
+            {
+                auto format = R"(^@%.setter
+def %(value):
+    return __internal__.%.%(value))";
+                w.write_indented(format,
+                    prop.Name(),
+                    prop.Name(),
+                    prop.Parent().TypeName(),
+                    methods.set.Name());
+            }
+            else
+            {
+                auto format = R"(^@%.setter
+def %(self, value):
+    return self.__instance__.%(value))";
+                w.write_indented(format,
+                    prop.Name(),
+                    prop.Name(),
+                    methods.get.Name());
+            }
+
+            w.write("\n\n");
+        }
+    }
+
+
+
+    void write_python_method(writer& w, std::string_view const& method_name, std::vector<method_info> const& overloads)
+    {
+        //if (is_static_method(overloads.method.b))
+        //{
+        //    w.write_indented("@staticmethod\n");
+        //}
+
+        w.write_indented("def %():\n    pass\n\n", method_name/*, bind<write_python_method_args>(method)*/);
+    }
+
+    void write_python_class(writer& w, TypeDef const& type)
+    {
+        w.write_indented("class @:\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+
+            for (auto&&[name, overloads] : get_methods(type))
+            {
+                if (overloads[0].method.Flags().SpecialName())
+                {
+                    continue;
+                }
+
+                write_python_method(w, name, overloads);
+            }
+
+            for (auto&& prop_info : get_properties(type))
+            {
+                auto methods = get_property_methods(prop_info.property);
+
+                w.write_indented("^@%property\n", is_static_method(methods.get) ? "static" : "");
+                w.write_indented("def %():\n    pass\n\n", prop_info.property.Name());
+
+                if (methods.set)
+                {
+                    w.write_indented("^@%.setter\n", prop_info.property.Name());
+                    w.write_indented("def %(value):\n    pass\n\n", prop_info.property.Name());
+                }
+            }
+            //for (auto&& prop : type.PropertyList())
+            //{
+            //    write_python_property(w, prop);
+            //}
+        }
+
+        w.write_indented("\n");
+    }
+
+
     void write_type_fromspec(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type))

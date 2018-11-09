@@ -121,13 +121,21 @@ namespace xlang
     inline void write_namespace_init(stdfs::path const& folder, std::string_view const& module_name, std::set<std::string> const& needed_namespaces, std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
+        
+        w.write_license_python();
 
-        w.write(strings::ns_init, module_name, ns);
+        w.write_indented(R"(from % import _import_ns
+import typing
+)", module_name);
 
         if (settings.filter.includes(members.enums))
         {
             w.write("import enum\n\n");
         }
+
+        w.write_indented("_internal = _import_ns(\"%\")\n", ns);
+
+
         
         if (!needed_namespaces.empty())
         {
@@ -145,7 +153,7 @@ except:
         }
 
         settings.filter.bind_each<write_python_enum>(members.enums)(w);
-        settings.filter.bind_each<write_import_type>(members.classes)(w);
+        settings.filter.bind_each<write_python_class>(members.classes)(w);
         settings.filter.bind_each<write_import_type>(members.interfaces)(w);
         settings.filter.bind_each<write_import_type>(members.structs)(w);
 
