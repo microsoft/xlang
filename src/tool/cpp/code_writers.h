@@ -2887,7 +2887,7 @@ void* winrt_make_%()
         using class_type = @::%;
         using implements_type = typename %_base::implements_type;
         using implements_type::implements_type;
-        @
+        %
         operator impl::producer_ref<class_type> const() const noexcept
         {
             return { to_abi<default_interface<class_type>>(this) };
@@ -2938,7 +2938,7 @@ void* winrt_make_%()
                 type_namespace,
                 type_name,
                 type_name,
-                "",
+                composable_base_name,
                 type_namespace,
                 type_name,
                 "",
