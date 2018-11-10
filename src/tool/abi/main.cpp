@@ -206,21 +206,6 @@ int main(int const argc, char** argv)
                     group.add([&]()
                     {
                         auto types = mdCache.compile_namespaces({ foundation_namespace, collections_namespace });
-
-                        // Some types get processed separately, so remove them
-                        // auto remove_name = [&](auto& v, std::string_view ns, std::string_view name)
-                        // {
-                        //     auto const& t = mdCache.find(ns, name);
-                        //     auto [begin, end] = std::equal_range(v.begin(), v.end(), t);
-                        //     if (begin != end)
-                        //     {
-                        //         XLANG_ASSERT(std::distance(begin, end) == 1);
-                        //         v.erase(begin);
-                        //     }
-                        // };
-                        // remove_name(types.enums, collections_namespace, "CollectionChange"sv);
-                        // remove_name(types.interfaces, collections_namespace, "IVectorChangedEventArgs"sv);
-
                         write_abi_header(foundation_namespace, config, types);
                     });
                 }
