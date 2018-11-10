@@ -118,15 +118,8 @@ int main(int const argc, char** argv)
         filesToRead.insert(filesToRead.end(), inputFiles.begin(), inputFiles.end());
         filesToRead.insert(filesToRead.end(), referenceFiles.begin(), referenceFiles.end());
 
-        auto s = high_resolution_clock::now();
         cache c{ filesToRead };
-        auto e = high_resolution_clock::now();
-        w.write("Duration: %\n", duration_cast<milliseconds>(e - s).count());
-        s = high_resolution_clock::now();
         metadata_cache mdCache{ c };
-        e = high_resolution_clock::now();
-        w.write("Duration: %\n", duration_cast<milliseconds>(e - s).count());
-        w.flush_to_console();
 
         auto include = args.values("include");
         if (include.empty() && !referenceFiles.empty())
@@ -212,7 +205,23 @@ int main(int const argc, char** argv)
                 {
                     group.add([&]()
                     {
-                        write_abi_header(foundation_namespace, config, mdCache.compile_namespaces({ foundation_namespace, collections_namespace }));
+                        auto types = mdCache.compile_namespaces({ foundation_namespace, collections_namespace });
+
+                        // Some types get processed separately, so remove them
+                        // auto remove_name = [&](auto& v, std::string_view ns, std::string_view name)
+                        // {
+                        //     auto const& t = mdCache.find(ns, name);
+                        //     auto [begin, end] = std::equal_range(v.begin(), v.end(), t);
+                        //     if (begin != end)
+                        //     {
+                        //         XLANG_ASSERT(std::distance(begin, end) == 1);
+                        //         v.erase(begin);
+                        //     }
+                        // };
+                        // remove_name(types.enums, collections_namespace, "CollectionChange"sv);
+                        // remove_name(types.interfaces, collections_namespace, "IVectorChangedEventArgs"sv);
+
+                        write_abi_header(foundation_namespace, config, types);
                     });
                 }
             });

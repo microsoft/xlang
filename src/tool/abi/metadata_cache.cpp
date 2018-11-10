@@ -496,5 +496,39 @@ type_cache metadata_cache::compile_namespaces(std::initializer_list<std::string_
             [&](auto const& type) { return includes_namespace(type.get().clr_logical_namespace()); });
     }
 
+    // Structs need all members to be defined prior to the struct definition
+    std::pair range{ result.structs.begin(), result.structs.end() };
+    while (range.first != range.second)
+    {
+        bool shouldAdvance = true;
+        for (auto const& member : range.first->get().members)
+        {
+            if (auto structType = dynamic_cast<struct_type const*>(member.type))
+            {
+                if (includes_namespace(structType->clr_abi_namespace()))
+                {
+                    auto itr = std::find_if(range.first + 1, range.second, [&](auto const& type)
+                    {
+                        return &type.get() == structType;
+                    });
+                    if (itr != range.second)
+                    {
+                        std::rotate(range.first, itr, itr + 1);
+                        shouldAdvance = false;
+                        break;
+                    }
+                }
+                // Otherwise we're in a bit of an awkward situation. There's no definition guard for structs, so we
+                // can't pull in the type and define it here, which means that we are instead relying on the assumption
+                // that there are no cyclical dependencies between the namespaces
+            }
+        }
+
+        if (shouldAdvance)
+        {
+            ++range.first;
+        }
+    }
+
     return result;
 }

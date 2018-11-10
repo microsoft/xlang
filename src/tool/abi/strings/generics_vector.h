@@ -1,6 +1,7 @@
 
 namespace Windows { namespace Foundation { namespace Collections
 {
+    enum CollectionChange;
     struct IVectorChangedEventArgs;
 
     template <class T>

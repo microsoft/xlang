@@ -54,8 +54,6 @@ void enum_type::write_cpp_generic_param_abi_type(writer& w) const
 
 void enum_type::write_cpp_abi_type(writer& w) const
 {
-    // TODO
-    // w.write("enum %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
     write_cpp_fully_qualified_type(w, clr_abi_namespace(), cpp_abi_name());
 }
 
