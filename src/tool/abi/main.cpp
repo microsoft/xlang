@@ -155,8 +155,20 @@ int main(int const argc, char** argv)
                     return f.includes(t.type());
                 }) != vector.end();;
             };
-            return includes(types.enums) || includes(types.structs) || includes(types.delegates) ||
-                includes(types.interfaces) || includes(types.classes);
+            if (includes(types.enums) || includes(types.structs) || includes(types.delegates) ||
+                includes(types.interfaces) || includes(types.classes))
+            {
+                return true;
+            }
+
+            for (auto const& contract : types.contracts)
+            {
+                if (f.includes(contract.type))
+                {
+                    return true;
+                }
+            }
+            return false;
         };
 
         bool foundationDependency = false;
@@ -206,7 +218,40 @@ int main(int const argc, char** argv)
                     group.add([&]()
                     {
                         auto types = mdCache.compile_namespaces({ foundation_namespace, collections_namespace });
+
+                        // Remove both 'CollectionChange' and 'IVectorChangedEventArgs' since these are both defined in
+                        // ivectorchangedeventargs.h. There's no good reason for it to be separate (and in fact it works
+                        // perfectly fine without this), but it's sometimes a huge pain to try and get existing code to
+                        // build without it separated due to redefinition errors
+                        type_cache vectorChangedTypes{ &mdCache };
+                        if (auto itr = std::find_if(types.enums.begin(), types.enums.end(), [&](auto const& type)
+                        {
+                            return type.get().clr_full_name() == "Windows.Foundation.Collections.CollectionChange"sv;
+                        }); itr != types.enums.end())
+                        {
+                            vectorChangedTypes.enums.push_back(*itr);
+                            types.enums.erase(itr);
+                        }
+                        else
+                        {
+                            XLANG_ASSERT(false);
+                        }
+
+                        if (auto itr = std::find_if(types.interfaces.begin(), types.interfaces.end(), [&](auto const& type)
+                        {
+                            return type.get().clr_full_name() == "Windows.Foundation.Collections.IVectorChangedEventArgs"sv;
+                        }); itr != types.interfaces.end())
+                        {
+                            vectorChangedTypes.interfaces.push_back(*itr);
+                            types.interfaces.erase(itr);
+                        }
+                        else
+                        {
+                            XLANG_ASSERT(false);
+                        }
+
                         write_abi_header(foundation_namespace, config, types);
+                        write_abi_header("ivectorchangedeventargs", config, vectorChangedTypes);
                     });
                 }
             });

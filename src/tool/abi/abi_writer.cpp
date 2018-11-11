@@ -208,6 +208,11 @@ static void write_includes(writer& w, type_cache const& types, std::string_view 
         w.write(R"^-^(#include "Windows.Foundation.h"
 )^-^");
     }
+    else
+    {
+        w.write(R"^-^(#include "IVectorChangedEventArgs.h"
+)^-^");
+    }
 
     bool hasCollectionsDependency = false;
     for (auto ns : types.dependent_namespaces)
