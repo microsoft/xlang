@@ -856,8 +856,7 @@ namespace xlang
         }
 )");
         }
-
-        if (type.TypeName() == "IBuffer" && type.TypeNamespace() == "Windows.Storage.Streams")
+        else if (type.TypeName() == "IBuffer" && type.TypeNamespace() == "Windows.Storage.Streams")
         {
             w.write(R"(
     auto data() const
