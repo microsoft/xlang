@@ -515,14 +515,14 @@ static void write_c_iunknown_interface(writer& w, T const& type)
 template <typename T>
 static void write_c_iunknown_interface_macros(writer& w, T const& type)
 {
-    w.write(R"^-^(#define %_QueryInterface(This,riid,ppvObject) \
-    ( (This)->lpVtbl->QueryInterface(This,riid,ppvObject) )
+    w.write(R"^-^(#define %_QueryInterface(This, riid, ppvObject) \
+    ((This)->lpVtbl->QueryInterface(This, riid, ppvObject))
 
 #define %_AddRef(This) \
-    ( (This)->lpVtbl->AddRef(This) )
+    ((This)->lpVtbl->AddRef(This))
 
 #define %_Release(This) \
-    ( (This)->lpVtbl->Release(This) )
+    ((This)->lpVtbl->Release(This))
 
 )^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type), bind_mangled_name_macro(type));
 }
@@ -550,14 +550,14 @@ template <typename T>
 static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 {
     write_c_iunknown_interface_macros(w, type);
-    w.write(R"^-^(#define %_GetIids(This,iidCount,iids) \
-    ( (This)->lpVtbl->GetIids(This,iidCount,iids) )
+    w.write(R"^-^(#define %_GetIids(This, iidCount, iids) \
+    ((This)->lpVtbl->GetIids(This, iidCount, iids))
 
-#define %_GetRuntimeClassName(This,className) \
-    ( (This)->lpVtbl->GetRuntimeClassName(This,className) )
+#define %_GetRuntimeClassName(This, className) \
+    ((This)->lpVtbl->GetRuntimeClassName(This, className))
 
-#define %_GetTrustLevel(This,trustLevel) \
-    ( (This)->lpVtbl->GetTrustLevel(This,trustLevel) )
+#define %_GetTrustLevel(This, trustLevel) \
+    ((This)->lpVtbl->GetTrustLevel(This, trustLevel))
 
 )^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type), bind_mangled_name_macro(type));
 }
@@ -627,46 +627,46 @@ static void write_c_function_declaration_macro(writer& w, T const& type, functio
     {
         if (param.signature.Type().is_szarray())
         {
-            w.write(",%Length", param.name);
+            w.write(", %Length", param.name);
         }
 
-        w.write(",%", param.name);
+        w.write(", %", param.name);
     }
 
     if (func.return_type)
     {
         if (func.return_type->signature.Type().is_szarray())
         {
-            w.write(",%Length", func.return_type->name);
+            w.write(", %Length", func.return_type->name);
         }
 
-        w.write(",%", func.return_type->name);
+        w.write(", %", func.return_type->name);
     }
 
     w.write(R"^-^() \
-    ( (This)->lpVtbl->%(This)^-^", fnName);
+    ((This)->lpVtbl->%(This)^-^", fnName);
 
     for (auto const& param : func.params)
     {
         if (param.signature.Type().is_szarray())
         {
-            w.write(",%Length", param.name);
+            w.write(", %Length", param.name);
         }
 
-        w.write(",%", param.name);
+        w.write(", %", param.name);
     }
 
     if (func.return_type)
     {
         if (func.return_type->signature.Type().is_szarray())
         {
-            w.write(",%Length", func.return_type->name);
+            w.write(", %Length", func.return_type->name);
         }
 
-        w.write(",%", func.return_type->name);
+        w.write(", %", func.return_type->name);
     }
 
-    w.write(") )\n\n");
+    w.write("))\n\n");
 }
 
 template <typename T>
