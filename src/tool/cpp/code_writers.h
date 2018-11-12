@@ -335,6 +335,11 @@ namespace xlang
     {
         TypeSig const& return_signature = signature.return_signature().Type();
 
+        if (return_signature.is_szarray())
+        {
+            return false;
+        }
+
         if (auto type_def = std::get_if<coded_index<TypeDefOrRef>>(&return_signature.Type()))
         {
             auto category = category::interface_type;
@@ -357,7 +362,8 @@ namespace xlang
 
             return category == category::class_type || category == category::interface_type || category == category::delegate_type;
         }
-        else if (auto element_type = std::get_if<ElementType>(&return_signature.Type()))
+
+        if (auto element_type = std::get_if<ElementType>(&return_signature.Type()))
         {
             return *element_type == ElementType::String;
         }
@@ -2373,9 +2379,76 @@ protected:
 
     void write_namespace_special(writer& w, std::string_view const& namespace_name, cache const& c)
     {
-        if (namespace_name == "Windows.Foundation" && c.find("Windows.Foundation.PropertyValue"))
+        if (namespace_name == "Windows.Foundation")
         {
-            w.write(strings::base_reference_produce);
+            if (c.find("Windows.Foundation.PropertyValue"))
+            {
+                w.write(strings::base_reference_produce);
+            }
+
+            static constexpr std::pair<std::string_view, std::string_view> pairs[]
+            {
+                { "", "Windows::Foundation::IUnknown" },
+                { "", "Windows::Foundation::IInspectable" },
+                { "", "Windows::Foundation::IActivationFactory" },
+                { "", "Windows::Foundation::IAsyncInfo" },
+                { "", "Windows::Foundation::IAsyncAction" },
+                { "typename TProgress", "Windows::Foundation::IAsyncActionWithProgress<TProgress>" },
+                { "typename TResult", "Windows::Foundation::IAsyncOperation<TResult>" },
+                { "typename TResult, typename TProgress", "Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>" },
+                { "", "Windows::Foundation::AsyncActionCompletedHandler" },
+                { "typename TProgress", "Windows::Foundation::AsyncActionProgressHandler<TProgress>" },
+                { "typename TProgress", "Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>" },
+                { "typename TResult", "Windows::Foundation::AsyncOperationCompletedHandler<TResult>" },
+                { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>" },
+                { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>" },
+                { "typename T", "Windows::Foundation::IReference<T>" },
+                { "typename T", "Windows::Foundation::EventHandler<T>" },
+                { "typename TSender, typename TArgs", "Windows::Foundation::TypedEventHandler<TSender, TArgs>" }
+            };
+
+            write_std_namespace(w);
+
+            for (auto&& [params, name] : pairs)
+            {
+                w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
+                    params,
+                    name,
+                    name);
+            }
+
+            write_close_namespace(w);
+        }
+        else if (namespace_name == "Windows.Foundation.Collections")
+        {
+            static constexpr std::pair<std::string_view, std::string_view> pairs[]
+            {
+                { "typename T", "Windows::Foundation::Collections::IIterator<T>" },
+                { "typename T", "Windows::Foundation::Collections::IIterable<T>" },
+                { "typename T", "Windows::Foundation::Collections::IVectorView<T>" },
+                { "typename T", "Windows::Foundation::Collections::IVector<T>" },
+                { "typename T", "Windows::Foundation::Collections::IObservableVector<T>" },
+                { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
+                { "", "Windows::Foundation::Collections::IVectorChangedEventArgs" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IMapView<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IMap<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IObservableMap<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::MapChangedEventHandler<K, V>" },
+                { "typename K", "Windows::Foundation::Collections::IMapChangedEventArgs<K>" }
+            };
+
+            write_std_namespace(w);
+
+            for (auto&& [params, name] : pairs)
+            {
+                w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
+                    params,
+                    name,
+                    name);
+            }
+
+            write_close_namespace(w);
         }
         else if (namespace_name == "Windows.UI.Xaml.Interop")
         {

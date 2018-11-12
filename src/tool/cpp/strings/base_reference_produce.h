@@ -313,6 +313,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IReferenceArray<T>(std::nullptr_t = nullptr) noexcept {}
+        IReferenceArray(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
     };
 }
 

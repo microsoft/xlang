@@ -7443,6 +7443,7 @@ WINRT_EXPORT namespace winrt
             impl::consume_t<IActivationFactory>
         {
             IActivationFactory(std::nullptr_t = nullptr) noexcept {}
+            IActivationFactory(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
         };
     }
 
