@@ -1,0 +1,14 @@
+resources:
+  containers:
+  - container: build_container
+    image:   msftxlang.azurecr.io/xlang-windows-build
+    endpoint: msftxlang_acr
+
+pool:
+  vmImage: 'win1803'
+
+container: build_container
+
+steps:
+- script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build -GNinja && ninja -C _build -v
+  displayName: 'build'
