@@ -835,6 +835,41 @@ namespace xlang
         }
     }
 
+    void write_consume_extensions(writer& w, TypeDef const& type)
+    {
+        if (type.TypeName() == "IBindableIterator" && type.TypeNamespace() == "Windows.UI.Xaml.Interop")
+        {
+            w.write(R"(
+        auto& operator++()
+        {
+            if (!MoveNext())
+            {
+                static_cast<D&>(*this) = nullptr;
+            }
+
+            return *this;
+        }
+
+        auto operator*() const
+        {
+            return Current();
+        }
+)");
+        }
+
+        if (type.TypeName() == "IBuffer" && type.TypeNamespace() == "Windows.Storage.Streams")
+        {
+            w.write(R"(
+    auto data() const
+    {
+        uint8_t* data{};
+        static_cast<D const&>(*this).template as<IBufferByteAccess>()->Buffer(&data);
+        return data;
+    }
+)");
+        }
+    }
+
     void write_consume(writer& w, TypeDef const& type)
     {
         auto format = R"(    template <typename D>
@@ -856,7 +891,7 @@ namespace xlang
         w.write(format,
             impl_name,
             bind_each<write_consume_declaration>(type.MethodList()),
-            "",
+            bind<write_consume_extensions>(type),
             type_namespace,
             type_name,
             impl_name);
