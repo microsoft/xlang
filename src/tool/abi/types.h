@@ -120,7 +120,6 @@ struct element_type final : metadata_type
 
 private:
 
-    xlang::meta::reader::ElementType m_type;
     std::string_view m_clrName;
     std::string_view m_logicalName;
     std::string_view m_abiName;
@@ -442,7 +441,7 @@ struct struct_type final : typedef_base
     virtual void append_signature(sha1& hash) const override
     {
         using namespace std::literals;
-        XLANG_ASSERT(members.size() == distance(m_type.FieldList()));
+        XLANG_ASSERT(members.size() == static_cast<std::size_t>(distance(m_type.FieldList())));
         hash.append("struct("sv);
         hash.append(m_clrFullName);
         for (auto const& member : members)

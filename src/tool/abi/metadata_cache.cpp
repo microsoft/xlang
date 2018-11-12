@@ -29,7 +29,7 @@ metadata_cache::metadata_cache(xlang::meta::reader::cache const& c)
             std::forward_as_tuple());
         XLANG_ASSERT(tableAdded);
 
-        group.add([&, &nsTypes = nsItr->second, &table = tableItr->second]()
+        group.add([&, &members = members, &nsTypes = nsItr->second, &table = tableItr->second]()
         {
             process_namespace_types(members, nsTypes, table);
         });
@@ -38,7 +38,7 @@ metadata_cache::metadata_cache(xlang::meta::reader::cache const& c)
 
     for (auto& [ns, nsCache] : namespaces)
     {
-        group.add([&]()
+        group.add([&, &nsCache = nsCache]()
         {
             process_namespace_dependencies(nsCache);
         });
@@ -62,14 +62,14 @@ void metadata_cache::process_namespace_types(
         {
             if (auto ptr = mapped_type::from_typedef(e))
             {
-                auto [itr, added] = table.emplace(e.TypeName(), *ptr);
+                [[maybe_unused]] auto [itr, added] = table.emplace(e.TypeName(), *ptr);
                 XLANG_ASSERT(added);
                 continue;
             }
         }
 
         target.enums.emplace_back(e);
-        auto [itr, added] = table.emplace(e.TypeName(), target.enums.back());
+        [[maybe_unused]] auto [itr, added] = table.emplace(e.TypeName(), target.enums.back());
         XLANG_ASSERT(added);
     }
 
@@ -81,14 +81,14 @@ void metadata_cache::process_namespace_types(
         {
             if (auto ptr = mapped_type::from_typedef(s))
             {
-                auto [itr, added] = table.emplace(s.TypeName(), *ptr);
+                [[maybe_unused]] auto [itr, added] = table.emplace(s.TypeName(), *ptr);
                 XLANG_ASSERT(added);
                 continue;
             }
         }
 
         target.structs.emplace_back(s);
-        auto [itr, added] = table.emplace(s.TypeName(), target.structs.back());
+        [[maybe_unused]] auto [itr, added] = table.emplace(s.TypeName(), target.structs.back());
         XLANG_ASSERT(added);
     }
 
@@ -96,7 +96,7 @@ void metadata_cache::process_namespace_types(
     for (auto const& d : members.delegates)
     {
         target.delegates.emplace_back(d);
-        auto [itr, added] = table.emplace(d.TypeName(), target.delegates.back());
+        [[maybe_unused]] auto [itr, added] = table.emplace(d.TypeName(), target.delegates.back());
         XLANG_ASSERT(added);
     }
 
@@ -108,14 +108,14 @@ void metadata_cache::process_namespace_types(
         {
             if (auto ptr = mapped_type::from_typedef(i))
             {
-                auto [itr, added] = table.emplace(i.TypeName(), *ptr);
+                [[maybe_unused]] auto [itr, added] = table.emplace(i.TypeName(), *ptr);
                 XLANG_ASSERT(added);
                 continue;
             }
         }
 
         target.interfaces.emplace_back(i);
-        auto [itr, added] = table.emplace(i.TypeName(), target.interfaces.back());
+        [[maybe_unused]] auto [itr, added] = table.emplace(i.TypeName(), target.interfaces.back());
         XLANG_ASSERT(added);
     }
 
@@ -123,7 +123,7 @@ void metadata_cache::process_namespace_types(
     for (auto const& c : members.classes)
     {
         target.classes.emplace_back(c);
-        auto [itr, added] = table.emplace(c.TypeName(), target.classes.back());
+        [[maybe_unused]] auto [itr, added] = table.emplace(c.TypeName(), target.classes.back());
         XLANG_ASSERT(added);
     }
 
@@ -405,7 +405,7 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, Gene
     if (added)
     {
         auto restore = std::exchange(state.parent_generic_inst, &itr->second);
-        auto check_dependency = [&](auto const& t)
+        auto check_dependency = [&, &itr = itr](auto const& t)
         {
             auto mdType = &find_dependent_type(state, t);
             if (auto genericType = dynamic_cast<generic_inst const*>(mdType))

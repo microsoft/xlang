@@ -149,6 +149,15 @@ private:
         m_currentChunk = {};
     }
 
+    template <typename T>
+    static constexpr T lrot(T value, std::size_t count) noexcept
+    {
+        using U = std::make_unsigned_t<T>;
+        auto result = value << count;
+        result |= static_cast<U>(value) >> ((sizeof(T) * 8) - count);
+        return result;
+    }
+
     static constexpr void rotate(std::array<std::uint32_t, 5>& state, std::uint32_t value, std::uint32_t f, std::uint32_t k) noexcept
     {
         auto temp = lrot(state[0], 5) + state[4] + f + k + value;
@@ -157,15 +166,6 @@ private:
         state[2] = lrot(state[1], 30);
         state[1] = state[0];
         state[0] = temp;
-    }
-
-    template <typename T>
-    static constexpr T lrot(T value, std::size_t count) noexcept
-    {
-        using U = std::make_unsigned_t<T>;
-        auto result = value << count;
-        result |= static_cast<U>(value) >> ((sizeof(T) * 8) - count);
-        return result;
     }
 
     std::uint64_t m_sizeBytes = 0;

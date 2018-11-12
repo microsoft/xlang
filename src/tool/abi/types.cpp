@@ -475,8 +475,6 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 
     w.pop_namespace();
 
-    auto const iidFmt = (w.config().ns_prefix_state == ns_prefix::optional) ? "C_IID(%)"sv : "IID_%"sv;
-
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
@@ -1213,9 +1211,8 @@ element_type const& element_type::from_type(xlang::meta::reader::ElementType typ
     case ElementType::R8: return r8_type;
     case ElementType::String: return string_type;
     case ElementType::Object: return object_type;
+    default: xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
     }
-
-    xlang::throw_invalid("Unrecognized ElementType: ", std::to_string(static_cast<int>(type)));
 }
 
 void element_type::write_cpp_generic_param_logical_type(writer& w) const
@@ -1325,6 +1322,9 @@ void mapped_type::write_cpp_generic_param_abi_type(writer& w) const
     case category::struct_type:
         w.write("struct ");
         break;
+
+    default:
+        break; // Others don't get prefixes
     }
 
     write_cpp_abi_type(w);

@@ -183,7 +183,7 @@ int main(int const argc, char** argv)
                 }
                 else
                 {
-                    group.add([&]()
+                    group.add([&, ns = ns]()
                     {
                         write_abi_header(ns, config, mdCache.compile_namespaces({ ns }));
                     });
