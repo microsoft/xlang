@@ -25,7 +25,7 @@ namespace xlang
 
         auto filename = w.write_temp("py.%.h", ns);
 
-        settings.filter.bind_each<write_delegate>(members.delegates)(w);
+        settings.filter.bind_each<write_callable_to_delegate_function>(members.delegates)(w);
         settings.filter.bind_each<write_pinterface_decl>(members.interfaces)(w);
         settings.filter.bind_each<write_pinterface_impl>(members.interfaces)(w);
 
@@ -57,7 +57,6 @@ namespace xlang
         {
             auto format = R"(
 #include <winrt/%.h>
-
 )";
             w.write(format, ns);
         }
@@ -117,6 +116,7 @@ namespace xlang
 
         write_license_python(w);
         w.write(strings::package_init, module_name, module_name, module_name, module_name);
+
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");
     }
@@ -127,16 +127,14 @@ namespace xlang
         
         write_license_python(w);
 
-        w.write(R"(from % import _import_ns
-import typing
-)", module_name);
+        w.write("from % import _import_ns\nimport typing\n", module_name);
 
         if (settings.filter.includes(members.enums))
         {
             w.write("import enum\n\n");
         }
 
-        w.write("_internal = _import_ns(\"%\")\n", ns);
+        w.write("_internal = _import_ns(\"%\")\n\n", ns);
 
         if (!needed_namespaces.empty())
         {
@@ -154,7 +152,7 @@ except:
         }
 
         settings.filter.bind_each<write_python_enum>(members.enums)(w);
-        settings.filter.bind_each<write_python_class>(members.classes)(w);
+        settings.filter.bind_each<write_import_type>(members.classes)(w);
         settings.filter.bind_each<write_import_type>(members.interfaces)(w);
         settings.filter.bind_each<write_import_type>(members.structs)(w);
 

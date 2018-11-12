@@ -22,9 +22,6 @@ namespace xlang
 
 
 
-
-
-
     void write_import_type(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type))
@@ -314,24 +311,24 @@ static PyType_Spec @_Type_spec =
             // treat the args value as a single value, not as a tuple
             if (method.SpecialName() && !method.Flags().RTSpecialName()) 
             {
-                w.write("            auto param% = py::converter<%>::convert_to(args);\n", sequence, param.second->Type());
+                w.write("auto param% = py::converter<%>::convert_to(args);\n", sequence, param.second->Type());
             }
             else
             {
-                w.write("            auto param% = py::convert_to<%>(args, %);\n", sequence, param.second->Type(), sequence);
+                w.write("auto param% = py::convert_to<%>(args, %);\n", sequence, param.second->Type(), sequence);
             }
             break;
         case param_category::out:
-            w.write("            % param% { % };\n", param.second->Type(), sequence, bind<write_out_param_init>(param));
+            w.write("% param% { % };\n", param.second->Type(), sequence, bind<write_out_param_init>(param));
             break;
         case param_category::pass_array:
-            w.write("            /*p*/ winrt::array_view<% const> param% { }; // TODO: Convert incoming python parameter\n", param.second->Type(), sequence);
+            w.write("/*p*/ winrt::array_view<% const> param% { }; // TODO: Convert incoming python parameter\n", param.second->Type(), sequence);
             break;
         case param_category::fill_array:
-            w.write("            /*f*/ winrt::array_view<%> param% { }; // TODO: Convert incoming python parameter\n", param.second->Type(), sequence);
+            w.write("/*f*/ winrt::array_view<%> param% { }; // TODO: Convert incoming python parameter\n", param.second->Type(), sequence);
             break;
         case param_category::receive_array:
-            w.write("            /*r*/ winrt::com_array<%> param% { };\n", param.second->Type(), sequence);
+            w.write("/*r*/ winrt::com_array<%> param% { };\n", param.second->Type(), sequence);
             break;
         default:
             throw_invalid("write_param_conversion not impl");
@@ -389,151 +386,141 @@ static PyType_Spec @_Type_spec =
 
         if (get_param_category(signature.return_signature()) == param_category::receive_array)
         {
-            w.write(R"(        // returning a ReceiveArray not impl
+            w.write(R"(// returning a ReceiveArray not impl
         return nullptr;
 )");
             return;
         }
 
-        w.write("        try\n        {\n");
-        for (auto&& param : signature.params())
+        w.write("try\n{\n");
         {
-            write_param_declaration(w, info.method, param);
-        }
+            writer::indent_guard g{ w };
 
-        if (signature.has_params())
-        {
-            w.write("\n");
-        }
-
-        w.write("            %%%(%);\n",
-            bind<write_method_overload_return>(signature),
-            bind<write_method_overload_invoke_context>(type, info.method),
-            get_cpp_method_name(info.method),
-            bind_list<write_param_name>(", ", signature.params()));
-
-        if (signature.return_signature())
-        {
-            if (count_out_param(signature.params()) == 0)
+            for (auto&& param : signature.params())
             {
-                auto format = R"(
-            return py::convert(return_value);
+                write_param_declaration(w, info.method, param);
+            }
+
+            if (signature.has_params())
+            {
+                w.write("\n");
+            }
+
+            w.write("%%%(%);\n",
+                bind<write_method_overload_return>(signature),
+                bind<write_method_overload_invoke_context>(type, info.method),
+                get_cpp_method_name(info.method),
+                bind_list<write_param_name>(", ", signature.params()));
+
+            if (signature.return_signature())
+            {
+                if (count_out_param(signature.params()) == 0)
+                {
+                    w.write("\nreturn py::convert(return_value);\n");
+                }
+                else
+                {
+                    {
+                        auto format = R"(
+PyObject* out_return_value = py::convert(return_value);
+if (!out_return_value) 
+{ 
+    return nullptr;
+};
+
 )";
-                w.write(format);
+                        w.write(format);
+                    }
+
+                    int out_param_count = 1;
+                    std::string tuple_pack_param;
+
+                    for (auto&& param : signature.params())
+                    {
+                        if (is_in_param(param))
+                        {
+                            continue;
+                        }
+
+                        out_param_count++;
+                        auto sequence = param.first.Sequence() - 1;
+                        tuple_pack_param.append(", ");
+                        tuple_pack_param.append(w.write_temp("out%", sequence));
+
+                        auto format = R"(PyObject* out% = py::convert(param%);
+if (!out%) 
+{
+    return nullptr;
+}
+
+)";
+                        w.write(format, sequence, sequence, sequence);
+                    }
+
+                    w.write("return PyTuple_Pack(%, out_return_value%);\n", out_param_count, tuple_pack_param);
+                }
             }
             else
             {
-                {
-                    auto format = R"(
-            PyObject* out_return_value = py::convert(return_value);
-            if (!out_return_value) 
-            { 
-                return nullptr;
-            };
-
-)";
-                    w.write(format);
-                }
-
-                int out_param_count = 1;
-                std::string tuple_pack_param;
-
-                for (auto&& param : signature.params())
-                {
-                    if (is_in_param(param))
-                    {
-                        continue;
-                    }
-
-                    out_param_count++;
-                    auto sequence = param.first.Sequence() - 1;
-                    tuple_pack_param.append(", ");
-                    tuple_pack_param.append(w.write_temp("out%", sequence));
-
-                    auto format = R"(            PyObject* out% = py::convert(param%);
-            if (!out%) 
-            {
-                return nullptr;
-            }
-
-)";
-                    w.write(format, sequence, sequence, sequence);
-                }
-
-                w.write("            return PyTuple_Pack(%, out_return_value%);\n", out_param_count, tuple_pack_param);
+                w.write("Py_RETURN_NONE;\n");
             }
         }
-        else
-        {
-            w.write("            Py_RETURN_NONE;\n");
-        }
-
-        w.write(R"(        }
-        catch (...)
-        {
-            return py::to_PyErr();
-        }
-)");
+        w.write("}\ncatch (...)\n{\n    return py::to_PyErr();\n}\n");
     }
 
     template <auto F>
     void write_method_overload(writer& w, TypeDef const& type, std::vector<method_info> const& overloads)
     {
-        F(w, type, overloads[0]);
+        w.write("\n%\n{\n", bind<F>(type, overloads[0]));
 
-        if (overloads.size() == 1 && overloads[0].method.SpecialName())
         {
-            auto overload = overloads[0];
+            writer::indent_guard g{ w };
 
-            if (is_get_method(overloads[0].method))
+            if (overloads.size() == 1 && overloads[0].method.SpecialName())
             {
-                w.write(R"(    if (args != nullptr)
-    {
-        PyErr_SetString(PyExc_TypeError, "arguments not supported for get methods");
-        return nullptr;
-    }
-)");
-            }
+                auto overload = overloads[0];
 
-            method_signature signature{ overloads[0].method };
-            write_method_overload_body(w, type, overloads[0], signature);
-        }
-        else
-        {
-            w.write("    Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
-
-            bool first{ true };
-            for (auto&& overload : overloads)
-            {
-                method_signature signature{ overload.method };
-
-                w.write("    ");
-
-                if (first)
+                if (is_get_method(overloads[0].method))
                 {
-                    first = false;
-                }
-                else
-                {
-                    w.write("else ");
-                }
-
-                auto format = R"(if (arg_count == %)
-    {
-)";
-                w.write(format, count_in_param(signature.params()));
-                write_method_overload_body(w, type, overload, signature);
-                w.write("    }\n");
-            }
-
-            w.write(R"(    else if (arg_count == -1)
-    {
-        return nullptr; 
-    }
-
-    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+                    w.write(R"(if (args != nullptr)
+{
+    PyErr_SetString(PyExc_TypeError, "arguments not supported for get methods");
     return nullptr;
+}
+
 )");
+                }
+
+                method_signature signature{ overloads[0].method };
+                write_method_overload_body(w, type, overloads[0], signature);
+            }
+            else
+            {
+                w.write("Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
+
+                separator s{ w, "else " };
+                for (auto&& overload : overloads)
+                {
+                    method_signature signature{ overload.method };
+
+                    s();
+                    w.write("if (arg_count == %)\n{\n", count_in_param(signature.params()));
+                    {
+                        writer::indent_guard g{ w };
+                        write_method_overload_body(w, type, overload, signature);
+                    }
+                    w.write("}\n");
+                }
+
+                w.write(R"(else if (arg_count == -1)
+{
+    return nullptr; 
+}
+
+PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+return nullptr;
+)");
+            }
         }
 
         w.write("}\n");
@@ -587,7 +574,7 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
 
     void write_type_function_decl(writer& w, TypeDef const& type, method_info const& info)
     {
-        w.write("\nstatic PyObject* @_%(%, PyObject* args)\n{ \n",
+        w.write("static PyObject* @_%(%, PyObject* args)",
             type.TypeName(),
             info.method.Name(),
             bind<write_type_method_decl_self_type>(type, info.method));
@@ -599,7 +586,7 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
         {
             for (auto&&[name, overloads] : get_methods(type))
             {
-                write_type_function_decl(w, type, overloads[0]);
+                w.write("\n%\n{\n", bind<write_type_function_decl>(type, overloads[0]));
                 w.write("    return self->obj->%(args);\n}\n", name);
             }
         }
@@ -628,16 +615,16 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
             return;
         }
 
-        auto format = R"(    template<>
-    struct winrt_type<%>
-    {
-        static PyTypeObject* python_type;
+        auto format = R"(template<>
+struct winrt_type<%>
+{
+    static PyTypeObject* python_type;
 
-        static PyTypeObject* get_python_type()
-        {
-            return python_type;
-        }
-    };
+    static PyTypeObject* get_python_type()
+    {
+        return python_type;
+    }
+};
 
 )";
         w.write(format, bind<write_winrt_type_specialization_native_type>(type));
@@ -650,82 +637,78 @@ static PyObject* %__from(PyObject* /*unused*/, PyObject* arg)
 
     void write_class_constructor_overload(writer& w, MethodDef const& method, method_signature const& signature)
     {
-        w.write("        try\n        {\n");
-        for (auto&& param : signature.params())
+        w.write("try\n{\n");
         {
-            write_param_declaration(w, method, param);
-        }
+            writer::indent_guard g{ w };
 
-        auto format = R"(            % instance{ % };
-            return py::wrap(instance, type);
+            for (auto&& param : signature.params())
+            {
+                write_param_declaration(w, method, param);
+            }
+
+            w.write("% instance{ % };\nreturn py::wrap(instance, type);\n", 
+                method.Parent(), 
+                bind_list<write_param_name>(", ", signature.params()));
         }
-        catch (...)
-        {
-            return py::to_PyErr();
-        }
-)";
-        w.write(format, method.Parent(), bind_list<write_param_name>(", ", signature.params()));
+        w.write("}\ncatch (...)\n{\n    return py::to_PyErr();\n}\n");
     }
-
 
     void write_class_constructor(writer& w, TypeDef const& type)
     {
         w.write("\nstatic PyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
 
-        auto constructors = get_constructors(type);
+        {
+            writer::indent_guard g{ w };
 
-        if (is_static_class(type) || constructors.size() == 0)
-        {
-            auto format = R"(    PyErr_SetString(PyExc_TypeError, "% is not activatable");
-    return nullptr;
+            auto constructors = get_constructors(type);
+
+            if (is_static_class(type) || constructors.size() == 0)
+            {
+                auto format = R"(PyErr_SetString(PyExc_TypeError, "% is not activatable");
+return nullptr;
 )";
-            w.write(format, type.TypeName());
-        }
-        else
-        {
-            w.write(R"(    if (kwds != nullptr)
-    {
-        PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
-        return nullptr;
-    }
+                w.write(format, type.TypeName());
+            }
+            else
+            {
+                w.write(R"(if (kwds != nullptr)
+{
+    PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
+    return nullptr;
+}
 
 )");
-            w.write("    Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
+                w.write("Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
 
-            bool first{ true };
-            for (auto&& m : constructors)
-            {
-                method_signature signature{ m };
+                separator s{ w, "else " };
 
-                w.write("    ");
-
-                if (first)
+                for (auto&& m : constructors)
                 {
-                    first = false;
-                }
-                else
-                {
-                    w.write("else ");
-                }
+                    method_signature signature{ m };
 
-                auto format = R"(if (arg_count == %)
-    {
+                    s();
+                    auto format = R"(if (arg_count == %)
+{
 )";
-                w.write(format, count_in_param(signature.params()));
-                write_class_constructor_overload(w, m, signature);
-                w.write("    }\n");
+                    w.write(format, count_in_param(signature.params()));
+                    {
+                        writer::indent_guard g{ w };
+                        write_class_constructor_overload(w, m, signature);
+                    }
+                    w.write("}\n");
+                }
+
+                w.write(R"(else if (arg_count == -1)
+{
+    return nullptr; 
+}
+
+PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+return nullptr;
+)");
             }
 
-            w.write(R"(    else if (arg_count == -1)
-    {
-        return nullptr; 
-    }
-
-    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
-    return nullptr;
-)");
         }
-
         w.write("}\n");
     }
 
@@ -788,21 +771,24 @@ static void @_dealloc(%* self)
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\nstruct py@\n{\n", type.TypeName());
-        w.write("    virtual ~py@() {};\n", type.TypeName());
-        w.write("    virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
-        w.write("    virtual std::size_t hash() = 0;\n\n");
-            
-        for (auto&& [method_name, overloads] : get_methods(type))
         {
-            w.write("    virtual PyObject* %(PyObject* args) = 0;\n", method_name);
-        }
+            writer::indent_guard g{ w };
 
+            w.write("virtual ~py@() {};\n", type.TypeName());
+            w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
+            w.write("virtual std::size_t hash() = 0;\n\n");
+
+            for (auto&&[method_name, overloads] : get_methods(type))
+            {
+                w.write("virtual PyObject* %(PyObject* args) = 0;\n", method_name);
+            }
+        }
         w.write("};\n");
     }
 
     void write_pinterface_method_decl(writer& w, TypeDef const&, method_info const& info)
     {
-        w.write("\nPyObject* %(PyObject* args) override\n{\n", info.method.Name());
+        w.write("PyObject* %(PyObject* args) override", info.method.Name());
     }
 
     void write_pinterface_impl(writer& w, TypeDef const& type)
@@ -814,13 +800,18 @@ static void @_dealloc(%* self)
 
         w.write("\ntemplate<%>\nstruct py@Impl : public py@\n{\n", bind_list<write_pinterface_type_args>(", ", type.GenericParam()), type.TypeName(), type.TypeName());
 
-        w.write("py@Impl(%<%> o) : obj(o) {}\n", type.TypeName(), type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
-        w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return obj; }\n");
-        w.write("std::size_t hash() override { return py::get_instance_hash(obj); }\n");
+        {
+            writer::indent_guard g{ w };
 
-        write_methods<write_pinterface_method_decl>(w, type);
+            w.write("py@Impl(%<%> o) : obj(o) {}\n", type.TypeName(), type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+            w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return obj; }\n");
+            w.write("std::size_t hash() override { return py::get_instance_hash(obj); }\n");
 
-        w.write("\n    %<%> obj{ nullptr };\n};\n", type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+            write_methods<write_pinterface_method_decl>(w, type);
+
+            w.write("\n%<%> obj{ nullptr };\n", type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+        }
+        w.write("};\n");
     }
 
     void write_pinterface_type_mapper(writer& w, TypeDef const& type)
@@ -828,12 +819,12 @@ static void @_dealloc(%* self)
         if (!is_ptype(type))
             return;
 
-        auto format = R"(    template <%>
-    struct pinterface_python_type<%<%>>
-    {
-        using abstract = ::py@;
-        using concrete = ::py@Impl<%>;
-    };
+        auto format = R"(template <%>
+struct pinterface_python_type<%<%>>
+{
+    using abstract = ::py@;
+    using concrete = ::py@Impl<%>;
+};
 
 )";
         w.write(format, 
@@ -922,21 +913,19 @@ static void @_dealloc(%* self)
         w.write("auto param%", p.first.Sequence());
     }
 
-    void write_delegate(writer& w, TypeDef const& type)
+    void write_callable_to_delegate_function(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         auto invoke = get_delegate_invoke(type);
         method_signature signature{ invoke };
 
-        w.write("\n");
-
         if (is_ptype(type))
         {
-            w.write("template <%>\n", bind_list<write_pinterface_type_args>(", ", type.GenericParam()));
+            w.write("\ntemplate <%>", bind_list<write_pinterface_type_args>(", ", type.GenericParam()));
         }
 
-        w.write("struct py@\n{\n", type.TypeName());
+        w.write("\nstruct py@\n{\n", type.TypeName());
 
         {
             writer::indent_guard g{ w };
@@ -958,18 +947,26 @@ return [callable](%)
                 {
                     writer::indent_guard g{ w };
 
-
                     for (auto&& p : signature.params())
                     {
                         w.write("PyObject* pyObj% = py::convert(param%);\n", p.first.Sequence(), p.first.Sequence());
                     }
 
-                    w.write("\nPyObject* args = PyTuple_Pack(%", static_cast<int>(signature.params().size()));
-                    for (auto&& p : signature.params())
+                    if (signature.params().size() > 0)
                     {
-                        w.write(", pyObj%", p.first.Sequence());
+                        w.write("\nPyObject* args = PyTuple_Pack(%", static_cast<int>(signature.params().size()));
+                        for (auto&& p : signature.params())
+                        {
+                            w.write(", pyObj%", p.first.Sequence());
+                        }
+                        w.write(");\n\n");
                     }
-                    w.write(");\n\nwinrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };\n");
+                    else
+                    {
+                        w.write("PyObject* args = nullptr;\n");
+                    }
+
+                    w.write("\nwinrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };\n");
 
                     if (signature.return_signature())
                     {
@@ -1000,11 +997,11 @@ return [callable](%)
 
     void write_delegate_type_mapper(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <%>
-    struct delegate_python_type<%>
-    {
-        using type = %;
-    };
+        auto format = R"(template <%>
+struct delegate_python_type<%>
+{
+    using type = %;
+};
 
 )";
         w.write(format,

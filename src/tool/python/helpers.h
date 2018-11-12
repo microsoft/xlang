@@ -35,6 +35,7 @@ namespace xlang
     struct separator
     {
         writer& w;
+        std::string_view _separator{ ", " };
         bool first{ true };
 
         void operator()()
@@ -45,7 +46,7 @@ namespace xlang
             }
             else
             {
-                w.write(", ");
+                w.write(_separator);
             }
         }
     };
