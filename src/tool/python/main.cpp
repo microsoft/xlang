@@ -89,7 +89,7 @@ namespace xlang
             group.add([&]
             {
                 write_pybase_h(src_dir);
-                write_package_init(module_dir, native_module);
+                write_package_dunder_init_py(module_dir, native_module);
             });
 
             for (auto&&[ns, members] : c.namespaces())
@@ -122,8 +122,6 @@ namespace xlang
                     pos = new_pos + 1;
                 } 
 
-                write_package_init(module_dir, native_module);
-
                 std::string fqns{ ns };
                 auto h_filename = "py." + fqns + ".h";
 
@@ -133,7 +131,7 @@ namespace xlang
                 {
                     auto namespaces = write_namespace_cpp(src_dir, ns, members);
                     write_namespace_h(src_dir, ns, namespaces, members);
-                    write_namespace_init(ns_dir, settings.module, namespaces, ns, members);
+                    write_namespace_dunder_init_py(ns_dir, settings.module, namespaces, ns, members);
                 });
             }
 

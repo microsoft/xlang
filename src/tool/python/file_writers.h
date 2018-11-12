@@ -7,6 +7,7 @@ namespace xlang
     inline void write_pybase_h(stdfs::path const& folder)
     {
         writer w;
+        write_license_cpp(w);
         w.write(strings::pybase);
         create_directories(folder);
         w.flush_to_file(folder / "pybase.h");
@@ -42,7 +43,7 @@ namespace xlang
 
         w.swap();
 
-        w.write_license();
+        write_license_cpp(w);
         {
             auto format = R"(#pragma once
 
@@ -71,7 +72,7 @@ namespace xlang
         w.current_namespace = ns;
         auto filename = w.write_temp("py.%.cpp", ns);
 
-        w.write_license();
+        write_license_cpp(w);
         write_include(w, ns);
         settings.filter.bind_each<write_class>(members.classes)(w);
         settings.filter.bind_each<write_interface>(members.interfaces)(w);
@@ -87,7 +88,7 @@ namespace xlang
     {
         writer w;
 
-        w.write_license();
+        write_license_cpp(w);
         write_python_namespace_includes(w, namespaces);
         w.write(strings::module_methods);
         write_module_exec(w);
@@ -104,25 +105,27 @@ namespace xlang
     {
         writer w;
 
+        write_license_python(w);
         w.write(strings::setup, module_name, native_module_name, bind<write_setup_filenames>(native_module_name, namespaces));
         create_directories(folder);
         w.flush_to_file(folder / "setup.py");
     }
 
-    inline void write_package_init(stdfs::path const& folder, std::string_view const& module_name)
+    inline void write_package_dunder_init_py(stdfs::path const& folder, std::string_view const& module_name)
     {
         writer w;
 
+        write_license_python(w);
         w.write(strings::package_init, module_name, module_name, module_name, module_name);
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");
     }
 
-    inline void write_namespace_init(stdfs::path const& folder, std::string_view const& module_name, std::set<std::string> const& needed_namespaces, std::string_view const& ns, cache::namespace_members const& members)
+    inline void write_namespace_dunder_init_py(stdfs::path const& folder, std::string_view const& module_name, std::set<std::string> const& needed_namespaces, std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         
-        w.write_license_python();
+        write_license_python(w);
 
         w.write_indented(R"(from % import _import_ns
 import typing
@@ -135,8 +138,6 @@ import typing
 
         w.write_indented("_internal = _import_ns(\"%\")\n", ns);
 
-
-        
         if (!needed_namespaces.empty())
         {
             for (std::string needed_ns : needed_namespaces)
