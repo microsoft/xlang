@@ -4,6 +4,13 @@
 #include "code_writers.h"
 #include "types.h"
 
+inline void write_contract_version(writer& w, unsigned int value)
+{
+    auto versionHigh = static_cast<int>((value & 0xFFFF0000) >> 16);
+    auto versionLow = static_cast<int>(value & 0x0000FFFF);
+    w.write("%.%", versionHigh, versionLow);
+}
+
 inline void write_type_banner_version_info(writer& w, xlang::meta::reader::TypeDef const& type)
 {
     if (auto contractInfo = contract_attributes(type))

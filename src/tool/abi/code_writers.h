@@ -5,13 +5,6 @@
 #include "abi_writer.h"
 #include "types.h"
 
-inline void write_contract_version(writer& w, unsigned int value)
-{
-    auto versionHigh = static_cast<int>((value & 0xFFFF0000) >> 16);
-    auto versionLow = static_cast<int>(value & 0x0000FFFF);
-    w.write("%.%", versionHigh, versionLow);
-}
-
 inline std::string_view mangled_name_macro_format(writer& w)
 {
     using namespace std::literals;
@@ -62,9 +55,19 @@ inline void write_cpp_fully_qualified_type(writer& w, std::string_view typeNames
     w.write(cpp_typename_format(w), [&](writer& w) { w.write("@::%", typeNamespace, typeName); });
 }
 
+inline auto bind_cpp_fully_qualified_type(std::string_view typeNamespace, std::string_view typeName)
+{
+    return xlang::text::bind<write_cpp_fully_qualified_type>(typeNamespace, typeName);
+}
+
 inline void write_mangled_name(writer& w, std::string_view mangledName)
 {
     w.write(mangled_name_macro_format(w), mangledName);
+}
+
+inline auto bind_mangled_name(std::string_view mangledName)
+{
+    return xlang::text::bind<write_mangled_name>(mangledName);
 }
 
 inline void write_mangled_name_macro(writer& w, typedef_base const& type)
@@ -125,6 +128,24 @@ template <typename Suffix>
 inline void write_c_type_name(writer& w, generic_inst const& type, Suffix&& suffix)
 {
     w.write("%%", type.mangled_name(), suffix);
+}
+
+template <typename T>
+auto bind_c_type_name(T const& type)
+{
+    return [&](writer& w)
+    {
+        write_c_type_name(w, type);
+    };
+}
+
+template <typename T, typename Suffix>
+auto bind_c_type_name(T const& type, Suffix&& suffix)
+{
+    return [&](writer& w)
+    {
+        write_c_type_name(w, type, suffix);
+    };
 }
 
 inline void write_contract_macro(writer& w, std::string_view contractNamespace, std::string_view contractTypeName)

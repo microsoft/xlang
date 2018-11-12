@@ -64,17 +64,12 @@ void enum_type::write_c_forward_declaration(writer& w) const
         return;
     }
 
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, *this);
-    };
-
-    w.write("typedef enum % %;\n\n", write_name, write_name);
+    w.write("typedef enum % %;\n\n", bind_c_type_name(*this), bind_c_type_name(*this));
 }
 
 void enum_type::write_c_abi_type(writer& w) const
 {
-    w.write("enum %", [&](writer& w) { write_c_type_name(w, *this); });
+    w.write("enum %", bind_c_type_name(*this));
 }
 
 void enum_type::write_cpp_definition(writer& w) const
@@ -174,7 +169,7 @@ void enum_type::write_c_definition(writer& w) const
 
     w.write(R"^-^(%
 {
-)^-^", [&](writer& w) { write_c_type_name(w, *this); });
+)^-^", bind_c_type_name(*this));
 
     for (auto const& field : m_type.FieldList())
     {
@@ -221,7 +216,7 @@ void struct_type::write_cpp_generic_param_abi_type(writer& w) const
 
 void struct_type::write_cpp_abi_type(writer& w) const
 {
-    w.write("struct %", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+    w.write("struct %", bind_cpp_fully_qualified_type(clr_abi_namespace(), cpp_abi_name()));
 }
 
 void struct_type::write_c_forward_declaration(writer& w) const
@@ -231,17 +226,12 @@ void struct_type::write_c_forward_declaration(writer& w) const
         return;
     }
 
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, *this);
-    };
-
-    w.write("typedef struct % %;\n\n", write_name, write_name);
+    w.write("typedef struct % %;\n\n", bind_c_type_name(*this), bind_c_type_name(*this));
 }
 
 void struct_type::write_c_abi_type(writer& w) const
 {
-    w.write("struct %", [&](writer& w) { write_c_type_name(w, *this); });
+    w.write("struct %", bind_c_type_name(*this));
 }
 
 void struct_type::write_cpp_definition(writer& w) const
@@ -302,7 +292,7 @@ void struct_type::write_c_definition(writer& w) const
 
     w.write(R"^-^(%
 {
-)^-^", [&](writer& w) { write_c_type_name(w, *this); });
+)^-^", bind_c_type_name(*this));
 
     for (auto const& member : members)
     {
@@ -340,9 +330,9 @@ void delegate_type::write_cpp_forward_declaration(writer& w) const
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        bind<write_mangled_name>(m_mangledName),
-        bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), m_abiName),
-        bind<write_mangled_name>(m_mangledName));
+        bind_mangled_name(m_mangledName),
+        bind_cpp_fully_qualified_type(clr_abi_namespace(), m_abiName),
+        bind_mangled_name(m_mangledName));
 }
 
 void delegate_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -352,7 +342,7 @@ void delegate_type::write_cpp_generic_param_abi_type(writer& w) const
 
 void delegate_type::write_cpp_abi_type(writer& w) const
 {
-    w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+    w.write("%*", bind_cpp_fully_qualified_type(clr_abi_namespace(), cpp_abi_name()));
 }
 
 static std::string_view function_name(MethodDef const& def)
@@ -448,7 +438,7 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
-)^-^", bind<write_mangled_name>(type.mangled_name()), bind<write_mangled_name>(type.mangled_name()));
+)^-^", bind_mangled_name(type.mangled_name()), bind_mangled_name(type.mangled_name()));
 
     if constexpr (is_interface)
     {
@@ -490,7 +480,7 @@ static void write_cpp_interface_definition(writer& w, T const& type)
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(type), bind<write_mangled_name>(type.mangled_name()));
+)^-^", bind_iid_name(type), bind_mangled_name(type.mangled_name()));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -499,17 +489,12 @@ EXTERN_C const IID %;
 template <typename T>
 static void write_c_iunknown_interface(writer& w, T const& type)
 {
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, type);
-    };
-
     w.write(R"^-^(    HRESULT (STDMETHODCALLTYPE* QueryInterface)(%* This,
         REFIID riid,
         void** ppvObject);
     ULONG (STDMETHODCALLTYPE* AddRef)(%* This);
     ULONG (STDMETHODCALLTYPE* Release)(%* This);
-)^-^", write_name, write_name, write_name);
+)^-^", bind_c_type_name(type), bind_c_type_name(type), bind_c_type_name(type));
 }
 
 template <typename T>
@@ -530,11 +515,6 @@ static void write_c_iunknown_interface_macros(writer& w, T const& type)
 template <typename T>
 static void write_c_iinspectable_interface(writer& w, T const& type)
 {
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, type);
-    };
-
     write_c_iunknown_interface(w, type);
     w.write(R"^-^(    HRESULT (STDMETHODCALLTYPE* GetIids)(%* This,
         ULONG* iidCount,
@@ -543,7 +523,7 @@ static void write_c_iinspectable_interface(writer& w, T const& type)
         HSTRING* className);
     HRESULT (STDMETHODCALLTYPE* GetTrustLevel)(%* This,
         TrustLevel* trustLevel);
-)^-^", write_name, write_name, write_name);
+)^-^", bind_c_type_name(type), bind_c_type_name(type), bind_c_type_name(type));
 }
 
 template <typename T>
@@ -565,17 +545,12 @@ static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 template <typename T>
 static void write_c_function_declaration(writer& w, T const& type, function_def const& func)
 {
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, type);
-    };
-
     if (auto info = is_deprecated(func.def))
     {
         write_deprecation_message(w, *info, 1);
     }
 
-    w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), write_name);
+    w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), bind_c_type_name(type));
 
     for (auto const& param : func.params)
     {
@@ -672,16 +647,6 @@ static void write_c_function_declaration_macro(writer& w, T const& type, functio
 template <typename T>
 static void write_c_interface_definition(writer& w, T const& type)
 {
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, type);
-    };
-
-    auto write_vtbl_name = [&](writer& w)
-    {
-        write_c_type_name(w, type, "Vtbl");
-    };
-
     w.write("typedef struct");
     if (auto info = type.is_deprecated())
     {
@@ -697,7 +662,7 @@ static void write_c_interface_definition(writer& w, T const& type)
 {
     BEGIN_INTERFACE
 
-)^-^", write_vtbl_name);
+)^-^", bind_c_type_name(type, "Vtbl"));
 
     bool isDelegate = type.category() == category::delegate_type;
     if (isDelegate)
@@ -725,7 +690,7 @@ interface %
 
 #ifdef COBJMACROS
 
-)^-^", write_vtbl_name, write_name, write_vtbl_name);
+)^-^", bind_c_type_name(type, "Vtbl"), bind_c_type_name(type), bind_c_type_name(type, "Vtbl"));
 
     if (isDelegate)
     {
@@ -752,28 +717,23 @@ void delegate_type::write_c_forward_declaration(writer& w) const
         return;
     }
 
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, *this);
-    };
-
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
-)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+)^-^", bind_mangled_name(m_mangledName), bind_mangled_name(m_mangledName));
 
     w.write(R"^-^(typedef interface % %;
 
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        write_name,
-        write_name,
-        bind<write_mangled_name>(m_mangledName));
+        bind_c_type_name(*this),
+        bind_c_type_name(*this),
+        bind_mangled_name(m_mangledName));
 }
 
 void delegate_type::write_c_abi_type(writer& w) const
 {
-    w.write("%*", [&](writer& w) { write_c_type_name(w, *this); });
+    w.write("%*", bind_c_type_name(*this));
 }
 
 void delegate_type::write_cpp_definition(writer& w) const
@@ -794,14 +754,14 @@ void delegate_type::write_c_definition(writer& w) const
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
-)^-^",bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+)^-^",bind_mangled_name(m_mangledName), bind_mangled_name(m_mangledName));
 
     write_c_interface_definition(w, *this);
 
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(*this), bind<write_mangled_name>(m_mangledName));
+)^-^", bind_iid_name(*this), bind_mangled_name(m_mangledName));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -816,7 +776,7 @@ void interface_type::write_cpp_forward_declaration(writer& w) const
 
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
-)^-^", bind<write_mangled_name>(m_mangledName), bind<write_mangled_name>(m_mangledName));
+)^-^", bind_mangled_name(m_mangledName), bind_mangled_name(m_mangledName));
 
     w.push_namespace(clr_abi_namespace());
     w.write("%interface %;\n", indent{}, m_type.TypeName());
@@ -827,9 +787,9 @@ void interface_type::write_cpp_forward_declaration(writer& w) const
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        bind<write_mangled_name>(m_mangledName),
-        bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), m_type.TypeName()),
-        bind<write_mangled_name>(m_mangledName));
+        bind_mangled_name(m_mangledName),
+        bind_cpp_fully_qualified_type(clr_abi_namespace(), m_type.TypeName()),
+        bind_mangled_name(m_mangledName));
 }
 
 void interface_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -839,7 +799,7 @@ void interface_type::write_cpp_generic_param_abi_type(writer& w) const
 
 void interface_type::write_cpp_abi_type(writer& w) const
 {
-    w.write("%*", bind<write_cpp_fully_qualified_type>(clr_abi_namespace(), cpp_abi_name()));
+    w.write("%*", bind_cpp_fully_qualified_type(clr_abi_namespace(), cpp_abi_name()));
 }
 
 void interface_type::write_c_forward_declaration(writer& w) const
@@ -849,11 +809,6 @@ void interface_type::write_c_forward_declaration(writer& w) const
         return;
     }
 
-    auto write_name = [&](writer& w)
-    {
-        write_c_type_name(w, *this);
-    };
-
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
 typedef interface % %;
@@ -861,16 +816,16 @@ typedef interface % %;
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        bind<write_mangled_name>(m_mangledName),
-        bind<write_mangled_name>(m_mangledName),
-        write_name,
-        write_name,
-        bind<write_mangled_name>(m_mangledName));
+        bind_mangled_name(m_mangledName),
+        bind_mangled_name(m_mangledName),
+        bind_c_type_name(*this),
+        bind_c_type_name(*this),
+        bind_mangled_name(m_mangledName));
 }
 
 void interface_type::write_c_abi_type(writer& w) const
 {
-    w.write("%*", [&](writer& w) { write_c_type_name(w, *this); });
+    w.write("%*", bind_c_type_name(*this));
 }
 
 void interface_type::write_cpp_definition(writer& w) const
@@ -893,8 +848,8 @@ void interface_type::write_c_definition(writer& w) const
 #define __%_INTERFACE_DEFINED__
 extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] = L"%";
 )^-^",
-        bind<write_mangled_name>(m_mangledName),
-        bind<write_mangled_name>(m_mangledName),
+        bind_mangled_name(m_mangledName),
+        bind_mangled_name(m_mangledName),
         bind_list("_", namespace_range{ clr_abi_namespace() }),
         cpp_abi_name(),
         m_clrFullName);
@@ -904,7 +859,7 @@ extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] =
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(*this), bind<write_mangled_name>(m_mangledName));
+)^-^", bind_iid_name(*this), bind_mangled_name(m_mangledName));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -934,7 +889,7 @@ void class_type::write_cpp_forward_declaration(writer& w) const
 
 void class_type::write_cpp_generic_param_logical_type(writer& w) const
 {
-    w.write("%*", bind<write_cpp_fully_qualified_type>(clr_logical_namespace(), cpp_logical_name()));
+    w.write("%*", bind_cpp_fully_qualified_type(clr_logical_namespace(), cpp_logical_name()));
 }
 
 void class_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -949,8 +904,8 @@ void class_type::write_cpp_generic_param_abi_type(writer& w) const
     // The second template argument may look a bit odd, but it is correct. The default interface must be an interface,
     // which won't be aggregated and this is the simplest way to write generics correctly
     w.write("%<%*, %>",
-        bind<write_cpp_fully_qualified_type>("Windows.Foundation.Internal"sv, "AggregateType"sv),
-        bind<write_cpp_fully_qualified_type>(clr_logical_namespace(), cpp_logical_name()),
+        bind_cpp_fully_qualified_type("Windows.Foundation.Internal"sv, "AggregateType"sv),
+        bind_cpp_fully_qualified_type(clr_logical_namespace(), cpp_logical_name()),
         [&](writer& w) { default_interface->write_cpp_generic_param_abi_type(w); });
 }
 
@@ -1273,7 +1228,7 @@ void element_type::write_cpp_generic_param_abi_type(writer& w) const
     if (m_logicalName != m_abiName)
     {
         w.write("%<%, %>",
-            bind<write_cpp_fully_qualified_type>("Windows.Foundation.Internal"sv, "AggregateType"sv),
+            bind_cpp_fully_qualified_type("Windows.Foundation.Internal"sv, "AggregateType"sv),
             m_logicalName,
             m_abiName);
     }
