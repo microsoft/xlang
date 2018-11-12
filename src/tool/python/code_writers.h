@@ -936,55 +936,56 @@ static void @_dealloc(%* self)
             w.write("template <%>\n", bind_list<write_pinterface_type_args>(", ", type.GenericParam()));
         }
 
-        auto format = R"(struct py@
+        w.write("struct py@\n{\n", type.TypeName());
+
+        {
+            writer::indent_guard g{ w };
+
+            w.write("static % get(PyObject* callable)\n{\n", bind<write_full_type>(type));
+            {
+                writer::indent_guard g{ w };
+
+                w.write(R"(if (PyFunction_Check(callable) == 0)
 {
-    static % get(PyObject* callable)
-    {
-        if (PyFunction_Check(callable) == 0)
-        {
-            throw winrt::hresult_invalid_argument();
+    throw winrt::hresult_invalid_argument();
+}
+
+// TODO: How do I manage callable lifetime here?
+return [callable](%)
+{
+)", bind_list<write_delegate_param>(", ", signature.params()));
+
+                {
+                    writer::indent_guard g{ w };
+
+
+                    for (auto&& p : signature.params())
+                    {
+                        w.write("PyObject* pyObj% = py::convert(param%);\n", p.first.Sequence(), p.first.Sequence());
+                    }
+
+                    w.write("\nPyObject* args = PyTuple_Pack(%", static_cast<int>(signature.params().size()));
+                    for (auto&& p : signature.params())
+                    {
+                        w.write(", pyObj%", p.first.Sequence());
+                    }
+                    w.write(");\n\nwinrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };\n");
+
+                    if (signature.return_signature())
+                    {
+                        w.write("PyObject* return_value = PyObject_CallObject(callable, args);\nreturn py::convert<%>(return_value);\n", signature.return_signature().Type());
+                    }
+                    else
+                    {
+                        w.write("PyObject_CallObject(callable, args);\n");
+                    }
+                }
+
+                w.write("};\n");
+            }
+            w.write("};\n");
         }
-
-        // TODO: How do I manage callable lifetime here?
-        return [callable](%)
-        {
-)";
-        w.write(format, 
-            type.TypeName(),
-            bind<write_full_type>(type),
-            bind_list<write_delegate_param>(", ", signature.params()));
-
-        for (auto&& p : signature.params())
-        {
-            w.write("            PyObject* pyObj% = py::convert(param%);\n", p.first.Sequence(), p.first.Sequence());
-        }
-
-        w.write("\n            PyObject* args = PyTuple_Pack(%", static_cast<int>(signature.params().size()));
-        for (auto&& p : signature.params())
-        {
-            w.write(", pyObj%", p.first.Sequence());
-        }
-        w.write(R"();
-
-            winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
-)");
-
-        w.write("            ");
-        if (signature.return_signature())
-        {
-            w.write("PyObject* return_value = ");
-        }
-        w.write("PyObject_CallObject(callable, args);\n");
-
-        if (signature.return_signature())
-        {
-            w.write("            return py::convert<%>(return_value);\n", signature.return_signature().Type());
-        }
-
-        w.write(R"(        };
-    }
-};
-)");
+        w.write("};\n");
     }
 
     void write_python_delegate_type(writer& w, TypeDef const& type)
@@ -1037,14 +1038,14 @@ static void @_dealloc(%* self)
 
     void write_struct_converter_decl(writer& w, TypeDef const& type)
     {
-        w.write_indented("template<>\nstruct converter<%>\n{\n", type);
+        w.write("template<>\nstruct converter<%>\n{\n", type);
         {
             writer::indent_guard g{ w };
-            w.write_indented("static PyObject* convert(% instance) noexcept;\n", type);
-            w.write_indented("static % convert_to(PyObject* obj);\n", type);
+            w.write("static PyObject* convert(% instance) noexcept;\n", type);
+            w.write("static % convert_to(PyObject* obj);\n", type);
         }
 
-        w.write_indented("};\n\n");
+        w.write("};\n\n");
     }
 
     static const std::map<std::string_view, std::string_view> custom_foundation_convert_to = {
@@ -1056,59 +1057,59 @@ static void @_dealloc(%* self)
 
     void write_struct_convert_functions(writer& w, TypeDef const& type)
     {
-        w.write_indented("\nPyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
+        w.write("\nPyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
         {
             writer::indent_guard g{ w };
-            w.write_indented("return py::wrap_struct<%>(instance, py::get_python_type<%>());\n", type, type);
+            w.write("return py::wrap_struct<%>(instance, py::get_python_type<%>());\n", type, type);
         }
-        w.write_indented("}\n\n");
+        w.write("}\n\n");
 
-        w.write_indented("% py::converter<%>::convert_to(PyObject* obj)\n{\n", type, type);
+        w.write("% py::converter<%>::convert_to(PyObject* obj)\n{\n", type, type);
         {
             writer::indent_guard g{ w };
-            w.write_indented("throw_if_pyobj_null(obj);\n");
-            w.write_indented(R"(if (Py_TYPE(obj) == py::get_python_type<%>())
+            w.write("throw_if_pyobj_null(obj);\n");
+            w.write(R"(if (Py_TYPE(obj) == py::get_python_type<%>())
 {
     return reinterpret_cast<py::winrt_struct_wrapper<%>*>(obj)->obj;
 }
 
 )", type, type);
 
-            w.write_indented(R"(if (!PyDict_Check(obj))
+            w.write(R"(if (!PyDict_Check(obj))
 {
     throw winrt::hresult_invalid_argument();
 }
 
 )");
 
-            w.write_indented("% new_value{};\n", type);
+            w.write("% new_value{};\n", type);
 
             for (auto&& field : type.FieldList())
             {
                 auto field_name = get_cpp_field_name(field);
 
-                w.write_indented("PyObject* py% = PyDict_GetItemString(obj, \"%\");\n", field_name, field.Name());
-                w.write_indented("if (!py%) { throw winrt::hresult_invalid_argument(); }\n", field_name);
+                w.write("PyObject* py% = PyDict_GetItemString(obj, \"%\");\n", field_name, field.Name());
+                w.write("if (!py%) { throw winrt::hresult_invalid_argument(); }\n", field_name);
 
                 if (type.TypeNamespace() == "Windows.Foundation")
                 {
                     auto convert_to = custom_foundation_convert_to.find(type.TypeName());
                     if (convert_to != custom_foundation_convert_to.end())
                     {
-                        w.write_indented(convert_to->second);
+                        w.write(convert_to->second);
                         continue;
                     }
                 }
 
-                w.write_indented("new_value.% = converter<%>::convert_to(py%);\n",
+                w.write("new_value.% = converter<%>::convert_to(py%);\n",
                     field_name,
                     field.Signature().Type(),
                     field_name);
             }
 
-            w.write_indented("return new_value;\n");
+            w.write("return new_value;\n");
         }
-        w.write_indented("}\n\n");
+        w.write("}\n\n");
     }
 
     auto get_ireference_type(GenericTypeInstSig const& type)
@@ -1305,7 +1306,7 @@ static void @_dealloc(%* self)
 
     void write_struct_constructor(writer& w, TypeDef const& type)
     {
-        w.write_indented("PyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
+        w.write("PyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
@@ -1341,33 +1342,33 @@ if ((tuple_size == 1) && (kwds == nullptr))
 }
 
 )";
-            w.write_indented(format, type, type);
+            w.write(format, type, type);
 
             for (auto&& field : type.FieldList())
             {
-                w.write_indented("% %{};\n", bind<write_struct_field_var_type>(field), bind<write_struct_field_name>(field));
+                w.write("% %{};\n", bind<write_struct_field_var_type>(field), bind<write_struct_field_name>(field));
             }
 
-            w.write_indented("static char* kwlist[] = {%nullptr};\n\n", bind_each<write_struct_field_keyword>(type.FieldList()));
+            w.write("static char* kwlist[] = {%nullptr};\n\n", bind_each<write_struct_field_keyword>(type.FieldList()));
 
-            w.write_indented("if (!PyArg_ParseTupleAndKeywords(args, kwds, \"%\", kwlist%))\n{\n    return nullptr;\n}\n",
+            w.write("if (!PyArg_ParseTupleAndKeywords(args, kwds, \"%\", kwlist%))\n{\n    return nullptr;\n}\n",
                 bind_each<write_struct_field_format>(type.FieldList()),
                 bind_each<write_struct_field_parameter>(type.FieldList()));
 
-            w.write_indented("\ntry\n{\n");
+            w.write("\ntry\n{\n");
             {
                 writer::indent_guard gg{ w };
                 if (type.TypeNamespace() == "Windows.Foundation" && type.TypeName() == "DateTime")
                 {
-                    w.write_indented("winrt::Windows::Foundation::DateTime instance{ winrt::Windows::Foundation::TimeSpan{ _UniversalTime } };\n");
+                    w.write("winrt::Windows::Foundation::DateTime instance{ winrt::Windows::Foundation::TimeSpan{ _UniversalTime } };\n");
                 }
                 else
                 {
-                    w.write_indented("% instance{ % };\n", type, bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
+                    w.write("% instance{ % };\n", type, bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
                 }
-                w.write_indented("return py::wrap_struct(instance, type);\n");
+                w.write("return py::wrap_struct(instance, type);\n");
             }
-            w.write_indented(R"(}
+            w.write(R"(}
 catch (...)
 {
     return py::to_PyErr();
@@ -1375,7 +1376,7 @@ catch (...)
 )");
 
         }
-        w.write_indented("}\n");
+        w.write("}\n");
     }
 
     static const std::map<std::string_view, std::string_view> custom_foundation_get_variable = {
@@ -1506,7 +1507,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
-        w.write_indented("\n// ----- % struct --------------------\n", type.TypeName());
+        w.write("\n// ----- % struct --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
         write_struct_convert_functions(w, type);
         write_struct_constructor(w, type);
@@ -1526,7 +1527,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
 
     void write_python_enum(writer& w, TypeDef const& type)
     {
-        w.write_indented("class %(%):\n", type.TypeName(), is_flags_enum(type) ? "enum.Flag" : "enum.Enum");
+        w.write("class %(%):\n", type.TypeName(), is_flags_enum(type) ? "enum.Flag" : "enum.Enum");
         {
             writer::indent_guard g{ w };
             
@@ -1537,11 +1538,11 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
                     continue;
                 }
 
-                w.write_indented("% = %\n", field.Name(), field.Constant());
+                w.write("% = %\n", field.Name(), field.Constant());
             }
         }
 
-        w.write_indented("\n");
+        w.write("\n");
     }
 
 
@@ -1570,7 +1571,7 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
             auto format = R"(^@staticproperty
 def %():
     return __internal__.%.%())";
-            w.write_indented(format,
+            w.write(format,
                 prop.Name(),
                 prop.Parent().TypeName(),
                 methods.get.Name());
@@ -1580,7 +1581,7 @@ def %():
             auto format = R"(^@property
 def %(self):
     return self.__instance__.%())";
-            w.write_indented(format,
+            w.write(format,
                 prop.Name(),
                 methods.get.Name());
         }
@@ -1594,7 +1595,7 @@ def %(self):
                 auto format = R"(^@%.setter
 def %(value):
     return __internal__.%.%(value))";
-                w.write_indented(format,
+                w.write(format,
                     prop.Name(),
                     prop.Name(),
                     prop.Parent().TypeName(),
@@ -1605,7 +1606,7 @@ def %(value):
                 auto format = R"(^@%.setter
 def %(self, value):
     return self.__instance__.%(value))";
-                w.write_indented(format,
+                w.write(format,
                     prop.Name(),
                     prop.Name(),
                     methods.get.Name());
@@ -1621,15 +1622,15 @@ def %(self, value):
     {
         //if (is_static_method(overloads.method.b))
         //{
-        //    w.write_indented("@staticmethod\n");
+        //    w.write("@staticmethod\n");
         //}
 
-        w.write_indented("def %():\n    pass\n\n", method_name/*, bind<write_python_method_args>(method)*/);
+        w.write("def %():\n    pass\n\n", method_name/*, bind<write_python_method_args>(method)*/);
     }
 
     void write_python_class(writer& w, TypeDef const& type)
     {
-        w.write_indented("class @:\n", type.TypeName());
+        w.write("class @:\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
@@ -1647,13 +1648,13 @@ def %(self, value):
             {
                 auto methods = get_property_methods(prop_info.property);
 
-                w.write_indented("^@%property\n", is_static_method(methods.get) ? "static" : "");
-                w.write_indented("def %():\n    pass\n\n", prop_info.property.Name());
+                w.write("^@%property\n", is_static_method(methods.get) ? "static" : "");
+                w.write("def %():\n    pass\n\n", prop_info.property.Name());
 
                 if (methods.set)
                 {
-                    w.write_indented("^@%.setter\n", prop_info.property.Name());
-                    w.write_indented("def %(value):\n    pass\n\n", prop_info.property.Name());
+                    w.write("^@%.setter\n", prop_info.property.Name());
+                    w.write("def %(value):\n    pass\n\n", prop_info.property.Name());
                 }
             }
             //for (auto&& prop : type.PropertyList())
@@ -1662,7 +1663,7 @@ def %(self, value):
             //}
         }
 
-        w.write_indented("\n");
+        w.write("\n");
     }
 
 
@@ -1679,11 +1680,11 @@ def %(self, value):
 
         if (has_dealloc(type))
         {
-            w.write_indented("\ntype_object = PyType_FromSpecWithBases(&@_Type_spec, bases);\n", type.TypeName());
+            w.write("\ntype_object = PyType_FromSpecWithBases(&@_Type_spec, bases);\n", type.TypeName());
         }
         else
         {
-            w.write_indented("\ntype_object = PyType_FromSpec(&@_Type_spec);\n", type.TypeName());
+            w.write("\ntype_object = PyType_FromSpec(&@_Type_spec);\n", type.TypeName());
         }
 
 
@@ -1699,7 +1700,7 @@ if (PyModule_AddObject(module, "@", type_object) != 0)
 py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
 type_object = nullptr;
 )";
-        w.write_indented(format,
+        w.write(format,
             type.TypeName(),
             winrt_type_param);
     }
@@ -1714,7 +1715,7 @@ int %(PyObject* module)
     PyObject* bases = PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type);
 )";
 
-        w.write_indented(format, bind<write_ns_init_function_name>(ns));
+        w.write(format, bind<write_ns_init_function_name>(ns));
         {
             writer::indent_guard g{ w };
 
@@ -1722,12 +1723,12 @@ int %(PyObject* module)
             settings.filter.bind_each<write_type_fromspec>(members.interfaces)(w);
             settings.filter.bind_each<write_type_fromspec>(members.structs)(w);
 
-            w.write_indented(R"(
+            w.write(R"(
 Py_DECREF(bases);
 return 0;
 )");
         }
-        w.write_indented("}\n");
+        w.write("}\n");
 
         format = R"(
 static PyModuleDef_Slot module_slots[] = {
@@ -1757,7 +1758,7 @@ PyInit_%(void)
 )";
         auto segments = get_dotted_name_segments(ns);
         auto module_name = w.write_temp("_%_%", settings.module, bind_list("_", segments));
-        w.write_indented(format, bind<write_ns_init_function_name>(ns), module_name, module_name);
+        w.write(format, bind<write_ns_init_function_name>(ns), module_name, module_name);
     }
 
 

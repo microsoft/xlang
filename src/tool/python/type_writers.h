@@ -133,43 +133,49 @@ namespace xlang
             writer & _writer;
         };
 
-        template <typename... Args>
-        void write_indented(std::string_view const& value, Args const&... args)
+        void write_indent()
         {
-            if (indent == 0)
+            for (int32_t i = 0; i < indent; i++)
             {
-                write(value, args...);
+                writer_base::write_impl("    ");
             }
-            else
+        }
+
+        void write_impl(std::string_view const& value)
+        {
+            if (back() == '\n')
             {
-                auto indentation = std::string(indent * 4, ' ');
-                if (back() == '\n')
-                {
-                    write(indentation);
-                }
-
-                auto pos = value.find_last_of('\n', value.size() - 2);
-                if (pos == std::string_view::npos)
-                {
-                    write(value, args...);
-                }
-                else
-                {
-                    std::string value_{ value };
-
-                    while (pos != std::string::npos)
-                    {
-                        value_.insert(pos + 1, indentation);
-                        if (pos == 0)
-                        {
-                            break;
-                        }
-                        pos = value_.find_last_of('\n', pos - 1);
-                    }
-
-                    write(value_, args...);
-                }
+                write_indent();
             }
+
+            std::string_view::size_type current_pos{ 0 };
+            auto pos = value.find('\n', current_pos);
+
+            while(pos != std::string_view::npos)
+            {
+                writer_base::write_impl(value.substr(current_pos, pos + 1 - current_pos));
+                if (pos != value.size() - 1)
+                {
+                    write_indent();
+                }
+                current_pos = pos + 1;
+                pos = value.find('\n', current_pos);
+            }
+
+            if (pos == std::string_view::npos)
+            {
+                writer_base::write_impl(value.substr(current_pos));
+            }
+        }
+
+        void write_impl(char const value)
+        {
+            if (back() == '\n')
+            {
+                write_indent();
+            }
+
+            writer_base::write_impl(value);
         }
 
         void write_value(bool value)

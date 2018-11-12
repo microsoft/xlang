@@ -127,7 +127,7 @@ namespace xlang
         
         write_license_python(w);
 
-        w.write_indented(R"(from % import _import_ns
+        w.write(R"(from % import _import_ns
 import typing
 )", module_name);
 
@@ -136,7 +136,7 @@ import typing
             w.write("import enum\n\n");
         }
 
-        w.write_indented("_internal = _import_ns(\"%\")\n", ns);
+        w.write("_internal = _import_ns(\"%\")\n", ns);
 
         if (!needed_namespaces.empty())
         {
@@ -148,7 +148,7 @@ import typing
 except:
     pass
 )";
-                w.write_indented(format, module_name, needed_ns);
+                w.write(format, module_name, needed_ns);
             }
             w.write("\n");
         }
