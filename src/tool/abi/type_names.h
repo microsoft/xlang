@@ -59,15 +59,29 @@ template <bool IsGenericParam>
 inline std::string mangled_name(xlang::meta::reader::TypeDef const& type)
 {
     std::string result;
-    if (!is_generic(type))
-    {
-        details::append_mangled_name<IsGenericParam>(result, type.TypeNamespace());
-        result += IsGenericParam ? "__C" : "_C";
-    }
-    else
+    if (is_generic(type))
     {
         // Generic types don't have the namespace included in the mangled name
         result += "__F";
+    }
+    else
+    {
+        bool appendNamespace = true;
+        if constexpr (IsGenericParam)
+        {
+            if (type.TypeNamespace() == collections_namespace)
+            {
+                result += "__F";
+                appendNamespace = false;
+            }
+        }
+
+        if (appendNamespace)
+        {
+            details::append_mangled_name<IsGenericParam>(result, type.TypeNamespace());
+        }
+
+        result += IsGenericParam ? "__C" : "_C";
     }
 
     details::append_type_prefix(result, type);
