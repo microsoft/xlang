@@ -506,7 +506,7 @@ if (!out%)
                     s();
                     w.write("if (arg_count == %)\n{\n", count_in_param(signature.params()));
                     {
-                        writer::indent_guard g{ w };
+                        writer::indent_guard g2{ w };
                         write_method_overload_body(w, type, overload, signature);
                     }
                     w.write("}\n");
@@ -692,7 +692,7 @@ return nullptr;
 )";
                     w.write(format, count_in_param(signature.params()));
                     {
-                        writer::indent_guard g{ w };
+                        writer::indent_guard g2{ w };
                         write_class_constructor_overload(w, m, signature);
                     }
                     w.write("}\n");
@@ -932,7 +932,7 @@ static void @_dealloc(%* self)
 
             w.write("static % get(PyObject* callable)\n{\n", bind<write_full_type>(type));
             {
-                writer::indent_guard g{ w };
+                writer::indent_guard g2{ w };
 
                 w.write(R"(if (PyFunction_Check(callable) == 0)
 {
@@ -945,7 +945,7 @@ return [callable](%)
 )", bind_list<write_delegate_param>(", ", signature.params()));
 
                 {
-                    writer::indent_guard g{ w };
+                    writer::indent_guard g3{ w };
 
                     for (auto&& p : signature.params())
                     {
@@ -1542,127 +1542,131 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
         w.write("\n");
     }
 
-
-    void write_python_method_args(writer& w, MethodDef const& method)
+    void write_python_type(writer& /*w*/, TypeDef const& /*type*/)
     {
-        separator s{ w };
-        if (!is_static_method(method))
-        {
-            s();
-            w.write("self");
-        }
 
-        method_signature signature{ method };
-        for (auto&& p : signature.params())
-        {
-            s();
-            w.write(p.first.Name());
-        }
     }
 
-    void write_python_property(writer& w, Property const& prop)
-    {
-        auto methods = get_property_methods(prop);
-        if (is_static_method(methods.get))
-        {
-            auto format = R"(^@staticproperty
-def %():
-    return __internal__.%.%())";
-            w.write(format,
-                prop.Name(),
-                prop.Parent().TypeName(),
-                methods.get.Name());
-        }
-        else
-        {
-            auto format = R"(^@property
-def %(self):
-    return self.__instance__.%())";
-            w.write(format,
-                prop.Name(),
-                methods.get.Name());
-        }
-
-        w.write("\n\n");
-
-        if (methods.set)
-        {
-            if (is_static_method(methods.set))
-            {
-                auto format = R"(^@%.setter
-def %(value):
-    return __internal__.%.%(value))";
-                w.write(format,
-                    prop.Name(),
-                    prop.Name(),
-                    prop.Parent().TypeName(),
-                    methods.set.Name());
-            }
-            else
-            {
-                auto format = R"(^@%.setter
-def %(self, value):
-    return self.__instance__.%(value))";
-                w.write(format,
-                    prop.Name(),
-                    prop.Name(),
-                    methods.get.Name());
-            }
-
-            w.write("\n\n");
-        }
-    }
-
-
-
-    void write_python_method(writer& w, std::string_view const& method_name, std::vector<method_info> const& overloads)
-    {
-        //if (is_static_method(overloads.method.b))
-        //{
-        //    w.write("@staticmethod\n");
-        //}
-
-        w.write("def %():\n    pass\n\n", method_name/*, bind<write_python_method_args>(method)*/);
-    }
-
-    void write_python_class(writer& w, TypeDef const& type)
-    {
-        w.write("class @:\n", type.TypeName());
-        {
-            writer::indent_guard g{ w };
-
-            for (auto&&[name, overloads] : get_methods(type))
-            {
-                if (overloads[0].method.Flags().SpecialName())
-                {
-                    continue;
-                }
-
-                write_python_method(w, name, overloads);
-            }
-
-            for (auto&& prop_info : get_properties(type))
-            {
-                auto methods = get_property_methods(prop_info.property);
-
-                w.write("^@%property\n", is_static_method(methods.get) ? "static" : "");
-                w.write("def %():\n    pass\n\n", prop_info.property.Name());
-
-                if (methods.set)
-                {
-                    w.write("^@%.setter\n", prop_info.property.Name());
-                    w.write("def %(value):\n    pass\n\n", prop_info.property.Name());
-                }
-            }
-            //for (auto&& prop : type.PropertyList())
-            //{
-            //    write_python_property(w, prop);
-            //}
-        }
-
-        w.write("\n");
-    }
-
+//    void write_python_method_args(writer& w, MethodDef const& method)
+//    {
+//        separator s{ w };
+//        if (!is_static_method(method))
+//        {
+//            s();
+//            w.write("self");
+//        }
+//
+//        method_signature signature{ method };
+//        for (auto&& p : signature.params())
+//        {
+//            s();
+//            w.write(p.first.Name());
+//        }
+//    }
+//
+//    void write_python_property(writer& w, Property const& prop)
+//    {
+//        auto methods = get_property_methods(prop);
+//        if (is_static_method(methods.get))
+//        {
+//            auto format = R"(^@staticproperty
+//def %():
+//    return __internal__.%.%())";
+//            w.write(format,
+//                prop.Name(),
+//                prop.Parent().TypeName(),
+//                methods.get.Name());
+//        }
+//        else
+//        {
+//            auto format = R"(^@property
+//def %(self):
+//    return self.__instance__.%())";
+//            w.write(format,
+//                prop.Name(),
+//                methods.get.Name());
+//        }
+//
+//        w.write("\n\n");
+//
+//        if (methods.set)
+//        {
+//            if (is_static_method(methods.set))
+//            {
+//                auto format = R"(^@%.setter
+//def %(value):
+//    return __internal__.%.%(value))";
+//                w.write(format,
+//                    prop.Name(),
+//                    prop.Name(),
+//                    prop.Parent().TypeName(),
+//                    methods.set.Name());
+//            }
+//            else
+//            {
+//                auto format = R"(^@%.setter
+//def %(self, value):
+//    return self.__instance__.%(value))";
+//                w.write(format,
+//                    prop.Name(),
+//                    prop.Name(),
+//                    methods.get.Name());
+//            }
+//
+//            w.write("\n\n");
+//        }
+//    }
+//
+//
+//
+//    void write_python_method(writer& w, std::string_view const& method_name, std::vector<method_info> const& overloads)
+//    {
+//        //if (is_static_method(overloads.method.b))
+//        //{
+//        //    w.write("@staticmethod\n");
+//        //}
+//
+//        w.write("def %():\n    pass\n\n", method_name/*, bind<write_python_method_args>(method)*/);
+//    }
+//
+//    void write_python_class(writer& w, TypeDef const& type)
+//    {
+//        w.write("class @:\n", type.TypeName());
+//        {
+//            writer::indent_guard g{ w };
+//
+//            for (auto&&[name, overloads] : get_methods(type))
+//            {
+//                if (overloads[0].method.Flags().SpecialName())
+//                {
+//                    continue;
+//                }
+//
+//                write_python_method(w, name, overloads);
+//            }
+//
+//            for (auto&& prop_info : get_properties(type))
+//            {
+//                auto methods = get_property_methods(prop_info.property);
+//
+//                w.write("^@%property\n", is_static_method(methods.get) ? "static" : "");
+//                w.write("def %():\n    pass\n\n", prop_info.property.Name());
+//
+//                if (methods.set)
+//                {
+//                    w.write("^@%.setter\n", prop_info.property.Name());
+//                    w.write("def %(value):\n    pass\n\n", prop_info.property.Name());
+//                }
+//            }
+//            //for (auto&& prop : type.PropertyList())
+//            //{
+//            //    write_python_property(w, prop);
+//            //}
+//        }
+//
+//        w.write("\n");
+//    }
+//
 
     void write_type_fromspec(writer& w, TypeDef const& type)
     {
