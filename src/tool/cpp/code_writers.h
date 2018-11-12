@@ -2533,6 +2533,28 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         {
             w.write(", composable");
         }
+
+        auto base_type = get_base_class(type);
+
+        if (!base_type)
+        {
+            return;
+        }
+
+        if (settings.filter.includes(base_type))
+        {
+            return;
+        }
+
+        w.write(", composing");
+
+        for (auto&&[interface_name, info] : get_interfaces(w, base_type))
+        {
+            if (info.overridable)
+            {
+                w.write(", @", interface_name);
+            }
+        }
     }
 
     void write_component_composable_forwarder(writer& w, MethodDef const& method)
