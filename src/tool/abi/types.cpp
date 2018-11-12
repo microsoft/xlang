@@ -330,9 +330,9 @@ void delegate_type::write_cpp_forward_declaration(writer& w) const
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        bind_mangled_name(m_mangledName),
+        bind_mangled_name_macro(*this),
         bind_cpp_fully_qualified_type(clr_abi_namespace(), m_abiName),
-        bind_mangled_name(m_mangledName));
+        bind_mangled_name_macro(*this));
 }
 
 void delegate_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -438,7 +438,7 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
-)^-^", bind_mangled_name(type.mangled_name()), bind_mangled_name(type.mangled_name()));
+)^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type));
 
     if constexpr (is_interface)
     {
@@ -480,7 +480,7 @@ static void write_cpp_interface_definition(writer& w, T const& type)
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(type), bind_mangled_name(type.mangled_name()));
+)^-^", bind_iid_name(type), bind_mangled_name_macro(type));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -719,7 +719,7 @@ void delegate_type::write_c_forward_declaration(writer& w) const
 
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
-)^-^", bind_mangled_name(m_mangledName), bind_mangled_name(m_mangledName));
+)^-^", bind_mangled_name_macro(*this), bind_mangled_name_macro(*this));
 
     w.write(R"^-^(typedef interface % %;
 
@@ -728,7 +728,7 @@ void delegate_type::write_c_forward_declaration(writer& w) const
 )^-^",
         bind_c_type_name(*this),
         bind_c_type_name(*this),
-        bind_mangled_name(m_mangledName));
+        bind_mangled_name_macro(*this));
 }
 
 void delegate_type::write_c_abi_type(writer& w) const
@@ -754,14 +754,14 @@ void delegate_type::write_c_definition(writer& w) const
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
-)^-^",bind_mangled_name(m_mangledName), bind_mangled_name(m_mangledName));
+)^-^", bind_mangled_name_macro(*this), bind_mangled_name_macro(*this));
 
     write_c_interface_definition(w, *this);
 
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(*this), bind_mangled_name(m_mangledName));
+)^-^", bind_iid_name(*this), bind_mangled_name_macro(*this));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
@@ -776,7 +776,7 @@ void interface_type::write_cpp_forward_declaration(writer& w) const
 
     w.write(R"^-^(#ifndef __%_FWD_DEFINED__
 #define __%_FWD_DEFINED__
-)^-^", bind_mangled_name(m_mangledName), bind_mangled_name(m_mangledName));
+)^-^", bind_mangled_name_macro(*this), bind_mangled_name_macro(*this));
 
     w.push_namespace(clr_abi_namespace());
     w.write("%interface %;\n", indent{}, m_type.TypeName());
@@ -787,9 +787,9 @@ void interface_type::write_cpp_forward_declaration(writer& w) const
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        bind_mangled_name(m_mangledName),
+        bind_mangled_name_macro(*this),
         bind_cpp_fully_qualified_type(clr_abi_namespace(), m_type.TypeName()),
-        bind_mangled_name(m_mangledName));
+        bind_mangled_name_macro(*this));
 }
 
 void interface_type::write_cpp_generic_param_abi_type(writer& w) const
@@ -816,11 +816,11 @@ typedef interface % %;
 #endif // __%_FWD_DEFINED__
 
 )^-^",
-        bind_mangled_name(m_mangledName),
-        bind_mangled_name(m_mangledName),
+        bind_mangled_name_macro(*this),
+        bind_mangled_name_macro(*this),
         bind_c_type_name(*this),
         bind_c_type_name(*this),
-        bind_mangled_name(m_mangledName));
+        bind_mangled_name_macro(*this));
 }
 
 void interface_type::write_c_abi_type(writer& w) const
@@ -848,8 +848,8 @@ void interface_type::write_c_definition(writer& w) const
 #define __%_INTERFACE_DEFINED__
 extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] = L"%";
 )^-^",
-        bind_mangled_name(m_mangledName),
-        bind_mangled_name(m_mangledName),
+        bind_mangled_name_macro(*this),
+        bind_mangled_name_macro(*this),
         bind_list("_", namespace_range{ clr_abi_namespace() }),
         cpp_abi_name(),
         m_clrFullName);
@@ -859,7 +859,7 @@ extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] =
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(*this), bind_mangled_name(m_mangledName));
+)^-^", bind_iid_name(*this), bind_mangled_name_macro(*this));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');

@@ -60,16 +60,6 @@ inline auto bind_cpp_fully_qualified_type(std::string_view typeNamespace, std::s
     return xlang::text::bind<write_cpp_fully_qualified_type>(typeNamespace, typeName);
 }
 
-inline void write_mangled_name(writer& w, std::string_view mangledName)
-{
-    w.write(mangled_name_macro_format(w), mangledName);
-}
-
-inline auto bind_mangled_name(std::string_view mangledName)
-{
-    return xlang::text::bind<write_mangled_name>(mangledName);
-}
-
 inline void write_mangled_name_macro(writer& w, typedef_base const& type)
 {
     w.write(mangled_name_macro_format(w), type.mangled_name());
@@ -99,7 +89,7 @@ inline void write_iid_name(writer& w, T const& type)
     }
     else
     {
-        w.write("IID_%", bind<write_mangled_name>(type.mangled_name()));
+        w.write("IID_%", bind_mangled_name_macro(type));
     }
 }
 
