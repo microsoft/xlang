@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
+#include <array>
 #include <type_traits>
 #endif
 
@@ -80,6 +81,10 @@
 #define XLANG_PAL_CHAR8_T char
 #endif
 
+#ifdef __IUnknown_INTERFACE_DEFINED__
+#define XLANG_WINDOWS_ABI
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -93,6 +98,33 @@ extern "C"
         uint16_t Data2;
         uint16_t Data3;
         uint8_t  Data4[8];
+
+#ifdef __cplusplus
+        xlang_guid() noexcept = default;
+
+        constexpr xlang_guid(uint32_t Arg1, uint16_t Arg2, uint16_t Arg3, std::array<uint8_t, 8> const& Arg4) noexcept
+            : Data1(Arg1)
+            , Data2(Arg2)
+            , Data3(Arg3)
+            , Data4{ Arg4[0], Arg4[1],Arg4[2],Arg4[3],Arg4[4],Arg4[5],Arg4[6],Arg4[7] }
+        {
+        }
+# ifdef XLANG_WINDOWS_ABI
+        constexpr xlang_guid(GUID const& value) noexcept
+            : Data1(value.Data1)
+            , Data2(value.Data2)
+            , Data3(value.Data3)
+            , Data4{ value.Data4[0], value.Data4[1], value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6], value.Data4[7] }
+        {
+        }
+
+        operator GUID const&() const noexcept
+        {
+            static_assert(sizeof(xlang_guid) == sizeof(GUID));
+            return reinterpret_cast<GUID const&>(*this);
+        }
+# endif
+#endif
     };
 
     struct XLANG_NOVTABLE xlang_unknown
@@ -101,14 +133,13 @@ extern "C"
         virtual uint32_t XLANG_CALL AddRef() XLANG_NOEXCEPT = 0;
         virtual uint32_t XLANG_CALL Release() XLANG_NOEXCEPT = 0;
     };
-
     inline constexpr xlang_guid xlang_unknown_guid{ 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
 
+    // TODO(manodasanW): Update this with actual new error handling type(s)
     struct XLANG_NOVTABLE xlang_error_info : xlang_unknown
     {
         virtual xlang_result error_code() XLANG_NOEXCEPT = 0;
     };
-
     inline constexpr xlang_guid xlang_error_info_guid{ 0x9e89b87e, 0xb6fc, 0x491b, { 0xba, 0x2b, 0x71, 0xa, 0x1b, 0x46, 0x7a, 0xe3 } };
 
     typedef XLANG_PAL_CHAR8_T xlang_char8;
