@@ -2906,6 +2906,28 @@ void* winrt_make_%()
                     auto method_name = get_name(method);
                     w.async_types = is_async(method, signature);
 
+                    if (is_add_overload(method) || is_remove_overload(method))
+                    {
+                        auto format = R"(    % %::%(%)
+    {
+        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        return f.%(%);
+    }
+)";
+
+
+                        w.write(format,
+                            signature.return_signature(),
+                            type_name,
+                            method_name,
+                            bind<write_consume_params>(signature),
+                            type_namespace,
+                            type_name,
+                            factory.type,
+                            method_name,
+                            bind<write_consume_args>(signature));
+                    }
+                    else
                     {
                         auto format = R"(    % %::%(%)
     {
