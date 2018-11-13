@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "ThreeClass.h"
+#include "Component.Edge.ThreeClass.h"
 
 namespace winrt::Component::Edge::implementation
 {
@@ -7,7 +7,7 @@ namespace winrt::Component::Edge::implementation
     {
         throw hresult_not_implemented();
     }
-    void ThreeClass::StaticMethod(int32_t, int32_t, int32_t);
+    void ThreeClass::StaticMethod(int32_t, int32_t, int32_t)
     {
         throw hresult_not_implemented();
     }

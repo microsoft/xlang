@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "OneClass.h"
+#include "Component.Edge.OneClass.h"
 
 namespace winrt::Component::Edge::implementation
 {
@@ -7,7 +7,7 @@ namespace winrt::Component::Edge::implementation
     {
         throw hresult_not_implemented();
     }
-    void OneClass::StaticMethod(int32_t);
+    void OneClass::StaticMethod(int32_t)
     {
         throw hresult_not_implemented();
     }

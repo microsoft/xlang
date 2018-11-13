@@ -3,11 +3,16 @@
 #include "winrt/base.h"
 namespace winrt::Component::Collections
 {
+    struct IClass;
     struct IClassStatics;
     struct Class;
 }
 namespace winrt::impl
 {
+    template <> struct category<Component::Collections::IClass>
+    {
+        using type = interface_category;
+    };
     template <> struct category<Component::Collections::IClassStatics>
     {
         using type = interface_category;
@@ -15,6 +20,10 @@ namespace winrt::impl
     template <> struct category<Component::Collections::Class>
     {
         using type = class_category;
+    };
+    template <> struct name<Component::Collections::IClass>
+    {
+        static constexpr auto & value{ L"Component.Collections.IClass" };
     };
     template <> struct name<Component::Collections::IClassStatics>
     {
@@ -24,9 +33,23 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Component.Collections.Class" };
     };
+    template <> struct guid_storage<Component::Collections::IClass>
+    {
+        static constexpr guid value{ 0x0CDB4D56,0x3EA5,0x5C34,{ 0xB0,0x2C,0xE4,0xE4,0x69,0x49,0x86,0x4B } };
+    };
     template <> struct guid_storage<Component::Collections::IClassStatics>
     {
         static constexpr guid value{ 0xAF59A423,0x9A7D,0x5C88,{ 0xB9,0x15,0xDD,0xD1,0x85,0x92,0xCB,0xD5 } };
+    };
+    template <> struct default_interface<Component::Collections::Class>
+    {
+        using type = Component::Collections::IClass;
+    };
+    template <> struct abi<Component::Collections::IClass>
+    {
+        struct type : inspectable_abi
+        {
+        };
     };
     template <> struct abi<Component::Collections::IClassStatics>
     {
@@ -39,6 +62,14 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL MapView(void**) noexcept = 0;
             virtual int32_t WINRT_CALL Map(void**) noexcept = 0;
         };
+    };
+    template <typename D>
+    struct consume_Component_Collections_IClass
+    {
+    };
+    template <> struct consume<Component::Collections::IClass>
+    {
+        template <typename D> using type = consume_Component_Collections_IClass<D>;
     };
     template <typename D>
     struct consume_Component_Collections_IClassStatics

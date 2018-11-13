@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
-#include "SlowClass.h"
+#include "Component.Fast.SlowClass.h"
 
 namespace winrt::Component::Fast::implementation
 {
-    hstring SlowClass::StaticMethod();
+    hstring SlowClass::StaticMethod()
     {
         throw hresult_not_implemented();
     }

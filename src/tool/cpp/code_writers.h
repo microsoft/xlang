@@ -335,6 +335,11 @@ namespace xlang
     {
         TypeSig const& return_signature = signature.return_signature().Type();
 
+        if (return_signature.is_szarray())
+        {
+            return false;
+        }
+
         if (auto type_def = std::get_if<coded_index<TypeDefOrRef>>(&return_signature.Type()))
         {
             auto category = category::interface_type;
@@ -357,7 +362,8 @@ namespace xlang
 
             return category == category::class_type || category == category::interface_type || category == category::delegate_type;
         }
-        else if (auto element_type = std::get_if<ElementType>(&return_signature.Type()))
+
+        if (auto element_type = std::get_if<ElementType>(&return_signature.Type()))
         {
             return *element_type == ElementType::String;
         }
@@ -835,6 +841,40 @@ namespace xlang
         }
     }
 
+    void write_consume_extensions(writer& w, TypeDef const& type)
+    {
+        if (type.TypeName() == "IBindableIterator" && type.TypeNamespace() == "Windows.UI.Xaml.Interop")
+        {
+            w.write(R"(
+        auto& operator++()
+        {
+            if (!MoveNext())
+            {
+                static_cast<D&>(*this) = nullptr;
+            }
+
+            return *this;
+        }
+
+        auto operator*() const
+        {
+            return Current();
+        }
+)");
+        }
+        else if (type.TypeName() == "IBuffer" && type.TypeNamespace() == "Windows.Storage.Streams")
+        {
+            w.write(R"(
+    auto data() const
+    {
+        uint8_t* data{};
+        static_cast<D const&>(*this).template as<IBufferByteAccess>()->Buffer(&data);
+        return data;
+    }
+)");
+        }
+    }
+
     void write_consume(writer& w, TypeDef const& type)
     {
         auto format = R"(    template <typename D>
@@ -856,7 +896,7 @@ namespace xlang
         w.write(format,
             impl_name,
             bind_each<write_consume_declaration>(type.MethodList()),
-            "",
+            bind<write_consume_extensions>(type),
             type_namespace,
             type_name,
             impl_name);
@@ -1076,7 +1116,7 @@ namespace xlang
             {
                 auto param_name = param.Name();
 
-                w.write("\n            if (%) *% = detach_abi(winrt_impl_%);", param_name, param_name, param_name);
+                w.write("\n                if (%) *% = detach_abi(winrt_impl_%);", param_name, param_name, param_name);
             }
         }
     }
@@ -1238,7 +1278,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 w.write(format,
                     interface_name,
                     interface_name,
-                    bind_each<write_dispatch_overridable_method>(info.methods));
+                    bind_each<write_dispatch_overridable_method>(info.type.MethodList()));
             }
         }
     }
@@ -1270,9 +1310,9 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         {
             if (info.overridable && !info.base)
             {
-                auto name = info.type.TypeRef().TypeName();
+                auto name = info.type.TypeName();
 
-                w.write_each<write_interface_override_method>(info.methods, name);
+                w.write_each<write_interface_override_method>(info.type.MethodList(), name);
             }
         };
     }
@@ -1325,6 +1365,47 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             {
                 first = false;
                 w.write(",\n    %T<D>", name);
+            }
+            else
+            {
+                w.write(", %T<D>", name);
+            }
+        }
+    }
+
+    void write_component_override_defaults(writer& w, TypeDef const& type)
+    {
+        std::vector<std::string> interfaces;
+
+        for (auto&& base : get_bases(type))
+        {
+            if (settings.filter.includes(base))
+            {
+                continue;
+            }
+
+            for (auto&&[name, info] : get_interfaces(w, base))
+            {
+                if (info.base)
+                {
+                    continue;
+                }
+
+                if (info.overridable)
+                {
+                    interfaces.push_back(name);
+                }
+            }
+        }
+
+        bool first{ true };
+
+        for (auto&& name : interfaces)
+        {
+            if (first)
+            {
+                first = false;
+                w.write(",\n        %T<D>", name);
             }
             else
             {
@@ -1393,15 +1474,14 @@ public:
         {
             if (info.overridable && !info.base)
             {
-                auto interface_type = find(info.type.TypeRef());
-                auto interface_type_name = interface_type.TypeName();
+                auto interface_type_name = info.type.TypeName();
 
                 w.write(format,
                     interface_type_name,
                     interface_type_name,
-                    interface_type.TypeNamespace(),
+                    info.type.TypeNamespace(),
                     interface_type_name,
-                    bind_each<write_consume_declaration>(interface_type.MethodList()));
+                    bind_each<write_consume_declaration>(info.type.MethodList()));
             }
         }
     }
@@ -1425,16 +1505,16 @@ public:
             return;
         }
 
-        auto format = R"(template <typename D, typename... Interfaces>
-struct %T :
-    implements<D%, composing, Interfaces...>,
-    impl::require<D%>,
-    impl::base<D, %%>%
-{
-    using composable = %;
+        auto format = R"(    template <typename D, typename... Interfaces>
+    struct %T :
+        implements<D%, composing, Interfaces...>,
+        impl::require<D%>,
+        impl::base<D, %%>%
+    {
+        using composable = %;
 
-protected:
-%};
+    protected:
+    %};
 )";
 
         auto type_name = type.TypeName();
@@ -1474,12 +1554,12 @@ protected:
     {
         auto type_name = type.TypeName();
         auto interfaces_plus_self = get_interfaces(w, type);
-        interfaces_plus_self[std::string{ type_name }] = interface_info{ type.coded_index<TypeDefOrRef>(), type.MethodList() };
+        interfaces_plus_self[std::string{ type_name }] = interface_info{ type };
         std::map<std::string_view, std::set<std::string>> method_usage;
 
         for (auto&&[interface_name, info] : interfaces_plus_self)
         {
-            for (auto&& method : info.methods)
+            for (auto&& method : info.type.MethodList())
             {
                 method_usage[get_name(method)].insert(interface_name);
             }
@@ -1513,14 +1593,14 @@ protected:
         {
             if (info.defaulted && !info.base)
             {
-                for (auto&& method : info.methods)
+                for (auto&& method : info.type.MethodList())
                 {
                     method_usage[get_name(method)].insert(default_interface_name);
                 }
             }
             else
             {
-                for (auto&& method : info.methods)
+                for (auto&& method : info.type.MethodList())
                 {
                     method_usage[get_name(method)].insert(interface_name);
                 }
@@ -1652,24 +1732,24 @@ protected:
     {
         auto format = R"(    template <typename L> %::%(L handler) :
         %(impl::make_delegate<%>(std::forward<L>(handler)))
-    {}
-
+    {
+    }
     template <typename F> %::%(F* handler) :
         %([=](auto&&... args) { return handler(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> %::%(O* object, M method) :
         %([=](auto&&... args) { return ((*object).*(method))(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> %::%(com_ptr<O>&& object, M method) :
         %([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> %::%(weak_ref<O>&& object, M method) :
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-    {}
-
+    {
+    }
     inline % %::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
@@ -1854,7 +1934,7 @@ protected:
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            if (!info.exclusive && !info.base)
+            if (!is_exclusive(info.type) && !info.base)
             {
                 if (first)
                 {
@@ -1864,6 +1944,32 @@ protected:
 
                 w.write(", %", interface_name);
             }
+        }
+
+        if (!first)
+        {
+            w.write('>');
+        }
+    }
+
+    void write_component_class_base(writer& w, TypeDef const& type)
+    {
+        bool first{ true };
+
+        for (auto&& base : get_bases(type))
+        {
+            if (settings.filter.includes(base))
+            {
+                continue;
+            }
+
+            if (first)
+            {
+                first = false;
+                w.write(",\n    impl::base<D");
+            }
+
+            w.write(", %", base);
         }
 
         if (!first)
@@ -2024,26 +2130,49 @@ protected:
 
     void write_static_definitions(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
     {
-        auto format = R"(    inline % %::%(%)
+        method_signature signature{ method };
+        auto method_name = get_name(method);
+        w.async_types = is_async(method, signature);
+
+        {
+            auto format = R"(    inline % %::%(%)
     {
         %impl::call_factory<%, %>([&](auto&& f) { return f.%(%); });
     }
 )";
 
-        method_signature signature{ method };
-        auto method_name = get_name(method);
-        w.async_types = is_async(method, signature);
+            w.write(format,
+                signature.return_signature(),
+                type_name,
+                method_name,
+                bind<write_consume_params>(signature),
+                signature.return_signature() ? "return " : "",
+                type_name,
+                factory,
+                method_name,
+                bind<write_consume_args>(signature));
+        }
 
-        w.write(format,
-            signature.return_signature(),
-            type_name,
-            method_name,
-            bind<write_consume_params>(signature),
-            signature.return_signature() ? "return " : "",
-            type_name,
-            factory,
-            method_name,
-            bind<write_consume_args>(signature));
+        if (is_add_overload(method))
+        {
+            auto format = R"(    inline %::%_revoker %::%(auto_revoke_t, %)
+    {
+        auto f = get_activation_factory<%, %>();
+        return { f, f.%(%) };
+    }
+)";
+
+            w.write(format,
+                type_name,
+                method_name,
+                type_name,
+                method_name,
+                bind<write_consume_params>(signature),
+                type_name,
+                factory,
+                method_name,
+                bind<write_consume_args>(signature));
+        }
     }
 
     void write_class_definitions(writer& w, TypeDef const& type)
@@ -2273,9 +2402,76 @@ protected:
 
     void write_namespace_special(writer& w, std::string_view const& namespace_name, cache const& c)
     {
-        if (namespace_name == "Windows.Foundation" && c.find("Windows.Foundation.PropertyValue"))
+        if (namespace_name == "Windows.Foundation")
         {
-            w.write(strings::base_reference_produce);
+            if (c.find("Windows.Foundation.PropertyValue"))
+            {
+                w.write(strings::base_reference_produce);
+            }
+
+            static constexpr std::pair<std::string_view, std::string_view> pairs[]
+            {
+                { "", "Windows::Foundation::IUnknown" },
+                { "", "Windows::Foundation::IInspectable" },
+                { "", "Windows::Foundation::IActivationFactory" },
+                { "", "Windows::Foundation::IAsyncInfo" },
+                { "", "Windows::Foundation::IAsyncAction" },
+                { "typename TProgress", "Windows::Foundation::IAsyncActionWithProgress<TProgress>" },
+                { "typename TResult", "Windows::Foundation::IAsyncOperation<TResult>" },
+                { "typename TResult, typename TProgress", "Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>" },
+                { "", "Windows::Foundation::AsyncActionCompletedHandler" },
+                { "typename TProgress", "Windows::Foundation::AsyncActionProgressHandler<TProgress>" },
+                { "typename TProgress", "Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>" },
+                { "typename TResult", "Windows::Foundation::AsyncOperationCompletedHandler<TResult>" },
+                { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>" },
+                { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>" },
+                { "typename T", "Windows::Foundation::IReference<T>" },
+                { "typename T", "Windows::Foundation::EventHandler<T>" },
+                { "typename TSender, typename TArgs", "Windows::Foundation::TypedEventHandler<TSender, TArgs>" }
+            };
+
+            write_std_namespace(w);
+
+            for (auto&& [params, name] : pairs)
+            {
+                w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
+                    params,
+                    name,
+                    name);
+            }
+
+            write_close_namespace(w);
+        }
+        else if (namespace_name == "Windows.Foundation.Collections")
+        {
+            static constexpr std::pair<std::string_view, std::string_view> pairs[]
+            {
+                { "typename T", "Windows::Foundation::Collections::IIterator<T>" },
+                { "typename T", "Windows::Foundation::Collections::IIterable<T>" },
+                { "typename T", "Windows::Foundation::Collections::IVectorView<T>" },
+                { "typename T", "Windows::Foundation::Collections::IVector<T>" },
+                { "typename T", "Windows::Foundation::Collections::IObservableVector<T>" },
+                { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
+                { "", "Windows::Foundation::Collections::IVectorChangedEventArgs" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IMapView<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IMap<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::IObservableMap<K, V>" },
+                { "typename K, typename V", "Windows::Foundation::Collections::MapChangedEventHandler<K, V>" },
+                { "typename K", "Windows::Foundation::Collections::IMapChangedEventArgs<K>" }
+            };
+
+            write_std_namespace(w);
+
+            for (auto&& [params, name] : pairs)
+            {
+                w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
+                    params,
+                    name,
+                    name);
+            }
+
+            write_close_namespace(w);
         }
         else if (namespace_name == "Windows.UI.Xaml.Interop")
         {
@@ -2440,15 +2636,13 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
     void write_component_interfaces(writer& w, TypeDef const& type)
     {
-        auto interfaces = get_interfaces(w, type);
-
         if (is_fast_class(type))
         {
             w.write(", fast_interface<@::%>", type.TypeNamespace(), type.TypeName());
 
-            for (auto&&[interface_name, info] : interfaces)
+            for (auto&&[interface_name, info] : get_interfaces(w, type))
             {
-                if (!info.exclusive)
+                if (!is_exclusive(info.type) && !info.base)
                 {
                     w.write(", @", interface_name);
                 }
@@ -2456,11 +2650,63 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         }
         else
         {
-            for (auto&&[interface_name, info] : interfaces)
+            for (auto&&[interface_name, info] : get_interfaces(w, type))
+            {
+                if (!info.base)
+                {
+                    w.write(", @", interface_name);
+                }
+            }
+        }
+
+        if (has_composable_constructors(type))
+        {
+            w.write(", composable");
+        }
+
+        auto base_type = get_base_class(type);
+
+        if (!base_type)
+        {
+            return;
+        }
+
+        if (settings.filter.includes(base_type))
+        {
+            return;
+        }
+
+        w.write(", composing");
+
+        for (auto&&[interface_name, info] : get_interfaces(w, base_type))
+        {
+            if (info.overridable)
             {
                 w.write(", @", interface_name);
             }
         }
+    }
+
+    void write_component_composable_forwarder(writer& w, MethodDef const& method)
+    {
+        auto format = R"(        % %(%)
+        {
+            return impl::composable_factory<T>::template CreateInstance<%>(%);
+        }
+)";
+
+        method_signature signature{ method };
+        method_signature reordered_method = signature;
+        auto&& params = reordered_method.params();
+        std::rotate(params.begin(), params.end() - 2, params.end());
+        w.param_names = true;
+
+        w.write(format,
+            signature.return_signature(),
+            get_name(method),
+            bind<write_implementation_params>(signature),
+            signature.return_signature(),
+            bind<write_consume_args>(reordered_method));
     }
 
     void write_component_constructor_forwarder(writer& w, MethodDef const& method)
@@ -2529,6 +2775,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             }
             else if (factory.composable)
             {
+                w.write_each<write_component_composable_forwarder>(factory.type.MethodList());
             }
         }
 
@@ -2627,32 +2874,99 @@ void* winrt_make_%()
             }
             else if (factory.composable && factory.visible)
             {
-                // TODO: fold and replace with direct calls
-                w.write_each<write_composable_constructor_definition>(factory.type.MethodList(), type_name, factory.type);
+                for (auto&& method : factory.type.MethodList())
+                {
+                    method_signature signature{ method };
+                    auto& params = signature.params();
+                    params.pop_back();
+                    params.pop_back();
+
+                    auto format = R"(    %::%(%) :
+        %(make<@::implementation::%>(%))
+    {
+    }
+)";
+
+                    w.write(format,
+                        type_name,
+                        type_name,
+                        bind<write_consume_params>(signature),
+                        type_name,
+                        type_namespace,
+                        type_name,
+                        bind<write_consume_args>(signature));
+                }
             }
             else if (factory.statics)
             {
                 for (auto&& method : factory.type.MethodList())
                 {
-                    auto format = R"(    % %::%(%)
+                    method_signature signature{ method };
+                    auto method_name = get_name(method);
+                    w.async_types = is_async(method, signature);
+
+                    if (is_add_overload(method) || is_remove_overload(method))
+                    {
+                        auto format = R"(    % %::%(%)
+    {
+        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        return f.%(%);
+    }
+)";
+
+
+                        w.write(format,
+                            signature.return_signature(),
+                            type_name,
+                            method_name,
+                            bind<write_consume_params>(signature),
+                            type_namespace,
+                            type_name,
+                            factory.type,
+                            method_name,
+                            bind<write_consume_args>(signature));
+                    }
+                    else
+                    {
+                        auto format = R"(    % %::%(%)
     {
         return @::implementation::%::%(%);
     }
 )";
 
-                    method_signature signature{ method };
-                    auto method_name = get_name(method);
-                    w.async_types = is_async(method, signature);
 
-                    w.write(format,
-                        signature.return_signature(),
-                        type_name,
-                        method_name,
-                        bind<write_consume_params>(signature),
-                        type_namespace,
-                        type_name,
-                        method_name,
-                        bind<write_consume_args>(signature));
+                        w.write(format,
+                            signature.return_signature(),
+                            type_name,
+                            method_name,
+                            bind<write_consume_params>(signature),
+                            type_namespace,
+                            type_name,
+                            method_name,
+                            bind<write_consume_args>(signature));
+                    }
+
+                    if (is_add_overload(method))
+                    {
+                        auto format = R"(    %::%_revoker %::%(auto_revoke_t, %)
+    {
+        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        return { f, f.%(%) };
+    }
+)";
+
+                        w.write(format,
+                            type_name,
+                            method_name,
+                            type_name,
+                            method_name,
+                            bind<write_consume_params>(signature),
+                            type_namespace,
+                            type_name,
+                            factory.type,
+                            method_name,
+                            bind<write_consume_args>(signature));
+                    }
                 }
             }
         }
@@ -2724,6 +3038,88 @@ void* winrt_make_%()
         write_close_namespace(w);
     }
 
+    void write_component_override_dispatch_base(writer& w, TypeDef const& type)
+    {
+        if (!is_composable(type))
+        {
+            return;
+        }
+
+        std::string interfaces;
+
+        for (auto&& [name, info] : get_interfaces(w, type))
+        {
+            if (!info.overridable)
+            {
+                continue;
+            }
+
+            interfaces += ", ";
+            interfaces += name;
+        }
+
+        if (interfaces.empty())
+        {
+            return;
+        }
+
+        auto format = R"(
+    protected:
+        using dispatch = impl::dispatch_to_overridable<D@>;
+        auto overridable() noexcept { return dispatch::overridable(static_cast<D&>(*this)); }
+        )";
+
+        w.write(format, interfaces);
+    }
+
+    void write_component_class_override_constructors(writer& w, TypeDef const& type)
+    {
+        auto base_type = get_base_class(type);
+
+        if (!base_type)
+        {
+            return;
+        }
+
+        if (settings.filter.includes(base_type))
+        {
+            return;
+        }
+
+        auto type_name = type.TypeName();
+
+        for (auto&& factory : get_factories(base_type))
+        {
+            if (!factory.composable)
+            {
+                continue;
+            }
+
+            for (auto&& method : factory.type.MethodList())
+            {
+                method_signature signature{ method };
+                auto& params = signature.params();
+                params.resize(params.size() - 2);
+
+                auto format = R"(
+    %_base(%)
+    {
+        impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
+    }
+                )";
+
+                w.write(format,
+                    type_name,
+                    bind<write_consume_params>(signature),
+                    base_type,
+                    factory.type,
+                    get_name(method),
+                    bind<write_consume_args>(signature),
+                    params.empty() ? "" : ", ");
+            }
+        }
+    }
+
     void write_component_g_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -2743,7 +3139,7 @@ void* winrt_make_%()
         using class_type = @::%;
         using implements_type = typename %_base::implements_type;
         using implements_type::implements_type;
-        @
+        %
         operator impl::producer_ref<class_type> const() const noexcept
         {
             return { to_abi<default_interface<class_type>>(this) };
@@ -2757,25 +3153,48 @@ void* winrt_make_%()
 }
 )";
 
+            auto base_type = get_base_class(type);
+            std::string composable_base_name;
+            std::string base_type_parameter;
+            std::string base_type_argument;
+            std::string no_module_lock;
+            bool external_base_type{};
+
+            if (base_type)
+            {
+                external_base_type = !settings.filter.includes(base_type);
+
+                if (external_base_type)
+                {
+                    composable_base_name = w.write_temp("using composable_base = %;", base_type);
+                }
+                else
+                {
+                    base_type_parameter = ", typename B";
+                    base_type_argument = ", B";
+                    no_module_lock = "no_module_lock, ";
+                }
+            }
+
             w.write(format,
                 type_namespace,
-                "",
+                base_type_parameter,
                 type_name,
                 bind<write_component_interfaces>(type),
+                base_type_argument,
+                no_module_lock,
                 "",
-                "",
-                "",
-                bind<write_class_base>(type),
-                bind<write_class_override_defaults>(interfaces),
+                bind<write_component_class_base>(type),
+                bind<write_component_override_defaults>(type),
                 type_name,
                 type_namespace,
                 type_name,
                 type_name,
-                "",
+                composable_base_name,
                 type_namespace,
                 type_name,
-                "",
-                "");
+                bind<write_component_class_override_constructors>(type),
+                bind<write_component_override_dispatch_base>(type));
         }
 
         if (has_factory_members(type))
@@ -2837,9 +3256,25 @@ namespace winrt::@::implementation
         }
     }
 
-    void write_component_base(writer& w, std::string_view const& type_name, bool non_static)
+    void write_component_base(writer& w, TypeDef const& type)
     {
-        if (non_static)
+        if (empty(type.InterfaceImpl()))
+        {
+            return;
+        }
+
+        auto type_name = type.TypeName();
+        auto base_type = get_base_class(type);
+
+        if (base_type && settings.filter.includes(base_type))
+        {
+            w.write(" : %T<%, @::implementation::%>",
+                type_name,
+                type_name,
+                base_type.TypeNamespace(),
+                base_type.TypeName());
+        }
+        else
         {
             w.write(" : %T<%>", type_name, type_name);
         }
@@ -2886,7 +3321,14 @@ namespace winrt::@::implementation
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            for (auto&& method : info.methods)
+            if (info.base)
+            {
+                continue;
+            }
+
+            w.generic_param_stack.insert(w.generic_param_stack.end(), info.generic_param_stack.begin(), info.generic_param_stack.end());
+
+            for (auto&& method : info.type.MethodList())
             {
                 method_signature signature{ method };
                 w.async_types = is_async(method, signature);
@@ -2898,6 +3340,8 @@ namespace winrt::@::implementation
                     bind<write_implementation_params>(signature),
                     is_noexcept(method) ? " noexcept" : "");
             }
+
+            w.generic_param_stack.resize(w.generic_param_stack.size() - info.generic_param_stack.size());
         }
     }
 
@@ -2905,11 +3349,20 @@ namespace winrt::@::implementation
     {
         auto type_name = type.TypeName();
         auto type_namespace = type.TypeNamespace();
-        bool const non_static = !empty(type.InterfaceImpl());
+        auto base_type = get_base_class(type);
+        std::string base_include;
+
+        if (base_type)
+        {
+            if (settings.filter.includes(base_type))
+            {
+                base_include = "#include \"" + get_generated_component_filename(base_type) + ".h\"\n";
+            }
+        }
 
         {
             auto format = R"(#include "%.g.h"
-
+%
 namespace winrt::@::implementation
 {
     struct %%
@@ -2922,9 +3375,10 @@ namespace winrt::@::implementation
 
             w.write(format,
                 get_generated_component_filename(type),
+                base_include,
                 type_namespace,
                 type_name,
-                bind<write_component_base>(type_name, non_static),
+                bind<write_component_base>(type),
                 type_name,
                 bind<write_component_member_declarations>(type));
 
@@ -2979,7 +3433,7 @@ namespace winrt::@::implementation
             }
             else if (factory.statics)
             {
-                auto format = R"(    % %::%(%)%;
+                auto format = R"(    % %::%(%)%
     {
         throw hresult_not_implemented();
     }
@@ -3003,7 +3457,14 @@ namespace winrt::@::implementation
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            for (auto&& method : info.methods)
+            if (info.base)
+            {
+                continue;
+            }
+
+            w.generic_param_stack.insert(w.generic_param_stack.end(), info.generic_param_stack.begin(), info.generic_param_stack.end());
+
+            for (auto&& method : info.type.MethodList())
             {
                 auto format = R"(    % %::%(%)%
     {
@@ -3022,6 +3483,8 @@ namespace winrt::@::implementation
                     bind<write_implementation_params>(signature),
                     is_noexcept(method) ? " noexcept" : "");
             }
+
+            w.generic_param_stack.resize(w.generic_param_stack.size() - info.generic_param_stack.size());
         }
     }
 
@@ -3035,7 +3498,7 @@ namespace winrt::@::implementation
 )";
 
         w.write(format,
-            type.TypeName(),
+            get_component_filename(type),
             type.TypeNamespace(),
             bind<write_component_member_definitions>(type));
     }

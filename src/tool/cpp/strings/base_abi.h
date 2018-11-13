@@ -320,7 +320,7 @@ namespace winrt::impl
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token*  token) noexcept = 0;
+            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token* token) noexcept = 0;
             virtual int32_t WINRT_CALL remove_VectorChanged(winrt::event_token token) noexcept = 0;
         };
     };
