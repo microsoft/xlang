@@ -1,6 +1,7 @@
 #include "pal_internal.h"
 #include "platform_activation.h"
 #include "string_convert.h"
+#include "pal_error.h"
 
 namespace xlang::impl
 {
