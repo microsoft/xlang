@@ -11,6 +11,7 @@ target_sources(cpp_test PUBLIC
     test/Composable.cpp
     test/Edge.cpp
     test/Enum.cpp
+    test/Events.cpp
     test/Fast.cpp
     test/Structs.cpp
     implementation/Component.Async.Class.cpp
@@ -23,6 +24,7 @@ target_sources(cpp_test PUBLIC
     implementation/Component.Edge.ThreeClass.cpp
     implementation/Component.Edge.TwoClass.cpp
     implementation/Component.Edge.ZeroClass.cpp
+    implementation/Component.Events.Class.cpp
     implementation/Component.Fast.FastClass.cpp
     implementation/Component.Fast.SlowClass.cpp
     implementation/Component.Result.Class.cpp

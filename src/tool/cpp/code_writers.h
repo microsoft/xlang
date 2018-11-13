@@ -2130,26 +2130,50 @@ protected:
 
     void write_static_definitions(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
     {
-        auto format = R"(    inline % %::%(%)
+        method_signature signature{ method };
+        auto method_name = get_name(method);
+        w.async_types = is_async(method, signature);
+
+        {
+            auto format = R"(    inline % %::%(%)
     {
         %impl::call_factory<%, %>([&](auto&& f) { return f.%(%); });
     }
 )";
 
-        method_signature signature{ method };
-        auto method_name = get_name(method);
-        w.async_types = is_async(method, signature);
+            w.write(format,
+                signature.return_signature(),
+                type_name,
+                method_name,
+                bind<write_consume_params>(signature),
+                signature.return_signature() ? "return " : "",
+                type_name,
+                factory,
+                method_name,
+                bind<write_consume_args>(signature));
+        }
 
-        w.write(format,
-            signature.return_signature(),
-            type_name,
-            method_name,
-            bind<write_consume_params>(signature),
-            signature.return_signature() ? "return " : "",
-            type_name,
-            factory,
-            method_name,
-            bind<write_consume_args>(signature));
+        if (is_add_overload(method))
+        {
+            auto format = R"(
+inline %::%_revoker %::%(auto_revoke_t, %)
+{
+    auto f = get_activation_factory<%, %>();
+    return { f, f.%(%) };
+}
+)";
+
+            w.write(format,
+                type_name,
+                method_name,
+                type_name,
+                method_name,
+                bind<write_consume_params>(signature),
+                type_name,
+                factory,
+                method_name,
+                bind<write_consume_args>(signature));
+        }
     }
 
     void write_class_definitions(writer& w, TypeDef const& type)
@@ -2878,25 +2902,72 @@ void* winrt_make_%()
             {
                 for (auto&& method : factory.type.MethodList())
                 {
-                    auto format = R"(    % %::%(%)
+                    method_signature signature{ method };
+                    auto method_name = get_name(method);
+                    w.async_types = is_async(method, signature);
+
+                    if (is_add_overload(method) || is_remove_overload(method))
+                    {
+                        auto format = R"(    % %::%(%)
+    {
+        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        return f.%(%);
+    }
+)";
+
+
+                        w.write(format,
+                            signature.return_signature(),
+                            type_name,
+                            method_name,
+                            bind<write_consume_params>(signature),
+                            type_namespace,
+                            type_name,
+                            factory.type,
+                            method_name,
+                            bind<write_consume_args>(signature));
+                    }
+                    else
+                    {
+                        auto format = R"(    % %::%(%)
     {
         return @::implementation::%::%(%);
     }
 )";
 
-                    method_signature signature{ method };
-                    auto method_name = get_name(method);
-                    w.async_types = is_async(method, signature);
 
-                    w.write(format,
-                        signature.return_signature(),
-                        type_name,
-                        method_name,
-                        bind<write_consume_params>(signature),
-                        type_namespace,
-                        type_name,
-                        method_name,
-                        bind<write_consume_args>(signature));
+                        w.write(format,
+                            signature.return_signature(),
+                            type_name,
+                            method_name,
+                            bind<write_consume_params>(signature),
+                            type_namespace,
+                            type_name,
+                            method_name,
+                            bind<write_consume_args>(signature));
+                    }
+
+                    if (is_add_overload(method))
+                    {
+                        auto format = R"(    %::%_revoker %::%(auto_revoke_t, %)
+    {
+        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        return { f, f.%(%) };
+    }
+)";
+
+                        w.write(format,
+                            type_name,
+                            method_name,
+                            type_name,
+                            method_name,
+                            bind<write_consume_params>(signature),
+                            type_namespace,
+                            type_name,
+                            factory.type,
+                            method_name,
+                            bind<write_consume_args>(signature));
+                    }
                 }
             }
         }
@@ -3363,7 +3434,7 @@ namespace winrt::@::implementation
             }
             else if (factory.statics)
             {
-                auto format = R"(    % %::%(%)%;
+                auto format = R"(    % %::%(%)%
     {
         throw hresult_not_implemented();
     }

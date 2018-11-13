@@ -179,4 +179,17 @@ namespace Component
             String DerivedMethod();
         }
     }
+
+    namespace Events
+    {
+        delegate void Handler(Int32 value);
+
+        [default_interface]
+        runtimeclass Class
+        {
+            Class();
+            event Handler Member;
+            static event Handler Static;
+        }
+    }
 }

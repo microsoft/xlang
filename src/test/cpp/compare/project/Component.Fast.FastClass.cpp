@@ -3,7 +3,7 @@
 
 namespace winrt::Component::Fast::implementation
 {
-    hstring FastClass::StaticMethod();
+    hstring FastClass::StaticMethod()
     {
         throw hresult_not_implemented();
     }
