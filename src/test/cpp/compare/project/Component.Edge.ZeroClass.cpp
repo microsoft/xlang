@@ -3,7 +3,7 @@
 
 namespace winrt::Component::Edge::implementation
 {
-    void ZeroClass::StaticMethod();
+    void ZeroClass::StaticMethod()
     {
         throw hresult_not_implemented();
     }
