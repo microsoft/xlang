@@ -49,7 +49,7 @@ namespace winrt::impl
                 *value = nullptr;
                 typename D::abi_guard guard(this->shim());
                 *value = detach_from<Component::Composable::Base>(this->shim().CreateInstance(*reinterpret_cast<Windows::Foundation::IInspectable const*>(&baseInterface), winrt_impl_innerInterface));
-            if (innerInterface) *innerInterface = detach_abi(winrt_impl_innerInterface);
+                if (innerInterface) *innerInterface = detach_abi(winrt_impl_innerInterface);
                 return 0;
             }
             catch (...) { return to_hresult(); }
@@ -82,16 +82,16 @@ namespace winrt::Component::Composable
         Derived(impl::call_factory<Derived>([](auto&& f) { return f.template ActivateInstance<Derived>(); }))
     {
     }
-template <typename D, typename... Interfaces>
-struct BaseT :
-    implements<D, Windows::Foundation::IInspectable, composing, Interfaces...>,
-    impl::require<D, Component::Composable::IBase>,
-    impl::base<D, Base>
-{
-    using composable = Base;
+    template <typename D, typename... Interfaces>
+    struct BaseT :
+        implements<D, Windows::Foundation::IInspectable, composing, Interfaces...>,
+        impl::require<D, Component::Composable::IBase>,
+        impl::base<D, Base>
+    {
+        using composable = Base;
 
-protected:
-    BaseT()
+    protected:
+        BaseT()
     {
         impl::call_factory<Base, Component::Composable::IBaseFactory>([&](auto&& f) { f.CreateInstance(*this, this->m_inner); });
     }

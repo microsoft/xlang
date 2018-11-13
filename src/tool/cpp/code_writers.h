@@ -1116,7 +1116,7 @@ namespace xlang
             {
                 auto param_name = param.Name();
 
-                w.write("\n            if (%) *% = detach_abi(winrt_impl_%);", param_name, param_name, param_name);
+                w.write("\n                if (%) *% = detach_abi(winrt_impl_%);", param_name, param_name, param_name);
             }
         }
     }
@@ -1505,16 +1505,16 @@ public:
             return;
         }
 
-        auto format = R"(template <typename D, typename... Interfaces>
-struct %T :
-    implements<D%, composing, Interfaces...>,
-    impl::require<D%>,
-    impl::base<D, %%>%
-{
-    using composable = %;
+        auto format = R"(    template <typename D, typename... Interfaces>
+    struct %T :
+        implements<D%, composing, Interfaces...>,
+        impl::require<D%>,
+        impl::base<D, %%>%
+    {
+        using composable = %;
 
-protected:
-%};
+    protected:
+    %};
 )";
 
         auto type_name = type.TypeName();
@@ -1732,24 +1732,24 @@ protected:
     {
         auto format = R"(    template <typename L> %::%(L handler) :
         %(impl::make_delegate<%>(std::forward<L>(handler)))
-    {}
-
+    {
+    }
     template <typename F> %::%(F* handler) :
         %([=](auto&&... args) { return handler(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> %::%(O* object, M method) :
         %([=](auto&&... args) { return ((*object).*(method))(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> %::%(com_ptr<O>&& object, M method) :
         %([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> %::%(weak_ref<O>&& object, M method) :
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-    {}
-
+    {
+    }
     inline % %::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
@@ -2155,12 +2155,11 @@ protected:
 
         if (is_add_overload(method))
         {
-            auto format = R"(
-inline %::%_revoker %::%(auto_revoke_t, %)
-{
-    auto f = get_activation_factory<%, %>();
-    return { f, f.%(%) };
-}
+            auto format = R"(    inline %::%_revoker %::%(auto_revoke_t, %)
+    {
+        auto f = get_activation_factory<%, %>();
+        return { f, f.%(%) };
+    }
 )";
 
             w.write(format,

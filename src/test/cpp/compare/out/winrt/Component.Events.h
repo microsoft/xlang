@@ -105,36 +105,35 @@ namespace winrt::Component::Events
     {
         return impl::call_factory<Class, Component::Events::IClassStatics>([&](auto&& f) { return f.Static(handler); });
     }
-
-inline Class::Static_revoker Class::Static(auto_revoke_t, Component::Events::Handler const& handler)
-{
-    auto f = get_activation_factory<Class, Component::Events::IClassStatics>();
-    return { f, f.Static(handler) };
-}
+    inline Class::Static_revoker Class::Static(auto_revoke_t, Component::Events::Handler const& handler)
+    {
+        auto f = get_activation_factory<Class, Component::Events::IClassStatics>();
+        return { f, f.Static(handler) };
+    }
     inline void Class::Static(winrt::event_token const& token)
     {
         impl::call_factory<Class, Component::Events::IClassStatics>([&](auto&& f) { return f.Static(token); });
     }
     template <typename L> Handler::Handler(L handler) :
         Handler(impl::make_delegate<Handler>(std::forward<L>(handler)))
-    {}
-
+    {
+    }
     template <typename F> Handler::Handler(F* handler) :
         Handler([=](auto&&... args) { return handler(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> Handler::Handler(O* object, M method) :
         Handler([=](auto&&... args) { return ((*object).*(method))(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> Handler::Handler(com_ptr<O>&& object, M method) :
         Handler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
-    {}
-
+    {
+    }
     template <typename O, typename M> Handler::Handler(weak_ref<O>&& object, M method) :
         Handler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-    {}
-
+    {
+    }
     inline void Handler::operator()(int32_t value) const
     {
         check_hresult((*(impl::abi_t<Handler>**)this)->Invoke(value));
