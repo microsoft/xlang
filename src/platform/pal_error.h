@@ -13,10 +13,11 @@ namespace xlang
                 : m_result(result)
             {}
 
-            int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept override
+            int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
             {
                 if (id == xlang_unknown_guid)
                 {
+                    static_assert(std::is_base_of_v<xlang_unknown, xlang_error_info>, "Can only combine these two cases is this is true.");
                     *object = static_cast<xlang_unknown*>(this);
                 }
                 else if (id == xlang_error_info_guid)
@@ -26,18 +27,18 @@ namespace xlang
                 else
                 {
                     *object = nullptr;
-                    return 0x80004002;
+                    return xlang_error_no_interface;
                 }
                 AddRef();
                 return 0;
             }
 
-            uint32_t XLANG_CALL AddRef() noexcept override
+            uint32_t XLANG_CALL AddRef() noexcept final
             {
                 return ++m_count;
             }
 
-            uint32_t XLANG_CALL Release() noexcept override
+            uint32_t XLANG_CALL Release() noexcept final
             {
                 auto result = --m_count;
                 if (result == 0)
@@ -58,9 +59,14 @@ namespace xlang
         };
     }
 
+    [[nodiscard]] inline xlang_error_info* originate_error(xlang_result result)
+    {
+        return new impl::error_info{ result };
+    }
+
     [[noreturn]] inline void throw_result(xlang_result result)
     {
-        throw new impl::error_info{ result };
+        throw originate_error(result);
     }
 
     [[noreturn]] inline void throw_result(xlang_error_info* result)
@@ -81,7 +87,7 @@ namespace xlang
         }
         catch (std::bad_alloc const&)
         {
-            return new impl::error_info{ xlang_error_out_of_memory };
+            return originate_error(xlang_error_out_of_memory);
         }
         catch (...)
         {

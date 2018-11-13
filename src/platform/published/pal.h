@@ -90,7 +90,7 @@ extern "C"
 {
 #endif
     // Type/handle definitions
-    typedef uint32_t xlang_result;
+    typedef int32_t xlang_result;
 
     struct xlang_guid
     {
@@ -255,7 +255,7 @@ extern "C"
         void** factory
     ) XLANG_NOEXCEPT;
 
-    typedef xlang_error_info*(XLANG_CALL * xlang_pfn_lib_get_activation_factory)(xlang_string, xlang_guid const&, void **);
+    typedef xlang_result(XLANG_CALL * xlang_pfn_lib_get_activation_factory)(xlang_string, xlang_guid const&, void **);
 
 
 #ifdef __cplusplus
@@ -289,14 +289,15 @@ constexpr xlang_string_encoding& operator&=(xlang_string_encoding& lhs, xlang_st
 }
 
 inline constexpr xlang_result xlang_error_ok{ 0 };
-inline constexpr xlang_result xlang_error_mem_invalid_size{ 0x80080011 };
-inline constexpr xlang_result xlang_error_string_not_null_terminated{ 0x80000017 };
-inline constexpr xlang_result xlang_error_pointer{ 0x80004003 };
-inline constexpr xlang_result xlang_error_sadness{ 0x80004005 };
-inline constexpr xlang_result xlang_error_out_of_memory{ 0x8007000e };
-inline constexpr xlang_result xlang_error_invalid_arg{ 0x80070057 };
-inline constexpr xlang_result xlang_error_untranslatable_string{ 0x80070459 };
-inline constexpr xlang_result xlang_error_class_not_available{ 0x80040111 };
+inline constexpr xlang_result xlang_error_mem_invalid_size{ static_cast<int32_t>(0x80080011) };
+inline constexpr xlang_result xlang_error_string_not_null_terminated{ static_cast <int32_t>(0x80000017) };
+inline constexpr xlang_result xlang_error_no_interface{ static_cast<int32_t>(0x80004002) };
+inline constexpr xlang_result xlang_error_pointer{ static_cast<int32_t>(0x80004003) };
+inline constexpr xlang_result xlang_error_sadness{ static_cast<int32_t>(0x80004005) };
+inline constexpr xlang_result xlang_error_out_of_memory{ static_cast<int32_t>(0x8007000e) };
+inline constexpr xlang_result xlang_error_invalid_arg{ static_cast<int32_t>(0x80070057) };
+inline constexpr xlang_result xlang_error_untranslatable_string{ static_cast<int32_t>(0x80070459) };
+inline constexpr xlang_result xlang_error_class_not_available{ static_cast<int32_t>(0x80040111) };
 #endif
 
 #endif
