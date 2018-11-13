@@ -90,10 +90,7 @@ namespace xlang
         write_license_cpp(w);
         write_python_namespace_includes(w, namespaces);
         w.write(strings::module_methods);
-        write_module_exec(w);
-        write_module_slots(w);
-        write_module_def(w, module_name);
-        write_module_init_func(w, module_name);
+        write_module_def(w, module_name, module_name);
 
         auto filename = w.write_temp("%.cpp", module_name);
         create_directories(folder);
@@ -131,25 +128,27 @@ namespace xlang
 
         if (settings.filter.includes(members.enums))
         {
-            w.write("import enum\n\n");
+            w.write("import enum\n");
         }
 
-        w.write("_internal = _import_ns(\"%\")\n\n", ns);
+        w.write("\n__ns__ = _import_ns(\"%\")\n", ns);
 
         if (!needed_namespaces.empty())
         {
             for (std::string needed_ns : needed_namespaces)
             {
                 std::transform(needed_ns.begin(), needed_ns.end(), needed_ns.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
-                auto format = R"(try:
+                auto format = R"(
+try:
     import %.%
 except:
     pass
 )";
                 w.write(format, module_name, needed_ns);
             }
-            w.write("\n");
         }
+
+        w.write("\n");
 
         settings.filter.bind_each<write_python_enum>(members.enums)(w);
         settings.filter.bind_each<write_import_type>(members.classes)(w);

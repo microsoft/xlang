@@ -69,3 +69,21 @@ static PyMethodDef module_methods[]{
     { "uninit_apartment", uninit_apartment, METH_NOARGS, "uninitialize the apartment" },
     { nullptr }
 };
+
+static int module_exec(PyObject* module)
+{
+    PyObject* type_object = PyType_FromSpec(&winrt_base_Type_spec);
+    if (type_object == nullptr)
+    {
+        return -1;
+    }
+    if (PyModule_AddObject(module, "_winrt_base", type_object) != 0)
+    {
+        Py_DECREF(type_object);
+        return -1;
+    }
+    py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
+    type_object = nullptr;
+
+    return 0;
+}

@@ -20,7 +20,13 @@ namespace xlang
         w.write("// %\n\n", bind<impl::write_license>());
     }
 
-
+    void write_python_namespace_includes(writer& w, std::vector<std::string> const& namespaces)
+    {
+        for (auto&& ns : namespaces)
+        {
+            w.write("#include \"py.%.h\"\n", ns);
+        }
+    }
 
     void write_import_type(writer& w, TypeDef const& type)
     {
@@ -29,7 +35,7 @@ namespace xlang
             return;
         }
 
-        w.write("@ = _internal.@\n", type.TypeName(), type.TypeName());
+        w.write("@ = __ns__.@\n", type.TypeName(), type.TypeName());
     }
 
     void write_include(writer& w, std::string_view const& ns)
@@ -46,11 +52,6 @@ namespace xlang
         {
             w.write("#include \"py.%.h\"\n", ns);
         }
-    }
-
-    void write_ns_init_function_name(writer& w, std::string_view const& ns)
-    {
-        w.write("initialize_%", get_impl_name(ns));
     }
 
     void write_param_name(writer& w, method_signature::param_t param)
@@ -1542,9 +1543,157 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
         w.write("\n");
     }
 
-    void write_python_type(writer& /*w*/, TypeDef const& /*type*/)
-    {
+    //void write_python_method_decorator(writer& w, method_info const& method, std::vector<method_info> const& overloads)
+    //{
+    //    if (is_static_method(method.method))
+    //    {
+    //        w.write("@staticmethod\n");
+    //    }
 
+    //    if (overloads.size() > 1)
+    //    {
+    //        w.write("@typing.overload\n");
+    //    }
+    //}
+
+    void write_python_type_method_args(writer& w, MethodDef const& method)
+    {
+        method_signature signature{ method };
+        separator s{ w };
+
+        if (!is_static_method(method))
+        {
+            s();
+            w.write("self");
+        }
+
+        for (auto&& p : signature.params())
+        {
+            s();
+            w.write("%: %", p.first.Name(), p.second->Type());
+        }
+    }
+
+    void write_python_type_members(writer& w, TypeDef const& type)
+    {
+        for (auto&&[name, overloads] : get_methods(type))
+        {
+            if (is_special(overloads[0].method))
+            {
+                continue;
+            }
+
+            for (auto&& overload : overloads)
+            {
+                auto guard{ w.push_generic_params(overload.type_arguments) };
+                method_signature signature{ overload.method };
+
+                if (is_static_method(overload.method))
+                {
+                    w.write("@staticmethod\n");
+                }
+
+                w.write("def %(%):\n", name, bind<write_python_type_method_args>(overload.method));
+                w.write("    pass\n\n");
+            }
+
+            //if (overloads.size() > 1)
+            //{
+            //    if (is_static_method(overloads[0].method))
+            //    {
+            //        w.write("@staticmethod\n");
+            //        w.write("def %(*args):\n", name);
+            //        w.write("    pass\n\n");
+            //    }
+            //    else
+            //    {
+            //        w.write("def %(self, *args):\n", name);
+            //        w.write("    pass\n\n");
+            //    }
+            //}
+            
+            //if (is_static_method(overloads[0].method))
+            //{
+            //    w.write("@staticmethod\n");
+            //    w.write("def %(*args):\n", name);
+            //    
+            //    writer::indent_guard g{ w };
+            //    w.write("return __ns__.%.%(*args)\n\n", type.TypeName(), name);
+            //}
+            //else
+            //{
+            //    w.write("def %(self, *args):\n", name);
+
+            //    writer::indent_guard g{ w };
+            //    w.write("return self.__instance__.%(self, *args)\n\n", name);
+            //}
+        }
+
+        //for (auto&& prop : get_properties(type))
+        //{
+        //    auto guard{ w.push_generic_params(prop.type_arguments) };
+        //    auto prop_methods = get_property_methods(prop.property);
+
+        //    if (is_static_method(prop_methods.get))
+        //    {
+        //        w.write("# @staticproperty\n");
+        //        w.write("def %():\n", prop.property.Name());
+        //    }
+        //    else
+        //    {
+        //        w.write("@property\n");
+        //        w.write("def %(self):\n", prop.property.Name());
+        //    }
+
+        //    w.write("    pass\n\n");
+
+        //    if (prop_methods.set)
+        //    {
+        //        w.write("^@%.setter\n", prop.property.Name());
+        //        if (is_static_method(prop_methods.set))
+        //        {
+        //            w.write("def %(value):\n", prop.property.Name());
+        //        }
+        //        else
+        //        {
+        //            w.write("def %(self, value):\n", prop.property.Name());
+        //        }
+        //        w.write("    pass\n\n");
+        //    }
+        //}
+
+        //for (auto&& evt : get_events(type))
+        //{
+        //    auto guard{ w.push_generic_params(evt.type_arguments) };
+        //    auto evt_methods = get_event_methods(evt.event);
+
+        //    if (is_static_method(evt_methods.add))
+        //    {
+        //        w.write("# @staticevent\n");
+        //    }
+        //    else
+        //    {
+        //        w.write("# @event\n");
+        //    }
+
+        //    w.write("def %(self):\n", evt.event.Name());
+        //    w.write("    pass\n\n");
+        //}
+    }
+
+    void write_python_type(writer& w, TypeDef const& type)
+    {
+        if (is_exclusive_to(type))
+        {
+            return;
+        }
+
+        w.write("class @():\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+            write_python_type_members(w, type);
+        }
+        w.write("\n");
     }
 
 //    void write_python_method_args(writer& w, MethodDef const& method)
@@ -1668,7 +1817,14 @@ static int @_set_%(%* self, PyObject* value, void* /*unused*/)
 //    }
 //
 
-    void write_type_fromspec(writer& w, TypeDef const& type)
+
+
+
+
+
+
+
+    void write_namespace_module_exec_init_python_type(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type))
         {
@@ -1706,114 +1862,39 @@ type_object = nullptr;
             winrt_type_param);
     }
 
-    void write_namespace_initialization(writer& w, std::string_view const& ns, cache::namespace_members const& members)
+    void write_namespace_module_exec_func(writer& w, cache::namespace_members const& members)
     {
-        w.write("\n// ----- % Initialization --------------------\n", ns);
-        auto format = R"(
-int %(PyObject* module)
+        w.write(R"(
+static int module_exec(PyObject* module)
 {
     PyObject* type_object{ nullptr };
     PyObject* bases = PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type);
-)";
+)");
 
-        w.write(format, bind<write_ns_init_function_name>(ns));
         {
             writer::indent_guard g{ w };
 
-            settings.filter.bind_each<write_type_fromspec>(members.classes)(w);
-            settings.filter.bind_each<write_type_fromspec>(members.interfaces)(w);
-            settings.filter.bind_each<write_type_fromspec>(members.structs)(w);
+            settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.classes)(w);
+            settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.interfaces)(w);
+            settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.structs)(w);
 
-            w.write(R"(
-Py_DECREF(bases);
-return 0;
-)");
+            w.write("\nPy_DECREF(bases);\nreturn 0;\n");
         }
+
         w.write("}\n");
-
-        format = R"(
-static PyModuleDef_Slot module_slots[] = {
-    {Py_mod_exec, %},
-    {0, nullptr}
-};
-
-PyDoc_STRVAR(module_doc, "Langworthy projection module.\n");
-
-static struct PyModuleDef module_def = {
-    PyModuleDef_HEAD_INIT,
-    "%",
-    module_doc,
-    0,
-    nullptr,
-    module_slots,
-    nullptr,
-    nullptr,
-    nullptr
-};
-
-PyMODINIT_FUNC
-PyInit_%(void)
-{
-    return PyModuleDef_Init(&module_def);
-}
-)";
-        auto segments = get_dotted_name_segments(ns);
-        auto module_name = w.write_temp("_%_%", settings.module, bind_list("_", segments));
-        w.write(format, bind<write_ns_init_function_name>(ns), module_name, module_name);
     }
 
-
-    void write_python_namespace_includes(writer& w, std::vector<std::string> const& namespaces)
-    {
-        for (auto&& ns : namespaces)
-        {
-            w.write("#include \"py.%.h\"\n", ns);
-        }
-    }
-    
-    void write_module_exec(writer& w)
-    {
-        {
-            auto format = R"(
-static int module_exec(PyObject* module)
-{
-    PyObject* type_object = PyType_FromSpec(&winrt_base_Type_spec);
-    if (type_object == nullptr)
-    {
-        return -1;
-    }
-    if (PyModule_AddObject(module, "_winrt_base", type_object) != 0)
-    {
-        Py_DECREF(type_object);
-        return -1;
-    }
-    py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
-    type_object = nullptr;
-
-)";
-            w.write(format);
-        }
-
-        w.write("    return 0;\n}\n");
-    }
-
-    void write_module_slots(writer& w)
+    void write_module_def(writer& w, std::string_view const& module_name, std::string_view const& doc_string)
     {
         auto format = R"(
 static PyModuleDef_Slot module_slots[] = {
     {Py_mod_exec, module_exec},
     {0, nullptr}
 };
-)";
-        w.write(format);
-    }
 
-    void write_module_def(writer& w, std::string_view const& module_name)
-    {
-        auto format = R"(
-PyDoc_STRVAR(module_doc, "Langworthy projection module.\n");
+PyDoc_STRVAR(module_doc, "%");
 
-static struct PyModuleDef module_def = {
+static PyModuleDef module_def = {
     PyModuleDef_HEAD_INIT,
     "%",
     module_doc,
@@ -1824,19 +1905,24 @@ static struct PyModuleDef module_def = {
     nullptr,
     nullptr
 };
-)";
-        w.write(format, module_name);
-    }
 
-    void write_module_init_func(writer& w, std::string_view const& module_name)
-    {
-        auto format = R"(
 PyMODINIT_FUNC
 PyInit_%(void)
 {
     return PyModuleDef_Init(&module_def);
 }
 )";
-        w.write(format, module_name);
+        w.write(format, doc_string, module_name, module_name);
+    }
+
+    void write_namespace_initialization(writer& w, std::string_view const& ns, cache::namespace_members const& members)
+    {
+        w.write("\n// ----- % Initialization --------------------\n", ns);
+
+        auto segments = get_dotted_name_segments(ns);
+        auto module_name = w.write_temp("_%_%", settings.module, bind_list("_", segments));
+
+        write_namespace_module_exec_func(w, members);
+        write_module_def(w, module_name, ns);
     }
 }

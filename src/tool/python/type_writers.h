@@ -178,6 +178,19 @@ namespace xlang
             writer_base::write_impl(value);
         }
 
+        template <typename... Args>
+        std::string write_temp(std::string_view const& value, Args const&... args)
+        {
+            auto restore_indent = indent;
+            indent = 0;
+
+            auto result = writer_base::write_temp(value, args...);
+
+            indent = restore_indent;
+
+            return result;
+        }
+
         void write_value(bool value)
         {
             write(value ? "TRUE"sv : "FALSE"sv);

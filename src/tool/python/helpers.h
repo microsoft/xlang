@@ -404,10 +404,6 @@ namespace xlang
                 }
             }
         }
-        else
-        {
-            throw_invalid("only classes and interfaces have properties");
-        }
 
         return std::move(properties);
     }
@@ -439,10 +435,6 @@ namespace xlang
                     events.push_back(event_info{ event, info.type_arguments });
                 }
             }
-        }
-        else
-        {
-            throw_invalid("only classes and interfaces have properties");
         }
 
         return std::move(events);
@@ -496,6 +488,11 @@ namespace xlang
     bool is_static_class(TypeDef const& type)
     {
         return get_category(type) == category::class_type && type.Flags().Abstract();
+    }
+
+    bool is_special(MethodDef const& method)
+    {
+        return method.SpecialName() || method.Flags().RTSpecialName();
     }
 
     bool is_constructor(MethodDef const& method)
