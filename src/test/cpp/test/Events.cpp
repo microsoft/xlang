@@ -16,6 +16,6 @@ TEST_CASE("Events")
     Events::Class::Member_revoker c = instance.Member(auto_revoke, [](int){});
     c.revoke();
 
-    //Events::Class::Static_revoker d = Events::Class::Static(auto_revoke, [](int){});
-    //d.revoke();
+    Events::Class::Static_revoker d = Events::Class::Static(auto_revoke, [](int){});
+    d.revoke();
 }

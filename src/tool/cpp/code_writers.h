@@ -2927,12 +2927,11 @@ void* winrt_make_%()
 
                     if (is_add_overload(method))
                     {
-                        auto format = R"(
-inline %::%_revoker %::%(auto_revoke_t, %)
-{
-    auto f = get_activation_factory<%, %>();
-    return { f, f.%(%) };
-}
+                        auto format = R"(    %::%_revoker %::%(auto_revoke_t, %)
+    {
+        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        return { f, f.%(%) };
+    }
 )";
 
                         w.write(format,
@@ -2941,6 +2940,7 @@ inline %::%_revoker %::%(auto_revoke_t, %)
                             type_name,
                             method_name,
                             bind<write_consume_params>(signature),
+                            type_namespace,
                             type_name,
                             factory.type,
                             method_name,
