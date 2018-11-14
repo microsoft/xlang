@@ -252,7 +252,7 @@ namespace xlang
         bool defaulted{};
         bool overridable{};
         bool base{};
-        std::vector<std::vector<std::string>> generic_param_stack;
+        std::vector<std::vector<std::string>> generic_param_stack{};
     };
 
     static void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::vector<std::vector<std::string>> const& generic_param_stack, std::pair<InterfaceImpl, InterfaceImpl>&& children)
