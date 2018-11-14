@@ -5,6 +5,7 @@
 #include "type_writers.h"
 #include "helpers.h"
 #include "code_writers.h"
+#include "component_writers.h"
 #include "file_writers.h"
 #include "type_writers.h"
 
@@ -14,7 +15,7 @@ namespace xlang
 
     struct usage_exception {};
 
-    void process_args(int const argc, char** argv)
+    static void process_args(int const argc, char** argv)
     {
         std::vector<cmd::option> options
         {
@@ -103,7 +104,7 @@ namespace xlang
         }
     }
 
-    auto get_files_to_cache()
+    static auto get_files_to_cache()
     {
         std::vector<std::string> files;
         files.insert(files.end(), settings.input.begin(), settings.input.end());
@@ -111,7 +112,7 @@ namespace xlang
         return files;
     }
 
-    void supplement_includes(cache const& c)
+    static void supplement_includes(cache const& c)
     {
         if (settings.reference.empty() || !settings.include.empty())
         {
@@ -137,7 +138,7 @@ namespace xlang
         }
     }
 
-    void run(int const argc, char** argv)
+    static void run(int const argc, char** argv)
     {
         writer w;
 

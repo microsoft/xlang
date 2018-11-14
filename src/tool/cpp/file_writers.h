@@ -2,7 +2,7 @@
 
 namespace xlang
 {
-    void write_base_h()
+    static void write_base_h()
     {
         writer w;
         write_license(w);
@@ -63,7 +63,7 @@ namespace xlang
         w.flush_to_file(settings.output_folder + settings.root + "/base.h");
     }
 
-    void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)
+    static void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -113,7 +113,7 @@ namespace xlang
         w.save_header('0');
     }
 
-    void write_namespace_1_h(std::string_view const& ns, cache::namespace_members const& members)
+    static void write_namespace_1_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -135,7 +135,7 @@ namespace xlang
         w.save_header('1');
     }
 
-    void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members, cache const& c)
+    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members, cache const& c)
     {
         writer w;
         w.type_namespace = ns;
@@ -161,7 +161,7 @@ namespace xlang
         w.save_header('2');
     }
 
-    void write_namespace_h(cache const& c, std::string_view const& ns, cache::namespace_members const& members)
+    static void write_namespace_h(cache const& c, std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -199,7 +199,7 @@ namespace xlang
         w.save_header();
     }
 
-    void write_module_g_cpp(std::vector<TypeDef> const& classes)
+    static void write_module_g_cpp(std::vector<TypeDef> const& classes)
     {
         writer w;
         write_license(w);
@@ -208,7 +208,7 @@ namespace xlang
         w.flush_to_file(settings.output_folder + "module.g.cpp");
     }
 
-    void write_component_g_h(TypeDef const& type)
+    static void write_component_g_h(TypeDef const& type)
     {
         writer w;
         write_component_g_h(w, type);
@@ -229,7 +229,7 @@ namespace xlang
         w.flush_to_file(filename);
     }
 
-    void write_component_g_cpp(TypeDef const& type)
+    static void write_component_g_cpp(TypeDef const& type)
     {
         if (!settings.component_opt)
         {
@@ -247,7 +247,7 @@ namespace xlang
         w.flush_to_file(filename);
     }
 
-    void write_component_h(TypeDef const& type)
+    static void write_component_h(TypeDef const& type)
     {
         if (settings.component_folder.empty())
         {
@@ -267,7 +267,7 @@ namespace xlang
         w.flush_to_file(path);
     }
 
-    void write_component_cpp(TypeDef const& type)
+    static void write_component_cpp(TypeDef const& type)
     {
         if (settings.component_folder.empty())
         {

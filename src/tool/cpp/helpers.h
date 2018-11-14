@@ -2,12 +2,12 @@
 
 namespace xlang
 {
-    auto get_start_time()
+    static auto get_start_time()
     {
         return std::chrono::high_resolution_clock::now();
     }
 
-    auto get_elapsed_time(std::chrono::time_point<std::chrono::high_resolution_clock> const& start)
+    static auto get_elapsed_time(std::chrono::time_point<std::chrono::high_resolution_clock> const& start)
     {
         return std::chrono::duration_cast<std::chrono::duration<int64_t, std::milli>>(std::chrono::high_resolution_clock::now() - start).count();
     }
@@ -97,29 +97,23 @@ namespace xlang
         }
     };
 
-    bool is_static_class(TypeDef const& type)
-    {
-        auto impls = type.InterfaceImpl();
-        return impls.first == impls.second;
-    }
-
     template <typename T>
-    bool has_attribute(T const& row, std::string_view const& type_namespace, std::string_view const& type_name)
+    static bool has_attribute(T const& row, std::string_view const& type_namespace, std::string_view const& type_name)
     {
         return static_cast<bool>(get_attribute(row, type_namespace, type_name));
     }
 
-    bool is_fast_class(TypeDef const& type)
+    static bool is_fast_class(TypeDef const& type)
     {
         return has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute");
     }
 
-    bool is_exclusive(TypeDef const& type)
+    static bool is_exclusive(TypeDef const& type)
     {
         return has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
     }
 
-    coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
+    static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
     {
         auto impls = type.InterfaceImpl();
 
@@ -139,7 +133,7 @@ namespace xlang
         return {};
     }
 
-    auto get_abi_name(MethodDef const& method)
+    static auto get_abi_name(MethodDef const& method)
     {
         if (auto overload = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute"))
         {
@@ -151,7 +145,7 @@ namespace xlang
         }
     }
 
-    auto get_name(MethodDef const& method)
+    static auto get_name(MethodDef const& method)
     {
         auto name = method.Name();
 
@@ -163,27 +157,27 @@ namespace xlang
         return name;
     }
 
-    bool is_remove_overload(MethodDef const& method)
+    static bool is_remove_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "remove_");
     }
 
-    bool is_add_overload(MethodDef const& method)
+    static bool is_add_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "add_");
     }
 
-    bool is_put_overload(MethodDef const& method)
+    static bool is_put_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "put_");
     }
 
-    bool is_noexcept(MethodDef const& method)
+    static bool is_noexcept(MethodDef const& method)
     {
         return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptAttribute");
     }
 
-    bool is_async(MethodDef const& method, method_signature const& method_signature)
+    static bool is_async(MethodDef const& method, method_signature const& method_signature)
     {
         if (is_put_overload(method))
         {
@@ -218,7 +212,7 @@ namespace xlang
         return async;
     }
 
-    TypeDef get_base_class(TypeDef const& derived)
+    static TypeDef get_base_class(TypeDef const& derived)
     {
         auto extends = derived.Extends();
 
@@ -240,7 +234,7 @@ namespace xlang
     };
 
 
-    auto get_bases(TypeDef const& type)
+    static auto get_bases(TypeDef const& type)
     {
         std::vector<TypeDef> bases;
 
@@ -261,7 +255,7 @@ namespace xlang
         std::vector<std::vector<std::string>> generic_param_stack;
     };
 
-    void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::vector<std::vector<std::string>> const& generic_param_stack, std::pair<InterfaceImpl, InterfaceImpl>&& children)
+    static void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::vector<std::vector<std::string>> const& generic_param_stack, std::pair<InterfaceImpl, InterfaceImpl>&& children)
     {
         for (auto&& impl : children)
         {
@@ -333,7 +327,7 @@ namespace xlang
         }
     };
 
-    auto get_interfaces(writer& w, TypeDef const& type)
+    static auto get_interfaces(writer& w, TypeDef const& type)
     {
         std::map<std::string, interface_info> result;
         get_interfaces_impl(w, result, false, false, false, {}, type.InterfaceImpl());
@@ -355,7 +349,7 @@ namespace xlang
         bool visible{};
     };
 
-    auto get_factories(TypeDef const& type)
+    static auto get_factories(TypeDef const& type)
     {
         auto get_system_type = [&](auto&& signature) -> TypeDef
         {
@@ -416,7 +410,7 @@ namespace xlang
         std::pair<MethodDef, MethodDef> methods;
     };
 
-    auto get_fast_interfaces(writer& w, TypeDef const& type)
+    static auto get_fast_interfaces(writer& w, TypeDef const& type)
     {
         w.abi_types = false;
 
@@ -468,7 +462,7 @@ namespace xlang
         return interfaces;
     }
 
-    bool wrap_abi(TypeSig const& signature)
+    static bool wrap_abi(TypeSig const& signature)
     {
         bool wrap{};
 
@@ -485,7 +479,7 @@ namespace xlang
         return wrap;
     }
 
-    bool is_object(TypeSig const& signature)
+    static bool is_object(TypeSig const& signature)
     {
         bool object{};
 
@@ -502,7 +496,7 @@ namespace xlang
         return object;
     }
 
-    auto get_delegate_method(TypeDef const& type)
+    static auto get_delegate_method(TypeDef const& type)
     {
         auto methods = type.MethodList();
 
@@ -519,7 +513,7 @@ namespace xlang
         return method;
     }
 
-    std::string get_field_abi(writer& w, Field const& field)
+    static std::string get_field_abi(writer& w, Field const& field)
     {
         auto signature = field.Signature();
         auto const& type = signature.Type();
@@ -545,7 +539,7 @@ namespace xlang
         return name;
     }
 
-    std::string get_component_filename(TypeDef const& type)
+    static std::string get_component_filename(TypeDef const& type)
     {
         std::string result{ type.TypeNamespace() };
         result += '.';
@@ -564,7 +558,7 @@ namespace xlang
         return result;
     }
 
-    std::string get_generated_component_filename(TypeDef const& type)
+    static std::string get_generated_component_filename(TypeDef const& type)
     {
         auto result = get_component_filename(type);
 
@@ -576,7 +570,7 @@ namespace xlang
         return result;
     }
 
-    bool has_factory_members(TypeDef const& type)
+    static bool has_factory_members(TypeDef const& type)
     {
         for (auto&& factory : get_factories(type))
         {
@@ -589,7 +583,7 @@ namespace xlang
         return false;
     }
 
-    bool is_composable(TypeDef const& type)
+    static bool is_composable(TypeDef const& type)
     {
         for (auto&& factory : get_factories(type))
         {
@@ -602,7 +596,7 @@ namespace xlang
         return false;
     }
 
-    bool has_composable_constructors(TypeDef const& type)
+    static bool has_composable_constructors(TypeDef const& type)
     {
         for (auto&& factory : get_factories(type))
         {
