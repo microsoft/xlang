@@ -25,16 +25,15 @@ namespace xlang
 
         auto filename = w.write_temp("py.%.h", ns);
 
-        settings.filter.bind_each<write_callable_to_delegate_function>(members.delegates)(w);
-        settings.filter.bind_each<write_pinterface_decl>(members.interfaces)(w);
-        settings.filter.bind_each<write_pinterface_impl>(members.interfaces)(w);
+        settings.filter.bind_each<write_delegate_callable_wrapper>(members.delegates)(w);
+        settings.filter.bind_each<write_pinterface>(members.interfaces)(w);
 
         w.write("\nnamespace py\n{\n");
         {
             writer::indent_guard g{ w };
-            settings.filter.bind_each<write_winrt_type_specialization>(members.classes)(w);
-            settings.filter.bind_each<write_winrt_type_specialization>(members.interfaces)(w);
-            settings.filter.bind_each<write_winrt_type_specialization>(members.structs)(w);
+            settings.filter.bind_each<write_get_python_type_specialization>(members.classes)(w);
+            settings.filter.bind_each<write_get_python_type_specialization>(members.interfaces)(w);
+            settings.filter.bind_each<write_get_python_type_specialization>(members.structs)(w);
             settings.filter.bind_each<write_struct_converter_decl>(members.structs)(w);
             settings.filter.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
             settings.filter.bind_each<write_delegate_type_mapper>(members.delegates)(w);
@@ -72,7 +71,7 @@ namespace xlang
         auto filename = w.write_temp("py.%.cpp", ns);
 
         write_license_cpp(w);
-        write_include(w, ns);
+        w.write("#include \"py.%.h\"\n", ns);
         settings.filter.bind_each<write_class>(members.classes)(w);
         settings.filter.bind_each<write_interface>(members.interfaces)(w);
         settings.filter.bind_each<write_struct>(members.structs)(w);
@@ -88,9 +87,9 @@ namespace xlang
         writer w;
 
         write_license_cpp(w);
-        write_python_namespace_includes(w, namespaces);
+        //write_python_namespace_includes(w, namespaces);
         w.write(strings::module_methods);
-        write_module_def(w, module_name, module_name);
+        write_module_def(w, module_name, module_name, "module_methods");
 
         auto filename = w.write_temp("%.cpp", module_name);
         create_directories(folder);
@@ -150,10 +149,10 @@ except:
 
         w.write("\n");
 
-        settings.filter.bind_each<write_python_enum>(members.enums)(w);
-        settings.filter.bind_each<write_import_type>(members.classes)(w);
-        settings.filter.bind_each<write_import_type>(members.interfaces)(w);
-        settings.filter.bind_each<write_import_type>(members.structs)(w);
+        //settings.filter.bind_each<write_python_enum>(members.enums)(w);
+        //settings.filter.bind_each<write_import_type>(members.classes)(w);
+        //settings.filter.bind_each<write_import_type>(members.interfaces)(w);
+        //settings.filter.bind_each<write_import_type>(members.structs)(w);
 
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");
