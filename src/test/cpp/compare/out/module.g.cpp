@@ -3,11 +3,14 @@
 #include "winrt/base.h"
 #include "Component.Async.Class.h"
 #include "Component.Collections.Class.h"
+#include "Component.Composable.Base.h"
+#include "Component.Composable.Derived.h"
 #include "Component.Edge.OneClass.h"
 #include "Component.Edge.StaticClass.h"
 #include "Component.Edge.ThreeClass.h"
 #include "Component.Edge.TwoClass.h"
 #include "Component.Edge.ZeroClass.h"
+#include "Component.Events.Class.h"
 #include "Component.Fast.FastClass.h"
 #include "Component.Fast.SlowClass.h"
 #include "Component.Result.Class.h"
@@ -40,6 +43,16 @@ void* WINRT_CALL winrt_get_activation_factory(std::wstring_view const& name)
         return winrt::detach_abi(winrt::make<winrt::Component::Collections::factory_implementation::Class>());
     }
 
+    if (requal(name, L"Component.Composable.Base"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Composable::factory_implementation::Base>());
+    }
+
+    if (requal(name, L"Component.Composable.Derived"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Composable::factory_implementation::Derived>());
+    }
+
     if (requal(name, L"Component.Edge.OneClass"))
     {
         return winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::OneClass>());
@@ -63,6 +76,11 @@ void* WINRT_CALL winrt_get_activation_factory(std::wstring_view const& name)
     if (requal(name, L"Component.Edge.ZeroClass"))
     {
         return winrt::detach_abi(winrt::make<winrt::Component::Edge::factory_implementation::ZeroClass>());
+    }
+
+    if (requal(name, L"Component.Events.Class"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Events::factory_implementation::Class>());
     }
 
     if (requal(name, L"Component.Fast.FastClass"))

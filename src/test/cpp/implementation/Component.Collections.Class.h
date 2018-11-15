@@ -3,7 +3,7 @@
 
 namespace winrt::Component::Collections::implementation
 {
-    struct Class
+    struct Class : ClassT<Class>
     {
         Class() = default;
 
@@ -36,6 +36,17 @@ namespace winrt::Component::Collections::implementation
         {
             return single_threaded_map<hstring, int32_t>(std::map<hstring, int32_t>{{ L"Map", 1 }});
         }
+
+        Windows::Foundation::Collections::IIterator<Windows::Foundation::Collections::IKeyValuePair<hstring, int32_t>> First();
+        int32_t Lookup(hstring const&);
+        uint32_t Size();
+        bool HasKey(hstring const&);
+        Windows::Foundation::Collections::IMapView<hstring, int32_t> GetView();
+        bool Insert(hstring const&, int32_t const&);
+        void Remove(hstring const&);
+        void Clear();
+        winrt::event_token MapChanged(Windows::Foundation::Collections::MapChangedEventHandler<hstring, int32_t> const&);
+        void MapChanged(winrt::event_token const&);
     };
 }
 namespace winrt::Component::Collections::factory_implementation
