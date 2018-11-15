@@ -720,6 +720,17 @@ if (arg_count != %)
                 w.write("}\n");
             }
         }
+
+        if (implements_istringable(type))
+        {
+            auto format = R"(
+static PyObject* @_str(%* self)
+{
+    return py::convert(self->obj.ToString());
+}
+)";
+            w.write(format, type.TypeName(), bind<write_wrapper_type>(type));
+        }
     }
 
     void write_class_new_function_overload(writer& w, MethodDef const& method, method_signature const& signature)
@@ -1329,6 +1340,11 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
             if (category == category::struct_type)
             {
                 w.write("{ Py_tp_getset, @_getset },\n", type.TypeName());
+            }
+
+            if (implements_istringable(type))
+            {
+                w.write("{ Py_tp_str, @_str },\n", type.TypeName());
             }
 
             w.write("{ 0, nullptr },\n");

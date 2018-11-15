@@ -317,6 +317,56 @@ namespace xlang
         return std::move(interfaces);
     }
 
+    bool implements_istringable(TypeDef const& type)
+    {
+        auto category = get_category(type);
+
+        auto is_stringable = [](TypeDef const& td){ return td.TypeNamespace() == "Windows.Foundation" && td.TypeName() == "IStringable"; };
+
+        if (category == category::class_type)
+        {
+            for (auto&& ii : type.InterfaceImpl())
+            {
+                switch (ii.Interface().type())
+                {
+                case TypeDefOrRef::TypeDef:
+                {
+                    if (is_stringable(ii.Interface().TypeDef()))
+                    {
+                        return true;
+                    }
+                }
+                break;
+                case TypeDefOrRef::TypeRef:
+                {
+                    if (is_stringable(find_required(ii.Interface().TypeRef())))
+                    {
+                        return true;
+                    }
+                }
+                break;
+                }
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            if (is_stringable(type))
+            {
+                return true;
+            }
+
+            for (auto&& i : get_required_interfaces(type))
+            {
+                if (is_stringable(i.type))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     struct method_info
     {
         MethodDef method;

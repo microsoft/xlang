@@ -12,6 +12,9 @@ class TestJson(unittest.TestCase):
         self.assertEqual(a.ToString(), "[]")
         self.assertEqual(a.Stringify(), "[]")
 
+    def test_JsonArray_str(self):
+        a = wdj.JsonArray()
+        self.assertEqual(str(a), "[]")
 
     def test_activate_JsonObject(self):
         o = wdj.JsonObject()
