@@ -612,6 +612,44 @@ namespace xlang
         return category == category::interface_type || (category == category::class_type && !type.Flags().Abstract());
     }
 
+    TypeSig get_ireference_type(GenericTypeInstSig const& type)
+    {
+        TypeDef td{ };
+
+        switch (type.GenericType().type())
+        {
+        case TypeDefOrRef::TypeDef:
+            td = type.GenericType().TypeDef();
+            break;
+        case TypeDefOrRef::TypeRef:
+            td = find_required(type.GenericType().TypeRef());
+            break;
+        default:
+            throw_invalid("expecting TypeDef or TypeRef");
+        }
+
+        if ((td.TypeNamespace() != "Windows.Foundation") || (td.TypeName() != "IReference`1"))
+        {
+            throw_invalid("Expecting Windows.Foundation.IReference");
+        }
+
+        XLANG_ASSERT(type.GenericArgCount() == 1);
+
+        return *(type.GenericArgs().first);
+    }
+
+    bool is_customized_struct(TypeDef const& type)
+    {
+        if (type.TypeNamespace() == "Windows.Foundation")
+        {
+            static const std::set<std::string_view> custom_structs = { "DateTime", "EventRegistrationToken", "HResult", "TimeSpan" };
+
+            return custom_structs.find(type.TypeName()) != custom_structs.end();
+        }
+
+        return false;
+    }
+
     enum class param_category
     {
         in,

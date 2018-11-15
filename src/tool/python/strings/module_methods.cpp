@@ -1,3 +1,11 @@
+#include <winrt/base.h>
+
+WINRT_EXPORT namespace std 
+{
+    template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
+}
+
+#include "pybase.h"
 
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 

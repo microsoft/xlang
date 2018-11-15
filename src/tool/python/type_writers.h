@@ -405,55 +405,46 @@ namespace xlang
             write("%<%>", type.GenericType(), bind_list(", ", type.GenericArgs()));
         }
 
-        void write(ElementType type)
+        static std::string_view get_cpp_type(ElementType type)
         {
             switch (type)
             {
             case ElementType::Boolean:
-                write("bool");
-                break;
+                return "bool";
             case ElementType::Char:
-                write("char16_t");
-                break;
+                return "char16_t";
             case ElementType::I1:
-                write("int8_t");
-                break;
+                return "int8_t";
             case ElementType::U1:
-                write("uint8_t");
-                break;
+                return "uint8_t";
             case ElementType::I2:
-                write("int16_t");
-                break;
+                return "int16_t";
             case ElementType::U2:
-                write("uint16_t");
-                break;
+                return "uint16_t";
             case ElementType::I4:
-                write("int32_t");
-                break;
+                return "int32_t";
             case ElementType::U4:
-                write("uint32_t");
-                break;
+                return "uint32_t";
             case ElementType::I8:
-                write("int64_t");
-                break;
+                return "int64_t";
             case ElementType::U8:
-                write("uint64_t");
-                break;
+                return "uint64_t";
             case ElementType::R4:
-                write("float");
-                break;
+                return "float";
             case ElementType::R8:
-                write("double");
-                break;
+                return "double";
             case ElementType::String:
-                write("winrt::hstring");
-                break;
+                return "winrt::hstring";
             case ElementType::Object:
-                write("winrt::Windows::Foundation::IInspectable");
-                break;
-            default:
-                throw_invalid("write_method_comment_type element type not impl");
+                return "winrt::Windows::Foundation::IInspectable";
             }
+
+            throw_invalid("element type not supported");
+        }
+
+        void write(ElementType type)
+        {
+            write(writer::get_cpp_type(type));
         }
 
         void write(GenericTypeIndex var)

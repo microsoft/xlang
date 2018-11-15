@@ -82,12 +82,11 @@ namespace xlang
         return std::move(w.needed_namespaces);
     }
 
-    inline void write_module_cpp(stdfs::path const& folder, std::string_view const& module_name, std::vector<std::string> const& namespaces)
+    inline void write_module_cpp(stdfs::path const& folder, std::string_view const& module_name)
     {
         writer w;
 
         write_license_cpp(w);
-        //write_python_namespace_includes(w, namespaces);
         w.write(strings::module_methods);
         write_module_def(w, module_name, module_name, "module_methods");
 
@@ -150,9 +149,9 @@ except:
         w.write("\n");
 
         //settings.filter.bind_each<write_python_enum>(members.enums)(w);
-        //settings.filter.bind_each<write_import_type>(members.classes)(w);
-        //settings.filter.bind_each<write_import_type>(members.interfaces)(w);
-        //settings.filter.bind_each<write_import_type>(members.structs)(w);
+        settings.filter.bind_each<write_import_type>(members.classes)(w);
+        settings.filter.bind_each<write_import_type>(members.interfaces)(w);
+        settings.filter.bind_each<write_import_type>(members.structs)(w);
 
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");

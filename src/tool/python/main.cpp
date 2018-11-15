@@ -137,7 +137,7 @@ namespace xlang
 
             group.get();
 
-            write_module_cpp(src_dir, native_module, generated_namespaces);
+            write_module_cpp(src_dir, native_module);
             write_setup_py(settings.output_folder, settings.module, native_module, generated_namespaces);
 
             if (settings.verbose)
