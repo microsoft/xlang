@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
-#include "ZeroClass.h"
+#include "Component.Edge.ZeroClass.h"
 
 namespace winrt::Component::Edge::implementation
 {
-    void ZeroClass::StaticMethod();
+    void ZeroClass::StaticMethod()
     {
         throw hresult_not_implemented();
     }

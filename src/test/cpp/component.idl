@@ -150,8 +150,11 @@ namespace Component
 
     namespace Collections
     {
-        static runtimeclass Class
+        [default_interface]
+        runtimeclass Class : Windows.Foundation.Collections.IObservableMap<String, Int32>
         {
+            Class();
+
             static Windows.Foundation.Collections.IIterable<String> Iterable();
             static Windows.Foundation.Collections.IVectorView<String> VectorView();
             static Windows.Foundation.Collections.IVector<String> Vector();
@@ -159,6 +162,34 @@ namespace Component
             static Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Int32> > IterablePair();
             static Windows.Foundation.Collections.IMapView<String, Int32> MapView();
             static Windows.Foundation.Collections.IMap<String, Int32> Map();
+        }
+    }
+
+    namespace Composable
+    {
+        unsealed runtimeclass Base
+        {
+            Base();
+            String BaseMethod();
+        }
+
+        runtimeclass Derived : Base
+        {
+            Derived();
+            String DerivedMethod();
+        }
+    }
+
+    namespace Events
+    {
+        delegate void Handler(Int32 value);
+
+        [default_interface]
+        runtimeclass Class
+        {
+            Class();
+            event Handler Member;
+            static event Handler Static;
         }
     }
 }

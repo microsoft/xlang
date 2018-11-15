@@ -1,5 +1,6 @@
 #include "opaque_string_wrapper.h"
 #include "string_reference.h"
+#include "pal_error.h"
 
 // Define the ABI-level implementations of string methods
 
@@ -96,7 +97,7 @@ namespace xlang::impl
 using namespace xlang;
 using namespace xlang::impl;
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_reference_utf8(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_create_string_reference_utf8(
     xlang_char8 const* source_string,
     uint32_t length,
     xlang_string_header* header,
@@ -105,7 +106,7 @@ XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_reference_utf8(
 try
 {
     *string = xlang::impl::create_string_reference(source_string, length, header);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch(...)
 {
@@ -113,7 +114,7 @@ catch(...)
     return xlang::to_result();
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_reference_utf16(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_create_string_reference_utf16(
     char16_t const* source_string,
     uint32_t length,
     xlang_string_header* header,
@@ -122,7 +123,7 @@ XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_reference_utf16(
 try
 {
     *string = xlang::impl::create_string_reference(source_string, length, header);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -130,7 +131,7 @@ catch (...)
     return xlang::to_result();
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_utf8(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_create_string_utf8(
     xlang_char8 const* source_string,
     uint32_t length,
     xlang_string* string
@@ -138,7 +139,7 @@ XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_utf8(
 try
 {
     *string = xlang::impl::create_string(source_string, length);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -146,7 +147,7 @@ catch (...)
     return xlang::to_result();
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_utf16(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_create_string_utf16(
     char16_t const* source_string,
     uint32_t length,
     xlang_string* string
@@ -154,7 +155,7 @@ XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_create_string_utf16(
 try
 {
     *string = xlang::impl::create_string(source_string, length);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -171,7 +172,7 @@ XLANG_PAL_EXPORT void XLANG_CALL xlang_delete_string(xlang_string string) XLANG_
     }
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_delete_string_buffer(xlang_string_buffer buffer_handle) XLANG_NOEXCEPT
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_delete_string_buffer(xlang_string_buffer buffer_handle) XLANG_NOEXCEPT
 try
 {
     if (!buffer_handle)
@@ -180,14 +181,14 @@ try
     }
 
     from_handle(buffer_handle)->free_preallocated();
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
     return xlang::to_result();
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_duplicate_string(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_duplicate_string(
     xlang_string string,
     xlang_string* newString
 ) XLANG_NOEXCEPT
@@ -199,7 +200,7 @@ try
     {
         *newString = to_handle(from_handle(string)->duplicate_base());
     }
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -228,7 +229,7 @@ XLANG_PAL_EXPORT xlang_string_encoding XLANG_CALL xlang_get_string_encoding(
     }
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_get_string_raw_buffer_utf8(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_get_string_raw_buffer_utf8(
     xlang_string string,
     xlang_char8 const* * buffer,
     uint32_t* length
@@ -237,7 +238,7 @@ try
 {
 
     *length = xlang::impl::xlang_get_string_raw_buffer(string, buffer);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -246,7 +247,7 @@ catch (...)
     return xlang::to_result();
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_get_string_raw_buffer_utf16(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_get_string_raw_buffer_utf16(
     xlang_string string,
     char16_t const* * buffer,
     uint32_t* length
@@ -254,7 +255,7 @@ XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_get_string_raw_buffer_utf16(
 try
 {
     *length = xlang::impl::xlang_get_string_raw_buffer(string, buffer);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -263,7 +264,7 @@ catch (...)
     return xlang::to_result();
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_preallocate_string_buffer_utf8(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_preallocate_string_buffer_utf8(
     uint32_t length,
     xlang_char8** char_buffer,
     xlang_string_buffer* buffer_handle
@@ -271,7 +272,7 @@ XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_preallocate_string_buffer_utf8(
 try
 {
     *buffer_handle = xlang::impl::preallocate_string_buffer(length, char_buffer);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -281,7 +282,7 @@ catch (...)
 }
 
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_preallocate_string_buffer_utf16(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_preallocate_string_buffer_utf16(
     uint32_t length,
     char16_t** char_buffer,
     xlang_string_buffer* buffer_handle
@@ -289,7 +290,7 @@ XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_preallocate_string_buffer_utf16(
 try
 {
     *buffer_handle = xlang::impl::preallocate_string_buffer(length, char_buffer);
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {
@@ -298,7 +299,7 @@ catch (...)
     return xlang::to_result();
 }
 
-XLANG_PAL_EXPORT xlang_result XLANG_CALL xlang_promote_string_buffer(
+XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_promote_string_buffer(
     xlang_string_buffer buffer_handle,
     xlang_string* string,
     uint32_t length
@@ -319,7 +320,7 @@ try
         }
     }
 
-    return xlang_error_ok;
+    return nullptr;
 }
 catch (...)
 {

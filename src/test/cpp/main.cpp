@@ -9,5 +9,6 @@ CATCH_TRANSLATE_EXCEPTION(winrt::hresult_error const& e)
 
 int main(int const argc, char** argv)
 {
+    winrt::init_apartment();
     return Catch::Session().run(argc, argv);
 }

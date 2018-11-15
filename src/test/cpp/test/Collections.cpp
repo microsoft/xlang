@@ -24,4 +24,6 @@ TEST_CASE("Collections")
 
     IMap<hstring, int32_t> m = Collections::Class::Map();
     REQUIRE(m.Lookup(L"Map") == 1);
+
+    Collections::Class c;
 }
