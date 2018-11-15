@@ -62,16 +62,6 @@ namespace xlang
             return name;
         }
 
-        bool has_params() const
-        {
-            return !m_params.empty();
-        }
-
-        bool has_abi_params() const
-        {
-            return has_params() || return_signature();
-        }
-
     private:
 
         MethodDefSig m_method;
