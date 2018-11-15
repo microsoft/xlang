@@ -317,11 +317,11 @@ namespace xlang
         return std::move(interfaces);
     }
 
-    bool implements_istringable(TypeDef const& type)
+    bool implements_interface(TypeDef const& type, std::string_view const& ns, std::string_view const& name)
     {
         auto category = get_category(type);
 
-        auto is_stringable = [](TypeDef const& td){ return td.TypeNamespace() == "Windows.Foundation" && td.TypeName() == "IStringable"; };
+        auto is_stringable = [&ns, &name](TypeDef const& td){ return td.TypeNamespace() == ns && td.TypeName() == name; };
 
         if (category == category::class_type)
         {
@@ -365,6 +365,16 @@ namespace xlang
         }
 
         return false;
+    }
+
+    bool implements_istringable(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation", "IStringable");
+    }
+
+    bool implements_iclosable(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation", "IClosable");
     }
 
     struct method_info

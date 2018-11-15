@@ -723,14 +723,38 @@ if (arg_count != %)
 
         if (implements_istringable(type))
         {
-            auto format = R"(
-static PyObject* @_str(%* self)
-{
-    return py::convert(self->obj.ToString());
-}
-)";
-            w.write(format, type.TypeName(), bind<write_wrapper_type>(type));
+            w.write("\nstatic PyObject* __@_str(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+                write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.ToString());\n"); });
+            }
+            w.write("}\n");
         }
+
+
+        if (implements_iclosable(type))
+        {
+            auto format = R"(
+static PyObject* __@_enter(%* self)
+{
+    Py_INCREF(self);
+    return (PyObject*)self;
+}
+
+static PyObject* __@_exit(%* self)
+{
+)";
+            w.write(format, 
+                type.TypeName(), bind<write_wrapper_type>(type),
+                type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+                write_try_catch(w, [](auto& w) { w.write("self->obj.Close();\nPy_RETURN_FALSE;\n"); });
+
+            }
+            w.write("}\n");
+        }
+
     }
 
     void write_class_new_function_overload(writer& w, MethodDef const& method, method_signature const& signature)
@@ -1307,6 +1331,12 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
                 w.write("{ \"_from\", (PyCFunction)@__from, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
             }
 
+            if (implements_iclosable(type))
+            {
+                w.write("{ \"__enter__\", (PyCFunction)__@_enter, METH_O, nullptr },\n", type.TypeName());
+                w.write("{ \"__exit__\",  (PyCFunction)__@_exit,  METH_O, nullptr },\n", type.TypeName());
+            }
+
             w.write("{ nullptr }\n");
         }
 
@@ -1344,7 +1374,7 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
 
             if (implements_istringable(type))
             {
-                w.write("{ Py_tp_str, @_str },\n", type.TypeName());
+                w.write("{ Py_tp_str, __@_str },\n", type.TypeName());
             }
 
             w.write("{ 0, nullptr },\n");
