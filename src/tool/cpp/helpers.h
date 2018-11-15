@@ -88,7 +88,7 @@ namespace xlang
     };
 
     template <typename T>
-    static bool has_attribute(T const& row, std::string_view const& type_namespace, std::string_view const& type_name)
+    bool has_attribute(T const& row, std::string_view const& type_namespace, std::string_view const& type_name)
     {
         return static_cast<bool>(get_attribute(row, type_namespace, type_name));
     }
