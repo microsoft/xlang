@@ -9,17 +9,17 @@ WINRT_EXPORT namespace xlang::System
         Error,
     };
 
-    enum class TrustLevel : int32_t
+    enum class CollectionChange : int32_t
     {
-        BaseTrust,
-        PartialTrust,
-        FullTrust
+        Reset,
+        ItemInserted,
+        ItemRemoved,
+        ItemChanged,
     };
 
     struct IUnknown;
     struct IObject;
     struct IActivationFactory;
-    struct IAsyncInfo;
     struct IAsyncAction;
     struct AsyncActionCompletedHandler;
     template <typename T> struct IReference;
@@ -34,17 +34,6 @@ WINRT_EXPORT namespace xlang::System
     template <typename TResult, typename TProgress> struct IAsyncOperationWithProgress;
     template <typename T> struct EventHandler;
     template <typename TSender, typename TArgs> struct TypedEventHandler;
-}
-
-WINRT_EXPORT namespace xlang::System
-{
-    enum class CollectionChange : int32_t
-    {
-        Reset,
-        ItemInserted,
-        ItemRemoved,
-        ItemChanged,
-    };
 
     struct IVectorChangedEventArgs;
     template <typename K> struct IMapChangedEventArgs;

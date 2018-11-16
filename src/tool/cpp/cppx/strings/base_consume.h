@@ -420,42 +420,20 @@ namespace xlang::impl
         }
     };
 
-    template <typename D> struct consume_IAsyncInfo
+    template <typename D> struct consume_IAsyncAction
     {
-        uint32_t Id() const
-        {
-            uint32_t id{};
-            check_hresult(WINRT_SHIM(System::IAsyncInfo)->get_Id(&id));
-            return id;
-        }
-
         System::AsyncStatus Status() const
         {
             System::AsyncStatus status{};
-            check_hresult(WINRT_SHIM(System::IAsyncInfo)->get_Status(&status));
+            check_hresult(WINRT_SHIM(System::IAsyncAction)->get_Status(&status));
             return status;
-        }
-
-        hresult ErrorCode() const
-        {
-            int32_t code{};
-            check_hresult(WINRT_SHIM(System::IAsyncInfo)->get_ErrorCode(&code));
-            return code;
         }
 
         void Cancel() const
         {
-            check_hresult(WINRT_SHIM(System::IAsyncInfo)->Cancel());
+            check_hresult(WINRT_SHIM(System::IAsyncAction)->Cancel());
         }
 
-        void Close() const
-        {
-            check_hresult(WINRT_SHIM(System::IAsyncInfo)->Close());
-        }
-    };
-
-    template <typename D> struct consume_IAsyncAction
-    {
         void Completed(System::AsyncActionCompletedHandler const& handler) const;
         System::AsyncActionCompletedHandler Completed() const;
 
@@ -473,6 +451,18 @@ namespace xlang::impl
 
     template <typename D, typename TResult> struct consume_IAsyncOperation
     {
+        System::AsyncStatus Status() const
+        {
+            System::AsyncStatus status{};
+            check_hresult(WINRT_SHIM(System::IAsyncOperation<TResult>)->get_Status(&status));
+            return status;
+        }
+
+        void Cancel() const
+        {
+            check_hresult(WINRT_SHIM(System::IAsyncOperation<TResult>)->Cancel());
+        }
+
         void Completed(System::AsyncOperationCompletedHandler<TResult> const& handler) const;
         System::AsyncOperationCompletedHandler<TResult> Completed() const;
 
@@ -492,6 +482,18 @@ namespace xlang::impl
 
     template <typename D, typename TProgress> struct consume_IAsyncActionWithProgress
     {
+        System::AsyncStatus Status() const
+        {
+            System::AsyncStatus status{};
+            check_hresult(WINRT_SHIM(System::IAsyncActionWithProgress<TProgress>)->get_Status(&status));
+            return status;
+        }
+
+        void Cancel() const
+        {
+            check_hresult(WINRT_SHIM(System::IAsyncActionWithProgress<TProgress>)->Cancel());
+        }
+
         void Progress(System::AsyncActionProgressHandler<TProgress> const& handler) const;
         System::AsyncActionProgressHandler<TProgress> Progress() const;
 
@@ -508,11 +510,22 @@ namespace xlang::impl
             blocking_suspend(static_cast<System::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
             GetResults();
         }
-
     };
 
     template <typename D, typename TResult, typename TProgress> struct consume_IAsyncOperationWithProgress
     {
+        System::AsyncStatus Status() const
+        {
+            System::AsyncStatus status{};
+            check_hresult(WINRT_SHIM(System::IAsyncOperationWithProgress<TResult, TProgress>)->get_Status(&status));
+            return status;
+        }
+
+        void Cancel() const
+        {
+            check_hresult(WINRT_SHIM(System::IAsyncOperationWithProgress<TResult, TProgress>)->Cancel());
+        }
+
         void Progress(System::AsyncOperationProgressHandler<TResult, TProgress> const& handler) const;
         System::AsyncOperationProgressHandler<TResult, TProgress> Progress() const;
 

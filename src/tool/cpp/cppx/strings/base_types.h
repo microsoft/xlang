@@ -1,18 +1,9 @@
 
 WINRT_EXPORT namespace xlang::System
 {
-    struct WINRT_EBO IAsyncInfo :
-        IObject,
-        impl::consume_t<IAsyncInfo>
-    {
-        IAsyncInfo(std::nullptr_t = nullptr) noexcept {}
-        IAsyncInfo(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
-    };
-
     struct WINRT_EBO IAsyncAction :
         IObject,
-        impl::consume_t<IAsyncAction>,
-        impl::require<IAsyncAction, IAsyncInfo>
+        impl::consume_t<IAsyncAction>
     {
         IAsyncAction(std::nullptr_t = nullptr) noexcept {}
         IAsyncAction(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
@@ -21,8 +12,7 @@ WINRT_EXPORT namespace xlang::System
     template <typename TProgress>
     struct WINRT_EBO IAsyncActionWithProgress :
         IObject,
-        impl::consume_t<IAsyncActionWithProgress<TProgress>>,
-        impl::require<IAsyncActionWithProgress<TProgress>, IAsyncInfo>
+        impl::consume_t<IAsyncActionWithProgress<TProgress>>
     {
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         IAsyncActionWithProgress(std::nullptr_t = nullptr) noexcept {}
@@ -32,8 +22,7 @@ WINRT_EXPORT namespace xlang::System
     template <typename TResult>
     struct WINRT_EBO IAsyncOperation :
         IObject,
-        impl::consume_t<IAsyncOperation<TResult>>,
-        impl::require<IAsyncOperation<TResult>, IAsyncInfo>
+        impl::consume_t<IAsyncOperation<TResult>>
     {
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         IAsyncOperation(std::nullptr_t = nullptr) noexcept {}
@@ -43,8 +32,7 @@ WINRT_EXPORT namespace xlang::System
     template <typename TResult, typename TProgress>
     struct WINRT_EBO IAsyncOperationWithProgress :
         IObject,
-        impl::consume_t<IAsyncOperationWithProgress<TResult, TProgress>>,
-        impl::require<IAsyncOperationWithProgress<TResult, TProgress>, IAsyncInfo>
+        impl::consume_t<IAsyncOperationWithProgress<TResult, TProgress>>
     {
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");

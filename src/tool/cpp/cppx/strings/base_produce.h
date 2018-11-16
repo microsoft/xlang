@@ -100,6 +100,28 @@ namespace xlang::impl
 
     template <typename D> struct produce<D, System::IAsyncAction> : produce_base<D, System::IAsyncAction>
     {
+        int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *status = this->shim().Status();
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+
+        int32_t WINRT_CALL Cancel() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Cancel();
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+
         int32_t WINRT_CALL put_Completed(void* handler) noexcept final
         {
             try
@@ -135,36 +157,14 @@ namespace xlang::impl
         }
     };
 
-    template <typename D> struct produce<D, System::IAsyncInfo> : produce_base<D, System::IAsyncInfo>
+    template <typename D, typename TProgress> struct produce<D, System::IAsyncActionWithProgress<TProgress>> : produce_base<D, System::IAsyncActionWithProgress<TProgress>>
     {
-        int32_t WINRT_CALL get_Id(uint32_t* id) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *id = this->shim().Id();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
         int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
                 *status = this->shim().Status();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_ErrorCode(int32_t* errorCode) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *errorCode = this->shim().ErrorCode();
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -181,20 +181,6 @@ namespace xlang::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL Close() noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().Close();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename TProgress> struct produce<D, System::IAsyncActionWithProgress<TProgress>> : produce_base<D, System::IAsyncActionWithProgress<TProgress>>
-    {
         int32_t WINRT_CALL put_Progress(void* handler) noexcept final
         {
             try
@@ -255,6 +241,28 @@ namespace xlang::impl
 
     template <typename D, typename TResult> struct produce<D, System::IAsyncOperation<TResult>> : produce_base<D, System::IAsyncOperation<TResult>>
     {
+        int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *status = this->shim().Status();
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+
+        int32_t WINRT_CALL Cancel() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Cancel();
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+
         int32_t WINRT_CALL put_Completed(void* handler) noexcept final
         {
             try
@@ -293,6 +301,28 @@ namespace xlang::impl
 
     template <typename D, typename TResult, typename TProgress> struct produce<D, System::IAsyncOperationWithProgress<TResult, TProgress>> : produce_base<D, System::IAsyncOperationWithProgress<TResult, TProgress>>
     {
+        int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *status = this->shim().Status();
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+
+        int32_t WINRT_CALL Cancel() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Cancel();
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+
         int32_t WINRT_CALL put_Progress(void* handler) noexcept final
         {
             try

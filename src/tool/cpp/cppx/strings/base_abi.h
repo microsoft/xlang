@@ -67,22 +67,12 @@ namespace xlang::impl
         };
     };
 
-    template <> struct abi<System::IAsyncInfo>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Id(uint32_t* id) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
-            virtual int32_t WINRT_CALL get_ErrorCode(int32_t* errorCode) noexcept = 0;
-            virtual int32_t WINRT_CALL Cancel() noexcept = 0;
-            virtual int32_t WINRT_CALL Close() noexcept = 0;
-        };
-    };
-
     template <> struct abi<System::IAsyncAction>
     {
         struct type : inspectable_abi
         {
+            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Completed(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Completed(void** handler) noexcept = 0;
             virtual int32_t WINRT_CALL GetResults() noexcept = 0;
@@ -142,6 +132,8 @@ namespace xlang::impl
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
+            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Completed(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Completed(void** handler) noexcept = 0;
             virtual int32_t WINRT_CALL GetResults(arg_out<TResult> results) noexcept = 0;
@@ -152,6 +144,8 @@ namespace xlang::impl
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
+            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Progress(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Progress(void** handler) noexcept = 0;
             virtual int32_t WINRT_CALL put_Completed(void* handler) noexcept = 0;
@@ -164,6 +158,8 @@ namespace xlang::impl
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
+            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Progress(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Progress(void** handler) noexcept = 0;
             virtual int32_t WINRT_CALL put_Completed(void* handler) noexcept = 0;

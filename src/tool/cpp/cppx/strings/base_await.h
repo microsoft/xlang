@@ -172,7 +172,7 @@ namespace xlang::impl
     };
 
     template <typename Derived, typename AsyncInterface, typename CompletedHandler, typename TProgress = void>
-    struct promise_base : implements<Derived, AsyncInterface, System::IAsyncInfo>
+    struct promise_base : implements<Derived, AsyncInterface>
     {
         using AsyncStatus = System::AsyncStatus;
 

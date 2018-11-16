@@ -8,7 +8,7 @@ namespace xlang::impl
 
     template <> struct guid_storage<System::IObject>
     {
-        static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
+        static constexpr guid value{ 0x9df517c6, 0x60f2, 0x4e17,{ 0x93,0xc7,0xcd,0xd,0x45,0x92,0xc2,0x42 } };
     };
 
     template <> struct guid_storage<System::IActivationFactory>
@@ -34,11 +34,6 @@ namespace xlang::impl
     template <> struct guid_storage<wfc::IVectorChangedEventArgs>
     {
         static constexpr guid value{ 0x575933DF,0x34FE,0x4480,{ 0xAF,0x15,0x07,0x69,0x1F,0x3D,0x5D,0x9B } };
-    };
-
-    template <> struct guid_storage<System::IAsyncInfo>
-    {
-        static constexpr guid value{ 0x00000036,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
     template <> struct guid_storage<System::AsyncActionCompletedHandler>
@@ -196,11 +191,6 @@ namespace xlang::impl
         template <typename D> using type = consume_IAsyncOperationWithProgress<D, TResult, TProgress>;
     };
 
-    template <> struct consume<System::IAsyncInfo>
-    {
-        template <typename D> using type = consume_IAsyncInfo<D>;
-    };
-
     template <> struct consume<System::IAsyncAction>
     {
         template <typename D> using type = consume_IAsyncAction<D>;
@@ -294,11 +284,6 @@ namespace xlang::impl
     template <typename TResult, typename TProgress> struct name<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationWithProgressCompletedHandler`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
-    };
-
-    template <> struct name<System::IAsyncInfo>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.IAsyncInfo" };
     };
 
     template <> struct name<System::IAsyncAction>
@@ -455,11 +440,6 @@ namespace xlang::impl
     {
         using type = pinterface_category<TResult, TProgress>;
         static constexpr guid value{ 0xe85df41d, 0x6aa7, 0x46e3,{ 0xa8, 0xe2, 0xf0, 0x09, 0xd8, 0x40, 0xc6, 0x27 } };
-    };
-
-    template <> struct category<System::IAsyncInfo>
-    {
-        using type = interface_category;
     };
 
     template <> struct category<System::IAsyncAction>
