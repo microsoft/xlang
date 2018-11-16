@@ -316,27 +316,6 @@ WINRT_EXPORT namespace xlang
         IActivationFactory(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
-    enum class apartment_type : int32_t
-    {
-        single_threaded,
-        multi_threaded
-    };
-
-    inline void init_apartment(apartment_type const type = apartment_type::multi_threaded)
-    {
-        hresult const result = WINRT_RoInitialize(static_cast<uint32_t>(type));
-
-        if (result < 0)
-        {
-            throw_hresult(result);
-        }
-    }
-
-    inline void uninit_apartment() noexcept
-    {
-        WINRT_RoUninitialize();
-    }
-
     template <typename Class, typename Interface = IActivationFactory>
     auto get_activation_factory()
     {
@@ -364,13 +343,5 @@ WINRT_EXPORT namespace xlang
     inline void clear_factory_cache() noexcept
     {
         impl::get_factory_cache().clear();
-    }
-
-    template <typename Interface>
-    impl::com_ref<Interface> create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
-    {
-        impl::com_ref<Interface> temp{ nullptr };
-        check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), put_abi(temp)));
-        return temp;
     }
 }

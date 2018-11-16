@@ -86,11 +86,6 @@ extern "C"
     wchar_t const* WINRT_CALL WINRT_WindowsGetStringRawBuffer(void* string, uint32_t* length) noexcept;
     uint32_t WINRT_CALL WINRT_WindowsGetStringLen(void* string) noexcept;
 
-    int32_t  WINRT_CALL WINRT_CoCreateFreeThreadedMarshaler(void* outer, void** marshaler) noexcept;
-    int32_t  WINRT_CALL WINRT_CoCreateInstance(xlang::guid const& clsid, void* outer, uint32_t context, xlang::guid const& iid, void** object) noexcept;
-    int32_t  WINRT_CALL WINRT_CoGetCallContext(xlang::guid const& iid, void** object) noexcept;
-    int32_t  WINRT_CALL WINRT_CoGetObjectContext(xlang::guid const& iid, void** object) noexcept;
-    int32_t  WINRT_CALL WINRT_CoGetApartmentType(int32_t* type, int32_t* qualifier) noexcept;
     void*    WINRT_CALL WINRT_CoTaskMemAlloc(std::size_t size) noexcept;
     void     WINRT_CALL WINRT_CoTaskMemFree(void* ptr) noexcept;
     void     WINRT_CALL WINRT_SysFreeString(xlang::impl::bstr string) noexcept;
@@ -105,13 +100,6 @@ extern "C"
     uint32_t WINRT_CALL WINRT_GetLastError() noexcept;
     void     WINRT_CALL WINRT_GetSystemTimePreciseAsFileTime(void* result) noexcept;
 
-    int32_t  WINRT_CALL WINRT_OpenProcessToken(void* process, uint32_t access, void** token) noexcept;
-    void*    WINRT_CALL WINRT_GetCurrentProcess() noexcept;
-    int32_t  WINRT_CALL WINRT_DuplicateToken(void* existing, uint32_t level, void** duplicate) noexcept;
-    int32_t  WINRT_CALL WINRT_OpenThreadToken(void* thread, uint32_t access, int32_t self, void** token) noexcept;
-    void*    WINRT_CALL WINRT_GetCurrentThread() noexcept;
-    int32_t  WINRT_CALL WINRT_SetThreadToken(void** thread, void* token) noexcept;
-
     void    WINRT_CALL WINRT_AcquireSRWLockExclusive(xlang::impl::srwlock* lock) noexcept;
     void    WINRT_CALL WINRT_AcquireSRWLockShared(xlang::impl::srwlock* lock) noexcept;
     uint8_t WINRT_CALL WINRT_TryAcquireSRWLockExclusive(xlang::impl::srwlock* lock) noexcept;
@@ -124,19 +112,6 @@ extern "C"
     void    WINRT_CALL WINRT_InitializeSListHead(void* head) noexcept;
     void*   WINRT_CALL WINRT_InterlockedPushEntrySList(void* head, void* entry) noexcept;
     void*   WINRT_CALL WINRT_InterlockedFlushSList(void* head) noexcept;
-
-    uint32_t WINRT_CALL WINRT_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
-    int32_t  WINRT_CALL WINRT_TrySubmitThreadpoolCallback(void(WINRT_CALL *callback)(void*, void* context), void* context, void*) noexcept;
-    xlang::impl::ptp_timer WINRT_CALL WINRT_CreateThreadpoolTimer(void(WINRT_CALL *callback)(void*, void* context, void*), void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_SetThreadpoolTimer(xlang::impl::ptp_timer timer, void* time, uint32_t period, uint32_t window) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolTimer(xlang::impl::ptp_timer timer) noexcept;
-    xlang::impl::ptp_wait WINRT_CALL WINRT_CreateThreadpoolWait(void(WINRT_CALL *callback)(void*, void* context, void*, uint32_t result), void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_SetThreadpoolWait(xlang::impl::ptp_wait wait, void* handle, void* timeout) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolWait(xlang::impl::ptp_wait wait) noexcept;
-    xlang::impl::ptp_io WINRT_CALL WINRT_CreateThreadpoolIo(void* object, void(WINRT_CALL *callback)(void*, void* context, void* overlapped, uint32_t result, std::size_t bytes, void*) noexcept, void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_StartThreadpoolIo(xlang::impl::ptp_io io) noexcept;
-    void     WINRT_CALL WINRT_CancelThreadpoolIo(xlang::impl::ptp_io io) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolIo(xlang::impl::ptp_io io) noexcept;
 
     int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept;
     int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;
@@ -163,11 +138,6 @@ WINRT_LINK(WindowsConcatString, 12)
 WINRT_LINK(WindowsGetStringRawBuffer, 8)
 WINRT_LINK(WindowsGetStringLen, 4)
 
-WINRT_LINK(CoCreateFreeThreadedMarshaler, 8)
-WINRT_LINK(CoCreateInstance, 20)
-WINRT_LINK(CoGetCallContext, 8)
-WINRT_LINK(CoGetObjectContext, 8)
-WINRT_LINK(CoGetApartmentType, 8)
 WINRT_LINK(CoTaskMemAlloc, 4)
 WINRT_LINK(CoTaskMemFree, 4)
 WINRT_LINK(SysFreeString, 4)
@@ -182,13 +152,6 @@ WINRT_LINK(FormatMessageW, 28)
 WINRT_LINK(GetLastError, 0)
 WINRT_LINK(GetSystemTimePreciseAsFileTime, 4)
 
-WINRT_LINK(OpenProcessToken, 12)
-WINRT_LINK(GetCurrentProcess, 0)
-WINRT_LINK(DuplicateToken, 12)
-WINRT_LINK(OpenThreadToken, 16)
-WINRT_LINK(GetCurrentThread, 0)
-WINRT_LINK(SetThreadToken, 8)
-
 WINRT_LINK(AcquireSRWLockExclusive, 4)
 WINRT_LINK(AcquireSRWLockShared, 4)
 WINRT_LINK(TryAcquireSRWLockExclusive, 4)
@@ -201,16 +164,3 @@ WINRT_LINK(WakeAllConditionVariable, 4)
 WINRT_LINK(InitializeSListHead, 4)
 WINRT_LINK(InterlockedPushEntrySList, 8)
 WINRT_LINK(InterlockedFlushSList, 4)
-
-WINRT_LINK(WaitForSingleObject, 8)
-WINRT_LINK(TrySubmitThreadpoolCallback, 12)
-WINRT_LINK(CreateThreadpoolTimer, 12)
-WINRT_LINK(SetThreadpoolTimer, 16)
-WINRT_LINK(CloseThreadpoolTimer, 4)
-WINRT_LINK(CreateThreadpoolWait, 12)
-WINRT_LINK(SetThreadpoolWait, 12)
-WINRT_LINK(CloseThreadpoolWait, 4)
-WINRT_LINK(CreateThreadpoolIo, 16)
-WINRT_LINK(StartThreadpoolIo, 4)
-WINRT_LINK(CancelThreadpoolIo, 4)
-WINRT_LINK(CloseThreadpoolIo, 4)
