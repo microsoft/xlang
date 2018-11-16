@@ -103,7 +103,7 @@ WINRT_EXPORT namespace xlang
             {
                 WINRT_VERIFY_(impl::error_ok, m_info->GetReference(m_debug_reference.put()));
 
-                if (auto info2 = m_info.try_as<impl::ILanguageExceptionErrorInfo2>())
+                if (auto info2 = m_info.as<impl::ILanguageExceptionErrorInfo2>())
                 {
                     WINRT_VERIFY_(impl::error_ok, info2->CapturePropagationContext(nullptr));
                 }
@@ -154,9 +154,9 @@ WINRT_EXPORT namespace xlang
         }
 
         template <typename To>
-        auto try_as() const noexcept
+        auto as() const noexcept
         {
-            return m_info.try_as<To>();
+            return m_info.as<To>();
         }
 
         hresult to_abi() const noexcept

@@ -124,7 +124,7 @@ namespace xlang::impl
     {
         operator I() const noexcept
         {
-            return static_cast<D const*>(this)->template try_as<I>();
+            return static_cast<D const*>(this)->template as<I>();
         }
     };
 
@@ -137,7 +137,7 @@ namespace xlang::impl
     {
         operator I() const noexcept
         {
-            return static_cast<D const*>(this)->template try_as<I>();
+            return static_cast<D const*>(this)->template as<I>();
         }
     };
 

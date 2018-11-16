@@ -24,7 +24,7 @@ namespace xlang::impl
 
     inline size_t hash_unknown(IUnknown const& value) noexcept
     {
-        void* const abi_value = get_abi(value.try_as<IUnknown>());
+        void* const abi_value = get_abi(value.as<IUnknown>());
         return std::hash<void*>{}(abi_value);
     }
 

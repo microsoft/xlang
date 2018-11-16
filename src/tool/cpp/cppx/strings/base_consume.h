@@ -11,7 +11,7 @@ namespace xlang::impl
         {
             IObject instance;
             check_hresult(WINRT_SHIM(IActivationFactory)->ActivateInstance(put_abi(instance)));
-            return instance.try_as<T>();
+            return instance.as<T>();
         }
     };
 

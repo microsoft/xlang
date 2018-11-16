@@ -631,9 +631,9 @@ namespace xlang::impl
     struct WINRT_EBO root_implements_composing_outer<true>
     {
         template <typename Qi>
-        auto try_as() const noexcept
+        auto as() const noexcept
         {
-            return m_inner.try_as<Qi>();
+            return m_inner.as<Qi>();
         }
 
         explicit operator bool() const noexcept

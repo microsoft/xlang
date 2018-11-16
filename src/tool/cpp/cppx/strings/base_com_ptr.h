@@ -113,33 +113,21 @@ WINRT_EXPORT namespace xlang
         }
 
         template <typename To>
-        auto as() const
+        auto as() const noexcept
         {
             return impl::as<To>(m_ptr);
         }
 
         template <typename To>
-        auto try_as() const noexcept
-        {
-            return impl::try_as<To>(m_ptr);
-        }
-
-        template <typename To>
-        void as(To& to) const
+        bool as(To& to) const noexcept
         {
             to = as<impl::wrapped_type_t<To>>();
-        }
-
-        template <typename To>
-        bool try_as(To& to) const noexcept
-        {
-            to = try_as<impl::wrapped_type_t<To>>();
             return static_cast<bool>(to);
         }
 
-        hresult as(guid const& id, void** result) const noexcept
+        bool as(guid const& id, void** result) const noexcept
         {
-            return m_ptr->QueryInterface(id, result);
+            return 0 == m_ptr->QueryInterface(id, result);
         }
 
         void copy_from(type* other) noexcept

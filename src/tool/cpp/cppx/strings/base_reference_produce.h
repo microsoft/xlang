@@ -346,7 +346,7 @@ WINRT_EXPORT namespace xlang
         }
         else if constexpr (std::is_enum_v<T>)
         {
-            if (auto temp = value.try_as<IReference<T>>())
+            if (auto temp = value.as<IReference<T>>())
             {
                 return temp.Value();
             }
@@ -366,7 +366,7 @@ WINRT_EXPORT namespace xlang
     {
         if (value)
         {
-            if (auto temp = value.try_as<IReference<hstring>>())
+            if (auto temp = value.as<IReference<hstring>>())
             {
                 return temp.Value();
             }
@@ -382,26 +382,26 @@ WINRT_EXPORT namespace xlang
         {
             if constexpr (std::is_base_of_v<IObject, T>)
             {
-                if (auto temp = value.try_as<T>())
+                if (auto temp = value.as<T>())
                 {
                     return temp;
                 }
             }
             else if constexpr (std::is_enum_v<T>)
             {
-                if (auto temp = value.try_as<IReference<T>>())
+                if (auto temp = value.as<IReference<T>>())
                 {
                     return temp.Value();
                 }
 
-                if (auto temp = value.try_as<IReference<std::underlying_type_t<T>>>())
+                if (auto temp = value.as<IReference<std::underlying_type_t<T>>>())
                 {
                     return static_cast<T>(temp.Value());
                 }
             }
             else
             {
-                if (auto temp = value.try_as<IReference<T>>())
+                if (auto temp = value.as<IReference<T>>())
                 {
                     return temp.Value();
                 }

@@ -74,20 +74,7 @@ namespace xlang::impl
     };
 
     template <typename To, typename From>
-    com_ref<To> as(From* ptr)
-    {
-        if (!ptr)
-        {
-            return nullptr;
-        }
-
-        void* result;
-        check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
-    }
-
-    template <typename To, typename From>
-    com_ref<To> try_as(From* ptr) noexcept
+    com_ref<To> as(From* ptr) noexcept
     {
         if (!ptr)
         {
@@ -176,33 +163,21 @@ WINRT_EXPORT namespace xlang
         }
 
         template <typename To>
-        auto as() const
+        auto as() const noexcept
         {
             return impl::as<To>(m_ptr);
         }
 
         template <typename To>
-        auto try_as() const noexcept
-        {
-            return impl::try_as<To>(m_ptr);
-        }
-
-        template <typename To>
-        void as(To& to) const
+        bool as(To& to) const noexcept
         {
             to = as<impl::wrapped_type_t<To>>();
-        }
-
-        template <typename To>
-        bool try_as(To& to) const noexcept
-        {
-            to = try_as<impl::wrapped_type_t<To>>();
             return static_cast<bool>(to);
         }
 
-        hresult as(guid const& id, void** result) const noexcept
+        bool as(guid const& id, void** result) const noexcept
         {
-            return m_ptr->QueryInterface(id, result);
+            return 0 == m_ptr->QueryInterface(id, result);
         }
 
         friend void swap(IUnknown& left, IUnknown& right) noexcept
@@ -319,7 +294,7 @@ WINRT_EXPORT namespace xlang
         {
             return false;
         }
-        return get_abi(left.try_as<IUnknown>()) == get_abi(right.try_as<IUnknown>());
+        return get_abi(left.as<IUnknown>()) == get_abi(right.as<IUnknown>());
     }
 
     inline bool operator!=(IUnknown const& left, IUnknown const& right) noexcept
@@ -337,7 +312,7 @@ WINRT_EXPORT namespace xlang
         {
             return get_abi(left) < get_abi(right);
         }
-        return get_abi(left.try_as<IUnknown>()) < get_abi(right.try_as<IUnknown>());
+        return get_abi(left.as<IUnknown>()) < get_abi(right.as<IUnknown>());
     }
 
     inline bool operator>(IUnknown const& left, IUnknown const& right) noexcept
