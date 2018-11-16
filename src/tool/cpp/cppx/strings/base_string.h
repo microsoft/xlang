@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     inline constexpr hresult error_ok{ 0 }; // S_OK
     inline constexpr hresult error_false{ 1 }; // S_FALSE
@@ -56,7 +56,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     struct hstring
     {
@@ -272,7 +272,7 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <> struct abi<hstring>
     {
@@ -353,7 +353,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     inline bool embedded_null(hstring const& value) noexcept
     {

@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
 #ifdef WINRT_CHECKED_ITERATORS
 
@@ -26,7 +26,7 @@ namespace winrt::impl
 #endif
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename T>
     struct array_view
@@ -389,7 +389,7 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     struct array_size_proxy
@@ -430,7 +430,7 @@ namespace winrt::impl
     template <typename T>
     struct com_array_proxy
     {
-        com_array_proxy(uint32_t* size, winrt::impl::arg_out<T>* value) noexcept : m_size(size), m_value(value)
+        com_array_proxy(uint32_t* size, xlang::impl::arg_out<T>* value) noexcept : m_size(size), m_value(value)
         {}
 
         ~com_array_proxy() noexcept
@@ -457,7 +457,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename T>
     auto detach_abi(uint32_t* __valueSize, impl::arg_out<T>* value) noexcept

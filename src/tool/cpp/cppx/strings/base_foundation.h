@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace xlang::Windows::Foundation
 {
     struct Point
     {
@@ -100,7 +100,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <> struct name<Windows::Foundation::Point>
     {

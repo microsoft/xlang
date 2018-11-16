@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename T>
     using default_interface = typename impl::default_interface<T>::type;
@@ -16,7 +16,7 @@ WINRT_EXPORT namespace winrt
     struct fast_interface {};
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     struct fast_version;
@@ -762,7 +762,7 @@ namespace winrt::impl
     template <typename T>
     struct category_signature<class_category, T>
     {
-        constexpr static auto data{ combine("rc(", to_utf8<T>(), ";", signature<winrt::default_interface<T>>::data, ")") };
+        constexpr static auto data{ combine("rc(", to_utf8<T>(), ";", signature<xlang::default_interface<T>>::data, ")") };
     };
 
     template <typename... Args, typename T>
@@ -796,7 +796,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename T>
     constexpr auto name_of() noexcept

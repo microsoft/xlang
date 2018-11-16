@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename Interface = Windows::Foundation::IActivationFactory>
     auto get_activation_factory(param::hstring const& name)
@@ -24,7 +24,7 @@ WINRT_EXPORT namespace winrt
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-namespace winrt::impl
+namespace xlang::impl
 {
     inline int32_t interlocked_read_32(int32_t const volatile* target) noexcept
     {
@@ -210,11 +210,6 @@ namespace winrt::impl
 
             auto object = get_activation_factory<Interface>(name_of<Class>());
 
-            if (!object.template try_as<IAgileObject>())
-            {
-                return callback(object);
-            }
-
             {
                 count_guard const guard(m_value.count);
 
@@ -311,7 +306,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     namespace Windows::Foundation
     {

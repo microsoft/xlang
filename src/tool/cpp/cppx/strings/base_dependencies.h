@@ -22,35 +22,10 @@
 #include <vector>
 #include <experimental/coroutine>
 
-#if __has_include(<WindowsNumerics.impl.h>)
-#define WINRT_NUMERICS
-#include <directxmath.h>
-#endif
+#include <intrin.h>
 
 #ifndef WINRT_EXPORT
 #define WINRT_EXPORT
 #else
 export module winrt;
-#endif
-
-#ifdef WINRT_NUMERICS
-
-#define _WINDOWS_NUMERICS_NAMESPACE_ winrt::Windows::Foundation::Numerics
-#define _WINDOWS_NUMERICS_BEGIN_NAMESPACE_ WINRT_EXPORT namespace winrt::Windows::Foundation::Numerics
-#define _WINDOWS_NUMERICS_END_NAMESPACE_
-
-#ifdef __clang__
-#define _XM_NO_INTRINSICS_
-#endif
-
-#include <WindowsNumerics.impl.h>
-
-#ifdef __clang__
-#undef _XM_NO_INTRINSICS_
-#endif
-
-#undef _WINDOWS_NUMERICS_NAMESPACE_
-#undef _WINDOWS_NUMERICS_BEGIN_NAMESPACE_
-#undef _WINDOWS_NUMERICS_END_NAMESPACE_
-
 #endif

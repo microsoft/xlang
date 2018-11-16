@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     struct marker
     {
@@ -7,7 +7,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     struct non_agile : impl::marker {};
     struct no_weak_ref : impl::marker {};
@@ -29,7 +29,7 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template<typename...T>
     using tuple_cat_t = decltype(std::tuple_cat(std::declval<T>()...));
@@ -168,7 +168,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename D, typename I>
     D* get_self(I const& from) noexcept
@@ -189,7 +189,7 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename...> struct interface_list;
 
@@ -244,7 +244,7 @@ namespace winrt::impl
         using type = typename interface_list_append_impl<
             std::conditional_t<
             Predicate<T>::value,
-            interface_list<winrt::impl::uncloak<T>>,
+            interface_list<xlang::impl::uncloak<T>>,
             interface_list<>
             >,
             typename filter_impl<Predicate, Rest...>::type
@@ -261,7 +261,7 @@ namespace winrt::impl
     };
 
     template <template <typename> class Predicate, typename D, typename ... I, typename ... Rest>
-    struct filter_impl<Predicate, winrt::implements<D, I...>, Rest...>
+    struct filter_impl<Predicate, xlang::implements<D, I...>, Rest...>
     {
         using type = typename interface_list_append_impl<
             filter<Predicate, I...>,
@@ -273,7 +273,7 @@ namespace winrt::impl
     using implemented_interfaces = filter<is_interface, typename T::implements_type>;
 
     template <typename T>
-    struct is_uncloaked_interface : std::conjunction<is_interface<T>, std::negation<winrt::impl::is_cloaked<T>>> {};
+    struct is_uncloaked_interface : std::conjunction<is_interface<T>, std::negation<xlang::impl::is_cloaked<T>>> {};
     template <typename T>
     using uncloaked_interfaces = filter<is_uncloaked_interface, typename T::implements_type>;
 
@@ -284,7 +284,7 @@ namespace winrt::impl
     struct uncloaked_iids<interface_list<T...>>
     {
 #pragma warning(suppress: 4307)
-        static constexpr std::array<guid, sizeof...(T)> value{ winrt::guid_of<T>() ... };
+        static constexpr std::array<guid, sizeof...(T)> value{ xlang::guid_of<T>() ... };
     };
 
     template <typename T, typename = void>
@@ -296,7 +296,7 @@ namespace winrt::impl
     template <typename T>
     struct implements_default_interface<T, std::void_t<typename T::class_type>>
     {
-        using type = winrt::default_interface<typename T::class_type>;
+        using type = xlang::default_interface<typename T::class_type>;
     };
 
     template <typename T>
@@ -551,21 +551,6 @@ namespace winrt::impl
                 *object = static_cast<IWeakReference*>(this);
                 AddRef();
                 return error_ok;
-            }
-
-            if constexpr (Agile)
-            {
-                if (is_guid_of<IAgileObject>(id))
-                {
-                    *object = static_cast<unknown_abi*>(this);
-                    AddRef();
-                    return error_ok;
-                }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(this, object);
-                }
             }
 
             *object = nullptr;
@@ -968,7 +953,7 @@ namespace winrt::impl
         }
 
         template <typename T>
-        winrt::weak_ref<T> get_weak()
+        xlang::weak_ref<T> get_weak()
         {
             impl::IWeakReferenceSource* weak_ref = make_weak_ref();
             if (!weak_ref)
@@ -978,7 +963,7 @@ namespace winrt::impl
             com_ptr<impl::IWeakReferenceSource> source;
             attach_abi(source, weak_ref);
 
-            winrt::weak_ref<T> result;
+            xlang::weak_ref<T> result;
             check_hresult(source->GetWeakReference(result.put()));
             return result;
         }
@@ -1003,21 +988,6 @@ namespace winrt::impl
             {
                 AddRef();
                 return error_ok;
-            }
-
-            if constexpr (is_agile::value)
-            {
-                if (is_guid_of<IAgileObject>(id))
-                {
-                    *object = get_unknown();
-                    AddRef();
-                    return error_ok;
-                }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(get_unknown(), object);
-                }
             }
 
             if constexpr (is_inspectable::value)
@@ -1177,7 +1147,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename D, typename... Args>
     auto make(Args&&... args)

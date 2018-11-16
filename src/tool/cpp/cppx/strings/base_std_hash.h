@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     inline size_t hash_data(void const* ptr, size_t const bytes) noexcept
     {
@@ -40,13 +40,13 @@ namespace winrt::impl
 
 WINRT_EXPORT namespace std
 {
-    template<> struct hash<winrt::hstring>
+    template<> struct hash<xlang::hstring>
     {
-        size_t operator()(winrt::hstring const& value) const noexcept
+        size_t operator()(xlang::hstring const& value) const noexcept
         {
             uint32_t length = 0;
             const wchar_t* const buffer = WINRT_WindowsGetStringRawBuffer(get_abi(value), &length);
-            return winrt::impl::hash_data(buffer, length * sizeof(wchar_t));
+            return xlang::impl::hash_data(buffer, length * sizeof(wchar_t));
         }
     };
 }

@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     using ptp_io = struct tp_io*;
     using ptp_timer = struct tp_timer*;
@@ -14,7 +14,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     struct guid
     {
@@ -66,12 +66,12 @@ WINRT_EXPORT namespace winrt
 extern "C"
 {
     int32_t WINRT_CALL WINRT_GetRestrictedErrorInfo(void** info) noexcept;
-    int32_t WINRT_CALL WINRT_RoGetActivationFactory(void* classId, winrt::guid const& iid, void** factory) noexcept;
+    int32_t WINRT_CALL WINRT_RoGetActivationFactory(void* classId, xlang::guid const& iid, void** factory) noexcept;
     int32_t WINRT_CALL WINRT_RoInitialize(uint32_t type) noexcept;
     int32_t WINRT_CALL WINRT_RoOriginateLanguageException(int32_t error, void* message, void* exception) noexcept;
     void    WINRT_CALL WINRT_RoUninitialize() noexcept;
     int32_t WINRT_CALL WINRT_SetRestrictedErrorInfo(void* info) noexcept;
-    int32_t WINRT_CALL WINRT_RoGetAgileReference(uint32_t options, winrt::guid const& iid, void* object, void** reference) noexcept;
+    int32_t WINRT_CALL WINRT_RoGetAgileReference(uint32_t options, xlang::guid const& iid, void* object, void** reference) noexcept;
     int32_t WINRT_CALL WINRT_CoIncrementMTAUsage(void** cookie) noexcept;
 
     int32_t WINRT_CALL WINRT_WindowsCreateString(wchar_t const* sourceString, uint32_t length, void** string) noexcept;
@@ -87,15 +87,15 @@ extern "C"
     uint32_t WINRT_CALL WINRT_WindowsGetStringLen(void* string) noexcept;
 
     int32_t  WINRT_CALL WINRT_CoCreateFreeThreadedMarshaler(void* outer, void** marshaler) noexcept;
-    int32_t  WINRT_CALL WINRT_CoCreateInstance(winrt::guid const& clsid, void* outer, uint32_t context, winrt::guid const& iid, void** object) noexcept;
-    int32_t  WINRT_CALL WINRT_CoGetCallContext(winrt::guid const& iid, void** object) noexcept;
-    int32_t  WINRT_CALL WINRT_CoGetObjectContext(winrt::guid const& iid, void** object) noexcept;
+    int32_t  WINRT_CALL WINRT_CoCreateInstance(xlang::guid const& clsid, void* outer, uint32_t context, xlang::guid const& iid, void** object) noexcept;
+    int32_t  WINRT_CALL WINRT_CoGetCallContext(xlang::guid const& iid, void** object) noexcept;
+    int32_t  WINRT_CALL WINRT_CoGetObjectContext(xlang::guid const& iid, void** object) noexcept;
     int32_t  WINRT_CALL WINRT_CoGetApartmentType(int32_t* type, int32_t* qualifier) noexcept;
     void*    WINRT_CALL WINRT_CoTaskMemAlloc(std::size_t size) noexcept;
     void     WINRT_CALL WINRT_CoTaskMemFree(void* ptr) noexcept;
-    void     WINRT_CALL WINRT_SysFreeString(winrt::impl::bstr string) noexcept;
-    uint32_t WINRT_CALL WINRT_SysStringLen(winrt::impl::bstr string) noexcept;
-    int32_t  WINRT_CALL WINRT_IIDFromString(wchar_t const* string, winrt::guid* iid) noexcept;
+    void     WINRT_CALL WINRT_SysFreeString(xlang::impl::bstr string) noexcept;
+    uint32_t WINRT_CALL WINRT_SysStringLen(xlang::impl::bstr string) noexcept;
+    int32_t  WINRT_CALL WINRT_IIDFromString(wchar_t const* string, xlang::guid* iid) noexcept;
     int32_t  WINRT_CALL WINRT_CloseHandle(void* hObject) noexcept;
     int32_t  WINRT_CALL WINRT_MultiByteToWideChar(uint32_t codepage, uint32_t flags, char const* in_string, int32_t in_size, wchar_t* out_string, int32_t out_size) noexcept;
     int32_t  WINRT_CALL WINRT_WideCharToMultiByte(uint32_t codepage, uint32_t flags, wchar_t const* int_string, int32_t in_size, char* out_string, int32_t out_size, char const* default_char, int32_t* default_used) noexcept;
@@ -112,31 +112,31 @@ extern "C"
     void*    WINRT_CALL WINRT_GetCurrentThread() noexcept;
     int32_t  WINRT_CALL WINRT_SetThreadToken(void** thread, void* token) noexcept;
 
-    void    WINRT_CALL WINRT_AcquireSRWLockExclusive(winrt::impl::srwlock* lock) noexcept;
-    void    WINRT_CALL WINRT_AcquireSRWLockShared(winrt::impl::srwlock* lock) noexcept;
-    uint8_t WINRT_CALL WINRT_TryAcquireSRWLockExclusive(winrt::impl::srwlock* lock) noexcept;
-    uint8_t WINRT_CALL WINRT_TryAcquireSRWLockShared(winrt::impl::srwlock* lock) noexcept;
-    void    WINRT_CALL WINRT_ReleaseSRWLockExclusive(winrt::impl::srwlock* lock) noexcept;
-    void    WINRT_CALL WINRT_ReleaseSRWLockShared(winrt::impl::srwlock* lock) noexcept;
-    int32_t WINRT_CALL WINRT_SleepConditionVariableSRW(winrt::impl::condition_variable* cv, winrt::impl::srwlock* lock, uint32_t milliseconds, uint32_t flags) noexcept;
-    void    WINRT_CALL WINRT_WakeConditionVariable(winrt::impl::condition_variable* cv) noexcept;
-    void    WINRT_CALL WINRT_WakeAllConditionVariable(winrt::impl::condition_variable* cv) noexcept;
+    void    WINRT_CALL WINRT_AcquireSRWLockExclusive(xlang::impl::srwlock* lock) noexcept;
+    void    WINRT_CALL WINRT_AcquireSRWLockShared(xlang::impl::srwlock* lock) noexcept;
+    uint8_t WINRT_CALL WINRT_TryAcquireSRWLockExclusive(xlang::impl::srwlock* lock) noexcept;
+    uint8_t WINRT_CALL WINRT_TryAcquireSRWLockShared(xlang::impl::srwlock* lock) noexcept;
+    void    WINRT_CALL WINRT_ReleaseSRWLockExclusive(xlang::impl::srwlock* lock) noexcept;
+    void    WINRT_CALL WINRT_ReleaseSRWLockShared(xlang::impl::srwlock* lock) noexcept;
+    int32_t WINRT_CALL WINRT_SleepConditionVariableSRW(xlang::impl::condition_variable* cv, xlang::impl::srwlock* lock, uint32_t milliseconds, uint32_t flags) noexcept;
+    void    WINRT_CALL WINRT_WakeConditionVariable(xlang::impl::condition_variable* cv) noexcept;
+    void    WINRT_CALL WINRT_WakeAllConditionVariable(xlang::impl::condition_variable* cv) noexcept;
     void    WINRT_CALL WINRT_InitializeSListHead(void* head) noexcept;
     void*   WINRT_CALL WINRT_InterlockedPushEntrySList(void* head, void* entry) noexcept;
     void*   WINRT_CALL WINRT_InterlockedFlushSList(void* head) noexcept;
 
     uint32_t WINRT_CALL WINRT_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
     int32_t  WINRT_CALL WINRT_TrySubmitThreadpoolCallback(void(WINRT_CALL *callback)(void*, void* context), void* context, void*) noexcept;
-    winrt::impl::ptp_timer WINRT_CALL WINRT_CreateThreadpoolTimer(void(WINRT_CALL *callback)(void*, void* context, void*), void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_SetThreadpoolTimer(winrt::impl::ptp_timer timer, void* time, uint32_t period, uint32_t window) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolTimer(winrt::impl::ptp_timer timer) noexcept;
-    winrt::impl::ptp_wait WINRT_CALL WINRT_CreateThreadpoolWait(void(WINRT_CALL *callback)(void*, void* context, void*, uint32_t result), void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_SetThreadpoolWait(winrt::impl::ptp_wait wait, void* handle, void* timeout) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolWait(winrt::impl::ptp_wait wait) noexcept;
-    winrt::impl::ptp_io WINRT_CALL WINRT_CreateThreadpoolIo(void* object, void(WINRT_CALL *callback)(void*, void* context, void* overlapped, uint32_t result, std::size_t bytes, void*) noexcept, void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_StartThreadpoolIo(winrt::impl::ptp_io io) noexcept;
-    void     WINRT_CALL WINRT_CancelThreadpoolIo(winrt::impl::ptp_io io) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolIo(winrt::impl::ptp_io io) noexcept;
+    xlang::impl::ptp_timer WINRT_CALL WINRT_CreateThreadpoolTimer(void(WINRT_CALL *callback)(void*, void* context, void*), void* context, void*) noexcept;
+    void     WINRT_CALL WINRT_SetThreadpoolTimer(xlang::impl::ptp_timer timer, void* time, uint32_t period, uint32_t window) noexcept;
+    void     WINRT_CALL WINRT_CloseThreadpoolTimer(xlang::impl::ptp_timer timer) noexcept;
+    xlang::impl::ptp_wait WINRT_CALL WINRT_CreateThreadpoolWait(void(WINRT_CALL *callback)(void*, void* context, void*, uint32_t result), void* context, void*) noexcept;
+    void     WINRT_CALL WINRT_SetThreadpoolWait(xlang::impl::ptp_wait wait, void* handle, void* timeout) noexcept;
+    void     WINRT_CALL WINRT_CloseThreadpoolWait(xlang::impl::ptp_wait wait) noexcept;
+    xlang::impl::ptp_io WINRT_CALL WINRT_CreateThreadpoolIo(void* object, void(WINRT_CALL *callback)(void*, void* context, void* overlapped, uint32_t result, std::size_t bytes, void*) noexcept, void* context, void*) noexcept;
+    void     WINRT_CALL WINRT_StartThreadpoolIo(xlang::impl::ptp_io io) noexcept;
+    void     WINRT_CALL WINRT_CancelThreadpoolIo(xlang::impl::ptp_io io) noexcept;
+    void     WINRT_CALL WINRT_CloseThreadpoolIo(xlang::impl::ptp_io io) noexcept;
 
     int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept;
     int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;

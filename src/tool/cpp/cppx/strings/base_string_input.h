@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt::param
+WINRT_EXPORT namespace xlang::param
 {
     struct hstring
     {
@@ -8,7 +8,7 @@ WINRT_EXPORT namespace winrt::param
         hstring& operator=(hstring const& values) = delete;
         hstring(std::nullptr_t) = delete;
 
-        hstring(winrt::hstring const& value) noexcept : m_handle(get_abi(value))
+        hstring(xlang::hstring const& value) noexcept : m_handle(get_abi(value))
         {
         }
 
@@ -30,9 +30,9 @@ WINRT_EXPORT namespace winrt::param
             WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value, static_cast<uint32_t>(wcslen(value)), &m_header, &m_handle));
         }
 
-        operator winrt::hstring const&() const noexcept
+        operator xlang::hstring const&() const noexcept
         {
-            return *reinterpret_cast<winrt::hstring const*>(this);
+            return *reinterpret_cast<xlang::hstring const*>(this);
         }
 
     private:
@@ -60,7 +60,7 @@ WINRT_EXPORT namespace winrt::param
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     using param_type = std::conditional_t<std::is_same_v<T, hstring>, param::hstring, T>;

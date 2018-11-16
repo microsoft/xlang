@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     struct slim_condition_variable;
 

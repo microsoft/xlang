@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename T>
     struct weak_ref

@@ -2,16 +2,16 @@
 WINRT_EXPORT namespace std::experimental
 {
     template <typename... Args>
-    struct coroutine_traits<winrt::Windows::Foundation::IAsyncAction, Args...>
+    struct coroutine_traits<xlang::Windows::Foundation::IAsyncAction, Args...>
     {
-        struct promise_type final : winrt::impl::promise_base<promise_type, winrt::Windows::Foundation::IAsyncAction,
-            winrt::Windows::Foundation::AsyncActionCompletedHandler>
+        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::Windows::Foundation::IAsyncAction,
+            xlang::Windows::Foundation::AsyncActionCompletedHandler>
         {
-            using AsyncStatus = winrt::Windows::Foundation::AsyncStatus;
+            using AsyncStatus = xlang::Windows::Foundation::AsyncStatus;
 
             void GetResults()
             {
-                winrt::slim_lock_guard const guard(this->m_lock);
+                xlang::slim_lock_guard const guard(this->m_lock);
 
                 if (this->m_status == AsyncStatus::Completed)
                 {
@@ -20,16 +20,16 @@ WINRT_EXPORT namespace std::experimental
 
                 this->rethrow_if_failed();
                 WINRT_ASSERT(this->m_status == AsyncStatus::Started);
-                throw winrt::hresult_illegal_method_call();
+                throw xlang::hresult_illegal_method_call();
             }
 
             void return_void()
             {
-                winrt::Windows::Foundation::AsyncActionCompletedHandler handler;
+                xlang::Windows::Foundation::AsyncActionCompletedHandler handler;
                 AsyncStatus status;
 
                 {
-                    winrt::slim_lock_guard const guard(this->m_lock);
+                    xlang::slim_lock_guard const guard(this->m_lock);
 
                     if (this->m_status == AsyncStatus::Started)
                     {
@@ -38,7 +38,7 @@ WINRT_EXPORT namespace std::experimental
                     else
                     {
                         WINRT_ASSERT(this->m_status == AsyncStatus::Canceled);
-                        this->m_exception = make_exception_ptr(winrt::hresult_canceled());
+                        this->m_exception = make_exception_ptr(xlang::hresult_canceled());
                     }
 
                     handler = std::move(this->m_completed);

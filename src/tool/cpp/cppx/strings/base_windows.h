@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     void check_hresult(hresult result);
 
@@ -42,7 +42,7 @@ WINRT_EXPORT namespace winrt
     constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
@@ -115,7 +115,7 @@ namespace winrt::impl
     using wrapped_type_t = typename wrapped_type<T>::type;
 }
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace xlang::Windows::Foundation
 {
     struct IUnknown
     {
@@ -237,7 +237,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     };
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     inline void* get_abi(Windows::Foundation::IUnknown const& object) noexcept
     {
@@ -307,7 +307,7 @@ WINRT_EXPORT namespace winrt
 #endif
 }
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace xlang::Windows::Foundation
 {
     inline bool operator==(IUnknown const& left, IUnknown const& right) noexcept
     {

@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename D>
     void consume_IAsyncAction<D>::Completed(Windows::Foundation::AsyncActionCompletedHandler const& handler) const

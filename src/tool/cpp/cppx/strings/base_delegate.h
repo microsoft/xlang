@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T, typename H>
     struct implements_delegate : abi_t<T>, H
@@ -8,16 +8,11 @@ namespace winrt::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-            if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
+            if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 *result = static_cast<abi_t<T>*>(this);
                 AddRef();
                 return error_ok;
-            }
-
-            if (is_guid_of<IMarshal>(id))
-            {
-                return make_marshaler(this, result);
             }
 
             *result = nullptr;
@@ -73,7 +68,7 @@ namespace winrt::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-            if (is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
+            if (is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 *result = static_cast<unknown_abi*>(this);
                 AddRef();
@@ -108,7 +103,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename... T>
     struct WINRT_EBO delegate : Windows::Foundation::IUnknown
@@ -138,7 +133,7 @@ WINRT_EXPORT namespace winrt
         template <typename H>
         static auto make(H&& handler)
         {
-            winrt::delegate<T...> instance;
+            xlang::delegate<T...> instance;
             *put_abi(instance) = (new impl::variadic_delegate<H, T...>(std::forward<H>(handler)));
             return instance;
         }

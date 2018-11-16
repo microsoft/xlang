@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace xlang::Windows::Foundation
 {
     enum class AsyncStatus : int32_t
     {
@@ -36,7 +36,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     template <typename TSender, typename TArgs> struct TypedEventHandler;
 }
 
-WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
+WINRT_EXPORT namespace xlang::Windows::Foundation::Collections
 {
     enum class CollectionChange : int32_t
     {
@@ -61,7 +61,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     template <typename K, typename V> struct IObservableMap;
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     struct hresult
     {

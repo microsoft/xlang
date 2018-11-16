@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     inline bool operator==(hstring const& left, hstring const& right) noexcept
     {
@@ -94,7 +94,7 @@ WINRT_EXPORT namespace winrt
     bool operator>=(nullptr_t left, hstring const& right) = delete;
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     inline hstring concat_hstring(std::wstring_view const& left, std::wstring_view const& right)
     {
@@ -105,7 +105,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     inline hstring operator+(hstring const& left, hstring const& right)
     {

@@ -58,7 +58,7 @@
 #ifdef __IUnknown_INTERFACE_DEFINED__
 #define WINRT_WINDOWS_ABI
 
-namespace winrt::impl
+namespace xlang::impl
 {
     using hresult_type = long;
     using ref_count_type = unsigned long;
@@ -66,7 +66,7 @@ namespace winrt::impl
 
 #else
 
-namespace winrt::impl
+namespace xlang::impl
 {
     using hresult_type = int32_t;
     using ref_count_type = uint32_t;

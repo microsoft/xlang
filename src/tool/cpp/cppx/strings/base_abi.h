@@ -1,15 +1,6 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
-    struct com_callback_args
-    {
-        uint32_t reserved1;
-        uint32_t reserved2;
-        void* data;
-    };
-
-    struct ICallbackWithNoReentrancyToApplicationSTA;
-
     template <> struct abi<Windows::Foundation::IUnknown>
     {
         struct WINRT_NOVTABLE type
@@ -33,31 +24,6 @@ namespace winrt::impl
     };
 
     using inspectable_abi = abi_t<Windows::Foundation::IInspectable>;
-
-    struct WINRT_NOVTABLE IAgileObject : unknown_abi
-    {
-    };
-
-    struct WINRT_NOVTABLE IAgileReference : unknown_abi
-    {
-        virtual int32_t WINRT_CALL Resolve(guid const& id, void** object) noexcept = 0;
-    };
-
-    struct WINRT_NOVTABLE IMarshal : unknown_abi
-    {
-        virtual int32_t WINRT_CALL GetUnmarshalClass(guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags, guid* pCid) noexcept = 0;
-        virtual int32_t WINRT_CALL GetMarshalSizeMax(guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags, uint32_t* pSize) noexcept = 0;
-        virtual int32_t WINRT_CALL MarshalInterface(void* pStm, guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags) noexcept = 0;
-        virtual int32_t WINRT_CALL UnmarshalInterface(void* pStm, guid const& riid, void** ppv) noexcept = 0;
-        virtual int32_t WINRT_CALL ReleaseMarshalData(void* pStm) noexcept = 0;
-        virtual int32_t WINRT_CALL DisconnectObject(uint32_t dwReserved) noexcept = 0;
-    };
-
-    struct WINRT_NOVTABLE IStaticLifetime : inspectable_abi
-    {
-        virtual int32_t WINRT_CALL unused() noexcept = 0;
-        virtual int32_t WINRT_CALL GetCollection(void** value) noexcept = 0;
-    };
 
     struct WINRT_NOVTABLE IWeakReference : unknown_abi
     {
@@ -85,24 +51,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL GetPreviousLanguageExceptionErrorInfo(ILanguageExceptionErrorInfo2** previous) noexcept = 0;
         virtual int32_t WINRT_CALL CapturePropagationContext(void* exception) noexcept = 0;
         virtual int32_t WINRT_CALL GetPropagationContextHead(ILanguageExceptionErrorInfo2** head) noexcept = 0;
-    };
-
-    struct WINRT_NOVTABLE IContextCallback : unknown_abi
-    {
-        virtual int32_t WINRT_CALL ContextCallback(int32_t(WINRT_CALL *callback)(com_callback_args*), com_callback_args* args, guid const& iid, int method, void* reserved) noexcept = 0;
-    };
-
-    struct WINRT_NOVTABLE IServerSecurity : unknown_abi
-    {
-        virtual int32_t WINRT_CALL QueryBlanket(uint32_t*, uint32_t*, wchar_t**, uint32_t*, uint32_t*, void**, uint32_t*) noexcept = 0;
-        virtual int32_t WINRT_CALL ImpersonateClient() noexcept = 0;
-        virtual int32_t WINRT_CALL RevertToSelf() noexcept = 0;
-        virtual int32_t WINRT_CALL IsImpersonating() noexcept = 0;
-    };
-
-    struct WINRT_NOVTABLE IBufferByteAccess : unknown_abi
-    {
-        virtual int32_t WINRT_CALL Buffer(uint8_t** value) noexcept = 0;
     };
 
     template <> struct abi<Windows::Foundation::IActivationFactory>
@@ -320,8 +268,8 @@ namespace winrt::impl
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token* token) noexcept = 0;
-            virtual int32_t WINRT_CALL remove_VectorChanged(winrt::event_token token) noexcept = 0;
+            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, xlang::event_token* token) noexcept = 0;
+            virtual int32_t WINRT_CALL remove_VectorChanged(xlang::event_token token) noexcept = 0;
         };
     };
 
@@ -363,8 +311,8 @@ namespace winrt::impl
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL add_MapChanged(void* handler, winrt::event_token* token) noexcept = 0;
-            virtual int32_t WINRT_CALL remove_MapChanged(winrt::event_token token) noexcept = 0;
+            virtual int32_t WINRT_CALL add_MapChanged(void* handler, xlang::event_token* token) noexcept = 0;
+            virtual int32_t WINRT_CALL remove_MapChanged(xlang::event_token token) noexcept = 0;
         };
     };
 

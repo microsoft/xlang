@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     auto detach_from(T&& object) noexcept
@@ -148,7 +148,7 @@ namespace winrt::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL get_Status(winrt::Windows::Foundation::AsyncStatus* status) noexcept final
+        int32_t WINRT_CALL get_Status(xlang::Windows::Foundation::AsyncStatus* status) noexcept final
         {
             try
             {
@@ -816,7 +816,7 @@ namespace winrt::impl
 
     template <typename D, typename K, typename V> struct produce<D, wfc::IObservableMap<K, V>> : produce_base<D, wfc::IObservableMap<K, V>>
     {
-        int32_t WINRT_CALL add_MapChanged(void* handler, winrt::event_token* token) noexcept final
+        int32_t WINRT_CALL add_MapChanged(void* handler, xlang::event_token* token) noexcept final
         {
             try
             {
@@ -827,7 +827,7 @@ namespace winrt::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL remove_MapChanged(winrt::event_token token) noexcept final
+        int32_t WINRT_CALL remove_MapChanged(xlang::event_token token) noexcept final
         {
             try
             {
@@ -842,7 +842,7 @@ namespace winrt::impl
     template <typename D, typename T>
     struct produce<D, wfc::IObservableVector<T>> : produce_base<D, wfc::IObservableVector<T>>
     {
-        int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token* token) noexcept final
+        int32_t WINRT_CALL add_VectorChanged(void* handler, xlang::event_token* token) noexcept final
         {
             try
             {
@@ -853,7 +853,7 @@ namespace winrt::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL remove_VectorChanged(winrt::event_token token) noexcept final
+        int32_t WINRT_CALL remove_VectorChanged(xlang::event_token token) noexcept final
         {
             try
             {

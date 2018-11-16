@@ -2,29 +2,29 @@
 WINRT_EXPORT namespace std::experimental
 {
     template <typename TResult, typename TProgress, typename... Args>
-    struct coroutine_traits<winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>, Args...>
+    struct coroutine_traits<xlang::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>, Args...>
     {
-        struct promise_type final : winrt::impl::promise_base<promise_type, winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>,
-            winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, TProgress>
+        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>,
+            xlang::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, TProgress>
         {
-            using AsyncStatus = winrt::Windows::Foundation::AsyncStatus;
-            using ProgressHandler = winrt::Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>;
+            using AsyncStatus = xlang::Windows::Foundation::AsyncStatus;
+            using ProgressHandler = xlang::Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>;
 
             void Progress(ProgressHandler const& handler)
             {
-                winrt::slim_lock_guard const guard(this->m_lock);
+                xlang::slim_lock_guard const guard(this->m_lock);
                 m_progress = handler;
             }
 
             ProgressHandler Progress()
             {
-                winrt::slim_lock_guard const guard(this->m_lock);
+                xlang::slim_lock_guard const guard(this->m_lock);
                 return m_progress;
             }
 
             TResult GetResults()
             {
-                winrt::slim_lock_guard const guard(this->m_lock);
+                xlang::slim_lock_guard const guard(this->m_lock);
 
                 if (this->m_status == AsyncStatus::Completed)
                 {
@@ -33,16 +33,16 @@ WINRT_EXPORT namespace std::experimental
 
                 this->rethrow_if_failed();
                 WINRT_ASSERT(this->m_status == AsyncStatus::Started);
-                throw winrt::hresult_illegal_method_call();
+                throw xlang::hresult_illegal_method_call();
             }
 
             void return_value(TResult const& result)
             {
-                winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> handler;
+                xlang::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> handler;
                 AsyncStatus status;
 
                 {
-                    winrt::slim_lock_guard const guard(this->m_lock);
+                    xlang::slim_lock_guard const guard(this->m_lock);
 
                     if (this->m_status == AsyncStatus::Started)
                     {
@@ -52,7 +52,7 @@ WINRT_EXPORT namespace std::experimental
                     else
                     {
                         WINRT_ASSERT(this->m_status == AsyncStatus::Canceled);
-                        this->m_exception = make_exception_ptr(winrt::hresult_canceled());
+                        this->m_exception = make_exception_ptr(xlang::hresult_canceled());
                     }
 
                     handler = std::move(this->m_completed);
@@ -73,7 +73,7 @@ WINRT_EXPORT namespace std::experimental
                 }
             }
 
-            TResult m_result{ winrt::impl::empty_value<TResult>() };
+            TResult m_result{ xlang::impl::empty_value<TResult>() };
             ProgressHandler m_progress;
         };
     };

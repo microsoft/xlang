@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     struct event_token
     {
@@ -22,7 +22,7 @@ WINRT_EXPORT namespace winrt
     template <typename I>
     struct event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
+        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(xlang::event_token);
 
         event_revoker() noexcept = default;
         event_revoker(event_revoker const&) = delete;
@@ -77,7 +77,7 @@ WINRT_EXPORT namespace winrt
     template <typename I>
     struct factory_event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
+        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(xlang::event_token);
 
         factory_event_revoker() noexcept = default;
         factory_event_revoker(factory_event_revoker const&) = delete;
@@ -130,9 +130,9 @@ WINRT_EXPORT namespace winrt
     };
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
-    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(winrt::event_token)>
+    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(xlang::event_token)>
     struct event_revoker
     {
         event_revoker() noexcept = default;
@@ -151,7 +151,7 @@ namespace winrt::impl
             , m_token(token)
         {}
 
-        operator winrt::event_revoker<I>() && noexcept
+        operator xlang::event_revoker<I>() && noexcept
         {
             return { std::move(m_object), Method, m_token };
         }
@@ -189,11 +189,11 @@ namespace winrt::impl
             }
         }
 
-        winrt::weak_ref<I> m_object{};
+        xlang::weak_ref<I> m_object{};
         event_token m_token{};
     };
 
-    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(winrt::event_token)>
+    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(xlang::event_token)>
     struct factory_event_revoker
     {
         factory_event_revoker() noexcept = default;
@@ -211,7 +211,7 @@ namespace winrt::impl
             , m_token(token)
         {}
 
-        operator winrt::factory_event_revoker<I>() && noexcept
+        operator xlang::factory_event_revoker<I>() && noexcept
         {
             return { std::move(m_object), Method, m_token };
         }
@@ -339,7 +339,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     template <typename Delegate>
     struct event
@@ -375,16 +375,9 @@ WINRT_EXPORT namespace winrt
                 {
                     new_targets->back() = delegate;
                 }
-                else if (delegate.template try_as<impl::IAgileObject>() || !delegate.template try_as<impl::IMarshal>())
-                {
-                    new_targets->back() = delegate;
-                }
                 else
                 {
-                    new_targets->back() = [delegate = agile_ref<delegate_type>(delegate)](auto&&... args)
-                    {
-                        delegate.get()(args...);
-                    };
+                    new_targets->back() = delegate;
                 }
 
                 token = get_token(new_targets->back());

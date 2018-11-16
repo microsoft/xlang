@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename D, typename T>
     struct produce<D, Windows::Foundation::IReference<T>> : produce_base<D, Windows::Foundation::IReference<T>>
@@ -142,7 +142,7 @@ namespace winrt::impl
     template <typename T>
     struct reference_traits
     {
-        static auto make(T const& value) { return winrt::make<impl::reference<T>>(value); }
+        static auto make(T const& value) { return xlang::make<impl::reference<T>>(value); }
     };
 
     template <>
@@ -260,7 +260,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace xlang::Windows::Foundation
 {
     template <typename T>
     struct IReference :
@@ -317,7 +317,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     };
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     inline Windows::Foundation::IInspectable box_value(param::hstring const& value)
     {

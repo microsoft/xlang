@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     struct heap_traits
     {
@@ -57,7 +57,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+WINRT_EXPORT namespace xlang
 {
     struct hresult_error
     {
@@ -415,7 +415,7 @@ WINRT_EXPORT namespace winrt
     {
         if (!result)
         {
-            winrt::throw_last_error();
+            xlang::throw_last_error();
         }
     }
 

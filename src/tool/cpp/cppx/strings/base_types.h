@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace xlang::Windows::Foundation
 {
     struct WINRT_EBO IAsyncInfo :
         IInspectable,
@@ -318,7 +318,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     };
 }
 
-WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
+WINRT_EXPORT namespace xlang::Windows::Foundation::Collections
 {
     template <typename K>
     struct WINRT_EBO IMapChangedEventArgs :
