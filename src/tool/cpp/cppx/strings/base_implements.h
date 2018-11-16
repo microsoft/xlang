@@ -419,11 +419,6 @@ namespace xlang::impl
             return shim().Release();
         }
 
-        int32_t WINRT_CALL GetIids(uint32_t* count, guid** array) noexcept override
-        {
-            return shim().GetIids(count, array);
-        }
-
         int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept override
         {
             return shim().abi_GetRuntimeClassName(name);
@@ -465,11 +460,6 @@ namespace xlang::impl
         uint32_t WINRT_CALL Release() noexcept final
         {
             return this->shim().NonDelegatingRelease();
-        }
-
-        int32_t WINRT_CALL GetIids(uint32_t* count, guid** array) noexcept final
-        {
-            return this->shim().NonDelegatingGetIids(count, array);
         }
 
         int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept final
@@ -764,16 +754,6 @@ namespace xlang::impl
             }
         }
 
-        int32_t WINRT_CALL GetIids(uint32_t* count, guid** array) noexcept
-        {
-            if (this->outer())
-            {
-                return this->outer()->GetIids(count, array);
-            }
-
-            return NonDelegatingGetIids(count, array);
-        }
-
         int32_t WINRT_CALL abi_GetRuntimeClassName(void** name) noexcept
         {
             if (this->outer())
@@ -842,52 +822,6 @@ namespace xlang::impl
             }
 
             return result;
-        }
-
-        int32_t WINRT_CALL NonDelegatingGetIids(uint32_t* count, guid** array) noexcept
-        {
-            const auto& local_iids = static_cast<D*>(this)->get_local_iids();
-            const uint32_t& local_count = local_iids.first;
-            if constexpr (root_implements_type::is_composing)
-            {
-                if (local_count > 0)
-                {
-                    const com_array<guid>& inner_iids = get_interfaces(root_implements_type::m_inner);
-                    *count = local_count + inner_iids.size();
-                    *array = static_cast<guid*>(WINRT_CoTaskMemAlloc(sizeof(guid)*(*count)));
-                    if (*array == nullptr)
-                    {
-                        return error_bad_alloc;
-                    }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    out = std::copy(local_iids.second, local_iids.second + local_count, out);
-                    std::copy(inner_iids.cbegin(), inner_iids.cend(), out);
-                }
-                else
-                {
-                    return static_cast<inspectable_abi*>(get_abi(root_implements_type::m_inner))->GetIids(count, array);
-                }
-            }
-            else
-            {
-                if (local_count > 0)
-                {
-                    *count = local_count;
-                    *array = static_cast<guid*>(WINRT_CoTaskMemAlloc(sizeof(guid)*(*count)));
-                    if (*array == nullptr)
-                    {
-                        return error_bad_alloc;
-                    }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    std::copy(local_iids.second, local_iids.second + local_count, out);
-                }
-                else
-                {
-                    *count = 0;
-                    *array = nullptr;
-                }
-            }
-            return error_ok;
         }
 
         int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept
