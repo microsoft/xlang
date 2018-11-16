@@ -357,7 +357,7 @@ WINRT_EXPORT namespace xlang
     template <typename T>
     auto get_abi(array_view<T> object) noexcept
     {
-        if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, T>)
+        if constexpr (std::is_base_of_v<System::IUnknown, T>)
         {
             return (void**)object.data();
         }
@@ -465,23 +465,23 @@ WINRT_EXPORT namespace xlang
         return impl::com_array_proxy<T>(__valueSize, value);
     }
 
-    inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
+    inline hstring get_class_name(System::IInspectable const& object)
     {
         hstring value;
         check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(put_abi(value)));
         return value;
     }
 
-    inline com_array<guid> get_interfaces(Windows::Foundation::IInspectable const& object)
+    inline com_array<guid> get_interfaces(System::IInspectable const& object)
     {
         com_array<guid> value;
         check_hresult((*(impl::inspectable_abi**)&object)->GetIids(impl::put_size_abi(value), put_abi(value)));
         return value;
     }
 
-    inline Windows::Foundation::TrustLevel get_trust_level(Windows::Foundation::IInspectable const& object)
+    inline System::TrustLevel get_trust_level(System::IInspectable const& object)
     {
-        Windows::Foundation::TrustLevel value{};
+        System::TrustLevel value{};
         check_hresult((*(impl::inspectable_abi**)&object)->GetTrustLevel(&value));
         return value;
     }

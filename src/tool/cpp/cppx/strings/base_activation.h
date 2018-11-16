@@ -1,7 +1,7 @@
 
 WINRT_EXPORT namespace xlang
 {
-    template <typename Interface = Windows::Foundation::IActivationFactory>
+    template <typename Interface = System::IActivationFactory>
     auto get_activation_factory(param::hstring const& name)
     {
         impl::com_ref<Interface> object;
@@ -272,7 +272,7 @@ namespace xlang::impl
     template <typename Class, typename Interface>
     factory_cache_entry<Class, Interface> factory_storage<Class, Interface>::factory;
 
-    template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
+    template <typename Class, typename Interface = System::IActivationFactory, typename F>
     auto call_factory(F&& callback)
     {
         static_assert(sizeof(factory_cache_typeless_entry) == sizeof(factory_cache_entry<Class, Interface>));
@@ -283,7 +283,7 @@ namespace xlang::impl
         return factory_storage<Class, Interface>::factory.call(callback);
     }
 
-    template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
+    template <typename Class, typename Interface = System::IActivationFactory>
     auto try_get_activation_factory(hresult_error* exception = nullptr) noexcept
     {
         param::hstring const name{ name_of<Class>() };
@@ -308,7 +308,7 @@ namespace xlang::impl
 
 WINRT_EXPORT namespace xlang
 {
-    namespace Windows::Foundation
+    namespace System
     {
         struct IActivationFactory :
             IInspectable,
@@ -340,7 +340,7 @@ WINRT_EXPORT namespace xlang
         WINRT_RoUninitialize();
     }
 
-    template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
+    template <typename Class, typename Interface = System::IActivationFactory>
     auto get_activation_factory()
     {
         // Normally, the callback avoids having to return a ref-counted object and the resulting AddRef/Release bump.
@@ -352,13 +352,13 @@ WINRT_EXPORT namespace xlang
         });
     }
 
-    template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
+    template <typename Class, typename Interface = System::IActivationFactory>
     auto try_get_activation_factory() noexcept
     {
         return impl::try_get_activation_factory<Class, Interface>();
     }
 
-    template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
+    template <typename Class, typename Interface = System::IActivationFactory>
     auto try_get_activation_factory(hresult_error& exception) noexcept
     {
         return impl::try_get_activation_factory<Class, Interface>(&exception);

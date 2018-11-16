@@ -66,7 +66,7 @@ WINRT_EXPORT namespace xlang::param
     struct vector_view
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IVectorView<value_type>;
+        using interface_type = System::IVectorView<value_type>;
 
         vector_view(std::nullptr_t) noexcept
         {
@@ -139,7 +139,7 @@ WINRT_EXPORT namespace xlang::param
     struct async_vector_view
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IVectorView<value_type>;
+        using interface_type = System::IVectorView<value_type>;
 
         async_vector_view(std::nullptr_t) noexcept
         {

@@ -9,8 +9,8 @@ namespace xlang::impl
         template <typename T>
         T ActivateInstance() const
         {
-            Windows::Foundation::IInspectable instance;
-            check_hresult(WINRT_SHIM(Windows::Foundation::IActivationFactory)->ActivateInstance(put_abi(instance)));
+            System::IInspectable instance;
+            check_hresult(WINRT_SHIM(System::IActivationFactory)->ActivateInstance(put_abi(instance)));
             return instance.try_as<T>();
         }
     };
@@ -20,7 +20,7 @@ namespace xlang::impl
         T Value() const
         {
             T result{};
-            check_hresult(WINRT_SHIM(Windows::Foundation::IReference<T>)->get_Value(put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IReference<T>)->get_Value(put_abi(result)));
             return result;
         }
     };
@@ -30,7 +30,7 @@ namespace xlang::impl
         com_array<T> Value() const
         {
             com_array<T> result{};
-            check_hresult(WINRT_SHIM(Windows::Foundation::IReferenceArray<T>)->get_Value(impl::put_size_abi(result), put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IReferenceArray<T>)->get_Value(impl::put_size_abi(result), put_abi(result)));
             return result;
         }
     };
@@ -289,7 +289,7 @@ namespace xlang::impl
 
         auto TryLookup(param_type<K> const& key) const noexcept
         {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
+            if constexpr (std::is_base_of_v<System::IUnknown, V>)
             {
                 V result{ nullptr };
                 WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
@@ -339,7 +339,7 @@ namespace xlang::impl
 
         auto TryLookup(param_type<K> const& key) const noexcept
         {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
+            if constexpr (std::is_base_of_v<System::IUnknown, V>)
             {
                 V result{ nullptr };
                 WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
@@ -425,87 +425,87 @@ namespace xlang::impl
         uint32_t Id() const
         {
             uint32_t id{};
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->get_Id(&id));
+            check_hresult(WINRT_SHIM(System::IAsyncInfo)->get_Id(&id));
             return id;
         }
 
-        Windows::Foundation::AsyncStatus Status() const
+        System::AsyncStatus Status() const
         {
-            Windows::Foundation::AsyncStatus status{};
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->get_Status(&status));
+            System::AsyncStatus status{};
+            check_hresult(WINRT_SHIM(System::IAsyncInfo)->get_Status(&status));
             return status;
         }
 
         hresult ErrorCode() const
         {
             int32_t code{};
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->get_ErrorCode(&code));
+            check_hresult(WINRT_SHIM(System::IAsyncInfo)->get_ErrorCode(&code));
             return code;
         }
 
         void Cancel() const
         {
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->Cancel());
+            check_hresult(WINRT_SHIM(System::IAsyncInfo)->Cancel());
         }
 
         void Close() const
         {
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->Close());
+            check_hresult(WINRT_SHIM(System::IAsyncInfo)->Close());
         }
     };
 
     template <typename D> struct consume_IAsyncAction
     {
-        void Completed(Windows::Foundation::AsyncActionCompletedHandler const& handler) const;
-        Windows::Foundation::AsyncActionCompletedHandler Completed() const;
+        void Completed(System::AsyncActionCompletedHandler const& handler) const;
+        System::AsyncActionCompletedHandler Completed() const;
 
         void GetResults() const
         {
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->GetResults());
+            check_hresult(WINRT_SHIM(System::IAsyncAction)->GetResults());
         }
 
         void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<System::IAsyncAction const&>(static_cast<D const&>(*this)));
             GetResults();
         }
     };
 
     template <typename D, typename TResult> struct consume_IAsyncOperation
     {
-        void Completed(Windows::Foundation::AsyncOperationCompletedHandler<TResult> const& handler) const;
-        Windows::Foundation::AsyncOperationCompletedHandler<TResult> Completed() const;
+        void Completed(System::AsyncOperationCompletedHandler<TResult> const& handler) const;
+        System::AsyncOperationCompletedHandler<TResult> Completed() const;
 
         TResult GetResults() const
         {
             TResult result = empty_value<TResult>();
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->GetResults(put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IAsyncOperation<TResult>)->GetResults(put_abi(result)));
             return result;
         }
 
         TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<System::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
             return GetResults();
         }
     };
 
     template <typename D, typename TProgress> struct consume_IAsyncActionWithProgress
     {
-        void Progress(Windows::Foundation::AsyncActionProgressHandler<TProgress> const& handler) const;
-        Windows::Foundation::AsyncActionProgressHandler<TProgress> Progress() const;
+        void Progress(System::AsyncActionProgressHandler<TProgress> const& handler) const;
+        System::AsyncActionProgressHandler<TProgress> Progress() const;
 
-        void Completed(Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> const& handler) const;
-        Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> Completed() const;
+        void Completed(System::AsyncActionWithProgressCompletedHandler<TProgress> const& handler) const;
+        System::AsyncActionWithProgressCompletedHandler<TProgress> Completed() const;
 
         void GetResults() const
         {
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->GetResults());
+            check_hresult(WINRT_SHIM(System::IAsyncActionWithProgress<TProgress>)->GetResults());
         }
 
         void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<System::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
             GetResults();
         }
 
@@ -513,22 +513,22 @@ namespace xlang::impl
 
     template <typename D, typename TResult, typename TProgress> struct consume_IAsyncOperationWithProgress
     {
-        void Progress(Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> const& handler) const;
-        Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> Progress() const;
+        void Progress(System::AsyncOperationProgressHandler<TResult, TProgress> const& handler) const;
+        System::AsyncOperationProgressHandler<TResult, TProgress> Progress() const;
 
-        void Completed(Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> const& handler) const;
-        Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> Completed() const;
+        void Completed(System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> const& handler) const;
+        System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> Completed() const;
 
         TResult GetResults() const
         {
             TResult result = empty_value<TResult>();
-            check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->GetResults(put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IAsyncOperationWithProgress<TResult, TProgress>)->GetResults(put_abi(result)));
             return result;
         }
 
         TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<System::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
             return GetResults();
         }
     };

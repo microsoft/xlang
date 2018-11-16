@@ -8,7 +8,7 @@ WINRT_EXPORT namespace xlang
 {
     struct clock;
 
-    namespace Windows::Foundation
+    namespace System
     {
         using TimeSpan = std::chrono::duration<int64_t, impl::filetime_period>;
         using DateTime = std::chrono::time_point<clock, TimeSpan>;
@@ -17,32 +17,32 @@ WINRT_EXPORT namespace xlang
 
 namespace xlang::impl
 {
-    template <> struct abi<Windows::Foundation::TimeSpan>
+    template <> struct abi<System::TimeSpan>
     {
         using type = int64_t;
     };
 
-    template <> struct abi<Windows::Foundation::DateTime>
+    template <> struct abi<System::DateTime>
     {
         using type = int64_t;
     };
 
-    template <> struct name<Windows::Foundation::TimeSpan>
+    template <> struct name<System::TimeSpan>
     {
         static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };
     };
 
-    template <> struct category<Windows::Foundation::TimeSpan>
+    template <> struct category<System::TimeSpan>
     {
         using type = struct_category<int64_t>;
     };
 
-    template <> struct name<Windows::Foundation::DateTime>
+    template <> struct name<System::DateTime>
     {
         static constexpr auto & value{ L"Windows.Foundation.DateTime" };
     };
 
-    template <> struct category<Windows::Foundation::DateTime>
+    template <> struct category<System::DateTime>
     {
         using type = struct_category<int64_t>;
     };
@@ -77,8 +77,8 @@ WINRT_EXPORT namespace xlang
     {
         using rep = int64_t;
         using period = impl::filetime_period;
-        using duration = Windows::Foundation::TimeSpan;
-        using time_point = Windows::Foundation::DateTime;
+        using duration = System::TimeSpan;
+        using time_point = System::DateTime;
 
         static constexpr bool is_steady = false;
 

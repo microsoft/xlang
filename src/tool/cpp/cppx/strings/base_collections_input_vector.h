@@ -34,7 +34,7 @@ WINRT_EXPORT namespace xlang::param
     struct vector
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IVector<value_type>;
+        using interface_type = System::IVector<value_type>;
 
         vector(std::nullptr_t) noexcept
         {

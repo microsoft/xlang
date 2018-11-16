@@ -1,7 +1,7 @@
 
 namespace xlang::impl
 {
-    template <> struct abi<Windows::Foundation::IUnknown>
+    template <> struct abi<System::IUnknown>
     {
         struct WINRT_NOVTABLE type
         {
@@ -11,19 +11,19 @@ namespace xlang::impl
         };
     };
 
-    using unknown_abi = abi_t<Windows::Foundation::IUnknown>;
+    using unknown_abi = abi_t<System::IUnknown>;
 
-    template <> struct abi<Windows::Foundation::IInspectable>
+    template <> struct abi<System::IInspectable>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
             virtual int32_t WINRT_CALL GetIids(uint32_t* count, guid** ids) noexcept = 0;
             virtual int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept = 0;
-            virtual int32_t WINRT_CALL GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
+            virtual int32_t WINRT_CALL GetTrustLevel(System::TrustLevel* level) noexcept = 0;
         };
     };
 
-    using inspectable_abi = abi_t<Windows::Foundation::IInspectable>;
+    using inspectable_abi = abi_t<System::IInspectable>;
 
     struct WINRT_NOVTABLE IWeakReference : unknown_abi
     {
@@ -53,7 +53,7 @@ namespace xlang::impl
         virtual int32_t WINRT_CALL GetPropagationContextHead(ILanguageExceptionErrorInfo2** head) noexcept = 0;
     };
 
-    template <> struct abi<Windows::Foundation::IActivationFactory>
+    template <> struct abi<System::IActivationFactory>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -61,27 +61,27 @@ namespace xlang::impl
         };
     };
 
-    template <> struct abi<Windows::Foundation::AsyncActionCompletedHandler>
+    template <> struct abi<System::AsyncActionCompletedHandler>
     {
         struct type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Windows::Foundation::AsyncStatus asyncStatus) noexcept = 0;
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus asyncStatus) noexcept = 0;
         };
     };
 
-    template <> struct abi<Windows::Foundation::IAsyncInfo>
+    template <> struct abi<System::IAsyncInfo>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
             virtual int32_t WINRT_CALL get_Id(uint32_t* id) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Status(Windows::Foundation::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
             virtual int32_t WINRT_CALL get_ErrorCode(int32_t* errorCode) noexcept = 0;
             virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL Close() noexcept = 0;
         };
     };
 
-    template <> struct abi<Windows::Foundation::IAsyncAction>
+    template <> struct abi<System::IAsyncAction>
     {
         struct type : inspectable_abi
         {
@@ -100,31 +100,15 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult> struct abi<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+    template <typename TResult> struct abi<System::AsyncOperationCompletedHandler<TResult>>
     {
         struct type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Windows::Foundation::AsyncStatus status) noexcept = 0;
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus status) noexcept = 0;
         };
     };
 
-    template <typename TProgress> struct abi<Windows::Foundation::AsyncActionProgressHandler<TProgress>>
-    {
-        struct type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, arg_in<TProgress> progressInfo) noexcept = 0;
-        };
-    };
-
-    template <typename TProgress> struct abi<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>
-    {
-        struct type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Windows::Foundation::AsyncStatus status) noexcept = 0;
-        };
-    };
-
-    template <typename TResult, typename TProgress> struct abi<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>
+    template <typename TProgress> struct abi<System::AsyncActionProgressHandler<TProgress>>
     {
         struct type : unknown_abi
         {
@@ -132,15 +116,31 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult, typename TProgress> struct abi<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    template <typename TProgress> struct abi<System::AsyncActionWithProgressCompletedHandler<TProgress>>
     {
         struct type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Windows::Foundation::AsyncStatus status) noexcept = 0;
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus status) noexcept = 0;
         };
     };
 
-    template <typename TResult> struct abi<Windows::Foundation::IAsyncOperation<TResult>>
+    template <typename TResult, typename TProgress> struct abi<System::AsyncOperationProgressHandler<TResult, TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, arg_in<TProgress> progressInfo) noexcept = 0;
+        };
+    };
+
+    template <typename TResult, typename TProgress> struct abi<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus status) noexcept = 0;
+        };
+    };
+
+    template <typename TResult> struct abi<System::IAsyncOperation<TResult>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -150,7 +150,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename TProgress> struct abi<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    template <typename TProgress> struct abi<System::IAsyncActionWithProgress<TProgress>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -162,7 +162,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult, typename TProgress> struct abi<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    template <typename TResult, typename TProgress> struct abi<System::IAsyncOperationWithProgress<TResult, TProgress>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -174,7 +174,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<Windows::Foundation::IReference<T>>
+    template <typename T> struct abi<System::IReference<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -182,7 +182,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<Windows::Foundation::IReferenceArray<T>>
+    template <typename T> struct abi<System::IReferenceArray<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -316,7 +316,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
+    template <typename T> struct abi<System::EventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -324,7 +324,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename TSender, typename TArgs> struct abi<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
+    template <typename TSender, typename TArgs> struct abi<System::TypedEventHandler<TSender, TArgs>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {

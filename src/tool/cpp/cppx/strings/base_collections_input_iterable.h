@@ -72,7 +72,7 @@ WINRT_EXPORT namespace xlang::param
     struct iterable
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using interface_type = System::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -136,10 +136,10 @@ WINRT_EXPORT namespace xlang::param
     };
 
     template <typename K, typename V>
-    struct iterable<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    struct iterable<System::IKeyValuePair<K, V>>
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using value_type = System::IKeyValuePair<K, V>;
+        using interface_type = System::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -217,7 +217,7 @@ WINRT_EXPORT namespace xlang::param
     struct async_iterable
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using interface_type = System::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {
@@ -263,10 +263,10 @@ WINRT_EXPORT namespace xlang::param
     };
 
     template <typename K, typename V>
-    struct async_iterable<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    struct async_iterable<System::IKeyValuePair<K, V>>
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using value_type = System::IKeyValuePair<K, V>;
+        using interface_type = System::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {

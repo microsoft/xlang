@@ -22,9 +22,9 @@ namespace xlang::impl
         return result;
     }
 
-    inline size_t hash_unknown(Windows::Foundation::IUnknown const& value) noexcept
+    inline size_t hash_unknown(System::IUnknown const& value) noexcept
     {
-        void* const abi_value = get_abi(value.try_as<Windows::Foundation::IUnknown>());
+        void* const abi_value = get_abi(value.try_as<System::IUnknown>());
         return std::hash<void*>{}(abi_value);
     }
 

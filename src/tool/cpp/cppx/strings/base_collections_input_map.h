@@ -39,8 +39,8 @@ WINRT_EXPORT namespace xlang::param
     template <typename K, typename V>
     struct map
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IMap<K, V>;
+        using value_type = System::IKeyValuePair<K, V>;
+        using interface_type = System::IMap<K, V>;
 
         map(std::nullptr_t) noexcept
         {

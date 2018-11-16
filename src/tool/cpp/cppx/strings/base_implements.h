@@ -46,12 +46,12 @@ namespace xlang::impl
 #ifdef WINRT_WINDOWS_ABI
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, is_fast_interface<T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
+    struct is_interface : std::disjunction<std::is_base_of<System::IInspectable, T>, is_fast_interface<T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
 
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, is_fast_interface<T>> {};
+    struct is_interface : std::disjunction<std::is_base_of<System::IInspectable, T>, is_fast_interface<T>> {};
 
 #endif
 
@@ -75,8 +75,8 @@ namespace xlang::impl
 
     template <typename I>
     struct is_cloaked : std::disjunction<
-        std::is_same<Windows::Foundation::IInspectable, I>,
-        std::negation<std::is_base_of<Windows::Foundation::IInspectable, I>>
+        std::is_same<System::IInspectable, I>,
+        std::negation<std::is_base_of<System::IInspectable, I>>
     > {};
 
     template <typename I>
@@ -429,7 +429,7 @@ namespace xlang::impl
             return shim().abi_GetRuntimeClassName(name);
         }
 
-        int32_t WINRT_CALL GetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept final
+        int32_t WINRT_CALL GetTrustLevel(System::TrustLevel* trustLevel) noexcept final
         {
             return shim().abi_GetTrustLevel(trustLevel);
         }
@@ -444,7 +444,7 @@ namespace xlang::impl
 
 #endif
 
-    struct INonDelegatingInspectable : Windows::Foundation::IUnknown
+    struct INonDelegatingInspectable : System::IUnknown
     {
         INonDelegatingInspectable(std::nullptr_t = nullptr) noexcept {}
     };
@@ -546,7 +546,7 @@ namespace xlang::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** object) noexcept override
         {
-            if (is_guid_of<IWeakReference>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
+            if (is_guid_of<IWeakReference>(id) || is_guid_of<System::IUnknown>(id))
             {
                 *object = static_cast<IWeakReference*>(this);
                 AddRef();
@@ -657,7 +657,7 @@ namespace xlang::impl
         }
     protected:
         static constexpr bool is_composing = true;
-        Windows::Foundation::IInspectable m_inner;
+        System::IInspectable m_inner;
     };
 
     template <typename D, bool>
@@ -690,7 +690,7 @@ namespace xlang::impl
         : root_implements_composing_outer<std::disjunction<std::is_same<composing, I>...>::value>
         , root_implements_composable_inner<D, std::disjunction<std::is_same<composable, I>...>::value>
     {
-        using IInspectable = Windows::Foundation::IInspectable;
+        using IInspectable = System::IInspectable;
         using root_implements_type = root_implements;
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** object) noexcept
@@ -789,7 +789,7 @@ namespace xlang::impl
             return NonDelegatingGetRuntimeClassName(name);
         }
 
-        int32_t WINRT_CALL abi_GetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
+        int32_t WINRT_CALL abi_GetTrustLevel(System::TrustLevel* trustLevel) noexcept
         {
             if (this->outer())
             {
@@ -841,7 +841,7 @@ namespace xlang::impl
 
         int32_t WINRT_CALL NonDelegatingQueryInterface(const guid& id, void** object) noexcept
         {
-            if (is_guid_of<Windows::Foundation::IInspectable>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
+            if (is_guid_of<System::IInspectable>(id) || is_guid_of<System::IUnknown>(id))
             {
                 auto result = to_abi<INonDelegatingInspectable>(this);
                 NonDelegatingAddRef();
@@ -915,7 +915,7 @@ namespace xlang::impl
             catch (...) { return to_hresult(); }
         }
 
-        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
+        int32_t WINRT_CALL NonDelegatingGetTrustLevel(System::TrustLevel* trustLevel) noexcept
         {
             try
             {
@@ -968,12 +968,12 @@ namespace xlang::impl
             return result;
         }
 
-        using is_factory = std::disjunction<std::is_same<Windows::Foundation::IActivationFactory, I>...>;
+        using is_factory = std::disjunction<std::is_same<System::IActivationFactory, I>...>;
 
     private:
 
         using is_agile = std::negation<std::disjunction<std::is_same<non_agile, I>...>>;
-        using is_inspectable = std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, I>...>;
+        using is_inspectable = std::disjunction<std::is_base_of<System::IInspectable, I>...>;
         using is_weak_ref_source = std::conjunction<is_inspectable, std::negation<is_factory>, std::negation<std::disjunction<std::is_same<no_weak_ref, I>...>>>;
         using use_module_lock = std::negation<std::disjunction<std::is_same<no_module_lock, I>...>>;
         using weak_ref_t = impl::weak_ref<is_agile::value>;
@@ -992,7 +992,7 @@ namespace xlang::impl
 
             if constexpr (is_inspectable::value)
             {
-                if (is_guid_of<Windows::Foundation::IInspectable>(id))
+                if (is_guid_of<System::IInspectable>(id))
                 {
                     *object = find_inspectable();
                     AddRef();
@@ -1000,7 +1000,7 @@ namespace xlang::impl
                 }
             }
 
-            if (is_guid_of<Windows::Foundation::IUnknown>(id))
+            if (is_guid_of<System::IUnknown>(id))
             {
                 *object = get_unknown();
                 AddRef();
@@ -1083,9 +1083,9 @@ namespace xlang::impl
         virtual void* find_interface(guid const&) const noexcept = 0;
         virtual inspectable_abi* find_inspectable() const noexcept = 0;
 
-        virtual Windows::Foundation::TrustLevel GetTrustLevel() const noexcept
+        virtual System::TrustLevel GetTrustLevel() const noexcept
         {
-            return Windows::Foundation::TrustLevel::BaseTrust;
+            return System::TrustLevel::BaseTrust;
         }
 
         template <typename D, typename I, typename Enable>
@@ -1110,9 +1110,9 @@ namespace xlang::impl
         {
             static slim_mutex lock;
             auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
-            Windows::Foundation::IUnknown collection;
+            System::IUnknown collection;
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>>();
+            auto const map = collection.as<System::IMap<hstring, System::IInspectable>>();
 
             {
                 slim_lock_guard const guard{ lock };
@@ -1154,7 +1154,7 @@ WINRT_EXPORT namespace xlang
     {
         using I = typename impl::implements_default_interface<D>::type;
 
-        if constexpr (std::is_same_v<I, Windows::Foundation::IActivationFactory>)
+        if constexpr (std::is_same_v<I, System::IActivationFactory>)
         {
             static_assert(sizeof...(args) == 0);
             return impl::make_factory<D>();
@@ -1202,7 +1202,7 @@ WINRT_EXPORT namespace xlang
     public:
 
         using implements_type = implements;
-        using IInspectable = Windows::Foundation::IInspectable;
+        using IInspectable = System::IInspectable;
 
         weak_ref<D> get_weak()
         {

@@ -70,8 +70,8 @@ WINRT_EXPORT namespace xlang::param
     template <typename K, typename V>
     struct map_view
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IMapView<K, V>;
+        using value_type = System::IKeyValuePair<K, V>;
+        using interface_type = System::IMapView<K, V>;
 
         map_view(std::nullptr_t) noexcept
         {
@@ -143,8 +143,8 @@ WINRT_EXPORT namespace xlang::param
     template <typename K, typename V>
     struct async_map_view
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IMapView<K, V>;
+        using value_type = System::IKeyValuePair<K, V>;
+        using interface_type = System::IMapView<K, V>;
 
         async_map_view(std::nullptr_t) noexcept
         {

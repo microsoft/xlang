@@ -48,7 +48,7 @@ WINRT_EXPORT namespace xlang
 
     private:
 
-        struct iterator final : Version::iterator_type, implements<iterator, Windows::Foundation::Collections::IIterator<T>>
+        struct iterator final : Version::iterator_type, implements<iterator, System::IIterator<T>>
         {
             void abi_enter()
             {
@@ -162,7 +162,7 @@ WINRT_EXPORT namespace xlang
     template <typename D, typename T>
     struct vector_base : vector_view_base<D, T, impl::collection_version>
     {
-        Windows::Foundation::Collections::IVectorView<T> GetView() const noexcept
+        System::IVectorView<T> GetView() const noexcept
         {
             return static_cast<D const&>(*this);
         }
@@ -257,7 +257,7 @@ WINRT_EXPORT namespace xlang
     template <typename D, typename T>
     struct observable_vector_base : vector_base<D, T>
     {
-        event_token VectorChanged(Windows::Foundation::Collections::VectorChangedEventHandler<T> const& handler)
+        event_token VectorChanged(System::VectorChangedEventHandler<T> const& handler)
         {
             return m_changed.add(handler);
         }
@@ -270,63 +270,63 @@ WINRT_EXPORT namespace xlang
         void SetAt(uint32_t const index, T const& value)
         {
             vector_base<D, T>::SetAt(index, value);
-            call_changed(Windows::Foundation::Collections::CollectionChange::ItemChanged, index);
+            call_changed(System::CollectionChange::ItemChanged, index);
         }
 
         void InsertAt(uint32_t const index, T const& value)
         {
             vector_base<D, T>::InsertAt(index, value);
-            call_changed(Windows::Foundation::Collections::CollectionChange::ItemInserted, index);
+            call_changed(System::CollectionChange::ItemInserted, index);
         }
 
         void RemoveAt(uint32_t const index)
         {
             vector_base<D, T>::RemoveAt(index);
-            call_changed(Windows::Foundation::Collections::CollectionChange::ItemRemoved, index);
+            call_changed(System::CollectionChange::ItemRemoved, index);
         }
 
         void Append(T const& value)
         {
             vector_base<D, T>::Append(value);
-            call_changed(Windows::Foundation::Collections::CollectionChange::ItemInserted, this->Size() - 1);
+            call_changed(System::CollectionChange::ItemInserted, this->Size() - 1);
         }
 
         void RemoveAtEnd()
         {
             vector_base<D, T>::RemoveAtEnd();
-            call_changed(Windows::Foundation::Collections::CollectionChange::ItemRemoved, this->Size());
+            call_changed(System::CollectionChange::ItemRemoved, this->Size());
         }
 
         void Clear()
         {
             vector_base<D, T>::Clear();
-            call_changed(Windows::Foundation::Collections::CollectionChange::Reset, 0);
+            call_changed(System::CollectionChange::Reset, 0);
         }
 
         void ReplaceAll(array_view<T const> value)
         {
             vector_base<D, T>::ReplaceAll(value);
-            call_changed(Windows::Foundation::Collections::CollectionChange::Reset, 0);
+            call_changed(System::CollectionChange::Reset, 0);
         }
 
     private:
 
-        event<Windows::Foundation::Collections::VectorChangedEventHandler<T>> m_changed;
+        event<System::VectorChangedEventHandler<T>> m_changed;
 
-        void call_changed(Windows::Foundation::Collections::CollectionChange const change, uint32_t const index)
+        void call_changed(System::CollectionChange const change, uint32_t const index)
         {
             m_changed(static_cast<D const&>(*this), make<args>(change, index));
         }
 
-        struct args final : implements<args, Windows::Foundation::Collections::IVectorChangedEventArgs>
+        struct args final : implements<args, System::IVectorChangedEventArgs>
         {
-            args(Windows::Foundation::Collections::CollectionChange const change, uint32_t const index) noexcept :
+            args(System::CollectionChange const change, uint32_t const index) noexcept :
                 m_change(change),
                 m_index(index)
             {
             }
 
-            Windows::Foundation::Collections::CollectionChange CollectionChange() const noexcept
+            System::CollectionChange CollectionChange() const noexcept
             {
                 return m_change;
             }
@@ -338,13 +338,13 @@ WINRT_EXPORT namespace xlang
 
         private:
 
-            Windows::Foundation::Collections::CollectionChange const m_change;
+            System::CollectionChange const m_change;
             uint32_t const m_index;
         };
     };
 
     template <typename D, typename K, typename V, typename Version = impl::no_collection_version>
-    struct map_view_base : iterable_base<D, Windows::Foundation::Collections::IKeyValuePair<K, V>, Version>
+    struct map_view_base : iterable_base<D, System::IKeyValuePair<K, V>, Version>
     {
         V Lookup(K const& key) const
         {
@@ -368,7 +368,7 @@ WINRT_EXPORT namespace xlang
             return static_cast<D const&>(*this).get_container().find(static_cast<D const&>(*this).wrap_value(key)) != static_cast<D const&>(*this).get_container().end();
         }
 
-        void Split(Windows::Foundation::Collections::IMapView<K, V>& first, Windows::Foundation::Collections::IMapView<K, V>& second) const noexcept
+        void Split(System::IMapView<K, V>& first, System::IMapView<K, V>& second) const noexcept
         {
             first = nullptr;
             second = nullptr;
@@ -378,7 +378,7 @@ WINRT_EXPORT namespace xlang
     template <typename D, typename K, typename V>
     struct map_base : map_view_base<D, K, V, impl::collection_version>
     {
-        Windows::Foundation::Collections::IMapView<K, V> GetView() const
+        System::IMapView<K, V> GetView() const
         {
             return static_cast<D const&>(*this);
         }
@@ -406,7 +406,7 @@ WINRT_EXPORT namespace xlang
     template <typename D, typename K, typename V>
     struct observable_map_base : map_base<D, K, V>
     {
-        event_token MapChanged(Windows::Foundation::Collections::MapChangedEventHandler<K, V> const& handler)
+        event_token MapChanged(System::MapChangedEventHandler<K, V> const& handler)
         {
             return m_changed.add(handler);
         }
@@ -419,40 +419,40 @@ WINRT_EXPORT namespace xlang
         bool Insert(K const& key, V const& value)
         {
             bool const result = map_base<D, K, V>::Insert(key, value);
-            call_changed(Windows::Foundation::Collections::CollectionChange::ItemInserted, key);
+            call_changed(System::CollectionChange::ItemInserted, key);
             return result;
         }
 
         void Remove(K const& key)
         {
             map_base<D, K, V>::Remove(key);
-            call_changed(Windows::Foundation::Collections::CollectionChange::ItemRemoved, key);
+            call_changed(System::CollectionChange::ItemRemoved, key);
         }
 
         void Clear() noexcept
         {
             map_base<D, K, V>::Clear();
-            call_changed(Windows::Foundation::Collections::CollectionChange::Reset, impl::empty_value<K>());
+            call_changed(System::CollectionChange::Reset, impl::empty_value<K>());
         }
 
     private:
 
-        event<Windows::Foundation::Collections::MapChangedEventHandler<K, V>> m_changed;
+        event<System::MapChangedEventHandler<K, V>> m_changed;
 
-        void call_changed(Windows::Foundation::Collections::CollectionChange const change, K const& key)
+        void call_changed(System::CollectionChange const change, K const& key)
         {
             m_changed(static_cast<D const&>(*this), make<args>(change, key));
         }
 
-        struct args final : implements<args, Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+        struct args final : implements<args, System::IMapChangedEventArgs<K>>
         {
-            args(Windows::Foundation::Collections::CollectionChange const change, K const& key) noexcept :
+            args(System::CollectionChange const change, K const& key) noexcept :
                 m_change(change),
                 m_key(key)
             {
             }
 
-            Windows::Foundation::Collections::CollectionChange CollectionChange() const noexcept
+            System::CollectionChange CollectionChange() const noexcept
             {
                 return m_change;
             }
@@ -464,7 +464,7 @@ WINRT_EXPORT namespace xlang
 
         private:
 
-            Windows::Foundation::Collections::CollectionChange const m_change;
+            System::CollectionChange const m_change;
             K const m_key;
         };
     };

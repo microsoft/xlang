@@ -6,31 +6,31 @@ WINRT_EXPORT namespace xlang
     template <typename T>
     struct com_ptr;
 
-    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<System::IUnknown, T>>>
     auto get_abi(T const& object) noexcept
     {
         return reinterpret_cast<impl::abi_t<T> const&>(object);
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<System::IUnknown, T>>>
     auto put_abi(T& object) noexcept
     {
         return reinterpret_cast<impl::abi_t<T>*>(&object);
     }
 
-    template <typename T, typename V, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, typename V, typename = std::enable_if_t<!std::is_base_of_v<System::IUnknown, T>>>
     void copy_from_abi(T& object, V&& value)
     {
         object = reinterpret_cast<T const&>(value);
     }
 
-    template <typename T, typename V, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, typename V, typename = std::enable_if_t<!std::is_base_of_v<System::IUnknown, T>>>
     void copy_to_abi(T const& object, V& value)
     {
         reinterpret_cast<T&>(value) = object;
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, std::decay_t<T>> && !std::is_convertible_v<T, std::wstring_view>>>
+    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<System::IUnknown, std::decay_t<T>> && !std::is_convertible_v<T, std::wstring_view>>>
     auto detach_abi(T&& object)
     {
         impl::abi_t<T> result{};
@@ -45,7 +45,7 @@ WINRT_EXPORT namespace xlang
 namespace xlang::impl
 {
     template <typename T>
-    using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
+    using com_ref = std::conditional_t<std::is_base_of_v<System::IUnknown, T>, T, com_ptr<T>>;
 
     template <typename D, typename I, typename Enable = void>
     struct produce_base;
@@ -115,7 +115,7 @@ namespace xlang::impl
     using wrapped_type_t = typename wrapped_type<T>::type;
 }
 
-WINRT_EXPORT namespace xlang::Windows::Foundation
+WINRT_EXPORT namespace xlang::System
 {
     struct IUnknown
     {
@@ -239,31 +239,31 @@ WINRT_EXPORT namespace xlang::Windows::Foundation
 
 WINRT_EXPORT namespace xlang
 {
-    inline void* get_abi(Windows::Foundation::IUnknown const& object) noexcept
+    inline void* get_abi(System::IUnknown const& object) noexcept
     {
         return *(void**)(&object);
     }
 
-    inline void** put_abi(Windows::Foundation::IUnknown& object) noexcept
+    inline void** put_abi(System::IUnknown& object) noexcept
     {
         WINRT_ASSERT(get_abi(object) == nullptr);
         return reinterpret_cast<void**>(&object);
     }
 
-    inline void attach_abi(Windows::Foundation::IUnknown& object, void* value) noexcept
+    inline void attach_abi(System::IUnknown& object, void* value) noexcept
     {
         object = nullptr;
         *put_abi(object) = value;
     }
 
-    inline void* detach_abi(Windows::Foundation::IUnknown& object) noexcept
+    inline void* detach_abi(System::IUnknown& object) noexcept
     {
         void* temp = get_abi(object);
         *reinterpret_cast<void**>(&object) = nullptr;
         return temp;
     }
 
-    inline void* detach_abi(Windows::Foundation::IUnknown&& object) noexcept
+    inline void* detach_abi(System::IUnknown&& object) noexcept
     {
         void* temp = get_abi(object);
         *reinterpret_cast<void**>(&object) = nullptr;
@@ -275,7 +275,7 @@ WINRT_EXPORT namespace xlang
         return nullptr;
     }
 
-    inline void copy_from_abi(Windows::Foundation::IUnknown& object, void* value) noexcept
+    inline void copy_from_abi(System::IUnknown& object, void* value) noexcept
     {
         object = nullptr;
 
@@ -286,7 +286,7 @@ WINRT_EXPORT namespace xlang
         }
     }
 
-    inline void copy_to_abi(Windows::Foundation::IUnknown const& object, void*& value) noexcept
+    inline void copy_to_abi(System::IUnknown const& object, void*& value) noexcept
     {
         WINRT_ASSERT(value == nullptr);
         value = get_abi(object);
@@ -299,7 +299,7 @@ WINRT_EXPORT namespace xlang
 
 #ifdef WINRT_WINDOWS_ABI
 
-    inline ::IUnknown* get_unknown(Windows::Foundation::IUnknown const& object) noexcept
+    inline ::IUnknown* get_unknown(System::IUnknown const& object) noexcept
     {
         return static_cast<::IUnknown*>(get_abi(object));
     }
@@ -307,7 +307,7 @@ WINRT_EXPORT namespace xlang
 #endif
 }
 
-WINRT_EXPORT namespace xlang::Windows::Foundation
+WINRT_EXPORT namespace xlang::System
 {
     inline bool operator==(IUnknown const& left, IUnknown const& right) noexcept
     {

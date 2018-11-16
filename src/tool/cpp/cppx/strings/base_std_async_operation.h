@@ -2,12 +2,12 @@
 WINRT_EXPORT namespace std::experimental
 {
     template <typename TResult, typename... Args>
-    struct coroutine_traits<xlang::Windows::Foundation::IAsyncOperation<TResult>, Args...>
+    struct coroutine_traits<xlang::System::IAsyncOperation<TResult>, Args...>
     {
-        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::Windows::Foundation::IAsyncOperation<TResult>,
-            xlang::Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::System::IAsyncOperation<TResult>,
+            xlang::System::AsyncOperationCompletedHandler<TResult>>
         {
-            using AsyncStatus = xlang::Windows::Foundation::AsyncStatus;
+            using AsyncStatus = xlang::System::AsyncStatus;
 
             TResult GetResults()
             {
@@ -25,7 +25,7 @@ WINRT_EXPORT namespace std::experimental
 
             void return_value(TResult const& result)
             {
-                xlang::Windows::Foundation::AsyncOperationCompletedHandler<TResult> handler;
+                xlang::System::AsyncOperationCompletedHandler<TResult> handler;
                 AsyncStatus status;
 
                 {
