@@ -17,7 +17,7 @@ namespace xlang::impl
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
-            virtual int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept = 0;
+            virtual int32_t WINRT_CALL GetTypeName(void** name) noexcept = 0;
         };
     };
 

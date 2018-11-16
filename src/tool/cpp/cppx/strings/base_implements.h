@@ -419,9 +419,9 @@ namespace xlang::impl
             return shim().Release();
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept override
+        int32_t WINRT_CALL GetTypeName(void** name) noexcept override
         {
-            return shim().abi_GetRuntimeClassName(name);
+            return shim().abi_GetTypeName(name);
         }
     };
 
@@ -462,9 +462,9 @@ namespace xlang::impl
             return this->shim().NonDelegatingRelease();
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept final
+        int32_t WINRT_CALL GetTypeName(void** name) noexcept final
         {
-            return this->shim().NonDelegatingGetRuntimeClassName(name);
+            return this->shim().NonDelegatingGetTypeName(name);
         }
     };
 
@@ -754,14 +754,14 @@ namespace xlang::impl
             }
         }
 
-        int32_t WINRT_CALL abi_GetRuntimeClassName(void** name) noexcept
+        int32_t WINRT_CALL abi_GetTypeName(void** name) noexcept
         {
             if (this->outer())
             {
-                return this->outer()->GetRuntimeClassName(name);
+                return this->outer()->GetTypeName(name);
             }
 
-            return NonDelegatingGetRuntimeClassName(name);
+            return NonDelegatingGetTypeName(name);
         }
 
         uint32_t WINRT_CALL NonDelegatingAddRef() noexcept
@@ -824,11 +824,11 @@ namespace xlang::impl
             return result;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept
+        int32_t WINRT_CALL NonDelegatingGetTypeName(void** name) noexcept
         {
             try
             {
-                *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
+                *name = detach_abi(static_cast<D*>(this)->GetTypeName());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -988,7 +988,7 @@ namespace xlang::impl
 
         virtual unknown_abi* get_unknown() const noexcept = 0;
         virtual std::pair<uint32_t, const guid*> get_local_iids() const noexcept = 0;
-        virtual hstring GetRuntimeClassName() const = 0;
+        virtual hstring GetTypeName() const = 0;
         virtual void* find_interface(guid const&) const noexcept = 0;
         virtual inspectable_abi* find_inspectable() const noexcept = 0;
 
@@ -1174,7 +1174,7 @@ WINRT_EXPORT namespace xlang
             return reinterpret_cast<impl::unknown_abi*>(to_abi<typename impl::implements_default_interface<D>::type>(this));
         }
 
-        hstring GetRuntimeClassName() const override
+        hstring GetTypeName() const override
         {
             return impl::runtime_class_name<typename impl::implements_default_interface<D>::type>::get();
         }
