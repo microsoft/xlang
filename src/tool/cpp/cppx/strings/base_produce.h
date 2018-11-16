@@ -71,7 +71,7 @@ namespace xlang::impl
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IInspectable const*>(&sender), *reinterpret_cast<T const*>(&args));
+                    (*this)(*reinterpret_cast<System::IObject const*>(&sender), *reinterpret_cast<T const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }

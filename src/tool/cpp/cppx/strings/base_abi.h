@@ -13,7 +13,7 @@ namespace xlang::impl
 
     using unknown_abi = abi_t<System::IUnknown>;
 
-    template <> struct abi<System::IInspectable>
+    template <> struct abi<System::IObject>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -23,7 +23,7 @@ namespace xlang::impl
         };
     };
 
-    using inspectable_abi = abi_t<System::IInspectable>;
+    using inspectable_abi = abi_t<System::IObject>;
 
     struct WINRT_NOVTABLE IWeakReference : unknown_abi
     {

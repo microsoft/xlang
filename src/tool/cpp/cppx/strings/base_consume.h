@@ -9,7 +9,7 @@ namespace xlang::impl
         template <typename T>
         T ActivateInstance() const
         {
-            System::IInspectable instance;
+            System::IObject instance;
             check_hresult(WINRT_SHIM(System::IActivationFactory)->ActivateInstance(put_abi(instance)));
             return instance.try_as<T>();
         }

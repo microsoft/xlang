@@ -311,11 +311,11 @@ WINRT_EXPORT namespace xlang
     namespace System
     {
         struct IActivationFactory :
-            IInspectable,
+            IObject,
             impl::consume_t<IActivationFactory>
         {
             IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-            IActivationFactory(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+            IActivationFactory(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
         };
     }
 

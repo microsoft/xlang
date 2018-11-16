@@ -465,21 +465,21 @@ WINRT_EXPORT namespace xlang
         return impl::com_array_proxy<T>(__valueSize, value);
     }
 
-    inline hstring get_class_name(System::IInspectable const& object)
+    inline hstring get_class_name(System::IObject const& object)
     {
         hstring value;
         check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(put_abi(value)));
         return value;
     }
 
-    inline com_array<guid> get_interfaces(System::IInspectable const& object)
+    inline com_array<guid> get_interfaces(System::IObject const& object)
     {
         com_array<guid> value;
         check_hresult((*(impl::inspectable_abi**)&object)->GetIids(impl::put_size_abi(value), put_abi(value)));
         return value;
     }
 
-    inline System::TrustLevel get_trust_level(System::IInspectable const& object)
+    inline System::TrustLevel get_trust_level(System::IObject const& object)
     {
         System::TrustLevel value{};
         check_hresult((*(impl::inspectable_abi**)&object)->GetTrustLevel(&value));

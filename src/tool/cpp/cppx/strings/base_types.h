@@ -2,54 +2,54 @@
 WINRT_EXPORT namespace xlang::System
 {
     struct WINRT_EBO IAsyncInfo :
-        IInspectable,
+        IObject,
         impl::consume_t<IAsyncInfo>
     {
         IAsyncInfo(std::nullptr_t = nullptr) noexcept {}
-        IAsyncInfo(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncInfo(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     struct WINRT_EBO IAsyncAction :
-        IInspectable,
+        IObject,
         impl::consume_t<IAsyncAction>,
         impl::require<IAsyncAction, IAsyncInfo>
     {
         IAsyncAction(std::nullptr_t = nullptr) noexcept {}
-        IAsyncAction(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncAction(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename TProgress>
     struct WINRT_EBO IAsyncActionWithProgress :
-        IInspectable,
+        IObject,
         impl::consume_t<IAsyncActionWithProgress<TProgress>>,
         impl::require<IAsyncActionWithProgress<TProgress>, IAsyncInfo>
     {
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         IAsyncActionWithProgress(std::nullptr_t = nullptr) noexcept {}
-        IAsyncActionWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncActionWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename TResult>
     struct WINRT_EBO IAsyncOperation :
-        IInspectable,
+        IObject,
         impl::consume_t<IAsyncOperation<TResult>>,
         impl::require<IAsyncOperation<TResult>, IAsyncInfo>
     {
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         IAsyncOperation(std::nullptr_t = nullptr) noexcept {}
-        IAsyncOperation(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncOperation(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename TResult, typename TProgress>
     struct WINRT_EBO IAsyncOperationWithProgress :
-        IInspectable,
+        IObject,
         impl::consume_t<IAsyncOperationWithProgress<TResult, TProgress>>,
         impl::require<IAsyncOperationWithProgress<TResult, TProgress>, IAsyncInfo>
     {
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         IAsyncOperationWithProgress(std::nullptr_t = nullptr) noexcept {}
-        IAsyncOperationWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncOperationWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
@@ -79,7 +79,7 @@ WINRT_EXPORT namespace xlang::System
             EventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
         {}
 
-        void operator()(IInspectable const& sender, T const& args) const
+        void operator()(IObject const& sender, T const& args) const
         {
             check_hresult((*(impl::abi_t<EventHandler<T>>**)this)->Invoke(get_abi(sender), get_abi(args)));
         }
@@ -322,22 +322,22 @@ WINRT_EXPORT namespace xlang::System
 {
     template <typename K>
     struct WINRT_EBO IMapChangedEventArgs :
-        IInspectable,
+        IObject,
         impl::consume_t<IMapChangedEventArgs<K>>
     {
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         IMapChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
-        IMapChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IMapChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
     struct WINRT_EBO IIterator :
-        IInspectable,
+        IObject,
         impl::consume_t<IIterator<T>>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IIterator(std::nullptr_t = nullptr) noexcept {}
-        IIterator(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IIterator(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
 
         using iterator_category = std::input_iterator_tag;
         using value_type = T;
@@ -348,100 +348,100 @@ WINRT_EXPORT namespace xlang::System
 
     template <typename T>
     struct WINRT_EBO IIterable :
-        IInspectable,
+        IObject,
         impl::consume_t<IIterable<T>>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IIterable(std::nullptr_t = nullptr) noexcept {}
-        IIterable(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IIterable(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
     struct WINRT_EBO IVectorView :
-        IInspectable,
+        IObject,
         impl::consume_t<IVectorView<T>>,
         impl::require<IVectorView<T>, IIterable<T>>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IVectorView(std::nullptr_t = nullptr) noexcept {}
-        IVectorView(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IVectorView(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
     struct WINRT_EBO IVector :
-        IInspectable,
+        IObject,
         impl::consume_t<IVector<T>>,
         impl::require<IVector<T>, IIterable<T>>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IVector(std::nullptr_t = nullptr) noexcept {}
-        IVector(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IVector(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>
     struct WINRT_EBO IObservableVector :
-        IInspectable,
+        IObject,
         impl::consume_t<IObservableVector<T>>,
         impl::require<IObservableVector<T>, IVector<T>, IIterable<T>>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IObservableVector(std::nullptr_t = nullptr) noexcept {}
-        IObservableVector(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IObservableVector(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
     struct WINRT_EBO IKeyValuePair :
-        IInspectable,
+        IObject,
         impl::consume_t<IKeyValuePair<K, V>>
     {
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IKeyValuePair(std::nullptr_t = nullptr) noexcept {}
-        IKeyValuePair(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IKeyValuePair(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
     struct WINRT_EBO IMapView :
-        IInspectable,
+        IObject,
         impl::consume_t<IMapView<K, V>>,
         impl::require<IMapView<K, V>, IIterable<IKeyValuePair<K, V>>>
     {
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMapView(std::nullptr_t = nullptr) noexcept {}
-        IMapView(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IMapView(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
     struct WINRT_EBO IMap :
-        IInspectable,
+        IObject,
         impl::consume_t<IMap<K, V>>,
         impl::require<IMap<K, V>, IIterable<IKeyValuePair<K, V>>>
     {
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMap(std::nullptr_t = nullptr) noexcept {}
-        IMap(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IMap(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename K, typename V>
     struct WINRT_EBO IObservableMap :
-        IInspectable,
+        IObject,
         impl::consume_t<IObservableMap<K, V>>,
         impl::require<IObservableMap<K, V>, IMap<K, V>, IIterable<IKeyValuePair<K, V>>>
     {
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IObservableMap(std::nullptr_t = nullptr) noexcept {}
-        IObservableMap(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IObservableMap(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     struct WINRT_EBO IVectorChangedEventArgs :
-        IInspectable,
+        IObject,
         impl::consume_t<IVectorChangedEventArgs>
     {
         IVectorChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
-        IVectorChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IVectorChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 
     template <typename T>

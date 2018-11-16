@@ -113,7 +113,7 @@ namespace xlang::impl
         void GetChar16Array(com_array<char16_t> &) { throw hresult_not_implemented(); }
         void GetBooleanArray(com_array<bool> &) { throw hresult_not_implemented(); }
         void GetStringArray(com_array<hstring> &) { throw hresult_not_implemented(); }
-        void GetInspectableArray(com_array<System::IInspectable> &) { throw hresult_not_implemented(); }
+        void GetInspectableArray(com_array<System::IObject> &) { throw hresult_not_implemented(); }
         void GetGuidArray(com_array<guid> &) { throw hresult_not_implemented(); }
         void GetDateTimeArray(com_array<System::DateTime> &) { throw hresult_not_implemented(); }
         void GetTimeSpanArray(com_array<System::TimeSpan> &) { throw hresult_not_implemented(); }
@@ -218,9 +218,9 @@ namespace xlang::impl
     };
 
     template <>
-    struct reference_traits<System::IInspectable>
+    struct reference_traits<System::IObject>
     {
-        static auto make(System::IInspectable const& value) { return System::PropertyValue::CreateInspectable(value); }
+        static auto make(System::IObject const& value) { return System::PropertyValue::CreateInspectable(value); }
     };
 
     template <>
@@ -264,13 +264,13 @@ WINRT_EXPORT namespace xlang::System
 {
     template <typename T>
     struct IReference :
-        IInspectable,
+        IObject,
         impl::consume_t<IReference<T>>,
         impl::require<IReference<T>, IPropertyValue>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IReference(std::nullptr_t = nullptr) noexcept {}
-        IReference(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IReference(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
 
         IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
         {
@@ -278,7 +278,7 @@ WINRT_EXPORT namespace xlang::System
 
     private:
 
-        IReference<T>(IInspectable const& value) : IReference<T>(value.as<IReference<T>>())
+        IReference<T>(IObject const& value) : IReference<T>(value.as<IReference<T>>())
         {
         }
     };
@@ -307,27 +307,27 @@ WINRT_EXPORT namespace xlang::System
 
     template <typename T>
     struct WINRT_EBO IReferenceArray :
-        IInspectable,
+        IObject,
         impl::consume_t<IReferenceArray<T>>,
         impl::require<IReferenceArray<T>, IPropertyValue>
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IReferenceArray<T>(std::nullptr_t = nullptr) noexcept {}
-        IReferenceArray(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IReferenceArray(take_ownership_from_abi_t, void* ptr) noexcept : IObject(take_ownership_from_abi, ptr) {}
     };
 }
 
 WINRT_EXPORT namespace xlang
 {
-    inline System::IInspectable box_value(param::hstring const& value)
+    inline System::IObject box_value(param::hstring const& value)
     {
         return System::IReference<hstring>(*(hstring*)(&value));
     }
 
     template <typename T, typename = std::enable_if_t<!std::is_convertible_v<T, param::hstring>>>
-    System::IInspectable box_value(T const& value)
+    System::IObject box_value(T const& value)
     {
-        if constexpr (std::is_base_of_v<System::IInspectable, T>)
+        if constexpr (std::is_base_of_v<System::IObject, T>)
         {
             return value;
         }
@@ -338,9 +338,9 @@ WINRT_EXPORT namespace xlang
     }
 
     template <typename T>
-    T unbox_value(System::IInspectable const& value)
+    T unbox_value(System::IObject const& value)
     {
-        if constexpr (std::is_base_of_v<System::IInspectable, T>)
+        if constexpr (std::is_base_of_v<System::IObject, T>)
         {
             return value.as<T>();
         }
@@ -362,7 +362,7 @@ WINRT_EXPORT namespace xlang
     }
 
     template <typename T>
-    hstring unbox_value_or(System::IInspectable const& value, param::hstring const& default_value)
+    hstring unbox_value_or(System::IObject const& value, param::hstring const& default_value)
     {
         if (value)
         {
@@ -376,11 +376,11 @@ WINRT_EXPORT namespace xlang
     }
 
     template <typename T, typename = std::enable_if_t<!std::is_same_v<T, hstring>>>
-    T unbox_value_or(System::IInspectable const& value, T const& default_value)
+    T unbox_value_or(System::IObject const& value, T const& default_value)
     {
         if (value)
         {
-            if constexpr (std::is_base_of_v<System::IInspectable, T>)
+            if constexpr (std::is_base_of_v<System::IObject, T>)
             {
                 if (auto temp = value.try_as<T>())
                 {

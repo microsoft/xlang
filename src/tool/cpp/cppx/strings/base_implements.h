@@ -46,12 +46,12 @@ namespace xlang::impl
 #ifdef WINRT_WINDOWS_ABI
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<System::IInspectable, T>, is_fast_interface<T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
+    struct is_interface : std::disjunction<std::is_base_of<System::IObject, T>, is_fast_interface<T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
 
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<System::IInspectable, T>, is_fast_interface<T>> {};
+    struct is_interface : std::disjunction<std::is_base_of<System::IObject, T>, is_fast_interface<T>> {};
 
 #endif
 
@@ -75,8 +75,8 @@ namespace xlang::impl
 
     template <typename I>
     struct is_cloaked : std::disjunction<
-        std::is_same<System::IInspectable, I>,
-        std::negation<std::is_base_of<System::IInspectable, I>>
+        std::is_same<System::IObject, I>,
+        std::negation<std::is_base_of<System::IObject, I>>
     > {};
 
     template <typename I>
@@ -657,7 +657,7 @@ namespace xlang::impl
         }
     protected:
         static constexpr bool is_composing = true;
-        System::IInspectable m_inner;
+        System::IObject m_inner;
     };
 
     template <typename D, bool>
@@ -690,7 +690,7 @@ namespace xlang::impl
         : root_implements_composing_outer<std::disjunction<std::is_same<composing, I>...>::value>
         , root_implements_composable_inner<D, std::disjunction<std::is_same<composable, I>...>::value>
     {
-        using IInspectable = System::IInspectable;
+        using IObject = System::IObject;
         using root_implements_type = root_implements;
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** object) noexcept
@@ -841,7 +841,7 @@ namespace xlang::impl
 
         int32_t WINRT_CALL NonDelegatingQueryInterface(const guid& id, void** object) noexcept
         {
-            if (is_guid_of<System::IInspectable>(id) || is_guid_of<System::IUnknown>(id))
+            if (is_guid_of<System::IObject>(id) || is_guid_of<System::IUnknown>(id))
             {
                 auto result = to_abi<INonDelegatingInspectable>(this);
                 NonDelegatingAddRef();
@@ -973,7 +973,7 @@ namespace xlang::impl
     private:
 
         using is_agile = std::negation<std::disjunction<std::is_same<non_agile, I>...>>;
-        using is_inspectable = std::disjunction<std::is_base_of<System::IInspectable, I>...>;
+        using is_inspectable = std::disjunction<std::is_base_of<System::IObject, I>...>;
         using is_weak_ref_source = std::conjunction<is_inspectable, std::negation<is_factory>, std::negation<std::disjunction<std::is_same<no_weak_ref, I>...>>>;
         using use_module_lock = std::negation<std::disjunction<std::is_same<no_module_lock, I>...>>;
         using weak_ref_t = impl::weak_ref<is_agile::value>;
@@ -992,7 +992,7 @@ namespace xlang::impl
 
             if constexpr (is_inspectable::value)
             {
-                if (is_guid_of<System::IInspectable>(id))
+                if (is_guid_of<System::IObject>(id))
                 {
                     *object = find_inspectable();
                     AddRef();
@@ -1112,7 +1112,7 @@ namespace xlang::impl
             auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
             System::IUnknown collection;
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<System::IMap<hstring, System::IInspectable>>();
+            auto const map = collection.as<System::IMap<hstring, System::IObject>>();
 
             {
                 slim_lock_guard const guard{ lock };
@@ -1202,7 +1202,7 @@ WINRT_EXPORT namespace xlang
     public:
 
         using implements_type = implements;
-        using IInspectable = System::IInspectable;
+        using IObject = System::IObject;
 
         weak_ref<D> get_weak()
         {
@@ -1216,9 +1216,9 @@ WINRT_EXPORT namespace xlang
             return result;
         }
 
-        operator IInspectable() const noexcept
+        operator IObject() const noexcept
         {
-            IInspectable result;
+            IObject result;
             copy_from_abi(result, find_inspectable());
             return result;
         }

@@ -17,7 +17,7 @@ WINRT_EXPORT namespace xlang::System
     };
 
     struct IUnknown;
-    struct IInspectable;
+    struct IObject;
     struct IActivationFactory;
     struct IAsyncInfo;
     struct IAsyncAction;

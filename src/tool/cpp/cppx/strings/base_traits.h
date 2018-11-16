@@ -6,7 +6,7 @@ namespace xlang::impl
         static constexpr guid value{ 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
-    template <> struct guid_storage<System::IInspectable>
+    template <> struct guid_storage<System::IObject>
     {
         static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
     };
@@ -321,10 +321,10 @@ namespace xlang::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncOperationWithProgress`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
     };
 
-    template <> struct name<System::IInspectable>
+    template <> struct name<System::IObject>
     {
         static constexpr auto & value{ L"Object" };
-        static constexpr auto & data{ "cinterface(IInspectable)" };
+        static constexpr auto & data{ "cinterface(IObject)" };
     };
 
     template <> struct name<System::IActivationFactory>
@@ -490,7 +490,7 @@ namespace xlang::impl
         using type = interface_category;
     };
 
-    template <> struct category<System::IInspectable>
+    template <> struct category<System::IObject>
     {
         using type = basic_category;
     };

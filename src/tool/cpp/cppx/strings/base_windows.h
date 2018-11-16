@@ -355,9 +355,9 @@ WINRT_EXPORT namespace xlang::System
         return !(left < right);
     }
 
-    struct IInspectable : IUnknown
+    struct IObject : IUnknown
     {
-        IInspectable(std::nullptr_t = nullptr) noexcept {}
-        IInspectable(take_ownership_from_abi_t, void* ptr) noexcept : IUnknown(take_ownership_from_abi, ptr) {}
+        IObject(std::nullptr_t = nullptr) noexcept {}
+        IObject(take_ownership_from_abi_t, void* ptr) noexcept : IUnknown(take_ownership_from_abi, ptr) {}
     };
 }
