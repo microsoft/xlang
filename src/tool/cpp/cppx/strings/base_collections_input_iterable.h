@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename T, typename Container>
     struct input_iterable final :
-        implements<input_iterable<T, Container>, non_agile, no_weak_ref, System::IIterable<T>>,
+        implements<input_iterable<T, Container>, non_agile, no_weak_ref, Runtime::IIterable<T>>,
         iterable_base<input_iterable<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -25,7 +25,7 @@ namespace xlang::impl
     template <typename T, typename InputIt>
     struct scoped_input_iterable final :
         input_scope,
-        implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, System::IIterable<T>>,
+        implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, Runtime::IIterable<T>>,
         iterable_base<scoped_input_iterable<T, InputIt>, T>
     {
         void abi_enter() const
@@ -57,7 +57,7 @@ namespace xlang::impl
     template <typename T, typename InputIt>
     auto make_scoped_input_iterable(InputIt first, InputIt last)
     {
-        using interface_type = System::IIterable<T>;
+        using interface_type = Runtime::IIterable<T>;
         std::pair<interface_type, input_scope*> result;
         auto ptr = new scoped_input_iterable<T, InputIt>(first, last);
         *put_abi(result.first) = to_abi<interface_type>(ptr);
@@ -72,7 +72,7 @@ WINRT_EXPORT namespace xlang::param
     struct iterable
     {
         using value_type = T;
-        using interface_type = System::IIterable<value_type>;
+        using interface_type = Runtime::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -136,10 +136,10 @@ WINRT_EXPORT namespace xlang::param
     };
 
     template <typename K, typename V>
-    struct iterable<System::IKeyValuePair<K, V>>
+    struct iterable<Runtime::IKeyValuePair<K, V>>
     {
-        using value_type = System::IKeyValuePair<K, V>;
-        using interface_type = System::IIterable<value_type>;
+        using value_type = Runtime::IKeyValuePair<K, V>;
+        using interface_type = Runtime::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -217,7 +217,7 @@ WINRT_EXPORT namespace xlang::param
     struct async_iterable
     {
         using value_type = T;
-        using interface_type = System::IIterable<value_type>;
+        using interface_type = Runtime::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {
@@ -263,10 +263,10 @@ WINRT_EXPORT namespace xlang::param
     };
 
     template <typename K, typename V>
-    struct async_iterable<System::IKeyValuePair<K, V>>
+    struct async_iterable<Runtime::IKeyValuePair<K, V>>
     {
-        using value_type = System::IKeyValuePair<K, V>;
-        using interface_type = System::IIterable<value_type>;
+        using value_type = Runtime::IKeyValuePair<K, V>;
+        using interface_type = Runtime::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {

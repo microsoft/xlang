@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
     struct observable_map final :
-        implements<observable_map<K, V, Container>, System::IObservableMap<K, V>, System::IMap<K, V>, System::IMapView<K, V>, System::IIterable<System::IKeyValuePair<K, V>>>,
+        implements<observable_map<K, V, Container>, Runtime::IObservableMap<K, V>, Runtime::IMap<K, V>, Runtime::IMapView<K, V>, Runtime::IIterable<Runtime::IKeyValuePair<K, V>>>,
         observable_map_base<observable_map<K, V, Container>, K, V>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -31,37 +31,37 @@ namespace xlang::impl
 WINRT_EXPORT namespace xlang
 {
     template <typename K, typename V, typename Compare = std::less<K>, typename Allocator = std::allocator<std::pair<K const, V>>>
-    System::IMap<K, V> single_threaded_map()
+    Runtime::IMap<K, V> single_threaded_map()
     {
         return make<impl::input_map<K, V, std::map<K, V, Compare, Allocator>>>(std::map<K, V, Compare, Allocator>{});
     }
 
     template <typename K, typename V, typename Compare = std::less<K>, typename Allocator = std::allocator<std::pair<K const, V>>>
-    System::IMap<K, V> single_threaded_map(std::map<K, V, Compare, Allocator>&& values)
+    Runtime::IMap<K, V> single_threaded_map(std::map<K, V, Compare, Allocator>&& values)
     {
         return make<impl::input_map<K, V, std::map<K, V, Compare, Allocator>>>(std::move(values));
     }
 
     template <typename K, typename V, typename Hash = std::hash<K>, typename KeyEqual = std::equal_to<K>, typename Allocator = std::allocator<std::pair<K const, V>>>
-    System::IMap<K, V> single_threaded_map(std::unordered_map<K, V, Hash, KeyEqual, Allocator>&& values)
+    Runtime::IMap<K, V> single_threaded_map(std::unordered_map<K, V, Hash, KeyEqual, Allocator>&& values)
     {
         return make<impl::input_map<K, V, std::unordered_map<K, V, Hash, KeyEqual, Allocator>>>(std::move(values));
     }
 
     template <typename K, typename V, typename Compare = std::less<K>, typename Allocator = std::allocator<std::pair<K const, V>>>
-    System::IObservableMap<K, V> single_threaded_observable_map()
+    Runtime::IObservableMap<K, V> single_threaded_observable_map()
     {
         return make<impl::observable_map<K, V, std::map<K, V, Compare, Allocator>>>(std::map<K, V, Compare, Allocator>{});
     }
 
     template <typename K, typename V, typename Compare = std::less<K>, typename Allocator = std::allocator<std::pair<K const, V>>>
-    System::IObservableMap<K, V> single_threaded_observable_map(std::map<K, V, Compare, Allocator>&& values)
+    Runtime::IObservableMap<K, V> single_threaded_observable_map(std::map<K, V, Compare, Allocator>&& values)
     {
         return make<impl::observable_map<K, V, std::map<K, V, Compare, Allocator>>>(std::move(values));
     }
 
     template <typename K, typename V, typename Hash = std::hash<K>, typename KeyEqual = std::equal_to<K>, typename Allocator = std::allocator<std::pair<K const, V>>>
-    System::IObservableMap<K, V> single_threaded_observable_map(std::unordered_map<K, V, Hash, KeyEqual, Allocator>&& values)
+    Runtime::IObservableMap<K, V> single_threaded_observable_map(std::unordered_map<K, V, Hash, KeyEqual, Allocator>&& values)
     {
         return make<impl::observable_map<K, V, std::unordered_map<K, V, Hash, KeyEqual, Allocator>>>(std::move(values));
     }

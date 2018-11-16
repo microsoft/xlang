@@ -8,7 +8,7 @@ namespace xlang::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-            if (is_guid_of<T>(id) || is_guid_of<System::IUnknown>(id))
+            if (is_guid_of<T>(id) || is_guid_of<Runtime::IUnknown>(id))
             {
                 *result = static_cast<abi_t<T>*>(this);
                 AddRef();
@@ -68,7 +68,7 @@ namespace xlang::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-            if (is_guid_of<System::IUnknown>(id))
+            if (is_guid_of<Runtime::IUnknown>(id))
             {
                 *result = static_cast<unknown_abi*>(this);
                 AddRef();
@@ -106,7 +106,7 @@ namespace xlang::impl
 WINRT_EXPORT namespace xlang
 {
     template <typename... T>
-    struct WINRT_EBO delegate : System::IUnknown
+    struct WINRT_EBO delegate : Runtime::IUnknown
     {
         delegate(std::nullptr_t = nullptr) noexcept {}
 

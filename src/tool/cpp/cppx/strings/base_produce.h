@@ -7,7 +7,7 @@ namespace xlang::impl
         return detach_abi(std::forward<T>(object));
     }
 
-    template <typename D> struct produce<D, System::IActivationFactory> : produce_base<D, System::IActivationFactory>
+    template <typename D> struct produce<D, Runtime::IActivationFactory> : produce_base<D, Runtime::IActivationFactory>
     {
         int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
         {
@@ -22,18 +22,18 @@ namespace xlang::impl
         }
     };
 
-    template <typename T> struct delegate<System::VectorChangedEventHandler<T>>
+    template <typename T> struct delegate<Runtime::VectorChangedEventHandler<T>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::VectorChangedEventHandler<T>, H>
+        struct type final : implements_delegate<Runtime::VectorChangedEventHandler<T>, H>
         {
-            type(H&& handler) : implements_delegate<System::VectorChangedEventHandler<T>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::VectorChangedEventHandler<T>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IObservableVector<T> const*>(&sender), *reinterpret_cast<System::IVectorChangedEventArgs const*>(&args));
+                    (*this)(*reinterpret_cast<Runtime::IObservableVector<T> const*>(&sender), *reinterpret_cast<Runtime::IVectorChangedEventArgs const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -41,18 +41,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct delegate<System::MapChangedEventHandler<K, V>>
+    template <typename K, typename V> struct delegate<Runtime::MapChangedEventHandler<K, V>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::MapChangedEventHandler<K, V>, H>
+        struct type final : implements_delegate<Runtime::MapChangedEventHandler<K, V>, H>
         {
-            type(H&& handler) : implements_delegate<System::MapChangedEventHandler<K, V>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::MapChangedEventHandler<K, V>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IObservableMap<K, V> const*>(&sender), *reinterpret_cast<System::IMapChangedEventArgs<K> const*>(&args));
+                    (*this)(*reinterpret_cast<Runtime::IObservableMap<K, V> const*>(&sender), *reinterpret_cast<Runtime::IMapChangedEventArgs<K> const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -60,18 +60,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct delegate<System::EventHandler<T>>
+    template <typename T> struct delegate<Runtime::EventHandler<T>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::EventHandler<T>, H>
+        struct type final : implements_delegate<Runtime::EventHandler<T>, H>
         {
-            type(H&& handler) : implements_delegate<System::EventHandler<T>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::EventHandler<T>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(void* sender, arg_in<T> args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IObject const*>(&sender), *reinterpret_cast<T const*>(&args));
+                    (*this)(*reinterpret_cast<Runtime::IObject const*>(&sender), *reinterpret_cast<T const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -79,12 +79,12 @@ namespace xlang::impl
         };
     };
 
-    template <typename TSender, typename TArgs> struct delegate<System::TypedEventHandler<TSender, TArgs>>
+    template <typename TSender, typename TArgs> struct delegate<Runtime::TypedEventHandler<TSender, TArgs>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::TypedEventHandler<TSender, TArgs>, H>
+        struct type final : implements_delegate<Runtime::TypedEventHandler<TSender, TArgs>, H>
         {
-            type(H&& handler) : implements_delegate<System::TypedEventHandler<TSender, TArgs>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::TypedEventHandler<TSender, TArgs>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(arg_in<TSender> sender, arg_in<TArgs> args) noexcept final
             {
@@ -98,9 +98,9 @@ namespace xlang::impl
         };
     };
 
-    template <typename D> struct produce<D, System::IAsyncAction> : produce_base<D, System::IAsyncAction>
+    template <typename D> struct produce<D, Runtime::IAsyncAction> : produce_base<D, Runtime::IAsyncAction>
     {
-        int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
+        int32_t WINRT_CALL get_Status(xlang::Runtime::AsyncStatus* status) noexcept final
         {
             try
             {
@@ -127,7 +127,7 @@ namespace xlang::impl
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().Completed(*reinterpret_cast<System::AsyncActionCompletedHandler const*>(&handler));
+                this->shim().Completed(*reinterpret_cast<Runtime::AsyncActionCompletedHandler const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -139,7 +139,7 @@ namespace xlang::impl
             {
                 *handler = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *handler = detach_from<System::AsyncActionCompletedHandler>(this->shim().Completed());
+                *handler = detach_from<Runtime::AsyncActionCompletedHandler>(this->shim().Completed());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -157,9 +157,9 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename TProgress> struct produce<D, System::IAsyncActionWithProgress<TProgress>> : produce_base<D, System::IAsyncActionWithProgress<TProgress>>
+    template <typename D, typename TProgress> struct produce<D, Runtime::IAsyncActionWithProgress<TProgress>> : produce_base<D, Runtime::IAsyncActionWithProgress<TProgress>>
     {
-        int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
+        int32_t WINRT_CALL get_Status(xlang::Runtime::AsyncStatus* status) noexcept final
         {
             try
             {
@@ -186,7 +186,7 @@ namespace xlang::impl
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().Progress(*reinterpret_cast<System::AsyncActionProgressHandler<TProgress> const*>(&handler));
+                this->shim().Progress(*reinterpret_cast<Runtime::AsyncActionProgressHandler<TProgress> const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -198,7 +198,7 @@ namespace xlang::impl
             {
                 *handler = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *handler = detach_from<System::AsyncActionProgressHandler<TProgress>>(this->shim().Progress());
+                *handler = detach_from<Runtime::AsyncActionProgressHandler<TProgress>>(this->shim().Progress());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -209,7 +209,7 @@ namespace xlang::impl
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().Completed(*reinterpret_cast<System::AsyncActionWithProgressCompletedHandler<TProgress> const*>(&handler));
+                this->shim().Completed(*reinterpret_cast<Runtime::AsyncActionWithProgressCompletedHandler<TProgress> const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -221,7 +221,7 @@ namespace xlang::impl
             {
                 *handler = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *handler = detach_from<System::AsyncActionWithProgressCompletedHandler<TProgress>>(this->shim().Completed());
+                *handler = detach_from<Runtime::AsyncActionWithProgressCompletedHandler<TProgress>>(this->shim().Completed());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -239,9 +239,9 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename TResult> struct produce<D, System::IAsyncOperation<TResult>> : produce_base<D, System::IAsyncOperation<TResult>>
+    template <typename D, typename TResult> struct produce<D, Runtime::IAsyncOperation<TResult>> : produce_base<D, Runtime::IAsyncOperation<TResult>>
     {
-        int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
+        int32_t WINRT_CALL get_Status(xlang::Runtime::AsyncStatus* status) noexcept final
         {
             try
             {
@@ -268,7 +268,7 @@ namespace xlang::impl
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().Completed(*reinterpret_cast<System::AsyncOperationCompletedHandler<TResult> const*>(&handler));
+                this->shim().Completed(*reinterpret_cast<Runtime::AsyncOperationCompletedHandler<TResult> const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -280,7 +280,7 @@ namespace xlang::impl
             {
                 *handler = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *handler = detach_from<System::AsyncOperationCompletedHandler<TResult>>(this->shim().Completed());
+                *handler = detach_from<Runtime::AsyncOperationCompletedHandler<TResult>>(this->shim().Completed());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -299,9 +299,9 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename TResult, typename TProgress> struct produce<D, System::IAsyncOperationWithProgress<TResult, TProgress>> : produce_base<D, System::IAsyncOperationWithProgress<TResult, TProgress>>
+    template <typename D, typename TResult, typename TProgress> struct produce<D, Runtime::IAsyncOperationWithProgress<TResult, TProgress>> : produce_base<D, Runtime::IAsyncOperationWithProgress<TResult, TProgress>>
     {
-        int32_t WINRT_CALL get_Status(xlang::System::AsyncStatus* status) noexcept final
+        int32_t WINRT_CALL get_Status(xlang::Runtime::AsyncStatus* status) noexcept final
         {
             try
             {
@@ -328,7 +328,7 @@ namespace xlang::impl
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().Progress(*reinterpret_cast<System::AsyncOperationProgressHandler<TResult, TProgress> const*>(&handler));
+                this->shim().Progress(*reinterpret_cast<Runtime::AsyncOperationProgressHandler<TResult, TProgress> const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -340,7 +340,7 @@ namespace xlang::impl
             {
                 *handler = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *handler = detach_from<System::AsyncOperationProgressHandler<TResult, TProgress>>(this->shim().Progress());
+                *handler = detach_from<Runtime::AsyncOperationProgressHandler<TResult, TProgress>>(this->shim().Progress());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -351,7 +351,7 @@ namespace xlang::impl
             try
             {
                 typename D::abi_guard guard(this->shim());
-                this->shim().Completed(*reinterpret_cast<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> const*>(&handler));
+                this->shim().Completed(*reinterpret_cast<Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -363,7 +363,7 @@ namespace xlang::impl
             {
                 *handler = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *handler = detach_from<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>(this->shim().Completed());
+                *handler = detach_from<Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>(this->shim().Completed());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -383,9 +383,9 @@ namespace xlang::impl
     };
 
 
-    template <typename D> struct produce<D, System::IVectorChangedEventArgs> : produce_base<D, System::IVectorChangedEventArgs>
+    template <typename D> struct produce<D, Runtime::IVectorChangedEventArgs> : produce_base<D, Runtime::IVectorChangedEventArgs>
     {
-        int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept final
+        int32_t WINRT_CALL get_CollectionChange(Runtime::CollectionChange* value) noexcept final
         {
             try
             {
@@ -408,7 +408,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, System::IIterator<T>> : produce_base<D, System::IIterator<T>>
+    template <typename D, typename T> struct produce<D, Runtime::IIterator<T>> : produce_base<D, Runtime::IIterator<T>>
     {
         int32_t WINRT_CALL get_Current(arg_out<T> current) noexcept final
         {
@@ -457,7 +457,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, System::IIterable<T>> : produce_base<D, System::IIterable<T>>
+    template <typename D, typename T> struct produce<D, Runtime::IIterable<T>> : produce_base<D, Runtime::IIterable<T>>
     {
         int32_t WINRT_CALL First(void** first) noexcept final
         {
@@ -465,14 +465,14 @@ namespace xlang::impl
             {
                 *first = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *first = detach_from<System::IIterator<T>>(this->shim().First());
+                *first = detach_from<Runtime::IIterator<T>>(this->shim().First());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, System::IKeyValuePair<K, V>> : produce_base<D, System::IKeyValuePair<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, Runtime::IKeyValuePair<K, V>> : produce_base<D, Runtime::IKeyValuePair<K, V>>
     {
         int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept final
         {
@@ -499,7 +499,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, System::IVectorView<T>> : produce_base<D, System::IVectorView<T>>
+    template <typename D, typename T> struct produce<D, Runtime::IVectorView<T>> : produce_base<D, Runtime::IVectorView<T>>
     {
         int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept final
         {
@@ -548,7 +548,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, System::IVector<T>> : produce_base<D, System::IVector<T>>
+    template <typename D, typename T> struct produce<D, Runtime::IVector<T>> : produce_base<D, Runtime::IVector<T>>
     {
         int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept final
         {
@@ -579,7 +579,7 @@ namespace xlang::impl
             {
                 *view = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *view = detach_from<System::IVectorView<T>>(this->shim().GetView());
+                *view = detach_from<Runtime::IVectorView<T>>(this->shim().GetView());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -686,7 +686,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, System::IMapView<K, V>> : produce_base<D, System::IMapView<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, Runtime::IMapView<K, V>> : produce_base<D, Runtime::IMapView<K, V>>
     {
         int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
         {
@@ -729,14 +729,14 @@ namespace xlang::impl
                 *firstPartition = nullptr;
                 *secondPartition = nullptr;
                 typename D::abi_guard guard(this->shim());
-                this->shim().Split(*reinterpret_cast<System::IMapView<K, V>*>(firstPartition), *reinterpret_cast<System::IMapView<K, V>*>(secondPartition));
+                this->shim().Split(*reinterpret_cast<Runtime::IMapView<K, V>*>(firstPartition), *reinterpret_cast<Runtime::IMapView<K, V>*>(secondPartition));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, System::IMap<K, V>> : produce_base<D, System::IMap<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, Runtime::IMap<K, V>> : produce_base<D, Runtime::IMap<K, V>>
     {
         int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
         {
@@ -778,7 +778,7 @@ namespace xlang::impl
             {
                 *view = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *view = detach_from<System::IMapView<K, V>>(this->shim().GetView());
+                *view = detach_from<Runtime::IMapView<K, V>>(this->shim().GetView());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -818,9 +818,9 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename K> struct produce<D, System::IMapChangedEventArgs<K>> : produce_base<D, System::IMapChangedEventArgs<K>>
+    template <typename D, typename K> struct produce<D, Runtime::IMapChangedEventArgs<K>> : produce_base<D, Runtime::IMapChangedEventArgs<K>>
     {
-        int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept final
+        int32_t WINRT_CALL get_CollectionChange(Runtime::CollectionChange* value) noexcept final
         {
             try
             {
@@ -844,14 +844,14 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, System::IObservableMap<K, V>> : produce_base<D, System::IObservableMap<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, Runtime::IObservableMap<K, V>> : produce_base<D, Runtime::IObservableMap<K, V>>
     {
         int32_t WINRT_CALL add_MapChanged(void* handler, xlang::event_token* token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                *token = detach_from<event_token>(this->shim().MapChanged(*reinterpret_cast<System::MapChangedEventHandler<K, V> const*>(&handler)));
+                *token = detach_from<event_token>(this->shim().MapChanged(*reinterpret_cast<Runtime::MapChangedEventHandler<K, V> const*>(&handler)));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -870,14 +870,14 @@ namespace xlang::impl
     };
 
     template <typename D, typename T>
-    struct produce<D, System::IObservableVector<T>> : produce_base<D, System::IObservableVector<T>>
+    struct produce<D, Runtime::IObservableVector<T>> : produce_base<D, Runtime::IObservableVector<T>>
     {
         int32_t WINRT_CALL add_VectorChanged(void* handler, xlang::event_token* token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                *token = this->shim().VectorChanged(*reinterpret_cast<System::VectorChangedEventHandler<T> const*>(&handler));
+                *token = this->shim().VectorChanged(*reinterpret_cast<Runtime::VectorChangedEventHandler<T> const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -895,18 +895,18 @@ namespace xlang::impl
         }
     };
 
-    template <> struct delegate<System::AsyncActionCompletedHandler>
+    template <> struct delegate<Runtime::AsyncActionCompletedHandler>
     {
         template <typename H>
-        struct type final : implements_delegate<System::AsyncActionCompletedHandler, H>
+        struct type final : implements_delegate<Runtime::AsyncActionCompletedHandler, H>
         {
-            type(H&& handler) : implements_delegate<System::AsyncActionCompletedHandler, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::AsyncActionCompletedHandler, H>(std::forward<H>(handler)) {}
 
-            int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus asyncStatus) noexcept final
+            int32_t WINRT_CALL Invoke(void* asyncInfo, Runtime::AsyncStatus asyncStatus) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IAsyncAction const*>(&asyncInfo), asyncStatus);
+                    (*this)(*reinterpret_cast<Runtime::IAsyncAction const*>(&asyncInfo), asyncStatus);
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -914,18 +914,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult> struct delegate<System::AsyncOperationCompletedHandler<TResult>>
+    template <typename TResult> struct delegate<Runtime::AsyncOperationCompletedHandler<TResult>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::AsyncOperationCompletedHandler<TResult>, H>
+        struct type final : implements_delegate<Runtime::AsyncOperationCompletedHandler<TResult>, H>
         {
-            type(H&& handler) : implements_delegate<System::AsyncOperationCompletedHandler<TResult>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::AsyncOperationCompletedHandler<TResult>, H>(std::forward<H>(handler)) {}
 
-            int32_t WINRT_CALL Invoke(void* sender, System::AsyncStatus args) noexcept final
+            int32_t WINRT_CALL Invoke(void* sender, Runtime::AsyncStatus args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IAsyncOperation<TResult> const*>(&sender), args);
+                    (*this)(*reinterpret_cast<Runtime::IAsyncOperation<TResult> const*>(&sender), args);
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -933,18 +933,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename TProgress> struct delegate<System::AsyncActionProgressHandler<TProgress>>
+    template <typename TProgress> struct delegate<Runtime::AsyncActionProgressHandler<TProgress>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::AsyncActionProgressHandler<TProgress>, H>
+        struct type final : implements_delegate<Runtime::AsyncActionProgressHandler<TProgress>, H>
         {
-            type(H&& handler) : implements_delegate<System::AsyncActionProgressHandler<TProgress>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::AsyncActionProgressHandler<TProgress>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(void* sender, arg_in<TProgress> args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IAsyncActionWithProgress<TProgress> const*>(&sender), *reinterpret_cast<TProgress const*>(&args));
+                    (*this)(*reinterpret_cast<Runtime::IAsyncActionWithProgress<TProgress> const*>(&sender), *reinterpret_cast<TProgress const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -952,18 +952,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename TProgress> struct delegate<System::AsyncActionWithProgressCompletedHandler<TProgress>>
+    template <typename TProgress> struct delegate<Runtime::AsyncActionWithProgressCompletedHandler<TProgress>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::AsyncActionWithProgressCompletedHandler<TProgress>, H>
+        struct type final : implements_delegate<Runtime::AsyncActionWithProgressCompletedHandler<TProgress>, H>
         {
-            type(H&& handler) : implements_delegate<System::AsyncActionWithProgressCompletedHandler<TProgress>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::AsyncActionWithProgressCompletedHandler<TProgress>, H>(std::forward<H>(handler)) {}
 
-            int32_t WINRT_CALL Invoke(void* sender, System::AsyncStatus args) noexcept final
+            int32_t WINRT_CALL Invoke(void* sender, Runtime::AsyncStatus args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IAsyncActionWithProgress<TProgress> const*>(&sender), args);
+                    (*this)(*reinterpret_cast<Runtime::IAsyncActionWithProgress<TProgress> const*>(&sender), args);
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -971,18 +971,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult, typename TProgress> struct delegate<System::AsyncOperationProgressHandler<TResult, TProgress>>
+    template <typename TResult, typename TProgress> struct delegate<Runtime::AsyncOperationProgressHandler<TResult, TProgress>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::AsyncOperationProgressHandler<TResult, TProgress>, H>
+        struct type final : implements_delegate<Runtime::AsyncOperationProgressHandler<TResult, TProgress>, H>
         {
-            type(H&& handler) : implements_delegate<System::AsyncOperationProgressHandler<TResult, TProgress>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::AsyncOperationProgressHandler<TResult, TProgress>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(void* sender, arg_in<TProgress> args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IAsyncOperationWithProgress<TResult, TProgress> const*>(&sender), *reinterpret_cast<TProgress const*>(&args));
+                    (*this)(*reinterpret_cast<Runtime::IAsyncOperationWithProgress<TResult, TProgress> const*>(&sender), *reinterpret_cast<TProgress const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -990,18 +990,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult, typename TProgress> struct delegate<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    template <typename TResult, typename TProgress> struct delegate<Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
     {
         template <typename H>
-        struct type final : implements_delegate<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, H>
+        struct type final : implements_delegate<Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, H>
         {
-            type(H&& handler) : implements_delegate<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, H>(std::forward<H>(handler)) {}
 
-            int32_t WINRT_CALL Invoke(void* sender, System::AsyncStatus args) noexcept final
+            int32_t WINRT_CALL Invoke(void* sender, Runtime::AsyncStatus args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<System::IAsyncOperationWithProgress<TResult, TProgress> const*>(&sender), args);
+                    (*this)(*reinterpret_cast<Runtime::IAsyncOperationWithProgress<TResult, TProgress> const*>(&sender), args);
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }

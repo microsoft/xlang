@@ -2,12 +2,12 @@
 WINRT_EXPORT namespace std::experimental
 {
     template <typename... Args>
-    struct coroutine_traits<xlang::System::IAsyncAction, Args...>
+    struct coroutine_traits<xlang::Runtime::IAsyncAction, Args...>
     {
-        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::System::IAsyncAction,
-            xlang::System::AsyncActionCompletedHandler>
+        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::Runtime::IAsyncAction,
+            xlang::Runtime::AsyncActionCompletedHandler>
         {
-            using AsyncStatus = xlang::System::AsyncStatus;
+            using AsyncStatus = xlang::Runtime::AsyncStatus;
 
             void GetResults()
             {
@@ -25,7 +25,7 @@ WINRT_EXPORT namespace std::experimental
 
             void return_void()
             {
-                xlang::System::AsyncActionCompletedHandler handler;
+                xlang::Runtime::AsyncActionCompletedHandler handler;
                 AsyncStatus status;
 
                 {

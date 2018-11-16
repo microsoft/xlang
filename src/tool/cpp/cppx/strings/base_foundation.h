@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace xlang::System
+WINRT_EXPORT namespace xlang::Runtime
 {
     struct Point
     {
@@ -102,84 +102,84 @@ WINRT_EXPORT namespace xlang::System
 
 namespace xlang::impl
 {
-    template <> struct name<System::Point>
+    template <> struct name<Runtime::Point>
     {
-        static constexpr auto & value{ L"System.Point" };
+        static constexpr auto & value{ L"Runtime.Point" };
     };
 
-    template <> struct category<System::Point>
+    template <> struct category<Runtime::Point>
     {
         using type = struct_category<float, float>;
     };
 
-    template <> struct name<System::Size>
+    template <> struct name<Runtime::Size>
     {
-        static constexpr auto & value{ L"System.Size" };
+        static constexpr auto & value{ L"Runtime.Size" };
     };
 
-    template <> struct category<System::Size>
+    template <> struct category<Runtime::Size>
     {
         using type = struct_category<float, float>;
     };
     
-    template <> struct name<System::Rect>
+    template <> struct name<Runtime::Rect>
     {
-        static constexpr auto & value{ L"System.Rect" };
+        static constexpr auto & value{ L"Runtime.Rect" };
     };
 
-    template <> struct category<System::Rect>
+    template <> struct category<Runtime::Rect>
     {
         using type = struct_category<float, float, float, float>;
     };
 
 #ifdef WINRT_NUMERICS
 
-    template <> struct name<System::Numerics::float2>
+    template <> struct name<Runtime::Numerics::float2>
     {
-        static constexpr auto & value{ L"System.Numerics.Vector2" };
+        static constexpr auto & value{ L"Runtime.Numerics.Vector2" };
     };
 
-    template <> struct category<System::Numerics::float2>
+    template <> struct category<Runtime::Numerics::float2>
     {
         using type = struct_category<float, float>;
     };
 
-    template <> struct name<System::Numerics::float3>
+    template <> struct name<Runtime::Numerics::float3>
     {
-        static constexpr auto & value{ L"System.Numerics.Vector3" };
+        static constexpr auto & value{ L"Runtime.Numerics.Vector3" };
     };
 
-    template <> struct category<System::Numerics::float3>
+    template <> struct category<Runtime::Numerics::float3>
     {
         using type = struct_category<float, float, float>;
     };
 
-    template <> struct name<System::Numerics::float4>
+    template <> struct name<Runtime::Numerics::float4>
     {
-        static constexpr auto & value{ L"System.Numerics.Vector4" };
+        static constexpr auto & value{ L"Runtime.Numerics.Vector4" };
     };
 
-    template <> struct category<System::Numerics::float4>
+    template <> struct category<Runtime::Numerics::float4>
     {
         using type = struct_category<float, float, float, float>;
     };
 
-    template <> struct name<System::Numerics::float3x2>
+    template <> struct name<Runtime::Numerics::float3x2>
     {
-        static constexpr auto & value{ L"System.Numerics.Matrix3x2" };
+        static constexpr auto & value{ L"Runtime.Numerics.Matrix3x2" };
     };
 
-    template <> struct category<System::Numerics::float3x2>
+    template <> struct category<Runtime::Numerics::float3x2>
     {
         using type = struct_category<float, float, float, float, float, float>;
     };
 
-    template <> struct name<System::Numerics::float4x4>
+    template <> struct name<Runtime::Numerics::float4x4>
     {
-        static constexpr auto & value{ L"System.Numerics.Matrix4x4" };
+        static constexpr auto & value{ L"Runtime.Numerics.Matrix4x4" };
     };
 
-    template <> struct category<System::Numerics::float4x4>
+    template <> struct category<Runtime::Numerics::float4x4>
     {
         using type = struct_category<
             float, float, float, float,
@@ -189,24 +189,24 @@ namespace xlang::impl
         >;
     };
 
-    template <> struct name<System::Numerics::quaternion>
+    template <> struct name<Runtime::Numerics::quaternion>
     {
-        static constexpr auto & value{ L"System.Numerics.Quaternion" };
+        static constexpr auto & value{ L"Runtime.Numerics.Quaternion" };
     };
 
-    template <> struct category<System::Numerics::quaternion>
+    template <> struct category<Runtime::Numerics::quaternion>
     {
         using type = struct_category<float, float, float, float>;
     };
 
-    template <> struct name<System::Numerics::plane>
+    template <> struct name<Runtime::Numerics::plane>
     {
-        static constexpr auto & value{ L"System.Numerics.Plane" };
+        static constexpr auto & value{ L"Runtime.Numerics.Plane" };
     };
 
-    template <> struct category<System::Numerics::plane>
+    template <> struct category<Runtime::Numerics::plane>
     {
-        using type = struct_category<System::Numerics::float3, float>;
+        using type = struct_category<Runtime::Numerics::float3, float>;
     };
 
 #endif

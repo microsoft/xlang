@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename T, typename Container>
     struct input_vector final :
-        implements<input_vector<T, Container>, System::IVector<T>, System::IVectorView<T>, System::IIterable<T>>,
+        implements<input_vector<T, Container>, Runtime::IVector<T>, Runtime::IVectorView<T>, Runtime::IIterable<T>>,
         vector_base<input_vector<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -34,7 +34,7 @@ WINRT_EXPORT namespace xlang::param
     struct vector
     {
         using value_type = T;
-        using interface_type = System::IVector<value_type>;
+        using interface_type = Runtime::IVector<value_type>;
 
         vector(std::nullptr_t) noexcept
         {

@@ -1,7 +1,7 @@
 
 namespace xlang::impl
 {
-    template <> struct abi<System::IUnknown>
+    template <> struct abi<Runtime::IUnknown>
     {
         struct WINRT_NOVTABLE type
         {
@@ -11,9 +11,9 @@ namespace xlang::impl
         };
     };
 
-    using unknown_abi = abi_t<System::IUnknown>;
+    using unknown_abi = abi_t<Runtime::IUnknown>;
 
-    template <> struct abi<System::IObject>
+    template <> struct abi<Runtime::IObject>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -21,7 +21,7 @@ namespace xlang::impl
         };
     };
 
-    using inspectable_abi = abi_t<System::IObject>;
+    using inspectable_abi = abi_t<Runtime::IObject>;
 
     struct WINRT_NOVTABLE IWeakReference : unknown_abi
     {
@@ -51,7 +51,7 @@ namespace xlang::impl
         virtual int32_t WINRT_CALL GetPropagationContextHead(ILanguageExceptionErrorInfo2** head) noexcept = 0;
     };
 
-    template <> struct abi<System::IActivationFactory>
+    template <> struct abi<Runtime::IActivationFactory>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -59,19 +59,19 @@ namespace xlang::impl
         };
     };
 
-    template <> struct abi<System::AsyncActionCompletedHandler>
+    template <> struct abi<Runtime::AsyncActionCompletedHandler>
     {
         struct type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus asyncStatus) noexcept = 0;
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Runtime::AsyncStatus asyncStatus) noexcept = 0;
         };
     };
 
-    template <> struct abi<System::IAsyncAction>
+    template <> struct abi<Runtime::IAsyncAction>
     {
         struct type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Status(Runtime::AsyncStatus* status) noexcept = 0;
             virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Completed(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Completed(void** handler) noexcept = 0;
@@ -79,40 +79,24 @@ namespace xlang::impl
         };
     };
 
-    template <> struct abi<System::IVectorChangedEventArgs>
+    template <> struct abi<Runtime::IVectorChangedEventArgs>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept = 0;
+            virtual int32_t WINRT_CALL get_CollectionChange(Runtime::CollectionChange* value) noexcept = 0;
             virtual int32_t WINRT_CALL get_Index(uint32_t* value) noexcept = 0;
         };
     };
 
-    template <typename TResult> struct abi<System::AsyncOperationCompletedHandler<TResult>>
+    template <typename TResult> struct abi<Runtime::AsyncOperationCompletedHandler<TResult>>
     {
         struct type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus status) noexcept = 0;
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Runtime::AsyncStatus status) noexcept = 0;
         };
     };
 
-    template <typename TProgress> struct abi<System::AsyncActionProgressHandler<TProgress>>
-    {
-        struct type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, arg_in<TProgress> progressInfo) noexcept = 0;
-        };
-    };
-
-    template <typename TProgress> struct abi<System::AsyncActionWithProgressCompletedHandler<TProgress>>
-    {
-        struct type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus status) noexcept = 0;
-        };
-    };
-
-    template <typename TResult, typename TProgress> struct abi<System::AsyncOperationProgressHandler<TResult, TProgress>>
+    template <typename TProgress> struct abi<Runtime::AsyncActionProgressHandler<TProgress>>
     {
         struct type : unknown_abi
         {
@@ -120,19 +104,35 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult, typename TProgress> struct abi<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    template <typename TProgress> struct abi<Runtime::AsyncActionWithProgressCompletedHandler<TProgress>>
     {
         struct type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, System::AsyncStatus status) noexcept = 0;
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Runtime::AsyncStatus status) noexcept = 0;
         };
     };
 
-    template <typename TResult> struct abi<System::IAsyncOperation<TResult>>
+    template <typename TResult, typename TProgress> struct abi<Runtime::AsyncOperationProgressHandler<TResult, TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, arg_in<TProgress> progressInfo) noexcept = 0;
+        };
+    };
+
+    template <typename TResult, typename TProgress> struct abi<Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void* asyncInfo, Runtime::AsyncStatus status) noexcept = 0;
+        };
+    };
+
+    template <typename TResult> struct abi<Runtime::IAsyncOperation<TResult>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Status(Runtime::AsyncStatus* status) noexcept = 0;
             virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Completed(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Completed(void** handler) noexcept = 0;
@@ -140,11 +140,11 @@ namespace xlang::impl
         };
     };
 
-    template <typename TProgress> struct abi<System::IAsyncActionWithProgress<TProgress>>
+    template <typename TProgress> struct abi<Runtime::IAsyncActionWithProgress<TProgress>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Status(Runtime::AsyncStatus* status) noexcept = 0;
             virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Progress(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Progress(void** handler) noexcept = 0;
@@ -154,11 +154,11 @@ namespace xlang::impl
         };
     };
 
-    template <typename TResult, typename TProgress> struct abi<System::IAsyncOperationWithProgress<TResult, TProgress>>
+    template <typename TResult, typename TProgress> struct abi<Runtime::IAsyncOperationWithProgress<TResult, TProgress>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_Status(System::AsyncStatus* status) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Status(Runtime::AsyncStatus* status) noexcept = 0;
             virtual int32_t WINRT_CALL Cancel() noexcept = 0;
             virtual int32_t WINRT_CALL put_Progress(void* handler) noexcept = 0;
             virtual int32_t WINRT_CALL get_Progress(void** handler) noexcept = 0;
@@ -168,7 +168,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::IReference<T>>
+    template <typename T> struct abi<Runtime::IReference<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -176,7 +176,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::IReferenceArray<T>>
+    template <typename T> struct abi<Runtime::IReferenceArray<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -184,16 +184,16 @@ namespace xlang::impl
         };
     };
 
-    template <typename K> struct abi<System::IMapChangedEventArgs<K>>
+    template <typename K> struct abi<Runtime::IMapChangedEventArgs<K>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept = 0;
+            virtual int32_t WINRT_CALL get_CollectionChange(Runtime::CollectionChange* value) noexcept = 0;
             virtual int32_t WINRT_CALL get_Key(arg_out<K> value) noexcept = 0;
         };
     };
 
-    template <typename T> struct abi<System::VectorChangedEventHandler<T>>
+    template <typename T> struct abi<Runtime::VectorChangedEventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -201,7 +201,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<System::MapChangedEventHandler<K, V>>
+    template <typename K, typename V> struct abi<Runtime::MapChangedEventHandler<K, V>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -209,7 +209,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::IIterator<T>>
+    template <typename T> struct abi<Runtime::IIterator<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -220,7 +220,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::IIterable<T>>
+    template <typename T> struct abi<Runtime::IIterable<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -228,7 +228,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::IVectorView<T>>
+    template <typename T> struct abi<Runtime::IVectorView<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -239,7 +239,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::IVector<T>>
+    template <typename T> struct abi<Runtime::IVector<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -258,7 +258,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::IObservableVector<T>>
+    template <typename T> struct abi<Runtime::IObservableVector<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -267,7 +267,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<System::IKeyValuePair<K, V>>
+    template <typename K, typename V> struct abi<Runtime::IKeyValuePair<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -276,7 +276,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<System::IMapView<K, V>>
+    template <typename K, typename V> struct abi<Runtime::IMapView<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -287,7 +287,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<System::IMap<K, V>>
+    template <typename K, typename V> struct abi<Runtime::IMap<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -301,7 +301,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<System::IObservableMap<K, V>>
+    template <typename K, typename V> struct abi<Runtime::IObservableMap<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -310,7 +310,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<System::EventHandler<T>>
+    template <typename T> struct abi<Runtime::EventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -318,7 +318,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename TSender, typename TArgs> struct abi<System::TypedEventHandler<TSender, TArgs>>
+    template <typename TSender, typename TArgs> struct abi<Runtime::TypedEventHandler<TSender, TArgs>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {

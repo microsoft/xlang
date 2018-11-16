@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace xlang::System
+WINRT_EXPORT namespace xlang::Runtime
 {
     enum class AsyncStatus : int32_t
     {
@@ -69,5 +69,5 @@ WINRT_EXPORT namespace xlang
     };
 
     template <typename T>
-    using optional = System::IReference<T>;
+    using optional = Runtime::IReference<T>;
 }

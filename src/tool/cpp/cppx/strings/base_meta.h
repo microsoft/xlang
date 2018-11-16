@@ -148,7 +148,7 @@ namespace xlang::impl
     template <typename T>
     T empty_value() noexcept
     {
-        if constexpr (std::is_base_of_v<System::IUnknown, T>)
+        if constexpr (std::is_base_of_v<Runtime::IUnknown, T>)
         {
             return nullptr;
         }
@@ -165,7 +165,7 @@ namespace xlang::impl
     };
 
     template <typename T>
-    struct arg<T, std::enable_if_t<std::is_base_of_v<System::IUnknown, T>>>
+    struct arg<T, std::enable_if_t<std::is_base_of_v<Runtime::IUnknown, T>>>
     {
         using in = void*;
     };

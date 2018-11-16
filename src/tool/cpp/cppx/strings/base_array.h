@@ -357,7 +357,7 @@ WINRT_EXPORT namespace xlang
     template <typename T>
     auto get_abi(array_view<T> object) noexcept
     {
-        if constexpr (std::is_base_of_v<System::IUnknown, T>)
+        if constexpr (std::is_base_of_v<Runtime::IUnknown, T>)
         {
             return (void**)object.data();
         }
