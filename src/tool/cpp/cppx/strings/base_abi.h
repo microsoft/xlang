@@ -19,7 +19,6 @@ namespace xlang::impl
         {
             virtual int32_t WINRT_CALL GetIids(uint32_t* count, guid** ids) noexcept = 0;
             virtual int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept = 0;
-            virtual int32_t WINRT_CALL GetTrustLevel(System::TrustLevel* level) noexcept = 0;
         };
     };
 

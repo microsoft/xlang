@@ -428,11 +428,6 @@ namespace xlang::impl
         {
             return shim().abi_GetRuntimeClassName(name);
         }
-
-        int32_t WINRT_CALL GetTrustLevel(System::TrustLevel* trustLevel) noexcept final
-        {
-            return shim().abi_GetTrustLevel(trustLevel);
-        }
     };
 
 #ifdef WINRT_WINDOWS_ABI
@@ -789,16 +784,6 @@ namespace xlang::impl
             return NonDelegatingGetRuntimeClassName(name);
         }
 
-        int32_t WINRT_CALL abi_GetTrustLevel(System::TrustLevel* trustLevel) noexcept
-        {
-            if (this->outer())
-            {
-                return this->outer()->GetTrustLevel(trustLevel);
-            }
-
-            return NonDelegatingGetTrustLevel(trustLevel);
-        }
-
         uint32_t WINRT_CALL NonDelegatingAddRef() noexcept
         {
             if constexpr (is_weak_ref_source::value)
@@ -910,16 +895,6 @@ namespace xlang::impl
             try
             {
                 *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL NonDelegatingGetTrustLevel(System::TrustLevel* trustLevel) noexcept
-        {
-            try
-            {
-                *trustLevel = static_cast<D*>(this)->GetTrustLevel();
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -1082,11 +1057,6 @@ namespace xlang::impl
         virtual hstring GetRuntimeClassName() const = 0;
         virtual void* find_interface(guid const&) const noexcept = 0;
         virtual inspectable_abi* find_inspectable() const noexcept = 0;
-
-        virtual System::TrustLevel GetTrustLevel() const noexcept
-        {
-            return System::TrustLevel::BaseTrust;
-        }
 
         template <typename D, typename I, typename Enable>
         friend struct impl::produce_base;
