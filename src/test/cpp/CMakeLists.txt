@@ -40,7 +40,7 @@ endif()
 
 target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
 
-file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cpp.exe cpp_exe)
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files)
 file(TO_NATIVE_PATH "${generated_files}/attributes.winmd" attributes_winmd)
