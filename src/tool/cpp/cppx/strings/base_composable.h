@@ -5,22 +5,22 @@ namespace xlang::impl
     struct composable_factory
     {
         template <typename I, typename... Args>
-        static I CreateInstance(const Runtime::IObject& outer, Runtime::IObject& inner, Args&&... args)
+        static I CreateInstance(const IObject& outer, IObject& inner, Args&&... args)
         {
-            static_assert(std::is_base_of_v<Runtime::IObject, I>, "Requested interface must derive from xlang::Runtime::IObject");
+            static_assert(std::is_base_of_v<IObject, I>, "Requested interface must derive from xlang::IObject");
             inner = CreateInstanceImpl(outer, std::forward<Args>(args)...);
             return inner.as<I>();
         }
 
     private:
         template <typename... Args>
-        static Runtime::IObject CreateInstanceImpl(const Runtime::IObject& outer, Args&&... args)
+        static IObject CreateInstanceImpl(const IObject& outer, Args&&... args)
         {
             // Very specific dance here. The return value must have a ref on the outer, while inner must have a ref count of 1.
             // Be sure not to make a delegating QueryInterface call because the controlling outer is not fully constructed yet.
             com_ptr<D> instance = make_self<D>(std::forward<Args>(args)...);
             instance->m_outer = static_cast<inspectable_abi*>(get_abi(outer));
-            Runtime::IObject inner;
+            IObject inner;
             attach_abi(inner, to_abi<INonDelegatingInspectable>(detach_abi(instance)));
             return inner;
         }

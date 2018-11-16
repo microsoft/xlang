@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename T, typename Container>
     struct input_vector_view final :
-        implements<input_vector_view<T, Container>, non_agile, no_weak_ref, Runtime::IVectorView<T>, Runtime::IIterable<T>>,
+        implements<input_vector_view<T, Container>, non_agile, no_weak_ref, IVectorView<T>, IIterable<T>>,
         vector_view_base<input_vector_view<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -25,7 +25,7 @@ namespace xlang::impl
     template <typename T, typename InputIt>
     struct scoped_input_vector_view final :
         input_scope,
-        implements<scoped_input_vector_view<T, InputIt>, non_agile, no_weak_ref, Runtime::IVectorView<T>, Runtime::IIterable<T>>,
+        implements<scoped_input_vector_view<T, InputIt>, non_agile, no_weak_ref, IVectorView<T>, IIterable<T>>,
         vector_view_base<scoped_input_vector_view<T, InputIt>, T>
     {
         void abi_enter() const
@@ -51,7 +51,7 @@ namespace xlang::impl
     template <typename T, typename InputIt>
     auto make_scoped_input_vector_view(InputIt first, InputIt last)
     {
-        using interface_type = Runtime::IVectorView<T>;
+        using interface_type = IVectorView<T>;
         std::pair<interface_type, input_scope*> result;
         auto ptr = new scoped_input_vector_view<T, InputIt>(first, last);
         *put_abi(result.first) = to_abi<interface_type>(ptr);
@@ -66,7 +66,7 @@ WINRT_EXPORT namespace xlang::param
     struct vector_view
     {
         using value_type = T;
-        using interface_type = Runtime::IVectorView<value_type>;
+        using interface_type = IVectorView<value_type>;
 
         vector_view(std::nullptr_t) noexcept
         {
@@ -139,7 +139,7 @@ WINRT_EXPORT namespace xlang::param
     struct async_vector_view
     {
         using value_type = T;
-        using interface_type = Runtime::IVectorView<value_type>;
+        using interface_type = IVectorView<value_type>;
 
         async_vector_view(std::nullptr_t) noexcept
         {

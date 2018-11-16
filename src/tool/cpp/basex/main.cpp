@@ -1,7 +1,6 @@
 #include "base.h"
 
 using namespace xlang;
-using namespace xlang::Runtime;
 
 IAsyncOperation<hstring> Sample()
 {

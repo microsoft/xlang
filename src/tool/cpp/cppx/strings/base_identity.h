@@ -719,7 +719,7 @@ namespace xlang::impl
     template <>
     struct name<hresult>
     {
-        static constexpr auto & value{ L"Runtime.HResult" };
+        static constexpr auto & value{ L"xlang.HResult" };
     };
 
     template <>
@@ -731,7 +731,7 @@ namespace xlang::impl
     template <>
     struct name<event_token>
     {
-        static constexpr auto & value{ L"Runtime.EventRegistrationToken" };
+        static constexpr auto & value{ L"xlang.EventRegistrationToken" };
     };
 
     template <>

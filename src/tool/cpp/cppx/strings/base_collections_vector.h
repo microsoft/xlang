@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename T, typename Container>
     struct observable_vector final :
-        implements<observable_vector<T, Container>, Runtime::IObservableVector<T>, Runtime::IVector<T>, Runtime::IVectorView<T>, Runtime::IIterable<T>>,
+        implements<observable_vector<T, Container>, IObservableVector<T>, IVector<T>, IVectorView<T>, IIterable<T>>,
         observable_vector_base<observable_vector<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -31,13 +31,13 @@ namespace xlang::impl
 WINRT_EXPORT namespace xlang
 {
     template <typename T, typename Allocator = std::allocator<T>>
-    Runtime::IVector<T> single_threaded_vector(std::vector<T, Allocator>&& values = {})
+    IVector<T> single_threaded_vector(std::vector<T, Allocator>&& values = {})
     {
         return make<impl::input_vector<T, std::vector<T, Allocator>>>(std::move(values));
     }
 
     template <typename T, typename Allocator = std::allocator<T>>
-    Runtime::IObservableVector<T> single_threaded_observable_vector(std::vector<T, Allocator>&& values = {})
+    IObservableVector<T> single_threaded_observable_vector(std::vector<T, Allocator>&& values = {})
     {
         return make<impl::observable_vector<T, std::vector<T, Allocator>>>(std::move(values));
     }

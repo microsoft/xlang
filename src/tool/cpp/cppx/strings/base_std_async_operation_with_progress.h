@@ -2,13 +2,13 @@
 WINRT_EXPORT namespace std::experimental
 {
     template <typename TResult, typename TProgress, typename... Args>
-    struct coroutine_traits<xlang::Runtime::IAsyncOperationWithProgress<TResult, TProgress>, Args...>
+    struct coroutine_traits<xlang::IAsyncOperationWithProgress<TResult, TProgress>, Args...>
     {
-        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::Runtime::IAsyncOperationWithProgress<TResult, TProgress>,
-            xlang::Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, TProgress>
+        struct promise_type final : xlang::impl::promise_base<promise_type, xlang::IAsyncOperationWithProgress<TResult, TProgress>,
+            xlang::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, TProgress>
         {
-            using AsyncStatus = xlang::Runtime::AsyncStatus;
-            using ProgressHandler = xlang::Runtime::AsyncOperationProgressHandler<TResult, TProgress>;
+            using AsyncStatus = xlang::AsyncStatus;
+            using ProgressHandler = xlang::AsyncOperationProgressHandler<TResult, TProgress>;
 
             void Progress(ProgressHandler const& handler)
             {
@@ -38,7 +38,7 @@ WINRT_EXPORT namespace std::experimental
 
             void return_value(TResult const& result)
             {
-                xlang::Runtime::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> handler;
+                xlang::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> handler;
                 AsyncStatus status;
 
                 {

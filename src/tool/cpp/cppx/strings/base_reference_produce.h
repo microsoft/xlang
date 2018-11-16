@@ -2,7 +2,7 @@
 namespace xlang::impl
 {
     template <typename D, typename T>
-    struct produce<D, Runtime::IReference<T>> : produce_base<D, Runtime::IReference<T>>
+    struct produce<D, IReference<T>> : produce_base<D, IReference<T>>
     {
         int32_t WINRT_CALL get_Value(arg_out<T> value) noexcept final
         {
@@ -17,7 +17,7 @@ namespace xlang::impl
     };
 
     template <typename D, typename T>
-    struct produce<D, Runtime::IReferenceArray<T>> : produce_base<D, Runtime::IReferenceArray<T>>
+    struct produce<D, IReferenceArray<T>> : produce_base<D, IReferenceArray<T>>
     {
         int32_t WINRT_CALL get_Value(uint32_t* __valueSize, arg_out<T>* value) noexcept final
         {
@@ -34,7 +34,7 @@ namespace xlang::impl
     };
 
     template <typename T>
-    struct reference final : implements<reference<T>, Runtime::IReference<T>, Runtime::IPropertyValue>
+    struct reference final : implements<reference<T>, IReference<T>, IPropertyValue>
     {
         reference(T const& value) : m_value(value)
         {
@@ -45,9 +45,9 @@ namespace xlang::impl
             return m_value;
         }
 
-        Runtime::PropertyType Type() const noexcept
+        PropertyType Type() const noexcept
         {
-            return Runtime::PropertyType::OtherType;
+            return PropertyType::OtherType;
         }
 
         static constexpr bool IsNumericScalar() noexcept
@@ -96,11 +96,11 @@ namespace xlang::impl
         bool GetBoolean() { throw hresult_not_implemented(); }
         hstring GetString() { throw hresult_not_implemented(); }
         guid GetGuid() { throw hresult_not_implemented(); }
-        Runtime::DateTime GetDateTime() { throw hresult_not_implemented(); }
-        Runtime::TimeSpan GetTimeSpan() { throw hresult_not_implemented(); }
-        Runtime::Point GetPoint() { throw hresult_not_implemented(); }
-        Runtime::Size GetSize() { throw hresult_not_implemented(); }
-        Runtime::Rect GetRect() { throw hresult_not_implemented(); }
+        DateTime GetDateTime() { throw hresult_not_implemented(); }
+        TimeSpan GetTimeSpan() { throw hresult_not_implemented(); }
+        Point GetPoint() { throw hresult_not_implemented(); }
+        Size GetSize() { throw hresult_not_implemented(); }
+        Rect GetRect() { throw hresult_not_implemented(); }
         void GetUInt8Array(com_array<uint8_t> &) { throw hresult_not_implemented(); }
         void GetInt16Array(com_array<int16_t> &) { throw hresult_not_implemented(); }
         void GetUInt16Array(com_array<uint16_t> &) { throw hresult_not_implemented(); }
@@ -113,13 +113,13 @@ namespace xlang::impl
         void GetChar16Array(com_array<char16_t> &) { throw hresult_not_implemented(); }
         void GetBooleanArray(com_array<bool> &) { throw hresult_not_implemented(); }
         void GetStringArray(com_array<hstring> &) { throw hresult_not_implemented(); }
-        void GetInspectableArray(com_array<Runtime::IObject> &) { throw hresult_not_implemented(); }
+        void GetInspectableArray(com_array<IObject> &) { throw hresult_not_implemented(); }
         void GetGuidArray(com_array<guid> &) { throw hresult_not_implemented(); }
-        void GetDateTimeArray(com_array<Runtime::DateTime> &) { throw hresult_not_implemented(); }
-        void GetTimeSpanArray(com_array<Runtime::TimeSpan> &) { throw hresult_not_implemented(); }
-        void GetPointArray(com_array<Runtime::Point> &) { throw hresult_not_implemented(); }
-        void GetSizeArray(com_array<Runtime::Size> &) { throw hresult_not_implemented(); }
-        void GetRectArray(com_array<Runtime::Rect> &) { throw hresult_not_implemented(); }
+        void GetDateTimeArray(com_array<DateTime> &) { throw hresult_not_implemented(); }
+        void GetTimeSpanArray(com_array<TimeSpan> &) { throw hresult_not_implemented(); }
+        void GetPointArray(com_array<Point> &) { throw hresult_not_implemented(); }
+        void GetSizeArray(com_array<Size> &) { throw hresult_not_implemented(); }
+        void GetRectArray(com_array<Rect> &) { throw hresult_not_implemented(); }
 
     private:
 
@@ -148,119 +148,119 @@ namespace xlang::impl
     template <>
     struct reference_traits<uint8_t>
     {
-        static auto make(uint8_t value) { return Runtime::PropertyValue::CreateUInt8(value); }
+        static auto make(uint8_t value) { return PropertyValue::CreateUInt8(value); }
     };
 
     template <>
     struct reference_traits<uint16_t>
     {
-        static auto make(uint16_t value) { return Runtime::PropertyValue::CreateUInt16(value); }
+        static auto make(uint16_t value) { return PropertyValue::CreateUInt16(value); }
     };
 
     template <>
     struct reference_traits<int16_t>
     {
-        static auto make(int16_t value) { return Runtime::PropertyValue::CreateInt16(value); }
+        static auto make(int16_t value) { return PropertyValue::CreateInt16(value); }
     };
 
     template <>
     struct reference_traits<uint32_t>
     {
-        static auto make(uint32_t value) { return Runtime::PropertyValue::CreateUInt32(value); }
+        static auto make(uint32_t value) { return PropertyValue::CreateUInt32(value); }
     };
 
     template <>
     struct reference_traits<int32_t>
     {
-        static auto make(int32_t value) { return Runtime::PropertyValue::CreateInt32(value); }
+        static auto make(int32_t value) { return PropertyValue::CreateInt32(value); }
     };
 
     template <>
     struct reference_traits<uint64_t>
     {
-        static auto make(uint64_t value) { return Runtime::PropertyValue::CreateUInt64(value); }
+        static auto make(uint64_t value) { return PropertyValue::CreateUInt64(value); }
     };
 
     template <>
     struct reference_traits<int64_t>
     {
-        static auto make(int64_t value) { return Runtime::PropertyValue::CreateInt64(value); }
+        static auto make(int64_t value) { return PropertyValue::CreateInt64(value); }
     };
 
     template <>
     struct reference_traits<float>
     {
-        static auto make(float value) { return Runtime::PropertyValue::CreateSingle(value); }
+        static auto make(float value) { return PropertyValue::CreateSingle(value); }
     };
 
     template <>
     struct reference_traits<double>
     {
-        static auto make(double value) { return Runtime::PropertyValue::CreateDouble(value); }
+        static auto make(double value) { return PropertyValue::CreateDouble(value); }
     };
 
     template <>
     struct reference_traits<char16_t>
     {
-        static auto make(char16_t value) { return Runtime::PropertyValue::CreateChar16(value); }
+        static auto make(char16_t value) { return PropertyValue::CreateChar16(value); }
     };
 
     template <>
     struct reference_traits<bool>
     {
-        static auto make(bool value) { return Runtime::PropertyValue::CreateBoolean(value); }
+        static auto make(bool value) { return PropertyValue::CreateBoolean(value); }
     };
 
     template <>
     struct reference_traits<hstring>
     {
-        static auto make(hstring const& value) { return Runtime::PropertyValue::CreateString(value); }
+        static auto make(hstring const& value) { return PropertyValue::CreateString(value); }
     };
 
     template <>
-    struct reference_traits<Runtime::IObject>
+    struct reference_traits<IObject>
     {
-        static auto make(Runtime::IObject const& value) { return Runtime::PropertyValue::CreateInspectable(value); }
+        static auto make(IObject const& value) { return PropertyValue::CreateInspectable(value); }
     };
 
     template <>
     struct reference_traits<guid>
     {
-        static auto make(guid const& value) { return Runtime::PropertyValue::CreateGuid(value); }
+        static auto make(guid const& value) { return PropertyValue::CreateGuid(value); }
     };
 
     template <>
-    struct reference_traits<Runtime::DateTime>
+    struct reference_traits<DateTime>
     {
-        static auto make(Runtime::DateTime value) { return Runtime::PropertyValue::CreateDateTime(value); }
+        static auto make(DateTime value) { return PropertyValue::CreateDateTime(value); }
     };
 
     template <>
-    struct reference_traits<Runtime::TimeSpan>
+    struct reference_traits<TimeSpan>
     {
-        static auto make(Runtime::TimeSpan value) { return Runtime::PropertyValue::CreateTimeSpan(value); }
+        static auto make(TimeSpan value) { return PropertyValue::CreateTimeSpan(value); }
     };
 
     template <>
-    struct reference_traits<Runtime::Point>
+    struct reference_traits<Point>
     {
-        static auto make(Runtime::Point const& value) { return Runtime::PropertyValue::CreatePoint(value); }
+        static auto make(Point const& value) { return PropertyValue::CreatePoint(value); }
     };
 
     template <>
-    struct reference_traits<Runtime::Size>
+    struct reference_traits<Size>
     {
-        static auto make(Runtime::Size const& value) { return Runtime::PropertyValue::CreateSize(value); }
+        static auto make(Size const& value) { return PropertyValue::CreateSize(value); }
     };
 
     template <>
-    struct reference_traits<Runtime::Rect>
+    struct reference_traits<Rect>
     {
-        static auto make(Runtime::Rect const& value) { return Runtime::PropertyValue::CreateRect(value); }
+        static auto make(Rect const& value) { return PropertyValue::CreateRect(value); }
     };
 }
 
-WINRT_EXPORT namespace xlang::Runtime
+WINRT_EXPORT namespace xlang
 {
     template <typename T>
     struct IReference :
@@ -319,54 +319,54 @@ WINRT_EXPORT namespace xlang::Runtime
 
 WINRT_EXPORT namespace xlang
 {
-    inline Runtime::IObject box_value(param::hstring const& value)
+    inline IObject box_value(param::hstring const& value)
     {
-        return Runtime::IReference<hstring>(*(hstring*)(&value));
+        return IReference<hstring>(*(hstring*)(&value));
     }
 
     template <typename T, typename = std::enable_if_t<!std::is_convertible_v<T, param::hstring>>>
-    Runtime::IObject box_value(T const& value)
+    IObject box_value(T const& value)
     {
-        if constexpr (std::is_base_of_v<Runtime::IObject, T>)
+        if constexpr (std::is_base_of_v<IObject, T>)
         {
             return value;
         }
         else
         {
-            return Runtime::IReference<T>(value);
+            return IReference<T>(value);
         }
     }
 
     template <typename T>
-    T unbox_value(Runtime::IObject const& value)
+    T unbox_value(IObject const& value)
     {
-        if constexpr (std::is_base_of_v<Runtime::IObject, T>)
+        if constexpr (std::is_base_of_v<IObject, T>)
         {
             return value.as<T>();
         }
         else if constexpr (std::is_enum_v<T>)
         {
-            if (auto temp = value.try_as<Runtime::IReference<T>>())
+            if (auto temp = value.try_as<IReference<T>>())
             {
                 return temp.Value();
             }
             else
             {
-                return static_cast<T>(value.as<Runtime::IReference<std::underlying_type_t<T>>>().Value());
+                return static_cast<T>(value.as<IReference<std::underlying_type_t<T>>>().Value());
             }
         }
         else
         {
-            return value.as<Runtime::IReference<T>>().Value();
+            return value.as<IReference<T>>().Value();
         }
     }
 
     template <typename T>
-    hstring unbox_value_or(Runtime::IObject const& value, param::hstring const& default_value)
+    hstring unbox_value_or(IObject const& value, param::hstring const& default_value)
     {
         if (value)
         {
-            if (auto temp = value.try_as<Runtime::IReference<hstring>>())
+            if (auto temp = value.try_as<IReference<hstring>>())
             {
                 return temp.Value();
             }
@@ -376,11 +376,11 @@ WINRT_EXPORT namespace xlang
     }
 
     template <typename T, typename = std::enable_if_t<!std::is_same_v<T, hstring>>>
-    T unbox_value_or(Runtime::IObject const& value, T const& default_value)
+    T unbox_value_or(IObject const& value, T const& default_value)
     {
         if (value)
         {
-            if constexpr (std::is_base_of_v<Runtime::IObject, T>)
+            if constexpr (std::is_base_of_v<IObject, T>)
             {
                 if (auto temp = value.try_as<T>())
                 {
@@ -389,19 +389,19 @@ WINRT_EXPORT namespace xlang
             }
             else if constexpr (std::is_enum_v<T>)
             {
-                if (auto temp = value.try_as<Runtime::IReference<T>>())
+                if (auto temp = value.try_as<IReference<T>>())
                 {
                     return temp.Value();
                 }
 
-                if (auto temp = value.try_as<Runtime::IReference<std::underlying_type_t<T>>>())
+                if (auto temp = value.try_as<IReference<std::underlying_type_t<T>>>())
                 {
                     return static_cast<T>(temp.Value());
                 }
             }
             else
             {
-                if (auto temp = value.try_as<Runtime::IReference<T>>())
+                if (auto temp = value.try_as<IReference<T>>())
                 {
                     return temp.Value();
                 }

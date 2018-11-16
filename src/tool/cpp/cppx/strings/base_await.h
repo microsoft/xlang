@@ -36,7 +36,7 @@ namespace xlang::impl
 
         bool await_ready() const
         {
-            return async.Status() == Runtime::AsyncStatus::Completed;
+            return async.Status() == AsyncStatus::Completed;
         }
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
@@ -55,7 +55,7 @@ namespace xlang::impl
 }
 
 #ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
-WINRT_EXPORT namespace xlang::Runtime
+WINRT_EXPORT namespace xlang
 {
     inline impl::await_adapter<IAsyncAction> operator co_await(IAsyncAction const& async)
     {
@@ -126,7 +126,7 @@ namespace xlang::impl
 
         bool operator()() const noexcept
         {
-            return m_promise->Status() == Runtime::AsyncStatus::Canceled;
+            return m_promise->Status() == AsyncStatus::Canceled;
         }
 
         void callback(xlang::delegate<>&& cancel) noexcept
@@ -174,7 +174,7 @@ namespace xlang::impl
     template <typename Derived, typename AsyncInterface, typename CompletedHandler, typename TProgress = void>
     struct promise_base : implements<Derived, AsyncInterface>
     {
-        using AsyncStatus = Runtime::AsyncStatus;
+        using AsyncStatus = AsyncStatus;
 
         unsigned long WINRT_CALL Release() noexcept
         {

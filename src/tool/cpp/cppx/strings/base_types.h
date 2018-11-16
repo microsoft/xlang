@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace xlang::Runtime
+WINRT_EXPORT namespace xlang
 {
     struct WINRT_EBO IAsyncAction :
         IObject,
@@ -306,7 +306,7 @@ WINRT_EXPORT namespace xlang::Runtime
     };
 }
 
-WINRT_EXPORT namespace xlang::Runtime
+WINRT_EXPORT namespace xlang
 {
     template <typename K>
     struct WINRT_EBO IMapChangedEventArgs :
