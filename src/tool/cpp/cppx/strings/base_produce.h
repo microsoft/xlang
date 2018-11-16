@@ -22,18 +22,18 @@ namespace xlang::impl
         }
     };
 
-    template <typename T> struct delegate<wfc::VectorChangedEventHandler<T>>
+    template <typename T> struct delegate<System::VectorChangedEventHandler<T>>
     {
         template <typename H>
-        struct type final : implements_delegate<wfc::VectorChangedEventHandler<T>, H>
+        struct type final : implements_delegate<System::VectorChangedEventHandler<T>, H>
         {
-            type(H&& handler) : implements_delegate<wfc::VectorChangedEventHandler<T>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<System::VectorChangedEventHandler<T>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<wfc::IObservableVector<T> const*>(&sender), *reinterpret_cast<wfc::IVectorChangedEventArgs const*>(&args));
+                    (*this)(*reinterpret_cast<System::IObservableVector<T> const*>(&sender), *reinterpret_cast<System::IVectorChangedEventArgs const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -41,18 +41,18 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct delegate<wfc::MapChangedEventHandler<K, V>>
+    template <typename K, typename V> struct delegate<System::MapChangedEventHandler<K, V>>
     {
         template <typename H>
-        struct type final : implements_delegate<wfc::MapChangedEventHandler<K, V>, H>
+        struct type final : implements_delegate<System::MapChangedEventHandler<K, V>, H>
         {
-            type(H&& handler) : implements_delegate<wfc::MapChangedEventHandler<K, V>, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<System::MapChangedEventHandler<K, V>, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<wfc::IObservableMap<K, V> const*>(&sender), *reinterpret_cast<wfc::IMapChangedEventArgs<K> const*>(&args));
+                    (*this)(*reinterpret_cast<System::IObservableMap<K, V> const*>(&sender), *reinterpret_cast<System::IMapChangedEventArgs<K> const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }
@@ -383,9 +383,9 @@ namespace xlang::impl
     };
 
 
-    template <typename D> struct produce<D, wfc::IVectorChangedEventArgs> : produce_base<D, wfc::IVectorChangedEventArgs>
+    template <typename D> struct produce<D, System::IVectorChangedEventArgs> : produce_base<D, System::IVectorChangedEventArgs>
     {
-        int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept final
+        int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept final
         {
             try
             {
@@ -408,7 +408,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, wfc::IIterator<T>> : produce_base<D, wfc::IIterator<T>>
+    template <typename D, typename T> struct produce<D, System::IIterator<T>> : produce_base<D, System::IIterator<T>>
     {
         int32_t WINRT_CALL get_Current(arg_out<T> current) noexcept final
         {
@@ -457,7 +457,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, wfc::IIterable<T>> : produce_base<D, wfc::IIterable<T>>
+    template <typename D, typename T> struct produce<D, System::IIterable<T>> : produce_base<D, System::IIterable<T>>
     {
         int32_t WINRT_CALL First(void** first) noexcept final
         {
@@ -465,14 +465,14 @@ namespace xlang::impl
             {
                 *first = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *first = detach_from<wfc::IIterator<T>>(this->shim().First());
+                *first = detach_from<System::IIterator<T>>(this->shim().First());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, wfc::IKeyValuePair<K, V>> : produce_base<D, wfc::IKeyValuePair<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, System::IKeyValuePair<K, V>> : produce_base<D, System::IKeyValuePair<K, V>>
     {
         int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept final
         {
@@ -499,7 +499,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, wfc::IVectorView<T>> : produce_base<D, wfc::IVectorView<T>>
+    template <typename D, typename T> struct produce<D, System::IVectorView<T>> : produce_base<D, System::IVectorView<T>>
     {
         int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept final
         {
@@ -548,7 +548,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, wfc::IVector<T>> : produce_base<D, wfc::IVector<T>>
+    template <typename D, typename T> struct produce<D, System::IVector<T>> : produce_base<D, System::IVector<T>>
     {
         int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept final
         {
@@ -579,7 +579,7 @@ namespace xlang::impl
             {
                 *view = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *view = detach_from<wfc::IVectorView<T>>(this->shim().GetView());
+                *view = detach_from<System::IVectorView<T>>(this->shim().GetView());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -686,7 +686,7 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, wfc::IMapView<K, V>> : produce_base<D, wfc::IMapView<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, System::IMapView<K, V>> : produce_base<D, System::IMapView<K, V>>
     {
         int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
         {
@@ -729,14 +729,14 @@ namespace xlang::impl
                 *firstPartition = nullptr;
                 *secondPartition = nullptr;
                 typename D::abi_guard guard(this->shim());
-                this->shim().Split(*reinterpret_cast<wfc::IMapView<K, V>*>(firstPartition), *reinterpret_cast<wfc::IMapView<K, V>*>(secondPartition));
+                this->shim().Split(*reinterpret_cast<System::IMapView<K, V>*>(firstPartition), *reinterpret_cast<System::IMapView<K, V>*>(secondPartition));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, wfc::IMap<K, V>> : produce_base<D, wfc::IMap<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, System::IMap<K, V>> : produce_base<D, System::IMap<K, V>>
     {
         int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
         {
@@ -778,7 +778,7 @@ namespace xlang::impl
             {
                 *view = nullptr;
                 typename D::abi_guard guard(this->shim());
-                *view = detach_from<wfc::IMapView<K, V>>(this->shim().GetView());
+                *view = detach_from<System::IMapView<K, V>>(this->shim().GetView());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -818,9 +818,9 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename K> struct produce<D, wfc::IMapChangedEventArgs<K>> : produce_base<D, wfc::IMapChangedEventArgs<K>>
+    template <typename D, typename K> struct produce<D, System::IMapChangedEventArgs<K>> : produce_base<D, System::IMapChangedEventArgs<K>>
     {
-        int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept final
+        int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept final
         {
             try
             {
@@ -844,14 +844,14 @@ namespace xlang::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, wfc::IObservableMap<K, V>> : produce_base<D, wfc::IObservableMap<K, V>>
+    template <typename D, typename K, typename V> struct produce<D, System::IObservableMap<K, V>> : produce_base<D, System::IObservableMap<K, V>>
     {
         int32_t WINRT_CALL add_MapChanged(void* handler, xlang::event_token* token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                *token = detach_from<event_token>(this->shim().MapChanged(*reinterpret_cast<wfc::MapChangedEventHandler<K, V> const*>(&handler)));
+                *token = detach_from<event_token>(this->shim().MapChanged(*reinterpret_cast<System::MapChangedEventHandler<K, V> const*>(&handler)));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
@@ -870,14 +870,14 @@ namespace xlang::impl
     };
 
     template <typename D, typename T>
-    struct produce<D, wfc::IObservableVector<T>> : produce_base<D, wfc::IObservableVector<T>>
+    struct produce<D, System::IObservableVector<T>> : produce_base<D, System::IObservableVector<T>>
     {
         int32_t WINRT_CALL add_VectorChanged(void* handler, xlang::event_token* token) noexcept final
         {
             try
             {
                 typename D::abi_guard guard(this->shim());
-                *token = this->shim().VectorChanged(*reinterpret_cast<wfc::VectorChangedEventHandler<T> const*>(&handler));
+                *token = this->shim().VectorChanged(*reinterpret_cast<System::VectorChangedEventHandler<T> const*>(&handler));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename T, typename Container>
     struct input_vector final :
-        implements<input_vector<T, Container>, wfc::IVector<T>, wfc::IVectorView<T>, wfc::IIterable<T>>,
+        implements<input_vector<T, Container>, System::IVector<T>, System::IVectorView<T>, System::IIterable<T>>,
         vector_base<input_vector<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");

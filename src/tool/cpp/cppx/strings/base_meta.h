@@ -2,7 +2,6 @@
 namespace xlang::impl
 {
     using namespace std::literals;
-    namespace wfc = System;
 
     template <typename T>
     struct identity

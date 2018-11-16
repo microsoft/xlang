@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
     struct observable_map final :
-        implements<observable_map<K, V, Container>, wfc::IObservableMap<K, V>, wfc::IMap<K, V>, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
+        implements<observable_map<K, V, Container>, System::IObservableMap<K, V>, System::IMap<K, V>, System::IMapView<K, V>, System::IIterable<System::IKeyValuePair<K, V>>>,
         observable_map_base<observable_map<K, V, Container>, K, V>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");

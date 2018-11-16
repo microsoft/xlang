@@ -31,7 +31,7 @@ namespace xlang::impl
         static constexpr guid value{ 0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD } };
     };
 
-    template <> struct guid_storage<wfc::IVectorChangedEventArgs>
+    template <> struct guid_storage<System::IVectorChangedEventArgs>
     {
         static constexpr guid value{ 0x575933DF,0x34FE,0x4480,{ 0xAF,0x15,0x07,0x69,0x1F,0x3D,0x5D,0x9B } };
     };
@@ -96,64 +96,64 @@ namespace xlang::impl
         static constexpr guid value{ pinterface_guid<System::IAsyncOperationWithProgress<TResult, TProgress>>::value };
     };
 
-    template <typename K> struct guid_storage<wfc::IMapChangedEventArgs<K>>
+    template <typename K> struct guid_storage<System::IMapChangedEventArgs<K>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IMapChangedEventArgs<K>>::value };
+        static constexpr guid value{ pinterface_guid<System::IMapChangedEventArgs<K>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::VectorChangedEventHandler<T>>
+    template <typename T> struct guid_storage<System::VectorChangedEventHandler<T>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::VectorChangedEventHandler<T>>::value };
+        static constexpr guid value{ pinterface_guid<System::VectorChangedEventHandler<T>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::MapChangedEventHandler<K, V>>
+    template <typename K, typename V> struct guid_storage<System::MapChangedEventHandler<K, V>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
+        static constexpr guid value{ pinterface_guid<System::MapChangedEventHandler<K, V>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IIterator<T>>
+    template <typename T> struct guid_storage<System::IIterator<T>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IIterator<T>>::value };
+        static constexpr guid value{ pinterface_guid<System::IIterator<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IIterable<T>>
+    template <typename T> struct guid_storage<System::IIterable<T>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IIterable<T>>::value };
+        static constexpr guid value{ pinterface_guid<System::IIterable<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IVectorView<T>>
+    template <typename T> struct guid_storage<System::IVectorView<T>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IVectorView<T>>::value };
+        static constexpr guid value{ pinterface_guid<System::IVectorView<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IVector<T>>
+    template <typename T> struct guid_storage<System::IVector<T>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IVector<T>>::value };
+        static constexpr guid value{ pinterface_guid<System::IVector<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IObservableVector<T>>
+    template <typename T> struct guid_storage<System::IObservableVector<T>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IObservableVector<T>>::value };
+        static constexpr guid value{ pinterface_guid<System::IObservableVector<T>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IKeyValuePair<K, V>>
+    template <typename K, typename V> struct guid_storage<System::IKeyValuePair<K, V>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IKeyValuePair<K, V>>::value };
+        static constexpr guid value{ pinterface_guid<System::IKeyValuePair<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IMapView<K, V>>
+    template <typename K, typename V> struct guid_storage<System::IMapView<K, V>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IMapView<K, V>>::value };
+        static constexpr guid value{ pinterface_guid<System::IMapView<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IMap<K, V>>
+    template <typename K, typename V> struct guid_storage<System::IMap<K, V>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IMap<K, V>>::value };
+        static constexpr guid value{ pinterface_guid<System::IMap<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IObservableMap<K, V>>
+    template <typename K, typename V> struct guid_storage<System::IObservableMap<K, V>>
     {
-        static constexpr guid value{ pinterface_guid<wfc::IObservableMap<K, V>>::value };
+        static constexpr guid value{ pinterface_guid<System::IObservableMap<K, V>>::value };
     };
 
     template <typename T> struct guid_storage<System::EventHandler<T>>
@@ -171,7 +171,7 @@ namespace xlang::impl
         template <typename D> using type = consume_IActivationFactory<D>;
     };
 
-    template <> struct consume<wfc::IVectorChangedEventArgs>
+    template <> struct consume<System::IVectorChangedEventArgs>
     {
         template <typename D> using type = consume_IVectorChangedEventArgs<D>;
     };
@@ -206,104 +206,104 @@ namespace xlang::impl
         template <typename D> using type = consume_IReferenceArray<D, T>;
     };
 
-    template <typename K> struct consume<wfc::IMapChangedEventArgs<K>>
+    template <typename K> struct consume<System::IMapChangedEventArgs<K>>
     {
         template <typename D> using type = consume_IMapChangedEventArgs<D, K>;
     };
 
-    template <typename T> struct consume<wfc::IIterator<T>>
+    template <typename T> struct consume<System::IIterator<T>>
     {
         template <typename D> using type = consume_IIterator<D, T>;
     };
 
-    template <typename T> struct consume<wfc::IIterable<T>>
+    template <typename T> struct consume<System::IIterable<T>>
     {
         template <typename D> using type = consume_IIterable<D, T>;
     };
 
-    template <typename T> struct consume<wfc::IVectorView<T>>
+    template <typename T> struct consume<System::IVectorView<T>>
     {
         template <typename D> using type = consume_IVectorView<D, T>;
     };
 
-    template <typename T> struct consume<wfc::IVector<T>>
+    template <typename T> struct consume<System::IVector<T>>
     {
         template <typename D> using type = consume_IVector<D, T>;
     };
 
-    template <typename T> struct consume<wfc::IObservableVector<T>>
+    template <typename T> struct consume<System::IObservableVector<T>>
     {
         template <typename D> using type = consume_IObservableVector<D, T>;
     };
 
-    template <typename K, typename V> struct consume<wfc::IKeyValuePair<K, V>>
+    template <typename K, typename V> struct consume<System::IKeyValuePair<K, V>>
     {
         template <typename D> using type = consume_IKeyValuePair<D, K, V>;
     };
 
-    template <typename K, typename V> struct consume<wfc::IMapView<K, V>>
+    template <typename K, typename V> struct consume<System::IMapView<K, V>>
     {
         template <typename D> using type = consume_IMapView<D, K, V>;
     };
 
-    template <typename K, typename V> struct consume<wfc::IMap<K, V>>
+    template <typename K, typename V> struct consume<System::IMap<K, V>>
     {
         template <typename D> using type = consume_IMap<D, K, V>;
     };
 
-    template <typename K, typename V> struct consume<wfc::IObservableMap<K, V>>
+    template <typename K, typename V> struct consume<System::IObservableMap<K, V>>
     {
         template <typename D> using type = consume_IObservableMap<D, K, V>;
     };
 
     template <> struct name<System::AsyncActionCompletedHandler>
     {
-        static constexpr auto & value{ L"Windows.Foundation.AsyncActionCompletedHandler" };
+        static constexpr auto & value{ L"System.AsyncActionCompletedHandler" };
     };
 
     template <typename TResult> struct name<System::AsyncOperationCompletedHandler<TResult>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationCompletedHandler`1<", name_v<TResult>, L">") };
+        static constexpr auto value{ zcombine(L"System.AsyncOperationCompletedHandler`1<", name_v<TResult>, L">") };
     };
 
     template <typename TProgress> struct name<System::AsyncActionWithProgressCompletedHandler<TProgress>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncActionWithProgressCompletedHandler`1<", name_v<TProgress>, L">") };
+        static constexpr auto value{ zcombine(L"System.AsyncActionWithProgressCompletedHandler`1<", name_v<TProgress>, L">") };
     };
 
     template <typename TProgress> struct name<System::AsyncActionProgressHandler<TProgress>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncActionProgressHandler`1<", name_v<TProgress>, L">") };
+        static constexpr auto value{ zcombine(L"System.AsyncActionProgressHandler`1<", name_v<TProgress>, L">") };
     };
 
     template <typename TResult, typename TProgress> struct name<System::AsyncOperationProgressHandler<TResult, TProgress>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationProgressHandler`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
+        static constexpr auto value{ zcombine(L"System.AsyncOperationProgressHandler`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
     };
 
     template <typename TResult, typename TProgress> struct name<System::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationWithProgressCompletedHandler`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
+        static constexpr auto value{ zcombine(L"System.AsyncOperationWithProgressCompletedHandler`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
     };
 
     template <> struct name<System::IAsyncAction>
     {
-        static constexpr auto & value{ L"Windows.Foundation.IAsyncAction" };
+        static constexpr auto & value{ L"System.IAsyncAction" };
     };
 
     template <typename TResult> struct name<System::IAsyncOperation<TResult>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncOperation`1<", name_v<TResult>, L">") };
+        static constexpr auto value{ zcombine(L"System.IAsyncOperation`1<", name_v<TResult>, L">") };
     };
 
     template <typename TProgress> struct name<System::IAsyncActionWithProgress<TProgress>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncActionWithProgress`1<", name_v<TProgress>, L">") };
+        static constexpr auto value{ zcombine(L"System.IAsyncActionWithProgress`1<", name_v<TProgress>, L">") };
     };
 
     template <typename TResult, typename TProgress> struct name<System::IAsyncOperationWithProgress<TResult, TProgress>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncOperationWithProgress`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
+        static constexpr auto value{ zcombine(L"System.IAsyncOperationWithProgress`2<", name_v<TResult>, L", ", name_v<TProgress>, L">") };
     };
 
     template <> struct name<System::IObject>
@@ -314,7 +314,7 @@ namespace xlang::impl
 
     template <> struct name<System::IActivationFactory>
     {
-        static constexpr auto & value{ L"Windows.Foundation.IActivationFactory" };
+        static constexpr auto & value{ L"System.IActivationFactory" };
     };
 
     template <> struct name<IWeakReferenceSource>
@@ -324,87 +324,87 @@ namespace xlang::impl
 
     template <typename T> struct name<System::IReference<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.IReference`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.IReference`1<", name_v<T>, L">") };
     };
 
     template <typename T> struct name<System::IReferenceArray<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.IReferenceArray`1<", name_v<T>, L">") };
     };
 
-    template <> struct name<wfc::IVectorChangedEventArgs>
+    template <> struct name<System::IVectorChangedEventArgs>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Collections.IVectorChangedEventArgs" };
+        static constexpr auto & value{ L"System.IVectorChangedEventArgs" };
     };
 
-    template <typename K> struct name<wfc::IMapChangedEventArgs<K>>
+    template <typename K> struct name<System::IMapChangedEventArgs<K>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
+        static constexpr auto value{ zcombine(L"System.IMapChangedEventArgs`1<", name_v<K>, L">") };
     };
 
-    template <typename T> struct name<wfc::VectorChangedEventHandler<T>>
+    template <typename T> struct name<System::VectorChangedEventHandler<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.VectorChangedEventHandler`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.VectorChangedEventHandler`1<", name_v<T>, L">") };
     };
 
-    template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
+    template <typename K, typename V> struct name<System::MapChangedEventHandler<K, V>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
+        static constexpr auto value{ zcombine(L"System.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
-    template <typename T> struct name<wfc::IIterator<T>>
+    template <typename T> struct name<System::IIterator<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterator`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.IIterator`1<", name_v<T>, L">") };
     };
 
-    template <typename T> struct name<wfc::IIterable<T>>
+    template <typename T> struct name<System::IIterable<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterable`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.IIterable`1<", name_v<T>, L">") };
     };
 
-    template <typename T> struct name<wfc::IVectorView<T>>
+    template <typename T> struct name<System::IVectorView<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVectorView`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.IVectorView`1<", name_v<T>, L">") };
     };
 
-    template <typename T> struct name<wfc::IVector<T>>
+    template <typename T> struct name<System::IVector<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVector`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.IVector`1<", name_v<T>, L">") };
     };
 
-    template <typename T> struct name<wfc::IObservableVector<T>>
+    template <typename T> struct name<System::IObservableVector<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableVector`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.IObservableVector`1<", name_v<T>, L">") };
     };
 
-    template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
+    template <typename K, typename V> struct name<System::IKeyValuePair<K, V>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IKeyValuePair`2<", name_v<K>, L", ", name_v<V>, L">") };
+        static constexpr auto value{ zcombine(L"System.IKeyValuePair`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
-    template <typename K, typename V> struct name<wfc::IMapView<K, V>>
+    template <typename K, typename V> struct name<System::IMapView<K, V>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapView`2<", name_v<K>, L", ", name_v<V>, L">") };
+        static constexpr auto value{ zcombine(L"System.IMapView`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
-    template <typename K, typename V> struct name<wfc::IMap<K, V>>
+    template <typename K, typename V> struct name<System::IMap<K, V>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMap`2<", name_v<K>, L", ", name_v<V>, L">") };
+        static constexpr auto value{ zcombine(L"System.IMap`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
-    template <typename K, typename V> struct name<wfc::IObservableMap<K, V>>
+    template <typename K, typename V> struct name<System::IObservableMap<K, V>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, L", ", name_v<V>, L">") };
+        static constexpr auto value{ zcombine(L"System.IObservableMap`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename T> struct name<System::EventHandler<T>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.EventHandler`1<", name_v<T>, L">") };
+        static constexpr auto value{ zcombine(L"System.EventHandler`1<", name_v<T>, L">") };
     };
 
     template <typename TSender, typename TArgs> struct name<System::TypedEventHandler<TSender, TArgs>>
     {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.TypedEventHandler`2<", name_v<TSender>, L", ", name_v<TArgs>, L">") };
+        static constexpr auto value{ zcombine(L"System.TypedEventHandler`2<", name_v<TSender>, L", ", name_v<TArgs>, L">") };
     };
 
     template <> struct category<System::AsyncActionCompletedHandler>
@@ -492,78 +492,78 @@ namespace xlang::impl
         static constexpr guid value{ 0x61c17707, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
     };
 
-    template <> struct category<wfc::IVectorChangedEventArgs>
+    template <> struct category<System::IVectorChangedEventArgs>
     {
         using type = interface_category;
     };
 
-    template <typename K> struct category<wfc::IMapChangedEventArgs<K>>
+    template <typename K> struct category<System::IMapChangedEventArgs<K>>
     {
         using type = pinterface_category<K>;
         static constexpr guid value{ 0x9939f4df, 0x050a, 0x4c0f,{ 0xaa, 0x60, 0x77, 0x07, 0x5f, 0x9c, 0x47, 0x77 } };
     };
 
-    template <typename T> struct category<wfc::VectorChangedEventHandler<T>>
+    template <typename T> struct category<System::VectorChangedEventHandler<T>>
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x0c051752, 0x9fbf, 0x4c70,{ 0xaa, 0x0c, 0x0e, 0x4c, 0x82, 0xd9, 0xa7, 0x61 } };
     };
 
-    template <typename K, typename V> struct category<wfc::MapChangedEventHandler<K, V>>
+    template <typename K, typename V> struct category<System::MapChangedEventHandler<K, V>>
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
     };
 
-    template <typename T> struct category<wfc::IIterator<T>>
+    template <typename T> struct category<System::IIterator<T>>
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x6a79e863, 0x4300, 0x459a,{ 0x99, 0x66, 0xcb, 0xb6, 0x60, 0x96, 0x3e, 0xe1 } };
     };
 
-    template <typename T> struct category<wfc::IIterable<T>>
+    template <typename T> struct category<System::IIterable<T>>
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0xfaa585ea, 0x6214, 0x4217,{ 0xaf, 0xda, 0x7f, 0x46, 0xde, 0x58, 0x69, 0xb3 } };
     };
 
-    template <typename T> struct category<wfc::IVectorView<T>>
+    template <typename T> struct category<System::IVectorView<T>>
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0xbbe1fa4c, 0xb0e3, 0x4583,{ 0xba, 0xef, 0x1f, 0x1b, 0x2e, 0x48, 0x3e, 0x56 } };
     };
 
-    template <typename T> struct category<wfc::IVector<T>>
+    template <typename T> struct category<System::IVector<T>>
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x913337e9, 0x11a1, 0x4345,{ 0xa3, 0xa2, 0x4e, 0x7f, 0x95, 0x6e, 0x22, 0x2d } };
     };
 
-    template <typename T> struct category<wfc::IObservableVector<T>>
+    template <typename T> struct category<System::IObservableVector<T>>
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x5917eb53, 0x50b4, 0x4a0d,{ 0xb3, 0x09, 0x65, 0x86, 0x2b, 0x3f, 0x1d, 0xbc } };
     };
 
-    template <typename K, typename V> struct category<wfc::IKeyValuePair<K, V>>
+    template <typename K, typename V> struct category<System::IKeyValuePair<K, V>>
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x02b51929, 0xc1c4, 0x4a7e,{ 0x89, 0x40, 0x03, 0x12, 0xb5, 0xc1, 0x85, 0x00 } };
     };
 
-    template <typename K, typename V> struct category<wfc::IMapView<K, V>>
+    template <typename K, typename V> struct category<System::IMapView<K, V>>
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0xe480ce40, 0xa338, 0x4ada,{ 0xad, 0xcf, 0x27, 0x22, 0x72, 0xe4, 0x8c, 0xb9 } };
     };
 
-    template <typename K, typename V> struct category<wfc::IMap<K, V>>
+    template <typename K, typename V> struct category<System::IMap<K, V>>
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x3c2925fe, 0x8519, 0x45c1,{ 0xaa, 0x79, 0x19, 0x7b, 0x67, 0x18, 0xc1, 0xc1 } };
     };
 
-    template <typename K, typename V> struct category<wfc::IObservableMap<K, V>>
+    template <typename K, typename V> struct category<System::IObservableMap<K, V>>
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x65df2bf5, 0xbf39, 0x41b5,{ 0xae, 0xbc, 0x5a, 0x9d, 0x86, 0x5e, 0x47, 0x2b } };

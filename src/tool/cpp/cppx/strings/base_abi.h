@@ -79,11 +79,11 @@ namespace xlang::impl
         };
     };
 
-    template <> struct abi<wfc::IVectorChangedEventArgs>
+    template <> struct abi<System::IVectorChangedEventArgs>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept = 0;
+            virtual int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept = 0;
             virtual int32_t WINRT_CALL get_Index(uint32_t* value) noexcept = 0;
         };
     };
@@ -184,16 +184,16 @@ namespace xlang::impl
         };
     };
 
-    template <typename K> struct abi<wfc::IMapChangedEventArgs<K>>
+    template <typename K> struct abi<System::IMapChangedEventArgs<K>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept = 0;
+            virtual int32_t WINRT_CALL get_CollectionChange(System::CollectionChange* value) noexcept = 0;
             virtual int32_t WINRT_CALL get_Key(arg_out<K> value) noexcept = 0;
         };
     };
 
-    template <typename T> struct abi<wfc::VectorChangedEventHandler<T>>
+    template <typename T> struct abi<System::VectorChangedEventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -201,7 +201,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::MapChangedEventHandler<K, V>>
+    template <typename K, typename V> struct abi<System::MapChangedEventHandler<K, V>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
@@ -209,7 +209,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IIterator<T>>
+    template <typename T> struct abi<System::IIterator<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -220,7 +220,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IIterable<T>>
+    template <typename T> struct abi<System::IIterable<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -228,7 +228,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IVectorView<T>>
+    template <typename T> struct abi<System::IVectorView<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -239,7 +239,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IVector<T>>
+    template <typename T> struct abi<System::IVector<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -258,7 +258,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IObservableVector<T>>
+    template <typename T> struct abi<System::IObservableVector<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -267,7 +267,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
+    template <typename K, typename V> struct abi<System::IKeyValuePair<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -276,7 +276,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IMapView<K, V>>
+    template <typename K, typename V> struct abi<System::IMapView<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -287,7 +287,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IMap<K, V>>
+    template <typename K, typename V> struct abi<System::IMap<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {
@@ -301,7 +301,7 @@ namespace xlang::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IObservableMap<K, V>>
+    template <typename K, typename V> struct abi<System::IObservableMap<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
         {

@@ -89,7 +89,7 @@ namespace xlang::impl
     struct key_value_pair;
 
     template <typename K, typename V>
-    struct key_value_pair<wfc::IKeyValuePair<K, V>> final : implements<key_value_pair<wfc::IKeyValuePair<K, V>>, wfc::IKeyValuePair<K, V>>
+    struct key_value_pair<System::IKeyValuePair<K, V>> final : implements<key_value_pair<System::IKeyValuePair<K, V>>, System::IKeyValuePair<K, V>>
     {
         key_value_pair(K key, V value) :
             m_key(std::move(key)),
@@ -117,7 +117,7 @@ namespace xlang::impl
     struct is_key_value_pair : std::false_type {};
 
     template <typename K, typename V>
-    struct is_key_value_pair<wfc::IKeyValuePair<K, V>> : std::true_type {};
+    struct is_key_value_pair<System::IKeyValuePair<K, V>> : std::true_type {};
 
     struct input_scope
     {

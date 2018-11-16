@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename T, typename Container>
     struct observable_vector final :
-        implements<observable_vector<T, Container>, wfc::IObservableVector<T>, wfc::IVector<T>, wfc::IVectorView<T>, wfc::IIterable<T>>,
+        implements<observable_vector<T, Container>, System::IObservableVector<T>, System::IVector<T>, System::IVectorView<T>, System::IIterable<T>>,
         observable_vector_base<observable_vector<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");

@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
     struct input_map_view final :
-        implements<input_map_view<K, V, Container>, non_agile, no_weak_ref, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
+        implements<input_map_view<K, V, Container>, non_agile, no_weak_ref, System::IMapView<K, V>, System::IIterable<System::IKeyValuePair<K, V>>>,
         map_view_base<input_map_view<K, V, Container>, K, V>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -25,7 +25,7 @@ namespace xlang::impl
     template <typename K, typename V, typename Container>
     struct scoped_input_map_view final :
         input_scope,
-        implements<scoped_input_map_view<K, V, Container>, non_agile, no_weak_ref, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
+        implements<scoped_input_map_view<K, V, Container>, non_agile, no_weak_ref, System::IMapView<K, V>, System::IIterable<System::IKeyValuePair<K, V>>>,
         map_view_base<scoped_input_map_view<K, V, Container>, K, V>
     {
         void abi_enter() const
@@ -56,7 +56,7 @@ namespace xlang::impl
     template <typename K, typename V, typename Container>
     auto make_scoped_input_map_view(Container const& values)
     {
-        using interface_type = wfc::IMapView<K, V>;
+        using interface_type = System::IMapView<K, V>;
         std::pair<interface_type, input_scope*> result;
         auto ptr = new scoped_input_map_view<K, V, Container>(values);
         *put_abi(result.first) = to_abi<interface_type>(ptr);

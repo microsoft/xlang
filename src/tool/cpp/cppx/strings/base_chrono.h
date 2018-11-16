@@ -29,7 +29,7 @@ namespace xlang::impl
 
     template <> struct name<System::TimeSpan>
     {
-        static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };
+        static constexpr auto & value{ L"System.TimeSpan" };
     };
 
     template <> struct category<System::TimeSpan>
@@ -39,7 +39,7 @@ namespace xlang::impl
 
     template <> struct name<System::DateTime>
     {
-        static constexpr auto & value{ L"Windows.Foundation.DateTime" };
+        static constexpr auto & value{ L"System.DateTime" };
     };
 
     template <> struct category<System::DateTime>

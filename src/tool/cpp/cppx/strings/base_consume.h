@@ -37,34 +37,34 @@ namespace xlang::impl
 
     template <typename D> struct consume_IVectorChangedEventArgs
     {
-        wfc::CollectionChange CollectionChange() const
+        System::CollectionChange CollectionChange() const
         {
-            wfc::CollectionChange value{};
-            check_hresult(WINRT_SHIM(wfc::IVectorChangedEventArgs)->get_CollectionChange(&value));
+            System::CollectionChange value{};
+            check_hresult(WINRT_SHIM(System::IVectorChangedEventArgs)->get_CollectionChange(&value));
             return value;
         }
 
         uint32_t Index() const
         {
             uint32_t index{};
-            check_hresult(WINRT_SHIM(wfc::IVectorChangedEventArgs)->get_Index(&index));
+            check_hresult(WINRT_SHIM(System::IVectorChangedEventArgs)->get_Index(&index));
             return index;
         }
     };
 
     template <typename D, typename K> struct consume_IMapChangedEventArgs
     {
-        wfc::CollectionChange CollectionChange() const
+        System::CollectionChange CollectionChange() const
         {
-            wfc::CollectionChange value{};
-            check_hresult(WINRT_SHIM(wfc::IMapChangedEventArgs<K>)->get_CollectionChange(&value));
+            System::CollectionChange value{};
+            check_hresult(WINRT_SHIM(System::IMapChangedEventArgs<K>)->get_CollectionChange(&value));
             return value;
         }
 
         K Key() const
         {
             K result{ empty_value<K>() };
-            check_hresult(WINRT_SHIM(wfc::IMapChangedEventArgs<K>)->get_Key(put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IMapChangedEventArgs<K>)->get_Key(put_abi(result)));
             return result;
         }
     };
@@ -74,28 +74,28 @@ namespace xlang::impl
         T Current() const
         {
             T result{ empty_value<T>() };
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_Current(put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IIterator<T>)->get_Current(put_abi(result)));
             return result;
         }
 
         bool HasCurrent() const
         {
             bool temp{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_HasCurrent(put_abi(temp)));
+            check_hresult(WINRT_SHIM(System::IIterator<T>)->get_HasCurrent(put_abi(temp)));
             return temp;
         }
 
         bool MoveNext() const
         {
             bool temp{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->MoveNext(put_abi(temp)));
+            check_hresult(WINRT_SHIM(System::IIterator<T>)->MoveNext(put_abi(temp)));
             return temp;
         }
 
         uint32_t GetMany(array_view<T> values) const
         {
             uint32_t actual{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->GetMany(values.size(), get_abi(values), &actual));
+            check_hresult(WINRT_SHIM(System::IIterator<T>)->GetMany(values.size(), get_abi(values), &actual));
             return actual;
         }
 
@@ -117,10 +117,10 @@ namespace xlang::impl
 
     template <typename D, typename T> struct consume_IIterable
     {
-        wfc::IIterator<T> First() const
+        System::IIterator<T> First() const
         {
-            wfc::IIterator<T> iterator;
-            check_hresult(WINRT_SHIM(wfc::IIterable<T>)->First(put_abi(iterator)));
+            System::IIterator<T> iterator;
+            check_hresult(WINRT_SHIM(System::IIterable<T>)->First(put_abi(iterator)));
             return iterator;
         }
     };
@@ -130,28 +130,28 @@ namespace xlang::impl
         T GetAt(uint32_t const index) const
         {
             T result{ empty_value<T>() };
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->GetAt(index, put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IVectorView<T>)->GetAt(index, put_abi(result)));
             return result;
         }
 
         uint32_t Size() const
         {
             uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->get_Size(&size));
+            check_hresult(WINRT_SHIM(System::IVectorView<T>)->get_Size(&size));
             return size;
         }
 
         bool IndexOf(param_type<T> const& value, uint32_t& index) const
         {
             bool found{};
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->IndexOf(get_abi(value), &index, &found));
+            check_hresult(WINRT_SHIM(System::IVectorView<T>)->IndexOf(get_abi(value), &index, &found));
             return found;
         }
 
         uint32_t GetMany(uint32_t startIndex, array_view<T> values) const
         {
             uint32_t actual{};
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->GetMany(startIndex, values.size(), get_abi(values), &actual));
+            check_hresult(WINRT_SHIM(System::IVectorView<T>)->GetMany(startIndex, values.size(), get_abi(values), &actual));
             return actual;
         }
     };
@@ -161,91 +161,91 @@ namespace xlang::impl
         T GetAt(uint32_t const index) const
         {
             T result{ empty_value<T>() };
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetAt(index, put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->GetAt(index, put_abi(result)));
             return result;
         }
 
         uint32_t Size() const
         {
             uint32_t size = 0;
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->get_Size(&size));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->get_Size(&size));
             return size;
         }
 
-        wfc::IVectorView<T> GetView() const
+        System::IVectorView<T> GetView() const
         {
-            wfc::IVectorView<T> view;
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetView(put_abi(view)));
+            System::IVectorView<T> view;
+            check_hresult(WINRT_SHIM(System::IVector<T>)->GetView(put_abi(view)));
             return view;
         }
 
         bool IndexOf(param_type<T> const& value, uint32_t& index) const
         {
             bool found{};
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->IndexOf(get_abi(value), &index, &found));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->IndexOf(get_abi(value), &index, &found));
             return found;
         }
 
         void SetAt(uint32_t const index, param_type<T> const& value) const
         {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->SetAt(index, get_abi(value)));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->SetAt(index, get_abi(value)));
         }
 
         void InsertAt(uint32_t const index, param_type<T> const& value) const
         {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->InsertAt(index, get_abi(value)));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->InsertAt(index, get_abi(value)));
         }
 
         void RemoveAt(uint32_t const index) const
         {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->RemoveAt(index));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->RemoveAt(index));
         }
 
         void Append(param_type<T> const& value) const
         {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->Append(get_abi(value)));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->Append(get_abi(value)));
         }
 
         void RemoveAtEnd() const
         {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->RemoveAtEnd());
+            check_hresult(WINRT_SHIM(System::IVector<T>)->RemoveAtEnd());
         }
 
         void Clear() const
         {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->Clear());
+            check_hresult(WINRT_SHIM(System::IVector<T>)->Clear());
         }
 
         uint32_t GetMany(uint32_t startIndex, array_view<T> values) const
         {
             uint32_t actual{};
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetMany(startIndex, values.size(), get_abi(values), &actual));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->GetMany(startIndex, values.size(), get_abi(values), &actual));
             return actual;
         }
 
         void ReplaceAll(array_view<T const> value) const
         {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->ReplaceAll(value.size(), get_abi(value)));
+            check_hresult(WINRT_SHIM(System::IVector<T>)->ReplaceAll(value.size(), get_abi(value)));
         }
     };
 
     template <typename D, typename T> struct consume_IObservableVector
     {
-        event_token VectorChanged(wfc::VectorChangedEventHandler<T> const& handler) const
+        event_token VectorChanged(System::VectorChangedEventHandler<T> const& handler) const
         {
             event_token cookie{};
-            check_hresult(WINRT_SHIM(wfc::IObservableVector<T>)->add_VectorChanged(get_abi(handler), &cookie));
+            check_hresult(WINRT_SHIM(System::IObservableVector<T>)->add_VectorChanged(get_abi(handler), &cookie));
             return cookie;
         }
 
         void VectorChanged(event_token const cookie) const noexcept
         {
-            WINRT_SHIM(wfc::IObservableVector<T>)->remove_VectorChanged(cookie);
+            WINRT_SHIM(System::IObservableVector<T>)->remove_VectorChanged(cookie);
         }
 
-        using VectorChanged_revoker = event_revoker<wfc::IObservableVector<T>, &abi_t<wfc::IObservableVector<T>>::remove_VectorChanged>;
+        using VectorChanged_revoker = event_revoker<System::IObservableVector<T>, &abi_t<System::IObservableVector<T>>::remove_VectorChanged>;
 
-        VectorChanged_revoker VectorChanged(auto_revoke_t, wfc::VectorChangedEventHandler<T> const& handler) const
+        VectorChanged_revoker VectorChanged(auto_revoke_t, System::VectorChangedEventHandler<T> const& handler) const
         {
             return make_event_revoker<D, VectorChanged_revoker>(this, VectorChanged(handler));
         }
@@ -256,23 +256,23 @@ namespace xlang::impl
         K Key() const
         {
             K result{ empty_value<K>() };
-            check_hresult(WINRT_SHIM(wfc::IKeyValuePair<K, V>)->get_Key(put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IKeyValuePair<K, V>)->get_Key(put_abi(result)));
             return result;
         }
 
         V Value() const
         {
             V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IKeyValuePair<K, V>)->get_Value(put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IKeyValuePair<K, V>)->get_Value(put_abi(result)));
             return result;
         }
 
-        bool operator==(wfc::IKeyValuePair<K, V> const& other) const
+        bool operator==(System::IKeyValuePair<K, V> const& other) const
         {
             return Key() == other.Key() && Value() == other.Value();
         }
 
-        bool operator!=(wfc::IKeyValuePair<K, V> const& other) const
+        bool operator!=(System::IKeyValuePair<K, V> const& other) const
         {
             return !(*this == other);
         }
@@ -283,7 +283,7 @@ namespace xlang::impl
         V Lookup(param_type<K> const& key) const
         {
             V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result)));
             return result;
         }
 
@@ -292,7 +292,7 @@ namespace xlang::impl
             if constexpr (std::is_base_of_v<System::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_SHIM(System::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -300,7 +300,7 @@ namespace xlang::impl
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_SHIM(System::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -312,19 +312,19 @@ namespace xlang::impl
         uint32_t Size() const
         {
             uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->get_Size(&size));
+            check_hresult(WINRT_SHIM(System::IMapView<K, V>)->get_Size(&size));
             return size;
         }
 
         bool HasKey(param_type<K> const& key) const
         {
             bool found{};
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->HasKey(get_abi(key), &found));
+            check_hresult(WINRT_SHIM(System::IMapView<K, V>)->HasKey(get_abi(key), &found));
             return found;
         }
-        void Split(wfc::IMapView<K, V>& firstPartition, wfc::IMapView<K, V>& secondPartition)
+        void Split(System::IMapView<K, V>& firstPartition, System::IMapView<K, V>& secondPartition)
         {
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Split(put_abi(firstPartition), put_abi(secondPartition)));
+            check_hresult(WINRT_SHIM(System::IMapView<K, V>)->Split(put_abi(firstPartition), put_abi(secondPartition)));
         }
     };
 
@@ -333,7 +333,7 @@ namespace xlang::impl
         V Lookup(param_type<K> const& key) const
         {
             V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(result)));
+            check_hresult(WINRT_SHIM(System::IMap<K, V>)->Lookup(get_abi(key), put_abi(result)));
             return result;
         }
 
@@ -342,7 +342,7 @@ namespace xlang::impl
             if constexpr (std::is_base_of_v<System::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_SHIM(System::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -350,7 +350,7 @@ namespace xlang::impl
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_SHIM(System::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -362,59 +362,59 @@ namespace xlang::impl
         uint32_t Size() const
         {
             uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->get_Size(&size));
+            check_hresult(WINRT_SHIM(System::IMap<K, V>)->get_Size(&size));
             return size;
         }
 
         bool HasKey(param_type<K> const& key) const
         {
             bool found{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->HasKey(get_abi(key), &found));
+            check_hresult(WINRT_SHIM(System::IMap<K, V>)->HasKey(get_abi(key), &found));
             return found;
         }
 
-        wfc::IMapView<K, V> GetView() const
+        System::IMapView<K, V> GetView() const
         {
-            wfc::IMapView<K, V> view;
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->GetView(put_abi(view)));
+            System::IMapView<K, V> view;
+            check_hresult(WINRT_SHIM(System::IMap<K, V>)->GetView(put_abi(view)));
             return view;
         }
 
         bool Insert(param_type<K> const& key, param_type<V> const& value) const
         {
             bool replaced{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Insert(get_abi(key), get_abi(value), &replaced));
+            check_hresult(WINRT_SHIM(System::IMap<K, V>)->Insert(get_abi(key), get_abi(value), &replaced));
             return replaced;
         }
 
         void Remove(param_type<K> const& key) const
         {
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Remove(get_abi(key)));
+            check_hresult(WINRT_SHIM(System::IMap<K, V>)->Remove(get_abi(key)));
         }
 
         void Clear() const
         {
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Clear());
+            check_hresult(WINRT_SHIM(System::IMap<K, V>)->Clear());
         }
     };
 
     template <typename D, typename K, typename V> struct consume_IObservableMap
     {
-        event_token MapChanged(wfc::MapChangedEventHandler<K, V> const& handler) const
+        event_token MapChanged(System::MapChangedEventHandler<K, V> const& handler) const
         {
             event_token cookie{};
-            check_hresult(WINRT_SHIM(wfc::IObservableMap<K, V>)->add_MapChanged(get_abi(handler), &cookie));
+            check_hresult(WINRT_SHIM(System::IObservableMap<K, V>)->add_MapChanged(get_abi(handler), &cookie));
             return cookie;
         }
 
         void MapChanged(event_token const cookie) const noexcept
         {
-            WINRT_SHIM(wfc::IObservableMap<K, V>)->remove_MapChanged(cookie);
+            WINRT_SHIM(System::IObservableMap<K, V>)->remove_MapChanged(cookie);
         }
 
-        using MapChanged_revoker = event_revoker<wfc::IObservableMap<K, V>, &abi_t<wfc::IObservableMap<K, V>>::remove_MapChanged>;
+        using MapChanged_revoker = event_revoker<System::IObservableMap<K, V>, &abi_t<System::IObservableMap<K, V>>::remove_MapChanged>;
 
-        MapChanged_revoker MapChanged(auto_revoke_t, wfc::MapChangedEventHandler<K, V> const& handler) const
+        MapChanged_revoker MapChanged(auto_revoke_t, System::MapChangedEventHandler<K, V> const& handler) const
         {
             return make_event_revoker<D, MapChanged_revoker>(this, MapChanged(handler));
         }

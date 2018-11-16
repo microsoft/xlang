@@ -104,7 +104,7 @@ namespace xlang::impl
 {
     template <> struct name<System::Point>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Point" };
+        static constexpr auto & value{ L"System.Point" };
     };
 
     template <> struct category<System::Point>
@@ -114,7 +114,7 @@ namespace xlang::impl
 
     template <> struct name<System::Size>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Size" };
+        static constexpr auto & value{ L"System.Size" };
     };
 
     template <> struct category<System::Size>
@@ -124,7 +124,7 @@ namespace xlang::impl
     
     template <> struct name<System::Rect>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Rect" };
+        static constexpr auto & value{ L"System.Rect" };
     };
 
     template <> struct category<System::Rect>
@@ -136,7 +136,7 @@ namespace xlang::impl
 
     template <> struct name<System::Numerics::float2>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector2" };
+        static constexpr auto & value{ L"System.Numerics.Vector2" };
     };
 
     template <> struct category<System::Numerics::float2>
@@ -146,7 +146,7 @@ namespace xlang::impl
 
     template <> struct name<System::Numerics::float3>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector3" };
+        static constexpr auto & value{ L"System.Numerics.Vector3" };
     };
 
     template <> struct category<System::Numerics::float3>
@@ -156,7 +156,7 @@ namespace xlang::impl
 
     template <> struct name<System::Numerics::float4>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector4" };
+        static constexpr auto & value{ L"System.Numerics.Vector4" };
     };
 
     template <> struct category<System::Numerics::float4>
@@ -166,7 +166,7 @@ namespace xlang::impl
 
     template <> struct name<System::Numerics::float3x2>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix3x2" };
+        static constexpr auto & value{ L"System.Numerics.Matrix3x2" };
     };
 
     template <> struct category<System::Numerics::float3x2>
@@ -176,7 +176,7 @@ namespace xlang::impl
 
     template <> struct name<System::Numerics::float4x4>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix4x4" };
+        static constexpr auto & value{ L"System.Numerics.Matrix4x4" };
     };
 
     template <> struct category<System::Numerics::float4x4>
@@ -191,7 +191,7 @@ namespace xlang::impl
 
     template <> struct name<System::Numerics::quaternion>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Quaternion" };
+        static constexpr auto & value{ L"System.Numerics.Quaternion" };
     };
 
     template <> struct category<System::Numerics::quaternion>
@@ -201,7 +201,7 @@ namespace xlang::impl
 
     template <> struct name<System::Numerics::plane>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Plane" };
+        static constexpr auto & value{ L"System.Numerics.Plane" };
     };
 
     template <> struct category<System::Numerics::plane>
