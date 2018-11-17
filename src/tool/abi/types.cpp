@@ -12,7 +12,7 @@ using namespace xlang::text;
 template <typename T>
 static std::size_t push_type_contract_guards(writer& w, T const& type)
 {
-    if (auto vers = contract_attributes(type))
+    if (auto vers = get_contracts(type))
     {
         w.push_contract_guard(*vers);
         return 1;
@@ -424,48 +424,53 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 {
     constexpr bool is_delegate = std::is_same_v<T, delegate_type>;
     constexpr bool is_interface = std::is_same_v<T, interface_type>;
-    static_assert(is_delegate || is_interface);
-
-    // Generics don't get generated definitions
-    if (type.is_generic())
-    {
-        return;
-    }
-
-    write_type_banner(w, type);
-
-    auto contractDepth = type.push_contract_guards(w);
-
-    w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
-#define __%_INTERFACE_DEFINED__
-)^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type));
-
-    if constexpr (is_interface)
-    {
-        w.write(R"^-^(extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] = L"%";
-)^-^", bind_list("_", namespace_range{ type.clr_abi_namespace() }), type.cpp_abi_name(), type.clr_full_name());
-    }
+    constexpr bool is_fastabi = std::is_same_v<T, fastabi_type>;
+    static_assert(is_delegate || is_interface || is_fastabi);
 
     w.push_namespace(type.clr_abi_namespace());
 
-    auto iidStr = type_iid(type.type());
     w.write(R"^-^(%MIDL_INTERFACE("%")
-)^-^", indent{}, std::string_view{ iidStr.data(), iidStr.size() - 1 });
+)^-^", indent{}, bind_uuid(type));
 
     if (auto info = is_deprecated(type.type()))
     {
         write_deprecation_message(w, *info);
     }
 
-    auto baseType = is_delegate ? "IUnknown"sv : "IInspectable"sv;
+    auto writeBase = [&](writer& w)
+    {
+        if constexpr (is_delegate)
+        {
+            w.write("IUnknown");
+        }
+        else if constexpr (is_interface)
+        {
+            w.write("IInspectable");
+        }
+        else
+        {
+            write_cpp_fully_qualified_type(w, type.base().clr_abi_namespace(), type.base().cpp_abi_name());
+        }
+    };
+
     w.write(R"^-^(%% : public %
 %{
 %public:
-)^-^", indent{}, type.cpp_abi_name(), baseType, indent{}, indent{});
+)^-^", indent{}, type.cpp_abi_name(), writeBase, indent{}, indent{});
 
-    for (auto const& func : type.functions)
+    if constexpr (is_fastabi)
     {
-        write_cpp_function_declaration(w, func);
+        for (auto const& func : type.current_interface().functions)
+        {
+            write_cpp_function_declaration(w, func);
+        }
+    }
+    else
+    {
+        for (auto const& func : type.functions)
+        {
+            write_cpp_function_declaration(w, func);
+        }
     }
 
     w.write(R"^-^(%};
@@ -474,14 +479,6 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 )^-^", indent{}, indent{}, type.cpp_abi_name(), type.cpp_abi_name());
 
     w.pop_namespace();
-
-    w.write(R"^-^(
-EXTERN_C const IID %;
-#endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(type), bind_mangled_name_macro(type));
-
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
 }
 
 template <typename T>
@@ -734,35 +731,40 @@ void delegate_type::write_c_abi_type(writer& w) const
     w.write("%*", bind_c_type_name(*this));
 }
 
-void delegate_type::write_cpp_definition(writer& w) const
-{
-    write_cpp_interface_definition(w, *this);
-}
-
-void delegate_type::write_c_definition(writer& w) const
+static void write_delegate_definition(writer& w, delegate_type const& type, void (*func)(writer&, delegate_type const&))
 {
     // Generics don't get generated definitions
-    if (is_generic())
+    if (type.is_generic())
     {
         return;
     }
 
-    write_type_banner(w, *this);
-    auto contractDepth = push_contract_guards(w);
+    write_type_banner(w, type);
+    auto contractDepth = type.push_contract_guards(w);
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
-)^-^", bind_mangled_name_macro(*this), bind_mangled_name_macro(*this));
+)^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type));
 
-    write_c_interface_definition(w, *this);
+    func(w, type);
 
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(*this), bind_mangled_name_macro(*this));
+)^-^", bind_iid_name(type), bind_mangled_name_macro(type));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
+}
+
+void delegate_type::write_cpp_definition(writer& w) const
+{
+    write_delegate_definition(w, *this, &write_cpp_interface_definition<delegate_type>);
+}
+
+void delegate_type::write_c_definition(writer& w) const
+{
+    write_delegate_definition(w, *this, &write_c_interface_definition<delegate_type>);
 }
 
 void interface_type::write_cpp_forward_declaration(writer& w) const
@@ -826,41 +828,46 @@ void interface_type::write_c_abi_type(writer& w) const
     w.write("%*", bind_c_type_name(*this));
 }
 
-void interface_type::write_cpp_definition(writer& w) const
-{
-    write_cpp_interface_definition(w, *this);
-}
-
-void interface_type::write_c_definition(writer& w) const
+static void write_interface_definition(writer& w, interface_type const& type, void (*func)(writer&, interface_type const&))
 {
     // Generics don't get generated definitions
-    if (is_generic())
+    if (type.is_generic())
     {
         return;
     }
 
-    write_type_banner(w, *this);
-    auto contractDepth = push_contract_guards(w);
+    write_type_banner(w, type);
+    auto contractDepth = type.push_contract_guards(w);
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
 extern const __declspec(selectany) _Null_terminated_ WCHAR InterfaceName_%_%[] = L"%";
 )^-^",
-        bind_mangled_name_macro(*this),
-        bind_mangled_name_macro(*this),
-        bind_list("_", namespace_range{ clr_abi_namespace() }),
-        cpp_abi_name(),
-        m_clrFullName);
+        bind_mangled_name_macro(type),
+        bind_mangled_name_macro(type),
+        bind_list("_", namespace_range{ type.clr_abi_namespace() }),
+        type.cpp_abi_name(),
+        type.clr_full_name());
 
-    write_c_interface_definition(w, *this);
+    func(w, type);
 
     w.write(R"^-^(
 EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_iid_name(*this), bind_mangled_name_macro(*this));
+)^-^", bind_iid_name(type), bind_mangled_name_macro(type));
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
+}
+
+void interface_type::write_cpp_definition(writer& w) const
+{
+    write_interface_definition(w, *this, &write_cpp_interface_definition<interface_type>);
+}
+
+void interface_type::write_c_definition(writer& w) const
+{
+    write_interface_definition(w, *this, &write_c_interface_definition<interface_type>);
 }
 
 void class_type::write_cpp_forward_declaration(writer& w) const
@@ -977,6 +984,30 @@ void class_type::write_c_definition(writer& w) const
     write_cpp_definition(w);
 }
 
+static void write_fastabi_definition(writer& w, fastabi_type const& type, void (*func)(writer&, fastabi_type const&))
+{
+    write_type_banner(w, type);
+    auto contractDepth = type.push_contract_guards(w);
+
+    w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
+#define __%_INTERFACE_DEFINED__
+)^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type));
+
+    func(w, type);
+
+    w.write(R"^-^(
+#endif /* !defined(__%_INTERFACE_DEFINED__) */
+)^-^", bind_mangled_name_macro(type));
+
+    w.pop_contract_guards(contractDepth);
+    w.write('\n');
+}
+
+void fastabi_type::write_cpp_definition(writer& w) const
+{
+    write_fastabi_definition(w, *this, &write_cpp_interface_definition<fastabi_type>);
+}
+
 std::size_t generic_inst::push_contract_guards(writer& w) const
 {
     // Follow MIDLRT's lead and only write contract guards for the generic parameters
@@ -1018,30 +1049,6 @@ void generic_inst::write_cpp_forward_declaration(writer& w) const
 
     w.push_inline_namespace(clr_abi_namespace());
 
-    w.write(R"^-^(template <>
-struct __declspec(uuid(")^-^");
-
-    sha1 signatureHash;
-    static constexpr std::uint8_t namespaceGuidBytes[] =
-    {
-        0x11, 0xf4, 0x7a, 0xd5,
-        0x7b, 0x73,
-        0x42, 0xc0,
-        0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee
-    };
-    signatureHash.append(namespaceGuidBytes, std::size(namespaceGuidBytes));
-    append_signature(signatureHash);
-
-    auto iidHash = signatureHash.finalize();
-    iidHash[6] = (iidHash[6] & 0x0F) | 0x50;
-    iidHash[8] = (iidHash[8] & 0x3F) | 0x80;
-    w.write_printf("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-        iidHash[0], iidHash[1], iidHash[2], iidHash[3],
-        iidHash[4], iidHash[5],
-        iidHash[6], iidHash[7],
-        iidHash[8], iidHash[9],
-        iidHash[10], iidHash[11], iidHash[12], iidHash[13], iidHash[14], iidHash[15]);
-
     auto const cppName = generic_type_abi_name();
     auto write_cpp_name = [&](writer& w)
     {
@@ -1059,8 +1066,9 @@ struct __declspec(uuid(")^-^");
         w.write('>');
     };
 
-    w.write(R"^-^("))
-% : %_impl<)^-^", write_cpp_name, cppName);
+    w.write(R"^-^(template <>
+struct __declspec(uuid("%"))
+% : %_impl<)^-^", bind_uuid(*this), write_cpp_name, cppName);
 
     std::string_view prefix;
     for (auto param : m_genericParams)

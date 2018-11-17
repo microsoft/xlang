@@ -112,16 +112,16 @@ void writer::pop_inline_namespace()
     }
 }
 
-void writer::push_contract_guard(contract_version& vers)
+void writer::push_contract_guard(contract_attributes& vers)
 {
-    auto [ns, name] = decompose_type(vers.type_name);
-    write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.version });
+    auto [ns, name] = decompose_type(vers.current_contract.type_name);
+    write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.current_contract.version });
     for (auto const& prev : vers.previous_contracts)
     {
         auto [prevNs, prevName] = decompose_type(prev.type_name);
         write(" || \\\n    % >= % && % < %",
-            bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.low_version },
-            bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.high_version });
+            bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_introduced },
+            bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_removed });
     }
     write('\n');
 
@@ -133,14 +133,14 @@ void writer::pop_contract_guards(std::size_t count)
     while (count--)
     {
         auto const& vers = m_contractGuardStack.back();
-        auto [ns, name] = decompose_type(vers.type_name);
-        write("#endif // % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.version });
+        auto [ns, name] = decompose_type(vers.current_contract.type_name);
+        write("#endif // % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.current_contract.version });
         for (auto const& prev : vers.previous_contracts)
         {
             auto [prevNs, prevName] = decompose_type(prev.type_name);
             write(" || \\\n       // % >= % && % < %",
-                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.low_version},
-                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.high_version });
+                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_introduced },
+                bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_removed });
         }
         write('\n');
         m_contractGuardStack.pop_back();
@@ -318,6 +318,14 @@ static void write_cpp_type_definitions(writer& w, type_cache const& types)
     for (auto const& interfaceType : types.interfaces)
     {
         interfaceType.get().write_cpp_definition(w);
+    }
+
+    for (auto const& classType : types.classes)
+    {
+        for (auto const& fastAbiType : classType.get().fastabi_interfaces)
+        {
+            fastAbiType.write_cpp_definition(w);
+        }
     }
 
     for (auto const& classType : types.classes)

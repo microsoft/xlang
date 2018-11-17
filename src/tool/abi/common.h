@@ -87,23 +87,49 @@ inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_g
     return {};
 }
 
-struct previous_contract
+template <typename T, typename Func>
+inline void for_each_attribute(
+    T const& type,
+    std::string_view namespaceFilter,
+    std::string_view typeNameFilter,
+    Func&& func)
 {
-    std::string_view type_name;
-    std::uint32_t low_version;  // Introduced
-    std::uint32_t high_version; // Removed
-};
+    bool first = true;
+    for (auto const& attr : type.CustomAttribute())
+    {
+        auto [ns, name] = attr.TypeNamespaceAndName();
+        if ((ns == namespaceFilter) && (name == typeNameFilter))
+        {
+            func(first, attr);
+            first = false;
+        }
+    }
+}
 
 struct contract_version
 {
     std::string_view type_name;
     std::uint32_t version;
+};
 
+struct previous_contract
+{
+    std::string_view type_name;
+    std::uint32_t version_introduced;
+    std::uint32_t version_removed;
+};
+
+struct contract_attributes
+{
+    contract_version current_contract;
+
+    // NOTE: Ordered such that the "earliest" contracts come first. E.g. the first item is the contract where the type
+    //       was introduced. If the list is empty, then the above contract/version is the first contract
     std::vector<previous_contract> previous_contracts;
 };
 
 template <typename T>
-inline std::optional<contract_version> contract_attributes(T const& value)
+inline std::optional<contract_attributes> get_contracts(T const& value)
 {
     using namespace std::literals;
     using namespace xlang::meta::reader;
@@ -130,7 +156,7 @@ inline std::optional<contract_version> contract_attributes(T const& value)
         }
     };
 
-    contract_version result;
+    contract_attributes result;
 
     // The ContractVersionAttribute has three constructors, two of which are used for describing contract requirements
     // and the third describing contract definitions. This function is intended only for use with the first two
@@ -146,40 +172,89 @@ inline std::optional<contract_version> contract_attributes(T const& value)
     xlang::call(elemSig.value,
         [&](ElemSig::SystemType t)
         {
-            result.type_name = t.name;
+            result.current_contract.type_name = t.name;
         },
         [&](std::string_view name)
         {
-            result.type_name = name;
+            result.current_contract.type_name = name;
         },
         [](auto&&)
         {
             XLANG_ASSERT(false);
         });
 
-    result.version = read_version(std::get<ElemSig>(fixedArgs[1].value).value);
+    result.current_contract.version = read_version(std::get<ElemSig>(fixedArgs[1].value).value);
 
-    for (auto const& attr : value.CustomAttribute())
+    for_each_attribute(value, metadata_namespace, "PreviousContractVersionAttribute"sv,
+        [&](bool /*first*/, auto const& attr)
     {
-        auto [ns, name] = attr.TypeNamespaceAndName();
-        if ((ns == metadata_namespace) && (name == "PreviousContractVersionAttribute"sv))
-        {
-            auto prevSig = attr.Value();
-            auto const& prevArgs = prevSig.FixedArgs();
+        auto prevSig = attr.Value();
+        auto const& prevArgs = prevSig.FixedArgs();
 
-            // The PreviousContractVersionAttribute has two constructors, both of which start with the same three
-            // arguments - the only ones that we care about
-            previous_contract prev =
+        // The PreviousContractVersionAttribute has two constructors, both of which start with the same three
+        // arguments - the only ones that we care about
+        previous_contract prev =
+        {
+            std::get<std::string_view>(std::get<ElemSig>(prevArgs[0].value).value),
+            read_version(std::get<ElemSig>(prevArgs[1].value).value),
+            read_version(std::get<ElemSig>(prevArgs[2].value).value),
+        };
+        if (prevArgs.size() == 4)
+        {
+            // This contract "came before" a later contract. If we've already added that contract to the list, we
+            // need to insert this one before it
+            auto toName = std::get<std::string_view>(std::get<ElemSig>(prevArgs[3].value).value);
+            auto itr = std::find_if(result.previous_contracts.begin(), result.previous_contracts.end(),
+                [&](auto const& prevContract)
             {
-                std::get<std::string_view>(std::get<ElemSig>(prevArgs[0].value).value),
-                read_version(std::get<ElemSig>(prevArgs[1].value).value),
-                read_version(std::get<ElemSig>(prevArgs[2].value).value),
-            };
+                return prevContract.type_name == toName;
+            });
+            result.previous_contracts.insert(itr, prev);
+        }
+        else
+        {
+            // This is the last contract that the type was in before moving to its current contract. Always insert
+            // it at the tail
             result.previous_contracts.push_back(prev);
         }
-    }
+    });
 
     return result;
+}
+
+template <typename T>
+inline std::optional<contract_version> initial_contract(T const& value)
+{
+    auto attr = get_contracts(value);
+    if (!attr)
+    {
+        return std::nullopt;
+    }
+
+    if (attr->previous_contracts.empty())
+    {
+        return attr->current_contract;
+    }
+
+    return contract_version{ attr->previous_contracts[0].type_name, attr->previous_contracts[0].version_introduced };
+}
+
+template <typename T>
+inline std::optional<std::uint32_t> version_attribute(T const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+
+    if (auto attr = get_attribute(type, metadata_namespace, "VersionAttribute"sv))
+    {
+        auto sig = attr.Value();
+        auto const& prevArgs = sig.FixedArgs();
+
+        // The version is always the first argument
+        return std::get<std::uint32_t>(std::get<ElemSig>(prevArgs[0].value).value);
+    }
+
+    return std::nullopt;
 }
 
 struct deprecation_info
@@ -230,25 +305,6 @@ inline bool is_flags_enum(xlang::meta::reader::TypeDef const& type)
 {
     using namespace std::literals;
     return static_cast<bool>(get_attribute(type, system_namespace, "FlagsAttribute"sv));
-}
-
-template <typename T, typename Func>
-inline void for_each_attribute(
-    T const& type,
-    std::string_view namespaceFilter,
-    std::string_view typeNameFilter,
-    Func&& func)
-{
-    bool first = true;
-    for (auto const& attr : type.CustomAttribute())
-    {
-        auto [ns, name] = attr.TypeNamespaceAndName();
-        if ((ns == namespaceFilter) && (name == typeNameFilter))
-        {
-            func(first, attr);
-            first = false;
-        }
-    }
 }
 
 // NOTE: 37 characters for the null terminator; the actual string is 36 characters

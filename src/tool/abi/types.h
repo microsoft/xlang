@@ -564,6 +564,8 @@ struct interface_type final : typedef_base
     std::vector<function_def> functions;
 };
 
+struct fastabi_type;
+
 struct class_type final : typedef_base
 {
     class_type(xlang::meta::reader::TypeDef const& type) :
@@ -647,6 +649,7 @@ struct class_type final : typedef_base
 
     std::vector<metadata_type const*> required_interfaces;
     metadata_type const* default_interface = nullptr;
+    std::vector<fastabi_type> fastabi_interfaces;
 
 private:
 
@@ -776,5 +779,149 @@ private:
     typedef_base const* m_genericType;
     std::vector<metadata_type const*> m_genericParams;
     std::string m_clrFullName;
+    std::string m_mangledName;
+};
+
+struct fastabi_type : metadata_type
+{
+    fastabi_type(metadata_type const& base, interface_type const& type) :
+        m_base(&base),
+        m_type(&type)
+    {
+        // Synthesize an interface name
+        m_typeName = "fastabi_";
+        m_typeName += m_type->cpp_abi_name();
+
+        m_mangledName = mangled_namespace<false>(m_type->clr_abi_namespace()) + "_C";
+        details::append_mangled_name<false>(m_mangledName, m_typeName);
+    }
+
+    [[noreturn]]
+    virtual std::string_view clr_full_name() const override
+    {
+        // Fast ABI types are generated from metadata/attributes; they don't actually exist in metadata and therefore
+        // have no CLR name, nor is there a reason we should ever try and reference it
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempt to reference a fast ABI type's CLR name");
+    }
+
+    virtual std::string_view clr_abi_namespace() const override
+    {
+        return m_type->clr_abi_namespace();
+    }
+
+    [[noreturn]]
+    virtual std::string_view clr_logical_namespace() const override
+    {
+        // Fast ABI types exist solely at the ABI and therefore we should never try and reference their 'logical' name
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempt to reference a fast ABI type's logical namespace");
+    }
+
+    virtual std::string_view cpp_abi_name() const override
+    {
+        return m_typeName;
+    }
+
+    [[noreturn]]
+    virtual std::string_view cpp_logical_name() const override
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempt to reference a fast ABI type's logical name");
+    }
+
+    virtual std::string_view mangled_name() const override
+    {
+        return m_mangledName;
+    }
+
+    [[noreturn]]
+    virtual std::string_view generic_param_mangled_name() const override
+    {
+        // Fast ABI types don't exist in metadata and therefore should never appear as generic parameters
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempt to use a fast ABI type as a generic parameter");
+    }
+
+    virtual void append_signature(sha1& hash) const override
+    {
+        hash.append("fastabi(");
+        m_type->append_signature(hash);
+        hash.append(")");
+    }
+
+    virtual std::size_t push_contract_guards(writer& w) const override
+    {
+        auto result = m_base->push_contract_guards(w);
+        result += m_type->push_contract_guards(w);
+        return result;
+    }
+
+    [[noreturn]]
+    virtual void write_cpp_forward_declaration(writer&) const override
+    {
+        // Fast ABI types should only ever be used as base classes, which need to be defined, so we should never find
+        // ourselves in a scenario where we are trying to forward declare one
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attemptint to forward declare a fast ABI type");
+    }
+
+    [[noreturn]]
+    virtual void write_cpp_generic_param_logical_type(writer&) const override
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempt to use a fast ABI type as a generic parameter");
+    }
+
+    [[noreturn]]
+    virtual void write_cpp_generic_param_abi_type(writer&) const override
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempt to use a fast ABI type as a generic parameter");
+    }
+
+    [[noreturn]]
+    virtual void write_cpp_abi_type(writer&) const override
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempting to use a fast ABI type as a function parameter or struct member");
+    }
+
+    [[noreturn]]
+    virtual void write_c_forward_declaration(writer&) const override
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempting to forward declare a fast ABI type");
+    }
+
+    [[noreturn]]
+    virtual void write_c_abi_type(writer&) const override
+    {
+        XLANG_ASSERT(false);
+        xlang::throw_invalid("Attempting to use a fast ABI type as a function parameter or struct member");
+    }
+
+    void write_cpp_definition(writer& w) const;
+
+    xlang::meta::reader::TypeDef const& type() const noexcept
+    {
+        return m_type->type();
+    }
+
+    interface_type const& current_interface() const noexcept
+    {
+        return *m_type;
+    }
+
+    metadata_type const& base() const noexcept
+    {
+        return *m_base;
+    }
+
+private:
+
+    metadata_type const* m_base;
+    interface_type const* m_type;
+    std::string m_typeName;
     std::string m_mangledName;
 };

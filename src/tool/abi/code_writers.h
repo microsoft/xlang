@@ -60,7 +60,7 @@ inline auto bind_cpp_fully_qualified_type(std::string_view typeNamespace, std::s
     return xlang::text::bind<write_cpp_fully_qualified_type>(typeNamespace, typeName);
 }
 
-inline void write_mangled_name_macro(writer& w, typedef_base const& type)
+inline void write_mangled_name_macro(writer& w, metadata_type const& type)
 {
     w.write(mangled_name_macro_format(w), type.mangled_name());
 }
@@ -162,4 +162,58 @@ inline void write_deprecation_message(
         bind<write_contract_macro>(ns, name), format_hex{ info.version },
         indent{ additionalIndentation }, deprecationMacro, info.message,
         bind<write_contract_macro>(ns, name), format_hex{ info.version });
+}
+
+inline void write_uuid(writer& w, xlang::meta::reader::TypeDef const& type)
+{
+    auto iidStr = type_iid(type);
+    w.write(std::string_view{ iidStr.data(), iidStr.size() - 1 });
+}
+
+inline void write_uuid(writer& w, typedef_base const& type)
+{
+    write_uuid(w, type.type());
+}
+
+inline void write_generated_uuid(writer& w, metadata_type const& type)
+{
+    sha1 signatureHash;
+    static constexpr std::uint8_t namespaceGuidBytes[] =
+    {
+        0x11, 0xf4, 0x7a, 0xd5,
+        0x7b, 0x73,
+        0x42, 0xc0,
+        0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee
+    };
+    signatureHash.append(namespaceGuidBytes, std::size(namespaceGuidBytes));
+    type.append_signature(signatureHash);
+
+    auto iidHash = signatureHash.finalize();
+    iidHash[6] = (iidHash[6] & 0x0F) | 0x50;
+    iidHash[8] = (iidHash[8] & 0x3F) | 0x80;
+    w.write_printf("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+        iidHash[0], iidHash[1], iidHash[2], iidHash[3],
+        iidHash[4], iidHash[5],
+        iidHash[6], iidHash[7],
+        iidHash[8], iidHash[9],
+        iidHash[10], iidHash[11], iidHash[12], iidHash[13], iidHash[14], iidHash[15]);
+}
+
+inline void write_uuid(writer& w, generic_inst const& type)
+{
+    write_generated_uuid(w, type);
+}
+
+inline void write_uuid(writer& w, fastabi_type const& type)
+{
+    write_generated_uuid(w, type);
+}
+
+template <typename T>
+auto bind_uuid(T const& type)
+{
+    return [&](writer& w)
+    {
+        write_uuid(w, type);
+    };
 }
