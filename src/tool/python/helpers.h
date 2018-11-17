@@ -385,7 +385,7 @@ namespace xlang
 
     bool is_constructor(MethodDef const& method);
 
-    auto get_methods(TypeDef const& type)
+    auto get_methods(TypeDef const& type, bool include_special = false)
     {
         std::map<std::string_view, std::vector<method_info>> method_map{};
         auto category = get_category(type);
@@ -394,7 +394,7 @@ namespace xlang
         {
             for (auto&& method : type.MethodList())
             {
-                if (is_constructor(method))
+                if (is_constructor(method) || (method.SpecialName() && !include_special))
                 {
                     continue;
                 }
@@ -408,6 +408,11 @@ namespace xlang
             {
                 for (auto&& method : info.type.MethodList())
                 {
+                    if (method.SpecialName() && !include_special)
+                    {
+                        continue;
+                    }
+
                     method_map[method.Name()].push_back(method_info{ method, info.type_arguments });
                 }
             }
@@ -541,7 +546,7 @@ namespace xlang
         return distance(type.GenericParam()) > 0;
     }
 
-    bool is_static_class(TypeDef const& type)
+    bool is_static(TypeDef const& type)
     {
         return get_category(type) == category::class_type && type.Flags().Abstract();
     }
@@ -578,6 +583,11 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "put_");
     }
 
+    inline bool is_property_method(MethodDef const& method)
+    {
+        return method.SpecialName() && (starts_with(method.Name(), "get_") || starts_with(method.Name(), "put_"));
+    }
+
     inline bool is_add_method(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "add_");
@@ -588,7 +598,12 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "remove_");
     }
 
-    inline bool is_static_method(MethodDef const& method)
+    inline bool is_event_method(MethodDef const& method)
+    {
+        return method.SpecialName() && (starts_with(method.Name(), "add_") || starts_with(method.Name(), "remove_"));
+    }
+
+    inline bool is_static(MethodDef const& method)
     {
         return method.Flags().Static();
     }
@@ -631,6 +646,17 @@ namespace xlang
         return { get_method, set_method };
     }
 
+    bool is_static(Property const& prop)
+    {
+        auto methods = get_property_methods(prop);
+        return is_static(methods.get);
+    }
+
+    bool is_static(property_info const& prop)
+    {
+        return is_static(prop.property);
+    }
+
     struct event_type
     {
         MethodDef add;
@@ -664,6 +690,17 @@ namespace xlang
         XLANG_ASSERT(add_method.Flags().Static() == remove_method.Flags().Static());
 
         return { add_method, remove_method };
+    }
+
+    bool is_static(Event const& evt)
+    {
+        auto methods = get_event_methods(evt);
+        return is_static(methods.add);
+    }
+
+    bool is_static(event_info const& evt)
+    {
+        return is_static(evt.event);
     }
 
     bool has_dealloc(TypeDef const& type)
