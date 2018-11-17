@@ -406,6 +406,14 @@ static void write_c_type_definitions(writer& w, type_cache const& types)
 
     for (auto const& classType : types.classes)
     {
+        for (auto const& fastAbiType : classType.get().fastabi_interfaces)
+        {
+            fastAbiType.write_c_definition(w);
+        }
+    }
+
+    for (auto const& classType : types.classes)
+    {
         classType.get().write_c_definition(w);
     }
 }

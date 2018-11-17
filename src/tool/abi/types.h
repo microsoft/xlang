@@ -900,9 +900,6 @@ struct fastabi_type : metadata_type
         XLANG_ASSERT(false);
         xlang::throw_invalid("Attempting to use a fast ABI type as a function parameter or struct member");
     }
-
-    void write_cpp_definition(writer& w) const;
-
     xlang::meta::reader::TypeDef const& type() const noexcept
     {
         return m_type->type();
@@ -917,6 +914,15 @@ struct fastabi_type : metadata_type
     {
         return *m_base;
     }
+
+    auto is_deprecated() const noexcept
+    {
+        // TODO: Should this propagate? E.g. if IFoo2 is deprecated, should we infer that IFoo3 is deprecated?
+        return m_type->is_deprecated();
+    }
+
+    void write_cpp_definition(writer& w) const;
+    void write_c_definition(writer& w) const;
 
 private:
 

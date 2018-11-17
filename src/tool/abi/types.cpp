@@ -537,15 +537,15 @@ static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 )^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type), bind_mangled_name_macro(type));
 }
 
-template <typename T>
-static void write_c_function_declaration(writer& w, T const& type, function_def const& func)
+template <typename TypeName>
+static void write_c_function_declaration(writer& w, TypeName&& typeName, function_def const& func)
 {
     if (auto info = is_deprecated(func.def))
     {
         write_deprecation_message(w, *info, 1);
     }
 
-    w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), bind_c_type_name(type));
+    w.write("    HRESULT (STDMETHODCALLTYPE* %)(%* This", function_name(func.def), typeName);
 
     for (auto const& param : func.params)
     {
@@ -671,7 +671,7 @@ static void write_c_interface_definition(writer& w, T const& type)
 
     for (auto const& func : type.functions)
     {
-        write_c_function_declaration(w, type, func);
+        write_c_function_declaration(w, bind_c_type_name(type), func);
     }
 
     w.write(R"^-^(
@@ -1006,6 +1006,122 @@ static void write_fastabi_definition(writer& w, fastabi_type const& type, void (
 void fastabi_type::write_cpp_definition(writer& w) const
 {
     write_fastabi_definition(w, *this, &write_cpp_interface_definition<fastabi_type>);
+}
+
+static void write_c_interface_function_declarations(writer& w, fastabi_type const& type, interface_type const& iface)
+{
+    for (auto const& func : iface.functions)
+    {
+        write_c_function_declaration(w, bind_c_type_name(type), func);
+    }
+}
+
+static void write_c_interface_function_declarations(writer& w, fastabi_type const& type, generic_inst const& genericInst)
+{
+    for (auto const& func : genericInst.functions)
+    {
+        write_c_function_declaration(w, bind_c_type_name(type), func);
+    }
+}
+
+static void write_c_interface_function_declarations(writer& w, fastabi_type const& type, metadata_type const& targetType)
+{
+    if (auto iface = dynamic_cast<interface_type const*>(&targetType))
+    {
+        write_c_interface_function_declarations(w, type, *iface);
+    }
+    else if (auto genericInst = dynamic_cast<generic_inst const*>(&targetType))
+    {
+        // NOTE: Default interfaces can be generic instantiations, hence the check here
+        write_c_interface_function_declarations(w, type, *genericInst);
+    }
+    else
+    {
+        auto const& fastAbi = dynamic_cast<fastabi_type const&>(targetType);
+        write_c_interface_function_declarations(w, type, fastAbi.base());
+        write_c_interface_function_declarations(w, type, fastAbi.current_interface());
+    }
+}
+
+static void write_c_interface_function_declaration_macros(writer& w, interface_type const& type)
+{
+    for (auto const& func : type.functions)
+    {
+        write_c_function_declaration_macro(w, type, func);
+    }
+}
+
+static void write_c_interface_function_declaration_macros(writer& w, generic_inst const& type)
+{
+    for (auto const& func : type.functions)
+    {
+        write_c_function_declaration_macro(w, type, func);
+    }
+}
+
+static void write_c_interface_function_declaration_macros(writer& w, metadata_type const& type)
+{
+    if (auto iface = dynamic_cast<interface_type const*>(&type))
+    {
+        write_c_interface_function_declaration_macros(w, *iface);
+    }
+    else if (auto genericInst = dynamic_cast<generic_inst const*>(&type))
+    {
+        // NOTE: Default interfaces can be generic instantiations, hence the check here
+        write_c_interface_function_declaration_macros(w, *genericInst);
+    }
+    else
+    {
+        auto const& fastAbi = dynamic_cast<fastabi_type const&>(type);
+        write_c_interface_function_declaration_macros(w, fastAbi.base());
+        write_c_interface_function_declaration_macros(w, fastAbi.current_interface());
+    }
+}
+
+static void write_fastabi_c_interface_definition(writer& w, fastabi_type const& type)
+{
+    // We don't forward declare fast ABI interfaces with the remainder of the interfaces, so go ahead and do so now
+    // since the vtable type needs to refer to it
+    w.write(R"^-^(typedef struct % %;
+
+)^-^", bind_c_type_name(type), bind_c_type_name(type));
+
+    w.write(R"^-^(typedef struct %
+{
+    BEGIN_INTERFACE
+
+)^-^", bind_c_type_name(type, "Vtbl"));
+
+    write_c_iinspectable_interface(w, type);
+
+    write_c_interface_function_declarations(w, type, type.base());
+    write_c_interface_function_declarations(w, type, type.current_interface());
+
+    w.write(R"^-^(
+    END_INTERFACE
+} %;
+
+interface %
+{
+    CONST_VTBL struct %* lpVtbl;
+};
+
+#ifdef COBJMACROS
+
+)^-^", bind_c_type_name(type, "Vtbl"), bind_c_type_name(type), bind_c_type_name(type, "Vtbl"));
+
+    write_c_iinspectable_interface_macros(w, type);
+
+    write_c_interface_function_declaration_macros(w, type.base());
+    write_c_interface_function_declaration_macros(w, type.current_interface());
+
+    w.write(R"^-^(#endif /* COBJMACROS */
+)^-^");
+}
+
+void fastabi_type::write_c_definition(writer& w) const
+{
+    write_fastabi_definition(w, *this, &write_fastabi_c_interface_definition);
 }
 
 std::size_t generic_inst::push_contract_guards(writer& w) const

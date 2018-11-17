@@ -120,6 +120,12 @@ inline void write_c_type_name(writer& w, generic_inst const& type, Suffix&& suff
     w.write("%%", type.mangled_name(), suffix);
 }
 
+template <typename Suffix>
+inline void write_c_type_name(writer& w, fastabi_type const& type, Suffix&& suffix)
+{
+    w.write("%%", type.mangled_name(), suffix);
+}
+
 template <typename T>
 auto bind_c_type_name(T const& type)
 {
