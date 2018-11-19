@@ -446,26 +446,25 @@ static void write_cpp_interface_definition(writer& w, T const& type)
         write_deprecation_message(w, *info);
     }
 
-    auto writeBase = [&](writer& w)
-    {
-        if constexpr (is_delegate)
-        {
-            w.write("IUnknown");
-        }
-        else if constexpr (is_interface)
-        {
-            w.write("IInspectable");
-        }
-        else
-        {
-            type.base().write_cpp_abi_name(w);
-        }
-    };
+    w.write("%% : public ", indent{}, type.cpp_abi_name());
 
-    w.write(R"^-^(%% : public %
+    if constexpr (is_delegate)
+    {
+        w.write("IUnknown");
+    }
+    else if constexpr (is_interface)
+    {
+        w.write("IInspectable");
+    }
+    else
+    {
+        type.base().write_cpp_abi_name(w);
+    }
+
+    w.write(R"^-^(
 %{
 %public:
-)^-^", indent{}, type.cpp_abi_name(), writeBase, indent{}, indent{});
+)^-^", indent{}, indent{});
 
     if constexpr (is_fastabi)
     {
