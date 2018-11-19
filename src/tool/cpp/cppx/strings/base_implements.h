@@ -1012,41 +1012,8 @@ namespace xlang::impl
         }
         else
         {
-            static slim_mutex lock;
-            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
-            IUnknown collection;
-            check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<IMap<hstring, IObject>>();
-
-            {
-                slim_lock_guard const guard{ lock };
-
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
-                {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
-                }
-            }
-
-            result_type object;
-            *put_abi(object) = to_abi<result_type>(new D);
-
-            {
-                slim_lock_guard const guard{ lock };
-
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
-                {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
-                }
-                else
-                {
-                    map.Insert(name_of<typename D::instance_type>(), object);
-                    return object;
-                }
-            }
+            static result_type factory{ take_ownership_from_abi, to_abi<result_type>(new D) };
+            return factory;
         }
     }
 }
