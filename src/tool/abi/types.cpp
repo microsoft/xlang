@@ -27,6 +27,11 @@ std::size_t typedef_base::push_contract_guards(writer& w) const
     return push_type_contract_guards(w, m_type);
 }
 
+void typedef_base::write_cpp_abi_name(writer& w) const
+{
+    write_cpp_fully_qualified_type(w, clr_abi_namespace(), cpp_abi_name());
+}
+
 static std::string_view enum_string(writer& w)
 {
     return w.config().enum_class ? "MIDL_ENUM"sv : "enum"sv;
@@ -49,12 +54,13 @@ void enum_type::write_cpp_forward_declaration(writer& w) const
 void enum_type::write_cpp_generic_param_abi_type(writer& w) const
 {
     w.write("% ", enum_string(w));
-    write_cpp_abi_type(w);
+    write_cpp_abi_param(w);
 }
 
-void enum_type::write_cpp_abi_type(writer& w) const
+void enum_type::write_cpp_abi_param(writer& w) const
 {
-    write_cpp_fully_qualified_type(w, clr_abi_namespace(), cpp_abi_name());
+    // Enums are passed by value
+    write_cpp_abi_name(w);
 }
 
 void enum_type::write_c_forward_declaration(writer& w) const
@@ -67,7 +73,7 @@ void enum_type::write_c_forward_declaration(writer& w) const
     w.write("typedef enum % %;\n\n", bind_c_type_name(*this), bind_c_type_name(*this));
 }
 
-void enum_type::write_c_abi_type(writer& w) const
+void enum_type::write_c_abi_param(writer& w) const
 {
     w.write("enum %", bind_c_type_name(*this));
 }
@@ -211,12 +217,14 @@ void struct_type::write_cpp_forward_declaration(writer& w) const
 
 void struct_type::write_cpp_generic_param_abi_type(writer& w) const
 {
-    write_cpp_abi_type(w);
+    w.write("struct ");
+    write_cpp_abi_param(w);
 }
 
-void struct_type::write_cpp_abi_type(writer& w) const
+void struct_type::write_cpp_abi_param(writer& w) const
 {
-    w.write("struct %", bind_cpp_fully_qualified_type(clr_abi_namespace(), cpp_abi_name()));
+    // Structs are passed by value
+    write_cpp_abi_name(w);
 }
 
 void struct_type::write_c_forward_declaration(writer& w) const
@@ -229,7 +237,7 @@ void struct_type::write_c_forward_declaration(writer& w) const
     w.write("typedef struct % %;\n\n", bind_c_type_name(*this), bind_c_type_name(*this));
 }
 
-void struct_type::write_c_abi_type(writer& w) const
+void struct_type::write_c_abi_param(writer& w) const
 {
     w.write("struct %", bind_c_type_name(*this));
 }
@@ -264,7 +272,7 @@ void struct_type::write_cpp_definition(writer& w) const
             write_deprecation_message(w, *info, 1);
         }
 
-        w.write("%% %;\n", indent{ 1 }, [&](writer& w) { member.type->write_cpp_abi_type(w); }, member.field.Name());
+        w.write("%% %;\n", indent{ 1 }, [&](writer& w) { member.type->write_cpp_abi_param(w); }, member.field.Name());
     }
 
     w.write("%};\n", indent{});
@@ -301,7 +309,7 @@ void struct_type::write_c_definition(writer& w) const
             write_deprecation_message(w, *info, 1);
         }
 
-        w.write("    % %;\n", [&](writer& w) { member.type->write_c_abi_type(w); }, member.field.Name());
+        w.write("    % %;\n", [&](writer& w) { member.type->write_c_abi_param(w); }, member.field.Name());
     }
 
     w.write("};\n");
@@ -337,12 +345,13 @@ void delegate_type::write_cpp_forward_declaration(writer& w) const
 
 void delegate_type::write_cpp_generic_param_abi_type(writer& w) const
 {
-    write_cpp_abi_type(w);
+    write_cpp_abi_param(w);
 }
 
-void delegate_type::write_cpp_abi_type(writer& w) const
+void delegate_type::write_cpp_abi_param(writer& w) const
 {
-    w.write("%*", bind_cpp_fully_qualified_type(clr_abi_namespace(), cpp_abi_name()));
+    write_cpp_abi_name(w);
+    w.write('*');
 }
 
 static std::string_view function_name(MethodDef const& def)
@@ -385,7 +394,7 @@ static void write_cpp_function_declaration(writer& w, function_def const& func)
             prefix,
             indent{ 2 },
             constMod,
-            [&](writer& w) { param.type->write_cpp_abi_type(w); },
+            [&](writer& w) { param.type->write_cpp_abi_param(w); },
             refMod,
             param.name);
         prefix = ",\n";
@@ -404,7 +413,7 @@ static void write_cpp_function_declaration(writer& w, function_def const& func)
         w.write("%%%% %",
             prefix,
             indent{ 2 },
-            [&](writer& w) { func.return_type->type->write_cpp_abi_type(w); },
+            [&](writer& w) { func.return_type->type->write_cpp_abi_param(w); },
             refMod,
             func.return_type->name);
     }
@@ -449,7 +458,7 @@ static void write_cpp_interface_definition(writer& w, T const& type)
         }
         else
         {
-            write_cpp_fully_qualified_type(w, type.base().clr_abi_namespace(), type.base().cpp_abi_name());
+            type.base().write_cpp_abi_name(w);
         }
     };
 
@@ -559,7 +568,7 @@ static void write_c_function_declaration(writer& w, TypeName&& typeName, functio
         auto constMod = is_const(param.signature) ? "const "sv : ""sv;
         w.write(",\n        %%% %",
             constMod,
-            [&](writer& w) { param.type->write_c_abi_type(w); },
+            [&](writer& w) { param.type->write_c_abi_param(w); },
             refMod,
             param.name);
     }
@@ -574,7 +583,7 @@ static void write_c_function_declaration(writer& w, TypeName&& typeName, functio
         }
 
         w.write(",\n        %% %",
-            [&](writer& w) { func.return_type->type->write_c_abi_type(w); },
+            [&](writer& w) { func.return_type->type->write_c_abi_param(w); },
             refMod,
             func.return_type->name);
     }
@@ -726,7 +735,7 @@ void delegate_type::write_c_forward_declaration(writer& w) const
         bind_mangled_name_macro(*this));
 }
 
-void delegate_type::write_c_abi_type(writer& w) const
+void delegate_type::write_c_abi_param(writer& w) const
 {
     w.write("%*", bind_c_type_name(*this));
 }
@@ -794,12 +803,13 @@ void interface_type::write_cpp_forward_declaration(writer& w) const
 
 void interface_type::write_cpp_generic_param_abi_type(writer& w) const
 {
-    write_cpp_abi_type(w);
+    write_cpp_abi_param(w);
 }
 
-void interface_type::write_cpp_abi_type(writer& w) const
+void interface_type::write_cpp_abi_param(writer& w) const
 {
-    w.write("%*", bind_cpp_fully_qualified_type(clr_abi_namespace(), cpp_abi_name()));
+    write_cpp_abi_name(w);
+    w.write('*');
 }
 
 void interface_type::write_c_forward_declaration(writer& w) const
@@ -823,7 +833,7 @@ typedef interface % %;
         bind_mangled_name_macro(*this));
 }
 
-void interface_type::write_c_abi_type(writer& w) const
+void interface_type::write_c_abi_param(writer& w) const
 {
     w.write("%*", bind_c_type_name(*this));
 }
@@ -914,7 +924,7 @@ void class_type::write_cpp_generic_param_abi_type(writer& w) const
         [&](writer& w) { default_interface->write_cpp_generic_param_abi_type(w); });
 }
 
-void class_type::write_cpp_abi_type(writer& w) const
+void class_type::write_cpp_abi_param(writer& w) const
 {
     if (!default_interface)
     {
@@ -923,7 +933,7 @@ void class_type::write_cpp_abi_type(writer& w) const
             "default interface");
     }
 
-    default_interface->write_cpp_abi_type(w);
+    default_interface->write_cpp_abi_param(w);
 }
 
 void class_type::write_c_forward_declaration(writer& w) const
@@ -937,7 +947,7 @@ void class_type::write_c_forward_declaration(writer& w) const
     default_interface->write_c_forward_declaration(w);
 }
 
-void class_type::write_c_abi_type(writer& w) const
+void class_type::write_c_abi_param(writer& w) const
 {
     if (!default_interface)
     {
@@ -946,7 +956,7 @@ void class_type::write_c_abi_type(writer& w) const
             "default interface");
     }
 
-    default_interface->write_c_abi_type(w);
+    default_interface->write_c_abi_param(w);
 }
 
 void class_type::write_cpp_definition(writer& w) const
@@ -1001,6 +1011,11 @@ static void write_fastabi_definition(writer& w, fastabi_type const& type, void (
 
     w.pop_contract_guards(contractDepth);
     w.write('\n');
+}
+
+void fastabi_type::write_cpp_abi_name(writer& w) const
+{
+    write_cpp_fully_qualified_type(w, clr_abi_namespace(), m_typeName);
 }
 
 void fastabi_type::write_cpp_definition(writer& w) const
@@ -1244,10 +1259,15 @@ void generic_inst::write_cpp_generic_param_logical_type(writer& w) const
 
 void generic_inst::write_cpp_generic_param_abi_type(writer& w) const
 {
-    write_cpp_abi_type(w);
+    write_cpp_abi_param(w);
 }
 
-void generic_inst::write_cpp_abi_type(writer& w) const
+void generic_inst::write_cpp_abi_name(writer& w) const
+{
+    w.write(m_mangledName);
+}
+
+void generic_inst::write_cpp_abi_param(writer& w) const
 {
     w.write("%*", m_mangledName);
 }
@@ -1299,7 +1319,7 @@ EXTERN_C const IID IID_%;
     w.end_declaration(m_mangledName);
 }
 
-void generic_inst::write_c_abi_type(writer& w) const
+void generic_inst::write_c_abi_param(writer& w) const
 {
     w.write("%*", m_mangledName);
 }
@@ -1359,12 +1379,12 @@ void element_type::write_cpp_generic_param_abi_type(writer& w) const
     }
 }
 
-void element_type::write_cpp_abi_type(writer& w) const
+void element_type::write_cpp_abi_name(writer& w) const
 {
     w.write(m_cppName);
 }
 
-void element_type::write_c_abi_type(writer& w) const
+void element_type::write_c_abi_param(writer& w) const
 {
     w.write(m_cppName);
 }
@@ -1391,12 +1411,12 @@ void system_type::write_cpp_generic_param_abi_type(writer& w) const
     w.write(m_cppName);
 }
 
-void system_type::write_cpp_abi_type(writer& w) const
+void system_type::write_cpp_abi_name(writer& w) const
 {
     w.write(m_cppName);
 }
 
-void system_type::write_c_abi_type(writer& w) const
+void system_type::write_c_abi_param(writer& w) const
 {
     w.write(m_cppName);
 }
@@ -1451,16 +1471,21 @@ void mapped_type::write_cpp_generic_param_abi_type(writer& w) const
         break; // Others don't get prefixes
     }
 
-    write_cpp_abi_type(w);
+    write_cpp_abi_param(w);
 }
 
-void mapped_type::write_cpp_abi_type(writer& w) const
+void mapped_type::write_cpp_abi_name(writer& w) const
+{
+    w.write(m_cppName);
+}
+
+void mapped_type::write_cpp_abi_param(writer& w) const
 {
     // Currently all mapped types are mapped because the underlying type is a C type
-    write_c_abi_type(w);
+    write_c_abi_param(w);
 }
 
-void mapped_type::write_c_abi_type(writer& w) const
+void mapped_type::write_c_abi_param(writer& w) const
 {
     w.write(m_cppName);
 
