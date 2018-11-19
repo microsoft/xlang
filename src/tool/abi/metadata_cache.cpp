@@ -290,14 +290,14 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
         }
     }
 
-    // TODO: Check for "fast ABI" attribute. For testing, do for all classes with default interfaces
-    if (type.default_interface)
+    if (get_attribute(type.type(), metadata_namespace, "FastAbiAttribute"sv))
     {
         // The fast ABI interface for a default interface is the interface itself, so we don't go about re-defining it.
         // This will pose an issue, though, if the interface is defined in a different interface than the class since it
         // is ill-formed to derive from an undefined type
         XLANG_ASSERT(type.default_interface);
-        XLANG_ASSERT(type.default_interface->clr_abi_namespace() == type.clr_abi_namespace());
+        XLANG_ASSERT(dynamic_cast<generic_inst const*>(type.default_interface) ||
+            type.default_interface->clr_abi_namespace() == type.clr_logical_namespace());
 
         auto checkRequiredInterface = [&](metadata_type const* ptr)
         {
