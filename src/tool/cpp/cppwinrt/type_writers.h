@@ -107,36 +107,6 @@ namespace xlang
             return generic_param_guard{ this };
         }
 
-        void write_value(bool value)
-        {
-            write(value ? "TRUE"sv : "FALSE"sv);
-        }
-
-        void write_value(char16_t value)
-        {
-            write_printf("%#0hx", value);
-        }
-
-        void write_value(int8_t value)
-        {
-            write_printf("%hhd", value);
-        }
-
-        void write_value(uint8_t value)
-        {
-            write_printf("%#0hhx", value);
-        }
-
-        void write_value(int16_t value)
-        {
-            write_printf("%hd", value);
-        }
-
-        void write_value(uint16_t value)
-        {
-            write_printf("%#0hx", value);
-        }
-
         void write_value(int32_t value)
         {
             write_printf("%d", value);
@@ -145,31 +115,6 @@ namespace xlang
         void write_value(uint32_t value)
         {
             write_printf("%#0x", value);
-        }
-
-        void write_value(int64_t value)
-        {
-            write_printf("%lld", value);
-        }
-
-        void write_value(uint64_t value)
-        {
-            write_printf("%#0llx", value);
-        }
-
-        void write_value(float value)
-        {
-            write_printf("%f", value);
-        }
-
-        void write_value(double value)
-        {
-            write_printf("%f", value);
-        }
-
-        void write_value(std::string_view value)
-        {
-            write("\"%\"", value);
         }
 
         void write_code(std::string_view const& value)
@@ -195,48 +140,14 @@ namespace xlang
         {
             switch (value.Type())
             {
-            case ConstantType::Boolean:
-                write_value(value.ValueBoolean());
-                break;
-            case ConstantType::Char:
-                write_value(value.ValueChar());
-                break;
-            case ConstantType::Int8:
-                write_value(value.ValueInt8());
-                break;
-            case ConstantType::UInt8:
-                write_value(value.ValueUInt8());
-                break;
-            case ConstantType::Int16:
-                write_value(value.ValueInt16());
-                break;
-            case ConstantType::UInt16:
-                write_value(value.ValueUInt16());
-                break;
             case ConstantType::Int32:
                 write_value(value.ValueInt32());
                 break;
             case ConstantType::UInt32:
                 write_value(value.ValueUInt32());
                 break;
-            case ConstantType::Int64:
-                write_value(value.ValueInt64());
-                break;
-            case ConstantType::UInt64:
-                write_value(value.ValueUInt64());
-                break;
-            case ConstantType::Float32:
-                write_value(value.ValueFloat32());
-                break;
-            case ConstantType::Float64:
-                write_value(value.ValueFloat64());
-                break;
-            case ConstantType::String:
-                write_value(value.ValueString());
-                break;
-            case ConstantType::Class:
-                write("null");
-                break;
+            default:
+                throw_invalid("Unexpected constant type");
             }
         }
 
@@ -334,14 +245,11 @@ namespace xlang
             switch (type.type())
             {
             case TypeDefOrRef::TypeDef:
-
                 write(type.TypeDef());
                 break;
-
             case TypeDefOrRef::TypeRef:
                 write(type.TypeRef());
                 break;
-
             case TypeDefOrRef::TypeSpec:
                 write(type.TypeSpec().Signature().GenericTypeInst());
                 break;

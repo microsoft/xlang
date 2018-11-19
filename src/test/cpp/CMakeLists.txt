@@ -40,7 +40,7 @@ endif()
 
 target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
 
-file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cpp.exe cpp_exe)
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files)
 file(TO_NATIVE_PATH "${generated_files}/attributes.winmd" attributes_winmd)
@@ -68,18 +68,18 @@ add_custom_command(OUTPUT ${component_winmd}
 
 add_custom_command(OUTPUT ${foundation_h}
     COMMAND ${cpp_exe} -in ${project_folder}\\windows.winmd -out ${generated_files} -verbose
-    DEPENDS ${component_winmd} ${generated_files} cpp
+    DEPENDS ${component_winmd} ${generated_files} cppwinrt
 )
 
 add_custom_command(OUTPUT ${compare_component_h}
     COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd ${attributes_winmd} -out ${project_folder}/compare/out -component ${project_folder}/compare/project -verbose -prefix -base -overwrite
-    DEPENDS ${component_winmd} ${foundation_h} ${generated_files} cpp
+    DEPENDS ${component_winmd} ${foundation_h} ${generated_files} cppwinrt
 )
 
 add_custom_command(OUTPUT ${mogule_g_cpp}
     COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd ${attributes_winmd} -out ${generated_files} -component -verbose -prefix -base -lib test -opt
-    DEPENDS ${component_winmd} ${generated_files} cpp
+    DEPENDS ${component_winmd} ${generated_files} cppwinrt
 )
 
 add_custom_target(cpp_test_depends ALL DEPENDS ${compare_component_h} ${mogule_g_cpp})
-add_dependencies(cpp_test cpp cpp_test_depends)
+add_dependencies(cpp_test cppwinrt cpp_test_depends)
