@@ -56,6 +56,22 @@ namespace details
 }
 
 template <bool IsGenericParam>
+inline std::string mangled_namespace(std::string_view typeNamespace)
+{
+    if constexpr (IsGenericParam)
+    {
+        if (typeNamespace == collections_namespace)
+        {
+            return "__F";
+        }
+    }
+
+    std::string result;
+    details::append_mangled_name<IsGenericParam>(result, typeNamespace);
+    return result;
+}
+
+template <bool IsGenericParam>
 inline std::string mangled_name(xlang::meta::reader::TypeDef const& type)
 {
     std::string result;
@@ -66,21 +82,7 @@ inline std::string mangled_name(xlang::meta::reader::TypeDef const& type)
     }
     else
     {
-        bool appendNamespace = true;
-        if constexpr (IsGenericParam)
-        {
-            if (type.TypeNamespace() == collections_namespace)
-            {
-                result += "__F";
-                appendNamespace = false;
-            }
-        }
-
-        if (appendNamespace)
-        {
-            details::append_mangled_name<IsGenericParam>(result, type.TypeNamespace());
-        }
-
+        result = mangled_namespace<IsGenericParam>(type.TypeNamespace());
         result += IsGenericParam ? "__C" : "_C";
     }
 

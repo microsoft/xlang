@@ -179,9 +179,9 @@ void metadata_cache::process_namespace_dependencies(namespace_cache& target)
 template <typename T>
 static void process_contract_dependencies(namespace_cache& target, T const& type)
 {
-    if (auto attr = contract_attributes(type))
+    if (auto attr = get_contracts(type))
     {
-        target.dependent_namespaces.emplace(decompose_type(attr->type_name).first);
+        target.dependent_namespaces.emplace(decompose_type(attr->current_contract.type_name).first);
         for (auto const& prevContract : attr->previous_contracts)
         {
             target.dependent_namespaces.emplace(decompose_type(prevContract.type_name).first);
@@ -287,6 +287,152 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
         {
             XLANG_ASSERT(!type.default_interface);
             type.default_interface = ifaceType;
+        }
+    }
+
+    if (get_attribute(type.type(), metadata_namespace, "FastAbiAttribute"sv))
+    {
+        // The fast ABI interface for a default interface is the interface itself, so we don't go about re-defining it.
+        // This will pose an issue, though, if the interface is defined in a different interface than the class since it
+        // is ill-formed to derive from an undefined type
+        XLANG_ASSERT(type.default_interface);
+        XLANG_ASSERT(dynamic_cast<generic_inst const*>(type.default_interface) ||
+            type.default_interface->clr_abi_namespace() == type.clr_logical_namespace());
+
+        auto checkRequiredInterface = [&](metadata_type const* ptr)
+        {
+            if (auto ifacePtr = dynamic_cast<interface_type const*>(ptr))
+            {
+                if (ifacePtr != type.default_interface)
+                {
+                    if (auto attr = get_attribute(ifacePtr->type(), metadata_namespace, "ExclusiveToAttribute"sv))
+                    {
+                        // NOTE: We'll assume that the metadata is well formed and that the interface in question is
+                        //       exclusive to the class we're currently processing
+                        return ifacePtr;
+                    }
+                }
+            }
+
+            return static_cast<interface_type const*>(nullptr);
+        };
+
+        // Compile a list of exclusive interfaces that we will then sort
+        // NOTE: Generic types will never be exclusive to, so we can ignore them
+        std::vector<interface_type const*> exclusiveInterfaces;
+        for (auto ptr : type.required_interfaces)
+        {
+            if (auto ifacePtr = checkRequiredInterface(ptr))
+            {
+                exclusiveInterfaces.push_back(ifacePtr);
+            }
+        }
+
+        // Required interfaces of the exclusive interfaces need to be considered as well
+        for (std::size_t i = 0; i < exclusiveInterfaces.size(); ++i)
+        {
+            for (auto const& iface : exclusiveInterfaces[i]->type().InterfaceImpl())
+            {
+                auto dep = &find_dependent_type(state, iface.Interface());
+                if (auto ifacePtr = checkRequiredInterface(dep))
+                {
+                    // It may be the case that we've already processed this type
+                    if (std::find(exclusiveInterfaces.begin(), exclusiveInterfaces.end(), ifacePtr) == exclusiveInterfaces.end())
+                    {
+                        exclusiveInterfaces.push_back(ifacePtr);
+                    }
+                }
+            }
+        }
+
+        // We need to sort exclusive interfaces based off when they were added to the class. We accomplish this by
+        // looking at when the interface was introduced relative to the class' contract history (if it has one)
+        auto contractHistory = get_contracts(type.type());
+        auto contractPower = [&](interface_type const* iface)
+        {
+            auto initialContract = initial_contract(iface->type());
+            if (!initialContract)
+            {
+                xlang::throw_invalid("Interface '", iface->clr_full_name(), "' has no contract attribute, but is "
+                    "trying to be used as a fast ABI interface for class '", type.clr_full_name(), "' which does have "
+                    "a contract attribute");
+            }
+
+            std::size_t contractIndex = 0;
+            for (auto const& prev : contractHistory->previous_contracts)
+            {
+                if ((initialContract->type_name == prev.type_name) &&
+                    (initialContract->version >= prev.version_introduced) &&
+                    (initialContract->version < prev.version_removed))
+                {
+                    return std::make_pair(contractIndex, initialContract->version - prev.version_introduced);
+                }
+
+                ++contractIndex;
+            }
+
+            if ((initialContract->type_name == contractHistory->current_contract.type_name) &&
+                (initialContract->version >= contractHistory->current_contract.version))
+            {
+                return std::make_pair(contractIndex, initialContract->version - contractHistory->current_contract.version);
+            }
+
+            xlang::throw_invalid("Interface '", iface->clr_full_name(), "' is marked as exclusiveto class '",
+                type.clr_full_name(), "', but was introduced in a contract/version that the class was not a part of "
+                "and therefore cannot be used as a fast ABI interface");
+        };
+
+        auto getVersion = [&](interface_type const* iface)
+        {
+            if (auto ver = version_attribute(iface->type()))
+            {
+                return *ver;
+            }
+
+            xlang::throw_invalid("Interface '", iface->clr_full_name(), "' has no version attribute, but is trying to "
+                "be used as a fast ABI iterface for class '", type.clr_full_name(), "' which has no contract attribute");
+        };
+
+        std::sort(exclusiveInterfaces.begin(), exclusiveInterfaces.end(),
+            [&](interface_type const* lhs, interface_type const* rhs)
+        {
+            if (contractHistory)
+            {
+                auto [lhsIndex, lhsVer] = contractPower(lhs);
+                auto [rhsIndex, rhsVer] = contractPower(rhs);
+                if (lhsIndex != rhsIndex)
+                {
+                    return lhsIndex < rhsIndex;
+                }
+                else if (lhsVer != rhsVer)
+                {
+                    return lhsVer < rhsVer;
+                }
+
+                // Otherwise, introduced in the same contract; sort alphabetically
+                return lhs->clr_full_name() < rhs->clr_full_name();
+            }
+            else
+            {
+                // No contract on the class is much easier to sort since it's just a version compare
+                auto lhsVer = getVersion(lhs);
+                auto rhsVer = getVersion(rhs);
+                if (lhsVer != rhsVer)
+                {
+                    return lhsVer < rhsVer;
+                }
+
+                // Otherwise, introduced in the same version; sort alphabetically
+                return lhs->clr_full_name() < rhs->clr_full_name();
+            }
+        });
+
+        auto base = type.default_interface;
+        type.fastabi_interfaces.reserve(exclusiveInterfaces.size());
+        for (auto iface : exclusiveInterfaces)
+        {
+            type.fastabi_interfaces.emplace_back(*base, *iface);
+            base = &type.fastabi_interfaces.back();
         }
     }
 }
