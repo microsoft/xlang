@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
-#include "StaticClass.h"
+#include "Component.Edge.StaticClass.h"
 
 namespace winrt::Component::Edge::implementation
 {
-    void StaticClass::StaticMethod();
+    void StaticClass::StaticMethod()
     {
         throw hresult_not_implemented();
     }

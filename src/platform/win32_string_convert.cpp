@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include "pal_internal.h"
 #include "string_convert.h"
+#include "pal_error.h"
 
 namespace xlang::impl
 {
