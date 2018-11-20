@@ -50,7 +50,7 @@ namespace winrt::impl
     template <typename T, typename H>
     T make_delegate(H&& handler)
     {
-        return { new delegate_t<T, H>(std::forward<H>(handler)), take_ownership_from_abi };
+        return { static_cast<abi_t<T>*>(new delegate_t<T, H>(std::forward<H>(handler))), take_ownership_from_abi };
     }
 
     template <typename... T>

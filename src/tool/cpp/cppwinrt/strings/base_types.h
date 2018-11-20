@@ -457,7 +457,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         VectorChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
+        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         VectorChangedEventHandler(L handler) :

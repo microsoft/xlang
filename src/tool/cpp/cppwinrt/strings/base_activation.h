@@ -307,7 +307,7 @@ namespace winrt::impl
             }
         }
 
-        return { result, take_ownership_from_abi_t };
+        return { result, take_ownership_from_abi };
     }
 }
 
