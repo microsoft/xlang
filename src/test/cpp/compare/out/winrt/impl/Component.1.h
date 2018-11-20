@@ -8,6 +8,6 @@ namespace winrt::Component
         impl::consume_t<INotExclusive>
     {
         INotExclusive(std::nullptr_t = nullptr) noexcept {}
-        INotExclusive(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        INotExclusive(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
 }

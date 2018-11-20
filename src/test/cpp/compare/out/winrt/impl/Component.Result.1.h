@@ -8,6 +8,6 @@ namespace winrt::Component::Result
         impl::consume_t<IClassStatics>
     {
         IClassStatics(std::nullptr_t = nullptr) noexcept {}
-        IClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
 }

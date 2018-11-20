@@ -8,7 +8,7 @@ WINRT_EXPORT namespace winrt
 
         com_ptr(std::nullptr_t = nullptr) noexcept {}
 
-        com_ptr(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<type*>(ptr))
+        com_ptr(void* ptr, take_ownership_from_abi_t) noexcept : m_ptr(static_cast<type*>(ptr))
         {
         }
 

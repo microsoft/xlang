@@ -14,16 +14,16 @@ WINRT_EXPORT namespace winrt
             }
         }
 
-        auto get() const noexcept
+        impl::com_ref<T> get() const noexcept
         {
-            impl::com_ref<T> result{ nullptr };
+            void* result;
 
             if (m_ref)
             {
-                m_ref->Resolve(guid_of<T>(), put_abi(result));
+                m_ref->Resolve(guid_of<T>(), &result);
             }
 
-            return result;
+            return { result, take_ownership_from_abi };
         }
 
         explicit operator bool() const noexcept

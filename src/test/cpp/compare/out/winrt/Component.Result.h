@@ -16,25 +16,25 @@ namespace winrt::impl
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Result::IClassStatics)->GetString(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Component::Fast::FastClass consume_Component_Result_IClassStatics<D>::GetFastClass() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Result::IClassStatics)->GetFastClass(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Component::Fast::SlowClass consume_Component_Result_IClassStatics<D>::GetSlowClass() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Result::IClassStatics)->GetSlowClass(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Component::INotExclusive consume_Component_Result_IClassStatics<D>::GetInterface() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Result::IClassStatics)->GetInterface(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D>
     struct produce<D, Component::Result::IClassStatics> : produce_base<D, Component::Result::IClassStatics>

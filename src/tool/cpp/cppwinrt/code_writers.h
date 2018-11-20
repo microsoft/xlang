@@ -740,7 +740,7 @@ namespace xlang
 
         if (can_take_ownership_of_return_type(signature))
         {
-            w.write("\n        return { take_ownership_from_abi, % };", signature.return_param_name());
+            w.write("\n        return { %, take_ownership_from_abi };", signature.return_param_name());
         }
         else
         {
@@ -1583,7 +1583,7 @@ public:
         impl::consume_t<%>%
     {
         %(std::nullptr_t = nullptr) noexcept {}
-        %(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     %};
 )";
 
@@ -1605,6 +1605,7 @@ public:
         auto format = R"(    struct % : Windows::Foundation::IUnknown
     {
         %(std::nullptr_t = nullptr) noexcept {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
         template <typename L> %(L lambda);
         template <typename F> %(F* function);
         template <typename O, typename M> %(O* object, M method);
@@ -1619,6 +1620,7 @@ public:
         method_signature signature{ get_delegate_method(type) };
 
         w.write(format,
+            type_name,
             type_name,
             type_name,
             type_name,
@@ -2215,7 +2217,7 @@ public:
         auto format = R"(    struct WINRT_EBO % : %%%
     {
         %(std::nullptr_t) noexcept {}
-        %(take_ownership_from_abi_t, void* ptr) noexcept : %(take_ownership_from_abi, ptr) {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
 %%%    };
 )";
 
@@ -2250,7 +2252,7 @@ public:
         auto format = R"(    struct WINRT_EBO % : %%%
     {
         %(std::nullptr_t) noexcept {}
-        %(take_ownership_from_abi_t, void* ptr) noexcept : %(take_ownership_from_abi, ptr) {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
 %%%%    };
 )";
 

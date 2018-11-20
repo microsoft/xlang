@@ -2237,7 +2237,7 @@ namespace winrt::impl
 
         void* result;
         check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
+        return { get_self_abi<To>::value(result), take_ownership_from_abi };
     }
 
     template <typename To, typename From>
@@ -2250,7 +2250,7 @@ namespace winrt::impl
 
         void* result;
         ptr->QueryInterface(guid_of<To>(), &result);
-        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
+        return { get_self_abi<To>::value(result), take_ownership_from_abi };
     }
 
     template <typename T>
@@ -2277,7 +2277,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IUnknown(std::nullptr_t) noexcept {}
         void* operator new(size_t) = delete;
 
-        IUnknown(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
+        IUnknown(void* ptr, take_ownership_from_abi_t) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
         {
         }
 
@@ -2512,7 +2512,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct IInspectable : IUnknown
     {
         IInspectable(std::nullptr_t = nullptr) noexcept {}
-        IInspectable(take_ownership_from_abi_t, void* ptr) noexcept : IUnknown(take_ownership_from_abi, ptr) {}
+        IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
 }
 
@@ -2587,7 +2587,7 @@ WINRT_EXPORT namespace winrt
 
         hstring() noexcept = default;
 
-        hstring(take_ownership_from_abi_t, void* ptr) noexcept : m_handle(ptr)
+        hstring(void* ptr, take_ownership_from_abi_t) noexcept : m_handle(ptr)
         {
         }
 
@@ -2857,10 +2857,10 @@ namespace winrt::impl
         hstring to_hstring()
         {
             WINRT_ASSERT(m_buffer != nullptr);
-            hstring result;
-            check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, put_abi(result)));
+            void* result;
+            check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, &result));
             m_buffer = nullptr;
-            return result;
+            return { result, take_ownership_from_abi };
         }
 
     private:
@@ -3705,9 +3705,9 @@ WINRT_EXPORT namespace winrt
 
     inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
     {
-        hstring value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(put_abi(value)));
-        return value;
+        void* value;
+        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(&value));
+        return { value, take_ownership_from_abi };
     }
 
     inline com_array<guid> get_interfaces(Windows::Foundation::IInspectable const& object)
@@ -3734,7 +3734,7 @@ WINRT_EXPORT namespace winrt
 
         com_ptr(std::nullptr_t = nullptr) noexcept {}
 
-        com_ptr(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<type*>(ptr))
+        com_ptr(void* ptr, take_ownership_from_abi_t) noexcept : m_ptr(static_cast<type*>(ptr))
         {
         }
 
@@ -4056,26 +4056,27 @@ WINRT_EXPORT namespace winrt
             }
         }
 
-        auto get() const noexcept
+        impl::com_ref<T> get() const noexcept
         {
-            impl::com_ref<T> object{ nullptr };
-
-            if (m_ref)
+            if (!m_ref)
             {
-                if constexpr(impl::is_implements_v<T>)
-                {
-                    impl::com_ref<default_interface<T>> temp;
-                    m_ref->Resolve(guid_of<T>(), put_abi(temp));
-                    attach_abi(object, get_self<T>(temp));
-                    detach_abi(temp);
-                }
-                else
-                {
-                    m_ref->Resolve(guid_of<T>(), put_abi(object));
-                }
+                return nullptr;
             }
 
-            return object;
+            if constexpr(impl::is_implements_v<T>)
+            {
+                impl::com_ref<default_interface<T>> temp;
+                m_ref->Resolve(guid_of<T>(), put_abi(temp));
+                void* result = get_self<T>(temp);
+                detach_abi(temp);
+                return { result, take_ownership_from_abi };
+            }
+            else
+            {
+                void* result;
+                m_ref->Resolve(guid_of<T>(), &result);
+                return { result, take_ownership_from_abi };
+            }
         }
 
         auto put() noexcept
@@ -4115,16 +4116,16 @@ WINRT_EXPORT namespace winrt
             }
         }
 
-        auto get() const noexcept
+        impl::com_ref<T> get() const noexcept
         {
-            impl::com_ref<T> result{ nullptr };
+            void* result;
 
             if (m_ref)
             {
-                m_ref->Resolve(guid_of<T>(), put_abi(result));
+                m_ref->Resolve(guid_of<T>(), &result);
             }
 
-            return result;
+            return { result, take_ownership_from_abi };
         }
 
         explicit operator bool() const noexcept
@@ -4206,8 +4207,8 @@ WINRT_EXPORT namespace winrt
 {
     struct hresult_error
     {
-        struct from_abi_t {};
-        static constexpr from_abi_t from_abi{};
+        using from_abi_t = take_ownership_from_abi_t;
+        static constexpr auto from_abi{ take_ownership_from_abi };
 
         hresult_error() noexcept = default;
         hresult_error(hresult_error&&) = default;
@@ -4236,7 +4237,7 @@ WINRT_EXPORT namespace winrt
             originate(code, get_abi(message));
         }
 
-        hresult_error(hresult const code, from_abi_t) noexcept : m_code(code)
+        hresult_error(hresult const code, take_ownership_from_abi_t) noexcept : m_code(code)
         {
             WINRT_GetRestrictedErrorInfo(m_info.put_void());
 
@@ -4341,84 +4342,84 @@ WINRT_EXPORT namespace winrt
     {
         hresult_access_denied() noexcept : hresult_error(impl::error_access_denied) {}
         hresult_access_denied(param::hstring const& message) noexcept : hresult_error(impl::error_access_denied, message) {}
-        hresult_access_denied(from_abi_t) noexcept : hresult_error(impl::error_access_denied, from_abi) {}
+        hresult_access_denied(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_access_denied, take_ownership_from_abi) {}
     };
 
     struct hresult_wrong_thread : hresult_error
     {
         hresult_wrong_thread() noexcept : hresult_error(impl::error_wrong_thread) {}
         hresult_wrong_thread(param::hstring const& message) noexcept : hresult_error(impl::error_wrong_thread, message) {}
-        hresult_wrong_thread(from_abi_t) noexcept : hresult_error(impl::error_wrong_thread, from_abi) {}
+        hresult_wrong_thread(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_wrong_thread, take_ownership_from_abi) {}
     };
 
     struct hresult_not_implemented : hresult_error
     {
         hresult_not_implemented() noexcept : hresult_error(impl::error_not_implemented) {}
         hresult_not_implemented(param::hstring const& message) noexcept : hresult_error(impl::error_not_implemented, message) {}
-        hresult_not_implemented(from_abi_t) noexcept : hresult_error(impl::error_not_implemented, from_abi) {}
+        hresult_not_implemented(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_not_implemented, take_ownership_from_abi) {}
     };
 
     struct hresult_invalid_argument : hresult_error
     {
         hresult_invalid_argument() noexcept : hresult_error(impl::error_invalid_argument) {}
         hresult_invalid_argument(param::hstring const& message) noexcept : hresult_error(impl::error_invalid_argument, message) {}
-        hresult_invalid_argument(from_abi_t) noexcept : hresult_error(impl::error_invalid_argument, from_abi) {}
+        hresult_invalid_argument(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_invalid_argument, take_ownership_from_abi) {}
     };
 
     struct hresult_out_of_bounds : hresult_error
     {
         hresult_out_of_bounds() noexcept : hresult_error(impl::error_out_of_bounds) {}
         hresult_out_of_bounds(param::hstring const& message) noexcept : hresult_error(impl::error_out_of_bounds, message) {}
-        hresult_out_of_bounds(from_abi_t) noexcept : hresult_error(impl::error_out_of_bounds, from_abi) {}
+        hresult_out_of_bounds(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_out_of_bounds, take_ownership_from_abi) {}
     };
 
     struct hresult_no_interface : hresult_error
     {
         hresult_no_interface() noexcept : hresult_error(impl::error_no_interface) {}
         hresult_no_interface(param::hstring const& message) noexcept : hresult_error(impl::error_no_interface, message) {}
-        hresult_no_interface(from_abi_t) noexcept : hresult_error(impl::error_no_interface, from_abi) {}
+        hresult_no_interface(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_no_interface, take_ownership_from_abi) {}
     };
 
     struct hresult_class_not_available : hresult_error
     {
         hresult_class_not_available() noexcept : hresult_error(impl::error_class_not_available) {}
         hresult_class_not_available(param::hstring const& message) noexcept : hresult_error(impl::error_class_not_available, message) {}
-        hresult_class_not_available(from_abi_t) noexcept : hresult_error(impl::error_class_not_available, from_abi) {}
+        hresult_class_not_available(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_class_not_available, take_ownership_from_abi) {}
     };
 
     struct hresult_changed_state : hresult_error
     {
         hresult_changed_state() noexcept : hresult_error(impl::error_changed_state) {}
         hresult_changed_state(param::hstring const& message) noexcept : hresult_error(impl::error_changed_state, message) {}
-        hresult_changed_state(from_abi_t) noexcept : hresult_error(impl::error_changed_state, from_abi) {}
+        hresult_changed_state(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_changed_state, take_ownership_from_abi) {}
     };
 
     struct hresult_illegal_method_call : hresult_error
     {
         hresult_illegal_method_call() noexcept : hresult_error(impl::error_illegal_method_call) {}
         hresult_illegal_method_call(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_method_call, message) {}
-        hresult_illegal_method_call(from_abi_t) noexcept : hresult_error(impl::error_illegal_method_call, from_abi) {}
+        hresult_illegal_method_call(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_method_call, take_ownership_from_abi) {}
     };
 
     struct hresult_illegal_state_change : hresult_error
     {
         hresult_illegal_state_change() noexcept : hresult_error(impl::error_illegal_state_change) {}
         hresult_illegal_state_change(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_state_change, message) {}
-        hresult_illegal_state_change(from_abi_t) noexcept : hresult_error(impl::error_illegal_state_change, from_abi) {}
+        hresult_illegal_state_change(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_state_change, take_ownership_from_abi) {}
     };
 
     struct hresult_illegal_delegate_assignment : hresult_error
     {
         hresult_illegal_delegate_assignment() noexcept : hresult_error(impl::error_illegal_delegate_assignment) {}
         hresult_illegal_delegate_assignment(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_delegate_assignment, message) {}
-        hresult_illegal_delegate_assignment(from_abi_t) noexcept : hresult_error(impl::error_illegal_delegate_assignment, from_abi) {}
+        hresult_illegal_delegate_assignment(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_delegate_assignment, take_ownership_from_abi) {}
     };
 
     struct hresult_canceled : hresult_error
     {
         hresult_canceled() noexcept : hresult_error(impl::error_canceled) {}
         hresult_canceled(param::hstring const& message) noexcept : hresult_error(impl::error_canceled, message) {}
-        hresult_canceled(from_abi_t) noexcept : hresult_error(impl::error_canceled, from_abi) {}
+        hresult_canceled(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_canceled, take_ownership_from_abi) {}
     };
 
     [[noreturn]] inline WINRT_NOINLINE void throw_hresult(hresult const result)
@@ -4430,65 +4431,65 @@ WINRT_EXPORT namespace winrt
 
         if (result == impl::error_access_denied)
         {
-            throw hresult_access_denied(hresult_error::from_abi);
+            throw hresult_access_denied(take_ownership_from_abi);
         }
 
         if (result == impl::error_wrong_thread)
         {
-            throw hresult_wrong_thread(hresult_error::from_abi);
+            throw hresult_wrong_thread(take_ownership_from_abi);
         }
 
         if (result == impl::error_not_implemented)
         {
-            throw hresult_not_implemented(hresult_error::from_abi);
+            throw hresult_not_implemented(take_ownership_from_abi);
         }
 
         if (result == impl::error_invalid_argument)
         {
-            throw hresult_invalid_argument(hresult_error::from_abi);
+            throw hresult_invalid_argument(take_ownership_from_abi);
         }
 
         if (result == impl::error_out_of_bounds)
         {
-            throw hresult_out_of_bounds(hresult_error::from_abi);
+            throw hresult_out_of_bounds(take_ownership_from_abi);
         }
 
         if (result == impl::error_no_interface)
         {
-            throw hresult_no_interface(hresult_error::from_abi);
+            throw hresult_no_interface(take_ownership_from_abi);
         }
 
         if (result == impl::error_class_not_available)
         {
-            throw hresult_class_not_available(hresult_error::from_abi);
+            throw hresult_class_not_available(take_ownership_from_abi);
         }
 
         if (result == impl::error_changed_state)
         {
-            throw hresult_changed_state(hresult_error::from_abi);
+            throw hresult_changed_state(take_ownership_from_abi);
         }
 
         if (result == impl::error_illegal_method_call)
         {
-            throw hresult_illegal_method_call(hresult_error::from_abi);
+            throw hresult_illegal_method_call(take_ownership_from_abi);
         }
 
         if (result == impl::error_illegal_state_change)
         {
-            throw hresult_illegal_state_change(hresult_error::from_abi);
+            throw hresult_illegal_state_change(take_ownership_from_abi);
         }
 
         if (result == impl::error_illegal_delegate_assignment)
         {
-            throw hresult_illegal_delegate_assignment(hresult_error::from_abi);
+            throw hresult_illegal_delegate_assignment(take_ownership_from_abi);
         }
 
         if (result == impl::error_canceled)
         {
-            throw hresult_canceled(hresult_error::from_abi);
+            throw hresult_canceled(take_ownership_from_abi);
         }
 
-        throw hresult_error(result, hresult_error::from_abi);
+        throw hresult_error(result, take_ownership_from_abi);
     }
 
     inline WINRT_NOINLINE hresult to_hresult() noexcept
@@ -4906,13 +4907,11 @@ namespace winrt::impl
     };
 
     template <typename T>
-    auto make_event_array(uint32_t const capacity)
+    com_ptr<event_array<T>> make_event_array(uint32_t const capacity)
     {
         com_ptr<event_array<T>> instance;
         void* raw = ::operator new(sizeof(event_array<T>) + (sizeof(T)* capacity));
-#pragma warning(suppress: 6386)
-        *put_abi(instance) = new(raw) event_array<T>(capacity);
-        return instance;
+        return { new(raw) event_array<T>(capacity), take_ownership_from_abi };
     }
 }
 
@@ -5159,16 +5158,16 @@ namespace winrt::impl
 
         bool HasCurrent() const
         {
-            bool temp{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_HasCurrent(put_abi(temp)));
-            return temp;
+            bool result{};
+            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_HasCurrent(&result));
+            return result;
         }
 
         bool MoveNext() const
         {
-            bool temp{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->MoveNext(put_abi(temp)));
-            return temp;
+            bool result{};
+            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->MoveNext(&result));
+            return result;
         }
 
         uint32_t GetMany(array_view<T> values) const
@@ -5198,9 +5197,9 @@ namespace winrt::impl
     {
         wfc::IIterator<T> First() const
         {
-            wfc::IIterator<T> iterator;
-            check_hresult(WINRT_SHIM(wfc::IIterable<T>)->First(put_abi(iterator)));
-            return iterator;
+            void* result;
+            check_hresult(WINRT_SHIM(wfc::IIterable<T>)->First(&result));
+            return { result, take_ownership_from_abi };
         }
     };
 
@@ -5253,9 +5252,9 @@ namespace winrt::impl
 
         wfc::IVectorView<T> GetView() const
         {
-            wfc::IVectorView<T> view;
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetView(put_abi(view)));
-            return view;
+            void* result;
+            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetView(&result));
+            return { result, take_ownership_from_abi };
         }
 
         bool IndexOf(param_type<T> const& value, uint32_t& index) const
@@ -5401,6 +5400,7 @@ namespace winrt::impl
             check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->HasKey(get_abi(key), &found));
             return found;
         }
+
         void Split(wfc::IMapView<K, V>& firstPartition, wfc::IMapView<K, V>& secondPartition)
         {
             check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Split(put_abi(firstPartition), put_abi(secondPartition)));
@@ -5454,9 +5454,9 @@ namespace winrt::impl
 
         wfc::IMapView<K, V> GetView() const
         {
-            wfc::IMapView<K, V> view;
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->GetView(put_abi(view)));
-            return view;
+            void* result;
+            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->GetView(&result));
+            return { result, take_ownership_from_abi };
         }
 
         bool Insert(param_type<K> const& key, param_type<V> const& value) const
@@ -6425,11 +6425,9 @@ namespace winrt::impl
     };
 
     template <typename T, typename H>
-    auto make_delegate(H&& handler)
+    T make_delegate(H&& handler)
     {
-        T instance{};
-        *put_abi(instance) = (new delegate_t<T, H>(std::forward<H>(handler)));
-        return instance;
+        return { new delegate_t<T, H>(std::forward<H>(handler)), take_ownership_from_abi };
     }
 
     template <typename... T>
@@ -6491,6 +6489,7 @@ WINRT_EXPORT namespace winrt
     struct WINRT_EBO delegate : Windows::Foundation::IUnknown
     {
         delegate(std::nullptr_t = nullptr) noexcept {}
+        delegate(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         delegate(L handler) :
@@ -6513,11 +6512,9 @@ WINRT_EXPORT namespace winrt
     private:
 
         template <typename H>
-        static auto make(H&& handler)
+        static winrt::delegate<T...> make(H&& handler)
         {
-            winrt::delegate<T...> instance;
-            *put_abi(instance) = (new impl::variadic_delegate<H, T...>(std::forward<H>(handler)));
-            return instance;
+            return { new impl::variadic_delegate<H, T...>(std::forward<H>(handler)), take_ownership_from_abi };
         }
     };
 }
@@ -6529,7 +6526,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         impl::consume_t<IAsyncInfo>
     {
         IAsyncInfo(std::nullptr_t = nullptr) noexcept {}
-        IAsyncInfo(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncInfo(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     struct WINRT_EBO IAsyncAction :
@@ -6538,7 +6535,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         impl::require<IAsyncAction, IAsyncInfo>
     {
         IAsyncAction(std::nullptr_t = nullptr) noexcept {}
-        IAsyncAction(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncAction(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename TProgress>
@@ -6549,7 +6546,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         IAsyncActionWithProgress(std::nullptr_t = nullptr) noexcept {}
-        IAsyncActionWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncActionWithProgress(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename TResult>
@@ -6560,7 +6557,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         IAsyncOperation(std::nullptr_t = nullptr) noexcept {}
-        IAsyncOperation(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncOperation(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename TResult, typename TProgress>
@@ -6572,7 +6569,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         IAsyncOperationWithProgress(std::nullptr_t = nullptr) noexcept {}
-        IAsyncOperationWithProgress(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IAsyncOperationWithProgress(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename T>
@@ -6580,6 +6577,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         EventHandler(std::nullptr_t = nullptr) noexcept {}
+        EventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         EventHandler(L handler) :
@@ -6614,6 +6612,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         static_assert(impl::has_category_v<TSender>, "TSender must be WinRT type.");
         static_assert(impl::has_category_v<TArgs>, "TArgs must be WinRT type.");
         TypedEventHandler(std::nullptr_t = nullptr) noexcept {}
+        TypedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         TypedEventHandler(L handler) :
@@ -6645,6 +6644,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct AsyncActionCompletedHandler : IUnknown
     {
         AsyncActionCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncActionCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         AsyncActionCompletedHandler(L handler) :
@@ -6678,6 +6678,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         AsyncActionProgressHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncActionProgressHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         AsyncActionProgressHandler(L handler) :
@@ -6711,6 +6712,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         AsyncActionWithProgressCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncActionWithProgressCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         AsyncActionWithProgressCompletedHandler(L handler) :
@@ -6745,6 +6747,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         AsyncOperationProgressHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncOperationProgressHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         AsyncOperationProgressHandler(L handler) :
@@ -6779,6 +6782,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         static_assert(impl::has_category_v<TProgress>, "TProgress must be WinRT type.");
         AsyncOperationWithProgressCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncOperationWithProgressCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         AsyncOperationWithProgressCompletedHandler(L handler) :
@@ -6812,6 +6816,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<TResult>, "TResult must be WinRT type.");
         AsyncOperationCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncOperationCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         AsyncOperationCompletedHandler(L handler) :
@@ -6850,7 +6855,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         IMapChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
-        IMapChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IMapChangedEventArgs(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename T>
@@ -6860,7 +6865,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IIterator(std::nullptr_t = nullptr) noexcept {}
-        IIterator(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IIterator(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
 
         using iterator_category = std::input_iterator_tag;
         using value_type = T;
@@ -6876,7 +6881,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IIterable(std::nullptr_t = nullptr) noexcept {}
-        IIterable(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IIterable(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename T>
@@ -6887,7 +6892,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IVectorView(std::nullptr_t = nullptr) noexcept {}
-        IVectorView(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IVectorView(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename T>
@@ -6898,7 +6903,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IVector(std::nullptr_t = nullptr) noexcept {}
-        IVector(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IVector(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename T>
@@ -6909,7 +6914,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IObservableVector(std::nullptr_t = nullptr) noexcept {}
-        IObservableVector(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IObservableVector(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename K, typename V>
@@ -6920,7 +6925,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IKeyValuePair(std::nullptr_t = nullptr) noexcept {}
-        IKeyValuePair(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IKeyValuePair(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename K, typename V>
@@ -6932,7 +6937,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMapView(std::nullptr_t = nullptr) noexcept {}
-        IMapView(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IMapView(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename K, typename V>
@@ -6944,7 +6949,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMap(std::nullptr_t = nullptr) noexcept {}
-        IMap(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename K, typename V>
@@ -6956,7 +6961,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IObservableMap(std::nullptr_t = nullptr) noexcept {}
-        IObservableMap(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IObservableMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     struct WINRT_EBO IVectorChangedEventArgs :
@@ -6964,7 +6969,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         impl::consume_t<IVectorChangedEventArgs>
     {
         IVectorChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
-        IVectorChangedEventArgs(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IVectorChangedEventArgs(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename T>
@@ -6972,6 +6977,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         VectorChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
+        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         VectorChangedEventHandler(L handler) :
@@ -7006,6 +7012,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<K>, "K must be WinRT type.");
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         MapChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
+        MapChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         MapChangedEventHandler(L handler) :
@@ -7046,9 +7053,9 @@ namespace winrt::impl
     template <typename D>
     Windows::Foundation::AsyncActionCompletedHandler consume_IAsyncAction<D>::Completed() const
     {
-        Windows::Foundation::AsyncActionCompletedHandler handler{};
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->get_Completed(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TResult>
@@ -7060,9 +7067,9 @@ namespace winrt::impl
     template <typename D, typename TResult>
     Windows::Foundation::AsyncOperationCompletedHandler<TResult> consume_IAsyncOperation<D, TResult>::Completed() const
     {
-        Windows::Foundation::AsyncOperationCompletedHandler<TResult> temp;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->get_Completed(put_abi(temp)));
-        return temp;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TProgress>
@@ -7074,9 +7081,9 @@ namespace winrt::impl
     template <typename D, typename TProgress>
     Windows::Foundation::AsyncActionProgressHandler<TProgress> consume_IAsyncActionWithProgress<D, TProgress>::Progress() const
     {
-        Windows::Foundation::AsyncActionProgressHandler<TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Progress(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Progress(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TProgress>
@@ -7088,9 +7095,9 @@ namespace winrt::impl
     template <typename D, typename TProgress>
     Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> consume_IAsyncActionWithProgress<D, TProgress>::Completed() const
     {
-        Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Completed(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TResult, typename TProgress>
@@ -7102,9 +7109,9 @@ namespace winrt::impl
     template <typename D, typename TResult, typename TProgress>
     Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> consume_IAsyncOperationWithProgress<D, TResult, TProgress>::Progress() const
     {
-        Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Progress(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Progress(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TResult, typename TProgress>
@@ -7116,29 +7123,29 @@ namespace winrt::impl
     template <typename D, typename TResult, typename TProgress>
     Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> consume_IAsyncOperationWithProgress<D, TResult, TProgress>::Completed() const
     {
-        Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Completed(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 }
 
 WINRT_EXPORT namespace winrt
 {
     template <typename Interface = Windows::Foundation::IActivationFactory>
-    auto get_activation_factory(param::hstring const& name)
+    impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
-        impl::com_ref<Interface> object;
-        hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
+        void* result;
+        hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
         if (hr == impl::error_not_initialized)
         {
-            void* cookie{};
-            check_hresult(WINRT_CoIncrementMTAUsage(&cookie));
-            hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
+            void* cookie;
+            WINRT_CoIncrementMTAUsage(&cookie);
+            hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
         }
 
         check_hresult(hr);
-        return object;
+        return { result, take_ownership_from_abi };
     }
 }
 
@@ -7412,16 +7419,16 @@ namespace winrt::impl
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
-    auto try_get_activation_factory(hresult_error* exception = nullptr) noexcept
+    impl::com_ref<Interface> try_get_activation_factory(hresult_error* exception = nullptr) noexcept
     {
         param::hstring const name{ name_of<Class>() };
-        impl::com_ref<Interface> object;
-        hresult const hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
+        void* result;
+        hresult const hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
         if (hr < 0)
         {
             // Ensure that the IRestrictedErrorInfo is not left on the thread.
-            hresult_error local_exception{ hr, hresult_error::from_abi };
+            hresult_error local_exception{ hr, take_ownership_from_abi };
 
             if (exception)
             {
@@ -7430,7 +7437,7 @@ namespace winrt::impl
             }
         }
 
-        return object;
+        return { result, take_ownership_from_abi_t };
     }
 }
 
@@ -7443,7 +7450,7 @@ WINRT_EXPORT namespace winrt
             impl::consume_t<IActivationFactory>
         {
             IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-            IActivationFactory(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+            IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
         };
     }
 
@@ -7500,9 +7507,9 @@ WINRT_EXPORT namespace winrt
     template <typename Interface>
     impl::com_ref<Interface> create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
     {
-        impl::com_ref<Interface> temp{ nullptr };
-        check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), put_abi(temp)));
-        return temp;
+        void* result;
+        check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), &result));
+        return { result, take_ownership_from_abi };
     }
 }
 
@@ -8633,15 +8640,13 @@ namespace winrt::impl
     };
 
     template <typename D>
-    auto make_factory()
+    auto make_factory() -> typename impl::implements_default_interface<D>::type
     {
         using result_type = typename impl::implements_default_interface<D>::type;
 
         if constexpr (!has_static_lifetime_v<D>)
         {
-            result_type factory;
-            *put_abi(factory) = to_abi<result_type>(new D);
-            return factory;
+            return { to_abi<result_type>(new D), take_ownership_from_abi };
         }
         else
         {
@@ -8656,23 +8661,18 @@ namespace winrt::impl
 
                 if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
                 {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
+                    return { detach_abi(value), take_ownership_from_abi };
                 }
             }
 
-            result_type object;
-            *put_abi(object) = to_abi<result_type>(new D);
+            result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
 
             {
                 slim_lock_guard const guard{ lock };
 
                 if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
                 {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
+                    return { detach_abi(value), take_ownership_from_abi };
                 }
                 else
                 {
@@ -8698,31 +8698,24 @@ WINRT_EXPORT namespace winrt
         }
         else if constexpr (impl::has_composable<D>::value)
         {
-            impl::com_ref<I> result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
+            impl::com_ref<I> result{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
             return result.template as<typename D::composable>();
         }
         else if constexpr (impl::has_class_type<D>::value)
         {
             static_assert(std::is_same_v<I, default_interface<typename D::class_type>>);
-            typename D::class_type result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-            return result;
+            return typename D::class_type{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
         else
         {
-            impl::com_ref<I> result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-            return result;
+            return impl::com_ref<I>{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
     }
 
     template <typename D, typename... Args>
-    auto make_self(Args&&... args)
+    com_ptr<D> make_self(Args&&... args)
     {
-        com_ptr<D> result;
-        *put_abi(result) = new D(std::forward<Args>(args)...);
-        return result;
+        return { new D(std::forward<Args>(args)...), take_ownership_from_abi };
     }
 
     template <typename D, typename... I>
@@ -9839,12 +9832,14 @@ namespace winrt::impl
 
         I shim_overridable()
         {
-            I result;
+            void* result;
+
             if (shim().outer())
             {
-                check_hresult(shim().QueryInterface(guid_of<I>(), put_abi(result)));
+                check_hresult(shim().QueryInterface(guid_of<I>(), &result));
             }
-            return result;
+
+            return { result, take_ownership_from_abi };
         }
     };
 

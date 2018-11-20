@@ -2,20 +2,20 @@
 WINRT_EXPORT namespace winrt
 {
     template <typename Interface = Windows::Foundation::IActivationFactory>
-    auto get_activation_factory(param::hstring const& name)
+    impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
-        impl::com_ref<Interface> object;
-        hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
+        void* result;
+        hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
         if (hr == impl::error_not_initialized)
         {
-            void* cookie{};
-            check_hresult(WINRT_CoIncrementMTAUsage(&cookie));
-            hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
+            void* cookie;
+            WINRT_CoIncrementMTAUsage(&cookie);
+            hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
         }
 
         check_hresult(hr);
-        return object;
+        return { result, take_ownership_from_abi };
     }
 }
 
@@ -289,16 +289,16 @@ namespace winrt::impl
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
-    auto try_get_activation_factory(hresult_error* exception = nullptr) noexcept
+    impl::com_ref<Interface> try_get_activation_factory(hresult_error* exception = nullptr) noexcept
     {
         param::hstring const name{ name_of<Class>() };
-        impl::com_ref<Interface> object;
-        hresult const hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), put_abi(object));
+        void* result;
+        hresult const hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
         if (hr < 0)
         {
             // Ensure that the IRestrictedErrorInfo is not left on the thread.
-            hresult_error local_exception{ hr, hresult_error::from_abi };
+            hresult_error local_exception{ hr, take_ownership_from_abi };
 
             if (exception)
             {
@@ -307,7 +307,7 @@ namespace winrt::impl
             }
         }
 
-        return object;
+        return { result, take_ownership_from_abi_t };
     }
 }
 
@@ -320,7 +320,7 @@ WINRT_EXPORT namespace winrt
             impl::consume_t<IActivationFactory>
         {
             IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-            IActivationFactory(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+            IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
         };
     }
 
@@ -377,8 +377,8 @@ WINRT_EXPORT namespace winrt
     template <typename Interface>
     impl::com_ref<Interface> create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
     {
-        impl::com_ref<Interface> temp{ nullptr };
-        check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), put_abi(temp)));
-        return temp;
+        void* result;
+        check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), &result));
+        return { result, take_ownership_from_abi };
     }
 }

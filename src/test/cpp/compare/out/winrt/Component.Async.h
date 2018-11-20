@@ -9,7 +9,7 @@ namespace winrt::impl
     {
         void* operation;
         check_hresult(WINRT_SHIM(Component::Async::IClassStatics)->Action(&operation));
-        return { take_ownership_from_abi, operation };
+        return { operation, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::IAsyncActionWithProgress<int32_t> consume_Component_Async_IClassStatics<D>::ActionWithProgress() const
     {

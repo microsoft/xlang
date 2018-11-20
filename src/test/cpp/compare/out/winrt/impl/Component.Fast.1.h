@@ -8,41 +8,41 @@ namespace winrt::Component::Fast
         impl::consume_t<IFastClass>
     {
         IFastClass(std::nullptr_t = nullptr) noexcept {}
-        IFastClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IFastClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IFastClass2 :
         Windows::Foundation::IInspectable,
         impl::consume_t<IFastClass2>
     {
         IFastClass2(std::nullptr_t = nullptr) noexcept {}
-        IFastClass2(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IFastClass2(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IFastClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<IFastClassStatics>
     {
         IFastClassStatics(std::nullptr_t = nullptr) noexcept {}
-        IFastClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IFastClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO ISlowClass :
         Windows::Foundation::IInspectable,
         impl::consume_t<ISlowClass>
     {
         ISlowClass(std::nullptr_t = nullptr) noexcept {}
-        ISlowClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        ISlowClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO ISlowClass2 :
         Windows::Foundation::IInspectable,
         impl::consume_t<ISlowClass2>
     {
         ISlowClass2(std::nullptr_t = nullptr) noexcept {}
-        ISlowClass2(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        ISlowClass2(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO ISlowClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<ISlowClassStatics>
     {
         ISlowClassStatics(std::nullptr_t = nullptr) noexcept {}
-        ISlowClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        ISlowClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
 }

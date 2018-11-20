@@ -7,6 +7,7 @@ namespace winrt::Component::Events
     struct Handler : Windows::Foundation::IUnknown
     {
         Handler(std::nullptr_t = nullptr) noexcept {}
+        Handler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
         template <typename L> Handler(L lambda);
         template <typename F> Handler(F* function);
         template <typename O, typename M> Handler(O* object, M method);
@@ -17,7 +18,7 @@ namespace winrt::Component::Events
     struct WINRT_EBO Class : Component::Events::IClass
     {
         Class(std::nullptr_t) noexcept {}
-        Class(take_ownership_from_abi_t, void* ptr) noexcept : Component::Events::IClass(take_ownership_from_abi, ptr) {}
+        Class(void* ptr, take_ownership_from_abi_t) noexcept : Component::Events::IClass(ptr, take_ownership_from_abi) {}
         Class();
         static winrt::event_token Static(Component::Events::Handler const& handler);
         using Static_revoker = impl::factory_event_revoker<Component::Events::IClassStatics, &impl::abi_t<Component::Events::IClassStatics>::remove_Static>;

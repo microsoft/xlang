@@ -6,7 +6,7 @@ namespace winrt::Component::Composable
     struct WINRT_EBO Base : Component::Composable::IBase
     {
         Base(std::nullptr_t) noexcept {}
-        Base(take_ownership_from_abi_t, void* ptr) noexcept : Component::Composable::IBase(take_ownership_from_abi, ptr) {}
+        Base(void* ptr, take_ownership_from_abi_t) noexcept : Component::Composable::IBase(ptr, take_ownership_from_abi) {}
         Base();
     };
     struct WINRT_EBO Derived : Component::Composable::IDerived,
@@ -14,7 +14,7 @@ namespace winrt::Component::Composable
         impl::require<Derived, Component::Composable::IBase>
     {
         Derived(std::nullptr_t) noexcept {}
-        Derived(take_ownership_from_abi_t, void* ptr) noexcept : Component::Composable::IDerived(take_ownership_from_abi, ptr) {}
+        Derived(void* ptr, take_ownership_from_abi_t) noexcept : Component::Composable::IDerived(ptr, take_ownership_from_abi) {}
         Derived();
     };
 }

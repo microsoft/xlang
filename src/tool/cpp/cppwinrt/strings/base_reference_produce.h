@@ -270,7 +270,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IReference(std::nullptr_t = nullptr) noexcept {}
-        IReference(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IReference(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
 
         IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
         {
@@ -313,7 +313,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IReferenceArray<T>(std::nullptr_t = nullptr) noexcept {}
-        IReferenceArray(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
+        IReferenceArray(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 }
 

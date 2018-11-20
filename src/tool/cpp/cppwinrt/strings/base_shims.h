@@ -10,9 +10,9 @@ namespace winrt::impl
     template <typename D>
     Windows::Foundation::AsyncActionCompletedHandler consume_IAsyncAction<D>::Completed() const
     {
-        Windows::Foundation::AsyncActionCompletedHandler handler{};
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->get_Completed(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TResult>
@@ -24,9 +24,9 @@ namespace winrt::impl
     template <typename D, typename TResult>
     Windows::Foundation::AsyncOperationCompletedHandler<TResult> consume_IAsyncOperation<D, TResult>::Completed() const
     {
-        Windows::Foundation::AsyncOperationCompletedHandler<TResult> temp;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->get_Completed(put_abi(temp)));
-        return temp;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TProgress>
@@ -38,9 +38,9 @@ namespace winrt::impl
     template <typename D, typename TProgress>
     Windows::Foundation::AsyncActionProgressHandler<TProgress> consume_IAsyncActionWithProgress<D, TProgress>::Progress() const
     {
-        Windows::Foundation::AsyncActionProgressHandler<TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Progress(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Progress(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TProgress>
@@ -52,9 +52,9 @@ namespace winrt::impl
     template <typename D, typename TProgress>
     Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> consume_IAsyncActionWithProgress<D, TProgress>::Completed() const
     {
-        Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Completed(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TResult, typename TProgress>
@@ -66,9 +66,9 @@ namespace winrt::impl
     template <typename D, typename TResult, typename TProgress>
     Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> consume_IAsyncOperationWithProgress<D, TResult, TProgress>::Progress() const
     {
-        Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Progress(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Progress(&result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename D, typename TResult, typename TProgress>
@@ -80,8 +80,8 @@ namespace winrt::impl
     template <typename D, typename TResult, typename TProgress>
     Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> consume_IAsyncOperationWithProgress<D, TResult, TProgress>::Completed() const
     {
-        Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> handler;
-        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Completed(put_abi(handler)));
-        return handler;
+        void* result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Completed(&result));
+        return { result, take_ownership_from_abi };
     }
 }

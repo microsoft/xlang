@@ -61,8 +61,8 @@ WINRT_EXPORT namespace winrt
 {
     struct hresult_error
     {
-        struct from_abi_t {};
-        static constexpr from_abi_t from_abi{};
+        using from_abi_t = take_ownership_from_abi_t;
+        static constexpr auto from_abi{ take_ownership_from_abi };
 
         hresult_error() noexcept = default;
         hresult_error(hresult_error&&) = default;
@@ -91,7 +91,7 @@ WINRT_EXPORT namespace winrt
             originate(code, get_abi(message));
         }
 
-        hresult_error(hresult const code, from_abi_t) noexcept : m_code(code)
+        hresult_error(hresult const code, take_ownership_from_abi_t) noexcept : m_code(code)
         {
             WINRT_GetRestrictedErrorInfo(m_info.put_void());
 
@@ -196,84 +196,84 @@ WINRT_EXPORT namespace winrt
     {
         hresult_access_denied() noexcept : hresult_error(impl::error_access_denied) {}
         hresult_access_denied(param::hstring const& message) noexcept : hresult_error(impl::error_access_denied, message) {}
-        hresult_access_denied(from_abi_t) noexcept : hresult_error(impl::error_access_denied, from_abi) {}
+        hresult_access_denied(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_access_denied, take_ownership_from_abi) {}
     };
 
     struct hresult_wrong_thread : hresult_error
     {
         hresult_wrong_thread() noexcept : hresult_error(impl::error_wrong_thread) {}
         hresult_wrong_thread(param::hstring const& message) noexcept : hresult_error(impl::error_wrong_thread, message) {}
-        hresult_wrong_thread(from_abi_t) noexcept : hresult_error(impl::error_wrong_thread, from_abi) {}
+        hresult_wrong_thread(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_wrong_thread, take_ownership_from_abi) {}
     };
 
     struct hresult_not_implemented : hresult_error
     {
         hresult_not_implemented() noexcept : hresult_error(impl::error_not_implemented) {}
         hresult_not_implemented(param::hstring const& message) noexcept : hresult_error(impl::error_not_implemented, message) {}
-        hresult_not_implemented(from_abi_t) noexcept : hresult_error(impl::error_not_implemented, from_abi) {}
+        hresult_not_implemented(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_not_implemented, take_ownership_from_abi) {}
     };
 
     struct hresult_invalid_argument : hresult_error
     {
         hresult_invalid_argument() noexcept : hresult_error(impl::error_invalid_argument) {}
         hresult_invalid_argument(param::hstring const& message) noexcept : hresult_error(impl::error_invalid_argument, message) {}
-        hresult_invalid_argument(from_abi_t) noexcept : hresult_error(impl::error_invalid_argument, from_abi) {}
+        hresult_invalid_argument(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_invalid_argument, take_ownership_from_abi) {}
     };
 
     struct hresult_out_of_bounds : hresult_error
     {
         hresult_out_of_bounds() noexcept : hresult_error(impl::error_out_of_bounds) {}
         hresult_out_of_bounds(param::hstring const& message) noexcept : hresult_error(impl::error_out_of_bounds, message) {}
-        hresult_out_of_bounds(from_abi_t) noexcept : hresult_error(impl::error_out_of_bounds, from_abi) {}
+        hresult_out_of_bounds(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_out_of_bounds, take_ownership_from_abi) {}
     };
 
     struct hresult_no_interface : hresult_error
     {
         hresult_no_interface() noexcept : hresult_error(impl::error_no_interface) {}
         hresult_no_interface(param::hstring const& message) noexcept : hresult_error(impl::error_no_interface, message) {}
-        hresult_no_interface(from_abi_t) noexcept : hresult_error(impl::error_no_interface, from_abi) {}
+        hresult_no_interface(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_no_interface, take_ownership_from_abi) {}
     };
 
     struct hresult_class_not_available : hresult_error
     {
         hresult_class_not_available() noexcept : hresult_error(impl::error_class_not_available) {}
         hresult_class_not_available(param::hstring const& message) noexcept : hresult_error(impl::error_class_not_available, message) {}
-        hresult_class_not_available(from_abi_t) noexcept : hresult_error(impl::error_class_not_available, from_abi) {}
+        hresult_class_not_available(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_class_not_available, take_ownership_from_abi) {}
     };
 
     struct hresult_changed_state : hresult_error
     {
         hresult_changed_state() noexcept : hresult_error(impl::error_changed_state) {}
         hresult_changed_state(param::hstring const& message) noexcept : hresult_error(impl::error_changed_state, message) {}
-        hresult_changed_state(from_abi_t) noexcept : hresult_error(impl::error_changed_state, from_abi) {}
+        hresult_changed_state(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_changed_state, take_ownership_from_abi) {}
     };
 
     struct hresult_illegal_method_call : hresult_error
     {
         hresult_illegal_method_call() noexcept : hresult_error(impl::error_illegal_method_call) {}
         hresult_illegal_method_call(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_method_call, message) {}
-        hresult_illegal_method_call(from_abi_t) noexcept : hresult_error(impl::error_illegal_method_call, from_abi) {}
+        hresult_illegal_method_call(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_method_call, take_ownership_from_abi) {}
     };
 
     struct hresult_illegal_state_change : hresult_error
     {
         hresult_illegal_state_change() noexcept : hresult_error(impl::error_illegal_state_change) {}
         hresult_illegal_state_change(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_state_change, message) {}
-        hresult_illegal_state_change(from_abi_t) noexcept : hresult_error(impl::error_illegal_state_change, from_abi) {}
+        hresult_illegal_state_change(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_state_change, take_ownership_from_abi) {}
     };
 
     struct hresult_illegal_delegate_assignment : hresult_error
     {
         hresult_illegal_delegate_assignment() noexcept : hresult_error(impl::error_illegal_delegate_assignment) {}
         hresult_illegal_delegate_assignment(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_delegate_assignment, message) {}
-        hresult_illegal_delegate_assignment(from_abi_t) noexcept : hresult_error(impl::error_illegal_delegate_assignment, from_abi) {}
+        hresult_illegal_delegate_assignment(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_delegate_assignment, take_ownership_from_abi) {}
     };
 
     struct hresult_canceled : hresult_error
     {
         hresult_canceled() noexcept : hresult_error(impl::error_canceled) {}
         hresult_canceled(param::hstring const& message) noexcept : hresult_error(impl::error_canceled, message) {}
-        hresult_canceled(from_abi_t) noexcept : hresult_error(impl::error_canceled, from_abi) {}
+        hresult_canceled(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_canceled, take_ownership_from_abi) {}
     };
 
     [[noreturn]] inline WINRT_NOINLINE void throw_hresult(hresult const result)
@@ -285,65 +285,65 @@ WINRT_EXPORT namespace winrt
 
         if (result == impl::error_access_denied)
         {
-            throw hresult_access_denied(hresult_error::from_abi);
+            throw hresult_access_denied(take_ownership_from_abi);
         }
 
         if (result == impl::error_wrong_thread)
         {
-            throw hresult_wrong_thread(hresult_error::from_abi);
+            throw hresult_wrong_thread(take_ownership_from_abi);
         }
 
         if (result == impl::error_not_implemented)
         {
-            throw hresult_not_implemented(hresult_error::from_abi);
+            throw hresult_not_implemented(take_ownership_from_abi);
         }
 
         if (result == impl::error_invalid_argument)
         {
-            throw hresult_invalid_argument(hresult_error::from_abi);
+            throw hresult_invalid_argument(take_ownership_from_abi);
         }
 
         if (result == impl::error_out_of_bounds)
         {
-            throw hresult_out_of_bounds(hresult_error::from_abi);
+            throw hresult_out_of_bounds(take_ownership_from_abi);
         }
 
         if (result == impl::error_no_interface)
         {
-            throw hresult_no_interface(hresult_error::from_abi);
+            throw hresult_no_interface(take_ownership_from_abi);
         }
 
         if (result == impl::error_class_not_available)
         {
-            throw hresult_class_not_available(hresult_error::from_abi);
+            throw hresult_class_not_available(take_ownership_from_abi);
         }
 
         if (result == impl::error_changed_state)
         {
-            throw hresult_changed_state(hresult_error::from_abi);
+            throw hresult_changed_state(take_ownership_from_abi);
         }
 
         if (result == impl::error_illegal_method_call)
         {
-            throw hresult_illegal_method_call(hresult_error::from_abi);
+            throw hresult_illegal_method_call(take_ownership_from_abi);
         }
 
         if (result == impl::error_illegal_state_change)
         {
-            throw hresult_illegal_state_change(hresult_error::from_abi);
+            throw hresult_illegal_state_change(take_ownership_from_abi);
         }
 
         if (result == impl::error_illegal_delegate_assignment)
         {
-            throw hresult_illegal_delegate_assignment(hresult_error::from_abi);
+            throw hresult_illegal_delegate_assignment(take_ownership_from_abi);
         }
 
         if (result == impl::error_canceled)
         {
-            throw hresult_canceled(hresult_error::from_abi);
+            throw hresult_canceled(take_ownership_from_abi);
         }
 
-        throw hresult_error(result, hresult_error::from_abi);
+        throw hresult_error(result, take_ownership_from_abi);
     }
 
     inline WINRT_NOINLINE hresult to_hresult() noexcept
