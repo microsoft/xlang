@@ -1126,15 +1126,13 @@ namespace winrt::impl
     };
 
     template <typename D>
-    auto make_factory()
+    auto make_factory() -> typename impl::implements_default_interface<D>::type
     {
         using result_type = typename impl::implements_default_interface<D>::type;
 
         if constexpr (!has_static_lifetime_v<D>)
         {
-            result_type factory;
-            *put_abi(factory) = to_abi<result_type>(new D);
-            return factory;
+            return { to_abi<result_type>(new D), take_ownership_from_abi };
         }
         else
         {
@@ -1149,23 +1147,18 @@ namespace winrt::impl
 
                 if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
                 {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
+                    return { detach_abi(value), take_ownership_from_abi };
                 }
             }
 
-            result_type object;
-            *put_abi(object) = to_abi<result_type>(new D);
+            result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
 
             {
                 slim_lock_guard const guard{ lock };
 
                 if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
                 {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
+                    return { detach_abi(value), take_ownership_from_abi };
                 }
                 else
                 {
@@ -1191,31 +1184,24 @@ WINRT_EXPORT namespace winrt
         }
         else if constexpr (impl::has_composable<D>::value)
         {
-            impl::com_ref<I> result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
+            impl::com_ref<I> result{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
             return result.template as<typename D::composable>();
         }
         else if constexpr (impl::has_class_type<D>::value)
         {
             static_assert(std::is_same_v<I, default_interface<typename D::class_type>>);
-            typename D::class_type result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-            return result;
+            return typename D::class_type{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
         else
         {
-            impl::com_ref<I> result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-            return result;
+            return impl::com_ref<I>{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
     }
 
     template <typename D, typename... Args>
-    auto make_self(Args&&... args)
+    com_ptr<D> make_self(Args&&... args)
     {
-        com_ptr<D> result;
-        *put_abi(result) = new D(std::forward<Args>(args)...);
-        return result;
+        return { new D(std::forward<Args>(args)...), take_ownership_from_abi };
     }
 
     template <typename D, typename... I>

@@ -80,16 +80,16 @@ namespace winrt::impl
 
         bool HasCurrent() const
         {
-            bool temp{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_HasCurrent(put_abi(temp)));
-            return temp;
+            bool result{};
+            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_HasCurrent(&result));
+            return result;
         }
 
         bool MoveNext() const
         {
-            bool temp{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->MoveNext(put_abi(temp)));
-            return temp;
+            bool result{};
+            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->MoveNext(&result));
+            return result;
         }
 
         uint32_t GetMany(array_view<T> values) const
@@ -119,9 +119,9 @@ namespace winrt::impl
     {
         wfc::IIterator<T> First() const
         {
-            wfc::IIterator<T> iterator;
-            check_hresult(WINRT_SHIM(wfc::IIterable<T>)->First(put_abi(iterator)));
-            return iterator;
+            void* result;
+            check_hresult(WINRT_SHIM(wfc::IIterable<T>)->First(&result));
+            return { result, take_ownership_from_abi };
         }
     };
 
@@ -174,9 +174,9 @@ namespace winrt::impl
 
         wfc::IVectorView<T> GetView() const
         {
-            wfc::IVectorView<T> view;
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetView(put_abi(view)));
-            return view;
+            void* result;
+            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetView(&result));
+            return { result, take_ownership_from_abi };
         }
 
         bool IndexOf(param_type<T> const& value, uint32_t& index) const
@@ -322,6 +322,7 @@ namespace winrt::impl
             check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->HasKey(get_abi(key), &found));
             return found;
         }
+
         void Split(wfc::IMapView<K, V>& firstPartition, wfc::IMapView<K, V>& secondPartition)
         {
             check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Split(put_abi(firstPartition), put_abi(secondPartition)));
@@ -375,9 +376,9 @@ namespace winrt::impl
 
         wfc::IMapView<K, V> GetView() const
         {
-            wfc::IMapView<K, V> view;
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->GetView(put_abi(view)));
-            return view;
+            void* result;
+            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->GetView(&result));
+            return { result, take_ownership_from_abi };
         }
 
         bool Insert(param_type<K> const& key, param_type<V> const& value) const

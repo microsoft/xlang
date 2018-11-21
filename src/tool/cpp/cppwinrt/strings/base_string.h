@@ -70,7 +70,7 @@ WINRT_EXPORT namespace winrt
 
         hstring() noexcept = default;
 
-        hstring(take_ownership_from_abi_t, void* ptr) noexcept : m_handle(ptr)
+        hstring(void* ptr, take_ownership_from_abi_t) noexcept : m_handle(ptr)
         {
         }
 
@@ -340,10 +340,10 @@ namespace winrt::impl
         hstring to_hstring()
         {
             WINRT_ASSERT(m_buffer != nullptr);
-            hstring result;
-            check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, put_abi(result)));
+            void* result;
+            check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, &result));
             m_buffer = nullptr;
-            return result;
+            return { result, take_ownership_from_abi };
         }
 
     private:

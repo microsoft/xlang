@@ -37,12 +37,14 @@ namespace winrt::impl
 
         I shim_overridable()
         {
-            I result;
+            void* result;
+
             if (shim().outer())
             {
-                check_hresult(shim().QueryInterface(guid_of<I>(), put_abi(result)));
+                check_hresult(shim().QueryInterface(guid_of<I>(), &result));
             }
-            return result;
+
+            return { result, take_ownership_from_abi };
         }
     };
 

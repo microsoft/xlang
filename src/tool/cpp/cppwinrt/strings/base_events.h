@@ -329,13 +329,11 @@ namespace winrt::impl
     };
 
     template <typename T>
-    auto make_event_array(uint32_t const capacity)
+    com_ptr<event_array<T>> make_event_array(uint32_t const capacity)
     {
         com_ptr<event_array<T>> instance;
         void* raw = ::operator new(sizeof(event_array<T>) + (sizeof(T)* capacity));
-#pragma warning(suppress: 6386)
-        *put_abi(instance) = new(raw) event_array<T>(capacity);
-        return instance;
+        return { new(raw) event_array<T>(capacity), take_ownership_from_abi };
     }
 }
 

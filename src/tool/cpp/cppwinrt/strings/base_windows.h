@@ -83,7 +83,7 @@ namespace winrt::impl
 
         void* result;
         check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
-        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
+        return { get_self_abi<To>::value(result), take_ownership_from_abi };
     }
 
     template <typename To, typename From>
@@ -96,7 +96,7 @@ namespace winrt::impl
 
         void* result;
         ptr->QueryInterface(guid_of<To>(), &result);
-        return { take_ownership_from_abi, get_self_abi<To>::value(result) };
+        return { get_self_abi<To>::value(result), take_ownership_from_abi };
     }
 
     template <typename T>
@@ -123,7 +123,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IUnknown(std::nullptr_t) noexcept {}
         void* operator new(size_t) = delete;
 
-        IUnknown(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
+        IUnknown(void* ptr, take_ownership_from_abi_t) noexcept : m_ptr(static_cast<impl::unknown_abi*>(ptr))
         {
         }
 
@@ -358,6 +358,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct IInspectable : IUnknown
     {
         IInspectable(std::nullptr_t = nullptr) noexcept {}
-        IInspectable(take_ownership_from_abi_t, void* ptr) noexcept : IUnknown(take_ownership_from_abi, ptr) {}
+        IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
 }

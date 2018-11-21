@@ -467,9 +467,9 @@ WINRT_EXPORT namespace winrt
 
     inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
     {
-        hstring value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(put_abi(value)));
-        return value;
+        void* value;
+        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(&value));
+        return { value, take_ownership_from_abi };
     }
 
     inline com_array<guid> get_interfaces(Windows::Foundation::IInspectable const& object)

@@ -8,19 +8,19 @@ namespace winrt::impl
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Composable::IBase)->BaseMethod(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Component::Composable::Base consume_Component_Composable_IBaseFactory<D>::CreateInstance(Windows::Foundation::IInspectable const& baseInterface, Windows::Foundation::IInspectable& innerInterface) const
     {
         void* value;
         check_hresult(WINRT_SHIM(Component::Composable::IBaseFactory)->CreateInstance(get_abi(baseInterface), put_abi(innerInterface), &value));
-        return { take_ownership_from_abi, value };
+        return { value, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Composable_IDerived<D>::DerivedMethod() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Composable::IDerived)->DerivedMethod(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D>
     struct produce<D, Component::Composable::IBase> : produce_base<D, Component::Composable::IBase>
