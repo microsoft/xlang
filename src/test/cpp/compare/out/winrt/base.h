@@ -4118,13 +4118,13 @@ WINRT_EXPORT namespace winrt
 
         impl::com_ref<T> get() const noexcept
         {
-            void* result;
-
-            if (m_ref)
+            if (!m_ref)
             {
-                m_ref->Resolve(guid_of<T>(), &result);
+                return nullptr;
             }
 
+            void* result;
+            m_ref->Resolve(guid_of<T>(), &result);
             return { result, take_ownership_from_abi };
         }
 
@@ -6427,7 +6427,7 @@ namespace winrt::impl
     template <typename T, typename H>
     T make_delegate(H&& handler)
     {
-        return { new delegate_t<T, H>(std::forward<H>(handler)), take_ownership_from_abi };
+        return { static_cast<void*>(static_cast<abi_t<T>*>(new delegate_t<T, H>(std::forward<H>(handler)))), take_ownership_from_abi };
     }
 
     template <typename... T>
@@ -6977,7 +6977,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     {
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         VectorChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
+        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         VectorChangedEventHandler(L handler) :
@@ -7437,7 +7437,7 @@ namespace winrt::impl
             }
         }
 
-        return { result, take_ownership_from_abi_t };
+        return { result, take_ownership_from_abi };
     }
 }
 
@@ -8885,7 +8885,7 @@ namespace winrt::impl
             {
                 try
                 {
-                    (*this)(*reinterpret_cast<Windows::Foundation::IInspectable const*>(&sender), *reinterpret_cast<T const*>(&args));
+                    H::operator()(*reinterpret_cast<Windows::Foundation::IInspectable const*>(&sender), *reinterpret_cast<T const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }

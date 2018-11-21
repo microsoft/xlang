@@ -16,13 +16,13 @@ WINRT_EXPORT namespace winrt
 
         impl::com_ref<T> get() const noexcept
         {
-            void* result;
-
-            if (m_ref)
+            if (!m_ref)
             {
-                m_ref->Resolve(guid_of<T>(), &result);
+                return nullptr;
             }
 
+            void* result;
+            m_ref->Resolve(guid_of<T>(), &result);
             return { result, take_ownership_from_abi };
         }
 
