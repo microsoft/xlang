@@ -2,14 +2,14 @@
 
 namespace xlang
 {
-    inline auto write_namespace_cs(std::string_view const& ns, cache::namespace_members const& members)
+    static auto write_namespace_cs(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.current_namespace = ns;
         filter f{ settings.include, settings.exclude };
         auto filename = w.write_temp("%.cs", ns);
 
-        w.write_license();
+        write_license(w);
         write_type_namespace(w, ns);
         {
             writer::indent_guard g{ w };

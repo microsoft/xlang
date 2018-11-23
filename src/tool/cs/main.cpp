@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "version.h"
 #include "settings.h"
 #include "type_writers.h"
 #include "helpers.h"
@@ -58,7 +59,7 @@ namespace xlang
 
     int run(int const argc, char** argv)
     {
-        writer wc;
+        writer w;
 
         try
         {
@@ -69,15 +70,17 @@ namespace xlang
 
             if (settings.verbose)
             {
+                w.write(" tool:  % (C#/WinRT v%)\n", canonical(argv[0]).string(), XLANG_VERSION_STRING);
+
                 for (auto&& file : settings.input)
                 {
-                    wc.write("input: %\n", file);
+                    w.write(" in:    %\n", file);
                 }
 
-                wc.write("output: %\n", settings.output_folder);
+                w.write(" out:   %\n", settings.output_folder);
             }
 
-            wc.flush_to_console();
+            w.flush_to_console();
 
             task_group group;
 
@@ -98,18 +101,16 @@ namespace xlang
 
             if (settings.verbose)
             {
-                wc.write("time: %ms\n", get_elapsed_time(start));
+                w.write(" time:  %ms\n", get_elapsed_time(start));
             }
         }
         catch (std::exception const& e)
         {
-            wc.write("%\n", e.what());
-            wc.flush_to_console();
-            getchar();
+            w.write(" error: %\n", e.what());
             return -1;
         }
 
-        wc.flush_to_console();
+        w.flush_to_console();
         return 0;
     }
 }
