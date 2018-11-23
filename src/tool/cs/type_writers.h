@@ -445,17 +445,15 @@ namespace xlang
             }
             else
             {
-                write("?");
+                write("?GenericTypeIndex?");
             }
         }
 
         void write(TypeSig const& signature)
         {
-            visit(signature.Type(),
-                [&](auto&& type)
-            {
-                write(type);
-            });
+            std::visit(
+                [&](auto&& type) { write(type); },
+                signature.Type() );
         }
 
         void write(RetTypeSig const& value)

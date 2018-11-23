@@ -22,16 +22,14 @@ namespace xlang
     }
     void write_enum(writer& w, TypeDef const& type)
     {
-        if (get_attribute(type, "System", "FlagsAttribute"))
-        {
-            w.write("[Flags]\n");
-        }
         auto format = R"(
-public enum @ : % {%
+@public enum @ : % {%
 }
 )";
         auto fields = type.FieldList();
+        auto flags_attr = get_attribute(type, "System", "FlagsAttribute");
         w.write(format,
+            flags_attr ? "[Flags]\n" : "",
             type.TypeName(),
             fields.first.Signature().Type(),
             bind_each<write_enum_field>(fields));
@@ -41,7 +39,6 @@ public enum @ : % {%
     {
         w.write("\n    % @;", field.Signature().Type(), field.Name());
     }
-
 
     void write_struct(writer& w, TypeDef const& type)
     {
@@ -94,8 +91,7 @@ public struct @ {%
         int hr = func(instance%);
         if (hr < 0)
             throw new Exception(hr);%
-    }
-)---";
+    })---";
         method_signature msig{ method };
         w.write(format,
             msig.return_signature(),
