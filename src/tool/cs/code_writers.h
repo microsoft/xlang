@@ -152,7 +152,16 @@ namespace @
         );
     }
 
-    static void write_runtime_name(writer& w, std::string_view name)
+    static void write_impl_methods(writer& w, TypeDef const& type)
+    {
+        for (auto& iface : get_required_interfaces(type))
+        {
+            w.write( bind_each<write_impl_method>(iface.type.MethodList()) );
+        }
+    }
+
+
+    static void write_impl_name(writer& w, std::string_view name)
     {
         auto start = (name.size() && name[0] == 'I') ? 1 : 0;
         w.write(name.substr(start));
@@ -165,11 +174,10 @@ namespace @
         {
             if (is_ptype(iface.type))
             {
-                w.write("/*SKIP %*/", iface.type.TypeName());
+                w.write("/*SKIP %*/", iface.type);
                 continue;
             }
-            w.write(sep);
-            write_runtime_name(w, iface.type.TypeName());
+            w.write("%%", sep, iface.type);
             sep = ", ";
         }
     }
@@ -208,21 +216,22 @@ namespace @
         auto format = R"---(
     [Guid("%")]
     public unsafe partial class %%
-    {%
+    {
+        internal unsafe void* instance;
+        internal %(void* native) { instance = native; }%
     })---";
-        auto req = get_required_interfaces(type);
-        req.erase(req.begin(), req.begin() + 1);
         auto guid = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
         w.write(format,
             bind<write_guid_value>(guid.Value().FixedArgs()),
-            bind<write_runtime_name>(type.TypeName()),
-            bind<write_interfaces_required>(req),
-            bind_each<write_impl_method>(type.MethodList()));
+            bind<write_impl_name>(type.TypeName()),
+            bind<write_interfaces_required>(get_required_interfaces(type)),
+            bind<write_impl_name>(type.TypeName()),
+            bind<write_impl_methods>(type) );
     }
 
     static void write_interface(writer& w, TypeDef const& type)
     {
-        if (is_ptype(type))
+        if (is_ptype(type) || type.TypeName() == "IGetActivationFactory")
         {
             w.write("\n//SKIP %", type.TypeName());
             return;

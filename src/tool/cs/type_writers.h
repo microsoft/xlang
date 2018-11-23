@@ -409,7 +409,7 @@ namespace xlang
             }
             else
             {
-                write("?GenericTypeIndex?");
+                write("int/*GenericTypeIndex %*/", (int)var.index);
             }
         }
 
