@@ -616,4 +616,32 @@ namespace xlang
         return std::mismatch(t0.begin(), t0.end(), t1.begin(), t0.end());
     }
 
+    bool is_value_type(xlang::meta::reader::ElementType const& )
+    {
+        return true;
+    }
+
+    template<typename T>
+    bool is_value_type(xlang::meta::reader::coded_index<T> const& )
+    {
+        return true;
+    }
+
+    bool is_value_type(xlang::meta::reader::GenericTypeIndex const& )
+    {
+        return true;
+    }
+
+    bool is_value_type(xlang::meta::reader::GenericTypeInstSig const& )
+    {
+        return true;
+    }
+
+    bool is_value_type(TypeSig const& sig)
+    {
+        return std::visit(
+            [&](auto&& type) { return is_value_type(type); },
+            sig.Type());
+    }
+
 }

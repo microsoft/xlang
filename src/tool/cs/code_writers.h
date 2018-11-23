@@ -72,13 +72,14 @@ namespace @
     static void write_struct_field(writer& w, Field const& field)
     {
         auto format = R"(
-        % @;)";
+        public % @;)";
         w.write(format, field.Signature().Type(), field.Name());
     }
 
     static void write_struct(writer& w, TypeDef const& type)
     {
         auto format = R"(
+    [StructLayout(LayoutKind.Sequential)]
     public struct @
     {%
     })";
@@ -128,6 +129,47 @@ namespace @
             bind<write_method_params>(msig)
         );
     }
+    
+    static void write_impl_method_locals(writer& w, RetTypeSig const& sig)
+    {
+        if (!sig)
+        {
+            return;
+        }
+        if ( is_value_type(sig.Type()) )
+        {
+            auto format = R"(
+            var ret = new %();)";
+            w.write(format, sig);
+        }
+        else
+        {
+            auto format = R"(
+            void* ret;)";
+            w.write(format);
+        }
+        
+    }
+
+    static void write_impl_method_return(writer& w, RetTypeSig const& sig)
+    {
+        if (!sig)
+        {
+            return;
+        }
+        if (is_value_type(sig.Type()))
+        {
+            auto format = R"(
+            return ret;)";
+            w.write(format);
+        }
+        else
+        {
+            auto format = R"(
+            return new %(ret);)";
+            w.write(format, sig);
+        }
+    }
 
     static void write_impl_method(writer& w, MethodDef const& method)
     {
@@ -135,20 +177,21 @@ namespace @
         public % @(%)
         {
             var vslot = ((void***)instance)[0][%];
-            var func = Marshal.GetDelegateForFunctionPointer<@>((IntPtr)vslot);
+            var func = Marshal.GetDelegateForFunctionPointer<@>((IntPtr)vslot);%
             int hr = func(instance%);
             if (hr < 0)
-                throw new Exception(hr);%
+                throw new Xlang.XlangException(hr);%
         })---";
         method_signature msig{ method };
         w.write(format,
             msig.return_signature(),
             method.Name(),
             bind<write_method_params>(msig),
-            (int)method.RVA(),
-            "DEL",
-            ", arg1",
-            ""
+            "0",
+            "DEL/*FIXME*/",
+            bind<write_impl_method_locals>(msig.return_signature()),
+            ", 10/*FIXME*/",
+            bind<write_impl_method_return>(msig.return_signature())
         );
     }
 
