@@ -10,6 +10,7 @@ namespace xlang
         auto filename = w.write_temp("%.cs", ns);
 
         write_license(w);
+        write_using_modules(w);
         write_type_namespace(w, ns);
         {
             writer::indent_guard g{ w };

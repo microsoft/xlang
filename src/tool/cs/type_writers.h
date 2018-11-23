@@ -237,11 +237,7 @@ namespace xlang
         {
             for (auto&& c : value)
             {
-                if (c == '.')
-                {
-                    write("::");
-                }
-                else if (c == '`')
+                if (c == '`')
                 {
                     return;
                 }
@@ -306,41 +302,13 @@ namespace xlang
             auto ns = type.TypeNamespace();
             auto name = type.TypeName();
 
-            if (ns != current_namespace)
+            if (ns == current_namespace)
             {
-                needed_namespaces.emplace(ns);
-            }
-
-            if ((ns == "Windows.Foundation") && (name == "HResult"))
-            {
-                write("winrt::hresult");
-            }
-            else if ((ns == "Windows.Foundation") && (name == "EventRegistrationToken"))
-            {
-                write("winrt::event_token");
+                write("@", name);
             }
             else
             {
-                if (ns == "Windows.Foundation.Numerics")
-                {
-                    static const std::map<std::string_view, std::string_view> custom_numerics = {
-                        { "Matrix3x2", "float3x2" },
-                        { "Matrix4x4", "float4x4" },
-                        { "Plane", "plane" },
-                        { "Quaternion", "quaternion" },
-                        { "Vector2", "float2"},
-                        { "Vector3", "float3" },
-                        { "Vector4", "float4" }
-                    };
-
-                    auto custom_numeric = custom_numerics.find(name);
-                    if (custom_numeric != custom_numerics.end())
-                    {
-                        name = custom_numeric->second;
-                    }
-                }
-
-                write("winrt::@::@", ns, name);
+                write("@.@", ns, name);
             }
         }
 
@@ -348,7 +316,7 @@ namespace xlang
         {
             if (type.TypeName() == "Guid" && type.TypeNamespace() == "System")
             {
-                write("winrt::guid");
+                write("Guid");
             }
             else
             {
@@ -374,7 +342,12 @@ namespace xlang
 
         void write(GenericTypeInstSig const& type)
         {
-            write("%<%>", type.GenericType(), bind_list(", ", type.GenericArgs()));
+            auto gen = write_temp("%", type.GenericType());
+            if ( gen == "Windows.Foundation.IReference")
+            {
+                gen = "Nullable";
+            }
+            write("%<%>", gen, bind_list(", ", type.GenericArgs()));
         }
 
         void write(ElementType type)
@@ -385,31 +358,31 @@ namespace xlang
                 write("bool");
                 break;
             case ElementType::Char:
-                write("char16_t");
+                write("char");
                 break;
             case ElementType::I1:
-                write("int8_t");
+                write("sbyte");
                 break;
             case ElementType::U1:
-                write("uint8_t");
+                write("byte");
                 break;
             case ElementType::I2:
-                write("int16_t");
+                write("short");
                 break;
             case ElementType::U2:
-                write("uint16_t");
+                write("ushort");
                 break;
             case ElementType::I4:
-                write("int32_t");
+                write("int");
                 break;
             case ElementType::U4:
-                write("uint32_t");
+                write("uint");
                 break;
             case ElementType::I8:
-                write("int64_t");
+                write("long");
                 break;
             case ElementType::U8:
-                write("uint64_t");
+                write("ulong");
                 break;
             case ElementType::R4:
                 write("float");
@@ -418,10 +391,10 @@ namespace xlang
                 write("double");
                 break;
             case ElementType::String:
-                write("winrt::hstring");
+                write("string");
                 break;
             case ElementType::Object:
-                write("winrt::Windows::Foundation::IInspectable");
+                write("object");
                 break;
             default:
                 throw_invalid("write_method_comment_type element type not impl");

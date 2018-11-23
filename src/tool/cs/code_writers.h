@@ -10,9 +10,19 @@ namespace xlang
         w.write(format, XLANG_VERSION_STRING);
     }
 
+    static void write_using_modules(writer& w)
+    {
+        auto format = R"(
+using System;
+using System.Runtime.InteropServices;
+)";
+        w.write(format);
+    }
+
     static void write_type_namespace(writer& w, std::string_view const& ns)
     {
-        auto format = R"(namespace @
+        auto format = R"(
+namespace @
 {)";
         w.write(format, ns);
     }
@@ -107,8 +117,19 @@ namespace xlang
             w.write("% %", "int"/*param_signature->Type()*/, param.Name());
         }
     }
-
     static void write_interface_method(writer& w, MethodDef const& method)
+    {
+        auto format = R"---(
+        % @(%);)---";
+        method_signature msig{ method };
+        w.write(format,
+            msig.return_signature(),
+            method.Name(),
+            bind<write_method_params>(msig)
+        );
+    }
+
+    static void write_impl_method(writer& w, MethodDef const& method)
     {
         auto format = R"---(
         public % @(%)
@@ -131,9 +152,26 @@ namespace xlang
         );
     }
 
-    static void write_interface_required(writer& w, interface_info const& iface)
+    static void write_runtime_name(writer& w, std::string_view name)
     {
-        w.write("%, ", iface.type.TypeName());
+        auto start = (name.size() && name[0] == 'I') ? 1 : 0;
+        w.write(name.substr(start));
+    }
+
+    static void write_interfaces_required(writer& w, std::vector<interface_info> const& ifaces)
+    {
+        auto sep = " : ";
+        for (auto& iface : ifaces)
+        {
+            if (is_ptype(iface.type))
+            {
+                w.write("/*SKIP %*/", iface.type.TypeName());
+                continue;
+            }
+            w.write(sep);
+            write_runtime_name(w, iface.type.TypeName());
+            sep = ", ";
+        }
     }
 
     static void write_guid_value(writer& w, std::vector<FixedArgSig> const& args)
@@ -154,21 +192,43 @@ namespace xlang
             get<uint8_t>(get<ElemSig>(args[10].value).value));
     }
 
-    static void write_interface(writer& w, TypeDef const& type)
+    static void write_pure_interface(writer& w, TypeDef const& type)
     {
-        auto req = get_required_interfaces(type);
-        req.erase(req.begin(), req.begin() + 1);
-        
         auto format = R"---(
-    [GuidAttribute("%")]
-    public unsafe partial class % : %
+    public interface @
     {%
     })---";
+        w.write(format,
+            type.TypeName(),
+            bind_each<write_interface_method>(type.MethodList()));
+    }
+
+    static void write_impl_interface(writer& w, TypeDef const& type)
+    {
+        auto format = R"---(
+    [Guid("%")]
+    public unsafe partial class %%
+    {%
+    })---";
+        auto req = get_required_interfaces(type);
+        req.erase(req.begin(), req.begin() + 1);
         auto guid = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
         w.write(format,
             bind<write_guid_value>(guid.Value().FixedArgs()),
-            type.TypeName(),
-            bind_each<write_interface_required>(req),
-            bind_each<write_interface_method>(type.MethodList()));
+            bind<write_runtime_name>(type.TypeName()),
+            bind<write_interfaces_required>(req),
+            bind_each<write_impl_method>(type.MethodList()));
+    }
+
+    static void write_interface(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type))
+        {
+            w.write("\n//SKIP %", type.TypeName());
+            return;
+        }
+
+        write_pure_interface(w, type);
+        write_impl_interface(w, type);
     }
 }

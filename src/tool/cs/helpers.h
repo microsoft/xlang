@@ -609,4 +609,11 @@ namespace xlang
 
         return count;
     }
+
+    template<typename T0, typename T1>
+    auto mismatch(const T0& t0, const T1& t1)
+    {
+        return std::mismatch(t0.begin(), t0.end(), t1.begin(), t0.end());
+    }
+
 }
