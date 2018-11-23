@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pal_error.h"
+
 namespace xlang::impl
 {
     // packed_buffer_size and get_packed_buffer_ptr perform calculations

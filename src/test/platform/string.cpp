@@ -198,12 +198,12 @@ void simple_string()
     for (basic_string_view<char_type> const test_string : valid_strings<char_type>::value)
     {
         xlang_string str{};
-        xlang_result result{};
+        xlang_error_info* result{};
 
         {
             INFO("Create a valid string");
             result = xlang_create_string<char_type>(test_string.data(), static_cast<uint32_t>(test_string.size()), &str);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str));
         }
 
@@ -213,7 +213,7 @@ void simple_string()
         {
             INFO("The buffer matches the supplied string");
             result = xlang_get_string_raw_buffer<char_type>(str, &buffer, &length);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(test_string == basic_string_view<char_type>{buffer, length});
         }
 
@@ -221,7 +221,7 @@ void simple_string()
         {
             INFO("We can duplicate the string");
             result = xlang_duplicate_string(str, &str2);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str2));
         }
 
@@ -231,7 +231,7 @@ void simple_string()
         {
             INFO("The duplicated string returns the same buffer");
             result = xlang_get_string_raw_buffer(str2, &buffer2, &length2);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(buffer == buffer2);
             REQUIRE(length == length2);
         }
@@ -241,7 +241,7 @@ void simple_string()
             xlang_delete_string(str);
 
             result = xlang_get_string_raw_buffer(str2, &buffer2, &length2);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(buffer == buffer2);
             REQUIRE(length == length2);
 
@@ -266,13 +266,13 @@ void simple_string_reference()
     for (basic_string_view<char_type> const test_string : valid_strings<char_type>::value)
     {
         xlang_string str_ref{};
-        xlang_result result{};
+        xlang_error_info* result{};
         xlang_string_header header{};
 
         {
             INFO("Create a simple string reference");
             result = xlang_create_string_reference<char_type>(test_string.data(), static_cast<uint32_t>(test_string.size()), &header, &str_ref);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str_ref));
         }
 
@@ -281,7 +281,7 @@ void simple_string_reference()
         {
             INFO("Ensure the buffer contents match the supplied string");
             result = xlang_get_string_raw_buffer<char_type>(str_ref, &buffer_ref, &length_ref);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(basic_string_view<char_type>{buffer_ref, length_ref} == test_string);
         }
 
@@ -291,10 +291,10 @@ void simple_string_reference()
         {
             INFO("Duplicate the string reference, and ensure the duplicated contents match");
             result = xlang_duplicate_string(str_ref, &str);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str));
             result = xlang_get_string_raw_buffer<char_type>(str, &buffer, &length);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(test_string == basic_string_view<char_type>{buffer, length});
         }
 
@@ -318,7 +318,7 @@ void simple_preallocated()
 {
     for (basic_string_view<char_type> const test_string : valid_strings<char_type>::value)
     {
-        xlang_result result{};
+        xlang_error_info* result{};
         xlang_string_buffer buffer_handle{};
         char_type* pre_buffer{};
         uint32_t const pre_length = static_cast<uint32_t>(test_string.size());
@@ -326,7 +326,7 @@ void simple_preallocated()
         {
             INFO("Preallocate a string buffer");
             result = xlang_preallocate_string_buffer<char_type>(pre_length, &pre_buffer, &buffer_handle);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
         }
 
         std::copy(test_string.begin(), test_string.end(), pre_buffer);
@@ -337,11 +337,11 @@ void simple_preallocated()
         {
             INFO("Promote the string buffer and compare its contents");
             result = xlang_promote_string_buffer(buffer_handle, &str, pre_length);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str));
 
             result = xlang_get_string_raw_buffer(str, &buffer, &length);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(test_string == basic_string_view<char_type>{buffer, length});
         }
 
@@ -366,12 +366,12 @@ void convert_string()
     for (size_t i = 0; i < std::size(valid_strings<char_type>::value); ++i)
     {
         auto const test_string = valid_strings<char_type>::value[i];
-        xlang_result result{};
+        xlang_error_info* result{};
         xlang_string str{};
         {
             INFO("Create string");
             result = xlang_create_string(test_string.data(), static_cast<uint32_t>(test_string.size()), &str);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str));
         }
 
@@ -380,7 +380,7 @@ void convert_string()
         {
             INFO("Convert the string");
             result = xlang_get_string_raw_buffer<other_type>(str, &buffer, &length);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<other_type>(str));
             REQUIRE(valid_strings<other_type>::value[i] == basic_string_view<other_type>{buffer, length});
         }
@@ -390,12 +390,12 @@ void convert_string()
 
     for (auto const& test_string : invalid_strings<char_type>::value)
     {
-        xlang_result result{};
+        xlang_error_info* result{};
         xlang_string str{};
         {
             INFO("Create string");
             result = xlang_create_string(test_string.data(), static_cast<uint32_t>(test_string.size()), &str);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
         }
 
         other_type const* buffer{};
@@ -403,7 +403,8 @@ void convert_string()
         {
             INFO("Fail to convert string");
             result = xlang_get_string_raw_buffer<other_type>(str, &buffer, &length);
-            REQUIRE(result == xlang_error_untranslatable_string);
+            REQUIRE(result != nullptr);
+            REQUIRE(result->error_code() == xlang_error_untranslatable_string);
             REQUIRE(buffer == nullptr);
             REQUIRE(length == 0);
         }
@@ -429,13 +430,13 @@ void convert_string_reference()
     for (size_t i = 0; i < std::size(valid_strings<char_type>::value); ++i)
     {
         auto const test_string = valid_strings<char_type>::value[i];
-        xlang_result result{};
+        xlang_error_info* result{};
         xlang_string str_ref{};
         xlang_string_header header{};
         {
             INFO("Create string reference");
             result = xlang_create_string_reference<char_type>(test_string.data(), static_cast<uint32_t>(test_string.size()), &header, &str_ref);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str_ref));
         }
 
@@ -444,7 +445,7 @@ void convert_string_reference()
         {
             INFO("Convert the string");
             result = xlang_get_string_raw_buffer<other_type>(str_ref, &buffer_ref, &length_ref);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<other_type>(str_ref));
             REQUIRE(valid_strings<other_type>::value[i] == basic_string_view<other_type>{buffer_ref, length_ref});
         }
@@ -455,11 +456,11 @@ void convert_string_reference()
         {
             INFO("Duplicate string reference and ensure duplicated contents match");
             result = xlang_duplicate_string(str_ref, &str);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<other_type>(str));
 
             result = xlang_get_string_raw_buffer<other_type>(str, &buffer, &length);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(buffer == buffer_ref);
             REQUIRE(length == length_ref);
         }
@@ -470,13 +471,13 @@ void convert_string_reference()
 
     for (auto const& test_string : invalid_strings<char_type>::value)
     {
-        xlang_result result{};
+        xlang_error_info* result{};
         xlang_string str_ref{};
         xlang_string_header header{};
         {
             INFO("Create string reference");
             result = xlang_create_string_reference<char_type>(test_string.data(), static_cast<uint32_t>(test_string.size()), &header, &str_ref);
-            REQUIRE(result == xlang_error_ok);
+            REQUIRE(result == nullptr);
             REQUIRE(has_encoding<char_type>(str_ref));
         }
 
@@ -484,7 +485,8 @@ void convert_string_reference()
         uint32_t length_ref{};
         {
             result = xlang_get_string_raw_buffer<other_type>(str_ref, &buffer_ref, &length_ref);
-            REQUIRE(result == xlang_error_untranslatable_string);
+            REQUIRE(result != nullptr);
+            REQUIRE(result->error_code() == xlang_error_untranslatable_string);
             REQUIRE(buffer_ref == nullptr);
             REQUIRE(length_ref == 0);
         }

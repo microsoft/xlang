@@ -74,19 +74,22 @@ if (MSVC)
         string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_${build_type} "${CMAKE_CXX_FLAGS_${build_type}}")
         string(APPEND CMAKE_CXX_FLAGS_${build_type} " /GL")
 
-        string(REPLACE "/INCREMENTAL" "" CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${build_type}}")
-        string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
+        # TODO: replacing /INCREMENTAL leaves ":NO" on the command line, which screws up the link
+        #       Figure out the best way to make these changes to the build and linker flags
+        # string(REPLACE "/INCREMENTAL" "" CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${build_type}}")
+        # string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
     endforeach()
-    
-    add_compile_options(/await)
-    add_compile_options(/permissive-)
-    string(APPEND CMAKE_CXX_FLAGS_DEBUG " /JMC")
+
+    if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
+        add_compile_options(-Wno-delete-non-virtual-dtor -mcx16 -fno-delayed-template-parsing -Xclang -fcoroutines-ts)
+    else()
+        add_compile_options(/permissive- /await)
+    endif()
 
     # Explicitly configure _DEBUG preprocessor macro 
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " /D_DEBUG")
 else()
     add_compile_options(-stdlib=libc++)
-    add_compile_options(-fcoroutines-ts)
 
     # Add _DEBUG preprocessor macro for compatibility with MSVC
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " -D_DEBUG")

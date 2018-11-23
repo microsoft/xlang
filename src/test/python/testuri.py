@@ -1,12 +1,12 @@
 import find_projection
-
-import _pyrt
 import unittest
+
+import pyrt.windows.foundation as wf
 
 class TestUri(unittest.TestCase):
 
     def test_activate_uri(self):
-        u = _pyrt.Uri("http://microsoft.com")
+        u = wf.Uri("http://microsoft.com")
         self.assertEqual(u.get_Domain(), "microsoft.com")
         self.assertEqual(u.get_AbsoluteCanonicalUri(), "http://microsoft.com/")
         self.assertEqual(u.get_Port(), 80)
@@ -18,7 +18,7 @@ class TestUri(unittest.TestCase):
 
 
     def test_activate_uri2(self):
-        u = _pyrt.Uri("http://microsoft.com", "surface/studio")
+        u = wf.Uri("http://microsoft.com", "surface/studio")
         self.assertEqual(u.get_Domain(), "microsoft.com")
         self.assertEqual(u.get_AbsoluteCanonicalUri(), "http://microsoft.com/surface/studio")
         self.assertEqual(u.get_Port(), 80)
@@ -30,7 +30,7 @@ class TestUri(unittest.TestCase):
 
 
     def test_combine_uri(self):
-        u1 = _pyrt.Uri("http://microsoft.com")
+        u1 = wf.Uri("http://microsoft.com")
         u = u1.CombineUri("surface/studio")
         self.assertEqual(u.get_Domain(), "microsoft.com")
         self.assertEqual(u.get_AbsoluteCanonicalUri(), "http://microsoft.com/surface/studio")
@@ -42,7 +42,7 @@ class TestUri(unittest.TestCase):
         self.assertEqual(u.get_QueryParsed().get_Size(), 0)
 
     def test_activate_query_parsed(self):
-        u = _pyrt.Uri("http://microsoft.com?projection=python&platform=windows")
+        u = wf.Uri("http://microsoft.com?projection=python&platform=windows")
         self.assertEqual(u.get_Query(), "?projection=python&platform=windows")
 
         qp = u.get_QueryParsed()
@@ -65,11 +65,8 @@ class TestUri(unittest.TestCase):
 
     
 
-
-
-
-
 if __name__ == '__main__':
+    import _pyrt
     _pyrt.init_apartment()
     unittest.main()
     _pyrt.uninit_apartment()
