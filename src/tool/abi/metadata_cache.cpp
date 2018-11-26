@@ -390,7 +390,7 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
             }
 
             xlang::throw_invalid("Interface '", iface->clr_full_name(), "' has no version attribute, but is trying to "
-                "be used as a fast ABI iterface for class '", type.clr_full_name(), "' which has no contract attribute");
+                "be used as a fast ABI interface for class '", type.clr_full_name(), "' which has no contract attribute");
         };
 
         std::sort(exclusiveInterfaces.begin(), exclusiveInterfaces.end(),
