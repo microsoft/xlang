@@ -121,6 +121,88 @@ namespace xlang
         }
     }
 
+    static void write_guid_value(writer& w, std::vector<FixedArgSig> const& args)
+    {
+        using std::get;
+
+        w.write_printf("0x%08X,0x%04X,0x%04X,{ 0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X }",
+            get<uint32_t>(get<ElemSig>(args[0].value).value),
+            get<uint16_t>(get<ElemSig>(args[1].value).value),
+            get<uint16_t>(get<ElemSig>(args[2].value).value),
+            get<uint8_t>(get<ElemSig>(args[3].value).value),
+            get<uint8_t>(get<ElemSig>(args[4].value).value),
+            get<uint8_t>(get<ElemSig>(args[5].value).value),
+            get<uint8_t>(get<ElemSig>(args[6].value).value),
+            get<uint8_t>(get<ElemSig>(args[7].value).value),
+            get<uint8_t>(get<ElemSig>(args[8].value).value),
+            get<uint8_t>(get<ElemSig>(args[9].value).value),
+            get<uint8_t>(get<ElemSig>(args[10].value).value));
+    }
+
+    static void write_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        separator s{w};
+
+        for (auto&& param : params)
+        {
+            s();
+            w.write("typename %", param.Name());
+        }
+    }
+
+    static void write_generic_types(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        separator s{w};
+
+        for (auto&& param : params)
+        {
+            s();
+            w.write(param.Name());
+        }
+    }
+
+    static void write_interface_category(writer& w, TypeDef const& type)
+    {
+        auto generics = type.GenericParam();
+
+        if (empty(generics))
+        {
+            auto format = R"(    template <> struct category<%>
+    {
+        using type = interface_category;
+    };
+)";
+
+            w.write(format, type);
+        }
+        else
+        {
+            auto guard{ w.push_generic_params(generics) };
+
+            auto format = R"(    template <%> struct category<%::%<%>>
+    {
+        using type = pinterface_category<%>;
+        static constexpr guid value{ % };
+    };
+)";
+
+            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+
+            if (!attribute)
+            {
+                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+            }
+
+            w.write(format,
+                bind<write_generic_typenames>(generics),
+                type.TypeNamespace(),
+                remove_tick(type.TypeName()),
+                bind<write_generic_types>(generics),
+                bind<write_generic_types>(generics),
+                bind<write_guid_value>(attribute.Value().FixedArgs()));
+        }
+    }
+
     static void write_category(writer& w, TypeDef const& type, std::string_view const& category)
     {
         auto format = R"(    template <> struct category<%>
@@ -144,24 +226,6 @@ namespace xlang
         auto type_name = type.TypeName();
 
         w.write(format, type_namespace, type_name, type_namespace, type_name);
-    }
-
-    static void write_guid_value(writer& w, std::vector<FixedArgSig> const& args)
-    {
-        using std::get;
-
-        w.write_printf("0x%08X,0x%04X,0x%04X,{ 0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X }",
-            get<uint32_t>(get<ElemSig>(args[0].value).value),
-            get<uint16_t>(get<ElemSig>(args[1].value).value),
-            get<uint16_t>(get<ElemSig>(args[2].value).value),
-            get<uint8_t>(get<ElemSig>(args[3].value).value),
-            get<uint8_t>(get<ElemSig>(args[4].value).value),
-            get<uint8_t>(get<ElemSig>(args[5].value).value),
-            get<uint8_t>(get<ElemSig>(args[6].value).value),
-            get<uint8_t>(get<ElemSig>(args[7].value).value),
-            get<uint8_t>(get<ElemSig>(args[8].value).value),
-            get<uint8_t>(get<ElemSig>(args[9].value).value),
-            get<uint8_t>(get<ElemSig>(args[10].value).value));
     }
 
     static void write_guid(writer& w, TypeDef const& type)

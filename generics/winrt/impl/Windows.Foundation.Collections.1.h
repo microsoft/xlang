@@ -3,6 +3,14 @@
 #include "winrt/impl/Windows.Foundation.Collections.0.h"
 namespace winrt::Windows::Foundation::Collections
 {
+    struct WINRT_EBO IObservableVector`1 :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<IObservableVector`1>,
+    impl::require<IObservableVector`1, Windows::Foundation::Collections::IIterable<T>, Windows::Foundation::Collections::IVector<T>>
+    {
+        IObservableVector`1(std::nullptr_t = nullptr) noexcept {}
+        IObservableVector`1(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
     struct WINRT_EBO IPropertySet :
         Windows::Foundation::IInspectable,
         impl::consume_t<IPropertySet>,

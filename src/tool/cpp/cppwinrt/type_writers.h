@@ -76,7 +76,7 @@ namespace xlang
             }
         }
 
-        [[nodiscard]] auto push_generic_params(std::pair<GenericParam, GenericParam>&& params)
+        [[nodiscard]] auto push_generic_params(std::pair<GenericParam, GenericParam> const& params)
         {
             if (empty(params))
             {
