@@ -91,7 +91,23 @@ namespace xlang
         for (auto&& param : params)
         {
             s();
-            w.write("typename %", param.Name());
+            w.write("typename %", param);
+        }
+    }
+
+    static void write_comma_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        for (auto&& param : params)
+        {
+            w.write(", typename %", param);
+        }
+    }
+
+    static void write_comma_generic_types(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        for (auto&& param : params)
+        {
+            w.write(", %", param);
         }
     }
 
@@ -919,8 +935,15 @@ namespace xlang
 
     static void write_consume_definitions(writer& w, TypeDef const& type)
     {
-        auto guard{ w.push_generic_params(type.GenericParam()) };
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
         auto type_name = type.TypeName();
+
+        if (!empty(generics))
+        {
+            type_name = remove_tick(type_name);
+        }
+
         auto type_namespace = type.TypeNamespace();
         auto type_impl_name = get_impl_name(type_namespace, type_name);
 
@@ -934,45 +957,49 @@ namespace xlang
 
             if (is_noexcept(method))
             {
-                format = R"(    template <typename D> % consume_%<D>::%(%) const noexcept
+                format = R"(    template <typename D%> % consume_%<D%>::%(%) const noexcept
     {%
-        WINRT_VERIFY_(0, WINRT_SHIM(@::%)->%(%));%
+        WINRT_VERIFY_(0, WINRT_SHIM(%)->%(%));%
     }
 )";
             }
             else
             {
-                format = R"(    template <typename D> % consume_%<D>::%(%) const
+                format = R"(    template <typename D%> % consume_%<D%>::%(%) const
     {%
-        check_hresult(WINRT_SHIM(@::%)->%(%));%
+        check_hresult(WINRT_SHIM(%)->%(%));%
     }
 )";
             }
 
             w.write(format,
+                bind<write_comma_generic_typenames>(generics),
                 signature.return_signature(),
                 type_impl_name,
+                bind<write_comma_generic_types>(generics),
                 method_name,
                 bind<write_consume_params>(signature),
                 bind<write_consume_return_type>(signature),
-                type_namespace,
-                type_name,
+                type,
                 get_abi_name(method),
                 bind<write_abi_args>(signature),
                 bind<write_consume_return_statement>(signature));
 
             if (is_add_overload(method))
             {
-                format = R"(    template <typename D> typename consume_%<D>::%_revoker consume_%<D>::%(auto_revoke_t, %) const
+                format = R"(    template <typename D%> typename consume_%<D%>::%_revoker consume_%<D%>::%(auto_revoke_t, %) const
     {
         return impl::make_event_revoker<D, %_revoker>(this, %(%));
     }
 )";
 
                 w.write(format,
+                    bind<write_comma_generic_typenames>(generics),
                     type_impl_name,
+                    bind<write_comma_generic_types>(generics),
                     method_name,
                     type_impl_name,
+                    bind<write_comma_generic_types>(generics),
                     method_name,
                     bind<write_consume_params>(signature),
                     method_name,

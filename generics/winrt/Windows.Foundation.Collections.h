@@ -5,19 +5,19 @@
 #include "winrt/Windows.Foundation.h"
 namespace winrt::impl
 {
-    template <typename D> winrt::event_token consume_Windows_Foundation_Collections_IObservableVector`1<D>::VectorChanged(Windows::Foundation::Collections::VectorChangedEventHandler<T> const& vhnd) const
+    template <typename D, typename T> winrt::event_token consume_Windows_Foundation_Collections_IObservableVector<D, T>::VectorChanged(Windows::Foundation::Collections::VectorChangedEventHandler<T> const& vhnd) const
     {
         winrt::event_token winrt_impl_result;
-        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IObservableVector`1)->add_VectorChanged(get_abi(vhnd), put_abi(winrt_impl_result)));
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IObservableVector<T>)->add_VectorChanged(get_abi(vhnd), put_abi(winrt_impl_result)));
         return winrt_impl_result;
     }
-    template <typename D> typename consume_Windows_Foundation_Collections_IObservableVector`1<D>::VectorChanged_revoker consume_Windows_Foundation_Collections_IObservableVector`1<D>::VectorChanged(auto_revoke_t, Windows::Foundation::Collections::VectorChangedEventHandler<T> const& vhnd) const
+    template <typename D, typename T> typename consume_Windows_Foundation_Collections_IObservableVector<D, T>::VectorChanged_revoker consume_Windows_Foundation_Collections_IObservableVector<D, T>::VectorChanged(auto_revoke_t, Windows::Foundation::Collections::VectorChangedEventHandler<T> const& vhnd) const
     {
         return impl::make_event_revoker<D, VectorChanged_revoker>(this, VectorChanged(vhnd));
     }
-    template <typename D> void consume_Windows_Foundation_Collections_IObservableVector`1<D>::VectorChanged(winrt::event_token const& token) const noexcept
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IObservableVector<D, T>::VectorChanged(winrt::event_token const& token) const noexcept
     {
-        WINRT_VERIFY_(0, WINRT_SHIM(Windows::Foundation::Collections::IObservableVector`1)->remove_VectorChanged(get_abi(token)));
+        WINRT_VERIFY_(0, WINRT_SHIM(Windows::Foundation::Collections::IObservableVector<T>)->remove_VectorChanged(get_abi(token)));
     }
     template <typename D>
     struct produce<D, Windows::Foundation::Collections::IObservableVector<T>> : produce_base<D, Windows::Foundation::Collections::IObservableVector<T>>
