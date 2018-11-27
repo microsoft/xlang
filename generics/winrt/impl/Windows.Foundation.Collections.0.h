@@ -76,7 +76,7 @@ namespace winrt::impl
     {
         using type = Windows::Foundation::Collections::IPropertySet;
     };
-    template <> struct abi<Windows::Foundation::Collections::IObservableVector`1>
+    template <typename T> struct abi<Windows::Foundation::Collections::IObservableVector<T>>
     {
         struct type : inspectable_abi
         {

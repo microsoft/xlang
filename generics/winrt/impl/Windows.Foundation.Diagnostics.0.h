@@ -3,17 +3,17 @@
 #include "winrt/base.h"
 namespace winrt::Windows::Foundation
 {
-    struct Point;
-    struct Size;
-    struct Rect;
     enum class AsyncStatus : int32_t;
     struct EventRegistrationToken;
+    struct Point;
+    struct Rect;
+    struct Size;
     struct Uri;
 }
 namespace winrt::Windows::Storage
 {
-    struct StorageFile;
     struct IStorageFolder;
+    struct StorageFile;
 }
 namespace winrt::Windows::Foundation::Diagnostics
 {

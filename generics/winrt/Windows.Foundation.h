@@ -23,6 +23,24 @@ namespace winrt::impl
         check_hresult(WINRT_SHIM(Windows::Foundation::IGetActivationFactory)->GetActivationFactory(get_abi(activatableClassId), put_abi(factory)));
         return factory;
     }
+    template <typename D> winrt::guid consume_Windows_Foundation_IGuidHelperStatics<D>::CreateNewGuid() const
+    {
+        winrt::guid result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IGuidHelperStatics)->CreateNewGuid(put_abi(result)));
+        return result;
+    }
+    template <typename D> winrt::guid consume_Windows_Foundation_IGuidHelperStatics<D>::Empty() const
+    {
+        winrt::guid value;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IGuidHelperStatics)->get_Empty(put_abi(value)));
+        return value;
+    }
+    template <typename D> bool consume_Windows_Foundation_IGuidHelperStatics<D>::Equals(winrt::guid const& target, winrt::guid const& value) const
+    {
+        bool result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IGuidHelperStatics)->Equals(get_abi(target), get_abi(value), &result));
+        return result;
+    }
     template <typename D> Windows::Foundation::IMemoryBufferReference consume_Windows_Foundation_IMemoryBuffer<D>::CreateReference() const
     {
         void* reference;
@@ -727,6 +745,40 @@ namespace winrt::impl
                 *factory = nullptr;
                 typename D::abi_guard guard(this->shim());
                 *factory = detach_from<Windows::Foundation::IInspectable>(this->shim().GetActivationFactory(*reinterpret_cast<hstring const*>(&activatableClassId)));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D>
+    struct produce<D, Windows::Foundation::IGuidHelperStatics> : produce_base<D, Windows::Foundation::IGuidHelperStatics>
+    {
+        int32_t WINRT_CALL CreateNewGuid(winrt::guid* result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *result = detach_from<winrt::guid>(this->shim().CreateNewGuid());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Empty(winrt::guid* value) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *value = detach_from<winrt::guid>(this->shim().Empty());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL Equals(winrt::guid const& target, winrt::guid const& value, bool* result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *result = detach_from<bool>(this->shim().Equals(*reinterpret_cast<winrt::guid const*>(&target), *reinterpret_cast<winrt::guid const*>(&value)));
                 return 0;
             }
             catch (...) { return to_hresult(); }
@@ -2002,6 +2054,18 @@ namespace winrt::Windows::Foundation
         Deferral(impl::call_factory<Deferral, Windows::Foundation::IDeferralFactory>([&](auto&& f) { return f.Create(handler); }))
     {
     }
+    inline winrt::guid GuidHelper::CreateNewGuid()
+    {
+        return impl::call_factory<GuidHelper, Windows::Foundation::IGuidHelperStatics>([&](auto&& f) { return f.CreateNewGuid(); });
+    }
+    inline winrt::guid GuidHelper::Empty()
+    {
+        return impl::call_factory<GuidHelper, Windows::Foundation::IGuidHelperStatics>([&](auto&& f) { return f.Empty(); });
+    }
+    inline bool GuidHelper::Equals(winrt::guid const& target, winrt::guid const& value)
+    {
+        return impl::call_factory<GuidHelper, Windows::Foundation::IGuidHelperStatics>([&](auto&& f) { return f.Equals(target, value); });
+    }
     inline MemoryBuffer::MemoryBuffer(uint32_t capacity) :
         MemoryBuffer(impl::call_factory<MemoryBuffer, Windows::Foundation::IMemoryBufferFactory>([&](auto&& f) { return f.Create(capacity); }))
     {
@@ -2213,6 +2277,7 @@ namespace std
     template<> struct hash<winrt::Windows::Foundation::IDeferral> : winrt::impl::hash_base<winrt::Windows::Foundation::IDeferral> {};
     template<> struct hash<winrt::Windows::Foundation::IDeferralFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IDeferralFactory> {};
     template<> struct hash<winrt::Windows::Foundation::IGetActivationFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IGetActivationFactory> {};
+    template<> struct hash<winrt::Windows::Foundation::IGuidHelperStatics> : winrt::impl::hash_base<winrt::Windows::Foundation::IGuidHelperStatics> {};
     template<> struct hash<winrt::Windows::Foundation::IMemoryBuffer> : winrt::impl::hash_base<winrt::Windows::Foundation::IMemoryBuffer> {};
     template<> struct hash<winrt::Windows::Foundation::IMemoryBufferFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IMemoryBufferFactory> {};
     template<> struct hash<winrt::Windows::Foundation::IMemoryBufferReference> : winrt::impl::hash_base<winrt::Windows::Foundation::IMemoryBufferReference> {};
@@ -2227,6 +2292,7 @@ namespace std
     template<> struct hash<winrt::Windows::Foundation::IWwwFormUrlDecoderRuntimeClass> : winrt::impl::hash_base<winrt::Windows::Foundation::IWwwFormUrlDecoderRuntimeClass> {};
     template<> struct hash<winrt::Windows::Foundation::IWwwFormUrlDecoderRuntimeClassFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IWwwFormUrlDecoderRuntimeClassFactory> {};
     template<> struct hash<winrt::Windows::Foundation::Deferral> : winrt::impl::hash_base<winrt::Windows::Foundation::Deferral> {};
+    template<> struct hash<winrt::Windows::Foundation::GuidHelper> : winrt::impl::hash_base<winrt::Windows::Foundation::GuidHelper> {};
     template<> struct hash<winrt::Windows::Foundation::MemoryBuffer> : winrt::impl::hash_base<winrt::Windows::Foundation::MemoryBuffer> {};
     template<> struct hash<winrt::Windows::Foundation::PropertyValue> : winrt::impl::hash_base<winrt::Windows::Foundation::PropertyValue> {};
     template<> struct hash<winrt::Windows::Foundation::Uri> : winrt::impl::hash_base<winrt::Windows::Foundation::Uri> {};

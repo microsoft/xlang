@@ -634,27 +634,38 @@ namespace xlang
 
     static void write_interface_abi(writer& w, TypeDef const& type)
     {
+        auto type_namespace = type.TypeNamespace();
+        auto type_name = type.TypeName();
         auto generics = type.GenericParam();
-        auto guard{ w.push_generic_params(generics) }; // TODO: needed?
+        auto guard{ w.push_generic_params(generics) };
 
         if (empty(generics))
         {
-            
-        }
-        else
-        {
-
-        }
-
-        auto format = R"(    template <> struct abi<@::%>
+            auto format = R"(    template <> struct abi<@::%>
     {
         struct type : inspectable_abi
         {
 )";
 
-        w.write(format, type.TypeNamespace(), type.TypeName());
+            w.write(format, type_namespace, type_name);
+        }
+        else
+        {
+            auto format = R"(    template <%> struct abi<@::%<%>>
+    {
+        struct type : inspectable_abi
+        {
+)";
 
-        format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+            w.write(format,
+                bind<write_generic_typenames>(generics),
+                type_namespace,
+                remove_tick(type_name),
+                bind<write_generic_types>(generics));
+        }
+
+
+        auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())

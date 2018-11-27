@@ -2967,16 +2967,16 @@ namespace winrt::Windows::Foundation::Diagnostics
         LoggingActivity(impl::call_factory<LoggingActivity, Windows::Foundation::Diagnostics::ILoggingActivityFactory>([&](auto&& f) { return f.CreateLoggingActivityWithLevel(activityName, loggingChannel, level); }))
     {
     }
-    inline LoggingChannel::LoggingChannel(param::hstring const& name) :
-        LoggingChannel(impl::call_factory<LoggingChannel, Windows::Foundation::Diagnostics::ILoggingChannelFactory>([&](auto&& f) { return f.Create(name); }))
-    {
-    }
     inline LoggingChannel::LoggingChannel(param::hstring const& name, Windows::Foundation::Diagnostics::LoggingChannelOptions const& options) :
         LoggingChannel(impl::call_factory<LoggingChannel, Windows::Foundation::Diagnostics::ILoggingChannelFactory2>([&](auto&& f) { return f.CreateWithOptions(name, options); }))
     {
     }
     inline LoggingChannel::LoggingChannel(param::hstring const& name, Windows::Foundation::Diagnostics::LoggingChannelOptions const& options, winrt::guid const& id) :
         LoggingChannel(impl::call_factory<LoggingChannel, Windows::Foundation::Diagnostics::ILoggingChannelFactory2>([&](auto&& f) { return f.CreateWithOptionsAndId(name, options, id); }))
+    {
+    }
+    inline LoggingChannel::LoggingChannel(param::hstring const& name) :
+        LoggingChannel(impl::call_factory<LoggingChannel, Windows::Foundation::Diagnostics::ILoggingChannelFactory>([&](auto&& f) { return f.Create(name); }))
     {
     }
     inline LoggingChannelOptions::LoggingChannelOptions(winrt::guid const& group) :
@@ -2991,12 +2991,12 @@ namespace winrt::Windows::Foundation::Diagnostics
         LoggingFields(impl::call_factory<LoggingFields>([](auto&& f) { return f.template ActivateInstance<LoggingFields>(); }))
     {
     }
-    inline LoggingOptions::LoggingOptions(int64_t keywords) :
-        LoggingOptions(impl::call_factory<LoggingOptions, Windows::Foundation::Diagnostics::ILoggingOptionsFactory>([&](auto&& f) { return f.CreateWithKeywords(keywords); }))
-    {
-    }
     inline LoggingOptions::LoggingOptions() :
         LoggingOptions(impl::call_factory<LoggingOptions>([](auto&& f) { return f.template ActivateInstance<LoggingOptions>(); }))
+    {
+    }
+    inline LoggingOptions::LoggingOptions(int64_t keywords) :
+        LoggingOptions(impl::call_factory<LoggingOptions, Windows::Foundation::Diagnostics::ILoggingOptionsFactory>([&](auto&& f) { return f.CreateWithKeywords(keywords); }))
     {
     }
     inline LoggingSession::LoggingSession(param::hstring const& name) :

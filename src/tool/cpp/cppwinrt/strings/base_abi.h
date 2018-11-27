@@ -316,15 +316,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IObservableVector<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token* token) noexcept = 0;
-            virtual int32_t WINRT_CALL remove_VectorChanged(winrt::event_token token) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
