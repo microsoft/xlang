@@ -13,7 +13,7 @@ namespace winrt::Windows::Foundation
     struct WINRT_EBO IDeferral :
         Windows::Foundation::IInspectable,
         impl::consume_t<IDeferral>,
-    impl::require<IDeferral, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::IDeferral, Windows::Foundation::IClosable>
     {
         IDeferral(std::nullptr_t = nullptr) noexcept {}
         IDeferral(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -42,7 +42,7 @@ namespace winrt::Windows::Foundation
     struct WINRT_EBO IMemoryBuffer :
         Windows::Foundation::IInspectable,
         impl::consume_t<IMemoryBuffer>,
-    impl::require<IMemoryBuffer, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::IMemoryBuffer, Windows::Foundation::IClosable>
     {
         IMemoryBuffer(std::nullptr_t = nullptr) noexcept {}
         IMemoryBuffer(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -57,7 +57,7 @@ namespace winrt::Windows::Foundation
     struct WINRT_EBO IMemoryBufferReference :
         Windows::Foundation::IInspectable,
         impl::consume_t<IMemoryBufferReference>,
-    impl::require<IMemoryBufferReference, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::IMemoryBufferReference, Windows::Foundation::IClosable>
     {
         IMemoryBufferReference(std::nullptr_t = nullptr) noexcept {}
         IMemoryBufferReference(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -121,7 +121,7 @@ namespace winrt::Windows::Foundation
     struct WINRT_EBO IWwwFormUrlDecoderRuntimeClass :
         Windows::Foundation::IInspectable,
         impl::consume_t<IWwwFormUrlDecoderRuntimeClass>,
-    impl::require<IWwwFormUrlDecoderRuntimeClass, Windows::Foundation::Collections::IIterable<Windows::Foundation::IWwwFormUrlDecoderEntry>, Windows::Foundation::Collections::IVectorView<Windows::Foundation::IWwwFormUrlDecoderEntry>>
+        impl::require<Windows::Foundation::IWwwFormUrlDecoderRuntimeClass, Windows::Foundation::Collections::IIterable<Windows::Foundation::IWwwFormUrlDecoderEntry>, Windows::Foundation::Collections::IVectorView<Windows::Foundation::IWwwFormUrlDecoderEntry>>
     {
         IWwwFormUrlDecoderRuntimeClass(std::nullptr_t = nullptr) noexcept {}
         IWwwFormUrlDecoderRuntimeClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}

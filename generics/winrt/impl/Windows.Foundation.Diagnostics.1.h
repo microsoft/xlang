@@ -35,7 +35,7 @@ namespace winrt::Windows::Foundation::Diagnostics
     struct WINRT_EBO IFileLoggingSession :
         Windows::Foundation::IInspectable,
         impl::consume_t<IFileLoggingSession>,
-    impl::require<IFileLoggingSession, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::Diagnostics::IFileLoggingSession, Windows::Foundation::IClosable>
     {
         IFileLoggingSession(std::nullptr_t = nullptr) noexcept {}
         IFileLoggingSession(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -57,7 +57,7 @@ namespace winrt::Windows::Foundation::Diagnostics
     struct WINRT_EBO ILoggingActivity :
         Windows::Foundation::IInspectable,
         impl::consume_t<ILoggingActivity>,
-    impl::require<ILoggingActivity, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::Diagnostics::ILoggingActivity, Windows::Foundation::IClosable>
     {
         ILoggingActivity(std::nullptr_t = nullptr) noexcept {}
         ILoggingActivity(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -65,7 +65,7 @@ namespace winrt::Windows::Foundation::Diagnostics
     struct WINRT_EBO ILoggingActivity2 :
         Windows::Foundation::IInspectable,
         impl::consume_t<ILoggingActivity2>,
-    impl::require<ILoggingActivity2, Windows::Foundation::Diagnostics::ILoggingActivity, Windows::Foundation::Diagnostics::ILoggingTarget, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::Diagnostics::ILoggingActivity2, Windows::Foundation::Diagnostics::ILoggingActivity, Windows::Foundation::Diagnostics::ILoggingTarget, Windows::Foundation::IClosable>
     {
         ILoggingActivity2(std::nullptr_t = nullptr) noexcept {}
         ILoggingActivity2(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -80,7 +80,7 @@ namespace winrt::Windows::Foundation::Diagnostics
     struct WINRT_EBO ILoggingChannel :
         Windows::Foundation::IInspectable,
         impl::consume_t<ILoggingChannel>,
-    impl::require<ILoggingChannel, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::Diagnostics::ILoggingChannel, Windows::Foundation::IClosable>
     {
         ILoggingChannel(std::nullptr_t = nullptr) noexcept {}
         ILoggingChannel(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -88,7 +88,7 @@ namespace winrt::Windows::Foundation::Diagnostics
     struct WINRT_EBO ILoggingChannel2 :
         Windows::Foundation::IInspectable,
         impl::consume_t<ILoggingChannel2>,
-    impl::require<ILoggingChannel2, Windows::Foundation::Diagnostics::ILoggingChannel, Windows::Foundation::Diagnostics::ILoggingTarget, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::Diagnostics::ILoggingChannel2, Windows::Foundation::Diagnostics::ILoggingChannel, Windows::Foundation::Diagnostics::ILoggingTarget, Windows::Foundation::IClosable>
     {
         ILoggingChannel2(std::nullptr_t = nullptr) noexcept {}
         ILoggingChannel2(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
@@ -145,7 +145,7 @@ namespace winrt::Windows::Foundation::Diagnostics
     struct WINRT_EBO ILoggingSession :
         Windows::Foundation::IInspectable,
         impl::consume_t<ILoggingSession>,
-    impl::require<ILoggingSession, Windows::Foundation::IClosable>
+        impl::require<Windows::Foundation::Diagnostics::ILoggingSession, Windows::Foundation::IClosable>
     {
         ILoggingSession(std::nullptr_t = nullptr) noexcept {}
         ILoggingSession(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}

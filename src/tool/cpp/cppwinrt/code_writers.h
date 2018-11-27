@@ -1687,7 +1687,7 @@ public:
             return;
         }
 
-        w.write(",\n    impl::require<%", type.TypeName());
+        w.write(",\n        impl::require<%", type);
 
         for (auto&&[name, info] : interfaces)
         {
@@ -1783,7 +1783,14 @@ public:
 
     static void write_interface(writer& w, TypeDef const& type)
     {
-        auto format = R"(    struct WINRT_EBO % :
+        auto type_namespace = type.TypeNamespace();
+        auto type_name = type.TypeName();
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
+
+        if (empty(generics))
+        {
+            auto format = R"(    struct WINRT_EBO % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
     {
@@ -1792,17 +1799,37 @@ public:
     %};
 )";
 
-        auto type_name = type.TypeName();
+            w.write(format,
+                type_name,
+                type_name,
+                bind<write_interface_requires>(type),
+                type_name,
+                type_name,
+                bind<write_interface_usings>(type));
+        }
+        else
+        {
+            type_name = remove_tick(type_name);
 
-        auto guard{ w.push_generic_params(type.GenericParam()) };
+            auto format = R"(    template <%>
+    struct WINRT_EBO % :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<%>%
+    {
+        %(std::nullptr_t = nullptr) noexcept {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    %};
+)";
 
-        w.write(format,
-            type_name,
-            type_name,
-            bind<write_interface_requires>(type),
-            type_name,
-            type_name,
-            bind<write_interface_usings>(type));
+            w.write(format,
+                bind<write_generic_typenames>(generics),
+                type_name,
+                type,
+                bind<write_interface_requires>(type),
+                type_name,
+                type_name,
+                bind<write_interface_usings>(type));
+        }
     }
 
     static void write_delegate(writer& w, TypeDef const& type)

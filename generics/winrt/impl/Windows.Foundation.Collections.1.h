@@ -3,18 +3,19 @@
 #include "winrt/impl/Windows.Foundation.Collections.0.h"
 namespace winrt::Windows::Foundation::Collections
 {
-    struct WINRT_EBO IObservableVector`1 :
+    template <typename T>
+    struct WINRT_EBO IObservableVector :
         Windows::Foundation::IInspectable,
-        impl::consume_t<IObservableVector`1>,
-    impl::require<IObservableVector`1, Windows::Foundation::Collections::IIterable<T>, Windows::Foundation::Collections::IVector<T>>
+        impl::consume_t<Windows::Foundation::Collections::IObservableVector<T>>,
+        impl::require<Windows::Foundation::Collections::IObservableVector<T>, Windows::Foundation::Collections::IIterable<T>, Windows::Foundation::Collections::IVector<T>>
     {
-        IObservableVector`1(std::nullptr_t = nullptr) noexcept {}
-        IObservableVector`1(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+        IObservableVector(std::nullptr_t = nullptr) noexcept {}
+        IObservableVector(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IPropertySet :
         Windows::Foundation::IInspectable,
         impl::consume_t<IPropertySet>,
-    impl::require<IPropertySet, Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, Windows::Foundation::IInspectable>>, Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>, Windows::Foundation::Collections::IObservableMap<hstring, Windows::Foundation::IInspectable>>
+        impl::require<Windows::Foundation::Collections::IPropertySet, Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, Windows::Foundation::IInspectable>>, Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>, Windows::Foundation::Collections::IObservableMap<hstring, Windows::Foundation::IInspectable>>
     {
         IPropertySet(std::nullptr_t = nullptr) noexcept {}
         IPropertySet(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
