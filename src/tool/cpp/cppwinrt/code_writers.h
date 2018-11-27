@@ -2558,14 +2558,12 @@ public:
 
     static void write_std_hash(writer& w, TypeDef const& type)
     {
-        auto type_name = type.TypeName();
-        auto type_namespace = type.TypeNamespace();
+        auto generics = type.GenericParam();
 
-        w.write("    template<> struct hash<winrt::@::%> : winrt::impl::hash_base<winrt::@::%> {};\n",
-            type_namespace,
-            type_name,
-            type_namespace,
-            type_name);
+        w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
+            bind<write_generic_typenames>(generics),
+            type,
+            type);
     }
 
     static void write_namespace_special(writer& w, std::string_view const& namespace_name, cache const& c)
@@ -2618,7 +2616,6 @@ public:
                 { "typename T", "Windows::Foundation::Collections::IIterable<T>" },
                 { "typename T", "Windows::Foundation::Collections::IVectorView<T>" },
                 { "typename T", "Windows::Foundation::Collections::IVector<T>" },
-                { "typename T", "Windows::Foundation::Collections::IObservableVector<T>" },
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
                 { "", "Windows::Foundation::Collections::IVectorChangedEventArgs" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },

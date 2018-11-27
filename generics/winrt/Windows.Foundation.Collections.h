@@ -61,7 +61,7 @@ namespace winrt::Windows::Foundation::Collections
 }
 namespace std
 {
-    template<> struct hash<winrt::Windows::Foundation::Collections::IObservableVector`1> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector`1> {};
+    template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::IPropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IPropertySet> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::PropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::PropertySet> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::StringMap> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::StringMap> {};
