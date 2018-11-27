@@ -377,28 +377,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IObservableMap
-    {
-        event_token MapChanged(wfc::MapChangedEventHandler<K, V> const& handler) const
-        {
-            event_token cookie{};
-            check_hresult(WINRT_SHIM(wfc::IObservableMap<K, V>)->add_MapChanged(get_abi(handler), &cookie));
-            return cookie;
-        }
-
-        void MapChanged(event_token const cookie) const noexcept
-        {
-            WINRT_SHIM(wfc::IObservableMap<K, V>)->remove_MapChanged(cookie);
-        }
-
-        using MapChanged_revoker = event_revoker<wfc::IObservableMap<K, V>, &abi_t<wfc::IObservableMap<K, V>>::remove_MapChanged>;
-
-        MapChanged_revoker MapChanged(auto_revoke_t, wfc::MapChangedEventHandler<K, V> const& handler) const
-        {
-            return make_event_revoker<D, MapChanged_revoker>(this, MapChanged(handler));
-        }
-    };
-
     template <typename D> struct consume_IAsyncInfo
     {
         uint32_t Id() const

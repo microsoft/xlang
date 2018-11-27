@@ -421,18 +421,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         IMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
-    template <typename K, typename V>
-    struct WINRT_EBO IObservableMap :
-        IInspectable,
-        impl::consume_t<IObservableMap<K, V>>,
-        impl::require<IObservableMap<K, V>, IMap<K, V>, IIterable<IKeyValuePair<K, V>>>
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        IObservableMap(std::nullptr_t = nullptr) noexcept {}
-        IObservableMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
     struct WINRT_EBO IVectorChangedEventArgs :
         IInspectable,
         impl::consume_t<IVectorChangedEventArgs>

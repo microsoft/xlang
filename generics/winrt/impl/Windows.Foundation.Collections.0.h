@@ -7,6 +7,7 @@ namespace winrt::Windows::Foundation
 }
 namespace winrt::Windows::Foundation::Collections
 {
+    template <typename K, typename V> struct IObservableMap;
     template <typename T> struct IObservableVector;
     struct IPropertySet;
     struct PropertySet;
@@ -15,6 +16,11 @@ namespace winrt::Windows::Foundation::Collections
 }
 namespace winrt::impl
 {
+    template <typename K, typename V> struct category<Windows::Foundation::Collections::IObservableMap<K, V>>
+    {
+        using type = pinterface_category<K, V>;
+        static constexpr guid value{ 0x65DF2BF5,0xBF39,0x41B5,{ 0xAE,0xBC,0x5A,0x9D,0x86,0x5E,0x47,0x2B } };
+    };
     template <typename T> struct category<Windows::Foundation::Collections::IObservableVector<T>>
     {
         using type = pinterface_category<T>;
@@ -36,6 +42,10 @@ namespace winrt::impl
     {
         using type = class_category;
     };
+    template <typename K, typename V> struct name<Windows::Foundation::Collections::IObservableMap<K, V>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, name_v<V>, L">") };
+    };
     template <typename T> struct name<Windows::Foundation::Collections::IObservableVector<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableVector`1<", name_v<T>, L">") };
@@ -55,6 +65,10 @@ namespace winrt::impl
     template <> struct name<Windows::Foundation::Collections::ValueSet>
     {
         static constexpr auto & value{ L"Windows.Foundation.Collections.ValueSet" };
+    };
+    template <typename K, typename V> struct guid_storage<Windows::Foundation::Collections::IObservableMap<K, V>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IObservableMap<K, V>>::value };
     };
     template <typename T> struct guid_storage<Windows::Foundation::Collections::IObservableVector<T>>
     {
@@ -76,6 +90,14 @@ namespace winrt::impl
     {
         using type = Windows::Foundation::Collections::IPropertySet;
     };
+    template <typename K, typename V> struct abi<Windows::Foundation::Collections::IObservableMap<K, V>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL add_MapChanged(void*, winrt::event_token*) noexcept = 0;
+            virtual int32_t WINRT_CALL remove_MapChanged(winrt::event_token) noexcept = 0;
+        };
+    };
     template <typename T> struct abi<Windows::Foundation::Collections::IObservableVector<T>>
     {
         struct type : inspectable_abi
@@ -89,6 +111,18 @@ namespace winrt::impl
         struct type : inspectable_abi
         {
         };
+    };
+    template <typename D, typename K, typename V>
+    struct consume_Windows_Foundation_Collections_IObservableMap
+    {
+        winrt::event_token MapChanged(Windows::Foundation::Collections::MapChangedEventHandler<K, V> const& vhnd) const;
+        using MapChanged_revoker = impl::event_revoker<Windows::Foundation::Collections::IObservableMap<K, V>, &impl::abi_t<Windows::Foundation::Collections::IObservableMap<K, V>>::remove_MapChanged>;
+        MapChanged_revoker MapChanged(auto_revoke_t, Windows::Foundation::Collections::MapChangedEventHandler<K, V> const& vhnd) const;
+        void MapChanged(winrt::event_token const& token) const noexcept;
+    };
+    template <typename K, typename V> struct consume<Windows::Foundation::Collections::IObservableMap<K, V>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_Collections_IObservableMap<D, K, V>;
     };
     template <typename D, typename T>
     struct consume_Windows_Foundation_Collections_IObservableVector

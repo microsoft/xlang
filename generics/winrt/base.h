@@ -2118,15 +2118,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IObservableMap<K, V>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL add_MapChanged(void* handler, winrt::event_token* token) noexcept = 0;
-            virtual int32_t WINRT_CALL remove_MapChanged(winrt::event_token token) noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
@@ -5446,28 +5437,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IObservableMap
-    {
-        event_token MapChanged(wfc::MapChangedEventHandler<K, V> const& handler) const
-        {
-            event_token cookie{};
-            check_hresult(WINRT_SHIM(wfc::IObservableMap<K, V>)->add_MapChanged(get_abi(handler), &cookie));
-            return cookie;
-        }
-
-        void MapChanged(event_token const cookie) const noexcept
-        {
-            WINRT_SHIM(wfc::IObservableMap<K, V>)->remove_MapChanged(cookie);
-        }
-
-        using MapChanged_revoker = event_revoker<wfc::IObservableMap<K, V>, &abi_t<wfc::IObservableMap<K, V>>::remove_MapChanged>;
-
-        MapChanged_revoker MapChanged(auto_revoke_t, wfc::MapChangedEventHandler<K, V> const& handler) const
-        {
-            return make_event_revoker<D, MapChanged_revoker>(this, MapChanged(handler));
-        }
-    };
-
     template <typename D> struct consume_IAsyncInfo
     {
         uint32_t Id() const
@@ -5769,11 +5738,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::IMap<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IObservableMap<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IObservableMap<K, V>>::value };
-    };
-
     template <typename T> struct guid_storage<Windows::Foundation::EventHandler<T>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
@@ -5867,11 +5831,6 @@ namespace winrt::impl
     template <typename K, typename V> struct consume<wfc::IMap<K, V>>
     {
         template <typename D> using type = consume_IMap<D, K, V>;
-    };
-
-    template <typename K, typename V> struct consume<wfc::IObservableMap<K, V>>
-    {
-        template <typename D> using type = consume_IObservableMap<D, K, V>;
     };
 
     template <> struct name<Windows::Foundation::AsyncActionCompletedHandler>
@@ -6013,11 +5972,6 @@ namespace winrt::impl
     template <typename K, typename V> struct name<wfc::IMap<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMap`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::IObservableMap<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename T> struct name<Windows::Foundation::EventHandler<T>>
@@ -6183,12 +6137,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x3c2925fe, 0x8519, 0x45c1,{ 0xaa, 0x79, 0x19, 0x7b, 0x67, 0x18, 0xc1, 0xc1 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::IObservableMap<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0x65df2bf5, 0xbf39, 0x41b5,{ 0xae, 0xbc, 0x5a, 0x9d, 0x86, 0x5e, 0x47, 0x2b } };
     };
 
     template <typename T> struct category<Windows::Foundation::EventHandler<T>>
@@ -6887,18 +6835,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMap(std::nullptr_t = nullptr) noexcept {}
         IMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
-    template <typename K, typename V>
-    struct WINRT_EBO IObservableMap :
-        IInspectable,
-        impl::consume_t<IObservableMap<K, V>>,
-        impl::require<IObservableMap<K, V>, IMap<K, V>, IIterable<IKeyValuePair<K, V>>>
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        IObservableMap(std::nullptr_t = nullptr) noexcept {}
-        IObservableMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     struct WINRT_EBO IVectorChangedEventArgs :
@@ -9559,31 +9495,6 @@ namespace winrt::impl
                 clear_abi(value);
                 typename D::abi_guard guard(this->shim());
                 *value = detach_from<K>(this->shim().Key());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename K, typename V> struct produce<D, wfc::IObservableMap<K, V>> : produce_base<D, wfc::IObservableMap<K, V>>
-    {
-        int32_t WINRT_CALL add_MapChanged(void* handler, winrt::event_token* token) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *token = detach_from<event_token>(this->shim().MapChanged(*reinterpret_cast<wfc::MapChangedEventHandler<K, V> const*>(&handler)));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL remove_MapChanged(winrt::event_token token) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().MapChanged(token);
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

@@ -350,15 +350,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IObservableMap<K, V>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL add_MapChanged(void* handler, winrt::event_token* token) noexcept = 0;
-            virtual int32_t WINRT_CALL remove_MapChanged(winrt::event_token token) noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi

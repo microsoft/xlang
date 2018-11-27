@@ -5,6 +5,20 @@
 #include "winrt/Windows.Foundation.h"
 namespace winrt::impl
 {
+    template <typename D, typename K, typename V> winrt::event_token consume_Windows_Foundation_Collections_IObservableMap<D, K, V>::MapChanged(Windows::Foundation::Collections::MapChangedEventHandler<K, V> const& vhnd) const
+    {
+        winrt::event_token winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IObservableMap<K, V>)->add_MapChanged(get_abi(vhnd), put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename K, typename V> typename consume_Windows_Foundation_Collections_IObservableMap<D, K, V>::MapChanged_revoker consume_Windows_Foundation_Collections_IObservableMap<D, K, V>::MapChanged(auto_revoke_t, Windows::Foundation::Collections::MapChangedEventHandler<K, V> const& vhnd) const
+    {
+        return impl::make_event_revoker<D, MapChanged_revoker>(this, MapChanged(vhnd));
+    }
+    template <typename D, typename K, typename V> void consume_Windows_Foundation_Collections_IObservableMap<D, K, V>::MapChanged(winrt::event_token const& token) const noexcept
+    {
+        WINRT_VERIFY_(0, WINRT_SHIM(Windows::Foundation::Collections::IObservableMap<K, V>)->remove_MapChanged(get_abi(token)));
+    }
     template <typename D, typename T> winrt::event_token consume_Windows_Foundation_Collections_IObservableVector<D, T>::VectorChanged(Windows::Foundation::Collections::VectorChangedEventHandler<T> const& vhnd) const
     {
         winrt::event_token winrt_impl_result;
@@ -19,6 +33,26 @@ namespace winrt::impl
     {
         WINRT_VERIFY_(0, WINRT_SHIM(Windows::Foundation::Collections::IObservableVector<T>)->remove_VectorChanged(get_abi(token)));
     }
+    template <typename D, typename K, typename V>
+    struct produce<D, Windows::Foundation::Collections::IObservableMap<K, V>> : produce_base<D, Windows::Foundation::Collections::IObservableMap<K, V>>
+    {
+        int32_t WINRT_CALL add_MapChanged(void* vhnd, winrt::event_token* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<winrt::event_token>(this->shim().MapChanged(*reinterpret_cast<Windows::Foundation::Collections::MapChangedEventHandler<K, V> const*>(&vhnd)));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL remove_MapChanged(winrt::event_token token) noexcept final
+        {
+            typename D::abi_guard guard(this->shim());
+            this->shim().MapChanged(*reinterpret_cast<winrt::event_token const*>(&token));
+            return 0;
+        }
+    };
     template <typename D, typename T>
     struct produce<D, Windows::Foundation::Collections::IObservableVector<T>> : produce_base<D, Windows::Foundation::Collections::IObservableVector<T>>
     {
@@ -61,6 +95,7 @@ namespace winrt::Windows::Foundation::Collections
 }
 namespace std
 {
+    template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::IPropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IPropertySet> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::PropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::PropertySet> {};
