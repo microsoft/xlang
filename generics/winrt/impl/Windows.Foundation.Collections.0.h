@@ -56,9 +56,9 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.Collections.ValueSet" };
     };
-    template <> struct guid_storage<Windows::Foundation::Collections::IObservableVector`1>
+    template <typename T> struct guid_storage<Windows::Foundation::Collections::IObservableVector<T>>
     {
-        static constexpr guid value{ 0x5917EB53,0x50B4,0x4A0D,{ 0xB3,0x09,0x65,0x86,0x2B,0x3F,0x1D,0xBC } };
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IObservableVector<T>>::value };
     };
     template <> struct guid_storage<Windows::Foundation::Collections::IPropertySet>
     {

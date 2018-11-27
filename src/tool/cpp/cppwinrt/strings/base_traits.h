@@ -171,11 +171,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::IVector<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IObservableVector<T>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IObservableVector<T>>::value };
-    };
-
     template <typename K, typename V> struct guid_storage<wfc::IKeyValuePair<K, V>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IKeyValuePair<K, V>>::value };

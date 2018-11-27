@@ -311,22 +311,22 @@ namespace xlang
         }
         else
         {
-            type_name = remove_tick(type_name);
-
             auto format = R"(    template <%> struct guid_storage<@::%<%>>
     {
         static constexpr guid value{ pinterface_guid<@::%<%>>::value };
     };
 )";
 
+            type_name = remove_tick(type_name);
+
             w.write(format,
                 bind<write_generic_typenames>(generics),
                 type_namespace,
                 type_name,
-                bind<write_generic_types<generics>,
+                bind<write_generic_types>(generics),
                 type_namespace,
                 type_name,
-                bind<write_generic_types<generics>);
+                bind<write_generic_types>(generics));
         }
     }
 
