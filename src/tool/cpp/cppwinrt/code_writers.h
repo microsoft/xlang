@@ -285,20 +285,49 @@ namespace xlang
 
     static void write_guid(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <> struct guid_storage<%>
+        auto type_namespace = type.TypeNamespace();
+        auto type_name = type.TypeName();
+        auto generics = type.GenericParam();
+
+        if (empty(generics))
+        {
+            auto format = R"(    template <> struct guid_storage<@::%>
     {
         static constexpr guid value{ % };
     };
 )";
 
-        auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
 
-        if (!attribute)
-        {
-            throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+            if (!attribute)
+            {
+                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+            }
+
+            w.write(format,
+                type_namespace,
+                type_name,
+                bind<write_guid_value>(attribute.Value().FixedArgs()));
         }
+        else
+        {
+            type_name = remove_tick(type_name);
 
-        w.write(format, type, bind<write_guid_value>(attribute.Value().FixedArgs()));
+            auto format = R"(    template <%> struct guid_storage<@::%<%>>
+    {
+        static constexpr guid value{ pinterface_guid<@::%<%>>::value };
+    };
+)";
+
+            w.write(format,
+                bind<write_generic_typenames>(generics),
+                type_namespace,
+                type_name,
+                bind<write_generic_types<generics>,
+                type_namespace,
+                type_name,
+                bind<write_generic_types<generics>);
+        }
     }
 
     static void write_fast_version(writer& w, TypeDef const& type)
