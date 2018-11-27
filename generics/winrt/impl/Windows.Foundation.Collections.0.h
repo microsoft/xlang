@@ -130,14 +130,14 @@ namespace winrt::impl
     {
         struct type : inspectable_abi
         {
-            virtual int32_t WINRT_CALL GetAt(uint32_t, T*) noexcept = 0;
+            virtual int32_t WINRT_CALL GetAt(uint32_t, arg_out<T>) noexcept = 0;
             virtual int32_t WINRT_CALL get_Size(uint32_t*) noexcept = 0;
             virtual int32_t WINRT_CALL GetView(void**) noexcept = 0;
-            virtual int32_t WINRT_CALL IndexOf(T, uint32_t*, bool*) noexcept = 0;
-            virtual int32_t WINRT_CALL SetAt(uint32_t, T) noexcept = 0;
-            virtual int32_t WINRT_CALL InsertAt(uint32_t, T) noexcept = 0;
+            virtual int32_t WINRT_CALL IndexOf(arg_in<T>, uint32_t*, bool*) noexcept = 0;
+            virtual int32_t WINRT_CALL SetAt(uint32_t, arg_in<T>) noexcept = 0;
+            virtual int32_t WINRT_CALL InsertAt(uint32_t, arg_in<T>) noexcept = 0;
             virtual int32_t WINRT_CALL RemoveAt(uint32_t) noexcept = 0;
-            virtual int32_t WINRT_CALL Append(T) noexcept = 0;
+            virtual int32_t WINRT_CALL Append(arg_in<T>) noexcept = 0;
             virtual int32_t WINRT_CALL RemoveAtEnd() noexcept = 0;
             virtual int32_t WINRT_CALL Clear() noexcept = 0;
             virtual int32_t WINRT_CALL GetMany(uint32_t, uint32_t, T*, uint32_t*) noexcept = 0;

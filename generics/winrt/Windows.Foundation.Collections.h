@@ -138,7 +138,7 @@ namespace winrt::impl
     template <typename D, typename T>
     struct produce<D, Windows::Foundation::Collections::IVector<T>> : produce_base<D, Windows::Foundation::Collections::IVector<T>>
     {
-        int32_t WINRT_CALL GetAt(uint32_t index, T* winrt_impl_result) noexcept final
+        int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> winrt_impl_result) noexcept final
         {
             try
             {
@@ -169,7 +169,7 @@ namespace winrt::impl
             }
             catch (...) { return to_hresult(); }
         }
-        int32_t WINRT_CALL IndexOf(T value, uint32_t* index, bool* winrt_impl_result) noexcept final
+        int32_t WINRT_CALL IndexOf(arg_in<T> value, uint32_t* index, bool* winrt_impl_result) noexcept final
         {
             try
             {
@@ -179,7 +179,7 @@ namespace winrt::impl
             }
             catch (...) { return to_hresult(); }
         }
-        int32_t WINRT_CALL SetAt(uint32_t index, T value) noexcept final
+        int32_t WINRT_CALL SetAt(uint32_t index, arg_in<T> value) noexcept final
         {
             try
             {
@@ -189,7 +189,7 @@ namespace winrt::impl
             }
             catch (...) { return to_hresult(); }
         }
-        int32_t WINRT_CALL InsertAt(uint32_t index, T value) noexcept final
+        int32_t WINRT_CALL InsertAt(uint32_t index, arg_in<T> value) noexcept final
         {
             try
             {
@@ -209,7 +209,7 @@ namespace winrt::impl
             }
             catch (...) { return to_hresult(); }
         }
-        int32_t WINRT_CALL Append(T value) noexcept final
+        int32_t WINRT_CALL Append(arg_in<T> value) noexcept final
         {
             try
             {

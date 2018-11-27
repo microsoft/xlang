@@ -399,6 +399,30 @@ namespace xlang
         }
     }
 
+    static void write_abi_arg_in(writer& w, TypeSig const& type)
+    {
+        if (std::holds_alternative<GenericTypeIndex>(type.Type()))
+        {
+            w.write("arg_in<%>", type);
+        }
+        else
+        {
+            w.write(type);
+        }
+    }
+
+    static void write_abi_arg_out(writer& w, TypeSig const& type)
+    {
+        if (std::holds_alternative<GenericTypeIndex>(type.Type()))
+        {
+            w.write("arg_out<%>", type);
+        }
+        else
+        {
+            w.write("%*", type);
+        }
+    }
+
     static void write_abi_params(writer& w, method_signature const& method_signature)
     {
         w.abi_types = true;
@@ -429,11 +453,9 @@ namespace xlang
             }
             else
             {
-                w.write(param_signature->Type());
-
                 if (param.Flags().In())
                 {
-                    XLANG_ASSERT(!param.Flags().Out());
+                    write_abi_arg_in(w, param_signature->Type());
 
                     if (is_const(*param_signature))
                     {
@@ -442,10 +464,7 @@ namespace xlang
                 }
                 else
                 {
-                    XLANG_ASSERT(!param.Flags().In());
-                    XLANG_ASSERT(param.Flags().Out());
-
-                    w.write('*');
+                    write_abi_arg_out(w, param_signature->Type());
                 }
             }
 
@@ -467,7 +486,7 @@ namespace xlang
             }
             else
             {
-                w.write("%*", type);
+                write_abi_arg_out(w, type);
             }
 
             if (w.param_names)
