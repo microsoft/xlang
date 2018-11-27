@@ -6,6 +6,11 @@ namespace xlang
     using namespace text;
     using namespace meta::reader;
 
+    static auto remove_tick(std::string_view const& name)
+    {
+        return name.substr(0, name.rfind('`'));
+    }
+
     template <typename First, typename...Rest>
     auto get_impl_name(First const& first, Rest const&... rest)
     {
@@ -153,9 +158,36 @@ namespace xlang
 
         void write(TypeDef const& type)
         {
+            add_depends(type);
             auto ns = type.TypeNamespace();
             auto name = type.TypeName();
-            add_depends(type);
+            auto generics = type.GenericParam();
+
+            if (!empty(generics))
+            {
+                write("@::%<",
+                    ns,
+                    remove_tick(name));
+
+                bool first{true};
+
+                for (auto&& param : generics)
+                {
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        write(", ");
+                    }
+
+                    write(param.Name());
+                }
+
+                write(">");
+                return;
+            }
 
             // TODO: get rid of all these renames once parity with cppwinrt.exe has been reached...
 

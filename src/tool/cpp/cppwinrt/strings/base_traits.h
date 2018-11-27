@@ -271,11 +271,6 @@ namespace winrt::impl
         template <typename D> using type = consume_IVector<D, T>;
     };
 
-    template <typename T> struct consume<wfc::IObservableVector<T>>
-    {
-        template <typename D> using type = consume_IObservableVector<D, T>;
-    };
-
     template <typename K, typename V> struct consume<wfc::IKeyValuePair<K, V>>
     {
         template <typename D> using type = consume_IKeyValuePair<D, K, V>;

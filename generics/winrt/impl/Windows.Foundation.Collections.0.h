@@ -90,17 +90,17 @@ namespace winrt::impl
         {
         };
     };
-    template <typename D>
-    struct consume_Windows_Foundation_Collections_IObservableVector`1
+    template <typename D, typename T>
+    struct consume_Windows_Foundation_Collections_IObservableVector
     {
         winrt::event_token VectorChanged(Windows::Foundation::Collections::VectorChangedEventHandler<T> const& vhnd) const;
-        using VectorChanged_revoker = impl::event_revoker<Windows::Foundation::Collections::IObservableVector`1, &impl::abi_t<Windows::Foundation::Collections::IObservableVector`1>::remove_VectorChanged>;
+        using VectorChanged_revoker = impl::event_revoker<Windows::Foundation::Collections::IObservableVector<T>, &impl::abi_t<Windows::Foundation::Collections::IObservableVector<T>>::remove_VectorChanged>;
         VectorChanged_revoker VectorChanged(auto_revoke_t, Windows::Foundation::Collections::VectorChangedEventHandler<T> const& vhnd) const;
         void VectorChanged(winrt::event_token const& token) const noexcept;
     };
-    template <> struct consume<Windows::Foundation::Collections::IObservableVector`1>
+    template <typename T> struct consume<Windows::Foundation::Collections::IObservableVector<T>>
     {
-        template <typename D> using type = consume_Windows_Foundation_Collections_IObservableVector`1<D>;
+        template <typename D> using type = consume_Windows_Foundation_Collections_IObservableVector<D, T>;
     };
     template <typename D>
     struct consume_Windows_Foundation_Collections_IPropertySet

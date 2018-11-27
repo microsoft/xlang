@@ -1029,7 +1029,22 @@ namespace xlang
 
     static void write_consume(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <typename D>
+        w.abi_types = false;
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
+        auto type_name = type.TypeName();
+
+        if (!empty(generics))
+        {
+            type_name = remove_tick(type_name);
+        }
+
+        auto type_namespace = type.TypeNamespace();
+        auto impl_name = get_impl_name(type_namespace, type_name);
+
+        if (empty(generics))
+        {
+            auto format = R"(    template <typename D>
     struct consume_%
     {
 %%    };
@@ -1039,19 +1054,40 @@ namespace xlang
     };
 )";
 
-        w.abi_types = false;
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-        auto type_name = type.TypeName();
-        auto type_namespace = type.TypeNamespace();
-        auto impl_name = get_impl_name(type_namespace, type_name);
 
-        w.write(format,
-            impl_name,
-            bind_each<write_consume_declaration>(type.MethodList()),
-            bind<write_consume_extensions>(type),
-            type_namespace,
-            type_name,
-            impl_name);
+            w.write(format,
+                impl_name,
+                bind_each<write_consume_declaration>(type.MethodList()),
+                bind<write_consume_extensions>(type),
+                type_namespace,
+                type_name,
+                impl_name);
+        }
+        else
+        {
+            auto format = R"(    template <typename D, %>
+    struct consume_%
+    {
+%%    };
+    template <%> struct consume<@::%<%>>
+    {
+        template <typename D> using type = consume_%<D, %>;
+    };
+)";
+
+
+            w.write(format,
+                bind<write_generic_typenames>(generics),
+                impl_name,
+                bind_each<write_consume_declaration>(type.MethodList()),
+                bind<write_consume_extensions>(type),
+                bind<write_generic_typenames>(generics),
+                type_namespace,
+                type_name,
+                bind<write_generic_types>(generics),
+                impl_name,
+                bind<write_generic_types>(generics));
+        }
     }
 
     static void write_produce_params(writer& w, method_signature const& signature)

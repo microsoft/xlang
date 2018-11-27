@@ -147,11 +147,6 @@ namespace xlang
         return name;
     }
 
-    static auto remove_tick(std::string_view const& name)
-    {
-        return name.substr(0, name.rfind('`'));
-    }
-
     static bool is_remove_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "remove_");

@@ -229,28 +229,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct consume_IObservableVector
-    {
-        event_token VectorChanged(wfc::VectorChangedEventHandler<T> const& handler) const
-        {
-            event_token cookie{};
-            check_hresult(WINRT_SHIM(wfc::IObservableVector<T>)->add_VectorChanged(get_abi(handler), &cookie));
-            return cookie;
-        }
-
-        void VectorChanged(event_token const cookie) const noexcept
-        {
-            WINRT_SHIM(wfc::IObservableVector<T>)->remove_VectorChanged(cookie);
-        }
-
-        using VectorChanged_revoker = event_revoker<wfc::IObservableVector<T>, &abi_t<wfc::IObservableVector<T>>::remove_VectorChanged>;
-
-        VectorChanged_revoker VectorChanged(auto_revoke_t, wfc::VectorChangedEventHandler<T> const& handler) const
-        {
-            return make_event_revoker<D, VectorChanged_revoker>(this, VectorChanged(handler));
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IKeyValuePair
     {
         K Key() const
