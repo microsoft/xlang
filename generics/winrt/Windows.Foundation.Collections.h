@@ -33,6 +33,64 @@ namespace winrt::impl
     {
         WINRT_VERIFY_(0, WINRT_SHIM(Windows::Foundation::Collections::IObservableVector<T>)->remove_VectorChanged(get_abi(token)));
     }
+    template <typename D, typename T> T consume_Windows_Foundation_Collections_IVector<D, T>::GetAt(uint32_t index) const
+    {
+        T winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->GetAt(index, put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> uint32_t consume_Windows_Foundation_Collections_IVector<D, T>::Size() const
+    {
+        uint32_t winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->get_Size(&winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> Windows::Foundation::Collections::IVectorView<T> consume_Windows_Foundation_Collections_IVector<D, T>::GetView() const
+    {
+        Windows::Foundation::Collections::IVectorView<T> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->GetView(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> bool consume_Windows_Foundation_Collections_IVector<D, T>::IndexOf(T const& value, uint32_t& index) const
+    {
+        bool winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->IndexOf(get_abi(value), &index, &winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IVector<D, T>::SetAt(uint32_t index, T const& value) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->SetAt(index, get_abi(value)));
+    }
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IVector<D, T>::InsertAt(uint32_t index, T const& value) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->InsertAt(index, get_abi(value)));
+    }
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IVector<D, T>::RemoveAt(uint32_t index) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->RemoveAt(index));
+    }
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IVector<D, T>::Append(T const& value) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->Append(get_abi(value)));
+    }
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IVector<D, T>::RemoveAtEnd() const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->RemoveAtEnd());
+    }
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IVector<D, T>::Clear() const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->Clear());
+    }
+    template <typename D, typename T> uint32_t consume_Windows_Foundation_Collections_IVector<D, T>::GetMany(uint32_t startIndex, array_view<T> items) const
+    {
+        uint32_t winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->GetMany(startIndex, items.size(), get_abi(items), &winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> void consume_Windows_Foundation_Collections_IVector<D, T>::ReplaceAll(array_view<T const> items) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->ReplaceAll(items.size(), get_abi(items)));
+    }
     template <typename D, typename K, typename V>
     struct produce<D, Windows::Foundation::Collections::IObservableMap<K, V>> : produce_base<D, Windows::Foundation::Collections::IObservableMap<K, V>>
     {
@@ -77,6 +135,131 @@ namespace winrt::impl
     struct produce<D, Windows::Foundation::Collections::IPropertySet> : produce_base<D, Windows::Foundation::Collections::IPropertySet>
     {
     };
+    template <typename D, typename T>
+    struct produce<D, Windows::Foundation::Collections::IVector<T>> : produce_base<D, Windows::Foundation::Collections::IVector<T>>
+    {
+        int32_t WINRT_CALL GetAt(uint32_t index, T* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<T>(this->shim().GetAt(index));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Size(uint32_t* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<uint32_t>(this->shim().Size());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL GetView(void** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::Collections::IVectorView<T>>(this->shim().GetView());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL IndexOf(T value, uint32_t* index, bool* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<bool>(this->shim().IndexOf(*reinterpret_cast<T const*>(&value), *index));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL SetAt(uint32_t index, T value) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().SetAt(index, *reinterpret_cast<T const*>(&value));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL InsertAt(uint32_t index, T value) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().InsertAt(index, *reinterpret_cast<T const*>(&value));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL RemoveAt(uint32_t index) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().RemoveAt(index);
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL Append(T value) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Append(*reinterpret_cast<T const*>(&value));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL RemoveAtEnd() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().RemoveAtEnd();
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL Clear() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Clear();
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL GetMany(uint32_t startIndex, uint32_t __itemsSize, T* items, uint32_t* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<uint32_t>(this->shim().GetMany(startIndex, array_view<T>(reinterpret_cast<T*>(items), reinterpret_cast<T*>(items) + __itemsSize)));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL ReplaceAll(uint32_t __itemsSize, T* items) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().ReplaceAll(array_view<T const>(reinterpret_cast<T const *>(items), reinterpret_cast<T const *>(items) + __itemsSize));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
 }
 namespace winrt::Windows::Foundation::Collections
 {
@@ -98,6 +281,7 @@ namespace std
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::IPropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IPropertySet> {};
+    template<typename T> struct hash<winrt::Windows::Foundation::Collections::IVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::PropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::PropertySet> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::StringMap> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::StringMap> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::ValueSet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::ValueSet> {};

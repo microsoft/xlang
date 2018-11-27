@@ -2615,7 +2615,6 @@ public:
                 { "typename T", "Windows::Foundation::Collections::IIterator<T>" },
                 { "typename T", "Windows::Foundation::Collections::IIterable<T>" },
                 { "typename T", "Windows::Foundation::Collections::IVectorView<T>" },
-                { "typename T", "Windows::Foundation::Collections::IVector<T>" },
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
                 { "", "Windows::Foundation::Collections::IVectorChangedEventArgs" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },

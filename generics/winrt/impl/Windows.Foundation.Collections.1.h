@@ -29,4 +29,13 @@ namespace winrt::Windows::Foundation::Collections
         IPropertySet(std::nullptr_t = nullptr) noexcept {}
         IPropertySet(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
+    template <typename T>
+    struct WINRT_EBO IVector :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::Collections::IVector<T>>,
+        impl::require<Windows::Foundation::Collections::IVector<T>, Windows::Foundation::Collections::IIterable<T>>
+    {
+        IVector(std::nullptr_t = nullptr) noexcept {}
+        IVector(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
 }

@@ -297,25 +297,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IVector<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Size(uint32_t* size) noexcept = 0;
-            virtual int32_t WINRT_CALL GetView(void** view) noexcept = 0;
-            virtual int32_t WINRT_CALL IndexOf(arg_in<T> value, uint32_t* index, bool* found) noexcept = 0;
-            virtual int32_t WINRT_CALL SetAt(uint32_t index, arg_in<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL InsertAt(uint32_t index, arg_in<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL RemoveAt(uint32_t index) noexcept = 0;
-            virtual int32_t WINRT_CALL Append(arg_in<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL RemoveAtEnd() noexcept = 0;
-            virtual int32_t WINRT_CALL Clear() noexcept = 0;
-            virtual int32_t WINRT_CALL GetMany(uint32_t startIndex, uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept = 0;
-            virtual int32_t WINRT_CALL ReplaceAll(uint32_t count, arg_out<T> value) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi

@@ -2065,25 +2065,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IVector<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Size(uint32_t* size) noexcept = 0;
-            virtual int32_t WINRT_CALL GetView(void** view) noexcept = 0;
-            virtual int32_t WINRT_CALL IndexOf(arg_in<T> value, uint32_t* index, bool* found) noexcept = 0;
-            virtual int32_t WINRT_CALL SetAt(uint32_t index, arg_in<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL InsertAt(uint32_t index, arg_in<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL RemoveAt(uint32_t index) noexcept = 0;
-            virtual int32_t WINRT_CALL Append(arg_in<T> item) noexcept = 0;
-            virtual int32_t WINRT_CALL RemoveAtEnd() noexcept = 0;
-            virtual int32_t WINRT_CALL Clear() noexcept = 0;
-            virtual int32_t WINRT_CALL GetMany(uint32_t startIndex, uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept = 0;
-            virtual int32_t WINRT_CALL ReplaceAll(uint32_t count, arg_out<T> value) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
@@ -5216,79 +5197,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct consume_IVector
-    {
-        T GetAt(uint32_t const index) const
-        {
-            T result{ empty_value<T>() };
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetAt(index, put_abi(result)));
-            return result;
-        }
-
-        uint32_t Size() const
-        {
-            uint32_t size = 0;
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->get_Size(&size));
-            return size;
-        }
-
-        wfc::IVectorView<T> GetView() const
-        {
-            void* result;
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetView(&result));
-            return { result, take_ownership_from_abi };
-        }
-
-        bool IndexOf(param_type<T> const& value, uint32_t& index) const
-        {
-            bool found{};
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->IndexOf(get_abi(value), &index, &found));
-            return found;
-        }
-
-        void SetAt(uint32_t const index, param_type<T> const& value) const
-        {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->SetAt(index, get_abi(value)));
-        }
-
-        void InsertAt(uint32_t const index, param_type<T> const& value) const
-        {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->InsertAt(index, get_abi(value)));
-        }
-
-        void RemoveAt(uint32_t const index) const
-        {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->RemoveAt(index));
-        }
-
-        void Append(param_type<T> const& value) const
-        {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->Append(get_abi(value)));
-        }
-
-        void RemoveAtEnd() const
-        {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->RemoveAtEnd());
-        }
-
-        void Clear() const
-        {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->Clear());
-        }
-
-        uint32_t GetMany(uint32_t startIndex, array_view<T> values) const
-        {
-            uint32_t actual{};
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->GetMany(startIndex, values.size(), get_abi(values), &actual));
-            return actual;
-        }
-
-        void ReplaceAll(array_view<T const> value) const
-        {
-            check_hresult(WINRT_SHIM(wfc::IVector<T>)->ReplaceAll(value.size(), get_abi(value)));
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IKeyValuePair
     {
         K Key() const
@@ -5718,11 +5626,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::IVectorView<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IVector<T>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IVector<T>>::value };
-    };
-
     template <typename K, typename V> struct guid_storage<wfc::IKeyValuePair<K, V>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IKeyValuePair<K, V>>::value };
@@ -5811,11 +5714,6 @@ namespace winrt::impl
     template <typename T> struct consume<wfc::IVectorView<T>>
     {
         template <typename D> using type = consume_IVectorView<D, T>;
-    };
-
-    template <typename T> struct consume<wfc::IVector<T>>
-    {
-        template <typename D> using type = consume_IVector<D, T>;
     };
 
     template <typename K, typename V> struct consume<wfc::IKeyValuePair<K, V>>
@@ -5952,11 +5850,6 @@ namespace winrt::impl
     template <typename T> struct name<wfc::IVectorView<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVectorView`1<", name_v<T>, L">") };
-    };
-
-    template <typename T> struct name<wfc::IVector<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVector`1<", name_v<T>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
@@ -6113,12 +6006,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0xbbe1fa4c, 0xb0e3, 0x4583,{ 0xba, 0xef, 0x1f, 0x1b, 0x2e, 0x48, 0x3e, 0x56 } };
-    };
-
-    template <typename T> struct category<wfc::IVector<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x913337e9, 0x11a1, 0x4345,{ 0xa3, 0xa2, 0x4e, 0x7f, 0x95, 0x6e, 0x22, 0x2d } };
     };
 
     template <typename K, typename V> struct category<wfc::IKeyValuePair<K, V>>
@@ -6789,17 +6676,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<T>, "T must be WinRT type.");
         IVectorView(std::nullptr_t = nullptr) noexcept {}
         IVectorView(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
-    template <typename T>
-    struct WINRT_EBO IVector :
-        IInspectable,
-        impl::consume_t<IVector<T>>,
-        impl::require<IVector<T>, IIterable<T>>
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        IVector(std::nullptr_t = nullptr) noexcept {}
-        IVector(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename K, typename V>
@@ -9199,144 +9075,6 @@ namespace winrt::impl
                 clear_abi(value);
                 typename D::abi_guard guard(this->shim());
                 *actual = this->shim().GetMany(startIndex, array_view<T>(reinterpret_cast<T*>(value), reinterpret_cast<T*>(value) + capacity));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename T> struct produce<D, wfc::IVector<T>> : produce_base<D, wfc::IVector<T>>
-    {
-        int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept final
-        {
-            try
-            {
-                clear_abi(item);
-                typename D::abi_guard guard(this->shim());
-                *item = detach_from<T>(this->shim().GetAt(index));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Size(uint32_t* size) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *size = this->shim().Size();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL GetView(void** view) noexcept final
-        {
-            try
-            {
-                *view = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *view = detach_from<wfc::IVectorView<T>>(this->shim().GetView());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL IndexOf(arg_in<T> value, uint32_t* index, bool* found) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *found = this->shim().IndexOf(*reinterpret_cast<T const*>(&value), *index);
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL SetAt(uint32_t index, arg_in<T> item) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().SetAt(index, *reinterpret_cast<T const*>(&item));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL InsertAt(uint32_t index, arg_in<T> item) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().InsertAt(index, *reinterpret_cast<T const*>(&item));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL RemoveAt(uint32_t index) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().RemoveAt(index);
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL Append(arg_in<T> item) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().Append(*reinterpret_cast<T const*>(&item));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL RemoveAtEnd() noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().RemoveAtEnd();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL Clear() noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().Clear();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL GetMany(uint32_t startIndex, uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *actual = this->shim().GetMany(startIndex, array_view<T>(reinterpret_cast<T*>(value), reinterpret_cast<T*>(value) + capacity));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL ReplaceAll(uint32_t count, arg_out<T> item) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().ReplaceAll(array_view<T const>(reinterpret_cast<T const*>(item), reinterpret_cast<T const*>(item) + count));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }
