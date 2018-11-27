@@ -93,6 +93,6 @@ add_custom_command(
   OUTPUT ${module_pyd} 
   DEPENDS ${setup_py}
   WORKING_DIRECTORY ${generated_files_folder}
-  COMMAND py setup.py build
+  COMMAND py setup.py build_ext --inplace
 )
 add_custom_target(build_python_test DEPENDS ${module_pyd})
