@@ -634,7 +634,17 @@ namespace xlang
 
     static void write_interface_abi(writer& w, TypeDef const& type)
     {
-        auto guard{ w.push_generic_params(type.GenericParam()) };
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) }; // TODO: needed?
+
+        if (empty(generics))
+        {
+            
+        }
+        else
+        {
+
+        }
 
         auto format = R"(    template <> struct abi<@::%>
     {
