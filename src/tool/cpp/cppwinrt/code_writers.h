@@ -84,6 +84,28 @@ namespace xlang
         w.write(format, type.TypeName(), fields.first.Signature().Type(), bind_each<write_enum_field>(fields));
     }
 
+    static void write_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        separator s{w};
+
+        for (auto&& param : params)
+        {
+            s();
+            w.write("typename %", param.Name());
+        }
+    }
+
+    static void write_generic_types(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        separator s{w};
+
+        for (auto&& param : params)
+        {
+            s();
+            w.write(param.Name());
+        }
+    }
+
     static void write_forward(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -94,18 +116,32 @@ namespace xlang
 )";
 
             w.write(format, type_name, type.FieldList().first.Signature().Type());
+            return;
         }
-        else if ((type_name == "DateTime" || type_name == "TimeSpan") && type.TypeNamespace() == "Windows.Foundation")
+
+        if ((type_name == "DateTime" || type_name == "TimeSpan") && type.TypeNamespace() == "Windows.Foundation")
         {
             // Don't forward declare these since they're not structs.
+            return;
         }
-        else
+
+        auto generics = type.GenericParam();
+
+        if (empty(generics))
         {
             auto format = R"(    struct %;
 )";
 
             w.write(format, type_name);
+            return;
         }
+
+        auto format = R"(    template <%> struct %;
+)";
+
+        w.write(format,
+            bind<write_generic_typenames>(generics),
+            remove_tick(type_name));
     }
 
     static void write_enum_flag(writer& w, TypeDef const& type)
@@ -139,28 +175,6 @@ namespace xlang
             get<uint8_t>(get<ElemSig>(args[10].value).value));
     }
 
-    static void write_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
-    {
-        separator s{w};
-
-        for (auto&& param : params)
-        {
-            s();
-            w.write("typename %", param.Name());
-        }
-    }
-
-    static void write_generic_types(writer& w, std::pair<GenericParam, GenericParam> const& params)
-    {
-        separator s{w};
-
-        for (auto&& param : params)
-        {
-            s();
-            w.write(param.Name());
-        }
-    }
-
     static void write_interface_category(writer& w, TypeDef const& type)
     {
         auto generics = type.GenericParam();
@@ -177,8 +191,6 @@ namespace xlang
         }
         else
         {
-            auto guard{ w.push_generic_params(generics) };
-
             auto format = R"(    template <%> struct category<%::%<%>>
     {
         using type = pinterface_category<%>;

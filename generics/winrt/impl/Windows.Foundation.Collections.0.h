@@ -7,8 +7,8 @@ namespace winrt::Windows::Foundation
 }
 namespace winrt::Windows::Foundation::Collections
 {
-    struct IObservableVector`1;
-    struct IPropertySet;
+    template <typename T> struct IObservableVector;
+            struct IPropertySet;
     struct PropertySet;
     struct StringMap;
     struct ValueSet;
