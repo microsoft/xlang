@@ -95,17 +95,6 @@ namespace xlang
         }
     }
 
-    static void write_generic_types(writer& w, std::pair<GenericParam, GenericParam> const& params)
-    {
-        separator s{w};
-
-        for (auto&& param : params)
-        {
-            s();
-            w.write(param.Name());
-        }
-    }
-
     static void write_forward(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -209,8 +198,8 @@ namespace xlang
                 bind<write_generic_typenames>(generics),
                 type.TypeNamespace(),
                 remove_tick(type.TypeName()),
-                bind<write_generic_types>(generics),
-                bind<write_generic_types>(generics),
+                bind_list(", ", generics),
+                bind_list(", ", generics),
                 bind<write_guid_value>(attribute.Value().FixedArgs()));
         }
     }
@@ -262,7 +251,7 @@ namespace xlang
                 bind<write_generic_typenames>(generics),
                 type_namespace,
                 remove_tick(type_name),
-                bind<write_generic_types>(generics),
+                bind_list(", ", generics),
                 type_namespace,
                 type_name,
                 bind<write_generic_names>(generics));
@@ -323,10 +312,10 @@ namespace xlang
                 bind<write_generic_typenames>(generics),
                 type_namespace,
                 type_name,
-                bind<write_generic_types>(generics),
+                bind_list(", ", generics),
                 type_namespace,
                 type_name,
-                bind<write_generic_types>(generics));
+                bind_list(", ", generics));
         }
     }
 
@@ -661,7 +650,7 @@ namespace xlang
                 bind<write_generic_typenames>(generics),
                 type_namespace,
                 remove_tick(type_name),
-                bind<write_generic_types>(generics));
+                bind_list(", ", generics));
         }
 
 
@@ -1084,9 +1073,9 @@ namespace xlang
                 bind<write_generic_typenames>(generics),
                 type_namespace,
                 type_name,
-                bind<write_generic_types>(generics),
+                bind_list(", ", generics),
                 impl_name,
-                bind<write_generic_types>(generics));
+                bind_list(", ", generics));
         }
     }
 

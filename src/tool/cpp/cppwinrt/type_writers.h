@@ -165,27 +165,7 @@ namespace xlang
 
             if (!empty(generics))
             {
-                write("@::%<",
-                    ns,
-                    remove_tick(name));
-
-                bool first{true};
-
-                for (auto&& param : generics)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        write(", ");
-                    }
-
-                    write(param.Name());
-                }
-
-                write(">");
+                write("@::%<%>", ns, remove_tick(name), bind_list(", ", generics));
                 return;
             }
 
@@ -270,6 +250,11 @@ namespace xlang
             {
                 write(find_required(type));
             }
+        }
+
+        void write(GenericParam const& param)
+        {
+            write(param.Name());
         }
 
         void write(coded_index<TypeDefOrRef> const& type)
