@@ -82,7 +82,7 @@ namespace xlang
         w.write_each<write_category>(members.enums, "enum_category");
         w.write_each<write_struct_category>(members.structs);
         w.write_each<write_category>(members.delegates, "delegate_category");
-        w.write_each<write_name>(members.interfaces);
+        w.write_each<write_interface_name>(members.interfaces);
         w.write_each<write_name>(members.classes);
         w.write_each<write_name>(members.enums);
         w.write_each<write_name>(members.structs);

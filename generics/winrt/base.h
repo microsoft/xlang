@@ -6041,11 +6041,6 @@ namespace winrt::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVector`1<", name_v<T>, L">") };
     };
 
-    template <typename T> struct name<wfc::IObservableVector<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableVector`1<", name_v<T>, L">") };
-    };
-
     template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IKeyValuePair`2<", name_v<K>, L", ", name_v<V>, L">") };
@@ -6211,12 +6206,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x913337e9, 0x11a1, 0x4345,{ 0xa3, 0xa2, 0x4e, 0x7f, 0x95, 0x6e, 0x22, 0x2d } };
-    };
-
-    template <typename T> struct category<wfc::IObservableVector<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x5917eb53, 0x50b4, 0x4a0d,{ 0xb3, 0x09, 0x65, 0x86, 0x2b, 0x3f, 0x1d, 0xbc } };
     };
 
     template <typename K, typename V> struct category<wfc::IKeyValuePair<K, V>>

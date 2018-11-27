@@ -191,7 +191,7 @@ namespace xlang
         }
         else
         {
-            auto format = R"(    template <%> struct category<%::%<%>>
+            auto format = R"(    template <%> struct category<@::%<%>>
     {
         using type = pinterface_category<%>;
         static constexpr guid value{ % };
@@ -224,6 +224,49 @@ namespace xlang
 )";
 
         w.write(format, type, category);
+    }
+
+    static void write_generic_names(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        for (auto&& param : params)
+        {
+            w.write(", name_v<%>", param.Name());
+        }
+    }
+
+    static void write_interface_name(writer& w, TypeDef const& type)
+    {
+        auto type_namespace = type.TypeNamespace();
+        auto type_name = type.TypeName();
+        auto generics = type.GenericParam();
+
+        if (empty(generics))
+        {
+            auto format = R"(    template <> struct name<@::%>
+    {
+        static constexpr auto & value{ L"%.%" };
+    };
+)";
+
+            w.write(format, type_namespace, type_name, type_namespace, type_name);
+        }
+        else
+        {
+            auto format = R"(    template <%> struct name<@::%<%>>
+    {
+        static constexpr auto value{ zcombine(L"%.%<"%, L">") };
+    };
+)";
+
+            w.write(format,
+                bind<write_generic_typenames>(generics),
+                type_namespace,
+                remove_tick(type_name),
+                bind<write_generic_types>(generics),
+                type_namespace,
+                type_name,
+                bind<write_generic_names>(generics));
+        }
     }
 
     static void write_name(writer& w, TypeDef const& type)

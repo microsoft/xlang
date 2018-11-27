@@ -8,14 +8,14 @@ namespace winrt::Windows::Foundation
 namespace winrt::Windows::Foundation::Collections
 {
     template <typename T> struct IObservableVector;
-            struct IPropertySet;
+    struct IPropertySet;
     struct PropertySet;
     struct StringMap;
     struct ValueSet;
 }
 namespace winrt::impl
 {
-    template <typename T> struct category<Windows.Foundation.Collections::IObservableVector<T>>
+    template <typename T> struct category<Windows::Foundation::Collections::IObservableVector<T>>
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x5917EB53,0x50B4,0x4A0D,{ 0xB3,0x09,0x65,0x86,0x2B,0x3F,0x1D,0xBC } };
@@ -36,9 +36,9 @@ namespace winrt::impl
     {
         using type = class_category;
     };
-    template <> struct name<Windows::Foundation::Collections::IObservableVector`1>
+    template <typename T> struct name<Windows::Foundation::Collections::IObservableVector<T>>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Collections.IObservableVector`1" };
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableVector`1<", name_v<T>, L">") };
     };
     template <> struct name<Windows::Foundation::Collections::IPropertySet>
     {
