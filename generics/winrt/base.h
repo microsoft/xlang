@@ -9590,32 +9590,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T>
-    struct produce<D, wfc::IObservableVector<T>> : produce_base<D, wfc::IObservableVector<T>>
-    {
-        int32_t WINRT_CALL add_VectorChanged(void* handler, winrt::event_token* token) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *token = this->shim().VectorChanged(*reinterpret_cast<wfc::VectorChangedEventHandler<T> const*>(&handler));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL remove_VectorChanged(winrt::event_token token) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().VectorChanged(token);
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <> struct delegate<Windows::Foundation::AsyncActionCompletedHandler>
     {
         template <typename H>

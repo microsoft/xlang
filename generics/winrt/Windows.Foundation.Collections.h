@@ -19,7 +19,7 @@ namespace winrt::impl
     {
         WINRT_VERIFY_(0, WINRT_SHIM(Windows::Foundation::Collections::IObservableVector<T>)->remove_VectorChanged(get_abi(token)));
     }
-    template <typename D>
+    template <typename D, typename T>
     struct produce<D, Windows::Foundation::Collections::IObservableVector<T>> : produce_base<D, Windows::Foundation::Collections::IObservableVector<T>>
     {
         int32_t WINRT_CALL add_VectorChanged(void* vhnd, winrt::event_token* winrt_impl_result) noexcept final

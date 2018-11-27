@@ -1407,15 +1407,17 @@ namespace xlang
 
     static void write_produce(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <typename D>
+        auto format = R"(    template <typename D%>
     struct produce<D, %> : produce_base<D, %>
     {
 %    };
 )";
 
-        auto guard{ w.push_generic_params(type.GenericParam()) };
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
 
         w.write(format,
+            bind<write_comma_generic_typenames>(generics),
             type,
             type,
             bind_each<write_produce_method>(type.MethodList()));
