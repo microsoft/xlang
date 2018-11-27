@@ -438,18 +438,18 @@ namespace xlang
 
                 if (param.Flags().In())
                 {
-                    format = "uint32_t%, %*";
+                    format = "uint32_t%, %";
                 }
                 else if (param_signature->ByRef())
                 {
-                    format = "uint32_t*%, %**";
+                    format = "uint32_t*%, %*";
                 }
                 else
                 {
-                    format = "uint32_t%, %*";
+                    format = "uint32_t%, %";
                 }
 
-                w.write(format, bind<write_array_size_name>(param), param_signature->Type());
+                w.write(format, bind<write_array_size_name>(param), bind<write_abi_arg_out>(param_signature->Type()));
             }
             else
             {

@@ -239,7 +239,7 @@ namespace winrt::impl
             }
             catch (...) { return to_hresult(); }
         }
-        int32_t WINRT_CALL GetMany(uint32_t startIndex, uint32_t __itemsSize, T* items, uint32_t* winrt_impl_result) noexcept final
+        int32_t WINRT_CALL GetMany(uint32_t startIndex, uint32_t __itemsSize, arg_out<T> items, uint32_t* winrt_impl_result) noexcept final
         {
             try
             {
@@ -249,7 +249,7 @@ namespace winrt::impl
             }
             catch (...) { return to_hresult(); }
         }
-        int32_t WINRT_CALL ReplaceAll(uint32_t __itemsSize, T* items) noexcept final
+        int32_t WINRT_CALL ReplaceAll(uint32_t __itemsSize, arg_out<T> items) noexcept final
         {
             try
             {

@@ -140,8 +140,8 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL Append(arg_in<T>) noexcept = 0;
             virtual int32_t WINRT_CALL RemoveAtEnd() noexcept = 0;
             virtual int32_t WINRT_CALL Clear() noexcept = 0;
-            virtual int32_t WINRT_CALL GetMany(uint32_t, uint32_t, T*, uint32_t*) noexcept = 0;
-            virtual int32_t WINRT_CALL ReplaceAll(uint32_t, T*) noexcept = 0;
+            virtual int32_t WINRT_CALL GetMany(uint32_t, uint32_t, arg_out<T>, uint32_t*) noexcept = 0;
+            virtual int32_t WINRT_CALL ReplaceAll(uint32_t, arg_out<T>) noexcept = 0;
         };
     };
     template <typename D, typename K, typename V>
