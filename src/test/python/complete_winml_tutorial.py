@@ -43,7 +43,7 @@ async def wrap_async_op(op):
         else:
             loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("Unexpected AsyncStatus"))
 
-    op.put_Completed(callback)
+    op.Completed = callback
 
     return await future
 
@@ -85,7 +85,7 @@ def bind_model(model, image_frame):
 @timed_op
 def evaluate_model(session, binding):
     results = session.Evaluate(binding, "RunId")
-    o = results.get_Outputs().Lookup("softmaxout_1")
+    o = results.Outputs.Lookup("softmaxout_1")
     result_tensor = winml.TensorFloat._from(o)
     return result_tensor.GetAsVectorView()
 
@@ -103,7 +103,7 @@ def print_results(results, labels):
     topProbabilities = [0.0 for x in range(3)]
     topProbabilityLabelIndexes = [0 for x in range(3)]
 
-    for i in range(results.get_Size()):
+    for i in range(results.Size):
         for j in range(3):
             result = results.GetAt(i)
             if result > topProbabilities[j]:

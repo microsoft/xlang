@@ -521,6 +521,12 @@ static void @_dealloc(%* self)
         method_signature signature{ info.method };
         auto guard{ w.push_generic_params(info.type_arguments) };
 
+        if (signature.return_signature().Type().is_szarray())
+        {
+            w.write("// returning a ReceiveArray not impl\nreturn nullptr;\n");
+            return;
+        }
+
         for (auto&& param : signature.params())
         {
             write_method_param_definition(w, info.method, param);
