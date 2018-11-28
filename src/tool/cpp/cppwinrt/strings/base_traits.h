@@ -67,21 +67,6 @@ namespace winrt::impl
         static constexpr auto & data{ "cinterface(IInspectable)" };
     };
 
-    template <> struct name<IAgileObject>
-    {
-        static constexpr auto & value{ L"IAgileObject" };
-    };
-
-    template <> struct name<IWeakReferenceSource>
-    {
-        static constexpr auto & value{ L"IWeakReferenceSource" };
-    };
-
-    template <> struct category<Windows::Foundation::IUnknown>
-    {
-        using type = interface_category;
-    };
-
     template <> struct category<Windows::Foundation::IInspectable>
     {
         using type = basic_category;
