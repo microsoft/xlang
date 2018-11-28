@@ -105,14 +105,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL Buffer(uint8_t** value) noexcept = 0;
     };
 
-    template <> struct abi<Windows::Foundation::IActivationFactory>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<Windows::Foundation::IReference<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi

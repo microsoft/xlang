@@ -11,11 +11,6 @@ namespace winrt::impl
         static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
     };
 
-    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
-    {
-        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
     template <> struct guid_storage<IAgileObject>
     {
         static constexpr guid value{ 0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 } };
@@ -76,11 +71,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<Windows::Foundation::IReferenceArray<T>>::value };
     };
 
-    template <> struct consume<Windows::Foundation::IActivationFactory>
-    {
-        template <typename D> using type = consume_IActivationFactory<D>;
-    };
-
     template <typename T> struct consume<Windows::Foundation::IReference<T>>
     {
         template <typename D> using type = consume_IReference<D, T>;
@@ -95,11 +85,6 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Object" };
         static constexpr auto & data{ "cinterface(IInspectable)" };
-    };
-
-    template <> struct name<Windows::Foundation::IActivationFactory>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.IActivationFactory" };
     };
 
     template <> struct name<IAgileObject>
@@ -132,11 +117,6 @@ namespace winrt::impl
     template <> struct category<Windows::Foundation::IInspectable>
     {
         using type = basic_category;
-    };
-
-    template <> struct category<Windows::Foundation::IActivationFactory>
-    {
-        using type = interface_category;
     };
 
     template <typename T> struct category<Windows::Foundation::IReference<T>>

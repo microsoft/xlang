@@ -1,4 +1,51 @@
 
+namespace winrt::impl
+{
+    template <> struct abi<Windows::Foundation::IActivationFactory>
+    {
+        struct WINRT_NOVTABLE type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
+        };
+    };
+
+    template <typename D> struct consume_IActivationFactory
+    {
+        template <typename T>
+        T ActivateInstance() const
+        {
+            Windows::Foundation::IInspectable instance;
+            check_hresult(WINRT_SHIM(Windows::Foundation::IActivationFactory)->ActivateInstance(put_abi(instance)));
+            return instance.try_as<T>();
+        }
+    };
+
+    template <> struct consume<Windows::Foundation::IActivationFactory>
+    {
+        template <typename D> using type = consume_IActivationFactory<D>;
+    };
+
+    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
+    {
+        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
+        {
+            try
+            {
+                *instance = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *instance = detach_abi(this->shim().ActivateInstance());
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+
+    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
+    {
+        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
+}
+
 WINRT_EXPORT namespace winrt
 {
     template <typename Interface = Windows::Foundation::IActivationFactory>

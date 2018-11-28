@@ -24,7 +24,6 @@
 #include "base_marshaler.h"
 #include "base_delegate.h"
 #include "base_types.h"
-#include "base_shims.h"
 #include "base_activation.h"
 #include "base_implements.h"
 #include "base_produce.h"
