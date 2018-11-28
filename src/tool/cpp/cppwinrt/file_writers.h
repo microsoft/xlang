@@ -35,7 +35,6 @@ namespace xlang
         w.write(strings::base_foundation);
         w.write(strings::base_chrono);
         w.write(strings::base_security);
-        w.write(strings::base_await);
         w.write(strings::base_std_hash);
         w.write(strings::base_std_fire_and_forget);
         w.write(strings::base_reflect);

@@ -2830,6 +2830,7 @@ public:
             }
 
             w.write(strings::base_activation);
+            w.write(strings::base_await);
             w.write(strings::base_std_async_action);
             w.write(strings::base_std_async_action_with_progress);
             w.write(strings::base_std_async_operation);
