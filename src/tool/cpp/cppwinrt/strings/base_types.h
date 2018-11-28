@@ -328,22 +328,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
-    template <typename T>
-    struct WINRT_EBO IIterator :
-        IInspectable,
-        impl::consume_t<IIterator<T>>
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        IIterator(std::nullptr_t = nullptr) noexcept {}
-        IIterator(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-
-        using iterator_category = std::input_iterator_tag;
-        using value_type = T;
-        using difference_type = ptrdiff_t;
-        using pointer = T * ;
-        using reference = T & ;
-    };
-
     template <typename K, typename V>
     struct WINRT_EBO IKeyValuePair :
         IInspectable,

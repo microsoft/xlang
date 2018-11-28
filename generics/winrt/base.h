@@ -2017,17 +2017,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IIterator<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Current(arg_out<T> current) noexcept = 0;
-            virtual int32_t WINRT_CALL get_HasCurrent(bool* hasCurrent) noexcept = 0;
-            virtual int32_t WINRT_CALL MoveNext(bool* hasCurrent) noexcept = 0;
-            virtual int32_t WINRT_CALL GetMany(uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
@@ -5039,52 +5028,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct consume_IIterator
-    {
-        T Current() const
-        {
-            T result{ empty_value<T>() };
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_Current(put_abi(result)));
-            return result;
-        }
-
-        bool HasCurrent() const
-        {
-            bool result{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_HasCurrent(&result));
-            return result;
-        }
-
-        bool MoveNext() const
-        {
-            bool result{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->MoveNext(&result));
-            return result;
-        }
-
-        uint32_t GetMany(array_view<T> values) const
-        {
-            uint32_t actual{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->GetMany(values.size(), get_abi(values), &actual));
-            return actual;
-        }
-
-        auto& operator++()
-        {
-            if (!MoveNext())
-            {
-                static_cast<D&>(*this) = nullptr;
-            }
-
-            return *this;
-        }
-
-        T operator*() const
-        {
-            return Current();
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IKeyValuePair
     {
         K Key() const
@@ -5489,11 +5432,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IIterator<T>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IIterator<T>>::value };
-    };
-
     template <typename K, typename V> struct guid_storage<wfc::IKeyValuePair<K, V>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IKeyValuePair<K, V>>::value };
@@ -5557,11 +5495,6 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
     {
         template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
-    template <typename T> struct consume<wfc::IIterator<T>>
-    {
-        template <typename D> using type = consume_IIterator<D, T>;
     };
 
     template <typename K, typename V> struct consume<wfc::IKeyValuePair<K, V>>
@@ -5673,11 +5606,6 @@ namespace winrt::impl
     template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename T> struct name<wfc::IIterator<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterator`1<", name_v<T>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
@@ -5805,12 +5733,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename T> struct category<wfc::IIterator<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x6a79e863, 0x4300, 0x459a,{ 0x99, 0x66, 0xcb, 0xb6, 0x60, 0x96, 0x3e, 0xe1 } };
     };
 
     template <typename K, typename V> struct category<wfc::IKeyValuePair<K, V>>
@@ -6436,22 +6358,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
-    template <typename T>
-    struct WINRT_EBO IIterator :
-        IInspectable,
-        impl::consume_t<IIterator<T>>
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        IIterator(std::nullptr_t = nullptr) noexcept {}
-        IIterator(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-
-        using iterator_category = std::input_iterator_tag;
-        using value_type = T;
-        using difference_type = ptrdiff_t;
-        using pointer = T * ;
-        using reference = T & ;
-    };
-
     template <typename K, typename V>
     struct WINRT_EBO IKeyValuePair :
         IInspectable,
@@ -8675,55 +8581,6 @@ namespace winrt::impl
                 clear_abi(results);
                 typename D::abi_guard guard(this->shim());
                 *results = detach_from<TResult>(this->shim().GetResults());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename T> struct produce<D, wfc::IIterator<T>> : produce_base<D, wfc::IIterator<T>>
-    {
-        int32_t WINRT_CALL get_Current(arg_out<T> current) noexcept final
-        {
-            try
-            {
-                clear_abi(current);
-                typename D::abi_guard guard(this->shim());
-                *current = detach_from<T>(this->shim().Current());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_HasCurrent(bool* hasCurrent) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *hasCurrent = this->shim().HasCurrent();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL MoveNext(bool* hasCurrent) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *hasCurrent = this->shim().MoveNext();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL GetMany(uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *actual = this->shim().GetMany(array_view<T>(reinterpret_cast<T*>(value), reinterpret_cast<T*>(value) + capacity));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

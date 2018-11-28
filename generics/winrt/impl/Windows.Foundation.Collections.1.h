@@ -11,6 +11,20 @@ namespace winrt::Windows::Foundation::Collections
         IIterable(std::nullptr_t = nullptr) noexcept {}
         IIterable(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
+    template <typename T>
+    struct WINRT_EBO IIterator :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::Collections::IIterator<T>>
+    {
+        IIterator(std::nullptr_t = nullptr) noexcept {}
+        IIterator(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    
+        using iterator_category = std::input_iterator_tag;
+        using value_type = T;
+        using difference_type = ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
+};
     template <typename K>
     struct WINRT_EBO IMapChangedEventArgs :
         Windows::Foundation::IInspectable,

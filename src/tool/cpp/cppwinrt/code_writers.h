@@ -1048,16 +1048,54 @@ namespace xlang
             return Current();
         }
 )");
+            return;
         }
-        else if (type.TypeName() == "IBuffer" && type.TypeNamespace() == "Windows.Storage.Streams")
+
+        if (type.TypeName() == "IBuffer" && type.TypeNamespace() == "Windows.Storage.Streams")
         {
             w.write(R"(
-    auto data() const
-    {
-        uint8_t* data{};
-        static_cast<D const&>(*this).template as<IBufferByteAccess>()->Buffer(&data);
-        return data;
+        auto data() const
+        {
+            uint8_t* data{};
+            static_cast<D const&>(*this).template as<IBufferByteAccess>()->Buffer(&data);
+            return data;
+        }
+)");
+            return;
+        }
+
+        if (type.TypeName() == "IIterator`1" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            w.write(R"(
+        auto& operator++()
+        {
+            if (!MoveNext())
+            {
+                static_cast<D&>(*this) = nullptr;
+            }
+
+            return *this;
+        }
+
+        T operator*() const
+        {
+            return Current();
+        }
+)");
+            return;
+        }
     }
+
+    static void write_interface_extensions(writer& w, TypeDef const& type)
+    {
+        if (type.TypeName() == "IIterator`1" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            w.write(R"(
+        using iterator_category = std::input_iterator_tag;
+        using value_type = T;
+        using difference_type = ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
 )");
         }
     }
@@ -1833,7 +1871,7 @@ public:
     {
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    %};
+    %%    };
 )";
 
             w.write(format,
@@ -1842,7 +1880,8 @@ public:
                 bind<write_interface_requires>(type),
                 type_name,
                 type_name,
-                bind<write_interface_usings>(type));
+                bind<write_interface_usings>(type),
+                bind<write_interface_extensions>(type));
         }
         else
         {
@@ -1855,7 +1894,7 @@ public:
     {
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    %};
+    %%    };
 )";
 
             w.write(format,
@@ -1865,7 +1904,8 @@ public:
                 bind<write_interface_requires>(type),
                 type_name,
                 type_name,
-                bind<write_interface_usings>(type));
+                bind<write_interface_usings>(type),
+                bind<write_interface_extensions>(type));
         }
     }
 
@@ -2631,7 +2671,6 @@ public:
         {
             static constexpr std::pair<std::string_view, std::string_view> pairs[]
             {
-                { "typename T", "Windows::Foundation::Collections::IIterator<T>" },
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IMapView<K, V>" },

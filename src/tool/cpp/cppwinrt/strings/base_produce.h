@@ -352,55 +352,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, wfc::IIterator<T>> : produce_base<D, wfc::IIterator<T>>
-    {
-        int32_t WINRT_CALL get_Current(arg_out<T> current) noexcept final
-        {
-            try
-            {
-                clear_abi(current);
-                typename D::abi_guard guard(this->shim());
-                *current = detach_from<T>(this->shim().Current());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_HasCurrent(bool* hasCurrent) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *hasCurrent = this->shim().HasCurrent();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL MoveNext(bool* hasCurrent) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *hasCurrent = this->shim().MoveNext();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL GetMany(uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *actual = this->shim().GetMany(array_view<T>(reinterpret_cast<T*>(value), reinterpret_cast<T*>(value) + capacity));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <typename D, typename K, typename V> struct produce<D, wfc::IKeyValuePair<K, V>> : produce_base<D, wfc::IKeyValuePair<K, V>>
     {
         int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept final

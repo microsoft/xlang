@@ -25,7 +25,6 @@ namespace winrt::Windows::Foundation::Collections
 }
 namespace std
 {
-    template<typename T> struct hash<winrt::Windows::Foundation::Collections::IIterator<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IIterator<T>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::VectorChangedEventHandler<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::VectorChangedEventHandler<T>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IKeyValuePair<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IKeyValuePair<K, V>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IMapView<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IMapView<K, V>> {};

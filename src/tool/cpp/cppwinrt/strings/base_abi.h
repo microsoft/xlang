@@ -249,17 +249,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IIterator<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Current(arg_out<T> current) noexcept = 0;
-            virtual int32_t WINRT_CALL get_HasCurrent(bool* hasCurrent) noexcept = 0;
-            virtual int32_t WINRT_CALL MoveNext(bool* hasCurrent) noexcept = 0;
-            virtual int32_t WINRT_CALL GetMany(uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi

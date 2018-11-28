@@ -11,6 +11,30 @@ namespace winrt::impl
         check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IIterable<T>)->First(put_abi(winrt_impl_result)));
         return winrt_impl_result;
     }
+    template <typename D, typename T> T consume_Windows_Foundation_Collections_IIterator<D, T>::Current() const
+    {
+        T winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IIterator<T>)->get_Current(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> bool consume_Windows_Foundation_Collections_IIterator<D, T>::HasCurrent() const
+    {
+        bool winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IIterator<T>)->get_HasCurrent(&winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> bool consume_Windows_Foundation_Collections_IIterator<D, T>::MoveNext() const
+    {
+        bool winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IIterator<T>)->MoveNext(&winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> uint32_t consume_Windows_Foundation_Collections_IIterator<D, T>::GetMany(array_view<T> items) const
+    {
+        uint32_t winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IIterator<T>)->GetMany(items.size(), get_abi(items), &winrt_impl_result));
+        return winrt_impl_result;
+    }
     template <typename D, typename K> Windows::Foundation::Collections::CollectionChange consume_Windows_Foundation_Collections_IMapChangedEventArgs<D, K>::CollectionChange() const
     {
         Windows::Foundation::Collections::CollectionChange winrt_impl_result;
@@ -155,6 +179,50 @@ namespace winrt::impl
                 *winrt_impl_result = nullptr;
                 typename D::abi_guard guard(this->shim());
                 *winrt_impl_result = detach_from<Windows::Foundation::Collections::IIterator<T>>(this->shim().First());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D, typename T>
+    struct produce<D, Windows::Foundation::Collections::IIterator<T>> : produce_base<D, Windows::Foundation::Collections::IIterator<T>>
+    {
+        int32_t WINRT_CALL get_Current(arg_out<T> winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<T>(this->shim().Current());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_HasCurrent(bool* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<bool>(this->shim().HasCurrent());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL MoveNext(bool* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<bool>(this->shim().MoveNext());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL GetMany(uint32_t __itemsSize, arg_out<T> items, uint32_t* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<uint32_t>(this->shim().GetMany(array_view<T>(reinterpret_cast<T*>(items), reinterpret_cast<T*>(items) + __itemsSize)));
                 return 0;
             }
             catch (...) { return to_hresult(); }
@@ -440,6 +508,7 @@ namespace winrt::Windows::Foundation::Collections
 namespace std
 {
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IIterable<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IIterable<T>> {};
+    template<typename T> struct hash<winrt::Windows::Foundation::Collections::IIterator<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IIterator<T>> {};
     template<typename K> struct hash<winrt::Windows::Foundation::Collections::IMapChangedEventArgs<K>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IMapChangedEventArgs<K>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};

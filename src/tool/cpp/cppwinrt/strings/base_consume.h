@@ -35,52 +35,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct consume_IIterator
-    {
-        T Current() const
-        {
-            T result{ empty_value<T>() };
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_Current(put_abi(result)));
-            return result;
-        }
-
-        bool HasCurrent() const
-        {
-            bool result{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->get_HasCurrent(&result));
-            return result;
-        }
-
-        bool MoveNext() const
-        {
-            bool result{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->MoveNext(&result));
-            return result;
-        }
-
-        uint32_t GetMany(array_view<T> values) const
-        {
-            uint32_t actual{};
-            check_hresult(WINRT_SHIM(wfc::IIterator<T>)->GetMany(values.size(), get_abi(values), &actual));
-            return actual;
-        }
-
-        auto& operator++()
-        {
-            if (!MoveNext())
-            {
-                static_cast<D&>(*this) = nullptr;
-            }
-
-            return *this;
-        }
-
-        T operator*() const
-        {
-            return Current();
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IKeyValuePair
     {
         K Key() const
