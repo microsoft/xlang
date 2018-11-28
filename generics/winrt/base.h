@@ -1873,14 +1873,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL Buffer(uint8_t** value) noexcept = 0;
     };
 
-    template <> struct abi<Windows::Foundation::IActivationFactory>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<Windows::Foundation::IReference<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
@@ -4827,17 +4819,6 @@ namespace winrt::impl
     template <typename Async>
     void blocking_suspend(Async const& async);
 
-    template <typename D> struct consume_IActivationFactory
-    {
-        template <typename T>
-        T ActivateInstance() const
-        {
-            Windows::Foundation::IInspectable instance;
-            check_hresult(WINRT_SHIM(Windows::Foundation::IActivationFactory)->ActivateInstance(put_abi(instance)));
-            return instance.try_as<T>();
-        }
-    };
-
     template <typename D, typename T> struct consume_IReference
     {
         T Value() const
@@ -4869,11 +4850,6 @@ namespace winrt::impl
     template <> struct guid_storage<Windows::Foundation::IInspectable>
     {
         static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
-    };
-
-    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
-    {
-        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
     template <> struct guid_storage<IAgileObject>
@@ -4936,11 +4912,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<Windows::Foundation::IReferenceArray<T>>::value };
     };
 
-    template <> struct consume<Windows::Foundation::IActivationFactory>
-    {
-        template <typename D> using type = consume_IActivationFactory<D>;
-    };
-
     template <typename T> struct consume<Windows::Foundation::IReference<T>>
     {
         template <typename D> using type = consume_IReference<D, T>;
@@ -4955,11 +4926,6 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Object" };
         static constexpr auto & data{ "cinterface(IInspectable)" };
-    };
-
-    template <> struct name<Windows::Foundation::IActivationFactory>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.IActivationFactory" };
     };
 
     template <> struct name<IAgileObject>
@@ -4992,11 +4958,6 @@ namespace winrt::impl
     template <> struct category<Windows::Foundation::IInspectable>
     {
         using type = basic_category;
-    };
-
-    template <> struct category<Windows::Foundation::IActivationFactory>
-    {
-        using type = interface_category;
     };
 
     template <typename T> struct category<Windows::Foundation::IReference<T>>
@@ -5274,8 +5235,6 @@ WINRT_EXPORT namespace winrt
         }
     };
 }
-
-
 
 namespace winrt::impl
 {
@@ -6584,21 +6543,6 @@ namespace winrt::impl
     {
         return detach_abi(std::forward<T>(object));
     }
-
-    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
-    {
-        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
-        {
-            try
-            {
-                *instance = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *instance = detach_abi(this->shim().ActivateInstance());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
 }
 
 namespace winrt::impl
