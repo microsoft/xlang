@@ -33,6 +33,13 @@ namespace winrt::Windows::Foundation
         Deferral(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IDeferral(ptr, take_ownership_from_abi) {}
         Deferral(Windows::Foundation::DeferralCompletedHandler const& handler);
     };
+    struct GuidHelper
+    {
+        GuidHelper() = delete;
+        static winrt::guid CreateNewGuid();
+        static winrt::guid Empty();
+        static bool Equals(winrt::guid const& target, winrt::guid const& value);
+    };
     struct WINRT_EBO MemoryBuffer : Windows::Foundation::IMemoryBuffer
     {
         MemoryBuffer(std::nullptr_t) noexcept {}
