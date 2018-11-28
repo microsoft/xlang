@@ -233,6 +233,8 @@ return [callable](%)
                 {
                     writer::indent_guard ggg{ w };
 
+                    w.write("winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };\n\n");
+
                     std::vector<std::string> tuple_params{};
                     for (auto&& p : signature.params())
                     {
@@ -251,8 +253,6 @@ return [callable](%)
                     {
                         w.write("PyObject* args = nullptr;\n");
                     }
-
-                    w.write("\nwinrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };");
 
                     if (signature.return_signature())
                     {
