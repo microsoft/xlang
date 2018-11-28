@@ -328,18 +328,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
-    template <typename K, typename V>
-    struct WINRT_EBO IMap :
-        IInspectable,
-        impl::consume_t<IMap<K, V>>,
-        impl::require<IMap<K, V>, IIterable<IKeyValuePair<K, V>>>
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        IMap(std::nullptr_t = nullptr) noexcept {}
-        IMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
     template <typename T>
     struct WINRT_EBO VectorChangedEventHandler : IUnknown
     {

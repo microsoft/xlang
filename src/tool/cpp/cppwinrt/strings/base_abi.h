@@ -249,20 +249,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IMap<K, V>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Size(uint32_t* size) noexcept = 0;
-            virtual int32_t WINRT_CALL HasKey(arg_in<K> key, bool* found) noexcept = 0;
-            virtual int32_t WINRT_CALL GetView(void** view) noexcept = 0;
-            virtual int32_t WINRT_CALL Insert(arg_in<K> key, arg_in<V> value, bool* replaced) noexcept = 0;
-            virtual int32_t WINRT_CALL Remove(arg_in<K> key) noexcept = 0;
-            virtual int32_t WINRT_CALL Clear() noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi

@@ -2017,20 +2017,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IMap<K, V>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Size(uint32_t* size) noexcept = 0;
-            virtual int32_t WINRT_CALL HasKey(arg_in<K> key, bool* found) noexcept = 0;
-            virtual int32_t WINRT_CALL GetView(void** view) noexcept = 0;
-            virtual int32_t WINRT_CALL Insert(arg_in<K> key, arg_in<V> value, bool* replaced) noexcept = 0;
-            virtual int32_t WINRT_CALL Remove(arg_in<K> key) noexcept = 0;
-            virtual int32_t WINRT_CALL Clear() noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi
@@ -5008,69 +4994,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IMap
-    {
-        V Lookup(param_type<K> const& key) const
-        {
-            V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(result)));
-            return result;
-        }
-
-        auto TryLookup(param_type<K> const& key) const noexcept
-        {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
-            {
-                V result{ nullptr };
-                WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
-                return result;
-            }
-            else
-            {
-                std::optional<V> result;
-                V value{ empty_value<V>() };
-
-                if (error_ok == WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
-                {
-                    result = std::move(value);
-                }
-
-                return result;
-            }
-        }
-
-        uint32_t Size() const
-        {
-            uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->get_Size(&size));
-            return size;
-        }
-
-        bool HasKey(param_type<K> const& key) const
-        {
-            bool found{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->HasKey(get_abi(key), &found));
-            return found;
-        }
-
-        bool Insert(param_type<K> const& key, param_type<V> const& value) const
-        {
-            bool replaced{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Insert(get_abi(key), get_abi(value), &replaced));
-            return replaced;
-        }
-
-        void Remove(param_type<K> const& key) const
-        {
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Remove(get_abi(key)));
-        }
-
-        void Clear() const
-        {
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Clear());
-        }
-    };
-
     template <typename D> struct consume_IAsyncInfo
     {
         uint32_t Id() const
@@ -5327,11 +5250,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IMap<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IMap<K, V>>::value };
-    };
-
     template <typename T> struct guid_storage<Windows::Foundation::EventHandler<T>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
@@ -5380,11 +5298,6 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
     {
         template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
-    template <typename K, typename V> struct consume<wfc::IMap<K, V>>
-    {
-        template <typename D> using type = consume_IMap<D, K, V>;
     };
 
     template <> struct name<Windows::Foundation::AsyncActionCompletedHandler>
@@ -5481,11 +5394,6 @@ namespace winrt::impl
     template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::IMap<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMap`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename T> struct name<Windows::Foundation::EventHandler<T>>
@@ -5598,12 +5506,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::IMap<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0x3c2925fe, 0x8519, 0x45c1,{ 0xaa, 0x79, 0x19, 0x7b, 0x67, 0x18, 0xc1, 0xc1 } };
     };
 
     template <typename T> struct category<Windows::Foundation::EventHandler<T>>
@@ -6211,18 +6113,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
-    template <typename K, typename V>
-    struct WINRT_EBO IMap :
-        IInspectable,
-        impl::consume_t<IMap<K, V>>,
-        impl::require<IMap<K, V>, IIterable<IKeyValuePair<K, V>>>
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        IMap(std::nullptr_t = nullptr) noexcept {}
-        IMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
     template <typename T>
     struct WINRT_EBO VectorChangedEventHandler : IUnknown
     {
@@ -8411,88 +8301,6 @@ namespace winrt::impl
                 clear_abi(results);
                 typename D::abi_guard guard(this->shim());
                 *results = detach_from<TResult>(this->shim().GetResults());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename K, typename V> struct produce<D, wfc::IMap<K, V>> : produce_base<D, wfc::IMap<K, V>>
-    {
-        int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *value = detach_from<V>(this->shim().Lookup(*reinterpret_cast<K const*>(&key)));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Size(uint32_t* size) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *size = this->shim().Size();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL HasKey(arg_in<K> key, bool* found) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *found = this->shim().HasKey(*reinterpret_cast<K const*>(&key));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL GetView(void** view) noexcept final
-        {
-            try
-            {
-                *view = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *view = detach_from<wfc::IMapView<K, V>>(this->shim().GetView());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL Insert(arg_in<K> key, arg_in<V> value, bool* replaced) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *replaced = this->shim().Insert(*reinterpret_cast<K const*>(&key), *reinterpret_cast<V const*>(&value));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL Remove(arg_in<K> key) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().Remove(*reinterpret_cast<K const*>(&key));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL Clear() noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                this->shim().Clear();
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

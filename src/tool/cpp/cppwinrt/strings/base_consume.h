@@ -35,69 +35,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IMap
-    {
-        V Lookup(param_type<K> const& key) const
-        {
-            V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(result)));
-            return result;
-        }
-
-        auto TryLookup(param_type<K> const& key) const noexcept
-        {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
-            {
-                V result{ nullptr };
-                WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
-                return result;
-            }
-            else
-            {
-                std::optional<V> result;
-                V value{ empty_value<V>() };
-
-                if (error_ok == WINRT_SHIM(wfc::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
-                {
-                    result = std::move(value);
-                }
-
-                return result;
-            }
-        }
-
-        uint32_t Size() const
-        {
-            uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->get_Size(&size));
-            return size;
-        }
-
-        bool HasKey(param_type<K> const& key) const
-        {
-            bool found{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->HasKey(get_abi(key), &found));
-            return found;
-        }
-
-        bool Insert(param_type<K> const& key, param_type<V> const& value) const
-        {
-            bool replaced{};
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Insert(get_abi(key), get_abi(value), &replaced));
-            return replaced;
-        }
-
-        void Remove(param_type<K> const& key) const
-        {
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Remove(get_abi(key)));
-        }
-
-        void Clear() const
-        {
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->Clear());
-        }
-    };
-
     template <typename D> struct consume_IAsyncInfo
     {
         uint32_t Id() const

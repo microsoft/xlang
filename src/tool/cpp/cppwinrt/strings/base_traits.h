@@ -141,11 +141,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IMap<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IMap<K, V>>::value };
-    };
-
     template <typename T> struct guid_storage<Windows::Foundation::EventHandler<T>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
@@ -194,11 +189,6 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
     {
         template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
-    template <typename K, typename V> struct consume<wfc::IMap<K, V>>
-    {
-        template <typename D> using type = consume_IMap<D, K, V>;
     };
 
     template <> struct name<Windows::Foundation::AsyncActionCompletedHandler>
@@ -295,11 +285,6 @@ namespace winrt::impl
     template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::IMap<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMap`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename T> struct name<Windows::Foundation::EventHandler<T>>
@@ -412,12 +397,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::IMap<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0x3c2925fe, 0x8519, 0x45c1,{ 0xaa, 0x79, 0x19, 0x7b, 0x67, 0x18, 0xc1, 0xc1 } };
     };
 
     template <typename T> struct category<Windows::Foundation::EventHandler<T>>

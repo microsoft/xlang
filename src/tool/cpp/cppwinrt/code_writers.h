@@ -1129,7 +1129,39 @@ namespace xlang
             }
         }
 )");
+
+            return;
         }
+
+        if (type.TypeName() == "IMap`2" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            w.write(R"(
+        auto TryLookup(param_type<K> const& key) const noexcept
+        {
+            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
+            {
+                V result{ nullptr };
+                WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                return result;
+            }
+            else
+            {
+                std::optional<V> result;
+                V value{ empty_value<V>() };
+
+                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                {
+                    result = std::move(value);
+                }
+
+                return result;
+            }
+        }
+)");
+
+            return;
+        }
+
     }
 
     static void write_interface_extensions(writer& w, TypeDef const& type)
@@ -2720,7 +2752,6 @@ public:
             static constexpr std::pair<std::string_view, std::string_view> pairs[]
             {
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
-                { "typename K, typename V", "Windows::Foundation::Collections::IMap<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::MapChangedEventHandler<K, V>" },
             };
 

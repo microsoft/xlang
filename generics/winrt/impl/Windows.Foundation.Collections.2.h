@@ -26,6 +26,5 @@ namespace winrt::Windows::Foundation::Collections
 namespace std
 {
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::VectorChangedEventHandler<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::VectorChangedEventHandler<T>> {};
-    template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IMap<K, V>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::MapChangedEventHandler<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::MapChangedEventHandler<K, V>> {};
 }

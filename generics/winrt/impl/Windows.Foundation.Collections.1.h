@@ -51,6 +51,15 @@ namespace winrt::Windows::Foundation::Collections
         IMapView(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     template <typename K, typename V>
+    struct WINRT_EBO IMap :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::Collections::IMap<K, V>>,
+        impl::require<Windows::Foundation::Collections::IMap<K, V>, Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<K, V>>>
+    {
+        IMap(std::nullptr_t = nullptr) noexcept {}
+        IMap(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
+    template <typename K, typename V>
     struct WINRT_EBO IObservableMap :
         Windows::Foundation::IInspectable,
         impl::consume_t<Windows::Foundation::Collections::IObservableMap<K, V>>,
