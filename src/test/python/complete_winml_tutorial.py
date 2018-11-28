@@ -33,17 +33,20 @@ async def wrap_async_op(op):
     future = loop.create_future()
 
     def callback(operation, status):
-        if status == 1:
-            result = operation.GetResults()
-            loop.call_soon_threadsafe(asyncio.Future.set_result, future, result)
-        elif status == 2:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, asyncio.CancelledError())
-        elif status == 3:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("AsyncOp failed"))
-        else:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("Unexpected AsyncStatus"))
+        def threadsafe_callback():
+            if status == 1:
+                result = operation.GetResults()
+                future.set_result(result)
+            elif status == 2:
+                future.set_exception(asyncio.CancelledError())
+            elif status == 3:
+                future.set_exception(RuntimeError("AsyncOp failed"))
+            else:
+                future.set_exception(RuntimeError("Unexpected AsyncStatus"))
 
-    op.put_Completed(callback)
+        loop.call_soon_threadsafe(threadsafe_callback)
+
+    op.Completed = callback
 
     return await future
 
@@ -85,7 +88,7 @@ def bind_model(model, image_frame):
 @timed_op
 def evaluate_model(session, binding):
     results = session.Evaluate(binding, "RunId")
-    o = results.get_Outputs().Lookup("softmaxout_1")
+    o = results.Outputs.Lookup("softmaxout_1")
     result_tensor = winml.TensorFloat._from(o)
     return result_tensor.GetAsVectorView()
 
@@ -103,7 +106,7 @@ def print_results(results, labels):
     topProbabilities = [0.0 for x in range(3)]
     topProbabilityLabelIndexes = [0 for x in range(3)]
 
-    for i in range(results.get_Size()):
+    for i in range(results.Size):
         for j in range(3):
             result = results.GetAt(i)
             if result > topProbabilities[j]:

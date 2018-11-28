@@ -47,7 +47,7 @@ namespace xlang::text
             return result;
         }
 
-        void write(std::string_view const& value)
+        void write_impl(std::string_view const& value)
         {
             m_first.insert(m_first.end(), value.begin(), value.end());
 
@@ -59,7 +59,7 @@ namespace xlang::text
 #endif
         }
 
-        void write(char const value)
+        void write_impl(char const value)
         {
             m_first.push_back(value);
 
@@ -69,6 +69,16 @@ namespace xlang::text
                 ::printf("%c", value);
             }
 #endif
+        }
+
+        void write(std::string_view const& value)
+        {
+            static_cast<T*>(this)->write_impl(value);
+        }
+
+        void write(char const value)
+        {
+            static_cast<T*>(this)->write_impl(value);
         }
 
         void write_code(std::string_view const& value)
@@ -149,7 +159,7 @@ namespace xlang::text
 
         char back()
         {
-            return m_first.back();
+            return m_first.empty() ? char{} : m_first.back();
         }
 
 #if defined(XLANG_DEBUG)

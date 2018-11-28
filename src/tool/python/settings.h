@@ -12,6 +12,7 @@ namespace xlang
 
         std::set<std::string> include;
         std::set<std::string> exclude;
+        meta::reader::filter filter;
     };
 
     extern settings_type settings;
