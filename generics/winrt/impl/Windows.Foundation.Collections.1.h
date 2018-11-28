@@ -37,6 +37,13 @@ namespace winrt::Windows::Foundation::Collections
         IPropertySet(std::nullptr_t = nullptr) noexcept {}
         IPropertySet(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
+    struct WINRT_EBO IVectorChangedEventArgs :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<IVectorChangedEventArgs>
+    {
+        IVectorChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
+        IVectorChangedEventArgs(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
     template <typename T>
     struct WINRT_EBO IVectorView :
         Windows::Foundation::IInspectable,

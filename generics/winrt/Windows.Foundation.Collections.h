@@ -39,6 +39,18 @@ namespace winrt::impl
     {
         WINRT_VERIFY_(0, WINRT_SHIM(Windows::Foundation::Collections::IObservableVector<T>)->remove_VectorChanged(get_abi(token)));
     }
+    template <typename D> Windows::Foundation::Collections::CollectionChange consume_Windows_Foundation_Collections_IVectorChangedEventArgs<D>::CollectionChange() const
+    {
+        Windows::Foundation::Collections::CollectionChange value;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVectorChangedEventArgs)->get_CollectionChange(put_abi(value)));
+        return value;
+    }
+    template <typename D> uint32_t consume_Windows_Foundation_Collections_IVectorChangedEventArgs<D>::Index() const
+    {
+        uint32_t value;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVectorChangedEventArgs)->get_Index(&value));
+        return value;
+    }
     template <typename D, typename T> T consume_Windows_Foundation_Collections_IVectorView<D, T>::GetAt(uint32_t index) const
     {
         T winrt_impl_result;
@@ -179,6 +191,30 @@ namespace winrt::impl
     template <typename D>
     struct produce<D, Windows::Foundation::Collections::IPropertySet> : produce_base<D, Windows::Foundation::Collections::IPropertySet>
     {
+    };
+    template <typename D>
+    struct produce<D, Windows::Foundation::Collections::IVectorChangedEventArgs> : produce_base<D, Windows::Foundation::Collections::IVectorChangedEventArgs>
+    {
+        int32_t WINRT_CALL get_CollectionChange(int32_t* value) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *value = detach_from<Windows::Foundation::Collections::CollectionChange>(this->shim().CollectionChange());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Index(uint32_t* value) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *value = detach_from<uint32_t>(this->shim().Index());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
     };
     template <typename D, typename T>
     struct produce<D, Windows::Foundation::Collections::IVectorView<T>> : produce_base<D, Windows::Foundation::Collections::IVectorView<T>>
@@ -371,6 +407,7 @@ namespace std
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::IPropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IPropertySet> {};
+    template<> struct hash<winrt::Windows::Foundation::Collections::IVectorChangedEventArgs> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IVectorChangedEventArgs> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IVectorView<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IVectorView<T>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::PropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::PropertySet> {};

@@ -1911,15 +1911,6 @@ namespace winrt::impl
         };
     };
 
-    template <> struct abi<wfc::IVectorChangedEventArgs>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Index(uint32_t* value) noexcept = 0;
-        };
-    };
-
     template <typename TResult> struct abi<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
     {
         struct type : unknown_abi
@@ -5057,23 +5048,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D> struct consume_IVectorChangedEventArgs
-    {
-        wfc::CollectionChange CollectionChange() const
-        {
-            wfc::CollectionChange value{};
-            check_hresult(WINRT_SHIM(wfc::IVectorChangedEventArgs)->get_CollectionChange(&value));
-            return value;
-        }
-
-        uint32_t Index() const
-        {
-            uint32_t index{};
-            check_hresult(WINRT_SHIM(wfc::IVectorChangedEventArgs)->get_Index(&index));
-            return index;
-        }
-    };
-
     template <typename D, typename K> struct consume_IMapChangedEventArgs
     {
         wfc::CollectionChange CollectionChange() const
@@ -5466,11 +5440,6 @@ namespace winrt::impl
         static constexpr guid value{ 0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
     };
 
-    template <> struct guid_storage<wfc::IVectorChangedEventArgs>
-    {
-        static constexpr guid value{ 0x575933DF,0x34FE,0x4480,{ 0xAF,0x15,0x07,0x69,0x1F,0x3D,0x5D,0x9B } };
-    };
-
     template <> struct guid_storage<Windows::Foundation::IAsyncInfo>
     {
         static constexpr guid value{ 0x00000036,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
@@ -5584,11 +5553,6 @@ namespace winrt::impl
     template <> struct consume<Windows::Foundation::IActivationFactory>
     {
         template <typename D> using type = consume_IActivationFactory<D>;
-    };
-
-    template <> struct consume<wfc::IVectorChangedEventArgs>
-    {
-        template <typename D> using type = consume_IVectorChangedEventArgs<D>;
     };
 
     template <typename TResult> struct consume<Windows::Foundation::IAsyncOperation<TResult>>
@@ -5737,11 +5701,6 @@ namespace winrt::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
     };
 
-    template <> struct name<wfc::IVectorChangedEventArgs>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Collections.IVectorChangedEventArgs" };
-    };
-
     template <typename K> struct name<wfc::IMapChangedEventArgs<K>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
@@ -5875,11 +5834,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x61c17707, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
-    };
-
-    template <> struct category<wfc::IVectorChangedEventArgs>
-    {
-        using type = interface_category;
     };
 
     template <typename K> struct category<wfc::IMapChangedEventArgs<K>>
@@ -6588,14 +6542,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
         static_assert(impl::has_category_v<V>, "V must be WinRT type.");
         IMap(std::nullptr_t = nullptr) noexcept {}
         IMap(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
-    struct WINRT_EBO IVectorChangedEventArgs :
-        IInspectable,
-        impl::consume_t<IVectorChangedEventArgs>
-    {
-        IVectorChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
-        IVectorChangedEventArgs(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
     template <typename T>
@@ -8786,32 +8732,6 @@ namespace winrt::impl
                 clear_abi(results);
                 typename D::abi_guard guard(this->shim());
                 *results = detach_from<TResult>(this->shim().GetResults());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-
-    template <typename D> struct produce<D, wfc::IVectorChangedEventArgs> : produce_base<D, wfc::IVectorChangedEventArgs>
-    {
-        int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *value = this->shim().CollectionChange();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Index(uint32_t* value) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *value = this->shim().Index();
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

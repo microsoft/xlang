@@ -352,32 +352,6 @@ namespace winrt::impl
         }
     };
 
-
-    template <typename D> struct produce<D, wfc::IVectorChangedEventArgs> : produce_base<D, wfc::IVectorChangedEventArgs>
-    {
-        int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *value = this->shim().CollectionChange();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Index(uint32_t* value) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *value = this->shim().Index();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <typename D, typename T> struct produce<D, wfc::IIterator<T>> : produce_base<D, wfc::IIterator<T>>
     {
         int32_t WINRT_CALL get_Current(arg_out<T> current) noexcept final

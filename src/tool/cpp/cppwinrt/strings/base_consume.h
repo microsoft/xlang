@@ -35,23 +35,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D> struct consume_IVectorChangedEventArgs
-    {
-        wfc::CollectionChange CollectionChange() const
-        {
-            wfc::CollectionChange value{};
-            check_hresult(WINRT_SHIM(wfc::IVectorChangedEventArgs)->get_CollectionChange(&value));
-            return value;
-        }
-
-        uint32_t Index() const
-        {
-            uint32_t index{};
-            check_hresult(WINRT_SHIM(wfc::IVectorChangedEventArgs)->get_Index(&index));
-            return index;
-        }
-    };
-
     template <typename D, typename K> struct consume_IMapChangedEventArgs
     {
         wfc::CollectionChange CollectionChange() const

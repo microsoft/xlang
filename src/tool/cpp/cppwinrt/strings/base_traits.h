@@ -66,11 +66,6 @@ namespace winrt::impl
         static constexpr guid value{ 0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
     };
 
-    template <> struct guid_storage<wfc::IVectorChangedEventArgs>
-    {
-        static constexpr guid value{ 0x575933DF,0x34FE,0x4480,{ 0xAF,0x15,0x07,0x69,0x1F,0x3D,0x5D,0x9B } };
-    };
-
     template <> struct guid_storage<Windows::Foundation::IAsyncInfo>
     {
         static constexpr guid value{ 0x00000036,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
@@ -184,11 +179,6 @@ namespace winrt::impl
     template <> struct consume<Windows::Foundation::IActivationFactory>
     {
         template <typename D> using type = consume_IActivationFactory<D>;
-    };
-
-    template <> struct consume<wfc::IVectorChangedEventArgs>
-    {
-        template <typename D> using type = consume_IVectorChangedEventArgs<D>;
     };
 
     template <typename TResult> struct consume<Windows::Foundation::IAsyncOperation<TResult>>
@@ -337,11 +327,6 @@ namespace winrt::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
     };
 
-    template <> struct name<wfc::IVectorChangedEventArgs>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Collections.IVectorChangedEventArgs" };
-    };
-
     template <typename K> struct name<wfc::IMapChangedEventArgs<K>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
@@ -475,11 +460,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x61c17707, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
-    };
-
-    template <> struct category<wfc::IVectorChangedEventArgs>
-    {
-        using type = interface_category;
     };
 
     template <typename K> struct category<wfc::IMapChangedEventArgs<K>>

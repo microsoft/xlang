@@ -11,6 +11,7 @@ namespace winrt::Windows::Foundation::Collections
     template <typename K, typename V> struct IObservableMap;
     template <typename T> struct IObservableVector;
     struct IPropertySet;
+    struct IVectorChangedEventArgs;
     template <typename T> struct IVectorView;
     template <typename T> struct IVector;
     struct PropertySet;
@@ -35,6 +36,10 @@ namespace winrt::impl
         static constexpr guid value{ 0x5917EB53,0x50B4,0x4A0D,{ 0xB3,0x09,0x65,0x86,0x2B,0x3F,0x1D,0xBC } };
     };
     template <> struct category<Windows::Foundation::Collections::IPropertySet>
+    {
+        using type = interface_category;
+    };
+    template <> struct category<Windows::Foundation::Collections::IVectorChangedEventArgs>
     {
         using type = interface_category;
     };
@@ -76,6 +81,10 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.Collections.IPropertySet" };
     };
+    template <> struct name<Windows::Foundation::Collections::IVectorChangedEventArgs>
+    {
+        static constexpr auto & value{ L"Windows.Foundation.Collections.IVectorChangedEventArgs" };
+    };
     template <typename T> struct name<Windows::Foundation::Collections::IVectorView<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVectorView`1<", name_v<T>, L">") };
@@ -111,6 +120,10 @@ namespace winrt::impl
     template <> struct guid_storage<Windows::Foundation::Collections::IPropertySet>
     {
         static constexpr guid value{ 0x8A43ED9F,0xF4E6,0x4421,{ 0xAC,0xF9,0x1D,0xAB,0x29,0x86,0x82,0x0C } };
+    };
+    template <> struct guid_storage<Windows::Foundation::Collections::IVectorChangedEventArgs>
+    {
+        static constexpr guid value{ 0x575933DF,0x34FE,0x4480,{ 0xAF,0x15,0x07,0x69,0x1F,0x3D,0x5D,0x9B } };
     };
     template <typename T> struct guid_storage<Windows::Foundation::Collections::IVectorView<T>>
     {
@@ -159,6 +172,14 @@ namespace winrt::impl
     {
         struct type : inspectable_abi
         {
+        };
+    };
+    template <> struct abi<Windows::Foundation::Collections::IVectorChangedEventArgs>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL get_CollectionChange(int32_t*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Index(uint32_t*) noexcept = 0;
         };
     };
     template <typename T> struct abi<Windows::Foundation::Collections::IVectorView<T>>
@@ -229,6 +250,16 @@ namespace winrt::impl
     template <> struct consume<Windows::Foundation::Collections::IPropertySet>
     {
         template <typename D> using type = consume_Windows_Foundation_Collections_IPropertySet<D>;
+    };
+    template <typename D>
+    struct consume_Windows_Foundation_Collections_IVectorChangedEventArgs
+    {
+        Windows::Foundation::Collections::CollectionChange CollectionChange() const;
+        uint32_t Index() const;
+    };
+    template <> struct consume<Windows::Foundation::Collections::IVectorChangedEventArgs>
+    {
+        template <typename D> using type = consume_Windows_Foundation_Collections_IVectorChangedEventArgs<D>;
     };
     template <typename D, typename T>
     struct consume_Windows_Foundation_Collections_IVectorView

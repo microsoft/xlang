@@ -193,7 +193,6 @@ namespace xlang::meta::reader
             remove("Windows.Foundation.Collections", "IMapChangedEventArgs`1");
             remove("Windows.Foundation.Collections", "IMapView`2");
             remove("Windows.Foundation.Collections", "IMap`2");
-            remove("Windows.Foundation.Collections", "IVectorChangedEventArgs");
             remove("Windows.Foundation.Collections", "MapChangedEventHandler`2");
             remove("Windows.Foundation.Collections", "VectorChangedEventHandler`1");
             remove("Windows.Foundation.Collections", "CollectionChange");

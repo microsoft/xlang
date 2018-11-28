@@ -2633,7 +2633,6 @@ public:
             {
                 { "typename T", "Windows::Foundation::Collections::IIterator<T>" },
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
-                { "", "Windows::Foundation::Collections::IVectorChangedEventArgs" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IMapView<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IMap<K, V>" },
