@@ -192,4 +192,30 @@ namespace Component
             static event Handler Static;
         }
     }
+/*
+    namespace Depends
+    {
+        namespace Apples
+        {
+            interface IApple
+            {
+                String ToString();
+            }
+        }
+
+        namespace Oranges
+        {
+            interface IOrange
+            {
+                String ToString();
+            }
+        }
+
+        [default_interface]
+        runtimeclass Class : Component.Depends.Apples.IApple
+        {
+            Class();
+        }
+    }
+*/
 }
