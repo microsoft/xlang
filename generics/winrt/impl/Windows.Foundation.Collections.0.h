@@ -8,6 +8,7 @@ namespace winrt::Windows::Foundation
 namespace winrt::Windows::Foundation::Collections
 {
     template <typename T> struct IIterable;
+    template <typename K> struct IMapChangedEventArgs;
     template <typename K, typename V> struct IObservableMap;
     template <typename T> struct IObservableVector;
     struct IPropertySet;
@@ -24,6 +25,11 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0xFAA585EA,0x6214,0x4217,{ 0xAF,0xDA,0x7F,0x46,0xDE,0x58,0x69,0xB3 } };
+    };
+    template <typename K> struct category<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+    {
+        using type = pinterface_category<K>;
+        static constexpr guid value{ 0x9939F4DF,0x050A,0x4C0F,{ 0xAA,0x60,0x77,0x07,0x5F,0x9C,0x47,0x77 } };
     };
     template <typename K, typename V> struct category<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
@@ -69,6 +75,10 @@ namespace winrt::impl
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterable`1<", name_v<T>, L">") };
     };
+    template <typename K> struct name<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
+    };
     template <typename K, typename V> struct name<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, name_v<V>, L">") };
@@ -108,6 +118,10 @@ namespace winrt::impl
     template <typename T> struct guid_storage<Windows::Foundation::Collections::IIterable<T>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IIterable<T>>::value };
+    };
+    template <typename K> struct guid_storage<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IMapChangedEventArgs<K>>::value };
     };
     template <typename K, typename V> struct guid_storage<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
@@ -150,6 +164,14 @@ namespace winrt::impl
         struct type : inspectable_abi
         {
             virtual int32_t WINRT_CALL First(void**) noexcept = 0;
+        };
+    };
+    template <typename K> struct abi<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL get_CollectionChange(int32_t*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Key(arg_out<K>) noexcept = 0;
         };
     };
     template <typename K, typename V> struct abi<Windows::Foundation::Collections::IObservableMap<K, V>>
@@ -218,6 +240,16 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::Collections::IIterable<T>>
     {
         template <typename D> using type = consume_Windows_Foundation_Collections_IIterable<D, T>;
+    };
+    template <typename D, typename K>
+    struct consume_Windows_Foundation_Collections_IMapChangedEventArgs
+    {
+        Windows::Foundation::Collections::CollectionChange CollectionChange() const;
+        K Key() const;
+    };
+    template <typename K> struct consume<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_Collections_IMapChangedEventArgs<D, K>;
     };
     template <typename D, typename K, typename V>
     struct consume_Windows_Foundation_Collections_IObservableMap

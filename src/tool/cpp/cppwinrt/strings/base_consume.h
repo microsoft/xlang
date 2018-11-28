@@ -35,23 +35,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K> struct consume_IMapChangedEventArgs
-    {
-        wfc::CollectionChange CollectionChange() const
-        {
-            wfc::CollectionChange value{};
-            check_hresult(WINRT_SHIM(wfc::IMapChangedEventArgs<K>)->get_CollectionChange(&value));
-            return value;
-        }
-
-        K Key() const
-        {
-            K result{ empty_value<K>() };
-            check_hresult(WINRT_SHIM(wfc::IMapChangedEventArgs<K>)->get_Key(put_abi(result)));
-            return result;
-        }
-    };
-
     template <typename D, typename T> struct consume_IIterator
     {
         T Current() const

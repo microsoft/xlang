@@ -2637,7 +2637,6 @@ public:
                 { "typename K, typename V", "Windows::Foundation::Collections::IMapView<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IMap<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::MapChangedEventHandler<K, V>" },
-                { "typename K", "Windows::Foundation::Collections::IMapChangedEventArgs<K>" }
             };
 
             write_std_namespace(w);

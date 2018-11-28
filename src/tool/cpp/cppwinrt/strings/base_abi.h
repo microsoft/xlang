@@ -233,15 +233,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K> struct abi<wfc::IMapChangedEventArgs<K>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Key(arg_out<K> value) noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<wfc::VectorChangedEventHandler<T>>
     {
         struct WINRT_NOVTABLE type : unknown_abi

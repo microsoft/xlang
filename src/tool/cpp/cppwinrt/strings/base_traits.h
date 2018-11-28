@@ -131,11 +131,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>::value };
     };
 
-    template <typename K> struct guid_storage<wfc::IMapChangedEventArgs<K>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IMapChangedEventArgs<K>>::value };
-    };
-
     template <typename T> struct guid_storage<wfc::VectorChangedEventHandler<T>>
     {
         static constexpr guid value{ pinterface_guid<wfc::VectorChangedEventHandler<T>>::value };
@@ -214,11 +209,6 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
     {
         template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
-    template <typename K> struct consume<wfc::IMapChangedEventArgs<K>>
-    {
-        template <typename D> using type = consume_IMapChangedEventArgs<D, K>;
     };
 
     template <typename T> struct consume<wfc::IIterator<T>>
@@ -325,11 +315,6 @@ namespace winrt::impl
     template <typename T> struct name<Windows::Foundation::IReferenceArray<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
-    };
-
-    template <typename K> struct name<wfc::IMapChangedEventArgs<K>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
     };
 
     template <typename T> struct name<wfc::VectorChangedEventHandler<T>>
@@ -460,12 +445,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x61c17707, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
-    };
-
-    template <typename K> struct category<wfc::IMapChangedEventArgs<K>>
-    {
-        using type = pinterface_category<K>;
-        static constexpr guid value{ 0x9939f4df, 0x050a, 0x4c0f,{ 0xaa, 0x60, 0x77, 0x07, 0x5f, 0x9c, 0x47, 0x77 } };
     };
 
     template <typename T> struct category<wfc::VectorChangedEventHandler<T>>

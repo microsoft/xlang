@@ -190,7 +190,6 @@ namespace xlang::meta::reader
 
             remove("Windows.Foundation.Collections", "IIterator`1");
             remove("Windows.Foundation.Collections", "IKeyValuePair`2");
-            remove("Windows.Foundation.Collections", "IMapChangedEventArgs`1");
             remove("Windows.Foundation.Collections", "IMapView`2");
             remove("Windows.Foundation.Collections", "IMap`2");
             remove("Windows.Foundation.Collections", "MapChangedEventHandler`2");

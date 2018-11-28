@@ -560,32 +560,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K> struct produce<D, wfc::IMapChangedEventArgs<K>> : produce_base<D, wfc::IMapChangedEventArgs<K>>
-    {
-        int32_t WINRT_CALL get_CollectionChange(wfc::CollectionChange* value) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *value = this->shim().CollectionChange();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Key(arg_out<K> value) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *value = detach_from<K>(this->shim().Key());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <> struct delegate<Windows::Foundation::AsyncActionCompletedHandler>
     {
         template <typename H>
