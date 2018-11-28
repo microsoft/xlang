@@ -141,11 +141,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IKeyValuePair<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IKeyValuePair<K, V>>::value };
-    };
-
     template <typename K, typename V> struct guid_storage<wfc::IMapView<K, V>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IMapView<K, V>>::value };
@@ -204,11 +199,6 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
     {
         template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
-    template <typename K, typename V> struct consume<wfc::IKeyValuePair<K, V>>
-    {
-        template <typename D> using type = consume_IKeyValuePair<D, K, V>;
     };
 
     template <typename K, typename V> struct consume<wfc::IMapView<K, V>>
@@ -315,11 +305,6 @@ namespace winrt::impl
     template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IKeyValuePair`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IMapView<K, V>>
@@ -442,12 +427,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::IKeyValuePair<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0x02b51929, 0xc1c4, 0x4a7e,{ 0x89, 0x40, 0x03, 0x12, 0xb5, 0xc1, 0x85, 0x00 } };
     };
 
     template <typename K, typename V> struct category<wfc::IMapView<K, V>>

@@ -2017,15 +2017,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Value(arg_out<V> value) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IMapView<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
@@ -5028,33 +5019,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IKeyValuePair
-    {
-        K Key() const
-        {
-            K result{ empty_value<K>() };
-            check_hresult(WINRT_SHIM(wfc::IKeyValuePair<K, V>)->get_Key(put_abi(result)));
-            return result;
-        }
-
-        V Value() const
-        {
-            V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IKeyValuePair<K, V>)->get_Value(put_abi(result)));
-            return result;
-        }
-
-        bool operator==(wfc::IKeyValuePair<K, V> const& other) const
-        {
-            return Key() == other.Key() && Value() == other.Value();
-        }
-
-        bool operator!=(wfc::IKeyValuePair<K, V> const& other) const
-        {
-            return !(*this == other);
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IMapView
     {
         V Lookup(param_type<K> const& key) const
@@ -5432,11 +5396,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IKeyValuePair<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IKeyValuePair<K, V>>::value };
-    };
-
     template <typename K, typename V> struct guid_storage<wfc::IMapView<K, V>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IMapView<K, V>>::value };
@@ -5495,11 +5454,6 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
     {
         template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
-    template <typename K, typename V> struct consume<wfc::IKeyValuePair<K, V>>
-    {
-        template <typename D> using type = consume_IKeyValuePair<D, K, V>;
     };
 
     template <typename K, typename V> struct consume<wfc::IMapView<K, V>>
@@ -5606,11 +5560,6 @@ namespace winrt::impl
     template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IKeyValuePair`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IMapView<K, V>>
@@ -5733,12 +5682,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::IKeyValuePair<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0x02b51929, 0xc1c4, 0x4a7e,{ 0x89, 0x40, 0x03, 0x12, 0xb5, 0xc1, 0x85, 0x00 } };
     };
 
     template <typename K, typename V> struct category<wfc::IMapView<K, V>>
@@ -6358,17 +6301,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
-    template <typename K, typename V>
-    struct WINRT_EBO IKeyValuePair :
-        IInspectable,
-        impl::consume_t<IKeyValuePair<K, V>>
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        IKeyValuePair(std::nullptr_t = nullptr) noexcept {}
-        IKeyValuePair(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
     template <typename K, typename V>
     struct WINRT_EBO IMapView :
         IInspectable,
@@ -8581,33 +8513,6 @@ namespace winrt::impl
                 clear_abi(results);
                 typename D::abi_guard guard(this->shim());
                 *results = detach_from<TResult>(this->shim().GetResults());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename K, typename V> struct produce<D, wfc::IKeyValuePair<K, V>> : produce_base<D, wfc::IKeyValuePair<K, V>>
-    {
-        int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept final
-        {
-            try
-            {
-                clear_abi(key);
-                typename D::abi_guard guard(this->shim());
-                *key = detach_from<K>(this->shim().Key());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Value(arg_out<V> value) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *value = detach_from<V>(this->shim().Value());
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

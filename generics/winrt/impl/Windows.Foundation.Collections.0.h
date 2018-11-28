@@ -9,6 +9,7 @@ namespace winrt::Windows::Foundation::Collections
 {
     template <typename T> struct IIterable;
     template <typename T> struct IIterator;
+    template <typename K, typename V> struct IKeyValuePair;
     template <typename K> struct IMapChangedEventArgs;
     template <typename K, typename V> struct IObservableMap;
     template <typename T> struct IObservableVector;
@@ -31,6 +32,11 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x6A79E863,0x4300,0x459A,{ 0x99,0x66,0xCB,0xB6,0x60,0x96,0x3E,0xE1 } };
+    };
+    template <typename K, typename V> struct category<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    {
+        using type = pinterface_category<K, V>;
+        static constexpr guid value{ 0x02B51929,0xC1C4,0x4A7E,{ 0x89,0x40,0x03,0x12,0xB5,0xC1,0x85,0x00 } };
     };
     template <typename K> struct category<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
     {
@@ -85,6 +91,10 @@ namespace winrt::impl
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterator`1<", name_v<T>, L">") };
     };
+    template <typename K, typename V> struct name<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IKeyValuePair`2<", name_v<K>, name_v<V>, L">") };
+    };
     template <typename K> struct name<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
@@ -132,6 +142,10 @@ namespace winrt::impl
     template <typename T> struct guid_storage<Windows::Foundation::Collections::IIterator<T>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IIterator<T>>::value };
+    };
+    template <typename K, typename V> struct guid_storage<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IKeyValuePair<K, V>>::value };
     };
     template <typename K> struct guid_storage<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
     {
@@ -188,6 +202,14 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL get_HasCurrent(bool*) noexcept = 0;
             virtual int32_t WINRT_CALL MoveNext(bool*) noexcept = 0;
             virtual int32_t WINRT_CALL GetMany(uint32_t, arg_out<T>, uint32_t*) noexcept = 0;
+        };
+    };
+    template <typename K, typename V> struct abi<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL get_Key(arg_out<K>) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Value(arg_out<V>) noexcept = 0;
         };
     };
     template <typename K> struct abi<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
@@ -291,6 +313,26 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::Collections::IIterator<T>>
     {
         template <typename D> using type = consume_Windows_Foundation_Collections_IIterator<D, T>;
+    };
+    template <typename D, typename K, typename V>
+    struct consume_Windows_Foundation_Collections_IKeyValuePair
+    {
+        K Key() const;
+        V Value() const;
+
+        bool operator==(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
+        {
+            return Key() == other.Key() && Value() == other.Value();
+        }
+
+        bool operator!=(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
+        {
+            return !(*this == other);
+        }
+    };
+    template <typename K, typename V> struct consume<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_Collections_IKeyValuePair<D, K, V>;
     };
     template <typename D, typename K>
     struct consume_Windows_Foundation_Collections_IMapChangedEventArgs

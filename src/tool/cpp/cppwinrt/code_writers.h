@@ -1084,12 +1084,31 @@ namespace xlang
 )");
             return;
         }
+
+        if (type.TypeName() == "IKeyValuePair`2" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            w.write(R"(
+        bool operator==(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
+        {
+            return Key() == other.Key() && Value() == other.Value();
+        }
+
+        bool operator!=(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
+        {
+            return !(*this == other);
+        }
+)");
+
+            return;
+        }
     }
 
     static void write_interface_extensions(writer& w, TypeDef const& type)
     {
         if (type.TypeName() == "IIterator`1" && type.TypeNamespace() == "Windows.Foundation.Collections")
         {
+            // TODO: is all this still needed?
+
             w.write(R"(
         using iterator_category = std::input_iterator_tag;
         using value_type = T;
@@ -1871,7 +1890,7 @@ public:
     {
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    %%    };
+%%    };
 )";
 
             w.write(format,
@@ -1894,7 +1913,7 @@ public:
     {
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    %%    };
+%%    };
 )";
 
             w.write(format,
@@ -2672,7 +2691,6 @@ public:
             static constexpr std::pair<std::string_view, std::string_view> pairs[]
             {
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
-                { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IMapView<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IMap<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::MapChangedEventHandler<K, V>" },

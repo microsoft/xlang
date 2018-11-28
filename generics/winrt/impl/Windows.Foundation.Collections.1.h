@@ -10,7 +10,7 @@ namespace winrt::Windows::Foundation::Collections
     {
         IIterable(std::nullptr_t = nullptr) noexcept {}
         IIterable(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
     template <typename T>
     struct WINRT_EBO IIterator :
         Windows::Foundation::IInspectable,
@@ -24,7 +24,15 @@ namespace winrt::Windows::Foundation::Collections
         using difference_type = ptrdiff_t;
         using pointer = T*;
         using reference = T&;
-};
+    };
+    template <typename K, typename V>
+    struct WINRT_EBO IKeyValuePair :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    {
+        IKeyValuePair(std::nullptr_t = nullptr) noexcept {}
+        IKeyValuePair(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+        };
     template <typename K>
     struct WINRT_EBO IMapChangedEventArgs :
         Windows::Foundation::IInspectable,
@@ -32,7 +40,7 @@ namespace winrt::Windows::Foundation::Collections
     {
         IMapChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
         IMapChangedEventArgs(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
     template <typename K, typename V>
     struct WINRT_EBO IObservableMap :
         Windows::Foundation::IInspectable,
@@ -41,7 +49,7 @@ namespace winrt::Windows::Foundation::Collections
     {
         IObservableMap(std::nullptr_t = nullptr) noexcept {}
         IObservableMap(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
     template <typename T>
     struct WINRT_EBO IObservableVector :
         Windows::Foundation::IInspectable,
@@ -50,7 +58,7 @@ namespace winrt::Windows::Foundation::Collections
     {
         IObservableVector(std::nullptr_t = nullptr) noexcept {}
         IObservableVector(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
     struct WINRT_EBO IPropertySet :
         Windows::Foundation::IInspectable,
         impl::consume_t<IPropertySet>,
@@ -58,14 +66,14 @@ namespace winrt::Windows::Foundation::Collections
     {
         IPropertySet(std::nullptr_t = nullptr) noexcept {}
         IPropertySet(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
     struct WINRT_EBO IVectorChangedEventArgs :
         Windows::Foundation::IInspectable,
         impl::consume_t<IVectorChangedEventArgs>
     {
         IVectorChangedEventArgs(std::nullptr_t = nullptr) noexcept {}
         IVectorChangedEventArgs(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
     template <typename T>
     struct WINRT_EBO IVectorView :
         Windows::Foundation::IInspectable,
@@ -74,7 +82,7 @@ namespace winrt::Windows::Foundation::Collections
     {
         IVectorView(std::nullptr_t = nullptr) noexcept {}
         IVectorView(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
     template <typename T>
     struct WINRT_EBO IVector :
         Windows::Foundation::IInspectable,
@@ -83,5 +91,5 @@ namespace winrt::Windows::Foundation::Collections
     {
         IVector(std::nullptr_t = nullptr) noexcept {}
         IVector(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-    };
+        };
 }

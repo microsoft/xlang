@@ -35,33 +35,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IKeyValuePair
-    {
-        K Key() const
-        {
-            K result{ empty_value<K>() };
-            check_hresult(WINRT_SHIM(wfc::IKeyValuePair<K, V>)->get_Key(put_abi(result)));
-            return result;
-        }
-
-        V Value() const
-        {
-            V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IKeyValuePair<K, V>)->get_Value(put_abi(result)));
-            return result;
-        }
-
-        bool operator==(wfc::IKeyValuePair<K, V> const& other) const
-        {
-            return Key() == other.Key() && Value() == other.Value();
-        }
-
-        bool operator!=(wfc::IKeyValuePair<K, V> const& other) const
-        {
-            return !(*this == other);
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IMapView
     {
         V Lookup(param_type<K> const& key) const

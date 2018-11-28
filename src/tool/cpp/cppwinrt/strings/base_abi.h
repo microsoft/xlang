@@ -249,15 +249,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IKeyValuePair<K, V>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Value(arg_out<V> value) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IMapView<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi

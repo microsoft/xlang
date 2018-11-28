@@ -35,6 +35,18 @@ namespace winrt::impl
         check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IIterator<T>)->GetMany(items.size(), get_abi(items), &winrt_impl_result));
         return winrt_impl_result;
     }
+    template <typename D, typename K, typename V> K consume_Windows_Foundation_Collections_IKeyValuePair<D, K, V>::Key() const
+    {
+        K winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IKeyValuePair<K, V>)->get_Key(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename K, typename V> V consume_Windows_Foundation_Collections_IKeyValuePair<D, K, V>::Value() const
+    {
+        V winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IKeyValuePair<K, V>)->get_Value(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
     template <typename D, typename K> Windows::Foundation::Collections::CollectionChange consume_Windows_Foundation_Collections_IMapChangedEventArgs<D, K>::CollectionChange() const
     {
         Windows::Foundation::Collections::CollectionChange winrt_impl_result;
@@ -223,6 +235,30 @@ namespace winrt::impl
             {
                 typename D::abi_guard guard(this->shim());
                 *winrt_impl_result = detach_from<uint32_t>(this->shim().GetMany(array_view<T>(reinterpret_cast<T*>(items), reinterpret_cast<T*>(items) + __itemsSize)));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D, typename K, typename V>
+    struct produce<D, Windows::Foundation::Collections::IKeyValuePair<K, V>> : produce_base<D, Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    {
+        int32_t WINRT_CALL get_Key(arg_out<K> winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<K>(this->shim().Key());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Value(arg_out<V> winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<V>(this->shim().Value());
                 return 0;
             }
             catch (...) { return to_hresult(); }
@@ -509,6 +545,7 @@ namespace std
 {
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IIterable<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IIterable<T>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IIterator<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IIterator<T>> {};
+    template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IKeyValuePair<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IKeyValuePair<K, V>> {};
     template<typename K> struct hash<winrt::Windows::Foundation::Collections::IMapChangedEventArgs<K>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IMapChangedEventArgs<K>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};

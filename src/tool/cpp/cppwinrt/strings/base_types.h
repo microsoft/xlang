@@ -329,17 +329,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
     template <typename K, typename V>
-    struct WINRT_EBO IKeyValuePair :
-        IInspectable,
-        impl::consume_t<IKeyValuePair<K, V>>
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        IKeyValuePair(std::nullptr_t = nullptr) noexcept {}
-        IKeyValuePair(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
-    template <typename K, typename V>
     struct WINRT_EBO IMapView :
         IInspectable,
         impl::consume_t<IMapView<K, V>>,

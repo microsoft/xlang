@@ -352,33 +352,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, wfc::IKeyValuePair<K, V>> : produce_base<D, wfc::IKeyValuePair<K, V>>
-    {
-        int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept final
-        {
-            try
-            {
-                clear_abi(key);
-                typename D::abi_guard guard(this->shim());
-                *key = detach_from<K>(this->shim().Key());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Value(arg_out<V> value) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *value = detach_from<V>(this->shim().Value());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <typename D, typename K, typename V> struct produce<D, wfc::IMapView<K, V>> : produce_base<D, wfc::IMapView<K, V>>
     {
         int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
