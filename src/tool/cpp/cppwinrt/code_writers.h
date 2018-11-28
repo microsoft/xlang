@@ -2052,7 +2052,83 @@ public:
 
     static void write_delegate_definition(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <typename L> %::%(L handler) :
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
+        auto type_name = type.TypeName();
+        method_signature signature{ get_delegate_method(type) };
+
+        if (!empty(generics))
+        {
+            auto format = R"(    template <%> template <typename L> %<%>::%(L handler) :
+        %(impl::make_delegate<%<%>>(std::forward<L>(handler)))
+    {
+    }
+    template <%> template <typename F> %<%>::%(F* handler) :
+        %([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <%> template <typename O, typename M> %<%>::%(O* object, M method) :
+        %([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <%> template <typename O, typename M> %<%>::%(com_ptr<O>&& object, M method) :
+        %([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <%> template <typename O, typename M> %<%>::%(weak_ref<O>&& object, M method) :
+        %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <%> % %<%>::operator()(%) const
+    {%
+        check_hresult((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
+    }
+)";
+
+            type_name = remove_tick(type_name);
+
+            w.write(format,
+                bind<write_generic_typenames>(generics),
+                type_name,
+                bind_list(", ", generics),
+                type_name,
+                type_name,
+                type_name,
+                bind_list(", ", generics),
+                bind<write_generic_typenames>(generics),
+                type_name,
+                bind_list(", ", generics),
+                type_name,
+                type_name,
+                bind<write_generic_typenames>(generics),
+                type_name,
+                bind_list(", ", generics),
+                type_name,
+                type_name,
+                bind<write_generic_typenames>(generics),
+                type_name,
+                bind_list(", ", generics),
+                type_name,
+                type_name,
+                bind<write_generic_typenames>(generics),
+                type_name,
+                bind_list(", ", generics),
+                type_name,
+                type_name,
+                bind<write_generic_typenames>(generics),
+                signature.return_signature(),
+                type_name,
+                bind_list(", ", generics),
+                bind<write_consume_params>(signature),
+                bind<write_consume_return_type>(signature),
+                type_name,
+                bind_list(", ", generics),
+                bind<write_abi_args>(signature),
+                bind<write_consume_return_statement>(signature));
+        }
+        else
+        {
+            auto format = R"(    template <typename L> %::%(L handler) :
         %(impl::make_delegate<%>(std::forward<L>(handler)))
     {
     }
@@ -2078,34 +2154,31 @@ public:
     }
 )";
 
-        auto type_name = type.TypeName();
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-        method_signature signature{ get_delegate_method(type) };
-
-        w.write(format,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            type_name,
-            signature.return_signature(),
-            type_name,
-            bind<write_consume_params>(signature),
-            bind<write_consume_return_type>(signature),
-            type_name,
-            bind<write_abi_args>(signature),
-            bind<write_consume_return_statement>(signature));
+            w.write(format,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                type_name,
+                signature.return_signature(),
+                type_name,
+                bind<write_consume_params>(signature),
+                bind<write_consume_return_type>(signature),
+                type_name,
+                bind<write_abi_args>(signature),
+                bind<write_consume_return_statement>(signature));
+        }
     }
 
     static void write_struct_field(writer& w, std::pair<std::string_view, std::string> const& field)

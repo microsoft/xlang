@@ -4,8 +4,11 @@
 int main()
 {
   using namespace winrt;
+  using namespace Windows::Foundation;
   using namespace Windows::Foundation::Collections;
   
   IObservableVector<int> v = single_threaded_observable_vector<int>();
   return v.Size();
+  
+  TypedEventHandler<int, bool> d = [](int, bool){};
 }
