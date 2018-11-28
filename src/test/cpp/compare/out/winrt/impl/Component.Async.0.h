@@ -4,6 +4,9 @@
 namespace winrt::Windows::Foundation
 {
     struct IAsyncAction;
+    template <typename TProgress> struct IAsyncActionWithProgress;
+    template <typename TResult, typename TProgress> struct IAsyncOperationWithProgress;
+    template <typename TResult> struct IAsyncOperation;
 }
 namespace winrt::Component::Async
 {

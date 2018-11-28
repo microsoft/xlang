@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include <inspectable.h>
-#include "winrt/base.h"
+#include "winrt/Windows.Foundation.h"
 
 using namespace winrt;
 
