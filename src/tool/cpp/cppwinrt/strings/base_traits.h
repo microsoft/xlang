@@ -156,11 +156,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::IIterator<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IIterable<T>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IIterable<T>>::value };
-    };
-
     template <typename T> struct guid_storage<wfc::IVectorView<T>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IVectorView<T>>::value };
@@ -244,11 +239,6 @@ namespace winrt::impl
     template <typename T> struct consume<wfc::IIterator<T>>
     {
         template <typename D> using type = consume_IIterator<D, T>;
-    };
-
-    template <typename T> struct consume<wfc::IIterable<T>>
-    {
-        template <typename D> using type = consume_IIterable<D, T>;
     };
 
     template <typename T> struct consume<wfc::IVectorView<T>>
@@ -380,11 +370,6 @@ namespace winrt::impl
     template <typename T> struct name<wfc::IIterator<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterator`1<", name_v<T>, L">") };
-    };
-
-    template <typename T> struct name<wfc::IIterable<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterable`1<", name_v<T>, L">") };
     };
 
     template <typename T> struct name<wfc::IVectorView<T>>
@@ -534,12 +519,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x6a79e863, 0x4300, 0x459a,{ 0x99, 0x66, 0xcb, 0xb6, 0x60, 0x96, 0x3e, 0xe1 } };
-    };
-
-    template <typename T> struct category<wfc::IIterable<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0xfaa585ea, 0x6214, 0x4217,{ 0xaf, 0xda, 0x7f, 0x46, 0xde, 0x58, 0x69, 0xb3 } };
     };
 
     template <typename T> struct category<wfc::IVectorView<T>>

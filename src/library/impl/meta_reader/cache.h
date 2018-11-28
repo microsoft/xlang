@@ -188,7 +188,6 @@ namespace xlang::meta::reader
             remove("Windows.Foundation", "EventHandler`1");
             remove("Windows.Foundation", "TypedEventHandler`2");
 
-            remove("Windows.Foundation.Collections", "IIterable`1");
             remove("Windows.Foundation.Collections", "IIterator`1");
             remove("Windows.Foundation.Collections", "IKeyValuePair`2");
             remove("Windows.Foundation.Collections", "IMapChangedEventArgs`1");

@@ -427,21 +427,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, wfc::IIterable<T>> : produce_base<D, wfc::IIterable<T>>
-    {
-        int32_t WINRT_CALL First(void** first) noexcept final
-        {
-            try
-            {
-                *first = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *first = detach_from<wfc::IIterator<T>>(this->shim().First());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <typename D, typename K, typename V> struct produce<D, wfc::IKeyValuePair<K, V>> : produce_base<D, wfc::IKeyValuePair<K, V>>
     {
         int32_t WINRT_CALL get_Key(arg_out<K> key) noexcept final

@@ -7,6 +7,7 @@ namespace winrt::Windows::Foundation
 }
 namespace winrt::Windows::Foundation::Collections
 {
+    template <typename T> struct IIterable;
     template <typename K, typename V> struct IObservableMap;
     template <typename T> struct IObservableVector;
     struct IPropertySet;
@@ -17,6 +18,11 @@ namespace winrt::Windows::Foundation::Collections
 }
 namespace winrt::impl
 {
+    template <typename T> struct category<Windows::Foundation::Collections::IIterable<T>>
+    {
+        using type = pinterface_category<T>;
+        static constexpr guid value{ 0xFAA585EA,0x6214,0x4217,{ 0xAF,0xDA,0x7F,0x46,0xDE,0x58,0x69,0xB3 } };
+    };
     template <typename K, typename V> struct category<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
         using type = pinterface_category<K, V>;
@@ -48,6 +54,10 @@ namespace winrt::impl
     {
         using type = class_category;
     };
+    template <typename T> struct name<Windows::Foundation::Collections::IIterable<T>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterable`1<", name_v<T>, L">") };
+    };
     template <typename K, typename V> struct name<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, name_v<V>, L">") };
@@ -76,6 +86,10 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.Collections.ValueSet" };
     };
+    template <typename T> struct guid_storage<Windows::Foundation::Collections::IIterable<T>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IIterable<T>>::value };
+    };
     template <typename K, typename V> struct guid_storage<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IObservableMap<K, V>>::value };
@@ -103,6 +117,13 @@ namespace winrt::impl
     template <> struct default_interface<Windows::Foundation::Collections::ValueSet>
     {
         using type = Windows::Foundation::Collections::IPropertySet;
+    };
+    template <typename T> struct abi<Windows::Foundation::Collections::IIterable<T>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL First(void**) noexcept = 0;
+        };
     };
     template <typename K, typename V> struct abi<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
@@ -143,6 +164,15 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL GetMany(uint32_t, uint32_t, arg_out<T>, uint32_t*) noexcept = 0;
             virtual int32_t WINRT_CALL ReplaceAll(uint32_t, arg_out<T>) noexcept = 0;
         };
+    };
+    template <typename D, typename T>
+    struct consume_Windows_Foundation_Collections_IIterable
+    {
+        Windows::Foundation::Collections::IIterator<T> First() const;
+    };
+    template <typename T> struct consume<Windows::Foundation::Collections::IIterable<T>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_Collections_IIterable<D, T>;
     };
     template <typename D, typename K, typename V>
     struct consume_Windows_Foundation_Collections_IObservableMap

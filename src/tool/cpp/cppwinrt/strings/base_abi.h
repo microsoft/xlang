@@ -278,14 +278,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename T> struct abi<wfc::IIterable<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL First(void** first) noexcept = 0;
-        };
-    };
-
     template <typename T> struct abi<wfc::IVectorView<T>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi

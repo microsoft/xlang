@@ -5,6 +5,12 @@
 #include "winrt/Windows.Foundation.h"
 namespace winrt::impl
 {
+    template <typename D, typename T> Windows::Foundation::Collections::IIterator<T> consume_Windows_Foundation_Collections_IIterable<D, T>::First() const
+    {
+        Windows::Foundation::Collections::IIterator<T> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IIterable<T>)->First(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
     template <typename D, typename K, typename V> winrt::event_token consume_Windows_Foundation_Collections_IObservableMap<D, K, V>::MapChanged(Windows::Foundation::Collections::MapChangedEventHandler<K, V> const& vhnd) const
     {
         winrt::event_token winrt_impl_result;
@@ -91,6 +97,21 @@ namespace winrt::impl
     {
         check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->ReplaceAll(items.size(), get_abi(items)));
     }
+    template <typename D, typename T>
+    struct produce<D, Windows::Foundation::Collections::IIterable<T>> : produce_base<D, Windows::Foundation::Collections::IIterable<T>>
+    {
+        int32_t WINRT_CALL First(void** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::Collections::IIterator<T>>(this->shim().First());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
     template <typename D, typename K, typename V>
     struct produce<D, Windows::Foundation::Collections::IObservableMap<K, V>> : produce_base<D, Windows::Foundation::Collections::IObservableMap<K, V>>
     {
@@ -278,6 +299,7 @@ namespace winrt::Windows::Foundation::Collections
 }
 namespace std
 {
+    template<typename T> struct hash<winrt::Windows::Foundation::Collections::IIterable<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IIterable<T>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::IPropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IPropertySet> {};

@@ -355,16 +355,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
     };
 
     template <typename T>
-    struct WINRT_EBO IIterable :
-        IInspectable,
-        impl::consume_t<IIterable<T>>
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        IIterable(std::nullptr_t = nullptr) noexcept {}
-        IIterable(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
-    template <typename T>
     struct WINRT_EBO IVectorView :
         IInspectable,
         impl::consume_t<IVectorView<T>>,

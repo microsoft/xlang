@@ -3,6 +3,14 @@
 #include "winrt/impl/Windows.Foundation.Collections.0.h"
 namespace winrt::Windows::Foundation::Collections
 {
+    template <typename T>
+    struct WINRT_EBO IIterable :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::Collections::IIterable<T>>
+    {
+        IIterable(std::nullptr_t = nullptr) noexcept {}
+        IIterable(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
     template <typename K, typename V>
     struct WINRT_EBO IObservableMap :
         Windows::Foundation::IInspectable,

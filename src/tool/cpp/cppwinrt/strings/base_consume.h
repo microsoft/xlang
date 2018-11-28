@@ -115,16 +115,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct consume_IIterable
-    {
-        wfc::IIterator<T> First() const
-        {
-            void* result;
-            check_hresult(WINRT_SHIM(wfc::IIterable<T>)->First(&result));
-            return { result, take_ownership_from_abi };
-        }
-    };
-
     template <typename D, typename T> struct consume_IVectorView
     {
         T GetAt(uint32_t const index) const
