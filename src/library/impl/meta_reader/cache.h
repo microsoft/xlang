@@ -162,11 +162,6 @@ namespace xlang::meta::reader
                 remove(members.classes, name);
             };
 
-            remove("Windows.Foundation", "IAsyncInfo");
-            remove("Windows.Foundation", "IAsyncAction");
-            remove("Windows.Foundation", "IAsyncActionWithProgress`1");
-            remove("Windows.Foundation", "IAsyncOperation`1");
-            remove("Windows.Foundation", "IAsyncOperationWithProgress`2");
             remove("Windows.Foundation", "IReference`1");
             remove("Windows.Foundation", "IReferenceArray`1");
 
@@ -179,12 +174,6 @@ namespace xlang::meta::reader
             remove("Windows.Foundation", "Size");
             remove("Windows.Foundation", "TimeSpan");
 
-            remove("Windows.Foundation", "AsyncActionCompletedHandler");
-            remove("Windows.Foundation", "AsyncActionProgressHandler`1");
-            remove("Windows.Foundation", "AsyncActionWithProgressCompletedHandler`1");
-            remove("Windows.Foundation", "AsyncOperationCompletedHandler`1");
-            remove("Windows.Foundation", "AsyncOperationProgressHandler`2");
-            remove("Windows.Foundation", "AsyncOperationWithProgressCompletedHandler`2");
             remove("Windows.Foundation.Collections", "CollectionChange");
 
             remove("Windows.Foundation.Numerics", "Matrix3x2");

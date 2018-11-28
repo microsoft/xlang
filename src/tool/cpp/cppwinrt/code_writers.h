@@ -1139,6 +1139,45 @@ namespace xlang
             return;
         }
 
+        if (type.TypeName() == "IAsyncAction" && type.TypeNamespace() == "Windows.Foundation")
+        {
+            w.write(R"(        void get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+            GetResults();
+        })");
+            return;
+        }
+
+        if (type.TypeName() == "IAsyncOperation`1" && type.TypeNamespace() == "Windows.Foundation")
+        {
+            w.write(R"(        TResult get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+            return GetResults();
+        })");
+            return;
+        }
+
+        if (type.TypeName() == "IAsyncActionWithProgress`1" && type.TypeNamespace() == "Windows.Foundation")
+        {
+            w.write(R"(        void get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+            GetResults();
+        })");
+            return;
+        }
+
+        if (type.TypeName() == "IAsyncOperationWithProgress`2" && type.TypeNamespace() == "Windows.Foundation")
+        {
+            w.write(R"(        TResult get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+            return GetResults();
+        })");
+            return;
+        }
     }
 
     static void write_interface_extensions(writer& w, TypeDef const& type)
@@ -2781,17 +2820,6 @@ public:
                 { "", "Windows::Foundation::IUnknown" },
                 { "", "Windows::Foundation::IInspectable" },
                 { "", "Windows::Foundation::IActivationFactory" },
-                { "", "Windows::Foundation::IAsyncInfo" },
-                { "", "Windows::Foundation::IAsyncAction" },
-                { "typename TProgress", "Windows::Foundation::IAsyncActionWithProgress<TProgress>" },
-                { "typename TResult", "Windows::Foundation::IAsyncOperation<TResult>" },
-                { "typename TResult, typename TProgress", "Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>" },
-                { "", "Windows::Foundation::AsyncActionCompletedHandler" },
-                { "typename TProgress", "Windows::Foundation::AsyncActionProgressHandler<TProgress>" },
-                { "typename TProgress", "Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>" },
-                { "typename TResult", "Windows::Foundation::AsyncOperationCompletedHandler<TResult>" },
-                { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>" },
-                { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>" },
                 { "typename T", "Windows::Foundation::IReference<T>" },
             };
 

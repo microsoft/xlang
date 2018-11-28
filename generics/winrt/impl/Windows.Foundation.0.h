@@ -47,6 +47,11 @@ namespace winrt::Windows::Foundation
         RectArray = 1043,
         OtherTypeArray = 1044,
     };
+    struct IAsyncAction;
+    template <typename TProgress> struct IAsyncActionWithProgress;
+    struct IAsyncInfo;
+    template <typename TResult, typename TProgress> struct IAsyncOperationWithProgress;
+    template <typename TResult> struct IAsyncOperation;
     struct IClosable;
     struct IDeferral;
     struct IDeferralFactory;
@@ -72,12 +77,41 @@ namespace winrt::Windows::Foundation
     struct Uri;
     struct WwwFormUrlDecoder;
     struct WwwFormUrlDecoderEntry;
+    struct AsyncActionCompletedHandler;
+    template <typename TProgress> struct AsyncActionProgressHandler;
+    template <typename TProgress> struct AsyncActionWithProgressCompletedHandler;
+    template <typename TResult> struct AsyncOperationCompletedHandler;
+    template <typename TResult, typename TProgress> struct AsyncOperationProgressHandler;
+    template <typename TResult, typename TProgress> struct AsyncOperationWithProgressCompletedHandler;
     struct DeferralCompletedHandler;
     template <typename T> struct EventHandler;
     template <typename TSender, typename TResult> struct TypedEventHandler;
 }
 namespace winrt::impl
 {
+    template <> struct category<Windows::Foundation::IAsyncAction>
+    {
+        using type = interface_category;
+    };
+    template <typename TProgress> struct category<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    {
+        using type = pinterface_category<TProgress>;
+        static constexpr guid value{ 0x1F6DB258,0xE803,0x48A1,{ 0x95,0x46,0xEB,0x73,0x53,0x39,0x88,0x84 } };
+    };
+    template <> struct category<Windows::Foundation::IAsyncInfo>
+    {
+        using type = interface_category;
+    };
+    template <typename TResult, typename TProgress> struct category<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    {
+        using type = pinterface_category<TResult, TProgress>;
+        static constexpr guid value{ 0xB5D036D7,0xE297,0x498F,{ 0xBA,0x60,0x02,0x89,0xE7,0x6E,0x23,0xDD } };
+    };
+    template <typename TResult> struct category<Windows::Foundation::IAsyncOperation<TResult>>
+    {
+        using type = pinterface_category<TResult>;
+        static constexpr guid value{ 0x9FC2B0BB,0xE446,0x44E2,{ 0xAA,0x61,0x9C,0xAB,0x8F,0x63,0x6A,0xF2 } };
+    };
     template <> struct category<Windows::Foundation::IClosable>
     {
         using type = interface_category;
@@ -182,6 +216,35 @@ namespace winrt::impl
     {
         using type = enum_category;
     };
+    template <> struct category<Windows::Foundation::AsyncActionCompletedHandler>
+    {
+        using type = delegate_category;
+    };
+    template <typename TProgress> struct category<Windows::Foundation::AsyncActionProgressHandler<TProgress>>
+    {
+        using type = pinterface_category<TProgress>;
+        static constexpr guid value{ 0x6D844858,0x0CFF,0x4590,{ 0xAE,0x89,0x95,0xA5,0xA5,0xC8,0xB4,0xB8 } };
+    };
+    template <typename TProgress> struct category<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>
+    {
+        using type = pinterface_category<TProgress>;
+        static constexpr guid value{ 0x9C029F91,0xCC84,0x44FD,{ 0xAC,0x26,0x0A,0x6C,0x4E,0x55,0x52,0x81 } };
+    };
+    template <typename TResult> struct category<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+    {
+        using type = pinterface_category<TResult>;
+        static constexpr guid value{ 0xFCDCF02C,0xE5D8,0x4478,{ 0x91,0x5A,0x4D,0x90,0xB7,0x4B,0x83,0xA5 } };
+    };
+    template <typename TResult, typename TProgress> struct category<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>
+    {
+        using type = pinterface_category<TResult, TProgress>;
+        static constexpr guid value{ 0x55690902,0x0AAB,0x421A,{ 0x87,0x78,0xF8,0xCE,0x50,0x26,0xD7,0x58 } };
+    };
+    template <typename TResult, typename TProgress> struct category<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    {
+        using type = pinterface_category<TResult, TProgress>;
+        static constexpr guid value{ 0xE85DF41D,0x6AA7,0x46E3,{ 0xA8,0xE2,0xF0,0x09,0xD8,0x40,0xC6,0x27 } };
+    };
     template <> struct category<Windows::Foundation::DeferralCompletedHandler>
     {
         using type = delegate_category;
@@ -195,6 +258,26 @@ namespace winrt::impl
     {
         using type = pinterface_category<TSender, TResult>;
         static constexpr guid value{ 0x9DE1C534,0x6AE1,0x11E0,{ 0x84,0xE1,0x18,0xA9,0x05,0xBC,0xC5,0x3F } };
+    };
+    template <> struct name<Windows::Foundation::IAsyncAction>
+    {
+        static constexpr auto & value{ L"Windows.Foundation.IAsyncAction" };
+    };
+    template <typename TProgress> struct name<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncActionWithProgress`1<", name_v<TProgress>, L">") };
+    };
+    template <> struct name<Windows::Foundation::IAsyncInfo>
+    {
+        static constexpr auto & value{ L"Windows.Foundation.IAsyncInfo" };
+    };
+    template <typename TResult, typename TProgress> struct name<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncOperationWithProgress`2<", name_v<TResult>, name_v<TProgress>, L">") };
+    };
+    template <typename TResult> struct name<Windows::Foundation::IAsyncOperation<TResult>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IAsyncOperation`1<", name_v<TResult>, L">") };
     };
     template <> struct name<Windows::Foundation::IClosable>
     {
@@ -300,6 +383,30 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.PropertyType" };
     };
+    template <> struct name<Windows::Foundation::AsyncActionCompletedHandler>
+    {
+        static constexpr auto & value{ L"Windows.Foundation.AsyncActionCompletedHandler" };
+    };
+    template <typename TProgress> struct name<Windows::Foundation::AsyncActionProgressHandler<TProgress>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncActionProgressHandler`1<", name_v<TProgress>, L">") };
+    };
+    template <typename TProgress> struct name<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncActionWithProgressCompletedHandler`1<", name_v<TProgress>, L">") };
+    };
+    template <typename TResult> struct name<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationCompletedHandler`1<", name_v<TResult>, L">") };
+    };
+    template <typename TResult, typename TProgress> struct name<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationProgressHandler`2<", name_v<TResult>, name_v<TProgress>, L">") };
+    };
+    template <typename TResult, typename TProgress> struct name<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.AsyncOperationWithProgressCompletedHandler`2<", name_v<TResult>, name_v<TProgress>, L">") };
+    };
     template <> struct name<Windows::Foundation::DeferralCompletedHandler>
     {
         static constexpr auto & value{ L"Windows.Foundation.DeferralCompletedHandler" };
@@ -311,6 +418,26 @@ namespace winrt::impl
     template <typename TSender, typename TResult> struct name<Windows::Foundation::TypedEventHandler<TSender, TResult>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.TypedEventHandler`2<", name_v<TSender>, name_v<TResult>, L">") };
+    };
+    template <> struct guid_storage<Windows::Foundation::IAsyncAction>
+    {
+        static constexpr guid value{ 0x5A648006,0x843A,0x4DA9,{ 0x86,0x5B,0x9D,0x26,0xE5,0xDF,0xAD,0x7B } };
+    };
+    template <typename TProgress> struct guid_storage<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::IAsyncActionWithProgress<TProgress>>::value };
+    };
+    template <> struct guid_storage<Windows::Foundation::IAsyncInfo>
+    {
+        static constexpr guid value{ 0x00000036,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
+    template <typename TResult, typename TProgress> struct guid_storage<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>::value };
+    };
+    template <typename TResult> struct guid_storage<Windows::Foundation::IAsyncOperation<TResult>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::IAsyncOperation<TResult>>::value };
     };
     template <> struct guid_storage<Windows::Foundation::IClosable>
     {
@@ -384,6 +511,30 @@ namespace winrt::impl
     {
         static constexpr guid value{ 0x5B8C6B3D,0x24AE,0x41B5,{ 0xA1,0xBF,0xF0,0xC3,0xD5,0x44,0x84,0x5B } };
     };
+    template <> struct guid_storage<Windows::Foundation::AsyncActionCompletedHandler>
+    {
+        static constexpr guid value{ 0xA4ED5C81,0x76C9,0x40BD,{ 0x8B,0xE6,0xB1,0xD9,0x0F,0xB2,0x0A,0xE7 } };
+    };
+    template <typename TProgress> struct guid_storage<Windows::Foundation::AsyncActionProgressHandler<TProgress>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::AsyncActionProgressHandler<TProgress>>::value };
+    };
+    template <typename TProgress> struct guid_storage<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>::value };
+    };
+    template <typename TResult> struct guid_storage<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>::value };
+    };
+    template <typename TResult, typename TProgress> struct guid_storage<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>::value };
+    };
+    template <typename TResult, typename TProgress> struct guid_storage<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>::value };
+    };
     template <> struct guid_storage<Windows::Foundation::DeferralCompletedHandler>
     {
         static constexpr guid value{ 0xED32A372,0xF3C8,0x4FAA,{ 0x9C,0xFB,0x47,0x01,0x48,0xDA,0x38,0x88 } };
@@ -415,6 +566,57 @@ namespace winrt::impl
     template <> struct default_interface<Windows::Foundation::WwwFormUrlDecoderEntry>
     {
         using type = Windows::Foundation::IWwwFormUrlDecoderEntry;
+    };
+    template <> struct abi<Windows::Foundation::IAsyncAction>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL put_Completed(void*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Completed(void**) noexcept = 0;
+            virtual int32_t WINRT_CALL GetResults() noexcept = 0;
+        };
+    };
+    template <typename TProgress> struct abi<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL put_Progress(void*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Progress(void**) noexcept = 0;
+            virtual int32_t WINRT_CALL put_Completed(void*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Completed(void**) noexcept = 0;
+            virtual int32_t WINRT_CALL GetResults() noexcept = 0;
+        };
+    };
+    template <> struct abi<Windows::Foundation::IAsyncInfo>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL get_Id(uint32_t*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Status(int32_t*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_ErrorCode(winrt::hresult*) noexcept = 0;
+            virtual int32_t WINRT_CALL Cancel() noexcept = 0;
+            virtual int32_t WINRT_CALL Close() noexcept = 0;
+        };
+    };
+    template <typename TResult, typename TProgress> struct abi<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL put_Progress(void*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Progress(void**) noexcept = 0;
+            virtual int32_t WINRT_CALL put_Completed(void*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Completed(void**) noexcept = 0;
+            virtual int32_t WINRT_CALL GetResults(arg_out<TResult>) noexcept = 0;
+        };
+    };
+    template <typename TResult> struct abi<Windows::Foundation::IAsyncOperation<TResult>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL put_Completed(void*) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Completed(void**) noexcept = 0;
+            virtual int32_t WINRT_CALL GetResults(arg_out<TResult>) noexcept = 0;
+        };
     };
     template <> struct abi<Windows::Foundation::IClosable>
     {
@@ -642,6 +844,48 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL CreateWwwFormUrlDecoder(void*, void**) noexcept = 0;
         };
     };
+    template <> struct abi<Windows::Foundation::AsyncActionCompletedHandler>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, int32_t) noexcept = 0;
+        };
+    };
+    template <typename TProgress> struct abi<Windows::Foundation::AsyncActionProgressHandler<TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, arg_in<TProgress>) noexcept = 0;
+        };
+    };
+    template <typename TProgress> struct abi<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, int32_t) noexcept = 0;
+        };
+    };
+    template <typename TResult> struct abi<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, int32_t) noexcept = 0;
+        };
+    };
+    template <typename TResult, typename TProgress> struct abi<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, arg_in<TProgress>) noexcept = 0;
+        };
+    };
+    template <typename TResult, typename TProgress> struct abi<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, int32_t) noexcept = 0;
+        };
+    };
     template <> struct abi<Windows::Foundation::DeferralCompletedHandler>
     {
         struct type : unknown_abi
@@ -662,6 +906,83 @@ namespace winrt::impl
         {
             virtual int32_t WINRT_CALL Invoke(arg_in<TSender>, arg_in<TResult>) noexcept = 0;
         };
+    };
+    template <typename D>
+    struct consume_Windows_Foundation_IAsyncAction
+    {
+        void Completed(Windows::Foundation::AsyncActionCompletedHandler const& handler) const;
+        Windows::Foundation::AsyncActionCompletedHandler Completed() const;
+        void GetResults() const;
+        void get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+            GetResults();
+        }    };
+    template <> struct consume<Windows::Foundation::IAsyncAction>
+    {
+        template <typename D> using type = consume_Windows_Foundation_IAsyncAction<D>;
+    };
+    template <typename D, typename TProgress>
+    struct consume_Windows_Foundation_IAsyncActionWithProgress
+    {
+        void Progress(Windows::Foundation::AsyncActionProgressHandler<TProgress> const& handler) const;
+        Windows::Foundation::AsyncActionProgressHandler<TProgress> Progress() const;
+        void Completed(Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> const& handler) const;
+        Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> Completed() const;
+        void GetResults() const;
+        void get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+            GetResults();
+        }    };
+    template <typename TProgress> struct consume<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>;
+    };
+    template <typename D>
+    struct consume_Windows_Foundation_IAsyncInfo
+    {
+        uint32_t Id() const;
+        Windows::Foundation::AsyncStatus Status() const;
+        winrt::hresult ErrorCode() const;
+        void Cancel() const;
+        void Close() const;
+    };
+    template <> struct consume<Windows::Foundation::IAsyncInfo>
+    {
+        template <typename D> using type = consume_Windows_Foundation_IAsyncInfo<D>;
+    };
+    template <typename D, typename TResult, typename TProgress>
+    struct consume_Windows_Foundation_IAsyncOperationWithProgress
+    {
+        void Progress(Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> const& handler) const;
+        Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> Progress() const;
+        void Completed(Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> const& handler) const;
+        Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> Completed() const;
+        TResult GetResults() const;
+        TResult get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+            return GetResults();
+        }    };
+    template <typename TResult, typename TProgress> struct consume<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>;
+    };
+    template <typename D, typename TResult>
+    struct consume_Windows_Foundation_IAsyncOperation
+    {
+        void Completed(Windows::Foundation::AsyncOperationCompletedHandler<TResult> const& handler) const;
+        Windows::Foundation::AsyncOperationCompletedHandler<TResult> Completed() const;
+        TResult GetResults() const;
+        TResult get() const
+        {
+            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+            return GetResults();
+        }    };
+    template <typename TResult> struct consume<Windows::Foundation::IAsyncOperation<TResult>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_IAsyncOperation<D, TResult>;
     };
     template <typename D>
     struct consume_Windows_Foundation_IClosable

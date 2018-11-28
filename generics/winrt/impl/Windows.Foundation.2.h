@@ -4,6 +4,77 @@
 #include "winrt/impl/Windows.Foundation.1.h"
 namespace winrt::Windows::Foundation
 {
+    struct AsyncActionCompletedHandler : Windows::Foundation::IUnknown
+    {
+        AsyncActionCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncActionCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> AsyncActionCompletedHandler(L lambda);
+        template <typename F> AsyncActionCompletedHandler(F* function);
+        template <typename O, typename M> AsyncActionCompletedHandler(O* object, M method);
+        template <typename O, typename M> AsyncActionCompletedHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> AsyncActionCompletedHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::IAsyncAction const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const;
+    };
+    template <typename TProgress>
+    struct AsyncActionProgressHandler : Windows::Foundation::IUnknown
+    {
+        AsyncActionProgressHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncActionProgressHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> AsyncActionProgressHandler(L lambda);
+        template <typename F> AsyncActionProgressHandler(F* function);
+        template <typename O, typename M> AsyncActionProgressHandler(O* object, M method);
+        template <typename O, typename M> AsyncActionProgressHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> AsyncActionProgressHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::IAsyncActionWithProgress<TProgress> const& asyncInfo, TProgress const& progressInfo) const;
+    };
+    template <typename TProgress>
+    struct AsyncActionWithProgressCompletedHandler : Windows::Foundation::IUnknown
+    {
+        AsyncActionWithProgressCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncActionWithProgressCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> AsyncActionWithProgressCompletedHandler(L lambda);
+        template <typename F> AsyncActionWithProgressCompletedHandler(F* function);
+        template <typename O, typename M> AsyncActionWithProgressCompletedHandler(O* object, M method);
+        template <typename O, typename M> AsyncActionWithProgressCompletedHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> AsyncActionWithProgressCompletedHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::IAsyncActionWithProgress<TProgress> const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const;
+    };
+    template <typename TResult>
+    struct AsyncOperationCompletedHandler : Windows::Foundation::IUnknown
+    {
+        AsyncOperationCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncOperationCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> AsyncOperationCompletedHandler(L lambda);
+        template <typename F> AsyncOperationCompletedHandler(F* function);
+        template <typename O, typename M> AsyncOperationCompletedHandler(O* object, M method);
+        template <typename O, typename M> AsyncOperationCompletedHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> AsyncOperationCompletedHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::IAsyncOperation<TResult> const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const;
+    };
+    template <typename TResult, typename TProgress>
+    struct AsyncOperationProgressHandler : Windows::Foundation::IUnknown
+    {
+        AsyncOperationProgressHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncOperationProgressHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> AsyncOperationProgressHandler(L lambda);
+        template <typename F> AsyncOperationProgressHandler(F* function);
+        template <typename O, typename M> AsyncOperationProgressHandler(O* object, M method);
+        template <typename O, typename M> AsyncOperationProgressHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> AsyncOperationProgressHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const& asyncInfo, TProgress const& progressInfo) const;
+    };
+    template <typename TResult, typename TProgress>
+    struct AsyncOperationWithProgressCompletedHandler : Windows::Foundation::IUnknown
+    {
+        AsyncOperationWithProgressCompletedHandler(std::nullptr_t = nullptr) noexcept {}
+        AsyncOperationWithProgressCompletedHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> AsyncOperationWithProgressCompletedHandler(L lambda);
+        template <typename F> AsyncOperationWithProgressCompletedHandler(F* function);
+        template <typename O, typename M> AsyncOperationWithProgressCompletedHandler(O* object, M method);
+        template <typename O, typename M> AsyncOperationWithProgressCompletedHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> AsyncOperationWithProgressCompletedHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const;
+    };
     struct DeferralCompletedHandler : Windows::Foundation::IUnknown
     {
         DeferralCompletedHandler(std::nullptr_t = nullptr) noexcept {}
@@ -540,16 +611,5 @@ WINRT_EXPORT namespace winrt
     template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
     template<> struct hash<winrt::Windows::Foundation::IInspectable> : winrt::impl::hash_base<winrt::Windows::Foundation::IInspectable> {};
     template<> struct hash<winrt::Windows::Foundation::IActivationFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IActivationFactory> {};
-    template<> struct hash<winrt::Windows::Foundation::IAsyncInfo> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncInfo> {};
-    template<> struct hash<winrt::Windows::Foundation::IAsyncAction> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncAction> {};
-    template<typename TProgress> struct hash<winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>> {};
-    template<typename TResult> struct hash<winrt::Windows::Foundation::IAsyncOperation<TResult>> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncOperation<TResult>> {};
-    template<typename TResult, typename TProgress> struct hash<winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>> {};
-    template<> struct hash<winrt::Windows::Foundation::AsyncActionCompletedHandler> : winrt::impl::hash_base<winrt::Windows::Foundation::AsyncActionCompletedHandler> {};
-    template<typename TProgress> struct hash<winrt::Windows::Foundation::AsyncActionProgressHandler<TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::AsyncActionProgressHandler<TProgress>> {};
-    template<typename TProgress> struct hash<winrt::Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>> {};
-    template<typename TResult> struct hash<winrt::Windows::Foundation::AsyncOperationCompletedHandler<TResult>> : winrt::impl::hash_base<winrt::Windows::Foundation::AsyncOperationCompletedHandler<TResult>> {};
-    template<typename TResult, typename TProgress> struct hash<winrt::Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>> {};
-    template<typename TResult, typename TProgress> struct hash<winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::IReference<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::IReference<T>> {};
 }

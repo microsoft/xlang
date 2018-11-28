@@ -4,6 +4,112 @@
 #include "winrt/impl/Windows.Foundation.2.h"
 namespace winrt::impl
 {
+    template <typename D> void consume_Windows_Foundation_IAsyncAction<D>::Completed(Windows::Foundation::AsyncActionCompletedHandler const& handler) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->put_Completed(get_abi(handler)));
+    }
+    template <typename D> Windows::Foundation::AsyncActionCompletedHandler consume_Windows_Foundation_IAsyncAction<D>::Completed() const
+    {
+        void* handler;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->get_Completed(&handler));
+        return { handler, take_ownership_from_abi };
+    }
+    template <typename D> void consume_Windows_Foundation_IAsyncAction<D>::GetResults() const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncAction)->GetResults());
+    }
+    template <typename D, typename TProgress> void consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::Progress(Windows::Foundation::AsyncActionProgressHandler<TProgress> const& handler) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->put_Progress(get_abi(handler)));
+    }
+    template <typename D, typename TProgress> Windows::Foundation::AsyncActionProgressHandler<TProgress> consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::Progress() const
+    {
+        Windows::Foundation::AsyncActionProgressHandler<TProgress> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Progress(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename TProgress> void consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::Completed(Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> const& handler) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->put_Completed(get_abi(handler)));
+    }
+    template <typename D, typename TProgress> Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::Completed() const
+    {
+        Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->get_Completed(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename TProgress> void consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::GetResults() const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncActionWithProgress<TProgress>)->GetResults());
+    }
+    template <typename D> uint32_t consume_Windows_Foundation_IAsyncInfo<D>::Id() const
+    {
+        uint32_t winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->get_Id(&winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D> Windows::Foundation::AsyncStatus consume_Windows_Foundation_IAsyncInfo<D>::Status() const
+    {
+        Windows::Foundation::AsyncStatus winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->get_Status(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D> winrt::hresult consume_Windows_Foundation_IAsyncInfo<D>::ErrorCode() const
+    {
+        winrt::hresult winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->get_ErrorCode(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D> void consume_Windows_Foundation_IAsyncInfo<D>::Cancel() const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->Cancel());
+    }
+    template <typename D> void consume_Windows_Foundation_IAsyncInfo<D>::Close() const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncInfo)->Close());
+    }
+    template <typename D, typename TResult, typename TProgress> void consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::Progress(Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> const& handler) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->put_Progress(get_abi(handler)));
+    }
+    template <typename D, typename TResult, typename TProgress> Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::Progress() const
+    {
+        Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Progress(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename TResult, typename TProgress> void consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::Completed(Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> const& handler) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->put_Completed(get_abi(handler)));
+    }
+    template <typename D, typename TResult, typename TProgress> Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::Completed() const
+    {
+        Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->get_Completed(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename TResult, typename TProgress> TResult consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::GetResults() const
+    {
+        TResult winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>)->GetResults(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename TResult> void consume_Windows_Foundation_IAsyncOperation<D, TResult>::Completed(Windows::Foundation::AsyncOperationCompletedHandler<TResult> const& handler) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->put_Completed(get_abi(handler)));
+    }
+    template <typename D, typename TResult> Windows::Foundation::AsyncOperationCompletedHandler<TResult> consume_Windows_Foundation_IAsyncOperation<D, TResult>::Completed() const
+    {
+        Windows::Foundation::AsyncOperationCompletedHandler<TResult> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->get_Completed(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename TResult> TResult consume_Windows_Foundation_IAsyncOperation<D, TResult>::GetResults() const
+    {
+        TResult winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IAsyncOperation<TResult>)->GetResults(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
     template <typename D> void consume_Windows_Foundation_IClosable<D>::Close() const
     {
         check_hresult(WINRT_SHIM(Windows::Foundation::IClosable)->Close());
@@ -672,6 +778,132 @@ namespace winrt::impl
         check_hresult(WINRT_SHIM(Windows::Foundation::IWwwFormUrlDecoderRuntimeClassFactory)->CreateWwwFormUrlDecoder(get_abi(query), &instance));
         return { instance, take_ownership_from_abi };
     }
+    template <> struct delegate<Windows::Foundation::AsyncActionCompletedHandler>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::AsyncActionCompletedHandler, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::AsyncActionCompletedHandler, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* asyncInfo, int32_t asyncStatus) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::IAsyncAction const*>(&asyncInfo), *reinterpret_cast<Windows::Foundation::AsyncStatus const*>(&asyncStatus));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
+    template <typename TProgress> struct delegate<Windows::Foundation::AsyncActionProgressHandler<TProgress>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::AsyncActionProgressHandler<TProgress>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::AsyncActionProgressHandler<TProgress>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* asyncInfo, arg_in<TProgress> progressInfo) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const*>(&asyncInfo), *reinterpret_cast<TProgress const*>(&progressInfo));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
+    template <typename TProgress> struct delegate<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* asyncInfo, int32_t asyncStatus) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const*>(&asyncInfo), *reinterpret_cast<Windows::Foundation::AsyncStatus const*>(&asyncStatus));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
+    template <typename TResult> struct delegate<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::AsyncOperationCompletedHandler<TResult>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::AsyncOperationCompletedHandler<TResult>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* asyncInfo, int32_t asyncStatus) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::IAsyncOperation<TResult> const*>(&asyncInfo), *reinterpret_cast<Windows::Foundation::AsyncStatus const*>(&asyncStatus));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
+    template <typename TResult, typename TProgress> struct delegate<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* asyncInfo, arg_in<TProgress> progressInfo) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const*>(&asyncInfo), *reinterpret_cast<TProgress const*>(&progressInfo));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
+    template <typename TResult, typename TProgress> struct delegate<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* asyncInfo, int32_t asyncStatus) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const*>(&asyncInfo), *reinterpret_cast<Windows::Foundation::AsyncStatus const*>(&asyncStatus));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
     template <> struct delegate<Windows::Foundation::DeferralCompletedHandler>
     {
         template <typename H>
@@ -734,6 +966,242 @@ namespace winrt::impl
                 }
             }
         };
+    };
+    template <typename D>
+    struct produce<D, Windows::Foundation::IAsyncAction> : produce_base<D, Windows::Foundation::IAsyncAction>
+    {
+        int32_t WINRT_CALL put_Completed(void* handler) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Completed(*reinterpret_cast<Windows::Foundation::AsyncActionCompletedHandler const*>(&handler));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Completed(void** handler) noexcept final
+        {
+            try
+            {
+                *handler = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *handler = detach_from<Windows::Foundation::AsyncActionCompletedHandler>(this->shim().Completed());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL GetResults() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().GetResults();
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D, typename TProgress>
+    struct produce<D, Windows::Foundation::IAsyncActionWithProgress<TProgress>> : produce_base<D, Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    {
+        int32_t WINRT_CALL put_Progress(void* handler) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Progress(*reinterpret_cast<Windows::Foundation::AsyncActionProgressHandler<TProgress> const*>(&handler));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Progress(void** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::AsyncActionProgressHandler<TProgress>>(this->shim().Progress());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL put_Completed(void* handler) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Completed(*reinterpret_cast<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> const*>(&handler));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Completed(void** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>>(this->shim().Completed());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL GetResults() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().GetResults();
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D>
+    struct produce<D, Windows::Foundation::IAsyncInfo> : produce_base<D, Windows::Foundation::IAsyncInfo>
+    {
+        int32_t WINRT_CALL get_Id(uint32_t* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<uint32_t>(this->shim().Id());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Status(int32_t* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::AsyncStatus>(this->shim().Status());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_ErrorCode(winrt::hresult* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<winrt::hresult>(this->shim().ErrorCode());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL Cancel() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Cancel();
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL Close() noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Close();
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D, typename TResult, typename TProgress>
+    struct produce<D, Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>> : produce_base<D, Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    {
+        int32_t WINRT_CALL put_Progress(void* handler) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Progress(*reinterpret_cast<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress> const*>(&handler));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Progress(void** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>>(this->shim().Progress());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL put_Completed(void* handler) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Completed(*reinterpret_cast<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress> const*>(&handler));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Completed(void** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>(this->shim().Completed());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL GetResults(arg_out<TResult> winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<TResult>(this->shim().GetResults());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D, typename TResult>
+    struct produce<D, Windows::Foundation::IAsyncOperation<TResult>> : produce_base<D, Windows::Foundation::IAsyncOperation<TResult>>
+    {
+        int32_t WINRT_CALL put_Completed(void* handler) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                this->shim().Completed(*reinterpret_cast<Windows::Foundation::AsyncOperationCompletedHandler<TResult> const*>(&handler));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Completed(void** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<Windows::Foundation::AsyncOperationCompletedHandler<TResult>>(this->shim().Completed());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL GetResults(arg_out<TResult> winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<TResult>(this->shim().GetResults());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
     };
     template <typename D>
     struct produce<D, Windows::Foundation::IClosable> : produce_base<D, Windows::Foundation::IClosable>
@@ -2289,6 +2757,150 @@ namespace winrt::Windows::Foundation
         WwwFormUrlDecoder(impl::call_factory<WwwFormUrlDecoder, Windows::Foundation::IWwwFormUrlDecoderRuntimeClassFactory>([&](auto&& f) { return f.CreateWwwFormUrlDecoder(query); }))
     {
     }
+    template <typename L> AsyncActionCompletedHandler::AsyncActionCompletedHandler(L handler) :
+        AsyncActionCompletedHandler(impl::make_delegate<AsyncActionCompletedHandler>(std::forward<L>(handler)))
+    {
+    }
+    template <typename F> AsyncActionCompletedHandler::AsyncActionCompletedHandler(F* handler) :
+        AsyncActionCompletedHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename O, typename M> AsyncActionCompletedHandler::AsyncActionCompletedHandler(O* object, M method) :
+        AsyncActionCompletedHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename O, typename M> AsyncActionCompletedHandler::AsyncActionCompletedHandler(com_ptr<O>&& object, M method) :
+        AsyncActionCompletedHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename O, typename M> AsyncActionCompletedHandler::AsyncActionCompletedHandler(weak_ref<O>&& object, M method) :
+        AsyncActionCompletedHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    inline void AsyncActionCompletedHandler::operator()(Windows::Foundation::IAsyncAction const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const
+    {
+        check_hresult((*(impl::abi_t<AsyncActionCompletedHandler>**)this)->Invoke(get_abi(asyncInfo), get_abi(asyncStatus)));
+    }
+    template <typename TProgress> template <typename L> AsyncActionProgressHandler<TProgress>::AsyncActionProgressHandler(L handler) :
+        AsyncActionProgressHandler(impl::make_delegate<AsyncActionProgressHandler<TProgress>>(std::forward<L>(handler)))
+    {
+    }
+    template <typename TProgress> template <typename F> AsyncActionProgressHandler<TProgress>::AsyncActionProgressHandler(F* handler) :
+        AsyncActionProgressHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename TProgress> template <typename O, typename M> AsyncActionProgressHandler<TProgress>::AsyncActionProgressHandler(O* object, M method) :
+        AsyncActionProgressHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename TProgress> template <typename O, typename M> AsyncActionProgressHandler<TProgress>::AsyncActionProgressHandler(com_ptr<O>&& object, M method) :
+        AsyncActionProgressHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename TProgress> template <typename O, typename M> AsyncActionProgressHandler<TProgress>::AsyncActionProgressHandler(weak_ref<O>&& object, M method) :
+        AsyncActionProgressHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <typename TProgress> void AsyncActionProgressHandler<TProgress>::operator()(Windows::Foundation::IAsyncActionWithProgress<TProgress> const& asyncInfo, TProgress const& progressInfo) const
+    {
+        check_hresult((*(impl::abi_t<AsyncActionProgressHandler<TProgress>>**)this)->Invoke(get_abi(asyncInfo), get_abi(progressInfo)));
+    }
+    template <typename TProgress> template <typename L> AsyncActionWithProgressCompletedHandler<TProgress>::AsyncActionWithProgressCompletedHandler(L handler) :
+        AsyncActionWithProgressCompletedHandler(impl::make_delegate<AsyncActionWithProgressCompletedHandler<TProgress>>(std::forward<L>(handler)))
+    {
+    }
+    template <typename TProgress> template <typename F> AsyncActionWithProgressCompletedHandler<TProgress>::AsyncActionWithProgressCompletedHandler(F* handler) :
+        AsyncActionWithProgressCompletedHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename TProgress> template <typename O, typename M> AsyncActionWithProgressCompletedHandler<TProgress>::AsyncActionWithProgressCompletedHandler(O* object, M method) :
+        AsyncActionWithProgressCompletedHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename TProgress> template <typename O, typename M> AsyncActionWithProgressCompletedHandler<TProgress>::AsyncActionWithProgressCompletedHandler(com_ptr<O>&& object, M method) :
+        AsyncActionWithProgressCompletedHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename TProgress> template <typename O, typename M> AsyncActionWithProgressCompletedHandler<TProgress>::AsyncActionWithProgressCompletedHandler(weak_ref<O>&& object, M method) :
+        AsyncActionWithProgressCompletedHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <typename TProgress> void AsyncActionWithProgressCompletedHandler<TProgress>::operator()(Windows::Foundation::IAsyncActionWithProgress<TProgress> const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const
+    {
+        check_hresult((*(impl::abi_t<AsyncActionWithProgressCompletedHandler<TProgress>>**)this)->Invoke(get_abi(asyncInfo), get_abi(asyncStatus)));
+    }
+    template <typename TResult> template <typename L> AsyncOperationCompletedHandler<TResult>::AsyncOperationCompletedHandler(L handler) :
+        AsyncOperationCompletedHandler(impl::make_delegate<AsyncOperationCompletedHandler<TResult>>(std::forward<L>(handler)))
+    {
+    }
+    template <typename TResult> template <typename F> AsyncOperationCompletedHandler<TResult>::AsyncOperationCompletedHandler(F* handler) :
+        AsyncOperationCompletedHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename TResult> template <typename O, typename M> AsyncOperationCompletedHandler<TResult>::AsyncOperationCompletedHandler(O* object, M method) :
+        AsyncOperationCompletedHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename TResult> template <typename O, typename M> AsyncOperationCompletedHandler<TResult>::AsyncOperationCompletedHandler(com_ptr<O>&& object, M method) :
+        AsyncOperationCompletedHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename TResult> template <typename O, typename M> AsyncOperationCompletedHandler<TResult>::AsyncOperationCompletedHandler(weak_ref<O>&& object, M method) :
+        AsyncOperationCompletedHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <typename TResult> void AsyncOperationCompletedHandler<TResult>::operator()(Windows::Foundation::IAsyncOperation<TResult> const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const
+    {
+        check_hresult((*(impl::abi_t<AsyncOperationCompletedHandler<TResult>>**)this)->Invoke(get_abi(asyncInfo), get_abi(asyncStatus)));
+    }
+    template <typename TResult, typename TProgress> template <typename L> AsyncOperationProgressHandler<TResult, TProgress>::AsyncOperationProgressHandler(L handler) :
+        AsyncOperationProgressHandler(impl::make_delegate<AsyncOperationProgressHandler<TResult, TProgress>>(std::forward<L>(handler)))
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename F> AsyncOperationProgressHandler<TResult, TProgress>::AsyncOperationProgressHandler(F* handler) :
+        AsyncOperationProgressHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename O, typename M> AsyncOperationProgressHandler<TResult, TProgress>::AsyncOperationProgressHandler(O* object, M method) :
+        AsyncOperationProgressHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename O, typename M> AsyncOperationProgressHandler<TResult, TProgress>::AsyncOperationProgressHandler(com_ptr<O>&& object, M method) :
+        AsyncOperationProgressHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename O, typename M> AsyncOperationProgressHandler<TResult, TProgress>::AsyncOperationProgressHandler(weak_ref<O>&& object, M method) :
+        AsyncOperationProgressHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <typename TResult, typename TProgress> void AsyncOperationProgressHandler<TResult, TProgress>::operator()(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const& asyncInfo, TProgress const& progressInfo) const
+    {
+        check_hresult((*(impl::abi_t<AsyncOperationProgressHandler<TResult, TProgress>>**)this)->Invoke(get_abi(asyncInfo), get_abi(progressInfo)));
+    }
+    template <typename TResult, typename TProgress> template <typename L> AsyncOperationWithProgressCompletedHandler<TResult, TProgress>::AsyncOperationWithProgressCompletedHandler(L handler) :
+        AsyncOperationWithProgressCompletedHandler(impl::make_delegate<AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>(std::forward<L>(handler)))
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename F> AsyncOperationWithProgressCompletedHandler<TResult, TProgress>::AsyncOperationWithProgressCompletedHandler(F* handler) :
+        AsyncOperationWithProgressCompletedHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename O, typename M> AsyncOperationWithProgressCompletedHandler<TResult, TProgress>::AsyncOperationWithProgressCompletedHandler(O* object, M method) :
+        AsyncOperationWithProgressCompletedHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename O, typename M> AsyncOperationWithProgressCompletedHandler<TResult, TProgress>::AsyncOperationWithProgressCompletedHandler(com_ptr<O>&& object, M method) :
+        AsyncOperationWithProgressCompletedHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename TResult, typename TProgress> template <typename O, typename M> AsyncOperationWithProgressCompletedHandler<TResult, TProgress>::AsyncOperationWithProgressCompletedHandler(weak_ref<O>&& object, M method) :
+        AsyncOperationWithProgressCompletedHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <typename TResult, typename TProgress> void AsyncOperationWithProgressCompletedHandler<TResult, TProgress>::operator()(Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const& asyncInfo, Windows::Foundation::AsyncStatus const& asyncStatus) const
+    {
+        check_hresult((*(impl::abi_t<AsyncOperationWithProgressCompletedHandler<TResult, TProgress>>**)this)->Invoke(get_abi(asyncInfo), get_abi(asyncStatus)));
+    }
     template <typename L> DeferralCompletedHandler::DeferralCompletedHandler(L handler) :
         DeferralCompletedHandler(impl::make_delegate<DeferralCompletedHandler>(std::forward<L>(handler)))
     {
@@ -2364,6 +2976,11 @@ namespace winrt::Windows::Foundation
 }
 namespace std
 {
+    template<> struct hash<winrt::Windows::Foundation::IAsyncAction> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncAction> {};
+    template<typename TProgress> struct hash<winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>> {};
+    template<> struct hash<winrt::Windows::Foundation::IAsyncInfo> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncInfo> {};
+    template<typename TResult, typename TProgress> struct hash<winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>> {};
+    template<typename TResult> struct hash<winrt::Windows::Foundation::IAsyncOperation<TResult>> : winrt::impl::hash_base<winrt::Windows::Foundation::IAsyncOperation<TResult>> {};
     template<> struct hash<winrt::Windows::Foundation::IClosable> : winrt::impl::hash_base<winrt::Windows::Foundation::IClosable> {};
     template<> struct hash<winrt::Windows::Foundation::IDeferral> : winrt::impl::hash_base<winrt::Windows::Foundation::IDeferral> {};
     template<> struct hash<winrt::Windows::Foundation::IDeferralFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IDeferralFactory> {};

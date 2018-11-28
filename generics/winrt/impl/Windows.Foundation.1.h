@@ -4,6 +4,48 @@
 #include "winrt/impl/Windows.Foundation.0.h"
 namespace winrt::Windows::Foundation
 {
+    struct WINRT_EBO IAsyncAction :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<IAsyncAction>,
+        impl::require<Windows::Foundation::IAsyncAction, Windows::Foundation::IAsyncInfo>
+    {
+        IAsyncAction(std::nullptr_t = nullptr) noexcept {}
+        IAsyncAction(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
+    template <typename TProgress>
+    struct WINRT_EBO IAsyncActionWithProgress :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::IAsyncActionWithProgress<TProgress>>,
+        impl::require<Windows::Foundation::IAsyncActionWithProgress<TProgress>, Windows::Foundation::IAsyncInfo>
+    {
+        IAsyncActionWithProgress(std::nullptr_t = nullptr) noexcept {}
+        IAsyncActionWithProgress(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
+    struct WINRT_EBO IAsyncInfo :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<IAsyncInfo>
+    {
+        IAsyncInfo(std::nullptr_t = nullptr) noexcept {}
+        IAsyncInfo(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
+    template <typename TResult, typename TProgress>
+    struct WINRT_EBO IAsyncOperationWithProgress :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>,
+        impl::require<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>, Windows::Foundation::IAsyncInfo>
+    {
+        IAsyncOperationWithProgress(std::nullptr_t = nullptr) noexcept {}
+        IAsyncOperationWithProgress(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
+    template <typename TResult>
+    struct WINRT_EBO IAsyncOperation :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::IAsyncOperation<TResult>>,
+        impl::require<Windows::Foundation::IAsyncOperation<TResult>, Windows::Foundation::IAsyncInfo>
+    {
+        IAsyncOperation(std::nullptr_t = nullptr) noexcept {}
+        IAsyncOperation(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
     struct WINRT_EBO IClosable :
         Windows::Foundation::IInspectable,
         impl::consume_t<IClosable>
