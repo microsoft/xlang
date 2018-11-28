@@ -1,6 +1,50 @@
 
 namespace winrt::impl
 {
+    template <typename D>
+    auto make_factory() -> typename impl::implements_default_interface<D>::type
+    {
+        using result_type = typename impl::implements_default_interface<D>::type;
+
+        if constexpr (!has_static_lifetime_v<D>)
+        {
+            return { to_abi<result_type>(new D), take_ownership_from_abi };
+        }
+        else
+        {
+            static slim_mutex lock;
+            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
+            Windows::Foundation::IUnknown collection;
+            check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
+            auto const map = collection.as<Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>>();
+
+            {
+                slim_lock_guard const guard{ lock };
+
+                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
+                {
+                    return { detach_abi(value), take_ownership_from_abi };
+                }
+            }
+
+            result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
+
+            {
+                slim_lock_guard const guard{ lock };
+
+                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
+                {
+                    return { detach_abi(value), take_ownership_from_abi };
+                }
+                else
+                {
+                    map.Insert(name_of<typename D::instance_type>(), object);
+                    return object;
+                }
+            }
+        }
+    }
+
     template <typename T>
     struct fast_iterator
     {
