@@ -33,7 +33,6 @@ namespace xlang
         w.write(strings::base_delegate);
         w.write(strings::base_types);
         w.write(strings::base_shims);
-        w.write(strings::base_activation);
         w.write(strings::base_implements);
         w.write(strings::base_produce);
         w.write(strings::base_composable);

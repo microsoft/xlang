@@ -19,4 +19,7 @@ int main()
   TypedEventHandler<int, bool> d = [](int, bool){};
   
   printf("%ls\n", Async().get().c_str());
+  
+  Uri uri(L"http://kennykerr.ca/");
+  printf("%ls\n", uri.Domain().c_str());
 }

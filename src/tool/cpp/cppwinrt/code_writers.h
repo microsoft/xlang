@@ -1954,7 +1954,6 @@ public:
 
     static void write_interface(writer& w, TypeDef const& type)
     {
-        auto type_namespace = type.TypeNamespace();
         auto type_name = type.TypeName();
         auto generics = type.GenericParam();
         auto guard{ w.push_generic_params(generics) };
@@ -2815,25 +2814,7 @@ public:
                 w.write(strings::base_reference_produce);
             }
 
-            static constexpr std::pair<std::string_view, std::string_view> pairs[]
-            {
-                { "", "Windows::Foundation::IUnknown" },
-                { "", "Windows::Foundation::IInspectable" },
-                { "", "Windows::Foundation::IActivationFactory" },
-                { "typename T", "Windows::Foundation::IReference<T>" },
-            };
-
-            write_std_namespace(w);
-
-            for (auto&& [params, name] : pairs)
-            {
-                w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
-                    params,
-                    name,
-                    name);
-            }
-
-            write_close_namespace(w);
+            w.write(strings::base_activation);
         }
         else if (namespace_name == "Windows.UI.Xaml.Interop")
         {
