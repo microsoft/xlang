@@ -131,21 +131,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::VectorChangedEventHandler<T>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::VectorChangedEventHandler<T>>::value };
-    };
-
-    template <typename K, typename V> struct guid_storage<wfc::MapChangedEventHandler<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
-    };
-
-    template <typename T> struct guid_storage<Windows::Foundation::EventHandler<T>>
-    {
-        static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
-    };
-
     template <> struct consume<Windows::Foundation::IActivationFactory>
     {
         template <typename D> using type = consume_IActivationFactory<D>;
@@ -272,21 +257,6 @@ namespace winrt::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
     };
 
-    template <typename T> struct name<wfc::VectorChangedEventHandler<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.VectorChangedEventHandler`1<", name_v<T>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename T> struct name<Windows::Foundation::EventHandler<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.EventHandler`1<", name_v<T>, L">") };
-    };
-
     template <> struct category<Windows::Foundation::AsyncActionCompletedHandler>
     {
         using type = delegate_category;
@@ -375,23 +345,5 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x61c17707, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
-    };
-
-    template <typename T> struct category<wfc::VectorChangedEventHandler<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x0c051752, 0x9fbf, 0x4c70,{ 0xaa, 0x0c, 0x0e, 0x4c, 0x82, 0xd9, 0xa7, 0x61 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::MapChangedEventHandler<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename T> struct category<Windows::Foundation::EventHandler<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x9de1c535, 0x6ae1, 0x11e0,{ 0x84, 0xe1, 0x18, 0xa9, 0x05, 0xbc, 0xc5, 0x3f } };
     };
 }

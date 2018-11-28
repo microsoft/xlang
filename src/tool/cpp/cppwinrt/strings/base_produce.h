@@ -22,63 +22,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename T> struct delegate<wfc::VectorChangedEventHandler<T>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<wfc::VectorChangedEventHandler<T>, H>
-        {
-            type(H&& handler) : implements_delegate<wfc::VectorChangedEventHandler<T>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
-            {
-                try
-                {
-                    (*this)(*reinterpret_cast<wfc::IObservableVector<T> const*>(&sender), *reinterpret_cast<wfc::IVectorChangedEventArgs const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
-    };
-
-    template <typename K, typename V> struct delegate<wfc::MapChangedEventHandler<K, V>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<wfc::MapChangedEventHandler<K, V>, H>
-        {
-            type(H&& handler) : implements_delegate<wfc::MapChangedEventHandler<K, V>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
-            {
-                try
-                {
-                    (*this)(*reinterpret_cast<wfc::IObservableMap<K, V> const*>(&sender), *reinterpret_cast<wfc::IMapChangedEventArgs<K> const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
-    };
-
-    template <typename T> struct delegate<Windows::Foundation::EventHandler<T>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<Windows::Foundation::EventHandler<T>, H>
-        {
-            type(H&& handler) : implements_delegate<Windows::Foundation::EventHandler<T>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(void* sender, arg_in<T> args) noexcept final
-            {
-                try
-                {
-                    H::operator()(*reinterpret_cast<Windows::Foundation::IInspectable const*>(&sender), *reinterpret_cast<T const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
-    };
-
     template <typename D> struct produce<D, Windows::Foundation::IAsyncAction> : produce_base<D, Windows::Foundation::IAsyncAction>
     {
         int32_t WINRT_CALL put_Completed(void* handler) noexcept final

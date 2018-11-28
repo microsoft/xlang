@@ -3,6 +3,30 @@
 #include "winrt/impl/Windows.Foundation.Collections.1.h"
 namespace winrt::Windows::Foundation::Collections
 {
+    template <typename K, typename V>
+    struct MapChangedEventHandler : Windows::Foundation::IUnknown
+    {
+        MapChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
+        MapChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> MapChangedEventHandler(L lambda);
+        template <typename F> MapChangedEventHandler(F* function);
+        template <typename O, typename M> MapChangedEventHandler(O* object, M method);
+        template <typename O, typename M> MapChangedEventHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> MapChangedEventHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::Collections::IObservableMap<K, V> const& sender, Windows::Foundation::Collections::IMapChangedEventArgs<K> const& event) const;
+    };
+    template <typename T>
+    struct VectorChangedEventHandler : Windows::Foundation::IUnknown
+    {
+        VectorChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
+        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> VectorChangedEventHandler(L lambda);
+        template <typename F> VectorChangedEventHandler(F* function);
+        template <typename O, typename M> VectorChangedEventHandler(O* object, M method);
+        template <typename O, typename M> VectorChangedEventHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> VectorChangedEventHandler(weak_ref<O>&& object, M method);
+        void operator()(Windows::Foundation::Collections::IObservableVector<T> const& sender, Windows::Foundation::Collections::IVectorChangedEventArgs const& event) const;
+    };
     struct WINRT_EBO PropertySet : Windows::Foundation::Collections::IPropertySet
     {
         PropertySet(std::nullptr_t) noexcept {}
@@ -22,9 +46,4 @@ namespace winrt::Windows::Foundation::Collections
         ValueSet(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::Collections::IPropertySet(ptr, take_ownership_from_abi) {}
         ValueSet();
     };
-}
-namespace std
-{
-    template<typename T> struct hash<winrt::Windows::Foundation::Collections::VectorChangedEventHandler<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::VectorChangedEventHandler<T>> {};
-    template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::MapChangedEventHandler<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::MapChangedEventHandler<K, V>> {};
 }

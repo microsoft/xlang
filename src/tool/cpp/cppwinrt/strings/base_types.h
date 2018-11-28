@@ -52,40 +52,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IAsyncOperationWithProgress(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
-    template <typename T>
-    struct WINRT_EBO EventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        EventHandler(std::nullptr_t = nullptr) noexcept {}
-        EventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        EventHandler(L handler) :
-            EventHandler(impl::make_delegate<EventHandler<T>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> EventHandler(F* handler) :
-            EventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> EventHandler(O* object, M method) :
-            EventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> EventHandler(com_ptr<O>&& object, M method) :
-            EventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> EventHandler(weak_ref<O>&& object, M method) :
-            EventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(IInspectable const& sender, T const& args) const
-        {
-            check_hresult((*(impl::abi_t<EventHandler<T>>**)this)->Invoke(get_abi(sender), get_abi(args)));
-        }
-    };
-
     struct AsyncActionCompletedHandler : IUnknown
     {
         AsyncActionCompletedHandler(std::nullptr_t = nullptr) noexcept {}
@@ -287,78 +253,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         void operator()(IAsyncOperation<TResult> const& sender, AsyncStatus args) const
         {
             check_hresult((*(impl::abi_t<AsyncOperationCompletedHandler<TResult>>**)this)->Invoke(get_abi(sender), args));
-        }
-    };
-}
-
-WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
-{
-    template <typename T>
-    struct WINRT_EBO VectorChangedEventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        VectorChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        VectorChangedEventHandler(L handler) :
-            VectorChangedEventHandler(impl::make_delegate<VectorChangedEventHandler<T>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> VectorChangedEventHandler(F* handler) :
-            VectorChangedEventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> VectorChangedEventHandler(O* object, M method) :
-            VectorChangedEventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> VectorChangedEventHandler(com_ptr<O>&& object, M method) :
-            VectorChangedEventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> VectorChangedEventHandler(weak_ref<O>&& object, M method) :
-            VectorChangedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(IObservableVector<T> const& sender, IVectorChangedEventArgs const& args) const
-        {
-            check_hresult((*(impl::abi_t<VectorChangedEventHandler<T>>**)this)->Invoke(get_abi(sender), get_abi(args)));
-        }
-    };
-
-    template <typename K, typename V>
-    struct WINRT_EBO MapChangedEventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        MapChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        MapChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        MapChangedEventHandler(L handler) :
-            MapChangedEventHandler(impl::make_delegate<MapChangedEventHandler<K, V>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> MapChangedEventHandler(F* handler) :
-            MapChangedEventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> MapChangedEventHandler(O* object, M method) :
-            MapChangedEventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> MapChangedEventHandler(com_ptr<O>&& object, M method) :
-            MapChangedEventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> MapChangedEventHandler(weak_ref<O>&& object, M method) :
-            MapChangedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(IObservableMap<K, V> const& sender, IMapChangedEventArgs<K> const& args) const
-        {
-            check_hresult((*(impl::abi_t<MapChangedEventHandler<K, V>>**)this)->Invoke(get_abi(sender), get_abi(args)));
         }
     };
 }

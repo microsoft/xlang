@@ -73,6 +73,7 @@ namespace winrt::Windows::Foundation
     struct WwwFormUrlDecoder;
     struct WwwFormUrlDecoderEntry;
     struct DeferralCompletedHandler;
+    template <typename T> struct EventHandler;
     template <typename TSender, typename TResult> struct TypedEventHandler;
 }
 namespace winrt::impl
@@ -184,6 +185,11 @@ namespace winrt::impl
     template <> struct category<Windows::Foundation::DeferralCompletedHandler>
     {
         using type = delegate_category;
+    };
+    template <typename T> struct category<Windows::Foundation::EventHandler<T>>
+    {
+        using type = pinterface_category<T>;
+        static constexpr guid value{ 0x9DE1C535,0x6AE1,0x11E0,{ 0x84,0xE1,0x18,0xA9,0x05,0xBC,0xC5,0x3F } };
     };
     template <typename TSender, typename TResult> struct category<Windows::Foundation::TypedEventHandler<TSender, TResult>>
     {
@@ -298,6 +304,10 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.DeferralCompletedHandler" };
     };
+    template <typename T> struct name<Windows::Foundation::EventHandler<T>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.EventHandler`1<", name_v<T>, L">") };
+    };
     template <typename TSender, typename TResult> struct name<Windows::Foundation::TypedEventHandler<TSender, TResult>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.TypedEventHandler`2<", name_v<TSender>, name_v<TResult>, L">") };
@@ -377,6 +387,10 @@ namespace winrt::impl
     template <> struct guid_storage<Windows::Foundation::DeferralCompletedHandler>
     {
         static constexpr guid value{ 0xED32A372,0xF3C8,0x4FAA,{ 0x9C,0xFB,0x47,0x01,0x48,0xDA,0x38,0x88 } };
+    };
+    template <typename T> struct guid_storage<Windows::Foundation::EventHandler<T>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
     };
     template <typename TSender, typename TResult> struct guid_storage<Windows::Foundation::TypedEventHandler<TSender, TResult>>
     {
@@ -633,6 +647,13 @@ namespace winrt::impl
         struct type : unknown_abi
         {
             virtual int32_t WINRT_CALL Invoke() noexcept = 0;
+        };
+    };
+    template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, arg_in<T>) noexcept = 0;
         };
     };
     template <typename TSender, typename TResult> struct abi<Windows::Foundation::TypedEventHandler<TSender, TResult>>

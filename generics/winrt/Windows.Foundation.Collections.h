@@ -241,6 +241,48 @@ namespace winrt::impl
     {
         check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IVector<T>)->ReplaceAll(items.size(), get_abi(items)));
     }
+    template <typename K, typename V> struct delegate<Windows::Foundation::Collections::MapChangedEventHandler<K, V>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::Collections::MapChangedEventHandler<K, V>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::Collections::MapChangedEventHandler<K, V>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* sender, void* event) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::Collections::IObservableMap<K, V> const*>(&sender), *reinterpret_cast<Windows::Foundation::Collections::IMapChangedEventArgs<K> const*>(&event));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
+    template <typename T> struct delegate<Windows::Foundation::Collections::VectorChangedEventHandler<T>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::Collections::VectorChangedEventHandler<T>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::Collections::VectorChangedEventHandler<T>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(void* sender, void* event) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<Windows::Foundation::Collections::IObservableVector<T> const*>(&sender), *reinterpret_cast<Windows::Foundation::Collections::IVectorChangedEventArgs const*>(&event));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
     template <typename D, typename T>
     struct produce<D, Windows::Foundation::Collections::IIterable<T>> : produce_base<D, Windows::Foundation::Collections::IIterable<T>>
     {
@@ -720,6 +762,54 @@ namespace winrt::Windows::Foundation::Collections
     inline ValueSet::ValueSet() :
         ValueSet(impl::call_factory<ValueSet>([](auto&& f) { return f.template ActivateInstance<ValueSet>(); }))
     {
+    }
+    template <typename K, typename V> template <typename L> MapChangedEventHandler<K, V>::MapChangedEventHandler(L handler) :
+        MapChangedEventHandler(impl::make_delegate<MapChangedEventHandler<K, V>>(std::forward<L>(handler)))
+    {
+    }
+    template <typename K, typename V> template <typename F> MapChangedEventHandler<K, V>::MapChangedEventHandler(F* handler) :
+        MapChangedEventHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename K, typename V> template <typename O, typename M> MapChangedEventHandler<K, V>::MapChangedEventHandler(O* object, M method) :
+        MapChangedEventHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename K, typename V> template <typename O, typename M> MapChangedEventHandler<K, V>::MapChangedEventHandler(com_ptr<O>&& object, M method) :
+        MapChangedEventHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename K, typename V> template <typename O, typename M> MapChangedEventHandler<K, V>::MapChangedEventHandler(weak_ref<O>&& object, M method) :
+        MapChangedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <typename K, typename V> void MapChangedEventHandler<K, V>::operator()(Windows::Foundation::Collections::IObservableMap<K, V> const& sender, Windows::Foundation::Collections::IMapChangedEventArgs<K> const& event) const
+    {
+        check_hresult((*(impl::abi_t<MapChangedEventHandler<K, V>>**)this)->Invoke(get_abi(sender), get_abi(event)));
+    }
+    template <typename T> template <typename L> VectorChangedEventHandler<T>::VectorChangedEventHandler(L handler) :
+        VectorChangedEventHandler(impl::make_delegate<VectorChangedEventHandler<T>>(std::forward<L>(handler)))
+    {
+    }
+    template <typename T> template <typename F> VectorChangedEventHandler<T>::VectorChangedEventHandler(F* handler) :
+        VectorChangedEventHandler([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename T> template <typename O, typename M> VectorChangedEventHandler<T>::VectorChangedEventHandler(O* object, M method) :
+        VectorChangedEventHandler([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename T> template <typename O, typename M> VectorChangedEventHandler<T>::VectorChangedEventHandler(com_ptr<O>&& object, M method) :
+        VectorChangedEventHandler([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename T> template <typename O, typename M> VectorChangedEventHandler<T>::VectorChangedEventHandler(weak_ref<O>&& object, M method) :
+        VectorChangedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    template <typename T> void VectorChangedEventHandler<T>::operator()(Windows::Foundation::Collections::IObservableVector<T> const& sender, Windows::Foundation::Collections::IVectorChangedEventArgs const& event) const
+    {
+        check_hresult((*(impl::abi_t<VectorChangedEventHandler<T>>**)this)->Invoke(get_abi(sender), get_abi(event)));
     }
 }
 namespace std

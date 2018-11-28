@@ -289,12 +289,12 @@ namespace xlang
 
                 if (consume_types)
                 {
-                    static constexpr std::string_view optional("Windows::Foundation::IReference"sv);
-                    static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable"sv);
-                    static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView"sv);
-                    static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView"sv);
-                    static constexpr std::string_view vector("Windows::Foundation::Collections::IVector"sv);
-                    static constexpr std::string_view map("Windows::Foundation::Collections::IMap"sv);
+                    static constexpr std::string_view optional("Windows::Foundation::IReference<"sv);
+                    static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable<"sv);
+                    static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView<"sv);
+                    static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView<"sv);
+                    static constexpr std::string_view vector("Windows::Foundation::Collections::IVector<"sv);
+                    static constexpr std::string_view map("Windows::Foundation::Collections::IMap<"sv);
 
                     consume_types = false;
                     auto full_name = write_temp("@::%<%>", ns, name, bind_list(", ", type.GenericArgs()));

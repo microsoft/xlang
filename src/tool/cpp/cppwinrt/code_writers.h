@@ -2793,27 +2793,6 @@ public:
                 { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>" },
                 { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>" },
                 { "typename T", "Windows::Foundation::IReference<T>" },
-                { "typename T", "Windows::Foundation::EventHandler<T>" },
-            };
-
-            write_std_namespace(w);
-
-            for (auto&& [params, name] : pairs)
-            {
-                w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
-                    params,
-                    name,
-                    name);
-            }
-
-            write_close_namespace(w);
-        }
-        else if (namespace_name == "Windows.Foundation.Collections")
-        {
-            static constexpr std::pair<std::string_view, std::string_view> pairs[]
-            {
-                { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
-                { "typename K, typename V", "Windows::Foundation::Collections::MapChangedEventHandler<K, V>" },
             };
 
             write_std_namespace(w);

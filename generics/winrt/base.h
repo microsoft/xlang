@@ -2000,30 +2000,6 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL get_Value(uint32_t* __valueSize, arg_out<T>* value) noexcept = 0;
         };
     };
-
-    template <typename T> struct abi<wfc::VectorChangedEventHandler<T>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept = 0;
-        };
-    };
-
-    template <typename K, typename V> struct abi<wfc::MapChangedEventHandler<K, V>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept = 0;
-        };
-    };
-
-    template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* sender, arg_in<T> args) noexcept = 0;
-        };
-    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -5232,21 +5208,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::VectorChangedEventHandler<T>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::VectorChangedEventHandler<T>>::value };
-    };
-
-    template <typename K, typename V> struct guid_storage<wfc::MapChangedEventHandler<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
-    };
-
-    template <typename T> struct guid_storage<Windows::Foundation::EventHandler<T>>
-    {
-        static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
-    };
-
     template <> struct consume<Windows::Foundation::IActivationFactory>
     {
         template <typename D> using type = consume_IActivationFactory<D>;
@@ -5373,21 +5334,6 @@ namespace winrt::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
     };
 
-    template <typename T> struct name<wfc::VectorChangedEventHandler<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.VectorChangedEventHandler`1<", name_v<T>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename T> struct name<Windows::Foundation::EventHandler<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.EventHandler`1<", name_v<T>, L">") };
-    };
-
     template <> struct category<Windows::Foundation::AsyncActionCompletedHandler>
     {
         using type = delegate_category;
@@ -5476,24 +5422,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x61c17707, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
-    };
-
-    template <typename T> struct category<wfc::VectorChangedEventHandler<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x0c051752, 0x9fbf, 0x4c70,{ 0xaa, 0x0c, 0x0e, 0x4c, 0x82, 0xd9, 0xa7, 0x61 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::MapChangedEventHandler<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename T> struct category<Windows::Foundation::EventHandler<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x9de1c535, 0x6ae1, 0x11e0,{ 0x84, 0xe1, 0x18, 0xa9, 0x05, 0xbc, 0xc5, 0x3f } };
     };
 }
 
@@ -5813,40 +5741,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IAsyncOperationWithProgress(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
     };
 
-    template <typename T>
-    struct WINRT_EBO EventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        EventHandler(std::nullptr_t = nullptr) noexcept {}
-        EventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        EventHandler(L handler) :
-            EventHandler(impl::make_delegate<EventHandler<T>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> EventHandler(F* handler) :
-            EventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> EventHandler(O* object, M method) :
-            EventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> EventHandler(com_ptr<O>&& object, M method) :
-            EventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> EventHandler(weak_ref<O>&& object, M method) :
-            EventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(IInspectable const& sender, T const& args) const
-        {
-            check_hresult((*(impl::abi_t<EventHandler<T>>**)this)->Invoke(get_abi(sender), get_abi(args)));
-        }
-    };
-
     struct AsyncActionCompletedHandler : IUnknown
     {
         AsyncActionCompletedHandler(std::nullptr_t = nullptr) noexcept {}
@@ -6048,78 +5942,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         void operator()(IAsyncOperation<TResult> const& sender, AsyncStatus args) const
         {
             check_hresult((*(impl::abi_t<AsyncOperationCompletedHandler<TResult>>**)this)->Invoke(get_abi(sender), args));
-        }
-    };
-}
-
-WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
-{
-    template <typename T>
-    struct WINRT_EBO VectorChangedEventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        VectorChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        VectorChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        VectorChangedEventHandler(L handler) :
-            VectorChangedEventHandler(impl::make_delegate<VectorChangedEventHandler<T>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> VectorChangedEventHandler(F* handler) :
-            VectorChangedEventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> VectorChangedEventHandler(O* object, M method) :
-            VectorChangedEventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> VectorChangedEventHandler(com_ptr<O>&& object, M method) :
-            VectorChangedEventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> VectorChangedEventHandler(weak_ref<O>&& object, M method) :
-            VectorChangedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(IObservableVector<T> const& sender, IVectorChangedEventArgs const& args) const
-        {
-            check_hresult((*(impl::abi_t<VectorChangedEventHandler<T>>**)this)->Invoke(get_abi(sender), get_abi(args)));
-        }
-    };
-
-    template <typename K, typename V>
-    struct WINRT_EBO MapChangedEventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        MapChangedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        MapChangedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        MapChangedEventHandler(L handler) :
-            MapChangedEventHandler(impl::make_delegate<MapChangedEventHandler<K, V>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> MapChangedEventHandler(F* handler) :
-            MapChangedEventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> MapChangedEventHandler(O* object, M method) :
-            MapChangedEventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> MapChangedEventHandler(com_ptr<O>&& object, M method) :
-            MapChangedEventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> MapChangedEventHandler(weak_ref<O>&& object, M method) :
-            MapChangedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(IObservableMap<K, V> const& sender, IMapChangedEventArgs<K> const& args) const
-        {
-            check_hresult((*(impl::abi_t<MapChangedEventHandler<K, V>>**)this)->Invoke(get_abi(sender), get_abi(args)));
         }
     };
 }
@@ -7916,63 +7738,6 @@ namespace winrt::impl
             }
             catch (...) { return to_hresult(); }
         }
-    };
-
-    template <typename T> struct delegate<wfc::VectorChangedEventHandler<T>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<wfc::VectorChangedEventHandler<T>, H>
-        {
-            type(H&& handler) : implements_delegate<wfc::VectorChangedEventHandler<T>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
-            {
-                try
-                {
-                    (*this)(*reinterpret_cast<wfc::IObservableVector<T> const*>(&sender), *reinterpret_cast<wfc::IVectorChangedEventArgs const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
-    };
-
-    template <typename K, typename V> struct delegate<wfc::MapChangedEventHandler<K, V>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<wfc::MapChangedEventHandler<K, V>, H>
-        {
-            type(H&& handler) : implements_delegate<wfc::MapChangedEventHandler<K, V>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept final
-            {
-                try
-                {
-                    (*this)(*reinterpret_cast<wfc::IObservableMap<K, V> const*>(&sender), *reinterpret_cast<wfc::IMapChangedEventArgs<K> const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
-    };
-
-    template <typename T> struct delegate<Windows::Foundation::EventHandler<T>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<Windows::Foundation::EventHandler<T>, H>
-        {
-            type(H&& handler) : implements_delegate<Windows::Foundation::EventHandler<T>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(void* sender, arg_in<T> args) noexcept final
-            {
-                try
-                {
-                    H::operator()(*reinterpret_cast<Windows::Foundation::IInspectable const*>(&sender), *reinterpret_cast<T const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
     };
 
     template <typename D> struct produce<D, Windows::Foundation::IAsyncAction> : produce_base<D, Windows::Foundation::IAsyncAction>

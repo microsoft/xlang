@@ -232,28 +232,4 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL get_Value(uint32_t* __valueSize, arg_out<T>* value) noexcept = 0;
         };
     };
-
-    template <typename T> struct abi<wfc::VectorChangedEventHandler<T>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept = 0;
-        };
-    };
-
-    template <typename K, typename V> struct abi<wfc::MapChangedEventHandler<K, V>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* sender, void* args) noexcept = 0;
-        };
-    };
-
-    template <typename T> struct abi<Windows::Foundation::EventHandler<T>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(void* sender, arg_in<T> args) noexcept = 0;
-        };
-    };
 }

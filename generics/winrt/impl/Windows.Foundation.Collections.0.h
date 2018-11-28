@@ -22,6 +22,8 @@ namespace winrt::Windows::Foundation::Collections
     struct PropertySet;
     struct StringMap;
     struct ValueSet;
+    template <typename K, typename V> struct MapChangedEventHandler;
+    template <typename T> struct VectorChangedEventHandler;
 }
 namespace winrt::impl
 {
@@ -95,6 +97,16 @@ namespace winrt::impl
     {
         using type = class_category;
     };
+    template <typename K, typename V> struct category<Windows::Foundation::Collections::MapChangedEventHandler<K, V>>
+    {
+        using type = pinterface_category<K, V>;
+        static constexpr guid value{ 0x179517F3,0x94EE,0x41F8,{ 0xBD,0xDC,0x76,0x8A,0x89,0x55,0x44,0xF3 } };
+    };
+    template <typename T> struct category<Windows::Foundation::Collections::VectorChangedEventHandler<T>>
+    {
+        using type = pinterface_category<T>;
+        static constexpr guid value{ 0x0C051752,0x9FBF,0x4C70,{ 0xAA,0x0C,0x0E,0x4C,0x82,0xD9,0xA7,0x61 } };
+    };
     template <typename T> struct name<Windows::Foundation::Collections::IIterable<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterable`1<", name_v<T>, L">") };
@@ -155,6 +167,14 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.Collections.ValueSet" };
     };
+    template <typename K, typename V> struct name<Windows::Foundation::Collections::MapChangedEventHandler<K, V>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, name_v<V>, L">") };
+    };
+    template <typename T> struct name<Windows::Foundation::Collections::VectorChangedEventHandler<T>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.VectorChangedEventHandler`1<", name_v<T>, L">") };
+    };
     template <typename T> struct guid_storage<Windows::Foundation::Collections::IIterable<T>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IIterable<T>>::value };
@@ -202,6 +222,14 @@ namespace winrt::impl
     template <typename T> struct guid_storage<Windows::Foundation::Collections::IVector<T>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IVector<T>>::value };
+    };
+    template <typename K, typename V> struct guid_storage<Windows::Foundation::Collections::MapChangedEventHandler<K, V>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::MapChangedEventHandler<K, V>>::value };
+    };
+    template <typename T> struct guid_storage<Windows::Foundation::Collections::VectorChangedEventHandler<T>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::VectorChangedEventHandler<T>>::value };
     };
     template <> struct default_interface<Windows::Foundation::Collections::PropertySet>
     {
@@ -327,6 +355,20 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL Clear() noexcept = 0;
             virtual int32_t WINRT_CALL GetMany(uint32_t, uint32_t, arg_out<T>, uint32_t*) noexcept = 0;
             virtual int32_t WINRT_CALL ReplaceAll(uint32_t, arg_out<T>) noexcept = 0;
+        };
+    };
+    template <typename K, typename V> struct abi<Windows::Foundation::Collections::MapChangedEventHandler<K, V>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, void*) noexcept = 0;
+        };
+    };
+    template <typename T> struct abi<Windows::Foundation::Collections::VectorChangedEventHandler<T>>
+    {
+        struct type : unknown_abi
+        {
+            virtual int32_t WINRT_CALL Invoke(void*, void*) noexcept = 0;
         };
     };
     template <typename D, typename T>
