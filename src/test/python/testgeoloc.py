@@ -20,9 +20,9 @@ class TestGeolocation(unittest.TestCase):
         self.assertEqual(basic_pos.Altitude, 0.0)
 
         geocircle = wdg.Geocircle(basic_pos, 10)
-        center = geocircle.get_Center()
+        center = geocircle.Center
 
-        self.assertEqual(10, geocircle.get_Radius())
+        self.assertEqual(10, geocircle.Radius)
         for x in ["Latitude", "Longitude", "Altitude"]:
             self.assertEqual(getattr(basic_pos, x), getattr(center, x))
 
@@ -30,9 +30,9 @@ class TestGeolocation(unittest.TestCase):
         basic_pos = {"Latitude": 47.1, "Longitude": -122.1, "Altitude": 0.0}
 
         geocircle = wdg.Geocircle(basic_pos, 10)
-        center = geocircle.get_Center()
+        center = geocircle.Center
 
-        self.assertEqual(10, geocircle.get_Radius())
+        self.assertEqual(10, geocircle.Radius)
         for x in ["Latitude", "Longitude", "Altitude"]:
             self.assertEqual(basic_pos[x], getattr(center, x))
 
@@ -42,8 +42,8 @@ class TestGeolocation(unittest.TestCase):
         basic_pos2 = wdg.BasicGeoposition(47.2, -122.2, 0.0)
 
         box = wdg.GeoboundingBox.TryCompute([basic_pos1, basic_pos2])
-        nw = box.get_NorthwestCorner()
-        se = box.get_SoutheastCorner()
+        nw = box.NorthwestCorner
+        se = box.SoutheastCorner
 
         self.assertAlmostEqual(nw.Latitude, basic_pos2.Latitude)
         self.assertAlmostEqual(nw.Longitude, basic_pos2.Longitude)
@@ -70,15 +70,15 @@ class TestGeolocation(unittest.TestCase):
             
             locator = wdg.Geolocator()
             op = locator.GetGeopositionAsync()
-            op.put_Completed(callback)
+            op.Completed = callback
 
             pos = await future
             self.assertEqual(type(pos), wdg.Geoposition)
 
-            coord = pos.get_Coordinate()
-            self.assertEqual(type(coord.get_Timestamp().UniversalTime), int)
+            coord = pos.Coordinate
+            self.assertEqual(type(coord.Timestamp.UniversalTime), int)
 
-            basic_pos = coord.get_Point().get_Position()
+            basic_pos = coord.Point.Position
             lat = basic_pos.Latitude
             self.assertEqual(type(lat), float)
 
