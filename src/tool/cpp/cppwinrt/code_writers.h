@@ -180,7 +180,7 @@ namespace xlang
             get<uint8_t>(get<ElemSig>(args[10].value).value));
     }
 
-    static void write_interface_category(writer& w, TypeDef const& type)
+    static void write_category(writer& w, TypeDef const& type, std::string_view const& category)
     {
         auto generics = type.GenericParam();
 
@@ -188,11 +188,11 @@ namespace xlang
         {
             auto format = R"(    template <> struct category<%>
     {
-        using type = interface_category;
+        using type = %;
     };
 )";
 
-            w.write(format, type);
+            w.write(format, type, category);
         }
         else
         {
@@ -220,17 +220,6 @@ namespace xlang
         }
     }
 
-    static void write_category(writer& w, TypeDef const& type, std::string_view const& category)
-    {
-        auto format = R"(    template <> struct category<%>
-    {
-        using type = %;
-    };
-)";
-
-        w.write(format, type, category);
-    }
-
     static void write_generic_names(writer& w, std::pair<GenericParam, GenericParam> const& params)
     {
         for (auto&& param : params)
@@ -239,7 +228,7 @@ namespace xlang
         }
     }
 
-    static void write_interface_name(writer& w, TypeDef const& type)
+    static void write_name(writer& w, TypeDef const& type)
     {
         auto type_namespace = type.TypeNamespace();
         auto type_name = type.TypeName();
@@ -272,20 +261,6 @@ namespace xlang
                 type_name,
                 bind<write_generic_names>(generics));
         }
-    }
-
-    static void write_name(writer& w, TypeDef const& type)
-    {
-        auto format = R"(    template <> struct name<@::%>
-    {
-        static constexpr auto & value{ L"%.%" };
-    };
-)";
-
-        auto type_namespace = type.TypeNamespace();
-        auto type_name = type.TypeName();
-
-        w.write(format, type_namespace, type_name, type_namespace, type_name);
     }
 
     static void write_guid(writer& w, TypeDef const& type)
@@ -1995,9 +1970,12 @@ public:
     {
         auto generics = type.GenericParam();
         auto guard{ w.push_generic_params(generics) };
+        auto type_name = type.TypeName();
 
         if (!empty(generics))
         {
+            type_name = remove_tick(type_name);
+
             auto format = R"(    template <%>
 )";
 
@@ -2017,7 +1995,6 @@ public:
     };
 )";
 
-        auto type_name = type.TypeName();
         method_signature signature{ get_delegate_method(type) };
 
         w.write(format,
@@ -2744,7 +2721,6 @@ public:
                 { "typename TResult, typename TProgress", "Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>" },
                 { "typename T", "Windows::Foundation::IReference<T>" },
                 { "typename T", "Windows::Foundation::EventHandler<T>" },
-                { "typename TSender, typename TArgs", "Windows::Foundation::TypedEventHandler<TSender, TArgs>" }
             };
 
             write_std_namespace(w);

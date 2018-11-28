@@ -15,6 +15,18 @@ namespace winrt::Windows::Foundation
         template <typename O, typename M> DeferralCompletedHandler(weak_ref<O>&& object, M method);
         void operator()() const;
     };
+    template <typename TSender, typename TResult>
+    struct TypedEventHandler : Windows::Foundation::IUnknown
+    {
+        TypedEventHandler(std::nullptr_t = nullptr) noexcept {}
+        TypedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
+        template <typename L> TypedEventHandler(L lambda);
+        template <typename F> TypedEventHandler(F* function);
+        template <typename O, typename M> TypedEventHandler(O* object, M method);
+        template <typename O, typename M> TypedEventHandler(com_ptr<O>&& object, M method);
+        template <typename O, typename M> TypedEventHandler(weak_ref<O>&& object, M method);
+        void operator()(TSender const& sender, TResult const& args) const;
+    };
     struct WINRT_EBO Deferral : Windows::Foundation::IDeferral
     {
         Deferral(std::nullptr_t) noexcept {}
@@ -522,5 +534,4 @@ WINRT_EXPORT namespace winrt
     template<typename TResult, typename TProgress> struct hash<winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>> : winrt::impl::hash_base<winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::IReference<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::IReference<T>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::EventHandler<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::EventHandler<T>> {};
-    template<typename TSender, typename TArgs> struct hash<winrt::Windows::Foundation::TypedEventHandler<TSender, TArgs>> : winrt::impl::hash_base<winrt::Windows::Foundation::TypedEventHandler<TSender, TArgs>> {};
 }

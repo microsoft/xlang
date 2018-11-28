@@ -146,11 +146,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
     };
 
-    template <typename TSender, typename TArgs> struct guid_storage<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        static constexpr guid value{ pinterface_guid<Windows::Foundation::TypedEventHandler<TSender, TArgs>>::value };
-    };
-
     template <> struct consume<Windows::Foundation::IActivationFactory>
     {
         template <typename D> using type = consume_IActivationFactory<D>;
@@ -292,11 +287,6 @@ namespace winrt::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.EventHandler`1<", name_v<T>, L">") };
     };
 
-    template <typename TSender, typename TArgs> struct name<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.TypedEventHandler`2<", name_v<TSender>, L", ", name_v<TArgs>, L">") };
-    };
-
     template <> struct category<Windows::Foundation::AsyncActionCompletedHandler>
     {
         using type = delegate_category;
@@ -403,11 +393,5 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x9de1c535, 0x6ae1, 0x11e0,{ 0x84, 0xe1, 0x18, 0xa9, 0x05, 0xbc, 0xc5, 0x3f } };
-    };
-
-    template <typename TSender, typename TArgs> struct category<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        using type = pinterface_category<TSender, TArgs>;
-        static constexpr guid value{ 0x9de1c534, 0x6ae1, 0x11e0,{ 0x84, 0xe1, 0x18, 0xa9, 0x05, 0xbc, 0xc5, 0x3f } };
     };
 }

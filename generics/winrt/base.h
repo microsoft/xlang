@@ -2024,14 +2024,6 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL Invoke(void* sender, arg_in<T> args) noexcept = 0;
         };
     };
-
-    template <typename TSender, typename TArgs> struct abi<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(arg_in<TSender> sender, arg_in<TArgs> args) noexcept = 0;
-        };
-    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -5255,11 +5247,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<Windows::Foundation::EventHandler<T>>::value };
     };
 
-    template <typename TSender, typename TArgs> struct guid_storage<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        static constexpr guid value{ pinterface_guid<Windows::Foundation::TypedEventHandler<TSender, TArgs>>::value };
-    };
-
     template <> struct consume<Windows::Foundation::IActivationFactory>
     {
         template <typename D> using type = consume_IActivationFactory<D>;
@@ -5401,11 +5388,6 @@ namespace winrt::impl
         static constexpr auto value{ zcombine(L"Windows.Foundation.EventHandler`1<", name_v<T>, L">") };
     };
 
-    template <typename TSender, typename TArgs> struct name<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.TypedEventHandler`2<", name_v<TSender>, L", ", name_v<TArgs>, L">") };
-    };
-
     template <> struct category<Windows::Foundation::AsyncActionCompletedHandler>
     {
         using type = delegate_category;
@@ -5512,12 +5494,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x9de1c535, 0x6ae1, 0x11e0,{ 0x84, 0xe1, 0x18, 0xa9, 0x05, 0xbc, 0xc5, 0x3f } };
-    };
-
-    template <typename TSender, typename TArgs> struct category<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        using type = pinterface_category<TSender, TArgs>;
-        static constexpr guid value{ 0x9de1c534, 0x6ae1, 0x11e0,{ 0x84, 0xe1, 0x18, 0xa9, 0x05, 0xbc, 0xc5, 0x3f } };
     };
 }
 
@@ -5868,41 +5844,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         void operator()(IInspectable const& sender, T const& args) const
         {
             check_hresult((*(impl::abi_t<EventHandler<T>>**)this)->Invoke(get_abi(sender), get_abi(args)));
-        }
-    };
-
-    template <typename TSender, typename TArgs>
-    struct WINRT_EBO TypedEventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<TSender>, "TSender must be WinRT type.");
-        static_assert(impl::has_category_v<TArgs>, "TArgs must be WinRT type.");
-        TypedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        TypedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        TypedEventHandler(L handler) :
-            TypedEventHandler(impl::make_delegate<TypedEventHandler<TSender, TArgs>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> TypedEventHandler(F* handler) :
-            TypedEventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> TypedEventHandler(O* object, M method) :
-            TypedEventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> TypedEventHandler(com_ptr<O>&& object, M method) :
-            TypedEventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> TypedEventHandler(weak_ref<O>&& object, M method) :
-            TypedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(TSender const& sender, TArgs const& args) const
-        {
-            check_hresult((*(impl::abi_t<TypedEventHandler<TSender, TArgs>>**)this)->Invoke(get_abi(sender), get_abi(args)));
         }
     };
 
@@ -8027,25 +7968,6 @@ namespace winrt::impl
                 try
                 {
                     H::operator()(*reinterpret_cast<Windows::Foundation::IInspectable const*>(&sender), *reinterpret_cast<T const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
-    };
-
-    template <typename TSender, typename TArgs> struct delegate<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<Windows::Foundation::TypedEventHandler<TSender, TArgs>, H>
-        {
-            type(H&& handler) : implements_delegate<Windows::Foundation::TypedEventHandler<TSender, TArgs>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(arg_in<TSender> sender, arg_in<TArgs> args) noexcept final
-            {
-                try
-                {
-                    (*this)(*reinterpret_cast<TSender const*>(&sender), *reinterpret_cast<TArgs const*>(&args));
                     return error_ok;
                 }
                 catch (...) { return to_hresult(); }

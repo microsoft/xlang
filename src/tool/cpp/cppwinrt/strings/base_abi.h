@@ -256,12 +256,4 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL Invoke(void* sender, arg_in<T> args) noexcept = 0;
         };
     };
-
-    template <typename TSender, typename TArgs> struct abi<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        struct WINRT_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t WINRT_CALL Invoke(arg_in<TSender> sender, arg_in<TArgs> args) noexcept = 0;
-        };
-    };
 }

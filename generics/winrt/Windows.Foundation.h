@@ -675,6 +675,27 @@ namespace winrt::impl
             }
         };
     };
+    template <typename TSender, typename TResult> struct delegate<Windows::Foundation::TypedEventHandler<TSender, TResult>>
+    {
+        template <typename H>
+        struct type : implements_delegate<Windows::Foundation::TypedEventHandler<TSender, TResult>, H>
+        {
+            type(H&& handler) : implements_delegate<Windows::Foundation::TypedEventHandler<TSender, TResult>, H>(std::forward<H>(handler)) {}
+
+            int32_t WINRT_CALL Invoke(arg_in<TSender> sender, arg_in<TResult> args) noexcept final
+            {
+                try
+                {
+                    (*this)(*reinterpret_cast<TSender const*>(&sender), *reinterpret_cast<TResult const*>(&args));
+                    return 0;
+                }
+                catch (...)
+                {
+                    return to_hresult();
+                }
+            }
+        };
+    };
     template <typename D>
     struct produce<D, Windows::Foundation::IClosable> : produce_base<D, Windows::Foundation::IClosable>
     {
@@ -2206,6 +2227,30 @@ namespace winrt::Windows::Foundation
     inline void DeferralCompletedHandler::operator()() const
     {
         check_hresult((*(impl::abi_t<DeferralCompletedHandler>**)this)->Invoke());
+    }
+    template <typename L> TypedEventHandler`2::TypedEventHandler`2(L handler) :
+        TypedEventHandler`2(impl::make_delegate<TypedEventHandler`2>(std::forward<L>(handler)))
+    {
+    }
+    template <typename F> TypedEventHandler`2::TypedEventHandler`2(F* handler) :
+        TypedEventHandler`2([=](auto&&... args) { return handler(args...); })
+    {
+    }
+    template <typename O, typename M> TypedEventHandler`2::TypedEventHandler`2(O* object, M method) :
+        TypedEventHandler`2([=](auto&&... args) { return ((*object).*(method))(args...); })
+    {
+    }
+    template <typename O, typename M> TypedEventHandler`2::TypedEventHandler`2(com_ptr<O>&& object, M method) :
+        TypedEventHandler`2([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+    {
+    }
+    template <typename O, typename M> TypedEventHandler`2::TypedEventHandler`2(weak_ref<O>&& object, M method) :
+        TypedEventHandler`2([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+    {
+    }
+    inline void TypedEventHandler`2::operator()(TSender const& sender, TResult const& args) const
+    {
+        check_hresult((*(impl::abi_t<TypedEventHandler`2>**)this)->Invoke(get_abi(sender), get_abi(args)));
     }
 }
 namespace std

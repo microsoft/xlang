@@ -86,41 +86,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         }
     };
 
-    template <typename TSender, typename TArgs>
-    struct WINRT_EBO TypedEventHandler : IUnknown
-    {
-        static_assert(impl::has_category_v<TSender>, "TSender must be WinRT type.");
-        static_assert(impl::has_category_v<TArgs>, "TArgs must be WinRT type.");
-        TypedEventHandler(std::nullptr_t = nullptr) noexcept {}
-        TypedEventHandler(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-
-        template <typename L>
-        TypedEventHandler(L handler) :
-            TypedEventHandler(impl::make_delegate<TypedEventHandler<TSender, TArgs>>(std::forward<L>(handler)))
-        {}
-
-        template <typename F> TypedEventHandler(F* handler) :
-            TypedEventHandler([=](auto&&... args) { handler(args...); })
-        {}
-
-        template <typename O, typename M> TypedEventHandler(O* object, M method) :
-            TypedEventHandler([=](auto&&... args) { ((*object).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> TypedEventHandler(com_ptr<O>&& object, M method) :
-            TypedEventHandler([o = std::move(object), method](auto&&... args) { ((*o).*(method))(args...); })
-        {}
-
-        template <typename O, typename M> TypedEventHandler(weak_ref<O>&& object, M method) :
-            TypedEventHandler([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
-        {}
-
-        void operator()(TSender const& sender, TArgs const& args) const
-        {
-            check_hresult((*(impl::abi_t<TypedEventHandler<TSender, TArgs>>**)this)->Invoke(get_abi(sender), get_abi(args)));
-        }
-    };
-
     struct AsyncActionCompletedHandler : IUnknown
     {
         AsyncActionCompletedHandler(std::nullptr_t = nullptr) noexcept {}

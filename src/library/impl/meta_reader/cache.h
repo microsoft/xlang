@@ -186,7 +186,6 @@ namespace xlang::meta::reader
             remove("Windows.Foundation", "AsyncOperationProgressHandler`2");
             remove("Windows.Foundation", "AsyncOperationWithProgressCompletedHandler`2");
             remove("Windows.Foundation", "EventHandler`1");
-            remove("Windows.Foundation", "TypedEventHandler`2");
 
             remove("Windows.Foundation.Collections", "MapChangedEventHandler`2");
             remove("Windows.Foundation.Collections", "VectorChangedEventHandler`1");

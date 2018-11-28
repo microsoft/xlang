@@ -79,25 +79,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename TSender, typename TArgs> struct delegate<Windows::Foundation::TypedEventHandler<TSender, TArgs>>
-    {
-        template <typename H>
-        struct type final : implements_delegate<Windows::Foundation::TypedEventHandler<TSender, TArgs>, H>
-        {
-            type(H&& handler) : implements_delegate<Windows::Foundation::TypedEventHandler<TSender, TArgs>, H>(std::forward<H>(handler)) {}
-
-            int32_t WINRT_CALL Invoke(arg_in<TSender> sender, arg_in<TArgs> args) noexcept final
-            {
-                try
-                {
-                    (*this)(*reinterpret_cast<TSender const*>(&sender), *reinterpret_cast<TArgs const*>(&args));
-                    return error_ok;
-                }
-                catch (...) { return to_hresult(); }
-            }
-        };
-    };
-
     template <typename D> struct produce<D, Windows::Foundation::IAsyncAction> : produce_base<D, Windows::Foundation::IAsyncAction>
     {
         int32_t WINRT_CALL put_Completed(void* handler) noexcept final
