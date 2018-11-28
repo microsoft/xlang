@@ -705,7 +705,7 @@ namespace xlang
 
     static void write_delegate_abi(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <> struct abi<@::%>
+        auto format = R"(    template <%> struct abi<%>
     {
         struct type : unknown_abi
         {
@@ -714,13 +714,15 @@ namespace xlang
     };
 )";
 
-        auto guard{ w.push_generic_params(type.GenericParam()) };
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
         auto method = get_delegate_method(type);
         method_signature signature{ method };
+        w.abi_types = false;
 
         w.write(format,
-            type.TypeNamespace(),
-            type.TypeName(),
+            bind<write_generic_typenames>(generics),
+            type,
             bind<write_abi_params>(signature));
     }
 
@@ -1991,6 +1993,17 @@ public:
 
     static void write_delegate(writer& w, TypeDef const& type)
     {
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
+
+        if (!empty(generics))
+        {
+            auto format = R"(    template <%>
+)";
+
+            w.write(format, bind<write_generic_typenames>(generics));
+        }
+
         auto format = R"(    struct % : Windows::Foundation::IUnknown
     {
         %(std::nullptr_t = nullptr) noexcept {}
@@ -2005,7 +2018,6 @@ public:
 )";
 
         auto type_name = type.TypeName();
-        auto guard{ w.push_generic_params(type.GenericParam()) };
         method_signature signature{ get_delegate_method(type) };
 
         w.write(format,
@@ -2023,12 +2035,12 @@ public:
 
     static void write_delegate_implementation(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <> struct delegate<@::%>
+        auto format = R"(    template <%> struct delegate<%>
     {
         template <typename H>
-        struct type : implements_delegate<@::%, H>
+        struct type : implements_delegate<%, H>
         {
-            type(H&& handler) : implements_delegate<@::%, H>(std::forward<H>(handler)) {}
+            type(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
             int32_t WINRT_CALL Invoke(%) noexcept final
             {
@@ -2047,18 +2059,18 @@ public:
 )";
 
         w.param_names = true;
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-        auto type_name = type.TypeName();
-        auto type_namespace = type.TypeNamespace();
+        auto generics = type.GenericParam();
+        auto guard{ w.push_generic_params(generics) };
         method_signature signature{ get_delegate_method(type) };
 
         w.write(format,
-            type_namespace, type_name,
-            type_namespace, type_name,
-            type_namespace, type_name,
+            bind<write_generic_typenames>(generics),
+            type,
+            type,
+            type,
             bind<write_abi_params>(signature),
             bind<write_delegate_upcall>(signature),
-            "");
+            ""); // TODO: resolve
     }
 
     static void write_delegate_definition(writer& w, TypeDef const& type)
