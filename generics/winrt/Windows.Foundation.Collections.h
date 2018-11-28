@@ -59,6 +59,28 @@ namespace winrt::impl
         check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IMapChangedEventArgs<K>)->get_Key(put_abi(winrt_impl_result)));
         return winrt_impl_result;
     }
+    template <typename D, typename K, typename V> V consume_Windows_Foundation_Collections_IMapView<D, K, V>::Lookup(K const& key) const
+    {
+        V winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename K, typename V> uint32_t consume_Windows_Foundation_Collections_IMapView<D, K, V>::Size() const
+    {
+        uint32_t winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->get_Size(&winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D, typename K, typename V> bool consume_Windows_Foundation_Collections_IMapView<D, K, V>::HasKey(K const& key) const
+    {
+        bool winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->HasKey(get_abi(key), &winrt_impl_result));
+        return winrt_impl_result;
+    }
+    template <typename D, typename K, typename V> void consume_Windows_Foundation_Collections_IMapView<D, K, V>::Split(Windows::Foundation::Collections::IMapView<K, V>& first, Windows::Foundation::Collections::IMapView<K, V>& second) const
+    {
+        check_hresult(WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Split(put_abi(first), put_abi(second)));
+    }
     template <typename D, typename K, typename V> winrt::event_token consume_Windows_Foundation_Collections_IObservableMap<D, K, V>::MapChanged(Windows::Foundation::Collections::MapChangedEventHandler<K, V> const& vhnd) const
     {
         winrt::event_token winrt_impl_result;
@@ -283,6 +305,52 @@ namespace winrt::impl
             {
                 typename D::abi_guard guard(this->shim());
                 *winrt_impl_result = detach_from<K>(this->shim().Key());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D, typename K, typename V>
+    struct produce<D, Windows::Foundation::Collections::IMapView<K, V>> : produce_base<D, Windows::Foundation::Collections::IMapView<K, V>>
+    {
+        int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<V>(this->shim().Lookup(*reinterpret_cast<K const*>(&key)));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL get_Size(uint32_t* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<uint32_t>(this->shim().Size());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL HasKey(arg_in<K> key, bool* winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<bool>(this->shim().HasKey(*reinterpret_cast<K const*>(&key)));
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+        int32_t WINRT_CALL Split(void** first, void** second) noexcept final
+        {
+            try
+            {
+                *first = nullptr;
+                *second = nullptr;
+                typename D::abi_guard guard(this->shim());
+                this->shim().Split(*reinterpret_cast<Windows::Foundation::Collections::IMapView<K, V>*>(first), *reinterpret_cast<Windows::Foundation::Collections::IMapView<K, V>*>(second));
                 return 0;
             }
             catch (...) { return to_hresult(); }
@@ -547,6 +615,7 @@ namespace std
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IIterator<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IIterator<T>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IKeyValuePair<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IKeyValuePair<K, V>> {};
     template<typename K> struct hash<winrt::Windows::Foundation::Collections::IMapChangedEventArgs<K>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IMapChangedEventArgs<K>> {};
+    template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IMapView<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IMapView<K, V>> {};
     template<typename K, typename V> struct hash<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableMap<K, V>> {};
     template<typename T> struct hash<winrt::Windows::Foundation::Collections::IObservableVector<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IObservableVector<T>> {};
     template<> struct hash<winrt::Windows::Foundation::Collections::IPropertySet> : winrt::impl::hash_base<winrt::Windows::Foundation::Collections::IPropertySet> {};

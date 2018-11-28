@@ -352,56 +352,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct produce<D, wfc::IMapView<K, V>> : produce_base<D, wfc::IMapView<K, V>>
-    {
-        int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *value = detach_from<V>(this->shim().Lookup(*reinterpret_cast<K const*>(&key)));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Size(uint32_t* size) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *size = this->shim().Size();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL HasKey(arg_in<K> key, bool* found) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *found = this->shim().HasKey(*reinterpret_cast<K const*>(&key));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL Split(void** firstPartition, void** secondPartition) noexcept final
-        {
-            try
-            {
-                *firstPartition = nullptr;
-                *secondPartition = nullptr;
-                typename D::abi_guard guard(this->shim());
-                this->shim().Split(*reinterpret_cast<wfc::IMapView<K, V>*>(firstPartition), *reinterpret_cast<wfc::IMapView<K, V>*>(secondPartition));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <typename D, typename K, typename V> struct produce<D, wfc::IMap<K, V>> : produce_base<D, wfc::IMap<K, V>>
     {
         int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final

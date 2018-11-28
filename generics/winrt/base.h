@@ -2017,17 +2017,6 @@ namespace winrt::impl
         };
     };
 
-    template <typename K, typename V> struct abi<wfc::IMapView<K, V>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Size(uint32_t* size) noexcept = 0;
-            virtual int32_t WINRT_CALL HasKey(arg_in<K> key, bool* found) noexcept = 0;
-            virtual int32_t WINRT_CALL Split(void** firstPartition, void** secondPartition) noexcept = 0;
-        };
-    };
-
     template <typename K, typename V> struct abi<wfc::IMap<K, V>>
     {
         struct WINRT_NOVTABLE type : inspectable_abi
@@ -5019,57 +5008,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IMapView
-    {
-        V Lookup(param_type<K> const& key) const
-        {
-            V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result)));
-            return result;
-        }
-
-        auto TryLookup(param_type<K> const& key) const noexcept
-        {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
-            {
-                V result{ nullptr };
-                WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
-                return result;
-            }
-            else
-            {
-                std::optional<V> result;
-                V value{ empty_value<V>() };
-
-                if (error_ok == WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
-                {
-                    result = std::move(value);
-                }
-
-                return result;
-            }
-        }
-
-        uint32_t Size() const
-        {
-            uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->get_Size(&size));
-            return size;
-        }
-
-        bool HasKey(param_type<K> const& key) const
-        {
-            bool found{};
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->HasKey(get_abi(key), &found));
-            return found;
-        }
-
-        void Split(wfc::IMapView<K, V>& firstPartition, wfc::IMapView<K, V>& secondPartition)
-        {
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Split(put_abi(firstPartition), put_abi(secondPartition)));
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IMap
     {
         V Lookup(param_type<K> const& key) const
@@ -5113,13 +5051,6 @@ namespace winrt::impl
             bool found{};
             check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->HasKey(get_abi(key), &found));
             return found;
-        }
-
-        wfc::IMapView<K, V> GetView() const
-        {
-            void* result;
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->GetView(&result));
-            return { result, take_ownership_from_abi };
         }
 
         bool Insert(param_type<K> const& key, param_type<V> const& value) const
@@ -5396,11 +5327,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::MapChangedEventHandler<K, V>>::value };
     };
 
-    template <typename K, typename V> struct guid_storage<wfc::IMapView<K, V>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IMapView<K, V>>::value };
-    };
-
     template <typename K, typename V> struct guid_storage<wfc::IMap<K, V>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IMap<K, V>>::value };
@@ -5454,11 +5380,6 @@ namespace winrt::impl
     template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
     {
         template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
-    template <typename K, typename V> struct consume<wfc::IMapView<K, V>>
-    {
-        template <typename D> using type = consume_IMapView<D, K, V>;
     };
 
     template <typename K, typename V> struct consume<wfc::IMap<K, V>>
@@ -5560,11 +5481,6 @@ namespace winrt::impl
     template <typename K, typename V> struct name<wfc::MapChangedEventHandler<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.MapChangedEventHandler`2<", name_v<K>, L", ", name_v<V>, L">") };
-    };
-
-    template <typename K, typename V> struct name<wfc::IMapView<K, V>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapView`2<", name_v<K>, L", ", name_v<V>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IMap<K, V>>
@@ -5682,12 +5598,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<K, V>;
         static constexpr guid value{ 0x179517f3, 0x94ee, 0x41f8,{ 0xbd, 0xdc, 0x76, 0x8a, 0x89, 0x55, 0x44, 0xf3 } };
-    };
-
-    template <typename K, typename V> struct category<wfc::IMapView<K, V>>
-    {
-        using type = pinterface_category<K, V>;
-        static constexpr guid value{ 0xe480ce40, 0xa338, 0x4ada,{ 0xad, 0xcf, 0x27, 0x22, 0x72, 0xe4, 0x8c, 0xb9 } };
     };
 
     template <typename K, typename V> struct category<wfc::IMap<K, V>>
@@ -6301,18 +6211,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
-    template <typename K, typename V>
-    struct WINRT_EBO IMapView :
-        IInspectable,
-        impl::consume_t<IMapView<K, V>>,
-        impl::require<IMapView<K, V>, IIterable<IKeyValuePair<K, V>>>
-    {
-        static_assert(impl::has_category_v<K>, "K must be WinRT type.");
-        static_assert(impl::has_category_v<V>, "V must be WinRT type.");
-        IMapView(std::nullptr_t = nullptr) noexcept {}
-        IMapView(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-    };
-
     template <typename K, typename V>
     struct WINRT_EBO IMap :
         IInspectable,
@@ -8513,56 +8411,6 @@ namespace winrt::impl
                 clear_abi(results);
                 typename D::abi_guard guard(this->shim());
                 *results = detach_from<TResult>(this->shim().GetResults());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename K, typename V> struct produce<D, wfc::IMapView<K, V>> : produce_base<D, wfc::IMapView<K, V>>
-    {
-        int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *value = detach_from<V>(this->shim().Lookup(*reinterpret_cast<K const*>(&key)));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Size(uint32_t* size) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *size = this->shim().Size();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL HasKey(arg_in<K> key, bool* found) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *found = this->shim().HasKey(*reinterpret_cast<K const*>(&key));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL Split(void** firstPartition, void** secondPartition) noexcept final
-        {
-            try
-            {
-                *firstPartition = nullptr;
-                *secondPartition = nullptr;
-                typename D::abi_guard guard(this->shim());
-                this->shim().Split(*reinterpret_cast<wfc::IMapView<K, V>*>(firstPartition), *reinterpret_cast<wfc::IMapView<K, V>*>(secondPartition));
                 return error_ok;
             }
             catch (...) { return to_hresult(); }

@@ -35,57 +35,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename K, typename V> struct consume_IMapView
-    {
-        V Lookup(param_type<K> const& key) const
-        {
-            V result{ empty_value<V>() };
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result)));
-            return result;
-        }
-
-        auto TryLookup(param_type<K> const& key) const noexcept
-        {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
-            {
-                V result{ nullptr };
-                WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
-                return result;
-            }
-            else
-            {
-                std::optional<V> result;
-                V value{ empty_value<V>() };
-
-                if (error_ok == WINRT_SHIM(wfc::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
-                {
-                    result = std::move(value);
-                }
-
-                return result;
-            }
-        }
-
-        uint32_t Size() const
-        {
-            uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->get_Size(&size));
-            return size;
-        }
-
-        bool HasKey(param_type<K> const& key) const
-        {
-            bool found{};
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->HasKey(get_abi(key), &found));
-            return found;
-        }
-
-        void Split(wfc::IMapView<K, V>& firstPartition, wfc::IMapView<K, V>& secondPartition)
-        {
-            check_hresult(WINRT_SHIM(wfc::IMapView<K, V>)->Split(put_abi(firstPartition), put_abi(secondPartition)));
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IMap
     {
         V Lookup(param_type<K> const& key) const
@@ -129,13 +78,6 @@ namespace winrt::impl
             bool found{};
             check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->HasKey(get_abi(key), &found));
             return found;
-        }
-
-        wfc::IMapView<K, V> GetView() const
-        {
-            void* result;
-            check_hresult(WINRT_SHIM(wfc::IMap<K, V>)->GetView(&result));
-            return { result, take_ownership_from_abi };
         }
 
         bool Insert(param_type<K> const& key, param_type<V> const& value) const

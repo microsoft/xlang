@@ -11,6 +11,7 @@ namespace winrt::Windows::Foundation::Collections
     template <typename T> struct IIterator;
     template <typename K, typename V> struct IKeyValuePair;
     template <typename K> struct IMapChangedEventArgs;
+    template <typename K, typename V> struct IMapView;
     template <typename K, typename V> struct IObservableMap;
     template <typename T> struct IObservableVector;
     struct IPropertySet;
@@ -42,6 +43,11 @@ namespace winrt::impl
     {
         using type = pinterface_category<K>;
         static constexpr guid value{ 0x9939F4DF,0x050A,0x4C0F,{ 0xAA,0x60,0x77,0x07,0x5F,0x9C,0x47,0x77 } };
+    };
+    template <typename K, typename V> struct category<Windows::Foundation::Collections::IMapView<K, V>>
+    {
+        using type = pinterface_category<K, V>;
+        static constexpr guid value{ 0xE480CE40,0xA338,0x4ADA,{ 0xAD,0xCF,0x27,0x22,0x72,0xE4,0x8C,0xB9 } };
     };
     template <typename K, typename V> struct category<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
@@ -99,6 +105,10 @@ namespace winrt::impl
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapChangedEventArgs`1<", name_v<K>, L">") };
     };
+    template <typename K, typename V> struct name<Windows::Foundation::Collections::IMapView<K, V>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IMapView`2<", name_v<K>, name_v<V>, L">") };
+    };
     template <typename K, typename V> struct name<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IObservableMap`2<", name_v<K>, name_v<V>, L">") };
@@ -150,6 +160,10 @@ namespace winrt::impl
     template <typename K> struct guid_storage<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
     {
         static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IMapChangedEventArgs<K>>::value };
+    };
+    template <typename K, typename V> struct guid_storage<Windows::Foundation::Collections::IMapView<K, V>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IMapView<K, V>>::value };
     };
     template <typename K, typename V> struct guid_storage<Windows::Foundation::Collections::IObservableMap<K, V>>
     {
@@ -218,6 +232,16 @@ namespace winrt::impl
         {
             virtual int32_t WINRT_CALL get_CollectionChange(int32_t*) noexcept = 0;
             virtual int32_t WINRT_CALL get_Key(arg_out<K>) noexcept = 0;
+        };
+    };
+    template <typename K, typename V> struct abi<Windows::Foundation::Collections::IMapView<K, V>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL Lookup(arg_in<K>, arg_out<V>) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Size(uint32_t*) noexcept = 0;
+            virtual int32_t WINRT_CALL HasKey(arg_in<K>, bool*) noexcept = 0;
+            virtual int32_t WINRT_CALL Split(void**, void**) noexcept = 0;
         };
     };
     template <typename K, typename V> struct abi<Windows::Foundation::Collections::IObservableMap<K, V>>
@@ -343,6 +367,40 @@ namespace winrt::impl
     template <typename K> struct consume<Windows::Foundation::Collections::IMapChangedEventArgs<K>>
     {
         template <typename D> using type = consume_Windows_Foundation_Collections_IMapChangedEventArgs<D, K>;
+    };
+    template <typename D, typename K, typename V>
+    struct consume_Windows_Foundation_Collections_IMapView
+    {
+        V Lookup(K const& key) const;
+        uint32_t Size() const;
+        bool HasKey(K const& key) const;
+        void Split(Windows::Foundation::Collections::IMapView<K, V>& first, Windows::Foundation::Collections::IMapView<K, V>& second) const;
+
+        auto TryLookup(param_type<K> const& key) const noexcept
+        {
+            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
+            {
+                V result{ nullptr };
+                WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                return result;
+            }
+            else
+            {
+                std::optional<V> result;
+                V value{ empty_value<V>() };
+
+                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                {
+                    result = std::move(value);
+                }
+
+                return result;
+            }
+        }
+    };
+    template <typename K, typename V> struct consume<Windows::Foundation::Collections::IMapView<K, V>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_Collections_IMapView<D, K, V>;
     };
     template <typename D, typename K, typename V>
     struct consume_Windows_Foundation_Collections_IObservableMap

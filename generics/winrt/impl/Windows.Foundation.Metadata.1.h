@@ -9,5 +9,5 @@ namespace winrt::Windows::Foundation::Metadata
     {
         IApiInformationStatics(std::nullptr_t = nullptr) noexcept {}
         IApiInformationStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
-        };
+    };
 }

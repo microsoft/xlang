@@ -1030,6 +1030,8 @@ namespace xlang
 
     static void write_consume_extensions(writer& w, TypeDef const& type)
     {
+        // TODO: type_name and type_namespace
+
         if (type.TypeName() == "IBindableIterator" && type.TypeNamespace() == "Windows.UI.Xaml.Interop")
         {
             w.write(R"(
@@ -1100,6 +1102,33 @@ namespace xlang
 )");
 
             return;
+        }
+
+        if (type.TypeName() == "IMapView`2" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            w.write(R"(
+        auto TryLookup(param_type<K> const& key) const noexcept
+        {
+            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
+            {
+                V result{ nullptr };
+                WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                return result;
+            }
+            else
+            {
+                std::optional<V> result;
+                V value{ empty_value<V>() };
+
+                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                {
+                    result = std::move(value);
+                }
+
+                return result;
+            }
+        }
+)");
         }
     }
 
@@ -2691,7 +2720,6 @@ public:
             static constexpr std::pair<std::string_view, std::string_view> pairs[]
             {
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
-                { "typename K, typename V", "Windows::Foundation::Collections::IMapView<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IMap<K, V>" },
                 { "typename K, typename V", "Windows::Foundation::Collections::MapChangedEventHandler<K, V>" },
             };
