@@ -135,8 +135,6 @@ namespace xlang::meta::reader
 
         void remove_legacy_cppwinrt_foundation_types()
         {
-            // TODO: remove this function once cpp.exe generates these base types (soon)...
-
             auto remove = [&](auto&& ns, auto&& name)
             {
                 auto& members = m_namespaces[ns];
