@@ -285,7 +285,7 @@ namespace xlang
                 auto ns = generic_type.TypeNamespace();
                 auto name = generic_type.TypeName();
                 name.remove_suffix(name.size() - name.rfind('`'));
-                //add_depends(type);
+                add_depends(find_required(generic_type));
 
                 if (consume_types)
                 {

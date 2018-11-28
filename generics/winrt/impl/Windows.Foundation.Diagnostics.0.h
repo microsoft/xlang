@@ -8,6 +8,9 @@ namespace winrt::Windows::Foundation
     struct Rect;
     enum class AsyncStatus : int32_t;
     struct EventRegistrationToken;
+    template <typename TResult> struct IAsyncOperation;
+    template <typename TSender, typename TResult> struct TypedEventHandler;
+    template <typename T> struct EventHandler;
     struct Uri;
 }
 namespace winrt::Windows::Storage
