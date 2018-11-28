@@ -11,6 +11,7 @@ namespace winrt::Windows::Foundation::Collections
     template <typename K, typename V> struct IObservableMap;
     template <typename T> struct IObservableVector;
     struct IPropertySet;
+    template <typename T> struct IVectorView;
     template <typename T> struct IVector;
     struct PropertySet;
     struct StringMap;
@@ -36,6 +37,11 @@ namespace winrt::impl
     template <> struct category<Windows::Foundation::Collections::IPropertySet>
     {
         using type = interface_category;
+    };
+    template <typename T> struct category<Windows::Foundation::Collections::IVectorView<T>>
+    {
+        using type = pinterface_category<T>;
+        static constexpr guid value{ 0xBBE1FA4C,0xB0E3,0x4583,{ 0xBA,0xEF,0x1F,0x1B,0x2E,0x48,0x3E,0x56 } };
     };
     template <typename T> struct category<Windows::Foundation::Collections::IVector<T>>
     {
@@ -70,6 +76,10 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.Collections.IPropertySet" };
     };
+    template <typename T> struct name<Windows::Foundation::Collections::IVectorView<T>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVectorView`1<", name_v<T>, L">") };
+    };
     template <typename T> struct name<Windows::Foundation::Collections::IVector<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVector`1<", name_v<T>, L">") };
@@ -101,6 +111,10 @@ namespace winrt::impl
     template <> struct guid_storage<Windows::Foundation::Collections::IPropertySet>
     {
         static constexpr guid value{ 0x8A43ED9F,0xF4E6,0x4421,{ 0xAC,0xF9,0x1D,0xAB,0x29,0x86,0x82,0x0C } };
+    };
+    template <typename T> struct guid_storage<Windows::Foundation::Collections::IVectorView<T>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::Collections::IVectorView<T>>::value };
     };
     template <typename T> struct guid_storage<Windows::Foundation::Collections::IVector<T>>
     {
@@ -145,6 +159,16 @@ namespace winrt::impl
     {
         struct type : inspectable_abi
         {
+        };
+    };
+    template <typename T> struct abi<Windows::Foundation::Collections::IVectorView<T>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL GetAt(uint32_t, arg_out<T>) noexcept = 0;
+            virtual int32_t WINRT_CALL get_Size(uint32_t*) noexcept = 0;
+            virtual int32_t WINRT_CALL IndexOf(arg_in<T>, uint32_t*, bool*) noexcept = 0;
+            virtual int32_t WINRT_CALL GetMany(uint32_t, uint32_t, arg_out<T>, uint32_t*) noexcept = 0;
         };
     };
     template <typename T> struct abi<Windows::Foundation::Collections::IVector<T>>
@@ -205,6 +229,18 @@ namespace winrt::impl
     template <> struct consume<Windows::Foundation::Collections::IPropertySet>
     {
         template <typename D> using type = consume_Windows_Foundation_Collections_IPropertySet<D>;
+    };
+    template <typename D, typename T>
+    struct consume_Windows_Foundation_Collections_IVectorView
+    {
+        T GetAt(uint32_t index) const;
+        uint32_t Size() const;
+        bool IndexOf(T const& value, uint32_t& index) const;
+        uint32_t GetMany(uint32_t startIndex, array_view<T> items) const;
+    };
+    template <typename T> struct consume<Windows::Foundation::Collections::IVectorView<T>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_Collections_IVectorView<D, T>;
     };
     template <typename D, typename T>
     struct consume_Windows_Foundation_Collections_IVector

@@ -156,11 +156,6 @@ namespace winrt::impl
         static constexpr guid value{ pinterface_guid<wfc::IIterator<T>>::value };
     };
 
-    template <typename T> struct guid_storage<wfc::IVectorView<T>>
-    {
-        static constexpr guid value{ pinterface_guid<wfc::IVectorView<T>>::value };
-    };
-
     template <typename K, typename V> struct guid_storage<wfc::IKeyValuePair<K, V>>
     {
         static constexpr guid value{ pinterface_guid<wfc::IKeyValuePair<K, V>>::value };
@@ -239,11 +234,6 @@ namespace winrt::impl
     template <typename T> struct consume<wfc::IIterator<T>>
     {
         template <typename D> using type = consume_IIterator<D, T>;
-    };
-
-    template <typename T> struct consume<wfc::IVectorView<T>>
-    {
-        template <typename D> using type = consume_IVectorView<D, T>;
     };
 
     template <typename K, typename V> struct consume<wfc::IKeyValuePair<K, V>>
@@ -370,11 +360,6 @@ namespace winrt::impl
     template <typename T> struct name<wfc::IIterator<T>>
     {
         static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IIterator`1<", name_v<T>, L">") };
-    };
-
-    template <typename T> struct name<wfc::IVectorView<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.Collections.IVectorView`1<", name_v<T>, L">") };
     };
 
     template <typename K, typename V> struct name<wfc::IKeyValuePair<K, V>>
@@ -519,12 +504,6 @@ namespace winrt::impl
     {
         using type = pinterface_category<T>;
         static constexpr guid value{ 0x6a79e863, 0x4300, 0x459a,{ 0x99, 0x66, 0xcb, 0xb6, 0x60, 0x96, 0x3e, 0xe1 } };
-    };
-
-    template <typename T> struct category<wfc::IVectorView<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0xbbe1fa4c, 0xb0e3, 0x4583,{ 0xba, 0xef, 0x1f, 0x1b, 0x2e, 0x48, 0x3e, 0x56 } };
     };
 
     template <typename K, typename V> struct category<wfc::IKeyValuePair<K, V>>

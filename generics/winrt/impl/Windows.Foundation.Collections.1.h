@@ -38,6 +38,15 @@ namespace winrt::Windows::Foundation::Collections
         IPropertySet(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     template <typename T>
+    struct WINRT_EBO IVectorView :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::Collections::IVectorView<T>>,
+        impl::require<Windows::Foundation::Collections::IVectorView<T>, Windows::Foundation::Collections::IIterable<T>>
+    {
+        IVectorView(std::nullptr_t = nullptr) noexcept {}
+        IVectorView(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
+    template <typename T>
     struct WINRT_EBO IVector :
         Windows::Foundation::IInspectable,
         impl::consume_t<Windows::Foundation::Collections::IVector<T>>,

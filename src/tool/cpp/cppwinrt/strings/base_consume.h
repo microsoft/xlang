@@ -115,37 +115,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct consume_IVectorView
-    {
-        T GetAt(uint32_t const index) const
-        {
-            T result{ empty_value<T>() };
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->GetAt(index, put_abi(result)));
-            return result;
-        }
-
-        uint32_t Size() const
-        {
-            uint32_t size{};
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->get_Size(&size));
-            return size;
-        }
-
-        bool IndexOf(param_type<T> const& value, uint32_t& index) const
-        {
-            bool found{};
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->IndexOf(get_abi(value), &index, &found));
-            return found;
-        }
-
-        uint32_t GetMany(uint32_t startIndex, array_view<T> values) const
-        {
-            uint32_t actual{};
-            check_hresult(WINRT_SHIM(wfc::IVectorView<T>)->GetMany(startIndex, values.size(), get_abi(values), &actual));
-            return actual;
-        }
-    };
-
     template <typename D, typename K, typename V> struct consume_IKeyValuePair
     {
         K Key() const

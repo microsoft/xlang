@@ -454,55 +454,6 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename T> struct produce<D, wfc::IVectorView<T>> : produce_base<D, wfc::IVectorView<T>>
-    {
-        int32_t WINRT_CALL GetAt(uint32_t index, arg_out<T> item) noexcept final
-        {
-            try
-            {
-                clear_abi(item);
-                typename D::abi_guard guard(this->shim());
-                *item = detach_from<T>(this->shim().GetAt(index));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL get_Size(uint32_t* size) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *size = this->shim().Size();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL IndexOf(arg_in<T> value, uint32_t* index, bool* found) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *found = this->shim().IndexOf(*reinterpret_cast<T const*>(&value), *index);
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL GetMany(uint32_t startIndex, uint32_t capacity, arg_out<T> value, uint32_t* actual) noexcept final
-        {
-            try
-            {
-                clear_abi(value);
-                typename D::abi_guard guard(this->shim());
-                *actual = this->shim().GetMany(startIndex, array_view<T>(reinterpret_cast<T*>(value), reinterpret_cast<T*>(value) + capacity));
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <typename D, typename K, typename V> struct produce<D, wfc::IMapView<K, V>> : produce_base<D, wfc::IMapView<K, V>>
     {
         int32_t WINRT_CALL Lookup(arg_in<K> key, arg_out<V> value) noexcept final

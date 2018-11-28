@@ -2632,7 +2632,6 @@ public:
             static constexpr std::pair<std::string_view, std::string_view> pairs[]
             {
                 { "typename T", "Windows::Foundation::Collections::IIterator<T>" },
-                { "typename T", "Windows::Foundation::Collections::IVectorView<T>" },
                 { "typename T", "Windows::Foundation::Collections::VectorChangedEventHandler<T>" },
                 { "", "Windows::Foundation::Collections::IVectorChangedEventArgs" },
                 { "typename K, typename V", "Windows::Foundation::Collections::IKeyValuePair<K, V>" },
