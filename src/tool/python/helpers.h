@@ -129,19 +129,14 @@ namespace xlang
             }
         }
 
-        // void handle_start_generic() { throw_invalid("handle_start_generic not implemented"); }
-
-        // void handle_end_generic() { throw_invalid("handle_end_generic not implemented"); }
-
         void handle(GenericTypeInstSig const& type)
         {
             handle(type.GenericType());
-            // static_cast<T*>(this)->handle_start_generic();
+
             for (auto&& arg : type.GenericArgs())
             {
                 handle(arg);
             }
-            // static_cast<T*>(this)->handle_end_generic();
         }
 
         void handle(ElementType /*type*/) { throw_invalid("handle(ElementType) not implemented"); }
