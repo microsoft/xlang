@@ -119,6 +119,33 @@ namespace winrt::Windows::Foundation
         IPropertyValueStatics(std::nullptr_t = nullptr) noexcept {}
         IPropertyValueStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
+    template <typename T>
+    struct WINRT_EBO IReferenceArray :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::IReferenceArray<T>>,
+        impl::require<Windows::Foundation::IReferenceArray<T>, Windows::Foundation::IPropertyValue>
+    {
+        IReferenceArray(std::nullptr_t = nullptr) noexcept {}
+        IReferenceArray(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
+    template <typename T>
+    struct WINRT_EBO IReference :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<Windows::Foundation::IReference<T>>,
+        impl::require<Windows::Foundation::IReference<T>, Windows::Foundation::IPropertyValue>
+    {
+        IReference(std::nullptr_t = nullptr) noexcept {}
+        IReference(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+        IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
+        {
+        }
+
+    private:
+
+        IReference<T>(IInspectable const& value) : IReference<T>(value.as<IReference<T>>())
+        {
+        }
+    };
     struct WINRT_EBO IStringable :
         Windows::Foundation::IInspectable,
         impl::consume_t<IStringable>

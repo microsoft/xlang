@@ -162,9 +162,6 @@ namespace xlang::meta::reader
                 remove(members.classes, name);
             };
 
-            remove("Windows.Foundation", "IReference`1");
-            remove("Windows.Foundation", "IReferenceArray`1");
-
             remove("Windows.Foundation", "AsyncStatus");
             remove("Windows.Foundation", "DateTime");
             remove("Windows.Foundation", "EventRegistrationToken");

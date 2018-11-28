@@ -104,20 +104,4 @@ namespace winrt::impl
     {
         virtual int32_t WINRT_CALL Buffer(uint8_t** value) noexcept = 0;
     };
-
-    template <typename T> struct abi<Windows::Foundation::IReference<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Value(arg_out<T> value) noexcept = 0;
-        };
-    };
-
-    template <typename T> struct abi<Windows::Foundation::IReferenceArray<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Value(uint32_t* __valueSize, arg_out<T>* value) noexcept = 0;
-        };
-    };
 }

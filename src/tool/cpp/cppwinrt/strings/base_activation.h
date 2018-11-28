@@ -435,5 +435,4 @@ namespace std
     template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
     template<> struct hash<winrt::Windows::Foundation::IInspectable> : winrt::impl::hash_base<winrt::Windows::Foundation::IInspectable> {};
     template<> struct hash<winrt::Windows::Foundation::IActivationFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IActivationFactory> {};
-    template<typename T> struct hash<winrt::Windows::Foundation::IReference<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::IReference<T>> {};
 }

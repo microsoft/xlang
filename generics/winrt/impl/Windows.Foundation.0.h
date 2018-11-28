@@ -62,6 +62,8 @@ namespace winrt::Windows::Foundation
     struct IMemoryBufferReference;
     struct IPropertyValue;
     struct IPropertyValueStatics;
+    template <typename T> struct IReferenceArray;
+    template <typename T> struct IReference;
     struct IStringable;
     struct IUriEscapeStatics;
     struct IUriRuntimeClass;
@@ -151,6 +153,16 @@ namespace winrt::impl
     template <> struct category<Windows::Foundation::IPropertyValueStatics>
     {
         using type = interface_category;
+    };
+    template <typename T> struct category<Windows::Foundation::IReferenceArray<T>>
+    {
+        using type = pinterface_category<T>;
+        static constexpr guid value{ 0x61C17707,0x2D65,0x11E0,{ 0x9A,0xE8,0xD4,0x85,0x64,0x01,0x54,0x72 } };
+    };
+    template <typename T> struct category<Windows::Foundation::IReference<T>>
+    {
+        using type = pinterface_category<T>;
+        static constexpr guid value{ 0x61C17706,0x2D65,0x11E0,{ 0x9A,0xE8,0xD4,0x85,0x64,0x01,0x54,0x72 } };
     };
     template <> struct category<Windows::Foundation::IStringable>
     {
@@ -319,6 +331,14 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.IPropertyValueStatics" };
     };
+    template <typename T> struct name<Windows::Foundation::IReferenceArray<T>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
+    };
+    template <typename T> struct name<Windows::Foundation::IReference<T>>
+    {
+        static constexpr auto value{ zcombine(L"Windows.Foundation.IReference`1<", name_v<T>, L">") };
+    };
     template <> struct name<Windows::Foundation::IStringable>
     {
         static constexpr auto & value{ L"Windows.Foundation.IStringable" };
@@ -478,6 +498,14 @@ namespace winrt::impl
     template <> struct guid_storage<Windows::Foundation::IPropertyValueStatics>
     {
         static constexpr guid value{ 0x629BDBC8,0xD932,0x4FF4,{ 0x96,0xB9,0x8D,0x96,0xC5,0xC1,0xE8,0x58 } };
+    };
+    template <typename T> struct guid_storage<Windows::Foundation::IReferenceArray<T>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::IReferenceArray<T>>::value };
+    };
+    template <typename T> struct guid_storage<Windows::Foundation::IReference<T>>
+    {
+        static constexpr guid value{ pinterface_guid<Windows::Foundation::IReference<T>>::value };
     };
     template <> struct guid_storage<Windows::Foundation::IStringable>
     {
@@ -766,6 +794,20 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL CreatePointArray(uint32_t, Windows::Foundation::Point*, void**) noexcept = 0;
             virtual int32_t WINRT_CALL CreateSizeArray(uint32_t, Windows::Foundation::Size*, void**) noexcept = 0;
             virtual int32_t WINRT_CALL CreateRectArray(uint32_t, Windows::Foundation::Rect*, void**) noexcept = 0;
+        };
+    };
+    template <typename T> struct abi<Windows::Foundation::IReferenceArray<T>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL get_Value(uint32_t* __winrt_impl_resultSize, T**) noexcept = 0;
+        };
+    };
+    template <typename T> struct abi<Windows::Foundation::IReference<T>>
+    {
+        struct type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL get_Value(arg_out<T>) noexcept = 0;
         };
     };
     template <> struct abi<Windows::Foundation::IStringable>
@@ -1155,6 +1197,24 @@ namespace winrt::impl
     template <> struct consume<Windows::Foundation::IPropertyValueStatics>
     {
         template <typename D> using type = consume_Windows_Foundation_IPropertyValueStatics<D>;
+    };
+    template <typename D, typename T>
+    struct consume_Windows_Foundation_IReferenceArray
+    {
+        com_array<T> Value() const;
+    };
+    template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_IReferenceArray<D, T>;
+    };
+    template <typename D, typename T>
+    struct consume_Windows_Foundation_IReference
+    {
+        T Value() const;
+    };
+    template <typename T> struct consume<Windows::Foundation::IReference<T>>
+    {
+        template <typename D> using type = consume_Windows_Foundation_IReference<D, T>;
     };
     template <typename D>
     struct consume_Windows_Foundation_IStringable

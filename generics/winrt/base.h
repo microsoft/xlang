@@ -1872,22 +1872,6 @@ namespace winrt::impl
     {
         virtual int32_t WINRT_CALL Buffer(uint8_t** value) noexcept = 0;
     };
-
-    template <typename T> struct abi<Windows::Foundation::IReference<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Value(arg_out<T> value) noexcept = 0;
-        };
-    };
-
-    template <typename T> struct abi<Windows::Foundation::IReferenceArray<T>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL get_Value(uint32_t* __valueSize, arg_out<T>* value) noexcept = 0;
-        };
-    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -4818,26 +4802,6 @@ namespace winrt::impl
 {
     template <typename Async>
     void blocking_suspend(Async const& async);
-
-    template <typename D, typename T> struct consume_IReference
-    {
-        T Value() const
-        {
-            T result{};
-            check_hresult(WINRT_SHIM(Windows::Foundation::IReference<T>)->get_Value(put_abi(result)));
-            return result;
-        }
-    };
-
-    template <typename D, typename T> struct consume_IReferenceArray
-    {
-        com_array<T> Value() const
-        {
-            com_array<T> result{};
-            check_hresult(WINRT_SHIM(Windows::Foundation::IReferenceArray<T>)->get_Value(impl::put_size_abi(result), put_abi(result)));
-            return result;
-        }
-    };
 }
 
 namespace winrt::impl
@@ -4902,26 +4866,6 @@ namespace winrt::impl
         static constexpr guid value{ 0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
     };
 
-    template <typename T> struct guid_storage<Windows::Foundation::IReference<T>>
-    {
-        static constexpr guid value{ pinterface_guid<Windows::Foundation::IReference<T>>::value };
-    };
-
-    template <typename T> struct guid_storage<Windows::Foundation::IReferenceArray<T>>
-    {
-        static constexpr guid value{ pinterface_guid<Windows::Foundation::IReferenceArray<T>>::value };
-    };
-
-    template <typename T> struct consume<Windows::Foundation::IReference<T>>
-    {
-        template <typename D> using type = consume_IReference<D, T>;
-    };
-
-    template <typename T> struct consume<Windows::Foundation::IReferenceArray<T>>
-    {
-        template <typename D> using type = consume_IReferenceArray<D, T>;
-    };
-
     template <> struct name<Windows::Foundation::IInspectable>
     {
         static constexpr auto & value{ L"Object" };
@@ -4938,18 +4882,6 @@ namespace winrt::impl
         static constexpr auto & value{ L"IWeakReferenceSource" };
     };
 
-    template <typename T> struct name<Windows::Foundation::IReference<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.IReference`1<", name_v<T>, L">") };
-    };
-
-    template <typename T> struct name<Windows::Foundation::IReferenceArray<T>>
-    {
-        static constexpr auto value{ zcombine(L"Windows.Foundation.IReferenceArray`1<", name_v<T>, L">") };
-    };
-
-
-
     template <> struct category<Windows::Foundation::IUnknown>
     {
         using type = interface_category;
@@ -4958,18 +4890,6 @@ namespace winrt::impl
     template <> struct category<Windows::Foundation::IInspectable>
     {
         using type = basic_category;
-    };
-
-    template <typename T> struct category<Windows::Foundation::IReference<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x61c17706, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
-    };
-
-    template <typename T> struct category<Windows::Foundation::IReferenceArray<T>>
-    {
-        using type = pinterface_category<T>;
-        static constexpr guid value{ 0x61c17707, 0x2d65, 0x11e0,{ 0x9a, 0xe8, 0xd4, 0x85, 0x64, 0x01, 0x54, 0x72 } };
     };
 }
 

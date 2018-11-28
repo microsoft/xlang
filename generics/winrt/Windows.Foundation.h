@@ -610,6 +610,18 @@ namespace winrt::impl
         check_hresult(WINRT_SHIM(Windows::Foundation::IPropertyValueStatics)->CreateRectArray(value.size(), get_abi(value), put_abi(propertyValue)));
         return propertyValue;
     }
+    template <typename D, typename T> com_array<T> consume_Windows_Foundation_IReferenceArray<D, T>::Value() const
+    {
+        com_array<T> winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IReferenceArray<T>)->get_Value(impl::put_size_abi(winrt_impl_result), put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
+    template <typename D, typename T> T consume_Windows_Foundation_IReference<D, T>::Value() const
+    {
+        T winrt_impl_result;
+        check_hresult(WINRT_SHIM(Windows::Foundation::IReference<T>)->get_Value(put_abi(winrt_impl_result)));
+        return winrt_impl_result;
+    }
     template <typename D> hstring consume_Windows_Foundation_IStringable<D>::ToString() const
     {
         void* value;
@@ -2221,6 +2233,36 @@ namespace winrt::impl
             catch (...) { return to_hresult(); }
         }
     };
+    template <typename D, typename T>
+    struct produce<D, Windows::Foundation::IReferenceArray<T>> : produce_base<D, Windows::Foundation::IReferenceArray<T>>
+    {
+        int32_t WINRT_CALL get_Value(uint32_t* __winrt_impl_resultSize, T** winrt_impl_result) noexcept final
+        {
+            try
+            {
+                *__winrt_impl_resultSize = 0;
+                *winrt_impl_result = nullptr;
+                typename D::abi_guard guard(this->shim());
+                std::tie(*__winrt_impl_resultSize, *winrt_impl_result) = detach_abi(this->shim().Value());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+    template <typename D, typename T>
+    struct produce<D, Windows::Foundation::IReference<T>> : produce_base<D, Windows::Foundation::IReference<T>>
+    {
+        int32_t WINRT_CALL get_Value(arg_out<T> winrt_impl_result) noexcept final
+        {
+            try
+            {
+                typename D::abi_guard guard(this->shim());
+                *winrt_impl_result = detach_from<T>(this->shim().Value());
+                return 0;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
     template <typename D>
     struct produce<D, Windows::Foundation::IStringable> : produce_base<D, Windows::Foundation::IStringable>
     {
@@ -2991,6 +3033,8 @@ namespace std
     template<> struct hash<winrt::Windows::Foundation::IMemoryBufferReference> : winrt::impl::hash_base<winrt::Windows::Foundation::IMemoryBufferReference> {};
     template<> struct hash<winrt::Windows::Foundation::IPropertyValue> : winrt::impl::hash_base<winrt::Windows::Foundation::IPropertyValue> {};
     template<> struct hash<winrt::Windows::Foundation::IPropertyValueStatics> : winrt::impl::hash_base<winrt::Windows::Foundation::IPropertyValueStatics> {};
+    template<typename T> struct hash<winrt::Windows::Foundation::IReferenceArray<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::IReferenceArray<T>> {};
+    template<typename T> struct hash<winrt::Windows::Foundation::IReference<T>> : winrt::impl::hash_base<winrt::Windows::Foundation::IReference<T>> {};
     template<> struct hash<winrt::Windows::Foundation::IStringable> : winrt::impl::hash_base<winrt::Windows::Foundation::IStringable> {};
     template<> struct hash<winrt::Windows::Foundation::IUriEscapeStatics> : winrt::impl::hash_base<winrt::Windows::Foundation::IUriEscapeStatics> {};
     template<> struct hash<winrt::Windows::Foundation::IUriRuntimeClass> : winrt::impl::hash_base<winrt::Windows::Foundation::IUriRuntimeClass> {};

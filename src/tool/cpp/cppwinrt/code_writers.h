@@ -1193,6 +1193,21 @@ namespace xlang
         using pointer = T*;
         using reference = T&;
 )");
+            return;
+        }
+
+        if (type.TypeName() == "IReference`1" && type.TypeNamespace() == "Windows.Foundation")
+        {
+            w.write(R"(        IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
+        {
+        }
+
+    private:
+
+        IReference<T>(IInspectable const& value) : IReference<T>(value.as<IReference<T>>())
+        {
+        }
+)");
         }
     }
 
