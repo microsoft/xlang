@@ -4798,7 +4798,6 @@ WINRT_EXPORT namespace winrt
     };
 }
 
-
 namespace winrt::impl
 {
     template <> struct guid_storage<Windows::Foundation::IUnknown>
@@ -6320,6 +6319,12 @@ namespace winrt::impl
             }
         }
     }
+
+    template <typename T>
+    auto detach_from(T&& object) noexcept
+    {
+        return detach_abi(std::forward<T>(object));
+    }
 }
 
 WINRT_EXPORT namespace winrt
@@ -6449,15 +6454,6 @@ WINRT_EXPORT namespace winrt
         template <typename T>
         friend struct weak_ref;
     };
-}
-
-namespace winrt::impl
-{
-    template <typename T>
-    auto detach_from(T&& object) noexcept
-    {
-        return detach_abi(std::forward<T>(object));
-    }
 }
 
 namespace winrt::impl
