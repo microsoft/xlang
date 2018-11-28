@@ -38,10 +38,6 @@ namespace xlang
         w.write(strings::base_await);
         w.write(strings::base_std_hash);
         w.write(strings::base_std_fire_and_forget);
-        w.write(strings::base_std_async_action);
-        w.write(strings::base_std_async_action_with_progress);
-        w.write(strings::base_std_async_operation);
-        w.write(strings::base_std_async_operation_with_progress);
         w.write(strings::base_reflect);
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);

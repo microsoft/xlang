@@ -2830,6 +2830,10 @@ public:
             }
 
             w.write(strings::base_activation);
+            w.write(strings::base_std_async_action);
+            w.write(strings::base_std_async_action_with_progress);
+            w.write(strings::base_std_async_operation);
+            w.write(strings::base_std_async_operation_with_progress);
         }
         else if (namespace_name == "Windows.Foundation.Collections")
         {
