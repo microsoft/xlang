@@ -36,15 +36,6 @@ namespace xlang
         w.write(strings::base_chrono);
         w.write(strings::base_security);
         w.write(strings::base_await);
-        w.write(strings::base_collections);
-        w.write(strings::base_collections_base);
-        w.write(strings::base_collections_input_iterable);
-        w.write(strings::base_collections_input_vector_view);
-        w.write(strings::base_collections_input_map_view);
-        w.write(strings::base_collections_input_vector);
-        w.write(strings::base_collections_input_map);
-        w.write(strings::base_collections_vector);
-        w.write(strings::base_collections_map);
         w.write(strings::base_std_hash);
         w.write(strings::base_std_fire_and_forget);
         w.write(strings::base_std_async_action);

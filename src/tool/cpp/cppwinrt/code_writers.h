@@ -2831,6 +2831,18 @@ public:
 
             w.write(strings::base_activation);
         }
+        else if (namespace_name == "Windows.Foundation.Collections")
+        {
+            w.write(strings::base_collections);
+            w.write(strings::base_collections_base);
+            w.write(strings::base_collections_input_iterable);
+            w.write(strings::base_collections_input_vector_view);
+            w.write(strings::base_collections_input_map_view);
+            w.write(strings::base_collections_input_vector);
+            w.write(strings::base_collections_input_map);
+            w.write(strings::base_collections_vector);
+            w.write(strings::base_collections_map);
+        }
         else if (namespace_name == "Windows.UI.Xaml.Interop")
         {
             w.write(strings::base_xaml_typename);
