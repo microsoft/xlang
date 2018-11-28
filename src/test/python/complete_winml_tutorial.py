@@ -33,15 +33,18 @@ async def wrap_async_op(op):
     future = loop.create_future()
 
     def callback(operation, status):
-        if status == 1:
-            result = operation.GetResults()
-            loop.call_soon_threadsafe(asyncio.Future.set_result, future, result)
-        elif status == 2:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, asyncio.CancelledError())
-        elif status == 3:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("AsyncOp failed"))
-        else:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("Unexpected AsyncStatus"))
+        def threadsafe_callback():
+            if status == 1:
+                result = operation.GetResults()
+                future.set_result(result)
+            elif status == 2:
+                future.set_exception(asyncio.CancelledError())
+            elif status == 3:
+                future.set_exception(RuntimeError("AsyncOp failed"))
+            else:
+                future.set_exception(RuntimeError("Unexpected AsyncStatus"))
+
+        loop.call_soon_threadsafe(threadsafe_callback)
 
     op.Completed = callback
 
