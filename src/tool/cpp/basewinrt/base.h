@@ -22,6 +22,7 @@
 #include "base_traits.h"
 #include "base_marshaler.h"
 #include "base_delegate.h"
+#include "base_activation.h"
 #include "base_implements.h"
 #include "base_composable.h"
 #include "base_foundation.h"
