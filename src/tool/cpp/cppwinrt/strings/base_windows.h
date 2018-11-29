@@ -334,18 +334,4 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IInspectable(std::nullptr_t = nullptr) noexcept {}
         IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
-
-    struct IActivationFactory : IInspectable
-    {
-        IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-        IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-
-        template <typename T>
-        T ActivateInstance() const
-        {
-            IInspectable instance;
-            check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
-            return instance.try_as<T>();
-        }
-    };
 }
