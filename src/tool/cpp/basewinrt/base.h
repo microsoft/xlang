@@ -19,7 +19,6 @@
 #include "base_agile_ref.h"
 #include "base_error.h"
 #include "base_events.h"
-#include "base_traits.h"
 #include "base_marshaler.h"
 #include "base_delegate.h"
 #include "base_activation.h"
