@@ -98,27 +98,17 @@ export module winrt;
 #define WINRT_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM64_BARRIER_ISH));
 #endif
 
+namespace winrt::impl
+{
 #ifdef __IUnknown_INTERFACE_DEFINED__
 #define WINRT_WINDOWS_ABI
-
-namespace winrt::impl
-{
     using hresult_type = long;
     using ref_count_type = unsigned long;
-}
-
 #else
-
-namespace winrt::impl
-{
     using hresult_type = int32_t;
     using ref_count_type = uint32_t;
-}
-
 #endif
 
-namespace winrt::impl
-{
     using ptp_io = struct tp_io*;
     using ptp_timer = struct tp_timer*;
     using ptp_wait = struct tp_wait*;
