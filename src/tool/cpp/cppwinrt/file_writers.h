@@ -27,7 +27,6 @@ namespace xlang
         w.write(strings::base_agile_ref);
         w.write(strings::base_error);
         w.write(strings::base_events);
-        w.write(strings::base_traits);
         w.write(strings::base_marshaler);
         w.write(strings::base_delegate);
         w.write(strings::base_activation);
