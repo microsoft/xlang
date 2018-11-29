@@ -430,6 +430,15 @@ WINRT_EXPORT namespace winrt
 
     template <typename T>
     using optional = Windows::Foundation::IReference<T>;
+
+    void check_hresult(hresult const result);
+    hresult to_hresult() noexcept;
+
+    struct take_ownership_from_abi_t {};
+    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
+
+    template <typename T>
+    struct com_ptr;
 }
 
 namespace winrt::impl
@@ -609,6 +618,29 @@ namespace winrt::impl
 
     template <typename T>
     using arg_out = arg_in<T>*;
+
+    template <typename D, typename I, typename Enable = void>
+    struct produce_base;
+
+    template <typename D, typename I>
+    struct produce : produce_base<D, I>
+    {
+    };
+
+    template <typename T>
+    struct wrapped_type
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    struct wrapped_type<com_ptr<T>>
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    using wrapped_type_t = typename wrapped_type<T>::type;
 
     template <template <typename...> typename Trait, typename Enabler, typename... Args>
     struct is_detected : std::false_type {};
@@ -1769,14 +1801,23 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-    struct com_callback_args
-    {
-        uint32_t reserved1;
-        uint32_t reserved2;
-        void* data;
-    };
-
-    struct ICallbackWithNoReentrancyToApplicationSTA;
+    inline constexpr hresult error_ok{ 0 }; // S_OK
+    inline constexpr hresult error_false{ 1 }; // S_FALSE
+    inline constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
+    inline constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
+    inline constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD
+    inline constexpr hresult error_not_implemented{ static_cast<hresult>(0x80004001) }; // E_NOTIMPL
+    inline constexpr hresult error_invalid_argument{ static_cast<hresult>(0x80070057) }; // E_INVALIDARG
+    inline constexpr hresult error_out_of_bounds{ static_cast<hresult>(0x8000000B) }; // E_BOUNDS
+    inline constexpr hresult error_no_interface{ static_cast<hresult>(0x80004002) }; // E_NOINTERFACE
+    inline constexpr hresult error_class_not_available{ static_cast<hresult>(0x80040111) }; // CLASS_E_CLASSNOTAVAILABLE
+    inline constexpr hresult error_changed_state{ static_cast<hresult>(0x8000000C) }; // E_CHANGED_STATE
+    inline constexpr hresult error_illegal_method_call{ static_cast<hresult>(0x8000000E) }; // E_ILLEGAL_METHOD_CALL
+    inline constexpr hresult error_illegal_state_change{ static_cast<hresult>(0x8000000D) }; // E_ILLEGAL_STATE_CHANGE
+    inline constexpr hresult error_illegal_delegate_assignment{ static_cast<hresult>(0x80000018) }; // E_ILLEGAL_DELEGATE_ASSIGNMENT
+    inline constexpr hresult error_canceled{ static_cast<hresult>(0x800704C7) }; // HRESULT_FROM_WIN32(ERROR_CANCELLED)
+    inline constexpr hresult error_bad_alloc{ static_cast<hresult>(0x8007000E) }; // E_OUTOFMEMORY
+    inline constexpr hresult error_not_initialized{ static_cast<hresult>(0x800401F0) }; // CO_E_NOTINITIALIZED
 
     template <> struct abi<Windows::Foundation::IUnknown>
     {
@@ -1787,7 +1828,10 @@ namespace winrt::impl
             virtual uint32_t WINRT_CALL Release() noexcept = 0;
         };
     };
-
+    template <> struct guid_storage<Windows::Foundation::IUnknown>
+    {
+        static constexpr guid value{ 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
     using unknown_abi = abi_t<Windows::Foundation::IUnknown>;
 
     template <> struct abi<Windows::Foundation::IInspectable>
@@ -1799,11 +1843,27 @@ namespace winrt::impl
             virtual int32_t WINRT_CALL GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
         };
     };
-
+    template <> struct guid_storage<Windows::Foundation::IInspectable>
+    {
+        static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
+    };
+    template <> struct name<Windows::Foundation::IInspectable>
+    {
+        static constexpr auto & value{ L"Object" };
+        static constexpr auto & data{ "cinterface(IInspectable)" };
+    };
+    template <> struct category<Windows::Foundation::IInspectable>
+    {
+        using type = basic_category;
+    };
     using inspectable_abi = abi_t<Windows::Foundation::IInspectable>;
 
     struct WINRT_NOVTABLE IAgileObject : unknown_abi
     {
+    };
+    template <> struct guid_storage<IAgileObject>
+    {
+        static constexpr guid value{ 0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 } };
     };
 
     struct WINRT_NOVTABLE IAgileReference : unknown_abi
@@ -1820,11 +1880,19 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL ReleaseMarshalData(void* pStm) noexcept = 0;
         virtual int32_t WINRT_CALL DisconnectObject(uint32_t dwReserved) noexcept = 0;
     };
+    template <> struct guid_storage<IMarshal>
+    {
+        static constexpr guid value{ 0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
 
     struct WINRT_NOVTABLE IStaticLifetime : inspectable_abi
     {
         virtual int32_t WINRT_CALL unused() noexcept = 0;
         virtual int32_t WINRT_CALL GetCollection(void** value) noexcept = 0;
+    };
+    template <> struct guid_storage<IStaticLifetime>
+    {
+        static constexpr guid value{ 0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae } };
     };
 
     struct WINRT_NOVTABLE IStaticLifetimeCollection : inspectable_abi
@@ -1837,7 +1905,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL unused4() noexcept = 0;
         virtual int32_t WINRT_CALL unused5() noexcept = 0;
     };
-
     template <> struct guid_storage<IStaticLifetimeCollection>
     {
         static constexpr guid value{ 0x1b0d3570,0x0877,0x5ec2,{ 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca } };
@@ -1847,10 +1914,18 @@ namespace winrt::impl
     {
         virtual int32_t WINRT_CALL Resolve(guid const& iid, void** objectReference) noexcept = 0;
     };
+    template <> struct guid_storage<IWeakReference>
+    {
+        static constexpr guid value{ 0x00000037,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
 
     struct WINRT_NOVTABLE IWeakReferenceSource : unknown_abi
     {
         virtual int32_t WINRT_CALL GetWeakReference(IWeakReference** weakReference) noexcept = 0;
+    };
+    template <> struct guid_storage<IWeakReferenceSource>
+    {
+        static constexpr guid value{ 0x00000038,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
     struct WINRT_NOVTABLE IRestrictedErrorInfo : unknown_abi
@@ -1859,21 +1934,38 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL GetReference(bstr* reference) noexcept = 0;
     };
 
-    struct WINRT_NOVTABLE ILanguageExceptionErrorInfo : unknown_abi
+    struct WINRT_NOVTABLE ILanguageExceptionErrorInfo2 : unknown_abi
     {
         virtual int32_t WINRT_CALL GetLanguageException(void** exception) noexcept = 0;
-    };
-
-    struct WINRT_NOVTABLE ILanguageExceptionErrorInfo2 : ILanguageExceptionErrorInfo
-    {
         virtual int32_t WINRT_CALL GetPreviousLanguageExceptionErrorInfo(ILanguageExceptionErrorInfo2** previous) noexcept = 0;
         virtual int32_t WINRT_CALL CapturePropagationContext(void* exception) noexcept = 0;
         virtual int32_t WINRT_CALL GetPropagationContextHead(ILanguageExceptionErrorInfo2** head) noexcept = 0;
+    };
+    template <> struct guid_storage<ILanguageExceptionErrorInfo2>
+    {
+        static constexpr guid value{ 0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD } };
+    };
+
+    struct com_callback_args
+    {
+        uint32_t reserved1;
+        uint32_t reserved2;
+        void* data;
+    };
+
+    struct ICallbackWithNoReentrancyToApplicationSTA;
+    template <> struct guid_storage<ICallbackWithNoReentrancyToApplicationSTA>
+    {
+        static constexpr guid value{ 0x0A299774,0x3E4E,0xFC42,{ 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 } };
     };
 
     struct WINRT_NOVTABLE IContextCallback : unknown_abi
     {
         virtual int32_t WINRT_CALL ContextCallback(int32_t(WINRT_CALL *callback)(com_callback_args*), com_callback_args* args, guid const& iid, int method, void* reserved) noexcept = 0;
+    };
+    template <> struct guid_storage<IContextCallback>
+    {
+        static constexpr guid value{ 0x000001da,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
     struct WINRT_NOVTABLE IServerSecurity : unknown_abi
@@ -1883,10 +1975,44 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL RevertToSelf() noexcept = 0;
         virtual int32_t WINRT_CALL IsImpersonating() noexcept = 0;
     };
+    template <> struct guid_storage<IServerSecurity>
+    {
+        static constexpr guid value{ 0x0000013E,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
 
     struct WINRT_NOVTABLE IBufferByteAccess : unknown_abi
     {
         virtual int32_t WINRT_CALL Buffer(uint8_t** value) noexcept = 0;
+    };
+    template <> struct guid_storage<IBufferByteAccess>
+    {
+        static constexpr guid value{ 0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
+    };
+
+    template <> struct abi<Windows::Foundation::IActivationFactory>
+    {
+        struct WINRT_NOVTABLE type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
+        };
+    };
+    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
+    {
+        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
+    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
+    {
+        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
+        {
+            try
+            {
+                *instance = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *instance = detach_abi(this->shim().ActivateInstance());
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
     };
 }
 
@@ -1928,23 +2054,12 @@ WINRT_EXPORT namespace winrt
         reinterpret_cast<T&>(result) = std::move(object);
         return result;
     }
-
-    struct take_ownership_from_abi_t {};
-    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 }
 
 namespace winrt::impl
 {
     template <typename T>
     using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
-
-    template <typename D, typename I, typename Enable = void>
-    struct produce_base;
-
-    template <typename D, typename I>
-    struct produce : produce_base<D, I>
-    {
-    };
 
     template <typename D, typename Enable = void>
     struct get_self_abi
@@ -1989,21 +2104,6 @@ namespace winrt::impl
         ptr->QueryInterface(guid_of<To>(), &result);
         return { get_self_abi<To>::value(result), take_ownership_from_abi };
     }
-
-    template <typename T>
-    struct wrapped_type
-    {
-        using type = T;
-    };
-
-    template <typename T>
-    struct wrapped_type<com_ptr<T>>
-    {
-        using type = T;
-    };
-
-    template <typename T>
-    using wrapped_type_t = typename wrapped_type<T>::type;
 }
 
 WINRT_EXPORT namespace winrt::Windows::Foundation
@@ -2251,28 +2351,333 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IInspectable(std::nullptr_t = nullptr) noexcept {}
         IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
+
+    struct IActivationFactory : IInspectable
+    {
+        IActivationFactory(std::nullptr_t = nullptr) noexcept {}
+        IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
+
+        template <typename T>
+        T ActivateInstance() const
+        {
+            IInspectable instance;
+            check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
+            return instance.try_as<T>();
+        }
+    };
+}
+
+WINRT_EXPORT namespace winrt
+{
+    template <typename T>
+    struct com_ptr
+    {
+        using type = impl::abi_t<T>;
+
+        com_ptr(std::nullptr_t = nullptr) noexcept {}
+
+        com_ptr(void* ptr, take_ownership_from_abi_t) noexcept : m_ptr(static_cast<type*>(ptr))
+        {
+        }
+
+        com_ptr(com_ptr const& other) noexcept : m_ptr(other.m_ptr)
+        {
+            add_ref();
+        }
+
+        template <typename U>
+        com_ptr(com_ptr<U> const& other) noexcept : m_ptr(other.m_ptr)
+        {
+            add_ref();
+        }
+
+        template <typename U>
+        com_ptr(com_ptr<U>&& other) noexcept : m_ptr(std::exchange(other.m_ptr, {}))
+        {
+        }
+
+        ~com_ptr() noexcept
+        {
+            release_ref();
+        }
+
+        com_ptr& operator=(com_ptr const& other) noexcept
+        {
+            copy_ref(other.m_ptr);
+            return*this;
+        }
+
+        com_ptr& operator=(com_ptr&& other) noexcept
+        {
+            if (this != &other)
+            {
+                release_ref();
+                m_ptr = std::exchange(other.m_ptr, {});
+            }
+
+            return*this;
+        }
+
+        template <typename U>
+        com_ptr& operator=(com_ptr<U> const& other) noexcept
+        {
+            copy_ref(other.m_ptr);
+            return*this;
+        }
+
+        template <typename U>
+        com_ptr& operator=(com_ptr<U>&& other) noexcept
+        {
+            release_ref();
+            m_ptr = std::exchange(other.m_ptr, {});
+            return*this;
+        }
+
+        explicit operator bool() const noexcept
+        {
+            return m_ptr != nullptr;
+        }
+
+        auto operator->() const noexcept
+        {
+            return m_ptr;
+        }
+
+        T& operator*() const noexcept
+        {
+            return *m_ptr;
+        }
+
+        type* get() const noexcept
+        {
+            return m_ptr;
+        }
+
+        type** put() noexcept
+        {
+            WINRT_ASSERT(m_ptr == nullptr);
+            return &m_ptr;
+        }
+
+        void** put_void() noexcept
+        {
+            return reinterpret_cast<void**>(put());
+        }
+
+        void attach(type* value) noexcept
+        {
+            release_ref();
+            *put() = value;
+        }
+
+        type* detach() noexcept
+        {
+            return std::exchange(m_ptr, {});
+        }
+
+        friend void swap(com_ptr& left, com_ptr& right) noexcept
+        {
+            std::swap(left.m_ptr, right.m_ptr);
+        }
+
+        template <typename To>
+        auto as() const
+        {
+            return impl::as<To>(m_ptr);
+        }
+
+        template <typename To>
+        auto try_as() const noexcept
+        {
+            return impl::try_as<To>(m_ptr);
+        }
+
+        template <typename To>
+        void as(To& to) const
+        {
+            to = as<impl::wrapped_type_t<To>>();
+        }
+
+        template <typename To>
+        bool try_as(To& to) const noexcept
+        {
+            to = try_as<impl::wrapped_type_t<To>>();
+            return static_cast<bool>(to);
+        }
+
+        hresult as(guid const& id, void** result) const noexcept
+        {
+            return m_ptr->QueryInterface(id, result);
+        }
+
+        void copy_from(type* other) noexcept
+        {
+            copy_ref(other);
+        }
+
+        void copy_to(type** other) const noexcept
+        {
+            add_ref();
+            *other = m_ptr;
+        }
+
+        template <typename F, typename...Args>
+        void capture(F function, Args&&...args)
+        {
+            check_hresult(function(args..., guid_of<T>(), put_void()));
+        }
+
+        template <typename O, typename M, typename...Args>
+        void capture(com_ptr<O> const& object, M method, Args&&...args)
+        {
+            check_hresult((object.get()->*(method))(args..., guid_of<T>(), put_void()));
+        }
+
+    private:
+
+        void copy_ref(type* other) noexcept
+        {
+            if (m_ptr != other)
+            {
+                release_ref();
+                m_ptr = other;
+                add_ref();
+            }
+        }
+
+        void add_ref() const noexcept
+        {
+            if (m_ptr)
+            {
+                const_cast<std::remove_const_t<type>*>(m_ptr)->AddRef();
+            }
+        }
+
+        void release_ref() noexcept
+        {
+            if (m_ptr)
+            {
+                unconditional_release_ref();
+            }
+        }
+
+        WINRT_NOINLINE void unconditional_release_ref() noexcept
+        {
+            std::exchange(m_ptr, {})->Release();
+        }
+
+        template <typename U>
+        friend struct com_ptr;
+
+        type* m_ptr{};
+    };
+
+    template <typename T, typename F, typename...Args>
+    auto capture(F function, Args&&...args)
+    {
+        com_ptr<T> result;
+        check_hresult(function(args..., guid_of<T>(), result.put_void()));
+        return result;
+    }
+
+    template <typename T, typename O, typename M, typename...Args>
+    auto capture(com_ptr<O> const& object, M method, Args&&...args)
+    {
+        com_ptr<T> result;
+        check_hresult((object.get()->*(method))(args..., guid_of<T>(), result.put_void()));
+        return result;
+    }
+
+    template <typename T>
+    auto get_abi(com_ptr<T> const& object) noexcept
+    {
+        return object.get();
+    }
+
+    template <typename T>
+    auto put_abi(com_ptr<T>& object) noexcept
+    {
+        return object.put_void();
+    }
+
+    template <typename T>
+    void attach_abi(com_ptr<T>& object, impl::abi_t<T>* value) noexcept
+    {
+        object.attach(value);
+    }
+
+    template <typename T>
+    auto detach_abi(com_ptr<T>& object) noexcept
+    {
+        return object.detach();
+    }
+
+    template <typename T>
+    bool operator==(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
+    {
+        return get_abi(left) == get_abi(right);
+    }
+
+    template <typename T>
+    bool operator==(com_ptr<T> const& left, std::nullptr_t) noexcept
+    {
+        return get_abi(left) == nullptr;
+    }
+
+    template <typename T>
+    bool operator==(std::nullptr_t, com_ptr<T> const& right) noexcept
+    {
+        return nullptr == get_abi(right);
+    }
+
+    template <typename T>
+    bool operator!=(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
+    {
+        return !(left == right);
+    }
+
+    template <typename T>
+    bool operator!=(com_ptr<T> const& left, std::nullptr_t) noexcept
+    {
+        return !(left == nullptr);
+    }
+
+    template <typename T>
+    bool operator!=(std::nullptr_t, com_ptr<T> const& right) noexcept
+    {
+        return !(nullptr == right);
+    }
+
+    template <typename T>
+    bool operator<(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
+    {
+        return get_abi(left) < get_abi(right);
+    }
+
+    template <typename T>
+    bool operator>(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
+    {
+        return right < left;
+    }
+
+    template <typename T>
+    bool operator<=(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
+    {
+        return !(right < left);
+    }
+
+    template <typename T>
+    bool operator>=(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
+    {
+        return !(left < right);
+    }
+
+    template <typename D, typename I>
+    D* get_self(I const& from) noexcept;
 }
 
 namespace winrt::impl
 {
-    inline constexpr hresult error_ok{ 0 }; // S_OK
-    inline constexpr hresult error_false{ 1 }; // S_FALSE
-    inline constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
-    inline constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
-    inline constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD
-    inline constexpr hresult error_not_implemented{ static_cast<hresult>(0x80004001) }; // E_NOTIMPL
-    inline constexpr hresult error_invalid_argument{ static_cast<hresult>(0x80070057) }; // E_INVALIDARG
-    inline constexpr hresult error_out_of_bounds{ static_cast<hresult>(0x8000000B) }; // E_BOUNDS
-    inline constexpr hresult error_no_interface{ static_cast<hresult>(0x80004002) }; // E_NOINTERFACE
-    inline constexpr hresult error_class_not_available{ static_cast<hresult>(0x80040111) }; // CLASS_E_CLASSNOTAVAILABLE
-    inline constexpr hresult error_changed_state{ static_cast<hresult>(0x8000000C) }; // E_CHANGED_STATE
-    inline constexpr hresult error_illegal_method_call{ static_cast<hresult>(0x8000000E) }; // E_ILLEGAL_METHOD_CALL
-    inline constexpr hresult error_illegal_state_change{ static_cast<hresult>(0x8000000D) }; // E_ILLEGAL_STATE_CHANGE
-    inline constexpr hresult error_illegal_delegate_assignment{ static_cast<hresult>(0x80000018) }; // E_ILLEGAL_DELEGATE_ASSIGNMENT
-    inline constexpr hresult error_canceled{ static_cast<hresult>(0x800704C7) }; // HRESULT_FROM_WIN32(ERROR_CANCELLED)
-    inline constexpr hresult error_bad_alloc{ static_cast<hresult>(0x8007000E) }; // E_OUTOFMEMORY
-    inline constexpr hresult error_not_initialized{ static_cast<hresult>(0x800401F0) }; // CO_E_NOTINITIALIZED
-
     inline void* duplicate_string(void* other)
     {
         void* result = nullptr;
@@ -3465,315 +3870,6 @@ WINRT_EXPORT namespace winrt
 WINRT_EXPORT namespace winrt
 {
     template <typename T>
-    struct com_ptr
-    {
-        using type = impl::abi_t<T>;
-
-        com_ptr(std::nullptr_t = nullptr) noexcept {}
-
-        com_ptr(void* ptr, take_ownership_from_abi_t) noexcept : m_ptr(static_cast<type*>(ptr))
-        {
-        }
-
-        com_ptr(com_ptr const& other) noexcept : m_ptr(other.m_ptr)
-        {
-            add_ref();
-        }
-
-        template <typename U>
-        com_ptr(com_ptr<U> const& other) noexcept : m_ptr(other.m_ptr)
-        {
-            add_ref();
-        }
-
-        template <typename U>
-        com_ptr(com_ptr<U>&& other) noexcept : m_ptr(std::exchange(other.m_ptr, {}))
-        {
-        }
-
-        ~com_ptr() noexcept
-        {
-            release_ref();
-        }
-
-        com_ptr& operator=(com_ptr const& other) noexcept
-        {
-            copy_ref(other.m_ptr);
-            return*this;
-        }
-
-        com_ptr& operator=(com_ptr&& other) noexcept
-        {
-            if (this != &other)
-            {
-                release_ref();
-                m_ptr = std::exchange(other.m_ptr, {});
-            }
-
-            return*this;
-        }
-
-        template <typename U>
-        com_ptr& operator=(com_ptr<U> const& other) noexcept
-        {
-            copy_ref(other.m_ptr);
-            return*this;
-        }
-
-        template <typename U>
-        com_ptr& operator=(com_ptr<U>&& other) noexcept
-        {
-            release_ref();
-            m_ptr = std::exchange(other.m_ptr, {});
-            return*this;
-        }
-
-        explicit operator bool() const noexcept
-        {
-            return m_ptr != nullptr;
-        }
-
-        auto operator->() const noexcept
-        {
-            return m_ptr;
-        }
-
-        T& operator*() const noexcept
-        {
-            return *m_ptr;
-        }
-
-        type* get() const noexcept
-        {
-            return m_ptr;
-        }
-
-        type** put() noexcept
-        {
-            WINRT_ASSERT(m_ptr == nullptr);
-            return &m_ptr;
-        }
-
-        void** put_void() noexcept
-        {
-            return reinterpret_cast<void**>(put());
-        }
-
-        void attach(type* value) noexcept
-        {
-            release_ref();
-            *put() = value;
-        }
-
-        type* detach() noexcept
-        {
-            return std::exchange(m_ptr, {});
-        }
-
-        friend void swap(com_ptr& left, com_ptr& right) noexcept
-        {
-            std::swap(left.m_ptr, right.m_ptr);
-        }
-
-        template <typename To>
-        auto as() const
-        {
-            return impl::as<To>(m_ptr);
-        }
-
-        template <typename To>
-        auto try_as() const noexcept
-        {
-            return impl::try_as<To>(m_ptr);
-        }
-
-        template <typename To>
-        void as(To& to) const
-        {
-            to = as<impl::wrapped_type_t<To>>();
-        }
-
-        template <typename To>
-        bool try_as(To& to) const noexcept
-        {
-            to = try_as<impl::wrapped_type_t<To>>();
-            return static_cast<bool>(to);
-        }
-
-        hresult as(guid const& id, void** result) const noexcept
-        {
-            return m_ptr->QueryInterface(id, result);
-        }
-
-        void copy_from(type* other) noexcept
-        {
-            copy_ref(other);
-        }
-
-        void copy_to(type** other) const noexcept
-        {
-            add_ref();
-            *other = m_ptr;
-        }
-
-        template <typename F, typename...Args>
-        void capture(F function, Args&&...args)
-        {
-            check_hresult(function(args..., guid_of<T>(), put_void()));
-        }
-
-        template <typename O, typename M, typename...Args>
-        void capture(com_ptr<O> const& object, M method, Args&&...args)
-        {
-            check_hresult((object.get()->*(method))(args..., guid_of<T>(), put_void()));
-        }
-
-    private:
-
-        void copy_ref(type* other) noexcept
-        {
-            if (m_ptr != other)
-            {
-                release_ref();
-                m_ptr = other;
-                add_ref();
-            }
-        }
-
-        void add_ref() const noexcept
-        {
-            if (m_ptr)
-            {
-                const_cast<std::remove_const_t<type>*>(m_ptr)->AddRef();
-            }
-        }
-
-        void release_ref() noexcept
-        {
-            if (m_ptr)
-            {
-                unconditional_release_ref();
-            }
-        }
-
-        WINRT_NOINLINE void unconditional_release_ref() noexcept
-        {
-            std::exchange(m_ptr, {})->Release();
-        }
-
-        template <typename U>
-        friend struct com_ptr;
-
-        type* m_ptr{};
-    };
-
-    template <typename T, typename F, typename...Args>
-    auto capture(F function, Args&&...args)
-    {
-        com_ptr<T> result;
-        check_hresult(function(args..., guid_of<T>(), result.put_void()));
-        return result;
-    }
-
-    template <typename T, typename O, typename M, typename...Args>
-    auto capture(com_ptr<O> const& object, M method, Args&&...args)
-    {
-        com_ptr<T> result;
-        check_hresult((object.get()->*(method))(args..., guid_of<T>(), result.put_void()));
-        return result;
-    }
-
-    template <typename T>
-    auto get_abi(com_ptr<T> const& object) noexcept
-    {
-        return object.get();
-    }
-
-    template <typename T>
-    auto put_abi(com_ptr<T>& object) noexcept
-    {
-        return object.put_void();
-    }
-
-    template <typename T>
-    void attach_abi(com_ptr<T>& object, impl::abi_t<T>* value) noexcept
-    {
-        object.attach(value);
-    }
-
-    template <typename T>
-    auto detach_abi(com_ptr<T>& object) noexcept
-    {
-        return object.detach();
-    }
-
-    template <typename T>
-    bool operator==(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
-    {
-        return get_abi(left) == get_abi(right);
-    }
-
-    template <typename T>
-    bool operator==(com_ptr<T> const& left, std::nullptr_t) noexcept
-    {
-        return get_abi(left) == nullptr;
-    }
-
-    template <typename T>
-    bool operator==(std::nullptr_t, com_ptr<T> const& right) noexcept
-    {
-        return nullptr == get_abi(right);
-    }
-
-    template <typename T>
-    bool operator!=(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
-    {
-        return !(left == right);
-    }
-
-    template <typename T>
-    bool operator!=(com_ptr<T> const& left, std::nullptr_t) noexcept
-    {
-        return !(left == nullptr);
-    }
-
-    template <typename T>
-    bool operator!=(std::nullptr_t, com_ptr<T> const& right) noexcept
-    {
-        return !(nullptr == right);
-    }
-
-    template <typename T>
-    bool operator<(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
-    {
-        return get_abi(left) < get_abi(right);
-    }
-
-    template <typename T>
-    bool operator>(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
-    {
-        return right < left;
-    }
-
-    template <typename T>
-    bool operator<=(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
-    {
-        return !(right < left);
-    }
-
-    template <typename T>
-    bool operator>=(com_ptr<T> const& left, com_ptr<T> const& right) noexcept
-    {
-        return !(left < right);
-    }
-
-    template <typename D, typename I>
-    D* get_self(I const& from) noexcept;
-}
-
-WINRT_EXPORT namespace winrt
-{
-    template <typename T>
     struct weak_ref
     {
         weak_ref(std::nullptr_t = nullptr) noexcept {}
@@ -4816,80 +4912,6 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
-    template <> struct guid_storage<Windows::Foundation::IUnknown>
-    {
-        static constexpr guid value{ 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
-    template <> struct guid_storage<Windows::Foundation::IInspectable>
-    {
-        static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
-    };
-
-    template <> struct guid_storage<IAgileObject>
-    {
-        static constexpr guid value{ 0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 } };
-    };
-
-    template <> struct guid_storage<IMarshal>
-    {
-        static constexpr guid value{ 0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
-    template <> struct guid_storage<IStaticLifetime>
-    {
-        static constexpr guid value{ 0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae } };
-    };
-
-    template <> struct guid_storage<IWeakReference>
-    {
-        static constexpr guid value{ 0x00000037,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
-    template <> struct guid_storage<IWeakReferenceSource>
-    {
-        static constexpr guid value{ 0x00000038,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
-    template <> struct guid_storage<ILanguageExceptionErrorInfo2>
-    {
-        static constexpr guid value{ 0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD } };
-    };
-
-    template <> struct guid_storage<IContextCallback>
-    {
-        static constexpr guid value{ 0x000001da,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
-    template <> struct guid_storage<IServerSecurity>
-    {
-        static constexpr guid value{ 0x0000013E,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
-    template <> struct guid_storage<ICallbackWithNoReentrancyToApplicationSTA>
-    {
-        static constexpr guid value{ 0x0A299774,0x3E4E,0xFC42,{ 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 } };
-    };
-
-    template <> struct guid_storage<IBufferByteAccess>
-    {
-        static constexpr guid value{ 0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
-    };
-
-    template <> struct name<Windows::Foundation::IInspectable>
-    {
-        static constexpr auto & value{ L"Object" };
-        static constexpr auto & data{ "cinterface(IInspectable)" };
-    };
-
-    template <> struct category<Windows::Foundation::IInspectable>
-    {
-        using type = basic_category;
-    };
-}
-
-namespace winrt::impl
-{
     inline int32_t make_marshaler(unknown_abi* outer, void** result) noexcept
     {
         struct marshaler final : IMarshal
@@ -5148,53 +5170,6 @@ WINRT_EXPORT namespace winrt
         {
             return { new impl::variadic_delegate<H, T...>(std::forward<H>(handler)), take_ownership_from_abi };
         }
-    };
-}
-
-namespace winrt::impl
-{
-    template <> struct abi<Windows::Foundation::IActivationFactory>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
-        };
-    };
-
-    template <typename D> struct consume_IActivationFactory
-    {
-        template <typename T>
-        T ActivateInstance() const
-        {
-            Windows::Foundation::IInspectable instance;
-            check_hresult(WINRT_SHIM(Windows::Foundation::IActivationFactory)->ActivateInstance(put_abi(instance)));
-            return instance.try_as<T>();
-        }
-    };
-
-    template <> struct consume<Windows::Foundation::IActivationFactory>
-    {
-        template <typename D> using type = consume_IActivationFactory<D>;
-    };
-
-    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
-    {
-        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
-        {
-            try
-            {
-                *instance = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *instance = detach_abi(this->shim().ActivateInstance());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
-    {
-        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 }
 
@@ -5512,17 +5487,6 @@ namespace winrt::impl
 
 WINRT_EXPORT namespace winrt
 {
-    namespace Windows::Foundation
-    {
-        struct IActivationFactory :
-            IInspectable,
-            impl::consume_t<IActivationFactory>
-        {
-            IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-            IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-        };
-    }
-
     enum class apartment_type : int32_t
     {
         single_threaded,

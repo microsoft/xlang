@@ -91,3 +91,9 @@ WINRT_EXPORT namespace winrt
     template <typename T>
     struct com_ptr;
 }
+
+namespace winrt::impl
+{
+    template <typename T>
+    struct reference_traits;
+}
