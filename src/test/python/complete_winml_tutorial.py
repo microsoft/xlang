@@ -28,7 +28,7 @@ def timed_op(fun):
 
     return async_wrapper if asyncio.iscoroutinefunction(fun) else sync_wrapper
 
-async def wrap_async_op(op):
+def wrap_async_op(op):
     loop = asyncio.get_event_loop()
     future = loop.create_future()
 
@@ -48,7 +48,7 @@ async def wrap_async_op(op):
 
     op.Completed = callback
 
-    return await future
+    return future
 
 def run_async_code(code):
     loop = asyncio.get_event_loop()

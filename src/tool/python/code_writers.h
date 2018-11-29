@@ -224,7 +224,8 @@ struct winrt_type<%>
     throw winrt::hresult_invalid_argument();
 }
 
-// TODO: How do I manage callable lifetime here?
+Py_INCREF(callable);
+
 return [callable](%)
 {
 )";
@@ -258,13 +259,14 @@ return [callable](%)
                     {
                         auto format2 = R"(
 PyObject* return_value = PyObject_CallObject(callable, args);
+Py_DECREF(callable);
 return py::convert<%>(return_value);
 )";
                         w.write(format2, signature.return_signature().Type());
                     }
                     else
                     {
-                        w.write("\nPyObject_CallObject(callable, args);\n");
+                        w.write("\nPyObject_CallObject(callable, args);\nPy_DECREF(callable);\n");
                     }
                 }
 
