@@ -75,6 +75,13 @@ namespace winrt::Windows::Foundation
         IGetActivationFactory(std::nullptr_t = nullptr) noexcept {}
         IGetActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
+    struct WINRT_EBO IGuidHelperStatics :
+        Windows::Foundation::IInspectable,
+        impl::consume_t<IGuidHelperStatics>
+    {
+        IGuidHelperStatics(std::nullptr_t = nullptr) noexcept {}
+        IGuidHelperStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+    };
     struct WINRT_EBO IMemoryBuffer :
         Windows::Foundation::IInspectable,
         impl::consume_t<IMemoryBuffer>,

@@ -47,9 +47,9 @@ namespace winrt::Windows::Foundation::Diagnostics
     {
         LoggingChannel(std::nullptr_t) noexcept {}
         LoggingChannel(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::Diagnostics::ILoggingChannel(ptr, take_ownership_from_abi) {}
-        LoggingChannel(param::hstring const& name);
         LoggingChannel(param::hstring const& name, Windows::Foundation::Diagnostics::LoggingChannelOptions const& options);
         LoggingChannel(param::hstring const& name, Windows::Foundation::Diagnostics::LoggingChannelOptions const& options, winrt::guid const& id);
+        LoggingChannel(param::hstring const& name);
     };
     struct WINRT_EBO LoggingChannelOptions : Windows::Foundation::Diagnostics::ILoggingChannelOptions
     {
@@ -68,8 +68,8 @@ namespace winrt::Windows::Foundation::Diagnostics
     {
         LoggingOptions(std::nullptr_t) noexcept {}
         LoggingOptions(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::Diagnostics::ILoggingOptions(ptr, take_ownership_from_abi) {}
-        LoggingOptions(int64_t keywords);
         LoggingOptions();
+        LoggingOptions(int64_t keywords);
     };
     struct WINRT_EBO LoggingSession : Windows::Foundation::Diagnostics::ILoggingSession
     {
