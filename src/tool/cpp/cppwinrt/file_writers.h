@@ -12,7 +12,6 @@ namespace xlang
         w.write(strings::base_macros);
         w.write(strings::base_types);
         w.write(strings::base_extern);
-        w.write(strings::base_forward);
         w.write(strings::base_meta);
         w.write(strings::base_identity);
         w.write(strings::base_handle);
