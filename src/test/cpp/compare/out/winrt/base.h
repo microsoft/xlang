@@ -358,6 +358,9 @@ WINRT_EXPORT namespace winrt
     void check_hresult(hresult const result);
     hresult to_hresult() noexcept;
 
+    template <typename D, typename I>
+    D* get_self(I const& from) noexcept;
+
     struct take_ownership_from_abi_t {};
     constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 
@@ -5326,6 +5329,34 @@ namespace winrt::impl
 
         return { result, take_ownership_from_abi };
     }
+
+    template <> struct abi<Windows::Foundation::IActivationFactory>
+    {
+        struct WINRT_NOVTABLE type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
+        };
+    };
+
+    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
+    {
+        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
+
+    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
+    {
+        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
+        {
+            try
+            {
+                *instance = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *instance = detach_abi(this->shim().ActivateInstance());
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -5387,44 +5418,7 @@ WINRT_EXPORT namespace winrt
         check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), &result));
         return { result, take_ownership_from_abi };
     }
-}
 
-namespace winrt::impl
-{
-    template <> struct abi<Windows::Foundation::IActivationFactory>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
-        };
-    };
-    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
-    {
-        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
-    {
-        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
-        {
-            try
-            {
-                *instance = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *instance = detach_abi(this->shim().ActivateInstance());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    struct marker
-    {
-        marker() = delete;
-    };
-}
-
-WINRT_EXPORT namespace winrt
-{
     namespace Windows::Foundation
     {
         struct IActivationFactory : IInspectable
@@ -5441,7 +5435,18 @@ WINRT_EXPORT namespace winrt
             }
         };
     }
+}
 
+namespace winrt::impl
+{
+    struct marker
+    {
+        marker() = delete;
+    };
+}
+
+WINRT_EXPORT namespace winrt
+{
     struct non_agile : impl::marker {};
     struct no_weak_ref : impl::marker {};
     struct composing : impl::marker {};
