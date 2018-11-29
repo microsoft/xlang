@@ -1,14 +1,6 @@
 
 WINRT_EXPORT namespace winrt::Windows::Foundation
 {
-    enum class AsyncStatus : int32_t
-    {
-        Started,
-        Completed,
-        Canceled,
-        Error,
-    };
-
     enum class TrustLevel : int32_t
     {
         BaseTrust,
@@ -38,14 +30,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 WINRT_EXPORT namespace winrt::Windows::Foundation::Collections
 {
-    enum class CollectionChange : int32_t
-    {
-        Reset,
-        ItemInserted,
-        ItemRemoved,
-        ItemChanged,
-    };
-
     struct IVectorChangedEventArgs;
     template <typename K> struct IMapChangedEventArgs;
     template <typename T> struct VectorChangedEventHandler;

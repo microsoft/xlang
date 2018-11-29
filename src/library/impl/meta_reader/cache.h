@@ -160,7 +160,6 @@ namespace xlang::meta::reader
                 remove(members.classes, name);
             };
 
-            remove("Windows.Foundation", "AsyncStatus");
             remove("Windows.Foundation", "DateTime");
             remove("Windows.Foundation", "EventRegistrationToken");
             remove("Windows.Foundation", "HResult");
@@ -168,8 +167,6 @@ namespace xlang::meta::reader
             remove("Windows.Foundation", "Rect");
             remove("Windows.Foundation", "Size");
             remove("Windows.Foundation", "TimeSpan");
-
-            remove("Windows.Foundation.Collections", "CollectionChange");
 
             remove("Windows.Foundation.Numerics", "Matrix3x2");
             remove("Windows.Foundation.Numerics", "Matrix4x4");
