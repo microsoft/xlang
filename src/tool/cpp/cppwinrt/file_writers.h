@@ -17,12 +17,12 @@ namespace xlang
         w.write(strings::base_handle);
         w.write(strings::base_lock);
         w.write(strings::base_abi);
+        w.write(strings::base_com_ptr);
         w.write(strings::base_windows);
         w.write(strings::base_string);
         w.write(strings::base_string_input);
         w.write(strings::base_string_operators);
         w.write(strings::base_array);
-        w.write(strings::base_com_ptr);
         w.write(strings::base_weak_ref);
         w.write(strings::base_agile_ref);
         w.write(strings::base_error);

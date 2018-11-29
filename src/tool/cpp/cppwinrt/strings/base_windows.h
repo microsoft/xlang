@@ -360,4 +360,12 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IInspectable(std::nullptr_t = nullptr) noexcept {}
         IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
+
+    struct IActivationFactory :
+        IInspectable,
+        impl::consume_t<IActivationFactory>
+    {
+        IActivationFactory(std::nullptr_t = nullptr) noexcept {}
+        IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
+    };
 }
