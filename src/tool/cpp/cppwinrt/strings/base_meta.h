@@ -1,36 +1,6 @@
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
-{
-    enum class TrustLevel : int32_t
-    {
-        BaseTrust,
-        PartialTrust,
-        FullTrust
-    };
-
-    struct IUnknown;
-    struct IInspectable;
-    struct IActivationFactory;
-}
-
 WINRT_EXPORT namespace winrt
 {
-    struct hresult
-    {
-        int32_t value{};
-
-        constexpr hresult() noexcept = default;
-
-        constexpr hresult(int32_t const value) noexcept : value(value)
-        {
-        }
-
-        constexpr operator int32_t() const noexcept
-        {
-            return value;
-        }
-    };
-
     void check_hresult(hresult const result);
     hresult to_hresult() noexcept;
 
@@ -43,13 +13,10 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
+    using namespace std::literals;
+
     template <typename T>
     struct reference_traits;
-}
-
-namespace winrt::impl
-{
-    using namespace std::literals;
 
     template <typename T>
     struct identity

@@ -25,6 +25,22 @@ namespace winrt::impl
 
 WINRT_EXPORT namespace winrt
 {
+    struct hresult
+    {
+        int32_t value{};
+
+        constexpr hresult() noexcept = default;
+
+        constexpr hresult(int32_t const value) noexcept : value(value)
+        {
+        }
+
+        constexpr operator int32_t() const noexcept
+        {
+            return value;
+        }
+    };
+
     struct guid
     {
         uint32_t Data1;
@@ -70,4 +86,18 @@ WINRT_EXPORT namespace winrt
     {
         return !(left == right);
     }
+}
+
+WINRT_EXPORT namespace winrt::Windows::Foundation
+{
+    enum class TrustLevel : int32_t
+    {
+        BaseTrust,
+        PartialTrust,
+        FullTrust
+    };
+
+    struct IUnknown;
+    struct IInspectable;
+    struct IActivationFactory;
 }
