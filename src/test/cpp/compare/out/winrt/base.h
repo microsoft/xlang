@@ -24,37 +24,28 @@
 #include <vector>
 #include <experimental/coroutine>
 
-#if __has_include(<WindowsNumerics.impl.h>)
-#define WINRT_NUMERICS
-#include <directxmath.h>
-#endif
-
 #ifndef WINRT_EXPORT
 #define WINRT_EXPORT
 #else
 export module winrt;
 #endif
 
-#ifdef WINRT_NUMERICS
-
+#if __has_include(<WindowsNumerics.impl.h>)
+#define WINRT_NUMERICS
+#include <directxmath.h>
 #define _WINDOWS_NUMERICS_NAMESPACE_ winrt::Windows::Foundation::Numerics
 #define _WINDOWS_NUMERICS_BEGIN_NAMESPACE_ WINRT_EXPORT namespace winrt::Windows::Foundation::Numerics
 #define _WINDOWS_NUMERICS_END_NAMESPACE_
-
 #ifdef __clang__
 #define _XM_NO_INTRINSICS_
 #endif
-
 #include <WindowsNumerics.impl.h>
-
 #ifdef __clang__
 #undef _XM_NO_INTRINSICS_
 #endif
-
 #undef _WINDOWS_NUMERICS_NAMESPACE_
 #undef _WINDOWS_NUMERICS_BEGIN_NAMESPACE_
 #undef _WINDOWS_NUMERICS_END_NAMESPACE_
-
 #endif
 
 #ifdef _DEBUG
@@ -76,13 +67,11 @@ export module winrt;
 #define WINRT_NOVTABLE __declspec(novtable)
 #define WINRT_CALL __stdcall
 #define WINRT_NOINLINE  __declspec(noinline)
-#define WINRT_FORCEINLINE __forceinline
 #else
 #define WINRT_EBO
 #define WINRT_NOVTABLE
 #define WINRT_CALL
 #define WINRT_NOINLINE
-#define WINRT_FORCEINLINE
 #endif
 
 #if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0
@@ -4329,7 +4318,7 @@ WINRT_EXPORT namespace winrt
         throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
     }
 
-    inline WINRT_FORCEINLINE void check_hresult(hresult const result)
+    inline void check_hresult(hresult const result)
     {
         if (result < 0)
         {

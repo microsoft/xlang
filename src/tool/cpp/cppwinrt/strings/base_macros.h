@@ -18,13 +18,11 @@
 #define WINRT_NOVTABLE __declspec(novtable)
 #define WINRT_CALL __stdcall
 #define WINRT_NOINLINE  __declspec(noinline)
-#define WINRT_FORCEINLINE __forceinline
 #else
 #define WINRT_EBO
 #define WINRT_NOVTABLE
 #define WINRT_CALL
 #define WINRT_NOINLINE
-#define WINRT_FORCEINLINE
 #endif
 
 #if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0

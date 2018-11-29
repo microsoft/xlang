@@ -384,7 +384,7 @@ WINRT_EXPORT namespace winrt
         throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
     }
 
-    inline WINRT_FORCEINLINE void check_hresult(hresult const result)
+    inline void check_hresult(hresult const result)
     {
         if (result < 0)
         {
