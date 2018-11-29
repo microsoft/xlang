@@ -342,7 +342,14 @@ struct delegate_python_type<%>
 
             w.write("virtual ~py@() {};\n", type.TypeName());
             w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
-            w.write("virtual std::size_t hash() = 0;\n\n");
+            w.write("virtual std::size_t hash() = 0;\n");
+
+            if (is_async_interface(type))
+            {
+                w.write("virtual PyObject* dunder_await() = 0;\n");
+            }
+
+            w.write("\n");
 
             for (auto&&[name, overloads] : get_methods(type, true))
             {
@@ -369,7 +376,14 @@ struct delegate_python_type<%>
 
             w.write("py@Impl(%<%> o) : obj(o) {}\n", type.TypeName(), type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
             w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return obj; }\n");
-            w.write("std::size_t hash() override { return py::get_instance_hash(obj); }\n\n");
+            w.write("std::size_t hash() override { return py::get_instance_hash(obj); }\n");
+
+            if (is_async_interface(type))
+            {
+                w.write("PyObject* dunder_await() override { return py::dunder_await(obj); }\n");
+            }
+
+            w.write("\n");
 
             for (auto&&[name, overloads] : get_methods(type, true))
             {
@@ -876,6 +890,23 @@ static PyObject* __@_exit(%* self)
             w.write("}\n");
         }
 
+        if (is_async_interface(type))
+        {
+            w.write("\nstatic PyObject* __@_await(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->dunder_await();\n");
+                }
+                else
+                {
+                    w.write("return py::dunder_await(self->obj);\n");
+                }
+            }
+            w.write("}\n");
+        }
     }
 
     void write_class_new_function_overload(writer& w, MethodDef const& method, method_signature const& signature)
@@ -1538,6 +1569,11 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
             if (implements_istringable(type))
             {
                 w.write("{ Py_tp_str, __@_str },\n", type.TypeName());
+            }
+
+            if (is_async_interface(type))
+            {
+                w.write("{ Py_am_await, (unaryfunc)__@_await },\n", type.TypeName());
             }
 
             w.write("{ 0, nullptr },\n");

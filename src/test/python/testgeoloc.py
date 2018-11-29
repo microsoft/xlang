@@ -88,6 +88,26 @@ class TestGeolocation(unittest.TestCase):
         loop.run_until_complete(async_test(loop))
         loop.close()
 
+    def test_GetGeopositionAsync2(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(None)
+
+        async def async_test():
+            
+            locator = wdg.Geolocator()
+            pos = await locator.GetGeopositionAsync()
+            self.assertEqual(type(pos), wdg.Geoposition)
+
+            coord = pos.Coordinate
+            self.assertEqual(type(coord.Timestamp.UniversalTime), int)
+
+            basic_pos = coord.Point.Position
+            lat = basic_pos.Latitude
+            self.assertEqual(type(lat), float)
+
+        loop.run_until_complete(async_test())
+        loop.close()
+
 if __name__ == '__main__':
     import _pyrt
     _pyrt.init_apartment()

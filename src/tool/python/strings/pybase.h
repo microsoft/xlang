@@ -808,4 +808,73 @@ namespace py
     {
         return converter<T>::convert_to(PyTuple_GetItem(args, index));
     }
+
+    template <typename Async>
+    PyObject* get_results(Async const& operation)
+    {
+        if constexpr (std::is_void_v<decltype(operation.GetResults())>)
+        {
+            operation.GetResults();
+            Py_INCREF(Py_None);
+            return Py_None;
+        }
+        else
+        {
+            return convert(operation.GetResults());
+        }
+    }
+
+    template <typename Async>
+    PyObject* dunder_await(Async const& async)
+    {
+        PyObject* loop = PyObject_CallMethodObjArgs(PyImport_ImportModule("asyncio"), PyUnicode_FromString("get_event_loop"), nullptr);
+        if (!loop)
+        {
+            return nullptr;
+        }
+
+        PyObject* future = PyObject_CallMethodObjArgs(loop, PyUnicode_FromString("create_future"), nullptr);
+        if (!future)
+        {
+            return nullptr;
+        }
+
+        try
+        {
+            async.Completed([loop, future](Async const& operation, winrt::Windows::Foundation::AsyncStatus status)
+            {
+                winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
+
+                if (status == winrt::Windows::Foundation::AsyncStatus::Completed)
+                {
+                    // result = operation.GetResults()
+                    PyObject* results = get_results(operation);
+
+                    // loop.call_soon_threadsafe(future.set_result, results)
+                    PyObject_CallMethodObjArgs(loop, PyUnicode_FromString("call_soon_threadsafe"),
+                        PyObject_GetAttrString(future, "set_result"),
+                        results,
+                        nullptr);
+                }
+                else
+                {
+                    // loop.call_soon_threadsafe(future.set_exception, RuntimeError("AsyncOp failed"))
+                    PyObject_CallMethodObjArgs(loop, PyUnicode_FromString("call_soon_threadsafe"),
+                        PyObject_GetAttrString(future, "set_exception"),
+                        PyExc_RuntimeError,
+                        nullptr);
+                }
+
+                Py_DECREF(future);
+                Py_DECREF(loop);
+            });
+        }
+        catch (...)
+        {
+            return py::to_PyErr();
+        }
+
+        return PyObject_GetIter(future);
+    }
+
 }

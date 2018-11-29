@@ -372,6 +372,23 @@ namespace xlang
         return implements_interface(type, "Windows.Foundation", "IClosable");
     }
 
+    bool is_async_interface(TypeDef const& type)
+    {
+        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation")
+        {
+            auto name = type.TypeName();
+            if (name == "IAsyncAction" || 
+                name == "IAsyncActionWithProgress`1" ||
+                name == "IAsyncOperation`1" || 
+                name == "IAsyncOperationWithProgress`2")
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
     struct method_info
     {
         MethodDef method;
