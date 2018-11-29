@@ -344,7 +344,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         T ActivateInstance() const
         {
             IInspectable instance;
-            check_hresult(WINRT_SHIM(IActivationFactory)->ActivateInstance(put_abi(instance)));
+            check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
             return instance.try_as<T>();
         }
     };
