@@ -59,6 +59,22 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL GetCollection(void** value) noexcept = 0;
     };
 
+    struct WINRT_NOVTABLE IStaticLifetimeCollection : inspectable_abi
+    {
+        virtual int32_t WINRT_CALL Lookup(void*, void**) noexcept = 0;
+        virtual int32_t WINRT_CALL unused() noexcept = 0;
+        virtual int32_t WINRT_CALL unused2() noexcept = 0;
+        virtual int32_t WINRT_CALL unused3() noexcept = 0;
+        virtual int32_t WINRT_CALL Insert(void*, void*, bool*) noexcept = 0;
+        virtual int32_t WINRT_CALL unused4() noexcept = 0;
+        virtual int32_t WINRT_CALL unused5() noexcept = 0;
+    };
+
+    template <> struct guid_storage<IStaticLifetimeCollection>
+    {
+        static constexpr guid value{ 0x1b0d3570,0x0877,0x5ec2,{ 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca } };
+    };
+
     struct WINRT_NOVTABLE IWeakReference : unknown_abi
     {
         virtual int32_t WINRT_CALL Resolve(guid const& iid, void** objectReference) noexcept = 0;

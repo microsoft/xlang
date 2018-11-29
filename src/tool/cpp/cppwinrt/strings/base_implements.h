@@ -1140,14 +1140,16 @@ namespace winrt::impl
             auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
             Windows::Foundation::IUnknown collection;
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>>();
+            auto const map = collection.as<IStaticLifetimeCollection>();
+            param::hstring const name{ name_of<typename D::instance_type>() };
 
             {
                 slim_lock_guard const guard{ lock };
+                void* result;
 
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
+                if (error_ok == map->Lookup(get_abi(name), &result))
                 {
-                    return { detach_abi(value), take_ownership_from_abi };
+                    return { result, take_ownership_from_abi };
                 }
             }
 
@@ -1155,14 +1157,15 @@ namespace winrt::impl
 
             {
                 slim_lock_guard const guard{ lock };
+                void* result;
 
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
+                if (error_ok == map->Lookup(get_abi(name), &result))
                 {
-                    return { detach_abi(value), take_ownership_from_abi };
+                    return { result, take_ownership_from_abi };
                 }
                 else
                 {
-                    map.Insert(name_of<typename D::instance_type>(), object);
+                    check_hresult(map->Insert(get_abi(name), get_abi(object));
                     return object;
                 }
             }

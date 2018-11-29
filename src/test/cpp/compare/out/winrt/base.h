@@ -1827,6 +1827,22 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL GetCollection(void** value) noexcept = 0;
     };
 
+    struct WINRT_NOVTABLE IStaticLifetimeCollection : inspectable_abi
+    {
+        virtual int32_t WINRT_CALL Lookup(void*, void**) noexcept = 0;
+        virtual int32_t WINRT_CALL unused() noexcept = 0;
+        virtual int32_t WINRT_CALL unused2() noexcept = 0;
+        virtual int32_t WINRT_CALL unused3() noexcept = 0;
+        virtual int32_t WINRT_CALL Insert(void*, void*, bool*) noexcept = 0;
+        virtual int32_t WINRT_CALL unused4() noexcept = 0;
+        virtual int32_t WINRT_CALL unused5() noexcept = 0;
+    };
+
+    template <> struct guid_storage<IStaticLifetimeCollection>
+    {
+        static constexpr guid value{ 0x1b0d3570,0x0877,0x5ec2,{ 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca } };
+    };
+
     struct WINRT_NOVTABLE IWeakReference : unknown_abi
     {
         virtual int32_t WINRT_CALL Resolve(guid const& iid, void** objectReference) noexcept = 0;
@@ -6707,14 +6723,16 @@ namespace winrt::impl
             auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
             Windows::Foundation::IUnknown collection;
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>>();
+            auto const map = collection.as<IStaticLifetimeCollection>();
+            param::hstring const name{ name_of<typename D::instance_type>() };
 
             {
                 slim_lock_guard const guard{ lock };
+                void* result;
 
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
+                if (error_ok == map->Lookup(get_abi(name), &result))
                 {
-                    return { detach_abi(value), take_ownership_from_abi };
+                    return { result, take_ownership_from_abi };
                 }
             }
 
@@ -6722,14 +6740,15 @@ namespace winrt::impl
 
             {
                 slim_lock_guard const guard{ lock };
+                void* result;
 
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
+                if (error_ok == map->Lookup(get_abi(name), &result))
                 {
-                    return { detach_abi(value), take_ownership_from_abi };
+                    return { result, take_ownership_from_abi };
                 }
                 else
                 {
-                    map.Insert(name_of<typename D::instance_type>(), object);
+                    check_hresult(map->Insert(get_abi(name), get_abi(object));
                     return object;
                 }
             }
