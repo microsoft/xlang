@@ -1166,8 +1166,6 @@ namespace xlang
 
         if (type_name == "IIterator`1" && type_namespace == "Windows.Foundation.Collections")
         {
-            // TODO: is all this still needed?
-
             w.write(R"(
         using iterator_category = std::input_iterator_tag;
         using value_type = T;
