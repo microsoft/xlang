@@ -1007,9 +1007,10 @@ namespace xlang
 
     static void write_consume_extensions(writer& w, TypeDef const& type)
     {
-        // TODO: type_name and type_namespace
+        auto type_namespace = type.TypeNamespace();
+        auto type_name = type.TypeName();
 
-        if (type.TypeName() == "IBindableIterator" && type.TypeNamespace() == "Windows.UI.Xaml.Interop")
+        if (type_name == "IBindableIterator" && type_namespace == "Windows.UI.Xaml.Interop")
         {
             w.write(R"(
         auto& operator++()
@@ -1027,10 +1028,8 @@ namespace xlang
             return Current();
         }
 )");
-            return;
         }
-
-        if (type.TypeName() == "IBuffer" && type.TypeNamespace() == "Windows.Storage.Streams")
+        else if (type_name == "IBuffer" && type_namespace == "Windows.Storage.Streams")
         {
             w.write(R"(
         auto data() const
@@ -1040,10 +1039,8 @@ namespace xlang
             return data;
         }
 )");
-            return;
         }
-
-        if (type.TypeName() == "IIterator`1" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        else if (type_name == "IIterator`1" && type_namespace == "Windows.Foundation.Collections")
         {
             w.write(R"(
         auto& operator++()
@@ -1061,10 +1058,8 @@ namespace xlang
             return Current();
         }
 )");
-            return;
         }
-
-        if (type.TypeName() == "IKeyValuePair`2" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        else if (type_name == "IKeyValuePair`2" && type_namespace == "Windows.Foundation.Collections")
         {
             w.write(R"(
         bool operator==(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
@@ -1077,11 +1072,8 @@ namespace xlang
             return !(*this == other);
         }
 )");
-
-            return;
         }
-
-        if (type.TypeName() == "IMapView`2" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        else if (type_name == "IMapView`2" && type_namespace == "Windows.Foundation.Collections")
         {
             w.write(R"(
         auto TryLookup(param_type<K> const& key) const noexcept
@@ -1106,11 +1098,8 @@ namespace xlang
             }
         }
 )");
-
-            return;
         }
-
-        if (type.TypeName() == "IMap`2" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        else if (type_name == "IMap`2" && type_namespace == "Windows.Foundation.Collections")
         {
             w.write(R"(
         auto TryLookup(param_type<K> const& key) const noexcept
@@ -1135,54 +1124,47 @@ namespace xlang
             }
         }
 )");
-
-            return;
         }
-
-        if (type.TypeName() == "IAsyncAction" && type.TypeNamespace() == "Windows.Foundation")
+        else if (type_name == "IAsyncAction" && type_namespace == "Windows.Foundation")
         {
             w.write(R"(        void get() const
         {
             blocking_suspend(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
             GetResults();
         })");
-            return;
         }
-
-        if (type.TypeName() == "IAsyncOperation`1" && type.TypeNamespace() == "Windows.Foundation")
+        else if (type_name == "IAsyncOperation`1" && type_namespace == "Windows.Foundation")
         {
             w.write(R"(        TResult get() const
         {
             blocking_suspend(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
             return GetResults();
         })");
-            return;
         }
-
-        if (type.TypeName() == "IAsyncActionWithProgress`1" && type.TypeNamespace() == "Windows.Foundation")
+        else if (type_name == "IAsyncActionWithProgress`1" && type_namespace == "Windows.Foundation")
         {
             w.write(R"(        void get() const
         {
             blocking_suspend(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
             GetResults();
         })");
-            return;
         }
-
-        if (type.TypeName() == "IAsyncOperationWithProgress`2" && type.TypeNamespace() == "Windows.Foundation")
+        else if (type_name == "IAsyncOperationWithProgress`2" && type_namespace == "Windows.Foundation")
         {
             w.write(R"(        TResult get() const
         {
             blocking_suspend(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
             return GetResults();
         })");
-            return;
         }
     }
 
     static void write_interface_extensions(writer& w, TypeDef const& type)
     {
-        if (type.TypeName() == "IIterator`1" && type.TypeNamespace() == "Windows.Foundation.Collections")
+        auto type_namespace = type.TypeNamespace();
+        auto type_name = type.TypeName();
+
+        if (type_name == "IIterator`1" && type_namespace == "Windows.Foundation.Collections")
         {
             // TODO: is all this still needed?
 
@@ -1193,10 +1175,8 @@ namespace xlang
         using pointer = T*;
         using reference = T&;
 )");
-            return;
         }
-
-        if (type.TypeName() == "IReference`1" && type.TypeNamespace() == "Windows.Foundation")
+        else if (type_name == "IReference`1" && type_namespace == "Windows.Foundation")
         {
             w.write(R"(        IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
         {

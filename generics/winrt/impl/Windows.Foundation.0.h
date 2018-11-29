@@ -56,7 +56,6 @@ namespace winrt::Windows::Foundation
     struct IDeferral;
     struct IDeferralFactory;
     struct IGetActivationFactory;
-    struct IGuidHelperStatics;
     struct IMemoryBuffer;
     struct IMemoryBufferFactory;
     struct IMemoryBufferReference;
@@ -73,7 +72,6 @@ namespace winrt::Windows::Foundation
     struct IWwwFormUrlDecoderRuntimeClass;
     struct IWwwFormUrlDecoderRuntimeClassFactory;
     struct Deferral;
-    struct GuidHelper;
     struct MemoryBuffer;
     struct PropertyValue;
     struct Uri;
@@ -127,10 +125,6 @@ namespace winrt::impl
         using type = interface_category;
     };
     template <> struct category<Windows::Foundation::IGetActivationFactory>
-    {
-        using type = interface_category;
-    };
-    template <> struct category<Windows::Foundation::IGuidHelperStatics>
     {
         using type = interface_category;
     };
@@ -197,10 +191,6 @@ namespace winrt::impl
         using type = interface_category;
     };
     template <> struct category<Windows::Foundation::Deferral>
-    {
-        using type = class_category;
-    };
-    template <> struct category<Windows::Foundation::GuidHelper>
     {
         using type = class_category;
     };
@@ -307,10 +297,6 @@ namespace winrt::impl
     {
         static constexpr auto & value{ L"Windows.Foundation.IGetActivationFactory" };
     };
-    template <> struct name<Windows::Foundation::IGuidHelperStatics>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.IGuidHelperStatics" };
-    };
     template <> struct name<Windows::Foundation::IMemoryBuffer>
     {
         static constexpr auto & value{ L"Windows.Foundation.IMemoryBuffer" };
@@ -374,10 +360,6 @@ namespace winrt::impl
     template <> struct name<Windows::Foundation::Deferral>
     {
         static constexpr auto & value{ L"Windows.Foundation.Deferral" };
-    };
-    template <> struct name<Windows::Foundation::GuidHelper>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.GuidHelper" };
     };
     template <> struct name<Windows::Foundation::MemoryBuffer>
     {
@@ -474,10 +456,6 @@ namespace winrt::impl
     template <> struct guid_storage<Windows::Foundation::IGetActivationFactory>
     {
         static constexpr guid value{ 0x4EDB8EE2,0x96DD,0x49A7,{ 0x94,0xF7,0x46,0x07,0xDD,0xAB,0x8E,0x3C } };
-    };
-    template <> struct guid_storage<Windows::Foundation::IGuidHelperStatics>
-    {
-        static constexpr guid value{ 0x59C7966B,0xAE52,0x5283,{ 0xAD,0x7F,0xA1,0xB9,0xE9,0x67,0x8A,0xDD } };
     };
     template <> struct guid_storage<Windows::Foundation::IMemoryBuffer>
     {
@@ -672,15 +650,6 @@ namespace winrt::impl
         struct type : inspectable_abi
         {
             virtual int32_t WINRT_CALL GetActivationFactory(void*, void**) noexcept = 0;
-        };
-    };
-    template <> struct abi<Windows::Foundation::IGuidHelperStatics>
-    {
-        struct type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL CreateNewGuid(winrt::guid*) noexcept = 0;
-            virtual int32_t WINRT_CALL get_Empty(winrt::guid*) noexcept = 0;
-            virtual int32_t WINRT_CALL Equals(winrt::guid const&, winrt::guid const&, bool*) noexcept = 0;
         };
     };
     template <> struct abi<Windows::Foundation::IMemoryBuffer>
@@ -1061,17 +1030,6 @@ namespace winrt::impl
     template <> struct consume<Windows::Foundation::IGetActivationFactory>
     {
         template <typename D> using type = consume_Windows_Foundation_IGetActivationFactory<D>;
-    };
-    template <typename D>
-    struct consume_Windows_Foundation_IGuidHelperStatics
-    {
-        winrt::guid CreateNewGuid() const;
-        winrt::guid Empty() const;
-        bool Equals(winrt::guid const& target, winrt::guid const& value) const;
-    };
-    template <> struct consume<Windows::Foundation::IGuidHelperStatics>
-    {
-        template <typename D> using type = consume_Windows_Foundation_IGuidHelperStatics<D>;
     };
     template <typename D>
     struct consume_Windows_Foundation_IMemoryBuffer

@@ -3,20 +3,20 @@
 #include "winrt/base.h"
 namespace winrt::Windows::Foundation
 {
+    struct Point;
+    struct Size;
+    struct Rect;
     enum class AsyncStatus : int32_t;
-    template <typename T> struct EventHandler;
     struct EventRegistrationToken;
     template <typename TResult> struct IAsyncOperation;
-    struct Point;
-    struct Rect;
-    struct Size;
     template <typename TSender, typename TResult> struct TypedEventHandler;
+    template <typename T> struct EventHandler;
     struct Uri;
 }
 namespace winrt::Windows::Storage
 {
-    struct IStorageFolder;
     struct StorageFile;
+    struct IStorageFolder;
 }
 namespace winrt::Windows::Foundation::Diagnostics
 {
