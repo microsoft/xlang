@@ -2,7 +2,6 @@
 namespace winrt::impl
 {
     using namespace std::literals;
-    namespace wfc = Windows::Foundation::Collections;
 
     template <typename T>
     struct identity

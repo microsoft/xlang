@@ -1,6 +1,8 @@
 
 namespace winrt::impl
 {
+    namespace wfc = Windows::Foundation::Collections;
+
     template <typename T>
     struct fast_iterator
     {

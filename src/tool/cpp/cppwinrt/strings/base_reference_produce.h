@@ -347,3 +347,9 @@ WINRT_EXPORT namespace winrt
         return default_value;
     }
 }
+
+WINRT_EXPORT namespace winrt
+{
+    template <typename T>
+    using optional = Windows::Foundation::IReference<T>;
+}
