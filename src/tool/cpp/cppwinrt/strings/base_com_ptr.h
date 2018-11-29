@@ -303,7 +303,4 @@ WINRT_EXPORT namespace winrt
     {
         return !(left < right);
     }
-
-    template <typename D, typename I>
-    D* get_self(I const& from) noexcept;
 }
