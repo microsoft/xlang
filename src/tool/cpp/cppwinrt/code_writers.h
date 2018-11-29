@@ -2807,7 +2807,6 @@ public:
                 w.write(strings::base_reference_produce);
             }
 
-            w.write(strings::base_activation);
             w.write(strings::base_await);
             w.write(strings::base_std_async_action);
             w.write(strings::base_std_async_action_with_progress);

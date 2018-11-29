@@ -30,6 +30,7 @@ namespace xlang
         w.write(strings::base_traits);
         w.write(strings::base_marshaler);
         w.write(strings::base_delegate);
+        w.write(strings::base_activation);
         w.write(strings::base_implements);
         w.write(strings::base_composable);
         w.write(strings::base_foundation);

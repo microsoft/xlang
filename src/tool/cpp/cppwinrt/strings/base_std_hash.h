@@ -49,4 +49,8 @@ WINRT_EXPORT namespace std
             return winrt::impl::hash_data(buffer, length * sizeof(wchar_t));
         }
     };
+
+    template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
+    template<> struct hash<winrt::Windows::Foundation::IInspectable> : winrt::impl::hash_base<winrt::Windows::Foundation::IInspectable> {};
+    template<> struct hash<winrt::Windows::Foundation::IActivationFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IActivationFactory> {};
 }
