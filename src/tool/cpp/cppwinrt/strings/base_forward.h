@@ -81,4 +81,13 @@ WINRT_EXPORT namespace winrt
 
     template <typename T>
     using optional = Windows::Foundation::IReference<T>;
+
+    void check_hresult(hresult const result);
+    hresult to_hresult() noexcept;
+
+    struct take_ownership_from_abi_t {};
+    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
+
+    template <typename T>
+    struct com_ptr;
 }

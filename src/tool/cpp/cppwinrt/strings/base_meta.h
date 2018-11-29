@@ -177,6 +177,29 @@ namespace winrt::impl
     template <typename T>
     using arg_out = arg_in<T>*;
 
+    template <typename D, typename I, typename Enable = void>
+    struct produce_base;
+
+    template <typename D, typename I>
+    struct produce : produce_base<D, I>
+    {
+    };
+
+    template <typename T>
+    struct wrapped_type
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    struct wrapped_type<com_ptr<T>>
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    using wrapped_type_t = typename wrapped_type<T>::type;
+
     template <template <typename...> typename Trait, typename Enabler, typename... Args>
     struct is_detected : std::false_type {};
 

@@ -37,23 +37,12 @@ WINRT_EXPORT namespace winrt
         reinterpret_cast<T&>(result) = std::move(object);
         return result;
     }
-
-    struct take_ownership_from_abi_t {};
-    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 }
 
 namespace winrt::impl
 {
     template <typename T>
     using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
-
-    template <typename D, typename I, typename Enable = void>
-    struct produce_base;
-
-    template <typename D, typename I>
-    struct produce : produce_base<D, I>
-    {
-    };
 
     template <typename D, typename Enable = void>
     struct get_self_abi
@@ -98,21 +87,6 @@ namespace winrt::impl
         ptr->QueryInterface(guid_of<To>(), &result);
         return { get_self_abi<To>::value(result), take_ownership_from_abi };
     }
-
-    template <typename T>
-    struct wrapped_type
-    {
-        using type = T;
-    };
-
-    template <typename T>
-    struct wrapped_type<com_ptr<T>>
-    {
-        using type = T;
-    };
-
-    template <typename T>
-    using wrapped_type_t = typename wrapped_type<T>::type;
 }
 
 WINRT_EXPORT namespace winrt::Windows::Foundation
@@ -361,11 +335,17 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
         IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
 
-    struct IActivationFactory :
-        IInspectable,
-        impl::consume_t<IActivationFactory>
+    struct IActivationFactory : IInspectable
     {
         IActivationFactory(std::nullptr_t = nullptr) noexcept {}
         IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
+
+        template <typename T>
+        T ActivateInstance() const
+        {
+            IInspectable instance;
+            check_hresult(WINRT_SHIM(IActivationFactory)->ActivateInstance(put_abi(instance)));
+            return instance.try_as<T>();
+        }
     };
 }

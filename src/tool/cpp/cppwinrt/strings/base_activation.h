@@ -313,17 +313,6 @@ namespace winrt::impl
 
 WINRT_EXPORT namespace winrt
 {
-    namespace Windows::Foundation
-    {
-        struct IActivationFactory :
-            IInspectable,
-            impl::consume_t<IActivationFactory>
-        {
-            IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-            IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-        };
-    }
-
     enum class apartment_type : int32_t
     {
         single_threaded,
