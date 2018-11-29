@@ -25,10 +25,6 @@
 #define WINRT_NOINLINE
 #endif
 
-#if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0
-#define WINRT_CHECKED_ITERATORS
-#endif
-
 #define WINRT_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 
 #ifndef WINRT_EXTERNAL_CATCH_CLAUSE

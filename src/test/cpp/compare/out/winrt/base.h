@@ -74,10 +74,6 @@ export module winrt;
 #define WINRT_NOINLINE
 #endif
 
-#if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0
-#define WINRT_CHECKED_ITERATORS
-#endif
-
 #define WINRT_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 
 #ifndef WINRT_EXTERNAL_CATCH_CLAUSE
@@ -3334,33 +3330,6 @@ WINRT_EXPORT namespace winrt
     }
 }
 
-namespace winrt::impl
-{
-#ifdef WINRT_CHECKED_ITERATORS
-
-    template <typename T>
-    using array_iterator = stdext::checked_array_iterator<T*>;
-
-    template <typename T>
-    auto make_array_iterator(T* data, uint32_t size, uint32_t index = 0) noexcept
-    {
-        return array_iterator<T>(data, size, index);
-    }
-
-#else
-
-    template <typename T>
-    using array_iterator = T*;
-
-    template <typename T>
-    auto make_array_iterator(T* data, uint32_t, uint32_t index = 0) noexcept
-    {
-        return data + index;
-    }
-
-#endif
-}
-
 WINRT_EXPORT namespace winrt
 {
     template <typename T>
@@ -3372,8 +3341,8 @@ WINRT_EXPORT namespace winrt
         using const_reference = value_type const&;
         using pointer = value_type*;
         using const_pointer = value_type const*;
-        using iterator = impl::array_iterator<value_type>;
-        using const_iterator = impl::array_iterator<value_type const>;
+        using iterator = value_type*;
+        using const_iterator = value_type const*;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -3481,32 +3450,32 @@ WINRT_EXPORT namespace winrt
 
         iterator begin() noexcept
         {
-            return impl::make_array_iterator(m_data, m_size);
+            return m_data;
         }
 
         const_iterator begin() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size);
+            return m_data;
         }
 
         const_iterator cbegin() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size);
+            return m_data;
         }
 
         iterator end() noexcept
         {
-            return impl::make_array_iterator(m_data, m_size, m_size);
+            return m_data + m_size;
         }
 
         const_iterator end() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size, m_size);
+            return m_data + m_size;
         }
 
         const_iterator cend() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size, m_size);
+            return m_data + m_size;
         }
 
         reverse_iterator rbegin() noexcept
@@ -4631,7 +4600,7 @@ namespace winrt::impl
         using value_type = T;
         using reference = value_type&;
         using pointer = value_type*;
-        using iterator = array_iterator<value_type>;
+        using iterator = value_type*;
 
         explicit event_array(uint32_t const count) noexcept : m_size(count)
         {
@@ -4665,12 +4634,12 @@ namespace winrt::impl
 
         iterator begin() noexcept
         {
-            return make_array_iterator(data(), m_size);
+            return data();
         }
 
         iterator end() noexcept
         {
-            return make_array_iterator(data(), m_size, m_size);
+            return data() + m_size;
         }
 
         uint32_t size() const noexcept
@@ -6434,9 +6403,8 @@ namespace winrt::impl
                     {
                         return error_bad_alloc;
                     }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    out = std::copy(local_iids.second, local_iids.second + local_count, out);
-                    std::copy(inner_iids.cbegin(), inner_iids.cend(), out);
+                    *array = std::copy(local_iids.second, local_iids.second + local_count, *array);
+                    std::copy(inner_iids.cbegin(), inner_iids.cend(), *array);
                 }
                 else
                 {
@@ -6453,8 +6421,7 @@ namespace winrt::impl
                     {
                         return error_bad_alloc;
                     }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    std::copy(local_iids.second, local_iids.second + local_count, out);
+                    std::copy(local_iids.second, local_iids.second + local_count, *array);
                 }
                 else
                 {

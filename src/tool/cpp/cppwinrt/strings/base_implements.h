@@ -932,9 +932,8 @@ namespace winrt::impl
                     {
                         return error_bad_alloc;
                     }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    out = std::copy(local_iids.second, local_iids.second + local_count, out);
-                    std::copy(inner_iids.cbegin(), inner_iids.cend(), out);
+                    *array = std::copy(local_iids.second, local_iids.second + local_count, *array);
+                    std::copy(inner_iids.cbegin(), inner_iids.cend(), *array);
                 }
                 else
                 {
@@ -951,8 +950,7 @@ namespace winrt::impl
                     {
                         return error_bad_alloc;
                     }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    std::copy(local_iids.second, local_iids.second + local_count, out);
+                    std::copy(local_iids.second, local_iids.second + local_count, *array);
                 }
                 else
                 {

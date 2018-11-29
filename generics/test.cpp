@@ -22,4 +22,10 @@ int main()
   
   Uri uri(L"http://kennykerr.ca/");
   printf("%ls\n", uri.Domain().c_str());
+  
+  std::vector<int> vec;
+  array_view<int> view{vec};
+  for (auto&& i : view)
+  {
+  }
 }

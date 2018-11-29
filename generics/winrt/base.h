@@ -24,37 +24,28 @@
 #include <vector>
 #include <experimental/coroutine>
 
-#if __has_include(<WindowsNumerics.impl.h>)
-#define WINRT_NUMERICS
-#include <directxmath.h>
-#endif
-
 #ifndef WINRT_EXPORT
 #define WINRT_EXPORT
 #else
 export module winrt;
 #endif
 
-#ifdef WINRT_NUMERICS
-
+#if __has_include(<WindowsNumerics.impl.h>)
+#define WINRT_NUMERICS
+#include <directxmath.h>
 #define _WINDOWS_NUMERICS_NAMESPACE_ winrt::Windows::Foundation::Numerics
 #define _WINDOWS_NUMERICS_BEGIN_NAMESPACE_ WINRT_EXPORT namespace winrt::Windows::Foundation::Numerics
 #define _WINDOWS_NUMERICS_END_NAMESPACE_
-
 #ifdef __clang__
 #define _XM_NO_INTRINSICS_
 #endif
-
 #include <WindowsNumerics.impl.h>
-
 #ifdef __clang__
 #undef _XM_NO_INTRINSICS_
 #endif
-
 #undef _WINDOWS_NUMERICS_NAMESPACE_
 #undef _WINDOWS_NUMERICS_BEGIN_NAMESPACE_
 #undef _WINDOWS_NUMERICS_END_NAMESPACE_
-
 #endif
 
 #ifdef _DEBUG
@@ -76,18 +67,16 @@ export module winrt;
 #define WINRT_NOVTABLE __declspec(novtable)
 #define WINRT_CALL __stdcall
 #define WINRT_NOINLINE  __declspec(noinline)
-#define WINRT_FORCEINLINE __forceinline
 #else
 #define WINRT_EBO
 #define WINRT_NOVTABLE
 #define WINRT_CALL
 #define WINRT_NOINLINE
-#define WINRT_FORCEINLINE
 #endif
 
-#if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0
-#define WINRT_CHECKED_ITERATORS
-#endif
+// #if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0
+// #define WINRT_CHECKED_ITERATORS
+// #endif
 
 #define WINRT_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 
@@ -439,6 +428,12 @@ WINRT_EXPORT namespace winrt
 
     template <typename T>
     struct com_ptr;
+}
+
+namespace winrt::impl
+{
+    template <typename T>
+    struct reference_traits;
 }
 
 namespace winrt::impl
@@ -1988,32 +1983,6 @@ namespace winrt::impl
     {
         static constexpr guid value{ 0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
     };
-
-    template <> struct abi<Windows::Foundation::IActivationFactory>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
-        };
-    };
-    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
-    {
-        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
-    {
-        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
-        {
-            try
-            {
-                *instance = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *instance = detach_abi(this->shim().ActivateInstance());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -2350,20 +2319,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         IInspectable(std::nullptr_t = nullptr) noexcept {}
         IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
-    };
-
-    struct IActivationFactory : IInspectable
-    {
-        IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-        IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
-
-        template <typename T>
-        T ActivateInstance() const
-        {
-            IInspectable instance;
-            check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
-            return instance.try_as<T>();
-        }
     };
 }
 
@@ -4363,7 +4318,7 @@ WINRT_EXPORT namespace winrt
         throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
     }
 
-    inline WINRT_FORCEINLINE void check_hresult(hresult const result)
+    inline void check_hresult(hresult const result)
     {
         if (result < 0)
         {
@@ -5548,6 +5503,32 @@ WINRT_EXPORT namespace winrt
 
 namespace winrt::impl
 {
+    template <> struct abi<Windows::Foundation::IActivationFactory>
+    {
+        struct WINRT_NOVTABLE type : inspectable_abi
+        {
+            virtual int32_t WINRT_CALL ActivateInstance(void** instance) noexcept = 0;
+        };
+    };
+    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
+    {
+        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    };
+    template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
+    {
+        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
+        {
+            try
+            {
+                *instance = nullptr;
+                typename D::abi_guard guard(this->shim());
+                *instance = detach_abi(this->shim().ActivateInstance());
+                return error_ok;
+            }
+            catch (...) { return to_hresult(); }
+        }
+    };
+
     struct marker
     {
         marker() = delete;
@@ -5556,6 +5537,23 @@ namespace winrt::impl
 
 WINRT_EXPORT namespace winrt
 {
+    namespace Windows::Foundation
+    {
+        struct IActivationFactory : IInspectable
+        {
+            IActivationFactory(std::nullptr_t = nullptr) noexcept {}
+            IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
+
+            template <typename T>
+            T ActivateInstance() const
+            {
+                IInspectable instance;
+                check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
+                return instance.try_as<T>();
+            }
+        };
+    }
+
     struct non_agile : impl::marker {};
     struct no_weak_ref : impl::marker {};
     struct composing : impl::marker {};

@@ -265,7 +265,7 @@ namespace winrt::impl
         using value_type = T;
         using reference = value_type&;
         using pointer = value_type*;
-        using iterator = array_iterator<value_type>;
+        using iterator = value_type*;
 
         explicit event_array(uint32_t const count) noexcept : m_size(count)
         {
@@ -299,12 +299,12 @@ namespace winrt::impl
 
         iterator begin() noexcept
         {
-            return make_array_iterator(data(), m_size);
+            return data();
         }
 
         iterator end() noexcept
         {
-            return make_array_iterator(data(), m_size, m_size);
+            return data() + m_size;
         }
 
         uint32_t size() const noexcept
