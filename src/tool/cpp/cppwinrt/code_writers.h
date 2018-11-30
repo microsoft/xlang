@@ -894,6 +894,11 @@ namespace xlang
             auto format = "\n        void* %;";
             w.write(format, signature.return_param_name());
         }
+        else if (std::holds_alternative<GenericTypeIndex>(signature.return_signature().Type().Type()))
+        {
+            auto format = "\n        % %{ empty_value<%>() };";
+            w.write(format, signature.return_signature(), signature.return_param_name(), signature.return_signature());
+        }
         else
         {
             auto format = "\n        % %;";
