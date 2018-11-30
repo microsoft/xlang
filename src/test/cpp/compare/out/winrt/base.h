@@ -6771,7 +6771,7 @@ namespace winrt::impl
 
         I shim_overridable()
         {
-            void* result;
+            void* result{};
 
             if (shim().outer())
             {
