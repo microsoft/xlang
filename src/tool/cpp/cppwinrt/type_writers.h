@@ -302,28 +302,28 @@ namespace xlang
 
                     if (starts_with(full_name, optional))
                     {
-                        write("optional%", full_name.substr(optional.size()));
+                        write("optional%", full_name.substr(optional.size() - 1));
                     }
                     else if (starts_with(full_name, iterable))
                     {
                         if (async_types)
                         {
-                            write("param::async_iterable%", full_name.substr(iterable.size()));
+                            write("param::async_iterable%", full_name.substr(iterable.size() - 1));
                         }
                         else
                         {
-                            write("param::iterable%", full_name.substr(iterable.size()));
+                            write("param::iterable%", full_name.substr(iterable.size() - 1));
                         }
                     }
                     else if (starts_with(full_name, vector_view))
                     {
                         if (async_types)
                         {
-                            write("param::async_vector_view%", full_name.substr(vector_view.size()));
+                            write("param::async_vector_view%", full_name.substr(vector_view.size() - 1));
                         }
                         else
                         {
-                            write("param::vector_view%", full_name.substr(vector_view.size()));
+                            write("param::vector_view%", full_name.substr(vector_view.size() - 1));
                         }
                     }
 
@@ -331,20 +331,20 @@ namespace xlang
                     {
                         if (async_types)
                         {
-                            write("param::async_map_view%", full_name.substr(map_view.size()));
+                            write("param::async_map_view%", full_name.substr(map_view.size() - 1));
                         }
                         else
                         {
-                            write("param::map_view%", full_name.substr(map_view.size()));
+                            write("param::map_view%", full_name.substr(map_view.size() - 1));
                         }
                     }
                     else if (starts_with(full_name, vector))
                     {
-                        write("param::vector%", full_name.substr(vector.size()));
+                        write("param::vector%", full_name.substr(vector.size() - 1));
                     }
                     else if (starts_with(full_name, map))
                     {
-                        write("param::map%", full_name.substr(map.size()));
+                        write("param::map%", full_name.substr(map.size() - 1));
                     }
                     else
                     {
