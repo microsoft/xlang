@@ -8,9 +8,11 @@ def async_test(test):
         original_loop = asyncio.get_event_loop()
         test_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(test_loop)
-        test_loop.run_until_complete(test(*args, **kwargs))
-        test_loop.close()
-        asyncio.set_event_loop(original_loop)
+        try:
+            test_loop.run_until_complete(test(*args, **kwargs))
+        finally:
+            test_loop.close()
+            asyncio.set_event_loop(original_loop)
     return wrapper
 
 import pyrt.windows.devices.geolocation as wdg

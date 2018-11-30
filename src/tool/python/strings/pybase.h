@@ -827,13 +827,13 @@ namespace py
     template <typename Async>
     PyObject* dunder_await(Async const& async)
     {
-        PyObject* loop = PyObject_CallMethodObjArgs(PyImport_ImportModule("asyncio"), PyUnicode_FromString("get_event_loop"), nullptr);
+        PyObject* loop = PyObject_CallMethod(PyImport_ImportModule("asyncio"), "get_event_loop", nullptr);
         if (!loop)
         {
             return nullptr;
         }
 
-        PyObject* future = PyObject_CallMethodObjArgs(loop, PyUnicode_FromString("create_future"), nullptr);
+        PyObject* future = PyObject_CallMethod(loop, "create_future", nullptr);
         if (!future)
         {
             return nullptr;
@@ -851,18 +851,12 @@ namespace py
                     PyObject* results = get_results(operation);
 
                     // loop.call_soon_threadsafe(future.set_result, results)
-                    PyObject_CallMethodObjArgs(loop, PyUnicode_FromString("call_soon_threadsafe"),
-                        PyObject_GetAttrString(future, "set_result"),
-                        results,
-                        nullptr);
+                    PyObject_CallMethod(loop, "call_soon_threadsafe", "OO", PyObject_GetAttrString(future, "set_result"), results);
                 }
                 else
                 {
                     // loop.call_soon_threadsafe(future.set_exception, RuntimeError("AsyncOp failed"))
-                    PyObject_CallMethodObjArgs(loop, PyUnicode_FromString("call_soon_threadsafe"),
-                        PyObject_GetAttrString(future, "set_exception"),
-                        PyExc_RuntimeError,
-                        nullptr);
+                    PyObject_CallMethod(loop, "call_soon_threadsafe", "OO", PyObject_GetAttrString(future, "set_exception"), PyExc_RuntimeError);
                 }
 
                 Py_DECREF(future);
