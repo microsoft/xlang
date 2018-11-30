@@ -5014,7 +5014,7 @@ WINRT_EXPORT namespace winrt
         template <typename H>
         static winrt::delegate<T...> make(H&& handler)
         {
-            return { new impl::variadic_delegate<H, T...>(std::forward<H>(handler)), take_ownership_from_abi };
+            return { static_cast<void*>(new impl::variadic_delegate<H, T...>(std::forward<H>(handler))), take_ownership_from_abi };
         }
     };
 }
