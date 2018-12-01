@@ -3,9 +3,4 @@
 
 int main()
 {
-    using namespace winrt;
-
-    delegate<> d = [] { puts("delegate"); };
-
-    d();
 }

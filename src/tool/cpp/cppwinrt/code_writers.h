@@ -222,8 +222,18 @@ namespace xlang
 
     static void write_generic_names(writer& w, std::pair<GenericParam, GenericParam> const& params)
     {
+        bool first{true};
+
         for (auto&& param : params)
         {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                w.write(R"(, L", ")");
+            }
             w.write(", name_v<%>", param.Name());
         }
     }
