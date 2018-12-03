@@ -1597,8 +1597,6 @@ namespace xlang
 %    };
 )";
 
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-
         w.write(format,
             type,
             type,
