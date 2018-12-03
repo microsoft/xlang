@@ -710,18 +710,19 @@ namespace xlang
         auto format = R"(    struct struct_%
     {
 %    };
-    template <> struct abi<%>
+    template <> struct abi<@::%>
     {
         using type = struct_%;
     };
 )";
 
-        auto impl_name = get_impl_name(type.TypeNamespace(), type.TypeName());
+        type_name type_name(type);
+        auto impl_name = get_impl_name(type_name.name_space, type_name.name);
 
         w.write(format,
             impl_name,
             bind_each<write_field_abi>(type.FieldList()),
-            type,
+            type_name.name_space, type_name.name,
             impl_name);
 
     }

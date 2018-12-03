@@ -218,9 +218,10 @@ namespace Component
                 Windows.Foundation.Collections.IVector<int> f,
                 Windows.Foundation.Collections.IMap<int, int> g);
 
-//            Component.Structs.Simple Structs(
-//                Component.Structs.Simple a,
-//                out Component.Structs.Simple b);
+
+            Component.Structs.Simple Structs(
+                Component.Structs.Simple a,
+                out Component.Structs.Simple b);
         }
     }
 }

@@ -41,6 +41,8 @@ else()
 endif()
 
 if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
+    target_sources(cpp_test PUBLIC main.cpp)
+else()
     target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
 endif()
 

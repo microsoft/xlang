@@ -12,8 +12,8 @@ namespace winrt::Component::Params::implementation
     {
         throw hresult_not_implemented();
     }
-    // Component::Structs::Simple Class::Structs(Component::Structs::Simple const&, Component::Structs::Simple&)
-    // {
-    //     throw hresult_not_implemented();
-    // }
+    Component::Structs::Simple Class::Structs(Component::Structs::Simple const&, Component::Structs::Simple&)
+    {
+        throw hresult_not_implemented();
+    }
 }

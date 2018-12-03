@@ -22,7 +22,7 @@ namespace winrt::impl
         uint8_t G;
         uint8_t B;
     };
-    template <> struct abi<struct struct_Component_Structs_Simple>
+    template <> struct abi<Component::Structs::Simple>
     {
         using type = struct_Component_Structs_Simple;
     };
