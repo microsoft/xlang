@@ -763,7 +763,11 @@ namespace xlang
 
                     auto param_type = std::get_if<ElementType>(&param_signature->Type().Type());
 
-                    if (param_type && *param_type != ElementType::String && *param_type != ElementType::Object)
+                    if (std::holds_alternative<GenericTypeIndex>(param_signature->Type().Type()))
+                    {
+                        w.write("param_type<%> const&", param_signature->Type());
+                    }
+                    else if (param_type && *param_type != ElementType::String && *param_type != ElementType::Object)
                     {
                         w.write("%", param_signature->Type());
                     }
