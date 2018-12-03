@@ -2433,6 +2433,8 @@ public:
 
     static void write_constructor_definition(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
     {
+        w.async_types = false;
+
         method_signature signature{ method };
 
         auto format = R"(    inline %::%(%) :

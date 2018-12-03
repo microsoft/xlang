@@ -36,7 +36,7 @@ namespace winrt::impl
             if (target == 0)
             {
                 std::atomic_thread_fence(std::memory_order_acquire);
-                delete this;
+                delete static_cast<delegate_t<T, H>*>(this);
             }
 
             return target;

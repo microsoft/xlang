@@ -61,8 +61,8 @@ namespace winrt::impl
     template <typename D>
     struct consume_Component_Params_IClass
     {
-        void SyncCall(param::hstring const& a, optional<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const;
-        Windows::Foundation::IAsyncAction NotSyncCall(param::hstring const& a, optional<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const;
+        void SyncCall(param::hstring const& a, Windows::Foundation::IReference<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const;
+        Windows::Foundation::IAsyncAction NotSyncCall(param::hstring const& a, Windows::Foundation::IReference<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const;
         Component::Structs::Simple Structs(Component::Structs::Simple const& a, Component::Structs::Simple& b) const;
     };
     template <> struct consume<Component::Params::IClass>

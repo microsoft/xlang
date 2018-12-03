@@ -366,6 +366,33 @@ WINRT_EXPORT namespace winrt
 
     template <typename T>
     struct com_ptr;
+
+    namespace param
+    {
+        template <typename T>
+        struct iterable;
+
+        template <typename T>
+        struct async_iterable;
+
+        template <typename K, typename V>
+        struct map_view;
+
+        template <typename K, typename V>
+        struct async_map_view;
+
+        template <typename K, typename V>
+        struct map;
+
+        template <typename T>
+        struct vector_view;
+
+        template <typename T>
+        struct async_vector_view;
+
+        template <typename T>
+        struct vector;
+    }
 }
 
 namespace winrt::impl
@@ -4915,7 +4942,7 @@ namespace winrt::impl
             if (target == 0)
             {
                 std::atomic_thread_fence(std::memory_order_acquire);
-                delete this;
+                delete static_cast<delegate_t<T, H>*>(this);
             }
 
             return target;

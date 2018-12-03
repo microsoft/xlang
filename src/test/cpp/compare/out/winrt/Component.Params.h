@@ -7,11 +7,11 @@
 #include "winrt/Component.h"
 namespace winrt::impl
 {
-    template <typename D> void consume_Component_Params_IClass<D>::SyncCall(param::hstring const& a, optional<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const
+    template <typename D> void consume_Component_Params_IClass<D>::SyncCall(param::hstring const& a, Windows::Foundation::IReference<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const
     {
         check_hresult(WINRT_SHIM(Component::Params::IClass)->SyncCall(get_abi(a), get_abi(b), get_abi(c), get_abi(d), get_abi(e), get_abi(f), get_abi(g)));
     }
-    template <typename D> Windows::Foundation::IAsyncAction consume_Component_Params_IClass<D>::NotSyncCall(param::hstring const& a, optional<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const
+    template <typename D> Windows::Foundation::IAsyncAction consume_Component_Params_IClass<D>::NotSyncCall(param::hstring const& a, Windows::Foundation::IReference<int32_t> const& b, param::iterable<int32_t> const& c, param::vector_view<int32_t> const& d, param::map_view<int32_t, int32_t> const& e, param::vector<int32_t> const& f, param::map<int32_t, int32_t> const& g) const
     {
         void* operation;
         check_hresult(WINRT_SHIM(Component::Params::IClass)->NotSyncCall(get_abi(a), get_abi(b), get_abi(c), get_abi(d), get_abi(e), get_abi(f), get_abi(g), &operation));
