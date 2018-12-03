@@ -372,6 +372,9 @@ namespace winrt::impl
 {
     using namespace std::literals;
 
+    template <typename Async>
+    void blocking_suspend(Async const& async);
+
     template <typename T>
     struct reference_traits;
 

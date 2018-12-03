@@ -13,6 +13,7 @@
 #include "Component.Events.Class.h"
 #include "Component.Fast.FastClass.h"
 #include "Component.Fast.SlowClass.h"
+#include "Component.Params.Class.h"
 #include "Component.Result.Class.h"
 
 bool WINRT_CALL winrt_can_unload_now() noexcept
@@ -91,6 +92,11 @@ void* WINRT_CALL winrt_get_activation_factory(std::wstring_view const& name)
     if (requal(name, L"Component.Fast.SlowClass"))
     {
         return winrt::detach_abi(winrt::make<winrt::Component::Fast::factory_implementation::SlowClass>());
+    }
+
+    if (requal(name, L"Component.Params.Class"))
+    {
+        return winrt::detach_abi(winrt::make<winrt::Component::Params::factory_implementation::Class>());
     }
 
     if (requal(name, L"Component.Result.Class"))
