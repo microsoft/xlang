@@ -6,6 +6,44 @@ namespace xlang
     using namespace text;
     using namespace meta::reader;
 
+    struct type_name
+    {
+        std::string_view name;
+        std::string_view name_space;
+
+        explicit type_name(TypeDef const& type) :
+            name(type.TypeName()),
+            name_space(type.TypeNamespace())
+        {
+        }
+
+        explicit type_name(TypeRef const& type) :
+            name(type.TypeName()),
+            name_space(type.TypeNamespace())
+        {
+        }
+    };
+
+    bool operator==(type_name const& left, std::string_view const& right)
+    {
+        if (left.name.size() + 1 + left.name_space.size() != right.size())
+        {
+            return false;
+        }
+
+        if (right[left.name_space.size()] != '.')
+        {
+            return false;
+        }
+
+        if (0 != right.compare(left.name_space.size(), left.name.size(), left.name))
+        {
+            return false;
+        }
+
+        return 0 == right.compare(0, left.name_space.size(), left.name_space);
+    }
+
     static auto remove_tick(std::string_view const& name)
     {
         return name.substr(0, name.rfind('`'));
@@ -242,7 +280,7 @@ namespace xlang
 
         void write(TypeRef const& type)
         {
-            if (type.TypeName() == "Guid" && type.TypeNamespace() == "System")
+            if (type_name(type) == "System.Guid")
             {
                 write("winrt::guid");
             }

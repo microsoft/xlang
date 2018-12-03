@@ -113,18 +113,19 @@ namespace xlang
 
     static void write_forward(writer& w, TypeDef const& type)
     {
-        auto type_name = type.TypeName();
+        type_name type_name(type);
 
         if (get_category(type) == category::enum_type)
         {
             auto format = R"(    enum class % : %;
 )";
 
-            w.write(format, type_name, type.FieldList().first.Signature().Type());
+            w.write(format, type_name.name, type.FieldList().first.Signature().Type());
             return;
         }
 
-        if ((type_name == "DateTime" || type_name == "TimeSpan") && type.TypeNamespace() == "Windows.Foundation")
+        if (type_name == "Windows.Foundation.DateTime" || 
+            type_name == "Windows.Foundation.TimeSpan")
         {
             // Don't forward declare these since they're not structs.
             return;
@@ -137,7 +138,7 @@ namespace xlang
             auto format = R"(    struct %;
 )";
 
-            w.write(format, type_name);
+            w.write(format, type_name.name);
             return;
         }
 
@@ -146,20 +147,22 @@ namespace xlang
 
         w.write(format,
             bind<write_generic_typenames>(generics),
-            remove_tick(type_name));
+            remove_tick(type_name.name));
     }
 
     static void write_enum_flag(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template<> struct is_enum_flag<@::%> : std::true_type
+        if (!has_attribute(type, "System", "FlagsAttribute"))
+        {
+            return;
+        }
+
+        auto format = R"(    template<> struct is_enum_flag<%> : std::true_type
     {
     };
 )";
 
-        if (has_attribute(type, "System", "FlagsAttribute"))
-        {
-            w.write(format, type.TypeNamespace(), type.TypeName());
-        }
+        w.write(format, type);
     }
 
     static void write_guid_value(writer& w, std::vector<FixedArgSig> const& args)
@@ -196,7 +199,7 @@ namespace xlang
         }
         else
         {
-            auto format = R"(    template <%> struct category<@::%<%>>
+            auto format = R"(    template <%> struct category<%>
     {
         using type = pinterface_category<%>;
         static constexpr guid value{ % };
@@ -212,9 +215,7 @@ namespace xlang
 
             w.write(format,
                 bind<write_generic_typenames>(generics),
-                type.TypeNamespace(),
-                remove_tick(type.TypeName()),
-                bind_list(", ", generics),
+                type,
                 bind_list(", ", generics),
                 bind<write_guid_value>(attribute.Value().FixedArgs()));
         }
@@ -240,23 +241,22 @@ namespace xlang
 
     static void write_name(writer& w, TypeDef const& type)
     {
-        auto type_namespace = type.TypeNamespace();
-        auto type_name = type.TypeName();
+        type_name type_name(type);
         auto generics = type.GenericParam();
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct name<@::%>
+            auto format = R"(    template <> struct name<%>
     {
         static constexpr auto & value{ L"%.%" };
     };
 )";
 
-            w.write(format, type_namespace, type_name, type_namespace, type_name);
+            w.write(format, type, type_name.name_space, type_name.name);
         }
         else
         {
-            auto format = R"(    template <%> struct name<@::%<%>>
+            auto format = R"(    template <%> struct name<%>
     {
         static constexpr auto value{ zcombine(L"%.%<"%, L">") };
     };
@@ -264,24 +264,20 @@ namespace xlang
 
             w.write(format,
                 bind<write_generic_typenames>(generics),
-                type_namespace,
-                remove_tick(type_name),
-                bind_list(", ", generics),
-                type_namespace,
-                type_name,
+                type,
+                type_name.name_space,
+                type_name.name,
                 bind<write_generic_names>(generics));
         }
     }
 
     static void write_guid(writer& w, TypeDef const& type)
     {
-        auto type_namespace = type.TypeNamespace();
-        auto type_name = type.TypeName();
         auto generics = type.GenericParam();
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct guid_storage<@::%>
+            auto format = R"(    template <> struct guid_storage<%>
     {
         static constexpr guid value{ % };
     };
@@ -295,28 +291,21 @@ namespace xlang
             }
 
             w.write(format,
-                type_namespace,
-                type_name,
+                type,
                 bind<write_guid_value>(attribute.Value().FixedArgs()));
         }
         else
         {
-            auto format = R"(    template <%> struct guid_storage<@::%<%>>
+            auto format = R"(    template <%> struct guid_storage<%>
     {
-        static constexpr guid value{ pinterface_guid<@::%<%>>::value };
+        static constexpr guid value{ pinterface_guid<%>::value };
     };
 )";
 
-            type_name = remove_tick(type_name);
-
             w.write(format,
                 bind<write_generic_typenames>(generics),
-                type_namespace,
-                type_name,
-                bind_list(", ", generics),
-                type_namespace,
-                type_name,
-                bind_list(", ", generics));
+                type,
+                type);
         }
     }
 
@@ -498,7 +487,7 @@ namespace xlang
             {
                 auto type_ref = type_def->TypeRef();
 
-                if (type_ref.TypeName() == "Guid" && type_ref.TypeNamespace() == "System")
+                if (type_name(type_ref) == "System.Guid")
                 {
                     return false;
                 }
@@ -612,13 +601,14 @@ namespace xlang
             return;
         }
 
-        auto format = R"(    template <> struct abi<fast_interface<@::%>>
+        auto format = R"(    template <> struct abi<fast_interface<%>>
     {
         struct type : inspectable_abi
         {
 )";
 
-        w.write(format, type.TypeNamespace(), type.TypeName());
+        w.abi_types = false;
+        w.write(format, type);
 
         for (auto&& info : get_fast_interfaces(w, type))
         {
@@ -643,24 +633,23 @@ namespace xlang
 
     static void write_interface_abi(writer& w, TypeDef const& type)
     {
-        auto type_namespace = type.TypeNamespace();
-        auto type_name = type.TypeName();
         auto generics = type.GenericParam();
         auto guard{ w.push_generic_params(generics) };
+        w.abi_types = false;
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct abi<@::%>
+            auto format = R"(    template <> struct abi<%>
     {
         struct type : inspectable_abi
         {
 )";
 
-            w.write(format, type_namespace, type_name);
+            w.write(format, type);
         }
         else
         {
-            auto format = R"(    template <%> struct abi<@::%<%>>
+            auto format = R"(    template <%> struct abi<%>
     {
         struct type : inspectable_abi
         {
@@ -668,9 +657,7 @@ namespace xlang
 
             w.write(format,
                 bind<write_generic_typenames>(generics),
-                type_namespace,
-                remove_tick(type_name),
-                bind_list(", ", generics));
+                type);
         }
 
 
@@ -723,21 +710,18 @@ namespace xlang
         auto format = R"(    struct struct_%
     {
 %    };
-    template <> struct abi<@::%>
+    template <> struct abi<%>
     {
         using type = struct_%;
     };
 )";
 
-        auto type_name = type.TypeName();
-        auto type_namespace = type.TypeNamespace();
-        auto impl_name = get_impl_name(type_namespace, type_name);
+        auto impl_name = get_impl_name(type.TypeNamespace(), type.TypeName());
 
         w.write(format,
             impl_name,
             bind_each<write_field_abi>(type.FieldList()),
-            type_namespace,
-            type_name,
+            type,
             impl_name);
 
     }
@@ -1022,10 +1006,9 @@ namespace xlang
 
     static void write_consume_extensions(writer& w, TypeDef const& type)
     {
-        auto type_namespace = type.TypeNamespace();
-        auto type_name = type.TypeName();
+        type_name type_name(type);
 
-        if (type_name == "IBindableIterator" && type_namespace == "Windows.UI.Xaml.Interop")
+        if (type_name == "Windows.UI.Xaml.Interop.IBindableIterator")
         {
             w.write(R"(
         auto& operator++()
@@ -1044,7 +1027,7 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "IBuffer" && type_namespace == "Windows.Storage.Streams")
+        else if (type_name == "Windows.Storage.Streams.IBuffer")
         {
             w.write(R"(
         auto data() const
@@ -1055,7 +1038,7 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "IIterator`1" && type_namespace == "Windows.Foundation.Collections")
+        else if (type_name == "Windows.Foundation.Collections.IIterator`1")
         {
             w.write(R"(
         auto& operator++()
@@ -1074,7 +1057,7 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "IKeyValuePair`2" && type_namespace == "Windows.Foundation.Collections")
+        else if (type_name == "Windows.Foundation.Collections.IKeyValuePair`2")
         {
             w.write(R"(
         bool operator==(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
@@ -1088,7 +1071,7 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "IMapView`2" && type_namespace == "Windows.Foundation.Collections")
+        else if (type_name == "Windows.Foundation.Collections.IMapView`2")
         {
             w.write(R"(
         auto TryLookup(param_type<K> const& key) const noexcept
@@ -1114,7 +1097,7 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "IMap`2" && type_namespace == "Windows.Foundation.Collections")
+        else if (type_name == "Windows.Foundation.Collections.IMap`2")
         {
             w.write(R"(
         auto TryLookup(param_type<K> const& key) const noexcept
@@ -1140,7 +1123,7 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "IAsyncAction" && type_namespace == "Windows.Foundation")
+        else if (type_name == "Windows.Foundation.IAsyncAction")
         {
             w.write(R"(        void get() const
         {
@@ -1148,7 +1131,7 @@ namespace xlang
             GetResults();
         })");
         }
-        else if (type_name == "IAsyncOperation`1" && type_namespace == "Windows.Foundation")
+        else if (type_name == "Windows.Foundation.IAsyncOperation`1")
         {
             w.write(R"(        TResult get() const
         {
@@ -1156,7 +1139,7 @@ namespace xlang
             return GetResults();
         })");
         }
-        else if (type_name == "IAsyncActionWithProgress`1" && type_namespace == "Windows.Foundation")
+        else if (type_name == "Windows.Foundation.IAsyncActionWithProgress`1")
         {
             w.write(R"(        void get() const
         {
@@ -1164,7 +1147,7 @@ namespace xlang
             GetResults();
         })");
         }
-        else if (type_name == "IAsyncOperationWithProgress`2" && type_namespace == "Windows.Foundation")
+        else if (type_name == "Windows.Foundation.IAsyncOperationWithProgress`2")
         {
             w.write(R"(        TResult get() const
         {
@@ -1176,10 +1159,9 @@ namespace xlang
 
     static void write_interface_extensions(writer& w, TypeDef const& type)
     {
-        auto type_namespace = type.TypeNamespace();
-        auto type_name = type.TypeName();
+        type_name type_name(type);
 
-        if (type_name == "IIterator`1" && type_namespace == "Windows.Foundation.Collections")
+        if (type_name == "Windows.Foundation.Collections.IIterator`1")
         {
             w.write(R"(
         using iterator_category = std::input_iterator_tag;
@@ -1189,7 +1171,7 @@ namespace xlang
         using reference = T&;
 )");
         }
-        else if (type_name == "IReference`1" && type_namespace == "Windows.Foundation")
+        else if (type_name == "Windows.Foundation.IReference`1")
         {
             w.write(R"(        IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
         {
@@ -1225,7 +1207,7 @@ namespace xlang
     struct consume_%
     {
 %%    };
-    template <> struct consume<@::%>
+    template <> struct consume<%>
     {
         template <typename D> using type = consume_%<D>;
     };
@@ -1236,8 +1218,7 @@ namespace xlang
                 impl_name,
                 bind_each<write_consume_declaration>(type.MethodList()),
                 bind<write_consume_extensions>(type),
-                type_namespace,
-                type_name,
+                type,
                 impl_name);
         }
         else
@@ -1246,7 +1227,7 @@ namespace xlang
     struct consume_%
     {
 %%    };
-    template <%> struct consume<@::%<%>>
+    template <%> struct consume<%>
     {
         template <typename D> using type = consume_%<D, %>;
     };
@@ -1259,9 +1240,7 @@ namespace xlang
                 bind_each<write_consume_declaration>(type.MethodList()),
                 bind<write_consume_extensions>(type),
                 bind<write_generic_typenames>(generics),
-                type_namespace,
-                type_name,
-                bind_list(", ", generics),
+                type,
                 impl_name,
                 bind_list(", ", generics));
         }
@@ -1789,7 +1768,7 @@ class %T
 
 public:
 
-    using % = winrt::@::%;
+    using % = winrt::%;
 
 %};
 )";
@@ -1798,13 +1777,12 @@ public:
         {
             if (info.overridable && !info.base)
             {
-                auto interface_type_name = info.type.TypeName();
+                auto type_name = info.type.TypeName();
 
                 w.write(format,
-                    interface_type_name,
-                    interface_type_name,
-                    info.type.TypeNamespace(),
-                    interface_type_name,
+                    type_name,
+                    type_name,
+                    info.type,
                     bind_each<write_consume_declaration>(info.type.MethodList()));
             }
         }
@@ -2298,7 +2276,7 @@ public:
         {
             for (auto&& field : left.fields)
             {
-                if (w.write_temp("@::%", right.type.TypeNamespace(), right.type.TypeName()) == field.second)
+                if (w.write_temp("%", right.type) == field.second)
                 {
                     return true;
                 }
@@ -2457,7 +2435,7 @@ public:
         method_signature signature{ method };
 
         auto format = R"(    inline %::%(%) :
-        %(impl::call_factory<%, @::%>([&](auto&& f) { return f.%(%); }))
+        %(impl::call_factory<%, %>([&](auto&& f) { return f.%(%); }))
     {
     }
 )";
@@ -2468,7 +2446,7 @@ public:
             bind<write_consume_params>(signature),
             type_name,
             type_name,
-            factory.TypeNamespace(), factory.TypeName(),
+            factory,
             get_name(method),
             bind<write_consume_args>(signature));
     }
@@ -2485,7 +2463,7 @@ public:
         auto format = R"(    inline %::%(%)
     {
         Windows::Foundation::IInspectable %, %;
-        *this = impl::call_factory<%, @::%>([&](auto&& f) { return f.%(%%%, %); });
+        *this = impl::call_factory<%, %>([&](auto&& f) { return f.%(%%%, %); });
     }
 )";
 
@@ -2496,7 +2474,7 @@ public:
             base_param,
             inner_param,
             type_name,
-            factory.TypeNamespace(), factory.TypeName(),
+            factory,
             get_name(method),
             bind<write_consume_args>(signature),
             params.empty() ? "" : ", ",
@@ -2737,7 +2715,7 @@ public:
 
         if (auto base = get_base_class(type))
         {
-            base_type = w.write_temp("@::%", base.TypeNamespace(), base.TypeName());
+            base_type = w.write_temp("%", base);
         }
         else
         {
