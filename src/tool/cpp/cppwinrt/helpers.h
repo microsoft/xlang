@@ -408,7 +408,7 @@ namespace xlang
         {
             for (auto&& attribute : type.CustomAttribute())
             {
-                auto [ns, name] = attribute.TypeNamespaceAndName();
+                auto[ns, name] = attribute.TypeNamespaceAndName();
 
                 if (ns == "Windows.Foundation.Metadata")
                 {

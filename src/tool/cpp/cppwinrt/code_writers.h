@@ -86,7 +86,7 @@ namespace xlang
 
     static void write_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
     {
-        separator s{w};
+        separator s{ w };
 
         for (auto&& param : params)
         {
@@ -124,7 +124,7 @@ namespace xlang
             return;
         }
 
-        if (type_name == "Windows.Foundation.DateTime" || 
+        if (type_name == "Windows.Foundation.DateTime" ||
             type_name == "Windows.Foundation.TimeSpan")
         {
             // Don't forward declare these since they're not structs.
@@ -223,7 +223,7 @@ namespace xlang
 
     static void write_generic_names(writer& w, std::pair<GenericParam, GenericParam> const& params)
     {
-        bool first{true};
+        bool first{ true };
 
         for (auto&& param : params)
         {
@@ -335,7 +335,7 @@ namespace xlang
         {
             if (is_fast_class(type))
             {
-        auto format = R"(    template <> struct default_interface<%>
+                auto format = R"(    template <> struct default_interface<%>
     {
         using type = fast_interface<%>;
     };
@@ -344,7 +344,7 @@ namespace xlang
             }
             else
             {
-        auto format = R"(    template <> struct default_interface<%>
+                auto format = R"(    template <> struct default_interface<%>
     {
         using type = %;
     };
