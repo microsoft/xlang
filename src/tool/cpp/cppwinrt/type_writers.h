@@ -327,7 +327,6 @@ namespace xlang
 
                 if (consume_types)
                 {
-                    static constexpr std::string_view optional("Windows::Foundation::IReference<"sv);
                     static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable<"sv);
                     static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView<"sv);
                     static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView<"sv);
@@ -338,11 +337,7 @@ namespace xlang
                     auto full_name = write_temp("@::%<%>", ns, name, bind_list(", ", type.GenericArgs()));
                     consume_types = true;
 
-                    if (starts_with(full_name, optional))
-                    {
-                        write("optional%", full_name.substr(optional.size() - 1));
-                    }
-                    else if (starts_with(full_name, iterable))
+                    if (starts_with(full_name, iterable))
                     {
                         if (async_types)
                         {

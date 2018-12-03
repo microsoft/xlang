@@ -12,6 +12,33 @@ WINRT_EXPORT namespace winrt
 
     template <typename T>
     struct com_ptr;
+
+    namespace param
+    {
+        template <typename T>
+        struct iterable;
+
+        template <typename T>
+        struct async_iterable;
+
+        template <typename K, typename V>
+        struct map_view;
+
+        template <typename K, typename V>
+        struct async_map_view;
+
+        template <typename K, typename V>
+        struct map;
+
+        template <typename T>
+        struct vector_view;
+
+        template <typename T>
+        struct async_vector_view;
+
+        template <typename T>
+        struct vector;
+    }
 }
 
 namespace winrt::impl
