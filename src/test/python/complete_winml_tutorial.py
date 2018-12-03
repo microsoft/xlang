@@ -28,33 +28,6 @@ def timed_op(fun):
 
     return async_wrapper if asyncio.iscoroutinefunction(fun) else sync_wrapper
 
-async def wrap_async_op(op):
-    loop = asyncio.get_event_loop()
-    future = loop.create_future()
-
-    def callback(operation, status):
-        def threadsafe_callback():
-            if status == 1:
-                result = operation.GetResults()
-                future.set_result(result)
-            elif status == 2:
-                future.set_exception(asyncio.CancelledError())
-            elif status == 3:
-                future.set_exception(RuntimeError("AsyncOp failed"))
-            else:
-                future.set_exception(RuntimeError("Unexpected AsyncStatus"))
-
-        loop.call_soon_threadsafe(threadsafe_callback)
-
-    op.Completed = callback
-
-    return await future
-
-def run_async_code(code):
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(code())
-    loop.close()
-
 import pyrt.windows.ai.machinelearning as winml 
 import os
 
@@ -68,10 +41,10 @@ async def load_image_file(file_path):
     from pyrt.windows.graphics.imaging import BitmapDecoder
     from pyrt.windows.media import VideoFrame
 
-    file = await wrap_async_op(StorageFile.GetFileFromPathAsync(os.fspath(file_path)))
-    stream = await wrap_async_op(file.OpenAsync(0)) # 0 == FileAccessMode::Read 
-    decoder = await wrap_async_op(BitmapDecoder.CreateAsync(stream))
-    software_bitmap = await wrap_async_op(decoder.GetSoftwareBitmapAsync())
+    file = await StorageFile.GetFileFromPathAsync(os.fspath(file_path))
+    stream = await file.OpenAsync(0) # 0 == FileAccessMode::Read 
+    decoder = await BitmapDecoder.CreateAsync(stream)
+    software_bitmap = await decoder.GetSoftwareBitmapAsync()
     return VideoFrame.CreateWithSoftwareBitmap(software_bitmap)
 
 @timed_op
@@ -142,4 +115,6 @@ async def async_main():
 
     print_results(results, labels)
 
-run_async_code(async_main)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(async_main())
+loop.close()

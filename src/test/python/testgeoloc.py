@@ -2,6 +2,19 @@ import find_projection
 import unittest
 import asyncio
 
+# async_test inspired by https://stackoverflow.com/a/23036785
+def async_test(test):
+    def wrapper(*args, **kwargs):
+        original_loop = asyncio.get_event_loop()
+        test_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(test_loop)
+        try:
+            test_loop.run_until_complete(test(*args, **kwargs))
+        finally:
+            test_loop.close()
+            asyncio.set_event_loop(original_loop)
+    return wrapper
+
 import pyrt.windows.devices.geolocation as wdg
 import pyrt.windows.foundation as wf
 
@@ -36,7 +49,6 @@ class TestGeolocation(unittest.TestCase):
         for x in ["Latitude", "Longitude", "Altitude"]:
             self.assertEqual(basic_pos[x], getattr(center, x))
 
-    
     def test_iiterable_wraping(self):
         basic_pos1 = wdg.BasicGeoposition(47.1, -122.1, 0.0)
         basic_pos2 = wdg.BasicGeoposition(47.2, -122.2, 0.0)
@@ -51,28 +63,15 @@ class TestGeolocation(unittest.TestCase):
         self.assertAlmostEqual(se.Longitude, basic_pos1.Longitude)
 
     def test_GetGeopositionAsync(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)
+        """test async method using IAsyncOperation Completed callback"""
+        import threading
 
-        async def async_test():
-            future = loop.create_future()
-            
-            def callback(operation, status):
-                if status == 1:
-                    result = operation.GetResults()
-                    loop.call_soon_threadsafe(asyncio.Future.set_result, future, result)
-                elif status == 2:
-                    loop.call_soon_threadsafe(asyncio.Future.set_exception, future, asyncio.CancelledError())
-                elif status == 3:
-                    loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("AsyncOp failed"))
-                else:
-                    loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("Unexpected AsyncStatus"))
-            
-            locator = wdg.Geolocator()
-            op = locator.GetGeopositionAsync()
-            op.Completed = callback
+        complete_event = threading.Event()
 
-            pos = await future
+        def callback(operation, status):
+            self.assertEqual(status, 1)
+            pos = operation.GetResults()
+
             self.assertEqual(type(pos), wdg.Geoposition)
 
             coord = pos.Coordinate
@@ -82,8 +81,29 @@ class TestGeolocation(unittest.TestCase):
             lat = basic_pos.Latitude
             self.assertEqual(type(lat), float)
 
-        loop.run_until_complete(async_test())
-        loop.close()
+            complete_event.set()
+
+        locator = wdg.Geolocator()
+        op = locator.GetGeopositionAsync()
+        op.Completed = callback
+
+        self.assertTrue(complete_event.wait(5))
+
+    @async_test
+    async def test_GetGeopositionAsync_await(self):
+        """test async method by directly awaiting IAsyncOperation"""
+
+        locator = wdg.Geolocator()
+        pos = await locator.GetGeopositionAsync()
+        self.assertEqual(type(pos), wdg.Geoposition)
+
+        coord = pos.Coordinate
+        self.assertEqual(type(coord.Timestamp.UniversalTime), int)
+
+        basic_pos = coord.Point.Position
+        lat = basic_pos.Latitude
+        self.assertEqual(type(lat), float)
+
 
 if __name__ == '__main__':
     import _pyrt
