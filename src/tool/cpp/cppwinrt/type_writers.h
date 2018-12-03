@@ -36,7 +36,7 @@ namespace xlang
             return false;
         }
 
-        if (0 != right.compare(left.name_space.size(), left.name.size(), left.name))
+        if (0 != right.compare(left.name_space.size() + 1, left.name.size(), left.name))
         {
             return false;
         }
