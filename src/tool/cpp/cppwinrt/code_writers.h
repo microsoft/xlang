@@ -479,6 +479,11 @@ namespace xlang
             return false;
         }
 
+        if (std::holds_alternative<GenericTypeInstSig>(return_signature.Type()))
+        {
+            return true;
+        }
+
         if (auto type_def = std::get_if<coded_index<TypeDefOrRef>>(&return_signature.Type()))
         {
             auto category = category::interface_type;

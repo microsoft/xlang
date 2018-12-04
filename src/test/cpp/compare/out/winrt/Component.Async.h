@@ -13,21 +13,21 @@ namespace winrt::impl
     }
     template <typename D> Windows::Foundation::IAsyncActionWithProgress<int32_t> consume_Component_Async_IClassStatics<D>::ActionWithProgress() const
     {
-        Windows::Foundation::IAsyncActionWithProgress<int32_t> operation;
-        check_hresult(WINRT_SHIM(Component::Async::IClassStatics)->ActionWithProgress(put_abi(operation)));
-        return operation;
+        void* operation;
+        check_hresult(WINRT_SHIM(Component::Async::IClassStatics)->ActionWithProgress(&operation));
+        return { operation, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::IAsyncOperation<hstring> consume_Component_Async_IClassStatics<D>::Operation() const
     {
-        Windows::Foundation::IAsyncOperation<hstring> operation;
-        check_hresult(WINRT_SHIM(Component::Async::IClassStatics)->Operation(put_abi(operation)));
-        return operation;
+        void* operation;
+        check_hresult(WINRT_SHIM(Component::Async::IClassStatics)->Operation(&operation));
+        return { operation, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::IAsyncOperationWithProgress<hstring, int32_t> consume_Component_Async_IClassStatics<D>::OperationWithProgress() const
     {
-        Windows::Foundation::IAsyncOperationWithProgress<hstring, int32_t> operation;
-        check_hresult(WINRT_SHIM(Component::Async::IClassStatics)->OperationWithProgress(put_abi(operation)));
-        return operation;
+        void* operation;
+        check_hresult(WINRT_SHIM(Component::Async::IClassStatics)->OperationWithProgress(&operation));
+        return { operation, take_ownership_from_abi };
     }
     template <typename D>
     struct produce<D, Component::Async::IClassStatics> : produce_base<D, Component::Async::IClassStatics>

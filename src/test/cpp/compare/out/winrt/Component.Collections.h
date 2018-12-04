@@ -7,39 +7,39 @@ namespace winrt::impl
 {
     template <typename D> Windows::Foundation::Collections::IIterable<hstring> consume_Component_Collections_IClassStatics<D>::Iterable() const
     {
-        Windows::Foundation::Collections::IIterable<hstring> result;
-        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->Iterable(put_abi(result)));
-        return result;
+        void* result;
+        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->Iterable(&result));
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::Collections::IVectorView<hstring> consume_Component_Collections_IClassStatics<D>::VectorView() const
     {
-        Windows::Foundation::Collections::IVectorView<hstring> result;
-        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->VectorView(put_abi(result)));
-        return result;
+        void* result;
+        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->VectorView(&result));
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::Collections::IVector<hstring> consume_Component_Collections_IClassStatics<D>::Vector() const
     {
-        Windows::Foundation::Collections::IVector<hstring> result;
-        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->Vector(put_abi(result)));
-        return result;
+        void* result;
+        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->Vector(&result));
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, int32_t>> consume_Component_Collections_IClassStatics<D>::IterablePair() const
     {
-        Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, int32_t>> result;
-        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->IterablePair(put_abi(result)));
-        return result;
+        void* result;
+        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->IterablePair(&result));
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::Collections::IMapView<hstring, int32_t> consume_Component_Collections_IClassStatics<D>::MapView() const
     {
-        Windows::Foundation::Collections::IMapView<hstring, int32_t> result;
-        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->MapView(put_abi(result)));
-        return result;
+        void* result;
+        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->MapView(&result));
+        return { result, take_ownership_from_abi };
     }
     template <typename D> Windows::Foundation::Collections::IMap<hstring, int32_t> consume_Component_Collections_IClassStatics<D>::Map() const
     {
-        Windows::Foundation::Collections::IMap<hstring, int32_t> result;
-        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->Map(put_abi(result)));
-        return result;
+        void* result;
+        check_hresult(WINRT_SHIM(Component::Collections::IClassStatics)->Map(&result));
+        return { result, take_ownership_from_abi };
     }
     template <typename D>
     struct produce<D, Component::Collections::IClass> : produce_base<D, Component::Collections::IClass>
