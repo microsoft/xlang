@@ -2,6 +2,7 @@
 
 #include "catch.hpp"
 #include "winrt/base.h"
+using namespace std::literals;
 
 template<bool B> bool static_require()
 {
