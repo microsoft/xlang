@@ -509,7 +509,7 @@ namespace xlang
 
         if (auto element_type = std::get_if<ElementType>(&return_signature.Type()))
         {
-            return *element_type == ElementType::String;
+            return *element_type == ElementType::String || *element_type == ElementType::Object;
         }
 
         return false;
