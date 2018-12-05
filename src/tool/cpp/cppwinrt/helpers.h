@@ -339,7 +339,7 @@ namespace xlang
         bool visible{};
     };
 
-    static auto get_factories(TypeDef const& type)
+    static auto get_factories(writer& w, TypeDef const& type)
     {
         auto get_system_type = [&](auto&& signature) -> TypeDef
         {
@@ -398,9 +398,7 @@ namespace xlang
 
                 if (info.type)
                 {
-                    name = info.type.TypeNamespace();
-                    name += '.';
-                    name += info.type.TypeName();
+                    name = w.write_temp("%", info.type);
                 }
 
                 result[name] = std::move(info);
@@ -577,9 +575,9 @@ namespace xlang
         return result;
     }
 
-    static bool has_factory_members(TypeDef const& type)
+    static bool has_factory_members(writer& w, TypeDef const& type)
     {
-        for (auto&&[factory_name, factory] : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(w, type))
         {
             if (!factory.type || !empty(factory.type.MethodList()))
             {
@@ -590,9 +588,9 @@ namespace xlang
         return false;
     }
 
-    static bool is_composable(TypeDef const& type)
+    static bool is_composable(writer& w, TypeDef const& type)
     {
-        for (auto&&[factory_name, factory] : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(w, type))
         {
             if (factory.composable)
             {
@@ -603,9 +601,9 @@ namespace xlang
         return false;
     }
 
-    static bool has_composable_constructors(TypeDef const& type)
+    static bool has_composable_constructors(writer& w, TypeDef const& type)
     {
-        for (auto&&[interface_name, factory] : get_factories(type))
+        for (auto&&[interface_name, factory] : get_factories(w, type))
         {
             if (factory.composable && !empty(factory.type.MethodList()))
             {

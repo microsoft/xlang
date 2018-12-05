@@ -1760,7 +1760,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                     type_name,
                     bind<write_consume_params>(signature),
                     type_name,
-                    factory.type,
+                    factory_name,
                     get_name(method),
                     bind<write_consume_args>(signature),
                     signature.params().empty() ? "" : ", ");
@@ -1800,7 +1800,7 @@ public:
 
     static void write_class_override(writer& w, TypeDef const& type)
     {
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
         bool has_composable_factories{};
 
         for (auto&&[interface_name, factory] : factories)
@@ -2587,7 +2587,7 @@ public:
 
         auto type_name = type.TypeName();
 
-        for (auto&&[interface_name, factory] : get_factories(type))
+        for (auto&&[interface_name, factory] : get_factories(w, type))
         {
             if (factory.activatable)
             {
@@ -2697,7 +2697,7 @@ public:
     static void write_slow_class(writer& w, TypeDef const& type, coded_index<TypeDefOrRef> const& base_type)
     {
         auto type_name = type.TypeName();
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
 
         auto format = R"(    struct WINRT_EBO % : %%%
     {
@@ -2722,7 +2722,7 @@ public:
     static void write_fast_class(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
         std::string base_type;
 
         if (auto base = get_base_class(type))
@@ -2758,7 +2758,7 @@ public:
     static void write_static_class(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
 
         auto format = R"(    struct %
     {
