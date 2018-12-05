@@ -56,6 +56,45 @@ auto get_dotted_name_segments(std::string_view ns)
     };
 };
 
+bool is_exclusive_to(xlang::meta::reader::TypeDef const& type)
+{
+    return xlang::meta::reader::get_category(type) == xlang::meta::reader::category::interface_type && xlang::meta::reader::get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+}
+
+struct winrt_ns
+{
+    std::string namespace_name;
+    std::vector<winrt_ns> sub_namespaces{};
+    xlang::meta::reader::cache::namespace_members members{};
+};
+
+void write_ns(writer& w, std::vector<winrt_ns> const& ns, int indent)
+{
+    for (auto&& sub : ns)
+    {
+        for (int i = 0; i < indent; i++)
+        {
+            w.write("  ");
+        }
+        w.write("%\n", sub.namespace_name);
+
+        for (auto&&[n, td] : sub.members.types)
+        {
+            if (is_exclusive_to(td)) { continue; }
+
+            for (int i = 0; i < indent; i++)
+            {
+                w.write("  ");
+            }
+
+            w.write("**%\n", n);
+            break;
+        }
+
+        write_ns(w, sub.sub_namespaces, indent + 1);
+    }
+}
+
 int main(int const /*argc*/, char** /*argv*/)
 {
 #ifdef _WIN64
@@ -77,28 +116,30 @@ int main(int const /*argc*/, char** /*argv*/)
     auto start = get_start_time();
 
     xlang::meta::reader::cache c{ files };
+    std::vector<winrt_ns> root_namespaces;
 
     for (auto&&[ns, members] : c.namespaces())
     {
-        w.write("%\n", ns);
-        auto segments = get_dotted_name_segments(ns);
+        std::vector<winrt_ns>::iterator cur;
+        auto* nsmap = &root_namespaces;
 
-        for (decltype(segments.size()) i = 0; i < segments.size(); i++)
+        for (auto&& s : get_dotted_name_segments(ns))
         {
-            separator s{ w, "." };
-            w.write("\t");
-
-            for (decltype(i) j = 0; j <= i; j++)
+            cur = std::find_if(nsmap->begin(), nsmap->end(), [s](winrt_ns const& n) { return n.namespace_name == s; });
+            if (cur == nsmap->end())
             {
-                s();
-                w.write(segments[j]);
+                cur = nsmap->insert(nsmap->end(), winrt_ns{ std::string{s} });
             }
-            w.write("\n");
+
+            nsmap = &(cur->sub_namespaces);
         }
+
+        cur->members = members;
     }
 
     auto elapsed = get_elapsed_time(start);
 
+    write_ns(w, root_namespaces, 0);
     w.write("\n%ms\n", elapsed);
     w.flush_to_console();
 
