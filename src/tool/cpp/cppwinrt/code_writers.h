@@ -1735,7 +1735,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_class_override_constructors(writer& w, std::string_view const& type_name, std::map<std::string, factory_type> const& factories)
+    static void write_class_override_constructors(writer& w, std::string_view const& type_name, std::map<std::string, factory_info> const& factories)
     {
         auto format = R"(    %T(%)
     {
@@ -2400,7 +2400,7 @@ public:
         }
     }
 
-    static void write_constructor_declarations(writer& w, TypeDef const& type, std::map<std::string, factory_type> const& factories)
+    static void write_constructor_declarations(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
     {
         auto type_name = type.TypeName();
 
@@ -2495,7 +2495,7 @@ public:
     }
 
 
-    static void write_static_declaration(writer& w, std::pair<std::string const, factory_type> const& factory)
+    static void write_static_declaration(writer& w, std::pair<std::string const, factory_info> const& factory)
     {
         if (!factory.second.statics)
         {

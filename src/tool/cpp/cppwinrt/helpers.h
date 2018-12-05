@@ -330,7 +330,7 @@ namespace xlang
         return result;
     }
 
-    struct factory_type // TODO: rename to factory_info for consistency with interface_info above
+    struct factory_info
     {
         TypeDef type;
         bool activatable{};
@@ -354,55 +354,57 @@ namespace xlang
             return {};
         };
 
-        std::map<std::string, factory_type> result;
+        std::map<std::string, factory_info> result;
 
         for (auto&& attribute : type.CustomAttribute())
         {
-            auto atname = attribute.TypeNamespaceAndName();
+            auto attribute_name = attribute.TypeNamespaceAndName();
 
-            if (atname.first == "Windows.Foundation.Metadata")
+            if (attribute_name.first != "Windows.Foundation.Metadata")
             {
-                auto signature = attribute.Value();
-                factory_type info;
+                continue;
+            }
 
-                if (atname.second == "ActivatableAttribute")
-                {
-                    info.type = get_system_type(signature);
-                    info.activatable = true;
-                }
-                else if (atname.second == "StaticAttribute")
-                {
-                    info.type = get_system_type(signature);
-                    info.statics = true;
-                }
-                else if (atname.second == "ComposableAttribute")
-                {
-                    info.type = get_system_type(signature);
-                    info.composable = true;
+            auto signature = attribute.Value();
+            factory_info info;
 
-                    for (auto&& arg : signature.FixedArgs())
+            if (attribute_name.second == "ActivatableAttribute")
+            {
+                info.type = get_system_type(signature);
+                info.activatable = true;
+            }
+            else if (attribute_name.second == "StaticAttribute")
+            {
+                info.type = get_system_type(signature);
+                info.statics = true;
+            }
+            else if (attribute_name.second == "ComposableAttribute")
+            {
+                info.type = get_system_type(signature);
+                info.composable = true;
+
+                for (auto&& arg : signature.FixedArgs())
+                {
+                    if (auto visibility = std::get_if<ElemSig::EnumValue>(&std::get<ElemSig>(arg.value).value))
                     {
-                        if (auto visibility = std::get_if<ElemSig::EnumValue>(&std::get<ElemSig>(arg.value).value))
-                        {
-                            info.visible = std::get<int32_t>(visibility->value) == 2;
-                            break;
-                        }
+                        info.visible = std::get<int32_t>(visibility->value) == 2;
+                        break;
                     }
                 }
-                else
-                {
-                    continue;
-                }
-
-                std::string name;
-
-                if (info.type)
-                {
-                    name = w.write_temp("%", info.type);
-                }
-
-                result[name] = std::move(info);
             }
+            else
+            {
+                continue;
+            }
+
+            std::string name;
+
+            if (info.type)
+            {
+                name = w.write_temp("%", info.type);
+            }
+
+            result[name] = std::move(info);
         }
 
         return result;

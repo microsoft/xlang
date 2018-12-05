@@ -317,7 +317,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             bind<write_consume_args>(signature));
     }
 
-    static void write_component_forwarders(writer& w, std::map<std::string, factory_type> const& factories)
+    static void write_component_forwarders(writer& w, std::map<std::string, factory_info> const& factories)
     {
         bool default_constructor{};
 
@@ -360,7 +360,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         }
     }
 
-    static void write_component_factory_interfaces(writer& w, std::map<std::string, factory_type> const& factories)
+    static void write_component_factory_interfaces(writer& w, std::map<std::string, factory_info> const& factories)
     {
         for (auto&&[factory_name, factory] : factories)
         {
