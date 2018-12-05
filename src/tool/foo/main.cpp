@@ -68,6 +68,35 @@ struct winrt_ns
     xlang::meta::reader::cache::namespace_members members{};
 };
 
+xlang::meta::reader::cache::namespace_members const* find_ns(std::vector<winrt_ns> const& namespaces, std::string_view const& ns)
+{
+    auto dot_pos = ns.find('.', 0);
+    if (dot_pos == std::string_view::npos)
+    {
+        auto it = std::find_if(namespaces.begin(), namespaces.end(), [ns](auto const& wns) { return wns.namespace_name == ns; });
+        if (it == namespaces.end())
+        {
+            return nullptr;
+        }
+        else
+        {
+            return &(it->members);
+        }
+    }
+    else
+    {
+        auto it = std::find_if(namespaces.begin(), namespaces.end(), [ns = ns.substr(0, dot_pos)](auto const& wns) { return wns.namespace_name == ns; });
+        if (it == namespaces.end())
+        {
+            return nullptr;
+        }
+        else
+        {
+            return find_ns(it->sub_namespaces, ns.substr(dot_pos + 1));
+        }
+    }
+}
+
 void write_ns(writer& w, std::vector<winrt_ns> const& ns, int indent)
 {
     for (auto&& sub : ns)
@@ -138,6 +167,8 @@ int main(int const /*argc*/, char** /*argv*/)
     }
 
     auto elapsed = get_elapsed_time(start);
+
+    auto q = find_ns(root_namespaces, "Windows.AI.MachineLearning");
 
     write_ns(w, root_namespaces, 0);
     w.write("\n%ms\n", elapsed);
