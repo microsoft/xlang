@@ -317,11 +317,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             bind<write_consume_args>(signature));
     }
 
-    static void write_component_forwarders(writer& w, std::vector<factory_type> const& factories)
+    static void write_component_forwarders(writer& w, std::map<std::string, factory_type> const& factories)
     {
         bool default_constructor{};
 
-        for (auto&& factory : factories)
+        for (auto&&[factory_name, factory] : factories)
         {
             if (factory.activatable)
             {
@@ -360,9 +360,9 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         }
     }
 
-    static void write_component_factory_interfaces(writer& w, std::vector<factory_type> const& factories)
+    static void write_component_factory_interfaces(writer& w, std::map<std::string, factory_type> const& factories)
     {
-        for (auto&& factory : factories)
+        for (auto&&[factory_name, factory] : factories)
         {
             if (!factory.type)
             {
@@ -401,7 +401,7 @@ void* winrt_make_%()
 
         write_type_namespace(w, type_namespace);
 
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(type))
         {
             if (factory.activatable)
             {
@@ -659,7 +659,7 @@ void* winrt_make_%()
 
         auto type_name = type.TypeName();
 
-        for (auto&& factory : get_factories(base_type))
+        for (auto&&[factory_name, factory] : get_factories(base_type))
         {
             if (!factory.composable)
             {
@@ -855,7 +855,7 @@ namespace winrt::@::implementation
     {
         auto type_name = type.TypeName();
 
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(type))
         {
             if (factory.activatable)
             {
@@ -977,7 +977,7 @@ namespace winrt::@::implementation
     {
         auto type_name = type.TypeName();
 
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(type))
         {
             if (factory.activatable)
             {

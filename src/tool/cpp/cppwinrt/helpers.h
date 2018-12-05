@@ -330,7 +330,7 @@ namespace xlang
         return result;
     }
 
-    struct factory_type
+    struct factory_type // TODO: rename to factory_info for consistency with interface_info above
     {
         TypeDef type;
         bool activatable{};
@@ -354,43 +354,60 @@ namespace xlang
             return {};
         };
 
-        std::vector<factory_type> factories;
+        std::map<std::string, factory_type> result;
 
         for (auto&& attribute : type.CustomAttribute())
         {
-            auto name = attribute.TypeNamespaceAndName();
+            auto atname = attribute.TypeNamespaceAndName();
 
-            if (name.first == "Windows.Foundation.Metadata")
+            if (atname.first == "Windows.Foundation.Metadata")
             {
                 auto signature = attribute.Value();
+                factory_type info;
 
-                if (name.second == "ActivatableAttribute")
+                if (atname.second == "ActivatableAttribute")
                 {
-                    factories.push_back({ get_system_type(signature), true, false });
+                    info.type = get_system_type(signature);
+                    info.activatable = true;
                 }
-                else if (name.second == "StaticAttribute")
+                else if (atname.second == "StaticAttribute")
                 {
-                    factories.push_back({ get_system_type(signature), false, true });
+                    info.type = get_system_type(signature);
+                    info.statics = true;
                 }
-                else if (name.second == "ComposableAttribute")
+                else if (atname.second == "ComposableAttribute")
                 {
-                    bool visible{};
+                    info.type = get_system_type(signature);
+                    info.composable = true;
 
                     for (auto&& arg : signature.FixedArgs())
                     {
                         if (auto visibility = std::get_if<ElemSig::EnumValue>(&std::get<ElemSig>(arg.value).value))
                         {
-                            visible = std::get<int32_t>(visibility->value) == 2;
+                            info.visible = std::get<int32_t>(visibility->value) == 2;
                             break;
                         }
                     }
-
-                    factories.push_back({ get_system_type(signature), false, false, true, visible });
                 }
+                else
+                {
+                    continue;
+                }
+
+                std::string name;
+
+                if (info.type)
+                {
+                    name = info.type.TypeNamespace();
+                    name += '.';
+                    name += info.type.TypeName();
+                }
+
+                result[name] = std::move(info);
             }
         }
 
-        return factories;
+        return result;
     }
 
     struct fast_interface_info
@@ -562,7 +579,7 @@ namespace xlang
 
     static bool has_factory_members(TypeDef const& type)
     {
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(type))
         {
             if (!factory.type || !empty(factory.type.MethodList()))
             {
@@ -575,7 +592,7 @@ namespace xlang
 
     static bool is_composable(TypeDef const& type)
     {
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(type))
         {
             if (factory.composable)
             {
@@ -588,7 +605,7 @@ namespace xlang
 
     static bool has_composable_constructors(TypeDef const& type)
     {
-        for (auto&& factory : get_factories(type))
+        for (auto&&[interface_name, factory] : get_factories(type))
         {
             if (factory.composable && !empty(factory.type.MethodList()))
             {
