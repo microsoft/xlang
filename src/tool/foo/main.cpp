@@ -58,7 +58,13 @@ auto get_dotted_name_segments(std::string_view ns)
 
 int main(int const /*argc*/, char** /*argv*/)
 {
-    stdfs::path winmd{ "C:\\Windows\\System32\\WinMetadata" }; 
+#ifdef _WIN64
+    auto sys32 = "c:\\Windows\\System32";
+#else
+    auto sys32 = "c:\\Windows\\Sysnative";
+#endif
+
+    auto winmd = stdfs::path{ sys32 } / "WinMetadata";
 
     std::vector<std::string> files;
     for (auto& p : stdfs::directory_iterator(winmd))
