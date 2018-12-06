@@ -1,17 +1,5 @@
 #include "pch.h"
 
-namespace stdfs = std::experimental::filesystem;
-
-struct writer : xlang::text::writer_base<writer>
-{
-    using xlang::text::writer_base<writer>::write;
-
-    void write(std::size_t const value)
-    {
-        write(std::to_string(value));
-    }
-};
-
 auto get_start_time()
 {
     return std::chrono::high_resolution_clock::now();
@@ -53,24 +41,6 @@ struct winrt_ns
     xlang::meta::reader::cache::namespace_members members{};
 };
 
-void write_indent(writer& w, int indent) noexcept
-{
-    for (int i = 0; i < indent; i++)
-    {
-        w.write("  ");
-    }
-}
-
-void write_ns(writer& w, std::map<std::string_view, winrt_ns> const& ns, int indent) noexcept
-{
-    for (auto&& [name, _ns] : ns)
-    {
-        w.write("%% (%)\n", xlang::text::bind<write_indent>(indent), name, _ns.members.types.size());
-
-        write_ns(w, _ns.sub_namespaces, indent + 1);
-    }
-}
-
 xlang::meta::reader::cache::namespace_members const* find_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns) noexcept
 {
     auto dot_pos = ns.find('.', 0);
@@ -102,16 +72,18 @@ xlang::meta::reader::cache::namespace_members const* find_ns(std::map<std::strin
 
 auto get_system_metadata()
 {
+    namespace fs = std::experimental::filesystem;
+
 #ifdef _WIN64
     auto sys32 = "c:\\Windows\\System32";
 #else
     auto sys32 = "c:\\Windows\\Sysnative";
 #endif
 
-    auto winmd = stdfs::path{ sys32 } / "WinMetadata";
+    auto winmd = fs::path{ sys32 } / "WinMetadata";
 
     std::vector<std::string> files;
-    for (auto& p : stdfs::directory_iterator(winmd))
+    for (auto& p : fs::directory_iterator(winmd))
     {
         files.push_back(p.path().string());
     }
@@ -119,7 +91,7 @@ auto get_system_metadata()
     return std::move(files);
 }
 
-auto get_system_namespaces(xlang::meta::reader::cache const& c)
+auto get_namespace_map(xlang::meta::reader::cache const& c)
 {
     std::map<std::string_view, winrt_ns> root_namespaces;
 
@@ -143,22 +115,14 @@ auto get_system_namespaces(xlang::meta::reader::cache const& c)
 
 int main(int const /*argc*/, char** /*argv*/)
 {
-    writer w;
-
     auto start = get_start_time();
 
     xlang::meta::reader::cache c{ get_system_metadata() };
-    auto namespaces = get_system_namespaces(c);
+    auto namespaces = get_namespace_map(c);
 
     auto elapsed = get_elapsed_time(start);
 
-    write_ns(w, namespaces, 0);
-
-    w.write("\n%ms\n", elapsed);
-    w.write("  Windows.AI.MachineLearning %\n", find_ns(namespaces, "Windows.AI.MachineLearning") == nullptr ? "true" : "false");
-    w.write("  Windows.AI.MachineLearningz %\n", find_ns(namespaces, "Windows.AI.MachineLearningz") == nullptr ? "true" : "false");
-
-    w.flush_to_console();
+    printf("%lldms\n", elapsed);
 
     return 0;
 }
