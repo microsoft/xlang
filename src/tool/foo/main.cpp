@@ -5,24 +5,10 @@ namespace stdfs = std::experimental::filesystem;
 struct writer : xlang::text::writer_base<writer>
 {
     using xlang::text::writer_base<writer>::write;
-};
 
-struct separator
-{
-    writer& w;
-    std::string_view _separator{ ", " };
-    bool first{ true };
-
-    void operator()()
+    void write(std::size_t const value)
     {
-        if (first)
-        {
-            first = false;
-        }
-        else
-        {
-            w.write(_separator);
-        }
+        write(std::to_string(value));
     }
 };
 
@@ -63,68 +49,58 @@ bool is_exclusive_to(xlang::meta::reader::TypeDef const& type)
 
 struct winrt_ns
 {
-    std::string namespace_name;
-    std::vector<winrt_ns> sub_namespaces{};
+    std::map<std::string_view, winrt_ns> sub_namespaces{};
     xlang::meta::reader::cache::namespace_members members{};
 };
 
-xlang::meta::reader::cache::namespace_members const* find_ns(std::vector<winrt_ns> const& namespaces, std::string_view const& ns)
+void write_indent(writer& w, int indent) noexcept
+{
+    for (int i = 0; i < indent; i++)
+    {
+        w.write("  ");
+    }
+}
+
+void write_ns(writer& w, std::map<std::string_view, winrt_ns> const& ns, int indent) noexcept
+{
+    for (auto&& [name, _ns] : ns)
+    {
+        w.write("%% (%)\n", xlang::text::bind<write_indent>(indent), name, _ns.members.types.size());
+
+        write_ns(w, _ns.sub_namespaces, indent + 1);
+    }
+}
+
+xlang::meta::reader::cache::namespace_members const* find_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns) noexcept
 {
     auto dot_pos = ns.find('.', 0);
     if (dot_pos == std::string_view::npos)
     {
-        auto it = std::find_if(namespaces.begin(), namespaces.end(), [ns](auto const& wns) { return wns.namespace_name == ns; });
+        auto it = namespaces.find(ns);
         if (it == namespaces.end())
         {
             return nullptr;
         }
         else
         {
-            return &(it->members);
+            return &(it->second.members);
         }
     }
     else
     {
-        auto it = std::find_if(namespaces.begin(), namespaces.end(), [ns = ns.substr(0, dot_pos)](auto const& wns) { return wns.namespace_name == ns; });
+        auto it = namespaces.find(ns.substr(0, dot_pos));
         if (it == namespaces.end())
         {
             return nullptr;
         }
         else
         {
-            return find_ns(it->sub_namespaces, ns.substr(dot_pos + 1));
+            return find_ns(it->second.sub_namespaces, ns.substr(dot_pos + 1));
         }
     }
 }
 
-void write_ns(writer& w, std::vector<winrt_ns> const& ns, int indent)
-{
-    for (auto&& sub : ns)
-    {
-        for (int i = 0; i < indent; i++)
-        {
-            w.write("  ");
-        }
-        w.write("%\n", sub.namespace_name);
-
-        for (auto&&[n, td] : sub.members.types)
-        {
-            if (is_exclusive_to(td)) { continue; }
-
-            for (int i = 0; i < indent; i++)
-            {
-                w.write("  ");
-            }
-
-            w.write("**%\n", n);
-            break;
-        }
-
-        write_ns(w, sub.sub_namespaces, indent + 1);
-    }
-}
-
-int main(int const /*argc*/, char** /*argv*/)
+auto get_system_metadata()
 {
 #ifdef _WIN64
     auto sys32 = "c:\\Windows\\System32";
@@ -140,38 +116,48 @@ int main(int const /*argc*/, char** /*argv*/)
         files.push_back(p.path().string());
     }
 
+    return std::move(files);
+}
+
+auto get_system_namespaces(xlang::meta::reader::cache const& c)
+{
+    std::map<std::string_view, winrt_ns> root_namespaces;
+
+    for (auto&&[ns, members] : c.namespaces())
+    {
+        winrt_ns* curns{ nullptr };
+        std::map<std::string_view, winrt_ns>* nsmap = &root_namespaces;
+
+        for (auto&& s : get_dotted_name_segments(ns))
+        {
+            winrt_ns& q = (*nsmap)[s];
+            curns = &q;
+            nsmap = &(q.sub_namespaces);
+        }
+
+        curns->members = members;
+    }
+
+    return std::move(root_namespaces);
+}
+
+int main(int const /*argc*/, char** /*argv*/)
+{
     writer w;
 
     auto start = get_start_time();
 
-    xlang::meta::reader::cache c{ files };
-    std::vector<winrt_ns> root_namespaces;
-
-    for (auto&&[ns, members] : c.namespaces())
-    {
-        std::vector<winrt_ns>::iterator cur;
-        auto* nsmap = &root_namespaces;
-
-        for (auto&& s : get_dotted_name_segments(ns))
-        {
-            cur = std::find_if(nsmap->begin(), nsmap->end(), [s](winrt_ns const& n) { return n.namespace_name == s; });
-            if (cur == nsmap->end())
-            {
-                cur = nsmap->insert(nsmap->end(), winrt_ns{ std::string{s} });
-            }
-
-            nsmap = &(cur->sub_namespaces);
-        }
-
-        cur->members = members;
-    }
+    xlang::meta::reader::cache c{ get_system_metadata() };
+    auto namespaces = get_system_namespaces(c);
 
     auto elapsed = get_elapsed_time(start);
 
-    auto q = find_ns(root_namespaces, "Windows.AI.MachineLearning");
+    write_ns(w, namespaces, 0);
 
-    write_ns(w, root_namespaces, 0);
     w.write("\n%ms\n", elapsed);
+    w.write("  Windows.AI.MachineLearning %\n", find_ns(namespaces, "Windows.AI.MachineLearning") == nullptr ? "true" : "false");
+    w.write("  Windows.AI.MachineLearningz %\n", find_ns(namespaces, "Windows.AI.MachineLearningz") == nullptr ? "true" : "false");
+
     w.flush_to_console();
 
     return 0;
