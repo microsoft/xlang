@@ -1,5 +1,10 @@
 #include "pch.h"
 
+// TODO: local declarations of winrt APIs to avoid dependencies on Windows SDK
+#include <wrl\client.h>
+#include <wrl\wrappers\corewrappers.h>
+#include <windows.data.json.h>
+
 auto get_start_time()
 {
     return std::chrono::high_resolution_clock::now();
@@ -70,6 +75,17 @@ xlang::meta::reader::cache::namespace_members const* find_ns(std::map<std::strin
     }
 }
 
+xlang::meta::reader::cache::namespace_members const& get_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns)
+{
+    auto _ns = find_ns(namespaces, ns);
+    if (_ns == nullptr)
+    {
+        throw std::out_of_range{ std::string{ns} };
+    }
+
+    return *_ns;
+}
+
 auto get_system_metadata()
 {
     namespace fs = std::experimental::filesystem;
@@ -113,6 +129,30 @@ auto get_namespace_map(xlang::meta::reader::cache const& c)
     return std::move(root_namespaces);
 }
 
+auto get_guid(xlang::meta::reader::CustomAttribute const& attrib)
+{
+    std::vector<xlang::meta::reader::FixedArgSig> z = attrib.Value().FixedArgs();
+
+    auto getarg = [&z](std::size_t index) { return std::get<xlang::meta::reader::ElemSig>(z[index].value).value; };
+    return GUID{
+        std::get<uint32_t>(getarg(0)),
+        std::get<uint16_t>(getarg(1)),
+        std::get<uint16_t>(getarg(2)),
+        {
+            std::get<uint8_t>(getarg(3)),
+            std::get<uint8_t>(getarg(4)),
+            std::get<uint8_t>(getarg(5)),
+            std::get<uint8_t>(getarg(6)),
+            std::get<uint8_t>(getarg(7)),
+            std::get<uint8_t>(getarg(8)),
+            std::get<uint8_t>(getarg(9)),
+            std::get<uint8_t>(getarg(10))
+        }
+    };
+}
+
+typedef HRESULT(__stdcall *zz_activate_instance)(void*, IInspectable**);
+
 int main(int const /*argc*/, char** /*argv*/)
 {
     auto start = get_start_time();
@@ -123,6 +163,46 @@ int main(int const /*argc*/, char** /*argv*/)
     auto elapsed = get_elapsed_time(start);
 
     printf("%lldms\n", elapsed);
+
+    auto json_ns = get_ns(namespaces, "Windows.Data.Json");
+    auto ijos_td = json_ns.types["IJsonObjectStatics"];
+
+    auto ijos_guid = get_guid(xlang::meta::reader::get_attribute(ijos_td, "Windows.Foundation.Metadata", "GuidAttribute"));
+
+    Microsoft::WRL::Wrappers::RoInitializeWrapper ro_init(RO_INIT_MULTITHREADED);
+    if (FAILED(ro_init))
+    {
+        throw std::exception{ "roinit failed" };
+    }
+
+    Microsoft::WRL::ComPtr<IActivationFactory> factory;
+    Microsoft::WRL::Wrappers::HStringReference jo_name{ L"Windows.Data.Json.JsonObject" };
+    HRESULT hr = Windows::Foundation::GetActivationFactory(jo_name.Get(), &factory);
+
+    {
+        Microsoft::WRL::ComPtr<IInspectable> insp;
+        hr = factory->ActivateInstance(insp.GetAddressOf());
+
+        Microsoft::WRL::ComPtr<ABI::Windows::Foundation::IStringable> istr;
+        hr = insp.As(&istr);
+
+        Microsoft::WRL::Wrappers::HString jostr;
+        hr = istr->ToString(jostr.GetAddressOf());
+    }
+
+    {
+        auto factory_vtbl = *((void***)factory.Get());
+        auto activate_func = (zz_activate_instance)factory_vtbl[6];
+
+        Microsoft::WRL::ComPtr<IInspectable> insp;
+        hr = (*activate_func)(factory.Get(), insp.GetAddressOf());
+
+        Microsoft::WRL::ComPtr<ABI::Windows::Foundation::IStringable> istr;
+        hr = insp.As(&istr);
+
+        Microsoft::WRL::Wrappers::HString jostr;
+        hr = istr->ToString(jostr.GetAddressOf());
+    }
 
     return 0;
 }
