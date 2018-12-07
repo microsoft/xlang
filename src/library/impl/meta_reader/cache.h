@@ -135,8 +135,6 @@ namespace xlang::meta::reader
 
         void remove_legacy_cppwinrt_foundation_types()
         {
-            // TODO: remove this function once cpp.exe generates these base types (soon)...
-
             auto remove = [&](auto&& ns, auto&& name)
             {
                 auto& members = m_namespaces[ns];
@@ -162,15 +160,6 @@ namespace xlang::meta::reader
                 remove(members.classes, name);
             };
 
-            remove("Windows.Foundation", "IAsyncInfo");
-            remove("Windows.Foundation", "IAsyncAction");
-            remove("Windows.Foundation", "IAsyncActionWithProgress`1");
-            remove("Windows.Foundation", "IAsyncOperation`1");
-            remove("Windows.Foundation", "IAsyncOperationWithProgress`2");
-            remove("Windows.Foundation", "IReference`1");
-            remove("Windows.Foundation", "IReferenceArray`1");
-
-            remove("Windows.Foundation", "AsyncStatus");
             remove("Windows.Foundation", "DateTime");
             remove("Windows.Foundation", "EventRegistrationToken");
             remove("Windows.Foundation", "HResult");
@@ -178,30 +167,6 @@ namespace xlang::meta::reader
             remove("Windows.Foundation", "Rect");
             remove("Windows.Foundation", "Size");
             remove("Windows.Foundation", "TimeSpan");
-
-            remove("Windows.Foundation", "AsyncActionCompletedHandler");
-            remove("Windows.Foundation", "AsyncActionProgressHandler`1");
-            remove("Windows.Foundation", "AsyncActionWithProgressCompletedHandler`1");
-            remove("Windows.Foundation", "AsyncOperationCompletedHandler`1");
-            remove("Windows.Foundation", "AsyncOperationProgressHandler`2");
-            remove("Windows.Foundation", "AsyncOperationWithProgressCompletedHandler`2");
-            remove("Windows.Foundation", "EventHandler`1");
-            remove("Windows.Foundation", "TypedEventHandler`2");
-
-            remove("Windows.Foundation.Collections", "IIterable`1");
-            remove("Windows.Foundation.Collections", "IIterator`1");
-            remove("Windows.Foundation.Collections", "IKeyValuePair`2");
-            remove("Windows.Foundation.Collections", "IMapChangedEventArgs`1");
-            remove("Windows.Foundation.Collections", "IMapView`2");
-            remove("Windows.Foundation.Collections", "IMap`2");
-            remove("Windows.Foundation.Collections", "IObservableMap`2");
-            remove("Windows.Foundation.Collections", "IObservableVector`1");
-            remove("Windows.Foundation.Collections", "IVectorChangedEventArgs");
-            remove("Windows.Foundation.Collections", "IVectorView`1");
-            remove("Windows.Foundation.Collections", "IVector`1");
-            remove("Windows.Foundation.Collections", "MapChangedEventHandler`2");
-            remove("Windows.Foundation.Collections", "VectorChangedEventHandler`1");
-            remove("Windows.Foundation.Collections", "CollectionChange");
 
             remove("Windows.Foundation.Numerics", "Matrix3x2");
             remove("Windows.Foundation.Numerics", "Matrix4x4");

@@ -1,31 +1,4 @@
 
-namespace winrt::impl
-{
-#ifdef WINRT_CHECKED_ITERATORS
-
-    template <typename T>
-    using array_iterator = stdext::checked_array_iterator<T*>;
-
-    template <typename T>
-    auto make_array_iterator(T* data, uint32_t size, uint32_t index = 0) noexcept
-    {
-        return array_iterator<T>(data, size, index);
-    }
-
-#else
-
-    template <typename T>
-    using array_iterator = T*;
-
-    template <typename T>
-    auto make_array_iterator(T* data, uint32_t, uint32_t index = 0) noexcept
-    {
-        return data + index;
-    }
-
-#endif
-}
-
 WINRT_EXPORT namespace winrt
 {
     template <typename T>
@@ -37,8 +10,8 @@ WINRT_EXPORT namespace winrt
         using const_reference = value_type const&;
         using pointer = value_type*;
         using const_pointer = value_type const*;
-        using iterator = impl::array_iterator<value_type>;
-        using const_iterator = impl::array_iterator<value_type const>;
+        using iterator = value_type*;
+        using const_iterator = value_type const*;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -146,32 +119,32 @@ WINRT_EXPORT namespace winrt
 
         iterator begin() noexcept
         {
-            return impl::make_array_iterator(m_data, m_size);
+            return m_data;
         }
 
         const_iterator begin() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size);
+            return m_data;
         }
 
         const_iterator cbegin() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size);
+            return m_data;
         }
 
         iterator end() noexcept
         {
-            return impl::make_array_iterator(m_data, m_size, m_size);
+            return m_data + m_size;
         }
 
         const_iterator end() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size, m_size);
+            return m_data + m_size;
         }
 
         const_iterator cend() const noexcept
         {
-            return impl::make_array_iterator<value_type const>(m_data, m_size, m_size);
+            return m_data + m_size;
         }
 
         reverse_iterator rbegin() noexcept
@@ -467,9 +440,9 @@ WINRT_EXPORT namespace winrt
 
     inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
     {
-        hstring value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(put_abi(value)));
-        return value;
+        void* value;
+        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(&value));
+        return { value, take_ownership_from_abi };
     }
 
     inline com_array<guid> get_interfaces(Windows::Foundation::IInspectable const& object)

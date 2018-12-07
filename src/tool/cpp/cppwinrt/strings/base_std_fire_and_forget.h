@@ -1,4 +1,9 @@
 
+WINRT_EXPORT namespace winrt
+{
+    struct fire_and_forget {};
+}
+
 WINRT_EXPORT namespace std::experimental
 {
     template <typename... Args>

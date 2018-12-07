@@ -497,8 +497,6 @@ WINRT_EXPORT namespace winrt
     {
         return{};
     }
-
-    struct fire_and_forget {};
 }
 
 namespace winrt::impl

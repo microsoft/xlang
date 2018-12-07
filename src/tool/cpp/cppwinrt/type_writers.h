@@ -6,6 +6,49 @@ namespace xlang
     using namespace text;
     using namespace meta::reader;
 
+    struct type_name
+    {
+        std::string_view name;
+        std::string_view name_space;
+
+        explicit type_name(TypeDef const& type) :
+            name(type.TypeName()),
+            name_space(type.TypeNamespace())
+        {
+        }
+
+        explicit type_name(TypeRef const& type) :
+            name(type.TypeName()),
+            name_space(type.TypeNamespace())
+        {
+        }
+    };
+
+    bool operator==(type_name const& left, std::string_view const& right)
+    {
+        if (left.name.size() + 1 + left.name_space.size() != right.size())
+        {
+            return false;
+        }
+
+        if (right[left.name_space.size()] != '.')
+        {
+            return false;
+        }
+
+        if (0 != right.compare(left.name_space.size() + 1, left.name.size(), left.name))
+        {
+            return false;
+        }
+
+        return 0 == right.compare(0, left.name_space.size(), left.name_space);
+    }
+
+    static auto remove_tick(std::string_view const& name)
+    {
+        return name.substr(0, name.rfind('`'));
+    }
+
     template <typename First, typename...Rest>
     auto get_impl_name(First const& first, Rest const&... rest)
     {
@@ -76,7 +119,7 @@ namespace xlang
             }
         }
 
-        [[nodiscard]] auto push_generic_params(std::pair<GenericParam, GenericParam>&& params)
+        [[nodiscard]] auto push_generic_params(std::pair<GenericParam, GenericParam> const& params)
         {
             if (empty(params))
             {
@@ -153,9 +196,16 @@ namespace xlang
 
         void write(TypeDef const& type)
         {
+            add_depends(type);
             auto ns = type.TypeNamespace();
             auto name = type.TypeName();
-            add_depends(type);
+            auto generics = type.GenericParam();
+
+            if (!empty(generics))
+            {
+                write("@::%<%>", ns, remove_tick(name), bind_list(", ", generics));
+                return;
+            }
 
             // TODO: get rid of all these renames once parity with cppwinrt.exe has been reached...
 
@@ -230,7 +280,7 @@ namespace xlang
 
         void write(TypeRef const& type)
         {
-            if (type.TypeName() == "Guid" && type.TypeNamespace() == "System")
+            if (type_name(type) == "System.Guid")
             {
                 write("winrt::guid");
             }
@@ -238,6 +288,11 @@ namespace xlang
             {
                 write(find_required(type));
             }
+        }
+
+        void write(GenericParam const& param)
+        {
+            write(param.Name());
         }
 
         void write(coded_index<TypeDefOrRef> const& type)
@@ -268,44 +323,40 @@ namespace xlang
                 auto ns = generic_type.TypeNamespace();
                 auto name = generic_type.TypeName();
                 name.remove_suffix(name.size() - name.rfind('`'));
+                add_depends(find_required(generic_type));
 
                 if (consume_types)
                 {
-                    static constexpr std::string_view optional("Windows::Foundation::IReference"sv);
-                    static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable"sv);
-                    static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView"sv);
-                    static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView"sv);
-                    static constexpr std::string_view vector("Windows::Foundation::Collections::IVector"sv);
-                    static constexpr std::string_view map("Windows::Foundation::Collections::IMap"sv);
+                    static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable<"sv);
+                    static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView<"sv);
+                    static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView<"sv);
+                    static constexpr std::string_view vector("Windows::Foundation::Collections::IVector<"sv);
+                    static constexpr std::string_view map("Windows::Foundation::Collections::IMap<"sv);
 
                     consume_types = false;
                     auto full_name = write_temp("@::%<%>", ns, name, bind_list(", ", type.GenericArgs()));
                     consume_types = true;
 
-                    if (starts_with(full_name, optional))
-                    {
-                        write("optional%", full_name.substr(optional.size()));
-                    }
-                    else if (starts_with(full_name, iterable))
+                    if (starts_with(full_name, iterable))
                     {
                         if (async_types)
                         {
-                            write("param::async_iterable%", full_name.substr(iterable.size()));
+                            write("param::async_iterable%", full_name.substr(iterable.size() - 1));
                         }
                         else
                         {
-                            write("param::iterable%", full_name.substr(iterable.size()));
+                            write("param::iterable%", full_name.substr(iterable.size() - 1));
                         }
                     }
                     else if (starts_with(full_name, vector_view))
                     {
                         if (async_types)
                         {
-                            write("param::async_vector_view%", full_name.substr(vector_view.size()));
+                            write("param::async_vector_view%", full_name.substr(vector_view.size() - 1));
                         }
                         else
                         {
-                            write("param::vector_view%", full_name.substr(vector_view.size()));
+                            write("param::vector_view%", full_name.substr(vector_view.size() - 1));
                         }
                     }
 
@@ -313,20 +364,20 @@ namespace xlang
                     {
                         if (async_types)
                         {
-                            write("param::async_map_view%", full_name.substr(map_view.size()));
+                            write("param::async_map_view%", full_name.substr(map_view.size() - 1));
                         }
                         else
                         {
-                            write("param::map_view%", full_name.substr(map_view.size()));
+                            write("param::map_view%", full_name.substr(map_view.size() - 1));
                         }
                     }
                     else if (starts_with(full_name, vector))
                     {
-                        write("param::vector%", full_name.substr(vector.size()));
+                        write("param::vector%", full_name.substr(vector.size() - 1));
                     }
                     else if (starts_with(full_name, map))
                     {
-                        write("param::map%", full_name.substr(map.size()));
+                        write("param::map%", full_name.substr(map.size() - 1));
                     }
                     else
                     {

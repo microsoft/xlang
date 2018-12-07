@@ -9,61 +9,61 @@ namespace winrt::impl
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::IFastClass)->First(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_IFastClass<D>::Second() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::IFastClass)->Second(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_IFastClass2<D>::Third() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::IFastClass2)->Third(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_IFastClass2<D>::Fourth() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::IFastClass2)->Fourth(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_IFastClassStatics<D>::StaticMethod() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::IFastClassStatics)->StaticMethod(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_ISlowClass<D>::First() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::ISlowClass)->First(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_ISlowClass<D>::Second() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::ISlowClass)->Second(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_ISlowClass2<D>::Third() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::ISlowClass2)->Third(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_ISlowClass2<D>::Fourth() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::ISlowClass2)->Fourth(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D> hstring consume_Component_Fast_ISlowClassStatics<D>::StaticMethod() const
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::Fast::ISlowClassStatics)->StaticMethod(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D>
     struct produce<D, Component::Fast::IFastClass> : produce_base<D, Component::Fast::IFastClass>
@@ -262,33 +262,33 @@ namespace winrt::Component::Fast
     {
         void* result;
         check_hresult((*(impl::abi_t<fast_interface<FastClass>>**)this)->First(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     inline hstring FastClass::Second() const
     {
         void* result;
         check_hresult((*(impl::abi_t<fast_interface<FastClass>>**)this)->Second(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     inline hstring FastClass::Third() const
     {
         void* result;
         check_hresult((*(impl::abi_t<fast_interface<FastClass>>**)this)->Third(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     inline hstring FastClass::Fourth() const
     {
         void* result;
         check_hresult((*(impl::abi_t<fast_interface<FastClass>>**)this)->Fourth(&result));
-        return { take_ownership_from_abi, result };
-    }
-    inline hstring SlowClass::StaticMethod()
-    {
-        return impl::call_factory<SlowClass, Component::Fast::ISlowClassStatics>([&](auto&& f) { return f.StaticMethod(); });
+        return { result, take_ownership_from_abi };
     }
     inline SlowClass::SlowClass() :
         SlowClass(impl::call_factory<SlowClass>([](auto&& f) { return f.template ActivateInstance<SlowClass>(); }))
     {
+    }
+    inline hstring SlowClass::StaticMethod()
+    {
+        return impl::call_factory<SlowClass, Component::Fast::ISlowClassStatics>([&](auto&& f) { return f.StaticMethod(); });
     }
 }
 namespace std

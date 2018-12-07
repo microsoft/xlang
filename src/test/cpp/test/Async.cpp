@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "winrt/Component.Async.h"
+#include "winrt/Windows.Foundation.h"
 
 using namespace winrt;
 using namespace Component;

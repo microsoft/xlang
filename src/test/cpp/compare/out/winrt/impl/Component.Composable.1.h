@@ -8,20 +8,20 @@ namespace winrt::Component::Composable
         impl::consume_t<IBase>
     {
         IBase(std::nullptr_t = nullptr) noexcept {}
-        IBase(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IBase(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IBaseFactory :
         Windows::Foundation::IInspectable,
         impl::consume_t<IBaseFactory>
     {
         IBaseFactory(std::nullptr_t = nullptr) noexcept {}
-        IBaseFactory(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IBaseFactory(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IDerived :
         Windows::Foundation::IInspectable,
         impl::consume_t<IDerived>
     {
         IDerived(std::nullptr_t = nullptr) noexcept {}
-        IDerived(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IDerived(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
 }

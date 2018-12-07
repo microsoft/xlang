@@ -1,8 +1,55 @@
 
+WINRT_EXPORT namespace winrt
+{
+    void check_hresult(hresult const result);
+    hresult to_hresult() noexcept;
+
+    template <typename D, typename I>
+    D* get_self(I const& from) noexcept;
+
+    struct take_ownership_from_abi_t {};
+    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
+
+    template <typename T>
+    struct com_ptr;
+
+    namespace param
+    {
+        template <typename T>
+        struct iterable;
+
+        template <typename T>
+        struct async_iterable;
+
+        template <typename K, typename V>
+        struct map_view;
+
+        template <typename K, typename V>
+        struct async_map_view;
+
+        template <typename K, typename V>
+        struct map;
+
+        template <typename T>
+        struct vector_view;
+
+        template <typename T>
+        struct async_vector_view;
+
+        template <typename T>
+        struct vector;
+    }
+}
+
 namespace winrt::impl
 {
     using namespace std::literals;
-    namespace wfc = Windows::Foundation::Collections;
+
+    template <typename Async>
+    void blocking_suspend(Async const& async);
+
+    template <typename T>
+    struct reference_traits;
 
     template <typename T>
     struct identity
@@ -176,6 +223,29 @@ namespace winrt::impl
 
     template <typename T>
     using arg_out = arg_in<T>*;
+
+    template <typename D, typename I, typename Enable = void>
+    struct produce_base;
+
+    template <typename D, typename I>
+    struct produce : produce_base<D, I>
+    {
+    };
+
+    template <typename T>
+    struct wrapped_type
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    struct wrapped_type<com_ptr<T>>
+    {
+        using type = T;
+    };
+
+    template <typename T>
+    using wrapped_type_t = typename wrapped_type<T>::type;
 
     template <template <typename...> typename Trait, typename Enabler, typename... Args>
     struct is_detected : std::false_type {};

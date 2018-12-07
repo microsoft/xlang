@@ -237,7 +237,14 @@ namespace winrt::impl
     struct name
     {
 #pragma warning(suppress: 4307)
-        static constexpr auto value{ to_array<wchar_t>(guid_of<T>()) };
+        static constexpr auto value
+        {
+            combine
+            (
+                to_array<wchar_t>(guid_of<T>()),
+                std::array<wchar_t, 1>{ L'\0' }
+            )
+        };
     };
 
     template <typename T>

@@ -18,17 +18,11 @@
 #define WINRT_NOVTABLE __declspec(novtable)
 #define WINRT_CALL __stdcall
 #define WINRT_NOINLINE  __declspec(noinline)
-#define WINRT_FORCEINLINE __forceinline
 #else
 #define WINRT_EBO
 #define WINRT_NOVTABLE
 #define WINRT_CALL
 #define WINRT_NOINLINE
-#define WINRT_FORCEINLINE
-#endif
-
-#if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL != 0
-#define WINRT_CHECKED_ITERATORS
 #endif
 
 #define WINRT_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
@@ -53,23 +47,4 @@
 #define WINRT_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM_BARRIER_ISH));
 #elif defined _M_ARM64
 #define WINRT_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM64_BARRIER_ISH));
-#endif
-
-#ifdef __IUnknown_INTERFACE_DEFINED__
-#define WINRT_WINDOWS_ABI
-
-namespace winrt::impl
-{
-    using hresult_type = long;
-    using ref_count_type = unsigned long;
-}
-
-#else
-
-namespace winrt::impl
-{
-    using hresult_type = int32_t;
-    using ref_count_type = uint32_t;
-}
-
 #endif

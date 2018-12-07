@@ -6,12 +6,12 @@ namespace winrt::Component::Edge
     struct WINRT_EBO EmptyClass : Component::Edge::IEmptyClass
     {
         EmptyClass(std::nullptr_t) noexcept {}
-        EmptyClass(take_ownership_from_abi_t, void* ptr) noexcept : Component::Edge::IEmptyClass(take_ownership_from_abi, ptr) {}
+        EmptyClass(void* ptr, take_ownership_from_abi_t) noexcept : Component::Edge::IEmptyClass(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO OneClass : Component::Edge::IOneClass
     {
         OneClass(std::nullptr_t) noexcept {}
-        OneClass(take_ownership_from_abi_t, void* ptr) noexcept : Component::Edge::IOneClass(take_ownership_from_abi, ptr) {}
+        OneClass(void* ptr, take_ownership_from_abi_t) noexcept : Component::Edge::IOneClass(ptr, take_ownership_from_abi) {}
         OneClass(int32_t a);
         static void StaticMethod(int32_t a);
     };
@@ -23,21 +23,21 @@ namespace winrt::Component::Edge
     struct WINRT_EBO ThreeClass : Component::Edge::IThreeClass
     {
         ThreeClass(std::nullptr_t) noexcept {}
-        ThreeClass(take_ownership_from_abi_t, void* ptr) noexcept : Component::Edge::IThreeClass(take_ownership_from_abi, ptr) {}
+        ThreeClass(void* ptr, take_ownership_from_abi_t) noexcept : Component::Edge::IThreeClass(ptr, take_ownership_from_abi) {}
         ThreeClass(int32_t a, int32_t b, int32_t c);
         static void StaticMethod(int32_t a, int32_t b, int32_t c);
     };
     struct WINRT_EBO TwoClass : Component::Edge::ITwoClass
     {
         TwoClass(std::nullptr_t) noexcept {}
-        TwoClass(take_ownership_from_abi_t, void* ptr) noexcept : Component::Edge::ITwoClass(take_ownership_from_abi, ptr) {}
+        TwoClass(void* ptr, take_ownership_from_abi_t) noexcept : Component::Edge::ITwoClass(ptr, take_ownership_from_abi) {}
         TwoClass(int32_t a, int32_t b);
         static void StaticMethod(int32_t a, int32_t b);
     };
     struct WINRT_EBO ZeroClass : Component::Edge::IZeroClass
     {
         ZeroClass(std::nullptr_t) noexcept {}
-        ZeroClass(take_ownership_from_abi_t, void* ptr) noexcept : Component::Edge::IZeroClass(take_ownership_from_abi, ptr) {}
+        ZeroClass(void* ptr, take_ownership_from_abi_t) noexcept : Component::Edge::IZeroClass(ptr, take_ownership_from_abi) {}
         ZeroClass();
         static void StaticMethod();
     };

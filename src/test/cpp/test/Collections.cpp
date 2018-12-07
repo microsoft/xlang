@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "winrt/Component.Collections.h"
+#include "winrt/Windows.Foundation.Collections.h"
 
 using namespace winrt;
 using namespace Component;
