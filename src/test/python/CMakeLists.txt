@@ -1,19 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-execute_process(
-    COMMAND py -c "import sys; vi = sys.version_info; print('cp{0}{1}-{2}'.format(vi.major, vi.minor, 'win_amd64' if sys.maxsize > 2**32 else 'win32'))"
-    OUTPUT_VARIABLE python_version_info
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
 set(python_module_name pyrt)
-file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/python/pywinrt.exe pywinrt_exe)
-file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files)
-file(TO_NATIVE_PATH "$ENV{WindowsSdkDir}References/$ENV{WindowsSDKVersion}" winsdk_references_root)
-file(TO_NATIVE_PATH "${generated_files}/build/_${python_module_name}.${python_version_info}" module_path_no_ext)
-file(TO_NATIVE_PATH "${module_path_no_ext}.pyd" module_path)
-file(TO_NATIVE_PATH "${module_path_no_ext}.pdb" module_pdb_path)
-file(TO_NATIVE_PATH "${generated_files}/setup.py" setup_py)
 
 set(winmd_files
     Windows.Foundation.FoundationContract
@@ -71,8 +58,10 @@ set(excluded_namespaces
     # Windows.Storage.Streams.
 )
 
-set(pywinrt_cmdline "-output ${generated_files} -module ${python_module_name}")
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files_folder)
+set(pywinrt_cmdline "-output ${generated_files_folder} -module ${python_module_name}")
 
+file(TO_NATIVE_PATH "$ENV{WindowsSdkDir}References/$ENV{WindowsSDKVersion}" winsdk_references_root)
 foreach (winmd ${winmd_files})
     file(TO_NATIVE_PATH "${winsdk_references_root}/${winmd}" contract_root)
     file(GLOB_RECURSE winmd_path "${contract_root}/${winmd}.winmd")
@@ -90,22 +79,20 @@ foreach(ns ${excluded_namespaces})
     string(APPEND pywinrt_cmdline " -exclude ${ns}")
 endforeach()
 
+file(TO_NATIVE_PATH "${generated_files_folder}/setup.py" setup_py)
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/python/pywinrt.exe pywinrt_exe)
 add_custom_command(
   OUTPUT ${setup_py} 
   DEPENDS ${pywinrt_exe}
   COMMAND ${pywinrt_exe} ${pywinrt_cmdline}
 )
+add_custom_target(generate_python_test DEPENDS ${setup_py})
 
+file(TO_NATIVE_PATH "${generated_files_folder}/_${python_module_name}.pyd" module_pyd)
 add_custom_command(
-  OUTPUT ${module_path} 
-  BYPRODUCTS ${module_pdb_path}
+  OUTPUT ${module_pyd} 
   DEPENDS ${setup_py}
-  WORKING_DIRECTORY ${generated_files}
-  COMMAND py setup.py develop
+  WORKING_DIRECTORY ${generated_files_folder}
+  COMMAND py setup.py build_ext --inplace
 )
-
-add_custom_target(generate_python_test ALL DEPENDS ${setup_py})
-add_custom_target(python_test ALL DEPENDS ${module_path})
-
-# TODO: include python_test in ALL once issue running python on build system is resolved 
-set_target_properties(python_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_custom_target(build_python_test DEPENDS ${module_pyd})
