@@ -330,7 +330,7 @@ namespace xlang
         return result;
     }
 
-    struct factory_type
+    struct factory_info
     {
         TypeDef type;
         bool activatable{};
@@ -339,7 +339,7 @@ namespace xlang
         bool visible{};
     };
 
-    static auto get_factories(TypeDef const& type)
+    static auto get_factories(writer& w, TypeDef const& type)
     {
         auto get_system_type = [&](auto&& signature) -> TypeDef
         {
@@ -354,43 +354,60 @@ namespace xlang
             return {};
         };
 
-        std::vector<factory_type> factories;
+        std::map<std::string, factory_info> result;
 
         for (auto&& attribute : type.CustomAttribute())
         {
-            auto name = attribute.TypeNamespaceAndName();
+            auto attribute_name = attribute.TypeNamespaceAndName();
 
-            if (name.first == "Windows.Foundation.Metadata")
+            if (attribute_name.first != "Windows.Foundation.Metadata")
             {
-                auto signature = attribute.Value();
+                continue;
+            }
 
-                if (name.second == "ActivatableAttribute")
-                {
-                    factories.push_back({ get_system_type(signature), true, false });
-                }
-                else if (name.second == "StaticAttribute")
-                {
-                    factories.push_back({ get_system_type(signature), false, true });
-                }
-                else if (name.second == "ComposableAttribute")
-                {
-                    bool visible{};
+            auto signature = attribute.Value();
+            factory_info info;
 
-                    for (auto&& arg : signature.FixedArgs())
+            if (attribute_name.second == "ActivatableAttribute")
+            {
+                info.type = get_system_type(signature);
+                info.activatable = true;
+            }
+            else if (attribute_name.second == "StaticAttribute")
+            {
+                info.type = get_system_type(signature);
+                info.statics = true;
+            }
+            else if (attribute_name.second == "ComposableAttribute")
+            {
+                info.type = get_system_type(signature);
+                info.composable = true;
+
+                for (auto&& arg : signature.FixedArgs())
+                {
+                    if (auto visibility = std::get_if<ElemSig::EnumValue>(&std::get<ElemSig>(arg.value).value))
                     {
-                        if (auto visibility = std::get_if<ElemSig::EnumValue>(&std::get<ElemSig>(arg.value).value))
-                        {
-                            visible = std::get<int32_t>(visibility->value) == 2;
-                            break;
-                        }
+                        info.visible = std::get<int32_t>(visibility->value) == 2;
+                        break;
                     }
-
-                    factories.push_back({ get_system_type(signature), false, false, true, visible });
                 }
             }
+            else
+            {
+                continue;
+            }
+
+            std::string name;
+
+            if (info.type)
+            {
+                name = w.write_temp("%", info.type);
+            }
+
+            result[name] = std::move(info);
         }
 
-        return factories;
+        return result;
     }
 
     struct fast_interface_info
@@ -560,9 +577,9 @@ namespace xlang
         return result;
     }
 
-    static bool has_factory_members(TypeDef const& type)
+    static bool has_factory_members(writer& w, TypeDef const& type)
     {
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(w, type))
         {
             if (!factory.type || !empty(factory.type.MethodList()))
             {
@@ -573,9 +590,9 @@ namespace xlang
         return false;
     }
 
-    static bool is_composable(TypeDef const& type)
+    static bool is_composable(writer& w, TypeDef const& type)
     {
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(w, type))
         {
             if (factory.composable)
             {
@@ -586,9 +603,9 @@ namespace xlang
         return false;
     }
 
-    static bool has_composable_constructors(TypeDef const& type)
+    static bool has_composable_constructors(writer& w, TypeDef const& type)
     {
-        for (auto&& factory : get_factories(type))
+        for (auto&&[interface_name, factory] : get_factories(w, type))
         {
             if (factory.composable && !empty(factory.type.MethodList()))
             {

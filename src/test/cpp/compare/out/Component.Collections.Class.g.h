@@ -34,6 +34,10 @@ namespace winrt::Component::Collections::factory_implementation
         {
             return L"Component.Collections.Class";
         }
+        Windows::Foundation::IInspectable ActivateInstance() const
+        {
+            return make<T>();
+        }
         Windows::Foundation::Collections::IIterable<hstring> Iterable()
         {
             return T::Iterable();
@@ -57,10 +61,6 @@ namespace winrt::Component::Collections::factory_implementation
         Windows::Foundation::Collections::IMap<hstring, int32_t> Map()
         {
             return T::Map();
-        }
-        Windows::Foundation::IInspectable ActivateInstance() const
-        {
-            return make<T>();
         }
     };
 }

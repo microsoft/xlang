@@ -118,6 +118,10 @@ namespace winrt::impl
 }
 namespace winrt::Component::Collections
 {
+    inline Class::Class() :
+        Class(impl::call_factory<Class>([](auto&& f) { return f.template ActivateInstance<Class>(); }))
+    {
+    }
     inline Windows::Foundation::Collections::IIterable<hstring> Class::Iterable()
     {
         return impl::call_factory<Class, Component::Collections::IClassStatics>([&](auto&& f) { return f.Iterable(); });
@@ -141,10 +145,6 @@ namespace winrt::Component::Collections
     inline Windows::Foundation::Collections::IMap<hstring, int32_t> Class::Map()
     {
         return impl::call_factory<Class, Component::Collections::IClassStatics>([&](auto&& f) { return f.Map(); });
-    }
-    inline Class::Class() :
-        Class(impl::call_factory<Class>([](auto&& f) { return f.template ActivateInstance<Class>(); }))
-    {
     }
 }
 namespace std

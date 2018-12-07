@@ -1735,7 +1735,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_class_override_constructors(writer& w, std::string_view const& type_name, std::vector<factory_type> const& factories)
+    static void write_class_override_constructors(writer& w, std::string_view const& type_name, std::map<std::string, factory_info> const& factories)
     {
         auto format = R"(    %T(%)
     {
@@ -1743,7 +1743,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     }
 )";
 
-        for (auto&& factory : factories)
+        for (auto&&[factory_name, factory] : factories)
         {
             if (!factory.composable)
             {
@@ -1760,7 +1760,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                     type_name,
                     bind<write_consume_params>(signature),
                     type_name,
-                    factory.type,
+                    factory_name,
                     get_name(method),
                     bind<write_consume_args>(signature),
                     signature.params().empty() ? "" : ", ");
@@ -1800,10 +1800,10 @@ public:
 
     static void write_class_override(writer& w, TypeDef const& type)
     {
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
         bool has_composable_factories{};
 
-        for (auto&& factory : factories)
+        for (auto&&[interface_name, factory] : factories)
         {
             if (factory.composable && !empty(factory.type.MethodList()))
             {
@@ -2400,11 +2400,11 @@ public:
         }
     }
 
-    static void write_constructor_declarations(writer& w, TypeDef const& type, std::vector<factory_type> const& factories)
+    static void write_constructor_declarations(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
     {
         auto type_name = type.TypeName();
 
-        for (auto&& factory : factories)
+        for (auto&&[factory_name, factory] : factories)
         {
             if (factory.activatable)
             {
@@ -2495,14 +2495,14 @@ public:
     }
 
 
-    static void write_static_declaration(writer& w, factory_type const& factory)
+    static void write_static_declaration(writer& w, std::pair<std::string const, factory_info> const& factory)
     {
-        if (!factory.statics)
+        if (!factory.second.statics)
         {
             return;
         }
 
-        for (auto&& method : factory.type.MethodList())
+        for (auto&& method : factory.second.type.MethodList())
         {
             method_signature signature{ method };
             auto method_name = get_name(method);
@@ -2521,8 +2521,8 @@ public:
 
                 w.write(format,
                     method_name,
-                    factory.type,
-                    factory.type,
+                    factory.second.type,
+                    factory.second.type,
                     method_name,
                     method_name,
                     method_name,
@@ -2587,7 +2587,7 @@ public:
 
         auto type_name = type.TypeName();
 
-        for (auto&& factory : get_factories(type))
+        for (auto&&[interface_name, factory] : get_factories(w, type))
         {
             if (factory.activatable)
             {
@@ -2697,7 +2697,7 @@ public:
     static void write_slow_class(writer& w, TypeDef const& type, coded_index<TypeDefOrRef> const& base_type)
     {
         auto type_name = type.TypeName();
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
 
         auto format = R"(    struct WINRT_EBO % : %%%
     {
@@ -2722,7 +2722,7 @@ public:
     static void write_fast_class(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
         std::string base_type;
 
         if (auto base = get_base_class(type))
@@ -2758,7 +2758,7 @@ public:
     static void write_static_class(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
 
         auto format = R"(    struct %
     {
