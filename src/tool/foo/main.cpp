@@ -1,54 +1,31 @@
 #include "pch.h"
+#include "helpers.h"
 
 #include "ffi.h"
+
 
 // TODO: local declarations of winrt APIs to avoid dependencies on Windows SDK
 #include <wrl\client.h>
 #include <wrl\wrappers\corewrappers.h>
 #include <windows.data.json.h>
 
-auto get_start_time()
+namespace wrl 
 {
-    return std::chrono::high_resolution_clock::now();
-}
+    using namespace Microsoft::WRL;
+    using namespace Microsoft::WRL::Wrappers;
+} 
 
-auto get_elapsed_time(std::chrono::time_point<std::chrono::high_resolution_clock> const& start)
-{
-    return std::chrono::duration_cast<std::chrono::duration<int64_t, std::milli>>(std::chrono::high_resolution_clock::now() - start).count();
-}
+namespace xmd = xlang::meta::reader;
 
-auto get_dotted_name_segments(std::string_view ns)
-{
-    std::vector<std::string_view> segments;
-    size_t pos = 0;
-
-    while (true)
-    {
-        auto new_pos = ns.find('.', pos);
-
-        if (new_pos == std::string_view::npos)
-        {
-            segments.push_back(ns.substr(pos));
-            return std::move(segments);
-        }
-
-        segments.push_back(ns.substr(pos, new_pos - pos));
-        pos = new_pos + 1;
-    };
-};
-
-bool is_exclusive_to(xlang::meta::reader::TypeDef const& type)
-{
-    return xlang::meta::reader::get_category(type) == xlang::meta::reader::category::interface_type && xlang::meta::reader::get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
-}
+using namespace fooxlang;
 
 struct winrt_ns
 {
     std::map<std::string_view, winrt_ns> sub_namespaces{};
-    xlang::meta::reader::cache::namespace_members members{};
+    xmd::cache::namespace_members members{};
 };
 
-xlang::meta::reader::cache::namespace_members const* find_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns) noexcept
+xmd::cache::namespace_members const* find_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns) noexcept
 {
     auto dot_pos = ns.find('.', 0);
     if (dot_pos == std::string_view::npos)
@@ -77,7 +54,7 @@ xlang::meta::reader::cache::namespace_members const* find_ns(std::map<std::strin
     }
 }
 
-xlang::meta::reader::cache::namespace_members const& get_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns)
+xmd::cache::namespace_members const& get_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns)
 {
     auto _ns = find_ns(namespaces, ns);
     if (_ns == nullptr)
@@ -109,7 +86,7 @@ auto get_system_metadata()
     return std::move(files);
 }
 
-auto get_namespace_map(xlang::meta::reader::cache const& c)
+auto get_namespace_map(xmd::cache const& c)
 {
     std::map<std::string_view, winrt_ns> root_namespaces;
 
@@ -131,11 +108,11 @@ auto get_namespace_map(xlang::meta::reader::cache const& c)
     return std::move(root_namespaces);
 }
 
-auto get_guid(xlang::meta::reader::CustomAttribute const& attrib)
+auto get_guid(xmd::CustomAttribute const& attrib)
 {
-    std::vector<xlang::meta::reader::FixedArgSig> z = attrib.Value().FixedArgs();
+    std::vector<xmd::FixedArgSig> z = attrib.Value().FixedArgs();
 
-    auto getarg = [&z](std::size_t index) { return std::get<xlang::meta::reader::ElemSig>(z[index].value).value; };
+    auto getarg = [&z](std::size_t index) { return std::get<xmd::ElemSig>(z[index].value).value; };
     return GUID{
         std::get<uint32_t>(getarg(0)),
         std::get<uint16_t>(getarg(1)),
@@ -153,64 +130,147 @@ auto get_guid(xlang::meta::reader::CustomAttribute const& attrib)
     };
 }
 
-typedef HRESULT(__stdcall *zz_activate_instance)(void*, IInspectable**);
+auto get_guid(xmd::TypeDef const& type)
+{
+    return get_guid(xmd::get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute"));
+}
+
+//ffi_type* foobarffi(method_signature::param_t const& type)
+//{
+//    //struct fiibarbaz: signature_handler_base<fiibarbaz>
+//    //{
+//    //    using signature_handler_base<fiibarbaz>::handle;
+//    //};
+//
+//    //fiibarbaz fbb{};
+//    //fbb.handle(type);
+//}
+
+wrl::ComPtr<IUnknown> query_interface(IUnknown* unk, GUID const& iid)
+{
+    wrl::ComPtr<IUnknown> new_interface;
+    HRESULT hr = unk->QueryInterface(iid, (void**)new_interface.GetAddressOf());
+    if (FAILED(hr)) { throw std::exception{}; }
+
+    return std::move(new_interface);
+}
+
+auto get_arg_types(method_signature const& signature)
+{
+    std::vector<ffi_type*> arg_types{};
+    
+    // explicit this pointer 
+    arg_types.push_back(&ffi_type_pointer); 
+
+    for (auto&& p : signature.params())
+    {
+        xlang::throw_invalid("not implemented");
+    }
+
+    if (signature.return_signature())
+    {
+        if (signature.return_signature().Type().is_szarray())
+        {
+            xlang::throw_invalid("not implemented");
+        }
+
+        // return values are always pointers
+        arg_types.push_back(&ffi_type_pointer);
+    }
+
+    return std::move(arg_types);
+}
+
+HSTRING invoke(IUnknown* unk, int index, xmd::MethodDef const& method)
+{
+    ffi_cif cif;
+    method_signature signature{ method };
+    std::vector<ffi_type*> arg_types = get_arg_types(signature);
+    auto ffi_return = ffi_prep_cif(&cif, FFI_STDCALL, arg_types.size(), &ffi_type_sint32, arg_types.data());
+    if (ffi_return != FFI_OK) { throw std::exception{}; }
+
+    HRESULT hr;
+    std::vector<void*> arg_values{};
+    arg_values.push_back(&unk); // explicit this
+
+    // TODO: read return value and params from metadata
+    HSTRING returnvalue{};
+    auto foo = &returnvalue;
+    arg_values.push_back(&foo);
+
+    auto vtbl = *((void***)unk);
+    ffi_call(&cif, FFI_FN(vtbl[6]), &hr, arg_values.data());
+    if (FAILED(hr)) { throw std::exception{}; }
+
+    return returnvalue;
+}
 
 int main(int const /*argc*/, char** /*argv*/)
 {
     auto start = get_start_time();
 
-    xlang::meta::reader::cache c{ get_system_metadata() };
+    xmd::cache c{ get_system_metadata() };
     auto namespaces = get_namespace_map(c);
 
     auto elapsed = get_elapsed_time(start);
 
     printf("%lldms\n", elapsed);
 
-    auto json_ns = get_ns(namespaces, "Windows.Data.Json");
-    auto ijos_td = json_ns.types["IJsonObjectStatics"];
+    auto istringable_typedef = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
+    auto tostring_methoddef = istringable_typedef.MethodList().first;
 
-    auto ijos_guid = get_guid(xlang::meta::reader::get_attribute(ijos_td, "Windows.Foundation.Metadata", "GuidAttribute"));
 
-    Microsoft::WRL::Wrappers::RoInitializeWrapper ro_init(RO_INIT_MULTITHREADED);
-    if (FAILED(ro_init))
+    wrl::RoInitializeWrapper ro_init(RO_INIT_MULTITHREADED);
+    if (FAILED(ro_init)) { throw std::exception{ "roinit failed" }; }
+
+    wrl::ComPtr<IActivationFactory> factory;
+    if (FAILED(Windows::Foundation::GetActivationFactory(wrl::HStringReference{ L"Windows.Data.Json.JsonObject" }.Get(), &factory))) { throw std::exception{}; }
+
+    auto call_to_string = [&istringable_typedef, &tostring_methoddef](IUnknown* insp)
     {
-        throw std::exception{ "roinit failed" };
-    }
+        wrl::ComPtr<IUnknown> istringable_ptr = query_interface(insp, get_guid(istringable_typedef));
 
-    Microsoft::WRL::ComPtr<IActivationFactory> factory;
-    Microsoft::WRL::Wrappers::HStringReference jo_name{ L"Windows.Data.Json.JsonObject" };
-    HRESULT foo = Windows::Foundation::GetActivationFactory(jo_name.Get(), &factory);
+        return invoke(istringable_ptr.Get(), 6, tostring_methoddef);
+        //ffi_cif cif;
+        //method_signature signature{ tostring_methoddef };
+        //std::vector<ffi_type*> arg_types = get_arg_types(signature);
+        //auto ffi_return = ffi_prep_cif(&cif, FFI_STDCALL, arg_types.size(), &ffi_type_sint32, arg_types.data());
+        //if (ffi_return != FFI_OK) { throw std::exception{}; }
 
-    auto call_to_string = [](Microsoft::WRL::ComPtr<IInspectable> const& insp)
-    {
-        Microsoft::WRL::ComPtr<ABI::Windows::Foundation::IStringable> istr;
-        HRESULT hr = insp.As(&istr);
-        if (FAILED(hr)) { throw std::exception{}; }
+        //HRESULT hr;
+        //wrl::HString result;
 
-        Microsoft::WRL::Wrappers::HString jostr;
-        hr = istr->ToString(jostr.GetAddressOf());
-        if (FAILED(hr)) { throw std::exception{}; }
+        //auto arg0 = istringable_ptr.Get();
+        //auto arg1 = result.GetAddressOf();
 
-        return jostr;
+        //std::vector<void*> arg_values{};
+        //arg_values.push_back(&arg0);
+        //arg_values.push_back(&arg1);
+
+        //auto vtbl = *((void***)istringable_ptr.Get());
+        //ffi_call(&cif, FFI_FN(vtbl[6]), &hr, arg_values.data());
+        //if (FAILED(hr)) { throw std::exception{}; }
+
+        //return result;
     };
 
     {
-        Microsoft::WRL::ComPtr<IInspectable> insp;
+        wrl::ComPtr<IInspectable> insp;
         HRESULT hr = factory->ActivateInstance(insp.GetAddressOf());
         if (FAILED(hr)) { throw std::exception{}; }
 
-        auto str = call_to_string(insp);
+        auto str = call_to_string(insp.Get());
     }
 
     {
         auto factory_vtbl = *((void***)factory.Get());
-        auto activate_func = (zz_activate_instance)factory_vtbl[6];
+        auto activate_intance_method = (HRESULT(__stdcall *)(void*, IInspectable**))factory_vtbl[6];
 
-        Microsoft::WRL::ComPtr<IInspectable> insp;
-        HRESULT hr = (*activate_func)(factory.Get(), insp.GetAddressOf());
+        wrl::ComPtr<IInspectable> insp;
+        HRESULT hr = (*activate_intance_method)(factory.Get(), insp.GetAddressOf());
         if (FAILED(hr)) { throw std::exception{}; }
 
-        auto str = call_to_string(insp);
+        auto str = call_to_string(insp.Get());
     }
 
     {
@@ -220,7 +280,7 @@ int main(int const /*argc*/, char** /*argv*/)
         if (ffi_return != FFI_OK) { throw std::exception{}; }
 
         HRESULT hr;
-        Microsoft::WRL::ComPtr<IInspectable> insp;
+        wrl::ComPtr<IInspectable> insp;
 
         auto arg0 = factory.Get();
         auto arg1 = insp.GetAddressOf();
@@ -230,7 +290,7 @@ int main(int const /*argc*/, char** /*argv*/)
         ffi_call(&cif, FFI_FN(factory_vtbl[6]), &hr, arg_values);
         if (FAILED(hr)) { throw std::exception{}; }
 
-        auto str = call_to_string(insp);
+        auto str = call_to_string(insp.Get());
     }
 
     return 0;
