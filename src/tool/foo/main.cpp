@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include "ffi.h"
+
 // TODO: local declarations of winrt APIs to avoid dependencies on Windows SDK
 #include <wrl\client.h>
 #include <wrl\wrappers\corewrappers.h>
@@ -177,17 +179,27 @@ int main(int const /*argc*/, char** /*argv*/)
 
     Microsoft::WRL::ComPtr<IActivationFactory> factory;
     Microsoft::WRL::Wrappers::HStringReference jo_name{ L"Windows.Data.Json.JsonObject" };
-    HRESULT hr = Windows::Foundation::GetActivationFactory(jo_name.Get(), &factory);
+    HRESULT foo = Windows::Foundation::GetActivationFactory(jo_name.Get(), &factory);
 
+    auto call_to_string = [](Microsoft::WRL::ComPtr<IInspectable> const& insp)
     {
-        Microsoft::WRL::ComPtr<IInspectable> insp;
-        hr = factory->ActivateInstance(insp.GetAddressOf());
-
         Microsoft::WRL::ComPtr<ABI::Windows::Foundation::IStringable> istr;
-        hr = insp.As(&istr);
+        HRESULT hr = insp.As(&istr);
+        if (FAILED(hr)) { throw std::exception{}; }
 
         Microsoft::WRL::Wrappers::HString jostr;
         hr = istr->ToString(jostr.GetAddressOf());
+        if (FAILED(hr)) { throw std::exception{}; }
+
+        return jostr;
+    };
+
+    {
+        Microsoft::WRL::ComPtr<IInspectable> insp;
+        HRESULT hr = factory->ActivateInstance(insp.GetAddressOf());
+        if (FAILED(hr)) { throw std::exception{}; }
+
+        auto str = call_to_string(insp);
     }
 
     {
@@ -195,13 +207,30 @@ int main(int const /*argc*/, char** /*argv*/)
         auto activate_func = (zz_activate_instance)factory_vtbl[6];
 
         Microsoft::WRL::ComPtr<IInspectable> insp;
-        hr = (*activate_func)(factory.Get(), insp.GetAddressOf());
+        HRESULT hr = (*activate_func)(factory.Get(), insp.GetAddressOf());
+        if (FAILED(hr)) { throw std::exception{}; }
 
-        Microsoft::WRL::ComPtr<ABI::Windows::Foundation::IStringable> istr;
-        hr = insp.As(&istr);
+        auto str = call_to_string(insp);
+    }
 
-        Microsoft::WRL::Wrappers::HString jostr;
-        hr = istr->ToString(jostr.GetAddressOf());
+    {
+        ffi_cif cif;
+        ffi_type* arg_types[]{ &ffi_type_pointer, &ffi_type_pointer };
+        auto ffi_return = ffi_prep_cif(&cif, FFI_STDCALL, 2, &ffi_type_sint32, arg_types);
+        if (ffi_return != FFI_OK) { throw std::exception{}; }
+
+        HRESULT hr;
+        Microsoft::WRL::ComPtr<IInspectable> insp;
+
+        auto arg0 = factory.Get();
+        auto arg1 = insp.GetAddressOf();
+        void* arg_values[]{ &arg0, &arg1 };
+
+        auto factory_vtbl = *((void***)factory.Get());
+        ffi_call(&cif, FFI_FN(factory_vtbl[6]), &hr, arg_values);
+        if (FAILED(hr)) { throw std::exception{}; }
+
+        auto str = call_to_string(insp);
     }
 
     return 0;

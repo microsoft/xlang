@@ -11,7 +11,13 @@
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Debug\\Install",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
-            "ctestCommandArgs": ""
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_TOOLCHAIN_FILE",
+                    "value": "${workspaceRoot}\\src\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
+                }
+            ]
         },
         {
             "name": "x86-Release",
@@ -24,7 +30,13 @@
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Release\\Install",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
-            "ctestCommandArgs": ""
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_TOOLCHAIN_FILE",
+                    "value": "${workspaceRoot}\\src\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
+                }
+            ]
         },
         {
             "name": "x64-Debug",
