@@ -147,7 +147,7 @@ namespace xlang
             auto start = get_start_time();
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
-            c.remove_legacy_cppwinrt_foundation_types();
+            c.remove_cppwinrt_foundation_types();
             supplement_includes(c);
             settings.filter = { settings.include, settings.exclude };
 
