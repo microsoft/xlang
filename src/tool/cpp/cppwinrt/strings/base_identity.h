@@ -10,10 +10,10 @@ WINRT_EXPORT namespace winrt
         return impl::guid_storage<default_interface<T>>::value;
     }
 
-    template <typename T>
+    template <typename... T>
     bool is_guid_of(guid const& id) noexcept
     {
-        return id == guid_of<T>();
+        return ((id == guid_of<T>()) || ...);
     }
 
     struct event_token;

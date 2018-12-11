@@ -18,15 +18,12 @@ namespace winrt
 {
     template<> bool is_guid_of<IDerived>(guid const& id) noexcept
     {
-        return id == guid_of<IDerived>() ||
-               id == guid_of<IBase>();
+        return is_guid_of<IDerived, IBase>(id);
     }
 
     template<> bool is_guid_of<IMoreDerived>(guid const& id) noexcept
     {
-        return id == guid_of<IMoreDerived>() ||
-               id == guid_of<IDerived>() ||
-               id == guid_of<IBase>();
+        return is_guid_of<IMoreDerived, IDerived, IBase>(id);
     }
 }
 
