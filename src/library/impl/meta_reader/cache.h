@@ -133,7 +133,7 @@ namespace xlang::meta::reader
             return m_namespaces;
         }
 
-        void remove_legacy_cppwinrt_foundation_types()
+        void remove_cppwinrt_foundation_types()
         {
             auto remove = [&](auto&& ns, auto&& name)
             {
