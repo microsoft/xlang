@@ -2,7 +2,6 @@
 namespace winrt::impl
 {
     inline constexpr hresult error_ok{ 0 }; // S_OK
-    inline constexpr hresult error_false{ 1 }; // S_FALSE
     inline constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
     inline constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
     inline constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD

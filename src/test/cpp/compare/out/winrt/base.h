@@ -710,6 +710,12 @@ WINRT_EXPORT namespace winrt
         return impl::guid_storage<default_interface<T>>::value;
     }
 
+    template <typename... T>
+    bool is_guid_of(guid const& id) noexcept
+    {
+        return ((id == guid_of<T>()) || ...);
+    }
+
     struct event_token;
 
     template <typename T>
@@ -726,12 +732,6 @@ namespace winrt::impl
 
     template <typename T>
     struct is_fast_interface<fast_interface<T>> : std::true_type {};
-
-    template <typename T>
-    constexpr bool is_guid_of(guid const& id) noexcept
-    {
-        return id == guid_of<T>();
-    }
 
     template <size_t Size, typename T, size_t... Index>
     constexpr std::array<T, Size> to_array(T const* value, std::index_sequence<Index...> const) noexcept
@@ -1768,7 +1768,6 @@ WINRT_EXPORT namespace winrt
 namespace winrt::impl
 {
     inline constexpr hresult error_ok{ 0 }; // S_OK
-    inline constexpr hresult error_false{ 1 }; // S_FALSE
     inline constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
     inline constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
     inline constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD

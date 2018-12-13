@@ -10,6 +10,12 @@ WINRT_EXPORT namespace winrt
         return impl::guid_storage<default_interface<T>>::value;
     }
 
+    template <typename... T>
+    bool is_guid_of(guid const& id) noexcept
+    {
+        return ((id == guid_of<T>()) || ...);
+    }
+
     struct event_token;
 
     template <typename T>
@@ -26,12 +32,6 @@ namespace winrt::impl
 
     template <typename T>
     struct is_fast_interface<fast_interface<T>> : std::true_type {};
-
-    template <typename T>
-    constexpr bool is_guid_of(guid const& id) noexcept
-    {
-        return id == guid_of<T>();
-    }
 
     template <size_t Size, typename T, size_t... Index>
     constexpr std::array<T, Size> to_array(T const* value, std::index_sequence<Index...> const) noexcept
