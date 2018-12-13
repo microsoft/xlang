@@ -13,6 +13,7 @@ target_sources(cpp_test PUBLIC
     test/Enum.cpp
     test/Events.cpp
     test/Fast.cpp
+    test/FinalRelease.cpp
     test/Names.cpp
     test/Structs.cpp
     implementation/Component.Async.Class.cpp
