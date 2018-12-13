@@ -6238,6 +6238,7 @@ namespace winrt::impl
 
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
+        static void final_release(std::unique_ptr<D>) noexcept {}
 
     protected:
 
@@ -6289,6 +6290,11 @@ namespace winrt::impl
 
         uint32_t WINRT_CALL NonDelegatingAddRef() noexcept
         {
+            if (!m_references)
+            {
+                return 1;
+            }
+
             if constexpr (is_weak_ref_source::value)
             {
                 uintptr_t count_or_pointer = m_references.load(std::memory_order_relaxed);
@@ -6316,12 +6322,17 @@ namespace winrt::impl
 
         uint32_t WINRT_CALL NonDelegatingRelease() noexcept
         {
+            if (!m_references)
+            {
+                return 0;
+            }
+
             uint32_t const target = subtract_reference();
 
             if (target == 0)
             {
                 std::atomic_thread_fence(std::memory_order_acquire);
-                delete this;
+                D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
             }
 
             return target;
