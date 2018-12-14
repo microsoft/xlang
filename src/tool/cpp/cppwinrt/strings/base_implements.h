@@ -779,6 +779,8 @@ namespace winrt::impl
 
         virtual ~root_implements() noexcept
         {
+            subtract_reference();
+
             if constexpr (use_module_lock::value)
             {
                 --get_module_lock();
@@ -817,11 +819,6 @@ namespace winrt::impl
 
         uint32_t WINRT_CALL NonDelegatingAddRef() noexcept
         {
-            if (!m_references)
-            {
-                return 1;
-            }
-
             if constexpr (is_weak_ref_source::value)
             {
                 uintptr_t count_or_pointer = m_references.load(std::memory_order_relaxed);
@@ -849,16 +846,11 @@ namespace winrt::impl
 
         uint32_t WINRT_CALL NonDelegatingRelease() noexcept
         {
-            if (!m_references)
-            {
-                return 0;
-            }
-
             uint32_t const target = subtract_reference();
 
             if (target == 0)
             {
-                std::atomic_thread_fence(std::memory_order_acquire);
+                m_references = 1;
                 D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
             }
 
