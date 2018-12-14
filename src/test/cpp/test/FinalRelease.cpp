@@ -21,7 +21,7 @@ namespace
             REQUIRE(s.ToString() == L"Sample");
 
             // Weak references are also supported during destruction.
-            weak_ref<IStringable>{ s };
+            REQUIRE(weak_ref<IStringable>{ s }.get());
 
             REQUIRE(released);
             REQUIRE(!destroyed);
@@ -54,8 +54,8 @@ TEST_CASE("FinalRelease")
 {
     auto s = make<Sample>();
 
-    // Weak references are supported prior to destruction
-    weak_ref<IStringable>{ s };
+    // Weak references are supported prior to destruction.
+    REQUIRE(weak_ref<IStringable>{ s }.get());
 
     REQUIRE(!Sample::released);
     REQUIRE(!Sample::destroyed);
