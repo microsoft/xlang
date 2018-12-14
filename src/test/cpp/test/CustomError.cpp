@@ -7,7 +7,7 @@ using namespace Windows::Foundation;
 namespace
 {
     // Some custom exception type unknown to C++/WinRT
-    struct WilException
+    struct CustomError
     {
     };
 
@@ -16,7 +16,7 @@ namespace
         hstring ToString()
         {
             // Throw custom exception inside C++/WinRT projection
-            throw WilException();
+            throw CustomError();
         }
     };
 
@@ -29,7 +29,7 @@ namespace
         {
             throw;
         }
-        catch (WilException)
+        catch (CustomError)
         {
             return 0x80000018; // E_ILLEGAL_DELEGATE_ASSIGNMENT
         }
@@ -39,7 +39,7 @@ namespace
     }
 }
 
-TEST_CASE("Wil")
+TEST_CASE("CustomError")
 {
     // Set up global handler
     REQUIRE(!winrt_to_hresult_handler);
