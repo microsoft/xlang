@@ -3860,6 +3860,8 @@ WINRT_EXPORT namespace winrt
     }
 }
 
+__declspec(selectany) int32_t (WINRT_CALL *winrt_to_hresult_handler)(void* address) noexcept{};
+
 namespace winrt::impl
 {
     struct heap_traits
@@ -4209,6 +4211,11 @@ WINRT_EXPORT namespace winrt
 
     inline WINRT_NOINLINE hresult to_hresult() noexcept
     {
+        if (winrt_to_hresult_handler)
+        {
+            return winrt_to_hresult_handler(_ReturnAddress());
+        }
+
         try
         {
             throw;

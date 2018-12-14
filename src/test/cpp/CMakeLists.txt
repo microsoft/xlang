@@ -16,6 +16,7 @@ target_sources(cpp_test PUBLIC
     test/FinalRelease.cpp
     test/Names.cpp
     test/Structs.cpp
+    test/CustomError.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
     implementation/Component.Composable.Base.cpp
