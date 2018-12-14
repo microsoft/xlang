@@ -20,10 +20,6 @@ namespace
             check_hresult(QueryInterface(guid_of<IStringable>(), put_abi(s)));
             REQUIRE(s.ToString() == L"Sample");
 
-            // Weak references cannot be resolved.
-            weak_ref<IStringable> ref(s);
-            REQUIRE(!ref.get());
-
             REQUIRE(released);
             REQUIRE(!destroyed);
             destroyed = true;
