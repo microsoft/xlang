@@ -779,6 +779,7 @@ namespace winrt::impl
 
         virtual ~root_implements() noexcept
         {
+            // If a weak reference is created during destruction, this ensures that it is also destroyed.
             subtract_reference();
 
             if constexpr (use_module_lock::value)
@@ -850,7 +851,10 @@ namespace winrt::impl
 
             if (target == 0)
             {
+                // If a weak reference was previously created, the m_references value will not be stable value (won't be zero).
+                // This ensures destruction has a stable value during destruction.
                 m_references = 1;
+
                 D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
             }
 
