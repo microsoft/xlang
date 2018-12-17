@@ -20,6 +20,9 @@ namespace
             check_hresult(QueryInterface(guid_of<IStringable>(), put_abi(s)));
             REQUIRE(s.ToString() == L"Sample");
 
+            // Weak references are also supported during destruction.
+            REQUIRE(weak_ref<IStringable>{ s }.get());
+
             REQUIRE(released);
             REQUIRE(!destroyed);
             destroyed = true;
@@ -50,6 +53,10 @@ namespace
 TEST_CASE("FinalRelease")
 {
     auto s = make<Sample>();
+
+    // Weak references are supported prior to destruction.
+    REQUIRE(weak_ref<IStringable>{ s }.get());
+
     REQUIRE(!Sample::released);
     REQUIRE(!Sample::destroyed);
     s = nullptr;
