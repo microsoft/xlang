@@ -2,3 +2,5 @@
 *       text eol=lf
 *.png   -text
 *.onnx  -text
+*.dll   -text
+*.pdb   -text
