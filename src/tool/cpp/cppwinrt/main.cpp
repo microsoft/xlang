@@ -252,5 +252,4 @@ namespace xlang
 int main(int const argc, char** argv)
 {
     xlang::run(argc, argv);
-
 }
