@@ -9,7 +9,7 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Debug",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Debug\\Install",
-            "cmakeCommandArgs": "",
+            "cmakeCommandArgs": "-Wno-dev",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": "",
             "variables": [
@@ -28,7 +28,7 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Release",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Release\\Install",
-            "cmakeCommandArgs": "",
+            "cmakeCommandArgs": "-Wno-dev",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": "",
             "variables": [
@@ -47,7 +47,7 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Debug",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Debug\\Install",
-            "cmakeCommandArgs": "",
+            "cmakeCommandArgs": "-Wno-dev",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": ""
         },
@@ -60,7 +60,7 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Release",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Release\\Install",
-            "cmakeCommandArgs": "",
+            "cmakeCommandArgs": "-Wno-dev",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": ""
         }
