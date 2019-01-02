@@ -45,7 +45,11 @@ endif()
 if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
     target_sources(cpp_test PUBLIC main.cpp)
 else()
-    target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
+    target_sources(cpp_test PUBLIC
+        main.cpp
+        test/Interop.cpp
+        test/Capture.cpp
+    )
 endif()
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
