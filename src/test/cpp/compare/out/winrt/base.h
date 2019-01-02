@@ -5045,6 +5045,16 @@ WINRT_EXPORT namespace winrt
             delegate([=](auto&&... args) { ((*object).*(method))(args...); })
         {}
 
+        template <typename O, typename M> delegate(com_ptr<O>&& object, M method) :
+            delegate([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+        {
+        }
+
+        template <typename O, typename M> delegate(weak_ref<O>&& object, M method) :
+            delegate([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+        {
+        }
+
         void operator()(T const&... args) const
         {
             (*(impl::variadic_delegate_abi<T...>**)this)->invoke(args...);

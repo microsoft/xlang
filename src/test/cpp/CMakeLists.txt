@@ -17,6 +17,7 @@ target_sources(cpp_test PUBLIC
     test/Names.cpp
     test/Structs.cpp
     test/CustomError.cpp
+    test/VariadicDelegate.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
     implementation/Component.Composable.Base.cpp
