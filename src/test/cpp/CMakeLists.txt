@@ -13,7 +13,10 @@ target_sources(cpp_test PUBLIC
     test/Enum.cpp
     test/Events.cpp
     test/Fast.cpp
+    test/FinalRelease.cpp
+    test/Names.cpp
     test/Structs.cpp
+    test/CustomError.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
     implementation/Component.Composable.Base.cpp
@@ -27,6 +30,7 @@ target_sources(cpp_test PUBLIC
     implementation/Component.Events.Class.cpp
     implementation/Component.Fast.FastClass.cpp
     implementation/Component.Fast.SlowClass.cpp
+    implementation/Component.Params.Class.cpp
     implementation/Component.Result.Class.cpp
 )
 
@@ -38,7 +42,11 @@ else()
     target_link_libraries(cpp_test -lpthread)
 endif()
 
-target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
+if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
+    target_sources(cpp_test PUBLIC main.cpp)
+else()
+    target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
+endif()
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)

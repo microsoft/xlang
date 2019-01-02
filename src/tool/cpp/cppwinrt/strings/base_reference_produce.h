@@ -1,38 +1,6 @@
 
 namespace winrt::impl
 {
-    template <typename D, typename T>
-    struct produce<D, Windows::Foundation::IReference<T>> : produce_base<D, Windows::Foundation::IReference<T>>
-    {
-        int32_t WINRT_CALL get_Value(arg_out<T> value) noexcept final
-        {
-            try
-            {
-                typename D::abi_guard guard(this->shim());
-                *value = detach_from<T>(this->shim().Value());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
-    template <typename D, typename T>
-    struct produce<D, Windows::Foundation::IReferenceArray<T>> : produce_base<D, Windows::Foundation::IReferenceArray<T>>
-    {
-        int32_t WINRT_CALL get_Value(uint32_t* __valueSize, arg_out<T>* value) noexcept final
-        {
-            try
-            {
-                *__valueSize = 0;
-                *value = nullptr;
-                typename D::abi_guard guard(this->shim());
-                std::tie(*__valueSize, *value) = detach_abi(this->shim().Value());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-    };
-
     template <typename T>
     struct reference final : implements<reference<T>, Windows::Foundation::IReference<T>, Windows::Foundation::IPropertyValue>
     {
@@ -263,27 +231,6 @@ namespace winrt::impl
 WINRT_EXPORT namespace winrt::Windows::Foundation
 {
     template <typename T>
-    struct IReference :
-        IInspectable,
-        impl::consume_t<IReference<T>>,
-        impl::require<IReference<T>, IPropertyValue>
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        IReference(std::nullptr_t = nullptr) noexcept {}
-        IReference(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
-
-        IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
-        {
-        }
-
-    private:
-
-        IReference<T>(IInspectable const& value) : IReference<T>(value.as<IReference<T>>())
-        {
-        }
-    };
-
-    template <typename T>
     bool operator==(IReference<T> const& left, IReference<T> const& right)
     {
         if (get_abi(left) == get_abi(right))
@@ -304,17 +251,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     {
         return !(left == right);
     }
-
-    template <typename T>
-    struct WINRT_EBO IReferenceArray :
-        IInspectable,
-        impl::consume_t<IReferenceArray<T>>,
-        impl::require<IReferenceArray<T>, IPropertyValue>
-    {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
-        IReferenceArray<T>(std::nullptr_t = nullptr) noexcept {}
-        IReferenceArray(take_ownership_from_abi_t, void* ptr) noexcept : IInspectable(take_ownership_from_abi, ptr) {}
-    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -410,4 +346,10 @@ WINRT_EXPORT namespace winrt
 
         return default_value;
     }
+}
+
+WINRT_EXPORT namespace winrt
+{
+    template <typename T>
+    using optional = Windows::Foundation::IReference<T>;
 }

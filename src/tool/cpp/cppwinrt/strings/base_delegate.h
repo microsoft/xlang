@@ -36,7 +36,7 @@ namespace winrt::impl
             if (target == 0)
             {
                 std::atomic_thread_fence(std::memory_order_acquire);
-                delete this;
+                delete static_cast<delegate_t<T, H>*>(this);
             }
 
             return target;
@@ -48,11 +48,9 @@ namespace winrt::impl
     };
 
     template <typename T, typename H>
-    auto make_delegate(H&& handler)
+    T make_delegate(H&& handler)
     {
-        T instance{};
-        *put_abi(instance) = (new delegate_t<T, H>(std::forward<H>(handler)));
-        return instance;
+        return { static_cast<void*>(static_cast<abi_t<T>*>(new delegate_t<T, H>(std::forward<H>(handler)))), take_ownership_from_abi };
     }
 
     template <typename... T>
@@ -114,6 +112,7 @@ WINRT_EXPORT namespace winrt
     struct WINRT_EBO delegate : Windows::Foundation::IUnknown
     {
         delegate(std::nullptr_t = nullptr) noexcept {}
+        delegate(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
         delegate(L handler) :
@@ -136,11 +135,9 @@ WINRT_EXPORT namespace winrt
     private:
 
         template <typename H>
-        static auto make(H&& handler)
+        static winrt::delegate<T...> make(H&& handler)
         {
-            winrt::delegate<T...> instance;
-            *put_abi(instance) = (new impl::variadic_delegate<H, T...>(std::forward<H>(handler)));
-            return instance;
+            return { static_cast<void*>(new impl::variadic_delegate<H, T...>(std::forward<H>(handler))), take_ownership_from_abi };
         }
     };
 }

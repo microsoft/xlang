@@ -7,7 +7,7 @@ namespace winrt::impl
     {
         void* result;
         check_hresult(WINRT_SHIM(Component::INotExclusive)->NotExclusive(&result));
-        return { take_ownership_from_abi, result };
+        return { result, take_ownership_from_abi };
     }
     template <typename D>
     struct produce<D, Component::INotExclusive> : produce_base<D, Component::INotExclusive>

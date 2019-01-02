@@ -8,13 +8,13 @@ namespace winrt::Component::Events
         impl::consume_t<IClass>
     {
         IClass(std::nullptr_t = nullptr) noexcept {}
-        IClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<IClassStatics>
     {
         IClassStatics(std::nullptr_t = nullptr) noexcept {}
-        IClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
 }

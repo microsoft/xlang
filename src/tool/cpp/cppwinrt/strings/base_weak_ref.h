@@ -21,26 +21,27 @@ WINRT_EXPORT namespace winrt
             }
         }
 
-        auto get() const noexcept
+        impl::com_ref<T> get() const noexcept
         {
-            impl::com_ref<T> object{ nullptr };
-
-            if (m_ref)
+            if (!m_ref)
             {
-                if constexpr(impl::is_implements_v<T>)
-                {
-                    impl::com_ref<default_interface<T>> temp;
-                    m_ref->Resolve(guid_of<T>(), put_abi(temp));
-                    attach_abi(object, get_self<T>(temp));
-                    detach_abi(temp);
-                }
-                else
-                {
-                    m_ref->Resolve(guid_of<T>(), put_abi(object));
-                }
+                return nullptr;
             }
 
-            return object;
+            if constexpr(impl::is_implements_v<T>)
+            {
+                impl::com_ref<default_interface<T>> temp;
+                m_ref->Resolve(guid_of<T>(), put_abi(temp));
+                void* result = get_self<T>(temp);
+                detach_abi(temp);
+                return { result, take_ownership_from_abi };
+            }
+            else
+            {
+                void* result;
+                m_ref->Resolve(guid_of<T>(), &result);
+                return { result, take_ownership_from_abi };
+            }
         }
 
         auto put() noexcept

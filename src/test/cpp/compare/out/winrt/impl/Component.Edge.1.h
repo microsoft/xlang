@@ -8,90 +8,90 @@ namespace winrt::Component::Edge
         impl::consume_t<IEmptyClass>
     {
         IEmptyClass(std::nullptr_t = nullptr) noexcept {}
-        IEmptyClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IEmptyClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IOneClass :
         Windows::Foundation::IInspectable,
         impl::consume_t<IOneClass>
     {
         IOneClass(std::nullptr_t = nullptr) noexcept {}
-        IOneClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IOneClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IOneClassFactory :
         Windows::Foundation::IInspectable,
         impl::consume_t<IOneClassFactory>
     {
         IOneClassFactory(std::nullptr_t = nullptr) noexcept {}
-        IOneClassFactory(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IOneClassFactory(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IOneClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<IOneClassStatics>
     {
         IOneClassStatics(std::nullptr_t = nullptr) noexcept {}
-        IOneClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IOneClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IStaticClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<IStaticClassStatics>
     {
         IStaticClassStatics(std::nullptr_t = nullptr) noexcept {}
-        IStaticClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IStaticClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IThreeClass :
         Windows::Foundation::IInspectable,
         impl::consume_t<IThreeClass>
     {
         IThreeClass(std::nullptr_t = nullptr) noexcept {}
-        IThreeClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IThreeClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IThreeClassFactory :
         Windows::Foundation::IInspectable,
         impl::consume_t<IThreeClassFactory>
     {
         IThreeClassFactory(std::nullptr_t = nullptr) noexcept {}
-        IThreeClassFactory(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IThreeClassFactory(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IThreeClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<IThreeClassStatics>
     {
         IThreeClassStatics(std::nullptr_t = nullptr) noexcept {}
-        IThreeClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IThreeClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO ITwoClass :
         Windows::Foundation::IInspectable,
         impl::consume_t<ITwoClass>
     {
         ITwoClass(std::nullptr_t = nullptr) noexcept {}
-        ITwoClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        ITwoClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO ITwoClassFactory :
         Windows::Foundation::IInspectable,
         impl::consume_t<ITwoClassFactory>
     {
         ITwoClassFactory(std::nullptr_t = nullptr) noexcept {}
-        ITwoClassFactory(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        ITwoClassFactory(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO ITwoClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<ITwoClassStatics>
     {
         ITwoClassStatics(std::nullptr_t = nullptr) noexcept {}
-        ITwoClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        ITwoClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IZeroClass :
         Windows::Foundation::IInspectable,
         impl::consume_t<IZeroClass>
     {
         IZeroClass(std::nullptr_t = nullptr) noexcept {}
-        IZeroClass(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IZeroClass(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
     struct WINRT_EBO IZeroClassStatics :
         Windows::Foundation::IInspectable,
         impl::consume_t<IZeroClassStatics>
     {
         IZeroClassStatics(std::nullptr_t = nullptr) noexcept {}
-        IZeroClassStatics(take_ownership_from_abi_t, void* ptr) noexcept : Windows::Foundation::IInspectable(take_ownership_from_abi, ptr) {}
+        IZeroClassStatics(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
     };
 }
