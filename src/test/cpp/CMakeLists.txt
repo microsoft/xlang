@@ -7,6 +7,7 @@ target_sources(cpp_test PUBLIC
     pch.cpp
     activation.cpp
     test/AbiGuard.cpp
+    test/AgileRef.cpp
     test/Async.cpp
     test/Collections.cpp
     test/Composable.cpp
