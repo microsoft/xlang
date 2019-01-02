@@ -6,6 +6,7 @@ target_sources(cpp_test PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp"
     pch.cpp
     activation.cpp
+    test/AbiGuard.cpp
     test/Async.cpp
     test/Collections.cpp
     test/Composable.cpp
