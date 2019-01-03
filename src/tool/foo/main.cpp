@@ -4,6 +4,8 @@
 
 #include "ffi.h"
 
+#include <memory>
+
 namespace meta = xlang::meta::reader;
 
 using namespace fooxlang;
@@ -124,6 +126,109 @@ auto get_guid(meta::TypeDef const& type)
     return get_guid(meta::get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute"));
 }
 
+auto get_arg_types(meta::MethodDef const& method)
+{
+    method_signature signature{ method };
+
+    std::vector<ffi_type*> arg_types{};
+
+    // explicit this pointer 
+    arg_types.push_back(&ffi_type_pointer);
+
+    for (auto&& p : signature.params())
+    {
+        xlang::throw_invalid("not implemented");
+    }
+
+    if (signature.return_signature())
+    {
+        if (signature.return_signature().Type().is_szarray())
+        {
+            xlang::throw_invalid("not implemented");
+        }
+
+        // return values are always pointers
+        arg_types.push_back(&ffi_type_pointer);
+    }
+
+    return std::move(arg_types);
+}
+
+std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
+{
+    std::vector<ffi_type const*> arg_types{ &ffi_type_pointer };
+
+    method_signature signature{ method };
+    if (signature.has_params())
+    {
+        xlang::throw_invalid("not implemented");
+    }
+
+    if (signature.return_signature())
+    {
+        if (signature.return_signature().Type().is_szarray())
+        {
+            xlang::throw_invalid("not implemented");
+        }
+
+        arg_types.push_back(&ffi_type_pointer);
+    }
+
+    return std::move(arg_types);
+}
+
+namespace std
+{
+    template<> struct hash<std::vector<ffi_type const*>>
+    {
+        std::size_t operator()(std::vector<ffi_type const*> const& vec) const noexcept
+        {
+            std::hash<ffi_type const*> hasher;
+            
+            std::size_t seed = vec.size();
+            for (auto&& t : vec)
+            {
+                seed ^= hasher(t) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            }
+
+            return seed;
+        }
+    };
+}
+
+std::unordered_map<std::vector<ffi_type const*>, std::shared_ptr<ffi_cif>> cif_cache;
+
+ffi_cif* get_cif(std::vector<ffi_type const*> const& arg_types)
+{
+    if (cif_cache.find(arg_types) == cif_cache.end())
+    {
+        std::shared_ptr<ffi_cif> new_cif(new ffi_cif);
+        auto ffi_return = ffi_prep_cif(new_cif.get(), FFI_STDCALL, arg_types.size(), &ffi_type_sint32, const_cast<ffi_type**>(arg_types.data()));
+        if (ffi_return != FFI_OK) { xlang::throw_invalid("ffi_prep_cif failure"); }
+
+        cif_cache.emplace(arg_types, std::move(new_cif));
+    }
+
+    return cif_cache.at(arg_types).get();
+}
+
+void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instance, int offset, std::vector<void*> const& parameters)
+{
+    winrt::hresult hr;
+    std::vector<void*> args{};
+
+    auto vtable = winrt::get_abi(instance);
+
+    args.push_back(&vtable);
+    for (auto&& p : parameters)
+    {
+        args.push_back(const_cast<void**>(&p));
+    }
+
+    ffi_call(cif, FFI_FN((*((void***)vtable))[offset]), &hr, args.data());
+    winrt::check_hresult(hr);
+}
+
 int main(int const /*argc*/, char** /*argv*/)
 {
     //auto start = get_start_time();
@@ -135,52 +240,40 @@ int main(int const /*argc*/, char** /*argv*/)
 
     //printf("%lldms\n", elapsed);
 
-    auto istringable_typedef = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
-    auto tostring_methoddef = istringable_typedef.MethodList().first;
+    meta::TypeDef   td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
+    meta::TypeDef   td_ijsonvalue  = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
 
     winrt::init_apartment();
     auto factory = winrt::get_activation_factory(L"Windows.Data.Json.JsonObject");
 
-    ffi_cif cif;
-    ffi_type* arg_types[]{ &ffi_type_pointer, &ffi_type_pointer };
-    auto ffi_return = ffi_prep_cif(&cif, FFI_STDCALL, 2, &ffi_type_sint32, arg_types);
-    if (ffi_return != FFI_OK) { throw std::exception{}; }
+    std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
 
-    auto invoke_activate_instance = [&cif](winrt::Windows::Foundation::IUnknown const& factory)
+    winrt::Windows::Foundation::IInspectable instance;
     {
-        winrt::hresult hr;
-        winrt::com_ptr<winrt::Windows::Foundation::IInspectable> instance;
-
-        auto arg0 = winrt::get_abi(factory);
-        auto arg1 = winrt::put_abi(instance);
-        void* arg_values[]{ &arg0, &arg1 };
-
-        ffi_call(&cif, FFI_FN((*((void***)arg0))[6]), &hr, arg_values);
-        winrt::check_hresult(hr);
-
-        return std::move(instance);
+        std::vector<void*> args{ winrt::put_abi(instance) };
+        invoke(get_cif(arg_types), factory, 6, args);
     };
 
-    auto invoke_to_string = [&cif, &istringable_typedef](winrt::com_ptr<winrt::Windows::Foundation::IInspectable> const& instance)
+    winrt::hstring str;
     {
-        winrt::com_ptr<winrt::Windows::Foundation::IInspectable> istringable;
-        winrt::check_hresult(instance.as(get_guid(istringable_typedef), winrt::put_abi(istringable)));
+        winrt::Windows::Foundation::IInspectable istringable;
+        winrt::check_hresult(instance.as(get_guid(td_istringable), winrt::put_abi(istringable)));
 
-        winrt::hresult hr;
-        winrt::hstring str;
+        auto arg_types2 = get_method_ffi_types(td_istringable.MethodList().first[0]);
+        std::vector<void*> args{ winrt::put_abi(str) };
+        invoke(get_cif(arg_types2), istringable, 6, args);
+    }
 
-        auto arg0 = winrt::get_abi(istringable);
-        auto arg1 = winrt::put_abi(str);
-        void* arg_values[]{ &arg0, &arg1 };
+    winrt::hstring str2;
+    {
+        winrt::Windows::Foundation::IInspectable ijsonvalue;
+        winrt::check_hresult(instance.as(get_guid(td_ijsonvalue), winrt::put_abi(ijsonvalue)));
 
-        ffi_call(&cif, FFI_FN((*((void***)arg0))[6]), &hr, arg_values);
-        winrt::check_hresult(hr);
+        auto arg_types3 = get_method_ffi_types(td_ijsonvalue.MethodList().first[1]);
 
-        return std::move(str);
+        std::vector<void*> args2{ winrt::put_abi(str2) };
+        invoke(get_cif(arg_types3), ijsonvalue, 7, args2);
     };
-
-    auto instance = invoke_activate_instance(factory);
-    auto str = invoke_to_string(instance);
 
     return 0;
 }
