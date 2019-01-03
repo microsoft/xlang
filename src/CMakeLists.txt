@@ -5,7 +5,9 @@ set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
 
 function(TARGET_CONFIG_MSVC_PCH target pch_cpp pch_header)
 
-    set(pch_output_file "\"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pch\"")
+    get_target_property(target_name ${target} NAME)
+    set(pch_output_file_name "${target_name}.pch")
+    set(pch_output_file "\"${CMAKE_CURRENT_BINARY_DIR}/${pch_output_file_name}\"")
 
     get_target_property(sources ${target} SOURCES)
     foreach(file ${sources})
@@ -13,12 +15,12 @@ function(TARGET_CONFIG_MSVC_PCH target pch_cpp pch_header)
             set_source_files_properties(${file}
                 PROPERTIES
                 COMPILE_FLAGS " /Yc${pch_header} /Fp${pch_output_file}"
-                OBJECT_OUTPUTS ${PROJECT_NAME}.pch)
+                OBJECT_OUTPUTS ${pch_output_file_name})
         else()
             set_source_files_properties(${file}
                 PROPERTIES
                 COMPILE_FLAGS " /Yu${pch_header} /Fp${pch_output_file}"
-                OBJECT_DEPENDS ${PROJECT_NAME}.pch)
+                OBJECT_DEPENDS ${pch_output_file_name})
         endif()
     endforeach()
 
