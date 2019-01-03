@@ -22,20 +22,6 @@ WINRT_EXPORT namespace std::experimental
                 return m_progress;
             }
 
-            void GetResults()
-            {
-                winrt::slim_lock_guard const guard(this->m_lock);
-
-                if (this->m_status == AsyncStatus::Completed)
-                {
-                    return;
-                }
-
-                this->rethrow_if_failed();
-                WINRT_ASSERT(this->m_status == AsyncStatus::Started);
-                throw winrt::hresult_illegal_method_call();
-            }
-
             void return_void()
             {
                 winrt::Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress> handler;

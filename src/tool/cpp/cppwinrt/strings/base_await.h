@@ -671,9 +671,27 @@ namespace winrt::impl
         {
         }
 
+        auto GetResults()
+        {
+            slim_lock_guard const guard(m_lock);
+
+            if (m_status == AsyncStatus::Completed)
+            {
+                return static_cast<Derived*>(this)->get_return_value();
+            }
+
+            rethrow_if_failed();
+            WINRT_ASSERT(m_status == AsyncStatus::Started);
+            throw hresult_illegal_method_call();
+        }
+
         AsyncInterface get_return_object() const noexcept
         {
             return*this;
+        }
+
+        void get_return_value() const noexcept
+        {
         }
 
         std::experimental::suspend_never initial_suspend() const noexcept

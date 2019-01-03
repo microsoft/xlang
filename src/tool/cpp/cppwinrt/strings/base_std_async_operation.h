@@ -9,18 +9,9 @@ WINRT_EXPORT namespace std::experimental
         {
             using AsyncStatus = winrt::Windows::Foundation::AsyncStatus;
 
-            TResult GetResults()
+            TResult get_return_value() const
             {
-                winrt::slim_lock_guard const guard(this->m_lock);
-
-                if (this->m_status == AsyncStatus::Completed)
-                {
-                    return m_result;
-                }
-
-                this->rethrow_if_failed();
-                WINRT_ASSERT(this->m_status == AsyncStatus::Started);
-                throw winrt::hresult_illegal_method_call();
+                return m_result;
             }
 
             void return_value(TResult const& result)
