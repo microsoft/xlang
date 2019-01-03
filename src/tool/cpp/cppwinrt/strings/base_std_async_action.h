@@ -8,11 +8,8 @@ WINRT_EXPORT namespace std::experimental
             winrt::Windows::Foundation::IAsyncAction,
             winrt::Windows::Foundation::AsyncActionCompletedHandler>
         {
-            using AsyncStatus = winrt::Windows::Foundation::AsyncStatus;
-
-            void return_void()
+            void return_void() const noexcept
             {
-                this->set_completed();
             }
         };
     };

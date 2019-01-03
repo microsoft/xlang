@@ -657,6 +657,7 @@ namespace winrt::impl
                 if (m_status == AsyncStatus::Started)
                 {
                     m_status = AsyncStatus::Canceled;
+                    m_exception = std::make_exception_ptr(hresult_canceled());
                     cancel = std::move(m_cancel);
                 }
             }
@@ -696,26 +697,16 @@ namespace winrt::impl
 
         void set_completed() noexcept
         {
-            slim_lock_guard const guard(m_lock);
-
-            if (m_status == AsyncStatus::Started)
-            {
-                m_status = AsyncStatus::Completed;
-            }
-            else
-            {
-                WINRT_ASSERT(m_status == AsyncStatus::Canceled);
-                m_exception = std::make_exception_ptr(hresult_canceled());
-            }
-        }
-
-        void invoke_completed() noexcept
-        {
             CompletedHandler handler;
             AsyncStatus status;
 
             {
-                slim_lock_guard const guard(this->m_lock);
+                slim_lock_guard const guard(m_lock);
+
+                if (m_status == AsyncStatus::Started)
+                {
+                    m_status = AsyncStatus::Completed;
+                }
 
                 handler = std::move(this->m_completed);
                 status = this->m_status;
@@ -732,36 +723,30 @@ namespace winrt::impl
             return{};
         }
 
-        struct final_suspend_type
+        auto final_suspend() noexcept
         {
-            promise_base* promise;
-
-            bool await_ready() const noexcept
+            struct awaiter
             {
-                return false;
-            }
+                promise_base* promise;
 
-            void await_resume() const noexcept
-            {
-            }
-
-            bool await_suspend(std::experimental::coroutine_handle<>) const noexcept
-            {
-                uint32_t const remaining = promise->subtract_reference();
-
-                if (remaining == 0)
+                bool await_ready() const noexcept
                 {
-                    std::atomic_thread_fence(std::memory_order_acquire);
+                    return false;
                 }
 
-                return remaining > 0;
-            }
-        };
+                void await_resume() const noexcept
+                {
+                }
 
-        final_suspend_type final_suspend() noexcept
-        {
-            invoke_completed();
-            return{ this };
+                bool await_suspend(std::experimental::coroutine_handle<>) const noexcept
+                {
+                    uint32_t const remaining = promise->subtract_reference();
+                    promise->set_completed();
+                    return remaining > 0;
+                }
+            };
+
+            return awaiter{ this };
         }
 
         void unhandled_exception() noexcept

@@ -8,7 +8,6 @@ WINRT_EXPORT namespace std::experimental
             winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>,
             winrt::Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>, TProgress>
         {
-            using AsyncStatus = winrt::Windows::Foundation::AsyncStatus;
             using ProgressHandler = winrt::Windows::Foundation::AsyncActionProgressHandler<TProgress>;
 
             void Progress(ProgressHandler const& handler)
@@ -23,9 +22,8 @@ WINRT_EXPORT namespace std::experimental
                 return m_progress;
             }
 
-            void return_void()
+            void return_void() const noexcept
             {
-                this->set_completed();
             }
 
             void set_progress(TProgress const& result)
