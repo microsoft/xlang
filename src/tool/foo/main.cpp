@@ -196,24 +196,23 @@ namespace std
     };
 }
 
-std::unordered_map<std::vector<ffi_type const*>, std::shared_ptr<ffi_cif>> cif_cache{};
-std::vector<std::vector<ffi_type const*>> cif_args_cache{};
+std::unordered_map<std::vector<ffi_type const*>, std::pair<ffi_cif, std::vector<ffi_type const*>>> cif_cache{};
 
 ffi_cif* get_cif(std::vector<ffi_type const*> const& arg_types)
 {
     if (cif_cache.find(arg_types) == cif_cache.end())
     {
+        // Make a copy of arg_types for cached ffi_cif struct to point to 
         std::vector<ffi_type const*> arg_types_copy{ arg_types.begin(), arg_types.end() };
-        auto it = cif_args_cache.insert(cif_args_cache.begin(), std::move(arg_types_copy));
+        auto pair = std::make_pair<ffi_cif, std::vector<ffi_type const*>>(ffi_cif{}, std::move(arg_types_copy));
 
-        std::shared_ptr<ffi_cif> new_cif(new ffi_cif);
-        auto ffi_return = ffi_prep_cif(new_cif.get(), FFI_STDCALL, it->size(), &ffi_type_sint32, const_cast<ffi_type**>(it->data()));
+        auto ffi_return = ffi_prep_cif(&pair.first, FFI_STDCALL, pair.second.size(), &ffi_type_sint32, const_cast<ffi_type**>(pair.second.data()));
         if (ffi_return != FFI_OK) { xlang::throw_invalid("ffi_prep_cif failure"); }
 
-        cif_cache.emplace(arg_types, new_cif);
+        cif_cache.emplace(arg_types, std::move(pair));
     }
 
-    return cif_cache.at(arg_types).get();
+    return &(cif_cache.at(arg_types).first);
 }
 
 void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instance, int offset, std::vector<void*> const& parameters)
