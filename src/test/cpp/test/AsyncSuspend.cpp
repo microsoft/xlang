@@ -41,7 +41,7 @@ namespace
     }
 
     template <typename F>
-    void CheckState(F make)
+    void Check(F make)
     {
         handle start{ CreateEvent(nullptr, true, false, nullptr) };
         handle completed{ CreateEvent(nullptr, true, false, nullptr) };
@@ -80,8 +80,8 @@ TEST_CASE("AsyncSuspend")
     OperationWithProgress(start.get()).get();
     Await().get();
 
-    CheckState(Action);
-    CheckState(ActionWithProgress);
-    CheckState(Operation);
-    CheckState(OperationWithProgress);
+    Check(Action);
+    Check(ActionWithProgress);
+    Check(Operation);
+    Check(OperationWithProgress);
 }
