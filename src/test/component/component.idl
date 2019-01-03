@@ -1,0 +1,227 @@
+namespace Component
+{
+    enum Signed
+    {
+        First = -1,
+        Second = 0,
+        Third = 1
+    };
+
+    [flags]
+    enum Unsigned
+    {
+        First = 0,
+        Second = 1,
+        Third = 2
+    };
+
+    interface INotExclusive
+    {
+        String NotExclusive();
+    }
+
+    namespace Edge
+    {
+        [default_interface]
+        runtimeclass EmptyClass
+        {
+        }
+
+        static runtimeclass StaticClass
+        {
+            static void StaticMethod();
+        }
+
+        runtimeclass ZeroClass
+        {
+            ZeroClass();
+            void Method();
+            static void StaticMethod();
+        }
+
+        runtimeclass OneClass
+        {
+            OneClass(Int32 a);
+            void Method(Int32 a);
+            static void StaticMethod(Int32 a);
+
+            Int32 First();
+        }
+
+        runtimeclass TwoClass
+        {
+            TwoClass(Int32 a, Int32 b);
+            void Method(Int32 a, Int32 b);
+            static void StaticMethod(Int32 a, Int32 b);
+
+            Int32 First();
+            Int32 Second();
+        }
+
+        runtimeclass ThreeClass
+        {
+            ThreeClass(Int32 a, Int32 b, Int32 c);
+            void Method(Int32 a, Int32 b, Int32 c);
+            static void StaticMethod(Int32 a, Int32 b, Int32 c);
+
+            Int32 First();
+            Int32 Second();
+            Int32 Third();
+        }
+    }
+
+    namespace Fast
+    {
+        [exclusiveto(FastClass)]
+        interface IFastClass
+        {
+            String First();
+            String Second();
+        }
+
+        [exclusiveto(FastClass)]
+        interface IFastClass2
+        {
+            String Third();
+            String Fourth();
+        }
+
+        [exclusiveto(SlowClass)]
+        interface ISlowClass
+        {
+            String First();
+            String Second();
+        }
+
+        [exclusiveto(SlowClass)]
+        interface ISlowClass2
+        {
+            String Third();
+            String Fourth();
+        }
+
+        runtimeclass SlowClass : [default] ISlowClass, ISlowClass2, Component.INotExclusive
+        {
+            SlowClass();
+            static String StaticMethod();
+        }
+
+        [Windows.Foundation.Metadata.FastAbiAttribute]
+        runtimeclass FastClass : [default] IFastClass, IFastClass2, Component.INotExclusive
+        {
+            FastClass();
+            static String StaticMethod();
+        }
+    }
+
+    namespace Result
+    {
+        static runtimeclass Class
+        {
+            static Int32 GetInt32();
+            static String GetString();
+            static Component.Fast.FastClass GetFastClass();
+            static Component.Fast.SlowClass GetSlowClass();
+            static Component.INotExclusive GetInterface();
+        }
+    }
+
+    namespace Structs
+    {
+        struct Simple
+        {
+            UInt8 A;
+            UInt8 R;
+            UInt8 G;
+            UInt8 B;
+        };
+    }
+
+    namespace Async
+    {
+        static runtimeclass Class
+        {
+            static Windows.Foundation.IAsyncAction Action();
+            static Windows.Foundation.IAsyncActionWithProgress<Int32> ActionWithProgress();
+            static Windows.Foundation.IAsyncOperation<String> Operation();
+            static Windows.Foundation.IAsyncOperationWithProgress<String, Int32> OperationWithProgress();
+        }
+    }
+
+    namespace Collections
+    {
+        [default_interface]
+        runtimeclass Class : Windows.Foundation.Collections.IObservableMap<String, Int32>
+        {
+            Class();
+
+            static Windows.Foundation.Collections.IIterable<String> Iterable();
+            static Windows.Foundation.Collections.IVectorView<String> VectorView();
+            static Windows.Foundation.Collections.IVector<String> Vector();
+
+            static Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Int32> > IterablePair();
+            static Windows.Foundation.Collections.IMapView<String, Int32> MapView();
+            static Windows.Foundation.Collections.IMap<String, Int32> Map();
+        }
+    }
+
+    namespace Composable
+    {
+        unsealed runtimeclass Base
+        {
+            Base();
+            String BaseMethod();
+        }
+
+        runtimeclass Derived : Base
+        {
+            Derived();
+            String DerivedMethod();
+        }
+    }
+
+    namespace Events
+    {
+        delegate void Handler(Int32 value);
+
+        [default_interface]
+        runtimeclass Class
+        {
+            Class();
+            event Handler Member;
+            static event Handler Static;
+        }
+    }
+
+    namespace Params
+    {
+        [default_interface]
+        runtimeclass Class
+        {
+            Class();
+
+            void SyncCall(
+                String a,
+                Windows.Foundation.IReference<int> b,
+                Windows.Foundation.Collections.IIterable<int> c,
+                Windows.Foundation.Collections.IVectorView<int> d,
+                Windows.Foundation.Collections.IMapView<int, int> e,
+                Windows.Foundation.Collections.IVector<int> f,
+                Windows.Foundation.Collections.IMap<int, int> g);
+
+            Windows.Foundation.IAsyncAction NotSyncCall(
+                String a,
+                Windows.Foundation.IReference<int> b,
+                Windows.Foundation.Collections.IIterable<int> c,
+                Windows.Foundation.Collections.IVectorView<int> d,
+                Windows.Foundation.Collections.IMapView<int, int> e,
+                Windows.Foundation.Collections.IVector<int> f,
+                Windows.Foundation.Collections.IMap<int, int> g);
+
+
+            Component.Structs.Simple Structs(
+                Component.Structs.Simple a,
+                out Component.Structs.Simple b);
+        }
+    }
+}
