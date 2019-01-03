@@ -9,6 +9,7 @@ target_sources(cpp_test PUBLIC
     test/AbiGuard.cpp
     test/AgileRef.cpp
     test/Async.cpp
+    test/AsyncNoSuspend.cpp
     test/Collections.cpp
     test/Composable.cpp
     test/Edge.cpp
