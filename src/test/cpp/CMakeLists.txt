@@ -53,6 +53,7 @@ else()
         main.cpp
         test/Interop.cpp
         test/Capture.cpp
+        test/AsyncSuspend.cpp
     )
 endif()
 
