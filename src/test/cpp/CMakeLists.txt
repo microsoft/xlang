@@ -6,6 +6,8 @@ target_sources(cpp_test PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp"
     pch.cpp
     activation.cpp
+    test/AbiGuard.cpp
+    test/AgileRef.cpp
     test/Async.cpp
     test/Collections.cpp
     test/Composable.cpp
@@ -17,6 +19,7 @@ target_sources(cpp_test PUBLIC
     test/Names.cpp
     test/Structs.cpp
     test/CustomError.cpp
+    test/VariadicDelegate.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
     implementation/Component.Composable.Base.cpp
@@ -45,7 +48,11 @@ endif()
 if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
     target_sources(cpp_test PUBLIC main.cpp)
 else()
-    target_sources(cpp_test PUBLIC main.cpp test/Interop.cpp)
+    target_sources(cpp_test PUBLIC
+        main.cpp
+        test/Interop.cpp
+        test/Capture.cpp
+    )
 endif()
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
