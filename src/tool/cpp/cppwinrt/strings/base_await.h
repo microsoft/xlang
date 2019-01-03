@@ -694,6 +694,39 @@ namespace winrt::impl
         {
         }
 
+        void set_completed() noexcept
+        {
+            slim_lock_guard const guard(m_lock);
+
+            if (m_status == AsyncStatus::Started)
+            {
+                m_status = AsyncStatus::Completed;
+            }
+            else
+            {
+                WINRT_ASSERT(m_status == AsyncStatus::Canceled);
+                m_exception = std::make_exception_ptr(hresult_canceled());
+            }
+        }
+
+        void invoke_completed() noexcept
+        {
+            CompletedHandler handler;
+            AsyncStatus status;
+
+            {
+                slim_lock_guard const guard(this->m_lock);
+
+                handler = std::move(this->m_completed);
+                status = this->m_status;
+            }
+
+            if (handler)
+            {
+                handler(*this, status);
+            }
+        }
+
         std::experimental::suspend_never initial_suspend() const noexcept
         {
             return{};
@@ -727,39 +760,27 @@ namespace winrt::impl
 
         final_suspend_type final_suspend() noexcept
         {
+            invoke_completed();
             return{ this };
         }
 
         void unhandled_exception() noexcept
         {
-            CompletedHandler handler;
-            AsyncStatus status;
+            slim_lock_guard const guard(m_lock);
+            WINRT_ASSERT(m_status == AsyncStatus::Started || m_status == AsyncStatus::Canceled);
+            m_exception = std::current_exception();
 
+            try
             {
-                slim_lock_guard const guard(m_lock);
-                WINRT_ASSERT(m_status == AsyncStatus::Started || m_status == AsyncStatus::Canceled);
-                m_exception = std::current_exception();
-
-                try
-                {
-                    std::rethrow_exception(m_exception);
-                }
-                catch (hresult_canceled const&)
-                {
-                    m_status = AsyncStatus::Canceled;
-                }
-                catch (...)
-                {
-                    m_status = AsyncStatus::Error;
-                }
-
-                handler = std::move(m_completed);
-                status = m_status;
+                std::rethrow_exception(m_exception);
             }
-
-            if (handler)
+            catch (hresult_canceled const&)
             {
-                handler(*this, status);
+                m_status = AsyncStatus::Canceled;
+            }
+            catch (...)
+            {
+                m_status = AsyncStatus::Error;
             }
         }
 
