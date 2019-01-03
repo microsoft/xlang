@@ -7,26 +7,16 @@ using namespace Windows::Foundation;
 
 namespace
 {
-    IAsyncAction Action(HANDLE event)
-    {
-        co_await resume_on_signal(event);
-    }
-
-    IAsyncActionWithProgress<int> ActionWithProgress(HANDLE event)
-    {
-        co_await resume_on_signal(event);
-    }
-
     IAsyncOperation<int> Operation(HANDLE event)
     {
         co_await resume_on_signal(event);
-        co_return 1;
+        co_return 123;
     }
 
     IAsyncOperationWithProgress<int, int> OperationWithProgress(HANDLE event)
     {
         co_await resume_on_signal(event);
-        co_return 1;
+        co_return 123;
     }
 
     IAsyncAction Await()
@@ -34,10 +24,11 @@ namespace
         // Manual reset so that all waiters will resume and initially set so they won't block.
         handle event{ CreateEvent(nullptr, true, true, nullptr) };
 
-        co_await Action(event.get());
-        co_await ActionWithProgress(event.get());
-        co_await Operation(event.get());
-        co_await OperationWithProgress(event.get());
+        int a = co_await Operation(event.get());
+        int b = co_await OperationWithProgress(event.get());
+
+        REQUIRE(a == 123);
+        REQUIRE(b == 123);
     }
 
     template <typename F>
@@ -69,20 +60,17 @@ namespace
 
         REQUIRE(async.Status() == AsyncStatus::Completed);
         REQUIRE(async.ErrorCode() == S_OK);
+        REQUIRE(async.GetResults() == 123);
     }
 }
 
-TEST_CASE("AsyncSuspend")
+TEST_CASE("AsyncResult")
 {
     handle start{ CreateEvent(nullptr, true, true, nullptr) };
-    Action(start.get()).get();
-    ActionWithProgress(start.get()).get();
-    Operation(start.get()).get();
-    OperationWithProgress(start.get()).get();
+    REQUIRE(123 == Operation(start.get()).get());
+    REQUIRE(123 == OperationWithProgress(start.get()).get());
     Await().get();
 
-    Check(Action);
-    Check(ActionWithProgress);
     Check(Operation);
     Check(OperationWithProgress);
 }
