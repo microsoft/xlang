@@ -53,9 +53,13 @@ else()
         main.cpp
         test/Interop.cpp
         test/Capture.cpp
+        test/AsyncAutoCancel.cpp
+        test/AsyncCancelCallback.cpp
+        test/AsyncCheckCancel.cpp
         test/AsyncProgress.cpp
-        test/AsyncSuspend.cpp
         test/AsyncResult.cpp
+        test/AsyncSuspend.cpp
+        test/AsyncThrow.cpp
     )
 endif()
 
