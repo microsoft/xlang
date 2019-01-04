@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
+file(TO_NATIVE_PATH ${CMAKE_BINARY_DIR}/tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/attributes.winmd" attributes_winmd)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/component.winmd" component_winmd)
@@ -9,7 +9,7 @@ file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/generated" generated_files)
 file(TO_NATIVE_PATH "${generated_files}/winrt/Windows.Foundation.h" foundation_h)
 file(TO_NATIVE_PATH "${generated_files}/module.g.cpp" module_g_cpp)
 
-add_library(test_component MODULE)
+add_library(test_component SHARED)
 target_include_directories(test_component BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${generated_files})
 target_sources(test_component PUBLIC
     pch.cpp
