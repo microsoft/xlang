@@ -6,14 +6,16 @@ file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/attributes.winmd" attributes_wi
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/component.winmd" component_winmd)
 file(TO_NATIVE_PATH "${project_folder}/Windows.Foundation.FoundationContract.winmd" foundation_winmd)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/generated" generated_files)
-file(TO_NATIVE_PATH "${generated_files}/winrt/Windows.Foundation.h" foundation_h)
-file(TO_NATIVE_PATH "${generated_files}/module.g.cpp" module_g_cpp)
+file(TO_NATIVE_PATH "${generated_files}/foundation" generated_foundation_files)
+file(TO_NATIVE_PATH "${generated_foundation_files}/winrt/Windows.Foundation.h" foundation_h)
+file(TO_NATIVE_PATH "${generated_files}/component" generated_component_files)
+file(TO_NATIVE_PATH "${generated_component_files}/module.g.cpp" module_g_cpp)
 
 add_library(test_component SHARED)
-target_include_directories(test_component BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${generated_files})
+target_include_directories(test_component BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${generated_component_files} ${generated_foundation_files})
 target_sources(test_component PUBLIC
     pch.cpp
-    "${generated_files}/module.g.cpp"
+    ${module_g_cpp}
     module.def
     Component.Async.Class.cpp
     Component.Collections.Class.cpp
@@ -52,14 +54,16 @@ add_custom_command(OUTPUT ${component_winmd}
 )
 
 add_custom_command(OUTPUT ${foundation_h}
-    COMMAND ${cpp_exe} -in ${foundation_winmd} -out ${generated_files} -verbose
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${generated_foundation_files}
+    COMMAND ${cpp_exe} -in ${foundation_winmd} -out ${generated_foundation_files} -verbose
     DEPENDS cppwinrt
 )
 
 add_custom_command(OUTPUT ${module_g_cpp}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${foundation_winmd} ${attributes_winmd} -out ${generated_files} -component -verbose -prefix -base -opt
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${generated_component_files}
+    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${foundation_winmd} ${attributes_winmd} -out ${generated_component_files} -component -verbose -prefix -base -opt
     DEPENDS ${component_winmd} cppwinrt
 )
 
-add_custom_target(test_component_depends ALL DEPENDS ${component_winmd} ${foundation_h} ${module_g_cpp} )
+add_custom_target(test_component_depends ALL DEPENDS ${foundation_h} ${module_g_cpp})
 add_dependencies(test_component test_component_depends)
