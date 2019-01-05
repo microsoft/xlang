@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 
 set(python_module_name pytestcmp)
 
-file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/tool/cpp/cppwinrt/cppwinrt.exe" cpp_exe)
+find_file(orig_cppwinrt_exe cppwinrt.exe)
 file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/tool/python/pywinrt.exe" pywinrt_exe)
 file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/test/component/attributes.winmd" attributes_winmd)
 file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/test/component/component.winmd" component_winmd)
@@ -12,12 +12,13 @@ file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/generated/cpp" generated_cppwin
 file(TO_NATIVE_PATH "${generated_cppwinrt_files}/winrt/base.h" base_h)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/generated/py" generated_pywinrt_files)
 file(TO_NATIVE_PATH "${generated_pywinrt_files}/setup.py" setup_py)
-# file(TO_NATIVE_PATH "${generated_files}/_${python_module_name}.pyd" module_pyd)
+file(TO_NATIVE_PATH "${generated_pywinrt_files}/_${python_module_name}.cp37-win_amd64.pyd" module_pyd)
 
 add_custom_command(OUTPUT ${base_h}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${generated_cppwinrt_files}
-    COMMAND ${cpp_exe} -in ${attributes_winmd} -in ${component_winmd} -in ${foundation_winmd} -out ${generated_cppwinrt_files} -verbose
-    DEPENDS cppwinrt ${component_winmd}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${generated_cppwinrt_files}
+    COMMAND ${orig_cppwinrt_exe} -in ${attributes_winmd} -in ${component_winmd} -in ${foundation_winmd} -out ${generated_cppwinrt_files} -verbose
+    DEPENDS ${component_winmd}
 )
 
 add_custom_command(OUTPUT ${setup_py}
@@ -28,11 +29,10 @@ add_custom_command(OUTPUT ${setup_py}
 
 add_custom_target(python_test_2 DEPENDS ${base_h} ${setup_py})
 
-# add_custom_command(
-#   OUTPUT ${module_pyd} 
-#   DEPENDS ${setup_py}
-#   WORKING_DIRECTORY ${generated_files}
+# add_custom_command(OUTPUT ${module_pyd} 
+#   WORKING_DIRECTORY ${generated_pywinrt_files}
 #   COMMAND py setup.py build_ext --inplace
+#   DEPENDS python_test_2
 # )
 
 # add_custom_target(build_python_test_2 DEPENDS ${module_pyd})
