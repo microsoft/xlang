@@ -8,12 +8,12 @@ WINRT_EXPORT namespace std::experimental
             winrt::Windows::Foundation::IAsyncOperation<TResult>,
             winrt::Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
         {
-            TResult get_return_value() const
+            TResult get_return_value() const noexcept
             {
                 return m_result;
             }
 
-            void return_value(TResult const& result)
+            void return_value(TResult const& result) noexcept
             {
                 m_result = result;
             }

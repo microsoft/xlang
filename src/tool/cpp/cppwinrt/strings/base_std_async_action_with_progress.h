@@ -10,13 +10,13 @@ WINRT_EXPORT namespace std::experimental
         {
             using ProgressHandler = winrt::Windows::Foundation::AsyncActionProgressHandler<TProgress>;
 
-            void Progress(ProgressHandler const& handler)
+            void Progress(ProgressHandler const& handler) noexcept
             {
                 winrt::slim_lock_guard const guard(this->m_lock);
                 m_progress = handler;
             }
 
-            ProgressHandler Progress()
+            ProgressHandler Progress() noexcept
             {
                 winrt::slim_lock_guard const guard(this->m_lock);
                 return m_progress;
