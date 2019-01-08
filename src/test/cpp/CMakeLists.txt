@@ -56,6 +56,7 @@ else()
         test/AsyncAutoCancel.cpp
         test/AsyncCancelCallback.cpp
         test/AsyncCheckCancel.cpp
+        test/AsyncLocal.cpp
         test/AsyncProgress.cpp
         test/AsyncResult.cpp
         test/AsyncSuspend.cpp
