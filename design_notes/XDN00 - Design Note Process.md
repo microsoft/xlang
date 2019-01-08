@@ -30,7 +30,7 @@ To foster collaboration, the decision closure process used within the project sh
 
 - **Discoverable**. An outsider or someone new to the effort should be able to quickly determine the set of completed decisions and the motivation for those decisions. New project members should understand and efficiently participate in the process with little training.
 
-Design Notes are _not_ a substitute for documentation. Project documentation describes _how_ the system works. Design Notes capture _why_ the team chose to build the system the way that they did.
+Design notes are _not_ a substitute for documentation. Project documentation describes _how_ the system works. Design notes capture _why_ the team chose to build the system the way that they did.
 
 ## 2\. The Process
 
@@ -82,7 +82,7 @@ The steps of the design note process are as follows:
 
    5) **The moderator calls for a vote on the design note at the end of the meeting**. The review committee may decide to approve a design note, approve it subject to edits, or return the design note to the working group for further work. Strictly speaking, a majority vote is sufficient for approval of a design note; however, in practice, the design note review process is intended to produce a widely accepted consensus decision.
 
-8. **After acceptance, the final design note is published**. The design note is archived in the Design Notes of the project repo with its status changed to "Adopted". The moderator sends email with the design note's URL to the appropriate mailing lists announcing that the design note is complete and adopted. If the design note replaces or invalidates earlier adopted design notes, their status is changed to "Deprecated".
+8. **After acceptance, the final design note is published**. The design note is archived in the design notes folder of the project repo with its status changed to "Adopted". The moderator sends email with the design note's URL to the appropriate mailing lists announcing that the design note is complete and adopted. If the design note replaces or invalidates earlier adopted design notes, their status is changed to "Deprecated".
 
 ## 3\. The Decisions
 
@@ -128,4 +128,4 @@ The _least effective design notes_ are those that are written primarily as post-
 
 The _least effective working groups_ fail because they attempt to overload too much into a single design note or they confuse writing design notes with writing documentation. Overloading produces two problems: writing the design note becomes onerous and decision making becomes insular. When a design group goes dark, casual (and often insightful) participants have little room for input.
 
-Design notes should be based upon a standard Design Note Template. This document uses one such template.
+Design notes should be based upon a standard design note Template. This document uses one such template.
