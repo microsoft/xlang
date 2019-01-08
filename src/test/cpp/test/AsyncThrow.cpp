@@ -8,6 +8,10 @@ using namespace std::chrono_literals;
 
 namespace
 {
+    //
+    // Checks that exceptions are correctly captured and propagated.
+    //
+
     IAsyncAction Action()
     {
         co_await 10ms;

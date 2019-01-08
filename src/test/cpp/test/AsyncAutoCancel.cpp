@@ -7,6 +7,10 @@ using namespace Windows::Foundation;
 
 namespace
 {
+    //
+    // Checks that the coroutine is automatically canceled when reaching a suspension point.
+    //
+
     IAsyncAction Action(HANDLE event)
     {
         co_await resume_on_signal(event);

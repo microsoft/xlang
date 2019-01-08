@@ -7,6 +7,10 @@ using namespace Windows::Foundation;
 
 namespace
 {
+    //
+    // Checks that progress reporting works.
+    //
+
     IAsyncActionWithProgress<int> Action(HANDLE event)
     {
         co_await resume_on_signal(event);

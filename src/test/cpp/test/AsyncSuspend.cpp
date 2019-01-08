@@ -7,6 +7,10 @@ using namespace Windows::Foundation;
 
 namespace
 {
+    //
+    // Checks basic suspension behavior.
+    //
+
     IAsyncAction Action(HANDLE event)
     {
         co_await resume_on_signal(event);

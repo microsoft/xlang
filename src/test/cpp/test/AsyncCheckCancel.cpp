@@ -7,6 +7,10 @@ using namespace Windows::Foundation;
 
 namespace
 {
+    //
+    // Checks that manual cancellation checks work.
+    //
+
     IAsyncAction Action(HANDLE event, bool& canceled)
     {
         co_await resume_on_signal(event);

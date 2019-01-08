@@ -6,6 +6,10 @@ using namespace Windows::Foundation;
 
 namespace
 {
+    //
+    // Checks that coroutines lacking suspension points work.
+    //
+
     IAsyncAction Action()
     {
         co_return;
@@ -35,7 +39,7 @@ namespace
     }
 
     template <typename T>
-    void CheckState(T const& async)
+    void Check(T const& async)
     {
         REQUIRE(async.Status() == AsyncStatus::Completed);
         REQUIRE(async.ErrorCode() == 0);
@@ -75,8 +79,8 @@ TEST_CASE("AsyncNoSuspend")
     OperationWithProgress().get();
     Await().get();
 
-    CheckState(Action());
-    CheckState(ActionWithProgress());
-    CheckState(Operation());
-    CheckState(OperationWithProgress());
+    Check(Action());
+    Check(ActionWithProgress());
+    Check(Operation());
+    Check(OperationWithProgress());
 }

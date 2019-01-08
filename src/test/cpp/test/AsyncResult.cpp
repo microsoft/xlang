@@ -7,6 +7,10 @@ using namespace Windows::Foundation;
 
 namespace
 {
+    //
+    // Checks that result values are propagated properly.
+    //
+
     IAsyncOperation<int> Operation(HANDLE event)
     {
         co_await resume_on_signal(event);

@@ -7,6 +7,10 @@ using namespace Windows::Foundation;
 
 namespace
 {
+    //
+    // Checks that the cancellation callback is invoked.
+    //
+
     IAsyncAction Action(HANDLE event, bool& canceled)
     {
         auto cancel = co_await get_cancellation_token();
