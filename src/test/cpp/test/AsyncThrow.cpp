@@ -50,6 +50,32 @@ namespace
         {
             REQUIRE(e.message() == L"Async");
         }
+
+        handle completed{ CreateEvent(nullptr, true, false, nullptr) };
+        auto async = make();
+
+        async.Completed([&](auto&& sender, AsyncStatus status)
+            {
+                REQUIRE(async == sender);
+                REQUIRE(status == AsyncStatus::Error);
+                SetEvent(completed.get());
+            });
+
+        REQUIRE(WaitForSingleObject(completed.get(), 1000) == WAIT_OBJECT_0);
+        REQUIRE(async.Status() == AsyncStatus::Error);
+
+        hresult_error e(async.ErrorCode(), take_ownership_from_abi);
+        REQUIRE(e.message() == L"Async");
+
+        try
+        {
+            async.GetResults();
+            REQUIRE(false);
+        }
+        catch (hresult_invalid_argument const& e)
+        {
+            REQUIRE(e.message() == L"Async");
+        }
     }
 }
 
