@@ -17,7 +17,6 @@ namespace
 
         ~Local()
         {
-            Sleep(100);
             REQUIRE(!destroyed);
             destroyed = true;
         }
@@ -27,21 +26,18 @@ namespace
     {
         co_await resume_on_signal(event);
         Local local{ destroyed };
-        Sleep(100);
     }
 
     IAsyncActionWithProgress<int> ActionWithProgress(HANDLE event, bool& destroyed)
     {
         co_await resume_on_signal(event);
         Local local{ destroyed };
-        Sleep(100);
     }
 
     IAsyncOperation<int> Operation(HANDLE event, bool& destroyed)
     {
         co_await resume_on_signal(event);
         Local local{ destroyed };
-        Sleep(100);
         co_return 1;
     }
 
@@ -49,7 +45,6 @@ namespace
     {
         co_await resume_on_signal(event);
         Local local{ destroyed };
-        Sleep(100);
         co_return 1;
     }
 

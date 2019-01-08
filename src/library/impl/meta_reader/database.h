@@ -30,6 +30,61 @@ namespace xlang::meta::reader
         database(database&&) = delete;
         database& operator=(database&&) = delete;
 
+        static bool is_database(std::string_view const& path)
+        {
+            file_view file{ path };
+
+            auto dos = file.as<impl::image_dos_header>();
+
+            if (dos.e_magic != 0x5A4D) // IMAGE_DOS_SIGNATURE
+            {
+                return false;
+            }
+
+            auto pe = file.as<impl::image_nt_headers32>(dos.e_lfanew);
+
+            if (pe.FileHeader.NumberOfSections == 0 || pe.FileHeader.NumberOfSections > 100)
+            {
+                return false;
+            }
+
+            auto com = pe.OptionalHeader.DataDirectory[14]; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+            auto sections = &file.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32));
+            auto sections_end = sections + pe.FileHeader.NumberOfSections;
+
+            auto section = section_from_rva(sections, sections_end, com.VirtualAddress);
+
+            if (section == sections_end)
+            {
+                return false;
+            }
+
+            auto offset = offset_from_rva(*section, com.VirtualAddress);
+
+            auto cli = file.as<impl::image_cor20_header>(offset);
+
+            if (cli.cb != sizeof(impl::image_cor20_header))
+            {
+                return false;
+            }
+
+            section = section_from_rva(sections, sections_end, cli.MetaData.VirtualAddress);
+
+            if (section == sections_end)
+            {
+                return false;
+            }
+
+            offset = offset_from_rva(*section, cli.MetaData.VirtualAddress);
+
+            if (file.as<uint32_t>(offset) != 0x424a5342)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         database(std::string_view const& path, cache const* cache) : file_view{ path }, m_path{ path }, m_cache{ cache }
         {
             auto dos = as<impl::image_dos_header>();

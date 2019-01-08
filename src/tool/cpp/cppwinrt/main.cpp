@@ -49,6 +49,21 @@ namespace xlang
         settings.root = args.value("root", "winrt");
         settings.input = args.files("input");
         settings.reference = args.files("reference");
+
+        auto remove_non_databases = [](std::set<std::string>& files)
+        {
+            for (auto i = files.begin(); i != files.end(); ++i)
+            {
+                if (!database::is_database(*i))
+                {
+
+                }
+            }
+        };
+
+        remove_non_databases(settings.input);
+        remove_non_databases(settings.reference);
+
         settings.component = args.exists("component");
         settings.base = args.exists("base");
 
