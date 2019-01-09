@@ -122,6 +122,12 @@ namespace xlang::cmd
 
         auto files(std::string_view const& name) const
         {
+            return files(name, [](auto&&) {return true; });
+        }
+
+        template <typename F>
+        auto files(std::string_view const& name, F directory_filter) const
+        {
             std::set<std::string> files;
 
             auto add_directory = [&](auto&& path)
@@ -130,7 +136,12 @@ namespace xlang::cmd
                 {
                     if (std::experimental::filesystem::is_regular_file(file))
                     {
-                        files.insert(canonical(file.path()).string());
+                        auto filename = canonical(file.path()).string();
+
+                        if (directory_filter(filename))
+                        {
+                            files.insert(filename);
+                        }
                     }
                 }
             };
