@@ -27,10 +27,14 @@ WINRT_EXPORT namespace std::experimental
                 return std::move(m_result);
             }
 
-            template <typename Value>
-            void return_value(Value&& value) noexcept
+            void return_value(TResult&& value) noexcept
             {
-                m_result = std::forward<Value>(value);
+                m_result = std::move(value);
+            }
+
+            void return_value(TResult const& value) noexcept
+            {
+                m_result = value;
             }
 
             void set_progress(TProgress const& result)
