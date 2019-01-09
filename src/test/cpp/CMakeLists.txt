@@ -10,6 +10,7 @@ target_sources(cpp_test PUBLIC
     test/AgileRef.cpp
     test/Async.cpp
     test/AsyncNoSuspend.cpp
+    test/AsyncReturn.cpp
     test/Collections.cpp
     test/Composable.cpp
     test/Edge.cpp
