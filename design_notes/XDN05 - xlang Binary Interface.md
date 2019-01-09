@@ -12,5 +12,6 @@ status: draft
 
 ## Abstract
 
-This document describes the [application binary interface](https://en.wikipedia.org/wiki/Application_binary_interface) (or ABI) for xlang.
-
+This design note describes xlang's [application binary interface](https://en.wikipedia.org/wiki/Application_binary_interface)
+(or ABI). The ABI defines a stable contract between xlang language projections and xlang components
+that is necessary in order to interoperate.

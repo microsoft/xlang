@@ -12,4 +12,7 @@ status: draft
 
 ## Abstract
 
-This document describes how types provided by an xlang component are represented in metadata files.
+This design note describes the machine-readable format used to encode details about
+[xlang types](XDN03%20-%20xlang%20Type%20System.md) implemented by xlang components. The metadata
+is used to generate language projections for xlang components automatically using compile time
+and/or run time tools.
