@@ -15,7 +15,7 @@ WINRT_EXPORT namespace std::experimental
 
             void return_value(TResult&& result) noexcept
             {
-                m_result = std::forward<TResult>(result);
+                m_result = std::move(result);
             }
 
             TResult m_result{ winrt::impl::empty_value<TResult>() };
