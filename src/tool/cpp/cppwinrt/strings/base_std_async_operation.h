@@ -8,14 +8,14 @@ WINRT_EXPORT namespace std::experimental
             winrt::Windows::Foundation::IAsyncOperation<TResult>,
             winrt::Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
         {
-            TResult get_return_value() const noexcept
+            TResult get_return_value() noexcept
             {
-                return m_result;
+                return std::move(m_result);
             }
 
-            void return_value(TResult const& result) noexcept
+            void return_value(TResult&& result) noexcept
             {
-                m_result = result;
+                m_result = std::forward<TResult>(result);
             }
 
             TResult m_result{ winrt::impl::empty_value<TResult>() };

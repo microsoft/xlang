@@ -740,8 +740,8 @@ namespace winrt::impl
 
                 bool await_suspend(std::experimental::coroutine_handle<>) const noexcept
                 {
-                    uint32_t const remaining = promise->subtract_reference();
                     promise->set_completed();
+                    uint32_t const remaining = promise->subtract_reference();
                     return remaining > 0;
                 }
             };
