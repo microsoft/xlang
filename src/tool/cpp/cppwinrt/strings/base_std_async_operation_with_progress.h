@@ -29,7 +29,7 @@ WINRT_EXPORT namespace std::experimental
 
             void return_value(TResult&& result) noexcept
             {
-                m_result = std::forward<TResult>(result);
+                m_result = std::move(result);
             }
 
             void set_progress(TProgress const& result)
