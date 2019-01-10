@@ -72,7 +72,7 @@ xlang, but remains a separate implementation.
 ## IUnknown
 
 > This section is intended to be a short introduction to the IUnknown COM interface.
-For a more thorough explanation of IUnknown, please review the official Microsoft documentation 
+For a more thorough explanation of IUnknown, please review the official Microsoft documentation
 [Using and Implementing IUnknown](https://docs.microsoft.com/en-us/windows/desktop/com/using-and-implementing-iunknown).
 
 IUnknown is the root COM interface in any COM-based system. It provides functions for two core
@@ -82,10 +82,9 @@ methods.
 
 ### Capability Navigation
 
-
 Given any COM interface pointer, you can query for any other COM interface via IUnknown's
 QueryInterface method. If the referenced COM object supports the interface being queried, a pointer
-to that COM interface is returned to the caller. Otherwise, an error code indicating that the 
+to that COM interface is returned to the caller. Otherwise, an error code indicating that the
 requested interface is not supported.
 
 As stated above, interfaces are identified by a GUID. This GUID is passed by reference as the first
@@ -96,13 +95,14 @@ the correct COM interface pointer type.
 Methods on COM interfaces (including xlang ABI interfaces) never throw C++ exceptions, due to the
 need for a stable contract across compilers. QueryInterface returns a 32-bit signed integer as an
 error code known. On Windows, this code is known as an
-[HRESULT](https://docs.microsoft.com/en-us/windows/desktop/com/error-handling-in-com). 
+[HRESULT](https://docs.microsoft.com/en-us/windows/desktop/com/error-handling-in-com).
 Generally with HRESULTs, non-negative integers indicate errors, positive integers and zero indicate
-success. QueryInterface in particular should always return 0 on success. 
+success. QueryInterface in particular should always return 0 on success.
 
 QueryInterface may return the following error codes:
-* 0x80004002 indicates the requested interface is not supported by this object
-* 0x80004003 indicated that the void** pointer was null
+
+- 0x80004002 indicates the requested interface is not supported by this object
+- 0x80004003 indicated that the void** pointer argument provided by the caller was null
 
 ``` cpp
 int32_t QueryInterface(guid const& interface_id, void** object)
@@ -124,12 +124,12 @@ uint32_t AddRef();
 uint32_t Release();
 ```
 
-### IXlangUnknown
+### IXlangObject
 
 > Note, WinRT calls this interface IInspectable.
 
 In addition to the core functionality described by IUnknown, all ABI interfaces in xlang derive from
-IXlangUnknown. This interface adds additional core functionality needed for xlang.
+IXlangObject. This interface adds additional core functionality needed for xlang.
 
 #### String Representation
 
@@ -138,7 +138,7 @@ example, C# has
 [Object.ToString](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2)
 and Python has the [str function](https://docs.python.org/3/library/functions.html#func-str).
 
-IXlangUnknown::ToString returns a string representation of a given object. By default, this method
+IXlangObject::ToString returns a string representation of a given object. By default, this method
 should return the type's name, however it can be implemented in whatever manner makes most sense
 for the underlying object.
 
@@ -152,9 +152,9 @@ int32_t ToString(xlang_string* object_string)
 [GetRuntimeClassName](https://docs.microsoft.com/en-us/windows/desktop/api/inspectable/nf-inspectable-iinspectable-getruntimeclassname).
 
 Dynamic languages such as JavaScript and Python often need to be able to discover information
-about an object at runtime. 
+about an object at runtime.
 
-IXlangUnknown::GetTypeName returns the fully namespace qualified name of the type as a string.
+IXlangObject::GetTypeName returns the fully namespace qualified name of the type as a string.
 
 ``` cpp
 int32_t GetTypeName(xlang_string* object_string);
@@ -162,7 +162,7 @@ int32_t GetTypeName(xlang_string* object_string);
 
 > @devhawk We need a design note to cover reflection + GetTypeName. Obviously, the type
 name alone is of little use without a mechanism to find and consume the associated metadata for
-a given type at runtime. 
+a given type at runtime.
 
 #### Weak References
 
@@ -176,7 +176,7 @@ references to it. As such, weak reference holders must check to see if a given r
 valid via the IWeakReference::Resolve method.
 
 Note, because IWeakReference represents a proxy to an xlang object that may no longer exist, none
-of the IXlangUnknown methods are relevant. As such, this is one of the few places where an xlang
+of the IXlangObject methods are relevant. As such, this is one of the few places where an xlang
 ABI interface inherits directly from IUnknown.
 
 ``` cpp
@@ -190,8 +190,11 @@ struct IWeakReference : IUnknown
 
 #### Reference Count Retrieval
 
-> @devhawk We need a design note to cover GetReferenceCount. It's unclear what the scenarios are
-for this method.
+xlang is intended to integrate with languages that support a variety of different garbage
+collection schemes. Based on learnings from WinRT, there are scenarios where having the
+internal reference count of an object can improve garbage collection efficiency.
+
+> @devhawk do we need a design note further describing how xlang integrates with GCs?
 
 ``` cpp
 int32_t GetReferenceCount(uint32_t** reference_count) noexcept;
