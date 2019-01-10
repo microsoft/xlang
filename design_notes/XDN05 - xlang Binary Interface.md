@@ -188,13 +188,23 @@ struct IWeakReference : IUnknown
 };
 ```
 
+> @devhawk In WinRT, weak reference support requires implementing the
+[IWeakReferenceSource](https://docs.microsoft.com/en-us/windows/desktop/api/weakreference/nn-weakreference-iweakreferencesource)
+interface. Components implemented with C++/WinRT support IWeakReferenceSource by default but can
+opt-out of weak reference support via
+[no_weak_ref](https://docs.microsoft.com/en-us/uwp/cpp-ref-for-winrt/no-weak-ref). Since weak
+reference support is optional, there's an argument to be made that it should not take up a vtable
+slot on every xlang ABI interface. On the other hand, since weak references will likely be
+supported by default, then supporting weak reference will be the overwhelmingly common case and we
+should avoid the overhead of QueryInterface.
+
 #### Reference Count Retrieval
 
 xlang is intended to integrate with languages that support a variety of different garbage
 collection schemes. Based on learnings from WinRT, there are scenarios where having the
 internal reference count of an object can improve garbage collection efficiency.
 
-> @devhawk do we need a design note further describing how xlang integrates with GCs?
+> @devhawk It's unclear if this method is needed. Propose we nominate someone to write a design note
 
 ``` cpp
 int32_t GetReferenceCount(uint32_t** reference_count) noexcept;
