@@ -101,8 +101,7 @@ success. QueryInterface in particular should always return 0 on success.
 
 QueryInterface may return the following error codes:
 
-- 0x80004002 indicates the requested interface is not supported by this object
-- 0x80004003 indicated that the void** pointer argument provided by the caller was null
+- 0x80004002 indicates the requested interface is not supported by this object (E_NOINTERFACE)
 
 ``` cpp
 int32_t QueryInterface(guid const& interface_id, void** object)
@@ -119,10 +118,13 @@ projection must call Release.
 The return value of these function is the new reference count of the system. As per the COM
 standard, this value is intended to be used only for test purposes.
 
+> in windows, the accuate ref count is not always returned 
+
 ``` cpp
 uint32_t AddRef();
 uint32_t Release();
 ```
+> TODO: are addref and release thread safe? standard definition is dependent on apartments, which aren't a part of xlang.
 
 ### IXlangObject
 
@@ -130,6 +132,8 @@ uint32_t Release();
 
 In addition to the core functionality described by IUnknown, all ABI interfaces in xlang derive from
 IXlangObject. This interface adds additional core functionality needed for xlang.
+
+> Proposal: add a GetProperty method takes takes an identifier and a void** out param. THis would be an extensible method for retrieving single data elements. 
 
 #### String Representation
 
@@ -166,6 +170,8 @@ a given type at runtime.
 
 #### Weak References
 
+> TODO: Change weak reference to be a separate interface similar to how winrt does it today
+
 One issue faced in COM based systems is circular references - i.e. two objects who each hold a
 pointer to the other. In this case, neither reference count will ever go to zero and neither
 object will ever be cleaned up. To avoid this issue, xlang supports weak references.
@@ -200,6 +206,8 @@ should avoid the overhead of QueryInterface.
 
 #### Reference Count Retrieval
 
+> todo: cut this
+
 xlang is intended to integrate with languages that support a variety of different garbage
 collection schemes. Based on learnings from WinRT, there are scenarios where having the
 internal reference count of an object can improve garbage collection efficiency.
@@ -209,3 +217,6 @@ internal reference count of an object can improve garbage collection efficiency.
 ``` cpp
 int32_t GetReferenceCount(uint32_t** reference_count) noexcept;
 ```
+
+
+> TODO: add get property value for current memory for interaction w/ GC systems
