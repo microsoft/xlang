@@ -181,6 +181,107 @@ namespace xlang::cmd
 
     private:
 
+#if XLANG_PLATFORM_WINDOWS
+
+        struct registry_key
+        {
+            HKEY value{};
+
+            ~registry_key() noexcept
+            {
+                if (value)
+                {
+                    RegCloseKey(value);
+                }
+            }
+
+            explicit operator bool() const noexcept
+            {
+                return value != 0;
+            }
+        };
+
+        static registry_key open_sdk()
+        {
+            HKEY key;
+
+            if (0 != RegOpenKeyEx(
+                HKEY_LOCAL_MACHINE,
+                "SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots",
+                0,
+                KEY_READ,
+                &key))
+            {
+                throw_invalid("Could not find the Windows SDK");
+            }
+
+            return { key };
+        }
+
+        static std::string get_module_path()
+        {
+            std::string path(100, '?');
+            DWORD actual_size{};
+
+            while (true)
+            {
+                actual_size = GetModuleFileNameA(nullptr, path.data(), 1 + static_cast<uint32_t>(path.size()));
+
+                if (actual_size < 1 + path.size())
+                {
+                    path.resize(actual_size);
+                    break;
+                }
+                else
+                {
+                    path.resize(path.size() * 2, '?');
+                }
+            }
+
+            return path;
+        }
+
+        static std::string get_sdk_version()
+        {
+            auto module_path = get_module_path();
+            std::regex rx(R"(((\d+)\.(\d+)\.(\d+)\.(\d+)))");
+            std::cmatch match;
+
+            if (std::regex_search(module_path.c_str(), match, rx))
+            {
+                return match[1].str();
+            }
+
+            auto key = open_sdk();
+            uint32_t index{};
+            std::array<char, 100> subkey;
+            std::array<unsigned long, 4> last{};
+
+            auto to_number = [](auto&& match)
+            {
+                auto string = match.str();
+                return strtoul(string.begin(), string.end(), 10);
+            }
+
+            while (0 == RegEnumKeyA(key.value, index++, subkey.data(), subkey.size()))
+            {
+                if (!std::regex_match(subkey.data(), match, rx))
+                {
+                    continue;
+                }
+
+                std::array<unsigned long, 4> current
+                {
+                    to_number(match[2]),
+                    to_number(match[3]),
+                    to_number(match[4]),
+                    to_number(match[5])
+                };
+            }
+        }
+
+#endif
+
         std::vector<option>::const_iterator find(std::vector<option> const& options, std::string_view const& arg)
         {
             for (auto current = options.begin(); current != options.end(); ++current)
