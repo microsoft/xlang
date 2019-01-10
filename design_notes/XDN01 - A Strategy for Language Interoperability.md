@@ -12,11 +12,11 @@ status: draft
 
 ## Abstract
 
-This design note describes the goals and guiding principles of the Xlang project. This document is aspirational: It describes the project and its features as it has been envisioned. Some of the features or characteristics described have not yet been implemented yet.
+This design note describes the goals and guiding principles of the xlang project. This document is aspirational: It describes the project and its features as it has been envisioned. Some of the features or characteristics described have not yet been implemented yet.
 
 ## Overview
 
-Xlang is a system that enables a component written in any supported language to be callable from any other supported language using object oriented programming constructs. Components are written using natural and familiar code in the implementation language and clients invoke those components using constructs familiar to the language that they are consuming the component from. Xlang projections use metadata that describes the component's interface to translate from one language to another using a common binary interface.
+xlang is a system that enables a component written in any supported language to be callable from any other supported language using object oriented programming constructs. Components are written using natural and familiar code in the implementation language and clients invoke those components using constructs familiar to the language that they are consuming the component from. xlang projections use metadata that describes the component's interface to translate from one language to another using a common binary interface.
 
 This project is based on an approach originally developed for Windows 8 called the Windows Runtime. The project adopts many concepts from that work, enabling language interoperability on numerous operating systems beyond the Windows family.
 
@@ -24,27 +24,27 @@ This is an open source project that welcomes community contributions. See the li
 
 ## Conceptual Model
 
-In Xlang, language interoperability is achieved via a combination of language independent metadata, binary interface standards, language-specific projections, and a shared runtime. The interoperability enables bidirectional control & data flow among any number of programming languages within a process.
+In xlang, language interoperability is achieved via a combination of language independent metadata, binary interface standards, language-specific projections, and a shared runtime. The interoperability enables bidirectional control & data flow among any number of programming languages within a process.
 
 ### Common Type System
 
-Components are written using the type system of the implementation language and accessed using the type system of the consuming language. As such, the Xlang type system is designed to interoperate with modern object-oriented programming languages. This includes both static (such as C#) and dynamic (such as Python) object-oriented languages as well as strongly typed (such as C++) and weakly typed (such as JavaScript) languages.
+Components are written using the type system of the implementation language and accessed using the type system of the consuming language. As such, the xlang type system is designed to interoperate with modern object-oriented programming languages. This includes both static (such as C#) and dynamic (such as Python) object-oriented languages as well as strongly typed (such as C++) and weakly typed (such as JavaScript) languages.
 
-Xlang's type system is _not_ designed to be accessed directly, except by language projections. The underlying type system includes concepts such as resource ownership semantics, error propagation semantics, and binary-stable interfaces that component authors and consumers do not need to be aware of.
+xlang's type system is _not_ designed to be accessed directly, except by language projections. The underlying type system includes concepts such as resource ownership semantics, error propagation semantics, and binary-stable interfaces that component authors and consumers do not need to be aware of.
 
 ### Application Programming Interface (API) Metadata
 
-All Xlang APIs are described in machine-readable metadata stored in the industry standard [ECMA-335 format](https://www.ecma-international.org/publications/standards/Ecma-335.htm). This metadata is used by both the consuming & producing projections. The data may be used at build time, run time or both depending on the nature of the projection. The metadata is the definitive description of the available APIs and how to call them. Metadata also provides information about dependencies and versioning.
+All xlang APIs are described in machine-readable metadata stored in the industry standard [ECMA-335 format](https://www.ecma-international.org/publications/standards/Ecma-335.htm). This metadata is used by both the consuming & producing projections. The data may be used at build time, run time or both depending on the nature of the projection. The metadata is the definitive description of the available APIs and how to call them. Metadata also provides information about dependencies and versioning.
 
-### Abstract Binary Interface (ABI)
+### Application Binary Interface (ABI)
 
-The abstract binary interface is a specification of how the machine state is set to transfer control from a caller to a callee, irrespective of programming language. This includes register and stack layout of parameters, calling conventions, and ownership transfer semantics for pointers to memory off the stack. For convenience, these semantics are expressed in terms of carefully crafted C or C++ function specifications that avoid ambiguities that might arise from different compiler or processor architecture factors.
+The application binary interface is a specification of how the machine state is set to transfer control from a caller to a callee, irrespective of programming language. This includes register and stack layout of parameters, calling conventions, and ownership transfer semantics for pointers to memory off the stack. For convenience, these semantics are expressed in terms of carefully crafted C or C++ function specifications that avoid ambiguities that might arise from different compiler or processor architecture factors.
 
 While the ABI is critical to enable interoperability among languages, most developers creating components do not need to be aware of the ABI. Projections provide an adaptation layer that map natural and familiar concepts from each programming language to the underlying ABI.
 
 ### Language Projections
 
-A projection converts calls made using familiar concepts in one programming language into a calls that, on the machine's call stack and in machine registers, conforms to the abstract binary interface. On the other side of the call, another projection converts those calls into a call tailored to the language that the library was implemented in. As a simple example, this means that you could call an API in C# using a System.String, and the C++ implementation would receive a std::string_view.
+A projection converts calls made using familiar concepts in one programming language into a calls that, on the machine's call stack and in machine registers, conforms to the application binary interface. On the other side of the call, another projection converts those calls into a call tailored to the language that the library was implemented in. As a simple example, this means that you could call an API in C# using a System.String, and the C++ implementation would receive a std::string_view.
 
 In some compiled languages, this translation may involve a few simple type conversions, or potentially no work at all. In interpreted languages, this can sometimes involve more complex transformations. For example, JavaScript has a very different notion of numbers than most other languages. However, the ABI is specifically tailored to minimize the cost and data loss in these conversions.
 

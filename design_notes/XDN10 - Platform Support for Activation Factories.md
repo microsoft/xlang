@@ -1,11 +1,11 @@
 ---
-id: XDN03
+id: XDN10
 title: Platform Support for Activation Factories
 author: ryansh@microsoft.com
 status: Draft
 ---
 
-# Title: XDN03 - Platform Support for Activation factories
+# Title: XDN10 - Platform Support for Activation factories
 * Author: Ryan Shepherd (ryansh@microsoft.com)
 * Status: Draft
 

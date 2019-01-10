@@ -12,7 +12,7 @@ status: template
 
 ## Abstract
 
-This document is a template for Xlang Project Design Notes. All major features and behaviors of the Xlang Project are documented in a Design Note submitted to the repository.
+This document is a template for xlang Project Design Notes. All major features and behaviors of the xlang Project are documented in a Design Note submitted to the repository.
 
 ## Design Note Section 1
 
