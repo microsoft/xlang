@@ -9,6 +9,8 @@ target_sources(cpp_test PUBLIC
     test/AbiGuard.cpp
     test/AgileRef.cpp
     test/Async.cpp
+    test/AsyncNoSuspend.cpp
+    test/AsyncReturn.cpp
     test/Collections.cpp
     test/Composable.cpp
     test/Edge.cpp
@@ -52,6 +54,14 @@ else()
         main.cpp
         test/Interop.cpp
         test/Capture.cpp
+        test/AsyncAutoCancel.cpp
+        test/AsyncCancelCallback.cpp
+        test/AsyncCheckCancel.cpp
+        test/AsyncLocal.cpp
+        test/AsyncProgress.cpp
+        test/AsyncResult.cpp
+        test/AsyncSuspend.cpp
+        test/AsyncThrow.cpp
     )
 endif()
 
