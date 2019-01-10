@@ -12,11 +12,10 @@ status: draft
 
 ## Abstract
 
-This design note describes xlang's [application binary interface](https://en.wikipedia.org/wiki/Application_binary_interface)
+This design note describes xlang's
+[application binary interface](https://en.wikipedia.org/wiki/Application_binary_interface)
 (or ABI). The ABI defines a stable contract between xlang language projections and xlang components
 that is necessary in order to interoperate.
-
-> @devhawk this is an example of a comment
 
 ## Overview
 
@@ -56,6 +55,10 @@ COM interfaces are identified by a 128-bit integer known as a globally unique id
 This identifier enables calling code to query a given xlang component about its support for
 specific interfaces.
 
+Once a COM interface is published, it cannot be changed. As stated before, a COM interface is a
+stable contract between caller and callee. Interoperability would be impossible if COM interfaces
+were allowed to change over time.
+
 COM Interfaces are allowed to inherit from other interfaces. This is often used to add capabilities
 to later versions of a given component. By inheriting from another interface, the COM interface is
 defining a single longer array of function pointers, where the first set of function pointers are
@@ -80,7 +83,16 @@ capabilities - navigating an object's capabilities and managing the object's lif
 interfaces derive from IUnknown and all objects in any COM based system must implement these
 methods.
 
-### Capability Navigation
+``` cpp
+struct IUnknown
+{
+    int32_t  QueryInterface(guid const& id, void** object);
+    uint32_t AddRef();
+    uint32_t Release();
+};
+```
+
+### QueryInterface
 
 Given any COM interface pointer, you can query for any other COM interface via IUnknown's
 QueryInterface method. If the referenced COM object supports the interface being queried, a pointer
@@ -101,13 +113,9 @@ success. QueryInterface in particular should always return 0 on success.
 
 QueryInterface may return the following error codes:
 
-- 0x80004002 indicates the requested interface is not supported by this object (E_NOINTERFACE)
+- 0x80004002 (E_NOINTERFACE) indicates the requested interface is not supported by this object.
 
-``` cpp
-int32_t QueryInterface(guid const& interface_id, void** object)
-```
-
-### Lifetime Management
+### AddRef and Release
 
 COM objects manage their own lifetime via an internal reference count. When this count goes to
 zero, the COM object cleans itself up. IUnknown provides methods to increment and decrement the
@@ -115,62 +123,96 @@ object's reference count. If a language projection makes a copy of a COM interfa
 call AddRef. When client code is finished using a given pointer to a COM interface, the language
 projection must call Release.
 
-The return value of these function is the new reference count of the system. As per the COM
-standard, this value is intended to be used only for test purposes.
+The return value of these function is specified to be the new reference count of the object.
+However the COM standard itself warns that this value is intended to be used only for test purposes.
+In practice on Windows, the value returned from these two functions is often inaccurate. The one
+scenario where you can trust the return value is when Release returns zero - in this case, you can
+reliably assume the object has cleaned itself up.
 
-> in windows, the accuate ref count is not always returned 
+## IXlangObject
+
+In addition to the core functionality described by IUnknown, ABI interfaces for xlang types derive
+from IXlangObject. This interface adds additional core functionality needed for xlang.
 
 ``` cpp
-uint32_t AddRef();
-uint32_t Release();
+enum ObjectInfoCategory
+{
+    StringRepresentation,
+    TypeName,
+    MemoryUsage
+};
+
+struct IXlangObject
+{
+    int32_t GetInfo(ObjectInfoCategory info_category, void** info);
+};
 ```
-> TODO: are addref and release thread safe? standard definition is dependent on apartments, which aren't a part of xlang.
 
-### IXlangObject
+### GetInfo
 
-> Note, WinRT calls this interface IInspectable.
+In WinRT, the IInspectable interface provides property get methods that retrieved information about
+the object needed in specific runtime scenarios. Over time, the list of information categories that
+might be useful at runtime grew. For example, knowing the memory footprint of a given WinRT object
+would allow for garbage collected languages like C# make better scheduling decisions. But since
+IInspectable is the base COM interface for every interface in WinRT, it's impossible to extend.
 
-In addition to the core functionality described by IUnknown, all ABI interfaces in xlang derive from
-IXlangObject. This interface adds additional core functionality needed for xlang.
+For xlang, instead of individual property get methods, IXlangObject exposes a single GetObjectInfo
+method. The method takes an enum value indicating the object info being requested and a void** to
+hold the returned value. xlang objects are not required to support all object information
+categories. Similar to QueryInterface, an object can simply return an error code indicating that a
+requested information category is not supported by the object.
 
-> Proposal: add a GetProperty method takes takes an identifier and a void** out param. THis would be an extensible method for retrieving single data elements. 
+Having a single GetInfo method has two primary benefits over the IInspectable approach. Because
+enums can be additively versioned over time, it is possible to add new ones over time. Since
+supporting a given information category is optional, adding new ones would not break existing
+objects. Furthermore, it reduces the size of virtual function table that every xlang object needs
+to support.
+
+Over time, we expect the list of object information categories to grow. Unlike COM interfaces, we
+expect the list of object information categories to be managed centrally by the xlang project.
 
 #### String Representation
 
-Many languages have a standard way to retrieve a string representation of a given object. For
-example, C# has
-[Object.ToString](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2)
-and Python has the [str function](https://docs.python.org/3/library/functions.html#func-str).
+Most mainstream languages including
+[JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString),
+[Python](https://docs.python.org/3/library/functions.html#func-str),
+[.NET](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2),
+[Java](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#toString()) and
+[Objective-C](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description)
+have a mechanism to retrieve the string representation of an object. 
 
-IXlangObject::ToString returns a string representation of a given object. By default, this method
-should return the type's name, however it can be implemented in whatever manner makes most sense
-for the underlying object.
+The StringRepresentation information category retrieves the string representation of the object in
+question. The property type for StringRepresentation is an xlang_string.
 
-``` cpp
-int32_t ToString(xlang_string* object_string)
-```
+While all information categories are optional, it is highly recommended that all objects support
+StringRepresentation. By default, this method can return the type's name, however it can be
+implemented in whatever manner makes most sense for the underlying object.
 
 #### Type Information
 
-> Note, WinRT calls this method
-[GetRuntimeClassName](https://docs.microsoft.com/en-us/windows/desktop/api/inspectable/nf-inspectable-iinspectable-getruntimeclassname).
-
 Dynamic languages such as JavaScript and Python often need to be able to discover information
-about an object at runtime.
+about an object at runtime. In order to do this, xlang object must have a mechanism to find the
+metadata for arbitrary xlang objects.
 
-IXlangObject::GetTypeName returns the fully namespace qualified name of the type as a string.
+The TypeName information category retrieves the fully namespace qualified name of the type in
+question. The property type for TypeName is an xlang_string.
 
-``` cpp
-int32_t GetTypeName(xlang_string* object_string);
-```
+While all information categories are optional, it is highly recommended that all objects support
+TypeName in order to be usable from dynamic languages.
 
-> @devhawk We need a design note to cover reflection + GetTypeName. Obviously, the type
-name alone is of little use without a mechanism to find and consume the associated metadata for
-a given type at runtime.
+#### Memory Usage
 
-#### Weak References
+In languages C# and Java, garbage collection happens on background threads on a non-deterministic
+schedule. These garbage collectors typically depend on an omniscient understanding of memory usage.
+The memory used by xlang components is not typically visible to these garbage collectors, leading
+to uninformed decision making regarding collection scheduling. If these systems could retrieve
+the memory usage of arbitrary xlang objects, their scheduling heuristics would be better and the
+system would run more smoothly overall.
 
-> TODO: Change weak reference to be a separate interface similar to how winrt does it today
+The MemoryUsage information category retrieves the memory usage in bytes of the object in question.
+The property type for MemoryUsage is an unsigned 32-bit integer.
+
+## Weak References
 
 One issue faced in COM based systems is circular references - i.e. two objects who each hold a
 pointer to the other. In this case, neither reference count will ever go to zero and neither
@@ -181,42 +223,22 @@ reference count of an object goes to zero, it cleans itself up even if there are
 references to it. As such, weak reference holders must check to see if a given reference is still
 valid via the IWeakReference::Resolve method.
 
-Note, because IWeakReference represents a proxy to an xlang object that may no longer exist, none
-of the IXlangObject methods are relevant. As such, this is one of the few places where an xlang
-ABI interface inherits directly from IUnknown.
+Weak references are retrieved for an arbitrary xlang object by querying for the
+IWeakReferenceSource interface and calling GetWeakReference. If an object does not support weak
+references, it simply returns the no interface error code from query interface.
+
+Note, because IWeakReferenceSource and IWeakReference are ABI interfaces that represents a proxy to
+an xlang object that may no longer exist, none of the IXlangObject methods are relevant. As such,
+this is one of the few places where an xlang ABI interface inherits directly from IUnknown.
 
 ``` cpp
-int32_t GetWeakReference(IWeakReference** weak_reference);
-
 struct IWeakReference : IUnknown
 {
-    virtual int32_t Resolve(guid const& iid, void** objectReference);
+    int32_t Resolve(guid const& iid, void** object_reference);
+};
+
+struct IWeakReferenceSource : IUnknown
+{
+    int32_t GetWeakReference(IWeakReference** weak_reference);
 };
 ```
-
-> @devhawk In WinRT, weak reference support requires implementing the
-[IWeakReferenceSource](https://docs.microsoft.com/en-us/windows/desktop/api/weakreference/nn-weakreference-iweakreferencesource)
-interface. Components implemented with C++/WinRT support IWeakReferenceSource by default but can
-opt-out of weak reference support via
-[no_weak_ref](https://docs.microsoft.com/en-us/uwp/cpp-ref-for-winrt/no-weak-ref). Since weak
-reference support is optional, there's an argument to be made that it should not take up a vtable
-slot on every xlang ABI interface. On the other hand, since weak references will likely be
-supported by default, then supporting weak reference will be the overwhelmingly common case and we
-should avoid the overhead of QueryInterface.
-
-#### Reference Count Retrieval
-
-> todo: cut this
-
-xlang is intended to integrate with languages that support a variety of different garbage
-collection schemes. Based on learnings from WinRT, there are scenarios where having the
-internal reference count of an object can improve garbage collection efficiency.
-
-> @devhawk It's unclear if this method is needed. Propose we nominate someone to write a design note
-
-``` cpp
-int32_t GetReferenceCount(uint32_t** reference_count) noexcept;
-```
-
-
-> TODO: add get property value for current memory for interaction w/ GC systems
