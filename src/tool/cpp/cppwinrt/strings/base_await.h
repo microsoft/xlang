@@ -742,6 +742,12 @@ namespace winrt::impl
                 {
                     promise->set_completed();
                     uint32_t const remaining = promise->subtract_reference();
+
+                    if (remaining == 0)
+                    {
+                        std::atomic_thread_fence(std::memory_order_acquire);
+                    }
+
                     return remaining > 0;
                 }
             };

@@ -82,6 +82,7 @@ namespace
         async.Cancel();
         REQUIRE(canceled);
         SetEvent(event.get());
+        REQUIRE_THROWS_AS(async.GetResults(), hresult_canceled);
     }
 }
 

@@ -96,6 +96,7 @@ namespace
 
         REQUIRE(async.Status() == AsyncStatus::Canceled);
         REQUIRE(async.ErrorCode() == HRESULT_FROM_WIN32(ERROR_CANCELLED));
+        REQUIRE_THROWS_AS(async.GetResults(), hresult_canceled);
     }
 }
 
