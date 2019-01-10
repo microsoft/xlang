@@ -174,11 +174,38 @@ namespace xlang::cmd
                     continue;
                 }
 
-                bool include_extensions = path.back() == '+';
+                std::string sdk_version;
 
                 if (path == "sdk" || path == "sdk+")
                 {
+                    sdk_version = get_sdk_version();
+                }
+                else
+                {
+                    std::regex rx(R"(((\d+)\.(\d+)\.(\d+)\.(\d+))\+?)");
+                    std::smatch match;
 
+                    if (std::regex_match(path, rx, match))
+                    {
+                        sdk_version = match[1].str();
+                    }
+                }
+
+                if (!sdk_version.empty())
+                {
+                    auto sdk_path = get_sdk_path();
+                    sdk_path /= L"Platforms\\UAP";
+                    sdk_path /= sdk_version;
+                    sdk_path /= L"Platform.xml";
+
+                    add_files_from_xml(files, sdk_path);
+
+                    if (path.back() == '+')
+                    {
+                        // TODO: add extensions
+                    }
+
+                    continue;
                 }
 #endif
                 throw_invalid("Path '", path, "' is not a file or directory");
@@ -209,6 +236,13 @@ namespace xlang::cmd
             }
         };
 
+        static void add_files_from_xml(std::set<std::string>& files, std::experimental::filesystem::path const& filename)
+        {
+            
+
+
+        }
+
         static registry_key open_sdk()
         {
             HKEY key;
@@ -224,6 +258,36 @@ namespace xlang::cmd
             }
 
             return { key };
+        }
+
+        static std::experimental::filesystem::path get_sdk_path()
+        {
+            auto key = open_sdk();
+
+            DWORD path_size = 0;
+
+            if (0 != RegQueryValueExW(
+                key.value,
+                L"KitsRoot10",
+                nullptr,
+                nullptr,
+                nullptr,
+                &path_size))
+            {
+                throw_invalid("Could not find the Windows SDK");
+            }
+
+            std::wstring root((path_size / sizeof(wchar_t)) - 1, L'?');
+
+            RegQueryValueExW(
+                key.value,
+                L"KitsRoot10",
+                nullptr,
+                nullptr,
+                reinterpret_cast<BYTE*>(root.data()),
+                &path_size);
+
+            return root;
         }
 
         static std::string get_module_path()
