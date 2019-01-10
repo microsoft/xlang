@@ -153,13 +153,16 @@ namespace xlang::cmd
                 if (std::experimental::filesystem::is_directory(canonical))
                 {
                     add_directory(canonical);
+                    continue;
                 }
-                else if (std::experimental::filesystem::is_regular_file(canonical))
+
+                if (std::experimental::filesystem::is_regular_file(canonical))
                 {
                     files.insert(canonical.string());
+                    continue;
                 }
 #if XLANG_PLATFORM_WINDOWS
-                else if (path == "local")
+                if (path == "local")
                 {
                     std::array<char, MAX_PATH> local{};
 #ifdef _WIN64
@@ -168,12 +171,17 @@ namespace xlang::cmd
                     ExpandEnvironmentStringsA("%windir%\\SysNative\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
 #endif
                     add_directory(local.data());
+                    continue;
+                }
+
+                bool include_extensions = path.back() == '+';
+
+                if (path == "sdk" || path == "sdk+")
+                {
+
                 }
 #endif
-                else
-                {
-                    throw_invalid("Path '", path, "' is not a file or directory");
-                }
+                throw_invalid("Path '", path, "' is not a file or directory");
             }
 
             return files;
@@ -255,13 +263,8 @@ namespace xlang::cmd
             auto key = open_sdk();
             uint32_t index{};
             std::array<char, 100> subkey;
-            std::array<unsigned long, 4> last{};
-
-            auto to_number = [](auto&& match)
-            {
-                auto string = match.str();
-                return strtoul(string.begin(), string.end(), 10);
-            }
+            std::array<unsigned long, 4> version_parts{};
+            std::string result;
 
             while (0 == RegEnumKeyA(key.value, index++, subkey.data(), subkey.size()))
             {
@@ -270,14 +273,40 @@ namespace xlang::cmd
                     continue;
                 }
 
-                std::array<unsigned long, 4> current
+                char* next_part = subkey.data();
+
+                for (size_t i = 0; ; ++i)
                 {
-                    to_number(match[2]),
-                    to_number(match[3]),
-                    to_number(match[4]),
-                    to_number(match[5])
-                };
+                    auto version_part = strtoul(next_part, &next_part, 10);
+
+                    if (version_part < version_parts[i])
+                    {
+                        break;
+                    }
+
+                    version_parts[i] = version_part;
+
+                    if (i == std::size(version_parts) - 1)
+                    {
+                        result = subkey.data();
+                        break;
+                    }
+
+                    if (!next_part)
+                    {
+                        break;
+                    }
+
+                    ++next_part;
+                }
             }
+
+            if (result.empty())
+            {
+                throw_invalid("Could not find the Windows SDK");
+            }
+
+            return result;
         }
 
 #endif
