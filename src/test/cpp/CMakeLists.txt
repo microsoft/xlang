@@ -16,6 +16,7 @@ target_sources(cpp_test PUBLIC
     test/Edge.cpp
     test/Enum.cpp
     test/Events.cpp
+    test/EventsInvalid.cpp
     test/Fast.cpp
     test/FinalRelease.cpp
     test/Names.cpp
