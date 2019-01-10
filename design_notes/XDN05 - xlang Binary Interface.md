@@ -16,6 +16,8 @@ This design note describes xlang's [application binary interface](https://en.wik
 (or ABI). The ABI defines a stable contract between xlang language projections and xlang components
 that is necessary in order to interoperate.
 
+> @devhawk this is an example of a comment
+
 ## Overview
 
 xlang components are intended to be authored and built independently from their clients - both
