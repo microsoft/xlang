@@ -5,7 +5,7 @@ using namespace winrt;
 using namespace Windows::Foundation;
 
 //
-// Checks that invalid tokens may safely be removed.
+// Checks that invalid tokens may be removed harmlessly.
 //
 
 TEST_CASE("EventsInvalid")

@@ -4686,8 +4686,7 @@ WINRT_EXPORT namespace winrt
                 token = get_token(new_targets->back());
 
                 slim_lock_guard const swap_guard(m_swap);
-                temp_targets = m_targets;
-                m_targets = new_targets;
+                temp_targets = std::exchange(m_targets, std::move(new_targets));
             }
 
             return token;
@@ -4745,8 +4744,7 @@ WINRT_EXPORT namespace winrt
                 if (removed)
                 {
                     slim_lock_guard const swap_guard(m_swap);
-                    temp_targets = std::move(m_targets);
-                    m_targets = std::move(new_targets);
+                    temp_targets = std::exchange(m_targets, std::move(new_targets));
                 }
             }
         }
