@@ -657,7 +657,6 @@ namespace winrt::impl
                 if (m_status == AsyncStatus::Started)
                 {
                     m_status = AsyncStatus::Canceled;
-                    m_exception = std::make_exception_ptr(hresult_canceled());
                     cancel = std::move(m_cancel);
                 }
             }
@@ -742,6 +741,12 @@ namespace winrt::impl
                 {
                     promise->set_completed();
                     uint32_t const remaining = promise->subtract_reference();
+
+                    if (remaining == 0)
+                    {
+                        std::atomic_thread_fence(std::memory_order_acquire);
+                    }
+
                     return remaining > 0;
                 }
             };
