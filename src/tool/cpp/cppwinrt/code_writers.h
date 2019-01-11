@@ -1718,7 +1718,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             if (first)
             {
                 first = false;
-                w.write(",\n    %T<D>", name);
+                w.write(",\n        %T<D>", name);
             }
             else
             {
@@ -1770,17 +1770,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override(writer& w, TypeDef const& type)
     {
-        auto format = R"(template <typename D>
-class %T
-{
-    D& shim() noexcept { return *static_cast<D*>(this); }
-    D const& shim() const noexcept { return *static_cast<const D*>(this); }
-
-public:
-
-    using % = winrt::%;
-
-%};
+        auto format = R"(    template <typename D>
+    class %T
+    {
+        D& shim() noexcept { return *static_cast<D*>(this); }
+        D const& shim() const noexcept { return *static_cast<const D*>(this); }
+    public:
+        using % = winrt::%;
+%    };
 )";
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
@@ -1824,7 +1821,6 @@ public:
         impl::base<D, %%>%
     {
         using composable = %;
-
     protected:
 %    };
 )";
@@ -1886,7 +1882,7 @@ public:
 
             for (auto&& interface_name : interfaces)
             {
-                w.write("    using impl::consume_t<%, %>::%;\n",
+                w.write("        using impl::consume_t<%, %>::%;\n",
                     type_name,
                     interface_name,
                     method_name);
@@ -1930,13 +1926,13 @@ public:
             {
                 if (default_interface_name == interface_name)
                 {
-                    w.write("    using %::%;\n",
+                    w.write("        using %::%;\n",
                         interface_name,
                         method_name);
                 }
                 else
                 {
-                    w.write("    using impl::consume_t<%, %>::%;\n",
+                    w.write("        using impl::consume_t<%, %>::%;\n",
                         type_name,
                         interface_name,
                         method_name);
@@ -2388,7 +2384,7 @@ public:
             if (first)
             {
                 first = false;
-                w.write(",\n    impl::base<%", type.TypeName());
+                w.write(",\n        impl::base<%", type.TypeName());
             }
 
             w.write(", %", base);
