@@ -12,7 +12,7 @@ status: draft
 
 ## Abstract
 
-The Xlang Project involves many components written in a variety of programming languages. This document describes coding guidelines for each language.
+The xlang Project involves many components written in a variety of programming languages. This document describes coding guidelines for each language.
 
 ## Coding Guidelines
 
@@ -20,7 +20,7 @@ This project adopts industry standard guidelines where one exists. As new langua
 
 The project references these as guidelines, not laws. Thoughtful deviation is allowed if it aids readability of the specific code in question or is necessary for a technical reason. However, guidelines should not be ignored because of a disagreement with the guideline itself.
 
-Due to the nature of language interoperability, types expressed using the Xlang type system will adhere to naming guidelines in some languages and deviate from others. Naming conventions of the Xlang type system take precedence over language-specific guidelines where applicable.
+Due to the nature of language interoperability, types expressed using the xlang type system will adhere to naming guidelines in some languages and deviate from others. Naming conventions of the xlang type system take precedence over language-specific guidelines where applicable.
 
 ### References by language
 
