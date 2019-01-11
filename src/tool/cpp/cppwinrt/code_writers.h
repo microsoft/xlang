@@ -1639,10 +1639,10 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override_method(writer& w, MethodDef const& method, std::string_view const& interface_name)
     {
-        auto format = R"(template <typename D> % %T<D>::%(%) const
-{
-    return shim().template try_as<%>().%(%);
-}
+        auto format = R"(    template <typename D> % %T<D>::%(%) const
+    {
+        return shim().template try_as<%>().%(%);
+    }
 )";
 
         method_signature signature{ method };
@@ -1737,10 +1737,10 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_class_override_constructors(writer& w, std::string_view const& type_name, std::map<std::string, factory_info> const& factories)
     {
-        auto format = R"(    %T(%)
-    {
-        impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
-    }
+        auto format = R"(        %T(%)
+        {
+            impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
+        }
 )";
 
         for (auto&&[factory_name, factory] : factories)
@@ -1826,7 +1826,7 @@ public:
         using composable = %;
 
     protected:
-    %};
+%    };
 )";
 
         auto type_name = type.TypeName();
