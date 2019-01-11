@@ -30,8 +30,8 @@ used in xlang component binary loading as well as in xlang's
 
 ## COM Interfaces
 
-> This section is intended to be a short introduction to COM interfaces.
-For a more thorough definition of COM interfaces, please review the official Microsoft
+> This section is intended to be a short introduction to COM interfaces. For a more thorough
+definition of COM interfaces, please review the official Microsoft
 [COM Technical Overview](https://docs.microsoft.com/en-us/windows/desktop/com/com-technical-overview).
 
 [COM](https://docs.microsoft.com/en-us/windows/desktop/com/component-object-model--com--portal)
@@ -42,18 +42,18 @@ as well as the definition of fundamental COM interface
 [IUnknown](https://docs.microsoft.com/en-us/windows/desktop/com/using-and-implementing-iunknown)
 as a foundation for stable contracts that both components and language projections can depend on.
 
-A COM interface pointer is basically a pointer to an array of function pointers, similar to how
-most C++ compilers implement
+A COM interface pointer is basically a pointer to an array of function pointers, similar to how most
+C++ compilers implement
 [virtual method tables](https://en.wikipedia.org/wiki/Virtual_method_table).
 Each member of a COM interface is stored in an array slot as a function pointer. Each function in
-the array takes the array pointer as it's first parameter. While this design is intrinsic to most
+the array takes the array pointer as its first parameter. While this design is intrinsic to most
 C++ compilers, these function pointer arrays can also be built up explicitly in other languages
 where needed.
 
 COM interfaces are identified by a 128-bit integer known as a globally unique identifier or
 [GUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
-This identifier enables calling code to query a given xlang component about its support for
-specific interfaces.
+This identifier enables calling code to query a given xlang component about its support for specific
+interfaces.
 
 Once a COM interface is published, it cannot be changed. As stated before, a COM interface is a
 stable contract between caller and callee. Interoperability would be impossible if COM interfaces
@@ -65,25 +65,25 @@ defining a single longer array of function pointers, where the first set of func
 defined by the base interface while the next set of function pointers are defined by the derived
 interface. Multiple levels of COM interface single inheritance is supported.
 
-> Note, while xlang uses COM interfaces as a stable contract between components, xlang is
-explicitly avoiding the rest of the COM standard, including concepts such as apartments, monikers
-and marshalling. These constructs are tightly bound to the Windows platform and so have little use
-in the xlang project. Likewise, xlang is explicitly avoiding Windows technologies that build on COM
+> Note, while xlang uses COM interfaces as a stable contract between components, xlang is explicitly
+avoiding the rest of the COM standard, including concepts such as apartments, monikers and
+marshalling. These constructs are tightly bound to the Windows platform and so have little use in
+the xlang project. Likewise, xlang is explicitly avoiding Windows technologies that build on COM
 such as DCOM, MTS, COM+, ActiveX and the Windows Runtime. Windows Runtime is an inspiration for
 xlang, but remains a separate implementation.
 
 ## IUnknown
 
-> This section is intended to be a short introduction to the IUnknown COM interface.
-For a more thorough explanation of IUnknown, please review the official Microsoft documentation
+> This section is intended to be a short introduction to the IUnknown COM interface. For a more
+thorough explanation of IUnknown, please review the official Microsoft documentation
 [Using and Implementing IUnknown](https://docs.microsoft.com/en-us/windows/desktop/com/using-and-implementing-iunknown).
 
 IUnknown is the root COM interface in any COM-based system. It provides functions for two core
 capabilities - navigating an object's capabilities and managing the object's lifetime. All COM
-interfaces derive from IUnknown and all objects in any COM based system must implement these
-methods.
+interfaces derive from IUnknown and all objects in any COM based system must implement these methods.
 
 ``` cpp
+// IUnknown GUID identifier: 00000000-0000-0000-C000-000000000046
 struct IUnknown
 {
     int32_t  QueryInterface(guid const& id, void** object);
@@ -100,143 +100,159 @@ to that COM interface is returned to the caller. Otherwise, an error code indica
 requested interface is not supported.
 
 As stated above, interfaces are identified by a GUID. This GUID is passed by reference as the first
-parameter of QueryInterface. The pointer to the requested interface - if available - is returned
-via a void** out parameter. It is the responsibility of the calling code to cast this pointer to
-the correct COM interface pointer type.
+parameter of QueryInterface. The pointer to the requested interface - if available - is returned via
+a void** out parameter. It is the responsibility of the calling code to cast this pointer to the
+correct COM interface pointer type.
 
 Methods on COM interfaces (including xlang ABI interfaces) never throw C++ exceptions, due to the
 need for a stable contract across compilers. QueryInterface returns a 32-bit signed integer as an
-error code known. On Windows, this code is known as an
+error code. On Windows, this code is known as an
 [HRESULT](https://docs.microsoft.com/en-us/windows/desktop/com/error-handling-in-com).
-Generally with HRESULTs, negative integers indicate errors, positive integers and zero indicate
+Negative HRESULT values indicate errors while non-negative HRESULT values (including zero) indicate
 success. QueryInterface in particular should always return 0 on success.
 
-QueryInterface may return the following error codes:
-
-- 0x80004002 (E_NOINTERFACE) indicates the requested interface is not supported by this object.
+If the requested interface is not supported by the object, QueryInterface returns the error code
+value 0x80004002 (E_NOINTERFACE).
 
 ### AddRef and Release
 
-COM objects manage their own lifetime via an internal reference count. When this count goes to
-zero, the COM object cleans itself up. IUnknown provides methods to increment and decrement the
-object's reference count. If a language projection makes a copy of a COM interface pointer, it must
-call AddRef. When client code is finished using a given pointer to a COM interface, the language
+COM objects manage their own lifetime via an internal reference count. When this count goes to zero,
+the COM object cleans itself up. IUnknown provides methods to increment and decrement the object's
+reference count. If a language projection makes a copy of a COM interface pointer, it must call
+AddRef. When client code is finished using a given pointer to a COM interface, the language
 projection must call Release.
 
-The return value of these function is specified to be the new reference count of the object.
-However the COM standard itself warns that this value is intended to be used only for test purposes.
-In practice on Windows, the value returned from these two functions is often inaccurate. The one
-scenario where you can trust the return value is when Release returns zero - in this case, you can
-reliably assume the object has cleaned itself up.
+The return value of these function is specified to be the new reference count of the object. However
+the COM standard itself warns that this value is intended to be used only for test purposes. In
+practice on Windows, the value returned from these two functions is not guaranteed to be the object's
+true reference count. For example, COM object can choose to implement an "tear-off" interfaces.
+A tear-off interface is implemented on a separate object, which is constructed when the interface
+in question is queried. When AddRef or Release is called on the tear-off interface, it will return
+the reference count of the tear off interface object *not* the reference count of the original
+object.
 
 ## IXlangObject
 
-In addition to the core functionality described by IUnknown, ABI interfaces for xlang types derive
-from IXlangObject. This interface adds additional core functionality needed for xlang.
+In addition to the core functionality described by IUnknown, ABI interfaces for projected xlang
+types derive from IXlangObject. This interface adds additional core functionality needed for xlang.
 
 ``` cpp
-enum ObjectInfoCategory
+enum XlangObjectInfoCategory
 {
-    StringRepresentation,
     TypeName,
-    MemoryUsage
+    StringRepresentation,
+    ObjectSize
 };
 
+// IXlangObject GUID identifier to be determined
 struct IXlangObject
 {
-    int32_t GetInfo(ObjectInfoCategory info_category, void** info);
+    bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info);
 };
 ```
 
-### GetInfo
+### GetObjectInfo
 
-In WinRT, the IInspectable interface provides property get methods that retrieved information about
+In WinRT, the IInspectable interface provides property get methods that retrieve information about
 the object needed in specific runtime scenarios. Over time, the list of information categories that
-might be useful at runtime grew. For example, knowing the memory footprint of a given WinRT object
-would allow for garbage collected languages like C# make better scheduling decisions. But since
-IInspectable is the base COM interface for every interface in WinRT, it's impossible to extend.
+might be useful at runtime has grown. For example, knowing the memory footprint of a given WinRT
+object would allow for garbage collected languages like C# to make better scheduling decisions. But
+since IInspectable is the base COM interface for every interface in WinRT, it's impossible to extend.
 
 For xlang, instead of individual property get methods, IXlangObject exposes a single GetObjectInfo
 method. The method takes an enum value indicating the object info being requested and a void** to
-hold the returned value. xlang objects are not required to support all object information
-categories. Similar to QueryInterface, an object can simply return an error code indicating that a
-requested information category is not supported by the object.
+hold the returned value. xlang objects are not required to support all object information categories.
+If a given object does not support a requested object information category, it returns false from
+GetObjectInfo and sets the info parameter value to null.
 
-Having a single GetInfo method has two primary benefits over the IInspectable approach. Because
+Having a single GetObjectInfo method has two primary benefits over the IInspectable approach. Because
 enums can be additively versioned over time, it is possible to add new ones over time. Since
 supporting a given information category is optional, adding new ones would not break existing
-objects. Furthermore, it reduces the size of virtual function table that every xlang object needs
-to support.
+objects. Furthermore, it reduces the size of the virtual function table that every xlang object
+needs to support.
 
 Over time, we expect the list of object information categories to grow. Unlike COM interfaces, we
 expect the list of object information categories to be managed centrally by the xlang project.
+
+#### Type Name
+
+Dynamic languages such as JavaScript and Python often need to be able to discover information
+about an object at runtime. In order to do this, xlang dynamic language projections must have a
+mechanism to find the metadata for arbitrary xlang objects.
+
+The TypeName information category retrieves the fully namespace qualified name of the type in
+question. The property type for TypeName is an xlang_string.
+
+In addition to the type name, a dynamic language projection would also need access to the xlang
+component's metadata. The type name alone is not sufficient to project an xlang type at runtime
+in a dynamic language.
+
+> Defining an xlang API for finding and/or consuming a type's metadata by name is outside the scope
+of this document. We need a design note on this.
+
+While all information categories are optional, it is highly recommended that all objects support
+TypeName in order to be usable from dynamic languages.
 
 #### String Representation
 
 Most mainstream languages including
 [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString),
-[Python](https://docs.python.org/3/library/functions.html#func-str),
+[Python](https://docs.python.org/3/library/stdtypes.html#str),
 [.NET](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2),
 [Java](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#toString()) and
 [Objective-C](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description)
-have a mechanism to retrieve the string representation of an object. 
+have a mechanism to retrieve the string representation of an object.
 
 The StringRepresentation information category retrieves the string representation of the object in
 question. The property type for StringRepresentation is an xlang_string.
 
-While all information categories are optional, it is highly recommended that all objects support
-StringRepresentation. By default, this method can return the type's name, however it can be
-implemented in whatever manner makes most sense for the underlying object.
+This information category should only be supported for types that wish to return a custom value for
+a language projection's equivalent of ToString. Language projections may choose to fall back to
+using the TypeName object info category if StringRepresentation is not supported by a given object.
 
-#### Type Information
-
-Dynamic languages such as JavaScript and Python often need to be able to discover information
-about an object at runtime. In order to do this, xlang object must have a mechanism to find the
-metadata for arbitrary xlang objects.
-
-The TypeName information category retrieves the fully namespace qualified name of the type in
-question. The property type for TypeName is an xlang_string.
-
-While all information categories are optional, it is highly recommended that all objects support
-TypeName in order to be usable from dynamic languages.
-
-#### Memory Usage
+#### Object Size
 
 In languages C# and Java, garbage collection happens on background threads on a non-deterministic
 schedule. These garbage collectors typically depend on an omniscient understanding of memory usage.
 The memory used by xlang components is not typically visible to these garbage collectors, leading
 to uninformed decision making regarding collection scheduling. If these systems could retrieve
-the memory usage of arbitrary xlang objects, their scheduling heuristics would be better and the
-system would run more smoothly overall.
+the size of arbitrary xlang objects, their scheduling heuristics would be better and the system
+would run more smoothly overall.
 
-The MemoryUsage information category retrieves the memory usage in bytes of the object in question.
-The property type for MemoryUsage is an unsigned 32-bit integer.
+The ObjectSize information category retrieves the memory usage in bytes of the object in question.
+The property type for ObjectSize is an unsigned 32-bit integer.
 
 ## Weak References
 
-One issue faced in COM based systems is circular references - i.e. two objects who each hold a
-pointer to the other. In this case, neither reference count will ever go to zero and neither
-object will ever be cleaned up. To avoid this issue, xlang supports weak references.
+One issue faced in COM based systems is circular references - i.e. two objects that each hold a
+reference to the other. In this case, neither reference count will ever go to zero and neither
+object will ever be cleaned up. To avoid this issue, xlang objects can optionally support weak references.
 
-A weak reference to an xlang object does not keep it alive. In other words, when all non-weak
+A weak reference to an xlang object does not keep it alive. In other words, when the non-weak
 reference count of an object goes to zero, it cleans itself up even if there are outstanding weak
-references to it. As such, weak reference holders must check to see if a given reference is still
-valid via the IWeakReference::Resolve method.
+references to it.
 
-Weak references are retrieved for an arbitrary xlang object by querying for the
-IWeakReferenceSource interface and calling GetWeakReference. If an object does not support weak
-references, it simply returns the no interface error code from query interface.
+Weak references are retrieved for an arbitrary xlang object by querying for the IWeakReferenceSource
+interface and calling GetWeakReference. If an object does not support weak references, it simply
+fails the query.
 
-Note, because IWeakReferenceSource and IWeakReference are ABI interfaces that represents a proxy to
-an xlang object that may no longer exist, none of the IXlangObject methods are relevant. As such,
-this is one of the few places where an xlang ABI interface inherits directly from IUnknown.
+Given an IWeakReference pointer, a strong reference to the specified object can be retrieved by
+calling the IWeakReference::Resolve method. Similar to QueryInterface, the Resolve method takes
+the GUID identifying the requested interface and a void** parameter to store the requested interface
+pointer. If the specified object has been cleaned up, the Resolve method return 0 (S_OK) but the
+void** parameter is null.
+
+Because IWeakReferenceSource and IWeakReference are ABI interfaces that are not part of the
+projected surface of any API, they inherit from IUnknown rather than IXlangObject.
 
 ``` cpp
+// IWeakReference GUID identifier: 00000037-0000-0000-C000-000000000046
 struct IWeakReference : IUnknown
 {
     int32_t Resolve(guid const& iid, void** object_reference);
 };
 
+// IWeakReferenceSource GUID identifier: 00000038-0000-0000-C000-000000000046
 struct IWeakReferenceSource : IUnknown
 {
     int32_t GetWeakReference(IWeakReference** weak_reference);
