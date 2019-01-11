@@ -36,32 +36,36 @@ The xlang Type system includes a core set of built-in primitive types.
 
 xlang Type | Type Description
 ---------- | ----------------------------------------------------------
-Int16      | a 16 bit signed integer
-Int32      | a 32 bit signed integer
-Int64      | a 64 bit signed integer
-UInt8      | an 8 bit unsigned integer
-UInt16     | a 16 bit unsigned integer
-UInt32     | a 32 bit unsigned integer
-UInt64     | a 64 bit unsigned integer
-Single     | a 32-bit IEEE 754 floating point number
-Double     | a 64-bit IEEE 754 floating point number
-Char16     | a 16-bit non-numeric value representing a UTF-16 code unit
-Boolean    | an 8-bit Boolean value
-String     | an immutable sequence of Char16s used to represent text
-Guid       | A 128-bit standard [universally unique identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
-Object     | An xlang object of unknown type
+Int8       | 8 bit signed integer
+Int16      | 16 bit signed integer
+Int32      | 32 bit signed integer
+Int64      | 64 bit signed integer
+UInt8      | 8 bit unsigned integer
+UInt16     | 16 bit unsigned integer
+UInt32     | 32 bit unsigned integer
+UInt64     | 64 bit unsigned integer
+Single     | 32-bit IEEE 754 floating point number
+Double     | 64-bit IEEE 754 floating point number
+Char16     | 16-bit non-numeric value representing a UTF-16 code unit
+Boolean    | 8-bit Boolean value
+String     | immutable sequence of Char16s used to represent text
+Guid       | 128-bit standard [universally unique identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
+Object     | xlang object of unknown type
 
-> Note: string encoding for xlang is currently under review. In particular, it has not been decided
-if xlang will support UTF-8 strings in some capacity. A design note will be commissioned for this
-decision.
+> Note: we need an XDN for string encoding. WinRT originally specified UTF-16 character type and
+strings. However, UTF-8 has become the dominant encoding on the web since WinRT was originally
+designed. This work is tracked by https://github.com/Microsoft/xlang/issues/53
 
 ## Enums
 
-An enum type is a distinct value type with a set of named values. Each named value in an enum
-corresponds to a constant integer value.
+An enum type is a set of named values. Each named value in an enum corresponds to a constant integer
+value.
 
 Each enum type has an underlying integral type. The only legal underlying integral types for enums
 in xlang are Int32 and UInt32.
+
+> TODO: consider expanding the types usable for enums. 64bit bit flags, unsigned enums that aren't
+flags (addresses) were both mentioned.
 
 An enum type with an underlying integral type of UInt32 is considered a Flags enum. Flags enums
 are intended to be treated as a bit field. Language projections can and should provide logical
@@ -69,6 +73,8 @@ operators such as and, or and not for Flags enum values.
 
 Enums are additively versionable. Subsequent versions of a given enum may add new named values (and
 associated constant integer values). Pre-existing values may not be removed or changed.
+
+> Note, we need an XDN that focuses on how versioning works in xlang.
 
 ## Structs
 
@@ -91,13 +97,11 @@ Structs are not versionable. Once they have been defined, they may never be chan
 
 ## Interfaces
 
-> Note, an xlang's type system interface is a different concept from
-[COM Interfaces](XDN05%20-%20xlang%20Binary%20Interface.md#com-interfaces) in xlang's
-[ABI](XDN05%20-%20xlang%20Binary%20Interface.md).
-So while an xlang ABI interface must inherit from
-[IXlangObject](XDN05%20-%20xlang%20Binary%20Interface.md#ixlangobject), interfaces in the xlang
-type system do not. Inheriting from IXlangObject is an implementation detail that is not directly
-surfaced in xlang's type system.
+> Note, an xlang's type system interface is a different concept from [COM Interfaces](XDN05%20-%20xlang%20Binary%20Interface.md#com-interfaces)
+in xlang's [ABI](XDN05%20-%20xlang%20Binary%20Interface.md). So while all xlang ABI interfaces must
+eventually inherit from [IUnknown](XDN05%20-%20xlang%20Binary%20Interface.md#iunknown), interfaces
+in xlang's type system do not. Ultimately inheriting from IUnknown is an implementation detail that
+is not directly surfaced in xlang's type system.
 
 An interface is a type that acts as a contract that can be implemented by multiple classes. An
 interface specifies the signatures for a group of object members (aka methods, properties and
@@ -108,12 +112,21 @@ interface's object members is unrelated to any other class's implementation of t
 
 Interfaces may optionally inherit from a single other interface. All of the type members of the
 base interface are considered part of the derived interface as well. Any class implementing an
-interface that uses inheritance must implement all of the type members specified by both the base
-and derived interfaces.
+interface that uses inheritance must implement all of the type members specified in all of the
+interfaces in the inheritance tree.
 
-> Note, WinRT interfaces support inheritance from multiple other interfaces. This approach leads to
-inefficiencies at the ABI layer that xlang wishes to avoid by constraining interfaces to single
-inheritance. This decision may be revisited as the xlang project progresses.
+> Note, WinRT interfaces do not support true inheritance. Rather, WinRT interfaces may optionally
+declare that they require one or more other interfaces to additionally be implemented on a class.
+This approach leads to inefficiencies at the ABI layer - both runtime overhead that stems from
+having to call QueryInterface as well as memory overhead that stems from types having multiple
+interface virtual memory tables. By limiting interfaces at the type system level to single
+inheritance, xlang can implement them at the ABI layer using a single composite virtual method
+table, avoiding the runtime and memory inefficiencies mentioned above.
+
+All xlang interfaces need an GUID identifier. This identifier has no relevance at the type system
+level, it is only used at the ABI level. An interface's GUID can either be explicitly provided or
+it can be implicitly generated from the interface's fully namespace qualified name using the
+algorithm defined in [RFC4122 section 4.3](https://tools.ietf.org/html/rfc4122#section-4.3).
 
 Interfaces are not versionable. Once they have been defined, they may never be changed.
 
@@ -129,8 +142,6 @@ be specified, though they may be specified in terms of the derived interface's t
 Non-parameterized interfaces can only inherit from concrete interfaces. This includes
 non-parameterized interfaces as  well as parameterized interfaces where all of the type parameters
 have been fully specified.
-
-Array types may not be used as type parameters.
 
 #### Parameterized Interface Examples
 
