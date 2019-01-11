@@ -387,8 +387,7 @@ WINRT_EXPORT namespace winrt
                 token = get_token(new_targets->back());
 
                 slim_lock_guard const swap_guard(m_swap);
-                temp_targets = m_targets;
-                m_targets = new_targets;
+                temp_targets = std::exchange(m_targets, std::move(new_targets));
             }
 
             return token;
@@ -407,7 +406,7 @@ WINRT_EXPORT namespace winrt
                     return;
                 }
 
-                uint32_t const available_slots = m_targets->size() - 1;
+                uint32_t available_slots = m_targets->size() - 1;
                 delegate_array new_targets;
                 bool removed = false;
 
@@ -425,22 +424,28 @@ WINRT_EXPORT namespace winrt
 
                     for (delegate_type const& element : *m_targets)
                     {
-                        if (!removed&& token == get_token(element))
+                        if (!removed && token == get_token(element))
                         {
                             removed = true;
                             continue;
                         }
 
+                        if (available_slots == 0)
+                        {
+                            WINRT_ASSERT(!removed);
+                            break;
+                        }
+
                         *new_iterator = element;
                         ++new_iterator;
+                        --available_slots;
                     }
                 }
 
                 if (removed)
                 {
                     slim_lock_guard const swap_guard(m_swap);
-                    temp_targets = m_targets;
-                    m_targets = new_targets;
+                    temp_targets = std::exchange(m_targets, std::move(new_targets));
                 }
             }
         }
