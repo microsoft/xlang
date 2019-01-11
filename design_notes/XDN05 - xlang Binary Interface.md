@@ -108,7 +108,7 @@ Methods on COM interfaces (including xlang ABI interfaces) never throw C++ excep
 need for a stable contract across compilers. QueryInterface returns a 32-bit signed integer as an
 error code known. On Windows, this code is known as an
 [HRESULT](https://docs.microsoft.com/en-us/windows/desktop/com/error-handling-in-com).
-Generally with HRESULTs, non-negative integers indicate errors, positive integers and zero indicate
+Generally with HRESULTs, negative integers indicate errors, positive integers and zero indicate
 success. QueryInterface in particular should always return 0 on success.
 
 QueryInterface may return the following error codes:
