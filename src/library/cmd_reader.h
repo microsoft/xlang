@@ -2,6 +2,8 @@
 
 #include "impl/base.h"
 
+using namespace std::experimental::filesystem;
+
 namespace xlang::cmd
 {
     struct option
@@ -35,31 +37,10 @@ namespace xlang::cmd
 
             auto last{ options.end() };
 
-            for (C i = 1; i < argc; ++i)
-            {
-                std::string_view arg{ argv[i] };
-
-                if (arg[0] == '-')
-                {
-                    arg.remove_prefix(1);
-                    last = find(options, arg);
-
-                    if (last == options.end())
-                    {
-                        throw_invalid("Option '-", arg, "' is not supported");
-                    }
-
-                    m_options.try_emplace(last->name);
-                }
-                else if (last == options.end())
-                {
-                    throw_invalid("Value '", arg, "' is not supported");
-                }
-                else
-                {
-                    m_options[last->name].push_back(std::string{ arg });
-                }
-            }
+			for (C i = 1; i < argc; ++i)
+			{
+				extract_option(std::string{ argv[i] }, options, last);
+			}
 
             for (auto&& option : options)
             {
@@ -184,5 +165,166 @@ namespace xlang::cmd
         }
 
         std::map<std::string_view, std::vector<std::string>> m_options;
+
+		template<typename O, typename L>
+		void extract_option(std::string const& sarg, O const& options, L &last) 
+		{
+			std::string_view svarg{ sarg };
+			if (svarg[0] == '-')
+			{
+				svarg.remove_prefix(1);
+				last = find(options, svarg);
+
+				if (last == options.end())
+				{
+					throw_invalid("Option '-", svarg, "' is not supported");
+				}
+
+				m_options.try_emplace(last->name);
+			}
+			else if (svarg[0] == '@')
+			{
+				svarg.remove_prefix(1);
+				extract_respose_file(svarg, options);
+			}
+			else if (last == options.end())
+			{
+				throw_invalid("Value '", svarg, "' is not supported");
+			}
+			else
+			{
+				m_options[last->name].push_back(std::string{ svarg });
+			}
+		}
+
+		template<typename O>
+		void extract_respose_file(std::string_view const& arg, O const& options)
+		{
+			path response_path{ std::string{ arg } };
+			std::wstring extension = response_path.extension();
+			std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
+			if (is_directory(response_path) || extension == L".winmd")
+			{
+				throw_invalid("'@' is reserved for response files");
+			}
+			std::array<char, 8192> line_buf;
+			std::ifstream response_file(absolute(response_path));
+			while (response_file.getline(line_buf.data(), line_buf.size()))
+			{
+				size_t argc = 0;
+				std::vector<std::string> argv;
+
+				parse_command_line(line_buf.data(), argv, &argc);
+
+				auto last{ options.end() };
+				for (auto i = 0; i < argc; i++)
+				{
+					extract_option(argv[i], options, last);
+				}
+			}
+		}
+
+		template <typename Character>
+		static void parse_command_line(
+			Character* cmdstart,
+			std::vector<std::string>& argv,
+			size_t* argument_count
+			) throw()
+		{
+			*argument_count  = 0;
+
+			Character c;
+			std::string args("");
+			int copy_character;                   /* 1 = copy char to *args */
+			unsigned numslash;              /* num of backslashes seen */
+			bool in_quotes;
+			bool first_arg;
+
+			/* first scan the program name, copy it, and count the bytes */
+			Character* p = cmdstart;
+			in_quotes = false;
+			first_arg = true;
+
+			// Loop on each argument
+			for (;;)
+			{
+				if (*p)
+				{
+					while (*p == ' ' || *p == '\t')
+						++p;
+				}
+
+				// Scan an argument:
+				if (!first_arg)
+				{
+					argv.emplace_back(args);
+					args.clear();
+					++*argument_count;
+				}
+
+				if (*p == '\0')
+					break; // End of arguments
+
+				// Loop through scanning one argument:
+				for (;;)
+				{
+					copy_character = 1;
+
+					// Rules:
+					// 2N     backslashes   + " ==> N backslashes and begin/end quote
+					// 2N + 1 backslashes   + " ==> N backslashes + literal "
+					// N      backslashes       ==> N backslashes
+					numslash = 0;
+
+					while (*p == '\\')
+					{
+						// Count number of backslashes for use below
+						++p;
+						++numslash;
+					}
+
+					if (*p == '"')
+					{
+						// if 2N backslashes before, start/end quote, otherwise
+						// copy literally:
+						if (numslash % 2 == 0)
+						{
+							if (in_quotes && p[1] == '"')
+							{
+								p++; // Double quote inside quoted string
+							}
+							else
+							{
+								// Skip first quote char and copy second:
+								copy_character = 0; // Don't copy quote
+								in_quotes = !in_quotes;
+							}
+						}
+
+						numslash /= 2;
+					}
+
+					// Copy slashes:
+					while (numslash--)
+					{
+						args.push_back('\\');
+					}
+
+					// If at end of arg, break loop:
+					if (*p == '\0' || (!in_quotes && (*p == ' ' || *p == '\t')))
+						break;
+
+					// Copy character into argument:
+					if (copy_character)
+					{
+						args.push_back(*p);
+					}
+
+					++p;
+				}
+
+				first_arg = false;
+			}
+		}
     };
 }
