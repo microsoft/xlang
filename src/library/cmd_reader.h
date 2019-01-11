@@ -201,9 +201,17 @@ namespace xlang::cmd
 
                     add_files_from_xml(files, sdk_version, xml_path, sdk_path);
 
-                    if (path.back() == '+')
+                    if (path.back() != '+')
                     {
-                        // TODO: add extensions
+                        continue;
+                    }
+
+                    for (auto&& item : std::experimental::filesystem::directory_iterator(sdk_path / L"Extension SDKs"))
+                    {
+                        xml_path = item.path() / sdk_version;
+                        xml_path /= L"SDKManifest.xml";
+
+                        add_files_from_xml(files, sdk_version, xml_path, sdk_path);
                     }
 
                     continue;
