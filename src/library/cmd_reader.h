@@ -420,7 +420,7 @@ namespace xlang::cmd
             std::array<unsigned long, 4> version_parts{};
             std::string result;
 
-            while (0 == RegEnumKeyA(key.handle, index++, subkey.data(), subkey.size()))
+            while (0 == RegEnumKeyA(key.handle, index++, subkey.data(), static_cast<uint32_t>(subkey.size())))
             {
                 if (!std::regex_match(subkey.data(), match, rx))
                 {
