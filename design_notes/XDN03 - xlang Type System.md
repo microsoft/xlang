@@ -57,8 +57,8 @@ decision.
 
 ## Enums
 
-An enum type is a distinct value type with a set of named value. Each named value in an enum
-corresponds to an constant integer value.
+An enum type is a distinct value type with a set of named values. Each named value in an enum
+corresponds to a constant integer value.
 
 Each enum type has an underlying integral type. The only legal underlying integral types for enums
 in xlang are Int32 and UInt32.
@@ -106,7 +106,7 @@ events) but does not specify an implementation for those object members.
 Interfaces can be implemented by multiple different classes. Each class implementation of a given
 interface's object members is unrelated to any other class's implementation of the same interface.
 
-Interfaces may optionally inherit from a single other interfaces. All of the type members of the
+Interfaces may optionally inherit from a single other interface. All of the type members of the
 base interface are considered part of the derived interface as well. Any class implementing an
 interface that uses inheritance must implement all of the type members specified by both the base
 and derived interfaces.
@@ -141,7 +141,7 @@ collections.
 - `IVector<T>` represents a collection that can be randomly accessed
 - `IMap<K,V>` represents a collection that maps from keys to values
 
-Both `IVector<T>` and `IMap<K,V>` can be enumerated. `IVector<T>`'s derives from `IIterable<T>`.
+Both `IVector<T>` and `IMap<K,V>` can be enumerated. `IVector<T>` derives from `IIterable<T>`.
 In this case, the same type parameter is used for both `IVector` and `IIterable`. However,
 `IMap<K,V>` derives from `IIterable<IKeyValuePair<K,V>>`. In this case, the `T` type parameter of
 `IIterable` is instantiated as parameterized type `IKeyValuePair<K,V>`, using the type parameters
