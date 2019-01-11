@@ -185,7 +185,7 @@ namespace xlang::cmd
                     std::regex rx(R"(((\d+)\.(\d+)\.(\d+)\.(\d+))\+?)");
                     std::smatch match;
 
-                    if (std::regex_match(path, rx, match))
+                    if (std::regex_match(path, match, rx))
                     {
                         sdk_version = match[1].str();
                     }
@@ -194,11 +194,12 @@ namespace xlang::cmd
                 if (!sdk_version.empty())
                 {
                     auto sdk_path = get_sdk_path();
-                    sdk_path /= L"Platforms\\UAP";
-                    sdk_path /= sdk_version;
-                    sdk_path /= L"Platform.xml";
+                    auto xml_path = sdk_path;
+                    xml_path /= L"Platforms\\UAP";
+                    xml_path /= sdk_version;
+                    xml_path /= L"Platform.xml";
 
-                    add_files_from_xml(files, sdk_path);
+                    add_files_from_xml(files, sdk_version, xml_path, sdk_path);
 
                     if (path.back() == '+')
                     {
@@ -220,27 +221,108 @@ namespace xlang::cmd
 
         struct registry_key
         {
-            HKEY value{};
+            HKEY handle{};
+
+            registry_key(registry_key const&) = delete;
+            registry_key& operator=(registry_key const&) = delete;
 
             ~registry_key() noexcept
             {
-                if (value)
+                if (handle)
                 {
-                    RegCloseKey(value);
+                    RegCloseKey(handle);
                 }
-            }
-
-            explicit operator bool() const noexcept
-            {
-                return value != 0;
             }
         };
 
-        static void add_files_from_xml(std::set<std::string>& files, std::experimental::filesystem::path const& filename)
+        template <typename T>
+        struct com_ptr
         {
-            
+            T* ptr{};
 
+            com_ptr(com_ptr const&) = delete;
+            com_ptr& operator=(com_ptr const&) = delete;
 
+            com_ptr() noexcept = default;
+
+            ~com_ptr() noexcept
+            {
+                if (ptr)
+                {
+                    ptr->Release();
+                }
+            }
+
+            auto operator->() const noexcept
+            {
+                return ptr;
+            }
+        };
+
+        static void check_xml(HRESULT result)
+        {
+            if (result < 0)
+            {
+                throw_invalid("Could not read the Windows SDK's Platform.xml");
+            }
+        }
+
+        static void add_files_from_xml(
+            std::set<std::string>& files,
+            std::string const& sdk_version,
+            std::experimental::filesystem::path const& xml_path,
+            std::experimental::filesystem::path const& sdk_path)
+        {
+            com_ptr<IStream> stream;
+
+            check_xml(SHCreateStreamOnFileW(
+                xml_path.c_str(),
+                STGM_READ, &stream.ptr));
+
+            com_ptr<IXmlReader> reader;
+
+            check_xml(CreateXmlReader(
+                __uuidof(IXmlReader),
+                reinterpret_cast<void**>(&reader.ptr),
+                nullptr));
+
+            check_xml(reader->SetInput(stream.ptr));
+            XmlNodeType node_type = XmlNodeType_None;
+
+            while (S_OK == reader->Read(&node_type))
+            {
+                if (node_type != XmlNodeType_Element)
+                {
+                    continue;
+                }
+
+                wchar_t const* value{ nullptr };
+                check_xml(reader->GetLocalName(&value, nullptr));
+
+                if (0 != wcscmp(value, L"ApiContract"))
+                {
+                    continue;
+                }
+
+                auto path = sdk_path;
+                path /= L"References";
+                path /= sdk_version;
+
+                check_xml(reader->MoveToAttributeByName(L"name", nullptr));
+                check_xml(reader->GetValue(&value, nullptr));
+                path /= value;
+
+                check_xml(reader->MoveToAttributeByName(L"version", nullptr));
+                check_xml(reader->GetValue(&value, nullptr));
+                path /= value;
+
+                check_xml(reader->MoveToAttributeByName(L"name", nullptr));
+                check_xml(reader->GetValue(&value, nullptr));
+                path /= value;
+
+                path += L".winmd";
+                files.insert(path.string());
+            }
         }
 
         static registry_key open_sdk()
@@ -267,7 +349,7 @@ namespace xlang::cmd
             DWORD path_size = 0;
 
             if (0 != RegQueryValueExW(
-                key.value,
+                key.handle,
                 L"KitsRoot10",
                 nullptr,
                 nullptr,
@@ -280,7 +362,7 @@ namespace xlang::cmd
             std::wstring root((path_size / sizeof(wchar_t)) - 1, L'?');
 
             RegQueryValueExW(
-                key.value,
+                key.handle,
                 L"KitsRoot10",
                 nullptr,
                 nullptr,
@@ -330,7 +412,7 @@ namespace xlang::cmd
             std::array<unsigned long, 4> version_parts{};
             std::string result;
 
-            while (0 == RegEnumKeyA(key.value, index++, subkey.data(), subkey.size()))
+            while (0 == RegEnumKeyA(key.handle, index++, subkey.data(), subkey.size()))
             {
                 if (!std::regex_match(subkey.data(), match, rx))
                 {
