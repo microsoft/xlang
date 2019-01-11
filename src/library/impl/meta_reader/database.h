@@ -34,9 +34,19 @@ namespace xlang::meta::reader
         {
             file_view file{ path };
 
+            if (file.size() < sizeof(impl::image_dos_header))
+            {
+                return false;
+            }
+
             auto dos = file.as<impl::image_dos_header>();
 
             if (dos.e_magic != 0x5A4D) // IMAGE_DOS_SIGNATURE
+            {
+                return false;
+            }
+
+            if (file.size() < (dos.e_lfanew + sizeof(impl::image_nt_headers32)))
             {
                 return false;
             }
