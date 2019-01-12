@@ -89,11 +89,80 @@ Structs are not versionable. Once they have been defined, they may never be chan
 
 ## Object Members
 
+xlang objects (i.e. interfaces and classes) support three types of members: methods, properties and
+events.
+
+### Member Errors
+
+All xlang object members may fail to execute for a variety of reasons. Error information is returned
+at the ABI layer and mapped to a language projection appropriate mechanism such as an exception for
+further processing
+
 ### Methods
+
+xlang objects support methods that take zero or more parameters and an optional return a value.
+Methods must declare the names and types of their parameters. Methods must declare the type of their
+return value, if there is one. 
+
+Parameterized delegates and methods of parameterized interfaces may use type parameters for both
+parameter and return value types.
+
+xlang methods support four kinds of parameters: value parameters, const reference parameters, output
+parameters, and array parameters.
+
+A value parameter is used to pass an input parameter. A value parameter gets its initial value from
+the argument that was passed for the parameter. Modifications to a value parameter do not affect the
+argument that was passed for the parameter. So, a value parameter is effective a const input parameter.
+
+A const reference parameter is used for efficient input parameter passing of large value types.
+Methods receive such parameters as a reference to the actual value, rather than receiving a copy of
+the actual value. For large value types, it's more efficient to pass (to a function) a pointer-sized
+reference to a value than to pass a copy of the actual value itself.
+
+An output parameter is used for output parameter passing. For an output parameter, the caller
+provides  a pointer to the location in which the callee should assign the value.
+
+An array parameter is a parameter that takes or returns a collection of variables of the same type,
+randomly accessed via computed indices. Arrays can be passed into or out of a method via a parameter
+in three ways:
+
+- PassArray – this style is used when the caller is providing an array to the method.
+- FillArray – this style is used when the caller is providing an array for the method to fill, up to
+  a maximum array size.
+- ReceiveArray – this style is used when the caller is receiving an array that was allocated by the
+  method.
+
+xlang supports method overloading on parameter types but favors overloading on the number of input
+parameters – aka the method's arity. This is done in order to ensure better support for weakly typed
+languages such as JavaScript. Note, output and receive array parameters are not included in the
+count of input parameters. Optionally, overloaded methods should be given a separate, unique name
+that can be used when projecting into languages that don't support overloading.
+
+xlang objects do not support operator overloading.
 
 ### Properties
 
+Properties are a paired get/set methods with matching name and type that appear in language
+projections as fields rather than methods.
+
+Properties on parameterized interfaces may use a type parameter as the property type.
+
+Properties may not be array types.
+
+Properties must have a get method. A property getter method has no parameters and returns a value of
+the property type. Properties with only a get method are called read only properties.
+
+Properties may optionally have a set method. A property setter method has a single parameter of the
+property type and returns void. Properties with both a get and set method are called read/write.
+
 ### Events
+
+Events are paired add/remove listener methods with matching name and delegate type. They provide a
+mechanism for the type to notify interested parties when something of interest happens.
+
+xlang events must specify the listener type via a delegate. An event add listener method takes a
+single parameter of the event delegate type and returns an event registration token. And event
+remove listener method has a single event registration token argument and returns void.
 
 ## Interfaces
 
@@ -133,15 +202,20 @@ Interfaces are not versionable. Once they have been defined, they may never be c
 ### Parameterized Interfaces
 
 xlang interfaces support type parameterization. Parameterized interfaces specify one or more type
-parameters that can be used as parameter types or return values of type members.
+parameters that can be used as parameter types or return values of type members. Parameterized
+interface members may declare argument and/or return value types in terms of the type parameters
+instead of as concrete types.
+
+Like non-parameterized interfaces, parameterized interfaces require a GUID identifier. This GUID can
+be explicitly specified or implicitly generated from the type name.
 
 Parameterized interfaces can inherit from both parameterized and non-parameterized interfaces.
 When inheriting from a parameterized interface, the type parameters of the base interface must
 be specified, though they may be specified in terms of the derived interface's type parameters.
 
-Non-parameterized interfaces can only inherit from concrete interfaces. This includes
-non-parameterized interfaces as  well as parameterized interfaces where all of the type parameters
-have been fully specified.
+A concrete interface is either a non-parameterized interface or a parameterized interface where all
+of the type parameters have been fully specified. Non-parameterized interfaces may inherit from
+concrete interfaces, but they may not inherit from a parameterized interface.
 
 #### Parameterized Interface Examples
 
@@ -151,6 +225,9 @@ collections.
 - `IIterable<T>` represents a collection that can be enumerated
 - `IVector<T>` represents a collection that can be randomly accessed
 - `IMap<K,V>` represents a collection that maps from keys to values
+
+`IIterable<T>` is a parameterized interface. `IIterable<String>` is a concrete interface, as all
+of the type parameters have been specified. 
 
 Both `IVector<T>` and `IMap<K,V>` can be enumerated. `IVector<T>` derives from `IIterable<T>`.
 In this case, the same type parameter is used for both `IVector` and `IIterable`. However,
@@ -164,4 +241,26 @@ declaration of IMap, where in the previous example we used type parameters.
 
 ## Delegates
 
+Delegates are xlang types that act as a type-safe function pointer. They are similar conceptually
+to an [interface](#interfaces) that declares one and only one method. Defining delegates as a
+separate type from interfaces enables better integration with free functions and/or [anonymous
+functions](https://en.wikipedia.org/wiki/Anonymous_function) in language projections. Delegates are
+often (but not exclusively) used to declare the signature for xlang event handlers.
+
+xlang delegates are named types and define a method signature. Delegate method signatures follow the
+same rules for parameters as interface methods do.
+
+Like interfaces, delegates require a GUID identifier. THis identifier can be provided explicitly or
+generated implicitly from the type's name.
+
+Like interfaces, delegates can be parameterized. Parameterized delegates may declare arguments
+and/or their return value type in terms of the type parameters instead of as concrete types.
+
+Delegates are not versionable. Once they have been defined, they may never be changed.
+
 ## Classes
+
+Classes are xlang types that expose behavior and encapsulate data. Often times, classes can be activated
+
+Classes are additively versionable. Subsequent versions of a given enum may add new members. 
+Pre-existing members may not be removed or modified in any way.
