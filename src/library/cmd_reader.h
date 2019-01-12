@@ -120,11 +120,6 @@ namespace xlang::cmd
             return result->second.front();
         }
 
-        auto files(std::string_view const& name) const
-        {
-            return files(name, [](auto&&) {return true; });
-        }
-
         template <typename F>
         auto files(std::string_view const& name, F directory_filter) const
         {
@@ -221,6 +216,11 @@ namespace xlang::cmd
             }
 
             return files;
+        }
+
+        auto files(std::string_view const& name) const
+        {
+            return files(name, [](auto&&) {return true; });
         }
 
     private:
