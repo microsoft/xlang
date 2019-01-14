@@ -20,7 +20,7 @@ GENERATE_STRING_LITERAL_FILES("${PROJECT_SOURCE_DIR}/strings/*.h" "strings" "xla
 
 if (WIN32)
     TARGET_CONFIG_MSVC_PCH(abi pch.cpp pch.h)
-    target_link_libraries(abi windowsapp ole32)
+    target_link_libraries(abi windowsapp ole32 shlwapi)
 else()
     target_link_libraries(abi c++ c++abi c++experimental)
     target_link_libraries(abi -lpthread)

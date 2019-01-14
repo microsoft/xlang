@@ -11,7 +11,7 @@ GENERATE_STRING_LITERAL_FILES("${PROJECT_SOURCE_DIR}/strings/*" "strings" "xlang
 if (WIN32)
     TARGET_CONFIG_MSVC_PCH(pywinrt pch.cpp pch.h)
     target_compile_options(pywinrt PUBLIC /await)
-    target_link_libraries(pywinrt windowsapp ole32)
+    target_link_libraries(pywinrt windowsapp ole32 shlwapi)
 else()
     target_link_libraries(pywinrt c++ c++abi c++experimental)
     target_link_libraries(pywinrt -lpthread)

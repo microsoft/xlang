@@ -47,8 +47,10 @@ namespace xlang
 
         settings.verbose = args.exists("verbose");
         settings.root = args.value("root", "winrt");
-        settings.input = args.files("input");
-        settings.reference = args.files("reference");
+
+        settings.input = args.files("input", database::is_database);
+        settings.reference = args.files("reference", database::is_database);
+
         settings.component = args.exists("component");
         settings.base = args.exists("base");
 

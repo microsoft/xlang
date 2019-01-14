@@ -53,6 +53,7 @@ if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
 else()
     target_sources(cpp_test PUBLIC
         main.cpp
+        test/Agility.cpp
         test/Interop.cpp
         test/Capture.cpp
         test/AsyncAutoCancel.cpp
