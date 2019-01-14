@@ -89,13 +89,12 @@ namespace winrt::Component::Composable
         impl::base<D, Base>
     {
         using composable = Base;
-
     protected:
         BaseT()
-    {
-        impl::call_factory<Base, Component::Composable::IBaseFactory>([&](auto&& f) { f.CreateInstance(*this, this->m_inner); });
-    }
-};
+        {
+            impl::call_factory<Base, Component::Composable::IBaseFactory>([&](auto&& f) { f.CreateInstance(*this, this->m_inner); });
+        }
+    };
 }
 namespace std
 {

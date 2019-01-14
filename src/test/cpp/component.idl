@@ -1,3 +1,20 @@
+namespace Windows.Foundation.Metadata
+{
+    [attributeusage(target_runtimeclass)]
+    [attributename("fastabi")]
+    [version(1.0)]
+    attribute FastAbiAttribute
+    {
+    }
+
+    [attributeusage(target_method, target_property)]
+    [attributename("noexcept")]
+    [version(1.0)]
+    attribute NoExceptionAttribute
+    {
+    }
+}
+
 namespace Component
 {
     enum Signed
@@ -106,7 +123,7 @@ namespace Component
             static String StaticMethod();
         }
 
-        [Windows.Foundation.Metadata.FastAbiAttribute]
+        [fastabi]
         runtimeclass FastClass : [default] IFastClass, IFastClass2, Component.INotExclusive
         {
             FastClass();
