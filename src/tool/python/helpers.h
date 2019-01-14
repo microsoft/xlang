@@ -389,6 +389,56 @@ namespace xlang
         return false;
     }
 
+    bool is_iterable_interface(TypeDef const& type)
+    {
+        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            return type.TypeName() == "IIterable`1";
+        }
+        
+        return false;
+    }
+
+    bool is_iterator_interface(TypeDef const& type)
+    {
+        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            return type.TypeName() == "IIterator`1";
+        }
+        
+        return false;
+    }
+
+    bool is_vector_interface(TypeDef const& type)
+    {
+        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            auto name = type.TypeName();
+            if (name == "IVector`1" ||
+                name == "IVectorView`1")
+            {
+                return true;
+            }        
+        }
+        
+        return false;
+    }
+
+    bool is_map_interface(TypeDef const& type)
+    {
+        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
+        {
+            auto name = type.TypeName();
+            if (name == "IMap`2" ||
+                name == "IMapView`2")
+            {
+                return true;
+            }        
+        }
+        
+        return false;
+    }
+
     struct method_info
     {
         MethodDef method;
