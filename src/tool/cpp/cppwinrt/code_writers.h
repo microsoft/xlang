@@ -1795,6 +1795,34 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
+    static void write_class_override_usings(writer& w, std::map<std::string, interface_info> const& required_interfaces)
+    {
+        std::map<std::string_view, std::set<std::string>> method_usage;
+
+        for (auto&&[interface_name, info] : required_interfaces)
+        {
+            for (auto&& method : info.type.MethodList())
+            {
+                method_usage[get_name(method)].insert(interface_name);
+            }
+        }
+
+        for (auto&&[method_name, interfaces] : method_usage)
+        {
+            if (interfaces.size() <= 1)
+            {
+                continue;
+            }
+
+            for (auto&& interface_name : interfaces)
+            {
+                w.write("        using impl::consume_t<D, %>::%;\n",
+                    interface_name,
+                    method_name);
+            }
+        }
+    }
+
     static void write_class_override(writer& w, TypeDef const& type)
     {
         auto factories = get_factories(w, type);
@@ -1822,7 +1850,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         using composable = %;
     protected:
-%    };
+%%    };
 )";
 
         auto type_name = type.TypeName();
@@ -1836,7 +1864,8 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             bind<write_class_override_bases>(type),
             bind<write_class_override_defaults>(interfaces),
             type_name,
-            bind<write_class_override_constructors>(type_name, factories));
+            bind<write_class_override_constructors>(type_name, factories),
+            bind< write_class_override_usings>(interfaces));
     }
 
     static void write_interface_requires(writer& w, TypeDef const& type)
