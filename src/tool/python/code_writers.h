@@ -349,6 +349,16 @@ struct delegate_python_type<%>
                 w.write("virtual PyObject* dunder_await() = 0;\n");
             }
 
+            if (has_dunder_iter(type))
+            {
+                w.write("virtual PyObject* dunder_iter() = 0;\n");
+            }
+
+            if (has_dunder_iternext(type))
+            {
+                w.write("virtual PyObject* dunder_iternext() = 0;\n");
+            }
+
             w.write("\n");
 
             for (auto&&[name, overloads] : get_methods(type, true))
@@ -381,6 +391,16 @@ struct delegate_python_type<%>
             if (is_async_interface(type))
             {
                 w.write("PyObject* dunder_await() override { return py::dunder_await(obj); }\n");
+            }
+
+            if (has_dunder_iter(type))
+            {
+                w.write("PyObject* dunder_iter() override { return nullptr; }\n");
+            }
+
+            if (has_dunder_iternext(type))
+            {
+                w.write("PyObject* dunder_iternext() override { return nullptr; }\n");
             }
 
             w.write("\n");
@@ -904,6 +924,28 @@ static PyObject* __@_exit(%* self)
                 {
                     w.write("return py::dunder_await(self->obj);\n");
                 }
+            }
+            w.write("}\n");
+        }
+
+        if (has_dunder_iter(type))
+        {
+            w.write("\nstatic PyObject* __@_iter(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+
+                w.write("return nullptr;\n");
+            }
+            w.write("}\n");
+        }
+
+        if (has_dunder_iternext(type))
+        {
+            w.write("\nstatic PyObject* __@_iternext(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+
+                w.write("return nullptr;\n");
             }
             w.write("}\n");
         }
@@ -1574,6 +1616,16 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
             if (is_async_interface(type))
             {
                 w.write("{ Py_am_await, (unaryfunc)__@_await },\n", type.TypeName());
+            }
+
+            if (has_dunder_iter(type))
+            {
+                w.write("{ Py_tp_iter, __@_iter },\n", type.TypeName());
+            }
+
+            if (has_dunder_iternext(type))
+            {
+                w.write("{ Py_tp_iternext, __@_iternext },\n", type.TypeName());
             }
 
             w.write("{ 0, nullptr },\n");

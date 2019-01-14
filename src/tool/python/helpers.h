@@ -316,7 +316,7 @@ namespace xlang
     {
         auto category = get_category(type);
 
-        auto is_stringable = [&ns, &name](TypeDef const& td){ return td.TypeNamespace() == ns && td.TypeName() == name; };
+        auto type_name_matches = [&ns, &name](TypeDef const& td){ return td.TypeNamespace() == ns && td.TypeName() == name; };
 
         if (category == category::class_type)
         {
@@ -326,7 +326,7 @@ namespace xlang
                 {
                 case TypeDefOrRef::TypeDef:
                 {
-                    if (is_stringable(ii.Interface().TypeDef()))
+                    if (type_name_matches(ii.Interface().TypeDef()))
                     {
                         return true;
                     }
@@ -334,7 +334,7 @@ namespace xlang
                 break;
                 case TypeDefOrRef::TypeRef:
                 {
-                    if (is_stringable(find_required(ii.Interface().TypeRef())))
+                    if (type_name_matches(find_required(ii.Interface().TypeRef())))
                     {
                         return true;
                     }
@@ -345,19 +345,32 @@ namespace xlang
         }
         else if (category == category::interface_type)
         {
-            if (is_stringable(type))
+            if (type_name_matches(type))
             {
                 return true;
             }
 
             for (auto&& i : get_required_interfaces(type))
             {
-                if (is_stringable(i.type))
+                if (type_name_matches(i.type))
                 {
                     return true;
                 }
             }
         }
+
+        return false;
+    }
+
+    bool implements_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> fnsq_names)
+    {
+         for (auto&& fnsq_name : fnsq_names)
+         {
+             if (implements_interface(type, std::get<0>(fnsq_name), std::get<1>(fnsq_name)))
+             {
+                 return true;
+             }
+         }
 
         return false;
     }
@@ -374,69 +387,45 @@ namespace xlang
 
     bool is_async_interface(TypeDef const& type)
     {
-        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation")
-        {
-            auto name = type.TypeName();
-            if (name == "IAsyncAction" || 
-                name == "IAsyncActionWithProgress`1" ||
-                name == "IAsyncOperation`1" || 
-                name == "IAsyncOperationWithProgress`2")
-            {
-                return true;
-            }
-        }
-        
-        return false;
+        return implements_interface(type, { 
+            std::make_tuple("Windows.Foundation", "IAsyncAction"),
+            std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
+            std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
+            std::make_tuple("Windows.Foundation", "IAsyncOperationWithProgress`2") });
     }
 
-    bool is_iterable_interface(TypeDef const& type)
+    bool is_iterable_container(TypeDef const& type)
     {
-        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
-        {
-            return type.TypeName() == "IIterable`1";
-        }
-        
-        return false;
+        return implements_interface(type, "Windows.Foundation.Collections", "IIterable`1");
     }
 
-    bool is_iterator_interface(TypeDef const& type)
+    bool is_iterator(TypeDef const& type)
     {
-        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
-        {
-            return type.TypeName() == "IIterator`1";
-        }
-        
-        return false;
+        return implements_interface(type, "Windows.Foundation.Collections", "IIterator`1");
+    }
+
+    bool has_dunder_iter(TypeDef const& type)
+    {
+        return (is_iterable_container(type) || is_iterator(type));
+    }
+
+    bool has_dunder_iternext(TypeDef const& type)
+    {
+        return is_iterator(type);
     }
 
     bool is_vector_interface(TypeDef const& type)
     {
-        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
-        {
-            auto name = type.TypeName();
-            if (name == "IVector`1" ||
-                name == "IVectorView`1")
-            {
-                return true;
-            }        
-        }
-        
-        return false;
+        return implements_interface(type, {
+            std::make_tuple("Windows.Foundation.Collections", "IVector`1"),
+            std::make_tuple("Windows.Foundation.Collections", "IVectorView`1") });
     }
 
     bool is_map_interface(TypeDef const& type)
     {
-        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation.Collections")
-        {
-            auto name = type.TypeName();
-            if (name == "IMap`2" ||
-                name == "IMapView`2")
-            {
-                return true;
-            }        
-        }
-        
-        return false;
+        return implements_interface(type, {
+            std::make_tuple("Windows.Foundation.Collections", "IMap`2"),
+            std::make_tuple("Windows.Foundation.Collections", "IMapView`2") });
     }
 
     struct method_info
