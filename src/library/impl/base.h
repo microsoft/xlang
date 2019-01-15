@@ -8,6 +8,8 @@
 
 #if XLANG_PLATFORM_WINDOWS 
 #include <windows.h>
+#include <shlwapi.h>
+#include <xmllite.h>
 #else
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -24,6 +26,7 @@
 #include <list>
 #include <map>
 #include <optional>
+#include <regex>
 #include <string>
 #include <string_view>
 #include <variant>
