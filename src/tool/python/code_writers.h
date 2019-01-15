@@ -8,7 +8,7 @@ namespace xlang
         {
             return;
         }
-    
+
         w.write("@ = __ns__.@\n", type.TypeName(), type.TypeName());
     }
 
@@ -434,7 +434,7 @@ struct delegate_python_type<%>
                     writer::indent_guard gg{ w };
                     write_try_catch(w, [](writer& w) { w.write("return py::convert(obj.First());\n"); });
                 }
-                
+
                 w.write("}\n");
             }
 
@@ -444,7 +444,7 @@ struct delegate_python_type<%>
                 w.write("\nPyObject* dunder_iternext() override\n{\n");
                 {
                     writer::indent_guard gg{ w };
-                    write_try_catch(w, [](writer& w) { 
+                    write_try_catch(w, [](writer& w) {
 
                         w.write(R"(if (obj.HasCurrent())
 {
@@ -468,9 +468,9 @@ else
                 {
                     writer::indent_guard gg{ w };
 
-                    write_try_catch(w, 
-                        [](writer& w){ w.write("return static_cast<Py_ssize_t>(obj.Size());\n"); }, 
-                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    write_try_catch(w,
+                        [](writer& w) { w.write("return static_cast<Py_ssize_t>(obj.Size());\n"); },
+                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                 }
                 w.write("}\n");
 
@@ -478,9 +478,9 @@ else
                 {
                     writer::indent_guard gg{ w };
 
-                    write_try_catch(w, 
-                        [](writer& w){ w.write("uint32_t index;\nreturn obj.IndexOf(py::convert_to<T>(value), index) ? 1 : 0;\n"); }, 
-                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    write_try_catch(w,
+                        [](writer& w) { w.write("uint32_t index;\nreturn obj.IndexOf(py::convert_to<T>(value), index) ? 1 : 0;\n"); },
+                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                 }
                 w.write("}\n");
 
@@ -488,8 +488,8 @@ else
                 {
                     writer::indent_guard gg{ w };
 
-                    write_try_catch(w, 
-                        [](writer& w){ w.write("return py::convert(obj.GetAt(static_cast<uint32_t>(i)));\n"); });
+                    write_try_catch(w,
+                        [](writer& w) { w.write("return py::convert(obj.GetAt(static_cast<uint32_t>(i)));\n"); });
                 }
                 w.write("}\n");
 
@@ -499,12 +499,14 @@ else
                     {
                         writer::indent_guard gg{ w };
 
-                        write_try_catch(w, 
-                            [](writer& w){ w.write(R"(if (value == nullptr) { obj.RemoveAt(static_cast<uint32_t>(i)); }
+                        auto format = R"(if (value == nullptr) { obj.RemoveAt(static_cast<uint32_t>(i)); }
 else { obj.SetAt(static_cast<uint32_t>(i), py::convert_to<T>(value)); }
 return 0;
-)"); },
-                            [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+)";
+
+                        write_try_catch(w,
+                            [&format](writer& w) { w.write(format); },
+                            [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                     }
                     w.write("}\n");
                 }
@@ -516,9 +518,9 @@ return 0;
                 {
                     writer::indent_guard gg{ w };
 
-                    write_try_catch(w, 
-                        [](writer& w){ w.write("return static_cast<Py_ssize_t>(obj.Size());\n"); }, 
-                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    write_try_catch(w,
+                        [](writer& w) { w.write("return static_cast<Py_ssize_t>(obj.Size());\n"); },
+                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                 }
                 w.write("}\n");
 
@@ -526,8 +528,8 @@ return 0;
                 {
                     writer::indent_guard gg{ w };
 
-                    write_try_catch(w, 
-                        [](writer& w){ w.write("return py::convert(obj.Lookup(py::convert_to<K>(key)));\n"); });
+                    write_try_catch(w,
+                        [](writer& w) { w.write("return py::convert(obj.Lookup(py::convert_to<K>(key)));\n"); });
                 }
                 w.write("}\n");
 
@@ -537,12 +539,12 @@ return 0;
                     {
                         writer::indent_guard gg{ w };
 
-                        write_try_catch(w, 
-                            [](writer& w){ w.write(R"(if (value == nullptr) { obj.Remove(py::convert_to<K>(key)); }
+                        write_try_catch(w,
+                            [](writer& w) { w.write(R"(if (value == nullptr) { obj.Remove(py::convert_to<K>(key)); }
 else { obj.Insert(py::convert_to<K>(key), py::convert_to<V>(value)); }
 return 0;
 )"); },
-                            [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+[](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                     }
                     w.write("}\n");
                 }
@@ -555,8 +557,8 @@ return 0;
                 auto front_method = overloads.front().method;
                 auto is_put = is_put_method(front_method);
 
-                w.write("% %(%) override\n{\n", 
-                    is_put ? "int" : "PyObject*", name, 
+                w.write("% %(%) override\n{\n",
+                    is_put ? "int" : "PyObject*", name,
                     bind<write_pinterface_param>(front_method));
                 {
                     writer::indent_guard gg{ w };
@@ -597,7 +599,7 @@ return 0;
         {
             return;
         }
-        
+
         auto format = R"(
 static void @_dealloc(%* self)
 {
@@ -961,6 +963,109 @@ return nullptr;
         }
     }
 
+    void write_event_functions(writer& w, TypeDef const& type, event_info const& evt)
+    {
+        auto methods = get_event_methods(evt.event);
+
+        w.write("\nstatic PyObject* @_%(%* self, PyObject* arg)\n{\n", type.TypeName(), methods.add.Name(), bind<write_wrapper_type>(type));
+        {
+            writer::indent_guard g{ w };
+            if (is_ptype(type))
+            {
+                w.write("return self->obj->%(%);\n", methods.add.Name(), bind<write_method_arg_param_name>(methods.add));
+            }
+            else
+            {
+                write_try_catch(w, [&](writer& w) { write_method_body(w, type, { methods.add, evt.type_arguments }); });
+            }
+        }
+        w.write("}\n");
+
+        w.write("\nstatic PyObject* @_%(%* self, PyObject* arg)\n{\n", type.TypeName(), methods.remove.Name(), bind<write_wrapper_type>(type));
+        {
+            writer::indent_guard g{ w };
+            if (is_ptype(type))
+            {
+                w.write("return self->obj->%(%);\n", methods.remove.Name(), bind<write_method_arg_param_name>(methods.remove));
+            }
+            else
+            {
+                write_try_catch(w, [&](writer& w) { write_method_body(w, type, { methods.remove, evt.type_arguments }); });
+            }
+        }
+        w.write("}\n");
+    }
+
+    void write_from_function(writer& w, TypeDef const& type)
+    {
+        auto format = R"(
+static PyObject* __%_from(PyObject* /*unused*/, PyObject* arg)
+{
+    try
+    {
+        auto instance = py::converter<winrt::Windows::Foundation::IInspectable>::convert_to(arg);
+        return py::convert(instance.as<%>());
+    }
+    catch (...)
+    {
+        return py::to_PyErr();
+    }
+}
+)";
+
+        w.write(format, type.TypeName(), type);
+    }
+
+    void write_str_function(writer& w, TypeDef const& type)
+    {
+        w.write("\nstatic PyObject* __@_str(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+        {
+            writer::indent_guard g{ w };
+            write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.ToString());\n"); });
+        }
+        w.write("}\n");
+    }
+
+    void write_enter_exit_functions(writer& w, TypeDef const& type)
+    {
+        auto format = R"(
+static PyObject* __@_enter(%* self)
+{
+    Py_INCREF(self);
+    return (PyObject*)self;
+}
+
+static PyObject* __@_exit(%* self)
+{
+)";
+        w.write(format,
+            type.TypeName(), bind<write_wrapper_type>(type),
+            type.TypeName(), bind<write_wrapper_type>(type));
+        {
+            writer::indent_guard g{ w };
+            write_try_catch(w, [](auto& w) { w.write("self->obj.Close();\nPy_RETURN_FALSE;\n"); });
+
+        }
+        w.write("}\n");
+    }
+
+    void write_await_function(writer& w, TypeDef const& type)
+    {
+        w.write("\nstatic PyObject* __@_await(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+        {
+            writer::indent_guard g{ w };
+
+            if (is_ptype(type))
+            {
+                w.write("return self->obj->dunder_await();\n");
+            }
+            else
+            {
+                w.write("return py::dunder_await(self->obj);\n");
+            }
+        }
+        w.write("}\n");
+    }
 
     void write_method_functions(writer& w, TypeDef const& type)
     {
@@ -983,107 +1088,28 @@ return nullptr;
 
         for (auto&& evt : get_events(type))
         {
-            auto methods = get_event_methods(evt.event);
-
-            w.write("\nstatic PyObject* @_%(%* self, PyObject* arg)\n{\n", type.TypeName(), methods.add.Name(), bind<write_wrapper_type>(type));
-            {
-                writer::indent_guard g{ w };
-                if (is_ptype(type))
-                {
-                    w.write("return self->obj->%(%);\n", methods.add.Name(), bind<write_method_arg_param_name>(methods.add));
-                }
-                else
-                {
-                    write_try_catch(w, [&](writer& w) { write_method_body(w, type, { methods.add, evt.type_arguments }); });
-                }
-            }
-            w.write("}\n");
-
-            w.write("\nstatic PyObject* @_%(%* self, PyObject* arg)\n{\n", type.TypeName(), methods.remove.Name(), bind<write_wrapper_type>(type));
-            {
-                writer::indent_guard g{ w };
-                if (is_ptype(type))
-                {
-                    w.write("return self->obj->%(%);\n", methods.remove.Name(), bind<write_method_arg_param_name>(methods.remove));
-                }
-                else
-                {
-                    write_try_catch(w, [&](writer& w) { write_method_body(w, type, { methods.remove, evt.type_arguments }); });
-                }
-            }
-            w.write("}\n");
+            write_event_functions(w, type, evt);
         }
 
         // TODO: pinterface _from support
         if (!is_ptype(type) && !is_static(type))
         {
-            auto format = R"(
-static PyObject* __%_from(PyObject* /*unused*/, PyObject* arg)
-{
-    try
-    {
-        auto instance = py::converter<winrt::Windows::Foundation::IInspectable>::convert_to(arg);
-        return py::convert(instance.as<%>());
-    }
-    catch (...)
-    {
-        return py::to_PyErr();
-    }
-}
-)";
-
-            w.write(format, type.TypeName(), type);
+            write_from_function(w, type);
         }
 
         if (implements_istringable(type))
         {
-            w.write("\nstatic PyObject* __@_str(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
-            {
-                writer::indent_guard g{ w };
-                write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.ToString());\n"); });
-            }
-            w.write("}\n");
+            write_str_function(w, type);
         }
 
         if (implements_iclosable(type))
         {
-            auto format = R"(
-static PyObject* __@_enter(%* self)
-{
-    Py_INCREF(self);
-    return (PyObject*)self;
-}
-
-static PyObject* __@_exit(%* self)
-{
-)";
-            w.write(format, 
-                type.TypeName(), bind<write_wrapper_type>(type),
-                type.TypeName(), bind<write_wrapper_type>(type));
-            {
-                writer::indent_guard g{ w };
-                write_try_catch(w, [](auto& w) { w.write("self->obj.Close();\nPy_RETURN_FALSE;\n"); });
-
-            }
-            w.write("}\n");
+            write_enter_exit_functions(w, type);
         }
 
         if (is_async_interface(type))
         {
-            w.write("\nstatic PyObject* __@_await(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
-            {
-                writer::indent_guard g{ w };
-
-                if (is_ptype(type))
-                {
-                    w.write("return self->obj->dunder_await();\n");
-                }
-                else
-                {
-                    w.write("return py::dunder_await(self->obj);\n");
-                }
-            }
-            w.write("}\n");
+            write_await_function(w, type);
         }
 
         if (implements_iiterable(type))
@@ -1124,19 +1150,22 @@ static PyObject* __@_exit(%* self)
 
         if (implements_sequence(type))
         {
+            auto type_args = get_type_arguments(type, "Windows.Foundation.Collections", { "IVector`1", "IVectorView`1" });
+            auto col_type = type_args.at(0);
+
             w.write("\nstatic Py_ssize_t __@_sq_length(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
             {
                 writer::indent_guard gg{ w };
-                
+
                 if (is_ptype(type))
                 {
                     w.write("return self->obj->_sq_length();\n");
                 }
                 else
                 {
-                    write_try_catch(w, 
-                        [](writer& w){ w.write("return static_cast<Py_ssize_t>(self->obj.Size());\n"); }, 
-                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    write_try_catch(w,
+                        [](writer& w) { w.write("return static_cast<Py_ssize_t>(self->obj.Size());\n"); },
+                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                 }
             }
             w.write("}\n");
@@ -1151,10 +1180,9 @@ static PyObject* __@_exit(%* self)
                 }
                 else
                 {
-                    w.write("return -1;//TODO find param type of IndexOf\n");
-                    // write_try_catch(w, 
-                    //     [](writer& w){ w.write("uint32_t index;\nreturn self->obj.IndexOf(py::convert_to<T>(value), index) ? 1 : 0;\n"); }, 
-                    //     [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    write_try_catch(w,
+                        [&col_type](writer& w) { w.write("uint32_t index;\nreturn self->obj.IndexOf(py::convert_to<@>(value), index) ? 1 : 0;\n", col_type); },
+                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                 }
             }
             w.write("}\n");
@@ -1169,8 +1197,8 @@ static PyObject* __@_exit(%* self)
                 }
                 else
                 {
-                    write_try_catch(w, 
-                        [](writer& w){ w.write("return py::convert(self->obj.GetAt(static_cast<uint32_t>(i)));\n"); });
+                    write_try_catch(w,
+                        [](writer& w) { w.write("return py::convert(self->obj.GetAt(static_cast<uint32_t>(i)));\n"); });
                 }
             }
             w.write("}\n");
@@ -1187,13 +1215,16 @@ static PyObject* __@_exit(%* self)
                     }
                     else
                     {
-                        w.write("return -1;//TODO find param type of SetAt\n");
-//                         write_try_catch(w, 
-//                             [](writer& w){ w.write(R"(if (value == nullptr) { self->obj.RemoveAt(static_cast<uint32_t>(i)); }
-// else { self->obj.SetAt(static_cast<uint32_t>(i), py::convert_to<T>(value)); }
-// return 0;
-// )"); },
-//                             [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                        write_try_catch(w,
+                            [&col_type](writer& w)
+                        {
+                            auto format = R"(if (value == nullptr) { self->obj.RemoveAt(static_cast<uint32_t>(i)); }
+ else { self->obj.SetAt(static_cast<uint32_t>(i), py::convert_to<%>(value)); }
+ return 0;
+ )";
+                            w.write(format, col_type);
+                        },
+                            [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                     }
                 }
                 w.write("}\n");
@@ -1202,12 +1233,69 @@ static PyObject* __@_exit(%* self)
 
         if (implements_mapping(type))
         {
-            w.write("\nstatic Py_ssize_t __@_mp_length(PyObject* self) { return -1; }\n", type.TypeName());
-            w.write("\nstatic PyObject* __@_mp_subscript(PyObject* self, PyObject* key) { return nullptr; };\n", type.TypeName());
+            auto type_args = get_type_arguments(type, "Windows.Foundation.Collections", { "IMap`2", "IMapView`2" });
+            auto key_type = type_args.at(0);
+            auto value_type = type_args.at(1);
+
+
+            w.write("\nstatic Py_ssize_t __@_mp_length(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard gg{ w };
+
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->_mp_length();\n");
+                }
+                else
+                {
+                    write_try_catch(w,
+                        [](writer& w) { w.write("return static_cast<Py_ssize_t>(self->obj.Size());\n"); },
+                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
+                }
+            }
+            w.write("}\n");
+
+            w.write("\nstatic PyObject* __@_mp_subscript(%* self, PyObject* key)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard gg{ w };
+
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->_mp_subscript(key);\n");
+                }
+                else
+                {
+                    write_try_catch(w,
+                        [&key_type](writer& w) { w.write("return py::convert(self->obj.Lookup(py::convert_to<%>(key)));\n", key_type); });
+                }
+            }
+            w.write("}\n");
 
             if (implements_imap(type))
             {
-                w.write("\nstatic int __@_mp_ass_item(PyObject* self, PyObject* key, PyObject* value) { return -1; };\n", type.TypeName());
+                w.write("\nstatic int __@_mp_ass_item(%* self, PyObject* key, PyObject* value)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+                {
+                    writer::indent_guard gg{ w };
+
+                    if (is_ptype(type))
+                    {
+                        w.write("return self->obj->_mp_ass_item(key, value);\n");
+                    }
+                    else
+                    {
+                        write_try_catch(w,
+                            [&key_type, &value_type](writer& w)
+                        {
+                            auto format = R"(if (value == nullptr) { self->obj.Remove(py::convert_to<%>(key)); }
+else { self->obj.Insert(py::convert_to<%>(key), py::convert_to<%>(value)); }
+return 0;
+)";
+                            w.write(format, key_type, key_type, value_type);
+                        },
+                            [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    }
+                }
+                w.write("}\n");
             }
         }
     }
@@ -1223,16 +1311,16 @@ static PyObject* __@_exit(%* self)
         {
             w.write("\n");
         }
-    
-        w.write("% instance{ % };\nreturn py::wrap(instance, type);\n", 
-            method.Parent(), 
+
+        w.write("% instance{ % };\nreturn py::wrap(instance, type);\n",
+            method.Parent(),
             bind_list<write_param_name>(", ", signature.params()));
     }
-    
+
     void write_class_new_function(writer& w, TypeDef const& type)
     {
         w.write("\nstatic PyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
-    
+
         {
             writer::indent_guard g{ w };
 
@@ -1542,7 +1630,7 @@ if (!PyDict_Check(obj))
                 {
                     w.write("new_value.% = converter<%>::convert_to(py_%);\n", field_name, field.Signature().Type(), field_name);
                 }
-                
+
             }
 
             w.write("\nreturn new_value;\n");
@@ -1553,7 +1641,7 @@ if (!PyDict_Check(obj))
     void write_struct_property_function(writer& w, TypeDef const& type, Field const& field)
     {
         w.write("\nstatic PyObject* @_get_%(%* self, void* /*unused*/)\n{\n",
-            type.TypeName(), 
+            type.TypeName(),
             field.Name(),
             bind<write_wrapper_type>(type));
         {
@@ -1617,7 +1705,7 @@ if (!PyDict_Check(obj))
         if (type.TypeNamespace() == "Windows.Foundation")
         {
             auto type_name = type.TypeName();
-            
+
             if (type_name == "DateTime")
             {
                 w.write(R"(

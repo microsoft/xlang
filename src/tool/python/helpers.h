@@ -312,6 +312,20 @@ namespace xlang
         return std::move(interfaces);
     }
 
+    std::vector<std::string> get_type_arguments(TypeDef const& type, std::string_view const& ns, std::vector<std::string_view> const& names)
+    {
+        for (auto&& ii : get_required_interfaces(type))
+        {
+            if (ii.type.TypeNamespace() == ns && std::any_of(
+                names.begin(), names.end(), [type_name = ii.type.TypeName()](auto const& name){ return name == type_name; }))
+            {
+                return std::move(ii.type_arguments);
+            }
+        }
+
+        return {};
+    }
+
     bool implements_interface(TypeDef const& type, std::string_view const& ns, std::string_view const& name)
     {
         auto category = get_category(type);
