@@ -19,7 +19,7 @@ namespace xlang
     {
         std::vector<cmd::option> options
         {
-            { "input", 1 },
+            { "input", 0 },
             { "reference", 0 },
             { "output", 0, 1 },
             { "component", 0, 1 },
