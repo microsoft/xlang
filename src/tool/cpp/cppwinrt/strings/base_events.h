@@ -368,22 +368,7 @@ WINRT_EXPORT namespace winrt
                     std::copy_n(m_targets->begin(), m_targets->size(), new_targets->begin());
                 }
 
-                if constexpr (!impl::has_category_v<delegate_type>)
-                {
-                    new_targets->back() = delegate;
-                }
-                else if (delegate.template try_as<impl::IAgileObject>() || !delegate.template try_as<impl::IMarshal>())
-                {
-                    new_targets->back() = delegate;
-                }
-                else
-                {
-                    new_targets->back() = [delegate = agile_ref<delegate_type>(delegate)](auto&&... args)
-                    {
-                        delegate.get()(args...);
-                    };
-                }
-
+                new_targets->back() = impl::make_agile_delegate(delegate);
                 token = get_token(new_targets->back());
 
                 slim_lock_guard const swap_guard(m_swap);
