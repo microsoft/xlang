@@ -35,7 +35,8 @@ namespace xlang
             { "root", 0, 1 },
             { "base", 0, 0 },
             { "lib", 0, 1 },
-            { "opt", 0, 0 }
+            { "opt", 0, 0 },
+            { "bracket", 0, 0 },
         };
 
         cmd::reader args{ argc, argv, options };

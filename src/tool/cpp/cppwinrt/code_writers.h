@@ -18,6 +18,36 @@ namespace xlang
         w.write(format);
     }
 
+    static void write_open_file_guard(writer& w, std::string_view const& file_name, char impl = 0)
+    {
+        std::string mangled_name;
+
+        for (auto&& c : file_name)
+        {
+            mangled_name += c == '.' ? '_' : c;
+        }
+
+        if (impl)
+        {
+            mangled_name += '_';
+            mangled_name += impl;
+        }
+
+        auto format = R"(#ifndef WINRT_HEADER_%
+#define WINRT_HEADER_%
+)";
+
+        w.write(format, mangled_name, mangled_name);
+    }
+
+    static void write_close_file_guard(writer& w)
+    {
+        auto format = R"(#endif
+)";
+
+        w.write(format);
+    }
+
     static void write_pch(writer& w)
     {
         auto format = R"(#include "%"
