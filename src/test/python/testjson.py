@@ -31,6 +31,13 @@ class TestJson(unittest.TestCase):
         with self.assertRaises(TypeError):
             v = wdj.JsonValue()
 
+    def test_JsonArray_iter(self):
+        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+        count = 0
+        for x in a:
+            count = count + 1
+        self.assertEqual(a.Size, count)
+
     def test_JsonArray_parse(self):
         a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
         self.assertEqual(a.ValueType, 4)

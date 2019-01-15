@@ -422,17 +422,18 @@ struct delegate_python_type<%>
                 {
                     writer::indent_guard gg{ w };
                     write_try_catch(w, [](writer& w) { 
-                        w.write("if (obj.MoveNext())\n{\n");
-                        {
-                            writer::indent_guard ggg{ w };
-                            w.write("return py::convert(obj.Current());\n");
-                        }
-                        w.write("}\nelse\n{\n");
-                        {
-                            writer::indent_guard ggg{ w };
-                            w.write("return nullptr;\n");
-                        }
-                        w.write("}\n");
+
+                        w.write(R"(if (obj.HasCurrent())
+{
+    auto cur = obj.Current();
+    obj.MoveNext();
+    return py::convert(cur);
+}
+else
+{
+    return nullptr;
+}
+)");
                     });
                 }
                 w.write("}\n");
