@@ -145,7 +145,7 @@ namespace xlang
 
         void handle(TypeSig const& signature)
         {
-            call(signature.Type(), [this](auto&& type){ static_cast<T*>(this)->handle(type); });
+            call(signature.Type(), [this](auto&& type) { static_cast<T*>(this)->handle(type); });
         }
     };
 
@@ -316,7 +316,7 @@ namespace xlang
     {
         auto category = get_category(type);
 
-        auto type_name_matches = [&ns, &name](TypeDef const& td){ return td.TypeNamespace() == ns && td.TypeName() == name; };
+        auto type_name_matches = [&ns, &name](TypeDef const& td) { return td.TypeNamespace() == ns && td.TypeName() == name; };
 
         if (category == category::class_type)
         {
@@ -326,7 +326,7 @@ namespace xlang
                 {
                 case TypeDefOrRef::TypeDef:
                 {
-                    if (type_name_matches(ii.Interface().TypeDef()))
+                    if (implements_interface(ii.Interface().TypeDef(), ns, name))
                     {
                         return true;
                     }
@@ -334,9 +334,38 @@ namespace xlang
                 break;
                 case TypeDefOrRef::TypeRef:
                 {
-                    if (type_name_matches(find_required(ii.Interface().TypeRef())))
+                    if (implements_interface(find_required(ii.Interface().TypeRef()), ns, name))
                     {
                         return true;
+                    }
+                }
+                break;
+                case TypeDefOrRef::TypeSpec:
+                {
+                    auto generic_type = ii.Interface().TypeSpec().Signature().GenericTypeInst().GenericType();
+                    switch (generic_type.type())
+                    {
+                    case TypeDefOrRef::TypeDef:
+                    {
+                        if (implements_interface(generic_type.TypeDef(), ns, name))
+                        {
+                            return true;
+                        }
+                    }
+                    break;
+                    case TypeDefOrRef::TypeRef:
+                    {
+                        if (implements_interface(find_required(generic_type.TypeRef()), ns, name))
+                        {
+                            return true;
+                        }
+                    }
+                    break;
+                    case TypeDefOrRef::TypeSpec:
+                    {
+                        throw_invalid("generic type of a type spec can't be a type spec");
+                    }
+                    break;
                     }
                 }
                 break;
@@ -364,13 +393,13 @@ namespace xlang
 
     bool implements_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> fnsq_names)
     {
-         for (auto&& fnsq_name : fnsq_names)
-         {
-             if (implements_interface(type, std::get<0>(fnsq_name), std::get<1>(fnsq_name)))
-             {
-                 return true;
-             }
-         }
+        for (auto&& fnsq_name : fnsq_names)
+        {
+            if (implements_interface(type, std::get<0>(fnsq_name), std::get<1>(fnsq_name)))
+            {
+                return true;
+            }
+        }
 
         return false;
     }
@@ -387,45 +416,36 @@ namespace xlang
 
     bool is_async_interface(TypeDef const& type)
     {
-        return implements_interface(type, { 
-            std::make_tuple("Windows.Foundation", "IAsyncAction"),
-            std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
-            std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
-            std::make_tuple("Windows.Foundation", "IAsyncOperationWithProgress`2") });
+        return get_category(type) == category::interface_type &&
+            implements_interface(type, {
+                std::make_tuple("Windows.Foundation", "IAsyncAction"),
+                std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
+                std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
+                std::make_tuple("Windows.Foundation", "IAsyncOperationWithProgress`2") });
     }
 
-    bool is_iterable_container(TypeDef const& type)
+    bool implements_iiterable(TypeDef const& type)
     {
         return implements_interface(type, "Windows.Foundation.Collections", "IIterable`1");
     }
 
-    bool is_iterator(TypeDef const& type)
+    bool implements_iiterator(TypeDef const& type)
     {
         return implements_interface(type, "Windows.Foundation.Collections", "IIterator`1");
-    }
-
-    bool has_dunder_iter(TypeDef const& type)
-    {
-        return (is_iterable_container(type) || is_iterator(type));
-    }
-
-    bool has_dunder_iternext(TypeDef const& type)
-    {
-        return is_iterator(type);
     }
 
     bool is_vector_interface(TypeDef const& type)
     {
         return implements_interface(type, {
-            std::make_tuple("Windows.Foundation.Collections", "IVector`1"),
-            std::make_tuple("Windows.Foundation.Collections", "IVectorView`1") });
+                std::make_tuple("Windows.Foundation.Collections", "IVector`1"),
+                std::make_tuple("Windows.Foundation.Collections", "IVectorView`1") });
     }
 
     bool is_map_interface(TypeDef const& type)
     {
         return implements_interface(type, {
-            std::make_tuple("Windows.Foundation.Collections", "IMap`2"),
-            std::make_tuple("Windows.Foundation.Collections", "IMapView`2") });
+                std::make_tuple("Windows.Foundation.Collections", "IMap`2"),
+                std::make_tuple("Windows.Foundation.Collections", "IMapView`2") });
     }
 
     struct method_info
@@ -857,9 +877,9 @@ namespace xlang
     {
         auto category = get_param_category(param);
 
-        return (category == param_category::in 
-             || category == param_category::pass_array 
-             || category == param_category::fill_array);
+        return (category == param_category::in
+            || category == param_category::pass_array
+            || category == param_category::fill_array);
     }
 
     bool is_out_param(method_signature::param_t const& param)

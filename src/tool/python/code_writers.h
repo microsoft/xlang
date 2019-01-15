@@ -13,6 +13,7 @@ namespace xlang
     }
 
     void write_method_body(writer& w, TypeDef const& type, method_info const& info);
+    void write_method_overloads(writer& w, TypeDef const& type, std::vector<xlang::method_info> const& overloads);
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type);
     void write_method_table(writer& w, TypeDef const& type);
     void write_getset_table(writer& w, TypeDef const& type);
@@ -36,14 +37,24 @@ namespace xlang
         }
     }
 
-    void write_try_catch(writer& w, std::function<void(writer&)> func, std::string_view const& catch_return = "py::to_PyErr()")
+    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::function<void(writer&)> catchfunc)
     {
         w.write("try\n{\n");
         {
             writer::indent_guard g{ w };
-            func(w);
+            tryfunc(w);
         }
-        w.write("}\ncatch (...)\n{\n    return %;\n}\n", catch_return);
+        w.write("}\ncatch (...)\n{\n");
+        {
+            writer::indent_guard g{ w };
+            catchfunc(w);
+        }
+        w.write("}\n");
+    }
+
+    void write_try_catch(writer& w, std::function<void(writer&)> func, std::string_view const& catch_return = "py::to_PyErr()")
+    {
+        write_try_catch(w, func, [&catch_return](writer& w) { w.write("return %;\n", catch_return); });
     }
 
     void write_py_tuple_pack(writer& w, std::vector<std::string> const& params)
@@ -349,12 +360,12 @@ struct delegate_python_type<%>
                 w.write("virtual PyObject* dunder_await() = 0;\n");
             }
 
-            if (has_dunder_iter(type))
+            if (implements_iiterable(type) || implements_iiterator(type))
             {
                 w.write("virtual PyObject* dunder_iter() = 0;\n");
             }
 
-            if (has_dunder_iternext(type))
+            if (implements_iiterator(type))
             {
                 w.write("virtual PyObject* dunder_iternext() = 0;\n");
             }
@@ -393,32 +404,64 @@ struct delegate_python_type<%>
                 w.write("PyObject* dunder_await() override { return py::dunder_await(obj); }\n");
             }
 
-            if (has_dunder_iter(type))
+            if (implements_iiterable(type))
             {
-                w.write("PyObject* dunder_iter() override { return nullptr; }\n");
+                w.write("\nPyObject* dunder_iter() override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+                    write_try_catch(w, [](writer& w) { w.write("return py::convert(obj.First());\n"); });
+                }
+                
+                w.write("}\n");
             }
 
-            if (has_dunder_iternext(type))
+            if (implements_iiterator(type))
             {
-                w.write("PyObject* dunder_iternext() override { return nullptr; }\n");
+                w.write("PyObject* dunder_iter() override { return reinterpret_cast<PyObject*>(this); }\n");
+                w.write("\nPyObject* dunder_iternext() override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+                    write_try_catch(w, [](writer& w) { 
+                        w.write("if (obj.MoveNext())\n{\n");
+                        {
+                            writer::indent_guard ggg{ w };
+                            w.write("return py::convert(obj.Current());\n");
+                        }
+                        w.write("}\nelse\n{\n");
+                        {
+                            writer::indent_guard ggg{ w };
+                            w.write("return nullptr;\n");
+                        }
+                        w.write("}\n");
+                    });
+                }
+                w.write("}\n");
             }
 
             w.write("\n");
 
             for (auto&&[name, overloads] : get_methods(type, true))
             {
+                auto front_method = overloads.front().method;
+                auto is_put = is_put_method(front_method);
+
                 w.write("% %(%) override\n{\n", 
-                    is_put_method(overloads.front().method) ? "int" : "PyObject*",
-                    name, bind<write_pinterface_param>(overloads.front().method));
+                    is_put ? "int" : "PyObject*", name, 
+                    bind<write_pinterface_param>(front_method));
                 {
                     writer::indent_guard gg{ w };
-                    for (auto&& overload : overloads)
-                    {
-                        write_try_catch(w, 
-                            [&](writer& w) { write_method_body(w, type, overload); },
-                            is_put_method(overloads.front().method) ? "-1" : " py::to_PyErr()");
 
+                    if (overloads.size() == 1 && (is_property_method(front_method) || is_event_method(front_method)))
+                    {
+                        write_try_catch(w,
+                            [&](writer& w) { write_method_body(w, type, overloads.front()); },
+                            is_put ? "-1" : "py::to_PyErr()");
                     }
+                    else
+                    {
+                        write_method_overloads(w, type, overloads);
+                    }
+
                 }
                 w.write("};\n\n");
 
@@ -650,6 +693,35 @@ if (!%)
         }
     }
 
+    void write_method_overloads(writer& w, TypeDef const& type, std::vector<xlang::method_info> const& overloads)
+    {
+        w.write("Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
+
+        separator s{ w, "else " };
+
+        for (auto&& overload : overloads)
+        {
+            method_signature signature{ overload.method };
+
+            s();
+            w.write("if (arg_count == %)\n{\n", count_in_param(signature.params()));
+            {
+                writer::indent_guard gg{ w };
+
+                write_try_catch(w, [&](writer& w) { write_method_body(w, type, overload); });
+            }
+            w.write("}\n");
+        }
+
+        w.write(R"(else if (arg_count != -1)
+{
+    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+}
+
+return nullptr;
+)");
+    }
+
     void write_method_self_type(writer& w, TypeDef const& type, MethodDef const& method)
     {
         if (is_static(method))
@@ -698,31 +770,7 @@ if (!%)
             }
             else
             {
-                w.write("Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
-
-                separator s{ w, "else " };
-
-                for (auto&& overload : overloads)
-                {
-                    method_signature signature{ overload.method };
-
-                    s();
-                    w.write("if (arg_count == %)\n{\n", count_in_param(signature.params()));
-                    {
-                        writer::indent_guard gg{ w };
-
-                        write_try_catch(w, [&](writer& w) { write_method_body(w, type, overload); });
-                    }
-                    w.write("}\n");
-                }
-
-                w.write(R"(else if (arg_count != -1)
-{
-    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
-}
-
-return nullptr;
-)");
+                write_method_overloads(w, type, overloads);
             }
         }
         w.write("}\n");
@@ -928,24 +976,38 @@ static PyObject* __@_exit(%* self)
             w.write("}\n");
         }
 
-        if (has_dunder_iter(type))
+        if (implements_iiterable(type))
         {
             w.write("\nstatic PyObject* __@_iter(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
             {
                 writer::indent_guard g{ w };
 
-                w.write("return nullptr;\n");
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->dunder_iter();\n");
+                }
+                else
+                {
+                    write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.First());\n"); });
+                }
             }
             w.write("}\n");
         }
 
-        if (has_dunder_iternext(type))
+        if (implements_iiterator(type))
         {
+            w.write("\nstatic PyObject* __@_iter(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+                write_try_catch(w, [](auto& w) { w.write("return reinterpret_cast<PyObject*>(self);\n"); });
+            }
+            w.write("}\n");
+
             w.write("\nstatic PyObject* __@_iternext(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
             {
                 writer::indent_guard g{ w };
 
-                w.write("return nullptr;\n");
+                w.write("return self->obj->dunder_iternext();\n");
             }
             w.write("}\n");
         }
@@ -1590,42 +1652,46 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
             || (category == category::interface_type)
             || (category == category::struct_type));
 
-        w.write("\nstatic PyType_Slot @_Type_slots[] = \n{\n", type.TypeName());
+        auto name = type.TypeName();
+
+        w.write("\nstatic PyType_Slot @_Type_slots[] = \n{\n", name);
 
         {
             writer::indent_guard g{ w };
+
             if (has_dealloc(type))
             {
-                w.write("{ Py_tp_dealloc, @_dealloc },\n", type.TypeName());
+                w.write("{ Py_tp_dealloc, @_dealloc },\n", name);
             }
 
-            w.write("{ Py_tp_new, @_new },\n", type.TypeName());
+            w.write("{ Py_tp_new, @_new },\n", name);
 
             if ((category == category::class_type) || (category == category::interface_type))
             {
-                w.write("{ Py_tp_methods, @_methods },\n", type.TypeName());
+                w.write("{ Py_tp_methods, @_methods },\n", name);
             }
 
-            w.write("{ Py_tp_getset, @_getset },\n", type.TypeName());
+            w.write("{ Py_tp_getset, @_getset },\n", name);
 
             if (implements_istringable(type))
             {
-                w.write("{ Py_tp_str, __@_str },\n", type.TypeName());
+                w.write("{ Py_tp_str, __@_str },\n", name);
             }
 
             if (is_async_interface(type))
             {
-                w.write("{ Py_am_await, (unaryfunc)__@_await },\n", type.TypeName());
+                w.write("{ Py_am_await, (unaryfunc)__@_await },\n", name);
             }
 
-            if (has_dunder_iter(type))
+            XLANG_ASSERT(!(implements_iiterable(type) && implements_iiterator(type)));
+            if (implements_iiterable(type) || implements_iiterator(type))
             {
-                w.write("{ Py_tp_iter, __@_iter },\n", type.TypeName());
+                w.write("{ Py_tp_iter, __@_iter },\n", name);
             }
 
-            if (has_dunder_iternext(type))
+            if (implements_iiterator(type))
             {
-                w.write("{ Py_tp_iternext, __@_iternext },\n", type.TypeName());
+                w.write("{ Py_tp_iternext, __@_iternext },\n", name);
             }
 
             w.write("{ 0, nullptr },\n");
