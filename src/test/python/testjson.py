@@ -60,12 +60,6 @@ class TestJson(unittest.TestCase):
         self.assertEqual(2, a[3].ValueType) # JsonValueType.Number
         self.assertEqual(3.14, a[3].GetNumber())
 
-
-    def test_JsonArray_contains(self):
-        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
-
-        self.assertTrue(a[2] in a) 
-
     def test_JsonArray_parse(self):
         a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
         self.assertEqual(a.ValueType, 4)

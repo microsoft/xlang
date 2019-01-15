@@ -373,7 +373,6 @@ struct delegate_python_type<%>
             if (implements_sequence(type))
             {
                 w.write("virtual Py_ssize_t _sq_length() = 0;\n");
-                w.write("virtual int _sq_contains(PyObject* value) = 0;\n");
                 w.write("virtual PyObject* _sq_item(Py_ssize_t i) = 0;\n");
 
                 if (implements_ivector(type))
@@ -470,16 +469,6 @@ else
 
                     write_try_catch(w,
                         [](writer& w) { w.write("return static_cast<Py_ssize_t>(obj.Size());\n"); },
-                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
-                }
-                w.write("}\n");
-
-                w.write("\nint32_t _sq_contains(PyObject* value) override\n{\n");
-                {
-                    writer::indent_guard gg{ w };
-
-                    write_try_catch(w,
-                        [](writer& w) { w.write("uint32_t index;\nreturn obj.IndexOf(py::convert_to<T>(value), index) ? 1 : 0;\n"); },
                         [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                 }
                 w.write("}\n");
@@ -1165,23 +1154,6 @@ static PyObject* __@_exit(%* self)
                 {
                     write_try_catch(w,
                         [](writer& w) { w.write("return static_cast<Py_ssize_t>(self->obj.Size());\n"); },
-                        [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
-                }
-            }
-            w.write("}\n");
-
-            w.write("\nstatic int __@_sq_contains(%* self, PyObject* value)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
-            {
-                writer::indent_guard gg{ w };
-
-                if (is_ptype(type))
-                {
-                    w.write("return self->obj->_sq_contains(value);\n");
-                }
-                else
-                {
-                    write_try_catch(w,
-                        [&col_type](writer& w) { w.write("uint32_t index;\nreturn self->obj.IndexOf(py::convert_to<@>(value), index) ? 1 : 0;\n", col_type); },
                         [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
                 }
             }
@@ -1984,7 +1956,6 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
             if (implements_sequence(type))
             {
                 w.write("{ Py_sq_length, __@_sq_length },\n", name);
-                w.write("{ Py_sq_contains, __@_sq_contains },\n", name);
                 w.write("{ Py_sq_item, __@_sq_item },\n", name);
 
                 if (implements_ivector(type))
