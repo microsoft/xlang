@@ -434,18 +434,34 @@ namespace xlang
         return implements_interface(type, "Windows.Foundation.Collections", "IIterator`1");
     }
 
-    bool is_vector_interface(TypeDef const& type)
+    bool implements_ivector(TypeDef const& type)
     {
-        return implements_interface(type, {
-                std::make_tuple("Windows.Foundation.Collections", "IVector`1"),
-                std::make_tuple("Windows.Foundation.Collections", "IVectorView`1") });
+        return implements_interface(type, "Windows.Foundation.Collections", "IVector`1");
     }
 
-    bool is_map_interface(TypeDef const& type)
+    bool implements_ivectorview(TypeDef const& type)
     {
-        return implements_interface(type, {
-                std::make_tuple("Windows.Foundation.Collections", "IMap`2"),
-                std::make_tuple("Windows.Foundation.Collections", "IMapView`2") });
+        return implements_interface(type, "Windows.Foundation.Collections", "IVectorView`1");
+    }
+
+    bool implements_sequence(TypeDef const& type)
+    {
+        return implements_ivector(type) || implements_ivectorview(type); 
+    }
+
+    bool implements_imap(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IMap`2");
+    }
+
+    bool implements_imapview(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IMapView`2");
+    }
+
+    bool implements_mapping(TypeDef const& type)
+    {
+        return implements_imap(type) || implements_imapview(type);
     }
 
     struct method_info

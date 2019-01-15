@@ -370,6 +370,29 @@ struct delegate_python_type<%>
                 w.write("virtual PyObject* dunder_iternext() = 0;\n");
             }
 
+            if (implements_sequence(type))
+            {
+                w.write("virtual Py_ssize_t _sq_length() = 0;\n");
+                w.write("virtual int _sq_contains(PyObject* value) = 0;\n");
+                w.write("virtual PyObject* _sq_item(Py_ssize_t i) = 0;\n");
+
+                if (implements_ivector(type))
+                {
+                    w.write("virtual int _sq_ass_item(Py_ssize_t i, PyObject* value) = 0;\n");
+                }
+            }
+
+            if (implements_mapping(type))
+            {
+                w.write("virtual Py_ssize_t _mp_length() = 0;\n");
+                w.write("virtual PyObject* _mp_subscript(PyObject* key) = 0;\n");
+
+                if (implements_imap(type))
+                {
+                    w.write("virtual int _mp_ass_item(PyObject* key, PyObject* value) = 0;\n");
+                }
+            }
+
             w.write("\n");
 
             for (auto&&[name, overloads] : get_methods(type, true))
@@ -437,6 +460,92 @@ else
                     });
                 }
                 w.write("}\n");
+            }
+
+            if (implements_sequence(type))
+            {
+                w.write("\nPy_ssize_t _sq_length() override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+
+                    write_try_catch(w, 
+                        [](writer& w){ w.write("return static_cast<Py_ssize_t>(obj.Size());\n"); }, 
+                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                }
+                w.write("}\n");
+
+                w.write("\nint32_t _sq_contains(PyObject* value) override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+
+                    write_try_catch(w, 
+                        [](writer& w){ w.write("uint32_t index;\nreturn obj.IndexOf(py::convert_to<T>(value), index) ? 1 : 0;\n"); }, 
+                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                }
+                w.write("}\n");
+
+                w.write("\nPyObject* _sq_item(Py_ssize_t i) override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+
+                    write_try_catch(w, 
+                        [](writer& w){ w.write("return py::convert(obj.GetAt(static_cast<uint32_t>(i)));\n"); });
+                }
+                w.write("}\n");
+
+                if (implements_ivector(type))
+                {
+                    w.write("\nint _sq_ass_item(Py_ssize_t i, PyObject* value) override\n{\n");
+                    {
+                        writer::indent_guard gg{ w };
+
+                        write_try_catch(w, 
+                            [](writer& w){ w.write(R"(if (value == nullptr) { obj.RemoveAt(static_cast<uint32_t>(i)); }
+else { obj.SetAt(static_cast<uint32_t>(i), py::convert_to<T>(value)); }
+return 0;
+)"); },
+                            [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    }
+                    w.write("}\n");
+                }
+            }
+
+            if (implements_mapping(type))
+            {
+                w.write("\nPy_ssize_t _mp_length() override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+
+                    write_try_catch(w, 
+                        [](writer& w){ w.write("return static_cast<Py_ssize_t>(obj.Size());\n"); }, 
+                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                }
+                w.write("}\n");
+
+                w.write("\nPyObject* _mp_subscript(PyObject* key) override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+
+                    write_try_catch(w, 
+                        [](writer& w){ w.write("return py::convert(obj.Lookup(py::convert_to<K>(key)));\n"); });
+                }
+                w.write("}\n");
+
+                if (implements_imap(type))
+                {
+                    w.write("\nint _mp_ass_item(PyObject* key, PyObject* value) override\n{\n");
+                    {
+                        writer::indent_guard gg{ w };
+
+                        write_try_catch(w, 
+                            [](writer& w){ w.write(R"(if (value == nullptr) { obj.Remove(py::convert_to<K>(key)); }
+else { obj.Insert(py::convert_to<K>(key), py::convert_to<V>(value)); }
+return 0;
+)"); },
+                            [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    }
+                    w.write("}\n");
+                }
             }
 
             w.write("\n");
@@ -1011,6 +1120,95 @@ static PyObject* __@_exit(%* self)
                 w.write("return self->obj->dunder_iternext();\n");
             }
             w.write("}\n");
+        }
+
+        if (implements_sequence(type))
+        {
+            w.write("\nstatic Py_ssize_t __@_sq_length(%* self)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard gg{ w };
+                
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->_sq_length();\n");
+                }
+                else
+                {
+                    write_try_catch(w, 
+                        [](writer& w){ w.write("return static_cast<Py_ssize_t>(self->obj.Size());\n"); }, 
+                        [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                }
+            }
+            w.write("}\n");
+
+            w.write("\nstatic int __@_sq_contains(%* self, PyObject* value)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard gg{ w };
+
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->_sq_contains(value);\n");
+                }
+                else
+                {
+                    w.write("return -1;//TODO find param type of IndexOf\n");
+                    // write_try_catch(w, 
+                    //     [](writer& w){ w.write("uint32_t index;\nreturn self->obj.IndexOf(py::convert_to<T>(value), index) ? 1 : 0;\n"); }, 
+                    //     [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                }
+            }
+            w.write("}\n");
+
+            w.write("\nstatic PyObject* __@_sq_item(%* self, Py_ssize_t i)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+            {
+                writer::indent_guard gg{ w };
+
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->_sq_item(i);\n");
+                }
+                else
+                {
+                    write_try_catch(w, 
+                        [](writer& w){ w.write("return py::convert(self->obj.GetAt(static_cast<uint32_t>(i)));\n"); });
+                }
+            }
+            w.write("}\n");
+
+            if (implements_ivector(type))
+            {
+                w.write("\nstatic int __@_sq_ass_item(%* self, Py_ssize_t i, PyObject* value)\n{\n", type.TypeName(), bind<write_wrapper_type>(type));
+                {
+                    writer::indent_guard gg{ w };
+
+                    if (is_ptype(type))
+                    {
+                        w.write("return self->obj->_sq_ass_item(i, value);\n");
+                    }
+                    else
+                    {
+                        w.write("return -1;//TODO find param type of SetAt\n");
+//                         write_try_catch(w, 
+//                             [](writer& w){ w.write(R"(if (value == nullptr) { self->obj.RemoveAt(static_cast<uint32_t>(i)); }
+// else { self->obj.SetAt(static_cast<uint32_t>(i), py::convert_to<T>(value)); }
+// return 0;
+// )"); },
+//                             [](writer& w){ w.write("py::to_PyErr();\nreturn -1;\n"); });
+                    }
+                }
+                w.write("}\n");
+            }
+        }
+
+        if (implements_mapping(type))
+        {
+            w.write("\nstatic Py_ssize_t __@_mp_length(PyObject* self) { return -1; }\n", type.TypeName());
+            w.write("\nstatic PyObject* __@_mp_subscript(PyObject* self, PyObject* key) { return nullptr; };\n", type.TypeName());
+
+            if (implements_imap(type))
+            {
+                w.write("\nstatic int __@_mp_ass_item(PyObject* self, PyObject* key, PyObject* value) { return -1; };\n", type.TypeName());
+            }
         }
     }
 
@@ -1693,6 +1891,29 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
             if (implements_iiterator(type))
             {
                 w.write("{ Py_tp_iternext, __@_iternext },\n", name);
+            }
+
+            if (implements_sequence(type))
+            {
+                w.write("{ Py_sq_length, __@_sq_length },\n", name);
+                w.write("{ Py_sq_contains, __@_sq_contains },\n", name);
+                w.write("{ Py_sq_item, __@_sq_item },\n", name);
+
+                if (implements_ivector(type))
+                {
+                    w.write("{ Py_sq_ass_item, __@_sq_ass_item },\n", name);
+                }
+            }
+
+            if (implements_mapping(type))
+            {
+                w.write("{ Py_mp_length, __@_mp_length },\n", name);
+                w.write("{ Py_mp_subscript, __@_mp_subscript },\n", name);
+
+                if (implements_imap(type))
+                {
+                    w.write("{ Py_mp_ass_subscript, __@_mp_ass_item },\n", name);
+                }
             }
 
             w.write("{ 0, nullptr },\n");
