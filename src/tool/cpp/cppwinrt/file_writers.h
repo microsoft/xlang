@@ -84,7 +84,6 @@ namespace xlang
         w.swap();
         write_license(w);
         write_open_file_guard(w, ns, '0');
-        w.write_depends("base");
 
         for (auto&& depends : w.depends)
         {
@@ -174,6 +173,7 @@ namespace xlang
         w.swap();
         write_license(w);
         write_open_file_guard(w, ns);
+        write_version_assert(w);
 
         for (auto&& depends : w.depends)
         {

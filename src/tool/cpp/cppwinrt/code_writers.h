@@ -10,6 +10,15 @@ namespace xlang
         w.write(format, XLANG_VERSION_STRING);
     }
 
+    static void write_version_assert(writer& w)
+    {
+        auto format = R"(#include "winrt/base.h"
+static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched component and base headers.");
+)";
+
+        w.write(format, XLANG_VERSION_STRING);
+    }
+
     static void write_include_guard(writer& w)
     {
         auto format = R"(#pragma once
@@ -33,8 +42,8 @@ namespace xlang
             mangled_name += impl;
         }
 
-        auto format = R"(#ifndef WINRT_HEADER_%
-#define WINRT_HEADER_%
+        auto format = R"(#ifndef WINRT_%_H
+#define WINRT_%_H
 )";
 
         w.write(format, mangled_name, mangled_name);
