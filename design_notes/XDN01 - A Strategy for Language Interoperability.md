@@ -52,6 +52,8 @@ underlying type system includes concepts such as resource ownership semantics, e
 semantics, and binary-stable interfaces that component authors and consumers do not need to be aware
 of.
 
+More details in [XDN03 - xlang Metadata](XDN03%20-%20xlang%20Type%20System.md).
+
 ### Application Programming Interface (API) Metadata
 
 All xlang APIs are described in machine-readable metadata stored in the industry standard [ECMA-335
@@ -59,6 +61,8 @@ format](https://www.ecma-international.org/publications/standards/Ecma-335.htm).
 used by both the consuming & producing projections. The data may be used at build time, run time or
 both depending on the nature of the projection. The metadata is the definitive description of the
 available APIs and how to call them. Metadata also provides information about dependencies and versioning.
+
+More details in [XDN04 - xlang Metadata](XDN04%20-%20xlang%20Metadata.md).
 
 ### Application Binary Interface (ABI)
 
@@ -72,6 +76,8 @@ processor architecture factors.
 While the ABI is critical to enable interoperability among languages, most developers creating
 components do not need to be aware of the ABI. Projections provide an adaptation layer that map
 natural and familiar concepts from each programming language to the underlying ABI.
+
+More Details in [XDN05 - xlang Binary Interface](XDN05%20-%20xlang%20Binary%20Interface.md).
 
 ### Language Projections
 
@@ -97,6 +103,8 @@ handles ownership and primitive operations such as cross-language string represe
 management, object activation, error origination, and shared memory lifetime management. The runtime
 itself is exposed as flat C APIs. All components that interoperate with each other must share the
 same platform adaptation layer.
+
+More Details in [XDN06 - xlang Platform Abstraction Layer](XDN06%20-%20xlang%20Platform%20Abstraction%20Layer.md).
 
 ### Developer Tools
 
