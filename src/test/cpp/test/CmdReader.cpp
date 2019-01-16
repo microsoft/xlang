@@ -5,9 +5,43 @@
 
 using namespace xlang::cmd;
 
+class response_file
+{
+    const char* resp_file_name = "respfile.txt";
+    void write_response_file(const char* input)
+    {
+            std::ofstream resp_file(resp_file_name);
+            if (!resp_file.is_open())
+                FAIL("Response file could not be created");
+            resp_file << input;
+            resp_file.close();
+    }
+
+    void remove_response_file()
+    {
+        std::remove(resp_file_name);
+    }
+
+public:
+    response_file(const char* input)
+    {
+        write_response_file(input);
+    }
+
+    reader create_reader(size_t const argc, const char* argv[], std::vector<option> const& options)
+    {
+        return reader{ argc, argv, options };
+    }
+
+    ~response_file()
+    {
+        remove_response_file();
+    }
+};
+
 TEST_CASE("CmdReader")
 {
-    const std::vector<option> options
+    static const std::vector<option> options
     {
         { "input", 1 },
         { "reference", 0 },
@@ -37,14 +71,10 @@ TEST_CASE("CmdReader")
     // response file #1: filename no quotes
     {
         const char* argv[] = { "progname", "@respfile.txt" };
-        const size_t argc = 2;
-        std::ofstream resp_file;
+        const size_t argc = _countof(argv);
 
-        resp_file.open("respfile.txt");
-        resp_file << "-in example_file.in -out example_file.out";
-        resp_file.close();
-        reader args{ argc, argv, options };
-        std::remove("respfile.txt");
+        response_file rf{ R"(-in example_file.in -out example_file.out)" };
+        reader args = rf.create_reader(argc, argv, options);
 
         REQUIRE(args.exists("input"));
         REQUIRE(args.value("input") == "example_file.in");
@@ -59,14 +89,10 @@ TEST_CASE("CmdReader")
     // response file #2: filename with quotes
     {
         const char* argv[] = { "progname", "@respfile.txt" };
-        const size_t argc = 2;
-        std::ofstream resp_file;
+        const size_t argc = _countof(argv);
 
-        resp_file.open("respfile.txt");
-        resp_file << "-in \"example file.in\" -out \"example file.out\"";
-        resp_file.close();
-        reader args{ argc, argv, options };
-        std::remove("respfile.txt");
+        response_file rf{ R"(-in "example file.in" -out "example file.out")" };
+        reader args = rf.create_reader(argc, argv, options);
 
         REQUIRE(args.exists("input"));
         REQUIRE(args.value("input") == "example file.in");
@@ -81,20 +107,16 @@ TEST_CASE("CmdReader")
     // response file #3: filename with quote within name
     {
         const char* argv[] = { "progname", "@respfile.txt" };
-        const size_t argc = 2;
-        std::ofstream resp_file;
+        const size_t argc = _countof(argv);
 
-        resp_file.open("respfile.txt");
-        resp_file << "-in example\\\"file.in -out example\\\"file.out";
-        resp_file.close();
-        reader args{ argc, argv, options };
-        std::remove("respfile.txt");
+        response_file rf{ R"(-in example\"file.in -out example\"file.out)" };
+        reader args = rf.create_reader(argc, argv, options);
 
         REQUIRE(args.exists("input"));
-        REQUIRE(args.value("input") == "example\"file.in");
+        REQUIRE(args.value("input") == R"(example"file.in)");
         REQUIRE_FALSE(args.exists("reference"));
         REQUIRE(args.exists("output"));
-        REQUIRE(args.value("output") == "example\"file.out");
+        REQUIRE(args.value("output") == R"(example"file.out)");
         REQUIRE_FALSE(args.exists("filter"));
         REQUIRE_FALSE(args.exists("name"));
         REQUIRE_FALSE(args.exists("verbose"));
@@ -103,27 +125,22 @@ TEST_CASE("CmdReader")
     // response file #4: really really long path
     {
         const char* argv[] = { "progname", "@respfile.txt" };
-        const size_t argc = 2;
-        std::ofstream resp_file;
-        std::string file_name_in("C:\\");
-        std::string file_name_out("C:\\");
+        const size_t argc = _countof(argv);
+        std::string file_name_in(R"(C:\)");
+        std::string file_name_out(R"(C:\)");
+        std::string input_str("-in ");
 
         for (int i = 0; i < 500; i++) {
-            file_name_in.append("dirname\\");
-            file_name_out.append("dirname\\");
+            file_name_in.append(R"(dirname\)");
+            file_name_out.append(R"(dirname\)");
         }
 
         file_name_in.append("example_file.in");
         file_name_out.append("example_file.out");
+        input_str.append(file_name_in).append(" -out ").append(file_name_out);
 
-        resp_file.open("respfile.txt");
-        resp_file << "-in ";
-        resp_file << file_name_in;
-        resp_file << " -out ";
-        resp_file << file_name_out;
-        resp_file.close();
-        reader args{ argc, argv, options };
-        std::remove("respfile.txt");
+        response_file rf{ input_str.data() };
+        reader args = rf.create_reader(argc, argv, options);
 
         REQUIRE(args.exists("input"));
         REQUIRE(args.value("input") == file_name_in);

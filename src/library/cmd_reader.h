@@ -200,7 +200,9 @@ namespace xlang::cmd
             std::experimental::filesystem::path response_path{ std::string{ arg } };
             std::string extension = response_path.extension().generic_string();
             std::transform(extension.begin(), extension.end(), extension.begin(),
-                [](unsigned char c) { return static_cast<unsigned char>(::tolower(c)); });
+                [](auto c) { return static_cast<unsigned char>(::tolower(c)); });
+
+            // Check if misuse of @ prefix, so if directory or metadata file instead of response file.
             if (is_directory(response_path) || extension == ".winmd")
             {
                 throw_invalid("'@' is reserved for response files");
