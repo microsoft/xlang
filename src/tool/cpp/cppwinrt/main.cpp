@@ -47,8 +47,10 @@ namespace xlang
 
         settings.verbose = args.exists("verbose");
         settings.root = args.value("root", "winrt");
-        settings.input = args.files("input");
-        settings.reference = args.files("reference");
+
+        settings.input = args.files("input", database::is_database);
+        settings.reference = args.files("reference", database::is_database);
+
         settings.component = args.exists("component");
         settings.base = args.exists("base");
 
@@ -138,6 +140,16 @@ namespace xlang
         }
     }
 
+    static bool has_projected_types(cache::namespace_members const& members)
+    {
+        return
+            !members.interfaces.empty() ||
+            !members.classes.empty() ||
+            !members.enums.empty() ||
+            !members.structs.empty() ||
+            !members.delegates.empty();
+    }
+
     static void run(int const argc, char** argv)
     {
         writer w;
@@ -180,7 +192,7 @@ namespace xlang
             {
                 group.add([&, &ns = ns, &members = members]
                 {
-                    if (members.types.empty() || !settings.filter.includes(members))
+                    if (!has_projected_types(members) || !settings.filter.includes(members))
                     {
                         return;
                     }

@@ -10,7 +10,7 @@ namespace winrt::Component::Composable
         Base();
     };
     struct WINRT_EBO Derived : Component::Composable::IDerived,
-    impl::base<Derived, Component::Composable::Base>,
+        impl::base<Derived, Component::Composable::Base>,
         impl::require<Derived, Component::Composable::IBase>
     {
         Derived(std::nullptr_t) noexcept {}
