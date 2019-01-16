@@ -36,8 +36,8 @@ in the root of this project for details on how to contribute.
 
 In xlang, language interoperability is achieved via a combination of language independent metadata,
 binary interface standards, language-specific projections, and a shared runtime. The
-interoperability enables bidirectional control & data flow among any number of programming language
-s within a process.
+interoperability enables bidirectional control & data flow among any number of programming languages
+within a process.
 
 ### Common Type System
 
