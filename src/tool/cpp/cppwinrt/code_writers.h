@@ -13,7 +13,7 @@ namespace xlang
     static void write_version_assert(writer& w)
     {
         auto format = R"(#include "winrt/base.h"
-static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched component and base headers.");
+static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched C++/WinRT headers.");
 )";
 
         w.write(format, XLANG_VERSION_STRING);

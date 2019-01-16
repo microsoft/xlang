@@ -163,7 +163,7 @@ namespace xlang
             c.remove_cppwinrt_foundation_types();
             supplement_includes(c);
             settings.filter = { settings.include, settings.exclude };
-            settings.base = settings.base || settings.component;
+            settings.base = settings.base || !settings.component;
 
             if (settings.verbose)
             {
