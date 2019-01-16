@@ -52,7 +52,7 @@ underlying type system includes concepts such as resource ownership semantics, e
 semantics, and binary-stable interfaces that component authors and consumers do not need to be aware
 of.
 
-More details in [XDN03 - xlang Metadata](XDN03%20-%20xlang%20Type%20System.md).
+More details in [XDN03 - xlang Type System](XDN03%20-%20xlang%20Type%20System.md).
 
 ### Application Programming Interface (API) Metadata
 
