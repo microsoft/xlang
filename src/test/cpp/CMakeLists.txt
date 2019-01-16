@@ -1,16 +1,18 @@
 cmake_minimum_required(VERSION 3.9)
 
 add_executable(cpp_test)
-target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-target_sources(cpp_test PUBLIC 
+target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated" ${XLANG_LIBRARY_PATH})
+target_sources(cpp_test PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp"
     pch.cpp
     activation.cpp
     test/AbiGuard.cpp
     test/AgileRef.cpp
     test/Async.cpp
+    test/CmdReader.cpp
     test/Collections.cpp
     test/Composable.cpp
+    test/CustomError.cpp
     test/Edge.cpp
     test/Enum.cpp
     test/Events.cpp
@@ -18,7 +20,6 @@ target_sources(cpp_test PUBLIC
     test/FinalRelease.cpp
     test/Names.cpp
     test/Structs.cpp
-    test/CustomError.cpp
     test/VariadicDelegate.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
