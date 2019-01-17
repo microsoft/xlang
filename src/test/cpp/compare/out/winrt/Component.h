@@ -2,7 +2,7 @@
 #ifndef WINRT_Component_H
 #define WINRT_Component_H
 #include "winrt/base.h"
-static_assert(winrt::check_version(CPPWINRT_VERSION, "2.0.000000.0"), "Mismatched component and base headers.");
+static_assert(winrt::check_version(CPPWINRT_VERSION, "2.0.000000.0"), "Mismatched C++/WinRT headers.");
 #include "winrt/impl/Component.2.h"
 namespace winrt::impl
 {

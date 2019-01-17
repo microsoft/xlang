@@ -2,7 +2,7 @@
 #ifndef WINRT_Component_Async_H
 #define WINRT_Component_Async_H
 #include "winrt/base.h"
-static_assert(winrt::check_version(CPPWINRT_VERSION, "2.0.000000.0"), "Mismatched component and base headers.");
+static_assert(winrt::check_version(CPPWINRT_VERSION, "2.0.000000.0"), "Mismatched C++/WinRT headers.");
 #include "winrt/impl/Windows.Foundation.2.h"
 #include "winrt/impl/Component.Async.2.h"
 #include "winrt/Component.h"

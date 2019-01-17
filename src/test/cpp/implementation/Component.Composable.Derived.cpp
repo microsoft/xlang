@@ -6,6 +6,7 @@ namespace winrt::Component::Composable::implementation
 {
     hstring Derived::DerivedMethod()
     {
+        BaseMethod();
         return L"Derived";
     }
 }
