@@ -8,7 +8,7 @@ target_include_directories(idl PUBLIC ${XLANG_LIBRARY_PATH})
 
 if (WIN32)
     TARGET_CONFIG_MSVC_PCH(idl pch.cpp pch.h)
-    target_link_libraries(idl windowsapp ole32)
+    target_link_libraries(idl windowsapp ole32 shlwapi)
 else()
     target_link_libraries(idl c++ c++abi c++experimental)
     target_link_libraries(idl -lpthread)

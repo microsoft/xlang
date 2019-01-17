@@ -12,13 +12,13 @@ status: draft
 
 ## Abstract
 
-This design note describes the process for making and disseminating architecturally important design decisions through Design Notes in the Xlang project (cross-platform Windows Runtime).
+This document describes the process for making and disseminating architecturally important design decisions through design notes in the [xlang project](http://github.com/Microsoft/xlang).
 
-Thanks to Galen Hunt for pioneering the use of the design note process and allowing us to use it on this project.
+Thanks to [Galen Hunt](https://www.microsoft.com/en-us/research/people/galenh/) for pioneering the use of the design note process and allowing us to use it on this project.
 
 ## 1\. The Purpose
 
-In any project, the process for making and documenting decisions defines the character of the endeavor. The XLang project is small now, but is likely to grow and become a collaborative effort across multiple divisions of Microsoft as well as the open source community.
+In any project, the process for making and documenting decisions defines the character of the endeavor. The xlang project is small now, but is likely to grow and become a collaborative effort across multiple divisions of Microsoft as well as the open source community.
 
 To foster collaboration, the decision closure process used within the project should have four qualities; it should be:
 
@@ -30,7 +30,7 @@ To foster collaboration, the decision closure process used within the project sh
 
 - **Discoverable**. An outsider or someone new to the effort should be able to quickly determine the set of completed decisions and the motivation for those decisions. New project members should understand and efficiently participate in the process with little training.
 
-Design Notes are _not_ a substitute for documentation. Project documentation describes _how_ the system works. Design Notes capture _why_ the team chose to build the system the way that they did.
+Design notes are _not_ a substitute for documentation. Project documentation describes _how_ the system works. Design notes capture _why_ the team chose to build the system the way that they did.
 
 ## 2\. The Process
 
@@ -40,7 +40,7 @@ The design note process is directed toward producing progress collaboratively in
 
 Participants in the design note process include:
 
-- The **_Community_**: everyone using or otherwise interested in the development of the Xlang project.
+- The **_Community_**: everyone using or otherwise interested in the development of the project.
 
 - The **_Design Note Author_**: person who volunteers to write a design note on a particular topic of interest.
 
@@ -48,11 +48,13 @@ Participants in the design note process include:
 
 - The **_Design Note Moderator_**: person who oversees the process of vetting design notes for formal acceptance as part of the plan of record. The moderator schedules and announces formal design note reviews, moderates discussions during the reviews to ensure that all viewpoints are expressed, judges consensus in reviews, and publishes the outcomes of formal design note reviews.
 
-> Note: A formal moderator for the Xlang project has not been chosen. For now please contact [Ben Kuhn](mailto:benkuhn@microsoft.com) and [Harry Pierson](mailto:hpierson@microsoft.com).
+> Note: Currently, a design note moderator has not been formally chosen for the xlang project. For now please contact [Ben Kuhn](mailto:benkuhn@microsoft.com) and [Harry Pierson](mailto:hpierson@microsoft.com).
 
-- The **_Design Note Review Committee_**: a small body of representatives chosen from the larger community. Members of the review committee are chosen to represent all of the major engineering groups participating in the Xlang project. As a body, the review committee has the final say of whether or not a design note becomes an accepted part of the plan of record.
+- The **_Design Note Review Committee_**: a small body of representatives chosen from the larger community. Members of the review committee are chosen to represent all of the major engineering groups participating in the project. As a body, the review committee has the final say of whether or not a design note becomes an accepted part of the plan of record.
 
-Design notes are used to communicate design decisions and information that should be shared with a wide audience of contributors to the Xlang project. The design note process is also used to gather input when complex or potential controversial decisions must be made. In general, narrowly scoped issues with few interested parties will not be documented through the design note process. For example much of the content of an implementation specification or a usage guide would not be appropriate for a design note. On the other hand, a decision such how to support UTF-8 strings should be included in a design note as it 1) has wide-ranging implications, and 2) would benefit from the wisdom of the crowd.
+> Note: Currently, the xlang project review committee consists entirely of Microsoft employees. After an initial project bootstrap period, we will open up this committee to include representatives from the larger xlang community.
+
+Design notes are used to communicate design decisions and information that should be shared with a wide audience of contributors to the project. The design note process is also used to gather input when complex or potential controversial decisions must be made. In general, narrowly scoped issues with few interested parties will not be documented through the design note process. For example much of the content of an implementation specification or a usage guide would not be appropriate for a design note. On the other hand, a decision such how to support UTF-8 strings should be included in a design note as it 1) has wide-ranging implications, and 2) would benefit from the wisdom of the crowd.
 
 The steps of the design note process are as follows:
 
@@ -62,7 +64,7 @@ The steps of the design note process are as follows:
 
 3. **The design note author leads discussions to draft a design note**. These discussions will often gather feedback from the community via email and refine ideas through small group meetings filtered to committed contributors.
 
-4. **The working group writes a design note using the design note template**. The design note template is available in the design_notes folder of the Xlang project git repo. Design note numbers are assigned sequentially in order of request by placing the first draft of the design note in the git repo (either directly or through the moderator) using the next available number. Design note drafts are marked with "Draft" status to encourage interested parties to read them. The working group may circulate early drafts of the design note via email or other collaboration tools to help interested parties track the design note evolution.
+4. **The working group writes a design note using the design note template**. The design note template is available in the design_notes folder of the project's git repo. Design note numbers are assigned sequentially in order of request by placing the first draft of the design note in the git repo (either directly or through the moderator) using the next available number. Design note drafts are marked with "Draft" status to encourage interested parties to read them. The working group may circulate early drafts of the design note via email or other collaboration tools to help interested parties track the design note evolution.
 
 5. **A formal design note review is scheduled through the moderator when the working group has completed its draft**. The moderator selects a date and schedules a review meeting with the review committee. The moderate announces the schedule for the review via an email to the appropriate mailing lists.
 
@@ -80,13 +82,13 @@ The steps of the design note process are as follows:
 
    5) **The moderator calls for a vote on the design note at the end of the meeting**. The review committee may decide to approve a design note, approve it subject to edits, or return the design note to the working group for further work. Strictly speaking, a majority vote is sufficient for approval of a design note; however, in practice, the design note review process is intended to produce a widely accepted consensus decision.
 
-8. **After acceptance, the final design note is published**. The design note is archived in the Design Notes of the Xlang project repo with its status changed to "Adopted". The moderator sends email with the design note's URL to the appropriate mailing lists announcing that the design note is complete and adopted. If the design note replaces or invalidates earlier adopted design notes, their status is changed to "Deprecated".
+8. **After acceptance, the final design note is published**. The design note is archived in the design notes folder of the project repo with its status changed to "Adopted". The moderator sends email with the design note's URL to the appropriate mailing lists announcing that the design note is complete and adopted. If the design note replaces or invalidates earlier adopted design notes, their status is changed to "Deprecated".
 
 ## 3\. The Decisions
 
-The design note process is most effective when individual participants recognize that design notes are the Xlang project's primary process for decision making and learning.
+The design note process is most effective when individual participants recognize that design notes are the project's primary process for decision making and learning.
 
-To you as an individual, the design note process gives well defined points at which you can influence the evolution and architecture of the Xlang project. You can choose which decision points to exercise based on the relevance of a particular issue to your personal and professional interests and agenda. In summary, the decision points available to you are as follows:
+To you as an individual, the design note process gives well defined points at which you can influence the evolution and architecture of the project. You can choose which decision points to exercise based on the relevance of a particular issue to your personal and professional interests and agenda. In summary, the decision points available to you are as follows:
 
 - **Formation of a working group**. You can propose the formation of a new working group. You can also vote with your feet to join or abstain from a working group.
 - **Working group discussions**. You can contribute to working group discussions. You should especially do so if the topic is an area of importance to you.
@@ -114,7 +116,7 @@ Ideally design notes are concise, clear, and definitive. A design note should be
 
 A design note should have sufficient clarity and content to stand on its own. As a rule of thumb, a new employee should be able to read a design note and understand what decisions were made and why without requiring extra material. Where a design note builds on earlier decisions, it should explicitly reference the appropriate previous design notes.
 
-As stated earlier, _design notes are not a substitute for project documentation_. A given area of the project may have multiple decisions that need to be made - and thus multiple design notes. For example, there are multiple decisions that need to be made for the Xlang platform adaptation layer regarding areas such as string representation, error origination APIs and activation registration. Each of these decisions should have a separate design note, timeline, author and working group. The details captured in these design notes will inform future team members who wish to understand _why_ a specific area of the platform adaptation layer works the way that it does. However, there needs to be separate documentation of the platform adaptation layer itself that enables future team members to use or port the platform adaptation layer without needing to review all of the details that went into the decision making process.
+As stated earlier, _design notes are not a substitute for project documentation_. A given area of the project may have multiple decisions that need to be made - and thus multiple design notes. For example, there are multiple decisions that need to be made for the xlang platform adaptation layer regarding areas such as string encoding, error origination APIs and activation registration. Each of these decisions should have a separate design note, timeline, author and working group. The details captured in these design notes will inform future team members who wish to understand _why_ a specific area of the platform adaptation layer works the way that it does. However, there needs to be separate documentation of the platform adaptation layer itself that enables future team members to use or port the platform adaptation layer without needing to review all of the details that went into the decision making process.
 
 The _most successful design notes_ (and therefore the most widely referenced) clearly separate objectives, priorities, principles, interfaces, abstractions and implementations. A given design note may target all or only a few of these points. Particularly, in areas of active exploration and learning, a design note will target a specific project phase. For example, an exploratory design note might state the problem and propose a method for evaluating potential solutions based on a set of priorities and principles. Later design notes might abstract the interface to a solution. Subsequent design notes might describe the core abstractions of an implementation and finally describe the implementation details of a system. In practice, putting forth the guiding principles and priorities is often sufficient for collaboration.
 
@@ -126,4 +128,4 @@ The _least effective design notes_ are those that are written primarily as post-
 
 The _least effective working groups_ fail because they attempt to overload too much into a single design note or they confuse writing design notes with writing documentation. Overloading produces two problems: writing the design note becomes onerous and decision making becomes insular. When a design group goes dark, casual (and often insightful) participants have little room for input.
 
-Design notes should be based upon a standard Design Note Template. This document uses one such template.
+Design notes should be based upon a standard design note Template. This document uses one such template.

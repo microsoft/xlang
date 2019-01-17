@@ -1,6 +1,7 @@
 #pragma once
 
 #include "impl/base.h"
+#include "impl/cmd_reader_windows.h"
 
 namespace xlang::cmd
 {
@@ -99,7 +100,8 @@ namespace xlang::cmd
             return result->second.front();
         }
 
-        auto files(std::string_view const& name) const
+        template <typename F>
+        auto files(std::string_view const& name, F directory_filter) const
         {
             std::set<std::string> files;
 
@@ -109,7 +111,12 @@ namespace xlang::cmd
                 {
                     if (std::experimental::filesystem::is_regular_file(file))
                     {
-                        files.insert(canonical(file.path()).string());
+                        auto filename = canonical(file.path()).string();
+
+                        if (directory_filter(filename))
+                        {
+                            files.insert(filename);
+                        }
                     }
                 }
             };
@@ -121,13 +128,16 @@ namespace xlang::cmd
                 if (std::experimental::filesystem::is_directory(canonical))
                 {
                     add_directory(canonical);
+                    continue;
                 }
-                else if (std::experimental::filesystem::is_regular_file(canonical))
+
+                if (std::experimental::filesystem::is_regular_file(canonical))
                 {
                     files.insert(canonical.string());
+                    continue;
                 }
 #if XLANG_PLATFORM_WINDOWS
-                else if (path == "local")
+                if (path == "local")
                 {
                     std::array<char, MAX_PATH> local{};
 #ifdef _WIN64
@@ -136,15 +146,61 @@ namespace xlang::cmd
                     ExpandEnvironmentStringsA("%windir%\\SysNative\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
 #endif
                     add_directory(local.data());
+                    continue;
                 }
-#endif
+
+                std::string sdk_version;
+
+                if (path == "sdk" || path == "sdk+")
+                {
+                    sdk_version = impl::get_sdk_version();
+                }
                 else
                 {
-                    throw_invalid("Path '", path, "' is not a file or directory");
+                    std::regex rx(R"(((\d+)\.(\d+)\.(\d+)\.(\d+))\+?)");
+                    std::smatch match;
+
+                    if (std::regex_match(path, match, rx))
+                    {
+                        sdk_version = match[1].str();
+                    }
                 }
+
+                if (!sdk_version.empty())
+                {
+                    auto sdk_path = impl::get_sdk_path();
+                    auto xml_path = sdk_path;
+                    xml_path /= L"Platforms\\UAP";
+                    xml_path /= sdk_version;
+                    xml_path /= L"Platform.xml";
+
+                    impl::add_files_from_xml(files, sdk_version, xml_path, sdk_path);
+
+                    if (path.back() != '+')
+                    {
+                        continue;
+                    }
+
+                    for (auto&& item : std::experimental::filesystem::directory_iterator(sdk_path / L"Extension SDKs"))
+                    {
+                        xml_path = item.path() / sdk_version;
+                        xml_path /= L"SDKManifest.xml";
+
+                        impl::add_files_from_xml(files, sdk_version, xml_path, sdk_path);
+                    }
+
+                    continue;
+                }
+#endif
+                throw_invalid("Path '", path, "' is not a file or directory");
             }
 
             return files;
+        }
+
+        auto files(std::string_view const& name) const
+        {
+            return files(name, [](auto&&) {return true; });
         }
 
     private:

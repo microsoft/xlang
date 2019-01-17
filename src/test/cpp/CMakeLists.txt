@@ -9,6 +9,8 @@ target_sources(cpp_test PUBLIC
     test/AbiGuard.cpp
     test/AgileRef.cpp
     test/Async.cpp
+    test/AsyncNoSuspend.cpp
+    test/AsyncReturn.cpp
     test/CmdReader.cpp
     test/Collections.cpp
     test/Composable.cpp
@@ -16,6 +18,7 @@ target_sources(cpp_test PUBLIC
     test/Edge.cpp
     test/Enum.cpp
     test/Events.cpp
+    test/EventsInvalid.cpp
     test/Fast.cpp
     test/FinalRelease.cpp
     test/Names.cpp
@@ -51,15 +54,23 @@ if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
 else()
     target_sources(cpp_test PUBLIC
         main.cpp
+        test/Agility.cpp
         test/Interop.cpp
         test/Capture.cpp
+        test/AsyncAutoCancel.cpp
+        test/AsyncCancelCallback.cpp
+        test/AsyncCheckCancel.cpp
+        test/AsyncLocal.cpp
+        test/AsyncProgress.cpp
+        test/AsyncResult.cpp
+        test/AsyncSuspend.cpp
+        test/AsyncThrow.cpp
     )
 endif()
 
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files)
-file(TO_NATIVE_PATH "${generated_files}/attributes.winmd" attributes_winmd)
 file(TO_NATIVE_PATH "${generated_files}/component.winmd" component_winmd)
 file(TO_NATIVE_PATH "${project_folder}/compare/out/winrt/Component.h" compare_component_h)
 file(TO_NATIVE_PATH "${project_folder}/generated/winrt/Windows.Foundation.h" foundation_h)
@@ -72,14 +83,9 @@ add_custom_command(OUTPUT ${generated_files}
     DEPENDS ${project_folder}\\component.idl
 )
 
-add_custom_command(OUTPUT ${attributes_winmd}
-    COMMAND midlrt ${project_folder}\\attributes.idl /nomidl /winrt /winmd ${attributes_winmd} /metadata_dir ${project_folder} /reference ${project_folder}\\windows.winmd /h "nul"
-    DEPENDS ${project_folder}\\attributes.idl ${generated_files}
-)
-
 add_custom_command(OUTPUT ${component_winmd}
-    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir ${project_folder} /reference ${project_folder}\\windows.winmd /reference ${attributes_winmd} /h "nul"
-    DEPENDS ${project_folder}\\component.idl ${attributes_winmd} ${generated_files}
+    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir ${project_folder} /reference ${project_folder}\\windows.winmd /h "nul"
+    DEPENDS ${project_folder}\\component.idl ${generated_files}
 )
 
 add_custom_command(OUTPUT ${foundation_h}
@@ -88,12 +94,12 @@ add_custom_command(OUTPUT ${foundation_h}
 )
 
 add_custom_command(OUTPUT ${compare_component_h}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd ${attributes_winmd} -out ${project_folder}/compare/out -component ${project_folder}/compare/project -verbose -prefix -base -overwrite
+    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd -include Component -out ${project_folder}/compare/out -component ${project_folder}/compare/project -verbose -prefix -base -overwrite
     DEPENDS ${component_winmd} ${foundation_h} ${generated_files} cppwinrt
 )
 
 add_custom_command(OUTPUT ${mogule_g_cpp}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd ${attributes_winmd} -out ${generated_files} -component -verbose -prefix -base -lib test -opt
+    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
     DEPENDS ${component_winmd} ${generated_files} cppwinrt
 )
 
