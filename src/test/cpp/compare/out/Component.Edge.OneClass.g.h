@@ -15,7 +15,6 @@ namespace winrt::Component::Edge::implementation
         {
             return { to_abi<default_interface<class_type>>(this) };
         }
-
         hstring GetRuntimeClassName() const
         {
             return L"Component.Edge.OneClass";
