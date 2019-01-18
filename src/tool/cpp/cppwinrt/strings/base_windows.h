@@ -4,17 +4,16 @@ namespace winrt::impl
     template <typename T>
     using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
 
-    template <typename T>
+    template <typename T, std::enable_if_t<is_implements_v<T>, int> = 0>
     com_ref<T> wrap_as_result(void* result)
     {
-        if constexpr (is_implements_v<T>)
-        {
-            return { &static_cast<produce<T, typename default_interface<T>::type>*>(result)->shim(), take_ownership_from_abi };
-        }
-        else
-        {
-            return { result, take_ownership_from_abi };
-        }
+        return { &static_cast<produce<T, typename default_interface<T>::type>*>(result)->shim(), take_ownership_from_abi };
+    }
+
+    template <typename T, std::enable_if_t<!is_implements_v<T>, int> = 0>
+    com_ref<T> wrap_as_result(void* result)
+    {
+        return { result, take_ownership_from_abi };
     }
 
     template <typename To, typename From>

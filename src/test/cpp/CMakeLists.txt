@@ -100,7 +100,7 @@ add_custom_command(OUTPUT ${compare_component_h}
 
 add_custom_command(OUTPUT ${mogule_g_cpp}
     COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
-    DEPENDS ${component_winmd} ${generated_files} cppwinrt
+    DEPENDS ${foundation_h} ${generated_files} cppwinrt
 )
 
 add_custom_target(cpp_test_depends ALL DEPENDS ${compare_component_h} ${mogule_g_cpp})

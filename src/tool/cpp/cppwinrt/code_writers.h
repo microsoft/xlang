@@ -10,9 +10,48 @@ namespace xlang
         w.write(format, XLANG_VERSION_STRING);
     }
 
+    static void write_version_assert(writer& w)
+    {
+        auto format = R"(#include "winrt/base.h"
+static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched C++/WinRT headers.");
+)";
+
+        w.write(format, XLANG_VERSION_STRING);
+    }
+
     static void write_include_guard(writer& w)
     {
         auto format = R"(#pragma once
+)";
+
+        w.write(format);
+    }
+
+    static void write_open_file_guard(writer& w, std::string_view const& file_name, char impl = 0)
+    {
+        std::string mangled_name;
+
+        for (auto&& c : file_name)
+        {
+            mangled_name += c == '.' ? '_' : c;
+        }
+
+        if (impl)
+        {
+            mangled_name += '_';
+            mangled_name += impl;
+        }
+
+        auto format = R"(#ifndef WINRT_%_H
+#define WINRT_%_H
+)";
+
+        w.write(format, mangled_name, mangled_name);
+    }
+
+    static void write_close_file_guard(writer& w)
+    {
+        auto format = R"(#endif
 )";
 
         w.write(format);
