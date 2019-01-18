@@ -232,47 +232,56 @@ void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instan
     winrt::check_hresult(hr);
 }
 
+auto get_activation_factory(meta::TypeDef const& type)
+{
+    // TODO: need a version of get_activation_factory that takes IID as param
+    // TODO: need a factory caching scheme that doesn't use compile time type name
+
+    winrt::hstring type_name = winrt::to_hstring(std::string{ type.TypeNamespace() } +"." + std::string{ type.TypeName() });
+    return winrt::get_activation_factory(type_name);
+}
+
 int main(int const /*argc*/, char** /*argv*/)
 {
     meta::cache c{ get_system_metadata() };
     auto namespaces = get_namespace_map(c);
 
-    meta::TypeDef td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
-    meta::TypeDef td_ijsonvalue  = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
+    meta::TypeDef td_json_object = get_ns(namespaces, "Windows.Data.Json").types.at("JsonObject");
 
     winrt::init_apartment();
-    auto factory = winrt::get_activation_factory(L"Windows.Data.Json.JsonObject");
-
-    std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
+    auto factory = get_activation_factory(td_json_object);
 
     winrt::Windows::Foundation::IInspectable instance;
     {
+        std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
         std::vector<void*> args{ winrt::put_abi(instance) };
         invoke(get_cif(arg_types), factory, 6, args);
     };
 
-    winrt::hstring str;
+    winrt::hstring istringable_str;
     {
+        meta::TypeDef td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
         winrt::Windows::Foundation::IInspectable istringable;
         winrt::check_hresult(instance.as(get_guid(td_istringable), winrt::put_abi(istringable)));
 
-        auto arg_types2 = get_method_ffi_types(td_istringable.MethodList().first[0]);
-        std::vector<void*> args{ winrt::put_abi(str) };
-        invoke(get_cif(arg_types2), istringable, 6, args);
+        auto arg_types = get_method_ffi_types(td_istringable.MethodList().first[0]);
+        std::vector<void*> args{ winrt::put_abi(istringable_str) };
+        invoke(get_cif(arg_types), istringable, 6, args);
     }
-    printf("%S\n", str.c_str());
+    printf("%S\n", istringable_str.c_str());
 
-    winrt::hstring str2;
+    winrt::hstring ijsonvalue_str;
     {
+        meta::TypeDef td_ijsonvalue = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
         winrt::Windows::Foundation::IInspectable ijsonvalue;
         winrt::check_hresult(instance.as(get_guid(td_ijsonvalue), winrt::put_abi(ijsonvalue)));
 
-        auto arg_types3 = get_method_ffi_types(td_ijsonvalue.MethodList().first[1]);
+        auto arg_types = get_method_ffi_types(td_ijsonvalue.MethodList().first[1]);
 
-        std::vector<void*> args2{ winrt::put_abi(str2) };
-        invoke(get_cif(arg_types3), ijsonvalue, 7, args2);
+        std::vector<void*> args{ winrt::put_abi(ijsonvalue_str) };
+        invoke(get_cif(arg_types), ijsonvalue, 7, args);
     };
-    printf("%S\n", str2.c_str());
+    printf("%S\n", ijsonvalue_str.c_str());
 
     return 0;
 }
