@@ -135,7 +135,7 @@ auto get_arg_types(meta::MethodDef const& method)
     // explicit this pointer 
     arg_types.push_back(&ffi_type_pointer);
 
-    for (auto&& p : signature.params())
+    if (signature.has_params())
     {
         xlang::throw_invalid("not implemented");
     }
@@ -234,17 +234,11 @@ void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instan
 
 int main(int const /*argc*/, char** /*argv*/)
 {
-    //auto start = get_start_time();
-
     meta::cache c{ get_system_metadata() };
     auto namespaces = get_namespace_map(c);
 
-    //auto elapsed = get_elapsed_time(start);
-
-    //printf("%lldms\n", elapsed);
-
-    meta::TypeDef   td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
-    meta::TypeDef   td_ijsonvalue  = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
+    meta::TypeDef td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
+    meta::TypeDef td_ijsonvalue  = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
 
     winrt::init_apartment();
     auto factory = winrt::get_activation_factory(L"Windows.Data.Json.JsonObject");
@@ -266,6 +260,7 @@ int main(int const /*argc*/, char** /*argv*/)
         std::vector<void*> args{ winrt::put_abi(str) };
         invoke(get_cif(arg_types2), istringable, 6, args);
     }
+    printf("%S\n", str.c_str());
 
     winrt::hstring str2;
     {
@@ -277,6 +272,7 @@ int main(int const /*argc*/, char** /*argv*/)
         std::vector<void*> args2{ winrt::put_abi(str2) };
         invoke(get_cif(arg_types3), ijsonvalue, 7, args2);
     };
+    printf("%S\n", str2.c_str());
 
     return 0;
 }
