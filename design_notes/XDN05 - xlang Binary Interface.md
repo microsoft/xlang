@@ -69,8 +69,9 @@ interface. Multiple levels of COM interface single inheritance is supported.
 avoiding the rest of the COM standard, including concepts such as apartments, monikers and
 marshalling. These constructs are tightly bound to the Windows platform and so have little use in
 the xlang project. Likewise, xlang is explicitly avoiding Windows technologies that build on COM
-such as DCOM, MTS, COM+, ActiveX and the Windows Runtime. Windows Runtime is an inspiration for
-xlang, but remains a separate implementation.
+such as DCOM, MTS, COM+ and ActiveX. Windows Runtime is the core inspiration for xlang and is
+expected to interoperate with xlang on Windows. However, ABI compatibility with WinRT is explicitly
+_not_ a goal for the xlang project.
 
 ## IUnknown
 
@@ -222,6 +223,10 @@ would run more smoothly overall.
 The ObjectSize information category retrieves the memory usage in bytes of the object in question.
 The property type for ObjectSize is an unsigned 32-bit integer.
 
+### Object Equality
+
+> TODO [xlang issue #133](https://github.com/Microsoft/xlang/issues/133)
+
 ## Weak References
 
 One issue faced in COM based systems is circular references - i.e. two objects that each hold a
@@ -258,3 +263,7 @@ struct IWeakReferenceSource : IUnknown
     int32_t GetWeakReference(IWeakReference** weak_reference);
 };
 ```
+
+## Activation Factories
+
+## Class Inheritance
