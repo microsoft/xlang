@@ -702,8 +702,8 @@ namespace winrt::impl
 
     template <typename D, typename... I>
     struct WINRT_NOVTABLE root_implements
-        : root_implements_composing_outer<std::disjunction<std::is_same<composing, I>...>::value>
-        , root_implements_composable_inner<D, std::disjunction<std::is_same<composable, I>...>::value>
+        : root_implements_composing_outer<std::disjunction_v<std::is_same<composing, I>...>>
+        , root_implements_composable_inner<D, std::disjunction_v<std::is_same<composable, I>...>>
     {
         using IInspectable = Windows::Foundation::IInspectable;
         using root_implements_type = root_implements;

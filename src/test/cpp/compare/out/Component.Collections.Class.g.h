@@ -16,7 +16,6 @@ namespace winrt::Component::Collections::implementation
         {
             return { to_abi<default_interface<class_type>>(this) };
         }
-
         hstring GetRuntimeClassName() const
         {
             return L"Component.Collections.Class";

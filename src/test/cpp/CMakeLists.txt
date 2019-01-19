@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.9)
 
 add_executable(cpp_test)
-target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated")
-target_sources(cpp_test PUBLIC 
+target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated" ${XLANG_LIBRARY_PATH})
+target_sources(cpp_test PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp"
     pch.cpp
     activation.cpp
@@ -11,8 +11,10 @@ target_sources(cpp_test PUBLIC
     test/Async.cpp
     test/AsyncNoSuspend.cpp
     test/AsyncReturn.cpp
+    test/CmdReader.cpp
     test/Collections.cpp
     test/Composable.cpp
+    test/CustomError.cpp
     test/Edge.cpp
     test/Enum.cpp
     test/Events.cpp
@@ -21,7 +23,6 @@ target_sources(cpp_test PUBLIC
     test/FinalRelease.cpp
     test/Names.cpp
     test/Structs.cpp
-    test/CustomError.cpp
     test/VariadicDelegate.cpp
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
@@ -99,7 +100,7 @@ add_custom_command(OUTPUT ${compare_component_h}
 
 add_custom_command(OUTPUT ${mogule_g_cpp}
     COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
-    DEPENDS ${component_winmd} ${generated_files} cppwinrt
+    DEPENDS ${foundation_h} ${generated_files} cppwinrt
 )
 
 add_custom_target(cpp_test_depends ALL DEPENDS ${compare_component_h} ${mogule_g_cpp})

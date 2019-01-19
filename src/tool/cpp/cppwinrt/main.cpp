@@ -19,7 +19,7 @@ namespace xlang
     {
         std::vector<cmd::option> options
         {
-            { "input", 1 },
+            { "input", 0 },
             { "reference", 0 },
             { "output", 0, 1 },
             { "component", 0, 1 },
@@ -35,7 +35,8 @@ namespace xlang
             { "root", 0, 1 },
             { "base", 0, 0 },
             { "lib", 0, 1 },
-            { "opt", 0, 0 }
+            { "opt", 0, 0 },
+            { "bracket", 0, 0 },
         };
 
         cmd::reader args{ argc, argv, options };
@@ -162,6 +163,7 @@ namespace xlang
             c.remove_cppwinrt_foundation_types();
             supplement_includes(c);
             settings.filter = { settings.include, settings.exclude };
+            settings.base = settings.base || !settings.component;
 
             if (settings.verbose)
             {
@@ -206,7 +208,7 @@ namespace xlang
 
             group.add([&]
             {
-                if (settings.filter.empty() || settings.base)
+                if (settings.base)
                 {
                     write_base_h();
                 }
