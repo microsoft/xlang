@@ -121,11 +121,11 @@ namespace fooxlang
         {
             if (is_flags_enum(type))
             {
-                static_cast<T*>(this)->handle(ElementType::U4);
+                static_cast<T*>(this)->handle(xlang::meta::reader::ElementType::U4);
             }
             else
             {
-                static_cast<T*>(this)->handle(ElementType::I4);
+                static_cast<T*>(this)->handle(xlang::meta::reader::ElementType::I4);
             }
         }
 
@@ -200,7 +200,7 @@ namespace fooxlang
 
         void handle(xlang::meta::reader::TypeSig const& signature)
         {
-            call(signature.Type(), [this](auto&& type) { static_cast<T*>(this)->handle(type); });
+            xlang::call(signature.Type(), [this](auto&& type) { static_cast<T*>(this)->handle(type); });
         }
     };
 }

@@ -10,6 +10,30 @@ namespace meta = xlang::meta::reader;
 
 using namespace fooxlang;
 
+struct writer : xlang::text::writer_base<writer>
+{
+};
+
+struct separator
+{
+    writer& w;
+    std::string_view _separator{ ", " };
+    bool first{ true };
+
+    void operator()()
+    {
+        if (first)
+        {
+            first = false;
+        }
+        else
+        {
+            w.write(_separator);
+        }
+    }
+};
+
+
 struct winrt_ns
 {
     std::map<std::string_view, winrt_ns> sub_namespaces{};
@@ -241,12 +265,92 @@ auto get_activation_factory(meta::TypeDef const& type)
     return winrt::get_activation_factory(type_name);
 }
 
+void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdrs)
+{
+    struct type_name_handler : signature_handler_base<type_name_handler>
+    {
+        using signature_handler_base<type_name_handler>::handle;
+        writer& w;
+
+        type_name_handler(writer& w_) : w(w_) {}
+
+        void handle(xlang::meta::reader::TypeDef const& type)
+        {
+            w.write("%.%", type.TypeNamespace(), type.TypeName());
+        }
+
+        void handle(xlang::meta::reader::ElementType type)
+        {
+            switch (type)
+            {
+            case xlang::meta::reader::ElementType::Boolean:
+                w.write("Boolean"); break;
+            case xlang::meta::reader::ElementType::Char:
+                w.write("Char"); break;
+            case xlang::meta::reader::ElementType::I1:
+                w.write("I1"); break;
+            case xlang::meta::reader::ElementType::U1:
+                w.write("U1"); break;
+            case xlang::meta::reader::ElementType::I2:
+                w.write("I2"); break;
+            case xlang::meta::reader::ElementType::U2:
+                w.write("U2"); break;
+            case xlang::meta::reader::ElementType::I4:
+                w.write("I4"); break;
+            case xlang::meta::reader::ElementType::U4:
+                w.write("U4"); break;
+            case xlang::meta::reader::ElementType::I8:
+                w.write("I8"); break;
+            case xlang::meta::reader::ElementType::U8:
+                w.write("U8"); break;
+            case xlang::meta::reader::ElementType::R4:
+                w.write("R4"); break;
+            case xlang::meta::reader::ElementType::R8:
+                w.write("R8"); break;
+            case xlang::meta::reader::ElementType::String:
+                w.write("String"); break;
+            case xlang::meta::reader::ElementType::Object:
+                w.write("Object"); break;
+            default:
+                xlang::throw_invalid("element type not supported");
+            }
+        }
+
+        void handle(xlang::meta::reader::GenericTypeInstSig const& type)
+        {
+            handle(type.GenericType());
+
+            w.write("<");
+            separator s{ w };
+            for (auto&& arg : type.GenericArgs())
+            {
+                s();
+                handle(arg);
+            }
+            w.write(">");
+        }
+    };
+
+    type_name_handler tnh{ w };
+    tnh.handle(tdrs);
+}
+
 int main(int const /*argc*/, char** /*argv*/)
 {
     meta::cache c{ get_system_metadata() };
     auto namespaces = get_namespace_map(c);
 
     meta::TypeDef td_json_object = get_ns(namespaces, "Windows.Data.Json").types.at("JsonObject");
+
+    writer w;
+
+    for (auto&& ii : td_json_object.InterfaceImpl())
+    {
+        write_type_name(w, ii.Interface());
+        w.write("\n");
+    }
+
+    w.flush_to_console();
 
     winrt::init_apartment();
     auto factory = get_activation_factory(td_json_object);
