@@ -53,6 +53,37 @@ namespace winrt::impl
         return { static_cast<void*>(static_cast<abi_t<T>*>(new delegate_t<T, H>(std::forward<H>(handler)))), take_ownership_from_abi };
     }
 
+    template <typename T>
+    T make_agile_delegate(T const& delegate) noexcept
+    {
+        if constexpr (!has_category_v<T>)
+        {
+            return delegate;
+        }
+        else
+        {
+            if (delegate.template try_as<IAgileObject>())
+            {
+                return delegate;
+            }
+
+            com_ptr<IAgileReference> ref;
+            WINRT_RoGetAgileReference(0, guid_of<T>(), get_abi(delegate), ref.put_void());
+
+            if (ref)
+            {
+                return[ref = std::move(ref)](auto&&... args)
+                {
+                    T delegate;
+                    ref->Resolve(guid_of<T>(), put_abi(delegate));
+                    return delegate(args...);
+                };
+            }
+
+            return delegate;
+        }
+    }
+
     template <typename... T>
     struct WINRT_NOVTABLE variadic_delegate_abi : unknown_abi
     {
@@ -126,6 +157,16 @@ WINRT_EXPORT namespace winrt
         template <typename O, typename M> delegate(O* object, M method) :
             delegate([=](auto&&... args) { ((*object).*(method))(args...); })
         {}
+
+        template <typename O, typename M> delegate(com_ptr<O>&& object, M method) :
+            delegate([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+        {
+        }
+
+        template <typename O, typename M> delegate(weak_ref<O>&& object, M method) :
+            delegate([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+        {
+        }
 
         void operator()(T const&... args) const
         {
