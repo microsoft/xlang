@@ -6,7 +6,7 @@ namespace xlang
     {
         writer w;
         write_license(w);
-        write_include_guard(w);
+        write_open_file_guard(w, "BASE");
 
         w.write(strings::base_dependencies);
         w.write(strings::base_macros);
@@ -26,9 +26,9 @@ namespace xlang
         w.write(strings::base_weak_ref);
         w.write(strings::base_agile_ref);
         w.write(strings::base_error);
+        w.write(strings::base_delegate);
         w.write(strings::base_events);
         w.write(strings::base_marshaler);
-        w.write(strings::base_delegate);
         w.write(strings::base_activation);
         w.write(strings::base_implements);
         w.write(strings::base_composable);
@@ -41,6 +41,7 @@ namespace xlang
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
+        write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + settings.root + "/base.h");
     }
 
@@ -79,10 +80,10 @@ namespace xlang
         w.write_each<write_struct_abi>(members.structs);
         write_close_namespace(w);
 
+        write_close_file_guard(w);
         w.swap();
         write_license(w);
-        write_include_guard(w);
-        w.write_depends("base");
+        write_open_file_guard(w, ns, '0');
 
         for (auto&& depends : w.depends)
         {
@@ -103,9 +104,10 @@ namespace xlang
         w.write_each<write_interface>(members.interfaces);
         write_close_namespace(w);
 
+        write_close_file_guard(w);
         w.swap();
         write_license(w);
-        write_include_guard(w);
+        write_open_file_guard(w, ns, '1');
 
         for (auto&& depends : w.depends)
         {
@@ -129,9 +131,10 @@ namespace xlang
         write_close_namespace(w);
         write_namespace_special(w, ns, c);
 
+        write_close_file_guard(w);
         w.swap();
         write_license(w);
-        write_include_guard(w);
+        write_open_file_guard(w, ns, '2');
 
         for (auto&& depends : w.depends)
         {
@@ -166,9 +169,11 @@ namespace xlang
         w.write_each<write_std_hash>(members.classes);
         write_close_namespace(w);
 
+        write_close_file_guard(w);
         w.swap();
         write_license(w);
-        write_include_guard(w);
+        write_open_file_guard(w, ns);
+        write_version_assert(w);
 
         for (auto&& depends : w.depends)
         {
