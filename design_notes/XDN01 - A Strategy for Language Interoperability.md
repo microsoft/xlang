@@ -7,7 +7,7 @@ status: draft
 
 # XDN01 - A Strategy for Language Interoperability
 
-- Harry Pierson (hpierson\@microsoft.com)
+- Harry Pierson (hpierson@microsoft.com)
 - Status: Draft
 
 ## Abstract
