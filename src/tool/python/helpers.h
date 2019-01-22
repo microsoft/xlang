@@ -405,11 +405,11 @@ namespace xlang
         return false;
     }
 
-    bool implements_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> fnsq_names)
+    bool implements_any_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> names)
     {
-        for (auto&& fnsq_name : fnsq_names)
+        for (auto&&[ns, name] : names)
         {
-            if (implements_interface(type, std::get<0>(fnsq_name), std::get<1>(fnsq_name)))
+            if (implements_interface(type, ns, name))
             {
                 return true;
             }
@@ -431,7 +431,7 @@ namespace xlang
     bool is_async_interface(TypeDef const& type)
     {
         return get_category(type) == category::interface_type &&
-            implements_interface(type, {
+            implements_any_interface(type, {
                 std::make_tuple("Windows.Foundation", "IAsyncAction"),
                 std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
                 std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
