@@ -21,12 +21,7 @@ namespace xlang::meta::reader
                     }
 
                     auto& ns = m_namespaces[type.TypeNamespace()];
-                    auto insert = ns.types.try_emplace(type.TypeName(), type);
-
-                    if (insert.second == false)
-                    {
-                        throw_invalid("Duplicate type indicates invalid combination of metadata files");
-                    }
+                    ns.types.try_emplace(type.TypeName(), type);
                 }
             }
 
