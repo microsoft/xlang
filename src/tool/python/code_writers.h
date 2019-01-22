@@ -541,8 +541,11 @@ return 0;
 
             w.write("\n");
 
-            for (auto&&[name, overloads] : get_methods(type, true))
+            for (auto&& method : get_methods(type, true))
             {
+                auto name = std::get<0>(method);
+                auto overloads = std::get<1>(method);
+
                 auto front_method = overloads.front().method;
                 auto is_put = is_put_method(front_method);
 
