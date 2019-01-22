@@ -145,7 +145,7 @@ namespace xlang
 
         void handle(TypeSig const& signature)
         {
-            call(signature.Type(), [this](auto&& type){ static_cast<T*>(this)->handle(type); });
+            call(signature.Type(), [this](auto&& type) { static_cast<T*>(this)->handle(type); });
         }
     };
 
@@ -312,11 +312,25 @@ namespace xlang
         return std::move(interfaces);
     }
 
+    std::vector<std::string> get_type_arguments(TypeDef const& type, std::string_view const& ns, std::vector<std::string_view> const& names)
+    {
+        for (auto&& ii : get_required_interfaces(type))
+        {
+            if (ii.type.TypeNamespace() == ns && std::any_of(
+                names.begin(), names.end(), [type_name = ii.type.TypeName()](auto const& name){ return name == type_name; }))
+            {
+                return std::move(ii.type_arguments);
+            }
+        }
+
+        return {};
+    }
+
     bool implements_interface(TypeDef const& type, std::string_view const& ns, std::string_view const& name)
     {
         auto category = get_category(type);
 
-        auto is_stringable = [&ns, &name](TypeDef const& td){ return td.TypeNamespace() == ns && td.TypeName() == name; };
+        auto type_name_matches = [&ns, &name](TypeDef const& td) { return td.TypeNamespace() == ns && td.TypeName() == name; };
 
         if (category == category::class_type)
         {
@@ -326,7 +340,7 @@ namespace xlang
                 {
                 case TypeDefOrRef::TypeDef:
                 {
-                    if (is_stringable(ii.Interface().TypeDef()))
+                    if (implements_interface(ii.Interface().TypeDef(), ns, name))
                     {
                         return true;
                     }
@@ -334,9 +348,38 @@ namespace xlang
                 break;
                 case TypeDefOrRef::TypeRef:
                 {
-                    if (is_stringable(find_required(ii.Interface().TypeRef())))
+                    if (implements_interface(find_required(ii.Interface().TypeRef()), ns, name))
                     {
                         return true;
+                    }
+                }
+                break;
+                case TypeDefOrRef::TypeSpec:
+                {
+                    auto generic_type = ii.Interface().TypeSpec().Signature().GenericTypeInst().GenericType();
+                    switch (generic_type.type())
+                    {
+                    case TypeDefOrRef::TypeDef:
+                    {
+                        if (implements_interface(generic_type.TypeDef(), ns, name))
+                        {
+                            return true;
+                        }
+                    }
+                    break;
+                    case TypeDefOrRef::TypeRef:
+                    {
+                        if (implements_interface(find_required(generic_type.TypeRef()), ns, name))
+                        {
+                            return true;
+                        }
+                    }
+                    break;
+                    case TypeDefOrRef::TypeSpec:
+                    {
+                        throw_invalid("generic type of a type spec can't be a type spec");
+                    }
+                    break;
                     }
                 }
                 break;
@@ -345,17 +388,30 @@ namespace xlang
         }
         else if (category == category::interface_type)
         {
-            if (is_stringable(type))
+            if (type_name_matches(type))
             {
                 return true;
             }
 
             for (auto&& i : get_required_interfaces(type))
             {
-                if (is_stringable(i.type))
+                if (type_name_matches(i.type))
                 {
                     return true;
                 }
+            }
+        }
+
+        return false;
+    }
+
+    bool implements_any_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> names)
+    {
+        for (auto&&[ns, name] : names)
+        {
+            if (implements_interface(type, ns, name))
+            {
+                return true;
             }
         }
 
@@ -374,19 +430,52 @@ namespace xlang
 
     bool is_async_interface(TypeDef const& type)
     {
-        if (get_category(type) == category::interface_type && type.TypeNamespace() == "Windows.Foundation")
-        {
-            auto name = type.TypeName();
-            if (name == "IAsyncAction" || 
-                name == "IAsyncActionWithProgress`1" ||
-                name == "IAsyncOperation`1" || 
-                name == "IAsyncOperationWithProgress`2")
-            {
-                return true;
-            }
-        }
-        
-        return false;
+        return get_category(type) == category::interface_type &&
+            implements_any_interface(type, {
+                std::make_tuple("Windows.Foundation", "IAsyncAction"),
+                std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
+                std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
+                std::make_tuple("Windows.Foundation", "IAsyncOperationWithProgress`2") });
+    }
+
+    bool implements_iiterable(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IIterable`1");
+    }
+
+    bool implements_iiterator(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IIterator`1");
+    }
+
+    bool implements_ivector(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IVector`1");
+    }
+
+    bool implements_ivectorview(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IVectorView`1");
+    }
+
+    bool implements_sequence(TypeDef const& type)
+    {
+        return implements_ivector(type) || implements_ivectorview(type); 
+    }
+
+    bool implements_imap(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IMap`2");
+    }
+
+    bool implements_imapview(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IMapView`2");
+    }
+
+    bool implements_mapping(TypeDef const& type)
+    {
+        return implements_imap(type) || implements_imapview(type);
     }
 
     struct method_info
@@ -818,9 +907,9 @@ namespace xlang
     {
         auto category = get_param_category(param);
 
-        return (category == param_category::in 
-             || category == param_category::pass_array 
-             || category == param_category::fill_array);
+        return (category == param_category::in
+            || category == param_category::pass_array
+            || category == param_category::fill_array);
     }
 
     bool is_out_param(method_signature::param_t const& param)

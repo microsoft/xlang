@@ -13,7 +13,7 @@ WINRT_EXPORT namespace std::experimental
             void Progress(ProgressHandler const& handler) noexcept
             {
                 winrt::slim_lock_guard const guard(this->m_lock);
-                m_progress = handler;
+                m_progress = winrt::impl::make_agile_delegate(handler);
             }
 
             ProgressHandler Progress() noexcept
