@@ -19,7 +19,7 @@ languages in a natural and familiar way.
 ## Namespaces
 
 A namespace is a naming scope used to organize code and avoid naming collisions. All type
-categories in the xlang type system (enums, structs, delegates, interfaces, and runtime classes)
+categories in the xlang type system (enumerations, structs, delegates, interfaces, and runtime classes)
 except for fundamental types live in a namespace.
 
 Namespaces may contain other namespaces.
@@ -56,30 +56,30 @@ Object     | xlang object of unknown type
 strings. However, UTF-8 has become the dominant encoding on the web since WinRT was originally
 designed. This work is tracked by https://github.com/Microsoft/xlang/issues/53
 
-## Enums
+## Enumerations
 
-An enum type is a set of named values. Each named value in an enum corresponds to a constant integer
-value.
+An enumeration (or enum) type is a set of named values. Each named value in an enum corresponds to
+a constant integer value.
 
-Each enum type has an underlying integral type. The only legal underlying integral types for enums
+Each enumeration type has an underlying integral type. The only legal underlying integral types for enums
 in xlang are Int32 and UInt32.
 
-> TODO: consider expanding the types usable for enums. 64bit bit flags, unsigned enums that aren't
-flags (addresses) were both mentioned.
-
-An enum type with an underlying integral type of UInt32 is considered a Flags enum. Flags enums
+An enumeration type with an underlying integral type of UInt32 is considered a Flags enum. Flags enums
 are intended to be treated as a bit field. Language projections can and should provide logical
 operators such as and, or and not for Flags enum values.
 
-Enums are additively versionable. Subsequent versions of a given enum may add new named values (and
-associated constant integer values). Pre-existing values may not be removed or changed.
+> TODO: consider expanding the types usable for enums, as well allowing other unsigned types to be
+flag enums. 64bit bit flags as well as unsigned enums that aren't flags (addresses) have been asked about.
 
-> Note, we need an XDN that focuses on how versioning works in xlang.
+Enumerations are additively versionable. Subsequent versions of an enumeration may add new named
+values (and associated constant integer values). Pre-existing values may not be removed or changed.
+
+> TODO: we need XDN that explicitly focuses on how versioning works in xlang.
 
 ## Structs
 
 Structs are a record type with one or more fields. Structs are always passed and returned by value.
-Struct fields may only be enums, structs and fundamental types (including strings).
+Struct fields may only be enums, other structs and fundamental types (including strings).
 
 Structs must have at least one field. All of a struct's fields are public.
 
@@ -89,31 +89,12 @@ Structs are not versionable. Once they have been defined, they may never be chan
 
 ## Interfaces
 
-> Note, an xlang's type system interface is a different concept from [COM Interfaces](XDN05%20-%20xlang%20Binary%20Interface.md#com-interfaces)
-in xlang's [ABI](XDN05%20-%20xlang%20Binary%20Interface.md). So while all xlang ABI interfaces must
-eventually inherit from [IUnknown](XDN05%20-%20xlang%20Binary%20Interface.md#iunknown), interfaces
-in xlang's type system do not. Ultimately inheriting from IUnknown is an implementation detail that
-is not directly surfaced in xlang's type system.
-
-An interface is a type that acts as a contract that can be implemented by multiple classes. An
+An interface is a type that acts as a contract that can have multiple implementations. An
 interface specifies the signatures for a group of object members (aka methods, properties and
 events) but does not specify an implementation for those object members.
 
 Interfaces can be implemented by multiple different classes. Each class implementation of a given
 interface's object members is unrelated to any other class's implementation of the same interface.
-
-Interfaces may optionally inherit from a single other interface. All of the type members of the
-base interface are considered part of the derived interface as well. Any class implementing an
-interface that uses inheritance must implement all of the type members specified in all of the
-interfaces in the inheritance tree.
-
-> Note, WinRT interfaces do not support true inheritance. Rather, WinRT interfaces may optionally
-declare that they require one or more other interfaces to additionally be implemented on a class.
-This approach leads to inefficiencies at the ABI layer - both runtime overhead that stems from
-having to call QueryInterface as well as memory overhead that stems from types having multiple
-interface virtual memory tables. By limiting interfaces at the type system level to single
-inheritance, xlang can implement them at the ABI layer using a single composite virtual method
-table, avoiding the runtime and memory inefficiencies mentioned above.
 
 All xlang interfaces need an GUID identifier. This identifier has no relevance at the type system
 level, it is only used at the ABI level. An interface's GUID can either be explicitly provided or
@@ -121,6 +102,29 @@ it can be implicitly generated from the interface's fully namespace qualified na
 algorithm defined in [RFC4122 section 4.3](https://tools.ietf.org/html/rfc4122#section-4.3).
 
 Interfaces are not versionable. Once they have been defined, they may never be changed.
+
+### Interface Inheritance
+
+Interfaces may optionally inherit from a single other interface. All of the type members of the
+base interface are considered part of the derived interface as well. Any class implementing an
+interface that uses inheritance must implement all of the type members specified in all of the
+interfaces in the inheritance tree.
+
+Note, WinRT interfaces do not support inheritance. WinRT interfaces may optionally declare that
+they require one or more other interfaces to be implemented by any class that implements it. For
+example, any type that implements [IStorageFile](https://docs.microsoft.com/en-us/uwp/api/Windows.Storage.IStorageFile)
+must also implement [IStorageItem](https://docs.microsoft.com/en-us/uwp/api/windows.storage.istorageitem),
+[IInputStreamReference](https://docs.microsoft.com/en-us/uwp/api/windows.storage.streams.iinputstreamreference)
+and [IRandomAccessStreamReference](https://docs.microsoft.com/en-us/uwp/api/windows.storage.streams.irandomaccessstreamreference).
+
+WinRT's interface requires approach leads to inefficiencies at the ABI layer - both runtime overhead
+from calling QueryInterface as well as memory overhead from having multiple interface virtual memory
+tables. By limiting interfaces at the type system level to single inheritance, xlang can implement
+them at the ABI layer using a single composite virtual method table, avoiding the runtime and memory
+overhead described above.
+
+> TODO: Given the WinRT IStorageFile example above, can we say definitively that there is no place
+for interface requires in xlang?
 
 ### Parameterized Interfaces
 
@@ -187,3 +191,54 @@ Classes are xlang types that expose behavior and encapsulate data. Often times, 
 
 Classes are additively versionable. Subsequent versions of a given enum may add new members. 
 Pre-existing members may not be removed or modified in any way.
+
+## Object Members
+
+### Methods
+
+#### Method Overloading
+
+#### Parameters
+
+##### Array Parameters
+
+### Properties
+
+### Events
+
+### Intrinsic Members
+
+All interfaces and runtime classes support the following members.
+
+#### ToString
+
+Projection language examples:
+
+- C++ N/A
+- [Java Object.toString](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#toString())
+- [JavaScript Object.prototype.toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString)
+- [.NET Object.ToString](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2)
+- [Objective-C NSObject description](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description)
+- [Python __str__ magic method](https://docs.python.org/3/library/stdtypes.html#str)
+
+#### GetHashCode
+
+Projection language examples:
+
+- [C++ std::hash struct](https://en.cppreference.com/w/cpp/utility/hash)
+- [Java Object.hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#hashCode())
+- JavaScript N/A
+- [.NET Object.GetHashCode](https://docs.microsoft.com/en-us/dotnet/api/system.object.gethashcode)
+- [Objective-C NSObject hash](https://developer.apple.com/documentation/objectivec/nsobject/1418561-hash)
+- [Python __hash__](https://docs.python.org/3/reference/datamodel.html#object.__hash__)
+
+#### Equals
+
+Projection language examples:
+
+- [C++ operator==](https://en.cppreference.com/w/cpp/language/operator_comparison)
+- [Java Object.equals](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#equals(java.lang.Object))
+- JavaScript N/A
+- [.NET Object.Equals](https://docs.microsoft.com/en-us/dotnet/api/system.object.equals#System_Object_Equals_System_Object_)
+- [Objective-C NSObject isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal)
+- [Python __eq__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__eq__)
