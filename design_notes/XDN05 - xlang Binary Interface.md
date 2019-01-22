@@ -141,6 +141,7 @@ types derive from IXlangObject. This interface adds additional core functionalit
 enum XlangObjectInfoCategory
 {
     TypeName,
+    HashCode,
     StringRepresentation,
     ObjectSize
 };
@@ -193,6 +194,14 @@ of this document. We need a design note on this.
 
 While all information categories are optional, it is highly recommended that all objects support
 TypeName in order to be usable from dynamic languages.
+
+#### Hash Code
+
+[C++](https://en.cppreference.com/w/cpp/utility/hash)
+[Java](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#hashCode())
+[.NET](https://docs.microsoft.com/en-us/dotnet/api/system.object.gethashcode)
+[Objective-C](https://developer.apple.com/documentation/objectivec/nsobject/1418561-hash)
+[Python](https://docs.python.org/3/reference/datamodel.html#object.__hash__)
 
 #### String Representation
 
