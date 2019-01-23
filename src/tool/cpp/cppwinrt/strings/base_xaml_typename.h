@@ -127,7 +127,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename T>
     inline Windows::UI::Xaml::Interop::TypeName xaml_typename()

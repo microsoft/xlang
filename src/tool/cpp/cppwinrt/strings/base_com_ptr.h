@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename T>
     struct com_ptr

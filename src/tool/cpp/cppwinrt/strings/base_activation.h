@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename Interface = Windows::Foundation::IActivationFactory>
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
@@ -339,7 +339,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     enum class apartment_type : int32_t
     {
