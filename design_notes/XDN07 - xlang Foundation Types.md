@@ -13,8 +13,8 @@ status: draft
 ## Abstract
 
 This design note describes xlang's foundational types. These types are provided as part of xlang
-and are designed to standardize the types used in common langauge interoperability scenarios like
-asyncronous processing and collections.
+and are designed to standardize the types used in common language interoperability scenarios like
+asynchronous processing and collections.
 
 ## DateTime and TimeStamp
 
@@ -27,4 +27,3 @@ asyncronous processing and collections.
 ## Observables
 
 ## URI
-
