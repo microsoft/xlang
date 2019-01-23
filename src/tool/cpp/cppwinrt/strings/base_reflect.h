@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt::experimental::reflect
+namespace winrt::experimental::reflect
 {
     template <typename T>
     struct base_type

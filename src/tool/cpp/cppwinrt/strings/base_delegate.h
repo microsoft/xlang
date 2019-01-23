@@ -137,7 +137,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename... T>
     struct WINRT_EBO delegate : Windows::Foundation::IUnknown

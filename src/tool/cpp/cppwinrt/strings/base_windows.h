@@ -43,7 +43,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+namespace winrt::Windows::Foundation
 {
     struct IUnknown
     {
@@ -165,7 +165,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
     auto get_abi(T const& object) noexcept
@@ -267,7 +267,7 @@ WINRT_EXPORT namespace winrt
 #endif
 }
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+namespace winrt::Windows::Foundation
 {
     inline bool operator==(IUnknown const& left, IUnknown const& right) noexcept
     {
