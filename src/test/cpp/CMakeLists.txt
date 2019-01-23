@@ -72,12 +72,10 @@ file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cpp/cppwinrt/cppwinrt
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files)
 file(TO_NATIVE_PATH "${generated_files}/component.winmd" component_winmd)
-file(TO_NATIVE_PATH "${project_folder}/compare/out/winrt/Component.h" compare_component_h)
 file(TO_NATIVE_PATH "${project_folder}/generated/winrt/Windows.Foundation.h" foundation_h)
 file(TO_NATIVE_PATH "${generated_files}/module.g.cpp" mogule_g_cpp)
 
 add_custom_command(OUTPUT ${generated_files}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${project_folder}/compare
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${generated_files}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${generated_files}
     DEPENDS ${project_folder}\\component.idl
@@ -93,15 +91,10 @@ add_custom_command(OUTPUT ${foundation_h}
     DEPENDS ${component_winmd} ${generated_files} cppwinrt
 )
 
-add_custom_command(OUTPUT ${compare_component_h}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd -include Component -out ${project_folder}/compare/out -component ${project_folder}/compare/project -verbose -prefix -base -overwrite
-    DEPENDS ${component_winmd} ${foundation_h} ${generated_files} cppwinrt
-)
-
 add_custom_command(OUTPUT ${mogule_g_cpp}
     COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
     DEPENDS ${foundation_h} ${generated_files} cppwinrt
 )
 
-add_custom_target(cpp_test_depends ALL DEPENDS ${compare_component_h} ${mogule_g_cpp})
+add_custom_target(cpp_test_depends ALL DEPENDS ${mogule_g_cpp})
 add_dependencies(cpp_test cppwinrt cpp_test_depends)
