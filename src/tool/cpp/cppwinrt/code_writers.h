@@ -888,10 +888,7 @@ static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched C++/WinRT
                 }
             }
 
-            if (w.param_names)
-            {
-                w.write(" %", param.Name());
-            }
+            w.write(" %", param.Name());
         }
     }
 
