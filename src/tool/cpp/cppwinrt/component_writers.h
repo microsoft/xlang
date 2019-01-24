@@ -1083,15 +1083,30 @@ namespace winrt::@::implementation
 
     static void write_component_cpp(writer& w, TypeDef const& type)
     {
-        auto format = R"(#include "%.h"
+        auto filename = get_component_filename(type);
 
+        {
+            auto format = R"(#include "%.h"
+)";
+
+            w.write(format, filename);
+        }
+
+        if (settings.component_opt)
+        {
+            auto format = R"(#include "%.g.cpp"
+)";
+
+            w.write(format, filename);
+        }
+
+        auto format = R"(
 namespace winrt::@::implementation
 {
 %}
 )";
 
         w.write(format,
-            get_component_filename(type),
             type.TypeNamespace(),
             bind<write_component_member_definitions>(type));
     }
