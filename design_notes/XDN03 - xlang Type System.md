@@ -54,7 +54,7 @@ Object     | xlang object of unknown type
 
 > Note: we need an XDN for string encoding. WinRT originally specified UTF-16 character type and
 strings. However, UTF-8 has become the dominant encoding on the web since WinRT was originally
-designed. This work is tracked by https://github.com/Microsoft/xlang/issues/53
+designed. This work is tracked by [xlang issue #53](https://github.com/Microsoft/xlang/issues/53).
 
 ## Enumerations
 
@@ -154,7 +154,7 @@ collections.
 - `IMap<K,V>` represents a collection that maps from keys to values
 
 `IIterable<T>` is a parameterized interface. `IIterable<String>` is a concrete interface, as all
-of the type parameters have been specified. 
+of the type parameters have been specified.
 
 Both `IVector<T>` and `IMap<K,V>` can be enumerated. `IVector<T>` derives from `IIterable<T>`.
 In this case, the same type parameter is used for both `IVector` and `IIterable`. However,
@@ -189,7 +189,7 @@ Delegates are not versionable. Once they have been defined, they may never be ch
 
 Classes are xlang types that expose behavior and encapsulate data. Often times, classes can be activated
 
-Classes are additively versionable. Subsequent versions of a given enum may add new members. 
+Classes are additively versionable. Subsequent versions of a given enum may add new members.
 Pre-existing members may not be removed or modified in any way.
 
 ## Object Members
@@ -231,7 +231,7 @@ Projection language examples:
 #### GetHashCode
 
 Returns an Int32 hash code that can be used to insert and identify an object in a hash-based collection.
-Typically, this defaults to a value derived from the object's reference information (such as it's
+Typically, this defaults to a value derived from the object's reference information (such as its
 this pointer in C++), but it can be customized. For example, an xlang type that represents a JSON
 value would return a hash code generated from the specific contained JSON value. Two xlang JSON value
 instances containing the same data would thus return the same value for GetHashCode. Note, however, that
