@@ -206,11 +206,18 @@ Pre-existing members may not be removed or modified in any way.
 
 ### Events
 
-### Intrinsic Members
+### Intrinsic Operations
 
-All interfaces and runtime classes support the following members.
+All interfaces and runtime classes support the following operations intrinsically. The projection of
+these intrinsic operations is language specific. For languages that have a standard projection for
+a given intrinsic operation (such as C++ ToString or JavaScript equals), the projection is free to
+project the operation in an appropriate manner, if at all.
 
 #### ToString
+
+Returns a string that represents the current object. Typically, this defaults to the object's fully
+namespace-qualified type name, but can be customized. For example, an xlang type that represents a
+[JSON value](http://json.org/) would return the text representation of the JSON value from ToString.
 
 Projection language examples:
 
@@ -223,6 +230,16 @@ Projection language examples:
 
 #### GetHashCode
 
+Returns an Int32 hash code that can be used to insert and identify an object in a hash-based collection.
+Typically, this defaults to a value derived from the object's reference information (such as it's
+this pointer in C++), but it can be customized. For example, an xlang type that represents a JSON
+value would return a hash code generated from the specific contained JSON value. Two xlang JSON value
+instances containing the same data would thus return the same value for GetHashCode. Note, however, that
+equal hash codes does not imply object equality.
+
+Note, xlang types that provide their own implementation of GetHashCode should also provide their own
+implementation of Equals (detailed below).
+
 Projection language examples:
 
 - [C++ std::hash struct](https://en.cppreference.com/w/cpp/utility/hash)
@@ -233,6 +250,14 @@ Projection language examples:
 - [Python __hash__](https://docs.python.org/3/reference/datamodel.html#object.__hash__)
 
 #### Equals
+
+Takes an object of any type and returns a boolean indicating if the objects are equal. Typically,
+this defaults to reference equality - i.e. is the object parameter the same object instance as the
+current object - but it can be customized. For example, an xlang type representing a JSON value would
+return true if the object parameter contained the same JSON data as the current object.
+
+Note, xlang types that provide their own implementation of Equals should also provide their own
+implementation of GetHashCode (detailed above).
 
 Projection language examples:
 

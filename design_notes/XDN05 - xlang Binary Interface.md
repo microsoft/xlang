@@ -83,6 +83,10 @@ IUnknown is the root COM interface in any COM-based system. It provides function
 capabilities - navigating an object's capabilities and managing the object's lifetime. All COM
 interfaces derive from IUnknown and all objects in any COM based system must implement these methods.
 
+For any given object instance, a call to QueryInterface with IUnknown GUID identifier must always
+return the same physical pointer value. This allows you to call QueryInterface on any two interfaces
+and compare the results to determine whether they point to the same instance of an object.
+
 ``` cpp
 // IUnknown GUID identifier: 00000000-0000-0000-C000-000000000046
 struct IUnknown
@@ -141,6 +145,7 @@ types derive from IXlangObject. This interface adds additional core functionalit
 enum XlangObjectInfoCategory
 {
     TypeName,
+    HashCode,
     StringRepresentation,
     ObjectSize
 };
@@ -149,6 +154,7 @@ enum XlangObjectInfoCategory
 struct IXlangObject
 {
     bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info);
+    bool Equals(IXlangObject* object);
 };
 ```
 
@@ -194,15 +200,17 @@ of this document. We need a design note on this.
 While all information categories are optional, it is highly recommended that all objects support
 TypeName in order to be usable from dynamic languages.
 
-#### String Representation
+#### Hash Code
 
-Most mainstream languages including
-[JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString),
-[Python](https://docs.python.org/3/library/stdtypes.html#str),
-[.NET](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2),
-[Java](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#toString()) and
-[Objective-C](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description)
-have a mechanism to retrieve the string representation of an object.
+The HashCode information category retrieves a numeric value that is used to identify an object in a
+hash based collectionThe property type for StringRepresentation is a 32 bit integer.
+
+This information category should only be supported for types that wish to return a custom value for
+a language projection's equivalent of GetHashCode. Language projections may choose to fall back to
+a hash code derived from the object's reference identification (such as a C++ pointer) if HashCode
+is not supported by a given object.
+
+#### String Representation
 
 The StringRepresentation information category retrieves the string representation of the object in
 question. The property type for StringRepresentation is an xlang_string.
@@ -225,7 +233,10 @@ The property type for ObjectSize is an unsigned 32-bit integer.
 
 ### Object Equality
 
-> TODO [xlang issue #133](https://github.com/Microsoft/xlang/issues/133)
+Returns true if the provided object parameter is equal to the current object. By default, this
+should default to reference equality - i.e. the object parameter is the same object instance as
+the Equals callee. However, types may customize their implementation of Equals in order to provide
+value semantics.
 
 ## Weak References
 
