@@ -381,8 +381,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         if (has_factory_members(w, type))
         {
-            auto format = R"(
-void* winrt_make_%()
+            auto format = R"(void* winrt_make_%()
 {
     return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
 }

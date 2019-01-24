@@ -167,7 +167,8 @@ namespace xlang
 
             if (settings.verbose)
             {
-                w.write(" tool:  % (C++/WinRT v%)\n", canonical(argv[0]).string(), XLANG_VERSION_STRING);
+                w.write(" tool:  %\n", canonical(argv[0]).string());
+                w.write(" ver:   %\n", XLANG_VERSION_STRING);
 
                 for (auto&& file : settings.input)
                 {
