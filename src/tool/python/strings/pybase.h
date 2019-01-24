@@ -804,9 +804,15 @@ namespace py
     }
 
     template<typename T>
+    auto convert_to(PyObject* value)
+    {
+        return converter<T>::convert_to(value);
+    }
+
+    template<typename T>
     auto convert_to(PyObject* args, int index)
     {
-        return converter<T>::convert_to(PyTuple_GetItem(args, index));
+        return convert_to<T>(PyTuple_GetItem(args, index));
     }
 
     template <typename Async>
