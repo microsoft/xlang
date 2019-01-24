@@ -117,7 +117,7 @@ namespace xlang
 
         if (impls.first != impls.second)
         {
-            throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
+            return impls.first.Interface();
         }
 
         return {};

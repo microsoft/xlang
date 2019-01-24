@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     inline bool operator==(hstring const& left, hstring const& right) noexcept
     {
@@ -105,7 +105,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     inline hstring operator+(hstring const& left, hstring const& right)
     {

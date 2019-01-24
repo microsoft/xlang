@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     void check_hresult(hresult const result);
     hresult to_hresult() noexcept;
@@ -300,45 +300,45 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT template <typename T>
+template <typename T>
 constexpr auto operator|(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
 {
     return static_cast<T>(winrt::impl::to_underlying_type(left) | winrt::impl::to_underlying_type(right));
 }
 
-WINRT_EXPORT template <typename T>
+template <typename T>
 constexpr auto operator|=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
 {
     left = left | right;
     return left;
 }
 
-WINRT_EXPORT template <typename T>
+template <typename T>
 constexpr auto operator&(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
 {
     return static_cast<T>(winrt::impl::to_underlying_type(left) & winrt::impl::to_underlying_type(right));
 }
 
-WINRT_EXPORT template <typename T>
+template <typename T>
 constexpr auto operator&=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
 {
     left = left & right;
     return left;
 }
 
-WINRT_EXPORT template <typename T>
+template <typename T>
 constexpr auto operator~(T const value) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
 {
     return static_cast<T>(~winrt::impl::to_underlying_type(value));
 }
 
-WINRT_EXPORT template <typename T>
+template <typename T>
 constexpr auto operator^(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
 {
     return static_cast<T>(winrt::impl::to_underlying_type(left) ^ winrt::impl::to_underlying_type(right));
 }
 
-WINRT_EXPORT template <typename T>
+template <typename T>
 constexpr auto operator^=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
 {
     left = left ^ right;

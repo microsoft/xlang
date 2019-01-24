@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename D, typename T, typename Version = impl::no_collection_version>
     struct iterable_base : Version

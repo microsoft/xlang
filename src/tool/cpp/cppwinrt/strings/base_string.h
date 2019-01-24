@@ -38,7 +38,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     struct hstring
     {
@@ -335,7 +335,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     inline bool embedded_null(hstring const& value) noexcept
     {
