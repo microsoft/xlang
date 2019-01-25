@@ -16,7 +16,28 @@ This design note describes the xlang's [type system](https://en.wikipedia.org/wi
 The type system is designed to interoperate with a variety of object-oriented programming
 languages in a natural and familiar way.
 
-## Namespaces
+## Philosophy
+
+xlang is designed to interoperate with many different object-oriented programming languages. The
+languages xlang is considering at this time include (but is not limited to):
+
+- [C++11](https://isocpp.org)
+- [Java](https://www.oracle.com/java)
+- [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+- [.NET](https://dotnet.microsoft.com), in particular
+  [C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/) and
+  [Visual Basic](https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/)
+- [Objective-C](http://en.wikipedia.org/wiki/Objective-C)
+- [Python](https://python.org)
+
+These languages represent a wide variety of philosophical differences in type system design.
+Strong vs. weak types. Compiled vs interpreted languages. Static vs dynamic typing. Designing
+a single type system that can work is such varied environments inevitably leads to compromises
+that an individual language designer would never face.
+
+## Type Categories
+
+### Namespaces
 
 A namespace is a naming scope used to organize code and avoid naming collisions. All type
 categories in the xlang type system (enumerations, structs, delegates, interfaces, and runtime classes)
@@ -30,7 +51,7 @@ and `foo.SomeType` nor can you have `Foo.SomeType` and `Foo.someType`. However, 
 `Foo.SomeType` and `foo.AnotherType`. In this case `SomeType` and `AnotherType` would be considered
 as belonging to the same namespace.
 
-## Fundamental Types
+### Fundamental Types
 
 The xlang Type system includes a core set of built-in primitive types.
 
@@ -52,11 +73,15 @@ String     | immutable sequence of Char16s used to represent text
 Guid       | 128-bit standard [universally unique identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
 Object     | xlang object of unknown type
 
-> Note: we need an XDN for string encoding. WinRT originally specified UTF-16 character type and
-strings. However, UTF-8 has become the dominant encoding on the web since WinRT was originally
-designed. This work is tracked by [xlang issue #53](https://github.com/Microsoft/xlang/issues/53).
+#### Fundamental Types Open Issues
 
-## Enumerations
+- String encoding has not been settled. WinRT originally specified UTF-16 character type and strings.
+  However, UTF-8 has become the dominant encoding on the web since WinRT was originally designed.
+  This work is tracked by [xlang issue #53](https://github.com/Microsoft/xlang/issues/53).
+- xlang should have a pointer sized primitive type, analogous to .NET's
+  [IntPtr](https://docs.microsoft.com/en-us/dotnet/api/system.intptr) type.
+
+### Enumerations
 
 An enumeration (or enum) type is a set of named values. Each named value in an enum corresponds to
 a constant integer value.
@@ -68,15 +93,16 @@ An enumeration type with an underlying integral type of UInt32 is considered a F
 are intended to be treated as a bit field. Language projections can and should provide logical
 operators such as and, or and not for Flags enum values.
 
-> TODO: consider expanding the types usable for enums, as well allowing other unsigned types to be
-flag enums. 64bit bit flags as well as unsigned enums that aren't flags (addresses) have been asked about.
-
 Enumerations are additively versionable. Subsequent versions of an enumeration may add new named
 values (and associated constant integer values). Pre-existing values may not be removed or changed.
 
-> TODO: we need XDN that explicitly focuses on how versioning works in xlang.
+#### Enumerations Open Issues
 
-## Structs
+- can xlang expand the types usable for enums, as well allowing other unsigned types to be flag
+  enums. 64bit bit flags as well as unsigned enums that aren't flags (addresses) have been asked about.
+- versioning in xlang needs its own XDN
+
+### Structs
 
 Structs are a record type with one or more fields. Structs are always passed and returned by value.
 Struct fields may only be enums, other structs and fundamental types (including strings).
@@ -87,7 +113,7 @@ Structs cannot be generic or parameterized.
 
 Structs are not versionable. Once they have been defined, they may never be changed.
 
-## Interfaces
+### Interfaces
 
 An interface is a type that acts as a contract that can have multiple implementations. An
 interface specifies the signatures for a group of object members (aka methods, properties and
@@ -103,7 +129,7 @@ algorithm defined in [RFC4122 section 4.3](https://tools.ietf.org/html/rfc4122#s
 
 Interfaces are not versionable. Once they have been defined, they may never be changed.
 
-### Interface Inheritance
+#### Interface Inheritance
 
 Interfaces may optionally inherit from a single other interface. All of the type members of the
 base interface are considered part of the derived interface as well. Any class implementing an
@@ -123,10 +149,7 @@ tables. By limiting interfaces at the type system level to single inheritance, x
 them at the ABI layer using a single composite virtual method table, avoiding the runtime and memory
 overhead described above.
 
-> TODO: Given the WinRT IStorageFile example above, can we say definitively that there is no place
-for interface requires in xlang?
-
-### Parameterized Interfaces
+#### Parameterized Interfaces
 
 xlang interfaces support type parameterization. Parameterized interfaces specify one or more type
 parameters that can be used as parameter types or return values of type members. Parameterized
@@ -144,10 +167,8 @@ A concrete interface is either a non-parameterized interface or a parameterized 
 of the type parameters have been fully specified. Non-parameterized interfaces may inherit from
 concrete interfaces, but they may not inherit from a parameterized interface.
 
-#### Parameterized Interface Examples
-
-For example, xlang's foundation types includes a set of parameterized interfaces to represent
-collections.
+For example, [xlang's foundation types](XDN07%20-%20xlang%20Foundation%20Types) includes a set of
+parameterized interfaces to represent collections.
 
 - `IIterable<T>` represents a collection that can be enumerated
 - `IVector<T>` represents a collection that can be randomly accessed
@@ -166,7 +187,12 @@ Using the same collection interfaces defined above, you could define an non para
 `IPropertySet` that inherits from `IMap<String, Object>`. Note the use of concrete types in the
 declaration of IMap, where in the previous example we used type parameters.
 
-## Delegates
+#### Interface Open Issues
+
+- Given the WinRT IStorageFile example from the Interface Inheritance section above, can xlang get
+  away with only not supporting interface requires?
+
+### Delegates
 
 Delegates are xlang types that act as a type-safe function pointer. They are similar conceptually
 to an [interface](#interfaces) that declares one and only one method. Defining delegates as a
@@ -185,7 +211,7 @@ and/or their return value type in terms of the type parameters instead of as con
 
 Delegates are not versionable. Once they have been defined, they may never be changed.
 
-## Classes
+### Classes
 
 Classes are xlang types that expose behavior and encapsulate data. Often times, classes can be activated
 
@@ -226,7 +252,7 @@ Projection language examples:
 - [JavaScript Object.prototype.toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString)
 - [.NET Object.ToString](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2)
 - [Objective-C NSObject description](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description)
-- [Python __str__ magic method](https://docs.python.org/3/library/stdtypes.html#str)
+- [Python \_\_str__ magic method](https://docs.python.org/3/library/stdtypes.html#str)
 
 #### GetHashCode
 
@@ -247,7 +273,7 @@ Projection language examples:
 - JavaScript N/A
 - [.NET Object.GetHashCode](https://docs.microsoft.com/en-us/dotnet/api/system.object.gethashcode)
 - [Objective-C NSObject hash](https://developer.apple.com/documentation/objectivec/nsobject/1418561-hash)
-- [Python __hash__](https://docs.python.org/3/reference/datamodel.html#object.__hash__)
+- [Python \_\_hash__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__hash__)
 
 #### Equals
 
@@ -266,7 +292,7 @@ Projection language examples:
 - JavaScript N/A
 - [.NET Object.Equals](https://docs.microsoft.com/en-us/dotnet/api/system.object.equals#System_Object_Equals_System_Object_)
 - [Objective-C NSObject isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal)
-- [Python __eq__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__eq__)
+- [Python \_\_eq__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__eq__)
 
 #### CompareTo
 
@@ -303,32 +329,27 @@ Projection language examples:
 - [Python Rich Comparison Methods](https://docs.python.org/3/reference/datamodel.html#object.__lt__)
   - [Rich Comparisons PEP](https://www.python.org/dev/peps/pep-0207/)
 
-##### CompareTo Open Issues
+#### Intrinsic Operations Open Issues
 
-###### Equals vs. CompareTo
-
-Almost all the mainstream languages xlang is likely to project into provide a way to intrinsic
-equality operations on all types. Some, in particular Python and Objective-C, also provide intrinsic
-comparison operators on all types. It has been proposed that xlang should have an intrinsic CompareTo
-operation instead of Equals, since CompareTo can also provide the equivalent of Equals.
-
-It's unclear, however, if this approach would project cleanly into languages like C# and Java that
-have an intrinsic equality operator but not intrinsic comparison operators. C# and Java both have
-generic interfaces that indicate a given type can be compared to another instance of that type for
-sorting purposes. Using CompareTo instead of Equals would likely imply the need for a \[Comparable]
-attribute to indicate a given type has a custom implementation of CompareTo.
-
-###### Comparable vs Comparer
-
-.NET has interfaces for both [IComparable\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
-and [IComparer\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1)
-as well as the [Comparison\<T> delegate](https://docs.microsoft.com/en-us/dotnet/api/system.comparison-1).
-IComparable\<T> is designed to be implemented on instances of the type while IComparer\<T> is
-designed to be implemented on a separate Comparer object. The Comparison delegate behaves similarly
-to the IComparer interface.
-
-The benefit of using a separate comparer object or delegate is that it allows types with value
-semantics to opt-in to comparison operations without requiring additional ABI interfaces on the
-type itself. However, in order to project cleanly into languages with intrinsic comparisons like
-Python and Objective-C, xlang would likely need a mechanism to associate a type with its
-comparer type.
+- Equals vs. CompareTo
+  - Almost all the mainstream languages xlang is likely to project into provide a way to intrinsic
+    equality operations on all types. Some, in particular Python and Objective-C, also provide intrinsic
+    comparison operators on all types. It has been proposed that xlang should have an intrinsic CompareTo
+    operation instead of Equals, since CompareTo can also provide the equivalent of Equals.
+  - It's unclear, however, if this approach would project cleanly into languages like C# and Java that
+    have an intrinsic equality operator but not intrinsic comparison operators. C# and Java both have
+    generic interfaces that indicate a given type can be compared to another instance of that type for
+    sorting purposes. Using CompareTo instead of Equals would likely imply the need for a \[Comparable]
+    attribute to indicate a given type has a custom implementation of CompareTo.
+- Comparable vs Comparer
+  - .NET has interfaces for both [IComparable\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
+    and [IComparer\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1)
+    as well as the [Comparison\<T> delegate](https://docs.microsoft.com/en-us/dotnet/api/system.comparison-1).
+    IComparable\<T> is designed to be implemented on instances of the type while IComparer\<T> is
+    designed to be implemented on a separate Comparer object. The Comparison delegate behaves similarly
+    to the IComparer interface.
+  - The benefit of using a separate comparer object or delegate is that it allows types with value
+    semantics to opt-in to comparison operations without requiring additional ABI interfaces on the
+    type itself. However, in order to project cleanly into languages with intrinsic comparisons like
+    Python and Objective-C, xlang would likely need a mechanism to associate a type with its
+    comparer type.
