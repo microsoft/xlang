@@ -213,7 +213,15 @@ Delegates are not versionable. Once they have been defined, they may never be ch
 
 ### Classes
 
-Classes are xlang types that expose behavior and encapsulate data. Often times, classes can be activated
+Classes are xlang types that expose behavior and encapsulate data.
+
+Classes have zero or more object members (i.e. Methods, Properties and Events).
+
+Classes can not be parameterized.
+
+Classes can optionally implement one or more interfaces. Classes may implement parameterized
+interfaces, but only if all type parameters are specified. For example, a `JsonArray` type could
+not implement `IVector<T>` but it could implement `IVector<JsonValue>`.
 
 Classes are additively versionable. Subsequent versions of a given enum may add new members.
 Pre-existing members may not be removed or modified in any way.
@@ -222,11 +230,11 @@ Pre-existing members may not be removed or modified in any way.
 
 ### Methods
 
-#### Method Overloading
-
 #### Parameters
 
 ##### Array Parameters
+
+#### Method Overloading
 
 ### Properties
 
