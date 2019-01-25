@@ -237,7 +237,7 @@ value would return a hash code generated from the specific contained JSON value.
 instances containing the same data would thus return the same value for GetHashCode. Note, however, that
 equal hash codes does not imply object equality.
 
-Note, xlang types that provide their own implementation of GetHashCode should also provide their own
+xlang types that provide their own implementation of GetHashCode should also provide their own
 implementation of Equals (detailed below).
 
 Projection language examples:
@@ -256,7 +256,7 @@ this defaults to reference equality - i.e. is the object parameter the same obje
 current object - but it can be customized. For example, an xlang type representing a JSON value would
 return true if the object parameter contained the same JSON data as the current object.
 
-Note, xlang types that provide their own implementation of Equals should also provide their own
+xlang types that provide their own implementation of Equals should also provide their own
 implementation of GetHashCode (detailed above).
 
 Projection language examples:
@@ -267,3 +267,68 @@ Projection language examples:
 - [.NET Object.Equals](https://docs.microsoft.com/en-us/dotnet/api/system.object.equals#System_Object_Equals_System_Object_)
 - [Objective-C NSObject isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal)
 - [Python __eq__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__eq__)
+
+#### CompareTo
+
+Takes an object of any type and returns an Int32 indicating the relative ordering of the current and
+provided objects. A value less than zero indicates the current object precedes the provided object
+in the sort order. A value greater than zero indicates the current object follows the provided object.
+Zero indicates the two objects are equal.
+
+For most xlang objects, this operation will default to reference comparison - i.e. Compare returns
+zero if the provided object is the same object instance as the provided object. If the objects are
+not the same instance, their sort order is based on a stable comparison of their reference identity
+(such as their ABI object pointers).
+
+xlang objects can provide a custom implementation of CompareTo. For example, an xlang type
+representing a JSON value would return a value depending on a lexigraphical comparison of the
+JSON strings each object represents.
+
+Note, xlang types that provide their own implementation of Compare should also provide their own
+implementation of GetHashCode (detailed above).
+
+Projection language examples:
+
+- C++ [Proposed "spaceship" operator](http://open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0515r0.pdf)
+- Java [Java Comparable\<T>](https://docs.oracle.com/javase/7/docs/api/java/lang/Comparable.html)
+- JavaScript N/A
+- .NET [IComparable\<T>](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
+- Objective-C NSObject Comparison Functions
+  - [isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal)
+  - [isNotEqual](https://developer.apple.com/documentation/objectivec/nsobject/1393843-isnotequal)
+  - [isLessThan](https://developer.apple.com/documentation/objectivec/nsobject/1393841-islessthan)
+  - [isLessThatOrEqual](https://developer.apple.com/documentation/objectivec/nsobject/1393827-islessthanorequal)
+  - [isGreaterThan](https://developer.apple.com/documentation/objectivec/nsobject/1393885-isgreaterthan)
+  - [isGreaterThanOrEqual](https://developer.apple.com/documentation/objectivec/nsobject/1393862-isgreaterthanorequal)
+- [Python Rich Comparison Methods](https://docs.python.org/3/reference/datamodel.html#object.__lt__)
+  - [Rich Comparisons PEP](https://www.python.org/dev/peps/pep-0207/)
+
+##### CompareTo Open Issues
+
+###### Equals vs. CompareTo
+
+Almost all the mainstream languages xlang is likely to project into provide a way to intrinsic
+equality operations on all types. Some, in particular Python and Objective-C, also provide intrinsic
+comparison operators on all types. It has been proposed that xlang should have an intrinsic CompareTo
+operation instead of Equals, since CompareTo can also provide the equivalent of Equals.
+
+It's unclear, however, if this approach would project cleanly into languages like C# and Java that
+have an intrinsic equality operator but not intrinsic comparison operators. C# and Java both have
+generic interfaces that indicate a given type can be compared to another instance of that type for
+sorting purposes. Using CompareTo instead of Equals would likely imply the need for a \[Comparable]
+attribute to indicate a given type has a custom implementation of CompareTo.
+
+###### Comparable vs Comparer
+
+.NET has interfaces for both [IComparable\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
+and [IComparer\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1)
+as well as the [Comparison\<T> delegate](https://docs.microsoft.com/en-us/dotnet/api/system.comparison-1).
+IComparable\<T> is designed to be implemented on instances of the type while IComparer\<T> is
+designed to be implemented on a separate Comparer object. The Comparison delegate behaves similarly
+to the IComparer interface.
+
+The benefit of using a separate comparer object or delegate is that it allows types with value
+semantics to opt-in to comparison operations without requiring additional ABI interfaces on the
+type itself. However, in order to project cleanly into languages with intrinsic comparisons like
+Python and Objective-C, xlang would likely need a mechanism to associate a type with its
+comparer type.
