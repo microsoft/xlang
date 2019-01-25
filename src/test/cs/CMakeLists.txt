@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
 
-set(cswinrt_exe ${CMAKE_CURRENT_BINARY_DIR}/../../tool/cs/cswinrt.exe)
-get_filename_component(output_dir ${CMAKE_CURRENT_SOURCE_DIR}/output REALPATH)
-
-file(TO_NATIVE_PATH "$ENV{WindowsSdkDir}References/$ENV{WindowsSDKVersion}" REFERENCES_ROOT)
 
 set(winmd_files
     Windows.Foundation.FoundationContract
@@ -22,33 +18,37 @@ set(excluded_namespaces
     Windows.Foundation.Metadata
 )
 
-set(cmdline "-output ${output_dir}")
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files_folder)
+set(cswinrt_cmdline "-output ${generated_files_folder}")
 
+file(TO_NATIVE_PATH "C:/Program Files (x86)/Windows Kits/10" WindowsSdkDir)
+set(WindowsSDKVersion "10.0.17763.0")
+
+file(TO_NATIVE_PATH "$ENV{WindowsSdkDir}References/$ENV{WindowsSDKVersion}" winsdk_references_root)
 foreach (winmd ${winmd_files})
-    file(TO_NATIVE_PATH "${REFERENCES_ROOT}/${winmd}" CONTRACT_ROOT)
+    file(TO_NATIVE_PATH "${winsdk_references_root}/${winmd}" CONTRACT_ROOT)
     file(GLOB_RECURSE winmd_path "${CONTRACT_ROOT}/${winmd}.winmd")
     list(LENGTH winmd_path winmd_path_length)
     if(winmd_path_length EQUAL 1)
-        string(APPEND cmdline " -input \"${winmd_path}\"")
+        string(APPEND cswinrt_cmdline " -input \"${winmd_path}\"")
     endif()
 endforeach()
 
 foreach(ns ${included_namespaces})
-    string(APPEND cmdline " -include ${ns}")
+    string(APPEND cswinrt_cmdline " -include ${ns}")
 endforeach()
 
 foreach(ns ${excluded_namespaces})
-    string(APPEND cmdline " -exclude ${ns}")
+    string(APPEND cswinrt_cmdline " -exclude ${ns}")
 endforeach()
 
-get_filename_component(output_dir ${CMAKE_CURRENT_SOURCE_DIR}/output REALPATH)
-set(timestamp ${output_dir}/timestamp.txt)
-
+file(TO_NATIVE_PATH "${generated_files_folder}/timestamp.txt" timestamp_txt)
+file(TO_NATIVE_PATH ${CMAKE_BINARY_DIR}/tool/cs/Debug/cswinrt.exe cswinrt_exe)
 add_custom_command(
-  OUTPUT ${timestamp}
+  OUTPUT ${timestamp_txt}
   DEPENDS ${cswinrt_exe}
-  COMMAND ${cswinrt_exe} ${cmdline}
+  COMMAND ${cswinrt_exe} ${cswinrt_cmdline}
 )
 
-add_custom_target(test_cs ALL DEPENDS ${timestamp})
+add_custom_target(test_cs ALL DEPENDS ${timestamp_txt})
 add_dependencies(test_cs cswinrt)
