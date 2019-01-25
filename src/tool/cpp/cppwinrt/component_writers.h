@@ -57,7 +57,7 @@ namespace xlang
             if (first)
             {
                 first = false;
-                w.write(",\n    impl::base<D");
+                w.write(",\n        impl::base<D");
             }
 
             w.write(", %", base);
@@ -71,7 +71,7 @@ namespace xlang
 
     static void write_component_include(writer& w, TypeDef const& type)
     {
-        if (!has_factory_members(type))
+        if (!has_factory_members(w, type))
         {
             return;
         }
@@ -94,7 +94,7 @@ namespace xlang
 
     static void write_component_activation(writer& w, TypeDef const& type)
     {
-        if (!has_factory_members(type))
+        if (!has_factory_members(w, type))
         {
             return;
         }
@@ -230,7 +230,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             }
         }
 
-        if (has_composable_constructors(type))
+        if (has_composable_constructors(w, type))
         {
             w.write(", composable");
         }
@@ -317,11 +317,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             bind<write_consume_args>(signature));
     }
 
-    static void write_component_forwarders(writer& w, std::vector<factory_type> const& factories)
+    static void write_component_forwarders(writer& w, std::map<std::string, factory_info> const& factories)
     {
         bool default_constructor{};
 
-        for (auto&& factory : factories)
+        for (auto&&[factory_name, factory] : factories)
         {
             if (factory.activatable)
             {
@@ -360,16 +360,16 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         }
     }
 
-    static void write_component_factory_interfaces(writer& w, std::vector<factory_type> const& factories)
+    static void write_component_factory_interfaces(writer& w, std::map<std::string, factory_info> const& factories)
     {
-        for (auto&& factory : factories)
+        for (auto&&[factory_name, factory] : factories)
         {
             if (!factory.type)
             {
                 continue;
             }
             
-            w.write(", %", factory.type);
+            w.write(", %", factory_name);
         }
     }
 
@@ -379,7 +379,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         auto type_namespace = type.TypeNamespace();
         auto impl_name = get_impl_name(type_namespace, type_name);
 
-        if (has_factory_members(type))
+        if (has_factory_members(w, type))
         {
             auto format = R"(
 void* winrt_make_%()
@@ -401,7 +401,7 @@ void* winrt_make_%()
 
         write_type_namespace(w, type_namespace);
 
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(w, type))
         {
             if (factory.activatable)
             {
@@ -493,7 +493,7 @@ void* winrt_make_%()
                             bind<write_consume_params>(signature),
                             type_namespace,
                             type_name,
-                            factory.type,
+                            factory_name,
                             method_name,
                             bind<write_consume_args>(signature));
                     }
@@ -534,7 +534,7 @@ void* winrt_make_%()
                             bind<write_consume_params>(signature),
                             type_namespace,
                             type_name,
-                            factory.type,
+                            factory_name,
                             method_name,
                             bind<write_consume_args>(signature));
                     }
@@ -611,7 +611,7 @@ void* winrt_make_%()
 
     static void write_component_override_dispatch_base(writer& w, TypeDef const& type)
     {
-        if (!is_composable(type))
+        if (!is_composable(w, type))
         {
             return;
         }
@@ -659,7 +659,7 @@ void* winrt_make_%()
 
         auto type_name = type.TypeName();
 
-        for (auto&& factory : get_factories(base_type))
+        for (auto&&[factory_name, factory] : get_factories(w, base_type))
         {
             if (!factory.composable)
             {
@@ -672,18 +672,17 @@ void* winrt_make_%()
                 auto& params = signature.params();
                 params.resize(params.size() - 2);
 
-                auto format = R"(
-    %_base(%)
-    {
-        impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
-    }
-                )";
+                auto format = R"(        %_base(%)
+        {
+            impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
+        }
+)";
 
                 w.write(format,
                     type_name,
                     bind<write_consume_params>(signature),
                     base_type,
-                    factory.type,
+                    factory_name,
                     get_name(method),
                     bind<write_consume_args>(signature),
                     params.empty() ? "" : ", ");
@@ -696,7 +695,7 @@ void* winrt_make_%()
         auto type_name = type.TypeName();
         auto type_namespace = type.TypeNamespace();
         auto interfaces = get_interfaces(w, type);
-        auto factories = get_factories(type);
+        auto factories = get_factories(w, type);
         bool const non_static = !empty(type.InterfaceImpl());
 
         if (non_static)
@@ -715,12 +714,11 @@ void* winrt_make_%()
         {
             return { to_abi<default_interface<class_type>>(this) };
         }
-
         hstring GetRuntimeClassName() const
         {
             return L"%.%";
         }
-    %%};
+%%    };
 }
 )";
 
@@ -729,15 +727,39 @@ void* winrt_make_%()
             std::string base_type_parameter;
             std::string base_type_argument;
             std::string no_module_lock;
-            bool external_base_type{};
+            std::string external_requires;
 
             if (base_type)
             {
-                external_base_type = !settings.filter.includes(base_type);
+                bool const external_base_type = !settings.filter.includes(base_type);
 
                 if (external_base_type)
                 {
                     composable_base_name = w.write_temp("using composable_base = %;", base_type);
+                    auto base_interfaces = get_interfaces(w, base_type);
+                    uint32_t base_interfaces_count{};
+                    external_requires = ",\n        impl::require<D";
+
+                    for (auto&&[name, info] : base_interfaces)
+                    {
+                        if (info.overridable)
+                        {
+                            continue;
+                        }
+
+                        ++base_interfaces_count;
+                        external_requires += ", ";
+                        external_requires += name;
+                    }
+
+                    if (base_interfaces_count)
+                    {
+                        external_requires += '>';
+                    }
+                    else
+                    {
+                        external_requires.clear();
+                    }
                 }
                 else
                 {
@@ -754,7 +776,7 @@ void* winrt_make_%()
                 bind<write_component_interfaces>(type),
                 base_type_argument,
                 no_module_lock,
-                "",
+                external_requires,
                 bind<write_component_class_base>(type),
                 bind<write_component_override_defaults>(type),
                 type_name,
@@ -768,7 +790,7 @@ void* winrt_make_%()
                 bind<write_component_override_dispatch_base>(type));
         }
 
-        if (has_factory_members(type))
+        if (has_factory_members(w, type))
         {
             auto format = R"(namespace winrt::@::factory_implementation
 {
@@ -855,7 +877,7 @@ namespace winrt::@::implementation
     {
         auto type_name = type.TypeName();
 
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(w, type))
         {
             if (factory.activatable)
             {
@@ -955,7 +977,7 @@ namespace winrt::@::implementation
 
         }
 
-        if (has_factory_members(type))
+        if (has_factory_members(w, type))
         {
             auto format = R"(namespace winrt::@::factory_implementation
 {
@@ -977,7 +999,7 @@ namespace winrt::@::implementation
     {
         auto type_name = type.TypeName();
 
-        for (auto&& factory : get_factories(type))
+        for (auto&&[factory_name, factory] : get_factories(w, type))
         {
             if (factory.activatable)
             {

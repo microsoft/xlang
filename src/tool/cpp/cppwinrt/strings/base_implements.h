@@ -7,7 +7,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     struct non_agile : impl::marker {};
     struct no_weak_ref : impl::marker {};
@@ -168,7 +168,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename D, typename I>
     D* get_self(I const& from) noexcept
@@ -702,8 +702,8 @@ namespace winrt::impl
 
     template <typename D, typename... I>
     struct WINRT_NOVTABLE root_implements
-        : root_implements_composing_outer<std::disjunction<std::is_same<composing, I>...>::value>
-        , root_implements_composable_inner<D, std::disjunction<std::is_same<composable, I>...>::value>
+        : root_implements_composing_outer<std::disjunction_v<std::is_same<composing, I>...>>
+        , root_implements_composable_inner<D, std::disjunction_v<std::is_same<composable, I>...>>
     {
         using IInspectable = Windows::Foundation::IInspectable;
         using root_implements_type = root_implements;
@@ -765,6 +765,7 @@ namespace winrt::impl
 
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
+        static void final_release(std::unique_ptr<D>) noexcept {}
 
     protected:
 
@@ -778,6 +779,9 @@ namespace winrt::impl
 
         virtual ~root_implements() noexcept
         {
+            // If a weak reference is created during destruction, this ensures that it is also destroyed.
+            subtract_reference();
+
             if constexpr (use_module_lock::value)
             {
                 --get_module_lock();
@@ -847,8 +851,11 @@ namespace winrt::impl
 
             if (target == 0)
             {
-                std::atomic_thread_fence(std::memory_order_acquire);
-                delete this;
+                // If a weak reference was previously created, the m_references value will not be stable value (won't be zero).
+                // This ensures destruction has a stable value during destruction.
+                m_references = 1;
+
+                D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
             }
 
             return target;
@@ -889,9 +896,8 @@ namespace winrt::impl
                     {
                         return error_bad_alloc;
                     }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    out = std::copy(local_iids.second, local_iids.second + local_count, out);
-                    std::copy(inner_iids.cbegin(), inner_iids.cend(), out);
+                    *array = std::copy(local_iids.second, local_iids.second + local_count, *array);
+                    std::copy(inner_iids.cbegin(), inner_iids.cend(), *array);
                 }
                 else
                 {
@@ -908,8 +914,7 @@ namespace winrt::impl
                     {
                         return error_bad_alloc;
                     }
-                    auto out = impl::make_array_iterator(*array, *count);
-                    std::copy(local_iids.second, local_iids.second + local_count, out);
+                    std::copy(local_iids.second, local_iids.second + local_count, *array);
                 }
                 else
                 {
@@ -1126,58 +1131,49 @@ namespace winrt::impl
     };
 
     template <typename D>
-    auto make_factory()
+    auto make_factory() -> typename impl::implements_default_interface<D>::type
     {
         using result_type = typename impl::implements_default_interface<D>::type;
 
         if constexpr (!has_static_lifetime_v<D>)
         {
-            result_type factory;
-            *put_abi(factory) = to_abi<result_type>(new D);
-            return factory;
+            return { to_abi<result_type>(new D), take_ownership_from_abi };
         }
         else
         {
-            static slim_mutex lock;
             auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
             Windows::Foundation::IUnknown collection;
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable>>();
+            auto const map = collection.as<IStaticLifetimeCollection>();
+            param::hstring const name{ name_of<typename D::instance_type>() };
+            result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
 
+            static slim_mutex lock;
+            slim_lock_guard const guard{ lock };
+            void* result;
+            map->Lookup(get_abi(name), &result);
+
+            if (result)
             {
-                slim_lock_guard const guard{ lock };
-
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
-                {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
-                }
+                return { result, take_ownership_from_abi };
             }
-
-            result_type object;
-            *put_abi(object) = to_abi<result_type>(new D);
-
+            else
             {
-                slim_lock_guard const guard{ lock };
-
-                if (auto value = map.TryLookup(name_of<typename D::instance_type>()))
-                {
-                    result_type factory;
-                    *put_abi(factory) = detach_abi(value);
-                    return factory;
-                }
-                else
-                {
-                    map.Insert(name_of<typename D::instance_type>(), object);
-                    return object;
-                }
+                bool found;
+                check_hresult(map->Insert(get_abi(name), get_abi(object), &found));
+                return object;
             }
         }
     }
+
+    template <typename T>
+    auto detach_from(T&& object) noexcept
+    {
+        return detach_abi(std::forward<T>(object));
+    }
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename D, typename... Args>
     auto make(Args&&... args)
@@ -1191,31 +1187,24 @@ WINRT_EXPORT namespace winrt
         }
         else if constexpr (impl::has_composable<D>::value)
         {
-            impl::com_ref<I> result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
+            impl::com_ref<I> result{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
             return result.template as<typename D::composable>();
         }
         else if constexpr (impl::has_class_type<D>::value)
         {
             static_assert(std::is_same_v<I, default_interface<typename D::class_type>>);
-            typename D::class_type result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-            return result;
+            return typename D::class_type{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
         else
         {
-            impl::com_ref<I> result{ nullptr };
-            *put_abi(result) = to_abi<I>(new D(std::forward<Args>(args)...));
-            return result;
+            return impl::com_ref<I>{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
     }
 
     template <typename D, typename... Args>
-    auto make_self(Args&&... args)
+    com_ptr<D> make_self(Args&&... args)
     {
-        com_ptr<D> result;
-        *put_abi(result) = new D(std::forward<Args>(args)...);
-        return result;
+        return { new D(std::forward<Args>(args)...), take_ownership_from_abi };
     }
 
     template <typename D, typename... I>

@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename T>
     struct agile_ref
@@ -14,16 +14,16 @@ WINRT_EXPORT namespace winrt
             }
         }
 
-        auto get() const noexcept
+        impl::com_ref<T> get() const noexcept
         {
-            impl::com_ref<T> result{ nullptr };
-
-            if (m_ref)
+            if (!m_ref)
             {
-                m_ref->Resolve(guid_of<T>(), put_abi(result));
+                return nullptr;
             }
 
-            return result;
+            void* result;
+            m_ref->Resolve(guid_of<T>(), &result);
+            return { result, take_ownership_from_abi };
         }
 
         explicit operator bool() const noexcept

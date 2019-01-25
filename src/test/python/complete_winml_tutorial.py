@@ -28,30 +28,6 @@ def timed_op(fun):
 
     return async_wrapper if asyncio.iscoroutinefunction(fun) else sync_wrapper
 
-async def wrap_async_op(op):
-    loop = asyncio.get_event_loop()
-    future = loop.create_future()
-
-    def callback(operation, status):
-        if status == 1:
-            result = operation.GetResults()
-            loop.call_soon_threadsafe(asyncio.Future.set_result, future, result)
-        elif status == 2:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, asyncio.CancelledError())
-        elif status == 3:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("AsyncOp failed"))
-        else:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("Unexpected AsyncStatus"))
-
-    op.put_Completed(callback)
-
-    return await future
-
-def run_async_code(code):
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(code())
-    loop.close()
-
 import pyrt.windows.ai.machinelearning as winml 
 import os
 
@@ -65,10 +41,10 @@ async def load_image_file(file_path):
     from pyrt.windows.graphics.imaging import BitmapDecoder
     from pyrt.windows.media import VideoFrame
 
-    file = await wrap_async_op(StorageFile.GetFileFromPathAsync(os.fspath(file_path)))
-    stream = await wrap_async_op(file.OpenAsync(0)) # 0 == FileAccessMode::Read 
-    decoder = await wrap_async_op(BitmapDecoder.CreateAsync(stream))
-    software_bitmap = await wrap_async_op(decoder.GetSoftwareBitmapAsync())
+    file = await StorageFile.GetFileFromPathAsync(os.fspath(file_path))
+    stream = await file.OpenAsync(0) # 0 == FileAccessMode::Read 
+    decoder = await BitmapDecoder.CreateAsync(stream)
+    software_bitmap = await decoder.GetSoftwareBitmapAsync()
     return VideoFrame.CreateWithSoftwareBitmap(software_bitmap)
 
 @timed_op
@@ -85,7 +61,7 @@ def bind_model(model, image_frame):
 @timed_op
 def evaluate_model(session, binding):
     results = session.Evaluate(binding, "RunId")
-    o = results.get_Outputs().Lookup("softmaxout_1")
+    o = results.Outputs.Lookup("softmaxout_1")
     result_tensor = winml.TensorFloat._from(o)
     return result_tensor.GetAsVectorView()
 
@@ -103,7 +79,7 @@ def print_results(results, labels):
     topProbabilities = [0.0 for x in range(3)]
     topProbabilityLabelIndexes = [0 for x in range(3)]
 
-    for i in range(results.get_Size()):
+    for i in range(results.Size):
         for j in range(3):
             result = results.GetAt(i)
             if result > topProbabilities[j]:
@@ -139,4 +115,6 @@ async def async_main():
 
     print_results(results, labels)
 
-run_async_code(async_main)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(async_main())
+loop.close()

@@ -66,7 +66,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt::param
+namespace winrt::param
 {
     template <typename T>
     struct iterable

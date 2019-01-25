@@ -1,3 +1,20 @@
+namespace Windows.Foundation.Metadata
+{
+    [attributeusage(target_runtimeclass)]
+    [attributename("fastabi")]
+    [version(1.0)]
+    attribute FastAbiAttribute
+    {
+    }
+
+    [attributeusage(target_method, target_property)]
+    [attributename("noexcept")]
+    [version(1.0)]
+    attribute NoExceptionAttribute
+    {
+    }
+}
+
 namespace Component
 {
     enum Signed
@@ -106,7 +123,7 @@ namespace Component
             static String StaticMethod();
         }
 
-        [Windows.Foundation.Metadata.FastAbiAttribute]
+        [fastabi]
         runtimeclass FastClass : [default] IFastClass, IFastClass2, Component.INotExclusive
         {
             FastClass();
@@ -190,6 +207,38 @@ namespace Component
             Class();
             event Handler Member;
             static event Handler Static;
+        }
+    }
+
+    namespace Params
+    {
+        [default_interface]
+        runtimeclass Class
+        {
+            Class();
+
+            void SyncCall(
+                String a,
+                Windows.Foundation.IReference<int> b,
+                Windows.Foundation.Collections.IIterable<int> c,
+                Windows.Foundation.Collections.IVectorView<int> d,
+                Windows.Foundation.Collections.IMapView<int, int> e,
+                Windows.Foundation.Collections.IVector<int> f,
+                Windows.Foundation.Collections.IMap<int, int> g);
+
+            Windows.Foundation.IAsyncAction NotSyncCall(
+                String a,
+                Windows.Foundation.IReference<int> b,
+                Windows.Foundation.Collections.IIterable<int> c,
+                Windows.Foundation.Collections.IVectorView<int> d,
+                Windows.Foundation.Collections.IMapView<int, int> e,
+                Windows.Foundation.Collections.IVector<int> f,
+                Windows.Foundation.Collections.IMap<int, int> g);
+
+
+            Component.Structs.Simple Structs(
+                Component.Structs.Simple a,
+                out Component.Structs.Simple b);
         }
     }
 }

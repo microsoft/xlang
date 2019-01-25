@@ -4,7 +4,7 @@ namespace winrt::impl
     using filetime_period = std::ratio_multiply<std::ratio<100>, std::nano>;
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     struct clock;
 
@@ -48,7 +48,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     struct file_time
     {

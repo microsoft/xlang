@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     struct event_token
     {
@@ -265,7 +265,7 @@ namespace winrt::impl
         using value_type = T;
         using reference = value_type&;
         using pointer = value_type*;
-        using iterator = array_iterator<value_type>;
+        using iterator = value_type*;
 
         explicit event_array(uint32_t const count) noexcept : m_size(count)
         {
@@ -299,12 +299,12 @@ namespace winrt::impl
 
         iterator begin() noexcept
         {
-            return make_array_iterator(data(), m_size);
+            return data();
         }
 
         iterator end() noexcept
         {
-            return make_array_iterator(data(), m_size, m_size);
+            return data() + m_size;
         }
 
         uint32_t size() const noexcept
@@ -329,17 +329,15 @@ namespace winrt::impl
     };
 
     template <typename T>
-    auto make_event_array(uint32_t const capacity)
+    com_ptr<event_array<T>> make_event_array(uint32_t const capacity)
     {
-        com_ptr<event_array<T>> instance;
         void* raw = ::operator new(sizeof(event_array<T>) + (sizeof(T)* capacity));
 #pragma warning(suppress: 6386)
-        *put_abi(instance) = new(raw) event_array<T>(capacity);
-        return instance;
+        return { new(raw) event_array<T>(capacity), take_ownership_from_abi };
     }
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename Delegate>
     struct event
@@ -371,27 +369,11 @@ WINRT_EXPORT namespace winrt
                     std::copy_n(m_targets->begin(), m_targets->size(), new_targets->begin());
                 }
 
-                if constexpr (!impl::has_category_v<delegate_type>)
-                {
-                    new_targets->back() = delegate;
-                }
-                else if (delegate.template try_as<impl::IAgileObject>() || !delegate.template try_as<impl::IMarshal>())
-                {
-                    new_targets->back() = delegate;
-                }
-                else
-                {
-                    new_targets->back() = [delegate = agile_ref<delegate_type>(delegate)](auto&&... args)
-                    {
-                        delegate.get()(args...);
-                    };
-                }
-
+                new_targets->back() = impl::make_agile_delegate(delegate);
                 token = get_token(new_targets->back());
 
                 slim_lock_guard const swap_guard(m_swap);
-                temp_targets = m_targets;
-                m_targets = new_targets;
+                temp_targets = std::exchange(m_targets, std::move(new_targets));
             }
 
             return token;
@@ -410,7 +392,7 @@ WINRT_EXPORT namespace winrt
                     return;
                 }
 
-                uint32_t const available_slots = m_targets->size() - 1;
+                uint32_t available_slots = m_targets->size() - 1;
                 delegate_array new_targets;
                 bool removed = false;
 
@@ -428,22 +410,28 @@ WINRT_EXPORT namespace winrt
 
                     for (delegate_type const& element : *m_targets)
                     {
-                        if (!removed&& token == get_token(element))
+                        if (!removed && token == get_token(element))
                         {
                             removed = true;
                             continue;
                         }
 
+                        if (available_slots == 0)
+                        {
+                            WINRT_ASSERT(!removed);
+                            break;
+                        }
+
                         *new_iterator = element;
                         ++new_iterator;
+                        --available_slots;
                     }
                 }
 
                 if (removed)
                 {
                     slim_lock_guard const swap_guard(m_swap);
-                    temp_targets = m_targets;
-                    m_targets = new_targets;
+                    temp_targets = std::exchange(m_targets, std::move(new_targets));
                 }
             }
         }

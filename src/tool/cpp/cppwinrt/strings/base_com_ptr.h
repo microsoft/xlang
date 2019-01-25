@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename T>
     struct com_ptr
@@ -8,7 +8,7 @@ WINRT_EXPORT namespace winrt
 
         com_ptr(std::nullptr_t = nullptr) noexcept {}
 
-        com_ptr(take_ownership_from_abi_t, void* ptr) noexcept : m_ptr(static_cast<type*>(ptr))
+        com_ptr(void* ptr, take_ownership_from_abi_t) noexcept : m_ptr(static_cast<type*>(ptr))
         {
         }
 
@@ -207,16 +207,15 @@ WINRT_EXPORT namespace winrt
     template <typename T, typename F, typename...Args>
     auto capture(F function, Args&&...args)
     {
-        com_ptr<T> result;
-        check_hresult(function(args..., guid_of<T>(), result.put_void()));
+        impl::com_ref<T> result{ nullptr };
+        check_hresult(function(args..., guid_of<T>(), reinterpret_cast<void**>(put_abi(result))));
         return result;
     }
-
     template <typename T, typename O, typename M, typename...Args>
     auto capture(com_ptr<O> const& object, M method, Args&&...args)
     {
-        com_ptr<T> result;
-        check_hresult((object.get()->*(method))(args..., guid_of<T>(), result.put_void()));
+        impl::com_ref<T> result{ nullptr };
+        check_hresult((object.get()->*(method))(args..., guid_of<T>(), reinterpret_cast<void**>(put_abi(result))));
         return result;
     }
 
@@ -303,7 +302,4 @@ WINRT_EXPORT namespace winrt
     {
         return !(left < right);
     }
-
-    template <typename D, typename I>
-    D* get_self(I const& from) noexcept;
 }

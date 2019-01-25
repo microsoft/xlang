@@ -19,7 +19,7 @@ namespace xlang
     {
         std::vector<cmd::option> options
         {
-            { "input", 1 },
+            { "input", 0 },
             { "reference", 0 },
             { "output", 0, 1 },
             { "component", 0, 1 },
@@ -35,7 +35,8 @@ namespace xlang
             { "root", 0, 1 },
             { "base", 0, 0 },
             { "lib", 0, 1 },
-            { "opt", 0, 0 }
+            { "opt", 0, 0 },
+            { "bracket", 0, 0 },
         };
 
         cmd::reader args{ argc, argv, options };
@@ -47,8 +48,10 @@ namespace xlang
 
         settings.verbose = args.exists("verbose");
         settings.root = args.value("root", "winrt");
-        settings.input = args.files("input");
-        settings.reference = args.files("reference");
+
+        settings.input = args.files("input", database::is_database);
+        settings.reference = args.files("reference", database::is_database);
+
         settings.component = args.exists("component");
         settings.base = args.exists("base");
 
@@ -138,6 +141,16 @@ namespace xlang
         }
     }
 
+    static bool has_projected_types(cache::namespace_members const& members)
+    {
+        return
+            !members.interfaces.empty() ||
+            !members.classes.empty() ||
+            !members.enums.empty() ||
+            !members.structs.empty() ||
+            !members.delegates.empty();
+    }
+
     static void run(int const argc, char** argv)
     {
         writer w;
@@ -147,9 +160,10 @@ namespace xlang
             auto start = get_start_time();
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
-            c.remove_legacy_cppwinrt_foundation_types();
+            c.remove_cppwinrt_foundation_types();
             supplement_includes(c);
             settings.filter = { settings.include, settings.exclude };
+            settings.base = settings.base || !settings.component;
 
             if (settings.verbose)
             {
@@ -180,7 +194,7 @@ namespace xlang
             {
                 group.add([&, &ns = ns, &members = members]
                 {
-                    if (members.types.empty() || !settings.filter.includes(members))
+                    if (!has_projected_types(members) || !settings.filter.includes(members))
                     {
                         return;
                     }
@@ -194,7 +208,7 @@ namespace xlang
 
             group.add([&]
             {
-                if (settings.filter.empty() || settings.base)
+                if (settings.base)
                 {
                     write_base_h();
                 }
@@ -252,5 +266,4 @@ namespace xlang
 int main(int const argc, char** argv)
 {
     xlang::run(argc, argv);
-
 }

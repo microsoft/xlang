@@ -65,7 +65,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt::param
+namespace winrt::param
 {
     template <typename K, typename V>
     struct map_view

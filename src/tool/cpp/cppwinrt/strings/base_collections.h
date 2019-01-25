@@ -1,6 +1,8 @@
 
 namespace winrt::impl
 {
+    namespace wfc = Windows::Foundation::Collections;
+
     template <typename T>
     struct fast_iterator
     {
@@ -54,7 +56,7 @@ namespace winrt::impl
         static constexpr bool value = get_value<T>(0);
     };
 
-    WINRT_EXPORT template <typename T, std::enable_if_t<!has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<!has_GetAt<T>::value>* = nullptr>
     auto begin(T const& collection) -> decltype(collection.First())
     {
         auto result = collection.First();
@@ -67,19 +69,19 @@ namespace winrt::impl
         return result;
     }
 
-    WINRT_EXPORT template <typename T, std::enable_if_t<!has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<!has_GetAt<T>::value>* = nullptr>
     auto end([[maybe_unused]] T const& collection) noexcept -> decltype(collection.First())
     {
         return {};
     }
 
-    WINRT_EXPORT template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
     fast_iterator<T> begin(T const& collection) noexcept
     {
         return fast_iterator<T>(collection, 0);
     }
 
-    WINRT_EXPORT template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
     fast_iterator<T> end(T const& collection)
     {
         return fast_iterator<T>(collection, collection.Size());

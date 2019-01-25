@@ -66,7 +66,7 @@ namespace winrt::impl
 }
 
 #ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
-WINRT_EXPORT namespace winrt::Windows::Foundation
+namespace winrt::Windows::Foundation
 {
     inline impl::await_adapter<IAsyncAction> operator co_await(IAsyncAction const& async)
     {
@@ -93,7 +93,7 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 }
 #endif
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     inline auto resume_background()
     {
@@ -497,8 +497,6 @@ WINRT_EXPORT namespace winrt
     {
         return{};
     }
-
-    struct fire_and_forget {};
 }
 
 namespace winrt::impl
@@ -605,7 +603,7 @@ namespace winrt::impl
 
                 if (m_status == AsyncStatus::Started)
                 {
-                    m_completed = handler;
+                    m_completed = make_agile_delegate(handler);
                     return;
                 }
 
@@ -659,6 +657,7 @@ namespace winrt::impl
                 if (m_status == AsyncStatus::Started)
                 {
                     m_status = AsyncStatus::Canceled;
+                    m_exception = std::make_exception_ptr(hresult_canceled());
                     cancel = std::move(m_cancel);
                 }
             }
@@ -673,9 +672,50 @@ namespace winrt::impl
         {
         }
 
+        auto GetResults()
+        {
+            slim_lock_guard const guard(m_lock);
+
+            if (m_status == AsyncStatus::Completed)
+            {
+                return static_cast<Derived*>(this)->get_return_value();
+            }
+
+            rethrow_if_failed();
+            WINRT_ASSERT(m_status == AsyncStatus::Started);
+            throw hresult_illegal_method_call();
+        }
+
         AsyncInterface get_return_object() const noexcept
         {
             return*this;
+        }
+
+        void get_return_value() const noexcept
+        {
+        }
+
+        void set_completed() noexcept
+        {
+            CompletedHandler handler;
+            AsyncStatus status;
+
+            {
+                slim_lock_guard const guard(m_lock);
+
+                if (m_status == AsyncStatus::Started)
+                {
+                    m_status = AsyncStatus::Completed;
+                }
+
+                handler = std::move(this->m_completed);
+                status = this->m_status;
+            }
+
+            if (handler)
+            {
+                handler(*this, status);
+            }
         }
 
         std::experimental::suspend_never initial_suspend() const noexcept
@@ -683,67 +723,55 @@ namespace winrt::impl
             return{};
         }
 
-        struct final_suspend_type
+        auto final_suspend() noexcept
         {
-            promise_base* promise;
-
-            bool await_ready() const noexcept
+            struct awaiter
             {
-                return false;
-            }
+                promise_base* promise;
 
-            void await_resume() const noexcept
-            {
-            }
-
-            bool await_suspend(std::experimental::coroutine_handle<>) const noexcept
-            {
-                uint32_t const remaining = promise->subtract_reference();
-
-                if (remaining == 0)
+                bool await_ready() const noexcept
                 {
-                    std::atomic_thread_fence(std::memory_order_acquire);
+                    return false;
                 }
 
-                return remaining > 0;
-            }
-        };
+                void await_resume() const noexcept
+                {
+                }
 
-        final_suspend_type final_suspend() noexcept
-        {
-            return{ this };
+                bool await_suspend(std::experimental::coroutine_handle<>) const noexcept
+                {
+                    promise->set_completed();
+                    uint32_t const remaining = promise->subtract_reference();
+
+                    if (remaining == 0)
+                    {
+                        std::atomic_thread_fence(std::memory_order_acquire);
+                    }
+
+                    return remaining > 0;
+                }
+            };
+
+            return awaiter{ this };
         }
 
         void unhandled_exception() noexcept
         {
-            CompletedHandler handler;
-            AsyncStatus status;
+            slim_lock_guard const guard(m_lock);
+            WINRT_ASSERT(m_status == AsyncStatus::Started || m_status == AsyncStatus::Canceled);
+            m_exception = std::current_exception();
 
+            try
             {
-                slim_lock_guard const guard(m_lock);
-                WINRT_ASSERT(m_status == AsyncStatus::Started || m_status == AsyncStatus::Canceled);
-                m_exception = std::current_exception();
-
-                try
-                {
-                    std::rethrow_exception(m_exception);
-                }
-                catch (hresult_canceled const&)
-                {
-                    m_status = AsyncStatus::Canceled;
-                }
-                catch (...)
-                {
-                    m_status = AsyncStatus::Error;
-                }
-
-                handler = std::move(m_completed);
-                status = m_status;
+                std::rethrow_exception(m_exception);
             }
-
-            if (handler)
+            catch (hresult_canceled const&)
             {
-                handler(*this, status);
+                m_status = AsyncStatus::Canceled;
+            }
+            catch (...)
+            {
+                m_status = AsyncStatus::Error;
             }
         }
 

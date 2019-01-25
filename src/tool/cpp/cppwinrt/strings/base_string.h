@@ -1,24 +1,6 @@
 
 namespace winrt::impl
 {
-    inline constexpr hresult error_ok{ 0 }; // S_OK
-    inline constexpr hresult error_false{ 1 }; // S_FALSE
-    inline constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
-    inline constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
-    inline constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD
-    inline constexpr hresult error_not_implemented{ static_cast<hresult>(0x80004001) }; // E_NOTIMPL
-    inline constexpr hresult error_invalid_argument{ static_cast<hresult>(0x80070057) }; // E_INVALIDARG
-    inline constexpr hresult error_out_of_bounds{ static_cast<hresult>(0x8000000B) }; // E_BOUNDS
-    inline constexpr hresult error_no_interface{ static_cast<hresult>(0x80004002) }; // E_NOINTERFACE
-    inline constexpr hresult error_class_not_available{ static_cast<hresult>(0x80040111) }; // CLASS_E_CLASSNOTAVAILABLE
-    inline constexpr hresult error_changed_state{ static_cast<hresult>(0x8000000C) }; // E_CHANGED_STATE
-    inline constexpr hresult error_illegal_method_call{ static_cast<hresult>(0x8000000E) }; // E_ILLEGAL_METHOD_CALL
-    inline constexpr hresult error_illegal_state_change{ static_cast<hresult>(0x8000000D) }; // E_ILLEGAL_STATE_CHANGE
-    inline constexpr hresult error_illegal_delegate_assignment{ static_cast<hresult>(0x80000018) }; // E_ILLEGAL_DELEGATE_ASSIGNMENT
-    inline constexpr hresult error_canceled{ static_cast<hresult>(0x800704C7) }; // HRESULT_FROM_WIN32(ERROR_CANCELLED)
-    inline constexpr hresult error_bad_alloc{ static_cast<hresult>(0x8007000E) }; // E_OUTOFMEMORY
-    inline constexpr hresult error_not_initialized{ static_cast<hresult>(0x800401F0) }; // CO_E_NOTINITIALIZED
-
     inline void* duplicate_string(void* other)
     {
         void* result = nullptr;
@@ -56,7 +38,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     struct hstring
     {
@@ -70,7 +52,7 @@ WINRT_EXPORT namespace winrt
 
         hstring() noexcept = default;
 
-        hstring(take_ownership_from_abi_t, void* ptr) noexcept : m_handle(ptr)
+        hstring(void* ptr, take_ownership_from_abi_t) noexcept : m_handle(ptr)
         {
         }
 
@@ -340,10 +322,10 @@ namespace winrt::impl
         hstring to_hstring()
         {
             WINRT_ASSERT(m_buffer != nullptr);
-            hstring result;
-            check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, put_abi(result)));
+            void* result;
+            check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, &result));
             m_buffer = nullptr;
-            return result;
+            return { result, take_ownership_from_abi };
         }
 
     private:
@@ -353,7 +335,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     inline bool embedded_null(hstring const& value) noexcept
     {

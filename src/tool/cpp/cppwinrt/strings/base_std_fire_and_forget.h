@@ -1,5 +1,10 @@
 
-WINRT_EXPORT namespace std::experimental
+namespace winrt
+{
+    struct fire_and_forget {};
+}
+
+namespace std::experimental
 {
     template <typename... Args>
     struct coroutine_traits<winrt::fire_and_forget, Args...>
@@ -25,8 +30,9 @@ WINRT_EXPORT namespace std::experimental
                 return{};
             }
 
-            void unhandled_exception() noexcept
+            void unhandled_exception() const noexcept
             {
+                std::terminate();
             }
         };
     };
