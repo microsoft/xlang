@@ -7,7 +7,7 @@ status: draft
 
 # Title: XLDN02 - Engineering Guidelines
 
-- Ben Kuhn (benkuhn\@microsoft.com)
+- Ben Kuhn (benkuhn@microsoft.com)
 - Status: Draft
 
 ## Abstract

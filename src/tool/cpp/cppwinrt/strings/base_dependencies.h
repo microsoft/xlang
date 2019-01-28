@@ -22,17 +22,11 @@
 #include <vector>
 #include <experimental/coroutine>
 
-#ifndef WINRT_EXPORT
-#define WINRT_EXPORT
-#else
-export module winrt;
-#endif
-
 #if __has_include(<WindowsNumerics.impl.h>)
 #define WINRT_NUMERICS
 #include <directxmath.h>
 #define _WINDOWS_NUMERICS_NAMESPACE_ winrt::Windows::Foundation::Numerics
-#define _WINDOWS_NUMERICS_BEGIN_NAMESPACE_ WINRT_EXPORT namespace winrt::Windows::Foundation::Numerics
+#define _WINDOWS_NUMERICS_BEGIN_NAMESPACE_ namespace winrt::Windows::Foundation::Numerics
 #define _WINDOWS_NUMERICS_END_NAMESPACE_
 #ifdef __clang__
 #define _XM_NO_INTRINSICS_

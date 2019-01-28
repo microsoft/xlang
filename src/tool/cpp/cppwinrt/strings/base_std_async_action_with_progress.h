@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace std::experimental
+namespace std::experimental
 {
     template <typename TProgress, typename... Args>
     struct coroutine_traits<winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>, Args...>

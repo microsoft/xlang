@@ -1,5 +1,5 @@
 
-WINRT_EXPORT namespace winrt::Windows::Foundation
+namespace winrt::Windows::Foundation
 {
     struct Point
     {
