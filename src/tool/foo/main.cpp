@@ -261,7 +261,7 @@ auto get_activation_factory(meta::TypeDef const& type)
     // TODO: need a version of get_activation_factory that takes IID as param
     // TODO: need a factory caching scheme that doesn't use compile time type name
 
-    winrt::hstring type_name = winrt::to_hstring(std::string{ type.TypeNamespace() } +"." + std::string{ type.TypeName() });
+    winrt::hstring type_name = winrt::to_hstring(std::string{ type.TypeNamespace() } + "." + std::string{ type.TypeName() });
     return winrt::get_activation_factory(type_name);
 }
 
@@ -342,15 +342,15 @@ int main(int const /*argc*/, char** /*argv*/)
 
     meta::TypeDef td_json_object = get_ns(namespaces, "Windows.Data.Json").types.at("JsonObject");
 
-    writer w;
+    // writer w;
 
-    for (auto&& ii : td_json_object.InterfaceImpl())
-    {
-        write_type_name(w, ii.Interface());
-        w.write("\n");
-    }
+    // for (auto&& ii : td_json_object.InterfaceImpl())
+    // {
+    //     write_type_name(w, ii.Interface());
+    //     w.write("\n");
+    // }
 
-    w.flush_to_console();
+    // w.flush_to_console();
 
     winrt::init_apartment();
     auto factory = get_activation_factory(td_json_object);
@@ -372,7 +372,7 @@ int main(int const /*argc*/, char** /*argv*/)
         std::vector<void*> args{ winrt::put_abi(istringable_str) };
         invoke(get_cif(arg_types), istringable, 6, args);
     }
-    printf("%S\n", istringable_str.c_str());
+    printf("IStringable::ToString: %S\n", istringable_str.c_str());
 
     winrt::hstring ijsonvalue_str;
     {
@@ -385,7 +385,20 @@ int main(int const /*argc*/, char** /*argv*/)
         std::vector<void*> args{ winrt::put_abi(ijsonvalue_str) };
         invoke(get_cif(arg_types), ijsonvalue, 7, args);
     };
-    printf("%S\n", ijsonvalue_str.c_str());
+    printf("IJsonValue::Stringify: %S\n", ijsonvalue_str.c_str());
+
+    int32_t jsonValueType = -1;
+    {
+        meta::TypeDef td_ijsonvalue = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
+        winrt::Windows::Foundation::IInspectable ijsonvalue;
+        winrt::check_hresult(instance.as(get_guid(td_ijsonvalue), winrt::put_abi(ijsonvalue)));
+
+        auto arg_types = get_method_ffi_types(td_ijsonvalue.MethodList().first[0]);
+
+        std::vector<void*> args{ &jsonValueType };
+        invoke(get_cif(arg_types), ijsonvalue, 6, args);
+    }
+    printf("IJsonValue::get_ValueType: %d\n", jsonValueType);
 
     return 0;
 }
