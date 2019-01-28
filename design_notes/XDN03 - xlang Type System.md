@@ -18,22 +18,23 @@ languages in a natural and familiar way.
 
 ## Philosophy
 
-xlang is designed to interoperate with many different object-oriented programming languages. The
-languages xlang is considering at this time include (but is not limited to):
+xlang is designed to interoperate with many different object-oriented programming languages. Some
+of the languages xlang is considering at this time include (but is not limited to):
 
 - [C++11](https://isocpp.org)
 - [Java](https://www.oracle.com/java)
-- [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+- [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)  
 - [.NET](https://dotnet.microsoft.com), in particular
   [C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/) and
   [Visual Basic](https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/)
 - [Objective-C](http://en.wikipedia.org/wiki/Objective-C)
 - [Python](https://python.org)
+- [TypeScript](https://www.typescriptlang.org/)
 
 These languages represent a wide variety of philosophical differences in type system design.
-Strong vs. weak types. Compiled vs interpreted languages. Static vs dynamic typing. Designing
-a single type system that can work is such varied environments inevitably leads to compromises
-that an individual language designer would never face.
+Strong vs. weak types. Compiled vs interpreted languages. Static vs dynamic typing. Gradual typing.
+Designing a single type system that can work is such varied environments inevitably leads to
+compromises that an individual language designer would never face.
 
 ## Type Categories
 
