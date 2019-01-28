@@ -22,12 +22,12 @@ xlang is designed to interoperate with many different object-oriented programmin
 of the languages xlang is considering at this time include (but is not limited to):
 
 - [C++11](https://isocpp.org)
-- [Java](https://www.oracle.com/java)
+- [Java](https://www.oracle.com/java) and [Kotlin](https://kotlinlang.org)
 - [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)  
 - [.NET](https://dotnet.microsoft.com), in particular
   [C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/) and
   [Visual Basic](https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/)
-- [Objective-C](http://en.wikipedia.org/wiki/Objective-C)
+- [Objective-C](http://en.wikipedia.org/wiki/Objective-C) and [Swift](https://swift.org)
 - [Python](https://python.org)
 - [TypeScript](https://www.typescriptlang.org/)
 
