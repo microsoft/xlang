@@ -74,12 +74,11 @@ String     | immutable sequence of Char16s used to represent text
 Guid       | 128-bit standard [universally unique identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
 Object     | xlang object of unknown type
 
-#### Fundamental Types Open Issues
-
-- String encoding has not been settled. WinRT originally specified UTF-16 character type and strings.
+> Open Issues
+> - String encoding has not been settled. WinRT originally specified UTF-16 character type and strings.
   However, UTF-8 has become the dominant encoding on the web since WinRT was originally designed.
   This work is tracked by [xlang issue #53](https://github.com/Microsoft/xlang/issues/53).
-- xlang should have a pointer sized primitive type, analogous to .NET's
+> - xlang should have a pointer sized primitive type, analogous to .NET's
   [IntPtr](https://docs.microsoft.com/en-us/dotnet/api/system.intptr) type.
 
 ### Enumerations
@@ -97,11 +96,10 @@ operators such as and, or and not for Flags enum values.
 Enumerations are additively versionable. Subsequent versions of an enumeration may add new named
 values (and associated constant integer values). Pre-existing values may not be removed or changed.
 
-#### Enumerations Open Issues
-
-- can xlang expand the types usable for enums, as well allowing other unsigned types to be flag
+> Open Issues
+> - can xlang expand the types usable for enums, as well allowing other unsigned types to be flag
   enums. 64bit bit flags as well as unsigned enums that aren't flags (addresses) have been asked about.
-- versioning in xlang needs its own XDN
+> - versioning in xlang needs its own XDN
 
 ### Structs
 
@@ -150,6 +148,10 @@ tables. By limiting interfaces at the type system level to single inheritance, x
 them at the ABI layer using a single composite virtual method table, avoiding the runtime and memory
 overhead described above.
 
+> Open Issues
+> - Given the WinRT IStorageFile example above, can xlang get away with only not supporting
+  interface requires?
+
 #### Parameterized Interfaces
 
 xlang interfaces support type parameterization. Parameterized interfaces specify one or more type
@@ -187,11 +189,6 @@ defined as part of of `IMap<K,V>`.
 Using the same collection interfaces defined above, you could define an non parameterized interface
 `IPropertySet` that inherits from `IMap<String, Object>`. Note the use of concrete types in the
 declaration of IMap, where in the previous example we used type parameters.
-
-#### Interface Open Issues
-
-- Given the WinRT IStorageFile example from the Interface Inheritance section above, can xlang get
-  away with only not supporting interface requires?
 
 ### Delegates
 
@@ -360,13 +357,11 @@ namespace-qualified type name, but can be customized. For example, an xlang type
 [JSON value](http://json.org/) would return the text representation of the JSON value from ToString.
 
 Projection language examples:
-
-- C++ N/A
-- [Java Object.toString](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#toString())
-- [JavaScript Object.prototype.toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString)
-- [.NET Object.ToString](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2)
-- [Objective-C NSObject description](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description)
-- [Python \_\_str__ magic method](https://docs.python.org/3/library/stdtypes.html#str)
+[Java Object.toString](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#toString()),
+[JavaScript Object.prototype.toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString),
+[.NET Object.ToString](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2),
+[Objective-C NSObject description](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description),
+and [Python \_\_str__ magic method](https://docs.python.org/3/library/stdtypes.html#str).
 
 #### GetHashCode
 
@@ -381,13 +376,18 @@ xlang types that provide their own implementation of GetHashCode should also pro
 implementation of Equals (detailed below).
 
 Projection language examples:
+[C++ std::hash struct](https://en.cppreference.com/w/cpp/utility/hash),
+[Java Object.hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#hashCode()),
+[.NET Object.GetHashCode](https://docs.microsoft.com/en-us/dotnet/api/system.object.gethashcode),
+[Objective-C NSObject hash](https://developer.apple.com/documentation/objectivec/nsobject/1418561-hash),
+and [Python \_\_hash__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__hash__).
 
-- [C++ std::hash struct](https://en.cppreference.com/w/cpp/utility/hash)
-- [Java Object.hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#hashCode())
-- JavaScript N/A
-- [.NET Object.GetHashCode](https://docs.microsoft.com/en-us/dotnet/api/system.object.gethashcode)
-- [Objective-C NSObject hash](https://developer.apple.com/documentation/objectivec/nsobject/1418561-hash)
-- [Python \_\_hash__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__hash__)
+> Open Issues
+> - Java and .NET intrinsic hash method returns Int32. Python and Objective-C returns a pointer
+  sized signed integer (i.e. IntPtr). C++ uses std::size_t, an implementation dependent unsigned
+  integer. Should xlang's GetHashCode method be limited to 32 bits to accommodate .NET and Java,
+  or should it be pointer sized, forcing .NET and Java to adapt the 64 bit hash value into a 32
+  bit one?
 
 #### Equals
 
@@ -400,13 +400,11 @@ xlang types that provide their own implementation of Equals should also provide 
 implementation of GetHashCode (detailed above).
 
 Projection language examples:
-
-- [C++ operator==](https://en.cppreference.com/w/cpp/language/operator_comparison)
-- [Java Object.equals](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#equals(java.lang.Object))
-- JavaScript N/A
-- [.NET Object.Equals](https://docs.microsoft.com/en-us/dotnet/api/system.object.equals#System_Object_Equals_System_Object_)
-- [Objective-C NSObject isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal)
-- [Python \_\_eq__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__eq__)
+[C++ operator==](https://en.cppreference.com/w/cpp/language/operator_comparison), 
+[Java Object.equals](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#equals(java.lang.Object)),
+[.NET Object.Equals](https://docs.microsoft.com/en-us/dotnet/api/system.object.equals#System_Object_Equals_System_Object_),
+[Objective-C NSObject isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal),
+and [Python \_\_eq__ magic method](https://docs.python.org/3/reference/datamodel.html#object.__eq__).
 
 #### CompareTo
 
@@ -428,47 +426,32 @@ Note, xlang types that provide their own implementation of Compare should also p
 implementation of GetHashCode (detailed above).
 
 Projection language examples:
-
-- C++ [Proposed "spaceship" operator](http://open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0515r0.pdf)
-- Java [Java Comparable\<T>](https://docs.oracle.com/javase/7/docs/api/java/lang/Comparable.html)
-- JavaScript N/A
-- .NET [IComparable\<T>](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
-- Objective-C NSObject Comparison Functions
-  - [isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal)
-  - [isNotEqual](https://developer.apple.com/documentation/objectivec/nsobject/1393843-isnotequal)
-  - [isLessThan](https://developer.apple.com/documentation/objectivec/nsobject/1393841-islessthan)
-  - [isLessThatOrEqual](https://developer.apple.com/documentation/objectivec/nsobject/1393827-islessthanorequal)
-  - [isGreaterThan](https://developer.apple.com/documentation/objectivec/nsobject/1393885-isgreaterthan)
-  - [isGreaterThanOrEqual](https://developer.apple.com/documentation/objectivec/nsobject/1393862-isgreaterthanorequal)
-- [Python Rich Comparison Methods](https://docs.python.org/3/reference/datamodel.html#object.__lt__)
-  - [Rich Comparisons PEP](https://www.python.org/dev/peps/pep-0207/)
-
-#### Intrinsic Operations Open Issues
-
-- GetHashCode return type
-  - Java and .NET intrinsic hash method returns Int32. Python and Objective-C returns a pointer
-    sized signed integer (i.e. IntPtr). C++ uses std::size_t, an implementation dependent unsigned
-    integer. Should xlang's GetHashCode method be limited to 32 bits to accommodate .NET and Java,
-    or should it be pointer sized, forcing .NET and Java to adapt the 64 bit hash value into a 32
-    bit one?
-- Equals vs. CompareTo
-  - Almost all the mainstream languages xlang is likely to project into provide a way to intrinsic
+C++ [Proposed "spaceship" operator](http://open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0515r0.pdf)
+Java [Java Comparable\<T>](https://docs.oracle.com/javase/7/docs/api/java/lang/Comparable.html)
+.NET [IComparable\<T>](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
+Objective-C NSObject [isLessThan](https://developer.apple.com/documentation/objectivec/nsobject/1393841-islessthan)
+/ [isGreaterThan](https://developer.apple.com/documentation/objectivec/nsobject/1393885-isgreaterthan),
+and [Python Rich Comparison Methods](https://docs.python.org/3/reference/datamodel.html#object.__lt__).
+  
+> Open Issues
+> - Equals vs. CompareTo
+>   - Almost all the mainstream languages xlang is likely to project into provide a way to intrinsic
     equality operations on all types. Some, in particular Python and Objective-C, also provide intrinsic
     comparison operators on all types. It has been proposed that xlang should have an intrinsic CompareTo
     operation instead of Equals, since CompareTo can also provide the equivalent of Equals.
-  - It's unclear, however, if this approach would project cleanly into languages like C# and Java that
+>   - It's unclear, however, if this approach would project cleanly into languages like C# and Java that
     have an intrinsic equality operator but not intrinsic comparison operators. C# and Java both have
     generic interfaces that indicate a given type can be compared to another instance of that type for
     sorting purposes. Using CompareTo instead of Equals would likely imply the need for a \[Comparable]
     attribute to indicate a given type has a custom implementation of CompareTo.
-- Comparable vs Comparer
-  - .NET has interfaces for both [IComparable\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
+> - Comparable vs Comparer
+>   - .NET has interfaces for both [IComparable\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.icomparable-1)
     and [IComparer\<T> interface](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1)
     as well as the [Comparison\<T> delegate](https://docs.microsoft.com/en-us/dotnet/api/system.comparison-1).
     IComparable\<T> is designed to be implemented on instances of the type while IComparer\<T> is
     designed to be implemented on a separate Comparer object. The Comparison delegate behaves similarly
     to the IComparer interface.
-  - The benefit of using a separate comparer object or delegate is that it allows types with value
+>   - The benefit of using a separate comparer object or delegate is that it allows types with value
     semantics to opt-in to comparison operations without requiring additional ABI interfaces on the
     type itself. However, in order to project cleanly into languages with intrinsic comparisons like
     Python and Objective-C, xlang would likely need a mechanism to associate a type with its
