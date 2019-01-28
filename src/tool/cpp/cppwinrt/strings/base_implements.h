@@ -1226,7 +1226,7 @@ namespace winrt
 #ifdef _DEBUG
         implements() noexcept
         {
-            WINRT_ASSERT(!is_stack_address(this));
+            WINRT_ASSERT(!is_stack_object());
         }
 #endif
 
@@ -1293,39 +1293,13 @@ namespace winrt
     private:
 
 #ifdef _DEBUG
-        bool is_stack_address(void const* const address) noexcept
+        bool is_stack_object() const noexcept
         {
-            struct memory_basic_information
-            {
-                void* BaseAddress;
-                void* AllocationBase;
-                uint32_t AllocationProtect;
-                size_t RegionSize;
-                uint32_t State;
-                uint32_t Protect;
-                uint32_t Type;
-            };
-
-            static constexpr uint32_t page_guard{ 0x100 };
-
-            memory_basic_information info{};
-            WINRT_VirtualQuery(address, &info, sizeof(info));
-
-            if (info.AllocationBase == info.BaseAddress)
-            {
-                return (info.Protect & page_guard) == page_guard;
-            }
-
-            WINRT_VirtualQuery(info.AllocationBase, &info, sizeof(info));
-
-            if ((info.Protect& page_guard) == page_guard)
-            {
-                return true;
-            }
-
-            void const* const potential_page = static_cast<char const*>(info.AllocationBase) + info.RegionSize;
-            WINRT_VirtualQuery(potential_page, &info, sizeof(info));
-            return (info.Protect & page_guard) == page_guard;
+            uintptr_t low_limit{};
+            uintptr_t high_limit{};
+            WINRT_GetCurrentThreadStackLimits(&low_limit, &high_limit);
+            uintptr_t const address = reinterpret_cast<uintptr_t>(this);
+            return (low_limit <= address) && (address < high_limit);
         }
 #endif
 
