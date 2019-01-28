@@ -203,7 +203,7 @@ TypeName in order to be usable from dynamic languages.
 #### Hash Code
 
 The HashCode information category retrieves a numeric value that is used to identify an object in a
-hash based collectionThe property type for StringRepresentation is a 32 bit integer.
+hash based collection. The size of the numeric value is currently an open issue.
 
 This information category should only be supported for types that wish to return a custom value for
 a language projection's equivalent of GetHashCode. Language projections may choose to fall back to

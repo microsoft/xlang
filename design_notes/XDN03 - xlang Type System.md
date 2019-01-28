@@ -270,7 +270,7 @@ Typically, this defaults to a value derived from the object's reference informat
 this pointer in C++), but it can be customized. For example, an xlang type that represents a JSON
 value would return a hash code generated from the specific contained JSON value. Two xlang JSON value
 instances containing the same data would thus return the same value for GetHashCode. Note, however, that
-equal hash codes does not imply object equality.
+while equal objects should hash equally, equal hash codes does not imply object equality.
 
 xlang types that provide their own implementation of GetHashCode should also provide their own
 implementation of Equals (detailed below).
@@ -340,6 +340,12 @@ Projection language examples:
 
 #### Intrinsic Operations Open Issues
 
+- GetHashCode return type
+  - Java and .NET intrinsic hash method returns Int32. Python and Objective-C returns a pointer
+    sized signed integer (i.e. IntPtr). C++ uses std::size_t, an implementation dependent unsigned
+    integer. Should xlang's GetHashCode method be limited to 32 bits to accommodate .NET and Java,
+    or should it be pointer sized, forcing .NET and Java to adapt the 64 bit hash value into a 32
+    bit one?
 - Equals vs. CompareTo
   - Almost all the mainstream languages xlang is likely to project into provide a way to intrinsic
     equality operations on all types. Some, in particular Python and Objective-C, also provide intrinsic
