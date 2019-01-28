@@ -218,28 +218,133 @@ Classes are xlang types that expose behavior and encapsulate data.
 
 Classes have zero or more object members (i.e. Methods, Properties and Events).
 
-Classes can not be parameterized.
+Classes may be activatable (i.e. directly constructible via a language specific mechanism like
+C++ "new"). Activatable classes provide one or more activation methods (i.e. constructors).
+Activation methods take zero or more `in` parameters and return a newly activated instance of the
+class. Neither `out` parameters nor a different return value are allowed for activation methods.
+Multiple activation methods are allowed, providing each method has a unique signature. As described
+in the Method Overloading section below, xlang generally prefers arity-based (i.e. number of
+parameters) to type based (i.e. types of parameters) overloading. All activation methods for a
+given class are considered to have the same name from the perspective of overloading.
 
-Classes can optionally implement one or more interfaces. Classes may implement parameterized
-interfaces, but only if all type parameters are specified. For example, a `JsonArray` type could
-not implement `IVector<T>` but it could implement `IVector<JsonValue>`.
+Classes may have zero or more instance members as well as zero or more static members. Instance
+members are members that are called on an activated instance of the class while static members are
+called on the class itself.
+
+Classes can implement zero or more interfaces. As described above, interfaces define a set of type
+members. Classes that implement a given interface much implement all the members of the interface.
+
+Classes can not be parameterized. Classes may implement parameterized interfaces, but only if all
+type parameters are specified. For example, a `JsonArray` type could not implement `IVector<T>` but
+it could implement `IVector<JsonValue>`.
 
 Classes are additively versionable. Subsequent versions of a given enum may add new members.
 Pre-existing members may not be removed or modified in any way.
 
+#### Class Inheritance
+
+TBD
+
 ## Object Members
+
+Interfaces and Classes can define zero or more members - Methods, Properties and Events.
 
 ### Methods
 
+Methods take zero or more parameters and a single optional return type.
+
+Methods must have a concrete number of arguments. Methods may not have optional parameters, nor
+parameters with default values.
+
+Methods may not be parameterized. Parameterized delegates and methods on parameterized interfaces
+may use the type parameters of the containing type in the method signature.
+
 #### Parameters
+
+All method parameters must have a name and a type. Method parameter names, including the return type
+name, must be unique within the scope of the method.
+
+Only parameters for parameterized delegates and members of parameterized interfaces may specify a
+parameterized type for the parameter type. Methods may not be individually parameterized.
+
+Method parameters default to being `in` parameters (i.e. they provide information to the method), but
+can optionally be marked as `out` parameters (i.e. the act as an additional return value from the method).
+`in\out` parameters are not supported.
 
 ##### Array Parameters
 
+Object members may optionally support arrays for parameter and return value types. Array parameters
+are a block of memory holding an specified number of elements of a given type.
+
+xlang supports array parameters of most xlang types including fundamental types, structs,
+enumerations, delegates, interfaces, and classes. Arrays of other arrays are not allowed.
+
+WinRT supports three different array-passing styles.
+
+- PassArray. This style is used when the caller provides an array for the the member read from.
+- FillArray. This style is used when the caller provides an array for the member to fill, up to a
+  maximum array size.
+- ReceiveArray. This style is used when the caller receives an array that was allocated by the member.
+
+For the purposes of determining a method's arity (described in the method overloading section below),
+only PassArray and FillArray are considered input parameters.
+
+Array return values may only use the ReceiveArray style.
+
+Arrays may not be used as stand-alone types, struct fields types or as type parameters for
+parameterized types.
+
 #### Method Overloading
+
+Within the scope of a single type, more than one method may have the same name. Methods with the
+same name on a type must have unique signatures. Only methods can be overloaded.
+
+xlang supports overloading on parameter types, but favors overloading on the number of input
+parameters - also known as the method's arity. This is done in order to support dynamic,
+weakly-typed languages such as JavaScript.
+
+Classes may not implement combinations of interfaces that create invalid method overload
+combinations. For example, assuming the existence of both an `ICowboy` and `IArtist` interface
+each with a `Draw()` method, it would not be valid to create a `CowboyArtist` class that
+implemented both interfaces since there would be two methods with the same signature named `Draw`.
 
 ### Properties
 
+A property is a pair of get/set methods with matching name and type that appear in some language
+projections as fields rather than methods.
+
+A property must have a get method. A property getter method has no parameters, and returns a value
+of the property type. A property with only a get method is called a read-only property.
+
+A property may optionally have a set method. A property setter method has a single parameter of the
+property type, and has no return value. A property with both a get and a set method is called a
+read/write property.
+
+Properties may not be parameterized. Properties from parameterized interfaces may use type
+parameters of the containing type as the property type.
+
+Properties may not be overloaded.
+
+#### Property Open Issues
+
+- Should xlang support write-only properties? Seems like there's little reason to exclude them.
+
 ### Events
+
+An event is a pair of add/remove listener methods with matching name and delegate type. Events are a
+mechanism for the type to notify interested parties when something of significance happens.
+
+An event add listener has a single parameter of the event delegate type, and returns an
+EventRegistrationToken. An event remove listener method has a single EventRegistrationToken
+parameter and has no return value.
+
+For languages that have intrinsic event semantics, like C#, event add/remove methods may be projected
+in a language-native manner instead of the signatures listed above.
+
+Events may not be parameterized. Events from parameterized interfaces may use type parameters of the
+containing type as the event delegate type.
+
+Events may not be overloaded.
 
 ### Intrinsic Operations
 
