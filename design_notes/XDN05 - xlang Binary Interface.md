@@ -173,7 +173,7 @@ If a given object does not support a requested object information category, it r
 GetObjectInfo and sets the info parameter value to null.
 
 Having a single GetObjectInfo method has two primary benefits over the IInspectable approach. Because
-enums can be additively versioned over time, it is possible to add new ones over time. Since
+enumerations can be additively versioned over time, it is possible to add new ones over time. Since
 supporting a given information category is optional, adding new ones would not break existing
 objects. Furthermore, it reduces the size of the virtual function table that every xlang object
 needs to support.

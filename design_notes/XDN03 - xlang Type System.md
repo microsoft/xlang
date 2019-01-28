@@ -400,7 +400,7 @@ xlang types that provide their own implementation of Equals should also provide 
 implementation of GetHashCode (detailed above).
 
 Projection language examples:
-[C++ operator==](https://en.cppreference.com/w/cpp/language/operator_comparison), 
+[C++ operator==](https://en.cppreference.com/w/cpp/language/operator_comparison),
 [Java Object.equals](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#equals(java.lang.Object)),
 [.NET Object.Equals](https://docs.microsoft.com/en-us/dotnet/api/system.object.equals#System_Object_Equals_System_Object_),
 [Objective-C NSObject isEqual](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418795-isequal),
@@ -419,7 +419,7 @@ not the same instance, their sort order is based on a stable comparison of their
 (such as their ABI object pointers).
 
 xlang objects can provide a custom implementation of CompareTo. For example, an xlang type
-representing a JSON value would return a value depending on a lexigraphical comparison of the
+representing a JSON value would return a value depending on a lexicographical comparison of the
 JSON strings each object represents.
 
 Note, xlang types that provide their own implementation of Compare should also provide their own
