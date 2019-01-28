@@ -1223,6 +1223,13 @@ namespace winrt
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
 
+#ifdef _DEBUG
+        implements() noexcept
+        {
+            WINRT_ASSERT(!is_stack_address(this));
+        }
+#endif
+
         weak_ref<D> get_weak()
         {
             return root_implements_type::template get_weak<D>();
@@ -1284,6 +1291,44 @@ namespace winrt
         }
 
     private:
+
+#ifdef _DEBUG
+        bool is_stack_address(void const* const address) noexcept
+        {
+            struct memory_basic_information
+            {
+                void* BaseAddress;
+                void* AllocationBase;
+                uint32_t AllocationProtect;
+                size_t RegionSize;
+                uint32_t State;
+                uint32_t Protect;
+                uint32_t Type;
+            };
+
+            static constexpr uint32_t page_guard{ 0x100 };
+
+            memory_basic_information info{};
+            WINRT_VirtualQuery(address, &info, sizeof(info));
+
+            if (info.AllocationBase == info.BaseAddress)
+            {
+                return (info.Protect & page_guard) == page_guard;
+            }
+
+            WINRT_VirtualQuery(info.AllocationBase, &info, sizeof(info));
+
+            if ((info.Protect& page_guard) == page_guard)
+            {
+                return true;
+            }
+
+            void const* const potential_page = static_cast<char const*>(info.AllocationBase) + info.RegionSize;
+            WINRT_VirtualQuery(potential_page, &info, sizeof(info));
+            return (info.Protect & page_guard) == page_guard;
+        }
+#endif
+
         impl::unknown_abi* get_unknown() const noexcept override
         {
             return reinterpret_cast<impl::unknown_abi*>(to_abi<typename impl::implements_default_interface<D>::type>(this));
