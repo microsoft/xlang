@@ -33,53 +33,6 @@ struct separator
     }
 };
 
-
-struct winrt_ns
-{
-    std::map<std::string_view, winrt_ns> sub_namespaces{};
-    meta::cache::namespace_members members{};
-};
-
-meta::cache::namespace_members const* find_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns) noexcept
-{
-    auto dot_pos = ns.find('.', 0);
-    if (dot_pos == std::string_view::npos)
-    {
-        auto it = namespaces.find(ns);
-        if (it == namespaces.end())
-        {
-            return nullptr;
-        }
-        else
-        {
-            return &(it->second.members);
-        }
-    }
-    else
-    {
-        auto it = namespaces.find(ns.substr(0, dot_pos));
-        if (it == namespaces.end())
-        {
-            return nullptr;
-        }
-        else
-        {
-            return find_ns(it->second.sub_namespaces, ns.substr(dot_pos + 1));
-        }
-    }
-}
-
-meta::cache::namespace_members const& get_ns(std::map<std::string_view, winrt_ns> const& namespaces, std::string_view const& ns)
-{
-    auto _ns = find_ns(namespaces, ns);
-    if (_ns == nullptr)
-    {
-        throw std::out_of_range{ std::string{ns} };
-    }
-
-    return *_ns;
-}
-
 auto get_system_metadata()
 {
     namespace fs = std::experimental::filesystem;
@@ -90,44 +43,27 @@ auto get_system_metadata()
     auto sys32 = "c:\\Windows\\Sysnative";
 #endif
 
-    auto winmd = fs::path{ sys32 } / "WinMetadata";
+    auto system_winmd_path = fs::path{ sys32 } / "WinMetadata";
 
-    std::vector<std::string> files;
-    for (auto& p : fs::directory_iterator(winmd))
+    std::vector<std::string> system_winmd_files;
+    for (auto& p : fs::directory_iterator(system_winmd_path))
     {
-        files.push_back(p.path().string());
+        system_winmd_files.push_back(p.path().string());
     }
 
-    return std::move(files);
+    return std::move(system_winmd_files);
 }
 
-auto get_namespace_map(meta::cache const& c)
+auto get_guid(meta::TypeDef const& type)
 {
-    std::map<std::string_view, winrt_ns> root_namespaces;
+    meta::CustomAttribute const& attrib = meta::get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
 
-    for (auto&&[ns, members] : c.namespaces())
-    {
-        winrt_ns* curns{ nullptr };
-        std::map<std::string_view, winrt_ns>* nsmap = &root_namespaces;
+    // TODO: validate attrib
 
-        for (auto&& s : get_dotted_name_segments(ns))
-        {
-            winrt_ns& q = (*nsmap)[s];
-            curns = &q;
-            nsmap = &(q.sub_namespaces);
-        }
+    std::vector<meta::FixedArgSig> args = attrib.Value().FixedArgs();
 
-        curns->members = members;
-    }
+    auto getarg = [&args](std::size_t index) { return std::get<meta::ElemSig>(args[index].value).value; };
 
-    return std::move(root_namespaces);
-}
-
-auto get_guid(meta::CustomAttribute const& attrib)
-{
-    std::vector<meta::FixedArgSig> z = attrib.Value().FixedArgs();
-
-    auto getarg = [&z](std::size_t index) { return std::get<meta::ElemSig>(z[index].value).value; };
     return winrt::guid{
         std::get<uint32_t>(getarg(0)),
         std::get<uint16_t>(getarg(1)),
@@ -145,46 +81,10 @@ auto get_guid(meta::CustomAttribute const& attrib)
     };
 }
 
-auto get_guid(meta::TypeDef const& type)
-{
-    return get_guid(meta::get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute"));
-}
-
-auto get_arg_types(meta::MethodDef const& method)
-{
-    method_signature signature{ method };
-
-    std::vector<ffi_type*> arg_types{};
-
-    // explicit this pointer 
-    arg_types.push_back(&ffi_type_pointer);
-
-    if (signature.has_params())
-    {
-        xlang::throw_invalid("not implemented");
-    }
-
-    if (signature.return_signature())
-    {
-        if (signature.return_signature().Type().is_szarray())
-        {
-            xlang::throw_invalid("not implemented");
-        }
-
-        // return values are always pointers
-        arg_types.push_back(&ffi_type_pointer);
-    }
-
-    return std::move(arg_types);
-}
-
 std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
 {
-    auto method_name = method.Name();
-
-    std::vector<ffi_type const*> arg_types{ &ffi_type_pointer };
-
     method_signature signature{ method };
+    std::vector<ffi_type const*> arg_types{ &ffi_type_pointer }; // first param is always a vtable pointer
 
     for (auto&& param : signature.params())
     {
@@ -258,6 +158,15 @@ std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
     return std::move(arg_types);
 }
 
+auto get_activation_factory(meta::TypeDef const& type)
+{
+    // TODO: need a version of get_activation_factory that takes IID as param
+    // TODO: need a factory caching scheme that doesn't use compile time type name
+
+    winrt::hstring type_name = winrt::to_hstring(std::string{ type.TypeNamespace() } +"." + std::string{ type.TypeName() });
+    return winrt::get_activation_factory(type_name);
+}
+
 namespace std
 {
     template<> struct hash<std::vector<ffi_type const*>>
@@ -296,6 +205,24 @@ ffi_cif* get_cif(std::vector<ffi_type const*> const& arg_types)
     return &(cif_cache.at(arg_types).first);
 }
 
+
+auto find_method(meta::TypeDef const& type, std::string_view name)
+{
+    meta::MethodDef method = std::find_if(
+        type.MethodList().first, type.MethodList().second,
+        [name](meta::MethodDef const& method) {
+        return method.Name() == name; });
+
+    auto n = method.Name();
+
+    if (method == type.MethodList().second)
+    {
+        xlang::throw_invalid("method not found");
+    }
+
+    return std::make_tuple(method.index() - type.MethodList().first.index(), method);
+}
+
 void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instance, int offset, std::vector<void*> const& parameters)
 {
     winrt::hresult hr;
@@ -311,15 +238,6 @@ void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instan
 
     ffi_call(cif, FFI_FN((*((void***)vtable))[offset]), &hr, args.data());
     winrt::check_hresult(hr);
-}
-
-auto get_activation_factory(meta::TypeDef const& type)
-{
-    // TODO: need a version of get_activation_factory that takes IID as param
-    // TODO: need a factory caching scheme that doesn't use compile time type name
-
-    winrt::hstring type_name = winrt::to_hstring(std::string{ type.TypeNamespace() } + "." + std::string{ type.TypeName() });
-    return winrt::get_activation_factory(type_name);
 }
 
 void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdrs)
@@ -392,33 +310,37 @@ void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdr
     tnh.handle(tdrs);
 }
 
-winrt::hstring invoke_tostring(std::map<std::string_view, winrt_ns> const& namespaces, winrt::Windows::Foundation::IInspectable const& instance)
+winrt::hstring invoke_tostring(meta::cache const& c, winrt::Windows::Foundation::IInspectable const& instance)
 {
     winrt::hstring istringable_str;
 
-    meta::TypeDef td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
+    meta::TypeDef td_istringable = c.find("Windows.Foundation", "IStringable");
+    auto[to_string_index, to_string_method] = find_method(td_istringable, "ToString");
+
     winrt::Windows::Foundation::IInspectable istringable;
     winrt::check_hresult(instance.as(get_guid(td_istringable), winrt::put_abi(istringable)));
 
-    auto arg_types = get_method_ffi_types(td_istringable.MethodList().first[0]);
+    auto arg_types = get_method_ffi_types(to_string_method);
     std::vector<void*> args{ winrt::put_abi(istringable_str) };
-    invoke(get_cif(arg_types), istringable, 6, args);
+    invoke(get_cif(arg_types), istringable, 6 + to_string_index, args);
 
     return std::move(istringable_str);
 }
 
-int32_t invoke_get_valuetype(std::map<std::string_view, winrt_ns> const& namespaces, winrt::Windows::Foundation::IInspectable const& instance)
+int32_t invoke_get_valuetype(meta::cache const& c, winrt::Windows::Foundation::IInspectable const& instance)
 {
     int32_t jsonValueType = -1;
 
-    meta::TypeDef td_ijsonvalue = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
+    meta::TypeDef td_ijsonvalue = c.find("Windows.Data.Json", "IJsonValue");
+    auto [get_valuetype_index, get_valuetype_method] = find_method(td_ijsonvalue, "get_ValueType");
+
     winrt::Windows::Foundation::IInspectable ijsonvalue;
     winrt::check_hresult(instance.as(get_guid(td_ijsonvalue), winrt::put_abi(ijsonvalue)));
 
-    auto arg_types = get_method_ffi_types(td_ijsonvalue.MethodList().first[0]);
+    auto arg_types = get_method_ffi_types(get_valuetype_method);
 
     std::vector<void*> args{ &jsonValueType };
-    invoke(get_cif(arg_types), ijsonvalue, 6, args);
+    invoke(get_cif(arg_types), ijsonvalue, 6 + get_valuetype_index, args);
 
     return jsonValueType;
 }
@@ -428,10 +350,9 @@ int main(int const /*argc*/, char** /*argv*/)
     try
     {
         meta::cache c{ get_system_metadata() };
-        auto namespaces = get_namespace_map(c);
 
-        meta::TypeDef td_json_object = get_ns(namespaces, "Windows.Data.Json").types.at("JsonObject");
-        meta::TypeDef td_json_value  = get_ns(namespaces, "Windows.Data.Json").types.at("JsonValue");
+        meta::TypeDef td_json_object = c.find("Windows.Data.Json", "JsonObject");
+        meta::TypeDef td_json_value  = c.find("Windows.Data.Json", "JsonValue"); 
 
         winrt::init_apartment();
         auto obj_factory = get_activation_factory(td_json_object);
@@ -439,41 +360,46 @@ int main(int const /*argc*/, char** /*argv*/)
 
         winrt::Windows::Foundation::IInspectable null_value;
         {
-            meta::TypeDef td_ijsonvaluestatics2 = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValueStatics2");
-            winrt::Windows::Foundation::IInspectable istringable;
-            winrt::check_hresult(val_factory.as(get_guid(td_ijsonvaluestatics2), winrt::put_abi(istringable)));
+            meta::TypeDef td_ijsonvaluestatics2 = c.find("Windows.Data.Json", "IJsonValueStatics2");
+            auto [create_null_value_index, create_null_value_method] = find_method(td_ijsonvaluestatics2, "CreateNullValue");
 
-            auto arg_types = get_method_ffi_types(td_ijsonvaluestatics2.MethodList().first[0]);
+            winrt::Windows::Foundation::IInspectable ijsonvaluestatics2;
+            winrt::check_hresult(val_factory.as(get_guid(td_ijsonvaluestatics2), winrt::put_abi(ijsonvaluestatics2)));
+
+            auto arg_types = get_method_ffi_types(create_null_value_method);
             std::vector<void*> args{ winrt::put_abi(null_value) };
-            invoke(get_cif(arg_types), istringable, 6, args);
+            invoke(get_cif(arg_types), ijsonvaluestatics2, 6 + create_null_value_index, args);
         }
 
         winrt::Windows::Foundation::IInspectable json_object;
         {
+            // TODO, get arg types from metadata
             std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
             std::vector<void*> args{ winrt::put_abi(json_object) };
             invoke(get_cif(arg_types), obj_factory, 6, args);
         };
 
-        printf("null_value  JsonValueType: %d\n", invoke_get_valuetype(namespaces, null_value));
-        printf("json_object JsonValueType: %d\n", invoke_get_valuetype(namespaces, json_object));
+        printf("null_value  JsonValueType: %d\n", invoke_get_valuetype(c, null_value));
+        printf("json_object JsonValueType: %d\n", invoke_get_valuetype(c, json_object));
 
-        printf("null_value  ToString: %S\n", invoke_tostring(namespaces, null_value).c_str());
-        printf("json_object ToString: %S\n", invoke_tostring(namespaces, json_object).c_str());
+        printf("null_value  ToString: %S\n", invoke_tostring(c, null_value).c_str());
+        printf("json_object ToString: %S\n", invoke_tostring(c, json_object).c_str());
 
         {
-            meta::TypeDef td_ijsonobject = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonObject");
+            meta::TypeDef td_ijsonobject = c.find("Windows.Data.Json", "IJsonObject");
+            auto[SetNamedValue_index, SetNamedValue_method] = find_method(td_ijsonobject, "SetNamedValue");
+
             winrt::Windows::Foundation::IInspectable ijsonobject;
             winrt::check_hresult(json_object.as(get_guid(td_ijsonobject), winrt::put_abi(ijsonobject)));
 
             winrt::hstring name { L"SirNotAppearingInThisFilm" };
-            auto arg_types = get_method_ffi_types(td_ijsonobject.MethodList().first[1]);
+            auto arg_types = get_method_ffi_types(SetNamedValue_method);
 
             std::vector<void*> args{ winrt::get_abi(name), winrt::get_abi(null_value) };
-            invoke(get_cif(arg_types), ijsonobject, 7, args);
+            invoke(get_cif(arg_types), ijsonobject, 6 + SetNamedValue_index, args);
         }
 
-        printf("json_object ToString: %S\n", invoke_tostring(namespaces, json_object).c_str());
+        printf("json_object ToString: %S\n", invoke_tostring(c, json_object).c_str());
     }
     catch (std::exception const& e)
     {
