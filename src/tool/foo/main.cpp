@@ -332,44 +332,44 @@ void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdr
     tnh.handle(tdrs);
 }
 
-winrt::hstring invoke_tostring(meta::cache const& c, IInspectable const& instance)
-{
-    winrt::hstring istringable_str;
-    std::vector<void*> args{ winrt::put_abi(istringable_str) };
-
-    meta::TypeDef td_istringable = c.find("Windows.Foundation", "IStringable");
-    interface_invoke(td_istringable, "ToString", instance, args);
-
-    return std::move(istringable_str);
-}
-
-winrt::hstring invoke_stringify(meta::cache const& c, IInspectable const& instance)
-{
-    winrt::hstring str;
-    std::vector<void*> args{ winrt::put_abi(str) };
-
-    meta::TypeDef td_ijsonvalue = c.find("Windows.Data.Json", "IJsonValue");
-    interface_invoke(td_ijsonvalue, "Stringify", instance, args);
-
-    return std::move(str);
-}
-
-int32_t invoke_get_valuetype(meta::cache const& c, IInspectable const& instance)
-{
-    int32_t jsonValueType = -1;
-    std::vector<void*> args{ &jsonValueType };
-
-    meta::TypeDef td_ijsonvalue = c.find("Windows.Data.Json", "IJsonValue");
-    interface_invoke(td_ijsonvalue, "get_ValueType", instance, args);
-
-    return jsonValueType;
-}
-
 int main(int const /*argc*/, char** /*argv*/)
 {
     try
     {
         meta::cache c{ get_system_metadata() };
+
+        auto invoke_tostring = [&c](IInspectable const& instance)
+        {
+            winrt::hstring str;
+            std::vector<void*> args{ winrt::put_abi(str) };
+
+            meta::TypeDef td_istringable = c.find("Windows.Foundation", "IStringable");
+            interface_invoke(td_istringable, "ToString", instance, args);
+
+            return std::move(str);
+        };
+
+        auto invoke_stringify = [&c](IInspectable const& instance)
+        {
+            winrt::hstring str;
+            std::vector<void*> args{ winrt::put_abi(str) };
+
+            meta::TypeDef td_ijsonvalue = c.find("Windows.Data.Json", "IJsonValue");
+            interface_invoke(td_ijsonvalue, "Stringify", instance, args);
+
+            return std::move(str);
+        };
+
+        auto invoke_get_valuetype = [&c](IInspectable const& instance)
+        {
+            int32_t jsonValueType = -1;
+            std::vector<void*> args{ &jsonValueType };
+
+            meta::TypeDef td_ijsonvalue = c.find("Windows.Data.Json", "IJsonValue");
+            interface_invoke(td_ijsonvalue, "get_ValueType", instance, args);
+
+            return jsonValueType;
+        };
 
         meta::TypeDef td_json_object = c.find("Windows.Data.Json", "JsonObject");
         meta::TypeDef td_json_value  = c.find("Windows.Data.Json", "JsonValue"); 
@@ -393,11 +393,11 @@ int main(int const /*argc*/, char** /*argv*/)
             invoke(get_cif(arg_types), obj_factory, 6, args);
         };
 
-        printf("null_value  JsonValueType: %d\n", invoke_get_valuetype(c, null_value));
-        printf("json_object JsonValueType: %d\n", invoke_get_valuetype(c, json_object));
+        printf("null_value  JsonValueType: %d\n", invoke_get_valuetype(null_value));
+        printf("json_object JsonValueType: %d\n", invoke_get_valuetype(json_object));
 
-        printf("null_value  ToString:  %S\n", invoke_tostring(c, null_value).c_str());
-        printf("json_object ToString:  %S\n", invoke_tostring(c, json_object).c_str());
+        printf("null_value  ToString:  %S\n", invoke_tostring(null_value).c_str());
+        printf("json_object ToString:  %S\n", invoke_tostring(json_object).c_str());
 
         {
             winrt::hstring name{ L"SirNotAppearingInThisFilm" };
@@ -407,7 +407,8 @@ int main(int const /*argc*/, char** /*argv*/)
             interface_invoke(td_ijsonobject, "SetNamedValue", json_object, args);
         }
 
-        printf("json_object Stringify: %S\n", invoke_stringify(c, json_object).c_str());
+        printf("null_value  Stringify: %S\n", invoke_stringify(null_value).c_str());
+        printf("json_object Stringify: %S\n", invoke_stringify(json_object).c_str());
     }
     catch (std::exception const& e)
     {
