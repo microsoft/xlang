@@ -335,44 +335,58 @@ void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdr
     tnh.handle(tdrs);
 }
 
+winrt::hstring invoke_tostring(std::map<std::string_view, winrt_ns> const& namespaces, winrt::Windows::Foundation::IInspectable const& instance)
+{
+    winrt::hstring istringable_str;
+
+    meta::TypeDef td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
+    winrt::Windows::Foundation::IInspectable istringable;
+    winrt::check_hresult(instance.as(get_guid(td_istringable), winrt::put_abi(istringable)));
+
+    auto arg_types = get_method_ffi_types(td_istringable.MethodList().first[0]);
+    std::vector<void*> args{ winrt::put_abi(istringable_str) };
+    invoke(get_cif(arg_types), istringable, 6, args);
+
+    return std::move(istringable_str);
+}
+
 int main(int const /*argc*/, char** /*argv*/)
 {
     meta::cache c{ get_system_metadata() };
     auto namespaces = get_namespace_map(c);
 
     meta::TypeDef td_json_object = get_ns(namespaces, "Windows.Data.Json").types.at("JsonObject");
-
-    // writer w;
-
-    // for (auto&& ii : td_json_object.InterfaceImpl())
-    // {
-    //     write_type_name(w, ii.Interface());
-    //     w.write("\n");
-    // }
-
-    // w.flush_to_console();
+    meta::TypeDef td_json_value  = get_ns(namespaces, "Windows.Data.Json").types.at("JsonValue");
 
     winrt::init_apartment();
-    auto factory = get_activation_factory(td_json_object);
+    auto obj_factory = get_activation_factory(td_json_object);
+    auto val_factory = get_activation_factory(td_json_value);
+
+    winrt::Windows::Foundation::IInspectable null_value;
+    {
+        meta::TypeDef td_ijsonvaluestatics2 = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValueStatics2");
+        winrt::Windows::Foundation::IInspectable istringable;
+        winrt::check_hresult(val_factory.as(get_guid(td_ijsonvaluestatics2), winrt::put_abi(istringable)));
+
+        auto arg_types = get_method_ffi_types(td_ijsonvaluestatics2.MethodList().first[0]);
+        std::vector<void*> args{ winrt::put_abi(null_value) };
+        invoke(get_cif(arg_types), istringable, 6, args);
+    }
 
     winrt::Windows::Foundation::IInspectable instance;
     {
         std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
         std::vector<void*> args{ winrt::put_abi(instance) };
-        invoke(get_cif(arg_types), factory, 6, args);
+        invoke(get_cif(arg_types), obj_factory, 6, args);
     };
 
-    winrt::hstring istringable_str;
-    {
-        meta::TypeDef td_istringable = get_ns(namespaces, "Windows.Foundation").types.at("IStringable");
-        winrt::Windows::Foundation::IInspectable istringable;
-        winrt::check_hresult(instance.as(get_guid(td_istringable), winrt::put_abi(istringable)));
+    auto json_value_str = invoke_tostring(namespaces, null_value);
+    printf("null_value ToString: %S\n", json_value_str.c_str());
 
-        auto arg_types = get_method_ffi_types(td_istringable.MethodList().first[0]);
-        std::vector<void*> args{ winrt::put_abi(istringable_str) };
-        invoke(get_cif(arg_types), istringable, 6, args);
-    }
-    printf("IStringable::ToString: %S\n", istringable_str.c_str());
+    // TODO: invoke IJsonObject::SetNamedValue with "SirNotAppearingInThisFilm" and null_value
+
+    auto instance_str = invoke_tostring(namespaces, instance);
+    printf("instance   ToString: %S\n", instance_str.c_str());
 
     winrt::hstring ijsonvalue_str;
     {
@@ -385,7 +399,7 @@ int main(int const /*argc*/, char** /*argv*/)
         std::vector<void*> args{ winrt::put_abi(ijsonvalue_str) };
         invoke(get_cif(arg_types), ijsonvalue, 7, args);
     };
-    printf("IJsonValue::Stringify: %S\n", ijsonvalue_str.c_str());
+    printf("instance   IJsonValue::Stringify: %S\n", ijsonvalue_str.c_str());
 
     int32_t jsonValueType = -1;
     {
@@ -398,7 +412,7 @@ int main(int const /*argc*/, char** /*argv*/)
         std::vector<void*> args{ &jsonValueType };
         invoke(get_cif(arg_types), ijsonvalue, 6, args);
     }
-    printf("IJsonValue::get_ValueType: %d\n", jsonValueType);
+    printf("instance   IJsonValue::get_ValueType: %d\n", jsonValueType);
 
     return 0;
 }
