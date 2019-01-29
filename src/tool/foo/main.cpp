@@ -93,7 +93,7 @@ std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
         {
             xlang::throw_invalid("not implemented");
         }
-        
+
         if (auto e = std::get_if<meta::ElementType>(&(param.second->Type().Type())))
         {
             switch (*e)
@@ -134,8 +134,8 @@ std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
             case meta::ElementType::Object:
                 arg_types.push_back(&ffi_type_pointer);
                 break;
-            //case meta::ElementType::Boolean:
-            //case meta::ElementType::Char:
+                //case meta::ElementType::Boolean:
+                //case meta::ElementType::Char:
             default:
                 xlang::throw_invalid("element type not supported");
             }
@@ -185,9 +185,9 @@ namespace std
         {
             std::size_t seed = vec.size();
 
-            for (auto&& t : vec) 
-            { 
-                hash_combine(seed, t); 
+            for (auto&& t : vec)
+            {
+                hash_combine(seed, t);
             }
 
             return seed;
@@ -260,6 +260,23 @@ void interface_invoke(meta::TypeDef const& type, std::string_view method_name, I
     auto arg_types = get_method_ffi_types(method_def);
 
     invoke(get_cif(arg_types), interface_instance, 6 + index, parameters);
+}
+
+IInspectable default_activation(IInspectable const& factory)
+{
+    IInspectable instance;
+
+    std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
+    std::vector<void*> args{ winrt::put_abi(instance) };
+    invoke(get_cif(arg_types), factory, 6, args);
+
+    return std::move(instance);
+}
+
+IInspectable default_activation(meta::TypeDef const& type)
+{
+    auto factory = get_activation_factory(type);
+    return default_activation(factory);
 }
 
 void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdrs)
@@ -338,7 +355,7 @@ int main(int const /*argc*/, char** /*argv*/)
     {
         meta::cache c{ get_system_metadata() };
 
-        auto invoke_tostring = [&c](IInspectable const& instance)
+        auto ToString = [&c](IInspectable const& instance)
         {
             winrt::hstring str;
             std::vector<void*> args{ winrt::put_abi(str) };
@@ -349,18 +366,18 @@ int main(int const /*argc*/, char** /*argv*/)
             return std::move(str);
         };
 
-        auto invoke_stringify = [&c](IInspectable const& instance)
+        auto Stringify = [&c](IInspectable const& instance)
         {
             winrt::hstring str;
             std::vector<void*> args{ winrt::put_abi(str) };
 
-            meta::TypeDef td_ijsonvalue = c.find("Windows.Data.Json", "IJsonValue");
-            interface_invoke(td_ijsonvalue, "Stringify", instance, args);
+            meta::TypeDef td_IJsonValue = c.find("Windows.Data.Json", "IJsonValue");
+            interface_invoke(td_IJsonValue, "Stringify", instance, args);
 
             return std::move(str);
         };
 
-        auto invoke_get_valuetype = [&c](IInspectable const& instance)
+        auto get_ValueType = [&c](IInspectable const& instance)
         {
             int32_t jsonValueType = -1;
             std::vector<void*> args{ &jsonValueType };
@@ -371,44 +388,73 @@ int main(int const /*argc*/, char** /*argv*/)
             return jsonValueType;
         };
 
-        meta::TypeDef td_json_object = c.find("Windows.Data.Json", "JsonObject");
-        meta::TypeDef td_json_value  = c.find("Windows.Data.Json", "JsonValue"); 
-
-        winrt::init_apartment();
-        auto obj_factory = get_activation_factory(td_json_object);
-        auto val_factory = get_activation_factory(td_json_value);
-
-        IInspectable null_value;
+        auto SetNamedValue = [&c](IInspectable const& instance, std::wstring_view key, IInspectable const& value)
         {
-            std::vector<void*> args{ winrt::put_abi(null_value) };
+            winrt::hstring name{ key };
+            std::vector<void*> args{ winrt::get_abi(name), winrt::get_abi(value) };
 
-            meta::TypeDef td_ijsonvaluestatics2 = c.find("Windows.Data.Json", "IJsonValueStatics2");
-            interface_invoke(td_ijsonvaluestatics2, "CreateNullValue", val_factory, args);
-        }
-
-        IInspectable json_object;
-        {
-            std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
-            std::vector<void*> args{ winrt::put_abi(json_object) };
-            invoke(get_cif(arg_types), obj_factory, 6, args);
+            meta::TypeDef td_IJsonObject = c.find("Windows.Data.Json", "IJsonObject");
+            interface_invoke(td_IJsonObject, "SetNamedValue", instance, args);
         };
 
-        printf("null_value  JsonValueType: %d\n", invoke_get_valuetype(null_value));
-        printf("json_object JsonValueType: %d\n", invoke_get_valuetype(json_object));
+        meta::TypeDef td_JsonObject = c.find("Windows.Data.Json", "JsonObject");
+        meta::TypeDef td_JsonArray = c.find("Windows.Data.Json", "JsonArray");
+        meta::TypeDef td_JsonValue = c.find("Windows.Data.Json", "JsonValue");
 
-        printf("null_value  ToString:  %S\n", invoke_tostring(null_value).c_str());
-        printf("json_object ToString:  %S\n", invoke_tostring(json_object).c_str());
+        winrt::init_apartment();
+        auto val_factory = get_activation_factory(td_JsonValue);
 
+        auto CreateStringValue = [&c, &val_factory](winrt::hstring str)
         {
-            winrt::hstring name{ L"SirNotAppearingInThisFilm" };
-            std::vector<void*> args{ winrt::get_abi(name), winrt::get_abi(null_value) };
+            IInspectable value;
+            std::vector<void*> args{ winrt::get_abi(str), winrt::put_abi(value) };
 
-            meta::TypeDef td_ijsonobject = c.find("Windows.Data.Json", "IJsonObject");
-            interface_invoke(td_ijsonobject, "SetNamedValue", json_object, args);
+            meta::TypeDef td_IJsonValueStatics = c.find("Windows.Data.Json", "IJsonValueStatics");
+            interface_invoke(td_IJsonValueStatics, "CreateStringValue", val_factory, args);
+
+            return std::move(value);
+        };
+        
+        auto CreateNullValue = [&c, &val_factory]()
+        {
+            IInspectable value;
+            std::vector<void*> args{ winrt::put_abi(value) };
+
+            meta::TypeDef td_IJsonValueStatics2 = c.find("Windows.Data.Json", "IJsonValueStatics2");
+            interface_invoke(td_IJsonValueStatics2, "CreateNullValue", val_factory, args);
+
+            return std::move(value);
+        };
+
+        IInspectable json_object = default_activation(td_JsonObject);
+        IInspectable json_array = default_activation(td_JsonArray);
+
+        IInspectable null_value = CreateNullValue();
+
+        std::map<std::wstring_view, IInspectable> knights = {
+            { L"arthur", CreateStringValue(L"Arthur, King of the Britons") },
+            { L"lancelot", CreateStringValue(L"Sir Lancelot the Brave") },
+            { L"robin", CreateStringValue(L"Sir Robin the Not-Quite-So-Brave-as-Sir-Lancelot") },
+            { L"bedevere", CreateStringValue(L"Sir Bedevere the Wise") },
+            { L"galahad", CreateStringValue(L"Sir Galahad the Pure")} };
+
+        printf("null_value  JsonValueType: %d\n", get_ValueType(null_value));
+        printf("json_array  JsonValueType: %d\n", get_ValueType(json_array));
+        printf("json_object JsonValueType: %d\n", get_ValueType(json_object));
+
+        printf("null_value  ToString:  %S\n", ToString(null_value).c_str());
+        printf("json_array  ToString:  %S\n", ToString(json_array).c_str());
+        printf("json_object ToString:  %S\n", ToString(json_object).c_str());
+
+        for (auto[key, knight] : knights)
+        {
+            SetNamedValue(json_object, key, knight);
         }
 
-        printf("null_value  Stringify: %S\n", invoke_stringify(null_value).c_str());
-        printf("json_object Stringify: %S\n", invoke_stringify(json_object).c_str());
+        SetNamedValue(json_object, L"SirNotAppearingInThisFilm", null_value);
+
+        printf("json_array  Stringify: %S\n", Stringify(json_array).c_str());
+        printf("json_object Stringify: %S\n", Stringify(json_object).c_str());
     }
     catch (std::exception const& e)
     {
