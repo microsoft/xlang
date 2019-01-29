@@ -180,12 +180,69 @@ auto get_arg_types(meta::MethodDef const& method)
 
 std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
 {
+    auto method_name = method.Name();
+
     std::vector<ffi_type const*> arg_types{ &ffi_type_pointer };
 
     method_signature signature{ method };
-    if (signature.has_params())
+
+    for (auto&& param : signature.params())
     {
-        xlang::throw_invalid("not implemented");
+        if (param.second->Type().is_szarray())
+        {
+            xlang::throw_invalid("not implemented");
+        }
+        
+        if (auto e = std::get_if<meta::ElementType>(&(param.second->Type().Type())))
+        {
+            switch (*e)
+            {
+            case meta::ElementType::I1:
+                arg_types.push_back(&ffi_type_sint8);
+                break;
+            case meta::ElementType::U1:
+                arg_types.push_back(&ffi_type_uint8);
+                break;
+            case meta::ElementType::I2:
+                arg_types.push_back(&ffi_type_sint16);
+                break;
+            case meta::ElementType::U2:
+                arg_types.push_back(&ffi_type_uint16);
+                break;
+            case meta::ElementType::I4:
+                arg_types.push_back(&ffi_type_sint32);
+                break;
+            case meta::ElementType::U4:
+                arg_types.push_back(&ffi_type_uint32);
+                break;
+            case meta::ElementType::I8:
+                arg_types.push_back(&ffi_type_sint64);
+                break;
+            case meta::ElementType::U8:
+                arg_types.push_back(&ffi_type_uint64);
+                break;
+            case meta::ElementType::R4:
+                arg_types.push_back(&ffi_type_float);
+                break;
+            case meta::ElementType::R8:
+                arg_types.push_back(&ffi_type_double);
+                break;
+            case meta::ElementType::String:
+                arg_types.push_back(&ffi_type_pointer);
+                break;
+            case meta::ElementType::Object:
+                arg_types.push_back(&ffi_type_pointer);
+                break;
+            //case meta::ElementType::Boolean:
+            //case meta::ElementType::Char:
+            default:
+                xlang::throw_invalid("element type not supported");
+            }
+        }
+        else
+        {
+            arg_types.push_back(&ffi_type_pointer);
+        }
     }
 
     if (signature.return_signature())
@@ -274,49 +331,49 @@ void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdr
 
         type_name_handler(writer& w_) : w(w_) {}
 
-        void handle(xlang::meta::reader::TypeDef const& type)
+        void handle(meta::TypeDef const& type)
         {
             w.write("%.%", type.TypeNamespace(), type.TypeName());
         }
 
-        void handle(xlang::meta::reader::ElementType type)
+        void handle(meta::ElementType type)
         {
             switch (type)
             {
-            case xlang::meta::reader::ElementType::Boolean:
+            case meta::ElementType::Boolean:
                 w.write("Boolean"); break;
-            case xlang::meta::reader::ElementType::Char:
+            case meta::ElementType::Char:
                 w.write("Char"); break;
-            case xlang::meta::reader::ElementType::I1:
+            case meta::ElementType::I1:
                 w.write("I1"); break;
-            case xlang::meta::reader::ElementType::U1:
+            case meta::ElementType::U1:
                 w.write("U1"); break;
-            case xlang::meta::reader::ElementType::I2:
+            case meta::ElementType::I2:
                 w.write("I2"); break;
-            case xlang::meta::reader::ElementType::U2:
+            case meta::ElementType::U2:
                 w.write("U2"); break;
-            case xlang::meta::reader::ElementType::I4:
+            case meta::ElementType::I4:
                 w.write("I4"); break;
-            case xlang::meta::reader::ElementType::U4:
+            case meta::ElementType::U4:
                 w.write("U4"); break;
-            case xlang::meta::reader::ElementType::I8:
+            case meta::ElementType::I8:
                 w.write("I8"); break;
-            case xlang::meta::reader::ElementType::U8:
+            case meta::ElementType::U8:
                 w.write("U8"); break;
-            case xlang::meta::reader::ElementType::R4:
+            case meta::ElementType::R4:
                 w.write("R4"); break;
-            case xlang::meta::reader::ElementType::R8:
+            case meta::ElementType::R8:
                 w.write("R8"); break;
-            case xlang::meta::reader::ElementType::String:
+            case meta::ElementType::String:
                 w.write("String"); break;
-            case xlang::meta::reader::ElementType::Object:
+            case meta::ElementType::Object:
                 w.write("Object"); break;
             default:
                 xlang::throw_invalid("element type not supported");
             }
         }
 
-        void handle(xlang::meta::reader::GenericTypeInstSig const& type)
+        void handle(meta::GenericTypeInstSig const& type)
         {
             handle(type.GenericType());
 
@@ -350,69 +407,79 @@ winrt::hstring invoke_tostring(std::map<std::string_view, winrt_ns> const& names
     return std::move(istringable_str);
 }
 
+int32_t invoke_get_valuetype(std::map<std::string_view, winrt_ns> const& namespaces, winrt::Windows::Foundation::IInspectable const& instance)
+{
+    int32_t jsonValueType = -1;
+
+    meta::TypeDef td_ijsonvalue = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
+    winrt::Windows::Foundation::IInspectable ijsonvalue;
+    winrt::check_hresult(instance.as(get_guid(td_ijsonvalue), winrt::put_abi(ijsonvalue)));
+
+    auto arg_types = get_method_ffi_types(td_ijsonvalue.MethodList().first[0]);
+
+    std::vector<void*> args{ &jsonValueType };
+    invoke(get_cif(arg_types), ijsonvalue, 6, args);
+
+    return jsonValueType;
+}
+
 int main(int const /*argc*/, char** /*argv*/)
 {
-    meta::cache c{ get_system_metadata() };
-    auto namespaces = get_namespace_map(c);
-
-    meta::TypeDef td_json_object = get_ns(namespaces, "Windows.Data.Json").types.at("JsonObject");
-    meta::TypeDef td_json_value  = get_ns(namespaces, "Windows.Data.Json").types.at("JsonValue");
-
-    winrt::init_apartment();
-    auto obj_factory = get_activation_factory(td_json_object);
-    auto val_factory = get_activation_factory(td_json_value);
-
-    winrt::Windows::Foundation::IInspectable null_value;
+    try
     {
-        meta::TypeDef td_ijsonvaluestatics2 = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValueStatics2");
-        winrt::Windows::Foundation::IInspectable istringable;
-        winrt::check_hresult(val_factory.as(get_guid(td_ijsonvaluestatics2), winrt::put_abi(istringable)));
+        meta::cache c{ get_system_metadata() };
+        auto namespaces = get_namespace_map(c);
 
-        auto arg_types = get_method_ffi_types(td_ijsonvaluestatics2.MethodList().first[0]);
-        std::vector<void*> args{ winrt::put_abi(null_value) };
-        invoke(get_cif(arg_types), istringable, 6, args);
+        meta::TypeDef td_json_object = get_ns(namespaces, "Windows.Data.Json").types.at("JsonObject");
+        meta::TypeDef td_json_value  = get_ns(namespaces, "Windows.Data.Json").types.at("JsonValue");
+
+        winrt::init_apartment();
+        auto obj_factory = get_activation_factory(td_json_object);
+        auto val_factory = get_activation_factory(td_json_value);
+
+        winrt::Windows::Foundation::IInspectable null_value;
+        {
+            meta::TypeDef td_ijsonvaluestatics2 = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValueStatics2");
+            winrt::Windows::Foundation::IInspectable istringable;
+            winrt::check_hresult(val_factory.as(get_guid(td_ijsonvaluestatics2), winrt::put_abi(istringable)));
+
+            auto arg_types = get_method_ffi_types(td_ijsonvaluestatics2.MethodList().first[0]);
+            std::vector<void*> args{ winrt::put_abi(null_value) };
+            invoke(get_cif(arg_types), istringable, 6, args);
+        }
+
+        winrt::Windows::Foundation::IInspectable json_object;
+        {
+            std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
+            std::vector<void*> args{ winrt::put_abi(json_object) };
+            invoke(get_cif(arg_types), obj_factory, 6, args);
+        };
+
+        printf("null_value  JsonValueType: %d\n", invoke_get_valuetype(namespaces, null_value));
+        printf("json_object JsonValueType: %d\n", invoke_get_valuetype(namespaces, json_object));
+
+        printf("null_value  ToString: %S\n", invoke_tostring(namespaces, null_value).c_str());
+        printf("json_object ToString: %S\n", invoke_tostring(namespaces, json_object).c_str());
+
+        {
+            meta::TypeDef td_ijsonobject = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonObject");
+            winrt::Windows::Foundation::IInspectable ijsonobject;
+            winrt::check_hresult(json_object.as(get_guid(td_ijsonobject), winrt::put_abi(ijsonobject)));
+
+            winrt::hstring name { L"SirNotAppearingInThisFilm" };
+            auto arg_types = get_method_ffi_types(td_ijsonobject.MethodList().first[1]);
+
+            std::vector<void*> args{ winrt::get_abi(name), winrt::get_abi(null_value) };
+            invoke(get_cif(arg_types), ijsonobject, 7, args);
+        }
+
+        printf("json_object ToString: %S\n", invoke_tostring(namespaces, json_object).c_str());
     }
-
-    winrt::Windows::Foundation::IInspectable instance;
+    catch (std::exception const& e)
     {
-        std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
-        std::vector<void*> args{ winrt::put_abi(instance) };
-        invoke(get_cif(arg_types), obj_factory, 6, args);
-    };
-
-    auto json_value_str = invoke_tostring(namespaces, null_value);
-    printf("null_value ToString: %S\n", json_value_str.c_str());
-
-    // TODO: invoke IJsonObject::SetNamedValue with "SirNotAppearingInThisFilm" and null_value
-
-    auto instance_str = invoke_tostring(namespaces, instance);
-    printf("instance   ToString: %S\n", instance_str.c_str());
-
-    winrt::hstring ijsonvalue_str;
-    {
-        meta::TypeDef td_ijsonvalue = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
-        winrt::Windows::Foundation::IInspectable ijsonvalue;
-        winrt::check_hresult(instance.as(get_guid(td_ijsonvalue), winrt::put_abi(ijsonvalue)));
-
-        auto arg_types = get_method_ffi_types(td_ijsonvalue.MethodList().first[1]);
-
-        std::vector<void*> args{ winrt::put_abi(ijsonvalue_str) };
-        invoke(get_cif(arg_types), ijsonvalue, 7, args);
-    };
-    printf("instance   IJsonValue::Stringify: %S\n", ijsonvalue_str.c_str());
-
-    int32_t jsonValueType = -1;
-    {
-        meta::TypeDef td_ijsonvalue = get_ns(namespaces, "Windows.Data.Json").types.at("IJsonValue");
-        winrt::Windows::Foundation::IInspectable ijsonvalue;
-        winrt::check_hresult(instance.as(get_guid(td_ijsonvalue), winrt::put_abi(ijsonvalue)));
-
-        auto arg_types = get_method_ffi_types(td_ijsonvalue.MethodList().first[0]);
-
-        std::vector<void*> args{ &jsonValueType };
-        invoke(get_cif(arg_types), ijsonvalue, 6, args);
+        printf("%s\n", e.what());
+        return -1;
     }
-    printf("instance   IJsonValue::get_ValueType: %d\n", jsonValueType);
 
     return 0;
 }
