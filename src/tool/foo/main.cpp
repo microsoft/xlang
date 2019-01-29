@@ -7,6 +7,7 @@
 #include <memory>
 
 namespace meta = xlang::meta::reader;
+using IInspectable = winrt::Windows::Foundation::IInspectable;
 
 using namespace fooxlang;
 
@@ -230,7 +231,7 @@ auto find_method(meta::TypeDef const& type, std::string_view name)
     return std::make_tuple(method.index() - type.MethodList().first.index(), method);
 }
 
-void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instance, int offset, std::vector<void*> const& parameters)
+void invoke(ffi_cif* cif, IInspectable const& instance, int offset, std::vector<void*> const& parameters)
 {
     winrt::hresult hr;
     std::vector<void*> args{};
@@ -247,13 +248,13 @@ void invoke(ffi_cif* cif, winrt::Windows::Foundation::IInspectable const& instan
     winrt::check_hresult(hr);
 }
 
-void interface_invoke(meta::TypeDef const& type, std::string_view method_name, winrt::Windows::Foundation::IInspectable const& instance, std::vector<void*> const& parameters)
+void interface_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& instance, std::vector<void*> const& parameters)
 {
     XLANG_ASSERT(meta::get_category(type) == meta::category::interface_type);
 
     auto[index, method_def] = find_method(type, method_name);
 
-    winrt::Windows::Foundation::IInspectable interface_instance;
+    IInspectable interface_instance;
     winrt::check_hresult(instance.as(get_guid(type), winrt::put_abi(interface_instance)));
 
     auto arg_types = get_method_ffi_types(method_def);
@@ -331,7 +332,7 @@ void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdr
     tnh.handle(tdrs);
 }
 
-winrt::hstring invoke_tostring(meta::cache const& c, winrt::Windows::Foundation::IInspectable const& instance)
+winrt::hstring invoke_tostring(meta::cache const& c, IInspectable const& instance)
 {
     winrt::hstring istringable_str;
     std::vector<void*> args{ winrt::put_abi(istringable_str) };
@@ -342,7 +343,7 @@ winrt::hstring invoke_tostring(meta::cache const& c, winrt::Windows::Foundation:
     return std::move(istringable_str);
 }
 
-winrt::hstring invoke_stringify(meta::cache const& c, winrt::Windows::Foundation::IInspectable const& instance)
+winrt::hstring invoke_stringify(meta::cache const& c, IInspectable const& instance)
 {
     winrt::hstring str;
     std::vector<void*> args{ winrt::put_abi(str) };
@@ -353,7 +354,7 @@ winrt::hstring invoke_stringify(meta::cache const& c, winrt::Windows::Foundation
     return std::move(str);
 }
 
-int32_t invoke_get_valuetype(meta::cache const& c, winrt::Windows::Foundation::IInspectable const& instance)
+int32_t invoke_get_valuetype(meta::cache const& c, IInspectable const& instance)
 {
     int32_t jsonValueType = -1;
     std::vector<void*> args{ &jsonValueType };
@@ -377,7 +378,7 @@ int main(int const /*argc*/, char** /*argv*/)
         auto obj_factory = get_activation_factory(td_json_object);
         auto val_factory = get_activation_factory(td_json_value);
 
-        winrt::Windows::Foundation::IInspectable null_value;
+        IInspectable null_value;
         {
             std::vector<void*> args{ winrt::put_abi(null_value) };
 
@@ -385,9 +386,8 @@ int main(int const /*argc*/, char** /*argv*/)
             interface_invoke(td_ijsonvaluestatics2, "CreateNullValue", val_factory, args);
         }
 
-        winrt::Windows::Foundation::IInspectable json_object;
+        IInspectable json_object;
         {
-            // TODO, get arg types from metadata
             std::vector<ffi_type const*> arg_types{ &ffi_type_pointer, &ffi_type_pointer };
             std::vector<void*> args{ winrt::put_abi(json_object) };
             invoke(get_cif(arg_types), obj_factory, 6, args);
