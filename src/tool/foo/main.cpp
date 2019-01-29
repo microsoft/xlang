@@ -13,24 +13,94 @@ using namespace fooxlang;
 
 struct writer : xlang::text::writer_base<writer>
 {
-};
+    using writer_base<writer>::write;
 
-struct separator
-{
-    writer& w;
-    std::string_view _separator{ ", " };
-    bool first{ true };
-
-    void operator()()
+    void write(meta::coded_index<meta::TypeDefOrRef> const& tdrs)
     {
-        if (first)
+        struct type_name_handler : signature_handler_base<type_name_handler>
         {
-            first = false;
-        }
-        else
-        {
-            w.write(_separator);
-        }
+            using signature_handler_base<type_name_handler>::handle;
+            std::string name{};
+
+            void insert(std::string_view const& value)
+            {
+                name.insert(name.end(), value.begin(), value.end());
+            }
+
+            void insert(char const value)
+            {
+                name.push_back(value);
+            }
+
+            void handle(meta::TypeDef const& type)
+            {
+                insert(type.TypeNamespace());
+                insert('.');
+                insert(type.TypeName());
+            }
+
+            void handle(meta::ElementType type)
+            {
+                switch (type)
+                {
+                case meta::ElementType::Boolean:
+                    insert("Boolean"); break;
+                case meta::ElementType::Char:
+                    insert("Char"); break;
+                case meta::ElementType::I1:
+                    insert("I1"); break;
+                case meta::ElementType::U1:
+                    insert("U1"); break;
+                case meta::ElementType::I2:
+                    insert("I2"); break;
+                case meta::ElementType::U2:
+                    insert("U2"); break;
+                case meta::ElementType::I4:
+                    insert("I4"); break;
+                case meta::ElementType::U4:
+                    insert("U4"); break;
+                case meta::ElementType::I8:
+                    insert("I8"); break;
+                case meta::ElementType::U8:
+                    insert("U8"); break;
+                case meta::ElementType::R4:
+                    insert("R4"); break;
+                case meta::ElementType::R8:
+                    insert("R8"); break;
+                case meta::ElementType::String:
+                    insert("String"); break;
+                case meta::ElementType::Object:
+                    insert("Object"); break;
+                default:
+                    xlang::throw_invalid("element type not supported");
+                }
+            }
+
+            void handle(meta::GenericTypeInstSig const& type)
+            {
+                handle(type.GenericType());
+
+                insert('<');
+                bool first{ true };
+                for (auto&& arg : type.GenericArgs())
+                {
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        insert(", ");
+                    }
+                    handle(arg);
+                }
+                insert('>');
+            }
+        };
+
+        type_name_handler tnh{};
+        tnh.handle(tdrs);
+        write(tnh.name);
     }
 };
 
@@ -214,23 +284,6 @@ ffi_cif* get_cif(std::vector<ffi_type const*> const& arg_types)
     return &(cif_cache.at(arg_types).first);
 }
 
-auto find_method(meta::TypeDef const& type, std::string_view name)
-{
-    meta::MethodDef method = std::find_if(
-        type.MethodList().first, type.MethodList().second,
-        [name](meta::MethodDef const& method) {
-        return method.Name() == name; });
-
-    auto n = method.Name();
-
-    if (method == type.MethodList().second)
-    {
-        xlang::throw_invalid("method not found");
-    }
-
-    return std::make_tuple(method.index() - type.MethodList().first.index(), method);
-}
-
 void invoke(ffi_cif* cif, IInspectable const& instance, int offset, std::vector<void*> const& parameters)
 {
     winrt::hresult hr;
@@ -252,14 +305,69 @@ void interface_invoke(meta::TypeDef const& type, std::string_view method_name, I
 {
     XLANG_ASSERT(meta::get_category(type) == meta::category::interface_type);
 
-    auto[index, method_def] = find_method(type, method_name);
+    meta::MethodDef method = std::find_if(
+        type.MethodList().first, type.MethodList().second,
+        [method_name](meta::MethodDef const& method) { return method.Name() == method_name; });
+
+    if (method == type.MethodList().second)
+    {
+        xlang::throw_invalid("method not found");
+    }
+
+    auto index = method.index() - type.MethodList().first.index();
 
     IInspectable interface_instance;
     winrt::check_hresult(instance.as(get_guid(type), winrt::put_abi(interface_instance)));
 
-    auto arg_types = get_method_ffi_types(method_def);
+    auto arg_types = get_method_ffi_types(method);
 
     invoke(get_cif(arg_types), interface_instance, 6 + index, parameters);
+}
+
+void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& instance, std::vector<void*> const& parameters)
+{
+    XLANG_ASSERT(meta::get_category(type) == meta::category::class_type);
+
+    meta::MethodDef method = std::find_if(
+        type.MethodList().first, type.MethodList().second,
+        [method_name](meta::MethodDef const& method) { return method.Name() == method_name; });
+
+    if (method == type.MethodList().second)
+    {
+        xlang::throw_invalid("method not found");
+    }
+
+    auto get_TypeDef = [](meta::coded_index<meta::TypeDefOrRef> const& type)
+    {
+        switch (type.type())
+        {
+        case meta::TypeDefOrRef::TypeDef:
+            return type.TypeDef();
+        case meta::TypeDefOrRef::TypeRef:
+            return find_required(type.TypeRef());
+        case meta::TypeDefOrRef::TypeSpec:
+            return find_required(type.TypeSpec().Signature().GenericTypeInst().GenericType().TypeRef());
+        }
+    };
+
+    writer w;
+    for (auto&& ii : type.InterfaceImpl())
+    {
+        auto name = w.write_temp("%", ii.Interface());
+        auto interface_type = get_TypeDef(ii.Interface());
+
+        meta::MethodDef method2 = std::find_if(
+            interface_type.MethodList().first, interface_type.MethodList().second,
+            [method_name](meta::MethodDef const& method) { return method.Name() == method_name; });
+
+        if (method2 != type.MethodList().second)
+        {
+            int i = 0;
+        }
+
+        
+        int i = 0;
+    }
 }
 
 IInspectable default_activation(IInspectable const& factory)
@@ -279,75 +387,6 @@ IInspectable default_activation(meta::TypeDef const& type)
     return default_activation(factory);
 }
 
-void write_type_name(writer& w, meta::coded_index<meta::TypeDefOrRef> const& tdrs)
-{
-    struct type_name_handler : signature_handler_base<type_name_handler>
-    {
-        using signature_handler_base<type_name_handler>::handle;
-        writer& w;
-
-        type_name_handler(writer& w_) : w(w_) {}
-
-        void handle(meta::TypeDef const& type)
-        {
-            w.write("%.%", type.TypeNamespace(), type.TypeName());
-        }
-
-        void handle(meta::ElementType type)
-        {
-            switch (type)
-            {
-            case meta::ElementType::Boolean:
-                w.write("Boolean"); break;
-            case meta::ElementType::Char:
-                w.write("Char"); break;
-            case meta::ElementType::I1:
-                w.write("I1"); break;
-            case meta::ElementType::U1:
-                w.write("U1"); break;
-            case meta::ElementType::I2:
-                w.write("I2"); break;
-            case meta::ElementType::U2:
-                w.write("U2"); break;
-            case meta::ElementType::I4:
-                w.write("I4"); break;
-            case meta::ElementType::U4:
-                w.write("U4"); break;
-            case meta::ElementType::I8:
-                w.write("I8"); break;
-            case meta::ElementType::U8:
-                w.write("U8"); break;
-            case meta::ElementType::R4:
-                w.write("R4"); break;
-            case meta::ElementType::R8:
-                w.write("R8"); break;
-            case meta::ElementType::String:
-                w.write("String"); break;
-            case meta::ElementType::Object:
-                w.write("Object"); break;
-            default:
-                xlang::throw_invalid("element type not supported");
-            }
-        }
-
-        void handle(meta::GenericTypeInstSig const& type)
-        {
-            handle(type.GenericType());
-
-            w.write("<");
-            separator s{ w };
-            for (auto&& arg : type.GenericArgs())
-            {
-                s();
-                handle(arg);
-            }
-            w.write(">");
-        }
-    };
-
-    type_name_handler tnh{ w };
-    tnh.handle(tdrs);
-}
 
 int main(int const /*argc*/, char** /*argv*/)
 {
@@ -401,6 +440,13 @@ int main(int const /*argc*/, char** /*argv*/)
         meta::TypeDef td_JsonArray = c.find("Windows.Data.Json", "JsonArray");
         meta::TypeDef td_JsonValue = c.find("Windows.Data.Json", "JsonValue");
 
+        auto Append = [&td_JsonArray](IInspectable const& instance, IInspectable const& value)
+        {
+            std::vector<void*> args{ winrt::get_abi(value) };
+
+            class_invoke(td_JsonArray, "Append", instance, args);
+        };        
+        
         winrt::init_apartment();
         auto val_factory = get_activation_factory(td_JsonValue);
 
@@ -449,6 +495,7 @@ int main(int const /*argc*/, char** /*argv*/)
         for (auto[key, knight] : knights)
         {
             SetNamedValue(json_object, key, knight);
+            Append(json_array, knight);
         }
 
         SetNamedValue(json_object, L"SirNotAppearingInThisFilm", null_value);
