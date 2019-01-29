@@ -95,7 +95,7 @@ namespace winrt::Windows::Foundation
 
 namespace winrt
 {
-    inline auto resume_background()
+    [[nodiscard]] inline auto resume_background()
     {
         struct awaitable
         {
@@ -128,7 +128,7 @@ namespace winrt
     }
 
     template <typename T>
-    auto resume_background(T&& context)
+    [[nodiscard]] auto resume_background(T&& context)
     {
         struct awaitable
         {
@@ -205,114 +205,121 @@ namespace winrt
         com_ptr<impl::IContextCallback> m_context;
     };
 
-    struct resume_after
+    [[nodiscard]] inline auto resume_after(Windows::Foundation::TimeSpan duration)
     {
-        explicit resume_after(Windows::Foundation::TimeSpan duration) noexcept : m_duration(duration)
+        struct awaitable
         {
-        }
-
-        bool await_ready() const noexcept
-        {
-            return m_duration.count() <= 0;
-        }
-
-        void await_suspend(std::experimental::coroutine_handle<> handle)
-        {
-            m_timer.attach(check_pointer(WINRT_CreateThreadpoolTimer(callback, handle.address(), nullptr)));
-            int64_t relative_count = -m_duration.count();
-            WINRT_SetThreadpoolTimer(m_timer.get(), &relative_count, 0, 0);
-        }
-
-        void await_resume() const noexcept
-        {
-        }
-
-    private:
-
-        static void WINRT_CALL callback(void*, void* context, void*) noexcept
-        {
-            std::experimental::coroutine_handle<>::from_address(context)();
-        }
-
-        struct timer_traits
-        {
-            using type = impl::ptp_timer;
-
-            static void close(type value) noexcept
+            explicit awaitable(Windows::Foundation::TimeSpan duration) noexcept :
+                m_duration(duration)
             {
-                WINRT_CloseThreadpoolTimer(value);
             }
 
-            static constexpr type invalid() noexcept
+            bool await_ready() const noexcept
             {
-                return nullptr;
+                return m_duration.count() <= 0;
             }
+
+            void await_suspend(std::experimental::coroutine_handle<> handle)
+            {
+                m_timer.attach(check_pointer(WINRT_CreateThreadpoolTimer(callback, handle.address(), nullptr)));
+                int64_t relative_count = -m_duration.count();
+                WINRT_SetThreadpoolTimer(m_timer.get(), &relative_count, 0, 0);
+            }
+
+            void await_resume() const noexcept
+            {
+            }
+
+        private:
+
+            static void WINRT_CALL callback(void*, void* context, void*) noexcept
+            {
+                std::experimental::coroutine_handle<>::from_address(context)();
+            }
+
+            struct timer_traits
+            {
+                using type = impl::ptp_timer;
+
+                static void close(type value) noexcept
+                {
+                    WINRT_CloseThreadpoolTimer(value);
+                }
+
+                static constexpr type invalid() noexcept
+                {
+                    return nullptr;
+                }
+            };
+
+            handle_type<timer_traits> m_timer;
+            Windows::Foundation::TimeSpan m_duration;
         };
 
-        handle_type<timer_traits> m_timer;
-        Windows::Foundation::TimeSpan m_duration;
-    };
+        return awaitable{ duration };
+    }
 
-    struct resume_on_signal
+    [[nodiscard]] inline auto resume_on_signal(void* handle, Windows::Foundation::TimeSpan timeout = {})
     {
-        explicit resume_on_signal(void* handle) noexcept :
-            m_handle(handle)
-        {}
-
-        resume_on_signal(void* handle, Windows::Foundation::TimeSpan timeout) noexcept :
-            m_timeout(timeout),
-            m_handle(handle)
-        {}
-
-        bool await_ready() const noexcept
+        struct awaitable
         {
-            return WINRT_WaitForSingleObject(m_handle, 0) == 0;
-        }
+            awaitable(void* handle, Windows::Foundation::TimeSpan timeout) noexcept :
+                m_timeout(timeout),
+                m_handle(handle)
+            {}
 
-        void await_suspend(std::experimental::coroutine_handle<> resume)
-        {
-            m_resume = resume;
-            m_wait.attach(check_pointer(WINRT_CreateThreadpoolWait(callback, this, nullptr)));
-            int64_t relative_count = -m_timeout.count();
-            int64_t* file_time = relative_count != 0 ? &relative_count : nullptr;
-            WINRT_SetThreadpoolWait(m_wait.get(), m_handle, file_time);
-        }
-
-        bool await_resume() const noexcept
-        {
-            return m_result == 0;
-        }
-
-    private:
-
-        static void WINRT_CALL callback(void*, void* context, void*, uint32_t result) noexcept
-        {
-            auto that = static_cast<resume_on_signal*>(context);
-            that->m_result = result;
-            that->m_resume();
-        }
-
-        struct wait_traits
-        {
-            using type = impl::ptp_wait;
-
-            static void close(type value) noexcept
+            bool await_ready() const noexcept
             {
-                WINRT_CloseThreadpoolWait(value);
+                return WINRT_WaitForSingleObject(m_handle, 0) == 0;
             }
 
-            static constexpr type invalid() noexcept
+            void await_suspend(std::experimental::coroutine_handle<> resume)
             {
-                return nullptr;
+                m_resume = resume;
+                m_wait.attach(check_pointer(WINRT_CreateThreadpoolWait(callback, this, nullptr)));
+                int64_t relative_count = -m_timeout.count();
+                int64_t* file_time = relative_count != 0 ? &relative_count : nullptr;
+                WINRT_SetThreadpoolWait(m_wait.get(), m_handle, file_time);
             }
+
+            bool await_resume() const noexcept
+            {
+                return m_result == 0;
+            }
+
+        private:
+
+            static void WINRT_CALL callback(void*, void* context, void*, uint32_t result) noexcept
+            {
+                auto that = static_cast<awaitable*>(context);
+                that->m_result = result;
+                that->m_resume();
+            }
+
+            struct wait_traits
+            {
+                using type = impl::ptp_wait;
+
+                static void close(type value) noexcept
+                {
+                    WINRT_CloseThreadpoolWait(value);
+                }
+
+                static constexpr type invalid() noexcept
+                {
+                    return nullptr;
+                }
+            };
+
+            handle_type<wait_traits> m_wait;
+            Windows::Foundation::TimeSpan m_timeout;
+            void* m_handle;
+            uint32_t m_result{};
+            std::experimental::coroutine_handle<> m_resume{ nullptr };
         };
 
-        handle_type<wait_traits> m_wait;
-        Windows::Foundation::TimeSpan m_timeout{ 0 };
-        void* m_handle{};
-        uint32_t m_result{};
-        std::experimental::coroutine_handle<> m_resume{ nullptr };
-    };
+        return awaitable{ handle, timeout };
+    }
 
     struct overlapped_io
     {
