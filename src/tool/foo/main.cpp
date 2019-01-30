@@ -157,7 +157,7 @@ auto get_system_metadata()
     return std::move(system_winmd_files);
 }
 
-auto get_guid_attrib(meta::TypeDef const& type)
+auto get_guid_attribute_value(meta::TypeDef const& type)
 {
     meta::CustomAttribute const& attrib = meta::get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
 
@@ -187,19 +187,19 @@ auto get_guid_attrib(meta::TypeDef const& type)
     };
 }
 
-struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
+struct ptype_signature_handler : signature_handler_base<ptype_signature_handler>
 {
-    using signature_handler_base<ptype_guid_calculator>::handle;
-    std::string name{};
+    using signature_handler_base<ptype_signature_handler>::handle;
+    std::string type_signature{};
 
     void insert(std::string_view const& value)
     {
-        name.insert(name.end(), value.begin(), value.end());
+        type_signature.insert(type_signature.end(), value.begin(), value.end());
     }
 
     void insert(char const value)
     {
-        name.push_back(value);
+        type_signature.push_back(value);
     }
 
     template <typename... Args>
@@ -240,7 +240,7 @@ struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
 
     void handle_interface(xlang::meta::reader::TypeDef const& type) 
     { 
-        insert(get_guid_attrib(type));
+        insert(get_guid_attribute_value(type));
     }
 
     //void handle_struct(xlang::meta::reader::TypeDef const& /*type*/) { xlang::throw_invalid("handle_struct not implemented"); }
@@ -289,9 +289,9 @@ struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
             switch (type.type())
             {
             case meta::TypeDefOrRef::TypeRef:
-                return get_guid_attrib(meta::find_required(type.TypeRef()));
+                return get_guid_attribute_value(meta::find_required(type.TypeRef()));
             case meta::TypeDefOrRef::TypeDef:
-                return get_guid_attrib(type.TypeDef());
+                return get_guid_attribute_value(type.TypeDef());
             }
 
             xlang::throw_invalid("Invalid TypeDefOrRef");
@@ -318,71 +318,47 @@ struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
     }
 };
 
-    //template <size_t Size>
-    //constexpr guid generate_guid(std::array<char, Size> const& value) noexcept
-    //{
-    //    guid namespace_guid = { 0xd57af411, 0x737b, 0xc042,{ 0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee } };
-
-    //    auto buffer = combine(to_array(namespace_guid), char_to_byte_array(value, std::make_index_sequence<Size>()));
-    //    auto hash = calculate_sha1(buffer);
-    //    auto big_endian_guid = to_guid(hash);
-    //    auto little_endian_guid = endian_swap(big_endian_guid);
-    //    return set_named_guid_fields(little_endian_guid);
-    //}
-
-std::stringbuf to_vector(winrt::guid const& value)
-{
-    std::stringbuf baz{};
-
-    baz.sputc(static_cast<char>(value.Data1 & 0x000000ff));
-    baz.sputc(static_cast<char>((value.Data1 & 0x0000ff00) >> 8));
-    baz.sputc(static_cast<char>((value.Data1 & 0x00ff0000) >> 16));
-    baz.sputc(static_cast<char>((value.Data1 & 0xff000000) >> 24));
-    baz.sputc(static_cast<char>(value.Data2 & 0x00ff));
-    baz.sputc(static_cast<char>((value.Data2 & 0xff00) >> 8));
-    baz.sputc(static_cast<char>(value.Data3 & 0x00ff));
-    baz.sputc(static_cast<char>((value.Data3 & 0xff00) >> 8));
-    baz.sputc(static_cast<char>(value.Data4[0]));
-    baz.sputc(static_cast<char>(value.Data4[1]));
-    baz.sputc(static_cast<char>(value.Data4[2]));
-    baz.sputc(static_cast<char>(value.Data4[3]));
-    baz.sputc(static_cast<char>(value.Data4[4]));
-    baz.sputc(static_cast<char>(value.Data4[5]));
-    baz.sputc(static_cast<char>(value.Data4[6]));
-    baz.sputc(static_cast<char>(value.Data4[7]));
-
-    return std::move(baz);
-}
+constexpr auto namespace_guid_buffer = winrt::impl::to_array({ 0xd57af411, 0x737b, 0xc042,{ 0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee } });
 
 auto calculate_guid(meta::TypeSpec const& type)
 {
-    ptype_guid_calculator guid_calc{};
-    guid_calc.handle(type.Signature().GenericTypeInst());
+    ptype_signature_handler sig_handler{};
+    sig_handler.handle(type.Signature().GenericTypeInst());
 
-    winrt::guid namespace_guid = { 0xd57af411, 0x737b, 0xc042,{ 0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee } };
-    auto buffer = to_vector(namespace_guid);
-    std::istream istrm(&buffer);
+    SHA1Context sha;
+    int err = SHA1Reset(&sha);
+    if (err)
+    {
+        xlang::throw_invalid("SHA1Reset Error");
+    }
 
-    SHA1 checksum;
-    checksum.update(istrm);
-    checksum.update(guid_calc.name);
-    auto hash = checksum.final();
-
-
-    //std::iostri ios{};
-
+    err = SHA1Input(&sha, namespace_guid_buffer.data(), namespace_guid_buffer.size());
+    if (err)
+    {
+        xlang::throw_invalid("SHA1Input Error");
+    }
     
-    
-    //for (auto c : guid_calc.name)
-    //{
-    //    buffer.push_back(static_cast<uint8_t>(c));
-    //}
+    err = SHA1Input(&sha, (uint8_t const*)sig_handler.type_signature.data(), sig_handler.type_signature.size());
+    if (err)
+    {
+        xlang::throw_invalid("SHA1Input Error");
+    }
 
-    //auto hash = winrt::impl::calculate_sha1()
-    //auto big_endian_guid = to_guid(hash);
-    //auto little_endian_guid = endian_swap(big_endian_guid);
+    uint8_t hash[20];
+    err = SHA1Result(&sha, hash);
+    if (err)
+    {
+        xlang::throw_invalid("SHA1Result Error");
+    }
+ 
+    winrt::guid big_endian_guid{
+        winrt::impl::to_guid(hash[0], hash[1], hash[2], hash[3]),
+        winrt::impl::to_guid(hash[4], hash[5]),
+        winrt::impl::to_guid(hash[6], hash[7]),
+        { hash[8], hash[9], hash[10], hash[11], hash[12], hash[13], hash[14], hash[15] } };
 
-    return namespace_guid;
+    auto little_endian_guid = winrt::impl::endian_swap(big_endian_guid);
+    return winrt::impl::set_named_guid_fields(little_endian_guid);
 }
 
 auto get_guid(meta::coded_index<meta::TypeDefOrRef> const& type)
@@ -390,9 +366,9 @@ auto get_guid(meta::coded_index<meta::TypeDefOrRef> const& type)
     switch (type.type())
     {
     case meta::TypeDefOrRef::TypeDef:
-        return get_guid_attrib(type.TypeDef());
+        return get_guid_attribute_value(type.TypeDef());
     case meta::TypeDefOrRef::TypeRef:
-        return get_guid_attrib(find_required(type.TypeRef()));
+        return get_guid_attribute_value(find_required(type.TypeRef()));
     case meta::TypeDefOrRef::TypeSpec:
         return calculate_guid(type.TypeSpec());
     }
@@ -400,7 +376,6 @@ auto get_guid(meta::coded_index<meta::TypeDefOrRef> const& type)
     xlang::throw_invalid("invalid TypeDefOrRef");
 
 }
-
 
 std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
 {
@@ -597,7 +572,7 @@ void interface_invoke(meta::TypeDef const& type, std::string_view const& method_
     auto index = method.index() - type.MethodList().first.index();
 
     IInspectable interface_instance;
-    winrt::check_hresult(instance.as(get_guid_attrib(type), winrt::put_abi(interface_instance)));
+    winrt::check_hresult(instance.as(get_guid_attribute_value(type), winrt::put_abi(interface_instance)));
 
     auto arg_types = get_method_ffi_types(method);
 
@@ -617,10 +592,10 @@ void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInsp
 
     auto index = method.index() - get_TypeDef(interface_type).MethodList().first.index();
 
-    writer w;
-    w.write("%::%", interface_type, method.Name());
-    w.write_printf("(index: %d)\n", index);
-    w.flush_to_console();
+    // writer w;
+    // w.write("%::%", interface_type, method.Name());
+    // w.write_printf("(index: %d)\n", index);
+    // w.flush_to_console();
 }
 
 IInspectable default_activation(IInspectable const& factory)
