@@ -3,8 +3,11 @@
 #include "helpers.h"
 
 #include "ffi.h"
+#include "sha1.h"
 
 #include <memory>
+#include <iostream>
+#include <sstream>
 
 namespace meta = xlang::meta::reader;
 using IInspectable = winrt::Windows::Foundation::IInspectable;
@@ -199,12 +202,48 @@ struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
         name.push_back(value);
     }
 
-    void handle(meta::TypeDef const& type)
+    template <typename... Args>
+    void insert(char const* format, Args const&... args)
     {
-        insert(type.TypeNamespace());
-        insert('.');
-        insert(type.TypeName());
+        char buffer[128];
+#if XLANG_PLATFORM_WINDOWS
+        size_t const size = sprintf_s(buffer, format, args...);
+#else
+        size_t const size = snprintf(buffer, sizeof(buffer), format, args...);
+#endif
+        insert(std::string_view{ buffer, size });
     }
+
+    void insert(winrt::guid const& value)
+    {
+        insert("{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+            value.Data1,
+            value.Data2,
+            value.Data3,
+            value.Data4[0],
+            value.Data4[1],
+            value.Data4[2],
+            value.Data4[3],
+            value.Data4[4],
+            value.Data4[5],
+            value.Data4[6],
+            value.Data4[7]);
+    }
+
+    //void handle_class(xlang::meta::reader::TypeDef const& /*type*/) { xlang::throw_invalid("handle_class not implemented"); }
+    //void handle_delegate(xlang::meta::reader::TypeDef const& /*type*/) { xlang::throw_invalid("handle_delegate not implemented"); }
+    
+    void handle_guid(xlang::meta::reader::TypeRef const& /*type*/) 
+    { 
+        insert("g16");
+    }
+
+    void handle_interface(xlang::meta::reader::TypeDef const& type) 
+    { 
+        insert(get_guid_attrib(type));
+    }
+
+    //void handle_struct(xlang::meta::reader::TypeDef const& /*type*/) { xlang::throw_invalid("handle_struct not implemented"); }
 
     void handle(meta::ElementType type)
     {
@@ -245,9 +284,23 @@ struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
 
     void handle(meta::GenericTypeInstSig const& type)
     {
-        handle(type.GenericType());
+        auto get_piid = [](meta::coded_index<meta::TypeDefOrRef> type)
+        {
+            switch (type.type())
+            {
+            case meta::TypeDefOrRef::TypeRef:
+                return get_guid_attrib(meta::find_required(type.TypeRef()));
+            case meta::TypeDefOrRef::TypeDef:
+                return get_guid_attrib(type.TypeDef());
+            }
 
-        insert('<');
+            xlang::throw_invalid("Invalid TypeDefOrRef");
+        };
+
+        insert("pinterface(");
+        insert(get_piid(type.GenericType()));
+        insert(';');
+
         bool first{ true };
         for (auto&& arg : type.GenericArgs())
         {
@@ -257,19 +310,79 @@ struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
             }
             else
             {
-                insert(", ");
+                insert(";");
             }
             handle(arg);
         }
-        insert('>');
+        insert(')');
     }
 };
 
+    //template <size_t Size>
+    //constexpr guid generate_guid(std::array<char, Size> const& value) noexcept
+    //{
+    //    guid namespace_guid = { 0xd57af411, 0x737b, 0xc042,{ 0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee } };
+
+    //    auto buffer = combine(to_array(namespace_guid), char_to_byte_array(value, std::make_index_sequence<Size>()));
+    //    auto hash = calculate_sha1(buffer);
+    //    auto big_endian_guid = to_guid(hash);
+    //    auto little_endian_guid = endian_swap(big_endian_guid);
+    //    return set_named_guid_fields(little_endian_guid);
+    //}
+
+std::stringbuf to_vector(winrt::guid const& value)
+{
+    std::stringbuf baz{};
+
+    baz.sputc(static_cast<char>(value.Data1 & 0x000000ff));
+    baz.sputc(static_cast<char>((value.Data1 & 0x0000ff00) >> 8));
+    baz.sputc(static_cast<char>((value.Data1 & 0x00ff0000) >> 16));
+    baz.sputc(static_cast<char>((value.Data1 & 0xff000000) >> 24));
+    baz.sputc(static_cast<char>(value.Data2 & 0x00ff));
+    baz.sputc(static_cast<char>((value.Data2 & 0xff00) >> 8));
+    baz.sputc(static_cast<char>(value.Data3 & 0x00ff));
+    baz.sputc(static_cast<char>((value.Data3 & 0xff00) >> 8));
+    baz.sputc(static_cast<char>(value.Data4[0]));
+    baz.sputc(static_cast<char>(value.Data4[1]));
+    baz.sputc(static_cast<char>(value.Data4[2]));
+    baz.sputc(static_cast<char>(value.Data4[3]));
+    baz.sputc(static_cast<char>(value.Data4[4]));
+    baz.sputc(static_cast<char>(value.Data4[5]));
+    baz.sputc(static_cast<char>(value.Data4[6]));
+    baz.sputc(static_cast<char>(value.Data4[7]));
+
+    return std::move(baz);
+}
+
 auto calculate_guid(meta::TypeSpec const& type)
 {
-    auto ns_guid = winrt::guid{ 0x11f47ad5, 0x7b73, 0x42c0, {0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee } };
+    ptype_guid_calculator guid_calc{};
+    guid_calc.handle(type.Signature().GenericTypeInst());
 
-    return ns_guid;
+    winrt::guid namespace_guid = { 0xd57af411, 0x737b, 0xc042,{ 0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee } };
+    auto buffer = to_vector(namespace_guid);
+    std::istream istrm(&buffer);
+
+    SHA1 checksum;
+    checksum.update(istrm);
+    checksum.update(guid_calc.name);
+    auto hash = checksum.final();
+
+
+    //std::iostri ios{};
+
+    
+    
+    //for (auto c : guid_calc.name)
+    //{
+    //    buffer.push_back(static_cast<uint8_t>(c));
+    //}
+
+    //auto hash = winrt::impl::calculate_sha1()
+    //auto big_endian_guid = to_guid(hash);
+    //auto little_endian_guid = endian_swap(big_endian_guid);
+
+    return namespace_guid;
 }
 
 auto get_guid(meta::coded_index<meta::TypeDefOrRef> const& type)
@@ -457,7 +570,6 @@ auto find_class_method(meta::TypeDef const& type, std::string_view const& method
 {
     XLANG_ASSERT(meta::get_category(type) == meta::category::class_type);
 
-
     for (auto&& ii : type.InterfaceImpl())
     {
         auto interface_type = get_TypeDef(ii.Interface());
@@ -500,6 +612,8 @@ void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInsp
     {
         xlang::throw_invalid("method not found");
     }
+
+    auto g = get_guid(interface_type);
 
     auto index = method.index() - get_TypeDef(interface_type).MethodList().first.index();
 

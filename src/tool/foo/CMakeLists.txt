@@ -6,7 +6,7 @@ find_library(FFI_LIBRARY_PATH libffi)
 project(foo)
 
 add_executable(foo "")
-target_sources(foo PUBLIC main.cpp pch.cpp)
+target_sources(foo PUBLIC main.cpp pch.cpp sha1.cpp)
 target_include_directories(foo PUBLIC ${XLANG_LIBRARY_PATH} ${FFI_INCLUDE_DIR} ${PROJECT_SOURCE_DIR}/../cpp/cppwinrt/strings)
 target_link_libraries(foo ${FFI_LIBRARY_PATH})
 
