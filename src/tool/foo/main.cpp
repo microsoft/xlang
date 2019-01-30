@@ -621,7 +621,7 @@ int main(int const /*argc*/, char** /*argv*/)
     {
         meta::cache c{ get_system_metadata() };
 
-        auto ToString = [&c](IInspectable const& instance)
+        auto IStringable_ToString = [&c](IInspectable const& instance)
         {
             winrt::hstring str;
             std::vector<void*> args{ winrt::put_abi(str) };
@@ -631,7 +631,7 @@ int main(int const /*argc*/, char** /*argv*/)
 
             return std::move(str);
         };
-        auto Stringify = [&c](IInspectable const& instance)
+        auto IJsonValue_Stringify = [&c](IInspectable const& instance)
         {
             winrt::hstring str;
             std::vector<void*> args{ winrt::put_abi(str) };
@@ -641,7 +641,7 @@ int main(int const /*argc*/, char** /*argv*/)
 
             return std::move(str);
         };
-        auto get_ValueType = [&c](IInspectable const& instance)
+        auto IJsonValue_get_ValueType = [&c](IInspectable const& instance)
         {
             int32_t jsonValueType = -1;
             std::vector<void*> args{ &jsonValueType };
@@ -651,7 +651,7 @@ int main(int const /*argc*/, char** /*argv*/)
 
             return jsonValueType;
         };
-        auto SetNamedValue = [&c](IInspectable const& instance, std::wstring_view key, IInspectable const& value)
+        auto IJsonObject_SetNamedValue = [&c](IInspectable const& instance, std::wstring_view key, IInspectable const& value)
         {
             winrt::hstring name{ key };
             std::vector<void*> args{ winrt::get_abi(name), winrt::get_abi(value) };
@@ -667,7 +667,7 @@ int main(int const /*argc*/, char** /*argv*/)
         winrt::init_apartment();
         auto JsonValue_factory = get_activation_factory(JsonValue_typedef);
 
-        auto CreateStringValue = [&c, &JsonValue_factory](winrt::hstring str)
+        auto JsonValue_CreateStringValue = [&c, &JsonValue_factory](winrt::hstring str)
         {
             IInspectable value;
             std::vector<void*> args{ winrt::get_abi(str), winrt::put_abi(value) };
@@ -677,7 +677,7 @@ int main(int const /*argc*/, char** /*argv*/)
 
             return std::move(value);
         };
-        auto CreateNullValue = [&c, &JsonValue_factory]()
+        auto JsonValue_CreateNullValue = [&c, &JsonValue_factory]()
         {
             IInspectable value;
             std::vector<void*> args{ winrt::put_abi(value) };
@@ -690,34 +690,34 @@ int main(int const /*argc*/, char** /*argv*/)
 
         IInspectable JsonObject_instance = default_activation(JsonObject_typedef);
         IInspectable JsonArray_instance  = default_activation(JsonArray_typedef);
-        IInspectable JsonValue_Null_instance = CreateNullValue();
+        IInspectable JsonValue_Null_instance = JsonValue_CreateNullValue();
 
         std::map<std::wstring_view, IInspectable> knights = {
-            { L"arthur", CreateStringValue(L"Arthur, King of the Britons") },
-            { L"lancelot", CreateStringValue(L"Sir Lancelot the Brave") },
-            { L"robin", CreateStringValue(L"Sir Robin the Not-Quite-So-Brave-as-Sir-Lancelot") },
-            { L"bedevere", CreateStringValue(L"Sir Bedevere the Wise") },
-            { L"galahad", CreateStringValue(L"Sir Galahad the Pure")} };
+            { L"arthur", JsonValue_CreateStringValue(L"Arthur, King of the Britons") },
+            { L"lancelot", JsonValue_CreateStringValue(L"Sir Lancelot the Brave") },
+            { L"robin", JsonValue_CreateStringValue(L"Sir Robin the Not-Quite-So-Brave-as-Sir-Lancelot") },
+            { L"bedevere", JsonValue_CreateStringValue(L"Sir Bedevere the Wise") },
+            { L"galahad", JsonValue_CreateStringValue(L"Sir Galahad the Pure")} };
 
         writer w;
 
-        w.write_printf("Null Value JsonValueType: %d\n", get_ValueType(JsonValue_Null_instance));
-        w.write_printf("JsonArray  JsonValueType: %d\n", get_ValueType(JsonArray_instance));
-        w.write_printf("JsonObject JsonValueType: %d\n", get_ValueType(JsonObject_instance));
+        w.write_printf("Null Value JsonValueType: %d\n", IJsonValue_get_ValueType(JsonValue_Null_instance));
+        w.write_printf("JsonArray  JsonValueType: %d\n", IJsonValue_get_ValueType(JsonArray_instance));
+        w.write_printf("JsonObject JsonValueType: %d\n", IJsonValue_get_ValueType(JsonObject_instance));
 
-        w.write("Null Value ToString:  %\n", ToString(JsonValue_Null_instance));
-        w.write("JsonArray  ToString:  %\n", ToString(JsonArray_instance));
-        w.write("JsonObject ToString:  %\n", ToString(JsonObject_instance));
+        w.write("Null Value ToString:  %\n", IStringable_ToString(JsonValue_Null_instance));
+        w.write("JsonArray  ToString:  %\n", IStringable_ToString(JsonArray_instance));
+        w.write("JsonObject ToString:  %\n", IStringable_ToString(JsonObject_instance));
 
         for (auto[key, knight] : knights)
         {
-            SetNamedValue(JsonObject_instance, key, knight);
+            IJsonObject_SetNamedValue(JsonObject_instance, key, knight);
         }
 
-        SetNamedValue(JsonObject_instance, L"SirNotAppearingInThisFilm", JsonValue_Null_instance);
+        IJsonObject_SetNamedValue(JsonObject_instance, L"SirNotAppearingInThisFilm", JsonValue_Null_instance);
 
-        w.write("JsonArray  Stringify: %\n", Stringify(JsonArray_instance));
-        w.write("JsonObject Stringify: %\n", Stringify(JsonObject_instance));
+        w.write("JsonArray  Stringify: %\n", IJsonValue_Stringify(JsonArray_instance));
+        w.write("JsonObject Stringify: %\n", IJsonValue_Stringify(JsonObject_instance));
 
         w.flush_to_console();
     }
