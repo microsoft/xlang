@@ -579,7 +579,7 @@ void interface_invoke(meta::TypeDef const& type, std::string_view const& method_
     invoke(get_cif(arg_types), interface_instance, 6 + index, parameters);
 }
 
-void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& instance, std::vector<void*> const& parameters)
+void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& /*instance*/, std::vector<void*> const& /*parameters*/)
 {
     auto[interface_type, method] = find_class_method(type, method_name);
 
@@ -588,9 +588,9 @@ void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInsp
         xlang::throw_invalid("method not found");
     }
 
-    auto g = get_guid(interface_type);
+    //auto g = get_guid(interface_type);
 
-    auto index = method.index() - get_TypeDef(interface_type).MethodList().first.index();
+    //auto index = method.index() - get_TypeDef(interface_type).MethodList().first.index();
 
     // writer w;
     // w.write("%::%", interface_type, method.Name());
