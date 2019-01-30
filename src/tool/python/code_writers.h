@@ -654,9 +654,20 @@ static void @_dealloc(%* self)
         case param_category::out:
             w.write("% % { % };\n", param.second->Type(), bind<write_param_name>(param), bind<write_out_param_init>(param));
             break;
-            // TODO: array param support
         case param_category::pass_array:
-            w.write("/*p*/ winrt::array_view<% const> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));
+        {
+            auto element_type = std::get_if<ElementType>(&(param.second->Type().Type()));
+            if (element_type && *element_type == ElementType::Boolean)
+            {
+                // have to specialize for bool due to C++'s custom implementation of vector<bool>
+                w.write("/*p*/ auto _param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
+                w.write("      auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
+            }
+            else
+            {
+                w.write("/*p*/ auto param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
+            }
+        }
             break;
         case param_category::fill_array:
             w.write("/*f*/ winrt::array_view<%> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));

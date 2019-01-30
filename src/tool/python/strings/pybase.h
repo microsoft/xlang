@@ -815,6 +815,73 @@ namespace py
         return convert_to<T>(PyTuple_GetItem(args, index));
     }
 
+    template<typename T>
+    auto convert_pass_array(PyObject* arg)
+    {
+        if (!arg || !PyList_Check(arg))
+        {
+            throw winrt::hresult_invalid_argument();
+        }
+
+        Py_ssize_t list_size = PyList_Size(arg);
+        if (list_size == -1)
+        {
+            // TODO: propagate python error 
+            throw winrt::hresult_invalid_argument();
+        }
+
+        if constexpr (std::is_same_v<T, bool>)
+        {
+            // have to specialize for bool due to C++'s custom implementation of vector<bool>
+            winrt::com_array<bool> items(static_cast<uint32_t>(list_size));
+
+            for (Py_ssize_t index = 0; index < list_size; index++)
+            {
+                PyObject* item = PyList_GetItem(arg, index);
+                if (item == nullptr)
+                {
+                    // TODO: propagate python error 
+                    throw winrt::hresult_invalid_argument();
+                }
+
+                items[static_cast<uint32_t>(index)] = convert_to<T>(item);
+            }
+
+            return std::move(items);
+        }
+        else
+        {
+            std::vector<T> items{};
+
+            for (Py_ssize_t index = 0; index < list_size; index++)
+            {
+                PyObject* item = PyList_GetItem(arg, index);
+                if (item == nullptr)
+                {
+                    // TODO: propagate python error 
+                    throw winrt::hresult_invalid_argument();
+                }
+
+                if constexpr (std::is_same_v<T, winrt::hstring>)
+                {
+                    items.emplace_back(convert_to<T>(item));
+                }
+                else
+                {
+                    items.push_back(convert_to<T>(item));
+                }
+            }
+
+            return std::move(items);
+        }
+    }
+
+    template<typename T>
+    auto convert_pass_array(PyObject* args, int index)
+    {
+        return convert_pass_array<T>(PyTuple_GetItem(args, index));
+    }
+
     template <typename Async>
     PyObject* get_results(Async const& operation)
     {
