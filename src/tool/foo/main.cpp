@@ -15,93 +15,122 @@ struct writer : xlang::text::writer_base<writer>
 {
     using writer_base<writer>::write;
 
-    void write(meta::coded_index<meta::TypeDefOrRef> const& tdrs)
+    void write(winrt::hstring const& str)
     {
-        struct type_name_handler : signature_handler_base<type_name_handler>
-        {
-            using signature_handler_base<type_name_handler>::handle;
-            std::string name{};
+        write(winrt::to_string(str));
+    }
 
-            void insert(std::string_view const& value)
-            {
-                name.insert(name.end(), value.begin(), value.end());
-            }
-
-            void insert(char const value)
-            {
-                name.push_back(value);
-            }
-
-            void handle(meta::TypeDef const& type)
-            {
-                insert(type.TypeNamespace());
-                insert('.');
-                insert(type.TypeName());
-            }
-
-            void handle(meta::ElementType type)
-            {
-                switch (type)
-                {
-                case meta::ElementType::Boolean:
-                    insert("Boolean"); break;
-                case meta::ElementType::Char:
-                    insert("Char"); break;
-                case meta::ElementType::I1:
-                    insert("I1"); break;
-                case meta::ElementType::U1:
-                    insert("U1"); break;
-                case meta::ElementType::I2:
-                    insert("I2"); break;
-                case meta::ElementType::U2:
-                    insert("U2"); break;
-                case meta::ElementType::I4:
-                    insert("I4"); break;
-                case meta::ElementType::U4:
-                    insert("U4"); break;
-                case meta::ElementType::I8:
-                    insert("I8"); break;
-                case meta::ElementType::U8:
-                    insert("U8"); break;
-                case meta::ElementType::R4:
-                    insert("R4"); break;
-                case meta::ElementType::R8:
-                    insert("R8"); break;
-                case meta::ElementType::String:
-                    insert("String"); break;
-                case meta::ElementType::Object:
-                    insert("Object"); break;
-                default:
-                    xlang::throw_invalid("element type not supported");
-                }
-            }
-
-            void handle(meta::GenericTypeInstSig const& type)
-            {
-                handle(type.GenericType());
-
-                insert('<');
-                bool first{ true };
-                for (auto&& arg : type.GenericArgs())
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        insert(", ");
-                    }
-                    handle(arg);
-                }
-                insert('>');
-            }
-        };
-
+    void write(meta::TypeDef const& type)
+    {
         type_name_handler tnh{};
-        tnh.handle(tdrs);
+        tnh.handle(type);
         write(tnh.name);
     }
+
+    void write(meta::coded_index<meta::TypeDefOrRef> const& type)
+    {
+        type_name_handler tnh{};
+        tnh.handle(type);
+        write(tnh.name);
+    }
+
+private:
+    struct type_name_handler : signature_handler_base<type_name_handler>
+    {
+        using signature_handler_base<type_name_handler>::handle;
+        std::string name{};
+
+        void insert(std::string_view const& value)
+        {
+            name.insert(name.end(), value.begin(), value.end());
+        }
+
+        void insert(char const value)
+        {
+            name.push_back(value);
+        }
+
+        void handle(meta::TypeDef const& type)
+        {
+            insert(type.TypeNamespace());
+            insert('.');
+            insert(type.TypeName());
+        }
+
+        void handle(meta::ElementType type)
+        {
+            switch (type)
+            {
+            case meta::ElementType::Boolean:
+                insert("Boolean"); break;
+            case meta::ElementType::Char:
+                insert("Char"); break;
+            case meta::ElementType::I1:
+                insert("I1"); break;
+            case meta::ElementType::U1:
+                insert("U1"); break;
+            case meta::ElementType::I2:
+                insert("I2"); break;
+            case meta::ElementType::U2:
+                insert("U2"); break;
+            case meta::ElementType::I4:
+                insert("I4"); break;
+            case meta::ElementType::U4:
+                insert("U4"); break;
+            case meta::ElementType::I8:
+                insert("I8"); break;
+            case meta::ElementType::U8:
+                insert("U8"); break;
+            case meta::ElementType::R4:
+                insert("R4"); break;
+            case meta::ElementType::R8:
+                insert("R8"); break;
+            case meta::ElementType::String:
+                insert("String"); break;
+            case meta::ElementType::Object:
+                insert("Object"); break;
+            default:
+                xlang::throw_invalid("element type not supported");
+            }
+        }
+
+        void handle(meta::GenericTypeInstSig const& type)
+        {
+            handle(type.GenericType());
+
+            insert('<');
+            bool first{ true };
+            for (auto&& arg : type.GenericArgs())
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    insert(", ");
+                }
+                handle(arg);
+            }
+            insert('>');
+        }
+    };
+
+};
+
+auto get_TypeDef(meta::coded_index<meta::TypeDefOrRef> const& type)
+{
+    switch (type.type())
+    {
+    case meta::TypeDefOrRef::TypeDef:
+        return type.TypeDef();
+    case meta::TypeDefOrRef::TypeRef:
+        return find_required(type.TypeRef());
+    case meta::TypeDefOrRef::TypeSpec:
+        return find_required(type.TypeSpec().Signature().GenericTypeInst().GenericType().TypeRef());
+    }
+
+    xlang::throw_invalid("invalid TypeDefOrRef");
 };
 
 auto get_system_metadata()
@@ -125,11 +154,14 @@ auto get_system_metadata()
     return std::move(system_winmd_files);
 }
 
-auto get_guid(meta::TypeDef const& type)
+auto get_guid_attrib(meta::TypeDef const& type)
 {
     meta::CustomAttribute const& attrib = meta::get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
 
-    // TODO: validate attrib
+    if (!attrib)
+    {
+        xlang::throw_invalid("missing guid");
+    }
 
     std::vector<meta::FixedArgSig> args = attrib.Value().FixedArgs();
 
@@ -151,6 +183,111 @@ auto get_guid(meta::TypeDef const& type)
         }
     };
 }
+
+struct ptype_guid_calculator : signature_handler_base<ptype_guid_calculator>
+{
+    using signature_handler_base<ptype_guid_calculator>::handle;
+    std::string name{};
+
+    void insert(std::string_view const& value)
+    {
+        name.insert(name.end(), value.begin(), value.end());
+    }
+
+    void insert(char const value)
+    {
+        name.push_back(value);
+    }
+
+    void handle(meta::TypeDef const& type)
+    {
+        insert(type.TypeNamespace());
+        insert('.');
+        insert(type.TypeName());
+    }
+
+    void handle(meta::ElementType type)
+    {
+        switch (type)
+        {
+        case meta::ElementType::Boolean:
+            insert("b1"); break;
+        case meta::ElementType::Char:
+            insert("c2"); break;
+        case meta::ElementType::I1:
+            insert("i1"); break;
+        case meta::ElementType::U1:
+            insert("u1"); break;
+        case meta::ElementType::I2:
+            insert("i2"); break;
+        case meta::ElementType::U2:
+            insert("u2"); break;
+        case meta::ElementType::I4:
+            insert("i4"); break;
+        case meta::ElementType::U4:
+            insert("u4"); break;
+        case meta::ElementType::I8:
+            insert("i8"); break;
+        case meta::ElementType::U8:
+            insert("u8"); break;
+        case meta::ElementType::R4:
+            insert("f4"); break;
+        case meta::ElementType::R8:
+            insert("f8"); break;
+        case meta::ElementType::String:
+            insert("string"); break;
+        case meta::ElementType::Object:
+            insert("cinterface(IInspectable)"); break;
+        default:
+            xlang::throw_invalid("element type not supported");
+        }
+    }
+
+    void handle(meta::GenericTypeInstSig const& type)
+    {
+        handle(type.GenericType());
+
+        insert('<');
+        bool first{ true };
+        for (auto&& arg : type.GenericArgs())
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                insert(", ");
+            }
+            handle(arg);
+        }
+        insert('>');
+    }
+};
+
+auto calculate_guid(meta::TypeSpec const& type)
+{
+    auto ns_guid = winrt::guid{ 0x11f47ad5, 0x7b73, 0x42c0, {0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee } };
+
+    return ns_guid;
+}
+
+auto get_guid(meta::coded_index<meta::TypeDefOrRef> const& type)
+{
+    switch (type.type())
+    {
+    case meta::TypeDefOrRef::TypeDef:
+        return get_guid_attrib(type.TypeDef());
+    case meta::TypeDefOrRef::TypeRef:
+        return get_guid_attrib(find_required(type.TypeRef()));
+    case meta::TypeDefOrRef::TypeSpec:
+        return calculate_guid(type.TypeSpec());
+    }
+
+    xlang::throw_invalid("invalid TypeDefOrRef");
+
+}
+
 
 std::vector<ffi_type const*> get_method_ffi_types(meta::MethodDef const& method)
 {
@@ -301,15 +438,46 @@ void invoke(ffi_cif* cif, IInspectable const& instance, int offset, std::vector<
     winrt::check_hresult(hr);
 }
 
-void interface_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& instance, std::vector<void*> const& parameters)
+auto find_interface_method(meta::TypeDef const& type, std::string_view const& method_name)
 {
     XLANG_ASSERT(meta::get_category(type) == meta::category::interface_type);
 
-    meta::MethodDef method = std::find_if(
-        type.MethodList().first, type.MethodList().second,
-        [method_name](meta::MethodDef const& method) { return method.Name() == method_name; });
+    for (auto&& method : type.MethodList())
+    {
+        if (method.Name() == method_name)
+        {
+            return method;
+        }
+    }
 
-    if (method == type.MethodList().second)
+    return meta::MethodDef{};
+}
+
+auto find_class_method(meta::TypeDef const& type, std::string_view const& method_name)
+{
+    XLANG_ASSERT(meta::get_category(type) == meta::category::class_type);
+
+
+    for (auto&& ii : type.InterfaceImpl())
+    {
+        auto interface_type = get_TypeDef(ii.Interface());
+
+        auto method = find_interface_method(interface_type, method_name);
+
+        if (method)
+        {
+            return std::make_tuple(ii.Interface(), method);
+        }
+    }
+
+    return std::make_tuple(meta::coded_index<meta::TypeDefOrRef>{}, meta::MethodDef{});
+}
+
+void interface_invoke(meta::TypeDef const& type, std::string_view const& method_name, IInspectable const& instance, std::vector<void*> const& parameters)
+{
+    meta::MethodDef method = find_interface_method(type, method_name);
+
+    if (!method)
     {
         xlang::throw_invalid("method not found");
     }
@@ -317,7 +485,7 @@ void interface_invoke(meta::TypeDef const& type, std::string_view method_name, I
     auto index = method.index() - type.MethodList().first.index();
 
     IInspectable interface_instance;
-    winrt::check_hresult(instance.as(get_guid(type), winrt::put_abi(interface_instance)));
+    winrt::check_hresult(instance.as(get_guid_attrib(type), winrt::put_abi(interface_instance)));
 
     auto arg_types = get_method_ffi_types(method);
 
@@ -326,48 +494,19 @@ void interface_invoke(meta::TypeDef const& type, std::string_view method_name, I
 
 void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& instance, std::vector<void*> const& parameters)
 {
-    XLANG_ASSERT(meta::get_category(type) == meta::category::class_type);
+    auto[interface_type, method] = find_class_method(type, method_name);
 
-    meta::MethodDef method = std::find_if(
-        type.MethodList().first, type.MethodList().second,
-        [method_name](meta::MethodDef const& method) { return method.Name() == method_name; });
-
-    if (method == type.MethodList().second)
+    if (!interface_type || !method)
     {
         xlang::throw_invalid("method not found");
     }
 
-    auto get_TypeDef = [](meta::coded_index<meta::TypeDefOrRef> const& type)
-    {
-        switch (type.type())
-        {
-        case meta::TypeDefOrRef::TypeDef:
-            return type.TypeDef();
-        case meta::TypeDefOrRef::TypeRef:
-            return find_required(type.TypeRef());
-        case meta::TypeDefOrRef::TypeSpec:
-            return find_required(type.TypeSpec().Signature().GenericTypeInst().GenericType().TypeRef());
-        }
-    };
+    auto index = method.index() - get_TypeDef(interface_type).MethodList().first.index();
 
     writer w;
-    for (auto&& ii : type.InterfaceImpl())
-    {
-        auto name = w.write_temp("%", ii.Interface());
-        auto interface_type = get_TypeDef(ii.Interface());
-
-        meta::MethodDef method2 = std::find_if(
-            interface_type.MethodList().first, interface_type.MethodList().second,
-            [method_name](meta::MethodDef const& method) { return method.Name() == method_name; });
-
-        if (method2 != type.MethodList().second)
-        {
-            int i = 0;
-        }
-
-        
-        int i = 0;
-    }
+    w.write("%::%", interface_type, method.Name());
+    w.write_printf("(index: %d)\n", index);
+    w.flush_to_console();
 }
 
 IInspectable default_activation(IInspectable const& factory)
@@ -386,7 +525,6 @@ IInspectable default_activation(meta::TypeDef const& type)
     auto factory = get_activation_factory(type);
     return default_activation(factory);
 }
-
 
 int main(int const /*argc*/, char** /*argv*/)
 {
@@ -484,24 +622,30 @@ int main(int const /*argc*/, char** /*argv*/)
             { L"bedevere", CreateStringValue(L"Sir Bedevere the Wise") },
             { L"galahad", CreateStringValue(L"Sir Galahad the Pure")} };
 
-        printf("null_value  JsonValueType: %d\n", get_ValueType(null_value));
-        printf("json_array  JsonValueType: %d\n", get_ValueType(json_array));
-        printf("json_object JsonValueType: %d\n", get_ValueType(json_object));
+        writer w;
+        w.write("\n\n");
 
-        printf("null_value  ToString:  %S\n", ToString(null_value).c_str());
-        printf("json_array  ToString:  %S\n", ToString(json_array).c_str());
-        printf("json_object ToString:  %S\n", ToString(json_object).c_str());
+        w.write_printf("null_value  JsonValueType: %d\n", get_ValueType(null_value));
+        w.write_printf("json_array  JsonValueType: %d\n", get_ValueType(json_array));
+        w.write_printf("json_object JsonValueType: %d\n", get_ValueType(json_object));
 
+        w.write("null_value  ToString:  %\n", ToString(null_value));
+        w.write("json_array  ToString:  %\n", ToString(json_array));
+        w.write("json_object ToString:  %\n", ToString(json_object));
+
+        Append(json_array, null_value);
+ 
         for (auto[key, knight] : knights)
         {
             SetNamedValue(json_object, key, knight);
-            Append(json_array, knight);
         }
 
         SetNamedValue(json_object, L"SirNotAppearingInThisFilm", null_value);
 
-        printf("json_array  Stringify: %S\n", Stringify(json_array).c_str());
-        printf("json_object Stringify: %S\n", Stringify(json_object).c_str());
+        w.write("json_array  Stringify: %\n", Stringify(json_array));
+        w.write("json_object Stringify: %\n", Stringify(json_object));
+
+        w.flush_to_console();
     }
     catch (std::exception const& e)
     {
