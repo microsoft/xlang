@@ -656,24 +656,25 @@ static void @_dealloc(%* self)
             break;
         case param_category::pass_array:
         {
+            w.write("// PassArray param\n");
             auto element_type = std::get_if<ElementType>(&(param.second->Type().Type()));
             if (element_type && *element_type == ElementType::Boolean)
             {
                 // have to specialize for bool due to C++'s custom implementation of vector<bool>
-                w.write("/*p*/ auto _param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
-                w.write("      auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
+                w.write("auto _param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
+                w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
             }
             else
             {
-                w.write("/*p*/ auto param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
+                w.write("auto param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
             }
         }
             break;
         case param_category::fill_array:
-            w.write("/*f*/ winrt::array_view<%> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));
+            w.write("// FillArray param\nwinrt::array_view<%> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));
             break;
         case param_category::receive_array:
-            w.write("/*r*/ winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
+            w.write("// ReceiveArray param\nwinrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
             break;
         default:
             throw_invalid("write_method_param_definition not impl");
@@ -717,8 +718,7 @@ static void @_dealloc(%* self)
 
         if (signature.return_signature().Type().is_szarray())
         {
-            w.write("// returning a ReceiveArray not impl\nreturn nullptr;\n");
-            return;
+            w.write("// ReceiveArray return\n");
         }
 
         for (auto&& param : signature.params())
@@ -740,62 +740,45 @@ static void @_dealloc(%* self)
             bind<write_method_cpp_name>(info.method),
             bind_list<write_param_name>(", ", signature.params()));
 
-        auto out_param_count = count_out_param(signature.params());
-        if (signature.return_signature() || out_param_count > 0)
-        {
-            if (out_param_count == 0)
-            {
-                w.write("return py::convert(return_value);\n");
-            }
-            else
-            {
-                auto write_out_param = [&](std::string_view param_name)
-                {
-                    std::string out_param_name = "out_"s + std::string{ param_name };
+        std::vector<std::string> return_values{};
 
-                    w.write(R"(PyObject* % = py::convert(%);
-if (!%) 
+        if (signature.return_signature())
+        {
+            
+            auto format = R"(PyObject* out_return_value = py::convert(return_value);
+if (!out_return_value) 
 { 
     return nullptr;
-};
+}
 
-)", out_param_name, param_name, out_param_name);
-                    return std::move(out_param_name);
-                };
-
-                std::vector<std::string> out_params{};
-
-                if (signature.return_signature())
-                {
-                    auto out_param = write_out_param("return_value");
-                    out_params.push_back(out_param);
-                }
-
-                for (auto&& param : signature.params())
-                {
-                    if (is_in_param(param))
-                    {
-                        continue;
-                    }
-
-                    auto param_name = w.write_temp("%", bind<write_param_name>(param));
-                    if (get_param_category(param) == param_category::receive_array)
-                    {
-                        std::string out_param_name = "out_"s + param_name;
-                        w.write("PyObject* % = nullptr; // TODO: receive array impl\n", out_param_name);
-                        out_params.push_back(out_param_name);
-                    }
-                    else
-                    {
-                        auto out_param_name = write_out_param(param_name);
-                        out_params.push_back(out_param_name);
-                    }
-                }
-
-                w.write("return %;\n", bind<write_py_tuple_pack>(out_params));
-            }
+)";
+            w.write(format);
+            return_values.push_back("out_return_value");
         }
-        else
+
+        for (auto&& param : signature.params())
+        {
+            if (!is_out_param(param))
+            {
+                continue;
+            }
+
+            auto sequence = param.first.Sequence() - 1;
+            auto out_param = w.write_temp("out%", sequence);
+
+            auto format = R"(PyObject* % = py::convert(param%);
+if (!%) 
+{
+    return nullptr;
+}
+
+)";
+
+            w.write(format, out_param, sequence, out_param);
+            return_values.push_back(out_param);
+        }
+
+        if (return_values.size() == 0)
         {
             if (is_put_method(info.method))
             {
@@ -805,6 +788,15 @@ if (!%)
             {
                 w.write("Py_RETURN_NONE;\n");
             }
+        }
+        else if (return_values.size() == 1)
+        {
+            w.write("return %;\n", return_values[0]);
+        }
+        else
+        {
+            auto x = w.write_temp("%", std::to_string(return_values.size()));
+            w.write("return PyTuple_Pack(%, %);\n", x, bind_list(", ", return_values));
         }
     }
 

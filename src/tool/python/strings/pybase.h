@@ -68,6 +68,19 @@ namespace py
         using type = void;
     };
 
+
+    template <typename T>
+    struct com_array_checker
+    {
+        static constexpr bool value = false;
+    };
+
+    template <typename T>
+    struct com_array_checker<winrt::com_array<T>>
+    {
+        static constexpr bool value = true;
+    };
+
     template<typename T>
     constexpr bool is_basic_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::basic_category>;
 
@@ -91,6 +104,9 @@ namespace py
 
     template<typename T>
     constexpr bool is_struct_category_v = struct_checker<typename winrt::impl::category<T>::type>::value;
+
+    template<typename T>
+    constexpr bool is_com_array_v = com_array_checker<typename T>::value;
 
     struct winrt_wrapper_base
     {
@@ -354,6 +370,110 @@ namespace py
             }
 
             return result > 0;
+        }
+    };
+    
+    template <>
+    struct converter<int8_t>
+    {
+        static PyObject* convert(int8_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static int8_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < INT8_MIN || result > INT8_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<int8_t>(result);
+        }
+    };
+
+    template <>
+    struct converter<uint8_t>
+    {
+        static PyObject* convert(uint8_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static uint8_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < 0 || result > UINT8_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<uint8_t>(result);
+        }
+    };
+
+    template <>
+    struct converter<int16_t>
+    {
+        static PyObject* convert(int16_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static int16_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < INT16_MIN || result > INT16_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<int16_t>(result);
+        }
+    };
+
+    template <>
+    struct converter<uint16_t>
+    {
+        static PyObject* convert(uint16_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static uint16_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < 0 || result > UINT16_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<uint16_t>(result);
         }
     };
 
@@ -797,10 +917,78 @@ namespace py
         }
     };
 
+    // template <typename T>
+    // struct converter<winrt::com_array<T>, typename std::enable_if_t<is_com_array_v<T>>>
+    // {
+    //     static PyObject* convert(winrt::com_array<T> const& instance) noexcept
+    //     {
+    //         PyObject* list = PyList_New(instance.size());
+    //         if (list == nullptr)
+    //         {
+    //             return nullptr;
+    //         }
+
+    //         for (uint32_t index = 0; index < instance.size(); index++)
+    //         {
+    //             PyObject* item = convert(instance[index]);
+    //             if (item == nullptr)
+    //             {
+    //                 return nullptr;
+    //             }
+
+    //             if (PyList_SetItem(list, index, item) == -1)
+    //             {
+    //                 return nullptr;
+    //             }
+    //         }
+
+    //         return list;
+    //     }
+
+    //     // static auto convert_to(PyObject* obj)
+    //     // {
+    //     //     throw_if_pyobj_null(obj);
+    //     //     return delegate_python_type<T>::type::get(obj);
+    //     // }
+    // };
+
+    template<typename T>
+    PyObject* convert_receive_array(winrt::com_array<T> const& instance) noexcept
+    {
+        PyObject* list = PyList_New(instance.size());
+        if (list == nullptr)
+        {
+            return nullptr;
+        }
+
+        for (uint32_t index = 0; index < instance.size(); index++)
+        {
+            PyObject* item = convert(instance[index]);
+            if (item == nullptr)
+            {
+                return nullptr;
+            }
+
+            if (PyList_SetItem(list, index, item) == -1)
+            {
+                return nullptr;
+            }
+        }
+
+        return list;
+    }
+
     template<typename T>
     PyObject* convert(T const& instance)
     {
-        return converter<T>::convert(instance);
+        if constexpr (is_com_array_v<T>)
+        {
+            return convert_receive_array(instance);
+        }
+        else
+        {
+            return converter<T>::convert(instance);
+        }
     }
 
     template<typename T>
