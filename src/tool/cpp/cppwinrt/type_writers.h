@@ -535,15 +535,5 @@ namespace xlang
             filename += ".h";
             flush_to_file(filename);
         }
-
-        bool skip_flush_to_file(std::string const& filename) const
-        {
-            if (!settings.component)
-            {
-                return false;
-            }
-
-            return file_equal(filename);
-        }
     };
 }
