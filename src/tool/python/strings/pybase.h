@@ -243,6 +243,11 @@ namespace py
     template<typename T>
     PyObject* wrap(T instance, PyTypeObject* type_object)
     {
+        if (!instance)
+        {
+            Py_RETURN_NONE;
+        }
+
         if (type_object == nullptr)
         {
             PyErr_SetNone(PyExc_NotImplementedError);
@@ -269,6 +274,11 @@ namespace py
     template<typename T>
     PyObject* wrap_pinterface(T instance)
     {
+        if (!instance)
+        {
+            Py_RETURN_NONE;
+        }
+
         using ptype = pinterface_python_type<T>;
 
         PyTypeObject* type_object = get_python_type<T>();
