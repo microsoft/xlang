@@ -579,7 +579,7 @@ void interface_invoke(meta::TypeDef const& type, std::string_view const& method_
     invoke(get_cif(arg_types), interface_instance, 6 + index, parameters);
 }
 
-void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& /*instance*/, std::vector<void*> const& /*parameters*/)
+void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInspectable const& instance, std::vector<void*> const& parameters)
 {
     auto[interface_type, method] = find_class_method(type, method_name);
 
@@ -588,14 +588,16 @@ void class_invoke(meta::TypeDef const& type, std::string_view method_name, IInsp
         xlang::throw_invalid("method not found");
     }
 
-    //auto g = get_guid(interface_type);
+    auto g = get_guid(interface_type);
 
-    //auto index = method.index() - get_TypeDef(interface_type).MethodList().first.index();
+    auto index = method.index() - get_TypeDef(interface_type).MethodList().first.index();
 
-    // writer w;
-    // w.write("%::%", interface_type, method.Name());
-    // w.write_printf("(index: %d)\n", index);
-    // w.flush_to_console();
+    IInspectable interface_instance;
+    winrt::check_hresult(instance.as(g, winrt::put_abi(interface_instance)));
+
+    auto arg_types = get_method_ffi_types(method);
+
+    invoke(get_cif(arg_types), interface_instance, 6 + index, parameters);
 }
 
 IInspectable default_activation(IInspectable const& factory)
@@ -687,6 +689,11 @@ int main(int const /*argc*/, char** /*argv*/)
 
             return std::move(value);
         };
+        auto JsonArray_Append = [&JsonArray_typedef](IInspectable const& instance, IInspectable const& value)
+        {
+            std::vector<void*> args{ winrt::get_abi(value) };
+            class_invoke(JsonArray_typedef, "Append", instance, args);
+        };
 
         IInspectable JsonObject_instance = default_activation(JsonObject_typedef);
         IInspectable JsonArray_instance  = default_activation(JsonArray_typedef);
@@ -712,9 +719,11 @@ int main(int const /*argc*/, char** /*argv*/)
         for (auto[key, knight] : knights)
         {
             IJsonObject_SetNamedValue(JsonObject_instance, key, knight);
+            JsonArray_Append(JsonArray_instance, knight);
         }
 
         IJsonObject_SetNamedValue(JsonObject_instance, L"SirNotAppearingInThisFilm", JsonValue_Null_instance);
+        JsonArray_Append(JsonArray_instance, JsonValue_Null_instance);
 
         w.write("JsonArray  Stringify: %\n", IJsonValue_Stringify(JsonArray_instance));
         w.write("JsonObject Stringify: %\n", IJsonValue_Stringify(JsonObject_instance));
