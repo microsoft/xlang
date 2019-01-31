@@ -659,14 +659,14 @@ static void @_dealloc(%* self)
             w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
             break;
         case param_category::fill_array:
-            w.write("// FillArray param\n");
-            w.write("winrt::array_view<%> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));
+            w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
+            w.write("winrt::com_array<%> % { %_count, py::empty_instance<%>::get() };\n", param.second->Type(), bind<write_param_name>(param), bind<write_param_name>(param), param.second->Type());
             break;
         case param_category::receive_array:
             w.write("winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
             break;
         default:
-            throw_invalid("write_method_param_definition not impl");
+            throw_invalid("invalid param_category");
         }
     }
 

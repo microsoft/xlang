@@ -301,9 +301,7 @@ namespace py
     {
         if (!instance)
         {
-            PyErr_SetNone(PyExc_RuntimeError);
-            return nullptr;
-
+            Py_RETURN_NONE;
         }
 
         if constexpr (is_class_category_v<T> || is_interface_category_v<T>)
