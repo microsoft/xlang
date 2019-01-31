@@ -16,6 +16,19 @@ namespace winrt::impl
 
 namespace py
 {
+    template <typename T, typename = std::void_t<>>
+    struct empty_instance
+    {
+        static T get() { return T{}; }
+    };
+
+
+    template <typename T>
+    struct empty_instance<T, std::void_t<decltype(T{nullptr})>>
+    {
+        static T get() { return T{nullptr}; }
+    };
+
     struct gil_state_traits
     {
         using type = PyGILState_STATE;
@@ -68,19 +81,6 @@ namespace py
         using type = void;
     };
 
-
-    template <typename T>
-    struct com_array_checker
-    {
-        static constexpr bool value = false;
-    };
-
-    template <typename T>
-    struct com_array_checker<winrt::com_array<T>>
-    {
-        static constexpr bool value = true;
-    };
-
     template<typename T>
     constexpr bool is_basic_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::basic_category>;
 
@@ -104,9 +104,6 @@ namespace py
 
     template<typename T>
     constexpr bool is_struct_category_v = struct_checker<typename winrt::impl::category<T>::type>::value;
-
-    template<typename T>
-    constexpr bool is_com_array_v = com_array_checker<typename T>::value;
 
     struct winrt_wrapper_base
     {
@@ -959,19 +956,7 @@ namespace py
                 throw winrt::hresult_invalid_argument();
             }
 
-            auto get_default = []()
-            {
-                if constexpr (std::is_fundamental_v<T>)
-                {
-                    return T{};
-                }
-                else
-                {
-                    return T{nullptr};
-                }
-            };
-
-            winrt::com_array<T> items(static_cast<uint32_t>(list_size), get_default());
+            winrt::com_array<T> items(static_cast<uint32_t>(list_size), empty_instance<T>::get());
 
             for (Py_ssize_t index = 0; index < list_size; index++)
             {
