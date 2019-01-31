@@ -372,7 +372,7 @@ namespace py
             return result > 0;
         }
     };
-    
+
     template <>
     struct converter<int8_t>
     {
@@ -917,78 +917,82 @@ namespace py
         }
     };
 
-    // template <typename T>
-    // struct converter<winrt::com_array<T>, typename std::enable_if_t<is_com_array_v<T>>>
-    // {
-    //     static PyObject* convert(winrt::com_array<T> const& instance) noexcept
-    //     {
-    //         PyObject* list = PyList_New(instance.size());
-    //         if (list == nullptr)
-    //         {
-    //             return nullptr;
-    //         }
-
-    //         for (uint32_t index = 0; index < instance.size(); index++)
-    //         {
-    //             PyObject* item = convert(instance[index]);
-    //             if (item == nullptr)
-    //             {
-    //                 return nullptr;
-    //             }
-
-    //             if (PyList_SetItem(list, index, item) == -1)
-    //             {
-    //                 return nullptr;
-    //             }
-    //         }
-
-    //         return list;
-    //     }
-
-    //     // static auto convert_to(PyObject* obj)
-    //     // {
-    //     //     throw_if_pyobj_null(obj);
-    //     //     return delegate_python_type<T>::type::get(obj);
-    //     // }
-    // };
-
-    template<typename T>
-    PyObject* convert_receive_array(winrt::com_array<T> const& instance) noexcept
+    template <typename T>
+    struct converter<winrt::com_array<T>>
     {
-        PyObject* list = PyList_New(instance.size());
-        if (list == nullptr)
+        static PyObject* convert(winrt::com_array<T> const& instance) noexcept
         {
-            return nullptr;
-        }
-
-        for (uint32_t index = 0; index < instance.size(); index++)
-        {
-            PyObject* item = convert(instance[index]);
-            if (item == nullptr)
+            PyObject* list = PyList_New(instance.size());
+            if (list == nullptr)
             {
                 return nullptr;
             }
 
-            if (PyList_SetItem(list, index, item) == -1)
+            for (uint32_t index = 0; index < instance.size(); index++)
             {
-                return nullptr;
+                PyObject* item = converter<T>::convert(instance[index]);
+                if (item == nullptr)
+                {
+                    return nullptr;
+                }
+
+                if (PyList_SetItem(list, index, item) == -1)
+                {
+                    return nullptr;
+                }
             }
+
+            return list;
         }
 
-        return list;
-    }
+        static auto convert_to(PyObject* obj)
+        {
+            if (!obj || !PyList_Check(obj))
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            Py_ssize_t list_size = PyList_Size(obj);
+            if (list_size == -1)
+            {
+                // TODO: propagate python error 
+                throw winrt::hresult_invalid_argument();
+            }
+
+            auto get_default = []()
+            {
+                if constexpr (std::is_fundamental_v<T>)
+                {
+                    return T{};
+                }
+                else
+                {
+                    return T{nullptr};
+                }
+            };
+
+            winrt::com_array<T> items(static_cast<uint32_t>(list_size), get_default());
+
+            for (Py_ssize_t index = 0; index < list_size; index++)
+            {
+                PyObject* item = PyList_GetItem(obj, index);
+                if (item == nullptr)
+                {
+                    // TODO: propagate python error 
+                    throw winrt::hresult_invalid_argument();
+                }
+
+                items[static_cast<uint32_t>(index)] = converter<T>::convert_to(item);
+            }
+
+            return std::move(items);
+        }
+    };
 
     template<typename T>
     PyObject* convert(T const& instance)
     {
-        if constexpr (is_com_array_v<T>)
-        {
-            return convert_receive_array(instance);
-        }
-        else
-        {
-            return converter<T>::convert(instance);
-        }
+        return converter<T>::convert(instance);
     }
 
     template<typename T>
@@ -1003,72 +1007,44 @@ namespace py
         return convert_to<T>(PyTuple_GetItem(args, index));
     }
 
-    template<typename T>
-    auto convert_pass_array(PyObject* arg)
-    {
-        if (!arg || !PyList_Check(arg))
-        {
-            throw winrt::hresult_invalid_argument();
-        }
+    // template<typename T>
+    // auto convert_pass_array(PyObject* arg)
+    // {
+    //     if (!arg || !PyList_Check(arg))
+    //     {
+    //         throw winrt::hresult_invalid_argument();
+    //     }
 
-        Py_ssize_t list_size = PyList_Size(arg);
-        if (list_size == -1)
-        {
-            // TODO: propagate python error 
-            throw winrt::hresult_invalid_argument();
-        }
+    //     Py_ssize_t list_size = PyList_Size(arg);
+    //     if (list_size == -1)
+    //     {
+    //         // TODO: propagate python error 
+    //         throw winrt::hresult_invalid_argument();
+    //     }
 
-        if constexpr (std::is_same_v<T, bool>)
-        {
-            // have to specialize for bool due to C++'s custom implementation of vector<bool>
-            winrt::com_array<bool> items(static_cast<uint32_t>(list_size));
+    //     // have to specialize for bool due to C++'s custom implementation of vector<bool>
+    //     winrt::com_array<T const> items(static_cast<uint32_t>(list_size));
 
-            for (Py_ssize_t index = 0; index < list_size; index++)
-            {
-                PyObject* item = PyList_GetItem(arg, index);
-                if (item == nullptr)
-                {
-                    // TODO: propagate python error 
-                    throw winrt::hresult_invalid_argument();
-                }
+    //     for (Py_ssize_t index = 0; index < list_size; index++)
+    //     {
+    //         PyObject* item = PyList_GetItem(arg, index);
+    //         if (item == nullptr)
+    //         {
+    //             // TODO: propagate python error 
+    //             throw winrt::hresult_invalid_argument();
+    //         }
 
-                items[static_cast<uint32_t>(index)] = convert_to<T>(item);
-            }
+    //         items[static_cast<uint32_t>(index)] = convert_to<T>(item);
+    //     }
 
-            return std::move(items);
-        }
-        else
-        {
-            std::vector<T> items{};
+    //     return std::move(items);
+    // }
 
-            for (Py_ssize_t index = 0; index < list_size; index++)
-            {
-                PyObject* item = PyList_GetItem(arg, index);
-                if (item == nullptr)
-                {
-                    // TODO: propagate python error 
-                    throw winrt::hresult_invalid_argument();
-                }
-
-                if constexpr (std::is_same_v<T, winrt::hstring>)
-                {
-                    items.emplace_back(convert_to<T>(item));
-                }
-                else
-                {
-                    items.push_back(convert_to<T>(item));
-                }
-            }
-
-            return std::move(items);
-        }
-    }
-
-    template<typename T>
-    auto convert_pass_array(PyObject* args, int index)
-    {
-        return convert_pass_array<T>(PyTuple_GetItem(args, index));
-    }
+    // template<typename T>
+    // auto convert_pass_array(PyObject* args, int index)
+    // {
+    //     return convert_pass_array<T>(PyTuple_GetItem(args, index));
+    // }
 
     template <typename Async>
     PyObject* get_results(Async const& operation)

@@ -657,24 +657,28 @@ static void @_dealloc(%* self)
         case param_category::pass_array:
         {
             w.write("// PassArray param\n");
-            auto element_type = std::get_if<ElementType>(&(param.second->Type().Type()));
-            if (element_type && *element_type == ElementType::Boolean)
-            {
-                // have to specialize for bool due to C++'s custom implementation of vector<bool>
-                w.write("auto _param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
-                w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
-            }
-            else
-            {
-                w.write("auto param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
-            }
+            w.write("auto _param% = py::convert_to<winrt::com_array<%>>(args, %);\n", sequence, param.second->Type(), sequence);
+            w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
+            // auto element_type = std::get_if<ElementType>(&(param.second->Type().Type()));
+            // if (element_type && *element_type == ElementType::Boolean)
+            // {
+            //     // have to specialize for bool due to C++'s custom implementation of vector<bool>
+            //     w.write("auto _param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
+            //     w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
+            // }
+            // else
+            // {
+            //     w.write("auto param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
+            // }
         }
             break;
         case param_category::fill_array:
-            w.write("// FillArray param\nwinrt::array_view<%> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));
+            w.write("// FillArray param\n");
+            w.write("winrt::array_view<%> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));
             break;
         case param_category::receive_array:
-            w.write("// ReceiveArray param\nwinrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
+            w.write("// ReceiveArray param\n");
+            w.write("winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
             break;
         default:
             throw_invalid("write_method_param_definition not impl");
