@@ -644,7 +644,7 @@ static void @_dealloc(%* self)
             // treat the args value as a single value, not as a tuple
             if (method.SpecialName() && !method.Flags().RTSpecialName())
             {
-                w.write("auto % = py::converter<%>::convert_to(arg);\n", bind<write_param_name>(param), param.second->Type());
+                w.write("auto % = py::convert_to<%>(arg);\n", bind<write_param_name>(param), param.second->Type());
             }
             else
             {
@@ -655,29 +655,14 @@ static void @_dealloc(%* self)
             w.write("% % { % };\n", param.second->Type(), bind<write_param_name>(param), bind<write_out_param_init>(param));
             break;
         case param_category::pass_array:
-        {
-            w.write("// PassArray param\n");
             w.write("auto _param% = py::convert_to<winrt::com_array<%>>(args, %);\n", sequence, param.second->Type(), sequence);
             w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
-            // auto element_type = std::get_if<ElementType>(&(param.second->Type().Type()));
-            // if (element_type && *element_type == ElementType::Boolean)
-            // {
-            //     // have to specialize for bool due to C++'s custom implementation of vector<bool>
-            //     w.write("auto _param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
-            //     w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
-            // }
-            // else
-            // {
-            //     w.write("auto param% = py::convert_pass_array<%>(args, %);\n", sequence, param.second->Type(), sequence);
-            // }
-        }
             break;
         case param_category::fill_array:
             w.write("// FillArray param\n");
             w.write("winrt::array_view<%> % { }; // TODO: Convert incoming python parameter\n", param.second->Type(), bind<write_param_name>(param));
             break;
         case param_category::receive_array:
-            w.write("// ReceiveArray param\n");
             w.write("winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
             break;
         default:
@@ -719,11 +704,6 @@ static void @_dealloc(%* self)
     {
         method_signature signature{ info.method };
         auto guard{ w.push_generic_params(info.type_arguments) };
-
-        if (signature.return_signature().Type().is_szarray())
-        {
-            w.write("// ReceiveArray return\n");
-        }
 
         for (auto&& param : signature.params())
         {
