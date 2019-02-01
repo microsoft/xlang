@@ -169,6 +169,9 @@ class TestJson(unittest.TestCase):
         self.assertEqual(items[1].GetNumber(), 42)
         self.assertEqual(items[2].ValueType, 0)
 
+        # TODO: remove clear call after resolving leak issue
+        items.clear()
+
     def test_JsonArray_GetMany2(self):
         a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
         count, items = a.GetMany(6, 3)
@@ -179,6 +182,9 @@ class TestJson(unittest.TestCase):
         self.assertEqual(items[0].GetString(), "plugh")
         self.assertIsNone(items[1])
         self.assertIsNone(items[2])
+
+        # TODO: remove clear call after resolving leak issue
+        items.clear()
 
 
 if __name__ == '__main__':
