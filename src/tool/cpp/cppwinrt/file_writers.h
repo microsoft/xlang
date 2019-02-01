@@ -36,13 +36,34 @@ namespace xlang
         w.write(strings::base_chrono);
         w.write(strings::base_security);
         w.write(strings::base_std_hash);
-        w.write(strings::base_std_fire_and_forget);
         w.write(strings::base_reflect);
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
         write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + settings.root + "/base.h");
+    }
+
+    static void write_coroutine_h()
+    {
+        writer w;
+        write_license(w);
+        write_open_file_guard(w, "COROUTINE");
+
+        w.write(R"(
+#include <experimental/coroutine>
+#include "winrt/Windows.Foundation.h"
+)");
+
+        w.write(strings::base_coroutine);
+        w.write(strings::base_std_async_action);
+        w.write(strings::base_std_async_action_with_progress);
+        w.write(strings::base_std_async_operation);
+        w.write(strings::base_std_async_operation_with_progress);
+        w.write(strings::base_std_fire_and_forget);
+
+        write_close_file_guard(w);
+        w.flush_to_file(settings.output_folder + settings.root + "/coroutine.h");
     }
 
     static void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)

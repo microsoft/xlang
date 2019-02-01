@@ -212,6 +212,7 @@ namespace xlang
                 if (settings.base)
                 {
                     write_base_h();
+                    write_coroutine_h();
                 }
 
                 if (settings.component)

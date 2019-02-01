@@ -2871,11 +2871,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 w.write(strings::base_reference_produce);
             }
 
-            w.write(strings::base_await);
-            w.write(strings::base_std_async_action);
-            w.write(strings::base_std_async_action_with_progress);
-            w.write(strings::base_std_async_operation);
-            w.write(strings::base_std_async_operation_with_progress);
+            w.write(strings::base_async);
         }
         else if (namespace_name == "Windows.Foundation.Collections")
         {

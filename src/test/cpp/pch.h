@@ -1,7 +1,8 @@
 #pragma once
 
 #include "catch.hpp"
-#include "winrt/base.h"
+#include "winrt/coroutine.h"
+
 using namespace std::literals;
 
 template<bool B> bool static_require()
