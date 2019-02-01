@@ -220,7 +220,7 @@ namespace py
     template<typename T>
     PyObject* wrap_struct(T instance, PyTypeObject* type_object)
     {
-        if (type_object == nullptr)
+        if (!type_object)
         {
             PyErr_SetNone(PyExc_NotImplementedError);
             return nullptr;
@@ -248,7 +248,7 @@ namespace py
             Py_RETURN_NONE;
         }
 
-        if (type_object == nullptr)
+        if (!type_object)
         {
             PyErr_SetNone(PyExc_NotImplementedError);
             return nullptr;
@@ -283,7 +283,7 @@ namespace py
 
         PyTypeObject* type_object = get_python_type<T>();
 
-        if (type_object == nullptr)
+        if (!type_object)
         {
             PyErr_SetNone(PyExc_NotImplementedError);
             return nullptr;
@@ -1006,8 +1006,7 @@ namespace py
         if constexpr (std::is_void_v<decltype(operation.GetResults())>)
         {
             operation.GetResults();
-            Py_INCREF(Py_None);
-            return Py_None;
+            Py_RETURN_NONE;
         }
         else
         {
