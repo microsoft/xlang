@@ -143,7 +143,7 @@ namespace xlang::text
 
         void flush_to_file(std::string const& filename)
         {
-            if (static_cast<T*>(this)->skip_flush_to_file(filename))
+            if (file_equal(filename))
             {
                 return;
             }
@@ -200,11 +200,6 @@ namespace xlang::text
     private:
 
         static constexpr std::array<uint8_t, 3> m_bom{ 0xEF, 0xBB, 0xBF };
-
-        constexpr bool skip_flush_to_file(std::string const&) const noexcept
-        {
-            return false;
-        }
 
         static constexpr uint32_t count_placeholders(std::string_view const& format) noexcept
         {

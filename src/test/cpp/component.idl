@@ -1,15 +1,13 @@
 namespace Windows.Foundation.Metadata
 {
     [attributeusage(target_runtimeclass)]
-    [attributename("fastabi")]
-    [version(1.0)]
     attribute FastAbiAttribute
     {
+        type Contract;
+        Int32 Version;
     }
 
     [attributeusage(target_method, target_property)]
-    [attributename("noexcept")]
-    [version(1.0)]
     attribute NoExceptionAttribute
     {
     }
@@ -89,6 +87,11 @@ namespace Component
 
     namespace Fast
     {
+        struct DummyType
+        {
+            Int32 Value;
+        };
+
         [exclusiveto(FastClass)]
         interface IFastClass
         {
@@ -123,7 +126,7 @@ namespace Component
             static String StaticMethod();
         }
 
-        [fastabi]
+        [Windows.Foundation.Metadata.FastAbi(DummyType, 123)]
         runtimeclass FastClass : [default] IFastClass, IFastClass2, Component.INotExclusive
         {
             FastClass();
