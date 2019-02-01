@@ -53,13 +53,16 @@ namespace xlang
         w.write(R"(
 #include <experimental/coroutine>
 #include "winrt/Windows.Foundation.h"
+#include "winrt/Windows.System.h"
+#include "winrt/Windows.UI.Core.h"
 )");
 
         w.write(strings::base_coroutine);
-        w.write(strings::base_std_async_action);
-        w.write(strings::base_std_async_action_with_progress);
-        w.write(strings::base_std_async_operation);
-        w.write(strings::base_std_async_operation_with_progress);
+        w.write(strings::base_coroutine_resume);
+        w.write(strings::base_coroutine_action);
+        w.write(strings::base_coroutine_action_with_progress);
+        w.write(strings::base_coroutine_operation);
+        w.write(strings::base_coroutine_operation_with_progress);
         w.write(strings::base_std_fire_and_forget);
 
         write_close_file_guard(w);

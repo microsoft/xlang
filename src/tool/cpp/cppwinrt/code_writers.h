@@ -2889,9 +2889,5 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         {
             w.write(strings::base_xaml_typename);
         }
-        else if (namespace_name == "Windows.UI.Core")
-        {
-            w.write(strings::base_resume_foreground);
-        }
     }
 }
