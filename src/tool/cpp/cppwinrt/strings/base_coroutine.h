@@ -102,7 +102,7 @@ namespace winrt::impl
 
         cancellation_token<Promise> await_resume() const noexcept
         {
-            return*this;
+            return *this;
         }
 
         bool operator()() const noexcept
@@ -117,7 +117,7 @@ namespace winrt::impl
 
     private:
 
-        Promise * m_promise;
+        Promise* m_promise;
     };
 
     template <typename Promise, typename Progress>
@@ -139,7 +139,7 @@ namespace winrt::impl
 
         progress_token<Promise, Progress> await_resume() const noexcept
         {
-            return*this;
+            return *this;
         }
 
         void operator()(Progress const& result)
@@ -149,7 +149,7 @@ namespace winrt::impl
 
     private:
 
-        Promise * m_promise;
+        Promise* m_promise;
     };
 
     template <typename Derived, typename AsyncInterface, typename CompletedHandler, typename TProgress = void>
@@ -271,7 +271,7 @@ namespace winrt::impl
 
         AsyncInterface get_return_object() const noexcept
         {
-            return*this;
+            return *this;
         }
 
         void get_return_value() const noexcept
