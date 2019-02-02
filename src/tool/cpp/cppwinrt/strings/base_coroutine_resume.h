@@ -38,7 +38,7 @@ namespace winrt
     {
         struct awaitable
         {
-            awaitable(T&& context) : m_context(context)
+            awaitable(T const& context) : m_context(context)
             {
             }
 
@@ -74,7 +74,7 @@ namespace winrt
             std::experimental::coroutine_handle<> m_resume{ nullptr };
         };
 
-        return awaitable{ std::forward<T>(context) };
+        return awaitable{ context };
     }
 
     struct apartment_context
