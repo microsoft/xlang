@@ -82,17 +82,17 @@ add_custom_command(OUTPUT ${generated_files}
 )
 
 add_custom_command(OUTPUT ${component_winmd}
-    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir ${project_folder} /reference ${project_folder}\\windows.winmd /h "nul"
+    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir C:\Windows\System32\WinMetadata /reference C:\Windows\System32\WinMetadata\Windows.Foundation.winmd /h "nul"
     DEPENDS ${project_folder}\\component.idl ${generated_files}
 )
 
 add_custom_command(OUTPUT ${foundation_h}
-    COMMAND ${cpp_exe} -in ${project_folder}\\windows.winmd -out ${generated_files} -verbose
+    COMMAND ${cpp_exe} -in local -out ${generated_files} -verbose
     DEPENDS ${component_winmd} ${generated_files} cppwinrt
 )
 
 add_custom_command(OUTPUT ${mogule_g_cpp}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${project_folder}\\windows.winmd -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
+    COMMAND ${cpp_exe} -in ${component_winmd} -ref local -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
     DEPENDS ${foundation_h} ${generated_files} cppwinrt
 )
 
