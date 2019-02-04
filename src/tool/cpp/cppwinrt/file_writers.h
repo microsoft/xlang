@@ -63,7 +63,7 @@ namespace xlang
         w.write(strings::base_coroutine_action_with_progress);
         w.write(strings::base_coroutine_operation);
         w.write(strings::base_coroutine_operation_with_progress);
-        w.write(strings::base_std_fire_and_forget);
+        w.write(strings::base_coroutine_fire_and_forget);
 
         write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + settings.root + "/coroutine.h");
