@@ -1,9 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--
-To install, copy to one of:
-  %USERPROFILE%\Documents\Visual Studio 2017\Visualizers
-  %VSINSTALLDIR%Common7\Packages\Debugger\Visualizers
--->
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
   <Type Name="xlang::meta::reader::byte_view">
