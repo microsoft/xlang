@@ -10,9 +10,48 @@ namespace xlang
         w.write(format, XLANG_VERSION_STRING);
     }
 
+    static void write_version_assert(writer& w)
+    {
+        auto format = R"(#include "winrt/base.h"
+static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched C++/WinRT headers.");
+)";
+
+        w.write(format, XLANG_VERSION_STRING);
+    }
+
     static void write_include_guard(writer& w)
     {
         auto format = R"(#pragma once
+)";
+
+        w.write(format);
+    }
+
+    static void write_open_file_guard(writer& w, std::string_view const& file_name, char impl = 0)
+    {
+        std::string mangled_name;
+
+        for (auto&& c : file_name)
+        {
+            mangled_name += c == '.' ? '_' : c;
+        }
+
+        if (impl)
+        {
+            mangled_name += '_';
+            mangled_name += impl;
+        }
+
+        auto format = R"(#ifndef WINRT_%_H
+#define WINRT_%_H
+)";
+
+        w.write(format, mangled_name, mangled_name);
+    }
+
+    static void write_close_file_guard(writer& w)
+    {
+        auto format = R"(#endif
 )";
 
         w.write(format);
@@ -849,10 +888,7 @@ namespace xlang
                 }
             }
 
-            if (w.param_names)
-            {
-                w.write(" %", param.Name());
-            }
+            w.write(" %", param.Name());
         }
     }
 
@@ -1639,10 +1675,10 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override_method(writer& w, MethodDef const& method, std::string_view const& interface_name)
     {
-        auto format = R"(template <typename D> % %T<D>::%(%) const
-{
-    return shim().template try_as<%>().%(%);
-}
+        auto format = R"(    template <typename D> % %T<D>::%(%) const
+    {
+        return shim().template try_as<%>().%(%);
+    }
 )";
 
         method_signature signature{ method };
@@ -1718,7 +1754,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             if (first)
             {
                 first = false;
-                w.write(",\n    %T<D>", name);
+                w.write(",\n        %T<D>", name);
             }
             else
             {
@@ -1737,10 +1773,10 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_class_override_constructors(writer& w, std::string_view const& type_name, std::map<std::string, factory_info> const& factories)
     {
-        auto format = R"(    %T(%)
-    {
-        impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
-    }
+        auto format = R"(        %T(%)
+        {
+            impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
+        }
 )";
 
         for (auto&&[factory_name, factory] : factories)
@@ -1770,17 +1806,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override(writer& w, TypeDef const& type)
     {
-        auto format = R"(template <typename D>
-class %T
-{
-    D& shim() noexcept { return *static_cast<D*>(this); }
-    D const& shim() const noexcept { return *static_cast<const D*>(this); }
-
-public:
-
-    using % = winrt::%;
-
-%};
+        auto format = R"(    template <typename D>
+    class %T
+    {
+        D& shim() noexcept { return *static_cast<D*>(this); }
+        D const& shim() const noexcept { return *static_cast<const D*>(this); }
+    public:
+        using % = winrt::%;
+%    };
 )";
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
@@ -1794,6 +1827,34 @@ public:
                     type_name,
                     info.type,
                     bind_each<write_consume_declaration>(info.type.MethodList()));
+            }
+        }
+    }
+
+    static void write_class_override_usings(writer& w, std::map<std::string, interface_info> const& required_interfaces)
+    {
+        std::map<std::string_view, std::set<std::string>> method_usage;
+
+        for (auto&&[interface_name, info] : required_interfaces)
+        {
+            for (auto&& method : info.type.MethodList())
+            {
+                method_usage[get_name(method)].insert(interface_name);
+            }
+        }
+
+        for (auto&&[method_name, interfaces] : method_usage)
+        {
+            if (interfaces.size() <= 1)
+            {
+                continue;
+            }
+
+            for (auto&& interface_name : interfaces)
+            {
+                w.write("        using impl::consume_t<D, %>::%;\n",
+                    interface_name,
+                    method_name);
             }
         }
     }
@@ -1824,9 +1885,8 @@ public:
         impl::base<D, %%>%
     {
         using composable = %;
-
     protected:
-    %};
+%%    };
 )";
 
         auto type_name = type.TypeName();
@@ -1840,7 +1900,8 @@ public:
             bind<write_class_override_bases>(type),
             bind<write_class_override_defaults>(interfaces),
             type_name,
-            bind<write_class_override_constructors>(type_name, factories));
+            bind<write_class_override_constructors>(type_name, factories),
+            bind< write_class_override_usings>(interfaces));
     }
 
     static void write_interface_requires(writer& w, TypeDef const& type)
@@ -1886,7 +1947,7 @@ public:
 
             for (auto&& interface_name : interfaces)
             {
-                w.write("    using impl::consume_t<%, %>::%;\n",
+                w.write("        using impl::consume_t<%, %>::%;\n",
                     type_name,
                     interface_name,
                     method_name);
@@ -1930,13 +1991,13 @@ public:
             {
                 if (default_interface_name == interface_name)
                 {
-                    w.write("    using %::%;\n",
+                    w.write("        using %::%;\n",
                         interface_name,
                         method_name);
                 }
                 else
                 {
-                    w.write("    using impl::consume_t<%, %>::%;\n",
+                    w.write("        using impl::consume_t<%, %>::%;\n",
                         type_name,
                         interface_name,
                         method_name);
@@ -2388,7 +2449,7 @@ public:
             if (first)
             {
                 first = false;
-                w.write(",\n    impl::base<%", type.TypeName());
+                w.write(",\n        impl::base<%", type.TypeName());
             }
 
             w.write(", %", base);
@@ -2810,11 +2871,7 @@ public:
                 w.write(strings::base_reference_produce);
             }
 
-            w.write(strings::base_await);
-            w.write(strings::base_std_async_action);
-            w.write(strings::base_std_async_action_with_progress);
-            w.write(strings::base_std_async_operation);
-            w.write(strings::base_std_async_operation_with_progress);
+            w.write(strings::base_async);
         }
         else if (namespace_name == "Windows.Foundation.Collections")
         {
@@ -2831,10 +2888,6 @@ public:
         else if (namespace_name == "Windows.UI.Xaml.Interop")
         {
             w.write(strings::base_xaml_typename);
-        }
-        else if (namespace_name == "Windows.UI.Core")
-        {
-            w.write(strings::base_resume_foreground);
         }
     }
 }

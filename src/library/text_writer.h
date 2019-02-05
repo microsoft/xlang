@@ -143,9 +143,13 @@ namespace xlang::text
 
         void flush_to_file(std::string const& filename)
         {
+            if (file_equal(filename))
+            {
+                return;
+            }
+
             std::ofstream file{ filename, std::ios::out | std::ios::binary };
-            std::array<uint8_t, 3> bom{ 0xEF, 0xBB, 0xBF };
-            file.write(reinterpret_cast<char*>(bom.data()), bom.size());
+            file.write(reinterpret_cast<char const*>(m_bom.data()), m_bom.size());
             file.write(m_first.data(), m_first.size());
             file.write(m_second.data(), m_second.size());
             m_first.clear();
@@ -162,11 +166,40 @@ namespace xlang::text
             return m_first.empty() ? char{} : m_first.back();
         }
 
+        bool file_equal(std::string const& filename) const
+        {
+            if (!std::experimental::filesystem::exists(filename))
+            {
+                return false;
+            }
+
+            meta::reader::file_view file{ filename };
+
+            if (file.size() != m_bom.size() + m_first.size() + m_second.size())
+            {
+                return false;
+            }
+
+            if (!std::equal(m_bom.begin(), m_bom.end(), file.begin(), file.begin() + m_bom.size()))
+            {
+                return false;
+            }
+
+            if (!std::equal(m_first.begin(), m_first.end(), file.begin() + m_bom.size(), file.begin() + m_bom.size() + m_first.size()))
+            {
+                return false;
+            }
+
+            return std::equal(m_second.begin(), m_second.end(), file.begin() + m_bom.size() + m_first.size(), file.end());
+        }
+
 #if defined(XLANG_DEBUG)
         bool debug_trace{};
 #endif
 
     private:
+
+        static constexpr std::array<uint8_t, 3> m_bom{ 0xEF, 0xBB, 0xBF };
 
         static constexpr uint32_t count_placeholders(std::string_view const& format) noexcept
         {

@@ -7,7 +7,7 @@ namespace winrt::impl
     };
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     struct non_agile : impl::marker {};
     struct no_weak_ref : impl::marker {};
@@ -168,7 +168,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename D, typename I>
     D* get_self(I const& from) noexcept
@@ -702,8 +702,8 @@ namespace winrt::impl
 
     template <typename D, typename... I>
     struct WINRT_NOVTABLE root_implements
-        : root_implements_composing_outer<std::disjunction<std::is_same<composing, I>...>::value>
-        , root_implements_composable_inner<D, std::disjunction<std::is_same<composable, I>...>::value>
+        : root_implements_composing_outer<std::disjunction_v<std::is_same<composing, I>...>>
+        , root_implements_composable_inner<D, std::disjunction_v<std::is_same<composable, I>...>>
     {
         using IInspectable = Windows::Foundation::IInspectable;
         using root_implements_type = root_implements;
@@ -1173,7 +1173,7 @@ namespace winrt::impl
     }
 }
 
-WINRT_EXPORT namespace winrt
+namespace winrt
 {
     template <typename D, typename... Args>
     auto make(Args&&... args)
@@ -1222,6 +1222,13 @@ WINRT_EXPORT namespace winrt
 
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
+
+#ifdef _DEBUG
+        implements() noexcept
+        {
+            WINRT_ASSERT(!is_stack_object());
+        }
+#endif
 
         weak_ref<D> get_weak()
         {
@@ -1284,6 +1291,18 @@ WINRT_EXPORT namespace winrt
         }
 
     private:
+
+#ifdef _DEBUG
+        bool is_stack_object() const noexcept
+        {
+            uintptr_t low_limit{};
+            uintptr_t high_limit{};
+            WINRT_GetCurrentThreadStackLimits(&low_limit, &high_limit);
+            uintptr_t const address = reinterpret_cast<uintptr_t>(this);
+            return (low_limit <= address) && (address < high_limit);
+        }
+#endif
+
         impl::unknown_abi* get_unknown() const noexcept override
         {
             return reinterpret_cast<impl::unknown_abi*>(to_abi<typename impl::implements_default_interface<D>::type>(this));

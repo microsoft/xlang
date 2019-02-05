@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include <inspectable.h>
-#include "winrt/Windows.Foundation.h"
+#include "winrt/coroutine.h"
 
 struct __declspec(uuid("5040a5f4-796a-42ff-9f06-be89137a518f")) IBase : IUnknown
 {
