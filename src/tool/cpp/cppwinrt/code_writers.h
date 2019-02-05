@@ -1302,7 +1302,7 @@ static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched C++/WinRT
     {
         if (signature.is_szarray())
         {
-            auto format = R"(                *__%Size = 0;
+            auto format = R"(            *__%Size = 0;
                 *% = nullptr;
 )";
 
@@ -1358,15 +1358,15 @@ static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched C++/WinRT
 
         if (optional)
         {
-            auto format = R"(                if (%) *% = nullptr;
-                Windows::Foundation::IInspectable winrt_impl_%;
+            auto format = R"(            if (%) *% = nullptr;
+            Windows::Foundation::IInspectable winrt_impl_%;
 )";
 
             w.write(format, param_name, param_name, param_name);
         }
         else if (clear)
         {
-            auto format = R"(                *% = nullptr;
+            auto format = R"(            *% = nullptr;
 )";
 
             w.write(format, param_name);
@@ -1559,9 +1559,9 @@ static_assert(winrt::check_version(CPPWINRT_VERSION, "%"), "Mismatched C++/WinRT
         {
             format = R"(        int32_t WINRT_CALL %(%) noexcept final
         {
-            try
+%            try
             {
-%                typename D::abi_guard guard(this->shim());
+                typename D::abi_guard guard(this->shim());
                 %
                 return 0;
             }
