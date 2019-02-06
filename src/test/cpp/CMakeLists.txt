@@ -86,4 +86,6 @@ add_custom_target(cpp_test_depends ALL DEPENDS ${mogule_g_cpp})
 add_dependencies(cpp_test cppwinrt cpp_test_depends)
 
 install(TARGETS cpp_test DESTINATION "test")
-install(FILES $<TARGET_PDB_FILE:cpp_test> DESTINATION "test" OPTIONAL)
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:cpp_test> DESTINATION "test" OPTIONAL)
+endif ()

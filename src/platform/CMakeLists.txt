@@ -19,4 +19,6 @@ target_include_directories(pal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(pal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/published)
 
 install(TARGETS pal DESTINATION "test/platform")
-install(FILES $<TARGET_PDB_FILE:pal> DESTINATION "test/platform" OPTIONAL)
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:pal> DESTINATION "test/platform" OPTIONAL)
+endif ()
