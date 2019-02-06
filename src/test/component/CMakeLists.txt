@@ -70,3 +70,6 @@ add_custom_command(OUTPUT ${module_g_cpp}
 
 add_custom_target(test_component_depends ALL DEPENDS ${module_g_cpp})
 add_dependencies(test_component cppwinrt test_component_depends)
+
+install(TARGETS test_component_dll DESTINATION "test/platform")
+install(FILES $<TARGET_PDB_FILE:test_component_dll> DESTINATION "test/platform" OPTIONAL)
