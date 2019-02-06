@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 
 add_executable(cpp_test "")
-target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated" ${XLANG_LIBRARY_PATH})
+target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated" ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH})
 target_sources(cpp_test PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/generated/module.g.cpp"
     pch.cpp
@@ -13,7 +13,7 @@ target_sources(cpp_test PUBLIC
     test/AsyncReturn.cpp
     test/CmdReader.cpp
     test/Collections.cpp
-    test/Composable.cpp
+    test/Composable.cpp 
     test/CustomError.cpp
     test/Edge.cpp
     test/Enum.cpp
@@ -24,22 +24,8 @@ target_sources(cpp_test PUBLIC
     test/Names.cpp
     test/Structs.cpp
     test/VariadicDelegate.cpp
-    implementation/Component.Async.Class.cpp
-    implementation/Component.Collections.Class.cpp
-    implementation/Component.Composable.Base.cpp
-    implementation/Component.Composable.Derived.cpp
-    implementation/Component.Edge.EmptyClass.cpp
-    implementation/Component.Edge.OneClass.cpp
-    implementation/Component.Edge.StaticClass.cpp
-    implementation/Component.Edge.ThreeClass.cpp
-    implementation/Component.Edge.TwoClass.cpp
-    implementation/Component.Edge.ZeroClass.cpp
-    implementation/Component.Events.Class.cpp
-    implementation/Component.Fast.FastClass.cpp
-    implementation/Component.Fast.SlowClass.cpp
-    implementation/Component.Params.Class.cpp
-    implementation/Component.Result.Class.cpp
 )
+target_link_libraries(cpp_test test_component)
 
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(cpp_test pch.cpp pch.h)
@@ -98,3 +84,8 @@ add_custom_command(OUTPUT ${mogule_g_cpp}
 
 add_custom_target(cpp_test_depends ALL DEPENDS ${mogule_g_cpp})
 add_dependencies(cpp_test cppwinrt cpp_test_depends)
+
+install(TARGETS cpp_test DESTINATION "test")
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:cpp_test> DESTINATION "test" OPTIONAL)
+endif ()

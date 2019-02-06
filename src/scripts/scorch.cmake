@@ -1,4 +1,4 @@
-set(EXTENSIONS_TO_SCORCH exe dll pdb ilk pch obj h cpp)
+set(EXTENSIONS_TO_SCORCH exe dll pdb ilk pch obj h cpp winmd py)
 
 foreach(EXTENSION in ${EXTENSIONS_TO_SCORCH})
     file(GLOB_RECURSE FILES_TO_DELETE "${folder}/*.${EXTENSION}")
