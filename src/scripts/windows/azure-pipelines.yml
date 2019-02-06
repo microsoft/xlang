@@ -12,7 +12,7 @@ container: build_container
 steps:
 - script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build -GNinja -DCMAKE_INSTALL_PREFIX=install && ninja -C _build install -v
   displayName: 'build'
-- script: _build/install/test/cpp_tests.exe
+- script: install/test/cpp_tests.exe
   displayName: 'cpp_test'
-- script: _build/install/test/platform/test_platform.exe
+- script: install/test/platform/test_platform.exe
   displayName: 'test_platform'
