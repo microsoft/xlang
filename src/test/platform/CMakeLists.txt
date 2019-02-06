@@ -22,4 +22,6 @@ endif()
 target_sources(test_platform PUBLIC main.cpp)
 
 install(TARGETS test_platform DESTINATION "test/platform")
-install(FILES $<TARGET_PDB_FILE:test_platform> DESTINATION "test/platform" OPTIONAL)
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:test_platform> DESTINATION "test/platform" OPTIONAL)
+endif ()
