@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include <windows.h>
-#include "winrt/Windows.Foundation.h"
+#include "winrt/coroutine.h"
 
 using namespace winrt;
 using namespace Windows::Foundation;
