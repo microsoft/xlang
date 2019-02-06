@@ -158,6 +158,34 @@ class TestJson(unittest.TestCase):
         with self.assertRaises(TypeError):
             wdj.JsonArray.Parse(10, 20)
 
+    def test_JsonArray_GetMany(self):
+        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+        count, items = a.GetMany(1, 3)
+
+        self.assertEqual(count, 3)
+        self.assertEqual(len(items), 3)
+
+        self.assertFalse(items[0].GetBoolean())
+        self.assertEqual(items[1].GetNumber(), 42)
+        self.assertEqual(items[2].ValueType, 0)
+
+        # TODO: remove clear call after resolving leak issue
+        items.clear()
+
+    def test_JsonArray_GetMany2(self):
+        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+        count, items = a.GetMany(6, 3)
+
+        self.assertEqual(count, 1)
+        self.assertEqual(len(items), 3)
+
+        self.assertEqual(items[0].GetString(), "plugh")
+        self.assertIsNone(items[1])
+        self.assertIsNone(items[2])
+
+        # TODO: remove clear call after resolving leak issue
+        items.clear()
+
 
 if __name__ == '__main__':
     import _pyrt
