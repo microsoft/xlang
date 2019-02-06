@@ -97,6 +97,8 @@ The **/library** folder contains the C++ header libraries provided by xlang for 
 
 * **text_writer.h** writes formatted text output.
 
+* **xlang.meta.natvis** provides Visual Studio debug visualizations of xlang::meta types.  To use, see [Deploying .natvis files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015#BKMK_natvis_location).
+
 ### /Platform
 
 The **/platform** folder contains the declaration and implementations of the common and minimal C API (and platform-specific implementations) used to support xlang on different platforms (otherwise known as the PAL or Platform Adaptation Layer).

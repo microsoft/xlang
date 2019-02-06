@@ -1,0 +1,3 @@
+EXPORTS
+DllCanUnloadNow = WINRT_CanUnloadNow                    PRIVATE
+xlang_lib_get_activation_factory = XLANG_get_activation_factory    PRIVATE
