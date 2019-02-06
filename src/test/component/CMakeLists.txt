@@ -40,9 +40,11 @@ else()
 endif()
 
 add_library(test_component_dll MODULE "")
-target_sources(test_component_dll PUBLIC module.def ${module_g_cpp})
+target_sources(test_component_dll PUBLIC module.def ${module_g_cpp} xlang_factory_adapter.cpp)
 target_link_libraries(test_component_dll test_component)
 set_target_properties(test_component_dll PROPERTIES OUTPUT_NAME "component")
+
+CONSUME_PAL(test_component_dll)
 
 add_custom_command(OUTPUT ${generated_files}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${generated_files}
