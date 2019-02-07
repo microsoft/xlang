@@ -53,7 +53,7 @@ add_custom_command(OUTPUT ${generated_files}
 )
 
 add_custom_command(OUTPUT ${component_winmd}
-    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir ${project_folder} /reference ${project_folder}\\Windows.Foundation.FoundationContract.winmd /h "nul"
+    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir ${project_folder}\\metadata /reference ${project_folder}\\metadata\\Windows.Foundation.FoundationContract.winmd /h "nul"
     DEPENDS ${project_folder}\\component.idl ${generated_files}
 )
 
