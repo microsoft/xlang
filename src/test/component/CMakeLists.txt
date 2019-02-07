@@ -13,6 +13,7 @@ file(TO_NATIVE_PATH "${generated_files}/module.g.cpp" module_g_cpp)
 
 set(sources
     pch.cpp
+    "${generated_files}\\module.g.cpp"
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
     implementation/Component.Composable.Base.cpp
@@ -30,8 +31,8 @@ set(sources
     implementation/Component.Result.Class.cpp
 )
 
-add_library(test_component STATIC ${sources})
-
+add_library(test_component STATIC "")
+target_sources(test_component PRIVATE ${sources})
 target_include_directories(test_component BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${generated_files})
 
 if (MSVC)
@@ -43,7 +44,7 @@ else()
 endif()
 
 add_library(test_component_dll MODULE "")
-target_sources(test_component_dll PUBLIC module.def ${module_g_cpp} xlang_factory_adapter.cpp)
+target_sources(test_component_dll PUBLIC module.def xlang_factory_adapter.cpp)
 target_link_libraries(test_component_dll test_component)
 set_target_properties(test_component_dll PROPERTIES OUTPUT_NAME "component")
 
