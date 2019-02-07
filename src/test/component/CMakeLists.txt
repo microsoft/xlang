@@ -13,7 +13,7 @@ file(TO_NATIVE_PATH "${generated_files}/module.g.cpp" module_g_cpp)
 
 set(sources
     pch.cpp
-    "${generated_files}\\module.g.cpp"
+    ${module_g_cpp}
     implementation/Component.Async.Class.cpp
     implementation/Component.Collections.Class.cpp
     implementation/Component.Composable.Base.cpp
@@ -32,7 +32,7 @@ set(sources
 )
 
 add_library(test_component STATIC "")
-target_sources(test_component PRIVATE ${sources})
+target_sources(test_component PRIVATE ${sources} )
 target_include_directories(test_component BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${generated_files})
 
 if (MSVC)
