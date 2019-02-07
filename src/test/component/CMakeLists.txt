@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.9)
 
 file(TO_NATIVE_PATH ${CMAKE_BINARY_DIR}/tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
-file(TO_NATIVE_PATH "${project_folder}/Windows.Foundation.FoundationContract.winmd" foundation_winmd)
+
+file(TO_NATIVE_PATH "${project_folder}/metadata" metadata_folder)
+file(TO_NATIVE_PATH "${metadata_folder}/Windows.Foundation.FoundationContract.winmd" foundation_winmd)
+
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/generated" generated_files)
 file(TO_NATIVE_PATH "${generated_files}/component.winmd" component_winmd)
 file(TO_NATIVE_PATH "${generated_files}/winrt/Windows.Foundation.h" foundation_h)
@@ -53,20 +56,20 @@ add_custom_command(OUTPUT ${generated_files}
 )
 
 add_custom_command(OUTPUT ${component_winmd}
-    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir ${project_folder}\\metadata /reference ${project_folder}\\metadata\\Windows.Foundation.FoundationContract.winmd /h "nul"
+    COMMAND midlrt ${project_folder}\\component.idl /nomidl /winrt /winmd ${component_winmd} /metadata_dir ${metadata_folder} /reference ${foundation_winmd} /h "nul"
     DEPENDS ${project_folder}\\component.idl ${generated_files}
 )
 
-# winrt/coroutine.h depends on Windows.System and Windows.UI.Core.h,  so we have to generate the
-# entire winrt projection here (aka -in local).
+# winrt/coroutine.h depends on Windows.System and Windows.UI.Core.h, so we have to generate the
+# entire winrt projection here (aka -in ${metadata_folder}).
 
 add_custom_command(OUTPUT ${foundation_h}
-    COMMAND ${cpp_exe} -in local -out ${generated_files} -verbose
+    COMMAND ${cpp_exe} -in ${metadata_folder} -out ${generated_files} -verbose
     DEPENDS ${component_winmd} ${generated_files} cppwinrt
 )
 
 add_custom_command(OUTPUT ${module_g_cpp}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref local -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
+    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${foundation_winmd} -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
     DEPENDS ${foundation_h} ${generated_files} cppwinrt
 )
 
