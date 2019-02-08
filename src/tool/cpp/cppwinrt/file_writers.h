@@ -41,7 +41,7 @@ namespace xlang
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
         write_close_file_guard(w);
-        w.flush_to_file(settings.output_folder + settings.root + "/base.h");
+        w.flush_to_file(settings.output_folder + "winrt/base.h");
     }
 
     static void write_coroutine_h()
@@ -66,7 +66,7 @@ namespace xlang
         w.write(strings::base_std_fire_and_forget);
 
         write_close_file_guard(w);
-        w.flush_to_file(settings.output_folder + settings.root + "/coroutine.h");
+        w.flush_to_file(settings.output_folder + "winrt/coroutine.h");
     }
 
     static void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)

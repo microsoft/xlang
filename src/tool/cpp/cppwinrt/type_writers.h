@@ -480,12 +480,11 @@ namespace xlang
 
         void write_root_include(std::string_view const& include)
         {
-            auto format = R"(#include %%/%.h%
+            auto format = R"(#include %winrt/%.h%
 )";
 
             write(format,
                 settings.brackets ? '<' : '\"',
-                settings.root,
                 include,
                 settings.brackets ? '>' : '\"');
         }
@@ -523,7 +522,7 @@ namespace xlang
 
         void save_header(char impl = 0)
         {
-            auto filename{ settings.output_folder + settings.root + "/" };
+            auto filename{ settings.output_folder + "winrt/" };
 
             if (impl)
             {
