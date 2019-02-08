@@ -293,7 +293,7 @@ Where <spec> is one or more of:
                 w.write(" time:  %ms\n", get_elapsed_time(start));
             }
         }
-        catch (usage_exception const& e)
+        catch (usage_exception const&)
         {
             print_usage(w);
         }

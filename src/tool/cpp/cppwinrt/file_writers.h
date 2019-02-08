@@ -47,7 +47,7 @@ namespace xlang
     static void write_coroutine_h()
     {
         writer w;
-        write_license(w);
+        write_preamble(w);
         write_open_file_guard(w, "COROUTINE");
 
         w.write(R"(
