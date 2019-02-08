@@ -28,7 +28,8 @@ public:
         write_response_file(input);
     }
 
-    reader create_reader(size_t const argc, const char* argv[], std::vector<option> const& options)
+    template<size_t numOptions>
+    reader create_reader(size_t const argc, const char* argv[], const option (&options)[numOptions])
     {
         return reader{ argc, argv, options };
     }
@@ -41,7 +42,7 @@ public:
 
 TEST_CASE("CmdReader")
 {
-    static const std::vector<option> options
+    static constexpr option options[]
     {
         { "input", 1 },
         { "reference", 0 },

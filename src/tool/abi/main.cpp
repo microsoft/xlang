@@ -34,7 +34,7 @@ int main(int const argc, char** argv)
     {
         auto const start = high_resolution_clock::now();
 
-        std::vector<option> options
+        static constexpr cmd::option options[]
         {
             // name, min, max
             { "input", 1 },
