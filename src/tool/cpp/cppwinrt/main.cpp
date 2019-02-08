@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <time.h>
 #include "version.h"
 #include "strings.h"
 #include "settings.h"
@@ -13,37 +14,105 @@ namespace xlang
 {
     settings_type settings;
 
-    struct usage_exception {};
+    struct usage_exception { bool details{}; };
+
+    static std::vector<cmd::option> options
+    {
+        { "input", 0, cmd::option::no_max, "<spec>", "Windows metadata to include in projection" },
+        { "reference", 0, cmd::option::no_max, "<spec>", "Windows metadata to reference from projection" },
+        { "output", 0, 1, "<path>", "Location of generated projection and component templates" },
+        { "component", 0, 1, "[<path>]", "Generate component templates, and optional implementation" },
+        { "name", 0, 1, "<name>", "Specify explicit name for component files" },
+        { "verbose", 0, 0, {}, "Show detailed progress information" },
+        { "overwrite", 0, 0, {}, "Overwrite generated component files" },
+        { "prefix", 0, cmd::option::no_max, {}, "Use dotted namespace convention for component files (defaults to folders)" },
+        { "pch", 0, 1, "<name>", "Specify name of precompiled header file (defaults to pch.h)" },
+        { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
+        { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
+        { "base", 0, 0, {}, "Generate base.h unconditionally" },
+        { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
+        { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
+        { "root", 0, 1 }, // "Root folder name for projection headers (defaults to winrt)
+        { "filter" }, // One or more prefixes to include in input (same as -include)
+        { "lib", 0, 1 }, // Specify library prefix (defaults to winrt)
+        { "license", 0, 0 }, // Generate license comment
+        { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
+    };
+
+    static void printUsage(writer& w, bool details)
+    {
+        static auto printColumns = [](writer& w, std::string_view const& col1, std::string_view const& col2)
+        {
+            w.write_printf("  %-20s%s\n", col1.data(), col2.data());
+        };
+
+        static auto printOption = [](writer& w, cmd::option const& opt)
+        {
+            if(opt.desc.empty())
+            {
+                return;
+            }
+            printColumns(w, w.write_temp("-% %", opt.name, opt.arg), opt.desc);
+        };
+
+        auto format = R"(
+C++/WinRT v%
+Copyright (c) % Microsoft Corporation. All rights reserved.
+
+  cppwinrt.exe [options...]
+
+Options:
+
+%  ^@<path>             Response file containing command line options
+
+Where <spec> is one or more of:
+
+  path                Path to winmd file or recursively scanned folder
+  local               Local ^%WinDir^%\System32\WinMetadata folder
+  sdk[+]              Current version of Windows SDK [with extensions]
+  10.0.12345.0[+]     Specific version of Windows SDK [with extensions]
+)";
+        time_t t{ time(nullptr) };
+        tm tm{};
+        localtime_s(&tm, &t);
+
+        w.write(format, 
+            XLANG_VERSION_STRING, 
+            1900 + tm.tm_year, 
+            bind_each(printOption, options));
+
+        if (details)
+        {
+            w.write(R"(
+Examples:
+
+1. Generate a projection from local metadata, in the current directory:
+>cppwinrt.exe -in local
+
+2. Generate a Desktop SDK projection using a response file, into output directory
+>type desktop.rsp 
+	"C:\Program Files (x86)\Windows Kits\10\...\Windows.Foundation.FoundationContract.winmd"
+	"C:\Program Files (x86)\Windows Kits\10\...\Windows.Foundation.UniversalApiContract.winmd"
+	...
+>cppwinrt.exe -in ^@desktop.rsp -out c:\desktop
+
+3. Generate a filtered component projection, referencing the current SDK:
+>cppwinrt.exe -v -c -r sdk -n Windows.System.Diagnostics -f Windows.System.Diagnostics.System -o wsd
+)");
+        }
+    }
 
     static void process_args(int const argc, char** argv)
     {
-        std::vector<cmd::option> options
-        {
-            { "input", 0 },
-            { "reference", 0 },
-            { "output", 0, 1 },
-            { "component", 0, 1 },
-            { "filter", 0 },
-            { "name", 0, 1 },
-            { "verbose", 0, 0 },
-            { "overwrite", 0, 0 },
-            { "prefix", 0, 0 },
-            { "license", 0, 0 },
-            { "pch", 0, 1 },
-            { "include", 0 },
-            { "exclude", 0 },
-            { "root", 0, 1 },
-            { "base", 0, 0 },
-            { "lib", 0, 1 },
-            { "opt", 0, 0 },
-            { "bracket", 0, 0 },
-        };
-
         cmd::reader args{ argc, argv, options };
 
         if (!args)
         {
-            throw usage_exception{};
+            throw usage_exception{ false };
+        }
+        if (args.exists("help"))
+        {
+            throw usage_exception{ true };
         }
 
         settings.verbose = args.exists("verbose");
@@ -54,6 +123,9 @@ namespace xlang
 
         settings.component = args.exists("component");
         settings.base = args.exists("base");
+
+        settings.license = args.exists("license");
+        settings.brackets = args.exists("brackets");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / settings.root / "impl");
@@ -252,9 +324,9 @@ namespace xlang
                 w.write(" time:  %ms\n", get_elapsed_time(start));
             }
         }
-        catch (usage_exception const&)
+        catch (usage_exception const& e)
         {
-            w.write("Usage...");
+            printUsage(w, e.details);
         }
         catch (std::exception const& e)
         {

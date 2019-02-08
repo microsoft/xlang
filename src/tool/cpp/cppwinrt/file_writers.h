@@ -5,7 +5,7 @@ namespace xlang
     static void write_base_h()
     {
         writer w;
-        write_license(w);
+        write_prolog(w);
         write_open_file_guard(w, "BASE");
 
         w.write(strings::base_dependencies);
@@ -106,7 +106,7 @@ namespace xlang
 
         write_close_file_guard(w);
         w.swap();
-        write_license(w);
+        write_prolog(w);
         write_open_file_guard(w, ns, '0');
 
         for (auto&& depends : w.depends)
@@ -130,7 +130,7 @@ namespace xlang
 
         write_close_file_guard(w);
         w.swap();
-        write_license(w);
+        write_prolog(w);
         write_open_file_guard(w, ns, '1');
 
         for (auto&& depends : w.depends)
@@ -157,7 +157,7 @@ namespace xlang
 
         write_close_file_guard(w);
         w.swap();
-        write_license(w);
+        write_prolog(w);
         write_open_file_guard(w, ns, '2');
 
         for (auto&& depends : w.depends)
@@ -195,7 +195,7 @@ namespace xlang
 
         write_close_file_guard(w);
         w.swap();
-        write_license(w);
+        write_prolog(w);
         write_open_file_guard(w, ns);
         write_version_assert(w);
 
@@ -212,7 +212,7 @@ namespace xlang
     static void write_module_g_cpp(std::vector<TypeDef> const& classes)
     {
         writer w;
-        write_license(w);
+        write_prolog(w);
         write_pch(w);
         write_module_g_cpp(w, classes);
         w.flush_to_file(settings.output_folder + "module.g.cpp");
@@ -224,7 +224,7 @@ namespace xlang
         write_component_g_h(w, type);
 
         w.swap();
-        write_license(w);
+        write_prolog(w);
         write_include_guard(w);
 
         for (auto&& depends : w.depends)
@@ -247,7 +247,7 @@ namespace xlang
         }
 
         writer w;
-        write_license(w);
+        write_prolog(w);
         write_component_g_cpp(w, type);
 
         auto filename = settings.output_folder + get_generated_component_filename(type) + ".g.cpp";

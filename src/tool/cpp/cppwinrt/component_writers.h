@@ -136,8 +136,8 @@ namespace xlang
 
     static void write_module_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
-        auto format = R"(#include "winrt/base.h"
-%
+        w.write_root_include("base");
+        auto format = R"(%
 bool WINRT_CALL %_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
