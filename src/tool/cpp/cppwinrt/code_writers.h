@@ -2,7 +2,7 @@
 
 namespace xlang
 {
-    static void write_prolog(writer& w)
+    static void write_preamble(writer& w)
     {
         if (settings.license)
         {

@@ -39,7 +39,7 @@ namespace xlang
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
     };
 
-    static void printUsage(writer& w, bool details)
+    static void print_usage(writer& w, bool details)
     {
         static auto printColumns = [](writer& w, std::string_view const& col1, std::string_view const& col2)
         {
@@ -57,7 +57,7 @@ namespace xlang
 
         auto format = R"(
 C++/WinRT v%
-Copyright (c) % Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation. All rights reserved.
 
   cppwinrt.exe [options...]
 
@@ -72,14 +72,7 @@ Where <spec> is one or more of:
   sdk[+]              Current version of Windows SDK [with extensions]
   10.0.12345.0[+]     Specific version of Windows SDK [with extensions]
 )";
-        time_t t{ time(nullptr) };
-        tm tm{};
-        localtime_s(&tm, &t);
-
-        w.write(format, 
-            XLANG_VERSION_STRING, 
-            1900 + tm.tm_year, 
-            bind_each(printOption, options));
+        w.write(format, XLANG_VERSION_STRING, bind_each(printOption, options));
 
         if (details)
         {
@@ -326,7 +319,7 @@ Examples:
         }
         catch (usage_exception const& e)
         {
-            printUsage(w, e.details);
+            print_usage(w, e.details);
         }
         catch (std::exception const& e)
         {
