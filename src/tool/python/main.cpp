@@ -14,7 +14,7 @@ namespace xlang
 
     void process_args(int const argc, char** argv)
     {
-        std::vector<cmd::option> options
+        static constexpr cmd::option options[]
         {
             { "input", 1 },
             { "output", 0, 1 },

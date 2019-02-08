@@ -8,7 +8,6 @@ namespace xlang
         std::set<std::string> reference;
 
         std::string output_folder;
-        std::string root{ "winrt" };
         bool base{};
         bool license{};
         bool brackets{};
@@ -19,7 +18,6 @@ namespace xlang
         std::string component_pch;
         bool component_prefix{};
         bool component_overwrite{};
-        std::string component_lib;
         bool component_opt{};
 
         bool verbose{};
