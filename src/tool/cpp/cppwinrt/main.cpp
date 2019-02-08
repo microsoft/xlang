@@ -14,7 +14,7 @@ namespace xlang
 {
     settings_type settings;
 
-    struct usage_exception { bool details{}; };
+    struct usage_exception {};
 
     static std::vector<cmd::option> options
     {
@@ -39,7 +39,7 @@ namespace xlang
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
     };
 
-    static void print_usage(writer& w, bool details)
+    static void print_usage(writer& w)
     {
         static auto printColumns = [](writer& w, std::string_view const& col1, std::string_view const& col2)
         {
@@ -73,39 +73,15 @@ Where <spec> is one or more of:
   10.0.12345.0[+]     Specific version of Windows SDK [with extensions]
 )";
         w.write(format, XLANG_VERSION_STRING, bind_each(printOption, options));
-
-        if (details)
-        {
-            w.write(R"(
-Examples:
-
-1. Generate a projection from local metadata, in the current directory:
->cppwinrt.exe -in local
-
-2. Generate a Desktop SDK projection using a response file, into output directory
->type desktop.rsp 
-	"C:\Program Files (x86)\Windows Kits\10\...\Windows.Foundation.FoundationContract.winmd"
-	"C:\Program Files (x86)\Windows Kits\10\...\Windows.Foundation.UniversalApiContract.winmd"
-	...
->cppwinrt.exe -in ^@desktop.rsp -out c:\desktop
-
-3. Generate a filtered component projection, referencing the current SDK:
->cppwinrt.exe -v -c -r sdk -n Windows.System.Diagnostics -f Windows.System.Diagnostics.System -o wsd
-)");
-        }
     }
 
     static void process_args(int const argc, char** argv)
     {
         cmd::reader args{ argc, argv, options };
 
-        if (!args)
+        if (!args || args.exists("help"))
         {
-            throw usage_exception{ false };
-        }
-        if (args.exists("help"))
-        {
-            throw usage_exception{ true };
+            throw usage_exception{};
         }
 
         settings.verbose = args.exists("verbose");
@@ -319,7 +295,7 @@ Examples:
         }
         catch (usage_exception const& e)
         {
-            print_usage(w, e.details);
+            print_usage(w);
         }
         catch (std::exception const& e)
         {
