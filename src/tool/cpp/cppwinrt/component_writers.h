@@ -136,9 +136,9 @@ namespace xlang
 
     static void write_module_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
-        auto format = R"(#include "winrt/base.h"
-%
-bool WINRT_CALL %_can_unload_now() noexcept
+        w.write_root_include("base");
+        auto format = R"(%
+bool WINRT_CALL winrt_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
     {
@@ -149,7 +149,7 @@ bool WINRT_CALL %_can_unload_now() noexcept
     return true;
 }
 
-void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
+void* WINRT_CALL winrt_get_activation_factory(std::wstring_view const& name)
 {
     auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
     {
@@ -168,7 +168,7 @@ int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
     }
 #endif
 
-    return %_can_unload_now() ? 0 : 1;
+    return winrt_can_unload_now() ? 0 : 1;
 }
 
 int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept
@@ -179,7 +179,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
         std::wstring_view const name{ buffer, length };
 
-        *factory = %_get_activation_factory(name);
+        *factory = winrt_get_activation_factory(name);
 
         if (*factory)
         {
@@ -198,11 +198,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         w.write(format,
             bind_each<write_component_include>(classes),
-            settings.component_lib,
-            settings.component_lib,
-            bind_each<write_component_activation>(classes),
-            settings.component_lib,
-            settings.component_lib);
+            bind_each<write_component_activation>(classes));
     }
 
     static void write_component_interfaces(writer& w, TypeDef const& type)
