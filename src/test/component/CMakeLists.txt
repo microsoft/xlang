@@ -70,7 +70,7 @@ add_custom_command(OUTPUT ${foundation_h}
 )
 
 add_custom_command(OUTPUT ${module_g_cpp}
-    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${foundation_winmd} -include Component -out ${generated_files} -component -verbose -prefix -base -opt
+    COMMAND ${cpp_exe} -in ${component_winmd} -ref ${foundation_winmd} -include Component -out ${generated_files} -component -verbose -prefix -base -lib test -opt
     DEPENDS ${foundation_h} ${generated_files} cppwinrt
 )
 
