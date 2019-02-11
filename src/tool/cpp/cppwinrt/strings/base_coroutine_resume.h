@@ -165,10 +165,12 @@ namespace winrt
         return awaitable{ duration };
     }
 
+#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
     inline auto operator co_await(Windows::Foundation::TimeSpan duration)
     {
         return resume_after(duration);
     }
+#endif
 
     [[nodiscard]] inline auto resume_on_signal(void* handle, Windows::Foundation::TimeSpan timeout = {}) noexcept
     {
