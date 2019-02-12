@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 # The natvis cppwinrtvisualizer.dll is only targeted at Visual Studio (on Windows)
 if (WIN32)
 

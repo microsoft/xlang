@@ -1,9 +1,7 @@
-cmake_minimum_required(VERSION 3.9)
-
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/../component/generated" generated_files)
 file(TO_NATIVE_PATH "${generated_files}/module.g.cpp" module_g_cpp)
 
-add_executable(cpp_test "")
+add_executable(cpp_test)
 target_include_directories(cpp_test BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/implementation "${CMAKE_CURRENT_SOURCE_DIR}/generated" ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH})
 target_sources(cpp_test PUBLIC
     pch.cpp

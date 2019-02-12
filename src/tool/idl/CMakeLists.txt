@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 3.9)
-
 project(idl)
 
-add_executable(idl "")
+add_executable(idl)
 target_sources(idl PUBLIC main.cpp pch.cpp)
 target_include_directories(idl PUBLIC ${XLANG_LIBRARY_PATH})
 
