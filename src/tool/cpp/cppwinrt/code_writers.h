@@ -655,7 +655,7 @@ namespace xlang
 
         auto format = R"(    template <> struct abi<fast_interface<%>>
     {
-        struct type : inspectable_abi
+        struct WINRT_NOVTABLE type : inspectable_abi
         {
 )";
 
@@ -666,7 +666,7 @@ namespace xlang
         {
             for (auto&& method : info.methods)
             {
-                format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+                format = R"(            WINRT_NOALIAS virtual int32_t WINRT_CALL %(%) noexcept = 0;
 )";
 
                 w.param_names = false;
@@ -693,7 +693,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct abi<%>
     {
-        struct type : inspectable_abi
+        struct WINRT_NOVTABLE type : inspectable_abi
         {
 )";
 
@@ -703,7 +703,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct abi<%>
     {
-        struct type : inspectable_abi
+        struct WINRT_NOVTABLE type : inspectable_abi
         {
 )";
 
@@ -713,7 +713,7 @@ namespace xlang
         }
 
 
-        auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+        auto format = R"(            WINRT_NOALIAS virtual int32_t WINRT_CALL %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())
@@ -731,9 +731,9 @@ namespace xlang
     {
         auto format = R"(    template <%> struct abi<%>
     {
-        struct type : unknown_abi
+        struct WINRT_NOVTABLE type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(%) noexcept = 0;
+            WINRT_NOALIAS virtual int32_t WINRT_CALL Invoke(%) noexcept = 0;
         };
     };
 )";

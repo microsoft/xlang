@@ -18,11 +18,13 @@
 #define WINRT_NOVTABLE __declspec(novtable)
 #define WINRT_CALL __stdcall
 #define WINRT_NOINLINE  __declspec(noinline)
+#define WINRT_NOALIAS __declspec(noalias)
 #else
 #define WINRT_EBO
 #define WINRT_NOVTABLE
 #define WINRT_CALL
 #define WINRT_NOINLINE
+#define WINRT_NOALIAS
 #endif
 
 #define WINRT_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
