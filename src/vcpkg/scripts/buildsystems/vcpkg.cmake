@@ -1,6 +1,11 @@
 # Mark variables as used so cmake doesn't complain about them
 mark_as_advanced(CMAKE_TOOLCHAIN_FILE)
 
+# Specify CMake polcies for xlang project
+cmake_policy(SET CMP0003 NEW)
+cmake_policy(SET CMP0007 NEW)
+cmake_policy(SET CMP0011 NEW)
+
 # This is a backport of CMAKE_TRY_COMPILE_PLATFORM_VARIABLES to cmake 3.0
 get_property( _CMAKE_IN_TRY_COMPILE GLOBAL PROPERTY IN_TRY_COMPILE )
 if( _CMAKE_IN_TRY_COMPILE )
