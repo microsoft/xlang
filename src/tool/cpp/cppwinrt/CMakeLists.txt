@@ -1,6 +1,6 @@
 project(cppwinrt)
 
-add_executable(cppwinrt)
+add_executable(cppwinrt "")
 target_sources(cppwinrt PUBLIC main.cpp pch.cpp "${PROJECT_BINARY_DIR}/strings.cpp")
 target_include_directories(cppwinrt PUBLIC ${XLANG_LIBRARY_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
 

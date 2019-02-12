@@ -1,6 +1,6 @@
 project(pywinrt)
 
-add_executable(pywinrt)
+add_executable(pywinrt "")
 target_sources(pywinrt PUBLIC main.cpp pch.cpp "${PROJECT_BINARY_DIR}/strings.cpp")
 target_include_directories(pywinrt PUBLIC ${XLANG_LIBRARY_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
 

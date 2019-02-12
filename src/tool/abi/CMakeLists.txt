@@ -4,7 +4,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_compile_options(-Wno-missing-field-initializers)
 endif()
 
-add_executable(abi)
+add_executable(abi "")
 target_sources(abi PUBLIC
     abi_writer.cpp
     main.cpp

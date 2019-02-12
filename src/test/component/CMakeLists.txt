@@ -29,7 +29,7 @@ set(sources
     implementation/Component.Result.Class.cpp
 )
 
-add_library(test_component STATIC)
+add_library(test_component STATIC "")
 target_sources(test_component PRIVATE ${sources} )
 target_include_directories(test_component BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${generated_files})
 
@@ -41,7 +41,7 @@ else()
     target_link_libraries(test_component -lpthread)
 endif()
 
-add_library(test_component_dll MODULE)
+add_library(test_component_dll MODULE "")
 target_sources(test_component_dll PUBLIC module.def xlang_factory_adapter.cpp)
 target_link_libraries(test_component_dll test_component)
 set_target_properties(test_component_dll PROPERTIES OUTPUT_NAME "component")
