@@ -9,7 +9,7 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Debug",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Debug\\Install",
-            "cmakeCommandArgs": "-Wno-dev",
+            "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": "",
             "variables": [
@@ -28,7 +28,7 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Release",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x86\\Release\\Install",
-            "cmakeCommandArgs": "-Wno-dev",
+            "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": "",
             "variables": [
@@ -47,9 +47,15 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Debug",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Debug\\Install",
-            "cmakeCommandArgs": "-Wno-dev",
+            "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
-            "ctestCommandArgs": ""
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_TOOLCHAIN_FILE",
+                    "value": "${workspaceRoot}\\src\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
+                }
+            ]
         },
         {
             "name": "x64-Release",
@@ -60,9 +66,15 @@
             ],
             "buildRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Release",
             "installRoot": "${workspaceRoot}\\_build\\Windows\\x64\\Release\\Install",
-            "cmakeCommandArgs": "-Wno-dev",
+            "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
-            "ctestCommandArgs": ""
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "CMAKE_TOOLCHAIN_FILE",
+                    "value": "${workspaceRoot}\\src\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
+                }
+            ]
         }
     ]
 }
