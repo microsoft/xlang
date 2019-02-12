@@ -4,8 +4,11 @@ add_executable(test_platform "")
 target_sources(test_platform
     PUBLIC pch.cpp memory.cpp string.cpp activation.cpp)
 
-target_include_directories(test_platform
-    PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
+target_include_directories(test_platform PUBLIC 
+    ${XLANG_LIBRARY_PATH} 
+    ${XLANG_TEST_INC_PATH} 
+    ${CATCH2_INCLUDE_DIR} 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
 
 CONSUME_PAL(test_platform)
 
