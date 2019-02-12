@@ -4,3 +4,4 @@
 *.onnx  -text
 *.dll   -text
 *.pdb   -text
+*.winmd -text

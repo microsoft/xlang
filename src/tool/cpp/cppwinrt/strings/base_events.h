@@ -132,7 +132,7 @@ namespace winrt
 
 namespace winrt::impl
 {
-    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(winrt::event_token)>
+    template <typename I, auto Method>
     struct event_revoker
     {
         event_revoker() noexcept = default;
@@ -193,7 +193,7 @@ namespace winrt::impl
         event_token m_token{};
     };
 
-    template <typename I, int32_t(WINRT_CALL abi_t<I>::*Method)(winrt::event_token)>
+    template <typename I, auto Method>
     struct factory_event_revoker
     {
         factory_event_revoker() noexcept = default;

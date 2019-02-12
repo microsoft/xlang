@@ -8,8 +8,9 @@ namespace xlang
         std::set<std::string> reference;
 
         std::string output_folder;
-        std::string root{ "winrt" };
         bool base{};
+        bool license{};
+        bool brackets{};
 
         bool component{};
         std::string component_folder;

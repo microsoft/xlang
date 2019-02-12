@@ -61,7 +61,7 @@ goto :init
     if not exist "%BUILD_PATH%/CMakeCache.txt"  set "RUN_CMAKE=yes"
 
     if defined RUN_CMAKE (
-        cmake "%SRC_PATH%" "-B%BUILD_PATH%" -GNinja -Wno-dev -DCMAKE_BUILD_TYPE=%BUILD_TYPE% "-DCMAKE_TOOLCHAIN_FILE=%SRC_PATH%\vcpkg\scripts\buildsystems\vcpkg.cmake"
+        cmake "%SRC_PATH%" "-B%BUILD_PATH%" -GNinja -Wno-dev -DCMAKE_BUILD_TYPE=%BUILD_TYPE% "-DCMAKE_INSTALL_PREFIX=%BUILD_PATH%/Install" "-DCMAKE_TOOLCHAIN_FILE=%SRC_PATH%\vcpkg\scripts\buildsystems\vcpkg.cmake"
     )
 
     ninja -C "%BUILD_PATH%" %OPT_VERBOSE% %BUILD_TARGET%

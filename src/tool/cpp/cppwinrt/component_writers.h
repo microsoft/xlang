@@ -136,8 +136,8 @@ namespace xlang
 
     static void write_module_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
-        auto format = R"(#include "winrt/base.h"
-%
+        w.write_root_include("base");
+        auto format = R"(%
 bool WINRT_CALL %_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
@@ -561,7 +561,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 {
                     format = R"(    % %::%(%) const noexcept
     {
-        return get_self<@::implementation::%>(*this)->%(%);
+        %get_self<@::implementation::%>(*this)->%(%);
     }
 )";
                 }
@@ -569,7 +569,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 {
                     format = R"(    % %::%(%) const
     {
-        return get_self<@::implementation::%>(*this)->%(%);
+        %get_self<@::implementation::%>(*this)->%(%);
     }
 )";
                 }
@@ -579,6 +579,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                     type_name,
                     method_name,
                     bind<write_consume_params>(signature),
+                    signature.return_signature() ? "return " : "",
                     type_namespace,
                     type_name,
                     method_name,
@@ -598,6 +599,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                         type_name,
                         method_name,
                         bind<write_consume_params>(signature),
+                        type_name,
                         method_name,
                         method_name,
                         bind<write_consume_args>(signature));
