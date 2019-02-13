@@ -1,9 +1,4 @@
-﻿//
-// App.xaml.cpp
-// Implementation of the App class.
-//
-
-#include "pch.h"
+﻿#include "pch.h"
 
 #include "App.h"
 #include "MainPage.h"

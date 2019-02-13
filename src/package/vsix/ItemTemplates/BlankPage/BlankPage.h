@@ -1,8 +1,4 @@
-﻿//
-// Declaration of the $safeitemname$ class.
-//
-
-#pragma once
+﻿#pragma once
 
 #include "$safeitemname$.g.h"
 

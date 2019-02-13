@@ -1,8 +1,4 @@
-﻿//
-// Declaration of the MainPage class.
-//
-
-#pragma once
+﻿#pragma once
 
 #include "MainPage.g.h"
 

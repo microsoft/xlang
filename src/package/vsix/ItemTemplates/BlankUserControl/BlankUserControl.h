@@ -1,8 +1,4 @@
-﻿//
-// Declaration of the $safeitemname$ class.
-//
-
-#pragma once
+﻿#pragma once
 
 #include "winrt/Windows.UI.Xaml.h"
 #include "winrt/Windows.UI.Xaml.Markup.h"
