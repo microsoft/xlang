@@ -6,8 +6,7 @@ target_sources(test_platform
 
 target_include_directories(test_platform PUBLIC 
     ${XLANG_LIBRARY_PATH} 
-    ${XLANG_TEST_INC_PATH} 
-    ${CATCH2_INCLUDE_DIR} 
+    ${VCPKG_INCLUDE_PATH} 
     ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
 
 CONSUME_PAL(test_platform)

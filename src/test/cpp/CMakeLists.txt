@@ -7,8 +7,7 @@ target_include_directories(cpp_test BEFORE PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/implementation 
     "${CMAKE_CURRENT_SOURCE_DIR}/generated" 
     ${XLANG_LIBRARY_PATH} 
-    ${XLANG_TEST_INC_PATH} 
-    ${CATCH2_INCLUDE_DIR})
+    ${VCPKG_INCLUDE_PATH})
 target_sources(cpp_test PUBLIC
     pch.cpp
     activation.cpp

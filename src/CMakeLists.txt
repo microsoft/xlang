@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 set(XLANG_SCRIPTS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
+set(VCPKG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg")
+set(VCPKG_INCLUDE_PATH "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include")
 
 function(ADD_OBJECT_DEPENDS file dependency)
     get_source_file_property(cur_obj_depends ${file} OBJECT_DEPENDS)

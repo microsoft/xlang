@@ -1,13 +1,5 @@
 #include "pch.h"
-#include "base.h"
 #include "helpers.h"
-
-#include "ffi.h"
-#include "sha1.h"
-
-#include <memory>
-#include <iostream>
-#include <sstream>
 
 namespace meta = xlang::meta::reader;
 using IInspectable = winrt::Windows::Foundation::IInspectable;
