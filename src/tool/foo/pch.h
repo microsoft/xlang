@@ -8,7 +8,6 @@
 #include "base.h"
 #include "sha1.h"
 #include "ffi.h"
-#include "chaiscript/chaiscript.hpp"
 
 #include <memory>
 #include <iostream>

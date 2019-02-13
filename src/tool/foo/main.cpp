@@ -609,118 +609,127 @@ IInspectable default_activation(meta::TypeDef const& type)
     return default_activation(factory);
 }
 
+std::string helloWorld(const std::string &t_name) 
+{
+    return "Hello " + t_name + "!";
+}
+
+void test_one(meta::cache const& c)
+{
+    auto IStringable_ToString = [&c](IInspectable const& instance)
+    {
+        winrt::hstring str;
+        std::vector<void*> args{ winrt::put_abi(str) };
+
+        meta::TypeDef IStringable_typedef = c.find("Windows.Foundation", "IStringable");
+        interface_invoke(IStringable_typedef, "ToString", instance, args);
+
+        return std::move(str);
+    };
+    auto IJsonValue_Stringify = [&c](IInspectable const& instance)
+    {
+        winrt::hstring str;
+        std::vector<void*> args{ winrt::put_abi(str) };
+
+        meta::TypeDef IJsonValue_typedef = c.find("Windows.Data.Json", "IJsonValue");
+        interface_invoke(IJsonValue_typedef, "Stringify", instance, args);
+
+        return std::move(str);
+    };
+    auto IJsonValue_get_ValueType = [&c](IInspectable const& instance)
+    {
+        int32_t jsonValueType = -1;
+        std::vector<void*> args{ &jsonValueType };
+
+        meta::TypeDef IJsonValue_typedef = c.find("Windows.Data.Json", "IJsonValue");
+        interface_invoke(IJsonValue_typedef, "get_ValueType", instance, args);
+
+        return jsonValueType;
+    };
+    auto IJsonObject_SetNamedValue = [&c](IInspectable const& instance, std::wstring_view key, IInspectable const& value)
+    {
+        winrt::hstring name{ key };
+        std::vector<void*> args{ winrt::get_abi(name), winrt::get_abi(value) };
+
+        meta::TypeDef IJsonObject_typedef = c.find("Windows.Data.Json", "IJsonObject");
+        interface_invoke(IJsonObject_typedef, "SetNamedValue", instance, args);
+    };
+
+    meta::TypeDef JsonObject_typedef = c.find("Windows.Data.Json", "JsonObject");
+    meta::TypeDef JsonArray_typedef  = c.find("Windows.Data.Json", "JsonArray");
+    meta::TypeDef JsonValue_typedef  = c.find("Windows.Data.Json", "JsonValue");
+
+    winrt::init_apartment();
+    auto JsonValue_factory = get_activation_factory(JsonValue_typedef);
+
+    auto JsonValue_CreateStringValue = [&c, &JsonValue_factory](winrt::hstring str)
+    {
+        IInspectable value;
+        std::vector<void*> args{ winrt::get_abi(str), winrt::put_abi(value) };
+
+        meta::TypeDef td_IJsonValueStatics = c.find("Windows.Data.Json", "IJsonValueStatics");
+        interface_invoke(td_IJsonValueStatics, "CreateStringValue", JsonValue_factory, args);
+
+        return std::move(value);
+    };
+    auto JsonValue_CreateNullValue = [&c, &JsonValue_factory]()
+    {
+        IInspectable value;
+        std::vector<void*> args{ winrt::put_abi(value) };
+
+        meta::TypeDef td_IJsonValueStatics2 = c.find("Windows.Data.Json", "IJsonValueStatics2");
+        interface_invoke(td_IJsonValueStatics2, "CreateNullValue", JsonValue_factory, args);
+
+        return std::move(value);
+    };
+    auto JsonArray_Append = [&JsonArray_typedef](IInspectable const& instance, IInspectable const& value)
+    {
+        std::vector<void*> args{ winrt::get_abi(value) };
+        class_invoke(JsonArray_typedef, "Append", instance, args);
+    };
+
+    IInspectable JsonObject_instance = default_activation(JsonObject_typedef);
+    IInspectable JsonArray_instance  = default_activation(JsonArray_typedef);
+    IInspectable JsonValue_Null_instance = JsonValue_CreateNullValue();
+
+    std::map<std::wstring_view, IInspectable> knights = {
+        { L"arthur", JsonValue_CreateStringValue(L"Arthur, King of the Britons") },
+        { L"lancelot", JsonValue_CreateStringValue(L"Sir Lancelot the Brave") },
+        { L"robin", JsonValue_CreateStringValue(L"Sir Robin the Not-Quite-So-Brave-as-Sir-Lancelot") },
+        { L"bedevere", JsonValue_CreateStringValue(L"Sir Bedevere the Wise") },
+        { L"galahad", JsonValue_CreateStringValue(L"Sir Galahad the Pure")} };
+
+    writer w;
+
+    w.write_printf("Null Value JsonValueType: %d\n", IJsonValue_get_ValueType(JsonValue_Null_instance));
+    w.write_printf("JsonArray  JsonValueType: %d\n", IJsonValue_get_ValueType(JsonArray_instance));
+    w.write_printf("JsonObject JsonValueType: %d\n", IJsonValue_get_ValueType(JsonObject_instance));
+
+    w.write("Null Value ToString:  %\n", IStringable_ToString(JsonValue_Null_instance));
+    w.write("JsonArray  ToString:  %\n", IStringable_ToString(JsonArray_instance));
+    w.write("JsonObject ToString:  %\n", IStringable_ToString(JsonObject_instance));
+
+    for (auto[key, knight] : knights)
+    {
+        IJsonObject_SetNamedValue(JsonObject_instance, key, knight);
+        JsonArray_Append(JsonArray_instance, knight);
+    }
+
+    IJsonObject_SetNamedValue(JsonObject_instance, L"SirNotAppearingInThisFilm", JsonValue_Null_instance);
+    JsonArray_Append(JsonArray_instance, JsonValue_Null_instance);
+
+    w.write("JsonArray  Stringify: %\n", IJsonValue_Stringify(JsonArray_instance));
+    w.write("JsonObject Stringify: %\n", IJsonValue_Stringify(JsonObject_instance));
+
+    w.flush_to_console();
+}
+
 int main(int const /*argc*/, char** /*argv*/)
 {
     try
     {
         meta::cache c{ get_system_metadata() };
-
-        auto IStringable_ToString = [&c](IInspectable const& instance)
-        {
-            winrt::hstring str;
-            std::vector<void*> args{ winrt::put_abi(str) };
-
-            meta::TypeDef IStringable_typedef = c.find("Windows.Foundation", "IStringable");
-            interface_invoke(IStringable_typedef, "ToString", instance, args);
-
-            return std::move(str);
-        };
-        auto IJsonValue_Stringify = [&c](IInspectable const& instance)
-        {
-            winrt::hstring str;
-            std::vector<void*> args{ winrt::put_abi(str) };
-
-            meta::TypeDef IJsonValue_typedef = c.find("Windows.Data.Json", "IJsonValue");
-            interface_invoke(IJsonValue_typedef, "Stringify", instance, args);
-
-            return std::move(str);
-        };
-        auto IJsonValue_get_ValueType = [&c](IInspectable const& instance)
-        {
-            int32_t jsonValueType = -1;
-            std::vector<void*> args{ &jsonValueType };
-
-            meta::TypeDef IJsonValue_typedef = c.find("Windows.Data.Json", "IJsonValue");
-            interface_invoke(IJsonValue_typedef, "get_ValueType", instance, args);
-
-            return jsonValueType;
-        };
-        auto IJsonObject_SetNamedValue = [&c](IInspectable const& instance, std::wstring_view key, IInspectable const& value)
-        {
-            winrt::hstring name{ key };
-            std::vector<void*> args{ winrt::get_abi(name), winrt::get_abi(value) };
-
-            meta::TypeDef IJsonObject_typedef = c.find("Windows.Data.Json", "IJsonObject");
-            interface_invoke(IJsonObject_typedef, "SetNamedValue", instance, args);
-        };
-
-        meta::TypeDef JsonObject_typedef = c.find("Windows.Data.Json", "JsonObject");
-        meta::TypeDef JsonArray_typedef  = c.find("Windows.Data.Json", "JsonArray");
-        meta::TypeDef JsonValue_typedef  = c.find("Windows.Data.Json", "JsonValue");
-
-        winrt::init_apartment();
-        auto JsonValue_factory = get_activation_factory(JsonValue_typedef);
-
-        auto JsonValue_CreateStringValue = [&c, &JsonValue_factory](winrt::hstring str)
-        {
-            IInspectable value;
-            std::vector<void*> args{ winrt::get_abi(str), winrt::put_abi(value) };
-
-            meta::TypeDef td_IJsonValueStatics = c.find("Windows.Data.Json", "IJsonValueStatics");
-            interface_invoke(td_IJsonValueStatics, "CreateStringValue", JsonValue_factory, args);
-
-            return std::move(value);
-        };
-        auto JsonValue_CreateNullValue = [&c, &JsonValue_factory]()
-        {
-            IInspectable value;
-            std::vector<void*> args{ winrt::put_abi(value) };
-
-            meta::TypeDef td_IJsonValueStatics2 = c.find("Windows.Data.Json", "IJsonValueStatics2");
-            interface_invoke(td_IJsonValueStatics2, "CreateNullValue", JsonValue_factory, args);
-
-            return std::move(value);
-        };
-        auto JsonArray_Append = [&JsonArray_typedef](IInspectable const& instance, IInspectable const& value)
-        {
-            std::vector<void*> args{ winrt::get_abi(value) };
-            class_invoke(JsonArray_typedef, "Append", instance, args);
-        };
-
-        IInspectable JsonObject_instance = default_activation(JsonObject_typedef);
-        IInspectable JsonArray_instance  = default_activation(JsonArray_typedef);
-        IInspectable JsonValue_Null_instance = JsonValue_CreateNullValue();
-
-        std::map<std::wstring_view, IInspectable> knights = {
-            { L"arthur", JsonValue_CreateStringValue(L"Arthur, King of the Britons") },
-            { L"lancelot", JsonValue_CreateStringValue(L"Sir Lancelot the Brave") },
-            { L"robin", JsonValue_CreateStringValue(L"Sir Robin the Not-Quite-So-Brave-as-Sir-Lancelot") },
-            { L"bedevere", JsonValue_CreateStringValue(L"Sir Bedevere the Wise") },
-            { L"galahad", JsonValue_CreateStringValue(L"Sir Galahad the Pure")} };
-
-        writer w;
-
-        w.write_printf("Null Value JsonValueType: %d\n", IJsonValue_get_ValueType(JsonValue_Null_instance));
-        w.write_printf("JsonArray  JsonValueType: %d\n", IJsonValue_get_ValueType(JsonArray_instance));
-        w.write_printf("JsonObject JsonValueType: %d\n", IJsonValue_get_ValueType(JsonObject_instance));
-
-        w.write("Null Value ToString:  %\n", IStringable_ToString(JsonValue_Null_instance));
-        w.write("JsonArray  ToString:  %\n", IStringable_ToString(JsonArray_instance));
-        w.write("JsonObject ToString:  %\n", IStringable_ToString(JsonObject_instance));
-
-        for (auto[key, knight] : knights)
-        {
-            IJsonObject_SetNamedValue(JsonObject_instance, key, knight);
-            JsonArray_Append(JsonArray_instance, knight);
-        }
-
-        IJsonObject_SetNamedValue(JsonObject_instance, L"SirNotAppearingInThisFilm", JsonValue_Null_instance);
-        JsonArray_Append(JsonArray_instance, JsonValue_Null_instance);
-
-        w.write("JsonArray  Stringify: %\n", IJsonValue_Stringify(JsonArray_instance));
-        w.write("JsonObject Stringify: %\n", IJsonValue_Stringify(JsonObject_instance));
-
-        w.flush_to_console();
+        test_one(c);
     }
     catch (std::exception const& e)
     {
