@@ -6,7 +6,7 @@
 namespace xlang::impl::convert
 {
     using utf8_worker_t = std::conditional_t<std::is_signed_v<xlang_char8>, uint8_t, xlang_char8>;
-    inline auto to_worker(xlang_char8 const* arg)
+    inline auto to_worker(xlang_char8 const* arg) noexcept
     {
         if constexpr (std::is_same_v<xlang_char8, utf8_worker_t>)
         {
@@ -17,7 +17,7 @@ namespace xlang::impl::convert
             return reinterpret_cast<utf8_worker_t const*>(arg);
         }
     }
-    inline auto to_worker(xlang_char8* arg)
+    inline auto to_worker(xlang_char8* arg) noexcept
     {
         if constexpr (std::is_same_v<xlang_char8, utf8_worker_t>)
         {
@@ -28,8 +28,8 @@ namespace xlang::impl::convert
             return reinterpret_cast<utf8_worker_t*>(arg);
         }
     }
-    inline char16_t const* to_worker(char16_t const* arg) { return arg; }
-    inline char16_t* to_worker(char16_t* arg) { return arg; }
+    inline char16_t const* to_worker(char16_t const* arg) noexcept { return arg; }
+    inline char16_t* to_worker(char16_t* arg) noexcept { return arg; }
 
     template <typename T>
     struct converter;
@@ -230,7 +230,7 @@ namespace xlang::impl::convert
     template <typename T>
     uint32_t get_converted_length(std::basic_string_view<T> input_str)
     {
-        using output_type = typename alternate_type<T>::result_type;
+        using output_type = alternate_string_type_t<T>;
 
         auto input_cursor = to_worker(input_str.data());
         const auto input_end = input_cursor + input_str.size();
@@ -244,9 +244,9 @@ namespace xlang::impl::convert
     }
 
     template <typename T>
-    uint32_t do_conversion(std::basic_string_view<T> input_str, typename alternate_type<T>::result_type *output_buffer, uint32_t buffer_size)
+    uint32_t do_conversion(std::basic_string_view<T> input_str, alternate_string_type_t<T> *output_buffer, uint32_t buffer_size)
     {
-        using output_type = typename alternate_type<T>::result_type;
+        using output_type = alternate_string_type_t<T>;
 
         auto input_cursor = to_worker(input_str.data());
         const auto input_end = input_cursor + input_str.size();
