@@ -90,7 +90,7 @@ namespace xlang::meta::reader
 
             if (pos == std::string_view::npos)
             {
-                throw_invalid("Type '", type_string, "' is missing namespace");
+                throw_invalid("Type '", type_string, "' is missing a namespace qualifier");
             }
 
             return find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
@@ -114,7 +114,7 @@ namespace xlang::meta::reader
 
             if (pos == std::string_view::npos)
             {
-                throw_invalid("Type '", type_string, "' is missing namespace");
+                throw_invalid("Type '", type_string, "' is missing a namespace qualifier");
             }
 
             return find_required(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
