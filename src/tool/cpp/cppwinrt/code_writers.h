@@ -451,7 +451,7 @@ namespace xlang
         w.abi_types = true;
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
 
@@ -568,7 +568,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
             auto param_name = param.Name();
@@ -785,7 +785,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : signature.params())
+        for (auto&& [param, param_signature] : signature.params())
         {
             s();
 
@@ -849,7 +849,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
 
@@ -977,7 +977,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : signature.params())
+        for (auto&& [param, param_signature] : signature.params())
         {
             s();
             w.write(param.Name());
@@ -1329,47 +1329,47 @@ namespace xlang
 
         call(signature.Type(),
             [&](ElementType type)
-        {
-            if (out && type == ElementType::Object)
             {
-                optional = true;
-            }
-            else if (type == ElementType::String || type == ElementType::Object)
+                if (out && type == ElementType::Object)
+                {
+                    optional = true;
+                }
+                else if (type == ElementType::String || type == ElementType::Object)
+                {
+                    clear = true;
+                }
+            },
+            [&](coded_index<TypeDefOrRef> const& index)
+            {
+                XLANG_ASSERT(index.type() == TypeDefOrRef::TypeDef || index.type() == TypeDefOrRef::TypeRef);
+
+                TypeDef type;
+
+                if (index.type() == TypeDefOrRef::TypeDef)
+                {
+                    type = index.TypeDef();
+                }
+                else if (index.type() == TypeDefOrRef::TypeRef)
+                {
+                    type = find(index.TypeRef());
+                }
+
+                if (type)
+                {
+                    auto category = get_category(type);
+
+                    clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
+                }
+            },
+                [&](GenericTypeIndex const&)
+            {
+                generic = true;
+            },
+                [&](GenericTypeInstSig const&)
             {
                 clear = true;
-            }
-        },
-            [&](coded_index<TypeDefOrRef> const& index)
-        {
-            XLANG_ASSERT(index.type() == TypeDefOrRef::TypeDef || index.type() == TypeDefOrRef::TypeRef);
-
-            TypeDef type;
-
-            if (index.type() == TypeDefOrRef::TypeDef)
-            {
-                type = index.TypeDef();
-            }
-            else if (index.type() == TypeDefOrRef::TypeRef)
-            {
-                type = find(index.TypeRef());
-            }
-
-            if (type)
-            {
-                auto category = get_category(type);
-
-                clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
-            }
-        },
-            [&](GenericTypeIndex const&)
-        {
-            generic = true;
-        },
-            [&](GenericTypeInstSig const&)
-        {
-            clear = true;
-        },
-            [](auto&&) {});
+            },
+                [](auto&&) {});
 
         if (optional)
         {
@@ -1397,7 +1397,7 @@ namespace xlang
 
     static void write_produce_cleanup(writer& w, method_signature const& method_signature)
     {
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             if (param.Flags().In() || !param_signature->ByRef())
             {
@@ -1418,7 +1418,7 @@ namespace xlang
         w.abi_types = false;
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
             auto param_name = param.Name();
@@ -1522,7 +1522,7 @@ namespace xlang
                 bind<write_produce_args>(method_signature));
         }
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             if (param.Flags().Out() && !param_signature->Type().is_szarray() && is_object(param_signature->Type()))
             {
@@ -1683,7 +1683,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 {
 %};)";
 
-        for (auto&&[interface_name, info] : get_interfaces(w, class_type))
+        for (auto&& [interface_name, info] : get_interfaces(w, class_type))
         {
             if (info.overridable && !info.base)
             {
@@ -1718,7 +1718,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override_methods(writer& w, TypeDef const& class_type)
     {
-        for (auto&&[interface_name, info] : get_interfaces(w, class_type))
+        for (auto&& [interface_name, info] : get_interfaces(w, class_type))
         {
             if (info.overridable && !info.base)
             {
@@ -1733,7 +1733,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool found{};
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             if (info.overridable)
             {
@@ -1752,7 +1752,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool found{};
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             if (!info.overridable)
             {
@@ -1766,7 +1766,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool first{ true };
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             if (!info.overridable)
             {
@@ -1801,7 +1801,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
 )";
 
-        for (auto&&[factory_name, factory] : factories)
+        for (auto&& [factory_name, factory] : factories)
         {
             if (!factory.composable)
             {
@@ -1838,7 +1838,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 %    };
 )";
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (info.overridable && !info.base)
             {
@@ -1857,7 +1857,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         std::map<std::string_view, std::set<std::string>> method_usage;
 
-        for (auto&&[interface_name, info] : required_interfaces)
+        for (auto&& [interface_name, info] : required_interfaces)
         {
             for (auto&& method : info.type.MethodList())
             {
@@ -1865,7 +1865,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             }
         }
 
-        for (auto&&[method_name, interfaces] : method_usage)
+        for (auto&& [method_name, interfaces] : method_usage)
         {
             if (interfaces.size() <= 1)
             {
@@ -1886,7 +1886,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto factories = get_factories(w, type);
         bool has_composable_factories{};
 
-        for (auto&&[interface_name, factory] : factories)
+        for (auto&& [interface_name, factory] : factories)
         {
             if (factory.composable && !empty(factory.type.MethodList()))
             {
@@ -1937,7 +1937,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         w.write(",\n        impl::require<%", type);
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             w.write(", %", name);
         }
@@ -1952,7 +1952,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         interfaces_plus_self[std::string{ type_name }] = interface_info{ type };
         std::map<std::string_view, std::set<std::string>> method_usage;
 
-        for (auto&&[interface_name, info] : interfaces_plus_self)
+        for (auto&& [interface_name, info] : interfaces_plus_self)
         {
             for (auto&& method : info.type.MethodList())
             {
@@ -1960,7 +1960,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             }
         }
 
-        for (auto&&[method_name, interfaces] : method_usage)
+        for (auto&& [method_name, interfaces] : method_usage)
         {
             if (interfaces.size() <= 1)
             {
@@ -1984,7 +1984,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto default_interface_name = w.write_temp("%", default_interface);
         std::map<std::string_view, std::set<std::string>> method_usage;
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (info.defaulted && !info.base)
             {
@@ -2002,7 +2002,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             }
         }
 
-        for (auto&&[method_name, interfaces] : method_usage)
+        for (auto&& [method_name, interfaces] : method_usage)
         {
             if (interfaces.size() <= 1)
             {
@@ -2418,7 +2418,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool first{ true };
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (!info.defaulted || info.base)
             {
@@ -2442,7 +2442,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool first{ true };
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (!is_exclusive(info.type) && !info.base)
             {
@@ -2487,7 +2487,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         auto type_name = type.TypeName();
 
-        for (auto&&[factory_name, factory] : factories)
+        for (auto&& [factory_name, factory] : factories)
         {
             if (factory.activatable)
             {
@@ -2663,14 +2663,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_class_definitions(writer& w, TypeDef const& type)
     {
-        if (settings.component_opt && settings.filter.includes(type))
+        if (settings.component_opt&& settings.filter.includes(type))
         {
             return;
         }
 
         auto type_name = type.TypeName();
 
-        for (auto&&[interface_name, factory] : get_factories(w, type))
+        for (auto&& [interface_name, factory] : get_factories(w, type))
         {
             if (factory.activatable)
             {
