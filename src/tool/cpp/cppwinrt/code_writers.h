@@ -1325,6 +1325,7 @@ namespace xlang
 
         bool clear{};
         bool optional{};
+        bool generic{};
 
         call(signature.Type(),
             [&](ElementType type)
@@ -1360,6 +1361,10 @@ namespace xlang
                 clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
             }
         },
+            [&](GenericTypeIndex const&)
+        {
+            generic = true;
+        },
             [&](GenericTypeInstSig const&)
         {
             clear = true;
@@ -1377,6 +1382,13 @@ namespace xlang
         else if (clear)
         {
             auto format = R"(            *% = nullptr;
+)";
+
+            w.write(format, param_name);
+        }
+        else if (generic)
+        {
+            auto format = R"(            clear_abi(%);
 )";
 
             w.write(format, param_name);
