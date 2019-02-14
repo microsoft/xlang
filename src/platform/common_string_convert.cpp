@@ -6,7 +6,7 @@
 namespace xlang::impl::convert
 {
     using utf8_worker_t = std::conditional_t<std::is_signed_v<xlang_char8>, uint8_t, xlang_char8>;
-    inline auto to_worker(xlang_char8 const* arg)
+    inline auto to_worker(xlang_char8 const* arg) noexcept
     {
         if constexpr (std::is_same_v<xlang_char8, utf8_worker_t>)
         {
@@ -17,7 +17,7 @@ namespace xlang::impl::convert
             return reinterpret_cast<utf8_worker_t const*>(arg);
         }
     }
-    inline auto to_worker(xlang_char8* arg)
+    inline auto to_worker(xlang_char8* arg) noexcept
     {
         if constexpr (std::is_same_v<xlang_char8, utf8_worker_t>)
         {
@@ -28,8 +28,8 @@ namespace xlang::impl::convert
             return reinterpret_cast<utf8_worker_t*>(arg);
         }
     }
-    inline char16_t const* to_worker(char16_t const* arg) { return arg; }
-    inline char16_t* to_worker(char16_t* arg) { return arg; }
+    inline char16_t const* to_worker(char16_t const* arg) noexcept { return arg; }
+    inline char16_t* to_worker(char16_t* arg) noexcept { return arg; }
 
     template <typename T>
     struct converter;
