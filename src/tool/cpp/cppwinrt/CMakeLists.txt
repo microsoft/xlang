@@ -15,3 +15,5 @@ else()
     target_link_libraries(cppwinrt c++ c++abi c++experimental)
     target_link_libraries(cppwinrt -lpthread)
 endif()
+
+string(APPEND CMAKE_CXX_FLAGS " -D \"XLANG_VERSION_STRING=\\\"${XLANG_BUILD_VERSION}\\\"\"")

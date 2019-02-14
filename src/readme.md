@@ -136,3 +136,7 @@ The **/script** folder contains the scripts and tools used to build and bootstra
 * **scorch.cmake** cmake function to delete build artifacts not automatically removed by the clean target.
 
 * **genStringLiteralFiles.cmake** cmake function to generate C++ string literals from files.
+
+### /Package
+
+The **/package** folder contains projects for packaging reusable xlang artifacts.  Some of these, such as the C++/WinRT NuGet package and Visual Studio extension, are regularly built, signed, and published by Microsoft.
