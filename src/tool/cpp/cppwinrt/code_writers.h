@@ -668,7 +668,7 @@ namespace xlang
         {
             for (auto&& method : info.methods)
             {
-                format = R"(            WINRT_NOALIAS virtual int32_t WINRT_CALL %(%) noexcept = 0;
+                format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
 )";
 
                 w.param_names = false;
@@ -715,7 +715,7 @@ namespace xlang
         }
 
 
-        auto format = R"(            WINRT_NOALIAS virtual int32_t WINRT_CALL %(%) noexcept = 0;
+        auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())
@@ -735,7 +735,7 @@ namespace xlang
     {
         struct WINRT_NOVTABLE type : unknown_abi
         {
-            WINRT_NOALIAS virtual int32_t WINRT_CALL Invoke(%) noexcept = 0;
+            virtual int32_t WINRT_CALL Invoke(%) noexcept = 0;
         };
     };
 )";
