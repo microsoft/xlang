@@ -6,7 +6,8 @@
 #define XLANG_PLATFORM_WINDOWS 0
 #endif
 
-#if XLANG_PLATFORM_WINDOWS 
+#if XLANG_PLATFORM_WINDOWS
+#define NOMINMAX
 #include <windows.h>
 #include <shlwapi.h>
 #include <xmllite.h>
