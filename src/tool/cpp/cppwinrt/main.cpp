@@ -1,6 +1,5 @@
 #include "pch.h"
 #include <time.h>
-#include "version.h"
 #include "strings.h"
 #include "settings.h"
 #include "type_writers.h"
