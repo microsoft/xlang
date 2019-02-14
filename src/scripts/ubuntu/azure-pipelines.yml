@@ -10,8 +10,14 @@ pool:
 container: build_container
 
 steps:
-- script: cmake ./src -B_build -GNinja -DCMAKE_CXX_COMPILER=clang++
+- script: cmake ./src -B_build -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=install
   displayName: 'CMake'
-- script: ninja -C _build -v 
+- script: ninja -C _build install -v
   displayName: 'Ninja'
-  
+- script: ./install/test/platform/test_platform.exe -r junit -o TEST-test_platform.xml
+  displayName: 'test_platform'
+  continueOnError: true
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/TEST-*.xml'  
