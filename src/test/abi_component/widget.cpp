@@ -1,0 +1,144 @@
+#include "iwidget.h"
+#include <pal_error.h>
+
+struct widget : iwidget
+{
+    int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
+    {
+        if (id == xlang_unknown_guid)
+        {
+            static_assert(std::is_base_of_v<xlang_unknown, iwidget>, "Can only combine these two cases is this is true.");
+            *object = static_cast<xlang_unknown*>(this);
+        }
+        else if (id == iwidget_guid)
+        {
+            *object = static_cast<iwidget*>(this);
+        }
+        else
+        {
+            *object = nullptr;
+            return xlang_error_no_interface;
+        }
+        AddRef();
+        return 0;
+    }
+
+    uint32_t XLANG_CALL AddRef() noexcept final
+    {
+        return ++m_count;
+    }
+
+    uint32_t XLANG_CALL Release() noexcept final
+    {
+        auto result = --m_count;
+        if (result == 0)
+        {
+            delete this;
+        }
+        return result;
+    }
+
+    xlang_error_info* get_answer(int32_t* answer) noexcept override
+    {
+        if (!answer)
+        {
+            return xlang::originate_error(xlang_error_pointer);
+        }
+
+        *answer = 42;
+        return xlang_error_ok;
+    }
+
+    private:
+        xlang::impl::atomic_ref_count m_count;
+};
+
+struct widget_factory : iwidget_factory
+{
+    int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
+    {
+        if (id == xlang_unknown_guid)
+        {
+            static_assert(std::is_base_of_v<xlang_unknown, iwidget_factory>, "Can only combine these two cases is this is true.");
+            *object = static_cast<xlang_unknown*>(this);
+        }
+        else if (id == iwidget_factory_guid)
+        {
+            *object = static_cast<iwidget_factory*>(this);
+        }
+        else
+        {
+            *object = nullptr;
+            return xlang_error_no_interface;
+        }
+        AddRef();
+        return 0;
+    }
+
+    uint32_t XLANG_CALL AddRef() noexcept final
+    {
+        return ++m_count;
+    }
+
+    uint32_t XLANG_CALL Release() noexcept final
+    {
+        auto result = --m_count;
+        if (result == 0)
+        {
+            delete this;
+        }
+        return result;
+    }
+
+    xlang_error_info* activate_widget(iwidget** instance) noexcept override
+    {
+        if (!instance)
+        {
+            return xlang::originate_error(xlang_error_pointer);
+        }
+
+        *instance = new widget{};
+        if (!*instance)
+        {
+            return xlang::originate_error(xlang_error_out_of_memory);
+        }
+
+        return xlang_error_ok;
+
+    }
+
+    private:
+        xlang::impl::atomic_ref_count m_count;
+};
+
+xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory)  XLANG_NOEXCEPT
+{
+    xlang_char8 const* buffer_ref{};
+    uint32_t length_ref{};
+    xlang_error_info* result{};
+    result = xlang_get_string_raw_buffer_utf8(class_name, &buffer_ref, &length_ref);
+    if (!result)
+    {
+        return result;
+    }
+
+    std::string_view const name{ buffer_ref, length_ref };
+    if (name == "abi_component.Widget")
+    {
+        if (iid == xlang_unknown_guid || iid == iwidget_factory_guid)
+        {
+            *factory = new widget_factory();
+
+            if (!*factory)
+            {
+                return xlang::originate_error(xlang_error_out_of_memory);
+            }
+
+            return xlang_error_ok;
+        }
+
+        return xlang::originate_error(xlang_error_no_interface);
+    }
+
+    return xlang::originate_error(xlang_error_class_not_available);
+}
