@@ -141,7 +141,6 @@
         <VSIXSubPath>%(RecursiveDir)</VSIXSubPath>
       </TemplateItems>
     </ItemGroup>
-    <Message Text="TemplateItems = @(TemplateItems->'*** %(FileName)%(Extension), %(VSIXSubPath)')"></Message>
     <ItemGroup>
       <Content Include="@(TemplateItems)"/>
     </ItemGroup>
