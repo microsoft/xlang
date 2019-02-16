@@ -8,10 +8,12 @@ namespace xlang::impl
     xlang_pfn_lib_get_activation_factory try_get_activation_func(
         std::basic_string_view<char16_t> module_namespace)
     {
-        // TODO: implement try_get_activation_func for non-windows platforms
-        throw_result(xlang_error_sadness);
+        auto const length = get_converted_length(module_namespace);
+        auto converted_name = std::make_unique<xlang_char8[]>(length);
+        uint32_t converted_length = convert_string(module_namespace, converted_name.get(), length);
+        return try_get_activation_func({ converted_name.get(), converted_length });
     }
-
+    
     xlang_pfn_lib_get_activation_factory try_get_activation_func(
         std::basic_string_view<char> module_namespace)
     {
