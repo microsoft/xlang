@@ -43,14 +43,6 @@ else()
     target_link_libraries(test_component -lpthread)
 endif()
 
-add_library(test_component_dll MODULE "")
-target_include_directories(test_component_dll PRIVATE "${CMAKE_SOURCE_DIR}/platform/helpers")
-target_sources(test_component_dll PUBLIC module.def xlang_factory_adapter.cpp)
-target_link_libraries(test_component_dll test_component)
-set_target_properties(test_component_dll PROPERTIES OUTPUT_NAME "component")
-
-CONSUME_PAL(test_component_dll)
-
 add_custom_command(OUTPUT ${generated_files}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${generated_files}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${generated_files}
@@ -77,8 +69,3 @@ add_custom_command(OUTPUT ${module_g_cpp}
 
 add_custom_target(test_component_depends ALL DEPENDS ${module_g_cpp})
 add_dependencies(test_component cppwinrt test_component_depends)
-
-install(TARGETS test_component_dll DESTINATION "test/platform")
-if (WIN32)
-    install(FILES $<TARGET_PDB_FILE:test_component_dll> DESTINATION "test/platform" OPTIONAL)
-endif ()
