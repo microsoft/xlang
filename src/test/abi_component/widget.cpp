@@ -113,17 +113,17 @@ struct widget_factory : iwidget_factory
 
 xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory)  XLANG_NOEXCEPT
 {
-    xlang_char8 const* buffer_ref{};
+    char16_t const* buffer_ref{};
     uint32_t length_ref{};
     xlang_error_info* result{};
-    result = xlang_get_string_raw_buffer_utf8(class_name, &buffer_ref, &length_ref);
-    if (!result)
+    result = xlang_get_string_raw_buffer_utf16(class_name, &buffer_ref, &length_ref);
+    if (result != nullptr)
     {
         return result;
     }
 
-    std::string_view const name{ buffer_ref, length_ref };
-    if (name == "abi_component.Widget")
+    std::u16string_view const name{ buffer_ref, length_ref };
+    if (name == u"AbiComponent.Widget")
     {
         if (iid == xlang_unknown_guid || iid == iwidget_factory_guid)
         {
