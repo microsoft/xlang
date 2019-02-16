@@ -1,5 +1,6 @@
 #include "iwidget.h"
 #include <pal_error.h>
+#include <string_view>
 
 struct widget : iwidget
 {
@@ -46,7 +47,7 @@ struct widget : iwidget
         }
 
         *answer = 42;
-        return xlang_error_ok;
+        return nullptr; // xlang_error_ok;
     }
 
     private:
@@ -103,7 +104,7 @@ struct widget_factory : iwidget_factory
             return xlang::originate_error(xlang_error_out_of_memory);
         }
 
-        return xlang_error_ok;
+        return nullptr; // xlang_error_ok;
 
     }
 
@@ -134,7 +135,7 @@ xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class
                 return xlang::originate_error(xlang_error_out_of_memory);
             }
 
-            return xlang_error_ok;
+            return nullptr; // xlang_error_ok;
         }
 
         return xlang::originate_error(xlang_error_no_interface);
