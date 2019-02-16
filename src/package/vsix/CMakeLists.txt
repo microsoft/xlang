@@ -12,12 +12,7 @@ file(TO_NATIVE_PATH "${cppwinrt_nupkg_dir}/Microsoft.Windows.CppWinRT.${XLANG_BU
 set(build_vsix msbuild ${CMAKE_CURRENT_SOURCE_DIR}/vsix.csproj /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH})
 
 add_custom_command(OUTPUT ${cppwinrt_vsix}
-    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${build_vsix} /p:CppWinRTVersion=${XLANG_BUILD_VERSION} /t:VersionTemplates
-    COMMAND ${CMAKE_COMMAND} -E copy ../LICENSE .
     COMMAND ${build_vsix} /p:CppWinRTVersion=${XLANG_BUILD_VERSION},NatvisDir=${cppwinrt_natvis_dir},NupkgDir=${cppwinrt_nupkg_dir}
-    COMMAND ${CMAKE_COMMAND} -E remove LICENSE
-    COMMAND ${build_vsix} /p:CppWinRTVersion=1.0.0.0 /t:VersionTemplates
     DEPENDS cppwinrtvisualizer ${cppwinrt_nupkg}
 )
 
