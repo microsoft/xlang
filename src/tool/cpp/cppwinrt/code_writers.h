@@ -1361,15 +1361,14 @@ namespace xlang
                     clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
                 }
             },
-                [&](GenericTypeIndex const&)
+            [&](GenericTypeIndex const&)
             {
                 generic = true;
             },
-                [&](GenericTypeInstSig const&)
+            [&](GenericTypeInstSig const&)
             {
                 clear = true;
-            },
-                [](auto&&) {});
+            });
 
         if (optional)
         {
