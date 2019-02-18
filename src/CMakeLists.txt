@@ -5,6 +5,10 @@ set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
 set(VCPKG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg")
 set(VCPKG_INCLUDE_PATH "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include")
 
+if(NOT DEFINED XLANG_BUILD_VERSION)
+set(XLANG_BUILD_VERSION "1.0.0")
+endif()
+
 function(ADD_OBJECT_DEPENDS file dependency)
     get_source_file_property(cur_obj_depends ${file} OBJECT_DEPENDS)
     if (${cur_obj_depends} STREQUAL "NOTFOUND")
@@ -111,6 +115,21 @@ if (WIN32)
     add_definitions(-DNOMINMAX)
 endif()
 
+# determine if VS SDK workload is installed via vswhere.exe 
+set(vssdk_installed false)
+if (WIN32)
+    file(TO_NATIVE_PATH "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer/vswhere.exe" vswhere_exe)
+    if (EXISTS ${vswhere_exe})
+        execute_process(
+            COMMAND ${vswhere_exe} -requires Microsoft.VisualStudio.Workload.VisualStudioExtension -format json
+            OUTPUT_VARIABLE vswhere_output
+        )
+        string(STRIP ${vswhere_output} vswhere_output)
+        string(COMPARE NOTEQUAL ${vswhere_output} "[]" vssdk_installed)
+    endif()
+endif()
+
 add_subdirectory(tool)
 add_subdirectory(test)
 add_subdirectory(platform)
+add_subdirectory(package)
