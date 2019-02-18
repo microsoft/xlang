@@ -1,4 +1,5 @@
 find_library(FFI_LIBRARY_PATH libffi)
+find_library(LUA_LIBRARY_PATH lua)
 
 project(foo)
 
@@ -8,7 +9,7 @@ target_include_directories(foo PUBLIC
     ${XLANG_LIBRARY_PATH} 
     ${VCPKG_INCLUDE_PATH} 
     ${PROJECT_SOURCE_DIR}/../cpp/cppwinrt/strings)
-target_link_libraries(foo ${FFI_LIBRARY_PATH})
+target_link_libraries(foo ${FFI_LIBRARY_PATH} ${LUA_LIBRARY_PATH})
 
 if (WIN32)
     TARGET_CONFIG_MSVC_PCH(foo pch.cpp pch.h)

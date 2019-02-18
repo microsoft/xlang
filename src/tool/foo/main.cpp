@@ -724,12 +724,26 @@ void test_one(meta::cache const& c)
     w.flush_to_console();
 }
 
+void test_two(meta::cache const& /*c*/)
+{
+    lua_State* L = luaL_newstate();
+    luaL_openlibs(L);
+
+    luaL_dostring(L, "x = 47");
+    lua_getglobal(L, "x");
+    lua_Number x = lua_tonumber(L, 1);
+    printf("lua says x = %d\n", (int)x);
+    lua_close(L);
+}
+
+
 int main(int const /*argc*/, char** /*argv*/)
 {
     try
     {
         meta::cache c{ get_system_metadata() };
-        test_one(c);
+        // test_one(c);
+        test_two(c);
     }
     catch (std::exception const& e)
     {

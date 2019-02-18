@@ -8,6 +8,7 @@
 #include "base.h"
 #include "sha1.h"
 #include "ffi.h"
+#include "lua.hpp"
 
 #include <memory>
 #include <iostream>
