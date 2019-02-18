@@ -1,7 +1,8 @@
 *       text=auto
 *       text eol=lf
-*.png   -text
-*.onnx  -text
 *.dll   -text
+*.exe   -text
+*.onnx  -text
 *.pdb   -text
+*.png   -text
 *.winmd -text
