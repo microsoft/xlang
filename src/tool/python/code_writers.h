@@ -12,6 +12,26 @@ namespace xlang
         w.write("@ = __ns__.@\n", type.TypeName(), type.TypeName());
     }
 
+    void write_python_enum(writer& w, TypeDef const& type)
+    {
+
+        w.write("class %(enum.%):\n", type.TypeName(), is_flags_enum(type) ? "IntFlag" : "IntEnum");
+        {
+            writer::indent_guard g{ w };
+
+            for(auto&& field : type.FieldList())
+            {
+                if (auto constant = field.Constant())
+                {
+                    w.write("% = %\n", field.Name(), *constant);
+                        // w.write(format, field.Name(), *constant);
+                }
+            }
+        }
+
+        w.write("\n");
+    }
+
     void write_method_body(writer& w, TypeDef const& type, method_info const& info);
     void write_method_overloads(writer& w, TypeDef const& type, std::vector<xlang::method_info> const& overloads);
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type);
