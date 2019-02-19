@@ -20,8 +20,17 @@ target_link_libraries(cppwinrtvisualizer windowsapp shell32 advapi32 $ENV{VSInst
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/cppwinrtvisualizer.vsdconfig" cppwinrtvisualizer_vsdconfig)
 file(TO_NATIVE_PATH "$ENV{VSInstallDir}VSSDK/VisualStudioIntegration/Tools/Bin/vsdconfigtool.exe" vsdconfigtool)
 
+# If building in VS15, remove the new WorkerProcessSupported attribute
+set(vsdconfigxml ${CMAKE_CURRENT_SOURCE_DIR}/cppwinrtvisualizer.vsdconfigxml)
+if($ENV{VSCMD_VER} VERSION_LESS "16.0.0")
+file(READ ${vsdconfigxml} vsdconfigxml_content)
+string(REGEX REPLACE "WorkerProcessSupported=\"true\"" "" vsdconfigxml_content_v15 ${vsdconfigxml_content})
+set(vsdconfigxml ${CMAKE_CURRENT_BINARY_DIR}/cppwinrtvisualizer.vsdconfigxml)
+file(WRITE ${vsdconfigxml} ${vsdconfigxml_content_v15})
+endif()
+
 add_custom_command(TARGET cppwinrtvisualizer POST_BUILD
-    COMMAND ${vsdconfigtool} ${CMAKE_CURRENT_SOURCE_DIR}/cppwinrtvisualizer.vsdconfigxml "${CMAKE_CURRENT_BINARY_DIR}/cppwinrtvisualizer.dll" "${cppwinrtvisualizer_vsdconfig}"
+    COMMAND ${vsdconfigtool} ${vsdconfigxml} "${CMAKE_CURRENT_BINARY_DIR}/cppwinrtvisualizer.dll" "${cppwinrtvisualizer_vsdconfig}"
 )
 
 set_target_properties(cppwinrtvisualizer PROPERTIES "cppwinrt_natvis_dir" ${cppwinrt_natvis_dir})
