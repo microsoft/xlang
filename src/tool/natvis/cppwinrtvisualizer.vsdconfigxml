@@ -5,7 +5,7 @@
     <DefineGuid Name="guidCppWinRTVisualizerSourceId" Value="7168763a-71e1-4447-b5d1-a44a52986527" />
 
     <NativeComponent ComponentId="1498d919-25ee-4913-910d-6f68b224b6e7" ComponentLevel="9991500" ModuleName="CppWinRTVisualizer.DLL">
-        <Class Name="CppWinRTVisualizer" ClassId="2ea3526b-93a1-4854-ae18-9028288f6f64">
+        <Class Name="CppWinrtVisualizer" ClassId="2ea3526b-93a1-4854-ae18-9028288f6f64" WorkerProcessSupported="true">
             <Implements>
                 <InterfaceGroup>
                     <Filter>

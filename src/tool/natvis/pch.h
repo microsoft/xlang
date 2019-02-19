@@ -10,6 +10,7 @@
 #include <rometadataapi.h>
 #include <rometadata.h>
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <set>
 #include <memory>
