@@ -112,7 +112,7 @@ struct widget_factory : iwidget_factory
         xlang::impl::atomic_ref_count m_count;
 };
 
-xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory)  XLANG_NOEXCEPT
+extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory)  XLANG_NOEXCEPT
 {
     char16_t const* buffer_ref{};
     uint32_t length_ref{};
