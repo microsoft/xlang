@@ -1312,10 +1312,10 @@ namespace xlang
     static void write_produce_cleanup_param(writer& w, T const& param_signature, std::string_view const& param_name, bool out)
     {
         TypeSig const& signature = param_signature.Type();
-
+        w.abi_types = false;
         bool clear{};
         bool optional{};
-        bool generic{};
+        bool zero{};
 
         call(signature.Type(),
             [&](ElementType type)
@@ -1349,11 +1349,12 @@ namespace xlang
                     auto category = get_category(type);
 
                     clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
+                    zero = category == category::struct_type;
                 }
             },
             [&](GenericTypeIndex const&)
             {
-                generic = true;
+                clear = true;
             },
             [&](GenericTypeInstSig const&)
             {
@@ -1364,49 +1365,55 @@ namespace xlang
         {
             if (param_signature.ByRef())
             {
-                auto format = R"(            *% = nullptr;
+                clear = true;
+            }
+            else if (optional || clear)
+            {
+                clear = false;
+                zero = true;
+            }
+        }
+
+        if (clear)
+        {
+            auto format = R"(            clear_abi(%);
+)";
+
+            w.write(format, param_name);
+        }
+        else if (zero)
+        {
+            if (signature.is_szarray())
+            {
+                // TODO: make sure this substitutes the template parameter for generics.
+
+                auto format = R"(            zero_abi<%>(%, __%Size);
 )";
 
                 w.write(format,
+                    signature.Type(),
+                    param_name,
                     param_name);
             }
-            else if (optional || clear || generic)
+            else
             {
-                auto format = R"(            memset(%, 0, sizeof(%) * __%Size);
+                // TODO: make sure this substitutes the template parameter for generics.
+
+                auto format = R"(            zero_abi<%>(%);
 )";
 
-                w.abi_types = false;
-
                 w.write(format,
-                    param_name,
                     signature.Type(),
                     param_name);
             }
-
-            return;
         }
-
-        if (optional)
+        else if (optional)
         {
             auto format = R"(            if (%) *% = nullptr;
             Windows::Foundation::IInspectable winrt_impl_%;
 )";
 
             w.write(format, param_name, param_name, param_name);
-        }
-        else if (clear)
-        {
-            auto format = R"(            *% = nullptr;
-)";
-
-            w.write(format, param_name);
-        }
-        else if (generic)
-        {
-            auto format = R"(            clear_abi(%);
-)";
-
-            w.write(format, param_name);
         }
     }
 
