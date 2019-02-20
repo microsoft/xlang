@@ -6,6 +6,8 @@ struct widget : iwidget
 {
     int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
     {
+        *object = nullptr;
+
         if (id == xlang_unknown_guid)
         {
             static_assert(std::is_base_of_v<xlang_unknown, iwidget>, "Can only combine these two cases if this is true.");
@@ -17,9 +19,9 @@ struct widget : iwidget
         }
         else
         {
-            *object = nullptr;
             return xlang_error_no_interface;
         }
+
         AddRef();
         return 0;
     }
@@ -41,11 +43,6 @@ struct widget : iwidget
 
     xlang_error_info* get_answer(int32_t* answer) noexcept override
     {
-        if (!answer)
-        {
-            return xlang::originate_error(xlang_error_pointer);
-        }
-
         *answer = 42;
         return nullptr; // xlang_error_ok;
     }
@@ -58,6 +55,8 @@ struct widget_factory : iwidget_factory
 {
     int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
     {
+        *object = nullptr;
+
         if (id == xlang_unknown_guid)
         {
             static_assert(std::is_base_of_v<xlang_unknown, iwidget_factory>, "Can only combine these two cases if this is true.");
@@ -72,6 +71,7 @@ struct widget_factory : iwidget_factory
             *object = nullptr;
             return xlang_error_no_interface;
         }
+
         AddRef();
         return 0;
     }
@@ -109,6 +109,8 @@ struct widget_factory : iwidget_factory
 
 extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory) noexcept
 {
+    *factory = nullptr;
+
     char16_t const* buffer_ref{};
     uint32_t length_ref{};
     xlang_error_info* result{};
