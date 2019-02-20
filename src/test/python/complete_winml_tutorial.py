@@ -37,19 +37,19 @@ def load_model(model_path):
 
 @timed_op
 async def load_image_file(file_path):
-    from pyrt.windows.storage import StorageFile
+    from pyrt.windows.storage import StorageFile, FileAccessMode
     from pyrt.windows.graphics.imaging import BitmapDecoder
     from pyrt.windows.media import VideoFrame
 
     file = await StorageFile.GetFileFromPathAsync(os.fspath(file_path))
-    stream = await file.OpenAsync(0) # 0 == FileAccessMode::Read 
+    stream = await file.OpenAsync(FileAccessMode.Read) 
     decoder = await BitmapDecoder.CreateAsync(stream)
     software_bitmap = await decoder.GetSoftwareBitmapAsync()
     return VideoFrame.CreateWithSoftwareBitmap(software_bitmap)
 
 @timed_op
 def bind_model(model, image_frame):
-    device = winml.LearningModelDevice(0) # 0 == LearningModelDeviceKind::Default
+    device = winml.LearningModelDevice(winml.LearningModelDeviceKind.Default)
     session = winml.LearningModelSession(model, device)
     binding = winml.LearningModelBinding(session)
     image_feature_value = winml.ImageFeatureValue.CreateFromVideoFrame(image_frame)

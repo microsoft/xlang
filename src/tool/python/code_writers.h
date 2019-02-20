@@ -12,6 +12,22 @@ namespace xlang
         w.write("@ = __ns__.@\n", type.TypeName(), type.TypeName());
     }
 
+    void write_python_enum_name(writer& w, std::string_view const& name)
+    {
+        // None is a python keyword, so project it as NONE
+        if (name == "None")
+        {
+            for(auto&& c : name)
+            {
+                w.write(static_cast<char>(::toupper(c)));
+            }
+        }
+        else
+        {
+            w.write(name);
+        }
+    }
+
     void write_python_enum(writer& w, TypeDef const& type)
     {
 
@@ -23,8 +39,7 @@ namespace xlang
             {
                 if (auto constant = field.Constant())
                 {
-                    w.write("% = %\n", field.Name(), *constant);
-                        // w.write(format, field.Name(), *constant);
+                    w.write("% = %\n", bind<write_python_enum_name>(field.Name()), *constant);
                 }
             }
         }
@@ -680,7 +695,7 @@ static void @_dealloc(%* self)
             break;
         case param_category::fill_array:
             w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
-            w.write("winrt::com_array<%> % { %_count, py::empty_instance<%>::get() };\n", param.second->Type(), bind<write_param_name>(param), bind<write_param_name>(param), param.second->Type());
+            w.write("winrt::com_array<%> % ( %_count, py::empty_instance<%>::get() );\n", param.second->Type(), bind<write_param_name>(param), bind<write_param_name>(param), param.second->Type());
             break;
         case param_category::receive_array:
             w.write("winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
@@ -737,7 +752,7 @@ static void @_dealloc(%* self)
 
         if (signature.return_signature())
         {
-            w.write("% return_value = ", signature.return_signature().Type());
+            w.write("auto return_value = ");
         }
         w.write("%%(%);\n\n",
             bind<write_method_invoke_context>(type, info.method),
