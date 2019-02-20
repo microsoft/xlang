@@ -2681,7 +2681,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_class_definitions(writer& w, TypeDef const& type)
     {
-        if (settings.component_opt&& settings.filter.includes(type))
+        if (settings.component_opt && settings.filter.includes(type))
         {
             return;
         }
