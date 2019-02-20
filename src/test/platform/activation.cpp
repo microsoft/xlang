@@ -9,7 +9,7 @@ TEST_CASE("Simple activation")
     xlang_error_info* result{};
 
     // TODO: Update cpp projection to emit char16_t names
-    std::u16string_view class_name{ u"Component.Class" };
+    std::u16string_view class_name{ u"Component.Edge.ZeroClass" };
     xlang_string_header str_header{};
     xlang_string str{};
 

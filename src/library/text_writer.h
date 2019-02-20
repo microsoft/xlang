@@ -143,7 +143,7 @@ namespace xlang::text
 
         void flush_to_file(std::string const& filename)
         {
-            if (static_cast<T*>(this)->skip_flush_to_file(filename))
+            if (file_equal(filename))
             {
                 return;
             }
@@ -201,11 +201,6 @@ namespace xlang::text
 
         static constexpr std::array<uint8_t, 3> m_bom{ 0xEF, 0xBB, 0xBF };
 
-        constexpr bool skip_flush_to_file(std::string const&) const noexcept
-        {
-            return false;
-        }
-
         static constexpr uint32_t count_placeholders(std::string_view const& format) noexcept
         {
             uint32_t count{};
@@ -232,7 +227,26 @@ namespace xlang::text
 
         void write_segment(std::string_view const& value)
         {
-            write(value);
+            auto offset = value.find_first_of("^");
+            if (offset == std::string_view::npos)
+            {
+                write(value);
+                return;
+            }
+
+            write(value.substr(0, offset));
+            auto next = value[offset + 1];
+            if (next == '%' || next == '@')
+            {
+                write(next);
+                offset++;
+            }
+            else
+            {
+                write('^');
+            }
+
+            write_segment(value.substr(offset + 1));
         }
 
         template <typename First, typename... Rest>
@@ -293,6 +307,15 @@ namespace xlang::text
         };
     }
 
+    template <typename F, typename... Args>
+    auto bind(F fwrite, Args const&... args)
+    {
+        return [&, fwrite](auto& writer)
+        {
+            fwrite(writer, args...);
+        };
+    }
+
     template <auto F, typename List, typename... Args>
     auto bind_each(List const& list, Args const&... args)
     {
@@ -305,8 +328,32 @@ namespace xlang::text
         };
     }
 
-    template <auto F, typename T>
-    auto bind_list(std::string_view const& delimiter, T const& list)
+    template <typename List, typename... Args>
+    auto bind_each(List const& list, Args const&... args)
+    {
+        return [&](auto& writer)
+        {
+            for (auto&& item : list)
+            {
+                writer.write(item, args...);
+            }
+        };
+    }
+
+    template <typename F, typename List, typename... Args>
+    auto bind_each(F fwrite, List const& list, Args const&... args)
+    {
+        return [&, fwrite](auto& writer)
+        {
+            for (auto&& item : list)
+            {
+                fwrite(writer, item, args...);
+            }
+        };
+    }
+
+    template <auto F, typename T, typename... Args>
+    auto bind_list(std::string_view const& delimiter, T const& list, Args const&... args)
     {
         return [&](auto& writer)
         {
@@ -323,7 +370,7 @@ namespace xlang::text
                     writer.write(delimiter);
                 }
 
-                F(writer, item);
+                F(writer, item, args...);
             }
         };
     }

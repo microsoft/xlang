@@ -7,15 +7,20 @@ namespace xlang::cmd
 {
     struct option
     {
+        static constexpr uint32_t no_min = 0;
+        static constexpr uint32_t no_max = std::numeric_limits<uint32_t>::max();
+        
         std::string_view name;
-        uint32_t min{ 0 };
-        uint32_t max{ std::numeric_limits<uint32_t>::max() };
+        uint32_t min{ no_min };
+        uint32_t max{ no_max };
+        std::string_view arg;
+        std::string_view desc;
     };
 
     struct reader
     {
-        template <typename C, typename V>
-        reader(C const argc, V const argv, std::vector<option> const& options)
+        template <typename C, typename V, size_t numOptions>
+        reader(C const argc, V const argv, const option(& options)[numOptions])
         {
 #ifdef XLANG_DEBUG
             {
@@ -34,7 +39,7 @@ namespace xlang::cmd
                 return;
             }
 
-            auto last{ options.end() };
+            auto last{ std::end(options) };
 
             for (C i = 1; i < argc; ++i)
             {
@@ -205,9 +210,10 @@ namespace xlang::cmd
 
     private:
 
-        std::vector<option>::const_iterator find(std::vector<option> const& options, std::string_view const& arg)
+        template<typename O>
+        auto find(O const& options, std::string_view const& arg)
         {
-            for (auto current = options.begin(); current != options.end(); ++current)
+            for (auto current = std::begin(options); current != std::end(options); ++current)
             {
                 if (starts_with(current->name, arg))
                 {
@@ -215,7 +221,7 @@ namespace xlang::cmd
                 }
             }
 
-            return options.end();
+            return std::end(options);
         }
 
         std::map<std::string_view, std::vector<std::string>> m_options;
@@ -228,7 +234,7 @@ namespace xlang::cmd
                 arg.remove_prefix(1);
                 last = find(options, arg);
 
-                if (last == options.end())
+                if (last == std::end(options))
                 {
                     throw_invalid("Option '-", arg, "' is not supported");
                 }
@@ -240,7 +246,7 @@ namespace xlang::cmd
                 arg.remove_prefix(1);
                 extract_response_file(arg, options);
             }
-            else if (last == options.end())
+            else if (last == std::end(options))
             {
                 throw_invalid("Value '", arg, "' is not supported");
             }
@@ -272,7 +278,7 @@ namespace xlang::cmd
 
                 parse_command_line(line_buf.data(), argv, &argc);
 
-                auto last{ options.end() };
+                auto last{ std::end(options) };
                 for (size_t i = 0; i < argc; i++)
                 {
                     extract_option(argv[i], options, last);

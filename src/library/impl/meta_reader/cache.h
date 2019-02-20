@@ -87,10 +87,12 @@ namespace xlang::meta::reader
         TypeDef find(std::string_view const& type_string) const
         {
             auto pos = type_string.rfind('.');
+
             if (pos == std::string_view::npos)
             {
-                throw_invalid("Type name is missing namespace separator");
+                throw_invalid("Type '", type_string, "' is missing a namespace qualifier");
             }
+
             return find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
         }
 
@@ -112,7 +114,7 @@ namespace xlang::meta::reader
 
             if (pos == std::string_view::npos)
             {
-                throw_invalid("Type name is missing namespace separator");
+                throw_invalid("Type '", type_string, "' is missing a namespace qualifier");
             }
 
             return find_required(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));

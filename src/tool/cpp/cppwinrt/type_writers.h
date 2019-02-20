@@ -478,21 +478,26 @@ namespace xlang
             write(value.Signature().Type());
         }
 
+        void write_root_include(std::string_view const& include)
+        {
+            auto format = R"(#include %winrt/%.h%
+)";
+
+            write(format,
+                settings.brackets ? '<' : '\"',
+                include,
+                settings.brackets ? '>' : '\"');
+        }
+
         void write_depends(std::string_view const& ns, char impl = 0)
         {
             if (impl)
             {
-                auto format = R"(#include "%/impl/%.%.h"
-)";
-
-                write(format, settings.root, ns, impl);
+                write_root_include(write_temp("impl/%.%", ns, impl));
             }
             else
             {
-                auto format = R"(#include "%/%.h"
-)";
-
-                write(format, settings.root, ns);
+                write_root_include(ns);
             }
         }
 
@@ -512,12 +517,12 @@ namespace xlang
                 return;
             }
 
-            write("#include \"%/%.h\"\n", settings.root, parent);
+            write_root_include(parent);
         }
 
         void save_header(char impl = 0)
         {
-            auto filename{ settings.output_folder + settings.root + "/" };
+            auto filename{ settings.output_folder + "winrt/" };
 
             if (impl)
             {
@@ -534,16 +539,6 @@ namespace xlang
 
             filename += ".h";
             flush_to_file(filename);
-        }
-
-        bool skip_flush_to_file(std::string const& filename) const
-        {
-            if (!settings.component)
-            {
-                return false;
-            }
-
-            return file_equal(filename);
         }
     };
 }

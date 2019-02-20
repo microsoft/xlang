@@ -16,6 +16,19 @@ namespace winrt::impl
 
 namespace py
 {
+    template <typename T, typename = std::void_t<>>
+    struct empty_instance
+    {
+        static T get() { return T{}; }
+    };
+
+
+    template <typename T>
+    struct empty_instance<T, std::void_t<decltype(T{nullptr})>>
+    {
+        static T get() { return T{nullptr}; }
+    };
+
     struct gil_state_traits
     {
         using type = PyGILState_STATE;
@@ -207,7 +220,7 @@ namespace py
     template<typename T>
     PyObject* wrap_struct(T instance, PyTypeObject* type_object)
     {
-        if (type_object == nullptr)
+        if (!type_object)
         {
             PyErr_SetNone(PyExc_NotImplementedError);
             return nullptr;
@@ -230,7 +243,12 @@ namespace py
     template<typename T>
     PyObject* wrap(T instance, PyTypeObject* type_object)
     {
-        if (type_object == nullptr)
+        if (!instance)
+        {
+            Py_RETURN_NONE;
+        }
+
+        if (!type_object)
         {
             PyErr_SetNone(PyExc_NotImplementedError);
             return nullptr;
@@ -256,11 +274,16 @@ namespace py
     template<typename T>
     PyObject* wrap_pinterface(T instance)
     {
+        if (!instance)
+        {
+            Py_RETURN_NONE;
+        }
+
         using ptype = pinterface_python_type<T>;
 
         PyTypeObject* type_object = get_python_type<T>();
 
-        if (type_object == nullptr)
+        if (!type_object)
         {
             PyErr_SetNone(PyExc_NotImplementedError);
             return nullptr;
@@ -288,9 +311,7 @@ namespace py
     {
         if (!instance)
         {
-            PyErr_SetNone(PyExc_RuntimeError);
-            return nullptr;
-
+            Py_RETURN_NONE;
         }
 
         if constexpr (is_class_category_v<T> || is_interface_category_v<T>)
@@ -354,6 +375,110 @@ namespace py
             }
 
             return result > 0;
+        }
+    };
+
+    template <>
+    struct converter<int8_t>
+    {
+        static PyObject* convert(int8_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static int8_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < INT8_MIN || result > INT8_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<int8_t>(result);
+        }
+    };
+
+    template <>
+    struct converter<uint8_t>
+    {
+        static PyObject* convert(uint8_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static uint8_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < 0 || result > UINT8_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<uint8_t>(result);
+        }
+    };
+
+    template <>
+    struct converter<int16_t>
+    {
+        static PyObject* convert(int16_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static int16_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < INT16_MIN || result > INT16_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<int16_t>(result);
+        }
+    };
+
+    template <>
+    struct converter<uint16_t>
+    {
+        static PyObject* convert(uint16_t value) noexcept
+        {
+            return PyLong_FromLong(static_cast<int32_t>(value));
+        }
+
+        static uint16_t convert_to(PyObject* obj)
+        {
+            int32_t result = PyLong_AsLong(obj);
+
+            if (result == -1 && PyErr_Occurred())
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            if (result < 0 || result > UINT16_MAX)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            return static_cast<uint16_t>(result);
         }
     };
 
@@ -797,6 +922,66 @@ namespace py
         }
     };
 
+    template <typename T>
+    struct converter<winrt::com_array<T>>
+    {
+        static PyObject* convert(winrt::com_array<T> const& instance) noexcept
+        {
+            PyObject* list = PyList_New(instance.size());
+            if (list == nullptr)
+            {
+                return nullptr;
+            }
+
+            for (uint32_t index = 0; index < instance.size(); index++)
+            {
+                PyObject* item = converter<T>::convert(instance[index]);
+                if (item == nullptr)
+                {
+                    return nullptr;
+                }
+
+                if (PyList_SetItem(list, index, item) == -1)
+                {
+                    return nullptr;
+                }
+            }
+
+            return list;
+        }
+
+        static auto convert_to(PyObject* obj)
+        {
+            if (!obj || !PyList_Check(obj))
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            Py_ssize_t list_size = PyList_Size(obj);
+            if (list_size == -1)
+            {
+                // TODO: propagate python error 
+                throw winrt::hresult_invalid_argument();
+            }
+
+            winrt::com_array<T> items(static_cast<uint32_t>(list_size), empty_instance<T>::get());
+
+            for (Py_ssize_t index = 0; index < list_size; index++)
+            {
+                PyObject* item = PyList_GetItem(obj, index);
+                if (item == nullptr)
+                {
+                    // TODO: propagate python error 
+                    throw winrt::hresult_invalid_argument();
+                }
+
+                items[static_cast<uint32_t>(index)] = converter<T>::convert_to(item);
+            }
+
+            return std::move(items);
+        }
+    };
+
     template<typename T>
     PyObject* convert(T const& instance)
     {
@@ -821,8 +1006,7 @@ namespace py
         if constexpr (std::is_void_v<decltype(operation.GetResults())>)
         {
             operation.GetResults();
-            Py_INCREF(Py_None);
-            return Py_None;
+            Py_RETURN_NONE;
         }
         else
         {
