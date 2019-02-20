@@ -345,10 +345,21 @@ namespace winrt
         }
     }
 
+    template <typename T>
+    auto put_abi(array_view<T> object) noexcept
+    {
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            std::fill(object.begin(), object.end(), impl::empty_value<T>());
+        }
+
+        return get_abi(object);
+    }
+
     template<typename T>
     auto put_abi(com_array<T>& object) noexcept
     {
-        WINRT_ASSERT(!object.data());
+        object.clear();
         return reinterpret_cast<impl::arg_out<T>*>(&object);
     }
 

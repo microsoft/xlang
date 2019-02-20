@@ -587,7 +587,7 @@ namespace xlang
                 }
                 else
                 {
-                    format = "%.size(), get_abi(%)";
+                    format = "%.size(), put_abi(%)";
                 }
 
                 w.write(format, param_name, param_name);
