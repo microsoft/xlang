@@ -71,6 +71,19 @@ function(CONSUME_PAL target)
     target_link_libraries(${target} pal)
 endfunction()
 
+# set test_platform linker flags to look for .so files in the current directory 
+# adapted from https://serverfault.com/a/926072
+function(RPATH_ORIGIN target)
+    if (NOT WIN32)
+        get_target_property(RPATH_ORIGIN_temp_link_flags ${target} LINK_FLAGS)
+        if (RPATH_ORIGIN_temp_link_flags MATCHES "NOTFOUND$")
+            set_target_properties(${target} PROPERTIES LINK_FLAGS "-Wl,-rpath='$ORIGIN'")
+        else()
+            set_target_properties(${target} PROPERTIES LINK_FLAGS "${RPATH_ORIGIN_temp_link_flags} -Wl,-rpath='$ORIGIN'")
+        endif()
+    endif()
+endfunction()
+
 
 add_custom_target(scorch COMMAND ${CMAKE_COMMAND} \"-Dfolder=${CMAKE_CURRENT_BINARY_DIR}\" -P \"${XLANG_SCRIPTS_PATH}/scorch.cmake\")
 set_target_properties(scorch PROPERTIES EXCLUDE_FROM_ALL TRUE)

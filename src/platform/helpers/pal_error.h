@@ -17,7 +17,7 @@ namespace xlang
             {
                 if (id == xlang_unknown_guid)
                 {
-                    static_assert(std::is_base_of_v<xlang_unknown, xlang_error_info>, "Can only combine these two cases is this is true.");
+                    static_assert(std::is_base_of_v<xlang_unknown, xlang_error_info>, "Can only combine these two cases if this is true.");
                     *object = static_cast<xlang_unknown*>(this);
                 }
                 else if (id == xlang_error_info_guid)
@@ -61,7 +61,7 @@ namespace xlang
 
     [[nodiscard]] inline xlang_error_info* originate_error(xlang_result result)
     {
-        return new impl::error_info{ result };
+        return new (std::nothrow) impl::error_info{ result };
     }
 
     [[noreturn]] inline void throw_result(xlang_result result)
