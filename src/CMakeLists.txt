@@ -113,20 +113,6 @@ if (WIN32)
     add_definitions(-DNOMINMAX)
 endif()
 
-# determine if VS SDK workload is installed via vswhere.exe 
-set(vssdk_installed false)
-if (WIN32)
-    file(TO_NATIVE_PATH "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer/vswhere.exe" vswhere_exe)
-    if (EXISTS ${vswhere_exe})
-        execute_process(
-            COMMAND ${vswhere_exe} -requires Microsoft.VisualStudio.Workload.VisualStudioExtension -format json
-            OUTPUT_VARIABLE vswhere_output
-        )
-        string(STRIP ${vswhere_output} vswhere_output)
-        string(COMPARE NOTEQUAL ${vswhere_output} "[]" vssdk_installed)
-    endif()
-endif()
-
 add_subdirectory(tool)
 add_subdirectory(test)
 add_subdirectory(platform)
