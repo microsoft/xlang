@@ -1385,8 +1385,6 @@ namespace xlang
         {
             if (signature.is_szarray())
             {
-                // TODO: make sure this substitutes the template parameter for generics.
-
                 auto format = R"(            zero_abi<%>(%, __%Size);
 )";
 
@@ -1397,8 +1395,6 @@ namespace xlang
             }
             else
             {
-                // TODO: make sure this substitutes the template parameter for generics.
-
                 auto format = R"(            zero_abi<%>(%);
 )";
 
