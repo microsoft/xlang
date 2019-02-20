@@ -48,14 +48,6 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <!-- <VSSDKRoot Condition="'$(DevEnvDir)'!='' and Exists('$(DevEnvDir)..\..\VSSDK\VisualStudioIntegration\')">$([System.IO.Path]::GetFullPath('$(DevEnvDir)..\..\VSSDK\'))</VSSDKRoot>
-    <VSSDKRoot Condition="'$(VSSDKRoot)'==''">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\VSIP\14.0\@InstallDir)</VSSDKRoot>
-    <VSSDKRoot Condition="'$(VSSDKRoot)'==''">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VisualStudio\VSIP\14.0\@InstallDir)</VSSDKRoot>
-    <VSSDKRoot Condition="'$(VSSDKRoot)'!='' and '$(VSSDKRoot.EndsWith(&quot;\&quot;))'=='false'">$(VSSDKRoot)\</VSSDKRoot>
-    <ConcordSDKDir>$(VSSDKRoot)VisualStudioIntegration\</ConcordSDKDir>
-    <ConcordSDKInc>$(ConcordSDKDir)Common\inc</ConcordSDKInc>
-    <VsDebugEng_Lib>$(ConcordSDKDir)Common\lib\$(PlatformTarget)\vsdebugeng.lib</VsDebugEng_Lib> 
-    -->
     <DIASDKInc>$(VSInstallDir)DIA SDK\include</DIASDKInc>
   </PropertyGroup>
   <ImportGroup Label="ExtensionSettings">
