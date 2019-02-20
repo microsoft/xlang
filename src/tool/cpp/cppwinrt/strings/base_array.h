@@ -221,6 +221,11 @@ namespace winrt
             com_array(count, value_type())
         {}
 
+        com_array(void* ptr, uint32_t const count, take_ownership_from_abi_t) noexcept :
+            array_view<T>(static_cast<value_type*>(ptr), static_cast<value_type*>(ptr) + count)
+        {
+        }
+
         com_array(size_type const count, value_type const& value)
         {
             alloc(count);

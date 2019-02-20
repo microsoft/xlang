@@ -1308,20 +1308,10 @@ namespace xlang
         write_abi_params(w, signature);
     }
 
-    static void write_produce_cleanup_param(writer& w, TypeSig const& signature, std::string_view const& param_name, bool out)
+    template <typename T>
+    static void write_produce_cleanup_param(writer& w, T const& param_signature, std::string_view const& param_name, bool out)
     {
-        if (signature.is_szarray())
-        {
-            auto format = R"(            *__%Size = 0;
-                *% = nullptr;
-)";
-
-            w.write(format,
-                param_name,
-                param_name);
-
-            return;
-        }
+        TypeSig const& signature = param_signature.Type();
 
         bool clear{};
         bool optional{};
@@ -1370,6 +1360,32 @@ namespace xlang
                 clear = true;
             });
 
+        if (signature.is_szarray())
+        {
+            if (param_signature.ByRef())
+            {
+                auto format = R"(            *% = nullptr;
+)";
+
+                w.write(format,
+                    param_name);
+            }
+            else if (optional || clear || generic)
+            {
+                auto format = R"(            memset(%, 0, sizeof(%) * __%Size);
+)";
+
+                w.abi_types = false;
+
+                w.write(format,
+                    param_name,
+                    signature.Type(),
+                    param_name);
+            }
+
+            return;
+        }
+
         if (optional)
         {
             auto format = R"(            if (%) *% = nullptr;
@@ -1398,17 +1414,17 @@ namespace xlang
     {
         for (auto&& [param, param_signature] : method_signature.params())
         {
-            if (param.Flags().In() || !param_signature->ByRef())
+            if (param.Flags().In())
             {
                 continue;
             }
 
-            write_produce_cleanup_param(w, param_signature->Type(), param.Name(), true);
+            write_produce_cleanup_param(w, *param_signature, param.Name(), true);
         }
 
         if (method_signature.return_signature())
         {
-            write_produce_cleanup_param(w, method_signature.return_signature().Type(), method_signature.return_param_name(), false);
+            write_produce_cleanup_param(w, method_signature.return_signature(), method_signature.return_param_name(), false);
         }
     }
 
