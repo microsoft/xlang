@@ -12,9 +12,9 @@ TEST_CASE("Simple activation")
     result = xlang_create_string_reference_utf16(class_name.data(), static_cast<uint32_t>(class_name.size()), &str_header, &str);
     REQUIRE(result == nullptr);
 
+    // TODO: use xplat com_ptr when available (GitHub issue #185)
     xlang_unknown* factory{};
-    xlang_guid iid = { 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    result = xlang_get_activation_factory(str, iid, reinterpret_cast<void**>(&factory));
+    result = xlang_get_activation_factory(str, xlang_unknown_guid, reinterpret_cast<void**>(&factory));
     REQUIRE(result == nullptr);
 
     // TODO: Actually call an activation method once we've converged our type system.

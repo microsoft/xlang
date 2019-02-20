@@ -8,7 +8,7 @@ struct widget : iwidget
     {
         if (id == xlang_unknown_guid)
         {
-            static_assert(std::is_base_of_v<xlang_unknown, iwidget>, "Can only combine these two cases is this is true.");
+            static_assert(std::is_base_of_v<xlang_unknown, iwidget>, "Can only combine these two cases if this is true.");
             *object = static_cast<xlang_unknown*>(this);
         }
         else if (id == iwidget_guid)
@@ -60,7 +60,7 @@ struct widget_factory : iwidget_factory
     {
         if (id == xlang_unknown_guid)
         {
-            static_assert(std::is_base_of_v<xlang_unknown, iwidget_factory>, "Can only combine these two cases is this is true.");
+            static_assert(std::is_base_of_v<xlang_unknown, iwidget_factory>, "Can only combine these two cases if this is true.");
             *object = static_cast<xlang_unknown*>(this);
         }
         else if (id == iwidget_factory_guid)
@@ -93,12 +93,7 @@ struct widget_factory : iwidget_factory
 
     xlang_error_info* activate_widget(iwidget** instance) noexcept override
     {
-        if (!instance)
-        {
-            return xlang::originate_error(xlang_error_pointer);
-        }
-
-        *instance = new widget{};
+        *instance = new (std::nothrow) widget{};
         if (!*instance)
         {
             return xlang::originate_error(xlang_error_out_of_memory);
@@ -112,7 +107,7 @@ struct widget_factory : iwidget_factory
         xlang::impl::atomic_ref_count m_count;
 };
 
-extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory)  XLANG_NOEXCEPT
+extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory) noexcept
 {
     char16_t const* buffer_ref{};
     uint32_t length_ref{};
@@ -128,7 +123,7 @@ extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_s
     {
         if (iid == xlang_unknown_guid || iid == iwidget_factory_guid)
         {
-            *factory = new widget_factory();
+            *factory = new (std::nothrow) widget_factory();
 
             if (!*factory)
             {

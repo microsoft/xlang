@@ -15,7 +15,7 @@ namespace xlang::impl
         uint32_t converted_length = convert_string(module_namespace, converted_name.get(), length);
 
         // Note: common convert_string is incorrectly return zero on success. Using length as a 
-        //       temporary workaround. Tracked by https://github.com/Microsoft/xlang/issues/180
+        //       temporary workaround. Tracked by GitHub issue #180
         return try_get_activation_func({ converted_name.get(), length });
     }
 
