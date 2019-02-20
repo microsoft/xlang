@@ -36,11 +36,7 @@ namespace xlang::impl
         {
             return reinterpret_cast<xlang_pfn_lib_get_activation_factory>(dlsym(module, activation_fn_name.data()));
         }
-        else
-        {
-            auto error = dlerror();
-            printf("%s", error);
-        }
+
         return nullptr;
     }
 }
