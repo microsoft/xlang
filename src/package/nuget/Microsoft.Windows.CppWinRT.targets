@@ -212,7 +212,7 @@ namespace $(RootNamespace)
             <_MidlReferencesDistinct Remove="@(_MidlReferencesDistinct)" />
             <_MidlReferencesDistinct Include="@(_MidlReferences->'%(WinMDPath)'->Distinct())" />
             <Midl Condition="'%(Midl.DisableReferences)'==''">
-                <AdditionalOptions>%(Midl.AdditionalOptions) @(_MidlReferencesDistinct->'/reference &quot;%(WinMDPath)&quot;',' ')</AdditionalOptions>
+              <AdditionalOptions>%(Midl.AdditionalOptions) %40"$(OutDir)midlrt.rsp"</AdditionalOptions>
             </Midl>
         </ItemGroup>
         <ItemGroup>
@@ -221,7 +221,15 @@ namespace $(RootNamespace)
                 <AdditionalMetadataDirectories Condition="'$(WindowsSDK_MetadataFoundationPath)' == ''">%(Midl.AdditionalMetadataDirectories);$(WindowsSDK_MetadataPath);</AdditionalMetadataDirectories>
             </Midl>
         </ItemGroup>
-        <Message Text="CppWinRTMidlReferences: @(_MidlReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
+      <PropertyGroup>
+        <_MidlrtParameters>@(_MidlReferencesDistinct->'/reference &quot;%(WinMDPath)&quot;',' ')</_MidlrtParameters>
+      </PropertyGroup>
+      <WriteLinesToFile File="$(OutDir)midlrt.rsp" Lines="$(_MidlrtParameters)" Overwrite="true" />
+      <Message Text="CppWinRTMidlReferences: @(_MidlReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
+    </Target>
+
+    <Target Name="CppWinRTRemoveMidlrtResponseFile" AfterTargets="Midl">
+        <Delete Files="$(OutDir)midlrt.rsp"/>
     </Target>
 
     <!--Merge project-generated WinMDs and project-referenced static library WinMDs into project WinMD-->
