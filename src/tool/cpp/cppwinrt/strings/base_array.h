@@ -221,6 +221,11 @@ namespace winrt
             com_array(count, value_type())
         {}
 
+        com_array(void* ptr, uint32_t const count, take_ownership_from_abi_t) noexcept :
+            array_view<T>(static_cast<value_type*>(ptr), static_cast<value_type*>(ptr) + count)
+        {
+        }
+
         com_array(size_type const count, value_type const& value)
         {
             alloc(count);
@@ -340,10 +345,21 @@ namespace winrt
         }
     }
 
+    template <typename T>
+    auto put_abi(array_view<T> object) noexcept
+    {
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            std::fill(object.begin(), object.end(), impl::empty_value<T>());
+        }
+
+        return get_abi(object);
+    }
+
     template<typename T>
     auto put_abi(com_array<T>& object) noexcept
     {
-        WINRT_ASSERT(!object.data());
+        object.clear();
         return reinterpret_cast<impl::arg_out<T>*>(&object);
     }
 
