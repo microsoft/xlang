@@ -9,7 +9,7 @@ int main(int const argc, char** argv)
 {
     if (argc < 3)
     {
-        puts("Usage: strings.exe input output");
+        puts("Usage: prebuild.exe input output");
         return 0;
     }
 
