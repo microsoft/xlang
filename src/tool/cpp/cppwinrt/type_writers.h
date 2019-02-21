@@ -93,7 +93,7 @@ namespace xlang
                 }
             }
 
-            generic_param_guard(generic_param_guard && other)
+            generic_param_guard(generic_param_guard&& other)
                 : owner(other.owner)
             {
                 owner = nullptr;
@@ -395,58 +395,58 @@ namespace xlang
         {
             call(type,
                 [&](ElementType type)
-            {
-                if (type == ElementType::Boolean) { write("bool"); }
-                else if (type == ElementType::Char) { write("char16_t"); }
-                else if (type == ElementType::I1) { write("int8_t"); }
-                else if (type == ElementType::U1) { write("uint8_t"); }
-                else if (type == ElementType::I2) { write("int16_t"); }
-                else if (type == ElementType::U2) { write("uint16_t"); }
-                else if (type == ElementType::I4) { write("int32_t"); }
-                else if (type == ElementType::U4) { write("uint32_t"); }
-                else if (type == ElementType::I8) { write("int64_t"); }
-                else if (type == ElementType::U8) { write("uint64_t"); }
-                else if (type == ElementType::R4) { write("float"); }
-                else if (type == ElementType::R8) { write("double"); }
-                else if (type == ElementType::String)
                 {
-                    if (abi_types)
+                    if (type == ElementType::Boolean) { write("bool"); }
+                    else if (type == ElementType::Char) { write("char16_t"); }
+                    else if (type == ElementType::I1) { write("int8_t"); }
+                    else if (type == ElementType::U1) { write("uint8_t"); }
+                    else if (type == ElementType::I2) { write("int16_t"); }
+                    else if (type == ElementType::U2) { write("uint16_t"); }
+                    else if (type == ElementType::I4) { write("int32_t"); }
+                    else if (type == ElementType::U4) { write("uint32_t"); }
+                    else if (type == ElementType::I8) { write("int64_t"); }
+                    else if (type == ElementType::U8) { write("uint64_t"); }
+                    else if (type == ElementType::R4) { write("float"); }
+                    else if (type == ElementType::R8) { write("double"); }
+                    else if (type == ElementType::String)
                     {
-                        write("void*");
+                        if (abi_types)
+                        {
+                            write("void*");
+                        }
+                        else if (consume_types)
+                        {
+                            write("param::hstring");
+                        }
+                        else
+                        {
+                            write("hstring");
+                        }
                     }
-                    else if (consume_types)
+                    else if (type == ElementType::Object)
                     {
-                        write("param::hstring");
+                        if (abi_types)
+                        {
+                            write("void*");
+                        }
+                        else
+                        {
+                            write("Windows::Foundation::IInspectable");
+                        }
                     }
                     else
                     {
-                        write("hstring");
+                        XLANG_ASSERT(false);
                     }
-                }
-                else if (type == ElementType::Object)
-                {
-                    if (abi_types)
-                    {
-                        write("void*");
-                    }
-                    else
-                    {
-                        write("Windows::Foundation::IInspectable");
-                    }
-                }
-                else
-                {
-                    XLANG_ASSERT(false);
-                }
-            },
+                },
                 [&](GenericTypeIndex var)
-            {
-                write(generic_param_stack.back()[var.index]);
-            },
-                [&](auto&& type)
-            {
-                write(type);
-            });
+                {
+                    write(generic_param_stack.back()[var.index]);
+                },
+                    [&](auto&& type)
+                {
+                    write(type);
+                });
         }
 
         void write(TypeSig const& signature)
@@ -478,21 +478,26 @@ namespace xlang
             write(value.Signature().Type());
         }
 
+        void write_root_include(std::string_view const& include)
+        {
+            auto format = R"(#include %winrt/%.h%
+)";
+
+            write(format,
+                settings.brackets ? '<' : '\"',
+                include,
+                settings.brackets ? '>' : '\"');
+        }
+
         void write_depends(std::string_view const& ns, char impl = 0)
         {
             if (impl)
             {
-                auto format = R"(#include "%/impl/%.%.h"
-)";
-
-                write(format, settings.root, ns, impl);
+                write_root_include(write_temp("impl/%.%", ns, impl));
             }
             else
             {
-                auto format = R"(#include "%/%.h"
-)";
-
-                write(format, settings.root, ns);
+                write_root_include(ns);
             }
         }
 
@@ -512,12 +517,12 @@ namespace xlang
                 return;
             }
 
-            write("#include \"%/%.h\"\n", settings.root, parent);
+            write_root_include(parent);
         }
 
         void save_header(char impl = 0)
         {
-            auto filename{ settings.output_folder + settings.root + "/" };
+            auto filename{ settings.output_folder + "winrt/" };
 
             if (impl)
             {
@@ -534,16 +539,6 @@ namespace xlang
 
             filename += ".h";
             flush_to_file(filename);
-        }
-
-        bool skip_flush_to_file(std::string const& filename) const
-        {
-            if (!settings.component)
-            {
-                return false;
-            }
-
-            return file_equal(filename);
         }
     };
 }

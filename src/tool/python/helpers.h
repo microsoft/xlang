@@ -909,14 +909,18 @@ namespace xlang
 
         return (category == param_category::in
             || category == param_category::pass_array
-            || category == param_category::fill_array);
+            // Note, fill array acts as in and out param in Python
+            || category == param_category::fill_array); 
     }
 
     bool is_out_param(method_signature::param_t const& param)
     {
         auto category = get_param_category(param);
 
-        return (category == param_category::out || category == param_category::receive_array);
+        return (category == param_category::out 
+            || category == param_category::receive_array
+            // Note, fill array acts as in and out param in Python
+            || category == param_category::fill_array);
     }
 
     int count_in_param(std::vector<method_signature::param_t> const& params)

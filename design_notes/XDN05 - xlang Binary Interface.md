@@ -83,6 +83,10 @@ IUnknown is the root COM interface in any COM-based system. It provides function
 capabilities - navigating an object's capabilities and managing the object's lifetime. All COM
 interfaces derive from IUnknown and all objects in any COM based system must implement these methods.
 
+For any given object instance, a call to QueryInterface with IUnknown GUID identifier must always
+return the same physical pointer value. This allows you to call QueryInterface on any two interfaces
+and compare the results to determine whether they point to the same instance of an object.
+
 ``` cpp
 // IUnknown GUID identifier: 00000000-0000-0000-C000-000000000046
 struct IUnknown
@@ -150,6 +154,7 @@ enum XlangObjectInfoCategory
 struct IXlangObject
 {
     bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info);
+    bool Equals(IXlangObject* object);
 };
 ```
 
@@ -168,7 +173,7 @@ If a given object does not support a requested object information category, it r
 GetObjectInfo and sets the info parameter value to null.
 
 Having a single GetObjectInfo method has two primary benefits over the IInspectable approach. Because
-enums can be additively versioned over time, it is possible to add new ones over time. Since
+enumerations can be additively versioned over time, it is possible to add new ones over time. Since
 supporting a given information category is optional, adding new ones would not break existing
 objects. Furthermore, it reduces the size of the virtual function table that every xlang object
 needs to support.
@@ -205,13 +210,12 @@ TypeName in order to be usable from dynamic languages.
 
 #### String Representation
 
-Most mainstream languages including
-[JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/toString),
-[Python](https://docs.python.org/3/library/stdtypes.html#str),
-[.NET](https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7.2),
-[Java](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#toString()) and
-[Objective-C](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1418746-description)
-have a mechanism to retrieve the string representation of an object.
+This information category should only be supported for types that wish to return a custom value for
+a language projection's equivalent of GetHashCode. Language projections may choose to fall back to
+a hash code derived from the object's reference identification (such as a C++ pointer) if HashCode
+is not supported by a given object.
+
+#### String Representation
 
 The StringRepresentation information category retrieves the string representation of the object in
 question. The property type for StringRepresentation is an xlang_string.
@@ -234,7 +238,17 @@ The property type for ObjectSize is an unsigned 32-bit integer.
 
 ### Object Equality
 
-> TODO [xlang issue #133](https://github.com/Microsoft/xlang/issues/133)
+Each xlang object implements the IUnknown interface. Therefore, it is possible to compare references
+for equality as described in the [IUnknown Remarks section](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nf-unknwn-iunknown-queryinterface%28refiid_void%29).
+In summary, the following steps can be used to decide if two references (`a` and `b`) are referring
+to the same object:
+* Call `QueryInterface` on `a` asking for the `IUnknown` interface
+* Call `QueryInterface` on `b` asking for the `IUnknown` interface
+* Compare if the two IUnknown pointer values returned from QueryInterface above are the same
+
+The above provides reference equality of objects, that may be suitable exposed by language projections.
+In addition, the type system may provide specific methods or interfaces to compare objects for
+value equality. This is not specifically addressed by the binary interface.
 
 ## Weak References
 

@@ -166,6 +166,24 @@ namespace winrt::impl
     {
         *value = nullptr;
     }
+
+    template <typename T>
+    void zero_abi(void* ptr, uint32_t const capacity) noexcept
+    {
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            memset(ptr, 0, sizeof(T) * capacity);
+        }
+    }
+
+    template <typename T>
+    void zero_abi(void* ptr) noexcept
+    {
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            memset(ptr, 0, sizeof(T));
+        }
+    }
 }
 
 namespace winrt
@@ -1223,6 +1241,13 @@ namespace winrt
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
 
+#ifdef _DEBUG
+        implements() noexcept
+        {
+            WINRT_ASSERT(!is_stack_object());
+        }
+#endif
+
         weak_ref<D> get_weak()
         {
             return root_implements_type::template get_weak<D>();
@@ -1284,6 +1309,18 @@ namespace winrt
         }
 
     private:
+
+#ifdef _DEBUG
+        bool is_stack_object() const noexcept
+        {
+            uintptr_t low_limit{};
+            uintptr_t high_limit{};
+            WINRT_GetCurrentThreadStackLimits(&low_limit, &high_limit);
+            uintptr_t const address = reinterpret_cast<uintptr_t>(this);
+            return (low_limit <= address) && (address < high_limit);
+        }
+#endif
+
         impl::unknown_abi* get_unknown() const noexcept override
         {
             return reinterpret_cast<impl::unknown_abi*>(to_abi<typename impl::implements_default_interface<D>::type>(this));

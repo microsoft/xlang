@@ -57,7 +57,7 @@ namespace xlang::impl
     std::unique_ptr<cache_string, xlang_mem_deleter> cache_string::create(char_type const* source_string, uint32_t length)
     {
         static_assert(std::disjunction_v<std::is_same<char_type, xlang_char8>, std::is_same<char_type, char16_t>>, "char_t must be either xlang_char8 or char16_t");
-        using alternate_char_type = typename alternate_type<char_type>::result_type;
+        using alternate_char_type = alternate_string_type_t<char_type>;
         uint32_t alternate_length = get_converted_length({ source_string, length });
 
         auto packed_size = packed_buffer_size<cache_string, alternate_char_type>(alternate_length);

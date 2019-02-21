@@ -136,8 +136,8 @@ namespace xlang
 
     static void write_module_g_cpp(writer& w, std::vector<TypeDef> const& classes)
     {
-        auto format = R"(#include "winrt/base.h"
-%
+        w.write_root_include("base");
+        auto format = R"(%
 bool WINRT_CALL %_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
@@ -381,8 +381,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         if (has_factory_members(w, type))
         {
-            auto format = R"(
-void* winrt_make_%()
+            auto format = R"(void* winrt_make_%()
 {
     return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
 }
@@ -562,7 +561,7 @@ void* winrt_make_%()
                 {
                     format = R"(    % %::%(%) const noexcept
     {
-        return get_self<@::implementation::%>(*this)->%(%);
+        %get_self<@::implementation::%>(*this)->%(%);
     }
 )";
                 }
@@ -570,7 +569,7 @@ void* winrt_make_%()
                 {
                     format = R"(    % %::%(%) const
     {
-        return get_self<@::implementation::%>(*this)->%(%);
+        %get_self<@::implementation::%>(*this)->%(%);
     }
 )";
                 }
@@ -580,6 +579,7 @@ void* winrt_make_%()
                     type_name,
                     method_name,
                     bind<write_consume_params>(signature),
+                    signature.return_signature() ? "return " : "",
                     type_namespace,
                     type_name,
                     method_name,
@@ -599,6 +599,7 @@ void* winrt_make_%()
                         type_name,
                         method_name,
                         bind<write_consume_params>(signature),
+                        type_name,
                         method_name,
                         method_name,
                         bind<write_consume_args>(signature));
@@ -1083,15 +1084,30 @@ namespace winrt::@::implementation
 
     static void write_component_cpp(writer& w, TypeDef const& type)
     {
-        auto format = R"(#include "%.h"
+        auto filename = get_component_filename(type);
 
+        {
+            auto format = R"(#include "%.h"
+)";
+
+            w.write(format, filename);
+        }
+
+        if (settings.component_opt)
+        {
+            auto format = R"(#include "%.g.cpp"
+)";
+
+            w.write(format, filename);
+        }
+
+        auto format = R"(
 namespace winrt::@::implementation
 {
 %}
 )";
 
         w.write(format,
-            get_component_filename(type),
             type.TypeNamespace(),
             bind<write_component_member_definitions>(type));
     }
