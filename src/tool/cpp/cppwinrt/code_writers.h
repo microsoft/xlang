@@ -451,7 +451,7 @@ namespace xlang
         w.abi_types = true;
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
 
@@ -568,7 +568,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
             auto param_name = param.Name();
@@ -587,7 +587,7 @@ namespace xlang
                 }
                 else
                 {
-                    format = "%.size(), get_abi(%)";
+                    format = "%.size(), put_abi(%)";
                 }
 
                 w.write(format, param_name, param_name);
@@ -785,7 +785,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : signature.params())
+        for (auto&& [param, param_signature] : signature.params())
         {
             s();
 
@@ -849,7 +849,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
 
@@ -977,7 +977,7 @@ namespace xlang
     {
         separator s{ w };
 
-        for (auto&&[param, param_signature] : signature.params())
+        for (auto&& [param, param_signature] : signature.params())
         {
             s();
             w.write(param.Name());
@@ -1308,65 +1308,102 @@ namespace xlang
         write_abi_params(w, signature);
     }
 
-    static void write_produce_cleanup_param(writer& w, TypeSig const& signature, std::string_view const& param_name, bool out)
+    template <typename T>
+    static void write_produce_cleanup_param(writer& w, T const& param_signature, std::string_view const& param_name, bool out)
     {
-        if (signature.is_szarray())
-        {
-            auto format = R"(            *__%Size = 0;
-                *% = nullptr;
-)";
-
-            w.write(format,
-                param_name,
-                param_name);
-
-            return;
-        }
-
+        TypeSig const& signature = param_signature.Type();
+        w.abi_types = false;
         bool clear{};
         bool optional{};
+        bool zero{};
 
         call(signature.Type(),
             [&](ElementType type)
-        {
-            if (out && type == ElementType::Object)
             {
-                optional = true;
-            }
-            else if (type == ElementType::String || type == ElementType::Object)
+                if (out && type == ElementType::Object)
+                {
+                    optional = true;
+                }
+                else if (type == ElementType::String || type == ElementType::Object)
+                {
+                    clear = true;
+                }
+            },
+            [&](coded_index<TypeDefOrRef> const& index)
+            {
+                XLANG_ASSERT(index.type() == TypeDefOrRef::TypeDef || index.type() == TypeDefOrRef::TypeRef);
+
+                TypeDef type;
+
+                if (index.type() == TypeDefOrRef::TypeDef)
+                {
+                    type = index.TypeDef();
+                }
+                else if (index.type() == TypeDefOrRef::TypeRef)
+                {
+                    type = find(index.TypeRef());
+                }
+
+                if (type)
+                {
+                    auto category = get_category(type);
+
+                    clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
+                    zero = category == category::struct_type;
+                }
+            },
+            [&](GenericTypeIndex const&)
+            {
+                clear = true;
+            },
+            [&](GenericTypeInstSig const&)
+            {
+                clear = true;
+            });
+
+        if (signature.is_szarray())
+        {
+            if (param_signature.ByRef())
             {
                 clear = true;
             }
-        },
-            [&](coded_index<TypeDefOrRef> const& index)
+            else if (optional || clear)
+            {
+                clear = false;
+                zero = true;
+            }
+        }
+
+        if (clear)
         {
-            XLANG_ASSERT(index.type() == TypeDefOrRef::TypeDef || index.type() == TypeDefOrRef::TypeRef);
+            auto format = R"(            clear_abi(%);
+)";
 
-            TypeDef type;
-
-            if (index.type() == TypeDefOrRef::TypeDef)
-            {
-                type = index.TypeDef();
-            }
-            else if (index.type() == TypeDefOrRef::TypeRef)
-            {
-                type = find(index.TypeRef());
-            }
-
-            if (type)
-            {
-                auto category = get_category(type);
-
-                clear = category == category::class_type || category == category::interface_type || category == category::delegate_type;
-            }
-        },
-            [&](GenericTypeInstSig const&)
+            w.write(format, param_name);
+        }
+        else if (zero)
         {
-            clear = true;
-        },
-            [](auto&&) {});
+            if (signature.is_szarray())
+            {
+                auto format = R"(            zero_abi<%>(%, __%Size);
+)";
 
-        if (optional)
+                w.write(format,
+                    signature.Type(),
+                    param_name,
+                    param_name);
+            }
+            else
+            {
+                auto format = R"(            zero_abi<%>(%);
+)";
+
+                w.write(format,
+                    signature.Type(),
+                    param_name);
+            }
+        }
+        else if (optional)
         {
             auto format = R"(            if (%) *% = nullptr;
             Windows::Foundation::IInspectable winrt_impl_%;
@@ -1374,30 +1411,23 @@ namespace xlang
 
             w.write(format, param_name, param_name, param_name);
         }
-        else if (clear)
-        {
-            auto format = R"(            *% = nullptr;
-)";
-
-            w.write(format, param_name);
-        }
     }
 
     static void write_produce_cleanup(writer& w, method_signature const& method_signature)
     {
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
-            if (param.Flags().In() || !param_signature->ByRef())
+            if (param.Flags().In())
             {
                 continue;
             }
 
-            write_produce_cleanup_param(w, param_signature->Type(), param.Name(), true);
+            write_produce_cleanup_param(w, *param_signature, param.Name(), true);
         }
 
         if (method_signature.return_signature())
         {
-            write_produce_cleanup_param(w, method_signature.return_signature().Type(), method_signature.return_param_name(), false);
+            write_produce_cleanup_param(w, method_signature.return_signature(), method_signature.return_param_name(), false);
         }
     }
 
@@ -1406,7 +1436,7 @@ namespace xlang
         w.abi_types = false;
         separator s{ w };
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             s();
             auto param_name = param.Name();
@@ -1510,7 +1540,7 @@ namespace xlang
                 bind<write_produce_args>(method_signature));
         }
 
-        for (auto&&[param, param_signature] : method_signature.params())
+        for (auto&& [param, param_signature] : method_signature.params())
         {
             if (param.Flags().Out() && !param_signature->Type().is_szarray() && is_object(param_signature->Type()))
             {
@@ -1671,7 +1701,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 {
 %};)";
 
-        for (auto&&[interface_name, info] : get_interfaces(w, class_type))
+        for (auto&& [interface_name, info] : get_interfaces(w, class_type))
         {
             if (info.overridable && !info.base)
             {
@@ -1706,7 +1736,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override_methods(writer& w, TypeDef const& class_type)
     {
-        for (auto&&[interface_name, info] : get_interfaces(w, class_type))
+        for (auto&& [interface_name, info] : get_interfaces(w, class_type))
         {
             if (info.overridable && !info.base)
             {
@@ -1721,7 +1751,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool found{};
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             if (info.overridable)
             {
@@ -1740,7 +1770,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool found{};
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             if (!info.overridable)
             {
@@ -1754,7 +1784,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool first{ true };
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             if (!info.overridable)
             {
@@ -1789,7 +1819,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
 )";
 
-        for (auto&&[factory_name, factory] : factories)
+        for (auto&& [factory_name, factory] : factories)
         {
             if (!factory.composable)
             {
@@ -1826,7 +1856,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 %    };
 )";
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (info.overridable && !info.base)
             {
@@ -1845,7 +1875,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         std::map<std::string_view, std::set<std::string>> method_usage;
 
-        for (auto&&[interface_name, info] : required_interfaces)
+        for (auto&& [interface_name, info] : required_interfaces)
         {
             for (auto&& method : info.type.MethodList())
             {
@@ -1853,7 +1883,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             }
         }
 
-        for (auto&&[method_name, interfaces] : method_usage)
+        for (auto&& [method_name, interfaces] : method_usage)
         {
             if (interfaces.size() <= 1)
             {
@@ -1874,7 +1904,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto factories = get_factories(w, type);
         bool has_composable_factories{};
 
-        for (auto&&[interface_name, factory] : factories)
+        for (auto&& [interface_name, factory] : factories)
         {
             if (factory.composable && !empty(factory.type.MethodList()))
             {
@@ -1925,7 +1955,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         w.write(",\n        impl::require<%", type);
 
-        for (auto&&[name, info] : interfaces)
+        for (auto&& [name, info] : interfaces)
         {
             w.write(", %", name);
         }
@@ -1940,7 +1970,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         interfaces_plus_self[std::string{ type_name }] = interface_info{ type };
         std::map<std::string_view, std::set<std::string>> method_usage;
 
-        for (auto&&[interface_name, info] : interfaces_plus_self)
+        for (auto&& [interface_name, info] : interfaces_plus_self)
         {
             for (auto&& method : info.type.MethodList())
             {
@@ -1948,7 +1978,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             }
         }
 
-        for (auto&&[method_name, interfaces] : method_usage)
+        for (auto&& [method_name, interfaces] : method_usage)
         {
             if (interfaces.size() <= 1)
             {
@@ -1972,7 +2002,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto default_interface_name = w.write_temp("%", default_interface);
         std::map<std::string_view, std::set<std::string>> method_usage;
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (info.defaulted && !info.base)
             {
@@ -1990,7 +2020,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             }
         }
 
-        for (auto&&[method_name, interfaces] : method_usage)
+        for (auto&& [method_name, interfaces] : method_usage)
         {
             if (interfaces.size() <= 1)
             {
@@ -2406,7 +2436,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool first{ true };
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (!info.defaulted || info.base)
             {
@@ -2430,7 +2460,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         bool first{ true };
 
-        for (auto&&[interface_name, info] : get_interfaces(w, type))
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
         {
             if (!is_exclusive(info.type) && !info.base)
             {
@@ -2475,7 +2505,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         auto type_name = type.TypeName();
 
-        for (auto&&[factory_name, factory] : factories)
+        for (auto&& [factory_name, factory] : factories)
         {
             if (factory.activatable)
             {
@@ -2658,7 +2688,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         auto type_name = type.TypeName();
 
-        for (auto&&[interface_name, factory] : get_factories(w, type))
+        for (auto&& [interface_name, factory] : get_factories(w, type))
         {
             if (factory.activatable)
             {

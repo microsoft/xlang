@@ -233,10 +233,17 @@ The property type for ObjectSize is an unsigned 32-bit integer.
 
 ### Object Equality
 
-Returns true if the provided object parameter is equal to the current object. By default, this
-should default to reference equality - i.e. the object parameter is the same object instance as
-the Equals callee. However, types may customize their implementation of Equals in order to provide
-value semantics.
+Each xlang object implements the IUnknown interface. Therefore, it is possible to compare references
+for equality as described in the [IUnknown Remarks section](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nf-unknwn-iunknown-queryinterface%28refiid_void%29).
+In summary, the following steps can be used to decide if two references (`a` and `b`) are referring
+to the same object:
+* Call `QueryInterface` on `a` asking for the `IUnknown` interface
+* Call `QueryInterface` on `b` asking for the `IUnknown` interface
+* Compare if the two IUnknown pointer values returned from QueryInterface above are the same
+
+The above provides reference equality of objects, that may be suitable exposed by language projections.
+In addition, the type system may provide specific methods or interfaces to compare objects for
+value equality. This is not specifically addressed by the binary interface.
 
 ## Weak References
 
