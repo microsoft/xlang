@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "catch.hpp"
-#include "Composable_h.h"
 
 using namespace winrt;
 using namespace Windows::Foundation;
