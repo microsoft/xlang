@@ -168,7 +168,7 @@ namespace winrt::impl
     }
 
     template <typename T>
-    void zero_abi(void* ptr, uint32_t const capacity) noexcept
+    void zero_abi([[maybe_unused]] void* ptr, [[maybe_unused]] uint32_t const capacity) noexcept
     {
         if constexpr (!std::is_trivially_destructible_v<T>)
         {
@@ -177,7 +177,7 @@ namespace winrt::impl
     }
 
     template <typename T>
-    void zero_abi(void* ptr) noexcept
+    void zero_abi([[maybe_unused]] void* ptr) noexcept
     {
         if constexpr (!std::is_trivially_destructible_v<T>)
         {

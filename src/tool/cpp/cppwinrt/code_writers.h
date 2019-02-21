@@ -1363,7 +1363,11 @@ namespace xlang
 
         if (signature.is_szarray())
         {
-            if (param_signature.ByRef())
+            if constexpr (std::is_same_v<RetTypeSig, T>)
+            {
+                clear = true;
+            }
+            else if (param_signature.ByRef())
             {
                 clear = true;
             }
