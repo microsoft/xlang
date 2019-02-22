@@ -45,6 +45,9 @@ namespace rgm
 			case TypeLayout::AutoLayout:
 				write("auto");
 				break;
+			case TypeLayout::SequentialLayout:
+				write("sequential");
+				break;
 			default:
 				throw_invalid("invalid TypeLayout");
 			}
