@@ -154,19 +154,13 @@ namespace xlang::meta::reader
         uint32_t index;
     };
 
-	inline ElementType parse_element_type(table_base const* table, byte_view& data)
-	{
-		auto cursor = data;
-		return uncompress_enum<ElementType>(cursor);
-	}
-
     struct TypeSig
     {
         using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>;
         TypeSig(table_base const* table, byte_view& data)
             : m_is_szarray(parse_szarray(table, data))
             , m_cmod(parse_cmods(table, data))
-			, m_element_type(parse_element_type(table, data))
+			, m_element_type(parse_element_type(data))
             , m_type(ParseType(table, data))
         {}
 
@@ -186,6 +180,12 @@ namespace xlang::meta::reader
         }
 
     private:
+		static ElementType parse_element_type(byte_view& data)
+		{
+			auto cursor = data;
+			return uncompress_enum<ElementType>(cursor);
+		}
+
         static value_type ParseType(table_base const* table, byte_view& data);
         bool m_is_szarray;
         std::vector<CustomModSig> m_cmod;
@@ -378,6 +378,11 @@ namespace xlang::meta::reader
         {
             return m_type;
         }
+
+		CallingConvention CallConvention() const noexcept
+		{
+			return m_calling_convention;
+		}
 
     private:
         static CallingConvention check_convention(byte_view& data)
