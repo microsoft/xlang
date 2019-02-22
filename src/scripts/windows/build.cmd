@@ -15,7 +15,6 @@ goto :init
     echo.  -v, --verbose            shows detailed output
     echo.  -f, --force-cmake        forces re-run of CMake
     echo.  -b, --build-type value   specify build type (Debug, Release, RelWithDebInfo, MinSizeRel)
-    echo.  --build-arch value       specify build architecture (x86 or x64)
     echo.  --build-version value    specify build semantic version number
     goto :eof
 
@@ -24,7 +23,6 @@ goto :init
     set "OPT_VERBOSE="
     set "OPT_FORCE_CMAKE="
     set "BUILD_TYPE=Debug"
-    set "BUILD_ARCH=%VSCMD_ARG_TGT_ARCH%"
     set "BUILD_VERSION=1.0.0"
     set "BUILD_TARGET="
 
@@ -50,8 +48,6 @@ goto :init
     if /i "%~1"=="-b"               set "BUILD_TYPE=%~2"   & shift & shift & goto :parse
     if /i "%~1"=="--build-type"     set "BUILD_TYPE=%~2"   & shift & shift & goto :parse
 
-    if /i "%~1"=="--build-arch"     set "BUILD_ARCH=%~2"   & shift & shift & goto :parse
-
     if /i "%~1"=="--build-version"  set "BUILD_VERSION=%~2"   & shift & shift & goto :parse
 
     if not defined Target           set "BUILD_TARGET=%~1"     & shift & goto :parse
@@ -62,14 +58,14 @@ goto :init
 :main
 
     set SRC_PATH=%REPO_ROOT_PATH%\src
-    set BUILD_PATH=%REPO_ROOT_PATH%\_build\Windows\%BUILD_ARCH%\%BUILD_TYPE%
+    set BUILD_PATH=%REPO_ROOT_PATH%\_build\Windows\%VSCMD_ARG_TGT_ARCH%\%BUILD_TYPE%
 
     set "RUN_CMAKE="
     if defined OPT_FORCE_CMAKE                  set "RUN_CMAKE=yes"
     if not exist "%BUILD_PATH%/CMakeCache.txt"  set "RUN_CMAKE=yes"
 
     if defined RUN_CMAKE (
-        cmake "%SRC_PATH%" "-B%BUILD_PATH%" -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DXLANG_BUILD_ARCH=%BUILD_ARCH% -DXLANG_BUILD_VERSION=%BUILD_VERSION% "-DCMAKE_INSTALL_PREFIX=%BUILD_PATH%/Install"
+        cmake "%SRC_PATH%" "-B%BUILD_PATH%" -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DXLANG_BUILD_VERSION=%BUILD_VERSION% "-DCMAKE_INSTALL_PREFIX=%BUILD_PATH%/Install"
     )
 
     ninja -C "%BUILD_PATH%" %OPT_VERBOSE% %BUILD_TARGET%

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.9)
 if (WIN32)
 
 file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
-file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${XLANG_BUILD_ARCH}/${CMAKE_BUILD_TYPE}" cppwinrt_natvis_dir)
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/$ENV{VSCMD_ARG_TGT_ARCH}/${CMAKE_BUILD_TYPE}" cppwinrt_natvis_dir)
 file(TO_NATIVE_PATH ${cppwinrt_natvis_dir}/cppwinrtvisualizer.dll cppwinrtvisualizer_dll)
 
 set(build_visualizer msbuild ${CMAKE_CURRENT_SOURCE_DIR}/cppwinrtvisualizer.vcxproj /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE})
