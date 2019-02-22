@@ -523,11 +523,6 @@ namespace xlang
     {
         TypeSig const& return_signature = signature.return_signature().Type();
 
-        if (return_signature.is_szarray())
-        {
-            return false;
-        }
-
         if (std::holds_alternative<GenericTypeInstSig>(return_signature.Type()))
         {
             return true;
@@ -632,11 +627,11 @@ namespace xlang
 
             if (type.is_szarray())
             {
-                w.write("impl::put_size_abi(%), put_abi(%)", param_name, param_name);
+                w.write("&%_impl_size, &%", param_name, param_name);
             }
             else
             {
-                if (!can_take_ownership_of_return_type(method_signature) && wrap_abi(method_signature.return_signature().Type()))
+                if (!can_take_ownership_of_return_type(method_signature) && wrap_abi(type))
                 {
                     w.write("put_abi(%)", param_name);
                 }
@@ -939,7 +934,22 @@ namespace xlang
             return;
         }
 
-        if (can_take_ownership_of_return_type(signature))
+        if (signature.return_signature().Type().is_szarray())
+        {
+            auto format = R"(
+        uint32_t %_impl_size;
+        %* %;)";
+
+            w.abi_types = true;
+
+            w.write(format,
+                signature.return_param_name(),
+                signature.return_signature(),
+                signature.return_param_name());
+
+            w.abi_types = false;
+        }
+        else if (can_take_ownership_of_return_type(signature))
         {
             auto format = "\n        void* %;";
             w.write(format, signature.return_param_name());
@@ -963,7 +973,13 @@ namespace xlang
             return;
         }
 
-        if (can_take_ownership_of_return_type(signature))
+        if (signature.return_signature().Type().is_szarray())
+        {
+            w.write("\n        return { %, %_impl_size, take_ownership_from_abi };",
+                signature.return_param_name(),
+                signature.return_param_name());
+        }
+        else if (can_take_ownership_of_return_type(signature))
         {
             w.write("\n        return { %, take_ownership_from_abi };", signature.return_param_name());
         }
