@@ -346,6 +346,11 @@ namespace rgm
 			write_param_name(param.first.Name());
 		}
 
+		void write(GenericParam const& param)
+		{
+			write(param.Name());
+		}
+
 		void write(RetTypeSig const& signature)
 		{
 			write(signature.Type());

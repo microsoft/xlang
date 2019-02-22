@@ -206,6 +206,32 @@ Options:
 		w.write("}\n\n");
 	}
 
+	static void write_generic_params(writer& w, std::pair<GenericParam, GenericParam> const& params)
+	{
+		if (params.first != params.second)
+		{
+			w.write("<%>", bind_list(",", params));
+		}
+	}
+
+	static void write_delegate(writer& w, TypeDef const& type)
+	{
+		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Class);
+		auto guard{ w.push_generic_params(type.GenericParam()) };
+
+		// TODO write generic params
+		w.write(".class % % % %%%.%% extends [mscorlib]System.MulticastDelegate\n{\n",
+			type.Flags().Visibility(),
+			type.Flags().Layout(),
+			type.Flags().StringFormat(),
+			bind<write_if_true>(type.Flags().WindowsRuntime(), "windowsruntime "),
+			bind<write_if_true>(type.Flags().Sealed(), "sealed "),
+			type.TypeNamespace(),
+			type.TypeName(),
+			bind<write_generic_params>(type.GenericParam()));
+		w.write("}\n\n");
+	}
+
 
 	inline bool operator && (CallingConvention lhs, CallingConvention rhs)
 	{
@@ -218,6 +244,7 @@ Options:
 		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Interface);
 		auto guard{ w.push_generic_params(type.GenericParam()) };
 
+		// TODO write generic params
 		w.write(".class interface % %% % %%.%\n",
 			type.Flags().Visibility(),
 			bind<write_if_true>(type.Flags().Abstract(), "abstract "),
@@ -317,12 +344,10 @@ Options:
 
             for (auto&&[ns, members] : c.namespaces())
             { 
-                if (ns.compare(0, 18, "Windows.Foundation") == 0)
-                    continue;
-
 				//w.write_each<write_enum>(members.enums);
 				//w.write_each<write_struct>(members.structs);
-				w.write_each<write_interface>(members.interfaces);
+				w.write_each<write_delegate>(members.delegates);
+				//w.write_each<write_interface>(members.interfaces);
             }
         }
         catch (usage_exception const&)
