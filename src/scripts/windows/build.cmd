@@ -62,7 +62,7 @@ goto :init
 :main
 
     set SRC_PATH=%REPO_ROOT_PATH%\src
-    set BUILD_PATH=%SRC_PATH%\_build\Windows\%BUILD_ARCH%\%BUILD_TYPE%
+    set BUILD_PATH=%REPO_ROOT_PATH%\_build\Windows\%BUILD_ARCH%\%BUILD_TYPE%
 
     set "RUN_CMAKE="
     if defined OPT_FORCE_CMAKE                  set "RUN_CMAKE=yes"

@@ -26,7 +26,6 @@
     <TargetName>cppwinrtvisualizer</TargetName>
     <NugetPackagesDirectory>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)packages\))</NugetPackagesDirectory>
   </PropertyGroup>
-  <Import Project="packages.version.props" />
   <Import Project="Cpp.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -94,7 +93,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;VISUALIZER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);$(ConcordSDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/await</AdditionalOptions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -110,7 +109,6 @@
       <AdditionalDependencies>advapi32.lib;shell32.lib;windowsapp.lib;$(VsDebugEng_Lib);%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\cppwinrtvisualizer.def</ModuleDefinitionFile>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <StripPrivateSymbols>No</StripPrivateSymbols>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -120,7 +118,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;VISUALIZER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);$(ConcordSDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await</AdditionalOptions>
@@ -146,7 +144,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;VISUALIZER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);$(ConcordSDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await</AdditionalOptions>
@@ -174,7 +172,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;VISUALIZER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);$(ConcordSDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);..\..\library;$(DIASDKInc);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await</AdditionalOptions>
@@ -194,8 +192,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDebugEng.$(ConcordPackageVersion)\inc\VSDebugEng.h" />
-    <ClInclude Include="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDebugEng.$(ConcordPackageVersion)\inc\vsdebugeng.templates.h" />
+    <ClInclude Include="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDebugEng.*\inc\VSDebugEng.h" />
+    <ClInclude Include="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDebugEng.*\inc\vsdebugeng.templates.h" />
     <ClInclude Include="object_visualizer.h" />
     <ClInclude Include="cppwinrt_visualizer.h" />
     <ClInclude Include="property_visualizer.h" />
@@ -226,22 +224,25 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.version.props">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDConfigTool.*\content\vsdconfig.xsd">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDConfigTool.$(ConcordPackageVersion)\content\vsdconfig.xsd">
-      <SubType>Designer</SubType>
-    </None>
+    <Xsd Remove="vsdconfig.xsd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDConfigTool.$(ConcordPackageVersion)\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets" Condition="Exists('$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDConfigTool.$(ConcordPackageVersion)\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets')" />
-    <Import Project="$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDebugEng.$(ConcordPackageVersion)\Microsoft.VSSDK.Debugger.VSDebugEng.targets" Condition="Exists('$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDebugEng.$(ConcordPackageVersion)\Microsoft.VSSDK.Debugger.VSDebugEng.targets')" />
+    <Import Project="packages\Microsoft.VSSDK.Debugger.VSDConfigTool.16.0.2012201-preview\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets" Condition="Exists('packages\Microsoft.VSSDK.Debugger.VSDConfigTool.16.0.2012201-preview\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets')" />
+    <Import Project="packages\Microsoft.VSSDK.Debugger.VSDebugEng.16.0.2012201-preview\Microsoft.VSSDK.Debugger.VSDebugEng.targets" Condition="Exists('packages\Microsoft.VSSDK.Debugger.VSDebugEng.16.0.2012201-preview\Microsoft.VSSDK.Debugger.VSDebugEng.targets')" />
   </ImportGroup>
-  <Target Name="VerifyConcordNugetPackagesRestored" BeforeTargets="PrepareForBuild">
-    <Error Condition="!Exists('$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDConfigTool.$(ConcordPackageVersion)\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets')" Text="Could not find Microsoft.VSSDK.Debugger.VSDConfigTool.targets. Right click on the solution and restore NuGet packages." />
-    <Error Condition="!Exists('$(NugetPackagesDirectory)Microsoft.VSSDK.Debugger.VSDebugEng.$(ConcordPackageVersion)\Microsoft.VSSDK.Debugger.VSDebugEng.targets')" Text="Could not find Microsoft.VSSDK.Debugger.VSDebugEng.targets. Right click on the solution and restore NuGet packages." />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Microsoft.VSSDK.Debugger.VSDConfigTool.16.0.2012201-preview\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.VSSDK.Debugger.VSDConfigTool.16.0.2012201-preview\build\Microsoft.VSSDK.Debugger.VSDConfigTool.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.VSSDK.Debugger.VSDebugEng.16.0.2012201-preview\Microsoft.VSSDK.Debugger.VSDebugEng.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.VSSDK.Debugger.VSDebugEng.16.0.2012201-preview\Microsoft.VSSDK.Debugger.VSDebugEng.targets'))" />
   </Target>
 </Project>
