@@ -338,13 +338,20 @@ namespace rgm
 
 		void write(std::pair<Param, ParamSig const*> const& param)
 		{
+			XLANG_ASSERT(param.first.Flags().In() != param.first.Flags().Out());
+
 			write("[%] % ", 
-				param.second->ByRef() ? "out" : "in",
+				param.first.Flags().In() ? "in" : "out",
 				param.second->Type());
 			write_param_name(param.first.Name());
 		}
 
 		void write(RetTypeSig const& signature)
+		{
+			write(signature.Type());
+		}
+
+		void write(PropertySig const& signature)
 		{
 			write(signature.Type());
 		}

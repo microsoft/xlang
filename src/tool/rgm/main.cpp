@@ -206,6 +206,13 @@ Options:
 		w.write("}\n\n");
 	}
 
+
+	inline bool operator && (CallingConvention lhs, CallingConvention rhs)
+	{
+		using T = std::underlying_type_t <CallingConvention>;
+		return (static_cast<T>(lhs) & static_cast<T>(rhs)) != 0;
+	}
+
 	static void write_interface(writer& w, TypeDef const& type)
 	{
 		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Interface);
@@ -253,7 +260,47 @@ Options:
 				method.ImplFlags().Managed());
 		}
 
-		// TODO props + events
+		for (auto&& prop : type.PropertyList())
+		{
+			w.write("  .property % % %()\n  {\n", 
+				(prop.Type().CallConvention() && CallingConvention::HasThis) ? "instance" : "static",
+				prop.Type(),
+				prop.Name());
+
+			for (auto&& method_semantic : prop.MethodSemantic())
+			{
+				auto method = method_semantic.Method();
+				method_signature signature{ method };
+				auto semantic = method_semantic.Semantic();
+				XLANG_ASSERT(semantic.Getter() || semantic.Setter());
+
+				if (semantic.Getter())
+				{
+					XLANG_ASSERT(signature.params().size() == 0);
+
+					w.write("    .get % % %.%::%()\n",
+						method.Flags().Static() ? "static" : "instance",
+						signature.return_signature(),
+						type.TypeNamespace(),
+						type.TypeName(),
+						method.Name());
+				}
+				else if (semantic.Setter())
+				{
+					XLANG_ASSERT(signature.params().size() == 1);
+
+					w.write("    .set % % %.%::%(%)\n",
+						method.Flags().Static() ? "static" : "instance",
+						signature.return_signature(),
+						type.TypeNamespace(),
+						type.TypeName(),
+						method.Name(),
+						signature.params()[0].second->Type());
+				}
+			}
+
+			w.write("  }\n");
+		}
 
 		w.write("}\n\n");
 	}
