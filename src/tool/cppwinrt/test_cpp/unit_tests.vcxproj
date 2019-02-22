@@ -112,7 +112,8 @@
       <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component.winmd -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>rem mt.exe -nologo -winmd:$(OutputPath)test_component.winmd -dll:test_component.dll -out:$(OutputPath)$(ProjectName).exe.manifest</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -137,7 +138,8 @@
       <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component.winmd -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>rem mt.exe -nologo -winmd:$(OutputPath)test_component.winmd -dll:test_component.dll -out:$(OutputPath)$(ProjectName).exe.manifest</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -162,7 +164,8 @@
       <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component.winmd -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>rem mt.exe -nologo -winmd:$(OutputPath)test_component.winmd -dll:test_component.dll -out:$(OutputPath)$(ProjectName).exe.manifest</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -191,7 +194,8 @@
       <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component.winmd -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>rem mt.exe -nologo -winmd:$(OutputPath)test_component.winmd -dll:test_component.dll -out:$(OutputPath)$(ProjectName).exe.manifest</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -228,6 +232,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="names.cpp" />
+    <ClCompile Include="noexcept.cpp" />
     <ClCompile Include="out_params.cpp" />
     <ClCompile Include="out_params_abi.cpp" />
     <ClCompile Include="pch.cpp">

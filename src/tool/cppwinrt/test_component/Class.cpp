@@ -239,20 +239,38 @@ namespace winrt::test_component::implementation
     {
         return { 1,2,3 };
     }
+
     com_array<hstring> Class::ReturnStringArray()
     {
         return { L"1", L"2", L"3" };
     }
+
     com_array<Windows::Foundation::IInspectable> Class::ReturnObjectArray()
     {
         return { make<Value>(1), make<Value>(2), make<Value>(3) };
     }
+
     com_array<Windows::Foundation::IStringable> Class::ReturnStringableArray()
     {
         return { make<Value>(1), make<Value>(2), make<Value>(3) };
     }
+
     com_array<Struct> Class::ReturnStructArray()
     {
         return { { L"1", L"2" }, { L"10", L"20" } };
+    }
+
+    void Class::NoexceptVoid() noexcept
+    {
+    }
+
+    int32_t Class::NoexceptInt32() noexcept
+    {
+        return 123;
+    }
+
+    hstring Class::NoexceptString() noexcept
+    {
+        return L"123";
     }
 }

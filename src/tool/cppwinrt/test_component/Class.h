@@ -63,6 +63,10 @@ namespace winrt::test_component::implementation
         com_array<Windows::Foundation::IStringable> ReturnStringableArray();
         com_array<Struct> ReturnStructArray();
 
+        void NoexceptVoid() noexcept;
+        int32_t NoexceptInt32() noexcept;
+        hstring NoexceptString() noexcept;
+
     private:
 
         bool m_fail{};

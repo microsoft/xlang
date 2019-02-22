@@ -1,5 +1,14 @@
 import "Windows.Foundation.idl";
 
+namespace Windows.Foundation.Metadata
+{
+    [attributeusage(target_method, target_property)]
+    [attributename("noexcept")]
+    attribute NoExceptionAttribute
+    {
+    }
+}
+
 namespace test_component
 {
     delegate void AgileDelegate();
@@ -73,5 +82,9 @@ namespace test_component
         Object[] ReturnObjectArray();
         Windows.Foundation.IStringable[] ReturnStringableArray();
         Struct[] ReturnStructArray();
+
+        [noexcept] void NoexceptVoid();
+        [noexcept] Int32 NoexceptInt32();
+        [noexcept] String NoexceptString();
     }
 }
