@@ -345,3 +345,4 @@ src/package/vsix/LICENSE
 
 build
 *.winmd
+*_h.h

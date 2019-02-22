@@ -36,7 +36,6 @@
     <ClCompile Include="Release.cpp" />
     <ClCompile Include="struct.cpp" />
     <ClCompile Include="weak.cpp" />
-    <ClCompile Include="natvis.cpp" />
     <ClCompile Include="as.cpp" />
     <ClCompile Include="param_iterable.cpp" />
     <ClCompile Include="single_threaded_map.cpp" />

@@ -220,13 +220,13 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">..\Composable</AdditionalIncludeDirectories>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</PrependWithABINamepsace>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">nul</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(ProjectName)_h.h</HeaderFileName>
     </Midl>
     <Midl>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">..\Composable</AdditionalIncludeDirectories>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</PrependWithABINamepsace>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">nul</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(ProjectName)_h.h</HeaderFileName>
     </Midl>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -257,7 +257,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>nul</HeaderFileName>
+      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -288,7 +288,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>nul</HeaderFileName>
+      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -317,7 +317,7 @@
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
-      <HeaderFileName>nul</HeaderFileName>
+      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -346,7 +346,7 @@
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
-      <HeaderFileName>nul</HeaderFileName>
+      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -378,7 +378,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>nul</HeaderFileName>
+      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -409,7 +409,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>nul</HeaderFileName>
+      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
