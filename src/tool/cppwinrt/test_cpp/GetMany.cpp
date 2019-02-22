@@ -69,4 +69,71 @@ TEST_CASE("GetMany")
         REQUIRE(buffer[2] == 0xCC);
         REQUIRE(buffer[3] == 0xCC);
     }
+
+    // The same tests but with a non-trivially destructible type...
+
+    // All
+    {
+        auto v = single_threaded_vector<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 3> buffer{ L"old", L"old", L"old" };
+        REQUIRE(3 == v.GetMany(0, buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+        REQUIRE(buffer[2] == L"3");
+    }
+    {
+        auto v = single_threaded_vector<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 3> buffer{ L"old", L"old", L"old" };
+        REQUIRE(3 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+        REQUIRE(buffer[2] == L"3");
+    }
+
+    // Less
+    {
+        auto v = single_threaded_vector<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 2> buffer{ L"old", L"old" };
+        REQUIRE(2 == v.GetMany(0, buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+    }
+    {
+        auto v = single_threaded_vector<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 2> buffer{ L"old", L"old" };
+        REQUIRE(2 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+    }
+
+    // More
+    {
+        auto v = single_threaded_vector<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 4> buffer{ L"old", L"old", L"old", L"old" };
+        REQUIRE(3 == v.GetMany(0, buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+        REQUIRE(buffer[2] == L"3");
+        REQUIRE(buffer[3] == L"");
+    }
+    {
+        auto v = single_threaded_vector<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 4> buffer{ L"old", L"old", L"old", L"old" };
+        REQUIRE(3 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+        REQUIRE(buffer[2] == L"3");
+        REQUIRE(buffer[3] == L"");
+    }
+
+    // Offset
+    {
+        auto v = single_threaded_vector<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 4> buffer{ L"old", L"old", L"old", L"old" };
+        REQUIRE(2 == v.GetMany(1, buffer));
+        REQUIRE(buffer[0] == L"2");
+        REQUIRE(buffer[1] == L"3");
+        REQUIRE(buffer[2] == L"");
+        REQUIRE(buffer[3] == L"");
+    }
 }
