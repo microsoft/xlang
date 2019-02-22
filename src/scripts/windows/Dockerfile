@@ -14,4 +14,5 @@ RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
     --add Microsoft.VisualStudio.Component.VSSDKBuildTools `
     --add Microsoft.VisualStudio.Component.VC.ATL `
     --add Microsoft.Net.Component.4.6.1.SDK `
+    --add Microsoft.Net.Component.4.5.2.TargetingPack `
     --installPath C:\BuildTools
