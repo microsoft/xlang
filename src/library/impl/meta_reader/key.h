@@ -9,6 +9,26 @@ namespace xlang::meta::reader
         return get_database().template get_table<Row>()[index()];
     }
 
+	inline auto typed_index<ResolutionScope>::Module() const
+	{
+		return get_row<reader::Module>();
+	}
+
+	inline auto typed_index<ResolutionScope>::ModuleRef() const
+	{
+		return get_row<reader::ModuleRef>();
+	}
+
+	inline auto typed_index<ResolutionScope>::AssemblyRef() const
+	{
+		return get_row<reader::AssemblyRef>();
+	}
+
+	inline auto typed_index<ResolutionScope>::TypeRef() const
+	{
+		return get_row<reader::TypeRef>();
+	}
+
     inline auto typed_index<TypeDefOrRef>::TypeDef() const
     {
         return get_row<reader::TypeDef>();

@@ -10,6 +10,16 @@ namespace xlang::meta::reader
         auto Property() const;
     };
 
+	template <> struct typed_index<ResolutionScope> : index_base<ResolutionScope>
+	{
+		using index_base<ResolutionScope>::index_base;
+
+		auto Module() const;
+		auto ModuleRef() const;
+		auto AssemblyRef() const;
+		auto TypeRef() const;
+	};
+
     template <> struct typed_index<TypeDefOrRef> : index_base<TypeDefOrRef>
     {
         using index_base<TypeDefOrRef>::index_base;
