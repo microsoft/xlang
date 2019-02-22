@@ -4,6 +4,7 @@ namespace rgm
 	using namespace xlang::text;
 	using namespace xlang::meta::reader;
 
+
 	struct writer : xlang::text::writer_base<writer>
 	{
 		using writer_base<writer>::write;
@@ -176,8 +177,8 @@ namespace rgm
 		{
 			switch (code_type)
 			{
-			case CodeType::IL: // should this be something else ?
-				write("il");
+			case CodeType::IL:
+				write("cil");
 				break;
 			case CodeType::Runtime:
 				write("runtime");
@@ -232,9 +233,19 @@ namespace rgm
 				write("float64"); break;
 			case ElementType::String:
 				write("string"); break;
+			case ElementType::Object:
+				write("object"); break;
+			case ElementType::End:
+			case ElementType::Void:
+				write("void"); break;
 			default:
 				throw_invalid("ElementType");
 			}
+		}
+
+		void write(AssemblyRef ref)
+		{
+			write("[%]", ref.Name());
 		}
 
 		void write(coded_index<ResolutionScope> const& scope)
@@ -243,8 +254,11 @@ namespace rgm
 			{
 			case ResolutionScope::Module:
 				break;
+			case ResolutionScope::AssemblyRef:
+				write(scope.AssemblyRef());
+				break;
 			default:
-				throw_invalid("not impl");
+				throw_invalid("coded_index<ResolutionScope>");
 			}
 		}
 
@@ -265,32 +279,69 @@ namespace rgm
 			case TypeDefOrRef::TypeDef:
 				write(type.TypeDef());
 				break;
-
 			case TypeDefOrRef::TypeRef:
 				write(type.TypeRef());
+				break;
+			case TypeDefOrRef::TypeSpec:
+				write(type.TypeSpec().Signature().GenericTypeInst());
 				break;
 			default:
 				throw_invalid("TypeDefOrRef");
 			}
 		}
 
-		void write(GenericTypeIndex const&)
+		void write(GenericTypeIndex const& var)
 		{
-			throw_invalid("GenericTypeIndex");
+			write(generic_param_stack.back()[var.index]);
 		}
 
-		void write(GenericTypeInstSig const&)
+		void write(GenericTypeInstSig const& type)
 		{
-			throw_invalid("GenericTypeInstSig");
+			write("%<%>", type.GenericType(), bind_list(", ", type.GenericArgs()));
 		}
 
 		void write(TypeSig const& signature)
 		{
+			switch (signature.element_type())
+			{
+			case ElementType::ValueType:
+				write("valuetype ");
+				break;
+			case ElementType::Class:
+				write("class ");
+				break;
+			}
+
 			call(signature.Type(),
 				[&](auto&& type)
 			{
 				write(type);
 			});
+
+			if (signature.is_szarray())
+			{
+				write("[]");
+			}
+		}
+
+		void write_param_name(std::string_view const& name)
+		{
+			if (name == "value")
+			{
+				write("'%'", name);
+			}
+			else
+			{
+				write(name);
+			}
+		}
+
+		void write(std::pair<Param, ParamSig const*> const& param)
+		{
+			write("[%] % ", 
+				param.second->ByRef() ? "out" : "in",
+				param.second->Type());
+			write_param_name(param.first.Name());
 		}
 
 		void write(RetTypeSig const& signature)
@@ -303,6 +354,7 @@ namespace rgm
 	{
 		writer& w;
 		std::string_view _separator{ ", " };
+		std::string_view _prefix{ };
 		bool first{ true };
 
 		void operator()()
@@ -310,6 +362,7 @@ namespace rgm
 			if (first)
 			{
 				first = false;
+				w.write(_prefix);
 			}
 			else
 			{

@@ -151,6 +151,8 @@ Options:
 
 	static void write_enum(writer& w, TypeDef const& type)
 	{
+		//TODO: Flag enum support
+
 		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Class);
 		auto guard{ w.push_generic_params(type.GenericParam()) };
 
@@ -209,7 +211,7 @@ Options:
 		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Interface);
 		auto guard{ w.push_generic_params(type.GenericParam()) };
 
-		w.write(".class interface % %% % %%.%\n{\n",
+		w.write(".class interface % %% % %%.%\n",
 			type.Flags().Visibility(),
 			bind<write_if_true>(type.Flags().Abstract(), "abstract "),
 			type.Flags().Layout(),
@@ -218,14 +220,22 @@ Options:
 			type.TypeNamespace(),
 			type.TypeName());
 
-		separator s{ w, "\n" };
+		separator s{ w, "                  ", "       implements " };
+		for (auto&& interface_impl : type.InterfaceImpl())
+		{
+			s();
+			w.write("%\n", interface_impl.Interface());
+		}
+		w.write("{\n");
+
+		// TODO: Guid Custom Attribute
+
 		for (auto&& method : type.MethodList())
 		{
 			method_signature signature{ method };
 
-			s();
 			w.write(R"(  .method % %% %%%
-          % % % () % %
+          % % % (%) % %
   {
   }
 )",
@@ -238,15 +248,20 @@ Options:
 				method.Flags().Static() ? "static" : "instance",
 				signature.return_signature(),
 				method.Name(),
-				method.ImplFlags().Managed(),
-				method.ImplFlags().CodeType());
+				bind_list(",\n                  ", signature.params()),
+				method.ImplFlags().CodeType(),
+				method.ImplFlags().Managed());
 		}
+
+		// TODO props + events
+
 		w.write("}\n\n");
 	}
 
     static void run(int const argc, char** argv)
     {
         writer w;
+		w.debug_trace = true;
 
         try
         {
@@ -266,13 +281,14 @@ Options:
         catch (usage_exception const&)
         {
             print_usage(w);
-        }
+			w.flush_to_console();
+		}
         catch (std::exception const& e)
         {
             w.write(" error: %\n", e.what());
-        }
+			w.flush_to_console();
+		}
 
-        w.flush_to_console();
 		system("pause");
     }
 }
