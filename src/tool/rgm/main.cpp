@@ -8,6 +8,70 @@ namespace rgm
 	using namespace xlang::text;
 	using namespace xlang::meta::reader;
 
+	struct method_signature
+	{
+		using param_t = std::pair<Param, ParamSig const*>;
+
+		explicit method_signature(MethodDef const& method) :
+			m_method(method.Signature())
+		{
+			auto params = method.ParamList();
+
+			if (m_method.ReturnType() && params.first != params.second && params.first.Sequence() == 0)
+			{
+				m_return = params.first;
+				++params.first;
+			}
+
+			for (uint32_t i{}; i != m_method.Params().size(); ++i)
+			{
+				m_params.emplace_back(params.first + i, m_method.Params().data() + i);
+			}
+		}
+
+		std::vector<param_t>& params()
+		{
+			return m_params;
+		}
+
+		std::vector<param_t> const& params() const
+		{
+			return m_params;
+		}
+
+		auto const& return_signature() const
+		{
+			return m_method.ReturnType();
+		}
+
+		auto return_param_name() const
+		{
+			std::string_view name;
+
+			if (m_return)
+			{
+				name = m_return.Name();
+			}
+			else
+			{
+				name = "winrt_impl_return_value";
+			}
+
+			return name;
+		}
+
+		bool has_params() const
+		{
+			return !m_params.empty();
+		}
+
+	private:
+
+		MethodDefSig m_method;
+		std::vector<param_t> m_params;
+		Param m_return;
+	};
+
 	settings_type settings;
 
 	struct usage_exception {};
@@ -87,6 +151,9 @@ Options:
 
 	static void write_enum(writer& w, TypeDef const& type)
 	{
+		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Class);
+		auto guard{ w.push_generic_params(type.GenericParam()) };
+
 		w.write(".class % % % %%%.% extends [mscorlib]System.Enum\n{\n",
 			type.Flags().Visibility(),
 			type.Flags().Layout(),
@@ -114,6 +181,9 @@ Options:
 
 	static void write_struct(writer& w, TypeDef const& type)
 	{
+		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Class);
+		auto guard{ w.push_generic_params(type.GenericParam()) };
+
 		w.write(".class % % % %%%.% extends [mscorlib]System.ValueType\n{\n",
 			type.Flags().Visibility(),
 			type.Flags().Layout(),
@@ -134,6 +204,46 @@ Options:
 		w.write("}\n\n");
 	}
 
+	static void write_interface(writer& w, TypeDef const& type)
+	{
+		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Interface);
+		auto guard{ w.push_generic_params(type.GenericParam()) };
+
+		w.write(".class interface % %% % %%.%\n{\n",
+			type.Flags().Visibility(),
+			bind<write_if_true>(type.Flags().Abstract(), "abstract "),
+			type.Flags().Layout(),
+			type.Flags().StringFormat(),
+			bind<write_if_true>(type.Flags().WindowsRuntime(), "windowsruntime "),
+			type.TypeNamespace(),
+			type.TypeName());
+
+		separator s{ w, "\n" };
+		for (auto&& method : type.MethodList())
+		{
+			method_signature signature{ method };
+
+			s();
+			w.write(R"(  .method % %% %%%
+          % % % () % %
+  {
+  }
+)",
+				method.Flags().Access(),
+				method.Flags().HideBySig() ? "hidebysig " : "",
+				method.Flags().Layout(),
+				method.Flags().SpecialName() ? "specialname " : "",
+				method.Flags().Abstract() ? "abstract " : "",
+				method.Flags().Virtual() ? "virtual " : "",
+				method.Flags().Static() ? "static" : "instance",
+				signature.return_signature(),
+				method.Name(),
+				method.ImplFlags().Managed(),
+				method.ImplFlags().CodeType());
+		}
+		w.write("}\n\n");
+	}
+
     static void run(int const argc, char** argv)
     {
         writer w;
@@ -148,8 +258,9 @@ Options:
                 if (ns.compare(0, 18, "Windows.Foundation") == 0)
                     continue;
 
-                //w.write_each<write_enum>(members.enums);
-				w.write_each<write_struct>(members.structs);
+				//w.write_each<write_enum>(members.enums);
+				//w.write_each<write_struct>(members.structs);
+				w.write_each<write_interface>(members.interfaces);
             }
         }
         catch (usage_exception const&)

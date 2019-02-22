@@ -8,6 +8,89 @@ namespace rgm
 	{
 		using writer_base<writer>::write;
 
+#pragma region generic param handling
+		std::vector<std::vector<std::string>> generic_param_stack;
+
+		struct generic_param_guard
+		{
+			explicit generic_param_guard(writer* arg = nullptr)
+				: owner(arg)
+			{}
+
+			~generic_param_guard()
+			{
+				if (owner)
+				{
+					owner->generic_param_stack.pop_back();
+				}
+			}
+
+			generic_param_guard(generic_param_guard && other)
+				: owner(other.owner)
+			{
+				owner = nullptr;
+			}
+
+			generic_param_guard& operator=(generic_param_guard&& other)
+			{
+				owner = std::exchange(other.owner, nullptr);
+				return *this;
+			}
+
+			generic_param_guard& operator=(generic_param_guard const&) = delete;
+			writer* owner;
+		};
+
+		[[nodiscard]] auto push_generic_params(std::pair<GenericParam, GenericParam>&& params)
+		{
+			if (empty(params))
+			{
+				return generic_param_guard{ nullptr };
+			}
+
+			std::vector<std::string> names;
+
+			for (auto&& param : params)
+			{
+				names.push_back(std::string{ param.Name() });
+			}
+
+			generic_param_stack.push_back(std::move(names));
+			return generic_param_guard{ this };
+		}
+
+		[[nodiscard]] auto push_generic_params(GenericTypeInstSig const& signature)
+		{
+			std::vector<std::string> names;
+
+			for (auto&& arg : signature.GenericArgs())
+			{
+				names.push_back(write_temp("%", arg));
+			}
+
+			generic_param_stack.push_back(std::move(names));
+			return generic_param_guard{ this };
+		}
+
+		[[nodiscard]] auto push_generic_params(std::vector<std::string> const& type_arguments)
+		{
+			if (type_arguments.size() == 0)
+			{
+				return generic_param_guard{ nullptr };
+			}
+
+			std::vector<std::string> names;
+
+			for (auto&& type_argument : type_arguments)
+			{
+				names.push_back(type_argument);
+			}
+
+			generic_param_stack.push_back(std::move(names));
+			return generic_param_guard{ this };
+		}
+
+#pragma endregion
 		void write(MemberAccess access)
 		{
 			switch (access)
@@ -53,6 +136,18 @@ namespace rgm
 			}
 		}
 
+		void write(VtableLayout layout)
+		{
+			switch (layout)
+			{
+			case VtableLayout::NewSlot:
+				write("newslot");
+				break;
+			default:
+				throw_invalid("invalid VtableLayout");
+			}
+		}
+
 		void write(StringFormat format)
 		{
 			switch (format)
@@ -62,6 +157,33 @@ namespace rgm
 				break;
 			default:
 				throw_invalid("invalid StringFormat");
+			}
+		}
+
+		void write(Managed managed)
+		{
+			switch (managed)
+			{
+			case Managed::Managed:
+				write("managed");
+				break;
+			default:
+				throw_invalid("invalid Managed");
+			}
+		}
+
+		void write(CodeType code_type)
+		{
+			switch (code_type)
+			{
+			case CodeType::IL: // should this be something else ?
+				write("il");
+				break;
+			case CodeType::Runtime:
+				write("runtime");
+				break;
+			default:
+				throw_invalid("invalid CodeType");
 			}
 		}
 
@@ -169,6 +291,30 @@ namespace rgm
 			{
 				write(type);
 			});
+		}
+
+		void write(RetTypeSig const& signature)
+		{
+			write(signature.Type());
+		}
+	};
+
+	struct separator
+	{
+		writer& w;
+		std::string_view _separator{ ", " };
+		bool first{ true };
+
+		void operator()()
+		{
+			if (first)
+			{
+				first = false;
+			}
+			else
+			{
+				w.write(_separator);
+			}
 		}
 	};
 }
