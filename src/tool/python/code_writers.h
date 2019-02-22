@@ -99,6 +99,7 @@ namespace xlang
 
     void write_param_name(writer& w, method_signature::param_t param)
     {
+        w.register_type_namespace(param.second->Type());
         w.write("param%", param.first.Sequence() - 1);
     }
 
@@ -752,6 +753,7 @@ static void @_dealloc(%* self)
 
         if (signature.return_signature())
         {
+            w.register_type_namespace(signature.return_signature().Type());
             w.write("auto return_value = ");
         }
         w.write("%%(%);\n\n",

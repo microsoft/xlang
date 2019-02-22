@@ -15,10 +15,10 @@ set(included_namespaces
     Windows.Graphics.DirectX
 
     # uncomment out the following to run complete_winml_tutorial.py
-    Windows.AI.MachineLearning
-    Windows.Graphics.Imaging
-    Windows.Media
-    Windows.Storage
+    # Windows.AI.MachineLearning
+    # Windows.Graphics.Imaging
+    # Windows.Media
+    # Windows.Storage
 )
 
 set(excluded_namespaces
