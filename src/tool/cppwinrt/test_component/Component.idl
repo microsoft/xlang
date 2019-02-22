@@ -37,8 +37,6 @@ namespace test_component
         String InStringable(Windows.Foundation.IStringable value);
         String InStruct(Struct value);
         String InStructRef(ref const Struct value);
-        // TODO: boxed/optional input
-        // TODO: generic variants of all tests
 
         void OutInt32(out Int32 value);
         void OutString(out String value);
