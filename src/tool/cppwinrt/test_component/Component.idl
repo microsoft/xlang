@@ -173,7 +173,7 @@ namespace test_component
             [contract(Windows.Foundation.UniversalApiContract, 4.0)] interface IVisual2;
         }
 
-        //[activatable(Windows.Foundation.UniversalApiContract, 2.0)]
+        [activatable(Windows.Foundation.UniversalApiContract, 2.0)]
         [contract(Windows.Foundation.UniversalApiContract, 2.0)]
         [marshaling_behavior(agile)]
         [threading(both)]
