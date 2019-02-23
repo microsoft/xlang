@@ -1,6 +1,5 @@
 #include "pch.h"
 #include <time.h>
-#include "version.h"
 #include "strings.h"
 #include "settings.h"
 #include "type_writers.h"
@@ -32,6 +31,7 @@ namespace xlang
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
         { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
+        { "lib", 0, 1, "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
@@ -125,6 +125,7 @@ Where <spec> is one or more of:
 
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
+            settings.component_lib = args.value("lib", "winrt");
             settings.component_opt = args.exists("opt");
 
             if (settings.component_pch == ".")

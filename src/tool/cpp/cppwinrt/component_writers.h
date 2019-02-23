@@ -138,7 +138,7 @@ namespace xlang
     {
         w.write_root_include("base");
         auto format = R"(%
-bool WINRT_CALL winrt_can_unload_now() noexcept
+bool WINRT_CALL %_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
     {
@@ -149,7 +149,7 @@ bool WINRT_CALL winrt_can_unload_now() noexcept
     return true;
 }
 
-void* WINRT_CALL winrt_get_activation_factory(std::wstring_view const& name)
+void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
 {
     auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
     {
@@ -168,7 +168,7 @@ int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
     }
 #endif
 
-    return winrt_can_unload_now() ? 0 : 1;
+    return %_can_unload_now() ? 0 : 1;
 }
 
 int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept
@@ -179,7 +179,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
         std::wstring_view const name{ buffer, length };
 
-        *factory = winrt_get_activation_factory(name);
+        *factory = %_get_activation_factory(name);
 
         if (*factory)
         {
@@ -198,7 +198,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         w.write(format,
             bind_each<write_component_include>(classes),
-            bind_each<write_component_activation>(classes));
+            settings.component_lib,
+            settings.component_lib,
+            bind_each<write_component_activation>(classes),
+            settings.component_lib,
+            settings.component_lib);
     }
 
     static void write_component_interfaces(writer& w, TypeDef const& type)
@@ -557,7 +561,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 {
                     format = R"(    % %::%(%) const noexcept
     {
-        return get_self<@::implementation::%>(*this)->%(%);
+        %get_self<@::implementation::%>(*this)->%(%);
     }
 )";
                 }
@@ -565,7 +569,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 {
                     format = R"(    % %::%(%) const
     {
-        return get_self<@::implementation::%>(*this)->%(%);
+        %get_self<@::implementation::%>(*this)->%(%);
     }
 )";
                 }
@@ -575,6 +579,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                     type_name,
                     method_name,
                     bind<write_consume_params>(signature),
+                    signature.return_signature() ? "return " : "",
                     type_namespace,
                     type_name,
                     method_name,
@@ -594,6 +599,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                         type_name,
                         method_name,
                         bind<write_consume_params>(signature),
+                        type_name,
                         method_name,
                         method_name,
                         bind<write_consume_args>(signature));

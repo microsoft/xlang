@@ -113,9 +113,9 @@ namespace xlang::impl
     {
         HKEY key;
 
-        if (0 != RegOpenKeyEx(
+        if (0 != RegOpenKeyExW(
             HKEY_LOCAL_MACHINE,
-            "SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots",
+            L"SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots",
             0,
             KEY_READ,
             &key))

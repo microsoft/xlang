@@ -18,6 +18,7 @@ namespace xlang
         std::string component_pch;
         bool component_prefix{};
         bool component_overwrite{};
+        std::string component_lib;
         bool component_opt{};
 
         bool verbose{};
