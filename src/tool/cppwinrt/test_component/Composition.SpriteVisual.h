@@ -12,6 +12,7 @@ namespace winrt::test_component::Composition::implementation
         void Shadow();
     };
 }
+
 namespace winrt::test_component::Composition::factory_implementation
 {
     struct SpriteVisual : SpriteVisualT<SpriteVisual, implementation::SpriteVisual>
