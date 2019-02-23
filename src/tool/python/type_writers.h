@@ -339,6 +339,55 @@ namespace xlang
             }
         }
 
+        void register_type_namespace(std::string_view ns)
+        {
+            if (ns != current_namespace && ns != "System")
+            {
+                needed_namespaces.emplace(ns);
+            }
+        }
+
+        void register_type_namespace(GenericTypeInstSig const& t)
+        {
+            register_type_namespace(t.GenericType());
+            for(auto&& type_arg : t.GenericArgs())
+            {
+                register_type_namespace(type_arg);
+            }
+        }
+
+        void register_type_namespace(coded_index<TypeDefOrRef> const& type)
+        {
+            switch (type.type())
+            {
+            case TypeDefOrRef::TypeDef:
+                register_type_namespace(type.TypeDef().TypeNamespace());
+                break;
+
+            case TypeDefOrRef::TypeRef:
+            {
+                auto tr = type.TypeRef();
+                if (tr.TypeName() != "Guid" || tr.TypeNamespace() != "System" )
+                {
+                    register_type_namespace(type.TypeRef().TypeNamespace());
+                }
+            }
+                break;
+
+            case TypeDefOrRef::TypeSpec:
+                write(type.TypeSpec().Signature().GenericTypeInst());
+                break;
+            }
+        }
+        
+        void register_type_namespace(TypeSig const& type)
+        {
+            call(type.Type(),
+                [&](ElementType) {},
+                [&](GenericTypeIndex) {},
+                [&](auto&& t) { register_type_namespace(t); });
+        }
+
         void write(TypeDef const& type)
         {
             auto ns = type.TypeNamespace();

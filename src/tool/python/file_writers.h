@@ -148,7 +148,7 @@ except:
 
         w.write("\n");
 
-        //settings.filter.bind_each<write_python_enum>(members.enums)(w);
+        settings.filter.bind_each<write_python_enum>(members.enums)(w);
         settings.filter.bind_each<write_import_type>(members.classes)(w);
         settings.filter.bind_each<write_import_type>(members.interfaces)(w);
         settings.filter.bind_each<write_import_type>(members.structs)(w);
