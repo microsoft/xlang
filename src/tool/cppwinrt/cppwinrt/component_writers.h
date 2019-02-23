@@ -207,26 +207,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
     static void write_component_interfaces(writer& w, TypeDef const& type)
     {
-        if (is_fast_class(type))
+        for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            w.write(", fast_interface<@::%>", type.TypeNamespace(), type.TypeName());
-
-            for (auto&&[interface_name, info] : get_interfaces(w, type))
+            if (!info.base)
             {
-                if (!is_exclusive(info.type) && !info.base)
-                {
-                    w.write(", @", interface_name);
-                }
-            }
-        }
-        else
-        {
-            for (auto&&[interface_name, info] : get_interfaces(w, type))
-            {
-                if (!info.base)
-                {
-                    w.write(", @", interface_name);
-                }
+                w.write(", @", interface_name);
             }
         }
 
@@ -537,72 +522,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                             method_name,
                             bind<write_consume_args>(signature));
                     }
-                }
-            }
-        }
-
-        if (!is_fast_class(type))
-        {
-            write_close_namespace(w);
-            return;
-        }
-
-        for (auto&& info : get_fast_interfaces(w, type))
-        {
-            for (auto&& method : info.methods)
-            {
-                auto method_name = get_name(method);
-                method_signature signature{ method };
-                w.async_types = is_async(method, signature);
-
-                std::string_view format;
-
-                if (is_noexcept(method))
-                {
-                    format = R"(    % %::%(%) const noexcept
-    {
-        %get_self<@::implementation::%>(*this)->%(%);
-    }
-)";
-                }
-                else
-                {
-                    format = R"(    % %::%(%) const
-    {
-        %get_self<@::implementation::%>(*this)->%(%);
-    }
-)";
-                }
-
-                w.write(format,
-                    signature.return_signature(),
-                    type_name,
-                    method_name,
-                    bind<write_consume_params>(signature),
-                    signature.return_signature() ? "return " : "",
-                    type_namespace,
-                    type_name,
-                    method_name,
-                    bind<write_consume_args>(signature));
-
-                if (is_add_overload(method))
-                {
-                    format = R"(    %::%_revoker %::%(auto_revoke_t, %) const
-    {
-        return impl::make_event_revoker<%, %_revoker>(this, %(%));
-    }
-)";
-
-                    w.write(format,
-                        type_name,
-                        method_name,
-                        type_name,
-                        method_name,
-                        bind<write_consume_params>(signature),
-                        type_name,
-                        method_name,
-                        method_name,
-                        bind<write_consume_args>(signature));
                 }
             }
         }

@@ -358,48 +358,16 @@ namespace xlang
         }
     }
 
-    static void write_fast_version(writer& w, TypeDef const& type)
-    {
-        if (!is_fast_class(type))
-        {
-            return;
-        }
-
-        auto format = R"(    template <> struct fast_version<%>
-    {
-        using type = %;
-    };
-)";
-
-        auto interfaces = get_fast_interfaces(w, type);
-
-        w.write(format,
-            type,
-            interfaces.back().name);
-    }
-
     static void write_default_interface(writer& w, TypeDef const& type)
     {
         if (auto default_interface = get_default_interface(type))
         {
-            if (is_fast_class(type))
-            {
-                auto format = R"(    template <> struct default_interface<%>
-    {
-        using type = fast_interface<%>;
-    };
+            auto format = R"(    template <> struct default_interface<%>
+{
+    using type = %;
+};
 )";
-                w.write(format, type, type);
-            }
-            else
-            {
-                auto format = R"(    template <> struct default_interface<%>
-    {
-        using type = %;
-    };
-)";
-                w.write(format, type, default_interface);
-            }
+            w.write(format, type, default_interface);
         }
     }
 
@@ -641,43 +609,6 @@ namespace xlang
                 }
             }
         }
-    }
-
-    static void write_fast_abi(writer& w, TypeDef const& type)
-    {
-        if (!is_fast_class(type))
-        {
-            return;
-        }
-
-        auto format = R"(    template <> struct abi<fast_interface<%>>
-    {
-        struct WINRT_NOVTABLE type : inspectable_abi
-        {
-)";
-
-        w.abi_types = false;
-        w.write(format, type);
-
-        for (auto&& info : get_fast_interfaces(w, type))
-        {
-            for (auto&& method : info.methods)
-            {
-                format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
-)";
-
-                w.param_names = false;
-                method_signature signature{ method };
-
-                w.write(format,
-                    get_abi_name(method),
-                    bind<write_abi_params>(signature));
-            }
-        }
-
-        w.write(R"(        };
-    };
-)");
     }
 
     static void write_interface_abi(writer& w, TypeDef const& type)
@@ -1640,17 +1571,6 @@ namespace xlang
             bind<write_produce_upcall>(method, signature));
     }
 
-    static void write_fast_produce_methods(writer& w, TypeDef const& type)
-    {
-        for (auto&& info : get_fast_interfaces(w, type))
-        {
-            for (auto&& method : info.methods)
-            {
-                write_produce_method(w, method);
-            }
-        }
-    }
-
     static void write_produce(writer& w, TypeDef const& type)
     {
         auto format = R"(    template <typename D%>
@@ -1667,25 +1587,6 @@ namespace xlang
             type,
             type,
             bind_each<write_produce_method>(type.MethodList()));
-    }
-
-    static void write_fast_produce(writer& w, TypeDef const& type)
-    {
-        if (!is_fast_class(type))
-        {
-            return;
-        }
-
-        auto format = R"(    template <typename D>
-    struct produce<D, fast_interface<%>> : produce_base<D, fast_interface<%>>
-    {
-%    };
-)";
-
-        w.write(format,
-            type,
-            type,
-            bind<write_fast_produce_methods>(type));
     }
 
     static void write_dispatch_overridable_method(writer& w, MethodDef const& method)
@@ -2476,30 +2377,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_fast_class_requires(writer& w, TypeDef const& type)
-    {
-        bool first{ true };
-
-        for (auto&& [interface_name, info] : get_interfaces(w, type))
-        {
-            if (!is_exclusive(info.type) && !info.base)
-            {
-                if (first)
-                {
-                    first = false;
-                    w.write(",\n        impl::require<%", type.TypeName());
-                }
-
-                w.write(", %", interface_name);
-            }
-        }
-
-        if (!first)
-        {
-            w.write('>');
-        }
-    }
-
     static void write_class_base(writer& w, TypeDef const& type)
     {
         bool first{ true };
@@ -2741,78 +2618,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 w.write_each<write_static_definitions>(factory.type.MethodList(), type_name, factory.type);
             }
         }
-
-        if (!is_fast_class(type))
-        {
-            return;
-        }
-
-        for (auto&& info : get_fast_interfaces(w, type))
-        {
-            for (auto&& method : info.methods)
-            {
-                auto method_name = get_name(method);
-                method_signature signature{ method };
-                w.async_types = is_async(method, signature);
-
-                std::string_view format;
-
-                if (is_noexcept(method))
-                {
-                    format = R"(    inline % %::%(%) const noexcept
-    {%
-        WINRT_VERIFY_(0, (*(impl::abi_t<fast_interface<%>>**)this)->%(%));%
-    }
-)";
-                }
-                else
-                {
-                    format = R"(    inline % %::%(%) const
-    {%
-        check_hresult((*(impl::abi_t<fast_interface<%>>**)this)->%(%));%
-    }
-)";
-                }
-
-                w.write(format,
-                    signature.return_signature(),
-                    type_name,
-                    method_name,
-                    bind<write_consume_params>(signature),
-                    bind<write_consume_return_type>(signature),
-                    type_name,
-                    get_abi_name(method),
-                    bind<write_abi_args>(signature),
-                    bind<write_consume_return_statement>(signature));
-
-                if (is_add_overload(method))
-                {
-                    format = R"(    inline %::%_revoker %::%(auto_revoke_t, %) const
-    {
-        return impl::make_event_revoker<%, %_revoker>(this, %(%));
-    }
-)";
-
-                    w.write(format,
-                        type_name,
-                        method_name,
-                        type_name,
-                        method_name,
-                        bind<write_consume_params>(signature),
-                        method_name,
-                        method_name,
-                        bind<write_consume_args>(signature));
-                }
-            }
-        }
-    }
-
-    static void write_fast_declarations(writer& w, TypeDef const& type)
-    {
-        for (auto&& info : get_fast_interfaces(w, type))
-        {
-            w.write_each<write_consume_declaration>(info.methods);
-        }
     }
 
     static void write_slow_class(writer& w, TypeDef const& type, coded_index<TypeDefOrRef> const& base_type)
@@ -2840,42 +2645,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             bind_each<write_static_declaration>(factories));
     }
 
-    static void write_fast_class(writer& w, TypeDef const& type)
-    {
-        auto type_name = type.TypeName();
-        auto factories = get_factories(w, type);
-        std::string base_type;
-
-        if (auto base = get_base_class(type))
-        {
-            base_type = w.write_temp("%", base);
-        }
-        else
-        {
-            base_type = "Windows::Foundation::IInspectable";
-        }
-
-        auto format = R"(    struct WINRT_EBO % : %%%
-    {
-        %(std::nullptr_t) noexcept {}
-        %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
-%%%%    };
-)";
-
-        w.write(format,
-            type_name,
-            base_type,
-            bind<write_class_base>(type),
-            bind<write_fast_class_requires>(type),
-            type_name,
-            type_name,
-            base_type,
-            bind<write_constructor_declarations>(type, factories),
-            bind<write_class_usings>(type),
-            bind_each<write_static_declaration>(factories),
-            bind<write_fast_declarations>(type));
-    }
-
     static void write_static_class(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -2897,14 +2666,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         if (auto default_interface = get_default_interface(type))
         {
-            if (is_fast_class(type))
-            {
-                write_fast_class(w, type);
-            }
-            else
-            {
-                write_slow_class(w, type, default_interface);
-            }
+            write_slow_class(w, type, default_interface);
         }
         else
         {

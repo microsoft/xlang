@@ -93,16 +93,6 @@ namespace xlang
         return static_cast<bool>(get_attribute(row, type_namespace, type_name));
     }
 
-    static bool is_fast_class(TypeDef const& type)
-    {
-        return has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute");
-    }
-
-    static bool is_exclusive(TypeDef const& type)
-    {
-        return has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
-    }
-
     static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
     {
         auto impls = type.InterfaceImpl();
@@ -408,65 +398,6 @@ namespace xlang
         }
 
         return result;
-    }
-
-    struct fast_interface_info
-    {
-        std::string name;
-        uint32_t version{};
-        std::pair<MethodDef, MethodDef> methods;
-    };
-
-    static auto get_fast_interfaces(writer& w, TypeDef const& type)
-    {
-        w.abi_types = false;
-
-        auto get_version = [](auto&& type)
-        {
-            for (auto&& attribute : type.CustomAttribute())
-            {
-                auto[ns, name] = attribute.TypeNamespaceAndName();
-
-                if (ns == "Windows.Foundation.Metadata")
-                {
-                    if (name == "VersionAttribute")
-                    {
-                        return std::get<uint32_t>(std::get<ElemSig>(attribute.Value().FixedArgs()[0].value).value);
-                    }
-
-                    if (name == "ContractVersionAttribute")
-                    {
-                        return std::get<uint32_t>(std::get<ElemSig>(attribute.Value().FixedArgs()[1].value).value);
-                    }
-                }
-            }
-
-            return 0u;
-        };
-
-        std::vector<fast_interface_info> interfaces;
-
-        for (auto&&[interface_name, interface_info] : get_interfaces(w, type))
-        {
-            if (!is_exclusive(interface_info.type))
-            {
-                continue;
-            }
-
-            fast_interface_info info;
-            info.methods = interface_info.type.MethodList();
-            info.name = interface_name;
-            info.version = get_version(interface_info.type);
-
-            interfaces.push_back(std::move(info));
-        }
-
-        std::sort(interfaces.begin(), interfaces.end(), [](auto&& left, auto&& right)
-        {
-            return (left.version < right.version || (!(right.version < left.version) && left.name < right.name));
-        });
-
-        return interfaces;
     }
 
     static bool wrap_abi(TypeSig const& signature)
