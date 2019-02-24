@@ -23,7 +23,7 @@ goto :init
     set "OPT_VERBOSE="
     set "OPT_FORCE_CMAKE="
     set "BUILD_TYPE=Debug"
-    set "BUILD_VERSION="
+    set "BUILD_VERSION=1.0.0"
     set "BUILD_TARGET="
 
     pushd %~dp0..\..\..\
@@ -48,7 +48,7 @@ goto :init
     if /i "%~1"=="-b"               set "BUILD_TYPE=%~2"   & shift & shift & goto :parse
     if /i "%~1"=="--build-type"     set "BUILD_TYPE=%~2"   & shift & shift & goto :parse
 
-    if /i "%~1"=="--build-version"     set "BUILD_VERSION=%~2"   & shift & shift & goto :parse
+    if /i "%~1"=="--build-version"  set "BUILD_VERSION=%~2"   & shift & shift & goto :parse
 
     if not defined Target           set "BUILD_TARGET=%~1"     & shift & goto :parse
 

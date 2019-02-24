@@ -42,16 +42,23 @@ void load_type_winmd(WCHAR const* processPath, std::string runtimeTypeName)
 
 cppwinrt_visualizer::cppwinrt_visualizer()
 {
-    std::array<char, MAX_PATH> local{};
-    ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
-    for (auto&& file : std::experimental::filesystem::directory_iterator(local.data()))
+    try
     {
-        if (std::experimental::filesystem::is_regular_file(file))
+        std::array<char, MAX_PATH> local{};
+        ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+        for (auto&& file : std::experimental::filesystem::directory_iterator(local.data()))
         {
-            db_files.push_back(file.path().string());
+            if (std::experimental::filesystem::is_regular_file(file))
+            {
+                db_files.push_back(file.path().string());
+            }
         }
+        db.reset(new cache(db_files));
     }
-    db.reset(new cache(db_files));
+    catch (...)
+    {
+        // If unable to read metadata, don't take down VS 
+    }
 
     // Log an event for telemetry purposes when the visualizer is brought online
     winrt::com_ptr<DkmString> eventName;
@@ -63,6 +70,12 @@ cppwinrt_visualizer::cppwinrt_visualizer()
             error->Post();
         }
     }
+}
+
+cppwinrt_visualizer::~cppwinrt_visualizer()
+{
+    db_files.clear();
+    db.reset();
 }
 
 HRESULT cppwinrt_visualizer::EvaluateVisualizedExpression(

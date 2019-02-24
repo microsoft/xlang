@@ -459,7 +459,7 @@ HRESULT object_visualizer::CreateEvaluationResult(_In_ DkmVisualizedExpression* 
 {
     winrt::com_ptr<object_visualizer> pObjectVisualizer = winrt::make_self<object_visualizer>(pVisualizedExpression, isAbiObject);
 
-    pVisualizedExpression->SetDataItem(DkmDataCreationDisposition::CreateNew, pObjectVisualizer.get());
+    IF_FAIL_RET(pVisualizedExpression->SetDataItem(DkmDataCreationDisposition::CreateNew, pObjectVisualizer.get()));
 
     IF_FAIL_RET(pObjectVisualizer->CreateEvaluationResult(ppResultObject));
 

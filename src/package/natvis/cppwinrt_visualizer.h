@@ -4,6 +4,7 @@ struct cppwinrt_visualizer : winrt::implements<cppwinrt_visualizer,
     ::Microsoft::VisualStudio::Debugger::ComponentInterfaces::IDkmCustomVisualizer>
 {
     cppwinrt_visualizer();
+    ~cppwinrt_visualizer();
 
     STDMETHOD(EvaluateVisualizedExpression)(
         _In_ Microsoft::VisualStudio::Debugger::Evaluation::DkmVisualizedExpression* pVisualizedExpression,
