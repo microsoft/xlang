@@ -433,7 +433,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<AssemblyFlags>(2);
+			return AssemblyAttributes{{ get_value<uint32_t>(2) }};
         }
 
         auto PublicKey() const
@@ -492,7 +492,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<AssemblyFlags>(1);
+			return AssemblyAttributes{{ get_value<uint32_t>(1) }};
         }
 
         auto PublicKeyOrToken() const
