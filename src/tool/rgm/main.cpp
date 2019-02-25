@@ -78,12 +78,13 @@ namespace rgm
 
 	static constexpr cmd::option options[]
 	{
-		{ "input", 0, cmd::option::no_max, "<path>", "Windows metadata to include in projection" },
-		{ "reference", 0, cmd::option::no_max, "<path>", "Windows metadata to reference from projection" },
+		{ "input", 1, 1, "<path>", "WinMD file to dump as il" },
+		{ "output", 0, 1, "<path>", "Location of generated il file" },
 	};
 
 	void process_args(int const argc, char** argv)
 	{
+		namespace fs = std::experimental::filesystem;
 		cmd::reader args{ argc, argv, options };
 
 		if (!args)
@@ -91,8 +92,10 @@ namespace rgm
 			throw usage_exception{};
 		}
 
-		settings.input = args.files("input", database::is_database);
-		settings.reference = args.files("reference", database::is_database);
+		settings.input = args.value("input");
+		XLANG_ASSERT(database::is_database(settings.input));
+		auto p = fs::canonical(fs::path{"."} / fs::path{ settings.input }.filename().replace_extension(".il"));
+		settings.output = args.value("output", p.string());
 	}
 
 	static void print_usage(writer& w)
@@ -127,8 +130,7 @@ Options:
 	static auto get_files_to_cache()
 	{
 		std::vector<std::string> files;
-		files.insert(files.end(), settings.input.begin(), settings.input.end());
-		files.insert(files.end(), settings.reference.begin(), settings.reference.end());
+		files.push_back(settings.input);
 		return files;
 	}
 
@@ -172,7 +174,7 @@ Options:
 				bind<write_if_true>(field.Flags().Static(), "static "),
 				bind<write_if_true>(field.Flags().SpecialName(), "specialname "),
 				bind<write_if_true>(field.Flags().RTSpecialName(), "rtspecialname "),
-				bind<write_if_true>(field.Flags().Literal(), "literal valuetype "),
+				bind<write_if_true>(field.Flags().Literal(), "literal "),
 				field.Signature().Type(),
 				field.Name(),
 				bind<write_enum_constant>(field.Constant()));
@@ -214,16 +216,19 @@ Options:
 		}
 	}
 
+
+	inline bool operator && (CallingConvention lhs, CallingConvention rhs)
+	{
+		using T = std::underlying_type_t <CallingConvention>;
+		return (static_cast<T>(lhs) & static_cast<T>(rhs)) != 0;
+	}
+
 	static void write_method(writer& w, MethodDef const& method)
 	{
 		method_signature signature{ method };
 
 		w.write(R"(  .method % %% %%%%
-          % % % (
-                  %) % %
-  {
-  }
-)",
+    % % % ()",
 			method.Flags().Access(),
 			method.Flags().HideBySig() ? "hidebysig " : "",
 			method.Flags().Layout(),
@@ -233,10 +238,72 @@ Options:
 			method.Flags().Virtual() ? "virtual " : "",
 			method.Flags().Static() ? "static" : "instance",
 			signature.return_signature(),
-			method.Name(),
-			bind_list(",\n                  ", signature.params()),
+			method.Name());
+
+		if (!signature.params().empty())
+		{
+			w.write("\n      %", bind_list(",\n      ", signature.params()));
+		}
+
+		w.write(R"() % %
+  {
+  }
+)",
 			method.ImplFlags().CodeType(),
 			method.ImplFlags().Managed());
+	}
+
+	static void write_semantic(writer& w, MethodSemantics const& semantics)
+	{
+		if (semantics.Semantic().Getter())
+		{
+			w.write("get");
+		}
+		else if (semantics.Semantic().Setter())
+		{
+			w.write("set");
+		}
+		else if (semantics.Semantic().AddOn())
+		{
+			w.write("addon");
+		}
+		else if (semantics.Semantic().RemoveOn())
+		{
+			w.write("removeon");
+		}
+	}
+
+	static void write_method_semantic(writer& w, MethodSemantics const& semantics)
+	{
+		auto method = semantics.Method();
+		method_signature signature{ method };
+		auto type = method.Parent();
+
+		w.write("    .% % % %.%::%(%)\n",
+			bind<write_semantic>(semantics),
+			method.Flags().Static() ? "static" : "instance",
+			signature.return_signature(),
+			type.TypeNamespace(),
+			type.TypeName(),
+			method.Name(),
+			bind_list(", ", signature.params()));
+	}
+
+	static void write_property(writer& w, Property const& prop)
+	{
+		w.write("  .property % % %()\n  {\n",
+			(prop.Type().CallConvention() && CallingConvention::HasThis) ? "instance" : "static",
+			prop.Type(),
+			prop.Name());
+		w.write_each<write_method_semantic>(prop.MethodSemantic());
+		w.write("  }\n");
+	}
+
+	static void write_event(writer& w, Event const& evt)
+	{
+		w.write("  .event class % %\n  {\n", evt.EventType(), evt.Name());
+		w.write_each<write_method_semantic>(evt.MethodSemantic());
+		w.write("  }\n");
 	}
 
 	static void write_delegate(writer& w, TypeDef const& type)
@@ -254,15 +321,9 @@ Options:
 			type.TypeName(),
 			bind<write_generic_params>(type.GenericParam()));
 
+		// TODO: Guid Custom Attribute
 		w.write_each<write_method>(type.MethodList());
 		w.write("}\n\n");
-	}
-
-
-	inline bool operator && (CallingConvention lhs, CallingConvention rhs)
-	{
-		using T = std::underlying_type_t <CallingConvention>;
-		return (static_cast<T>(lhs) & static_cast<T>(rhs)) != 0;
 	}
 
 	static void write_interface(writer& w, TypeDef const& type)
@@ -270,92 +331,67 @@ Options:
 		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Interface);
 		auto guard{ w.push_generic_params(type.GenericParam()) };
 
-		// TODO write generic params
-		w.write(".class interface % %% % %%.%\n",
+		w.write(".class interface % %% % %%.%%\n",
 			type.Flags().Visibility(),
 			bind<write_if_true>(type.Flags().Abstract(), "abstract "),
 			type.Flags().Layout(),
 			type.Flags().StringFormat(),
 			bind<write_if_true>(type.Flags().WindowsRuntime(), "windowsruntime "),
 			type.TypeNamespace(),
-			type.TypeName());
+			type.TypeName(),
+			bind<write_generic_params>(type.GenericParam()));
 
 		separator s{ w, "                  ", "       implements " };
 		for (auto&& interface_impl : type.InterfaceImpl())
 		{
 			s();
-			w.write("%\n", interface_impl.Interface());
+			w.write("class %\n", interface_impl.Interface());
 		}
 		w.write("{\n");
 
 		// TODO: Guid Custom Attribute
 
-		for (auto&& method : type.MethodList())
-		{
-			method_signature signature{ method };
-
-			w.write(R"(  .method % %% %%%
-          % % % (%) % %
-  {
-  }
-)",
-				method.Flags().Access(),
-				method.Flags().HideBySig() ? "hidebysig " : "",
-				method.Flags().Layout(),
-				method.Flags().SpecialName() ? "specialname " : "",
-				method.Flags().Abstract() ? "abstract " : "",
-				method.Flags().Virtual() ? "virtual " : "",
-				method.Flags().Static() ? "static" : "instance",
-				signature.return_signature(),
-				method.Name(),
-				bind_list(",\n                  ", signature.params()),
-				method.ImplFlags().CodeType(),
-				method.ImplFlags().Managed());
-		}
-
-		for (auto&& prop : type.PropertyList())
-		{
-			w.write("  .property % % %()\n  {\n", 
-				(prop.Type().CallConvention() && CallingConvention::HasThis) ? "instance" : "static",
-				prop.Type(),
-				prop.Name());
-
-			for (auto&& method_semantic : prop.MethodSemantic())
-			{
-				auto method = method_semantic.Method();
-				method_signature signature{ method };
-				auto semantic = method_semantic.Semantic();
-				XLANG_ASSERT(semantic.Getter() || semantic.Setter());
-
-				if (semantic.Getter())
-				{
-					XLANG_ASSERT(signature.params().size() == 0);
-
-					w.write("    .get % % %.%::%()\n",
-						method.Flags().Static() ? "static" : "instance",
-						signature.return_signature(),
-						type.TypeNamespace(),
-						type.TypeName(),
-						method.Name());
-				}
-				else if (semantic.Setter())
-				{
-					XLANG_ASSERT(signature.params().size() == 1);
-
-					w.write("    .set % % %.%::%(%)\n",
-						method.Flags().Static() ? "static" : "instance",
-						signature.return_signature(),
-						type.TypeNamespace(),
-						type.TypeName(),
-						method.Name(),
-						signature.params()[0].second->Type());
-				}
-			}
-
-			w.write("  }\n");
-		}
-
+		w.write_each<write_method>(type.MethodList());
+		w.write_each<write_property>(type.PropertyList());
+		w.write_each<write_event>(type.EventList());
 		w.write("}\n\n");
+	}
+
+	static void write_class(writer& w, TypeDef const& type)
+	{
+		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Class);
+		auto guard{ w.push_generic_params(type.GenericParam()) };
+
+		w.write(".class % %% % %%%.%%\n",
+			type.Flags().Visibility(),
+			type.Flags().Abstract() ? "abstract " : "",
+			type.Flags().Layout(),
+			type.Flags().StringFormat(),
+			type.Flags().WindowsRuntime() ? "windowsruntime " : "",
+			type.Flags().Sealed() ? "sealed " : "",
+			type.TypeNamespace(),
+			type.TypeName(),
+			bind<write_generic_params>(type.GenericParam()));
+		w.write("       extends %\n", type.Extends());
+		separator s{ w, ",\n                  ", "       implements " };
+		for (auto&& interface_impl : type.InterfaceImpl())
+		{
+			s();
+			w.write("%", interface_impl.Interface());
+		}
+		w.write("\n{\n");
+		// TODO: Custom Attributes
+
+		for (auto&& mi : type.MethodImplList())
+		{
+
+		}
+
+		w.write_each<write_method>(type.MethodList());
+		w.write_each<write_property>(type.PropertyList());
+		w.write_each<write_event>(type.EventList());
+
+		w.write("}\n");
 	}
 
 	void write_hex_byte(writer& w, uint8_t value)
@@ -417,37 +453,40 @@ Options:
 
     static void run(int const argc, char** argv)
     {
-        writer w;
-		w.debug_trace = true;
+        writer wc;
 
         try
         {
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
 
+			writer w;
+			//w.debug_trace = true;
+
 			XLANG_ASSERT(c.databases().size() == 1);
-			//write_header(w, c.databases().front());
+			write_header(w, c.databases().front());
 
             for (auto&&[ns, members] : c.namespaces())
             { 
-				//w.write_each<write_enum>(members.enums);
-				//w.write_each<write_struct>(members.structs);
+				w.write_each<write_enum>(members.enums);
+				w.write_each<write_struct>(members.structs);
 				w.write_each<write_delegate>(members.delegates);
-				//w.write_each<write_interface>(members.interfaces);
+				w.write_each<write_interface>(members.interfaces);
+				w.write_each<write_class>(members.classes);
             }
+
+			w.flush_to_file(settings.output);
         }
         catch (usage_exception const&)
         {
-            print_usage(w);
-			w.flush_to_console();
+            print_usage(wc);
+			wc.flush_to_console();
 		}
         catch (std::exception const& e)
         {
-            w.write(" error: %\n", e.what());
-			w.flush_to_console();
+            wc.write(" error: %\n", e.what());
+			wc.flush_to_console();
 		}
-
-		system("pause");
     }
 }
 

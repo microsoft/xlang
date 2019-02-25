@@ -195,10 +195,10 @@ namespace rgm
 			switch (value.Type())
 			{
 			case ConstantType::Int32:
-				write_printf("int(%d)", value.ValueInt32());
+				write_printf("int32(0x%x)", value.ValueInt32());
 				break;
 			case ConstantType::UInt32:
-				write_printf("uint(%#0x)", value.ValueUInt32());
+				write_printf("uint32(0x%x)", value.ValueUInt32());
 				break;
 			default:
 				throw_invalid("Constant");
@@ -313,6 +313,20 @@ namespace rgm
 				break;
 			case ElementType::Class:
 				write("class ");
+				break;
+			case ElementType::GenericInst:
+			{
+				auto sig = std::get<GenericTypeInstSig>(signature.Type());
+				switch (sig.ClassOrValueType())
+				{
+				case ElementType::ValueType:
+					write("valuetype ");
+					break;
+				case ElementType::Class:
+					write("class ");
+					break;
+				}
+			}
 				break;
 			}
 
