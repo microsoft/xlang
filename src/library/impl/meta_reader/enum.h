@@ -313,7 +313,8 @@ namespace xlang::meta::reader
     enum class AssemblyFlags : uint32_t
     {
         PublicKey = 0x0001, // The assembly reference holds the full (unhashed) public key
-        Retargetable = 0x01000,
+        Retargetable = 0x0100,
+		WindowsRuntime = 0x0200,
         DisableJITcompileOptimizer = 0x4000,
         EnableJITcompileTracking = 0x8000,
     };
