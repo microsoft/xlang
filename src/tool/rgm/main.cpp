@@ -332,6 +332,63 @@ Options:
 		w.write("}\n\n");
 	}
 
+	void write_hex_byte(writer& w, uint8_t value)
+	{
+		w.write_printf("%X ", value);
+	}
+
+	void write_version(writer& w, AssemblyVersion value)
+	{
+		w.write("%:%:%:%", 
+			value.MajorVersion,
+			value.MinorVersion,
+			value.BuildNumber,
+			value.RevisionNumber);
+	}
+
+	void write_header(writer& w, database const& db)
+	{
+		for (auto&& a : db.AssemblyRef)
+		{
+			w.write(".assembly extern %%\n{\n",
+				a.Flags().WindowsRuntime() ? "windowsruntime " : "",
+				a.Name());
+
+			auto pkt = a.PublicKeyOrToken();
+			if (pkt)
+			{
+				w.write("  .publickeytoken = (%)\n", bind_each<write_hex_byte>(pkt));
+			}
+
+			w.write("  .ver %\n", bind<write_version>(a.Version()));
+			w.write("}\n");
+		}
+
+		XLANG_ASSERT(db.Assembly.size() == 1);
+		auto a = db.Assembly[0];
+		w.write(".assembly %%\n{\n",
+			a.Flags().WindowsRuntime() ? "windowsruntime " : "",
+			a.Name());
+		if (a.HashAlgId() != AssemblyHashAlgorithm::None)
+		{
+			w.write_printf("  .hash algorithm 0x%X\n", a.HashAlgId());
+		}
+		w.write("  .ver %\n", bind<write_version>(a.Version()));
+		w.write("}\n");
+
+		XLANG_ASSERT(db.Module.size() == 1);
+		w.write(".module %\n", db.Module[0].Name());
+
+		// TODO: these values come from PE tables not metadata
+		w.write(R"(.imagebase 0x00400000
+.file alignment 0x00000200
+.stackreserve 0x00100000
+.subsystem 0x0003
+.corflags 0x00000001
+
+)");
+	}
+
     static void run(int const argc, char** argv)
     {
         writer w;
@@ -342,13 +399,16 @@ Options:
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
 
-            for (auto&&[ns, members] : c.namespaces())
-            { 
-				//w.write_each<write_enum>(members.enums);
-				//w.write_each<write_struct>(members.structs);
-				w.write_each<write_delegate>(members.delegates);
-				//w.write_each<write_interface>(members.interfaces);
-            }
+			XLANG_ASSERT(c.databases().size() == 1);
+			write_header(w, c.databases().front());
+
+    //        for (auto&&[ns, members] : c.namespaces())
+    //        { 
+				////w.write_each<write_enum>(members.enums);
+				////w.write_each<write_struct>(members.structs);
+				//w.write_each<write_delegate>(members.delegates);
+				////w.write_each<write_interface>(members.interfaces);
+    //        }
         }
         catch (usage_exception const&)
         {
