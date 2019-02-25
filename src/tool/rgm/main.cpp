@@ -214,13 +214,37 @@ Options:
 		}
 	}
 
+	static void write_method(writer& w, MethodDef const& method)
+	{
+		method_signature signature{ method };
+
+		w.write(R"(  .method % %% %%%%
+          % % % (
+                  %) % %
+  {
+  }
+)",
+			method.Flags().Access(),
+			method.Flags().HideBySig() ? "hidebysig " : "",
+			method.Flags().Layout(),
+			method.Flags().SpecialName() ? "specialname " : "",
+			method.Flags().RTSpecialName() ? "rtspecialname " : "",
+			method.Flags().Abstract() ? "abstract " : "",
+			method.Flags().Virtual() ? "virtual " : "",
+			method.Flags().Static() ? "static" : "instance",
+			signature.return_signature(),
+			method.Name(),
+			bind_list(",\n                  ", signature.params()),
+			method.ImplFlags().CodeType(),
+			method.ImplFlags().Managed());
+	}
+
 	static void write_delegate(writer& w, TypeDef const& type)
 	{
 		XLANG_ASSERT(type.Flags().Semantics() == TypeSemantics::Class);
 		auto guard{ w.push_generic_params(type.GenericParam()) };
 
-		// TODO write generic params
-		w.write(".class % % % %%%.%% extends [mscorlib]System.MulticastDelegate\n{\n",
+		w.write(".class % % % %%%.%%\n       extends [mscorlib]System.MulticastDelegate\n{\n",
 			type.Flags().Visibility(),
 			type.Flags().Layout(),
 			type.Flags().StringFormat(),
@@ -229,6 +253,8 @@ Options:
 			type.TypeNamespace(),
 			type.TypeName(),
 			bind<write_generic_params>(type.GenericParam()));
+
+		w.write_each<write_method>(type.MethodList());
 		w.write("}\n\n");
 	}
 
@@ -400,15 +426,15 @@ Options:
             cache c{ get_files_to_cache() };
 
 			XLANG_ASSERT(c.databases().size() == 1);
-			write_header(w, c.databases().front());
+			//write_header(w, c.databases().front());
 
-    //        for (auto&&[ns, members] : c.namespaces())
-    //        { 
-				////w.write_each<write_enum>(members.enums);
-				////w.write_each<write_struct>(members.structs);
-				//w.write_each<write_delegate>(members.delegates);
-				////w.write_each<write_interface>(members.interfaces);
-    //        }
+            for (auto&&[ns, members] : c.namespaces())
+            { 
+				//w.write_each<write_enum>(members.enums);
+				//w.write_each<write_struct>(members.structs);
+				w.write_each<write_delegate>(members.delegates);
+				//w.write_each<write_interface>(members.interfaces);
+            }
         }
         catch (usage_exception const&)
         {

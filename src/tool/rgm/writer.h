@@ -141,6 +141,8 @@ namespace rgm
 		{
 			switch (layout)
 			{
+			case VtableLayout::ReuseSlot:
+				break;
 			case VtableLayout::NewSlot:
 				write("newslot");
 				break;
@@ -235,6 +237,8 @@ namespace rgm
 				write("string"); break;
 			case ElementType::Object:
 				write("object"); break;
+			case ElementType::I:
+				write("native int"); break;
 			case ElementType::End:
 			case ElementType::Void:
 				write("void"); break;
@@ -292,7 +296,7 @@ namespace rgm
 
 		void write(GenericTypeIndex const& var)
 		{
-			write(generic_param_stack.back()[var.index]);
+			write("!%", generic_param_stack.back()[var.index]);
 		}
 
 		void write(GenericTypeInstSig const& type)
@@ -326,7 +330,7 @@ namespace rgm
 
 		void write_param_name(std::string_view const& name)
 		{
-			if (name == "value")
+			if (name == "value" || name == "object" || name == "method")
 			{
 				write("'%'", name);
 			}
@@ -338,10 +342,12 @@ namespace rgm
 
 		void write(std::pair<Param, ParamSig const*> const& param)
 		{
-			XLANG_ASSERT(param.first.Flags().In() != param.first.Flags().Out());
+			// make sure param is not marked both in and out
+			XLANG_ASSERT(!(param.first.Flags().In() && param.first.Flags().Out()));
 
-			write("[%] % ", 
-				param.first.Flags().In() ? "in" : "out",
+			write("%% % ", 
+				param.first.Flags().In() ? "[in]" : "",
+				param.first.Flags().Out() ? "[out]" : "",
 				param.second->Type());
 			write_param_name(param.first.Name());
 		}
