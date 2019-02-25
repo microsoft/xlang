@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-file(TO_NATIVE_PATH ${CMAKE_BINARY_DIR}/tool/cpp/cppwinrt/cppwinrt.exe cpp_exe)
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../tool/cppwinrt/build/cppwinrt.exe cpp_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} project_folder)
 
 file(TO_NATIVE_PATH "${project_folder}/metadata" metadata_folder)
