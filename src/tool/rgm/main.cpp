@@ -381,11 +381,7 @@ Options:
 		}
 		w.write("\n{\n");
 		// TODO: Custom Attributes
-
-		for (auto&& mi : type.MethodImplList())
-		{
-
-		}
+		// TODO: .override
 
 		w.write_each<write_method>(type.MethodList());
 		w.write_each<write_property>(type.PropertyList());
