@@ -48,3 +48,6 @@
 #elif defined _M_ARM64
 #define WINRT_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM64_BARRIER_ISH));
 #endif
+
+// Note: this is a workaround for a false-positive warning produced by the Visual C++ 15.9 compiler.
+#pragma warning(disable : 5046)
