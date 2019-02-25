@@ -394,12 +394,12 @@ namespace xlang::meta::reader
 
         auto MethodBody() const
         {
-            return get_value<MethodDefOrRef>(1);
+            return get_coded_index<MethodDefOrRef>(1);
         }
 
         auto MethodDeclaration() const
         {
-            return get_value<MethodDefOrRef>(2);
+            return get_coded_index<MethodDefOrRef>(2);
         }
     };
 
