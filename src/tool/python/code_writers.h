@@ -692,7 +692,7 @@ static void @_dealloc(%* self)
             break;
         case param_category::pass_array:
             w.write("auto _param% = py::convert_to<winrt::com_array<%>>(args, %);\n", sequence, param.second->Type(), sequence);
-            w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
+            w.write("auto param% = winrt::array_view<const %>(_param%.data(), _param%.data() + _param%.size());\n", sequence, param.second->Type(), sequence, sequence, sequence);
             break;
         case param_category::fill_array:
             w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
