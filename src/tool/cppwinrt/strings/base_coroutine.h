@@ -306,36 +306,36 @@ namespace winrt::impl
             return{};
         }
 
+        struct final_suspend_awaiter
+        {
+            promise_base* promise;
+
+            bool await_ready() const noexcept
+            {
+                return false;
+            }
+
+            void await_resume() const noexcept
+            {
+            }
+
+            bool await_suspend(std::experimental::coroutine_handle<>) const noexcept
+            {
+                promise->set_completed();
+                uint32_t const remaining = promise->subtract_reference();
+
+                if (remaining == 0)
+                {
+                    std::atomic_thread_fence(std::memory_order_acquire);
+                }
+
+                return remaining > 0;
+            }
+        };
+
         auto final_suspend() noexcept
         {
-            struct awaiter
-            {
-                promise_base* promise;
-
-                bool await_ready() const noexcept
-                {
-                    return false;
-                }
-
-                void await_resume() const noexcept
-                {
-                }
-
-                bool await_suspend(std::experimental::coroutine_handle<>) const noexcept
-                {
-                    promise->set_completed();
-                    uint32_t const remaining = promise->subtract_reference();
-
-                    if (remaining == 0)
-                    {
-                        std::atomic_thread_fence(std::memory_order_acquire);
-                    }
-
-                    return remaining > 0;
-                }
-            };
-
-            return awaiter{ this };
+            return final_suspend_awaiter{ this };
         }
 
         void unhandled_exception() noexcept
