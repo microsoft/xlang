@@ -10,7 +10,7 @@ setuptools.setup(
     url="http://github.com/Microsoft/xlang",
     ext_modules = [ setuptools.Extension('%', 
         sources = [%],
-        extra_compile_args = ["/std:c++17", "/await", "/Zi", "/Od"],
+        extra_compile_args = ["/std:c++17", "/await"],
         include_dirs = ['.'],
         extra_link_args=['/DEBUG'],
         libraries = ['windowsapp']) ],
