@@ -1,4 +1,3 @@
-import find_projection
 import unittest
 
 import pyrt.windows.foundation.numerics as wfn

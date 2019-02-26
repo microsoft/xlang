@@ -1,5 +1,3 @@
-import find_projection
-
 import pyrt
 import asyncio
 
