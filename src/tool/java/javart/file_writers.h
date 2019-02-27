@@ -2,7 +2,7 @@
 
 namespace xlang
 {
-    static void write_javart_h()
+    static void write_base_h()
     {
         writer w;
         write_license(w);

@@ -34,32 +34,11 @@ namespace xlang
 
     enum type_system
     {
-        undefined = 0,
         java_descriptor,
-        java_descriptor_brief,
-        jni_type,
+        java_suffix,
         java_type,
+        jni_type,
     };
-
-    //struct java_descriptor
-    //{
-    //    TypeSig sig;
-    //};
-
-    //struct java_descriptor_brief
-    //{
-    //    TypeSig sig;
-    //};
-
-    //struct jni_type
-    //{
-    //    TypeSig sig;
-    //};
-
-    //struct java_type
-    //{
-    //    TypeSig sig;
-    //};
 
     struct java_name
     {
@@ -108,24 +87,6 @@ namespace xlang
     static auto remove_tick(std::string_view const& name)
     {
         return name.substr(0, name.rfind('`'));
-    }
-
-    template <typename First, typename...Rest>
-    auto get_impl_name(First const& first, Rest const&... rest)
-    {
-        std::string result;
-
-        auto convert = [&](auto&& value)
-        {
-            for (auto&& c : value)
-            {
-                result += c == '.' ? '_' : c;
-            }
-        };
-
-        convert(first);
-        ((result += '_', convert(rest)), ...);
-        return result;
     }
 
     struct generic_iterator
@@ -373,99 +334,13 @@ namespace xlang
 
             if (!empty(generics))
             {
-//                write("@::%<%>", name_space, remove_tick(name), bind_list(", ", generics));
+                //write("@::%<%>", name_space, remove_tick(name), bind_list(", ", generics));
                 write("%%<%>", name_space, remove_tick(name), bind_list(", ", generics));
                 return;
             }
 
-            // TODO: get rid of all these renames once parity with cppwinrt.exe has been reached...
-
-            if (name == "EventRegistrationToken" && name_space == "Windows.Foundation")
-            {
-                write("winrt::event_token");
-            }
-            else if (name == "HResult" && name_space == "Windows.Foundation")
-            {
-                write("winrt::hresult");
-            }
-            else
-            {
-                switch (current_type_system)
-                {
-                case type_system::undefined:
-                    //XLANG_ASSERT(false);
-                    //break;
-                case type_system::java_descriptor:
-                    break;
-                case type_system::java_descriptor_brief:
-                    break;
-                case type_system::java_type:
-                    break;
-                case type_system::jni_type:
-                    break;
-                }
-                //write("@::%", name_space, name);
-                write("%%", name_space, name);
-            }
-            //else if (abi_types)
-            //{
-            //    auto category = get_category(type);
-
-            //    if (name_space == "Windows.Foundation.Numerics")
-            //    {
-            //        if (name == "Matrix3x2") { name = "float3x2"; }
-            //        else if (name == "Matrix4x4") { name = "float4x4"; }
-            //        else if (name == "Plane") { name = "plane"; }
-            //        else if (name == "Quaternion") { name = "quaternion"; }
-            //        else if (name == "Vector2") { name = "float2"; }
-            //        else if (name == "Vector3") { name = "float3"; }
-            //        else if (name == "Vector4") { name = "float4"; }
-
-            //        write("@::%", name_space, name);
-            //    }
-            //    else if (category == category::struct_type)
-            //    {
-            //        if ((name == "DateTime" || name == "TimeSpan") && name_space == "Windows.Foundation")
-            //        {
-            //            write("int64_t");
-            //        }
-            //        else if ((name == "Point" || name == "Size" || name == "Rect") && name_space == "Windows.Foundation")
-            //        {
-            //            write("@::%", name_space, name);
-            //        }
-            //        else
-            //        {
-            //            write("struct struct_%_%", get_impl_name(name_space), name);
-            //        }
-            //    }
-            //    else if (category == category::enum_type)
-            //    {
-            //        write(type.FieldList().first.Signature().Type());
-            //    }
-            //    else
-            //    {
-            //        write("void*");
-            //    }
-            //}
-            //else
-            //{
-            //    if (name_space == "Windows.Foundation.Numerics")
-            //    {
-            //        if (name == "Matrix3x2") { name = "float3x2"; }
-            //        else if (name == "Matrix4x4") { name = "float4x4"; }
-            //        else if (name == "Plane") { name = "plane"; }
-            //        else if (name == "Quaternion") { name = "quaternion"; }
-            //        else if (name == "Vector2") { name = "float2"; }
-            //        else if (name == "Vector3") { name = "float3"; }
-            //        else if (name == "Vector4") { name = "float4"; }
-
-            //        write("@::%", name_space, name);
-            //    }
-            //    else
-            //    {
-            //        write("@::%", name_space, name);
-            //    }
-            //}
+            //write("@::%", name_space, name);
+            write("%%", name_space, name);
         }
 
         void write(TypeRef const& type)
@@ -485,112 +360,6 @@ namespace xlang
             write(param.Name());
         }
 
-        void write(coded_index<TypeDefOrRef> const& type)
-        {
-            switch (type.type())
-            {
-            case TypeDefOrRef::TypeDef:
-                write(type.TypeDef());
-                break;
-            case TypeDefOrRef::TypeRef:
-                write(type.TypeRef());
-                break;
-            case TypeDefOrRef::TypeSpec:
-                write(type.TypeSpec().Signature().GenericTypeInst());
-                break;
-            }
-        }
-
-        void write(GenericTypeInstSig const& type)
-        {
-            switch (current_type_system)
-            {
-            case type_system::undefined:
-                //XLANG_ASSERT(false);
-                //break;
-            case type_system::java_descriptor:
-                break;
-            case type_system::java_descriptor_brief:
-                break;
-            case type_system::java_type:
-                break;
-            case type_system::jni_type:
-                break;
-            }
-
-            auto generic_type = type.GenericType().TypeRef();
-            auto name_space = generic_type.TypeNamespace();
-            auto name = generic_type.TypeName();
-            name.remove_suffix(name.size() - name.rfind('`'));
-
-            if (consume_types)
-            {
-                static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable<"sv);
-                static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView<"sv);
-                static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView<"sv);
-                static constexpr std::string_view vector("Windows::Foundation::Collections::IVector<"sv);
-                static constexpr std::string_view map("Windows::Foundation::Collections::IMap<"sv);
-
-                consume_types = false;
-//                auto full_name = write_temp("@::%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
-                auto full_name = write_temp("%.%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
-                consume_types = true;
-
-                if (starts_with(full_name, iterable))
-                {
-                    if (async_types)
-                    {
-                        write("param::async_iterable%", full_name.substr(iterable.size() - 1));
-                    }
-                    else
-                    {
-                        write("param::iterable%", full_name.substr(iterable.size() - 1));
-                    }
-                }
-                else if (starts_with(full_name, vector_view))
-                {
-                    if (async_types)
-                    {
-                        write("param::async_vector_view%", full_name.substr(vector_view.size() - 1));
-                    }
-                    else
-                    {
-                        write("param::vector_view%", full_name.substr(vector_view.size() - 1));
-                    }
-                }
-
-                else if (starts_with(full_name, map_view))
-                {
-                    if (async_types)
-                    {
-                        write("param::async_map_view%", full_name.substr(map_view.size() - 1));
-                    }
-                    else
-                    {
-                        write("param::map_view%", full_name.substr(map_view.size() - 1));
-                    }
-                }
-                else if (starts_with(full_name, vector))
-                {
-                    write("param::vector%", full_name.substr(vector.size() - 1));
-                }
-                else if (starts_with(full_name, map))
-                {
-                    write("param::map%", full_name.substr(map.size() - 1));
-                }
-                else
-                {
-                    write(full_name);
-                }
-            }
-            else
-            {
-                //write("@::%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
-                write("%.%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
-                //                write("%<%>", name, bind_list(", ", type.GenericArgs()));
-            }
-        }
-
         void write_java_descriptor(ElementType type)
         {
             if (type == ElementType::Void) { write("V"); }
@@ -607,7 +376,6 @@ namespace xlang
             else if (type == ElementType::R4) { write("F"); }
             else if (type == ElementType::R8) { write("D"); }
             else if (type == ElementType::String) { write("Ljava/lang/String;"); }
-            //else if (type == ElementType::Object) { XLANG_ASSERT(false); }
             else
             {
                 write("LTODO-desc-ElementType;");
@@ -615,7 +383,7 @@ namespace xlang
             }
         }
 
-        void write_java_descriptor_brief(ElementType type)
+        void write_java_suffix(ElementType type)
         {
             if (type == ElementType::Void) { write("V"); }
             else if (type == ElementType::Boolean) { write("Z"); }
@@ -631,7 +399,6 @@ namespace xlang
             else if (type == ElementType::R4) { write("F"); }
             else if (type == ElementType::R8) { write("D"); }
             else if (type == ElementType::String) { write("G"); }
-            //else if (type == ElementType::Object) { XLANG_ASSERT(false); }
             else
             {
                 write("LTODO-desc-brief-ElementType;");
@@ -687,147 +454,166 @@ namespace xlang
             }
         }
 
-        void write(TypeSig::value_type const& type)
+        void write(ElementType type)
         {
-            call(type,
-                [&](ElementType type)
+            switch (current_type_system)
             {
+            case type_system::java_descriptor:
+                write_java_descriptor(type);
+                break;
+            case type_system::java_suffix:
+                write_java_suffix(type);
+                break;
+            case type_system::java_type:
+                write_java_type(type);
+                break;
+            case type_system::jni_type:
+                write_jni_type(type);
+                break;
+            }
+        }
+
+        void write(coded_index<TypeDefOrRef> const& type)
+        {
+            switch (type.type())
+            {
+            case TypeDefOrRef::TypeDef:
                 switch (current_type_system)
                 {
-                case type_system::undefined:
-                    //XLANG_ASSERT(false);
-                    //break;
                 case type_system::java_descriptor:
-                    write_java_descriptor(type);
-                    break;
-                case type_system::java_descriptor_brief:
-                    write_java_descriptor_brief(type);
-                    break;
+                case type_system::java_suffix:
                 case type_system::java_type:
-                    write_java_type(type);
+                    write("L%;", java_type_name{ type.TypeDef() });
                     break;
                 case type_system::jni_type:
-                    write_jni_type(type);
+                    write("jlong");
                     break;
                 }
-
-                //if (type == ElementType::Boolean) { write("bool"); }
-                //else if (type == ElementType::Char) { write("char16_t"); }
-                //else if (type == ElementType::I1) { write("int8_t"); }
-                //else if (type == ElementType::U1) { write("uint8_t"); }
-                //else if (type == ElementType::I2) { write("int16_t"); }
-                //else if (type == ElementType::U2) { write("uint16_t"); }
-                //else if (type == ElementType::I4) { write("int32_t"); }
-                //else if (type == ElementType::U4) { write("uint32_t"); }
-                //else if (type == ElementType::I8) { write("int64_t"); }
-                //else if (type == ElementType::U8) { write("uint64_t"); }
-                //else if (type == ElementType::R4) { write("float"); }
-                //else if (type == ElementType::R8) { write("double"); }
-                //else if (type == ElementType::String)
-                //{
-                //    if (abi_types)
-                //    {
-                //        write("void*");
-                //    }
-                //    else if (consume_types)
-                //    {
-                //        write("param::hstring");
-                //    }
-                //    else
-                //    {
-                //        write("hstring");
-                //    }
-                //}
-                //else if (type == ElementType::Object)
-                //{
-                //    if (abi_types)
-                //    {
-                //        write("void*");
-                //    }
-                //    else
-                //    {
-                //        write("Windows::Foundation::IInspectable");
-                //    }
-                //}
-                //else
-                //{
-                //    XLANG_ASSERT(false);
-                //}
-            },
-                [&](coded_index<TypeDefOrRef> const& type)
-            {
-                switch (type.type())
+                break;
+            case TypeDefOrRef::TypeRef:
+                switch (current_type_system)
                 {
-                case TypeDefOrRef::TypeDef:
-                    switch (current_type_system)
-                    {
-                    case type_system::undefined:
-                        //XLANG_ASSERT(false);
-                        //break;
-                    case type_system::java_descriptor:
-                    case type_system::java_descriptor_brief:
-                    case type_system::java_type:
-                        write("L%;", java_type_name{ type.TypeDef() });
-                        break;
-                    case type_system::jni_type:
-                        write("jlong");
-                        break;
-                    }
+                case type_system::java_descriptor:
+                case type_system::java_suffix:
+                case type_system::java_type:
+                    write(type.TypeRef());
                     break;
-                case TypeDefOrRef::TypeRef:
-                    //write("LTODO-typeref;");
-                    //auto typeRef = type.TypeRef();
-                    //typeRef;
-                    //XLANG_ASSERT(false);
-                    switch (current_type_system)
-                    {
-                    case type_system::undefined:
-                        //XLANG_ASSERT(false);
-                        //break;
-                    case type_system::java_descriptor:
-                    case type_system::java_descriptor_brief:
-                    case type_system::java_type:
-                        write(type.TypeRef());
-                        break;
-                    case type_system::jni_type:
-                        write("jlong");
-                        break;
-                    }
-                    break;
-                case TypeDefOrRef::TypeSpec:
-                    //write("LTODO-typespec;");
-                    //XLANG_ASSERT(false);
-                    //auto typespec = type.TypeSpec();
-                    //auto sig = typespec.Signature();
-                    //sig;
-                    switch (current_type_system)
-                    {
-                    case type_system::undefined:
-                        //XLANG_ASSERT(false);
-                        //break;
-                    case type_system::java_descriptor:
-                    case type_system::java_descriptor_brief:
-                    case type_system::java_type:
-                        write(type.TypeSpec().Signature().GenericTypeInst());
-                        break;
-                    case type_system::jni_type:
-                        write("jlong");
-                        break;
-                    }
+                case type_system::jni_type:
+                    write("jlong");
                     break;
                 }
-            },
+                break;
+            case TypeDefOrRef::TypeSpec:
+                switch (current_type_system)
+                {
+                case type_system::java_descriptor:
+                case type_system::java_suffix:
+                case type_system::java_type:
+                    write(type.TypeSpec().Signature().GenericTypeInst());
+                    break;
+                case type_system::jni_type:
+                    write("jlong");
+                    break;
+                }
+                break;
+            }
+        }
 
-                [&](GenericTypeIndex var)
+        void write(GenericTypeIndex var)
+        {
+            write(generic_param_stack.back()[var.index]);
+        };
+
+        void write(GenericTypeInstSig const& type)
+        {
+            switch (current_type_system)
             {
-                //write("LTODO-desc-GenericTypeIndex;");
-                //XLANG_ASSERT(false);
-                write(generic_param_stack.back()[var.index]);
-            },
-                [&](auto&& type)
+            case type_system::java_descriptor:
+                break;
+            case type_system::java_suffix:
+                break;
+            case type_system::java_type:
+                break;
+            case type_system::jni_type:
+                break;
+            }
+
+            auto generic_type = type.GenericType().TypeRef();
+            auto name_space = generic_type.TypeNamespace();
+            auto name = generic_type.TypeName();
+            name.remove_suffix(name.size() - name.rfind('`'));
+
+            if (consume_types)
             {
-                //write("LTODO-desc-type;");
-                //XLANG_ASSERT(false);
+                static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable<"sv);
+                static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView<"sv);
+                static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView<"sv);
+                static constexpr std::string_view vector("Windows::Foundation::Collections::IVector<"sv);
+                static constexpr std::string_view map("Windows::Foundation::Collections::IMap<"sv);
+
+                consume_types = false;
+                // auto full_name = write_temp("@::%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
+                auto full_name = write_temp("%.%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
+                consume_types = true;
+
+                if (starts_with(full_name, iterable))
+                {
+                    if (async_types)
+                    {
+                        write("param::async_iterable%", full_name.substr(iterable.size() - 1));
+                    }
+                    else
+                    {
+                        write("param::iterable%", full_name.substr(iterable.size() - 1));
+                    }
+                }
+                else if (starts_with(full_name, vector_view))
+                {
+                    if (async_types)
+                    {
+                        write("param::async_vector_view%", full_name.substr(vector_view.size() - 1));
+                    }
+                    else
+                    {
+                        write("param::vector_view%", full_name.substr(vector_view.size() - 1));
+                    }
+                }
+
+                else if (starts_with(full_name, map_view))
+                {
+                    if (async_types)
+                    {
+                        write("param::async_map_view%", full_name.substr(map_view.size() - 1));
+                    }
+                    else
+                    {
+                        write("param::map_view%", full_name.substr(map_view.size() - 1));
+                    }
+                }
+                else if (starts_with(full_name, vector))
+                {
+                    write("param::vector%", full_name.substr(vector.size() - 1));
+                }
+                else if (starts_with(full_name, map))
+                {
+                    write("param::map%", full_name.substr(map.size() - 1));
+                }
+                else
+                {
+                    write(full_name);
+                }
+            }
+            else
+            {
+                //write("@::%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
+                write("%.%<%>", name_space, name, bind_list(", ", type.GenericArgs()));
+            }
+        }
+
+        void write(TypeSig::value_type const& type)
+        {
+            call(type,[&](auto&& type)
+            {
                 write(type);
             });
         }

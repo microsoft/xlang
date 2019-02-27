@@ -22,7 +22,7 @@ namespace xlang
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
         { "verbose", 0, 0, {}, "Show detailed progress information" },
-        { "base", 0, 0, {}, "Generate jbase.h unconditionally" },
+        { "base", 0, 0, {}, "Generate javart.h unconditionally" },
         { "lib", 0, 1, "<name>", "Set shared library name (defaults to package name)" },
         { "package", 0, 1, "<name>", "Set package base name (defaults to com.microsoft.)" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help" },
@@ -44,11 +44,10 @@ namespace xlang
             printColumns(w, w.write_temp("-% %", opt.name, opt.arg), opt.desc);
         };
             
-        // todo: will 'javax' be confused with javax.* extension classes?
         auto format = R"(
-Java/xlang Compiler v%
+Java/WinRT Compiler
 
-Usage: javax.exe [options...]
+Usage: javart.exe [options...]
 
 Options:
 
@@ -192,7 +191,7 @@ Where <spec> is one or more of:
             {
                 if (settings.base)
                 {
-                    write_javart_h();
+                    write_base_h();
                 }
             });
 

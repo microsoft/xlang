@@ -1,4 +1,4 @@
-// Java WinRT projection general support
+// Java/WinRT projection general support
 
 #pragma once
 
