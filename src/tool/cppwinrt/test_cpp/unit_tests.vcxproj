@@ -239,6 +239,7 @@
     </ClCompile>
     <ClCompile Include="return_params.cpp" />
     <ClCompile Include="return_params_abi.cpp" />
+    <ClCompile Include="scratch.cpp" />
     <ClCompile Include="variadic_delegate.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
