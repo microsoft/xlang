@@ -1,0 +1,24 @@
+import "Windows.Foundation.idl";
+
+namespace test_component_derived
+{
+    namespace Nested
+    {
+        // TODO: add Base class from test_component_base
+        unsealed runtimeclass Derived
+        {
+            Derived();
+            Derived(String name);
+
+            void DerivedMethod();
+        }
+
+        runtimeclass MoreDerived : Derived
+        {
+            MoreDerived();
+            MoreDerived(String name);
+
+            void MoreDerivedMethod();
+        }
+    }
+}

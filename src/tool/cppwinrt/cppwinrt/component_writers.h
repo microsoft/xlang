@@ -875,12 +875,9 @@ namespace winrt::@::implementation
         auto base_type = get_base_class(type);
         std::string base_include;
 
-        if (base_type)
+        if (base_type && settings.filter.includes(base_type))
         {
-            if (settings.filter.includes(base_type))
-            {
-                base_include = "#include \"" + get_generated_component_filename(base_type) + ".h\"\n";
-            }
+            base_include = "#include \"" + get_component_filename(base_type) + ".h\"\n";
         }
 
         {

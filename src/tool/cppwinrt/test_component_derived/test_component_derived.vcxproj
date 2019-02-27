@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{13333A6F-6A4A-48CD-865C-0F65135EB018}</ProjectGuid>
+    <ProjectGuid>{0080F6D1-AEC3-4F89-ADE1-3D22A7EBF99E}</ProjectGuid>
     <RootNamespace>Component</RootNamespace>
-    <ProjectName>test_component_base</ProjectName>
+    <ProjectName>test_component_derived</ProjectName>
   </PropertyGroup>
   <Import Project="..\cppwinrt.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -115,7 +115,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_derived.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -137,7 +137,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -146,7 +146,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_derived.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -171,7 +171,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_derived.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -193,7 +193,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -202,7 +202,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_derived.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -231,7 +231,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_derived.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -253,7 +253,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -262,7 +262,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_derived.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -291,7 +291,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_derived.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -313,7 +313,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -322,12 +322,13 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_derived.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Base.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
+    <ClCompile Include="Nested.Derived.cpp" />
+    <ClCompile Include="Nested.MoreDerived.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -336,7 +337,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Base.h" />
+    <ClInclude Include="Nested.Derived.h" />
+    <ClInclude Include="Nested.MoreDerived.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
