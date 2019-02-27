@@ -433,8 +433,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 {
                     method_signature signature{ method };
                     auto& params = signature.params();
-                    params.pop_back();
-                    params.pop_back();
+                    params.resize(params.size() - 2);
 
                     auto format = R"(    %::%(%) :
         %(make<@::implementation::%>(%))
@@ -799,7 +798,7 @@ namespace winrt::@::implementation
 
         for (auto&&[factory_name, factory] : get_factories(w, type))
         {
-            if (factory.activatable)
+            if (factory.activatable || factory.composable)
             {
                 if (!factory.type)
                 {
@@ -809,6 +808,17 @@ namespace winrt::@::implementation
                 for (auto&& method : factory.type.MethodList())
                 {
                     method_signature signature{ method };
+                    auto& params = signature.params();
+
+                    if (factory.composable)
+                    {
+                        params.resize(params.size() - 2);
+                    }
+
+                    if (params.empty())
+                    {
+                        continue;
+                    }
 
                     w.write("        %(%);\n",
                         type_name,
@@ -921,7 +931,7 @@ namespace winrt::@::implementation
 
         for (auto&&[factory_name, factory] : get_factories(w, type))
         {
-            if (factory.activatable)
+            if (factory.activatable || factory.composable)
             {
                 if (!factory.type)
                 {
@@ -937,6 +947,17 @@ namespace winrt::@::implementation
                 for (auto&& method : factory.type.MethodList())
                 {
                     method_signature signature{ method };
+                    auto& params = signature.params();
+
+                    if (factory.composable)
+                    {
+                        params.resize(params.size() - 2);
+                    }
+
+                    if (params.empty())
+                    {
+                        continue;
+                    }
 
                     w.write(format,
                         type_name,

@@ -7,6 +7,7 @@ namespace winrt::test_component_base::implementation
     {
         Base() = default;
 
+        Base(hstring const& name);
         void Method();
     };
 }
