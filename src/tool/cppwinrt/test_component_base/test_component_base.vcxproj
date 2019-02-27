@@ -343,7 +343,7 @@
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="Component.idl" />
+    <Midl Include="test_component_base.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

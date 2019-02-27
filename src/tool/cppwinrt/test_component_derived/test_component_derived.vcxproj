@@ -99,7 +99,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\test_component_base\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -135,9 +135,10 @@
       <AdditionalOptions>/nomidl %(AdditionalOptions)</AdditionalOptions>
       <AdditionalMetadataDirectories>C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -155,7 +156,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\test_component_base\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -191,9 +192,10 @@
       <AdditionalOptions>/nomidl %(AdditionalOptions)</AdditionalOptions>
       <AdditionalMetadataDirectories>C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -213,7 +215,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\test_component_base\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -251,9 +253,10 @@
       <AdditionalOptions>/nomidl %(AdditionalOptions)</AdditionalOptions>
       <AdditionalMetadataDirectories>C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -273,7 +276,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\test_component_base\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -311,9 +314,10 @@
       <AdditionalOptions>/nomidl %(AdditionalOptions)</AdditionalOptions>
       <AdditionalMetadataDirectories>C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -345,7 +349,7 @@
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="Component.idl" />
+    <Midl Include="test_component_derived.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

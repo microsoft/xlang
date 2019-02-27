@@ -54,7 +54,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_component_base", "test
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_component_derived", "test_component_derived\test_component_derived.vcxproj", "{0080F6D1-AEC3-4F89-ADE1-3D22A7EBF99E}"
 	ProjectSection(ProjectDependencies) = postProject
-		{D613FB39-5035-4043-91E2-BAB323908AF4} = {D613FB39-5035-4043-91E2-BAB323908AF4}
+		{13333A6F-6A4A-48CD-865C-0F65135EB018} = {13333A6F-6A4A-48CD-865C-0F65135EB018}
 	EndProjectSection
 EndProject
 Global

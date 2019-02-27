@@ -7,7 +7,7 @@ namespace winrt::test_component_base::implementation
     {
         throw hresult_not_implemented();
     }
-    void Base::Method()
+    void Base::BaseMethod()
     {
         throw hresult_not_implemented();
     }

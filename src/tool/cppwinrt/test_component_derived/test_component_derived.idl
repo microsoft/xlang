@@ -1,11 +1,11 @@
 import "Windows.Foundation.idl";
+import "test_component_base.idl";
 
 namespace test_component_derived
 {
     namespace Nested
     {
-        // TODO: add Base class from test_component_base
-        unsealed runtimeclass Derived
+        unsealed runtimeclass Derived : test_component_base.Base
         {
             Derived();
             Derived(String name);
@@ -13,7 +13,7 @@ namespace test_component_derived
             void DerivedMethod();
         }
 
-        runtimeclass MoreDerived : Derived
+        unsealed runtimeclass MoreDerived : Derived
         {
             MoreDerived();
             MoreDerived(String name);

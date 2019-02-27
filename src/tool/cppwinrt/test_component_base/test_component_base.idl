@@ -7,6 +7,6 @@ namespace test_component_base
         Base();
         Base(String name);
 
-        void Method();
+        void BaseMethod();
     }
 }
