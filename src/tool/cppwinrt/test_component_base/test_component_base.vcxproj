@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{85695954-3800-4558-9857-966E69E9F9EC}</ProjectGuid>
+    <ProjectGuid>{13333A6F-6A4A-48CD-865C-0F65135EB018}</ProjectGuid>
     <RootNamespace>Component</RootNamespace>
-    <ProjectName>test_component_folders</ProjectName>
+    <ProjectName>test_component_base</ProjectName>
   </PropertyGroup>
   <Import Project="..\cppwinrt.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -99,7 +99,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -114,7 +114,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_folders.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -136,7 +136,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -145,7 +145,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_folders.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -154,7 +154,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -169,7 +169,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_folders.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -191,7 +191,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -200,7 +200,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_folders.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -211,7 +211,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -228,7 +228,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_folders.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -250,7 +250,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -259,7 +259,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_folders.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -270,7 +270,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -287,7 +287,7 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component_folders.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_base.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
@@ -309,7 +309,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -318,13 +318,12 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component_folders.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_base.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Class.cpp" />
+    <ClCompile Include="Base.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
-    <ClCompile Include="Nested.NestedClass.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -333,8 +332,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Class.h" />
-    <ClInclude Include="Nested.NestedClass.h" />
+    <ClInclude Include="Base.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

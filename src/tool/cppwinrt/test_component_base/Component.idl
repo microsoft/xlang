@@ -1,0 +1,12 @@
+import "Windows.Foundation.idl";
+
+namespace test_component_base
+{
+    unsealed runtimeclass Base
+    {
+        Base();
+        Base(String name);
+
+        void Method();
+    }
+}
