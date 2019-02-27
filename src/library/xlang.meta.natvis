@@ -119,4 +119,22 @@
     </Expand>
   </Type>
 
+  <Type Name="xlang::text::writer_base&lt;*&gt;">
+    <Intrinsic Name="i_max" Expression="val1 > val2 ? val1 : val2">
+      <Parameter Name="val1" Type="char *" />
+      <Parameter Name="val2" Type="char *" />
+    </Intrinsic>
+    <Intrinsic Name="i_FirstHead" Expression="m_first._Mypair._Myval2._Myfirst" />
+    <Intrinsic Name="i_FirstTail" Expression="i_max(i_FirstHead(), m_first._Mypair._Myval2._Mylast - 100)" />
+    <Intrinsic Name="i_SecondHead" Expression="m_second._Mypair._Myval2._Myfirst" />
+    <Intrinsic Name="i_SecondTail" Expression="i_max(i_SecondHead(), m_second._Mypair._Myval2._Mylast - 100)" />
+    <DisplayString>{i_max(i_FirstTail(), i_SecondTail())}</DisplayString>
+    <Expand>
+      <Item Name="First:Head">i_FirstHead()</Item>
+      <Item Name="First:Tail">i_FirstTail()</Item>
+      <Item Name="Second:Head">i_SecondHead()</Item>
+      <Item Name="Second:Tail">i_SecondTail()</Item>
+    </Expand>
+  </Type>
+
 </AutoVisualizer>

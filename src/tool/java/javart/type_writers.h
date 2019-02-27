@@ -40,18 +40,18 @@ namespace xlang
         jni_type,
     };
 
-    struct java_name
+    enum class convention
+    {
+        lower,
+        upper,
+        camel,
+        mixed,
+    };
+
+    struct name_with_convention
     {
         std::string_view value;
-
-        enum convention
-        {
-            lower,
-            upper,
-            camel,
-            mixed,
-        }
-        convention{ mixed };
+        convention convention;
     };
 
     struct java_type_name : type_name
@@ -241,41 +241,41 @@ namespace xlang
             write_escaped_namespace(value, "::");
         }
 
-        void write(java_name const& name)
+        void write(name_with_convention const& name)
         {
             auto write_chars = [&](auto&& transform)
             {
                 for (auto c : name.value)
                 {
-                    if (auto x = static_cast<char>(transform(static_cast<unsigned char>(c))))
+                    if( auto x = static_cast<char>(transform(static_cast<unsigned char>(c))); x != '_')
                     {
                         write(x);
                     }
                 }
             };
 
+            auto index = 0;
             switch (name.convention)
             {
-            case java_name::lower:
+            case convention::lower:
                 return write_chars([](unsigned char c)
                     {
-                        return c == '_' ? '\0' : std::tolower(c);
+                        return std::tolower(c);
                     });
-            case java_name::upper:
+            case convention::upper:
                 return write_chars([](unsigned char c)
                     {
                         return std::toupper(c);
                     });
-            case java_name::camel:
-                return write_chars([](unsigned char c)
-                    {
-                        return c;
-                    });
-            case java_name::mixed:
-                auto index = 0;;
+            case convention::camel:
                 return write_chars([&](unsigned char c)
                     {
-                        return c == '_' ? '\0' : index++ == 0 ? std::tolower(c) : c;
+                        return index++ == 0 ? std::tolower(c) : c;
+                    });
+            case convention::mixed:
+                return write_chars([&](unsigned char c)
+                    {
+                        return index++ == 0 ? std::toupper(c) : c;
                     });
             }
         }
@@ -398,7 +398,7 @@ namespace xlang
             else if (type == ElementType::U8) { write("J"); }
             else if (type == ElementType::R4) { write("F"); }
             else if (type == ElementType::R8) { write("D"); }
-            else if (type == ElementType::String) { write("G"); }
+            else if (type == ElementType::String) { write("$"); }
             else
             {
                 write("LTODO-desc-brief-ElementType;");

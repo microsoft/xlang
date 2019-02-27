@@ -118,6 +118,7 @@
     <ClInclude Include="..\helpers.h" />
     <ClInclude Include="..\pch.h" />
     <ClInclude Include="..\settings.h" />
+    <ClInclude Include="..\strings\javart.h" />
     <ClInclude Include="..\type_writers.h" />
     <ClInclude Include="..\version.h" />
   </ItemGroup>
@@ -141,9 +142,7 @@
         $(BeforeClCompileTargets);gen_javart_strings
     </BeforeClCompileTargets>
   </PropertyGroup>
-  <Target Name="gen_javart_strings"
-          Inputs="..\strings\*"
-          Outputs="$(CmakeBinaryDir)\strings.cpp;$(CmakeBinaryDir)\strings.h">
-      <Exec Command="set VSCMD_ARG_TGT_ARCH=$(CmakePlatform)&amp;&amp; ..\..\..\..\scripts\windows\build.cmd -b $(Configuration) gen_javart_strings" />
+  <Target Name="gen_javart_strings" Inputs="..\strings\*" Outputs="$(CmakeBinaryDir)\strings.cpp;$(CmakeBinaryDir)\strings.h">
+    <Exec Command="set VSCMD_ARG_TGT_ARCH=$(CmakePlatform)&amp;&amp; ..\..\..\..\scripts\windows\build.cmd -b $(Configuration) gen_javart_strings" />
   </Target>
 </Project>

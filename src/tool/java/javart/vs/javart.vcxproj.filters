@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="strings">
+      <UniqueIdentifier>{56245c1b-652e-45da-a5e7-f31d935bd9b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\version.h">
@@ -36,6 +39,9 @@
     <ClInclude Include="..\code_writers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\strings\javart.h">
+      <Filter>strings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -44,7 +50,7 @@
     <ClCompile Include="..\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\_build\Windows\x86\Debug\tool\java\javart\strings.cpp">
+    <ClCompile Include="$(CmakeBinaryDir)\strings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

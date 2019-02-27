@@ -13,7 +13,7 @@
     JNIEXPORT void JNICALL \
     jni_export(jni_env* env, jclass cls) noexcept try \
     { \
-        jni_class::Register(*env, cls); \
+        jni_class::jni_register(*env, cls); \
     } \
     catch (...) \
     { \
@@ -21,7 +21,7 @@
     }
 
 #define JNI_EXPORT_FULLNAME_IMPL(jni_namespace, jni_class) \
-    jni_namespace##_##jni_class##_##Register 
+    jni_namespace##_##jni_class##_##jni_register 
 
 #define JNI_EXPORT_FULLNAME(jni_namespace, jni_class) \
 	JNI_EXPORT_FULLNAME_IMPL(jni_namespace, jni_class)
@@ -780,12 +780,12 @@ struct Projection
 	using type = T;
 	using resolve = ::resolve<type>;
 
-	static void Register(jni_env& env, jclass cls)
+	static void jni_register(jni_env& env, jclass cls)
 	{
 		class_cached = env.NewWeakGlobalRef(cls);
 	}
 
-	static void Unregister(jni_env& env) noexcept
+	static void jni_unregister(jni_env& env) noexcept
 	{
 		env.DeleteWeakGlobalRef(class_cached);
 	}
@@ -794,12 +794,12 @@ struct Projection
 template<typename D>
 struct Iterator
 {
-	static bool abi_hasNext(jni_env&, jobject, jlong abi)
+	static bool jni_hasNext(jni_env&, jobject, jlong abi)
 	{
 		return D::resolve{ abi }.HasCurrent();
 	}
 
-	static jobject abi_next(jni_env& env, jobject, jlong abi)
+	static jobject jni_next(jni_env& env, jobject, jlong abi)
 	{
 		auto obj = D::resolve{ abi };
 		if (!obj.HasCurrent())
@@ -811,12 +811,12 @@ struct Iterator
 		return env.create_projected_generic<D>(value_obj);
 	}
 
-	static void Register(jni_env& env, jclass cls)
+	static void jni_register(jni_env& env, jclass cls)
 	{
 		static JNINativeMethod methods[] =
 		{
-			JNI_METHOD0(abi_hasNext, "(J)Z"),
-			JNI_METHOD0(abi_next, winrt::impl::combine("(J)L", D::element_type, ";\0").data()),
+			JNI_METHOD0(jni_hasNext, "(J)Z"),
+			JNI_METHOD0(jni_next, winrt::impl::combine("(J)L", D::element_type, ";\0").data()),
 		};
 		env.register_natives(cls, methods);
 	}
@@ -825,16 +825,16 @@ struct Iterator
 template<typename D>
 struct Iterable
 {
-	static jobject abi_iterator(jni_env& env, jobject, jlong abi)
+	static jobject jni_iterator(jni_env& env, jobject, jlong abi)
 	{
 		return env.create_projected_object(D::resolve{ abi }.First(), D::iterator_type);
 	}
 
-	static void Register(jni_env& env, jclass cls)
+	static void jni_register(jni_env& env, jclass cls)
 	{
 		static JNINativeMethod methods[] =
 		{
-			JNI_METHOD0(abi_iterator, "(J)Ljava/util/Iterator;"),
+			JNI_METHOD0(jni_iterator, "(J)Ljava/util/Iterator;"),
 		};
 		env.register_natives(cls, methods);
 	}
@@ -843,102 +843,102 @@ struct Iterable
 template<typename D>
 struct Collection : public Iterable<D>
 {
-	static jboolean abi_add(jni_env&, jobject, jlong abi, jlong arg0_abi)
+	static jboolean jni_add(jni_env&, jobject, jlong abi, jlong arg0_abi)
 	{
 		abi;
 		arg0_abi;
 		return JNI_TRUE;
 	}
 
-	static jboolean abi_addAll(jni_env&, jobject, jlong abi, jobject arg0)
+	static jboolean jni_addAll(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static void abi_clear(jni_env&, jobject, jlong abi)
+	static void jni_clear(jni_env&, jobject, jlong abi)
 	{
 		abi;
 	}
 
-	static jboolean abi_contains(jni_env&, jobject, jlong abi, jobject arg0)
-	{
-		abi;
-		arg0;
-		return JNI_TRUE;
-	}
-
-	static jboolean abi_containsAll(jni_env&, jobject, jlong abi, jobject arg0)
+	static jboolean jni_contains(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static jboolean abi_isEmpty(jni_env&, jobject, jlong abi)
-	{
-		abi;
-		return JNI_TRUE;
-	}
-
-	static jboolean abi_remove(jni_env&, jobject, jlong abi, jobject arg0)
+	static jboolean jni_containsAll(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static jboolean abi_removeAll(jni_env&, jobject, jlong abi, jobject arg0)
+	static jboolean jni_isEmpty(jni_env&, jobject, jlong abi)
+	{
+		abi;
+		return JNI_TRUE;
+	}
+
+	static jboolean jni_remove(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static jboolean abi_retainAll(jni_env&, jobject, jlong abi, jobject arg0)
+	static jboolean jni_removeAll(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static jint abi_size(jni_env&, jobject, jlong abi)
+	static jboolean jni_retainAll(jni_env&, jobject, jlong abi, jobject arg0)
+	{
+		abi;
+		arg0;
+		return JNI_TRUE;
+	}
+
+	static jint jni_size(jni_env&, jobject, jlong abi)
 	{
 		abi;
 		return 0;
 	}
 
-	static jobjectArray abi_toArray(jni_env&, jobject, jlong abi)
+	static jobjectArray jni_toArray(jni_env&, jobject, jlong abi)
 	{
 		abi;
 		return nullptr;
 	}
 
-	static jobjectArray abi_toArray1(jni_env&, jobject, jlong abi, jobjectArray arg0)
+	static jobjectArray jni_toArray1(jni_env&, jobject, jlong abi, jobjectArray arg0)
 	{
 		abi;
 		arg0;
 		return nullptr;
 	}
 
-	static void Register(jni_env& env, jclass cls)
+	static void jni_register(jni_env& env, jclass cls)
 	{
-		__super::Register(env, cls);
+		__super::jni_register(env, cls);
 		static JNINativeMethod methods[] =
 		{
-			JNI_METHOD0(abi_add, "(JJ)Z"),
-			JNI_METHOD0(abi_addAll, "(JLjava/util/Collection;)Z"),
-			JNI_METHOD0(abi_clear, "(J)V"),
-			JNI_METHOD0(abi_contains, "(JLjava/lang/Object;)Z"),
-			JNI_METHOD0(abi_containsAll, "(JLjava/util/Collection;)Z"),
-			JNI_METHOD0(abi_isEmpty, "(J)Z"),
-			JNI_METHOD0(abi_remove, "(JLjava/lang/Object;)Z"),
-			JNI_METHOD0(abi_removeAll, "(JLjava/util/Collection;)Z"),
-			JNI_METHOD0(abi_retainAll, "(JLjava/util/Collection;)Z"),
-			JNI_METHOD0(abi_size, "(J)I"),
-			JNI_METHOD0(abi_toArray, "(J)[Ljava/lang/Object;"),
-			JNI_METHOD1(abi_toArray, "(J[Ljava/lang/Object;)[Ljava/lang/Object;"),
+			JNI_METHOD0(jni_add, "(JJ)Z"),
+			JNI_METHOD0(jni_addAll, "(JLjava/util/Collection;)Z"),
+			JNI_METHOD0(jni_clear, "(J)V"),
+			JNI_METHOD0(jni_contains, "(JLjava/lang/Object;)Z"),
+			JNI_METHOD0(jni_containsAll, "(JLjava/util/Collection;)Z"),
+			JNI_METHOD0(jni_isEmpty, "(J)Z"),
+			JNI_METHOD0(jni_remove, "(JLjava/lang/Object;)Z"),
+			JNI_METHOD0(jni_removeAll, "(JLjava/util/Collection;)Z"),
+			JNI_METHOD0(jni_retainAll, "(JLjava/util/Collection;)Z"),
+			JNI_METHOD0(jni_size, "(J)I"),
+			JNI_METHOD0(jni_toArray, "(J)[Ljava/lang/Object;"),
+			JNI_METHOD1(jni_toArray, "(J[Ljava/lang/Object;)[Ljava/lang/Object;"),
 		};
 		env.register_natives(cls, methods);
 	}
@@ -947,14 +947,14 @@ struct Collection : public Iterable<D>
 template<typename D>
 struct List : public Collection<D>
 {
-	static void abi_add(jni_env&, jobject, jlong abi, int arg0, jlong arg1_abi)
+	static void jni_add(jni_env&, jobject, jlong abi, int arg0, jlong arg1_abi)
 	{
 		abi;
 		arg0;
 		arg1_abi;
 	}
 
-	static jboolean abi_addAll(jni_env&, jobject, jlong abi, int arg0, jobject arg1)
+	static jboolean jni_addAll(jni_env&, jobject, jlong abi, int arg0, jobject arg1)
 	{
 		abi;
 		arg0;
@@ -962,47 +962,47 @@ struct List : public Collection<D>
 		return JNI_TRUE;
 	}
 
-	static jobject abi_get(jni_env& env, jobject, jlong abi, int arg0)
+	static jobject jni_get(jni_env& env, jobject, jlong abi, int arg0)
 	{
 		arg0;
 		return env.create_projected_generic<D>(D::resolve{ abi }.GetAt(arg0));
 	}
 
-	static jint abi_indexOf(jni_env&, jobject, jlong abi, jobject arg0)
+	static jint jni_indexOf(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return 0;
 	}
 
-	static jint abi_lastIndexOf(jni_env&, jobject, jlong abi, jobject arg0)
+	static jint jni_lastIndexOf(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return 0;
 	}
 
-	static jobject abi_listIterator(jni_env&, jobject, jlong abi)
+	static jobject jni_listIterator(jni_env&, jobject, jlong abi)
 	{
 		abi;
 		return nullptr;
 	}
 
-	static jobject abi_listIterator1(jni_env&, jobject, jlong abi, int arg0)
-	{
-		abi;
-		arg0;
-		return nullptr;
-	}
-
-	static jobject abi_remove(jni_env&, jobject, jlong abi, int arg0)
+	static jobject jni_listIterator1(jni_env&, jobject, jlong abi, int arg0)
 	{
 		abi;
 		arg0;
 		return nullptr;
 	}
 
-	static jobject abi_set(jni_env&, jobject, jlong abi, int arg0, jlong arg1_abi)
+	static jobject jni_remove(jni_env&, jobject, jlong abi, int arg0)
+	{
+		abi;
+		arg0;
+		return nullptr;
+	}
+
+	static jobject jni_set(jni_env&, jobject, jlong abi, int arg0, jlong arg1_abi)
 	{
 		abi;
 		arg0;
@@ -1010,7 +1010,7 @@ struct List : public Collection<D>
 		return nullptr;
 	}
 
-	static jobject abi_subList(jni_env&, jobject, jlong abi, int arg0, int arg1)
+	static jobject jni_subList(jni_env&, jobject, jlong abi, int arg0, int arg1)
 	{
 		abi;
 		arg0;
@@ -1018,21 +1018,21 @@ struct List : public Collection<D>
 		return nullptr;
 	}
 
-	static void Register(jni_env& env, jclass cls)
+	static void jni_register(jni_env& env, jclass cls)
 	{
-		__super::Register(env, cls);
+		__super::jni_register(env, cls);
 		static JNINativeMethod methods[] =
 		{
-			JNI_METHOD0(abi_add, "(JIJ)V"),
-			JNI_METHOD0(abi_addAll, "(JILjava/util/Collection;)Z"),
-			JNI_METHOD0(abi_get, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
-			JNI_METHOD0(abi_indexOf, "(JLjava/lang/Object;)I"),
-			JNI_METHOD0(abi_lastIndexOf, "(JLjava/lang/Object;)I"),
-			JNI_METHOD0(abi_listIterator, "(J)Ljava/util/ListIterator;"),
-			JNI_METHOD1(abi_listIterator, "(JI)Ljava/util/ListIterator;"),
-			JNI_METHOD0(abi_remove, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
-			JNI_METHOD0(abi_set, winrt::impl::combine("(JIJ)L", D::element_type, ";\0").data()),
-			JNI_METHOD0(abi_subList, "(JII)Ljava/util/List;"),
+			JNI_METHOD0(jni_add, "(JIJ)V"),
+			JNI_METHOD0(jni_addAll, "(JILjava/util/Collection;)Z"),
+			JNI_METHOD0(jni_get, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
+			JNI_METHOD0(jni_indexOf, "(JLjava/lang/Object;)I"),
+			JNI_METHOD0(jni_lastIndexOf, "(JLjava/lang/Object;)I"),
+			JNI_METHOD0(jni_listIterator, "(J)Ljava/util/ListIterator;"),
+			JNI_METHOD1(jni_listIterator, "(JI)Ljava/util/ListIterator;"),
+			JNI_METHOD0(jni_remove, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
+			JNI_METHOD0(jni_set, winrt::impl::combine("(JIJ)L", D::element_type, ";\0").data()),
+			JNI_METHOD0(jni_subList, "(JII)Ljava/util/List;"),
 		};
 		env.register_natives(cls, methods);
 	}
@@ -1041,88 +1041,88 @@ struct List : public Collection<D>
 template<typename D>
 struct ObservableList : List<D>
 {
-	static void abi_addListener(jni_env&, jobject, jlong abi, jobject arg0)
+	static void jni_addListener(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		//		D::resolve{ abi }.addListener(arg0);
 	}
 
-	static void abi_removeListener(jni_env&, jobject, jlong abi, jobject arg0)
+	static void jni_removeListener(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 	}
 
-	static jboolean abi_addAll(jni_env&, jobject, jlong abi, jobjectArray arg0)
+	static jboolean jni_addAll(jni_env&, jobject, jlong abi, jobjectArray arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static void abi_addListener1(jni_env&, jobject, jlong abi, jobject arg0)
+	static void jni_addListener1(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 	}
 
-	static void abi_remove(jni_env&, jobject, jlong abi, int arg0, int arg1)
+	static void jni_remove(jni_env&, jobject, jlong abi, int arg0, int arg1)
 	{
 		abi;
 		arg0;
 		arg1;
 	}
 
-	static jboolean abi_removeAll(jni_env&, jobject, jlong abi, jobject arg0)
+	static jboolean jni_removeAll(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static void abi_removeListener1(jni_env&, jobject, jlong abi, jobject arg0)
+	static void jni_removeListener1(jni_env&, jobject, jlong abi, jobject arg0)
 	{
 		abi;
 		arg0;
 	}
 
-	static jboolean abi_retainAll(jni_env&, jobject, jlong abi, jobjectArray arg0)
-	{
-		abi;
-		arg0;
-		return JNI_TRUE;
-	}
-
-	static jboolean abi_setAll(jni_env&, jobject, jlong abi, jobjectArray arg0)
+	static jboolean jni_retainAll(jni_env&, jobject, jlong abi, jobjectArray arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static jboolean abi_setAll1(jni_env&, jobject, jlong abi, jobject arg0)
+	static jboolean jni_setAll(jni_env&, jobject, jlong abi, jobjectArray arg0)
 	{
 		abi;
 		arg0;
 		return JNI_TRUE;
 	}
 
-	static void Register(jni_env& env, jclass cls)
+	static jboolean jni_setAll1(jni_env&, jobject, jlong abi, jobject arg0)
 	{
-		__super::Register(env, cls);
+		abi;
+		arg0;
+		return JNI_TRUE;
+	}
+
+	static void jni_register(jni_env& env, jclass cls)
+	{
+		__super::jni_register(env, cls);
 		static JNINativeMethod methods[] =
 		{
-			JNI_METHOD0(abi_addListener, "(JLjavafx/beans/InvalidationListener;)V"),
-			JNI_METHOD0(abi_removeListener, "(vLjavafx/beans/InvalidationListener;)V"),
-			JNI_METHOD0(abi_addAll, "(J[Ljava/lang/Object;)Z"),
-			JNI_METHOD1(abi_addListener, "(JLjavafx/collections/ListChangeListener;)V"),
-			JNI_METHOD0(abi_remove, "(JII)V"),
-			JNI_METHOD0(abi_removeAll, "(J[Ljava/lang/Object;)Z"),
-			JNI_METHOD1(abi_removeListener, "(JLjavafx/collections/ListChangeListener;)V"),
-			JNI_METHOD0(abi_retainAll, "(J[Ljava/lang/Object;)Z"),
-			JNI_METHOD0(abi_setAll, "(J[Ljava/lang/Object;)Z"),
-			JNI_METHOD1(abi_setAll, "(JLjava/util/Collection;)Z"),
+			JNI_METHOD0(jni_addListener, "(JLjavafx/beans/InvalidationListener;)V"),
+			JNI_METHOD0(jni_removeListener, "(vLjavafx/beans/InvalidationListener;)V"),
+			JNI_METHOD0(jni_addAll, "(J[Ljava/lang/Object;)Z"),
+			JNI_METHOD1(jni_addListener, "(JLjavafx/collections/ListChangeListener;)V"),
+			JNI_METHOD0(jni_remove, "(JII)V"),
+			JNI_METHOD0(jni_removeAll, "(J[Ljava/lang/Object;)Z"),
+			JNI_METHOD1(jni_removeListener, "(JLjavafx/collections/ListChangeListener;)V"),
+			JNI_METHOD0(jni_retainAll, "(J[Ljava/lang/Object;)Z"),
+			JNI_METHOD0(jni_setAll, "(J[Ljava/lang/Object;)Z"),
+			JNI_METHOD1(jni_setAll, "(JLjava/util/Collection;)Z"),
 		};
 		env.register_natives(cls, methods);
 	}
