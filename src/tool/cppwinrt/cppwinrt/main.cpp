@@ -24,7 +24,7 @@ namespace xlang
         { "name", 0, 1, "<name>", "Specify explicit name for component files" },
         { "verbose", 0, 0, {}, "Show detailed progress information" },
         { "overwrite", 0, 0, {}, "Overwrite generated component files" },
-        { "prefix", 0, cmd::option::no_max, {}, "Use dotted namespace convention for component files (defaults to folders)" },
+        { "prefix", 0, 0, {}, "Use dotted namespace convention for component files (defaults to folders)" },
         { "pch", 0, 1, "<name>", "Specify name of precompiled header file (defaults to pch.h)" },
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
