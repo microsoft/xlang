@@ -342,7 +342,3 @@ src/test/python/__pycache__/
 
 # Ignore copied license
 src/package/vsix/LICENSE
-
-build
-*.winmd
-*_h.h

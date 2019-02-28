@@ -125,16 +125,12 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <ExecutablePath>..\..;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
     <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <GenerateManifest>false</GenerateManifest>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <ExecutablePath>..\..;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
     <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <GenerateManifest>false</GenerateManifest>
@@ -165,16 +161,12 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <ExecutablePath>..\..;$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
     <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <GenerateManifest>false</GenerateManifest>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <ExecutablePath>..\..;$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
     <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)build\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
@@ -210,12 +202,16 @@
     <Midl>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</PrependWithABINamepsace>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
     <Midl>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</PrependWithABINamepsace>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -245,7 +241,9 @@
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
-      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -275,7 +273,9 @@
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
-      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -303,7 +303,9 @@
     <Midl>
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
-      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -331,7 +333,9 @@
     <Midl>
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
-      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -362,7 +366,9 @@
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
-      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -392,7 +398,9 @@
       <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <TypeLibraryName />
-      <HeaderFileName>$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
+      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -421,22 +429,38 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Composable.idl">
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName).winmd</MetadataFileName>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalMetadataDirectories>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </MetadataFileName>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</EnableWindowsRuntime>
