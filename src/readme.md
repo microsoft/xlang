@@ -97,7 +97,10 @@ The **/library** folder contains the C++ header libraries provided by xlang for 
 
 * **text_writer.h** writes formatted text output.
 
-* **xlang.meta.natvis** provides Visual Studio debug visualizations of xlang::meta types.  To use, see [Deploying .natvis files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015#BKMK_natvis_location).
+* **xlang.meta.natvis** provides Visual Studio debug visualizations of xlang::meta types.  Recommended install technique is to create a symlink:
+  > mklink "%USERPROFILE%\Documents\Visual Studio 2017\Visualizers\xlang.meta.natvis" c:\xlang\src\library\xlang.meta.natvis
+
+  See also [Deploying .natvis files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015#BKMK_natvis_location).
 
 ### /Platform
 
