@@ -209,14 +209,16 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
       <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </AdditionalMetadataDirectories>
     </Midl>
     <Midl>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</PrependWithABINamepsace>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
       <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </AdditionalMetadataDirectories>
     </Midl>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -248,7 +250,8 @@
       <TypeLibraryName />
       <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories>
+      </AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -280,7 +283,8 @@
       <TypeLibraryName />
       <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories>
+      </AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -310,7 +314,8 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories>
+      </AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -340,7 +345,8 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
       <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories>
+      </AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -373,7 +379,8 @@
       <TypeLibraryName />
       <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories>
+      </AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -405,7 +412,8 @@
       <TypeLibraryName />
       <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
       <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
-      <AdditionalMetadataDirectories>$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories>
+      </AdditionalMetadataDirectories>
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -434,22 +442,14 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Composable.idl">
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-      </AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-      </AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </MetadataFileName>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
