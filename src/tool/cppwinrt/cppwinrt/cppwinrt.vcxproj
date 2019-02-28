@@ -78,7 +78,7 @@
     <ClInclude Include="type_writers.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\build\temp\cppwinrt\strings.cpp" />
+    <ClCompile Include="$(CmakeOutDir)strings.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -88,12 +88,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\build\temp\cppwinrt\version.rc" />
+    <ResourceCompile Include="$(CmakeOutDir)version.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D613FB39-5035-4043-91E2-BAB323908AF4}</ProjectGuid>
     <RootNamespace>cppwinrt</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="..\cppwinrt.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -136,13 +137,25 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\library;$(IntermediateOutputPath)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\library;$(OutputPath)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -153,7 +166,7 @@
       <AdditionalDependencies>windowsapp.lib;shlwapi.lib;advapi32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)prebuild.exe ..\strings $(IntermediateOutputPath)</Command>
+      <Command>$(OutputPath)prebuild.exe ..\strings $(OutputPath)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -169,7 +182,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\library;$(IntermediateOutputPath)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\library;$(OutputPath)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -180,7 +193,7 @@
       <AdditionalDependencies>windowsapp.lib;shlwapi.lib;advapi32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)prebuild.exe ..\strings $(IntermediateOutputPath)</Command>
+      <Command>$(OutputPath)prebuild.exe ..\strings $(OutputPath)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -198,7 +211,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\library;$(IntermediateOutputPath)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\library;$(OutputPath)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -212,7 +225,7 @@
       <AdditionalDependencies>windowsapp.lib;shlwapi.lib;advapi32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)prebuild.exe ..\strings $(IntermediateOutputPath)</Command>
+      <Command>$(OutputPath)prebuild.exe ..\strings $(OutputPath)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -230,7 +243,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\library;$(IntermediateOutputPath)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\library;$(OutputPath)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -244,7 +257,7 @@
       <AdditionalDependencies>windowsapp.lib;shlwapi.lib;advapi32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)prebuild.exe ..\strings $(IntermediateOutputPath)</Command>
+      <Command>$(OutputPath)prebuild.exe ..\strings $(OutputPath)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

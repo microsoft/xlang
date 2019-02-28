@@ -1,1 +1,1 @@
-build\cppwinrt -in local -out build -verbose
+..\..\..\_build\Windows\x64\Release\tool\cppwinrt\cppwinrt.exe -in local -out ..\..\..\_build\Windows\x64\Release\tool\cppwinrt -verbose

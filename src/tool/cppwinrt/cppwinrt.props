@@ -15,12 +15,6 @@ of Visual Studio.
 
     <!--In Visual Studio 16, use the default Windows10 SDK-->
     <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and '$(VisualStudioVersion)' == '16.0'">10.0</WindowsTargetPlatformVersion>
-
-    <CmakePlatform>x64</CmakePlatform>
-    <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
-    <CmakeOutDir>$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
-    <OutDir>CmakeOutDir</OutDir>
-    <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
 </PropertyGroup>
 
   <!--In Dev14/Dev15, we need to set 'WindowsTargetPlatformVersion' to an exact build number. -->
@@ -57,5 +51,12 @@ of Visual Studio.
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
   </ItemDefinitionGroup>
+
+    <PropertyGroup>
+        <CmakePlatform>x64</CmakePlatform>
+        <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
+        <CmakeOutDir>$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
+        <OutDir>$(CmakeOutDir)</OutDir>
+    </PropertyGroup>
 
 </Project>
