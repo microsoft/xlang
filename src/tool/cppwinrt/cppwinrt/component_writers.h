@@ -51,7 +51,7 @@ namespace xlang
         {
             if (settings.filter.includes(base))
             {
-                continue;
+                return;
             }
 
             if (first)

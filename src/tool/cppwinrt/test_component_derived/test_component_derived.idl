@@ -5,20 +5,20 @@ namespace test_component_derived
 {
     namespace Nested
     {
-        unsealed runtimeclass Derived : test_component_base.Base
+        unsealed runtimeclass HierarchyC : test_component_base.HierarchyB
         {
-            Derived();
-            Derived(String name);
+            HierarchyC();
+            HierarchyC(String name);
 
-            void DerivedMethod();
+            void HierarchyC_Method();
         }
 
-        unsealed runtimeclass MoreDerived : Derived
+        unsealed runtimeclass HierarchyD : HierarchyC
         {
-            MoreDerived();
-            MoreDerived(String name);
+            HierarchyD();
+            HierarchyD(String name);
 
-            void MoreDerivedMethod();
+            void HierarchyD_Method();
         }
     }
 }

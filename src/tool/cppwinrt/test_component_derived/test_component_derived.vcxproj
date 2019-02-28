@@ -138,7 +138,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -195,7 +195,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -256,7 +256,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -317,7 +317,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -331,8 +331,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Generated Files\module.g.cpp" />
-    <ClCompile Include="Nested.Derived.cpp" />
-    <ClCompile Include="Nested.MoreDerived.cpp" />
+    <ClCompile Include="Nested.HierarchyC.cpp" />
+    <ClCompile Include="Nested.HierarchyD.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -341,8 +341,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Nested.Derived.h" />
-    <ClInclude Include="Nested.MoreDerived.h" />
+    <ClInclude Include="Nested.HierarchyC.h" />
+    <ClInclude Include="Nested.HierarchyD.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

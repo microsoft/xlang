@@ -1,13 +1,13 @@
 #include "pch.h"
-#include "Base.h"
+#include "HierarchyB.h"
 
 namespace winrt::test_component_base::implementation
 {
-    Base::Base(hstring const& name)
+    HierarchyB::HierarchyB(hstring const& name)
     {
         throw hresult_not_implemented();
     }
-    void Base::BaseMethod()
+    void HierarchyB::HierarchyB_Method()
     {
         throw hresult_not_implemented();
     }

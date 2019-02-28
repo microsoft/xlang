@@ -2,11 +2,19 @@ import "Windows.Foundation.idl";
 
 namespace test_component_base
 {
-    unsealed runtimeclass Base
+    unsealed runtimeclass HierarchyA
     {
-        Base();
-        Base(String name);
+        HierarchyA();
+        HierarchyA(String name);
 
-        void BaseMethod();
+        void HierarchyA_Method();
+    }
+
+    unsealed runtimeclass HierarchyB : HierarchyA
+    {
+        HierarchyB();
+        HierarchyB(String name);
+
+        void HierarchyB_Method();
     }
 }

@@ -5,6 +5,9 @@ namespace winrt::Composable::implementation
 {
     hstring Base::VirtualMethod()
     {
+        //Composable::Base b = *this;
+        //Composable::IBase ib = *this;
+
         return L"Base::VirtualMethod";
     }
 
