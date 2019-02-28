@@ -101,16 +101,38 @@ namespace xlang
         return left.name < right.name;
     }
 
+    static std::optional<TypeDef> get_exclusive_to(TypeDef const& type)
+    {
+        if (auto exclusive_attr = get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute"))
+        {
+            auto sig = exclusive_attr.Value();
+            auto const& fixed_args = sig.FixedArgs();
+            XLANG_ASSERT(fixed_args.size() == 1);
+            auto sys_type = std::get<ElemSig::SystemType>(std::get<ElemSig>(fixed_args[0].value).value);
+            return type.get_cache().find_required(sys_type.name);
+        }
+        // Note: Some interfaces lack the ExclusiveTo attribute (e.g., IWwwFormUrlDecoderEntry).  We'll use a
+        // naming convention to assume ExclusiveTo in these cases, and avoid unnecessary projection and casting.
+        // E.g., Some::Namespace::IRuntimeClass is assumed to be ExclusiveTo Some::Namespace::RuntimeClass.
+        if (auto probe = type.get_database().get_cache().find(type.TypeNamespace(), type.TypeName().substr(1)))
+        {
+            return probe;
+        }
+        return {};
+    }
+
     struct writer : writer_base<writer>
     {
         using writer_base<writer>::write;
 
-        std::string type_namespace;
+        std::string_view current_namespace;
+        std::string_view current_type;
         type_system current_type_system{};
         bool param_names{};
         bool consume_types{};
         bool async_types{};
         std::set<generic_iterator> iterators;
+        std::vector<std::string_view> unregisters;
         std::vector<std::vector<std::string>> generic_param_stack;
 
         struct type_system_guard
@@ -174,6 +196,11 @@ namespace xlang
         void add_iterator(generic_iterator&& it)
         {
             iterators.insert(std::move(it));
+        }
+
+        void add_unregister(std::string_view const& unregister)
+        {
+            unregisters.push_back(unregister);
         }
 
         [[nodiscard]] auto push_generic_params(std::pair<GenericParam, GenericParam> const& params)
@@ -310,18 +337,14 @@ namespace xlang
 
         void write(TypeDef const& type)
         {
-            if(auto exclusiveAttr = get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute"))
+            if(auto exclusive_to = get_exclusive_to(type); exclusive_to.has_value())
             {
-                auto sig = exclusiveAttr.Value();
-                auto const& fixedArgs = sig.FixedArgs();
-                XLANG_ASSERT(fixedArgs.size() == 1);
-                auto sysType = std::get<ElemSig::SystemType>(std::get<ElemSig>(fixedArgs[0].value).value);
-                write(type.get_cache().find_required(sysType.name));
+                write(exclusive_to.value());
                 return;
             }
 
             auto name_space = std::string(type.TypeNamespace());
-            if (name_space == type_namespace)
+            if (name_space == current_namespace)
             {
                 name_space = "";
             }

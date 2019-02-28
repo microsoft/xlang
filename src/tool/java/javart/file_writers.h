@@ -13,7 +13,7 @@ namespace xlang
     static auto create_jni_stubs(std::string_view const& name_space, cache::namespace_members const& members)
     {
         writer w;
-        w.type_namespace = name_space;
+        w.current_namespace = name_space;
 
         write_license(w);
         write_jni_prolog(w, name_space);
@@ -22,7 +22,7 @@ namespace xlang
         {
             write_jni_stub_iterator(w, it);
         }
-        write_jni_unregisters(w, name_space, members.classes);
+        write_jni_unregisters(w, name_space);
 
         auto jni_path = w.write_temp("%cpp/%.cpp", settings.output_folder, name_space);
         w.flush_to_file(jni_path);

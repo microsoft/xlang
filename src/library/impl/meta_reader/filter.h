@@ -65,6 +65,24 @@ namespace xlang::meta::reader
             return false;
         }
 
+        bool includes(std::string_view const& type_namespace, std::string_view const& type_name) const noexcept
+        {
+            if (m_rules.empty())
+            {
+                return true;
+            }
+
+            for (auto&& rule : m_rules)
+            {
+                if (match(type_namespace, type_name, rule.first))
+                {
+                    return rule.second;
+                }
+            }
+
+            return false;
+        }
+
         template <auto F>
         auto bind_each(std::vector<TypeDef> const& types) const
         {
@@ -86,24 +104,6 @@ namespace xlang::meta::reader
         }
 
     private:
-
-        bool includes(std::string_view const& type_namespace, std::string_view const& type_name) const noexcept
-        {
-            if (m_rules.empty())
-            {
-                return true;
-            }
-
-            for (auto&& rule : m_rules)
-            {
-                if (match(type_namespace, type_name, rule.first))
-                {
-                    return rule.second;
-                }
-            }
-
-            return false;
-        }
 
         static bool match(std::string_view const& type_namespace, std::string_view const& type_name, std::string_view const& match) noexcept
         {

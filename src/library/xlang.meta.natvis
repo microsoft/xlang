@@ -86,7 +86,9 @@
     <Intrinsic Name="i_TypeSpec" Expression="&amp;i_get_database()->TypeSpec" />
     <Intrinsic Name="i_TypeName" Expression="i_type() == 0 ? i_TypeDef()->i_TypeName(i_index()) : i_type() == 1 ? i_TypeRef()->i_TypeName(i_index()) : i_TypeSpec()->i_TypeName(i_index())" />
     <Intrinsic Name="i_TypeNamespace" Expression="i_type() == 0 ? i_TypeDef()->i_TypeNamespace(i_index()) : i_type() == 1 ? i_TypeRef()->i_TypeNamespace(i_index()) : i_TypeSpec()->i_TypeNamespace(i_index())" />
-    <DisplayString>{i_TypeNamespace(),sb}.{i_TypeName(),sb}</DisplayString>
+    <DisplayString Condition="i_type() == 0">TypeDef({i_TypeNamespace(),sb}.{i_TypeName(),sb})</DisplayString>
+    <DisplayString Condition="i_type() == 1">TypeRef({i_TypeNamespace(),sb}.{i_TypeName(),sb})</DisplayString>
+    <DisplayString Condition="i_type() == 2">TypeSpec({i_TypeNamespace(),sb}.{i_TypeName(),sb})</DisplayString>
     <Expand>
       <Synthetic Name="Type" Condition="i_type() == 0">
         <DisplayString>TypeDef</DisplayString>

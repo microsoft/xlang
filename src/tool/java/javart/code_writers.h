@@ -152,14 +152,6 @@ using namespace winrt;
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            // TODO: some interfaces lack exclusiveto attribute (e.g., IWwwFormUrlDecoderEntry)
-            // use naming convention to assume exclusiveto in theses cases, and avoid unnecessary projection.
-            // Some::Namespace::IRuntimeClass is assumed to be exclusive to Some::Namespace::RuntimeClass.
-            //if (is_exclusive(info.type))
-            //{
-            //    continue;
-            //}
-
             static constexpr std::string_view collections_namespace("Windows.Foundation.Collections."sv);
             if (starts_with(interface_name, collections_namespace))
             {
@@ -216,46 +208,45 @@ JNI_EXPORT(%);
             gi.name,
             gi.cpp_type,
             gi.name,
-            java_type_name{ gi.name, w.type_namespace },
+            java_type_name{ gi.name, w.current_namespace },
             gi.java_element,
             gi.name
         );
+
+        w.add_unregister(gi.name);
     }
 
     static void write_jni_generic_trait(writer& w, std::pair<std::variant<generic_interface_type, std::string>, interface_info> const& ifc)
     {
         if (auto generic_interface = std::get_if<generic_interface_type>(&ifc.first))
         {
+            // todo: make generic_param_stack a stack of TypeSigs to avoid all this string manipulation 
             auto cpp_params = w.write_temp("%", bind_list(",", ifc.second.generic_param_stack.back()));
             auto params = cpp_params;
-            auto is_delimiter = [](auto&& x) { return x == ':' || x == ','; };
+            auto is_delimiter = [](auto&& x) { return x == '.' || x == ','; };
             params.erase(std::remove_if(params.begin(), params.end(), is_delimiter), params.end());
-            auto name = w.write_temp("%%", generic_interface_info[to_underlying(*generic_interface)].projected, params);
+            auto name = w.write_temp("%%", params, generic_interface_info[to_underlying(*generic_interface)].projected);
 
             if (*generic_interface == generic_interface_type::Iterable)
             {
-                std::string element;
+                std::string element_java_type;
                 for (auto it = cpp_params.begin(); it != cpp_params.end(); ++it)
                 {
-                    if (*it == ':')
-                    {
-                        element.append("/");
-                        ++it;
-                    }
-                    else
-                    {
-                        element.append(1, *it);
-                    }
+                    element_java_type.append(1, *it == '.' ? '/' : *it);
+                }
+                if (element_java_type.find_first_of('/') == std::string::npos)
+                {
+                    element_java_type = w.write_temp("%", java_type_name{ element_java_type, w.current_namespace });
                 }
                 // record iterator for later implementation
-                w.add_iterator({ name, cpp_params, element });
+                w.add_iterator({ name, cpp_params, element_java_type });
             }
 
             auto format = R"(    static constexpr char %[] = "%";
 )";
             w.write(format,
                 generic_interface_info[to_underlying(*generic_interface)].base_trait,
-                java_type_name{ name, w.type_namespace });
+                java_type_name{ name, w.current_namespace });
         }
     }
 
@@ -428,6 +419,7 @@ JNI_EXPORT(Inspectable);
 )";
 
         w.write(format);
+        w.add_unregister("Inspectable");
     }
 
     static void write_jni_stub(writer& w, TypeDef const& type)
@@ -469,7 +461,9 @@ JNI_EXPORT(%);
             bind_each<write_jni_constructor_registration>(get_constructors(type)),
             bind_each<write_jni_method_registrations>(interfaces),
             type.TypeName()
-            );
+        );
+
+        w.add_unregister(type.TypeName());
     }
 
     static bool is_foundation(std::string_view const& ns)
@@ -493,9 +487,9 @@ JNI_EXPORT(%);
         w.write_each<write_jni_stub>(classes);
     }
 
-    static void write_jni_unregister(writer& w, TypeDef const& type)
+    static void write_jni_unregister(writer& w, std::string_view const& type_name)
     {
-        if (!settings.filter.includes(type))
+        if (!settings.filter.includes(w.current_namespace, type_name))
         {
             return;
         }
@@ -503,34 +497,19 @@ JNI_EXPORT(%);
         auto format = R"(    %::jni_unregister(*env);
 )";
 
-        w.write(format, type.TypeName());
+        w.write(format, type_name);
     }
 
-    static void write_jni_unregister_special(writer& w, std::string_view const& ns)
-    {
-        if (!is_foundation(ns))
-        {
-            return;
-        }
-
-        auto format = R"(    Inspectable::jni_unregister(env);
-)";
-
-        w.write(format);
-    }
-
-    static void write_jni_unregisters(writer& w, std::string_view const& ns, std::vector<TypeDef> const& classes)
+    static void write_jni_unregisters(writer& w, std::string_view const& ns)
     {
         auto format = R"(void %_Unregister(jni_env& env)
 {
-%%}
+%}
 )";
-
         w.write(format,
             java_export{ ns },
-            bind_each<write_jni_unregister>(classes),
-            bind<write_jni_unregister_special>(ns)
-            );
+            bind_each<write_jni_unregister>(w.unregisters)
+        );
     }
 
     static void write_java_implements(writer& w, std::map<std::variant<generic_interface_type, std::string>, interface_info> const& ifcs)
@@ -580,7 +559,8 @@ JNI_EXPORT(%);
             type.TypeName(),
             bind_list<write_param_as<java_type>>(", ", params, "% %"),
             bind_each<write_param_type_as<java_suffix>>(params),
-            bind_list<write_method_arg>(", ", params));
+            bind_list<write_method_arg>(", ", params)
+        );
     }
 
     static void write_java_public_method(writer& w, MethodDef const& method)
@@ -602,7 +582,8 @@ JNI_EXPORT(%);
             bind<write_method_name_as<java_type>>(method),
             bind_each<write_param_type_as<java_suffix>>(params),
             isStatic ? "" : signature.params().empty() ? "abi" : "abi, ",
-            bind_list<write_method_arg>(", ", params));
+            bind_list<write_method_arg>(", ", params)
+        );
     }
 
     static void write_java_public_methods(writer& w, std::pair<std::variant<generic_interface_type, std::string>, interface_info> const& ifc)
@@ -655,7 +636,8 @@ JNI_EXPORT(%);
             bind<write_method_name_as<java_type>>(method),
             bind_each<write_param_type_as<java_suffix>>(params),
             isStatic ? "" : "long abi",
-            bind_list<write_param_as<java_type>>(", ", params, isStatic ? "% %" : ", % %"));
+            bind_list<write_param_as<java_type>>(", ", params, isStatic ? "% %" : ", % %")
+        );
     }
 
     static void write_java_proxy_iterator(writer& w, std::string_view const& name_space, generic_iterator const& gi)
@@ -712,8 +694,8 @@ public class % extends Inspectable implements Iterator<%> {
             gi.name,
             java_class_descriptor,
             java_class_descriptor,
-
-            settings.shared_lib.empty() ? name_space : settings.shared_lib);
+            settings.shared_lib.empty() ? name_space : settings.shared_lib
+        );
     }
 
     static void write_java_proxy(writer& w, TypeDef const& type)

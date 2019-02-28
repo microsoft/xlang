@@ -143,14 +143,14 @@ namespace xlang
         std::vector<std::vector<std::string>> generic_param_stack{};
     };
 
-    static void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::vector<std::vector<std::string>> const& generic_param_stack, std::pair<InterfaceImpl, InterfaceImpl>&& children)
+    static void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, interface_info const& parent, std::pair<InterfaceImpl, InterfaceImpl>&& children)
     {
         for (auto&& impl : children)
         {
             interface_info info;
             auto type = impl.Interface();
             auto name = w.write_temp("%", type);
-            info.defaulted = !base && (defaulted || has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"));
+            info.defaulted = !parent.base && (parent.defaulted || has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"));
             
             {
                 // This is for correctness rather than an optimization (but helps performance as well).
@@ -171,9 +171,9 @@ namespace xlang
                 }
             }
 
-            info.overridable = overridable || has_attribute(impl, "Windows.Foundation.Metadata", "OverridableAttribute");
-            info.base = base;
-            info.generic_param_stack = generic_param_stack;
+            info.overridable = parent.overridable || has_attribute(impl, "Windows.Foundation.Metadata", "OverridableAttribute");
+            info.base = parent.base;
+            info.generic_param_stack = parent.generic_param_stack;
             writer::generic_param_guard guard;
 
             switch (type.type())
@@ -196,6 +196,23 @@ namespace xlang
 
                 for (auto&& arg : type_signature.GenericTypeInst().GenericArgs())
                 {
+                    if(auto type_index = std::get_if<coded_index<TypeDefOrRef>>(&arg.Type()))
+                    {
+                        if(type_index->type() == TypeDefOrRef::TypeRef)
+                        {
+                            auto type_ref = type_index->TypeRef();
+                            auto type_def = find_required(type_ref);
+                            if(type_def.Flags().Semantics() == TypeSemantics::Interface)
+                            {
+                                auto exclusive_to = get_exclusive_to(type_def);
+                                if (exclusive_to.has_value())
+                                {
+                                    names.push_back(w.write_temp("%", exclusive_to.value().TypeName()));
+                                    continue;
+                                }
+                            }
+                        }
+                    }
                     names.push_back(w.write_temp("%", arg));
                 }
 
@@ -209,19 +226,35 @@ namespace xlang
             }
             }
 
-            get_interfaces_impl(w, result, info.defaulted, info.overridable, base, info.generic_param_stack, info.type.InterfaceImpl());
+            get_interfaces_impl(w, result, info, info.type.InterfaceImpl());
             result[name] = std::move(info);
         }
     };
 
     static auto get_interfaces(writer& w, TypeDef const& type)
     {
-        std::map<std::string, interface_info> result;
-        get_interfaces_impl(w, result, false, false, false, {}, type.InterfaceImpl());
+        struct current_type_guard
+        {
+            writer& w;
+            current_type_guard(writer& w, std::string_view type_name) : w(w)
+            {
+                w.current_type = type_name;
+            }
+            ~current_type_guard()
+            {
+                w.current_type = "";
+            }
+        }
+        current_type(w, type.TypeName());
 
+        std::map<std::string, interface_info> result;
+        interface_info parent{};
+        get_interfaces_impl(w, result, parent, type.InterfaceImpl());
+
+        parent.base = true;
         for (auto&& base : get_bases(type))
         {
-            get_interfaces_impl(w, result, false, false, true, {}, base.InterfaceImpl());
+            get_interfaces_impl(w, result, parent, base.InterfaceImpl());
         }
 
         return result;
