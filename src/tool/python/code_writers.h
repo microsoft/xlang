@@ -165,7 +165,7 @@ struct winrt_type<%>
         w.write(format, bind<write_type_name>(type));
     }
 
-    void write_setup_filenames(writer& w, std::string_view const& module_name, std::vector<std::string> const& namespaces)
+    void write_setup_filenames(writer& w, std::vector<std::string> const& namespaces)
     {
         XLANG_ASSERT(namespaces.size() > 0);
 
@@ -174,7 +174,7 @@ struct winrt_type<%>
             w.write("'%/src/py.%.cpp', ", settings.module, ns);
         }
 
-        w.write("'%/src/%.cpp'", settings.module, module_name);
+        w.write("'%/src/_%.cpp'", settings.module, settings.module);
     }
 
     void write_struct_field_var_type(writer& w, Field const& field)
@@ -2026,12 +2026,18 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
         }
     }
 
+    void write_module_name(writer& w, std::string_view const& ns)
+    {
+        auto segments = get_dotted_name_segments(ns);
+        w.write("_%_%", settings.module, bind_list("_", segments));
+    }
+
     void write_type_spec(writer& w, TypeDef const& type)
     {
         auto format = R"(
 static PyType_Spec @_Type_spec =
 {
-    "@",
+    "%.@",
     %,
     0,
     Py_TPFLAGS_DEFAULT,
@@ -2041,6 +2047,7 @@ static PyType_Spec @_Type_spec =
         auto type_name = type.TypeName();
         w.write(format,
             type_name,
+            bind<write_module_name>(type.TypeNamespace()),
             type_name,
             bind<write_type_spec_size>(type),
             type_name);
@@ -2107,7 +2114,7 @@ static int module_exec(PyObject* module)
         w.write("}\n");
     }
 
-    void write_module_def(writer& w, std::string_view const& module_name, std::string_view const& doc_string, std::string_view const& module_methods = "nullptr")
+    void write_namespace_module_def(writer& w, std::string_view const& ns)
     {
         auto format = R"(
 static PyModuleDef_Slot module_slots[] = {
@@ -2122,7 +2129,7 @@ static PyModuleDef module_def = {
     "%",
     module_doc,
     0,
-    %,
+    nullptr,
     module_slots,
     nullptr,
     nullptr,
@@ -2135,17 +2142,14 @@ PyInit_%(void)
     return PyModuleDef_Init(&module_def);
 }
 )";
-        w.write(format, doc_string, module_name, module_methods, module_name);
+        w.write(format, ns, bind<write_module_name>(ns), bind<write_module_name>(ns));
     }
 
     void write_namespace_initialization(writer& w, std::string_view const& ns, cache::namespace_members const& members)
     {
         w.write("\n// ----- % Initialization --------------------\n", ns);
 
-        auto segments = get_dotted_name_segments(ns);
-        auto module_name = w.write_temp("_%_%", settings.module, bind_list("_", segments));
-
         write_namespace_module_exec_func(w, members);
-        write_module_def(w, module_name, ns);
+        write_namespace_module_def(w, ns);
     }
 }

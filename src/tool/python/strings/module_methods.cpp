@@ -19,7 +19,7 @@ static PyType_Slot winrt_base_Type_slots[] =
 
 static PyType_Spec winrt_base_Type_spec =
 {
-    "_winrt_base",
+    "_%._winrt_base",
     0,
     0,
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
@@ -94,4 +94,29 @@ static int module_exec(PyObject* module)
     type_object = nullptr;
 
     return 0;
+}
+
+static PyModuleDef_Slot module_slots[] = {
+    {Py_mod_exec, module_exec},
+    {0, nullptr}
+};
+
+PyDoc_STRVAR(module_doc, "_%");
+
+static PyModuleDef module_def = {
+    PyModuleDef_HEAD_INIT,
+    "_%",
+    module_doc,
+    0,
+    module_methods,
+    module_slots,
+    nullptr,
+    nullptr,
+    nullptr
+};
+
+PyMODINIT_FUNC
+PyInit__%(void)
+{
+    return PyModuleDef_Init(&module_def);
 }
