@@ -52,11 +52,11 @@ of Visual Studio.
     </ClCompile>
   </ItemDefinitionGroup>
 
-    <PropertyGroup>
-        <CmakePlatform>x64</CmakePlatform>
-        <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
-        <CmakeOutDir>$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
-        <OutDir>$(CmakeOutDir)</OutDir>
-    </PropertyGroup>
+  <PropertyGroup>
+    <CmakePlatform>x64</CmakePlatform>
+    <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
+    <CmakeOutDir>$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
+    <OutDir>$(CmakeOutDir)</OutDir>
+  </PropertyGroup>
 
 </Project>
