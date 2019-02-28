@@ -1,3 +1,6 @@
+import sys
+sys.path.append("./generated")
+
 import unittest
 
 import pyrt.windows.foundation.numerics as wfn

@@ -1,3 +1,6 @@
+import sys
+sys.path.append("./generated")
+
 import unittest
 
 import pyrt.windows.graphics.directx as wgd
