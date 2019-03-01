@@ -14,7 +14,8 @@ of Visual Studio.
     <CppWinRTVersion Condition="'$(CppWinRTVersion)'==''">2.3.4.5</CppWinRTVersion>
 
     <!--In Visual Studio 16, use the default Windows10 SDK-->
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and '$(VisualStudioVersion)' == '16.0'">10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)' == '16.0'">10.0</WindowsTargetPlatformVersion>
 </PropertyGroup>
 
   <!--In Dev14/Dev15, we need to set 'WindowsTargetPlatformVersion' to an exact build number. -->
