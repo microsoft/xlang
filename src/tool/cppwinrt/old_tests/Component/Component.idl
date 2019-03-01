@@ -123,10 +123,10 @@ namespace Component
     [version(1.0), uuid(e85655d9-9972-4aa5-92ad-83ecb01017dd)]
     delegate HRESULT TwoArgDelegate([in] int sender, [in] int args);
 
-    [version(1.0), uuid(e85655d9-9972-4aa5-92ad-83ecb01017dd)]
+    [version(1.0), uuid(7034aeb1-302a-40b5-a616-04941dd6ee83)]
     delegate HRESULT TwoArgDelegateReturn([in] int sender, [in] int args, [out,retval] BOOL* result);
 
-    [version(1.0), uuid(c5784dcd-8bed-444e-95f2-58f00878615f), exclusiveto(Events)]
+    [version(1.0), uuid(3669e5e1-9fc9-4c99-891a-aac6256cc4c9), exclusiveto(Events)]
     interface IEventsStatics : IInspectable
     {
         [eventadd] HRESULT StaticEvent([in] Windows.Foundation.EventHandler<int>* handler, [out][retval] EventRegistrationToken* cookie);

@@ -175,13 +175,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
-      <Command>$(SolutionDir)build\cppwinrt.exe -in $(ProjectDir)Component.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local $(ProjectDir)..\Composable -verbose</Command>
+      <Command>$(OutputPath)cppwinrt.exe -in $(OutputPath)Component.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local $(OutputPath)Composable.winmd -verbose</Command>
       <Message>C++/WinRT compiler</Message>
       <Outputs>Generated Files\module.g.cpp</Outputs>
-      <Inputs>Component.winmd</Inputs>
+      <Inputs>$(OutputPath)Component.winmd</Inputs>
     </CustomBuildStep>
     <ClCompile>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">stdcpp17</LanguageStandard>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">NOMINMAX;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Use</PrecompiledHeader>
@@ -194,7 +194,7 @@
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">stdcpp17</LanguageStandard>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">NOMINMAX;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Use</PrecompiledHeader>
@@ -206,21 +206,35 @@
     </ClCompile>
     <Midl>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">..\Composable</AdditionalIncludeDirectories>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</PrependWithABINamepsace>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </PrependWithABINamepsace>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </AdditionalOptions>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </HeaderFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </MetadataFileName>
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" />
     </Midl>
     <Midl>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">..\Composable</AdditionalIncludeDirectories>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</PrependWithABINamepsace>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/nomidl /struct_by_ref</AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </PrependWithABINamepsace>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </AdditionalOptions>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </HeaderFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </MetadataFileName>
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" />
     </Midl>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -228,7 +242,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <CompileAsWinRT>false</CompileAsWinRT>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <ConformanceMode>false</ConformanceMode>
@@ -247,14 +261,21 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
-      <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
-      <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <PrependWithABINamepsace>
+      </PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <HeaderFileName>
+      </HeaderFileName>
+      <MetadataFileName>
+      </MetadataFileName>
       <AdditionalMetadataDirectories>
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime>
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem />
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -263,7 +284,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <CompileAsWinRT>false</CompileAsWinRT>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <ConformanceMode>false</ConformanceMode>
@@ -281,14 +302,21 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
-      <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
-      <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <PrependWithABINamepsace>
+      </PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <HeaderFileName>
+      </HeaderFileName>
+      <MetadataFileName>
+      </MetadataFileName>
       <AdditionalMetadataDirectories>
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime>
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem />
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -297,7 +325,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <CompileAsWinRT>false</CompileAsWinRT>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <ConformanceMode>true</ConformanceMode>
@@ -314,13 +342,20 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
-      <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <PrependWithABINamepsace>true</PrependWithABINamepsace>
-      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <PrependWithABINamepsace>
+      </PrependWithABINamepsace>
+      <HeaderFileName>
+      </HeaderFileName>
+      <MetadataFileName>
+      </MetadataFileName>
       <AdditionalMetadataDirectories>
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime>
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem />
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -329,7 +364,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <CompileAsWinRT>false</CompileAsWinRT>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <ConformanceMode>true</ConformanceMode>
@@ -346,13 +381,20 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
-      <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <PrependWithABINamepsace>true</PrependWithABINamepsace>
-      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <PrependWithABINamepsace>
+      </PrependWithABINamepsace>
+      <HeaderFileName>
+      </HeaderFileName>
+      <MetadataFileName>
+      </MetadataFileName>
       <AdditionalMetadataDirectories>
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime>
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem />
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -361,7 +403,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <CompileAsWinRT>false</CompileAsWinRT>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <ConformanceMode>false</ConformanceMode>
@@ -380,14 +422,21 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
-      <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
-      <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <PrependWithABINamepsace>
+      </PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <HeaderFileName>
+      </HeaderFileName>
+      <MetadataFileName>
+      </MetadataFileName>
       <AdditionalMetadataDirectories>
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime>
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem />
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -396,7 +445,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <CompileAsWinRT>false</CompileAsWinRT>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;Generated Files;$(ProjectDir);..\Composable\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files;..\Composable\Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <ConformanceMode>false</ConformanceMode>
@@ -414,14 +463,21 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
-      <AdditionalOptions>/nomidl /struct_by_ref</AdditionalOptions>
-      <PrependWithABINamepsace>true</PrependWithABINamepsace>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <PrependWithABINamepsace>
+      </PrependWithABINamepsace>
       <TypeLibraryName />
       <AdditionalIncludeDirectories>..\Composable</AdditionalIncludeDirectories>
-      <HeaderFileName>$(OutDir)$(ProjectName)_h.h</HeaderFileName>
-      <MetadataFileName>$(OutDir)$(ProjectName).winmd</MetadataFileName>
+      <HeaderFileName>
+      </HeaderFileName>
+      <MetadataFileName>
+      </MetadataFileName>
       <AdditionalMetadataDirectories>
       </AdditionalMetadataDirectories>
+      <EnableWindowsRuntime>
+      </EnableWindowsRuntime>
+      <MinimumTargetSystem />
     </Midl>
     <CustomBuildStep />
   </ItemDefinitionGroup>
@@ -465,22 +521,14 @@
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-      </MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-      </MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</EnableWindowsRuntime>
@@ -489,6 +537,22 @@
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableWindowsRuntime>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\Composable</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\Composable</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">..\Composable</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">..\Composable</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">..\Composable</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">..\Composable</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\Composable</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\Composable</AdditionalIncludeDirectories>
     </Midl>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

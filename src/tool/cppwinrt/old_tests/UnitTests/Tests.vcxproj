@@ -275,7 +275,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -302,7 +302,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_HAS_AUTO_PTR_ETC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -328,7 +328,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_HAS_AUTO_PTR_ETC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -354,7 +354,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -383,7 +383,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -410,7 +410,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_HAS_AUTO_PTR_ETC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -436,7 +436,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_HAS_AUTO_PTR_ETC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -462,7 +462,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)build;..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
