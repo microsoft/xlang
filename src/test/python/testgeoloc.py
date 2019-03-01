@@ -108,7 +108,4 @@ class TestGeolocation(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import _pyrt
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()

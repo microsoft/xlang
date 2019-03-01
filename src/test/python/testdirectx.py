@@ -33,7 +33,4 @@ class TestDirectX(unittest.TestCase):
         self.assertEqual(msd.Quality, 2)
 
 if __name__ == '__main__':
-    import _pyrt
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()
