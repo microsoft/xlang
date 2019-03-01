@@ -15,6 +15,18 @@ namespace xlang::text
             m_first.reserve(16 * 1024);
         }
 
+        writer_base(writer_base && other)
+            : m_first(std::exchange(other.m_first, {})), m_second(std::exchange(other.m_second, {}))
+        {
+        }
+
+        writer_base& operator=(writer_base&& other)
+        {
+            m_first = std::exchange(other.m_first, {});
+            m_second = std::exchange(other.m_second, {});
+            return *this;
+        }
+
         template <typename... Args>
         void write(std::string_view const& value, Args const&... args)
         {
@@ -119,12 +131,41 @@ namespace xlang::text
             write(std::string_view{ buffer, size });
         }
 
+        template <typename List, typename... Args>
+        auto write_each(List const& list, Args const&... args)
+        {
+            for (auto&& item : list)
+            {
+                write(item, args...);
+            }
+        }
+
         template <auto F, typename List, typename... Args>
         void write_each(List const& list, Args const&... args)
         {
             for (auto&& item : list)
             {
                 F(*static_cast<T*>(this), item, args...);
+            }
+        }
+
+        template <typename T>
+        auto write_list(std::string_view const& delimiter, T const& list)
+        {
+            bool first{ true };
+
+            for (auto&& item : list)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    write(delimiter);
+                }
+
+                write(item);
             }
         }
         

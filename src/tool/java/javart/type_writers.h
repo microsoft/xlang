@@ -40,28 +40,34 @@ namespace xlang
         jni_type,
     };
 
-    enum class convention
-    {
-        lower,
-        upper,
-        camel,
-        mixed,
-    };
-
-    struct name_with_convention
+    struct lower_case
     {
         std::string_view value;
-        convention convention;
+    };
+
+    struct upper_case
+    {
+        std::string_view value;
+    };
+
+    struct camel_case
+    {
+        std::string_view value;
+    };
+
+    struct mixed_case
+    {
+        std::string_view value;
+    };
+
+    struct java_export 
+    {
+        std::string_view value;
     };
 
     struct java_type_name : type_name
     {
         using type_name::type_name;
-    };
-
-    struct java_export 
-    {
-        std::string_view name_space;
     };
 
     bool operator==(type_name const& left, std::string_view const& right)
@@ -124,6 +130,12 @@ namespace xlang
     struct writer : writer_base<writer>
     {
         using writer_base<writer>::write;
+
+        writer() = default;
+
+        writer(TypeDef const& current) :
+            current_namespace(current.TypeNamespace()), current_type(current.TypeName())
+        {}
 
         std::string_view current_namespace;
         std::string_view current_type;
@@ -268,43 +280,57 @@ namespace xlang
             write_escaped_namespace(value, "::");
         }
 
-        void write(name_with_convention const& name)
-        {
-            auto write_chars = [&](auto&& transform)
-            {
-                for (auto c : name.value)
-                {
-                    if( auto x = static_cast<char>(transform(static_cast<unsigned char>(c))); x != '_')
-                    {
-                        write(x);
-                    }
-                }
-            };
 
-            auto index = 0;
-            switch (name.convention)
+        void write(lower_case const& name)
+        {
+            for (auto c : name.value)
             {
-            case convention::lower:
-                return write_chars([](unsigned char c)
-                    {
-                        return std::tolower(c);
-                    });
-            case convention::upper:
-                return write_chars([](unsigned char c)
-                    {
-                        return std::toupper(c);
-                    });
-            case convention::camel:
-                return write_chars([&](unsigned char c)
-                    {
-                        return index++ == 0 ? std::tolower(c) : c;
-                    });
-            case convention::mixed:
-                return write_chars([&](unsigned char c)
-                    {
-                        return index++ == 0 ? std::toupper(c) : c;
-                    });
+                if (auto x = static_cast<char>(std::tolower(c)); x != '_')
+                {
+                    write(x);
+                }
             }
+        }
+
+        void write(upper_case const& name)
+        {
+            for (auto c : name.value)
+            {
+                if (c = static_cast<char>(std::toupper(c)); c != '_')
+                {
+                    write(c);
+                }
+            }
+        }
+
+        void write(camel_case const& name)
+        {
+            int index{};
+            for (auto c : name.value)
+            {
+                if (c = static_cast<char>(index++ == 0 ? std::tolower(c) : c); c != '_')
+                {
+                    write(c);
+                }
+            }
+        }
+
+        void write(mixed_case const& name)
+        {
+            int index{};
+            for (auto c : name.value)
+            {
+                if (c = static_cast<char>(index++ == 0 ? std::toupper(c) : c); c != '_')
+                {
+                    write(c);
+                }
+            }
+        }
+
+        void write(java_export const& java_export)
+        {
+            write("Java_");
+            write_escaped_namespace(java_export.value, "_");
         }
 
         void write(java_type_name const& type_name)
@@ -312,12 +338,6 @@ namespace xlang
             write_escaped_namespace(type_name.name_space, "/");
             write("/");
             write(type_name.name);
-        }
-        
-        void write(java_export const& java_export)
-        {
-            write("Java_");
-            write_escaped_namespace(java_export.name_space, "_");
         }
 
         void write(Constant const& value)

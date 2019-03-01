@@ -24,7 +24,7 @@ namespace xlang
         { "verbose", 0, 0, {}, "Show detailed progress information" },
         { "base", 0, 0, {}, "Generate javart.h unconditionally" },
         { "lib", 0, 1, "<name>", "Set shared library name (defaults to package name)" },
-        { "package", 0, 1, "<name>", "Set package base name (defaults to com.microsoft.)" },
+        { "package", 0, 1, "<name>", "Set package base name" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help" },
     };
 
@@ -77,7 +77,7 @@ Where <spec> is one or more of:
         settings.reference = args.files("reference", database::is_database);
         settings.base = args.exists("base");
         settings.shared_lib = args.value("lib");
-        settings.package_base = args.value("lib", "com.microsoft.");
+        settings.package_base = args.value("package");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / "cpp");

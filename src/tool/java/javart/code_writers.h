@@ -53,6 +53,12 @@ using namespace winrt;
     }
 
     template<type_system system>
+    static void write_field_as(writer& w, Field const& field)
+    {
+        w.write_as(system, "% %", field, field.Name());
+    }
+
+    template<type_system system>
     static void write_param_as(writer& w, std::pair<Param, const ParamSig*> const& param, std::string_view const& format)
     {
         w.write_as(system, format, param.second->Type(), param.first.Name());
@@ -95,7 +101,7 @@ using namespace winrt;
                 if constexpr (system == type_system::java_type)
                 {
                     w.write(is_get ? "get" : "set");
-                    w.write(name_with_convention{ bare_name, convention::mixed });
+                    w.write(mixed_case{ bare_name });
                 }
                 else
                 {
@@ -106,14 +112,13 @@ using namespace winrt;
         }
         if constexpr (system == type_system::java_type)
         {
-            w.write(name_with_convention{ name, convention::camel });
+            w.write(camel_case{ name });
         }
         else
         {
             w.write(name);
         }
     }
-
 
     static void write_method_arg(writer& w, std::pair<Param, ParamSig const*> const& param)
     {
@@ -124,9 +129,11 @@ using namespace winrt;
     {
         Iterable,
         VectorView,
-        MapView,
         Vector,
-        Map
+        ObvservableVector,
+        MapView,
+        Map,
+        ObservableMap,
     };
 
     static constexpr struct 
@@ -141,9 +148,11 @@ using namespace winrt;
     {
         {"IIterable"sv, "Iterable"sv, "iterator_type"sv, "Iterator"sv, "java.lang.Iterable"},
         {"IVectorView"sv, "VectorView"sv, "vector_view_type"sv, "VectorView"sv, "java.lang.VectorView"},
-        {"IMapView"sv, "MapView"sv, "map_view_type"sv, "MapView"sv, "java.lang.MapView"},
         {"IVector"sv, "Vector"sv, "vector_type"sv, "Vector"sv, "java.lang.Vector"},
+        {"IObservableVector"sv, "ObservableVector"sv, "observable_vector_type"sv, "ObservableVector"sv, "javafx.collections.ObservableList"},
+        {"IMapView"sv, "MapView"sv, "map_view_type"sv, "MapView"sv, "java.lang.MapView"},
         {"IMap"sv, "Map"sv, "map_type"sv, "Map"sv, "java.lang.Map"},
+        {"IObservableMap"sv, "ObservableMap"sv, "observable_map_type"sv, "ObservableMap"sv, "javafx.collections.ObservableMap"},
     };
 
     static auto get_interface_info(writer& w, TypeDef const& type)
@@ -191,14 +200,14 @@ using namespace winrt;
     {
         auto format = R"(struct % : Projection<Windows::Foundation::Collections::IIterator<%>>, Iterator<%>
 {
-	static constexpr char projected_type[] = "%";
-	static constexpr char element_type[] = "%";
+    static constexpr char projected_type[] = "%";
+    static constexpr char element_type[] = "%";
 
-	static void jni_register(jni_env& env, jclass cls)
-	{
-		Projection::jni_register(env, cls);
-		Iterator::jni_register(env, cls);
-	}
+    static void jni_register(jni_env& env, jclass cls)
+    {
+        Projection::jni_register(env, cls);
+        Iterator::jni_register(env, cls);
+    }
 };
 JNI_EXPORT(%);
 
@@ -300,7 +309,7 @@ JNI_EXPORT(%);
         auto&& params = signature.params();
         w.write(format,
             bind_each<write_param_type_as<java_suffix>>(params),
-            bind_list<write_param_as<jni_type>>(", ", params, ", % %"),
+            bind_list<write_param_as<jni_type>>(", ", params, "% %"),
             bind_list<write_jni_method_arg>(", ", params)
         );
     }
@@ -318,7 +327,7 @@ JNI_EXPORT(%);
         w.write(format,
             bind<write_method_name_as<java_type>>(method),
             bind_each<write_param_type_as<java_suffix>>(params),
-            bind_list<write_param_as<jni_type>>(", ", params, ", % %"),
+            bind_list<write_param_as<jni_type>>(", ", params, "% %"),
             bind<write_method_name_as<jni_type>>(method),
             bind_list<write_jni_method_arg>(", ", params)
         );
@@ -372,7 +381,7 @@ JNI_EXPORT(%);
     {
         auto format = R"(struct Inspectable : Projection<Windows::Foundation::IInspectable>
 {
-	static constexpr char projected_type[] = "Windows/Foundation/Inspectable";
+    static constexpr char projected_type[] = "Windows/Foundation/Inspectable";
 
     static auto jni_AddRef(jni_env&, jobject, jlong abi)
     {
@@ -537,7 +546,7 @@ JNI_EXPORT(%);
             {
                 auto params = w.write_temp("%", bind_list(",", info.generic_param_stack.back()));
                 auto implements = std::string(generic_interface_info[to_underlying(*generic_interface)].java_class) + "<" + params + ">";
-                write_implements(params);
+                write_implements(implements);
             }
             else
             {
@@ -546,7 +555,7 @@ JNI_EXPORT(%);
         }
     }
 
-    static void write_java_constructor(writer& w, MethodDef const& method, TypeDef const& type)
+    static void write_java_public_constructor(writer& w, MethodDef const& method, TypeDef const& type)
     {
         auto format = R"(    public %(%) {
         this(jni_construct%(%));
@@ -588,7 +597,21 @@ JNI_EXPORT(%);
 
     static void write_java_public_methods(writer& w, std::pair<std::variant<generic_interface_type, std::string>, interface_info> const& ifc)
     {
-        if (auto interface_name = std::get_if<std::string>(&ifc.first))
+        if (auto generic_interface = std::get_if<generic_interface_type>(&ifc.first))
+        {
+            if(*generic_interface == generic_interface_type::Iterable)
+            {
+                auto format = R"(    ^@Override
+    public java.util.Iterator<%> iterator() {
+        return abi_iterator(abi);
+    }
+
+)";
+                auto params = w.write_temp("%", bind_list(",", ifc.second.generic_param_stack.back()));
+                w.write(format, params);
+            }
+        }
+        else
         {
             push_interface_generic_params params(w, ifc.second);
             w.write("%", bind_each<write_java_public_method>(ifc.second.type.MethodList()));
@@ -622,6 +645,25 @@ JNI_EXPORT(%);
 //            bind_list<write_method_arg>(", ", params));
 //    }
 
+//    static void write_java_native_method(writer& w, MethodDef const& method)
+//    {
+//        auto format = R"(    private %native % jni_%%(%%);
+//
+//)";
+//        method_signature signature{ method };
+//        auto&& params = signature.params();
+//        bool isStatic = is_static(method) || is_constructor(method);
+//        auto return_type = is_constructor(method) ? "long" : w.write_temp("%", bind<write_return_type_as<java_type>>(signature.return_signature()));
+//        w.write(format,
+//            isStatic ? "static " : "",
+//            return_type,
+//            bind<write_method_name_as<java_type>>(method),
+//            bind_each<write_param_type_as<java_suffix>>(params),
+//            isStatic ? "" : "long abi",
+//            bind_list<write_param_as<java_type>>(", ", params, isStatic ? "% %" : ", % %")
+//        );
+//    }
+
     static void write_java_native_method(writer& w, MethodDef const& method)
     {
         auto format = R"(    private %native % jni_%%(%%);
@@ -630,9 +672,10 @@ JNI_EXPORT(%);
         method_signature signature{ method };
         auto&& params = signature.params();
         bool isStatic = is_static(method) || is_constructor(method);
+        auto return_type = is_constructor(method) ? "long" : w.write_temp("%", bind<write_return_type_as<java_type>>(signature.return_signature()));
         w.write(format,
             isStatic ? "static " : "",
-            bind<write_return_type_as<java_type>>(signature.return_signature()),
+            return_type,
             bind<write_method_name_as<java_type>>(method),
             bind_each<write_param_type_as<java_suffix>>(params),
             isStatic ? "" : "long abi",
@@ -640,41 +683,59 @@ JNI_EXPORT(%);
         );
     }
 
-    static void write_java_proxy_iterator(writer& w, std::string_view const& name_space, generic_iterator const& gi)
+    static void write_java_native_methods(writer& w, std::pair<std::variant<generic_interface_type, std::string>, interface_info> const& ifc)
+    {
+        if (auto generic_interface = std::get_if<generic_interface_type>(&ifc.first))
+        {
+            if (*generic_interface == generic_interface_type::Iterable)
+            {
+                auto format = R"(    private native Iterator<%> jni_iterator(long abi);
+
+)";
+                auto params = w.write_temp("%", bind_list(",", ifc.second.generic_param_stack.back()));
+                w.write(format, params);
+            }
+        }
+        else
+        {
+            push_interface_generic_params params(w, ifc.second);
+            w.write("%", bind_each<write_java_native_method>(ifc.second.type.MethodList()));
+        }
+    }
+
+    static auto write_java_proxy_iterator(std::string_view const& name_space, generic_iterator const& gi)
     {
         auto format = R"(package %;
 
-import java.util.Iterator;
+public class % extends Inspectable implements java.util.Iterator<%> {
 
-public class % extends Inspectable implements Iterator<%> {
+    public %(long abi) {
+        super(abi);
+    }
+    
+    public %(Inspectable that) {
+        super(that);
+    }
 
-	public %(long abi) {
-		super(abi);
-	}
-	
-	public %(Inspectable that) {
-		super(that);
-	}
+    ^@Override
+    public boolean hasNext() {
+        return jni_hasNext(abi);
+    }
 
-	^@Override
-	public boolean hasNext() {
-		return jni_hasNext(abi);
-	}
-
-	^@Override
-	public % next() {
-		return jni_next(abi);
-	}
+    ^@Override
+    public % next() {
+        return jni_next(abi);
+    }
 
     private native boolean jni_hasNext(long abi);
     private native % jni_next(long abi);
-	
-	private static native void jni_register();
+    
+    private static native void jni_register();
 
-	static {
-		System.loadLibrary("%");
-		jni_register();
-	}
+    static {
+        System.loadLibrary("%");
+        jni_register();
+    }
 })";
 
         auto java_class_descriptor = gi.java_element;
@@ -686,6 +747,8 @@ public class % extends Inspectable implements Iterator<%> {
             }
         }
 
+        writer w;
+        w.current_namespace = name_space;
         w.write(format,
             name_space,
             gi.name,
@@ -696,13 +759,12 @@ public class % extends Inspectable implements Iterator<%> {
             java_class_descriptor,
             settings.shared_lib.empty() ? name_space : settings.shared_lib
         );
+        return std::move(w);
     }
 
-    static void write_java_proxy(writer& w, TypeDef const& type)
+    static auto write_java_proxy(TypeDef const& type)
     {
         auto format = R"(package %;
-
-import java.util.Iterator;
 
 public class % extends Inspectable %
 {
@@ -714,9 +776,7 @@ public class % extends Inspectable %
         super(that);
     }
 
-%
-
-    ^@Override
+%    ^@Override
     public boolean equals(Object arg0) {
         if (arg0 instanceof %) {
             return super.equals(arg0);
@@ -724,10 +784,7 @@ public class % extends Inspectable %
         return false;
     }
 
-%
-
-%
-    private static native void jni_register();
+%%    private static native void jni_register();
 
     static {
         System.loadLibrary("%");
@@ -736,23 +793,132 @@ public class % extends Inspectable %
 };
         )";
         
+        writer w(type);
         auto package = settings.package_base + std::string(type.TypeNamespace());
-        auto library = settings.shared_lib.empty() ? package : settings.shared_lib;
         auto interfaces = get_interface_info(w, type);
-
         w.write(format,
-            name_with_convention{ package, convention::lower },
+            lower_case{ package },
             type.TypeName(),
             bind<write_java_implements>(interfaces),
             type.TypeName(),
             type.TypeName(),
             type.TypeName(),
-            bind_each<write_java_constructor>(get_constructors(type), type),
+            bind_each<write_java_public_constructor>(get_constructors(type), type),
             type.TypeName(),
             bind_each<write_java_public_methods>(interfaces),
             //bind_each<write_java_public_method>(type.MethodList()),
-            bind_each<write_java_native_method>(type.MethodList()),
-            name_with_convention{ library, convention::lower }
+            bind_each<write_java_native_methods>(interfaces),
+            //bind_each<write_java_native_method>(type.MethodList()),
+            lower_case{ settings.shared_lib.empty() ? package : settings.shared_lib }
         );
+        return std::move(w);
+    }
+
+    static void write_java_interface_method(writer& w, MethodDef const& method)
+    {
+        auto format = R"(    public % %(%);
+
+)";
+        method_signature signature{ method };
+        auto&& params = signature.params();
+        w.write(format,
+            bind<write_return_type_as<java_type>>(signature.return_signature()),
+            bind<write_method_name_as<java_type>>(method),
+            bind_list<write_param_as<java_type>>(", ", params, "% %")
+        );
+    }
+
+    static auto write_java_interface(TypeDef const& type)
+    {
+        auto format = R"(package %;
+
+public interface % {
+
+%}
+)";
+
+        writer w(type);
+        auto interfaces = get_interface_info(w, type);
+        w.write(format,
+            lower_case{ settings.package_base + std::string(type.TypeNamespace()) },
+            type.TypeName(),
+            bind_each<write_java_interface_method>(type.MethodList())
+        );
+        return std::move(w);
+    }
+
+    static void write_java_enum_fields(writer& w, TypeDef const& type)
+    {
+        auto is_first{true};
+        for (auto&& field: type.FieldList())
+        {
+            if (auto constant = field.Constant())
+            {
+                w.write(is_first ? "%(%)" : ",\n    %(%)", field.Name(), *constant);
+                is_first = false;
+            }
+        }
+    }
+
+    static auto write_java_enum(TypeDef const& type)
+    {
+        auto format = R"(package %;
+
+public enum % {
+	%;
+	
+	private final % value;
+
+	%(% value){
+		this.value = value;
+	}
+
+	public % value() {
+		return value;
+	}
+}
+)";
+        // TODO: project flags enum to EnumSet?
+        // auto flags_enum = get_attribute(type, "System", "FlagsAttribute");
+        writer w(type);
+        auto underlying_type = "int";
+        w.write(format,
+            lower_case{ settings.package_base + std::string(type.TypeNamespace()) },
+            type.TypeName(),
+            bind<write_java_enum_fields>(type),
+            underlying_type,
+            type.TypeName(),
+            underlying_type,
+            underlying_type
+        );
+        return std::move(w);
+    }
+
+    static void write_java_struct_field(writer& w, Field const& field)
+    {
+        w.write("    public %;\n", bind<write_field_as<java_type>>(field));
+    }
+
+    static auto write_java_struct(TypeDef const& type)
+    {
+        auto format = R"(package %;
+
+public class % {
+%}
+)";
+        writer w(type);
+        w.write(format,
+            lower_case{ settings.package_base + std::string(type.TypeNamespace()) },
+            type.TypeName(),
+            bind_each<write_java_struct_field>(type.FieldList())
+        );
+        return std::move(w);
+    }
+
+    static auto write_java_delegate(TypeDef const& type)
+    {
+        writer w(type);
+        // TODO
+        return std::move(w);
     }
 }
