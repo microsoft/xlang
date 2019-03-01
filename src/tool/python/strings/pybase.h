@@ -750,36 +750,52 @@ namespace py
         }
     };
 
+    struct pyobj_ptr_traits
+    {
+        using type = PyObject*;
+
+        static void close(type value) noexcept
+        {
+            Py_CLEAR(value);
+        }
+
+        static constexpr type invalid() noexcept
+        {
+            return nullptr;
+        }
+    };
+
     template <typename T>
     struct python_iterable final :
         winrt::implements<python_iterable<T>, winrt::Windows::Foundation::Collections::IIterable<T>>
     {
-        PyObject* _iterable;
+        winrt::handle_type<pyobj_ptr_traits> _iterable;
 
         explicit python_iterable(PyObject* iterable) : _iterable(iterable)
         {
+            Py_INCREF(_iterable.get());
         }
 
         auto First() const
         {
-            return winrt::make<iterator>(PyObject_GetIter(_iterable));
+            return winrt::make<iterator>(PyObject_GetIter(_iterable.get()));
         }
 
     private:
         struct iterator final : winrt::implements<iterator, winrt::Windows::Foundation::Collections::IIterator<T>>
         {
-            PyObject* _iterator;
+            winrt::handle_type<pyobj_ptr_traits> _iterator;
             std::optional<T> _current_value;
 
-            static std::optional<T> get_next(PyObject* iterator)
+            static std::optional<T> get_next(winrt::handle_type<pyobj_ptr_traits> const& iterator)
             {
-                if (iterator == nullptr)
+                if (!iterator)
                 {
                     throw winrt::hresult_invalid_argument();
                 }
 
-                PyObject* next = PyIter_Next(iterator);
-                if (next == nullptr)
+                winrt::handle_type<pyobj_ptr_traits> next { PyIter_Next(iterator.get()) };
+                if (!next)
                 {
                     if (PyErr_Occurred())
                     {
@@ -792,12 +808,12 @@ namespace py
                     }
                 }
 
-                return std::move(std::optional<T>{ converter<T>::convert_to(next) });
+                return std::move(std::optional<T>{ converter<T>::convert_to(next.get()) });
             }
 
             iterator(PyObject* i) : _iterator(i)
             {
-                if (_iterator == nullptr)
+                if (!_iterator)
                 {
                     throw winrt::hresult_invalid_argument();
                 }
@@ -868,7 +884,8 @@ namespace py
                 return result.value();
             }
 
-            if (PyObject* iterator = PyObject_GetIter(obj))
+            winrt::handle_type<pyobj_ptr_traits> iterator{ PyObject_GetIter(obj) };
+            if (iterator)
             {
                 return winrt::make<python_iterable<TItem>>(obj);
             }
