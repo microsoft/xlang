@@ -1091,5 +1091,4 @@ namespace py
 
         return PyObject_GetIter(future.get());
     }
-
 }
