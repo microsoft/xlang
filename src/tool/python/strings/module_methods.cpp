@@ -11,9 +11,17 @@ PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
 
+static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>* self)
+{
+    // auto hash_value = std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj);
+    // py::wrapped_instance(hash_value, nullptr);
+    self->obj = nullptr;
+}
+
 static PyType_Slot winrt_base_Type_slots[] =
 {
-    {Py_tp_doc, winrt_base_doc},
+    { Py_tp_dealloc, winrt_base_dealloc },
+    { Py_tp_doc, winrt_base_doc},
     { 0, nullptr },
 };
 

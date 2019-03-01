@@ -1772,6 +1772,7 @@ static void @_dealloc(PyObject*)
 }
 )", type.TypeName());
     }
+
     void write_struct(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
