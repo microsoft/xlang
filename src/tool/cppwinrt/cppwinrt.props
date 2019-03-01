@@ -56,7 +56,7 @@ of Visual Studio.
   <PropertyGroup>
     <CmakePlatform>x64</CmakePlatform>
     <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
-    <CmakeOutDir>$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
+    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
     <OutDir>$(CmakeOutDir)</OutDir>
   </PropertyGroup>
 
