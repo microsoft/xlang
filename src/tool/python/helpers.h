@@ -807,7 +807,9 @@ namespace xlang
     bool has_dealloc(TypeDef const& type)
     {
         auto category = get_category(type);
-        return category == category::interface_type || (category == category::class_type && !type.Flags().Abstract());
+        return category == category::struct_type ||
+            category == category::interface_type || 
+            (category == category::class_type && !type.Flags().Abstract());
     }
 
     TypeSig get_ireference_type(GenericTypeInstSig const& type)

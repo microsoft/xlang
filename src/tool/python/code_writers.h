@@ -1764,6 +1764,14 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
         }
     }
 
+    void write_struct_dealloc(writer& w, TypeDef const& type)
+    {
+        w.write(R"(
+static void @_dealloc(PyObject*)
+{
+}
+)", type.TypeName());
+    }
     void write_struct(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
@@ -1773,6 +1781,7 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
         write_winrt_type_specialization_storage(w, type);
         write_struct_convert_functions(w, type);
         write_struct_constructor(w, type);
+        write_struct_dealloc(w, type);
         write_property_functions(w, type);
         write_getset_table(w, type);
         write_type_slot_table(w, type);
