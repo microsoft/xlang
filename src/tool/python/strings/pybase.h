@@ -1056,31 +1056,48 @@ namespace py
             return nullptr;
         }
 
+        winrt::handle_type<pyobj_ptr_traits> future_type { PyObject_GetAttrString(asyncio.get(), "Future") };
+        if (!future_type)
+        {
+            return nullptr;
+        }
+
         // make a copy of future to pass into completed lambda
         winrt::handle_type<pyobj_ptr_traits> future_copy { future.get() };
         Py_INCREF(future_copy.get());
 
         try
         {
-            async.Completed([loop = std::move(loop), future = std::move(future_copy)](Async const& operation, winrt::Windows::Foundation::AsyncStatus status)
+            async.Completed(
+                [_loop = std::move(loop), _future = std::move(future_copy), _future_type = std::move(future_type)] 
+                (Async const& operation, winrt::Windows::Foundation::AsyncStatus status) mutable 
             {
                 winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
 
+                // std::move python pointers into local variables so they are cleaned up at end of 
+                // function block rather than when WinRT delegate object is collected. Note, this lambda
+                // is marked "mutable" above to enable moving the pointers to local scope.  
+                winrt::handle_type<pyobj_ptr_traits> loop { std::move(_loop) };
+                winrt::handle_type<pyobj_ptr_traits> future { std::move(_future) };
+                winrt::handle_type<pyobj_ptr_traits> future_type { std::move(_future_type) };
+
                 if (status == winrt::Windows::Foundation::AsyncStatus::Completed)
                 {
-                    // result = operation.GetResults()
                     winrt::handle_type<pyobj_ptr_traits> results { get_results(operation) };
 
-                    // loop.call_soon_threadsafe(future.set_result, results)
-                    winrt::handle_type<pyobj_ptr_traits> set_result { PyObject_GetAttrString(future.get(), "set_result") };
-                    
-                    winrt::handle_type<pyobj_ptr_traits> foo { PyObject_CallMethod(loop.get(), "call_soon_threadsafe", "OO", set_result.get(), results.get()) };
+                    winrt::handle_type<pyobj_ptr_traits> set_result { PyObject_GetAttrString(future_type.get(), "set_result") };
+                    winrt::handle_type<pyobj_ptr_traits> handle { PyObject_CallMethod(loop.get(), "call_soon_threadsafe", "OOO", 
+                        set_result.get(), 
+                        future.get(),
+                        results.get()) };
                 }
                 else
                 {
-                    // loop.call_soon_threadsafe(future.set_exception, RuntimeError("AsyncOp failed"))
-                    winrt::handle_type<pyobj_ptr_traits> set_exception { PyObject_GetAttrString(future.get(), "set_exception") };
-                    winrt::handle_type<pyobj_ptr_traits> foo { PyObject_CallMethod(loop.get(), "call_soon_threadsafe", "OO", set_exception.get(), PyExc_RuntimeError) };
+                    winrt::handle_type<pyobj_ptr_traits> set_exception { PyObject_GetAttrString(future_type.get(), "set_exception") };
+                    winrt::handle_type<pyobj_ptr_traits> handle { PyObject_CallMethod(loop.get(), "call_soon_threadsafe", "OOO", 
+                        set_exception.get(), 
+                        future.get(),
+                        PyExc_RuntimeError) };
                 }
             });
         }

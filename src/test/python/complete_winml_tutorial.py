@@ -1,3 +1,6 @@
+import sys
+sys.path.append("./generated")
+
 import pyrt
 import asyncio
 
