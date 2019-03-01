@@ -2075,31 +2075,37 @@ static PyType_Spec @_Type_spec =
             ? w.write_temp("py@", type.TypeName())
             : w.write_temp("%", type);
 
-        if (has_dealloc(type))
-        {
-            w.write("\ntype_object = PyType_FromSpecWithBases(&@_Type_spec, bases);\n", type.TypeName());
-        }
-        else
-        {
-            w.write("\ntype_object = PyType_FromSpec(&@_Type_spec);\n", type.TypeName());
-        }
+        w.write("\n{\n");
 
+        {
+            writer::indent_guard g{ w };
 
-        auto format = R"(if (type_object == nullptr)
+            w.write("winrt::handle_type<py::pyobj_ptr_traits> type_object { ");
+            if (has_dealloc(type))
+            {
+                w.write("PyType_FromSpecWithBases(&@_Type_spec, bases.get())", type.TypeName());
+            }
+            else
+            {
+                w.write("PyType_FromSpec(&@_Type_spec)", type.TypeName());
+            }
+            w.write(" };\n");
+
+            auto format = R"(if (!type_object)
 {
     return -1;
 }
-if (PyModule_AddObject(module, "@", type_object) != 0)
+if (PyModule_AddObject(module, "@", type_object.get()) != 0)
 {
-    Py_DECREF(type_object);
     return -1;
 }
-py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
-type_object = nullptr;
-)";
-        w.write(format,
-            type.TypeName(),
-            winrt_type_param);
+py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object.detach());)";
+            w.write(format,
+                type.TypeName(),
+                winrt_type_param);
+        }
+
+        w.write("\n}");
     }
 
     void write_namespace_module_exec_func(writer& w, cache::namespace_members const& members)
@@ -2107,8 +2113,7 @@ type_object = nullptr;
         w.write(R"(
 static int module_exec(PyObject* module)
 {
-    PyObject* type_object{ nullptr };
-    PyObject* bases = PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type);
+    winrt::handle_type<py::pyobj_ptr_traits> bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };
 )");
 
         {
@@ -2118,7 +2123,7 @@ static int module_exec(PyObject* module)
             settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.interfaces)(w);
             settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.structs)(w);
 
-            w.write("\nPy_DECREF(bases);\nreturn 0;\n");
+            w.write("\nreturn 0;\n");
         }
 
         w.write("}\n");
