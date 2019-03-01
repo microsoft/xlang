@@ -15,8 +15,16 @@ endif()
 
 add_definitions(-DXLANG_PAL_EXPORTS)
 add_library(pal SHARED ${sources})
-target_include_directories(pal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(pal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/helpers)
 target_include_directories(pal PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/published)
+set_target_properties(pal PROPERTIES OUTPUT_NAME "xlangpal")
+RPATH_ORIGIN(pal)
+
+if (NOT WIN32)
+    target_link_libraries(pal -ldl)
+    target_link_libraries(pal c++ c++abi)
+    target_link_libraries(pal -lpthread)
+endif()
 
 install(TARGETS pal DESTINATION "test/platform")
 if (WIN32)

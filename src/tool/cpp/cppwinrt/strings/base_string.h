@@ -210,7 +210,7 @@ namespace winrt
 
     inline void** put_abi(hstring& object) noexcept
     {
-        WINRT_ASSERT(get_abi(object) == nullptr);
+        object.clear();
         return reinterpret_cast<void**>(&object);
     }
 

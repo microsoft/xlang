@@ -166,6 +166,24 @@ namespace winrt::impl
     {
         *value = nullptr;
     }
+
+    template <typename T>
+    void zero_abi(void* ptr, uint32_t const capacity) noexcept
+    {
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            memset(ptr, 0, sizeof(T) * capacity);
+        }
+    }
+
+    template <typename T>
+    void zero_abi(void* ptr) noexcept
+    {
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            memset(ptr, 0, sizeof(T));
+        }
+    }
 }
 
 namespace winrt

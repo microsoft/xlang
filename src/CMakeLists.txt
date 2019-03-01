@@ -73,6 +73,19 @@ function(CONSUME_PAL target)
     target_link_libraries(${target} pal)
 endfunction()
 
+# set test_platform linker flags to look for .so files in the current directory 
+# adapted from https://serverfault.com/a/926072
+function(RPATH_ORIGIN target)
+    if (NOT WIN32)
+        get_target_property(RPATH_ORIGIN_temp_link_flags ${target} LINK_FLAGS)
+        if (RPATH_ORIGIN_temp_link_flags MATCHES "NOTFOUND$")
+            set_target_properties(${target} PROPERTIES LINK_FLAGS "-Wl,-rpath='$ORIGIN'")
+        else()
+            set_target_properties(${target} PROPERTIES LINK_FLAGS "${RPATH_ORIGIN_temp_link_flags} -Wl,-rpath='$ORIGIN'")
+        endif()
+    endif()
+endfunction()
+
 
 add_custom_target(scorch COMMAND ${CMAKE_COMMAND} \"-Dfolder=${CMAKE_CURRENT_BINARY_DIR}\" -P \"${XLANG_SCRIPTS_PATH}/scorch.cmake\")
 set_target_properties(scorch PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -113,20 +126,6 @@ endif()
 
 if (WIN32)
     add_definitions(-DNOMINMAX)
-endif()
-
-# determine if VS SDK workload is installed via vswhere.exe 
-set(vssdk_installed false)
-if (WIN32)
-    file(TO_NATIVE_PATH "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer/vswhere.exe" vswhere_exe)
-    if (EXISTS ${vswhere_exe})
-        execute_process(
-            COMMAND ${vswhere_exe} -requires Microsoft.VisualStudio.Workload.VisualStudioExtension -format json
-            OUTPUT_VARIABLE vswhere_output
-        )
-        string(STRIP ${vswhere_output} vswhere_output)
-        string(COMPARE NOTEQUAL ${vswhere_output} "[]" vssdk_installed)
-    endif()
 endif()
 
 add_subdirectory(tool)

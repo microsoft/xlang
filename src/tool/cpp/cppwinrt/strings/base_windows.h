@@ -176,6 +176,11 @@ namespace winrt
     template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
     auto put_abi(T& object) noexcept
     {
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            object = {};
+        }
+
         return reinterpret_cast<impl::abi_t<T>*>(&object);
     }
 
@@ -206,7 +211,7 @@ namespace winrt
 
     inline void** put_abi(Windows::Foundation::IUnknown& object) noexcept
     {
-        WINRT_ASSERT(get_abi(object) == nullptr);
+        object = nullptr;
         return reinterpret_cast<void**>(&object);
     }
 
