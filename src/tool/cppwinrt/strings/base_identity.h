@@ -17,22 +17,10 @@ namespace winrt
     }
 
     struct event_token;
-
-    template <typename T>
-    struct fast_interface {};
 }
 
 namespace winrt::impl
 {
-    template <typename T>
-    struct fast_version;
-
-    template <typename T, typename = std::void_t<>>
-    struct is_fast_interface : std::false_type {};
-
-    template <typename T>
-    struct is_fast_interface<fast_interface<T>> : std::true_type {};
-
     template <size_t Size, typename T, size_t... Index>
     constexpr std::array<T, Size> to_array(T const* value, std::index_sequence<Index...> const) noexcept
     {
@@ -481,12 +469,6 @@ namespace winrt::impl
     {
 #pragma warning(suppress: 4307)
         static constexpr guid value{ generate_guid(signature<T>::data) };
-    };
-
-    template <typename T> struct guid_storage<fast_interface<T>>
-    {
-#pragma warning(suppress: 4307)
-        static constexpr guid value{ generate_guid(combine("fastabi(", to_array<char>(guid_of<typename fast_version<T>::type>()), ")")) };
     };
 
     constexpr size_t to_utf8_size(wchar_t const value) noexcept

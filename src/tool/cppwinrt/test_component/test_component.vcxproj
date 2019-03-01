@@ -133,7 +133,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -overwrite -lib test</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -lib test</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -188,7 +188,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -overwrite -lib test</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -lib test</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -247,7 +247,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -overwrite -lib test</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -lib test</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -306,7 +306,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -overwrite -lib test</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref local -verbose -prefix -opt -lib test</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -324,6 +324,7 @@
     <ClCompile Include="Composition.SpriteVisual.cpp" />
     <ClCompile Include="Composition.Visual.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
+    <ClCompile Include="Generated Files\Simple.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -336,6 +337,7 @@
     <ClInclude Include="Composition.CompositionObject.h" />
     <ClInclude Include="Composition.SpriteVisual.h" />
     <ClInclude Include="Composition.Visual.h" />
+    <ClInclude Include="Generated Files\Simple.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

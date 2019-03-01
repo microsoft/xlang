@@ -46,12 +46,12 @@ namespace winrt::impl
 #ifdef WINRT_WINDOWS_ABI
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, is_fast_interface<T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
+    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
 
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, is_fast_interface<T>> {};
+    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>> {};
 
 #endif
 

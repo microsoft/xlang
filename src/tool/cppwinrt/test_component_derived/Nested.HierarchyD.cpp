@@ -9,17 +9,17 @@ namespace winrt::test_component_derived::Nested::implementation
     }
     void HierarchyD::HierarchyD_Method()
     {
-        //Nested::HierarchyD d = *this;
-        //assert(d);
+        Nested::HierarchyD d = *this;
+        assert(d);
 
-        //Nested::HierarchyC c = *this;
-        //assert(c);
+        Nested::HierarchyC c = *this;
+        assert(c);
 
-        //test_component_base::HierarchyB b = *this;
-        //assert(b);
+        test_component_base::HierarchyB b = *this;
+        assert(b);
 
-        //test_component_base::HierarchyA a = *this;
-        //assert(a);
+        test_component_base::HierarchyA a = *this;
+        assert(a);
 
         //Nested::IHierarchyD id = *this;
         //assert(id);
@@ -27,10 +27,10 @@ namespace winrt::test_component_derived::Nested::implementation
         //Nested::IHierarchyC ic = *this;
         //assert(ic);
 
-        //test_component_base::IHierarchyB ib = *this;
-        //assert(ib);
+        test_component_base::IHierarchyB ib = *this;
+        assert(ib);
 
-        //test_component_base::IHierarchyA ia = *this;
-        //assert(ia);
+        test_component_base::IHierarchyA ia = *this;
+        assert(ia);
     }
 }
