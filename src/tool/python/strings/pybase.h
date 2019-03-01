@@ -944,27 +944,30 @@ namespace py
     {
         static PyObject* convert(winrt::com_array<T> const& instance) noexcept
         {
-            PyObject* list = PyList_New(instance.size());
-            if (list == nullptr)
+            winrt::handle_type<pyobj_ptr_traits> list{ PyList_New(instance.size()) };
+            if (!list)
             {
                 return nullptr;
             }
 
             for (uint32_t index = 0; index < instance.size(); index++)
             {
-                PyObject* item = converter<T>::convert(instance[index]);
-                if (item == nullptr)
+                winrt::handle_type<pyobj_ptr_traits> item { converter<T>::convert(instance[index]) };
+                if (!item)
                 {
                     return nullptr;
                 }
 
-                if (PyList_SetItem(list, index, item) == -1)
+                if (PyList_SetItem(list.get(), index, item.get()) == -1)
                 {
                     return nullptr;
                 }
+
+                // PyList_SetItem steals the reference to item
+                item.detach();
             }
 
-            return list;
+            return list.detach();
         }
 
         static auto convert_to(PyObject* obj)
@@ -985,6 +988,7 @@ namespace py
 
             for (Py_ssize_t index = 0; index < list_size; index++)
             {
+                // PyList_GetItem returns a borrowed reference, so no RAII wrapper
                 PyObject* item = PyList_GetItem(obj, index);
                 if (item == nullptr)
                 {
@@ -1034,40 +1038,50 @@ namespace py
     template <typename Async>
     PyObject* dunder_await(Async const& async)
     {
-        PyObject* loop = PyObject_CallMethod(PyImport_ImportModule("asyncio"), "get_event_loop", nullptr);
+        winrt::handle_type<pyobj_ptr_traits> asyncio { PyImport_ImportModule("asyncio") };
+        if (!asyncio)
+        {
+            return nullptr;
+        }
+
+        winrt::handle_type<pyobj_ptr_traits> loop { PyObject_CallMethod(asyncio.get(), "get_event_loop", nullptr) };
         if (!loop)
         {
             return nullptr;
         }
 
-        PyObject* future = PyObject_CallMethod(loop, "create_future", nullptr);
+        winrt::handle_type<pyobj_ptr_traits> future { PyObject_CallMethod(loop.get(), "create_future", nullptr) };
         if (!future)
         {
             return nullptr;
         }
 
+        // make a copy of future to pass into completed lambda
+        winrt::handle_type<pyobj_ptr_traits> future_copy { future.get() };
+        Py_INCREF(future_copy.get());
+
         try
         {
-            async.Completed([loop, future](Async const& operation, winrt::Windows::Foundation::AsyncStatus status)
+            async.Completed([loop = std::move(loop), future = std::move(future_copy)](Async const& operation, winrt::Windows::Foundation::AsyncStatus status)
             {
                 winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
 
                 if (status == winrt::Windows::Foundation::AsyncStatus::Completed)
                 {
                     // result = operation.GetResults()
-                    PyObject* results = get_results(operation);
+                    winrt::handle_type<pyobj_ptr_traits> results { get_results(operation) };
 
                     // loop.call_soon_threadsafe(future.set_result, results)
-                    PyObject_CallMethod(loop, "call_soon_threadsafe", "OO", PyObject_GetAttrString(future, "set_result"), results);
+                    winrt::handle_type<pyobj_ptr_traits> set_result { PyObject_GetAttrString(future.get(), "set_result") };
+                    
+                    winrt::handle_type<pyobj_ptr_traits> foo { PyObject_CallMethod(loop.get(), "call_soon_threadsafe", "OO", set_result.get(), results.get()) };
                 }
                 else
                 {
                     // loop.call_soon_threadsafe(future.set_exception, RuntimeError("AsyncOp failed"))
-                    PyObject_CallMethod(loop, "call_soon_threadsafe", "OO", PyObject_GetAttrString(future, "set_exception"), PyExc_RuntimeError);
+                    winrt::handle_type<pyobj_ptr_traits> set_exception { PyObject_GetAttrString(future.get(), "set_exception") };
+                    winrt::handle_type<pyobj_ptr_traits> foo { PyObject_CallMethod(loop.get(), "call_soon_threadsafe", "OO", set_exception.get(), PyExc_RuntimeError) };
                 }
-
-                Py_DECREF(future);
-                Py_DECREF(loop);
             });
         }
         catch (...)
@@ -1075,7 +1089,7 @@ namespace py
             return py::to_PyErr();
         }
 
-        return PyObject_GetIter(future);
+        return PyObject_GetIter(future.get());
     }
 
 }
