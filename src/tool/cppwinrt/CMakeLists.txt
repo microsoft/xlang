@@ -12,7 +12,7 @@ add_custom_command(OUTPUT ${cppwinrt_exe}
 add_custom_target(cppwinrt ALL DEPENDS ${cppwinrt_exe})
 
 add_custom_target(cppwinrt_test ALL DEPENDS cppwinrt
-    COMMAND ${cppwinrt_exe} -in local -out ${CMAKE_CURRENT_BINARY_DIR} -verbose
+    COMMAND ${cppwinrt_exe} -in 10.0.17763.0 -out ${CMAKE_CURRENT_BINARY_DIR} -verbose
     COMMAND ${build} /t:test_component
     COMMAND ${build} /t:test_cpp
     COMMAND ${build} /t:old_tests\\Composable
