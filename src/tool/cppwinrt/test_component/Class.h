@@ -6,6 +6,7 @@ namespace winrt::test_component::implementation
     struct Class : ClassT<Class>
     {
         Class() = default;
+        Class(hstring const&) {}
 
         void Fail(bool fail)
         {

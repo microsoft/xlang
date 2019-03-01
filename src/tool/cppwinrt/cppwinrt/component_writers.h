@@ -209,7 +209,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            if (!info.base)
+            if (!info.base && !info.is_default)
             {
                 w.write(", @", interface_name);
             }
@@ -557,7 +557,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     protected:
         using dispatch = impl::dispatch_to_overridable<D@>;
         auto overridable() noexcept { return dispatch::overridable(static_cast<D&>(*this)); }
-        )";
+)";
 
         w.write(format, interfaces);
     }
@@ -622,17 +622,13 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             auto format = R"(namespace winrt::@::implementation
 {
     template <typename D%, typename... I>
-    struct WINRT_EBO %_base : implements<D%%, %I...>%%%
+    struct WINRT_EBO %_base : implements<D, @::%%%, %I...>%%%
     {
         using base_type = %_base;
         using class_type = @::%;
         using implements_type = typename %_base::implements_type;
         using implements_type::implements_type;
         %
-        operator impl::producer_ref<class_type> const() const noexcept
-        {
-            return { to_abi<default_interface<class_type>>(this) };
-        }
         hstring GetRuntimeClassName() const
         {
             return L"%.%";
@@ -691,6 +687,8 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             w.write(format,
                 type_namespace,
                 base_type_parameter,
+                type_name,
+                type_namespace,
                 type_name,
                 bind<write_component_interfaces>(type),
                 base_type_argument,

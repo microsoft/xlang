@@ -229,6 +229,7 @@ namespace xlang
     struct interface_info
     {
         TypeDef type;
+        bool is_default{};
         bool defaulted{};
         bool overridable{};
         bool base{};
@@ -242,7 +243,8 @@ namespace xlang
             interface_info info;
             auto type = impl.Interface();
             auto name = w.write_temp("%", type);
-            info.defaulted = !base && (defaulted || has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"));
+            info.is_default = has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute");
+            info.defaulted = !base && (defaulted || info.is_default);
 
             {
                 // This is for correctness rather than an optimization (but helps performance as well).

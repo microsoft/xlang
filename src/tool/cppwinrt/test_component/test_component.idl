@@ -44,6 +44,7 @@ namespace test_component
     runtimeclass Class
     {
         Class();
+        Class(String name);
 
         void Fail(Boolean value);
 
