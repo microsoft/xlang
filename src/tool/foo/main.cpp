@@ -724,15 +724,67 @@ void test_one(meta::cache const& c)
     w.flush_to_console();
 }
 
-void test_two(meta::cache const& /*c*/)
+inline int rawgetfield (lua_State* L, int index, char const* key)
+{
+  assert (lua_istable (L, index));
+  index = lua_absindex (L, index);
+  lua_pushstring (L, key);
+  return lua_rawget (L, index);
+}
+
+inline void rawsetfield (lua_State* L, int index, char const* key)
+{
+  assert (lua_istable (L, index));
+  index = lua_absindex (L, index);
+  lua_pushstring (L, key);
+  lua_insert (L, -2);
+  lua_rawset (L, index);
+}
+
+void lua_ns(lua_State* L, char const* name)
+{
+    XLANG_ASSERT (lua_istable (L, -1));
+    rawgetfield(L, -1, name); 
+    if (lua_isnil (L, -1))
+    {
+      lua_pop (L, 1);
+      lua_newtable (L);
+      // TODO: metatable
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -3, name);
+    }
+}
+
+void test_two(meta::cache const& c)
 {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
 
-    luaL_dostring(L, "x = 47");
-    lua_getglobal(L, "x");
-    lua_Number x = lua_tonumber(L, 1);
-    printf("lua says x = %d\n", (int)x);
+    for (auto&&[ns, members] : c.namespaces())
+    {
+        if (ns != "Windows.Data.Json")
+        {
+            continue;
+        }
+
+        auto type = lua_getglobal (L, "_G");
+        lua_ns(L, "Windows"); 
+        lua_ns(L, "Data"); 
+        lua_ns(L, "Json"); 
+
+        // lua_pop(L, 4); 
+
+        // type = lua_getglobal (L, "_G"); 
+        // XLANG_ASSERT(type == LUA_TTABLE);
+        // top = lua_gettop(L); 
+
+        // type = rawgetfield(L, -1, "Windows"); 
+        // XLANG_ASSERT(type == LUA_TTABLE);
+    }
+
+    luaL_dostring(L, "x = Windows.Data.Json");
+    int x = lua_getglobal(L, "x");
+
     lua_close(L);
 }
 
