@@ -553,6 +553,14 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">..\Composable</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\Composable</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\Composable</AdditionalIncludeDirectories>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</PrependWithABINamepsace>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</PrependWithABINamepsace>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</PrependWithABINamepsace>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</PrependWithABINamepsace>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</PrependWithABINamepsace>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</PrependWithABINamepsace>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</PrependWithABINamepsace>
+      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</PrependWithABINamepsace>
     </Midl>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
