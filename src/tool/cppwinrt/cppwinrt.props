@@ -40,7 +40,7 @@ of Visual Studio.
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
   <PropertyGroup>
-    <CppWinRTVersion Condition="'$(CppWinRTVersion)'==''">2.3.4.5</CppWinRTVersion>
+    <CppWinRTVersion>2.3.4.5</CppWinRTVersion>
     <CmakePlatform>x64</CmakePlatform>
     <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
     <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
