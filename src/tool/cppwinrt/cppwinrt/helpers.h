@@ -95,19 +95,12 @@ namespace xlang
 
     static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
     {
-        auto impls = type.InterfaceImpl();
-
-        for (auto&& impl : impls)
+        for (auto&& impl : type.InterfaceImpl())
         {
             if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
             {
                 return impl.Interface();
             }
-        }
-
-        if (impls.first != impls.second)
-        {
-            return impls.first.Interface();
         }
 
         return {};

@@ -88,6 +88,9 @@ namespace winrt::impl
     template <typename D, typename T>
     struct producers_base;
 
+    template <typename D, typename I, typename Enable = void>
+    struct producer_convert;
+
     template <typename T>
     struct producer_ref : T
     {
@@ -106,7 +109,7 @@ namespace winrt::impl
         }
     };
 
-    template <typename D, typename I>
+    template <typename D, typename I, typename Enable>
     struct producer_convert : producer<D, typename default_interface<I>::type>
     {
         operator producer_ref<I> const() const noexcept
@@ -465,6 +468,11 @@ namespace winrt::impl
 
     template <typename D, typename I>
     struct producer<D, I, std::enable_if_t<std::is_base_of_v< ::IUnknown, I> && !is_implements_v<I>>> : I
+    {
+    };
+
+    template <typename D, typename I>
+    struct producer_convert<D, I, std::enable_if_t<std::is_base_of_v< ::IUnknown, I> && !is_implements_v<I>>> : producer<D, I>
     {
     };
 

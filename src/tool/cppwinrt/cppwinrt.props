@@ -11,7 +11,6 @@ of Visual Studio.
     <PlatformToolset>v140</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
-    <CppWinRTVersion Condition="'$(CppWinRTVersion)'==''">2.3.4.5</CppWinRTVersion>
 
     <!--In Visual Studio 16, use the default Windows10 SDK-->
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
@@ -40,6 +39,14 @@ of Visual Studio.
   
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
+  <PropertyGroup>
+    <CppWinRTVersion Condition="'$(CppWinRTVersion)'==''">2.3.4.5</CppWinRTVersion>
+    <CmakePlatform>x64</CmakePlatform>
+    <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
+    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
+    <OutDir>$(CmakeOutDir)</OutDir>
+  </PropertyGroup>
+  
   <ItemDefinitionGroup>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -52,12 +59,5 @@ of Visual Studio.
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
   </ItemDefinitionGroup>
-
-  <PropertyGroup>
-    <CmakePlatform>x64</CmakePlatform>
-    <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
-    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
-    <OutDir>$(CmakeOutDir)</OutDir>
-  </PropertyGroup>
 
 </Project>
