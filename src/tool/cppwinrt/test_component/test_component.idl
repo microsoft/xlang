@@ -190,6 +190,22 @@ namespace test_component
             [default] interface ISpriteVisual;
             [contract(Windows.Foundation.UniversalApiContract, 3.0)] interface ISpriteVisual2;
         }
+    }
 
+    namespace Structs
+    {
+        struct Inner
+        {
+            Int32 InnerValue;
+        };
+
+        namespace Nested
+        {
+            struct Outer
+            {
+                test_component.Structs.Inner Depends;
+                Int32 OuterValue;
+            };
+        }
     }
 }

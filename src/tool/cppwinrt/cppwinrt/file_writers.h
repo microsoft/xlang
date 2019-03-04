@@ -195,6 +195,7 @@ namespace xlang
         write_preamble(w);
         write_open_file_guard(w, ns);
         write_version_assert(w);
+        w.write_parent_depends(c);
 
         for (auto&& depends : w.depends)
         {
@@ -202,7 +203,6 @@ namespace xlang
         }
 
         w.write_depends(w.type_namespace, '2');
-        w.write_parent_depends(c);
         w.save_header();
     }
 
