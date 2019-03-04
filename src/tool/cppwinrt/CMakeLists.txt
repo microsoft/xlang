@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt.exe" cppwinrt_exe)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" CmakeOutDir)
 
-set(build msbuild /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH},CppWinRTVersion=${XLANG_BUILD_VERSION},CmakeOutDir=${CmakeOutDir}  ${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt.sln)
+set(build msbuild /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH},XlangBuildVersion=${XLANG_BUILD_VERSION},CmakeOutDir=${CmakeOutDir}  ${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt.sln)
 
 add_custom_command(OUTPUT ${cppwinrt_exe}
     COMMAND ${build} /t:cppwinrt

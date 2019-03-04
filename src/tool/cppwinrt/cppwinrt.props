@@ -1,52 +1,32 @@
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-<!-- Copyright (c) Microsoft. All rights reserved.
+  <!-- Copyright (c) Microsoft. All rights reserved.
 Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 This file sets PlatformToolset/WindowsTargetPlatformVersion to allow this project to compile with multiple versions
 of Visual Studio.
 -->
 
-<PropertyGroup>
-    <PlatformToolset>v140</PlatformToolset>
-    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
-    <PlatformToolset Condition="'$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
-
-    <!--In Visual Studio 16, use the default Windows10 SDK-->
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '15.0'">
+    <PlatformToolset>v141</PlatformToolset>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)' == '16.0'">10.0</WindowsTargetPlatformVersion>
-</PropertyGroup>
-
-  <!--In Dev14/Dev15, we need to set 'WindowsTargetPlatformVersion' to an exact build number. -->
-  <PropertyGroup Condition="'$(WindowsTargetPlatformVersion)'==''">
-    <!--Try and find an SDK which is installed-->
-    <WinSDKRoot>$(WindowsSdkDir)</WinSDKRoot>
-    <WinSDKRoot Condition="'$(WinSDKRoot)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0@InstallationFolder)</WinSDKRoot>
-    <WinSDKRoot Condition="'$(WinSDKRoot)' == ''">$(Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0@InstallationFolder)</WinSDKRoot>
-    <WinSDKRoot Condition="'$(WinSDKRoot)'==''">$(MSBuildProgramFiles32)\Windows Kits\10\</WinSDKRoot>
-
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and Exists('$(WinSDKRoot)Include\10.0.17763.0\um\WinBase.h')">10.0.17763.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and Exists('$(WinSDKRoot)Include\10.0.17134.0\um\WinBase.h')">10.0.17134.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and Exists('$(WinSDKRoot)Include\10.0.16299.0\um\WinBase.h')">10.0.16299.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and Exists('$(WinSDKRoot)Include\10.0.15063.0\um\WinBase.h')">10.0.15063.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and Exists('$(WinSDKRoot)Include\10.0.14393.0\um\WinBase.h')">10.0.14393.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and Exists('$(WinSDKRoot)Include\10.0.10586.0\um\WinBase.h')">10.0.10586.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'=='' and Exists('$(WinSDKRoot)Include\10.0.10240.0\um\WinBase.h')">10.0.10240.0</WindowsTargetPlatformVersion>
-
-    <!--Fall back to the default 15.9 version if nothing else is found.-->
-    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'==''">10.0.17763.0"</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '16.0'">
+    <PlatformToolset>v142</PlatformToolset>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
   <PropertyGroup>
-    <CppWinRTVersion>2.3.4.5</CppWinRTVersion>
+    <XlangBuildVersion Condition="'$(XlangBuildVersion)'==''">2.3.4.5</XlangBuildVersion>
     <CmakePlatform>x64</CmakePlatform>
     <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
-    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt\</CmakeOutDir>
-    <OutDir>$(CmakeOutDir)</OutDir>
+    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt</CmakeOutDir>
+    <OutDir>$(CmakeOutDir)\</OutDir>
   </PropertyGroup>
-  
+
   <ItemDefinitionGroup>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -55,9 +35,12 @@ of Visual Studio.
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>XLANG_VERSION_STRING="$(CppWinRTVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
 
 </Project>
