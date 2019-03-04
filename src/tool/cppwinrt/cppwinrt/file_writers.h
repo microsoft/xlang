@@ -220,6 +220,7 @@ namespace xlang
     static void write_component_g_h(TypeDef const& type)
     {
         writer w;
+        w.add_depends(type);
         write_component_g_h(w, type);
 
         w.swap();
