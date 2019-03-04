@@ -1,4 +1,4 @@
-import "Windows.Foundation.idl";
+import "Windows.Foundation.Numerics.idl";
 
 namespace Windows.Foundation.Metadata
 {
@@ -194,6 +194,20 @@ namespace test_component
 
     namespace Structs
     {
+        struct All
+        {
+            Windows.Foundation.Numerics.Matrix3x2 A;
+            Windows.Foundation.Numerics.Matrix4x4 B;
+            Windows.Foundation.Numerics.Plane C;
+            Windows.Foundation.Numerics.Quaternion D;
+            Windows.Foundation.Numerics.Vector2 E;
+            Windows.Foundation.Numerics.Vector3 F;
+            Windows.Foundation.Numerics.Vector4 G;
+            Guid H;
+            //Windows.Foundation.HResult I;
+            //Windows.Foundation.EventRegistrationToken J;
+        };
+
         struct Inner
         {
             Int32 InnerValue;

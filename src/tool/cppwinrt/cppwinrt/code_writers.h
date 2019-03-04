@@ -180,6 +180,21 @@ namespace xlang
             return;
         }
 
+        if (type_name.name_space == "Windows.Foundation.Numerics")
+        {
+            if (type_name.name == "Matrix3x2" ||
+                type_name.name == "Matrix4x4" ||
+                type_name.name == "Plane" ||
+                type_name.name == "Quaternion" ||
+                type_name.name == "Vector2" ||
+                type_name.name == "Vector3" ||
+                type_name.name == "Vector4")
+            {
+                // Don't forward declare these since they're already defined with different names.
+                return;
+            }
+        }
+
         auto generics = type.GenericParam();
 
         if (empty(generics))
