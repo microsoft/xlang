@@ -6,8 +6,6 @@ add_subdirectory(platform)
 add_subdirectory(abi_component)
 
 if (WIN32)
-    add_subdirectory(component)
-    add_subdirectory(cpp)
     add_subdirectory(python)
 endif()
 
