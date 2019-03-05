@@ -1033,6 +1033,36 @@ namespace py
         return convert_to<T>(PyTuple_GetItem(args, index));
     }
 
+    struct delegate_callable
+    {
+        delegate_callable() noexcept = default;
+        
+        explicit delegate_callable(PyObject* callable)
+            : _callable(callable)
+        {
+            Py_INCREF(_callable);
+        }
+
+        delegate_callable(delegate_callable&& other) noexcept
+        {
+            std::swap(_callable, other._callable);
+        }
+
+        ~delegate_callable()
+        {
+            winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
+            Py_CLEAR(_callable);
+        }
+
+        PyObject* callable() const noexcept
+        {
+            return _callable;
+        }
+
+    private:
+        PyObject* _callable{};
+    };
+
     template <typename Async>
     PyObject* get_results(Async const& operation)
     {

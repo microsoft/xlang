@@ -92,11 +92,12 @@ namespace xlang
         write_try_catch(w, func, [&catch_return](writer& w) { w.write("return %;\n", catch_return); });
     }
 
-    void write_py_tuple_pack(writer& w, std::vector<std::string> const& params)
-    {
-        w.write("PyTuple_Pack(%, %)", static_cast<int>(params.size()), bind_list(", ", params));
-    }
 
+    void write_detach_param(writer& w, std::string const& paramName)
+    {
+        w.write("%.detach()", paramName);
+    }
+    
     void write_param_name(writer& w, method_signature::param_t param)
     {
         w.register_type_namespace(param.second->Type());
@@ -246,6 +247,11 @@ struct winrt_type<%>
         w.write("auto %", bind<write_param_name>(p));
     }
 
+    void write_py_tuple_pack(writer& w, std::vector<std::string> const& params)
+    {
+        w.write("PyTuple_Pack(%, %)", static_cast<int>(params.size()), bind_list<write_detach_param>(", ", params));
+    }
+
     void write_delegate_callable_wrapper(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
@@ -266,14 +272,11 @@ struct winrt_type<%>
             {
                 writer::indent_guard gg{ w };
 
-                auto format = R"(if (PyFunction_Check(callable) == 0)
-{
-    throw winrt::hresult_invalid_argument();
-}
+                auto format = R"(py::throw_if_pyobj_null(callable);
 
-Py_INCREF(callable);
+py::delegate_callable cb{ callable };
 
-return [callable](%)
+return [cb = std::move(cb)](%)
 {
 )";
                 w.write(format, bind_list<write_delegate_param>(", ", signature.params()));
@@ -289,31 +292,32 @@ return [callable](%)
                         auto param_name = w.write_temp("%", bind<write_param_name>(p));
                         auto py_param_name = "py_"s + param_name;
 
-                        w.write("PyObject* % = py::convert(%);\n", py_param_name, param_name);
+                        w.write("py::pyobj_handle %{ py::convert(%) };\n", py_param_name, param_name);
                         tuple_params.push_back(py_param_name);
                     }
 
                     if (tuple_params.size() > 0)
                     {
-                        w.write("\nPyObject* args = %;\n", bind<write_py_tuple_pack>(tuple_params));
+                        w.write("\npy::pyobj_handle args{ % };\n", bind<write_py_tuple_pack>(tuple_params));
                     }
                     else
                     {
-                        w.write("PyObject* args = nullptr;\n");
+                        w.write("py::pyobj_handle args{ nullptr };\n");
                     }
 
+                    // TODO: check return from PyObject_CallObject for errors 
+                    // https://docs.python.org/3.7/c-api/object.html?highlight=pyobject_callobject#c.PyObject_CallObject
                     if (signature.return_signature())
                     {
                         auto format2 = R"(
-PyObject* return_value = PyObject_CallObject(callable, args);
-Py_DECREF(callable);
-return py::convert<%>(return_value);
+py::pyobj_handle return_value{ PyObject_CallObject(cb.callable(), args.get()) };
+return py::convert<%>(return_value.get());
 )";
                         w.write(format2, signature.return_signature().Type());
                     }
                     else
                     {
-                        w.write("\nPyObject_CallObject(callable, args);\nPy_DECREF(callable);\n");
+                        w.write("\nPyObject_CallObject(cb.callable(), args.get());\n");
                     }
                 }
 
@@ -734,11 +738,6 @@ static void @_dealloc(%* self)
         {
             w.write(name);
         }
-    }
-
-    void write_detach_param(writer& w, std::string const& paramName)
-    {
-        w.write("%.detach()", paramName);
     }
 
     void write_method_body(writer& w, TypeDef const& type, method_info const& info)
