@@ -28,7 +28,7 @@ static PyType_Slot winrt_base_Type_slots[] =
 static PyType_Spec winrt_base_Type_spec =
 {
     "_%._winrt_base",
-    0,
+    sizeof(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>),
     0,
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     winrt_base_Type_slots
