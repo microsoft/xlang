@@ -204,8 +204,8 @@ namespace test_component
             Windows.Foundation.Numerics.Vector3 F;
             Windows.Foundation.Numerics.Vector4 G;
             Guid H;
-            //Windows.Foundation.HResult I;
-            //Windows.Foundation.EventRegistrationToken J;
+            HRESULT I;
+            EventRegistrationToken J;
         };
 
         struct Inner

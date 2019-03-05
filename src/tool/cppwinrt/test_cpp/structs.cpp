@@ -12,4 +12,7 @@ TEST_CASE("structs")
 
     test_component_no_pch::Peer2::B depends{};
     depends.First.Value = 1;
+
+    test_component::Structs::All all{};
+    all.J = {};
 }
