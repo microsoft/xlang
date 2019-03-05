@@ -2351,19 +2351,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
 
         bool promote = false;
-        std::string cpp_namespace;
-        
-        for (auto&& c : w.type_namespace)
-        {
-            if (c == '.')
-            {
-                cpp_namespace += "::";
-            }
-            else
-            {
-                cpp_namespace += c;
-            }
-        }
+        auto cpp_namespace = w.write_temp("@", w.type_namespace);
 
         for (auto&& type : structs)
         {
