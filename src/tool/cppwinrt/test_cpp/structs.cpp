@@ -14,5 +14,5 @@ TEST_CASE("structs")
     depends.First.Value = 1;
 
     test_component::Structs::All all{};
-    all.J = {};
+    all.H = {};
 }
