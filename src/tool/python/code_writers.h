@@ -2084,7 +2084,7 @@ static PyType_Spec @_Type_spec =
         {
             writer::indent_guard g{ w };
 
-            w.write("winrt::handle_type<py::pyobj_ptr_traits> type_object { ");
+            w.write("py::pyobj_handle type_object { ");
             if (has_dealloc(type))
             {
                 w.write("PyType_FromSpecWithBases(&@_Type_spec, bases.get())", type.TypeName());
@@ -2117,7 +2117,7 @@ py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object.det
         w.write(R"(
 static int module_exec(PyObject* module)
 {
-    winrt::handle_type<py::pyobj_ptr_traits> bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };
+    py::pyobj_handle bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };
 )");
 
         {
