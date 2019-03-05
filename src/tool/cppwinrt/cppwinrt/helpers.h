@@ -95,12 +95,19 @@ namespace xlang
 
     static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
     {
-        for (auto&& impl : type.InterfaceImpl())
+        auto impls = type.InterfaceImpl();
+
+        for (auto&& impl : impls)
         {
             if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
             {
                 return impl.Interface();
             }
+        }
+
+        if (!empty(impls))
+        {
+            throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
         }
 
         return {};
