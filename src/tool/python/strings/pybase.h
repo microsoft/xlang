@@ -388,6 +388,8 @@ namespace py
 
         static int8_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             int32_t result = PyLong_AsLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -414,6 +416,8 @@ namespace py
 
         static uint8_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             int32_t result = PyLong_AsLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -440,6 +444,8 @@ namespace py
 
         static int16_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             int32_t result = PyLong_AsLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -466,6 +472,8 @@ namespace py
 
         static uint16_t convert_to(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             int32_t result = PyLong_AsLong(obj);
 
             if (result == -1 && PyErr_Occurred())
@@ -649,6 +657,8 @@ namespace py
 
         explicit pystring(PyObject* obj)
         {
+            throw_if_pyobj_null(obj);
+
             Py_ssize_t py_size;
             buffer = PyUnicode_AsWideCharString(obj, &py_size);
             if (buffer != nullptr)
@@ -699,8 +709,6 @@ namespace py
 
         static pystringview convert_to(PyObject* obj)
         {
-            throw_if_pyobj_null(obj);
-
             pystringview str{ obj };
 
             if (!str)
@@ -765,11 +773,13 @@ namespace py
         }
     };
 
+    using pyobj_handle = winrt::handle_type<pyobj_ptr_traits>;
+
     template <typename T>
     struct python_iterable final :
         winrt::implements<python_iterable<T>, winrt::Windows::Foundation::Collections::IIterable<T>>
     {
-        winrt::handle_type<pyobj_ptr_traits> _iterable;
+        pyobj_handle _iterable;
 
         explicit python_iterable(PyObject* iterable) : _iterable(iterable)
         {
@@ -784,17 +794,17 @@ namespace py
     private:
         struct iterator final : winrt::implements<iterator, winrt::Windows::Foundation::Collections::IIterator<T>>
         {
-            winrt::handle_type<pyobj_ptr_traits> _iterator;
+            pyobj_handle _iterator;
             std::optional<T> _current_value;
 
-            static std::optional<T> get_next(winrt::handle_type<pyobj_ptr_traits> const& iterator)
+            static std::optional<T> get_next(pyobj_handle const& iterator)
             {
                 if (!iterator)
                 {
                     throw winrt::hresult_invalid_argument();
                 }
 
-                winrt::handle_type<pyobj_ptr_traits> next { PyIter_Next(iterator.get()) };
+                pyobj_handle next { PyIter_Next(iterator.get()) };
                 if (!next)
                 {
                     if (PyErr_Occurred())
@@ -884,7 +894,7 @@ namespace py
                 return result.value();
             }
 
-            winrt::handle_type<pyobj_ptr_traits> iterator{ PyObject_GetIter(obj) };
+            pyobj_handle iterator{ PyObject_GetIter(obj) };
             if (iterator)
             {
                 return winrt::make<python_iterable<TItem>>(obj);
@@ -944,7 +954,7 @@ namespace py
     {
         static PyObject* convert(winrt::com_array<T> const& instance) noexcept
         {
-            winrt::handle_type<pyobj_ptr_traits> list{ PyList_New(instance.size()) };
+            pyobj_handle list{ PyList_New(instance.size()) };
             if (!list)
             {
                 return nullptr;
@@ -952,7 +962,7 @@ namespace py
 
             for (uint32_t index = 0; index < instance.size(); index++)
             {
-                winrt::handle_type<pyobj_ptr_traits> item { converter<T>::convert(instance[index]) };
+                pyobj_handle item { converter<T>::convert(instance[index]) };
                 if (!item)
                 {
                     return nullptr;
@@ -972,7 +982,9 @@ namespace py
 
         static auto convert_to(PyObject* obj)
         {
-            if (!obj || !PyList_Check(obj))
+            throw_if_pyobj_null(obj);
+
+            if (!PyList_Check(obj))
             {
                 throw winrt::hresult_invalid_argument();
             }

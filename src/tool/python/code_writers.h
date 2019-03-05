@@ -736,6 +736,11 @@ static void @_dealloc(%* self)
         }
     }
 
+    void write_detach_param(writer& w, std::string const& paramName)
+    {
+        w.write("%.detach()", paramName);
+    }
+
     void write_method_body(writer& w, TypeDef const& type, method_info const& info)
     {
         method_signature signature{ info.method };
@@ -766,7 +771,7 @@ static void @_dealloc(%* self)
         if (signature.return_signature())
         {
             
-            auto format = R"(PyObject* out_return_value = py::convert(return_value);
+            auto format = R"(py::pyobj_handle out_return_value{ py::convert(return_value) };
 if (!out_return_value) 
 { 
     return nullptr;
@@ -787,7 +792,7 @@ if (!out_return_value)
             auto sequence = param.first.Sequence() - 1;
             auto out_param = w.write_temp("out%", sequence);
 
-            auto format = R"(PyObject* % = py::convert(param%);
+            auto format = R"(py::pyobj_handle %{ py::convert(param%) };
 if (!%) 
 {
     return nullptr;
@@ -812,12 +817,12 @@ if (!%)
         }
         else if (return_values.size() == 1)
         {
-            w.write("return %;\n", return_values[0]);
+            w.write("return %;\n", bind<write_detach_param>(return_values[0]));
         }
         else
         {
             auto x = w.write_temp("%", std::to_string(return_values.size()));
-            w.write("return PyTuple_Pack(%, %);\n", x, bind_list(", ", return_values));
+            w.write("return PyTuple_Pack(%, %);\n", x, bind_list<write_detach_param>(", ", return_values));
         }
     }
 
