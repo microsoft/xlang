@@ -1,4 +1,6 @@
-import find_projection
+import sys
+sys.path.append("./generated")
+
 import unittest
 
 import pyrt.windows.foundation.collections as wfc
@@ -13,7 +15,4 @@ class TestQueryInterface(unittest.TestCase):
         self.assertEqual(type(strmap), wfc.StringMap)
 
 if __name__ == '__main__':
-    import _pyrt
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()

@@ -149,7 +149,6 @@ namespace xlang::text
             }
 
             std::ofstream file{ filename, std::ios::out | std::ios::binary };
-            file.write(reinterpret_cast<char const*>(m_bom.data()), m_bom.size());
             file.write(m_first.data(), m_first.size());
             file.write(m_second.data(), m_second.size());
             m_first.clear();
@@ -175,22 +174,17 @@ namespace xlang::text
 
             meta::reader::file_view file{ filename };
 
-            if (file.size() != m_bom.size() + m_first.size() + m_second.size())
+            if (file.size() != m_first.size() + m_second.size())
             {
                 return false;
             }
 
-            if (!std::equal(m_bom.begin(), m_bom.end(), file.begin(), file.begin() + m_bom.size()))
+            if (!std::equal(m_first.begin(), m_first.end(), file.begin(), file.begin() + m_first.size()))
             {
                 return false;
             }
 
-            if (!std::equal(m_first.begin(), m_first.end(), file.begin() + m_bom.size(), file.begin() + m_bom.size() + m_first.size()))
-            {
-                return false;
-            }
-
-            return std::equal(m_second.begin(), m_second.end(), file.begin() + m_bom.size() + m_first.size(), file.end());
+            return std::equal(m_second.begin(), m_second.end(), file.begin() + m_first.size(), file.end());
         }
 
 #if defined(XLANG_DEBUG)
@@ -198,8 +192,6 @@ namespace xlang::text
 #endif
 
     private:
-
-        static constexpr std::array<uint8_t, 3> m_bom{ 0xEF, 0xBB, 0xBF };
 
         static constexpr uint32_t count_placeholders(std::string_view const& format) noexcept
         {

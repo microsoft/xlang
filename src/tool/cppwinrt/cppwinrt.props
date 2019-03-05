@@ -1,0 +1,46 @@
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Copyright (c) Microsoft. All rights reserved.
+Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+This file sets PlatformToolset/WindowsTargetPlatformVersion to allow this project to compile with multiple versions
+of Visual Studio.
+-->
+
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '15.0'">
+    <PlatformToolset>v141</PlatformToolset>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '16.0'">
+    <PlatformToolset>v142</PlatformToolset>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup>
+    <XlangBuildVersion Condition="'$(XlangBuildVersion)'==''">2.3.4.5</XlangBuildVersion>
+    <CmakePlatform>x64</CmakePlatform>
+    <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
+    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt</CmakeOutDir>
+    <OutDir>$(CmakeOutDir)\</OutDir>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+
+</Project>

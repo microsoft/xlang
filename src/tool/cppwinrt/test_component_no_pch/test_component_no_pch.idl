@@ -1,0 +1,11 @@
+import "Windows.Foundation.idl";
+
+namespace test_component_no_pch
+{
+    runtimeclass Class
+    {
+        Class();
+
+        void Method();
+    }
+}
