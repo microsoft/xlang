@@ -297,7 +297,6 @@ Where <spec> is one or more of:
         catch (usage_exception const&)
         {
             print_usage(w);
-            result = 1;
         }
         catch (std::exception const& e)
         {
