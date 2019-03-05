@@ -174,11 +174,6 @@ Where <spec> is one or more of:
                     continue;
                 }
 
-                if (get_category(type) != category::class_type)
-                {
-                    continue;
-                }
-
                 std::string include{ type.TypeNamespace() };
                 include += '.';
                 include += type.TypeName();
