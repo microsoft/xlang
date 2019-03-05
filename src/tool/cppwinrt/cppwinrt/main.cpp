@@ -174,7 +174,15 @@ Where <spec> is one or more of:
                     continue;
                 }
 
-                settings.include.insert(std::string{ type.TypeNamespace() });
+                if (get_category(type) != category::class_type)
+                {
+                    continue;
+                }
+
+                std::string include{ type.TypeNamespace() };
+                include += '.';
+                include += type.TypeName();
+                settings.include.insert(include);
             }
         }
     }
