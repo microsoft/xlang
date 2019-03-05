@@ -92,11 +92,12 @@ namespace xlang
         write_try_catch(w, func, [&catch_return](writer& w) { w.write("return %;\n", catch_return); });
     }
 
-    void write_py_tuple_pack(writer& w, std::vector<std::string> const& params)
-    {
-        w.write("PyTuple_Pack(%, %)", static_cast<int>(params.size()), bind_list(", ", params));
-    }
 
+    void write_detach_param(writer& w, std::string const& paramName)
+    {
+        w.write("%.detach()", paramName);
+    }
+    
     void write_param_name(writer& w, method_signature::param_t param)
     {
         w.register_type_namespace(param.second->Type());
@@ -165,7 +166,7 @@ struct winrt_type<%>
         w.write(format, bind<write_type_name>(type));
     }
 
-    void write_setup_filenames(writer& w, std::string_view const& module_name, std::vector<std::string> const& namespaces)
+    void write_setup_filenames(writer& w, std::vector<std::string> const& namespaces)
     {
         XLANG_ASSERT(namespaces.size() > 0);
 
@@ -174,7 +175,7 @@ struct winrt_type<%>
             w.write("'%/src/py.%.cpp', ", settings.module, ns);
         }
 
-        w.write("'%/src/%.cpp'", settings.module, module_name);
+        w.write("'%/src/_%.cpp'", settings.module, settings.module);
     }
 
     void write_struct_field_var_type(writer& w, Field const& field)
@@ -246,6 +247,11 @@ struct winrt_type<%>
         w.write("auto %", bind<write_param_name>(p));
     }
 
+    void write_py_tuple_pack(writer& w, std::vector<std::string> const& params)
+    {
+        w.write("PyTuple_Pack(%, %)", static_cast<int>(params.size()), bind_list<write_detach_param>(", ", params));
+    }
+
     void write_delegate_callable_wrapper(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
@@ -266,14 +272,11 @@ struct winrt_type<%>
             {
                 writer::indent_guard gg{ w };
 
-                auto format = R"(if (PyFunction_Check(callable) == 0)
-{
-    throw winrt::hresult_invalid_argument();
-}
+                auto format = R"(py::throw_if_pyobj_null(callable);
 
-Py_INCREF(callable);
+py::delegate_callable cb{ callable };
 
-return [callable](%)
+return [cb = std::move(cb)](%)
 {
 )";
                 w.write(format, bind_list<write_delegate_param>(", ", signature.params()));
@@ -289,31 +292,32 @@ return [callable](%)
                         auto param_name = w.write_temp("%", bind<write_param_name>(p));
                         auto py_param_name = "py_"s + param_name;
 
-                        w.write("PyObject* % = py::convert(%);\n", py_param_name, param_name);
+                        w.write("py::pyobj_handle %{ py::convert(%) };\n", py_param_name, param_name);
                         tuple_params.push_back(py_param_name);
                     }
 
                     if (tuple_params.size() > 0)
                     {
-                        w.write("\nPyObject* args = %;\n", bind<write_py_tuple_pack>(tuple_params));
+                        w.write("\npy::pyobj_handle args{ % };\n", bind<write_py_tuple_pack>(tuple_params));
                     }
                     else
                     {
-                        w.write("PyObject* args = nullptr;\n");
+                        w.write("py::pyobj_handle args{ nullptr };\n");
                     }
 
+                    // TODO: check return from PyObject_CallObject for errors 
+                    // https://docs.python.org/3.7/c-api/object.html?highlight=pyobject_callobject#c.PyObject_CallObject
                     if (signature.return_signature())
                     {
                         auto format2 = R"(
-PyObject* return_value = PyObject_CallObject(callable, args);
-Py_DECREF(callable);
-return py::convert<%>(return_value);
+py::pyobj_handle return_value{ PyObject_CallObject(cb.callable(), args.get()) };
+return py::convert<%>(return_value.get());
 )";
                         w.write(format2, signature.return_signature().Type());
                     }
                     else
                     {
-                        w.write("\nPyObject_CallObject(callable, args);\nPy_DECREF(callable);\n");
+                        w.write("\nPyObject_CallObject(cb.callable(), args.get());\n");
                     }
                 }
 
@@ -692,7 +696,7 @@ static void @_dealloc(%* self)
             break;
         case param_category::pass_array:
             w.write("auto _param% = py::convert_to<winrt::com_array<%>>(args, %);\n", sequence, param.second->Type(), sequence);
-            w.write("auto param% = winrt::array_view<const %>(_param%.begin(), _param%.end());\n", sequence, param.second->Type(), sequence, sequence);
+            w.write("auto param% = winrt::array_view<const %>(_param%.data(), _param%.data() + _param%.size());\n", sequence, param.second->Type(), sequence, sequence, sequence);
             break;
         case param_category::fill_array:
             w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
@@ -766,7 +770,7 @@ static void @_dealloc(%* self)
         if (signature.return_signature())
         {
             
-            auto format = R"(PyObject* out_return_value = py::convert(return_value);
+            auto format = R"(py::pyobj_handle out_return_value{ py::convert(return_value) };
 if (!out_return_value) 
 { 
     return nullptr;
@@ -787,7 +791,7 @@ if (!out_return_value)
             auto sequence = param.first.Sequence() - 1;
             auto out_param = w.write_temp("out%", sequence);
 
-            auto format = R"(PyObject* % = py::convert(param%);
+            auto format = R"(py::pyobj_handle %{ py::convert(param%) };
 if (!%) 
 {
     return nullptr;
@@ -812,12 +816,12 @@ if (!%)
         }
         else if (return_values.size() == 1)
         {
-            w.write("return %;\n", return_values[0]);
+            w.write("return %;\n", bind<write_detach_param>(return_values[0]));
         }
         else
         {
             auto x = w.write_temp("%", std::to_string(return_values.size()));
-            w.write("return PyTuple_Pack(%, %);\n", x, bind_list(", ", return_values));
+            w.write("return PyTuple_Pack(%, %);\n", x, bind_list<write_detach_param>(", ", return_values));
         }
     }
 
@@ -1764,6 +1768,15 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
         }
     }
 
+    void write_struct_dealloc(writer& w, TypeDef const& type)
+    {
+        w.write(R"(
+static void @_dealloc(PyObject*)
+{
+}
+)", type.TypeName());
+    }
+
     void write_struct(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
@@ -1773,6 +1786,7 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
         write_winrt_type_specialization_storage(w, type);
         write_struct_convert_functions(w, type);
         write_struct_constructor(w, type);
+        write_struct_dealloc(w, type);
         write_property_functions(w, type);
         write_getset_table(w, type);
         write_type_slot_table(w, type);
@@ -2026,12 +2040,18 @@ inline void custom_set(winrt::hresult& instance, int32_t value)
         }
     }
 
+    void write_module_name(writer& w, std::string_view const& ns)
+    {
+        auto segments = get_dotted_name_segments(ns);
+        w.write("_%_%", settings.module, bind_list("_", segments));
+    }
+
     void write_type_spec(writer& w, TypeDef const& type)
     {
         auto format = R"(
 static PyType_Spec @_Type_spec =
 {
-    "@",
+    "%.@",
     %,
     0,
     Py_TPFLAGS_DEFAULT,
@@ -2041,6 +2061,7 @@ static PyType_Spec @_Type_spec =
         auto type_name = type.TypeName();
         w.write(format,
             type_name,
+            bind<write_module_name>(type.TypeNamespace()),
             type_name,
             bind<write_type_spec_size>(type),
             type_name);
@@ -2058,31 +2079,37 @@ static PyType_Spec @_Type_spec =
             ? w.write_temp("py@", type.TypeName())
             : w.write_temp("%", type);
 
-        if (has_dealloc(type))
-        {
-            w.write("\ntype_object = PyType_FromSpecWithBases(&@_Type_spec, bases);\n", type.TypeName());
-        }
-        else
-        {
-            w.write("\ntype_object = PyType_FromSpec(&@_Type_spec);\n", type.TypeName());
-        }
+        w.write("\n{\n");
 
+        {
+            writer::indent_guard g{ w };
 
-        auto format = R"(if (type_object == nullptr)
+            w.write("py::pyobj_handle type_object { ");
+            if (has_dealloc(type))
+            {
+                w.write("PyType_FromSpecWithBases(&@_Type_spec, bases.get())", type.TypeName());
+            }
+            else
+            {
+                w.write("PyType_FromSpec(&@_Type_spec)", type.TypeName());
+            }
+            w.write(" };\n");
+
+            auto format = R"(if (!type_object)
 {
     return -1;
 }
-if (PyModule_AddObject(module, "@", type_object) != 0)
+if (PyModule_AddObject(module, "@", type_object.get()) != 0)
 {
-    Py_DECREF(type_object);
     return -1;
 }
-py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
-type_object = nullptr;
-)";
-        w.write(format,
-            type.TypeName(),
-            winrt_type_param);
+py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object.detach());)";
+            w.write(format,
+                type.TypeName(),
+                winrt_type_param);
+        }
+
+        w.write("\n}");
     }
 
     void write_namespace_module_exec_func(writer& w, cache::namespace_members const& members)
@@ -2090,8 +2117,7 @@ type_object = nullptr;
         w.write(R"(
 static int module_exec(PyObject* module)
 {
-    PyObject* type_object{ nullptr };
-    PyObject* bases = PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type);
+    py::pyobj_handle bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };
 )");
 
         {
@@ -2101,13 +2127,13 @@ static int module_exec(PyObject* module)
             settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.interfaces)(w);
             settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.structs)(w);
 
-            w.write("\nPy_DECREF(bases);\nreturn 0;\n");
+            w.write("\nreturn 0;\n");
         }
 
         w.write("}\n");
     }
 
-    void write_module_def(writer& w, std::string_view const& module_name, std::string_view const& doc_string, std::string_view const& module_methods = "nullptr")
+    void write_namespace_module_def(writer& w, std::string_view const& ns)
     {
         auto format = R"(
 static PyModuleDef_Slot module_slots[] = {
@@ -2122,7 +2148,7 @@ static PyModuleDef module_def = {
     "%",
     module_doc,
     0,
-    %,
+    nullptr,
     module_slots,
     nullptr,
     nullptr,
@@ -2135,17 +2161,14 @@ PyInit_%(void)
     return PyModuleDef_Init(&module_def);
 }
 )";
-        w.write(format, doc_string, module_name, module_methods, module_name);
+        w.write(format, ns, bind<write_module_name>(ns), bind<write_module_name>(ns));
     }
 
     void write_namespace_initialization(writer& w, std::string_view const& ns, cache::namespace_members const& members)
     {
         w.write("\n// ----- % Initialization --------------------\n", ns);
 
-        auto segments = get_dotted_name_segments(ns);
-        auto module_name = w.write_temp("_%_%", settings.module, bind_list("_", segments));
-
         write_namespace_module_exec_func(w, members);
-        write_module_def(w, module_name, ns);
+        write_namespace_module_def(w, ns);
     }
 }

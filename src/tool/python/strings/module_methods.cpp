@@ -11,16 +11,24 @@ PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
 
+static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>* self)
+{
+    // auto hash_value = std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj);
+    // py::wrapped_instance(hash_value, nullptr);
+    self->obj = nullptr;
+}
+
 static PyType_Slot winrt_base_Type_slots[] =
 {
-    {Py_tp_doc, winrt_base_doc},
+    { Py_tp_dealloc, winrt_base_dealloc },
+    { Py_tp_doc, winrt_base_doc},
     { 0, nullptr },
 };
 
 static PyType_Spec winrt_base_Type_spec =
 {
-    "_winrt_base",
-    0,
+    "_%._winrt_base",
+    sizeof(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>),
     0,
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     winrt_base_Type_slots
@@ -80,18 +88,41 @@ static PyMethodDef module_methods[]{
 
 static int module_exec(PyObject* module)
 {
-    PyObject* type_object = PyType_FromSpec(&winrt_base_Type_spec);
-    if (type_object == nullptr)
+    winrt::handle_type<py::pyobj_ptr_traits> type_object { PyType_FromSpec(&winrt_base_Type_spec) };
+    if (!type_object)
     {
         return -1;
     }
-    if (PyModule_AddObject(module, "_winrt_base", type_object) != 0)
+    if (PyModule_AddObject(module, "_winrt_base", type_object.get()) != 0)
     {
-        Py_DECREF(type_object);
         return -1;
     }
-    py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
-    type_object = nullptr;
+    py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object.detach());
 
     return 0;
+}
+
+static PyModuleDef_Slot module_slots[] = {
+    {Py_mod_exec, module_exec},
+    {0, nullptr}
+};
+
+PyDoc_STRVAR(module_doc, "_%");
+
+static PyModuleDef module_def = {
+    PyModuleDef_HEAD_INIT,
+    "_%",
+    module_doc,
+    0,
+    module_methods,
+    module_slots,
+    nullptr,
+    nullptr,
+    nullptr
+};
+
+PyMODINIT_FUNC
+PyInit__%(void)
+{
+    return PyModuleDef_Init(&module_def);
 }

@@ -82,14 +82,13 @@ namespace xlang
             std::vector<std::string> generated_namespaces{};
             task_group group;
 
-            auto native_module = "_" + settings.module;
             auto module_dir = settings.output_folder / settings.module;
             auto src_dir = module_dir / "src";
 
             group.add([&]
             {
                 write_pybase_h(src_dir);
-                write_package_dunder_init_py(module_dir, native_module);
+                write_package_dunder_init_py(module_dir);
             });
 
             for (auto&&[ns, members] : c.namespaces())
@@ -137,8 +136,8 @@ namespace xlang
 
             group.get();
 
-            write_module_cpp(src_dir, native_module);
-            write_setup_py(settings.output_folder, settings.module, native_module, generated_namespaces);
+            write_module_cpp(src_dir);
+            write_setup_py(settings.output_folder, generated_namespaces);
 
             if (settings.verbose)
             {
