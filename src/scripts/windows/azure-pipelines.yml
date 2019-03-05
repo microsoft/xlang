@@ -12,9 +12,6 @@ container: build_container
 steps:
 - script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build -GNinja -DCMAKE_INSTALL_PREFIX=install && ninja -C _build install -v
   displayName: 'build'
-- script: .\install\test\cpp_test.exe -r junit -o TEST-cpp_test.xml
-  displayName: 'cpp_test'
-  continueOnError: true
 - script: .\install\test\platform\test_platform.exe -r junit -o TEST-test_platform.xml
   displayName: 'test_platform'
   continueOnError: true
