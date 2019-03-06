@@ -25,18 +25,18 @@ namespace xlang
 
         auto filename = w.write_temp("py.%.h", ns);
 
-        settings.filter.bind_each<write_delegate_callable_wrapper>(members.delegates)(w);
-        settings.filter.bind_each<write_pinterface>(members.interfaces)(w);
+        //settings.filter.bind_each<write_delegate_callable_wrapper>(members.delegates)(w);
+        //settings.filter.bind_each<write_pinterface>(members.interfaces)(w);
 
         w.write("\nnamespace py\n{\n");
         {
             writer::indent_guard g{ w };
-            settings.filter.bind_each<write_get_python_type_specialization>(members.classes)(w);
-            settings.filter.bind_each<write_get_python_type_specialization>(members.interfaces)(w);
-            settings.filter.bind_each<write_get_python_type_specialization>(members.structs)(w);
-            settings.filter.bind_each<write_struct_converter_decl>(members.structs)(w);
-            settings.filter.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
-            settings.filter.bind_each<write_delegate_type_mapper>(members.delegates)(w);
+            //settings.filter.bind_each<write_get_python_type_specialization>(members.classes)(w);
+            //settings.filter.bind_each<write_get_python_type_specialization>(members.interfaces)(w);
+            //settings.filter.bind_each<write_get_python_type_specialization>(members.structs)(w);
+            //settings.filter.bind_each<write_struct_converter_decl>(members.structs)(w);
+            //settings.filter.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
+            //settings.filter.bind_each<write_delegate_type_mapper>(members.delegates)(w);
         }
         w.write("}\n");
 
@@ -51,7 +51,7 @@ namespace xlang
             w.write(format);
         }
 
-        w.write_each<write_include>(w.needed_namespaces);
+        //w.write_each<write_include>(w.needed_namespaces);
 
         {
             auto format = R"(
@@ -99,7 +99,7 @@ namespace xlang
         writer w;
 
         write_license_python(w);
-        w.write(strings::setup, settings.module, settings.module, bind<write_setup_filenames>(namespaces));
+        //w.write(strings::setup, settings.module, settings.module, bind<write_setup_filenames>(namespaces));
         create_directories(folder);
         w.flush_to_file(folder / "setup.py");
     }
