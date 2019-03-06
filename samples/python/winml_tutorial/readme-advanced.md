@@ -37,9 +37,9 @@ when (not if!) you find bugs.
 
 Currently, Python/WinRT is only distributed as source code. To use it, you'll need to build it. To
 build it, you'll need to clone the [xlang repo](https://github.com/Microsoft/xlang) and checkout the
-python-winml-sample-2019-02 tag.
+python-winml-sample-2019-03 tag.
 
-The python-winml-sample-2019-02 tag represents the Python/WinRT projection at the time this document
+The python-winml-sample-2019-03 tag represents the Python/WinRT projection at the time this document
 was written. Using that tag ensures the version of Python/WinRT you build matches the code described
 in the [WinML tutorial](readme.md). This sample will be updated periodically to work with the latest
 and greatest version of Python/WinRT.
