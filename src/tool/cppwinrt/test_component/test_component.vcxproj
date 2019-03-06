@@ -325,6 +325,7 @@
     <ClCompile Include="Composition.Visual.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
     <ClCompile Include="Generated Files\Simple.cpp" />
+    <ClCompile Include="module.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

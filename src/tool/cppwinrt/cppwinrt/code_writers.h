@@ -2270,7 +2270,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_structs(writer& w, std::vector<TypeDef> const& types)
+    static bool write_structs(writer& w, std::vector<TypeDef> const& types)
     {
         auto format = R"(    struct %
     {
@@ -2287,7 +2287,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         if (types.empty())
         {
-            return;
+            return false;
         }
 
         struct complex_struct
@@ -2350,6 +2350,9 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             }
         }
 
+        bool promote = false;
+        auto cpp_namespace = w.write_temp("@", w.type_namespace);
+
         for (auto&& type : structs)
         {
             auto name = type.type.TypeName();
@@ -2365,7 +2368,22 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 name,
                 name,
                 is_noexcept);
+
+            for (auto&& field : type.fields)
+            {
+                if (field.second.find(':') == std::string::npos)
+                {
+                    continue;
+                }
+
+                if (!starts_with(field.second, cpp_namespace))
+                {
+                    promote = true;
+                }
+            }
         }
+
+        return promote;
     }
 
     static void write_slow_class_requires(writer& w, TypeDef const& type)

@@ -147,7 +147,7 @@ namespace xlang
 
         write_type_namespace(w, ns);
         w.write_each<write_delegate>(members.delegates);
-        write_structs(w, members.structs);
+        bool const promote = write_structs(w, members.structs);
         w.write_each<write_class>(members.classes);
         w.write_each<write_interface_override>(members.classes);
         write_close_namespace(w);
@@ -158,9 +158,11 @@ namespace xlang
         write_preamble(w);
         write_open_file_guard(w, ns, '2');
 
+        char const impl = promote ? '2' : '1';
+
         for (auto&& depends : w.depends)
         {
-            w.write_depends(depends.first, '1');
+            w.write_depends(depends.first, impl);
         }
 
         w.write_depends(w.type_namespace, '1');
@@ -218,6 +220,7 @@ namespace xlang
     static void write_component_g_h(TypeDef const& type)
     {
         writer w;
+        w.add_depends(type);
         write_component_g_h(w, type);
 
         w.swap();
