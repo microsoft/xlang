@@ -73,8 +73,8 @@ namespace xlang
         write_license_cpp(w);
         w.write("#include \"py.%.h\"\n", ns);
         settings.filter.bind_each<write_class>(members.classes)(w);
-        settings.filter.bind_each<write_interface>(members.interfaces)(w);
-        settings.filter.bind_each<write_struct>(members.structs)(w);
+        //settings.filter.bind_each<write_interface>(members.interfaces)(w);
+        //settings.filter.bind_each<write_struct>(members.structs)(w);
         write_namespace_initialization(w, ns, members);
 
         create_directories(folder);

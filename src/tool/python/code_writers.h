@@ -51,8 +51,10 @@ namespace xlang
     void write_method_overloads(writer& w, TypeDef const& type, std::vector<xlang::method_info> const& overloads);
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type);
     void write_method_table(writer& w, TypeDef const& type);
+    void write_method_table2(writer& w, TypeDef const& type);
     void write_getset_table(writer& w, TypeDef const& type);
     void write_type_slot_table(writer& w, TypeDef const& type);
+    void write_type_slot_table2(writer& w, TypeDef const& type);
     void write_type_spec(writer& w, TypeDef const& type);
 
     void write_include(writer& w, std::string_view const& ns)
@@ -1379,13 +1381,13 @@ return nullptr;
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- % class --------------------\n", type.TypeName());
-        write_winrt_type_specialization_storage(w, type);
-        write_class_new_function(w, type);
-        write_dealloc_function(w, type);
-        write_method_functions(w, type);
-        write_method_table(w, type);
-        write_getset_table(w, type);
-        write_type_slot_table(w, type);
+        //write_winrt_type_specialization_storage(w, type);
+        //write_class_new_function(w, type);
+        //write_dealloc_function(w, type);
+        //write_method_functions(w, type);
+        write_method_table2(w, type);
+        //write_getset_table(w, type);
+        write_type_slot_table2(w, type);
         write_type_spec(w, type);
     }
 
@@ -2022,6 +2024,95 @@ static void @_dealloc(PyObject*)
         w.write("};\n");
     }
 
+    void write_method_table2(writer& w, TypeDef const& type)
+    {
+        XLANG_ASSERT(/*get_category(type) == category::interface_type || */get_category(type) == category::class_type);
+        w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+
+            for (auto&& ca : type.CustomAttribute())
+            {
+                auto pair = ca.TypeNamespaceAndName();
+                if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
+                {
+                    auto fixed_args = ca.Value().FixedArgs();
+                    auto elem0 = std::get<ElemSig>(fixed_args[0].value);
+
+                    // if the first param is SystemType, it hold the name of a factory interface
+                    if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
+                    {
+                        auto t = std::get<ElemSig::SystemType>(elem0.value);
+
+                        auto factory = type.get_cache().find_required(t.name);
+                        for (auto&& factory_method : factory.MethodList())
+                        {
+                            w.write(
+                                "{ \"_ctor_%\", (PyCFunction)_@_ctor_%, METH_VARARGS | METH_STATIC, nullptr },\n",
+                                factory_method.Name(), 
+                                type.TypeName(), 
+                                factory_method.Name());
+                        }
+                    }
+                    // if the first param is not SystemType, the type is default activatable
+                    else
+                    {
+                        XLANG_ASSERT(std::holds_alternative<uint32_t>(elem0.value));
+
+                        w.write(
+                            "{ \"_ctor_Default\", (PyCFunction)_@_ctor_Default, METH_NOARGS | METH_STATIC, nullptr },\n",
+                            type.TypeName());
+                    }
+                }
+            }
+
+            for (auto&& method : type.MethodList())
+            {
+                if (method.Name() != ".ctor")
+                {
+                    w.write("{ \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
+                        get_method_abi_name(method), 
+                        type.TypeName(), 
+                        get_method_abi_name(method), 
+                        is_static(method) ? " | METH_STATIC" : "");
+                }
+            }
+
+            if (!is_static(type))
+            {
+                w.write("{ \"_from\", (PyCFunction)_@_from, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+            }
+
+            w.write("{ nullptr }\n");
+        }
+
+        w.write("};\n");
+    }
+
+    void write_type_slot_table2(writer& w, TypeDef const& type)
+    {
+        auto category = get_category(type);
+
+        XLANG_ASSERT((category == category::class_type)
+            //|| (category == category::interface_type)
+            //|| (category == category::struct_type)
+        );
+
+        auto name = type.TypeName();
+
+        w.write("\nstatic PyType_Slot @_Type_slots[] = \n{\n", name);
+
+        {
+            writer::indent_guard g{ w };
+
+            w.write("{ Py_tp_dealloc, @_dealloc },\n", name);
+            w.write("{ Py_tp_methods, @_methods },\n", name);
+            w.write("{ 0, nullptr },\n");
+        }
+
+        w.write("};\n");
+    }
+
     void write_type_spec_size(writer& w, TypeDef const& type)
     {
         auto category = get_category(type);
@@ -2068,7 +2159,7 @@ static PyType_Spec @_Type_spec =
     }
 
 
-    void write_namespace_module_exec_init_python_type(writer& w, TypeDef const& type)
+    void write_ns_module_exec_init_python_type(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type))
         {
@@ -2112,7 +2203,7 @@ py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object.det
         w.write("\n}");
     }
 
-    void write_namespace_module_exec_func(writer& w, cache::namespace_members const& members)
+    void write_ns_module_exec_func(writer& w, cache::namespace_members const& members)
     {
         w.write(R"(
 static int module_exec(PyObject* module)
@@ -2123,9 +2214,9 @@ static int module_exec(PyObject* module)
         {
             writer::indent_guard g{ w };
 
-            settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.classes)(w);
-            settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.interfaces)(w);
-            settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.structs)(w);
+            settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.classes)(w);
+            //settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.interfaces)(w);
+            //settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.structs)(w);
 
             w.write("\nreturn 0;\n");
         }
@@ -2133,42 +2224,11 @@ static int module_exec(PyObject* module)
         w.write("}\n");
     }
 
-    void write_namespace_module_def(writer& w, std::string_view const& ns)
-    {
-        auto format = R"(
-static PyModuleDef_Slot module_slots[] = {
-    {Py_mod_exec, module_exec},
-    {0, nullptr}
-};
-
-PyDoc_STRVAR(module_doc, "%");
-
-static PyModuleDef module_def = {
-    PyModuleDef_HEAD_INIT,
-    "%",
-    module_doc,
-    0,
-    nullptr,
-    module_slots,
-    nullptr,
-    nullptr,
-    nullptr
-};
-
-PyMODINIT_FUNC
-PyInit_%(void)
-{
-    return PyModuleDef_Init(&module_def);
-}
-)";
-        w.write(format, ns, bind<write_module_name>(ns), bind<write_module_name>(ns));
-    }
-
     void write_namespace_initialization(writer& w, std::string_view const& ns, cache::namespace_members const& members)
     {
         w.write("\n// ----- % Initialization --------------------\n", ns);
 
-        write_namespace_module_exec_func(w, members);
-        write_namespace_module_def(w, ns);
+        write_ns_module_exec_func(w, members);
+		w.write(strings::ns_module_def, ns, bind<write_module_name>(ns), bind<write_module_name>(ns));
     }
 }
