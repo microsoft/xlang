@@ -158,7 +158,20 @@ void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
 %
     return nullptr;
 }
+)";
 
+        w.write(format,
+            bind_each<write_component_include>(classes),
+            settings.component_lib,
+            settings.component_lib,
+            bind_each<write_component_activation>(classes));
+
+        if (settings.component_lib != "winrt")
+        {
+            return;
+        }
+
+        format = R"(
 int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
 {
 #ifdef _WRL_MODULE_H_
@@ -197,10 +210,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 )";
 
         w.write(format,
-            bind_each<write_component_include>(classes),
-            settings.component_lib,
-            settings.component_lib,
-            bind_each<write_component_activation>(classes),
             settings.component_lib,
             settings.component_lib);
     }

@@ -174,7 +174,10 @@ Where <spec> is one or more of:
                     continue;
                 }
 
-                settings.include.insert(std::string{ type.TypeNamespace() });
+                std::string include{ type.TypeNamespace() };
+                include += '.';
+                include += type.TypeName();
+                settings.include.insert(include);
             }
         }
     }
@@ -189,8 +192,9 @@ Where <spec> is one or more of:
             !members.delegates.empty();
     }
 
-    static void run(int const argc, char** argv)
+    static int run(int const argc, char** argv)
     {
+        int result{};
         writer w;
 
         try
@@ -297,13 +301,15 @@ Where <spec> is one or more of:
         catch (std::exception const& e)
         {
             w.write(" error: %\n", e.what());
+            result = 1;
         }
 
         w.flush_to_console();
+        return result;
     }
 }
 
 int main(int const argc, char** argv)
 {
-    xlang::run(argc, argv);
+    return xlang::run(argc, argv);
 }

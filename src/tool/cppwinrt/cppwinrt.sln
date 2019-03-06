@@ -34,6 +34,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_component", "test_comp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_cpp", "test_cpp\unit_tests.vcxproj", "{D2961EA1-A8CA-4A62-B760-948403DC8494}"
 	ProjectSection(ProjectDependencies) = postProject
+		{F1C915B3-2C64-4992-AFB7-7F035B1A7607} = {F1C915B3-2C64-4992-AFB7-7F035B1A7607}
 		{A91B8BF3-28E4-4D9E-8DBA-64B70E4F0270} = {A91B8BF3-28E4-4D9E-8DBA-64B70E4F0270}
 	EndProjectSection
 EndProject
