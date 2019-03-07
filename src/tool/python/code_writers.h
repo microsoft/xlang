@@ -659,9 +659,7 @@ struct delegate_python_type<%>
                 writer::indent_guard gg{ w };
     
                 {
-                    auto format = R"(py::throw_if_pyobj_null(callable);
-    
-py::delegate_callable cb{ callable };
+                    auto format = R"(py::delegate_callable cb{ callable };
     
 return [cb = std::move(cb)](%)
 {
@@ -692,9 +690,6 @@ return [cb = std::move(cb)](%)
                         w.write("py::pyobj_handle args{ nullptr };\n");
                     }
     
-                    // TODO: check return from PyObject_CallObject for errors 
-                    // https://docs.python.org/3.7/c-api/object.html?highlight=pyobject_callobject#c.PyObject_CallObject
-
                     w.write(R"(py::pyobj_handle return_value{ PyObject_CallObject(cb.callable(), args.get()) };
 
 if (!return_value) 
