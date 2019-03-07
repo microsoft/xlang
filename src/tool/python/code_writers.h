@@ -49,7 +49,7 @@ struct winrt_type<%>
     void write_python_wrapper_aliases(writer& w, std::string_view const& ns, cache::namespace_members const& members)
     {
         auto segments = get_dotted_name_segments(ns);
-        w.write("namespace py%::%\n{\n", settings.module, bind_list("::", segments));
+        w.write("namespace py::proj::%\n{\n", bind_list("::", segments));
         {
             writer::indent_guard g{ w };
             settings.filter.bind_each<write_python_wrapper_alias>(members.classes)(w);
@@ -142,7 +142,7 @@ static int module_exec(PyObject* module)
     void write_wrapper_type(writer& w, TypeDef const& type)
     {
         auto segments = get_dotted_name_segments(type.TypeNamespace());
-        w.write("py%::%::@", settings.module, bind_list("::", segments), type.TypeName());
+        w.write("py::proj::%::@", bind_list("::", segments), type.TypeName());
     }
 
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
