@@ -258,9 +258,9 @@ static void @_dealloc(%* self)
         }
     }
 
-    void write_args_param_name(writer& w, MethodDef const& method)
+    void write_args_param_name(writer& w, arg_count arg_count)
     {
-        switch (get_arg_count(method))
+        switch (arg_count)
         {
         case arg_count::none:
             w.write("/* unused */");
@@ -274,19 +274,277 @@ static void @_dealloc(%* self)
         }
     }
 
+    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::function<void(writer&)> catchfunc)
+    {
+        w.write("try\n{\n");
+        {
+            writer::indent_guard g{ w };
+            tryfunc(w);
+        }
+        w.write("}\ncatch (...)\n{\n");
+        {
+            writer::indent_guard g{ w };
+            catchfunc(w);
+        }
+        w.write("}\n");
+    }
+
+    void write_try_catch(writer& w, std::function<void(writer&)> func, std::string_view const& catch_return = "py::to_PyErr()")
+    {
+        write_try_catch(w, func, [&catch_return](writer& w) { w.write("return %;\n", catch_return); });
+    }
+    //    void write_method_body(writer& w, TypeDef const& type, method_info const& info)
+    //    {
+    //
+    //
+    //
+    //        if (return_values.size() == 0)
+    //        {
+    //            if (is_put_method(info.method))
+    //            {
+    //                w.write("return 0;\n");
+    //            }
+    //            else
+    //            {
+    //                w.write("Py_RETURN_NONE;\n");
+    //            }
+    //        }
+    //        else if (return_values.size() == 1)
+    //        {
+    //            w.write("return %;\n", bind<write_detach_param>(return_values[0]));
+    //        }
+    //        else
+    //        {
+    //            auto x = w.write_temp("%", std::to_string(return_values.size()));
+    //            w.write("return PyTuple_Pack(%, %);\n", x, bind_list<write_detach_param>(", ", return_values));
+    //        }
+    //    }
+
+    void write_param_name(writer& w, method_signature::param_t param)
+    {
+        w.register_type_namespace(param.second->Type());
+        w.write("param%", param.first.Sequence() - 1);
+    }
+
+    void write_out_param_init(writer& w, method_signature::param_t const& param)
+    {
+        struct out_param_init : public signature_handler_base<out_param_init>
+        {
+            std::string_view param_init{};
+
+            using signature_handler_base<out_param_init>::handle;
+
+            // WinRT class, interface and delegate out params must be initialized as nullptr
+            void handle_class(TypeDef const& /*type*/) { param_init = "nullptr"; }
+            void handle_delegate(TypeDef const& /*type*/) { param_init = "nullptr"; }
+            void handle_interface(TypeDef const& /*type*/) { param_init = "nullptr"; }
+            void handle(GenericTypeInstSig const& /*type*/) { param_init = "nullptr"; }
+
+            // WinRT guid, struct and fundamental types don't require an initialization value
+            void handle_guid(TypeRef const& /*type*/) { /* no init needed */ }
+            void handle_struct(TypeDef const& /*type*/) { /* no init needed */ }
+            void handle(ElementType /*type*/) { /* no init needed */ }
+        };
+
+        out_param_init initializer{};
+        initializer.handle(param.second->Type());
+        w.write(initializer.param_init);
+    }
+
+    void write_method_param_definition(writer& w, MethodDef const& method, method_signature::param_t const& param)
+    {
+        auto sequence = param.first.Sequence() - 1;
+
+        switch (get_param_category(param))
+        {
+        case param_category::in:
+            // if method is special (i.e. get/put/add/remove) but not RTSpecial (i.e. ctor)
+            // treat the args value as a single value, not as a tuple
+            if (method.SpecialName() && !method.Flags().RTSpecialName())
+            {
+                w.write("auto % = py::convert_to<%>(arg);\n", bind<write_param_name>(param), param.second->Type());
+            }
+            else
+            {
+                w.write("auto % = py::convert_to<%>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
+            }
+            break;
+        case param_category::out:
+            w.write("% % { % };\n", param.second->Type(), bind<write_param_name>(param), bind<write_out_param_init>(param));
+            break;
+        case param_category::pass_array:
+            w.write("auto _param% = py::convert_to<winrt::com_array<%>>(args, %);\n", sequence, param.second->Type(), sequence);
+            w.write("auto param% = winrt::array_view<const %>(_param%.data(), _param%.data() + _param%.size());\n", sequence, param.second->Type(), sequence, sequence, sequence);
+            break;
+        case param_category::fill_array:
+            w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
+            w.write("winrt::com_array<%> % ( %_count, py::empty_instance<%>::get() );\n", param.second->Type(), bind<write_param_name>(param), bind<write_param_name>(param), param.second->Type());
+            break;
+        case param_category::receive_array:
+            w.write("winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
+            break;
+        default:
+            throw_invalid("invalid param_category");
+        }
+    }
+
+    void write_method_invoke_context(writer& w, MethodDef const& method)
+    {
+        if (is_static(method) || is_constructor(method))
+        {
+            w.write("%::", method.Parent());
+        }
+        else
+        {
+            w.write("self->obj.");
+        }
+    }
+
+    void write_method_cpp_name(writer& w, MethodDef const& method)
+    {
+        auto name = method.Name();
+
+        if (method.SpecialName())
+        {
+            w.write(name.substr(name.find('_') + 1));
+        }
+        else
+        {
+            w.write(name);
+        }
+    }
+
+    void write_detach_param(writer& w, std::string const& paramName)
+    {
+        w.write("%.detach()", paramName);
+    }
+
+    void write_method_body(writer& w, MethodDef const& method)
+    {
+        writer::indent_guard g{ w };
+
+        write_try_catch(w,
+            [&method](writer& w) 
+        { 
+            method_signature signature{ method };
+
+            // convert in params from Python -> C++
+            for (auto&& param : signature.params())
+            {
+                write_method_param_definition(w, method, param);
+            }
+            if (signature.params().size() > 0)
+            {
+                w.write("\n");
+            }
+
+            // Invoke member
+            if (is_constructor(method))
+            {
+                w.write("% return_value{ % };\n",
+                    method.Parent(),
+                    bind_list<write_param_name>(", ", signature.params()));
+            }
+            else
+            {
+                if (signature.return_signature())
+                {
+                    w.register_type_namespace(signature.return_signature().Type());
+                    w.write("auto return_value = ");
+                }
+                w.write("%%(%);\n",
+                    bind<write_method_invoke_context>(method),
+                    bind<write_method_cpp_name>(method),
+                    bind_list<write_param_name>(", ", signature.params()));
+            }
+            w.write("\n");
+
+            // Convert return values and out parameters from C++ -> Python
+            std::vector<std::string> return_values{};
+            if (signature.return_signature() || is_constructor(method))
+            {
+                auto format = R"(py::pyobj_handle out_return_value{ py::convert(return_value) };
+if (!out_return_value) 
+{ 
+    return nullptr;
+}
+)";
+                w.write(format);
+                return_values.push_back("out_return_value");
+            }
+            
+            for (auto&& param : signature.params())
+            {
+                if (!is_out_param(param))
+                {
+                    continue;
+                }
+            
+                auto sequence = param.first.Sequence() - 1;
+                auto out_param = w.write_temp("out%", sequence);
+            
+                auto format = R"(py::pyobj_handle %{ py::convert(param%) };
+if (!%) 
+{
+    return nullptr;
+}
+)";
+                w.write(format, out_param, sequence, out_param);
+                return_values.push_back(out_param);
+            }
+
+            // Return Python projected return/out params
+            if (return_values.size() == 0)
+            {
+                w.write("Py_RETURN_NONE;\n");
+            }
+            else if (return_values.size() == 1)
+            {
+                w.write("return %;\n", bind<write_detach_param>(return_values[0]));
+            }
+            else
+            {
+                auto x = w.write_temp("%", std::to_string(return_values.size()));
+                w.write("return PyTuple_Pack(%, %);\n", x, bind_list<write_detach_param>(", ", return_values));
+            }
+        });
+    }
+
     void write_method_functions(writer& w, TypeDef const& type)
     {
         for (auto&& method : type.MethodList())
         {
+            auto arg_count = get_arg_count(method);
+            method_signature signature{ method };
+
             w.write("\nstatic PyObject* @_%(%* %, PyObject* %)\n{\n", 
                 type.TypeName(), 
                 bind<write_method_name>(method),
                 bind<write_wrapper_type>(type),
                 bind<write_self_param_name>(method),
-                bind<write_args_param_name>(method));
+                bind<write_args_param_name>(arg_count));
             {
-                writer::indent_guard g{ w };
-                w.write("return nullptr;\n");
+                if (arg_count == arg_count::variable)
+                {
+                    writer::indent_guard g{ w };
+                    auto format = R"(Py_ssize_t arg_count = PyTuple_Size(args);
+
+if (arg_count == %)
+{
+%}
+else if (arg_count != -1)
+{
+     PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+}
+
+return nullptr;
+)";
+                    w.write(format, count_in_param(signature.params()), bind<write_method_body>(method));
+                }
+                else
+                {
+                    write_method_body(w, method);
+                }
             }
             w.write("};\n");
         }
@@ -408,31 +666,9 @@ static PyType_Spec @_Type_spec =
 //        }
 //    }
 //
-//    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::function<void(writer&)> catchfunc)
-//    {
-//        w.write("try\n{\n");
-//        {
-//            writer::indent_guard g{ w };
-//            tryfunc(w);
-//        }
-//        w.write("}\ncatch (...)\n{\n");
-//        {
-//            writer::indent_guard g{ w };
-//            catchfunc(w);
-//        }
-//        w.write("}\n");
-//    }
-//
-//    void write_try_catch(writer& w, std::function<void(writer&)> func, std::string_view const& catch_return = "py::to_PyErr()")
-//    {
-//        write_try_catch(w, func, [&catch_return](writer& w) { w.write("return %;\n", catch_return); });
-//    }
 //
 //
-//    void write_detach_param(writer& w, std::string const& paramName)
-//    {
-//        w.write("%.detach()", paramName);
-//    }
+
 //    
 //    void write_param_name(writer& w, method_signature::param_t param)
 //    {
@@ -969,72 +1205,10 @@ static PyType_Spec @_Type_spec =
 //        w.write(initializer.param_init);
 //    }
 //
-//    void write_method_param_definition(writer& w, MethodDef const& method, method_signature::param_t const& param)
-//    {
-//        auto sequence = param.first.Sequence() - 1;
 //
-//        switch (get_param_category(param))
-//        {
-//        case param_category::in:
-//            // if method is special (i.e. get/put/add/remove) but not RTSpecial (i.e. ctor)
-//            // treat the args value as a single value, not as a tuple
-//            if (method.SpecialName() && !method.Flags().RTSpecialName())
-//            {
-//                w.write("auto % = py::convert_to<%>(arg);\n", bind<write_param_name>(param), param.second->Type());
-//            }
-//            else
-//            {
-//                w.write("auto % = py::convert_to<%>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
-//            }
-//            break;
-//        case param_category::out:
-//            w.write("% % { % };\n", param.second->Type(), bind<write_param_name>(param), bind<write_out_param_init>(param));
-//            break;
-//        case param_category::pass_array:
-//            w.write("auto _param% = py::convert_to<winrt::com_array<%>>(args, %);\n", sequence, param.second->Type(), sequence);
-//            w.write("auto param% = winrt::array_view<const %>(_param%.data(), _param%.data() + _param%.size());\n", sequence, param.second->Type(), sequence, sequence, sequence);
-//            break;
-//        case param_category::fill_array:
-//            w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
-//            w.write("winrt::com_array<%> % ( %_count, py::empty_instance<%>::get() );\n", param.second->Type(), bind<write_param_name>(param), bind<write_param_name>(param), param.second->Type());
-//            break;
-//        case param_category::receive_array:
-//            w.write("winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
-//            break;
-//        default:
-//            throw_invalid("invalid param_category");
-//        }
-//    }
+
 //
-//    void write_method_invoke_context(writer& w, TypeDef const& type, MethodDef const& method)
-//    {
-//        if (is_ptype(type))
-//        {
-//            w.write("obj.");
-//        }
-//        else if (is_static(method))
-//        {
-//            w.write("%::", type);
-//        }
-//        else
-//        {
-//            w.write("self->obj.");
-//        }
-//    }
-//
-//    void write_method_cpp_name(writer& w, MethodDef const& method)
-//    {
-//        auto name = method.Name();
-//
-//        if (method.SpecialName())
-//        {
-//            w.write(name.substr(name.find('_') + 1));
-//        }
-//        else
-//        {
-//            w.write(name);
-//        }
-//    }
+
 //
 //    void write_method_body(writer& w, TypeDef const& type, method_info const& info)
 //    {
