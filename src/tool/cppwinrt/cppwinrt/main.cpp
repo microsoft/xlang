@@ -153,7 +153,7 @@ Where <spec> is one or more of:
         return files;
     }
 
-    static void build_projection_filter(cache const& c)
+    static void build_filters(cache const& c)
     {
         if (settings.reference.empty())
         {
@@ -181,6 +181,16 @@ Where <spec> is one or more of:
         }
 
         settings.projection_filter = { include, {} };
+
+        if (settings.include.empty() && settings.exclude.empty())
+        {
+            settings.component_filter = { include, {} };
+        }
+        else
+        {
+            settings.component_filter = { settings.include, settings.exclude };
+        }
+
     }
 
     static bool has_projected_types(cache::namespace_members const& members)
@@ -204,8 +214,7 @@ Where <spec> is one or more of:
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
             c.remove_cppwinrt_foundation_types();
-            build_projection_filter(c);
-            settings.component_filter = { settings.include, settings.exclude };
+            build_filters(c);
             settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
 
             if (settings.verbose)
