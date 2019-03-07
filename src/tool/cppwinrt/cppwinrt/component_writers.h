@@ -8,7 +8,7 @@ namespace xlang
 
         for (auto&& base : get_bases(type))
         {
-            if (settings.filter.includes(base))
+            if (settings.component_filter.includes(base))
             {
                 continue;
             }
@@ -49,7 +49,7 @@ namespace xlang
 
         for (auto&& base : get_bases(type))
         {
-            if (settings.filter.includes(base))
+            if (settings.component_filter.includes(base))
             {
                 return;
             }
@@ -236,7 +236,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             return;
         }
 
-        if (settings.filter.includes(base_type))
+        if (settings.component_filter.includes(base_type))
         {
             return;
         }
@@ -580,7 +580,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             return;
         }
 
-        if (settings.filter.includes(base_type))
+        if (settings.component_filter.includes(base_type))
         {
             return;
         }
@@ -655,7 +655,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
             if (base_type)
             {
-                bool const external_base_type = !settings.filter.includes(base_type);
+                bool const external_base_type = !settings.component_filter.includes(base_type);
 
                 if (external_base_type)
                 {
@@ -785,7 +785,7 @@ namespace winrt::@::implementation
         auto type_name = type.TypeName();
         auto base_type = get_base_class(type);
 
-        if (base_type && settings.filter.includes(base_type))
+        if (base_type && settings.component_filter.includes(base_type))
         {
             w.write(" : %T<%, @::implementation::%>",
                 type_name,
@@ -882,7 +882,7 @@ namespace winrt::@::implementation
         auto base_type = get_base_class(type);
         std::string base_include;
 
-        if (base_type && settings.filter.includes(base_type))
+        if (base_type && settings.component_filter.includes(base_type))
         {
             base_include = "#include \"" + get_component_filename(base_type) + ".h\"\n";
         }
