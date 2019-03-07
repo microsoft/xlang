@@ -271,7 +271,7 @@ namespace xlang::cmd
             }
             std::string line_buf;
             std::ifstream response_file(absolute(response_path));
-            while (getline(response_file, line_buf)) // getline calls line_buf.erase()
+            while (getline(response_file, line_buf))
             {
                 size_t argc = 0;
                 std::vector<std::string> argv;
