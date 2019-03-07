@@ -66,7 +66,7 @@ namespace xlang
             w.write(format);
         }
 
-        //w.write_each<write_include>(w.needed_namespaces);
+        w.write_each<write_include>(w.needed_namespaces);
 
         {
             auto format = R"(
