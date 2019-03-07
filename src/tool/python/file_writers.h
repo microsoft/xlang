@@ -34,10 +34,10 @@ namespace xlang
         {
             writer::indent_guard g{ w };
             settings.filter.bind_each<write_python_wrapper_alias>(members.classes)(w);
+            settings.filter.bind_each<write_python_wrapper_alias>(members.structs)(w);
             settings.filter.bind_each<write_delegate_callable_wrapper>(members.delegates)(w);
             
             //settings.filter.bind_each<write_python_wrapper_alias>(members.interfaces)(w);
-            //settings.filter.bind_each<write_python_wrapper_alias>(members.structs)(w);
 
         }
         w.write("}\n");
@@ -46,12 +46,12 @@ namespace xlang
         {
             writer::indent_guard g{ w };
             settings.filter.bind_each<write_get_python_type_specialization>(members.classes)(w);
-            //settings.filter.bind_each<write_get_python_type_specialization>(members.interfaces)(w);
-            //settings.filter.bind_each<write_get_python_type_specialization>(members.structs)(w);
-
-            //settings.filter.bind_each<write_struct_converter_decl>(members.structs)(w);
-            //settings.filter.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
+            settings.filter.bind_each<write_get_python_type_specialization>(members.structs)(w);
             settings.filter.bind_each<write_delegate_type_mapper>(members.delegates)(w);
+            settings.filter.bind_each<write_struct_converter_decl>(members.structs)(w);
+
+            //settings.filter.bind_each<write_get_python_type_specialization>(members.interfaces)(w);
+            //settings.filter.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
         }
         w.write("}\n");
 
@@ -87,9 +87,13 @@ namespace xlang
 
         write_license_cpp(w);
         w.write("#include \"py.%.h\"\n", ns);
+        if (ns == "Windows.Foundation")
+        {
+            w.write(strings::custom_struct_convert);
+        }
         settings.filter.bind_each<write_class>(members.classes)(w);
         //settings.filter.bind_each<write_interface>(members.interfaces)(w);
-        //settings.filter.bind_each<write_struct>(members.structs)(w);
+        settings.filter.bind_each<write_struct>(members.structs)(w);
         write_namespace_initialization(w, ns, members);
 
         create_directories(folder);
