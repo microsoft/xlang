@@ -26,7 +26,8 @@ namespace xlang
         std::set<std::string> include;
         std::set<std::string> exclude;
 
-        meta::reader::filter filter;
+        meta::reader::filter projection_filter;
+        meta::reader::filter component_filter;
     };
 
     extern settings_type settings;

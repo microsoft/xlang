@@ -153,12 +153,14 @@ Where <spec> is one or more of:
         return files;
     }
 
-    static void supplement_includes(cache const& c)
+    static void build_filters(cache const& c)
     {
-        if (settings.reference.empty() || !settings.include.empty())
+        if (settings.reference.empty())
         {
             return;
         }
+
+        std::set<std::string> include;
 
         for (auto file : settings.input)
         {
@@ -174,12 +176,21 @@ Where <spec> is one or more of:
                     continue;
                 }
 
-                std::string include{ type.TypeNamespace() };
-                include += '.';
-                include += type.TypeName();
-                settings.include.insert(include);
+                include.insert(std::string{ type.TypeNamespace() });
             }
         }
+
+        settings.projection_filter = { include, {} };
+
+        if (settings.include.empty() && settings.exclude.empty())
+        {
+            settings.component_filter = { include, {} };
+        }
+        else
+        {
+            settings.component_filter = { settings.include, settings.exclude };
+        }
+
     }
 
     static bool has_projected_types(cache::namespace_members const& members)
@@ -203,9 +214,8 @@ Where <spec> is one or more of:
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
             c.remove_cppwinrt_foundation_types();
-            supplement_includes(c);
-            settings.filter = { settings.include, settings.exclude };
-            settings.base = settings.base || (!settings.component && settings.filter.empty());
+            build_filters(c);
+            settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
 
             if (settings.verbose)
             {
@@ -237,7 +247,7 @@ Where <spec> is one or more of:
             {
                 group.add([&, &ns = ns, &members = members]
                 {
-                    if (!has_projected_types(members) || !settings.filter.includes(members))
+                    if (!has_projected_types(members) || !settings.projection_filter.includes(members))
                     {
                         return;
                     }
@@ -265,7 +275,7 @@ Where <spec> is one or more of:
                     {
                         for (auto&& type : members.classes)
                         {
-                            if (settings.filter.includes(type))
+                            if (settings.component_filter.includes(type))
                             {
                                 classes.push_back(type);
                             }
