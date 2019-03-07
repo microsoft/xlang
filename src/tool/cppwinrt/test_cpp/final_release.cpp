@@ -47,18 +47,49 @@ namespace
         static inline bool released;
         static inline bool destroyed;
     };
+
+    struct SampleNoFinalRelease : implements<SampleNoFinalRelease, IStringable>
+    {
+        hstring ToString()
+        {
+            return L"Sample";
+        }
+
+        static inline bool destroyed;
+
+    private:
+
+        // Private constructors are OK if final_release is not used.
+        ~SampleNoFinalRelease()
+        {
+            REQUIRE(!destroyed);
+            destroyed = true;
+        }
+    };
 }
 
 TEST_CASE("final_release")
 {
-    auto s = make<Sample>();
+    {
+        auto s = make<Sample>();
 
-    // Weak references are supported prior to destruction.
-    REQUIRE(weak_ref<IStringable>{ s }.get());
+        // Weak references are supported prior to destruction.
+        REQUIRE(weak_ref<IStringable>{ s }.get());
 
-    REQUIRE(!Sample::released);
-    REQUIRE(!Sample::destroyed);
-    s = nullptr;
-    REQUIRE(Sample::released);
-    REQUIRE(Sample::destroyed);
+        REQUIRE(!Sample::released);
+        REQUIRE(!Sample::destroyed);
+        s = nullptr;
+        REQUIRE(Sample::released);
+        REQUIRE(Sample::destroyed);
+    }
+    {
+        auto s = make<SampleNoFinalRelease>();
+
+        // Weak references are supported prior to destruction.
+        REQUIRE(weak_ref<IStringable>{ s }.get());
+
+        REQUIRE(!SampleNoFinalRelease::destroyed);
+        s = nullptr;
+        REQUIRE(SampleNoFinalRelease::destroyed);
+    }
 }

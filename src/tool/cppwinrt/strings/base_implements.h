@@ -799,7 +799,6 @@ namespace winrt::impl
 
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
-        static void final_release(std::unique_ptr<D>) noexcept {}
 
     protected:
 
@@ -889,7 +888,14 @@ namespace winrt::impl
                 // This ensures destruction has a stable value during destruction.
                 m_references = 1;
 
-                D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
+                if constexpr (has_final_release::value)
+                {
+                    D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
+                }
+                else
+                {
+                    delete this;
+                }
             }
 
             return target;
@@ -1025,6 +1031,16 @@ namespace winrt::impl
         using is_factory = std::disjunction<std::is_same<Windows::Foundation::IActivationFactory, I>...>;
 
     private:
+
+        class has_final_release
+        {
+            template <typename U, typename = decltype(std::declval<U>().final_release(0))> static constexpr bool get_value(int) { return true; }
+            template <typename> static constexpr bool get_value(...) { return false; }
+
+        public:
+
+            static constexpr bool value = get_value<D>(0);
+        };
 
         using is_agile = std::negation<std::disjunction<std::is_same<non_agile, I>...>>;
         using is_inspectable = std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, I>...>;
