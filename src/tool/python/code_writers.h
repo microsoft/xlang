@@ -94,7 +94,7 @@ static int module_exec(PyObject* module)
         //}
         //else
         //{
-            w.write("%", type);
+        w.write("%", type);
         //}
     }
 
@@ -130,41 +130,70 @@ static void @_dealloc(py::winrt_wrapper<%>* self)
             is_ptype(type) ? ".release()" : " = nullptr");
     }
 
-    std::tuple<bool, std::vector<MethodDef>> get_activation(TypeDef const& type)
+    void write_constructor_name(writer& w, MethodDef const& ctor)
     {
-        bool default_activation = false;
-        std::vector<MethodDef> custom_activation{};
-
-        for (auto&& attrib : type.CustomAttribute())
+        if (empty(ctor.ParamList()))
         {
-            auto pair = attrib.TypeNamespaceAndName();
-            if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
+            w.write("_default_constructor");
+        }
+        else
+        {
+            method_signature ctor_sig{ ctor };
+
+            auto type = ctor.Parent();
+            for (auto&& attrib : type.CustomAttribute())
             {
-                auto fixed_args = attrib.Value().FixedArgs();
-                auto elem0 = std::get<ElemSig>(fixed_args[0].value);
-
-                // if the first param is SystemType, it hold the name of a factory interface
-                if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
+                auto pair = attrib.TypeNamespaceAndName();
+                if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
                 {
-                    auto factory = type.get_cache().find_required(
-                        std::get<ElemSig::SystemType>(elem0.value).name);
+                    auto fixed_args = attrib.Value().FixedArgs();
+                    auto elem0 = std::get<ElemSig>(fixed_args[0].value);
 
-                    for (auto&& factory_method : factory.MethodList())
+                    // if the first param is SystemType, it holds the name of a factory interface
+                    if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
                     {
-                        custom_activation.push_back(factory_method);
+                        auto factory_type = type.get_cache().find_required(
+                            std::get<ElemSig::SystemType>(elem0.value).name);
+
+                        for (auto&& factory_method : factory_type.MethodList())
+                        {
+                            method_signature factory_method_sig{ factory_method };
+
+                            if (factory_method_sig.params().size() == ctor_sig.params().size())
+                            {
+                                // TODO, check and make sure param lists are same types
+                                w.write(factory_method.Name());
+                                return;
+                            }
+                        }
                     }
                 }
-                // if the first param is not SystemType, the type is default activatable
-                else
-                {
-                    XLANG_ASSERT(std::holds_alternative<uint32_t>(elem0.value));
-                    XLANG_ASSERT(!default_activation);
-                    default_activation = true;
-                }
+            }
+
+            throw_invalid("couldn't find factory method");
+        }
+    }
+
+    void write_method_name(writer& w, MethodDef const& method)
+    {
+        if (is_constructor(method))
+        {
+            w.write("%", bind<write_constructor_name>(method));
+        }
+        else
+        {
+            auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
+            if (overload_attrib)
+            {
+                auto args = overload_attrib.Value().FixedArgs();
+                auto name = std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
+                w.write(name);
+            }
+            else
+            {
+                w.write(method.Name());
             }
         }
-
-        return std::make_tuple(default_activation, std::move(custom_activation));
     }
 
     void write_method_table(writer& w, TypeDef const& type)
@@ -174,50 +203,36 @@ static void @_dealloc(py::winrt_wrapper<%>* self)
         {
             writer::indent_guard g{ w };
 
-            auto act = get_activation(type);
-
-            if (std::get<0>(act))
-            {
-                w.write(
-                    "{ \"_ctor_Default\", (PyCFunction)_@_ctor_Default, METH_NOARGS | METH_STATIC, nullptr },\n",
-                    type.TypeName());
-            }
-            
-            for (auto&& factory_method : std::get<1>(act))
-            {
-                w.write(
-                    "{ \"_ctor_%\", (PyCFunction)_@_ctor_%, METH_VARARGS | METH_STATIC, nullptr },\n",
-                    factory_method.Name(),
-                    type.TypeName(),
-                    factory_method.Name());
-            }
-
             for (auto&& method : type.MethodList())
             {
-                if (method.Name() == ".ctor")
-                {
-                    XLANG_ASSERT(method.Flags().RTSpecialName());
-                    XLANG_ASSERT(method.Flags().SpecialName());
-                }
-                else
-                {
-                    w.write("{ \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
-                        get_method_abi_name(method),
-                        type.TypeName(),
-                        get_method_abi_name(method),
-                        is_static(method) ? " | METH_STATIC" : "");
-                }
+                w.write("{ \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
+                    bind<write_method_name>(method),
+                    type.TypeName(),
+                    bind<write_method_name>(method),
+                    (is_static(method) || is_constructor(method)) ? " | METH_STATIC" : "");
             }
 
-            if (!is_static(type))
-            {
-                w.write("{ \"_from\", (PyCFunction)_@_from, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
-            }
+            // TODO _from / as support
 
             w.write("{ nullptr }\n");
         }
 
         w.write("};\n");
+    }
+
+    void write_method_functions(writer& w, TypeDef const& type)
+    {
+        //auto act = get_activation(type);
+
+        //for (auto&& method : type.MethodList())
+        //{
+        //    if (method.Name() == ".ctor")
+        //    {
+        //        continue;
+        //    }
+
+        //    w.write("\nstatic PyObject* @_%(PyObject* self, PyObject* args)\n{\n}\n", type.TypeName(), get_method_abi_name(method));
+        //}
     }
 
     void write_type_slot_table(writer& w, TypeDef const& type)
@@ -274,7 +289,7 @@ static PyType_Spec @_Type_spec =
         w.write("\n// ----- % class --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
         write_dealloc_function(w, type);
-        //write_method_functions(w, type);
+        write_method_functions(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
