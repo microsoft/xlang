@@ -29,35 +29,9 @@ struct winrt_type<%>
         w.write(format, type);
     }
 
-    void write_get_python_type_specializations(writer& w, cache::namespace_members const& members)
-    {
-        w.write("\nnamespace py\n{\n");
-        {
-            writer::indent_guard g{ w };
-            settings.filter.bind_each<write_get_python_type_specialization>(members.classes)(w);
-            //settings.filter.bind_each<write_get_python_type_specialization>(members.interfaces)(w);
-            //settings.filter.bind_each<write_get_python_type_specialization>(members.structs)(w);
-        }
-        w.write("}\n");
-    }
-
     void write_python_wrapper_alias(writer& w, TypeDef const& type)
     {
         w.write("using @ = winrt_wrapper<%>;\n", type.TypeName(), type);
-    }
-
-    void write_python_wrapper_aliases(writer& w, std::string_view const& ns, cache::namespace_members const& members)
-    {
-        auto segments = get_dotted_name_segments(ns);
-        w.write("namespace py::proj::%\n{\n", bind_list("::", segments));
-        {
-            writer::indent_guard g{ w };
-            settings.filter.bind_each<write_python_wrapper_alias>(members.classes)(w);
-            //settings.filter.bind_each<write_python_wrapper_alias>(members.interfaces)(w);
-            //settings.filter.bind_each<write_python_wrapper_alias>(members.structs)(w);
-
-        }
-        w.write("}\n");
     }
 
     void write_ns_module_exec_init_python_type(writer& w, TypeDef const& type)
@@ -346,32 +320,6 @@ static void @_dealloc(%* self)
     {
         write_try_catch(w, func, [&catch_return](writer& w) { w.write("return %;\n", catch_return); });
     }
-    //    void write_method_body(writer& w, TypeDef const& type, method_info const& info)
-    //    {
-    //
-    //
-    //
-    //        if (return_values.size() == 0)
-    //        {
-    //            if (is_put_method(info.method))
-    //            {
-    //                w.write("return 0;\n");
-    //            }
-    //            else
-    //            {
-    //                w.write("Py_RETURN_NONE;\n");
-    //            }
-    //        }
-    //        else if (return_values.size() == 1)
-    //        {
-    //            w.write("return %;\n", bind<write_detach_param>(return_values[0]));
-    //        }
-    //        else
-    //        {
-    //            auto x = w.write_temp("%", std::to_string(return_values.size()));
-    //            w.write("return PyTuple_Pack(%, %);\n", x, bind_list<write_detach_param>(", ", return_values));
-    //        }
-    //    }
 
     void write_param_name(writer& w, method_signature::param_t param)
     {
@@ -472,6 +420,11 @@ static void @_dealloc(%* self)
         w.write("%.detach()", paramName);
     }
 
+    void write_py_tuple_pack(writer& w, std::vector<std::string> const& params)
+    {
+        w.write("PyTuple_Pack(%, %)", static_cast<int>(params.size()), bind_list<write_detach_param>(", ", params));
+    }
+
     void write_method_body(writer& w, MethodDef const& method)
     {
         writer::indent_guard g{ w };
@@ -557,8 +510,7 @@ if (!%)
             }
             else
             {
-                auto x = w.write_temp("%", std::to_string(return_values.size()));
-                w.write("return PyTuple_Pack(%, %);\n", x, bind_list<write_detach_param>(", ", return_values));
+                w.write("return %;\n", bind<write_py_tuple_pack>(return_values));
             }
         });
     }
@@ -663,6 +615,107 @@ static PyType_Spec @_Type_spec =
         write_type_spec(w, type);
     }
 
+    void write_delegate_type_mapper(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type))
+        {
+            return;
+        }
+
+        auto format = R"(template <>
+struct delegate_python_type<%>
+{
+    using type = %;
+};
+
+)";
+        w.write(format, type, bind<write_wrapper_type>(type));
+    }
+
+    void write_delegate_param(writer& w, method_signature::param_t const& p)
+    {
+        w.write("auto %", bind<write_param_name>(p));
+    }
+
+    void write_delegate_callable_wrapper(writer& w, TypeDef const& type)
+    {
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+    
+        auto invoke = get_delegate_invoke(type);
+        method_signature signature{ invoke };
+    
+        if (is_ptype(type))
+        {
+            return;
+            /*w.write("\ntemplate <%>", bind_list<write_pinterface_type_arg>(", ", type.GenericParam()));*/
+        }
+    
+        w.write("\nstruct @\n{\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+    
+            w.write("static % get(PyObject* callable)\n{\n", type);
+            {
+                writer::indent_guard gg{ w };
+    
+                {
+                    auto format = R"(py::throw_if_pyobj_null(callable);
+    
+py::delegate_callable cb{ callable };
+    
+return [cb = std::move(cb)](%)
+{
+)";
+                    w.write(format, bind_list<write_delegate_param>(", ", signature.params()));
+                }
+                {
+                    writer::indent_guard ggg{ w };
+    
+                    w.write("winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };\n\n");
+    
+                    std::vector<std::string> tuple_params{};
+                    for (auto&& p : signature.params())
+                    {
+                        auto param_name = w.write_temp("%", bind<write_param_name>(p));
+                        auto py_param_name = "py_"s + param_name;
+    
+                        w.write("py::pyobj_handle %{ py::convert(%) };\n", py_param_name, param_name);
+                        tuple_params.push_back(py_param_name);
+                    }
+    
+                    if (tuple_params.size() > 0)
+                    {
+                        w.write("\npy::pyobj_handle args{ % };\n", bind<write_py_tuple_pack>(tuple_params));
+                    }
+                    else
+                    {
+                        w.write("py::pyobj_handle args{ nullptr };\n");
+                    }
+    
+                    // TODO: check return from PyObject_CallObject for errors 
+                    // https://docs.python.org/3.7/c-api/object.html?highlight=pyobject_callobject#c.PyObject_CallObject
+
+                    w.write(R"(py::pyobj_handle return_value{ PyObject_CallObject(cb.callable(), args.get()) };
+
+if (!return_value) 
+{
+    // TODO: propagate Python error
+    throw winrt::hresult_invalid_argument();
+}
+)");
+
+                    if (signature.return_signature())
+                    {
+                        w.write("\nreturn py::convert<%>(return_value.get());\n", signature.return_signature().Type());
+                    }
+                }
+    
+                w.write("};\n");
+            }
+            w.write("};\n");
+        }
+        w.write("};\n");
+    }
 
 
 
@@ -828,81 +881,6 @@ static PyType_Spec @_Type_spec =
 //        w.write("PyTuple_Pack(%, %)", static_cast<int>(params.size()), bind_list<write_detach_param>(", ", params));
 //    }
 //
-//    void write_delegate_callable_wrapper(writer& w, TypeDef const& type)
-//    {
-//        auto guard{ w.push_generic_params(type.GenericParam()) };
-//
-//        auto invoke = get_delegate_invoke(type);
-//        method_signature signature{ invoke };
-//
-//        if (is_ptype(type))
-//        {
-//            w.write("\ntemplate <%>", bind_list<write_pinterface_type_arg>(", ", type.GenericParam()));
-//        }
-//
-//        w.write("\nstruct py@\n{\n", type.TypeName());
-//        {
-//            writer::indent_guard g{ w };
-//
-//            w.write("static % get(PyObject* callable)\n{\n", bind<write_full_type_name>(type));
-//            {
-//                writer::indent_guard gg{ w };
-//
-//                auto format = R"(py::throw_if_pyobj_null(callable);
-//
-//py::delegate_callable cb{ callable };
-//
-//return [cb = std::move(cb)](%)
-//{
-//)";
-//                w.write(format, bind_list<write_delegate_param>(", ", signature.params()));
-//
-//                {
-//                    writer::indent_guard ggg{ w };
-//
-//                    w.write("winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };\n\n");
-//
-//                    std::vector<std::string> tuple_params{};
-//                    for (auto&& p : signature.params())
-//                    {
-//                        auto param_name = w.write_temp("%", bind<write_param_name>(p));
-//                        auto py_param_name = "py_"s + param_name;
-//
-//                        w.write("py::pyobj_handle %{ py::convert(%) };\n", py_param_name, param_name);
-//                        tuple_params.push_back(py_param_name);
-//                    }
-//
-//                    if (tuple_params.size() > 0)
-//                    {
-//                        w.write("\npy::pyobj_handle args{ % };\n", bind<write_py_tuple_pack>(tuple_params));
-//                    }
-//                    else
-//                    {
-//                        w.write("py::pyobj_handle args{ nullptr };\n");
-//                    }
-//
-//                    // TODO: check return from PyObject_CallObject for errors 
-//                    // https://docs.python.org/3.7/c-api/object.html?highlight=pyobject_callobject#c.PyObject_CallObject
-//                    if (signature.return_signature())
-//                    {
-//                        auto format2 = R"(
-//py::pyobj_handle return_value{ PyObject_CallObject(cb.callable(), args.get()) };
-//return py::convert<%>(return_value.get());
-//)";
-//                        w.write(format2, signature.return_signature().Type());
-//                    }
-//                    else
-//                    {
-//                        w.write("\nPyObject_CallObject(cb.callable(), args.get());\n");
-//                    }
-//                }
-//
-//                w.write("};\n");
-//            }
-//            w.write("};\n");
-//        }
-//        w.write("};\n");
-//    }
 //
 //    void write_pinterface_type_mapper(writer& w, TypeDef const& type)
 //    {
@@ -926,20 +904,7 @@ static PyType_Spec @_Type_spec =
 //            bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
 //    }
 //
-//    void write_delegate_type_mapper(writer& w, TypeDef const& type)
-//    {
-//        auto format = R"(template <%>
-//struct delegate_python_type<%>
-//{
-//    using type = %;
-//};
-//
-//)";
-//        w.write(format,
-//            bind_list<write_pinterface_type_arg>(", ", type.GenericParam()),
-//            bind<write_full_type_name>(type),
-//            bind<write_delegate_type_name>(type));
-//    }
+
 //
 //    void write_pinterface_param(writer& w, MethodDef const& method)
 //    {

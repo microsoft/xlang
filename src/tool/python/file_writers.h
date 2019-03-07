@@ -25,19 +25,33 @@ namespace xlang
 
         auto filename = w.write_temp("py.%.h", ns);
 
-        //settings.filter.bind_each<write_delegate_callable_wrapper>(members.delegates)(w);
         //settings.filter.bind_each<write_pinterface>(members.interfaces)(w);
 
         w.write("\n");
-        write_python_wrapper_aliases(w, ns, members);
-        write_get_python_type_specializations(w, members);
+
+        auto segments = get_dotted_name_segments(ns);
+        w.write("\nnamespace py::proj::%\n{\n", bind_list("::", segments));
+        {
+            writer::indent_guard g{ w };
+            settings.filter.bind_each<write_python_wrapper_alias>(members.classes)(w);
+            settings.filter.bind_each<write_delegate_callable_wrapper>(members.delegates)(w);
+            
+            //settings.filter.bind_each<write_python_wrapper_alias>(members.interfaces)(w);
+            //settings.filter.bind_each<write_python_wrapper_alias>(members.structs)(w);
+
+        }
+        w.write("}\n");
 
         w.write("\nnamespace py\n{\n");
         {
             writer::indent_guard g{ w };
+            settings.filter.bind_each<write_get_python_type_specialization>(members.classes)(w);
+            //settings.filter.bind_each<write_get_python_type_specialization>(members.interfaces)(w);
+            //settings.filter.bind_each<write_get_python_type_specialization>(members.structs)(w);
+
             //settings.filter.bind_each<write_struct_converter_decl>(members.structs)(w);
             //settings.filter.bind_each<write_pinterface_type_mapper>(members.interfaces)(w);
-            //settings.filter.bind_each<write_delegate_type_mapper>(members.delegates)(w);
+            settings.filter.bind_each<write_delegate_type_mapper>(members.delegates)(w);
         }
         w.write("}\n");
 
