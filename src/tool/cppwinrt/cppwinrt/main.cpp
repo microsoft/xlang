@@ -176,7 +176,10 @@ Where <spec> is one or more of:
                     continue;
                 }
 
-                include.insert(std::string{ type.TypeNamespace() });
+                std::string full_name{ type.TypeNamespace() };
+                full_name += '.';
+                full_name += type.TypeName();
+                include.insert(full_name);
             }
         }
 
