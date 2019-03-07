@@ -19,7 +19,7 @@ static PyModuleDef module_def = {
 };
 
 PyMODINIT_FUNC
-PyInit_ % (void)
+PyInit_% (void)
 {
     return PyModuleDef_Init(&module_def);
 }
