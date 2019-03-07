@@ -72,7 +72,7 @@ static int module_exec(PyObject* module)
         w.write("}\n");
     }
 
-    void write_module_name(writer& w, std::string_view const& ns)
+    void write_ns_module_name(writer& w, std::string_view const& ns)
     {
         auto segments = get_dotted_name_segments(ns);
         w.write("_%_%", settings.module, bind_list("_", segments));
@@ -83,51 +83,30 @@ static int module_exec(PyObject* module)
         w.write("\n// ----- % Initialization --------------------\n", ns);
 
         write_ns_module_exec_func(w, members);
-        w.write(strings::ns_module_def, ns, bind<write_module_name>(ns), bind<write_module_name>(ns));
-    }
-
-    void write_type_name(writer& w, TypeDef const& type)
-    {
-        //if (is_ptype(type))
-        //{
-        //    w.write("py@", type.TypeName());
-        //}
-        //else
-        //{
-        w.write("%", type);
-        //}
+        w.write(strings::ns_module_def, ns, bind<write_ns_module_name>(ns), bind<write_ns_module_name>(ns));
     }
 
     void write_wrapper_type(writer& w, TypeDef const& type)
     {
-        // TODO: type using alias for each TypeDef in header
-        auto wrapper_type = is_ptype(type) ? "winrt_pinterface_wrapper" :
-            get_category(type) == category::struct_type ? "winrt_struct_wrapper" : "winrt_wrapper";
-
-        w.write("py::%<%>", wrapper_type, type);
+        auto segments = get_dotted_name_segments(type.TypeNamespace());
+        w.write("py::%::@", bind_list("::", segments), type.TypeName());
     }
 
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
     {
-        w.write("\nPyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_type_name>(type));
+        w.write("\nPyTypeObject* py::winrt_type<%>::python_type;\n", type);
     }
 
     void write_dealloc_function(writer& w, TypeDef const& type)
     {
         auto format = R"(
-static void @_dealloc(py::winrt_wrapper<%>* self)
+static void @_dealloc(%* self)
 {
-    auto hash_value = %;
-    py::wrapped_instance(hash_value, nullptr);
-    self->obj%;
+    //TODO: dealloc impl
 }
 )";
 
-        w.write(format,
-            type.TypeName(),
-            bind<write_wrapper_type>(type),
-            is_ptype(type) ? "self->obj->hash()" : "std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj)",
-            is_ptype(type) ? ".release()" : " = nullptr");
+        w.write(format, type.TypeName(), bind<write_wrapper_type>(type));
     }
 
     void write_constructor_name(writer& w, MethodDef const& ctor)
@@ -196,20 +175,67 @@ static void @_dealloc(py::winrt_wrapper<%>* self)
         }
     }
 
+    enum class arg_count
+    {
+        none,
+        single,
+        variable
+    };
+
+    arg_count get_arg_count(MethodDef const& method)
+    {
+        if (is_constructor(method) && empty(method.ParamList()))
+        {
+            return arg_count::none;
+        }
+        else if (is_get_method(method))
+        {
+            return arg_count::none;
+        }
+        else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
+        {
+            return arg_count::single;
+        }
+        else
+        {
+            return arg_count::variable;
+        }
+    }
+
+    void write_method_args(writer& w, MethodDef const& method)
+    {
+        switch (get_arg_count(method))
+        {
+        case arg_count::none:
+            w.write("METH_NOARGS");
+            break;
+        case arg_count::single:
+            w.write("METH_O");
+            break;
+        case arg_count::variable:
+            w.write("METH_VARARGS");
+            break;
+        }
+
+        if (is_static(method) || is_constructor(method))
+        {
+            w.write("| METH_STATIC");
+        }
+    }
+
     void write_method_table(writer& w, TypeDef const& type)
     {
-        XLANG_ASSERT(/*get_category(type) == category::interface_type || */get_category(type) == category::class_type);
         w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
             for (auto&& method : type.MethodList())
             {
-                w.write("{ \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
+                w.write("{ \"%\", (PyCFunction)@_%, %, nullptr },\n",
                     bind<write_method_name>(method),
                     type.TypeName(),
                     bind<write_method_name>(method),
-                    (is_static(method) || is_constructor(method)) ? " | METH_STATIC" : "");
+                    bind<write_method_args>(method));
             }
 
             // TODO _from / as support
@@ -220,19 +246,50 @@ static void @_dealloc(py::winrt_wrapper<%>* self)
         w.write("};\n");
     }
 
+    void write_self_param_name(writer& w, MethodDef const& method)
+    {
+        if (is_static(method) || is_constructor(method))
+        {
+            w.write("/* unused */");
+        }
+        else
+        {
+            w.write("self");
+        }
+    }
+
+    void write_args_param_name(writer& w, MethodDef const& method)
+    {
+        switch (get_arg_count(method))
+        {
+        case arg_count::none:
+            w.write("/* unused */");
+            break;
+        case arg_count::single:
+            w.write("arg");
+            break;
+        case arg_count::variable:
+            w.write("args");
+            break;
+        }
+    }
+
     void write_method_functions(writer& w, TypeDef const& type)
     {
-        //auto act = get_activation(type);
-
-        //for (auto&& method : type.MethodList())
-        //{
-        //    if (method.Name() == ".ctor")
-        //    {
-        //        continue;
-        //    }
-
-        //    w.write("\nstatic PyObject* @_%(PyObject* self, PyObject* args)\n{\n}\n", type.TypeName(), get_method_abi_name(method));
-        //}
+        for (auto&& method : type.MethodList())
+        {
+            w.write("\nstatic PyObject* @_%(%* %, PyObject* %)\n{\n", 
+                type.TypeName(), 
+                bind<write_method_name>(method),
+                bind<write_wrapper_type>(type),
+                bind<write_self_param_name>(method),
+                bind<write_args_param_name>(method));
+            {
+                writer::indent_guard g{ w };
+                w.write("return nullptr;\n");
+            }
+            w.write("};\n");
+        }
     }
 
     void write_type_slot_table(writer& w, TypeDef const& type)
@@ -276,7 +333,7 @@ static PyType_Spec @_Type_spec =
         auto type_name = type.TypeName();
         w.write(format,
             type_name,
-            bind<write_module_name>(type.TypeNamespace()),
+            bind<write_ns_module_name>(type.TypeNamespace()),
             type_name,
             bind<write_type_spec_size>(type),
             type_name);
