@@ -37,10 +37,8 @@ namespace xlang
 
     void write_get_python_type_specialization(writer& w, TypeDef const& type)
     {
-        if (is_exclusive_to(type))
-        {
-            return;
-        }
+        if (is_exclusive_to(type)) return;
+        if (is_ptype(type)) return;
 
         auto format = R"(template<>
 struct winrt_type<%>
@@ -60,6 +58,12 @@ struct winrt_type<%>
         case category::class_type:
             w.write("winrt_wrapper");
             break;
+        case category::interface_type:
+            if (is_ptype(type))
+                throw_invalid("not impl");
+            else
+                w.write("winrt_wrapper");
+            break;
         case category::struct_type:
             w.write("winrt_struct_wrapper");
             break;
@@ -68,15 +72,16 @@ struct winrt_type<%>
 
     void write_python_wrapper_alias(writer& w, TypeDef const& type)
     {
+        if (is_exclusive_to(type)) return;
+        if (is_ptype(type)) return;
+
         w.write("using @ = py::%<%>;\n", type.TypeName(), bind<write_python_wrapper_type>(type), type);
     }
 
     void write_ns_module_exec_init_python_type(writer& w, TypeDef const& type)
     {
-        if (is_exclusive_to(type))
-        {
-            return;
-        }
+        if (is_exclusive_to(type)) return;
+        if (is_ptype(type)) return;
 
         auto winrt_type_param = is_ptype(type)
             ? w.write_temp("py@", type.TypeName())
@@ -127,7 +132,7 @@ static int module_exec(PyObject* module)
             writer::indent_guard g{ w };
 
             settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.classes)(w);
-            //settings.filter.bind_each<write_namespace_module_exec_init_python_type>(members.interfaces)(w);
+            settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.interfaces)(w);
             settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.structs)(w);
 
             w.write("\nreturn 0;\n");
@@ -176,7 +181,7 @@ static void @_dealloc(%* self)
 
         w.write(format, type.TypeName(), bind<write_wrapper_type>(type));
 
-        if (category == category::class_type)
+        if (category == category::class_type || category == category::interface_type)
         {
             writer::indent_guard g{ w };
             w.write("// TODO: clear cached instance\n");
@@ -314,7 +319,12 @@ static void @_dealloc(%* self)
                     bind<write_method_args>(method));
             }
 
-            // TODO _from / as support
+            // TODO Required interface support
+
+            if (!is_static(type))
+            {
+                w.write("{ \"_from\", (PyCFunction)_as_@, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+            }
 
             w.write("{ nullptr }\n");
         }
@@ -606,8 +616,15 @@ return nullptr;
 
     void write_type_slot_table(writer& w, TypeDef const& type)
     {
+        // TODO: need to write a tp_new function that throws so that these native python types are not created directly
         auto category = get_category(type);
         w.write("\nstatic PyType_Slot @_Type_slots[] = \n{\n", type.TypeName());
+        if (category == category::interface_type)
+        {
+            w.write("    { Py_tp_dealloc, @_dealloc },\n", type.TypeName());
+            w.write("    { Py_tp_methods, @_methods },\n", type.TypeName());
+            w.write("    { Py_tp_new, nullptr },\n");
+        }
         if (category == category::class_type)
         {
             if (!is_static(type))
@@ -615,6 +632,7 @@ return nullptr;
                 w.write("    { Py_tp_dealloc, @_dealloc },\n", type.TypeName());
             }
             w.write("    { Py_tp_methods, @_methods },\n", type.TypeName());
+            w.write("    { Py_tp_new, nullptr },\n");
         }
         if (category == category::struct_type)
         {
@@ -658,6 +676,13 @@ static PyType_Spec @_Type_spec =
             type_name);
     }
 
+    void write_as_function(writer& w, TypeDef const& type)
+    {
+        if (is_static(type)) return;
+
+        w.write(strings::as_function, type.TypeName(), type);
+    }
+
     void write_class(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
@@ -666,6 +691,24 @@ static PyType_Spec @_Type_spec =
         write_winrt_type_specialization_storage(w, type);
         write_dealloc_function(w, type);
         write_method_functions(w, type);
+        write_as_function(w, type);
+        write_method_table(w, type);
+        write_type_slot_table(w, type);
+        write_type_spec(w, type);
+    }
+
+    void write_interface(writer& w, TypeDef const& type)
+    {
+        if (is_exclusive_to(type)) return;
+        if (is_ptype(type)) return;
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        w.write("\n// ----- % interface --------------------\n", type.TypeName());
+        write_winrt_type_specialization_storage(w, type);
+        write_dealloc_function(w, type);
+        write_method_functions(w, type);
+        write_as_function(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
@@ -727,7 +770,7 @@ struct delegate_python_type<%%>
         {
             writer::indent_guard g{ w };
     
-            w.write("static % get(PyObject* callable)\n{\n", type);
+            w.write("static %% get(PyObject* callable)\n{\n", type, bind<write_template_args>(type));
             {
                 writer::indent_guard gg{ w };
     
@@ -1157,18 +1200,14 @@ if (!PyDict_Check(obj))
     
         w.write("\n// ----- % struct --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
-        //write_struct_customization(w, type);
-
         write_struct_convert_functions(w, type);
         write_struct_constructor(w, type);
         write_dealloc_function(w, type);
         write_struct_getset_functions(w, type);
         write_struct_getset_table(w, type);
-
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
-
 
 
 

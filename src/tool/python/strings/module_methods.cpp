@@ -18,6 +18,8 @@ static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IIn
     self->obj = nullptr;
 }
 
+// TODO: need to write a tp_new function that throws so that winrt_base can't be created directly
+
 static PyType_Slot winrt_base_Type_slots[] =
 {
     { Py_tp_dealloc, winrt_base_dealloc },
