@@ -197,7 +197,7 @@ namespace xlang
         write_preamble(w);
         write_open_file_guard(w, ns);
         write_version_assert(w);
-        w.write_parent_depends(c);
+        write_parent_depends(w, c, ns);
 
         for (auto&& depends : w.depends)
         {

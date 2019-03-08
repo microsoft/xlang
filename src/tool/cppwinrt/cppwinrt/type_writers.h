@@ -501,25 +501,6 @@ namespace xlang
             }
         }
 
-        void write_parent_depends(cache const& c)
-        {
-            auto pos = type_namespace.rfind('.');
-
-            if (pos == std::string::npos)
-            {
-                return;
-            }
-
-            auto parent = type_namespace.substr(0, pos);
-
-            if (c.namespaces().find(parent) == c.namespaces().end())
-            {
-                return;
-            }
-
-            write_root_include(parent);
-        }
-
         void save_header(char impl = 0)
         {
             auto filename{ settings.output_folder + "winrt/" };

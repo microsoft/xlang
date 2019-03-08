@@ -196,16 +196,6 @@ Where <spec> is one or more of:
 
     }
 
-    static bool has_projected_types(cache::namespace_members const& members)
-    {
-        return
-            !members.interfaces.empty() ||
-            !members.classes.empty() ||
-            !members.enums.empty() ||
-            !members.structs.empty() ||
-            !members.delegates.empty();
-    }
-
     static int run(int const argc, char** argv)
     {
         int result{};
@@ -261,6 +251,24 @@ Where <spec> is one or more of:
                     write_namespace_h(c, ns, members);
                 });
             }
+
+//            {
+//                writer test;
+//
+//                for (auto&& [ns, members] : c.namespaces())
+//                {
+//                    if (!has_projected_types(members) || !settings.projection_filter.includes(members))
+//                    {
+//                        continue;
+//                    }
+//
+//                    test.write(R"(#include "winrt/%.h"
+//)",
+//                        ns);
+//                }
+//
+//                test.flush_to_file(settings.output_folder + "all.h");
+//            }
 
             group.add([&]
             {
