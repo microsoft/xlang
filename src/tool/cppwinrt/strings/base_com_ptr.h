@@ -303,3 +303,9 @@ namespace winrt
         return !(left < right);
     }
 }
+
+template <typename T>
+void** IID_PPV_ARGS_Helper(winrt::com_ptr<T>* ptr) noexcept
+{
+    return winrt::put_abi(*ptr);
+}
