@@ -196,16 +196,6 @@ Where <spec> is one or more of:
 
     }
 
-    static bool has_projected_types(cache::namespace_members const& members)
-    {
-        return
-            !members.interfaces.empty() ||
-            !members.classes.empty() ||
-            !members.enums.empty() ||
-            !members.structs.empty() ||
-            !members.delegates.empty();
-    }
-
     static int run(int const argc, char** argv)
     {
         int result{};

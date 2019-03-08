@@ -67,6 +67,28 @@ namespace xlang
         w.write(format);
     }
 
+    static void write_parent_depends(writer& w, cache const& c, std::string_view const& type_namespace)
+    {
+        auto pos = type_namespace.rfind('.');
+
+        if (pos == std::string::npos)
+        {
+            return;
+        }
+
+        auto parent = type_namespace.substr(0, pos);
+        auto found = c.namespaces().find(parent);
+
+        if (found != c.namespaces().end() && has_projected_types(found->second))
+        {
+            w.write_root_include(parent);
+        }
+        else
+        {
+            write_parent_depends(w, c, parent);
+        }
+    }
+
     static void write_pch(writer& w)
     {
         auto format = R"(#include "%"
@@ -2433,6 +2455,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_constructor_declarations(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
     {
+        w.async_types = false;
         auto type_name = type.TypeName();
 
         for (auto&& [factory_name, factory] : factories)
