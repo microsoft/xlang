@@ -2455,6 +2455,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_constructor_declarations(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
     {
+        w.async_types = false;
         auto type_name = type.TypeName();
 
         for (auto&& [factory_name, factory] : factories)
