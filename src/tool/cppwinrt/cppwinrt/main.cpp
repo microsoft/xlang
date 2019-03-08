@@ -118,9 +118,17 @@ Where <spec> is one or more of:
             settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
 
-            if (settings.component_name.empty() && settings.input.size() == 1)
+            if (settings.component_name.empty())
             {
-                settings.component_name = path(*settings.input.begin()).filename().replace_extension().string();
+                // For compatibility with C++/WinRT 1.0, the component_name defaults to the *first*
+                // input, hence the use of values() here that will return the args in input order.
+
+                auto& values = args.values("input");
+
+                if (!values.empty())
+                {
+                    settings.component_name = path(values[0]).filename().replace_extension().string();
+                }
             }
 
             settings.component_pch = args.value("pch", "pch.h");
