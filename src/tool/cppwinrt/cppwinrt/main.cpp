@@ -252,24 +252,6 @@ Where <spec> is one or more of:
                 });
             }
 
-//            {
-//                writer test;
-//
-//                for (auto&& [ns, members] : c.namespaces())
-//                {
-//                    if (!has_projected_types(members) || !settings.projection_filter.includes(members))
-//                    {
-//                        continue;
-//                    }
-//
-//                    test.write(R"(#include "winrt/%.h"
-//)",
-//                        ns);
-//                }
-//
-//                test.flush_to_file(settings.output_folder + "all.h");
-//            }
-
             group.add([&]
             {
                 if (settings.base)
