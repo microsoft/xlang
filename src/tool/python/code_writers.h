@@ -744,9 +744,9 @@ struct delegate_python_type<%%>
                 writer::indent_guard gg{ w };
     
                 {
-                    auto format = R"(py::delegate_callable cb{ callable };
+                    auto format = R"(py::delegate_callable _delegate{ callable };
     
-return [cb = std::move(cb)](%)
+return [delegate = std::move(_delegate)](%)
 {
 )";
                     w.write(format, bind_list<write_delegate_param>(", ", signature.params()));
@@ -775,7 +775,7 @@ return [cb = std::move(cb)](%)
                         w.write("py::pyobj_handle args{ nullptr };\n");
                     }
     
-                    w.write(R"(py::pyobj_handle return_value{ PyObject_CallObject(cb.callable(), args.get()) };
+                    w.write(R"(py::pyobj_handle return_value{ PyObject_CallObject(delegate.callable(), args.get()) };
 
 if (!return_value) 
 {
