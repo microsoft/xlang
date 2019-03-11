@@ -16,7 +16,9 @@
   </metadata>
   <files>
     <file src="..\LICENSE"/>
+    <file src="..\..\..\_build\Windows\x86\Release\tool\cppwinrt\cppwinrt.exe" target="bin"/>
     <file src="Microsoft.Windows.CppWinRT.targets" target="build\native"/>
     <file src="Microsoft.Windows.CppWinRT.props" target="build\native"/>
+    <file src="readme.txt" target="" />
   </files>
 </package>

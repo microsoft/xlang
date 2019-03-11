@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 
 # The Microsoft.Windows.CppWinRT NuGet package is only targeted at Visual Studio (on Windows)
-if (WIN32)
+if (WIN32 AND ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86"))
 
 file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" cppwinrt_nupkg_dir)
@@ -14,7 +14,7 @@ add_custom_command(OUTPUT ${cppwinrt_nupkg}
     DEPENDS ${XLANG_BUILD_VERSION_h}
 )
 
-add_custom_target(make_cppwinrt_nupkg ALL DEPENDS ${cppwinrt_nupkg})
+add_custom_target(make_cppwinrt_nupkg ALL DEPENDS ${cppwinrt_nupkg} ${cppwinrt_exe})
 
 set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg_dir" ${cppwinrt_nupkg_dir})
 

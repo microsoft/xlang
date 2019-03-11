@@ -26,6 +26,7 @@ C++/WinRT configures build rules for the following tools:
 * Xaml compiler
 
 It sets the following project properties and item metadata:
+
 | Property | Value | Description |
 |-|-|-|
 | [PreferredToolArchitecture](https://docs.microsoft.com/en-us/cpp/build/msbuild-visual-cpp-overview?view=vs-2017) | x64 | Enables the compiler to use more memory |
@@ -51,6 +52,7 @@ The generated files directory created by C++/WinRT contains two subfolders:
 ## Customizing
 
 C++/WinRT behavior can be customized with these project properties:
+
 | Property | Value | Description |
 |-|-|-|
 | CppWinRTLibs | *true \| false | Enables the Link item metadata settings above |
@@ -63,6 +65,7 @@ C++/WinRT behavior can be customized with these project properties:
 ## Troubleshooting
 
 The msbuild verbosity level maps to msbuild message importance as follows:
+
 | Verbosity | Importance |
 |-|-|
 | q[uiet] | n/a |
