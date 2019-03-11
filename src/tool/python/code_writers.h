@@ -304,22 +304,40 @@ static void @_dealloc(%* self)
         }
     }
 
+    void write_method_table_row(writer& w, TypeDef const& type, MethodDef const& method)
+    {
+        w.write("{ \"%\", (PyCFunction)@_%, %, nullptr },\n",
+            bind<write_method_name>(method),
+            type.TypeName(),
+            bind<write_method_name>(method),
+            bind<write_method_args>(method));
+    }
+
     void write_method_table(writer& w, TypeDef const& type)
     {
         w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
-            for (auto&& method : type.MethodList())
-            {
-                w.write("{ \"%\", (PyCFunction)@_%, %, nullptr },\n",
-                    bind<write_method_name>(method),
-                    type.TypeName(),
-                    bind<write_method_name>(method),
-                    bind<write_method_args>(method));
-            }
+            auto category = get_category(type);
 
-            // TODO Required interface support
+            if (category == category::class_type)
+            {
+                for (auto&& method : type.MethodList())
+                {
+                    write_method_table_row(w, type, method);
+                }
+            }
+            else  if (category == category::interface_type)
+            {
+                for (auto&& ii : get_required_interfaces(type))
+                {
+                    for (auto&& method : ii.type.MethodList())
+                    {
+                        write_method_table_row(w, type, method);
+                    }
+                }
+            }
 
             if (!is_static(type))
             {
@@ -550,36 +568,58 @@ if (!%)
         }
     }
 
+    void write_method_function(writer& w, TypeDef const& type, MethodDef const& method)
+    {
+        auto arg_count = get_arg_count(method);
+        method_signature signature{ method };
+
+        w.write("\nstatic PyObject* @_%(%* %, PyObject* %)\n{\n",
+            type.TypeName(),
+            bind<write_method_name>(method),
+            bind<write_wrapper_type>(type),
+            bind<write_self_param_name>(method),
+            bind<write_args_param_name>(arg_count));
+        {
+            if (arg_count == arg_count::variable)
+            {
+                writer::indent_guard g{ w };
+
+                auto format = "return py::arg_count_invoker(args, %, [=](PyObject* args) -> PyObject* {\n%});\n";
+                w.write(format, count_in_param(signature.params()), bind<write_method_body>(method));
+            }
+            else
+            {
+                writer::indent_guard g{ w };
+
+                auto format = "return py::trycatch_invoker([=]() -> PyObject* {\n%});\n";
+                w.write(format, bind<write_method_body>(method));
+            }
+        }
+        w.write("};\n");
+    }
+
     void write_method_functions(writer& w, TypeDef const& type)
     {
-        for (auto&& method : type.MethodList())
+        auto category = get_category(type);
+
+        if (category == category::class_type)
         {
-            auto arg_count = get_arg_count(method);
-            method_signature signature{ method };
-
-            w.write("\nstatic PyObject* @_%(%* %, PyObject* %)\n{\n", 
-                type.TypeName(), 
-                bind<write_method_name>(method),
-                bind<write_wrapper_type>(type),
-                bind<write_self_param_name>(method),
-                bind<write_args_param_name>(arg_count));
+            for (auto&& method : type.MethodList())
             {
-                if (arg_count == arg_count::variable)
-                {
-                    writer::indent_guard g{ w };
+                write_method_function(w, type, method);
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            for (auto&& ii : get_required_interfaces(type))
+            {
+                auto guard{ w.push_generic_params(ii.type_arguments) };
 
-                    auto format = "return py::arg_count_invoker(args, %, [=](PyObject* args) -> PyObject* {\n%});\n";
-                    w.write(format, count_in_param(signature.params()), bind<write_method_body>(method));
-                }
-                else
+                for (auto&& method : ii.type.MethodList())
                 {
-                    writer::indent_guard g{ w };
-
-                    auto format = "return py::trycatch_invoker([=]() -> PyObject* {\n%});\n";
-                    w.write(format, bind<write_method_body>(method));
+                    write_method_function(w, type, method);
                 }
             }
-            w.write("};\n");
         }
     }
 
@@ -1220,11 +1260,11 @@ if (!PyDict_Check(obj))
     //void write_method_overloads(writer& w, TypeDef const& type, std::vector<xlang::method_info> const& overloads);
     //void write_winrt_type_specialization_storage(writer& w, TypeDef const& type);
     //void write_method_table(writer& w, TypeDef const& type);
-    void write_method_table2(writer& w, TypeDef const& type);
+    //void write_method_table2(writer& w, TypeDef const& type);
     //void write_getset_table(writer& w, TypeDef const& type);
     //void write_type_slot_table(writer& w, TypeDef const& type);
     //void write_type_slot_table2(writer& w, TypeDef const& type);
-    void write_type_spec(writer& w, TypeDef const& type);
+    //void write_type_spec(writer& w, TypeDef const& type);
 
 
 //
