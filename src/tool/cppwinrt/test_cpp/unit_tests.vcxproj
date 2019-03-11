@@ -214,6 +214,7 @@
     <ClCompile Include="enum.cpp" />
     <ClCompile Include="final_release.cpp" />
     <ClCompile Include="GetMany.cpp" />
+    <ClCompile Include="iid_ppv_args.cpp" />
     <ClCompile Include="interop.cpp" />
     <ClCompile Include="invalid_events.cpp" />
     <ClCompile Include="in_params.cpp" />
@@ -228,6 +229,7 @@
     <ClCompile Include="noexcept.cpp" />
     <ClCompile Include="out_params.cpp" />
     <ClCompile Include="out_params_abi.cpp" />
+    <ClCompile Include="parent_includes.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
