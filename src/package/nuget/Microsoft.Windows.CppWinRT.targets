@@ -49,6 +49,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <_FilesToDelete Include="$(OutDir)*.winmd"/>
             <_FilesToDelete Include="$(IntDir)*.winmd"/>
             <_FilesToDelete Include="$(IntDir)*.idl"/>
+            <_FilesToDelete Include="$(IntDir)*.rsp"/>
             <_FilesToDelete Include="$(CppWinRTMergedDir)\**"/>
             <_FilesToDelete Include="$(CppWinRTUnmergedDir)\**"/>
         </ItemGroup>
@@ -190,7 +191,8 @@ namespace $(RootNamespace)
         </PropertyGroup>
         <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderIdl)')"
             File="$(XamlMetaDataProviderIdl)" Lines="$(XamlMetaDataProviderLines)"
-            ContinueOnError="true" Overwrite="true"/>
+            ContinueOnError="true" Overwrite="true"
+            WriteOnlyWhenDifferent="true" />
         <ItemGroup Condition="$(_HasXaml)">
             <Midl Include="$(XamlMetaDataProviderIdl)">
                 <DisableReferences Condition="$(_DisableReferences)">>true</DisableReferences>
@@ -212,7 +214,7 @@ namespace $(RootNamespace)
             <_MidlReferencesDistinct Remove="@(_MidlReferencesDistinct)" />
             <_MidlReferencesDistinct Include="@(_MidlReferences->'%(WinMDPath)'->Distinct())" />
             <Midl Condition="'%(Midl.DisableReferences)'==''">
-              <AdditionalOptions>%(Midl.AdditionalOptions) %40"$(OutDir)midlrt.rsp"</AdditionalOptions>
+              <AdditionalOptions>%(Midl.AdditionalOptions) %40"$(IntDir)midlrt.rsp"</AdditionalOptions>
             </Midl>
         </ItemGroup>
         <ItemGroup>
@@ -224,12 +226,8 @@ namespace $(RootNamespace)
       <PropertyGroup>
         <_MidlrtParameters>@(_MidlReferencesDistinct->'/reference &quot;%(WinMDPath)&quot;','&#x0d;&#x0a;')</_MidlrtParameters>
       </PropertyGroup>
-      <WriteLinesToFile File="$(OutDir)midlrt.rsp" Lines="$(_MidlrtParameters)" Overwrite="true" />
+      <WriteLinesToFile File="$(IntDir)midlrt.rsp" Lines="$(_MidlrtParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
       <Message Text="CppWinRTMidlReferences: @(_MidlReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
-    </Target>
-
-    <Target Name="CppWinRTRemoveMidlrtResponseFile" AfterTargets="Midl">
-        <Delete Files="$(OutDir)midlrt.rsp"/>
     </Target>
 
     <!--Merge project-generated WinMDs and project-referenced static library WinMDs into project WinMD-->
@@ -242,7 +240,7 @@ namespace $(RootNamespace)
             <_MdMergeDepth Condition="'$(CppWinRTNamespaceMergeDepth)' != ''">-n:$(CppWinRTNamespaceMergeDepth)</_MdMergeDepth>
             <_MdMergeDepth Condition="'$(_MdMergeDepth)' == ''">$(CppWinRTMergeDepth)</_MdMergeDepth>
             <_MdMergeDepth Condition="'$(_MdMergeDepth)' == '' And ('@(Page)' != '' Or '@(ApplicationDefinition)' != '')">-n:1</_MdMergeDepth>
-            <_MdMergeCommand>$(MdMergePath)mdmerge %40"$(OutDir)mdmerge.rsp"</_MdMergeCommand>
+            <_MdMergeCommand>$(MdMergePath)mdmerge %40"$(IntDir)mdmerge.rsp"</_MdMergeCommand>
         </PropertyGroup>
         <ItemGroup>
             <_MdMergeInputs Remove="@(_MdMergeInputs)"/>
@@ -261,11 +259,10 @@ namespace $(RootNamespace)
           <_MdMergeParameters>-v @(_MdMergeRefsDistinct->'-metadata_dir &quot;%(RelativeDir).&quot;', '&#x0d;&#x0a;')</_MdMergeParameters>
           <_MdMergeParameters>$(_MdMergeParameters) -o &quot;$(CppWinRTMergedDir)&quot; -i &quot;$(CppWinRTUnmergedDir)&quot; -partial $(_MdMergeDepth)</_MdMergeParameters>
         </PropertyGroup>
-        <WriteLinesToFile File="$(OutDir)mdmerge.rsp" Lines="$(_MdMergeParameters)" Overwrite="true" />
+        <WriteLinesToFile File="$(IntDir)mdmerge.rsp" Lines="$(_MdMergeParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
         <Copy SourceFiles="@(_MdMergeInputs->'%(WinMDPath)')" DestinationFolder="$(CppWinRTUnmergedDir)\" />
         <Message Text="$(_MdMergeCommand)" Importance="$(CppWinRTVerbosity)"/>
         <Exec Command="$(_MdMergeCommand)" />
-        <Delete Files="$(OutDir)mdmerge.rsp"/>
         <ItemGroup>
             <_MdMergedOutput Remove="@(_MdMergedOutput)"/>
             <_MdMergedOutput Include="$(CppWinRTMergedDir)\*.winmd"/>
@@ -284,7 +281,7 @@ namespace $(RootNamespace)
             Inputs="@(CppWinRTDirectWinMDReferences);@(CppWinRTDynamicWinMDReferences);@(CppWinRTPlatformWinMDReferences)"
             Outputs="@(CppWinRTDirectWinMDReferences->'$(GeneratedFilesDir)winrt\%(Filename).h');@(CppWinRTDynamicWinMDReferences->'$(GeneratedFilesDir)winrt\%(Filename).h')">
         <PropertyGroup>
-            <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(OutDir)cppwinrt.rsp"</CppWinRTCommand>
+            <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(IntDir)cppwinrt.rsp"</CppWinRTCommand>
         </PropertyGroup>
         <ItemGroup>
             <_CppwinrtRefInputs Remove="@(_CppwinrtRefInputs)"/>
@@ -300,10 +297,9 @@ namespace $(RootNamespace)
             <_CppwinrtParameters Condition="'$(CppWinRTOverrideSDKReferences)' == 'true'">$(_CppwinrtParameters) @(_CppwinrtRefRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
             <_CppwinrtParameters>$(_CppwinrtParameters) -out &quot;$(GeneratedFilesDir).&quot;</_CppwinrtParameters>
         </PropertyGroup>
-        <WriteLinesToFile File="$(OutDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)" Overwrite="true" />
+        <WriteLinesToFile File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
         <Message Text="$(CppWinRTCommand)" Importance="$(CppWinRTVerbosity)"/>
         <Exec Command="$(CppWinRTCommand)" />
-        <Delete Files="$(OutDir)cppwinrt.rsp"/>
     </Target>
 
     <!--Build component projection from project WinMD file and WinMD project references-->
@@ -323,7 +319,7 @@ namespace $(RootNamespace)
         <PropertyGroup>
             <CppWinRTCommandUsePrefixes Condition="'$(CppWinRTUsePrefixes)' == 'true'">-prefix</CppWinRTCommandUsePrefixes>
             <CppWinRTCommandPrecompiledHeader Condition="'$(CppWinRTPrecompiledHeader)' != ''">-pch $(CppWinRTPrecompiledHeader)</CppWinRTCommandPrecompiledHeader>
-            <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(OutDir)cppwinrt.rsp"</CppWinRTCommand>
+            <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(IntDir)cppwinrt.rsp"</CppWinRTCommand>
         </PropertyGroup>
         <ItemGroup>
             <_CppwinrtCompInputs Remove="@(_CppwinrtCompInputs)"/>
@@ -345,10 +341,9 @@ namespace $(RootNamespace)
             <_CppwinrtParameters Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(_CppwinrtParameters) -ref $(CppWinRTTargetPlatformReferences)</_CppwinrtParameters>
             <_CppwinrtParameters>$(_CppwinrtParameters) -out &quot;$(GeneratedFilesDir).&quot;</_CppwinrtParameters>
         </PropertyGroup>
-        <WriteLinesToFile File="$(OutDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)" Overwrite="true" />
+        <WriteLinesToFile File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
         <Message Text="$(CppWinRTCommand)" Importance="$(CppWinRTVerbosity)" Condition="'@(_CppwinrtCompInputs)' != ''"/>
         <Exec Command="$(CppWinRTCommand)" Condition="'@(_CppwinrtCompInputs)' != ''"/>
-        <Delete Files="$(OutDir)cppwinrt.rsp"/>
         <Message Text="$(CppWinRTCommand)" Importance="$(CppWinRTVerbosity)" Condition="'@(_CppwinrtCompInputs)' != ''"/>
     </Target>
 
