@@ -375,7 +375,7 @@ namespace xlang
                 break;
 
             case TypeDefOrRef::TypeSpec:
-                write(type.TypeSpec().Signature().GenericTypeInst());
+                register_type_namespace(type.TypeSpec().Signature().GenericTypeInst());
                 break;
             }
         }
