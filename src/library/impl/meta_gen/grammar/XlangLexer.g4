@@ -1,6 +1,6 @@
 lexer grammar XlangLexer;
 
-// Line terminators
+/* Line terminators */
 NEWLINE
     : '\u000D'          // Carriage return character
     | '\u000A'          // Line feed character 
@@ -10,12 +10,12 @@ NEWLINE
     | '\u2029'          // Paragraph Separator character
     ;
 
-// Comments
+/* Comments */
 COMMENT: DELIMITED_COMMENT | SINGLE_LINE_COMMENT;
 DELIMITED_COMMENT: '/*' .*? '*/'    -> channel(HIDDEN); // Haven't considered this case "/* sd */ */"
 SINGLE_LINE_COMMENT: '//' ~[\u000D\u000A\u0085\u2028\u2029]*    -> channel(HIDDEN);
 
-// Whitespace
+/* Whitespace */
 WHITESPACE: Whitespace -> channel(HIDDEN);
 
 fragment Whitespace
@@ -25,15 +25,13 @@ fragment Whitespace
     | '\u000C'          // Form Feed Character
     ;
 
-// Unicode character escape sequences
-UNICODE_ESCAPE_SEQUENCE
+/* Unicode character escape sequences */
+fragment UnicodeEscapeSequence
     : '\\u' HexDigit HexDigit HexDigit HexDigit
     | '\\U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
     ;
-    
-fragment HexDigit : [0-9] | [A-F] | [a-f];
 
-// Identifiers
+/* Identifiers */
 // Note: An identifier-or-keyword that is not a keyword 
 // is not possible to do here. We have to check that during
 // semantic checking. 
@@ -81,51 +79,215 @@ fragment ConnectingCharacter
     ;
 
 fragment FormattingCharacter
-    : UnicodeClassCF
+    : '\u200c'
+    | '\u200d'
+    ;
+
+LITERAL
+    : BooleanLiteral
+    | IntegerLiteral
+    | RealLiteral
+    | CharacterLiteral
+    | StringLiteral
+    | NullLiteral
+    ;
+
+fragment BooleanLiteral: 'true' | 'false';
+ 
+fragment IntegerLiteral
+    : DecimalIntegerLiteral
+    | HexaDecmimalIntegerLiteral
+    ;
+
+fragment DecimalIntegerLiteral
+    : DecimalDigit+ IntegerTypeSuffix?
+    ;
+
+fragment DecimalDigit: [0-9];
+
+fragment IntegerTypeSuffix
+    : 'U'
+    | 'u'
+    | 'L'
+    | 'l'
+    | 'UL'
+    | 'Ul'
+    | 'uL'
+    | 'ul'
+    | 'LU'
+    | 'Lu'
+    | 'lU'
+    | 'lu'
+    ;
+    
+fragment HexaDecmimalIntegerLiteral
+    : '0x' HexDigit+ IntegerTypeSuffix?
+    | '0X' HexDigit+ IntegerTypeSuffix?
+    ;
+
+fragment HexDigit: [0-9A-Fa-f];
+
+fragment RealLiteral
+    : DecimalDigit+ '.' DecimalDigit+ ExponentPart RealTypeSuffix
+    | '.' DecimalDigit+ ExponentPart RealTypeSuffix
+    | DecimalDigit ExponentPart RealTypeSuffix
+    | DecimalDigit RealTypeSuffix
+    ;
+    
+fragment ExponentPart
+    : 'e' Sign? DecimalDigit+
+    | 'E' Sign? DecimalDigit+
+    ;
+    
+fragment Sign: [+-];
+
+fragment RealTypeSuffix: [FfDd];
+
+fragment CharacterLiteral: '\'' Character '\'';
+
+fragment Character
+    : SingleCharacter
+    | SimpleEscapeSequence
+    | HexadecimalEscapeSequence
+    | UnicodeEscapeSequence
+    ;
+
+// Any character except ' (U+0027), \ (U+005C), and NEWLINE
+// ISSUE: cannot do '\u000D\u000A'
+// Carriage return character followed by line feed character
+fragment SingleCharacter
+    : ~[\u0027\u005c\u000D\u000A\u0085\u2028\u2029]
+    ; 
+
+fragment SimpleEscapeSequence
+    : '\\\''
+    | '\\"' 
+    | '\\0'
+    | '\\a'
+    | '\\b'
+    | '\\f'
+    | '\\n'
+    | '\\r'
+    | '\\t'
+    | '\\v'
+    ;
+
+fragment HexadecimalEscapeSequence
+    : '\\x' HexDigit HexDigit? HexDigit? HexDigit?
+    ;
+
+fragment StringLiteral
+    : RegularStringLiteral
+    | VerbatimStringLiteral
+    ;
+
+fragment RegularStringLiteral
+    : '"' RegularStringLiteralCharacter* '"'
+    ;
+    
+fragment RegularStringLiteralCharacter
+    : SingleRegularStringLiteralCharacter
+    | SimpleEscapeSequence
+    | HexadecimalEscapeSequence
+    | UnicodeEscapeSequence
+    ;
+    
+fragment SingleRegularStringLiteralCharacter
+    : ~[\u0022\u005c\u000D\u000A\u0085\u2028\u2029]
     ;
  
-// Keywords   
+fragment VerbatimStringLiteral
+    : '@"' VerbatimStringLiteralCharacter* '"'
+    ;
+    
+fragment VerbatimStringLiteralCharacter
+    : SingleVerbatimStringLiteralCharacter
+    | QuoteEscapeSequence
+    ;
+
+fragment SingleVerbatimStringLiteralCharacter
+    : ~["]
+    ;
+
+fragment QuoteEscapeSequence
+    : '""'
+    ;
+ 
+fragment NullLiteral: 'null';
+    
+/* Keywords */   
 ABSTRACT: 'abstract';
 ATTRIBUTE: 'attribute';
-BOOLEAN: 'boolean';
-UINT8: 'Uint8';
-CHAR: 'Char';
 CLASS: 'class';
 CONST: 'const';
 DEFAULT: 'default';
 DELEGATE: 'delegate';
-DOUBLE: 'Double';
 ENUM: 'enum';
 EVENT: 'event';
-FALSE: 'false';
-SINGLE: 'Single';
-INT32: 'in';
 INTERFACE: 'interface';
-LONG: 'long';
+INTERNAL: 'internal';
 NAMEPSACE: 'namespace';
 NULL: 'null';
-OBJECT: 'Object';
+PARTIAL: 'partial';
+OBJECT: 'object';
 OUT: 'out';
 OVERRIDE: 'override';
 PROTECTED: 'protected';
-PUBIC: 'public';
 REF: 'ref';
 SEALED: 'sealed';
-SHORT: 'short';
 STATIC: 'static';
-STRING: 'String';
 STRUCT: 'struct';
-TRUE: 'true';
 TYPEOF: 'typeof';
-UINT32: 'UInt32';
-UINT64: 'UInt64';
-UINT16: 'UInt16';
 USING: 'using';
 VIRTUAL: 'virtual';
 VOID: 'void';
 
+PUBLIC: 'public';
+PRIVATE: 'private';
+NEW: 'new';
 
-// Unicode character classes
+ADD: 'add';
+REMOVE: 'remove';
+
+GET: 'get';
+SET: 'set';
+
+PLACEHOLDER_REMOVELATER: 'placeholder';
+
+// Xlang Type System
+INT16: 'Int16';
+INT32: 'Int32';
+INT64: 'Int64';
+UINT8: 'Uint8';
+UINT16: 'UInt16';
+UINT32: 'UInt32';
+UINT64: 'UInt64';
+SINGLE: 'Single';
+DOUBLE: 'Double';
+CHAR16: 'Char16';
+BOOLEAN: 'Boolean';
+STRING: 'String';
+GUID: 'Guid';
+
+SEMICOLON: ';';
+OPEN_BRACE: '{';
+CLOSE_BRACE: '}';
+OPEN_BRACKET: '[';
+CLOSE_BRACKET: ']';
+OPEN_PARENS: '(';
+CLOSE_PARENS: ')';
+DOT: '.';
+COMMA: ',';
+COLON: ':';
+QUESTION_MARK: '?';
+DOUBLE_COLON: '::';
+EQUAL: '=';
+LESS_THAN: '<';
+GREATER_THAN: '>';
+
+
+
+/* Unicode character classes */
 fragment UnicodeClassLU
     : '\u0041'..'\u005a'
     | '\u00c0'..'\u00d6'
