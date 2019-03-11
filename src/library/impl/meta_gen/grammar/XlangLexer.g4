@@ -3,7 +3,7 @@ lexer grammar XlangLexer;
 /* Line terminators */
 NEWLINE
     : '\u000D'          // Carriage return character
-    | '\u000A'          // Line feed character 
+    | '\u000A'          // Line feed character
     | '\u000D\u000A'    // Carriage return character followed by line feed character
     | '\u0085'          // Next Line character
     | '\u2028'          // Line Separator character
@@ -20,7 +20,7 @@ WHITESPACE: Whitespace -> channel(HIDDEN);
 
 fragment Whitespace
     : UnicodeClassZS    // Any Character With Unicode Class Zs
-    | '\u0009'          // Horizontal Tab Character 
+    | '\u0009'          // Horizontal Tab Character
     | '\u000B'          // Vertical Tab Character
     | '\u000C'          // Form Feed Character
     ;
@@ -32,22 +32,22 @@ fragment UnicodeEscapeSequence
     ;
 
 /* Identifiers */
-// Note: An identifier-or-keyword that is not a keyword 
+// Note: An identifier-or-keyword that is not a keyword
 // is not possible to do here. We have to check that during
-// semantic checking. 
+// semantic checking.
 IDENTIFIER
     : IdentifierOrKeyword
     ;
-    
+
 fragment IdentifierOrKeyword
     : IdentifierStartCharacter IdentifierPartCharacter*
     ;
-    
+
 fragment IdentifierStartCharacter
     : LetterCharacter
     | '_'
     ;
-    
+
 fragment IdentifierPartCharacter
     : LetterCharacter
     | CombiningCharacter
@@ -55,7 +55,7 @@ fragment IdentifierPartCharacter
     | ConnectingCharacter
     | FormattingCharacter
     ;
-    
+
 fragment LetterCharacter
     : UnicodeClassLU
     | UnicodeClassLL
@@ -64,7 +64,7 @@ fragment LetterCharacter
     | UnicodeClassLO
     | UnicodeClassNL
     ;
-    
+
 fragment CombiningCharacter
     : UnicodeClassMN
     | UnicodeClassMC
@@ -93,7 +93,7 @@ LITERAL
     ;
 
 fragment BooleanLiteral: 'true' | 'false';
- 
+
 fragment IntegerLiteral
     : DecimalIntegerLiteral
     | HexaDecmimalIntegerLiteral
@@ -119,7 +119,7 @@ fragment IntegerTypeSuffix
     | 'lU'
     | 'lu'
     ;
-    
+
 fragment HexaDecmimalIntegerLiteral
     : '0x' HexDigit+ IntegerTypeSuffix?
     | '0X' HexDigit+ IntegerTypeSuffix?
@@ -133,12 +133,12 @@ fragment RealLiteral
     | DecimalDigit ExponentPart RealTypeSuffix
     | DecimalDigit RealTypeSuffix
     ;
-    
+
 fragment ExponentPart
     : 'e' Sign? DecimalDigit+
     | 'E' Sign? DecimalDigit+
     ;
-    
+
 fragment Sign: [+-];
 
 fragment RealTypeSuffix: [FfDd];
@@ -157,11 +157,11 @@ fragment Character
 // Carriage return character followed by line feed character
 fragment SingleCharacter
     : ~[\u0027\u005c\u000D\u000A\u0085\u2028\u2029]
-    ; 
+    ;
 
 fragment SimpleEscapeSequence
     : '\\\''
-    | '\\"' 
+    | '\\"'
     | '\\0'
     | '\\a'
     | '\\b'
@@ -184,22 +184,22 @@ fragment StringLiteral
 fragment RegularStringLiteral
     : '"' RegularStringLiteralCharacter* '"'
     ;
-    
+
 fragment RegularStringLiteralCharacter
     : SingleRegularStringLiteralCharacter
     | SimpleEscapeSequence
     | HexadecimalEscapeSequence
     | UnicodeEscapeSequence
     ;
-    
+
 fragment SingleRegularStringLiteralCharacter
     : ~[\u0022\u005c\u000D\u000A\u0085\u2028\u2029]
     ;
- 
+
 fragment VerbatimStringLiteral
     : '@"' VerbatimStringLiteralCharacter* '"'
     ;
-    
+
 fragment VerbatimStringLiteralCharacter
     : SingleVerbatimStringLiteralCharacter
     | QuoteEscapeSequence
@@ -212,10 +212,10 @@ fragment SingleVerbatimStringLiteralCharacter
 fragment QuoteEscapeSequence
     : '""'
     ;
- 
+
 fragment NullLiteral: 'null';
-    
-/* Keywords */   
+
+/* Keywords */
 ABSTRACT: 'abstract';
 ATTRIBUTE: 'attribute';
 CLASS: 'class';
@@ -954,7 +954,7 @@ fragment UnicodeClassND
     | '\uabf0'..'\uabf9'
     | '\uff10'..'\uff19'
     ;
-    
+
 fragment UnicodeClassZS
     : '\u0020' // SPACE
     | '\u00A0' // NO_BREAK SPACE
@@ -974,11 +974,11 @@ fragment UnicodeClassZS
     | '\u3000' // IDEOGRAPHIC SPACE
     | '\u205F' // MEDIUM MATHEMATICAL SPACE
     ;
-    
+
 /*
 Keyword
-    : 
-    ( ABSTRACT 
+    :
+    ( ABSTRACT
     | ATTRIBUTE
     | BOOLEAN
     | UINT8

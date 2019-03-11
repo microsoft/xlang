@@ -5,8 +5,8 @@ options { tokenVocab=XlangLexer; }
 
 /* Entry Point */
 xlang
-	: xlang_body*
-	;
+    : xlang_body*
+    ;
 
 // For lexer tests
 xlang_body
@@ -20,15 +20,15 @@ namespace_name
 
 type_name
     : namespace_or_type_name
-    ; 
-    
-    
+    ;
+
+
 namespace_or_type_name
     : IDENTIFIER type_argument_list?
     | namespace_or_type_name . IDENTIFIER type_argument_list?
     | qualified_alias_member
     ;
-    
+
 /* Types */
 type
     : value_type
@@ -57,7 +57,7 @@ numeric_type
     : integral_type
     | floating_point_type
     ;
-    
+
 integral_type
     : INT16
     | INT32
@@ -98,11 +98,11 @@ class_type
 interface_type
     : type_name
     ;
-    
+
 rank_specifier
     : OPEN_BRACKET CLOSE_BRACKET
     ;
-    
+
 delegate_type
     : type_name
     ;
@@ -110,7 +110,7 @@ delegate_type
 type_argument_list
     : LESS_THAN type (COMMA type)* GREATER_THAN
     ;
-    
+
 type_parameter
     : IDENTIFIER
     ;
@@ -135,7 +135,7 @@ variable_initializer
     : expression
     | array_type
     ;
-    
+
 /* Namespaces */
 compilation_unit
     : using_directive*
@@ -153,15 +153,15 @@ using_directive
     : using_alias_directive
     | using_namespace_directive
     ;
-    
+
 using_alias_directive
     : USING IDENTIFIER EQUAL namespace_or_type_name SEMICOLON
     ;
-    
+
 using_namespace_directive
     : USING namespace_name SEMICOLON
     ;
-    
+
 namespace_member_declaration
     : namespace_declaration
     | type_declaration
@@ -174,7 +174,7 @@ type_declaration
     | enum_declaration
     | delegate_declaration
     ;
-    
+
 qualified_alias_member
     : IDENTIFIER DOUBLE_COLON IDENTIFIER type_argument_list?
     ;
@@ -182,10 +182,10 @@ qualified_alias_member
 
 //* Classes *//
 class_declaration
-    : class_modifier* CLASS IDENTIFIER type_parameter_list? 
+    : class_modifier* CLASS IDENTIFIER type_parameter_list?
         class_base? class_body SEMICOLON?
     ;
-    
+
 class_modifier
     : PUBLIC
     | INTERNAL
@@ -202,11 +202,11 @@ class_base
     | interface_type_list
     | class_type COMMA interface_type_list
     ;
-    
+
 interface_type_list
     : type_name (COMMA type_name)*
     ;
-    
+
 class_body
     : OPEN_BRACE class_member_declaration* CLOSE_BRACE
     ;
@@ -217,11 +217,11 @@ class_member_declaration
     | event_declaration
     | class_constructor_declaration
     ;
- 
+
 method_declaration
     : return_type IDENTIFIER type_parameter_list OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
-    
+
 formal_parameter_list
     : fixed_parameter (COMMA fixed_parameter)*
     ;
@@ -265,10 +265,10 @@ class_constructor_declaration
 
 /* Structs */
 struct_declaration
-    : struct_modifier* STRUCT IDENTIFIER type_parameter_list? 
+    : struct_modifier* STRUCT IDENTIFIER type_parameter_list?
         struct_body SEMICOLON
     ;
-    
+
 struct_modifier
     : PUBLIC
     | INTERNAL
@@ -277,11 +277,11 @@ struct_modifier
 struct_body
     : OPEN_BRACE struct_member_declaration* CLOSE_BRACE
     ;
-    
+
 struct_member_declaration
     : variable_declarator
     ;
-    
+
 /* Arrays */
 array_type
     : non_array_type rank_specifier
@@ -293,13 +293,13 @@ non_array_type
     | interface_type
     | delegate_type
     ;
-    
+
 /* Interfaces */
 interface_declaration
-    : interface_modifier* PARTIAL INTERFACE 
+    : interface_modifier* PARTIAL INTERFACE
         IDENTIFIER variant_type_parameter_list? interface_base?
     ;
-    
+
 interface_modifier
     : PUBLIC
     | INTERNAL
@@ -322,12 +322,12 @@ interface_member_declaration
     | property_declaration
     | event_declaration
     ;
-    
+
 /* Enums */
 enum_declaration
     : enum_modifier* ENUM IDENTIFIER enum_base? enum_body SEMICOLON?
     ;
-    
+
 enum_base
     : enum_integral_type
     ;
@@ -350,7 +350,7 @@ enum_member_declaration
 /* Delegates */
 delegate_declaration
     : delegate_modifier* DELEGATE return_type
-        IDENTIFIER variant_type_parameter_list? 
+        IDENTIFIER variant_type_parameter_list?
         OPEN_PARENS formal_parameter_list CLOSE_PARENS type_parameter_constraint_clauses? SEMICOLON
     ;
 
@@ -365,4 +365,4 @@ delegate_modifier
 type_parameter_constraint_clauses
     : PLACEHOLDER_REMOVELATER
     ;
-    
+
