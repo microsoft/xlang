@@ -189,7 +189,10 @@ namespace $(RootNamespace)
 }
             </XamlMetaDataProviderLines>
         </PropertyGroup>
-        <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderIdl)')"
+        <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderIdl)') And ('$(MSBuildToolsVersion)' &lt; '15')"
+            File="$(XamlMetaDataProviderIdl)" Lines="$(XamlMetaDataProviderLines)"
+            ContinueOnError="true" Overwrite="true" />
+        <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderIdl)') And ('$(MSBuildToolsVersion)' &gt;= '15')"
             File="$(XamlMetaDataProviderIdl)" Lines="$(XamlMetaDataProviderLines)"
             ContinueOnError="true" Overwrite="true"
             WriteOnlyWhenDifferent="true" />
@@ -226,7 +229,13 @@ namespace $(RootNamespace)
       <PropertyGroup>
         <_MidlrtParameters>@(_MidlReferencesDistinct->'/reference &quot;%(WinMDPath)&quot;','&#x0d;&#x0a;')</_MidlrtParameters>
       </PropertyGroup>
-      <WriteLinesToFile File="$(IntDir)midlrt.rsp" Lines="$(_MidlrtParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+      <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &lt; '15')"
+          File="$(IntDir)midlrt.rsp" Lines="$(_MidlrtParameters)"
+          ContinueOnError="true" Overwrite="true" />
+      <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &gt;= '15')"
+          File="$(IntDir)midlrt.rsp" Lines="$(_MidlrtParameters)"
+          ContinueOnError="true" Overwrite="true"
+          WriteOnlyWhenDifferent="true" />
       <Message Text="CppWinRTMidlReferences: @(_MidlReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
@@ -259,7 +268,13 @@ namespace $(RootNamespace)
           <_MdMergeParameters>-v @(_MdMergeRefsDistinct->'-metadata_dir &quot;%(RelativeDir).&quot;', '&#x0d;&#x0a;')</_MdMergeParameters>
           <_MdMergeParameters>$(_MdMergeParameters) -o &quot;$(CppWinRTMergedDir)&quot; -i &quot;$(CppWinRTUnmergedDir)&quot; -partial $(_MdMergeDepth)</_MdMergeParameters>
         </PropertyGroup>
-        <WriteLinesToFile File="$(IntDir)mdmerge.rsp" Lines="$(_MdMergeParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+        <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &lt; '15')"
+            File="$(IntDir)mdmerge.rsp" Lines="$(_MdMergeParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &gt;= '15')"
+            File="$(IntDir)mdmerge.rsp" Lines="$(_MdMergeParameters)"
+            ContinueOnError="true" Overwrite="true"
+            WriteOnlyWhenDifferent="true" />
         <Copy SourceFiles="@(_MdMergeInputs->'%(WinMDPath)')" DestinationFolder="$(CppWinRTUnmergedDir)\" />
         <Message Text="$(_MdMergeCommand)" Importance="$(CppWinRTVerbosity)"/>
         <Exec Command="$(_MdMergeCommand)" />
@@ -297,7 +312,13 @@ namespace $(RootNamespace)
             <_CppwinrtParameters Condition="'$(CppWinRTOverrideSDKReferences)' == 'true'">$(_CppwinrtParameters) @(_CppwinrtRefRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
             <_CppwinrtParameters>$(_CppwinrtParameters) -out &quot;$(GeneratedFilesDir).&quot;</_CppwinrtParameters>
         </PropertyGroup>
-        <WriteLinesToFile File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+        <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &lt; '15')"
+            File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &gt;= '15')"
+            File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)"
+            ContinueOnError="true" Overwrite="true"
+            WriteOnlyWhenDifferent="true" />
         <Message Text="$(CppWinRTCommand)" Importance="$(CppWinRTVerbosity)"/>
         <Exec Command="$(CppWinRTCommand)" />
     </Target>
@@ -341,7 +362,13 @@ namespace $(RootNamespace)
             <_CppwinrtParameters Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(_CppwinrtParameters) -ref $(CppWinRTTargetPlatformReferences)</_CppwinrtParameters>
             <_CppwinrtParameters>$(_CppwinrtParameters) -out &quot;$(GeneratedFilesDir).&quot;</_CppwinrtParameters>
         </PropertyGroup>
-        <WriteLinesToFile File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+        <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &lt; '15')"
+            File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <WriteLinesToFile Condition="('$(MSBuildToolsVersion)' &gt;= '15')"
+            File="$(IntDir)cppwinrt.rsp" Lines="$(_CppwinrtParameters)"
+            ContinueOnError="true" Overwrite="true"
+            WriteOnlyWhenDifferent="true" />
         <Message Text="$(CppWinRTCommand)" Importance="$(CppWinRTVerbosity)" Condition="'@(_CppwinrtCompInputs)' != ''"/>
         <Exec Command="$(CppWinRTCommand)" Condition="'@(_CppwinrtCompInputs)' != ''"/>
         <Message Text="$(CppWinRTCommand)" Importance="$(CppWinRTVerbosity)" Condition="'@(_CppwinrtCompInputs)' != ''"/>
