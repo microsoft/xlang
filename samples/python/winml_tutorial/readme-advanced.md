@@ -124,7 +124,7 @@ and Windows.Storage namespaces into the /output subdirectory.
 From here, you can follow the directions in the original tutorial, only substituting the "output"
 folder wherever that document references "pywinrt_output".
 
-> Note, you might notice that the instructions above generates significantly more files than are
+> Note, you might notice that the instructions above generate significantly more files than are
 > included in the main tutorial's pywinrt_output folder. This is because the pywinrt_output folder
 > only contains the minimum set of namespaces needed for the [WinML tutorial](https://docs.microsoft.com/en-us/windows/ai/get-started-desktop).
 > Any namespaces not needed for that tutorial were explicitly excluded to minimize build time for
