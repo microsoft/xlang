@@ -60,7 +60,7 @@ struct winrt_type<%>
             break;
         case category::interface_type:
             if (is_ptype(type))
-                throw_invalid("not impl");
+                w.write("winrt_pinterface_wrapper");
             else
                 w.write("winrt_wrapper");
             break;
@@ -70,12 +70,32 @@ struct winrt_type<%>
         }
     }
 
+    void write_type_namespace(writer& w, TypeDef const& type)
+    {
+        auto segments = get_dotted_name_segments(type.TypeNamespace());
+        w.write("%", bind_list("::", segments));
+    }
+
+    void write_python_wrapper_template_type(writer& w, TypeDef const& type)
+    {
+        if (is_ptype(type))
+        {
+            w.write("py::proj::%::@", bind<write_type_namespace>(type) , type.TypeName());
+        }
+        else
+        {
+            w.write("%", type);
+        }
+    }
+
+
     void write_python_wrapper_alias(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type)) return;
-        if (is_ptype(type)) return;
 
-        w.write("using @ = py::%<%>;\n", type.TypeName(), bind<write_python_wrapper_type>(type), type);
+        w.write("using @ = py::%<%>;\n", type.TypeName(), 
+            bind<write_python_wrapper_type>(type), 
+            bind<write_python_wrapper_template_type>(type));
     }
 
     void write_ns_module_exec_init_python_type(writer& w, TypeDef const& type)
@@ -155,10 +175,19 @@ static int module_exec(PyObject* module)
         w.write(strings::ns_module_def, ns, bind<write_ns_module_name>(ns), bind<write_ns_module_name>(ns));
     }
 
-    void write_wrapper_type(writer& w, TypeDef const& type)
+    void write_pywrapper_type(writer& w, TypeDef const& type)
     {
-        auto segments = get_dotted_name_segments(type.TypeNamespace());
-        w.write("py::proj::%::@", bind_list("::", segments), type.TypeName());
+        w.write("py::wrapper::%::@", bind<write_type_namespace>(type), type.TypeName());
+    }
+
+    void write_pyproj_type(writer& w, TypeDef const& type)
+    {
+        w.write("py::proj::%::@", bind<write_type_namespace>(type), type.TypeName());
+    }
+
+    void write_pyimpl_type(writer& w, TypeDef const& type)
+    {
+        w.write("py::impl::%::@", bind<write_type_namespace>(type), type.TypeName());
     }
 
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
@@ -179,7 +208,7 @@ static void _dealloc_@(%* self)
 {
 )";
 
-        w.write(format, type.TypeName(), bind<write_wrapper_type>(type));
+        w.write(format, type.TypeName(), bind<write_pywrapper_type>(type));
 
         if (category == category::class_type || category == category::interface_type)
         {
@@ -457,11 +486,15 @@ static void _dealloc_@(%* self)
         }
     }
 
-    void write_method_invoke_context(writer& w, MethodDef const& method)
+    void write_method_invoke_context(writer& w, TypeDef const& type, MethodDef const& method)
     {
-        if (is_static(method) || is_constructor(method))
+        if (is_ptype(type))
         {
-            w.write("%::", method.Parent());
+            w.write("_obj.");
+        }
+        else if (is_static(method) || is_constructor(method))
+        {
+            w.write("%::", type);
         }
         else
         {
@@ -493,7 +526,7 @@ static void _dealloc_@(%* self)
         w.write("PyTuple_Pack(%, %)", static_cast<int>(params.size()), bind_list<write_detach_param>(", ", params));
     }
 
-    void write_method_body(writer& w, MethodDef const& method)
+    void write_method_body_contents(writer& w, TypeDef const& type, MethodDef const& method)
     {
         writer::indent_guard g{ w };
 
@@ -524,7 +557,7 @@ static void _dealloc_@(%* self)
                 w.write("auto return_value = ");
             }
             w.write("%%(%);\n",
-                bind<write_method_invoke_context>(method),
+                bind<write_method_invoke_context>(type, method),
                 bind<write_method_cpp_name>(method),
                 bind_list<write_param_name>(", ", signature.params()));
         }
@@ -579,32 +612,37 @@ if (!%)
         }
     }
 
+    void write_method_body(writer& w, TypeDef const& type, MethodDef const& method)
+    {
+        auto arg_count = get_arg_count(method);
+
+        if (arg_count == arg_count::variable)
+        {
+            method_signature signature{ method };
+            writer::indent_guard g{ w };
+
+            auto format = "return py::arg_count_invoker(args, %, [=](PyObject* args) -> PyObject* {\n%});\n";
+            w.write(format, count_in_param(signature.params()), bind<write_method_body_contents>(type, method));
+        }
+        else
+        {
+            writer::indent_guard g{ w };
+
+            auto format = "return py::trycatch_invoker([=]() -> PyObject* {\n%});\n";
+            w.write(format, bind<write_method_body_contents>(type, method));
+        }
+    }
+
     void write_method_function(writer& w, TypeDef const& type, MethodDef const& method)
     {
         auto arg_count = get_arg_count(method);
-        method_signature signature{ method };
 
         w.write("\nstatic PyObject* %(%* %, PyObject* %)\n{\n",
             bind<write_method_function_name>(type, method),
-            bind<write_wrapper_type>(type),
+            bind<write_pywrapper_type>(type),
             bind<write_self_param_name>(method),
             bind<write_args_param_name>(arg_count));
-        {
-            if (arg_count == arg_count::variable)
-            {
-                writer::indent_guard g{ w };
-
-                auto format = "return py::arg_count_invoker(args, %, [=](PyObject* args) -> PyObject* {\n%});\n";
-                w.write(format, count_in_param(signature.params()), bind<write_method_body>(method));
-            }
-            else
-            {
-                writer::indent_guard g{ w };
-
-                auto format = "return py::trycatch_invoker([=]() -> PyObject* {\n%});\n";
-                w.write(format, bind<write_method_body>(method));
-            }
-        }
+        write_method_body(w, type, method);
         w.write("};\n");
     }
 
@@ -706,7 +744,7 @@ static PyType_Slot _type_slots_@[] =
         }
         else
         {
-            w.write("sizeof(%)", bind<write_wrapper_type>(type));
+            w.write("sizeof(%)", bind<write_pywrapper_type>(type));
         }
     }
 
@@ -814,7 +852,7 @@ struct delegate_python_type<%%>
             bind_list<write_pinterface_type_arg>(", ", type.GenericParam()), 
             type,
             bind<write_template_args>(type),
-            bind<write_wrapper_type>(type),
+            bind<write_pyimpl_type>(type),
             bind<write_template_args>(type));
     }
 
@@ -1166,7 +1204,7 @@ return py::trycatch_invoker([=]() -> PyObject* {
         w.write("\nstatic PyObject* @_get_%(%* self, void* /*unused*/)\n{\n",
             type.TypeName(),
             field.Name(),
-            bind<write_wrapper_type>(type));
+            bind<write_pywrapper_type>(type));
         {
             writer::indent_guard g{ w };
 
@@ -1192,7 +1230,7 @@ return py::trycatch_invoker([=]() -> PyObject* {
         w.write("\nstatic int @_set_%(%* self, PyObject* value, void* /*unused*/)\n{\n",
             type.TypeName(),
             field.Name(),
-            bind<write_wrapper_type>(type));
+            bind<write_pywrapper_type>(type));
         {
             writer::indent_guard g{ w };
 
@@ -1289,6 +1327,93 @@ if (!PyDict_Check(obj))
         write_struct_getset_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
+    }
+
+    void write_pinterface_type_mapper(writer& w, TypeDef const& type)
+    {
+        if (!is_ptype(type))
+            return;
+
+        auto format = R"(template <%>
+struct pinterface_python_type<%<%>>
+{
+    using abstract = %;
+    using concrete = %<%>;
+};
+
+)";
+        w.write(format,
+            bind_list<write_pinterface_type_arg>(", ", type.GenericParam()),
+            type,
+            bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()),
+            bind<write_pyproj_type>(type),
+            bind<write_pyimpl_type>(type),
+            bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+    }
+
+    void write_pinterface_decl(writer& w, TypeDef const& type)
+    {
+        if (!is_ptype(type))
+            return;
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        w.write("\nstruct @\n{\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+
+            w.write("virtual ~@() {};\n", type.TypeName());
+            w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
+            w.write("virtual std::size_t hash() = 0;\n");
+
+            for (auto&& ii : get_required_interfaces(type))
+            {
+                auto gguard{ w.push_generic_params(ii.type_arguments) };
+                for (auto&& method : ii.type.MethodList())
+                {
+                    w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
+                }
+            }
+        }
+        w.write("};\n");
+    }
+
+    void write_pinterface_impl(writer& w, TypeDef const& type)
+    {
+        if (!is_ptype(type))
+            return;
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        w.write("\ntemplate<%>\nstruct @ : public py::proj::%::@\n{\n", 
+            bind_list<write_pinterface_type_arg>(", ", type.GenericParam()), 
+            type.TypeName(), 
+            bind<write_type_namespace>(type),
+            type.TypeName());
+
+        {
+            writer::indent_guard g{ w };
+
+            w.write("@(%<%> o) : _obj(o) {}\n", type.TypeName(), type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+            w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return _obj; }\n");
+            w.write("std::size_t hash() override { return py::get_instance_hash(_obj); }\n");
+            w.write("\n%<%> _obj{ nullptr };\n", type, bind_list<write_pinterface_type_arg_name>(", ", type.GenericParam()));
+
+            for (auto&& ii : get_required_interfaces(type))
+            {
+                auto gguard{ w.push_generic_params(ii.type_arguments) };
+                for (auto&& method : ii.type.MethodList())
+                {
+                    auto arg_count = get_arg_count(method);
+                    w.write("\nPyObject* %(PyObject* %) override\n{\n", 
+                        method.Name(), 
+                        bind<write_args_param_name>(arg_count));
+                    write_method_body(w, type, method);
+                    w.write("}\n");
+                }
+            }
+        }
+        w.write("};\n");
     }
 
 
