@@ -1098,7 +1098,7 @@ return py::trycatch_invoker([=]() -> PyObject* {
 
             if (has_custom_conversion(type))
             {
-                auto format = R"(py::struct_set_invoker(value, [=](PyObject* value) {
+                auto format = R"(return py::struct_set_invoker(value, [=](PyObject* value) {
     custom_set(self->obj, py::converter<%>::convert_to(value));
 });
 )";
@@ -1106,7 +1106,7 @@ return py::trycatch_invoker([=]() -> PyObject* {
             }
             else
             {
-                auto format = R"(py::struct_set_invoker(value, [=](PyObject* value) {
+                auto format = R"(return py::struct_set_invoker(value, [=](PyObject* value) {
     self->obj.% = py::converter<%>::convert_to(value);
 });
 )";
