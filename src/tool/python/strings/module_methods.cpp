@@ -20,20 +20,20 @@ static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IIn
 
 // TODO: need to write a tp_new function that throws so that winrt_base can't be created directly
 
-static PyType_Slot winrt_base_Type_slots[] =
+static PyType_Slot winrt_base_type_slots[] =
 {
     { Py_tp_dealloc, winrt_base_dealloc },
     { Py_tp_doc, winrt_base_doc},
     { 0, nullptr },
 };
 
-static PyType_Spec winrt_base_Type_spec =
+static PyType_Spec winrt_base_type_spec =
 {
     "_%._winrt_base",
     sizeof(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>),
     0,
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    winrt_base_Type_slots
+    winrt_base_type_slots
 };
 
 std::unordered_map<std::size_t, PyObject*> instance_map{};
@@ -90,7 +90,7 @@ static PyMethodDef module_methods[]{
 
 static int module_exec(PyObject* module)
 {
-    winrt::handle_type<py::pyobj_ptr_traits> type_object { PyType_FromSpec(&winrt_base_Type_spec) };
+    winrt::handle_type<py::pyobj_ptr_traits> type_object { PyType_FromSpec(&winrt_base_type_spec) };
     if (!type_object)
     {
         return -1;

@@ -95,11 +95,11 @@ struct winrt_type<%>
             w.write("py::pyobj_handle type_object { ");
             if (has_dealloc(type))
             {
-                w.write("PyType_FromSpecWithBases(&@_Type_spec, bases.get())", type.TypeName());
+                w.write("PyType_FromSpecWithBases(&_type_spec_@, bases.get())", type.TypeName());
             }
             else
             {
-                w.write("PyType_FromSpec(&@_Type_spec)", type.TypeName());
+                w.write("PyType_FromSpec(&_type_spec_@)", type.TypeName());
             }
             w.write(" };\n");
 
@@ -175,7 +175,7 @@ static int module_exec(PyObject* module)
         }
 
         auto format = R"(
-static void @_dealloc(%* self)
+static void _dealloc_@(%* self)
 {
 )";
 
@@ -194,7 +194,7 @@ static void @_dealloc(%* self)
     {
         if (empty(ctor.ParamList()))
         {
-            w.write("_default_constructor");
+            w.write("_ctor");
         }
         else
         {
@@ -304,18 +304,29 @@ static void @_dealloc(%* self)
         }
     }
 
+    void write_method_function_name(writer& w, TypeDef const& type, MethodDef const& method)
+    {
+        if (is_constructor(method) && empty(method.ParamList()))
+        {
+            w.write("_ctor_@", type.TypeName());
+        }
+        else
+        {
+            w.write("@_%", type.TypeName(), bind<write_method_name>(method));
+        }
+    }
+
     void write_method_table_row(writer& w, TypeDef const& type, MethodDef const& method)
     {
-        w.write("{ \"%\", (PyCFunction)@_%, %, nullptr },\n",
+        w.write("{ \"%\", (PyCFunction)%, %, nullptr },\n",
             bind<write_method_name>(method),
-            type.TypeName(),
-            bind<write_method_name>(method),
+            bind<write_method_function_name>(type, method),
             bind<write_method_args>(method));
     }
 
     void write_method_table(writer& w, TypeDef const& type)
     {
-        w.write("\nstatic PyMethodDef @_methods[] = {\n", type.TypeName());
+        w.write("\nstatic PyMethodDef _methods_@[] = {\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
@@ -341,7 +352,7 @@ static void @_dealloc(%* self)
 
             if (!is_static(type))
             {
-                w.write("{ \"_from\", (PyCFunction)_as_@, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+                w.write("{ \"_from\", (PyCFunction)_from_@, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
             }
 
             w.write("{ nullptr }\n");
@@ -573,9 +584,8 @@ if (!%)
         auto arg_count = get_arg_count(method);
         method_signature signature{ method };
 
-        w.write("\nstatic PyObject* @_%(%* %, PyObject* %)\n{\n",
-            type.TypeName(),
-            bind<write_method_name>(method),
+        w.write("\nstatic PyObject* %(%* %, PyObject* %)\n{\n",
+            bind<write_method_function_name>(type, method),
             bind<write_wrapper_type>(type),
             bind<write_self_param_name>(method),
             bind<write_args_param_name>(arg_count));
@@ -623,33 +633,69 @@ if (!%)
         }
     }
 
-    void write_type_slot_table(writer& w, TypeDef const& type)
+    void write_type_slot_new(writer& w, TypeDef const& type)
     {
-        // TODO: need to write a tp_new function that throws so that these native python types are not created directly
+        w.write("_new_@", type.TypeName());
+    }
+
+    void write_type_slot_dealloc(writer& w, TypeDef const& type)
+    {
         auto category = get_category(type);
-        w.write("\nstatic PyType_Slot @_Type_slots[] = \n{\n", type.TypeName());
-        if (category == category::interface_type)
+        if ((category == category::class_type) && is_static(type))
         {
-            w.write("    { Py_tp_dealloc, @_dealloc },\n", type.TypeName());
-            w.write("    { Py_tp_methods, @_methods },\n", type.TypeName());
-            w.write("    { Py_tp_new, nullptr },\n");
+            w.write("nullptr");
         }
-        if (category == category::class_type)
+        else
         {
-            if (!is_static(type))
-            {
-                w.write("    { Py_tp_dealloc, @_dealloc },\n", type.TypeName());
-            }
-            w.write("    { Py_tp_methods, @_methods },\n", type.TypeName());
-            w.write("    { Py_tp_new, nullptr },\n");
+            w.write("_dealloc_@", type.TypeName());
         }
+    }
+
+    void write_type_slot_methods(writer& w, TypeDef const& type)
+    {
+        auto category = get_category(type);
+        if ((category == category::class_type) || (category == category::interface_type))
+        {
+            w.write("_methods_@", type.TypeName());
+        }
+        else
+        {
+            w.write("nullptr");
+        }
+    }
+
+    void write_type_slot_getset(writer& w, TypeDef const& type)
+    {
+        auto category = get_category(type);
         if (category == category::struct_type)
         {
-            w.write("    { Py_tp_dealloc, @_dealloc },\n", type.TypeName());
-            w.write("    { Py_tp_new, @_new },\n", type.TypeName());
-            w.write("    { Py_tp_getset, @_getset },\n", type.TypeName());
+            w.write("_getset_@", type.TypeName());
         }
-        w.write("    { 0, nullptr },\n};\n");
+        else
+        {
+            w.write("nullptr");
+        }
+    }
+
+
+    void write_type_slot_table(writer& w, TypeDef const& type)
+    {
+        auto format = R"(
+static PyType_Slot _type_slots_@[] = 
+{
+    { Py_tp_new, % },
+    { Py_tp_dealloc, % },
+    { Py_tp_methods, % },
+    { Py_tp_getset, % }, 
+    { 0, nullptr },
+};
+)";
+        w.write(format,
+            type.TypeName(),
+            bind<write_type_slot_new>(type),
+            bind<write_type_slot_dealloc>(type),
+            bind<write_type_slot_methods>(type),
+            bind<write_type_slot_getset>(type));
     }
 
     void write_type_spec_size(writer& w, TypeDef const& type)
@@ -667,13 +713,13 @@ if (!%)
     void write_type_spec(writer& w, TypeDef const& type)
     {
         auto format = R"(
-static PyType_Spec @_Type_spec =
+static PyType_Spec _type_spec_@ =
 {
     "%.@",
     %,
     0,
     Py_TPFLAGS_DEFAULT,
-    @_Type_slots
+    _type_slots_@
 };
 )";
         auto type_name = type.TypeName();
@@ -685,11 +731,23 @@ static PyType_Spec @_Type_spec =
             type_name);
     }
 
-    void write_as_function(writer& w, TypeDef const& type)
+    void write_from_function(writer& w, TypeDef const& type)
     {
         if (is_static(type)) return;
 
-        w.write(strings::as_function, type.TypeName(), type);
+        w.write(strings::from_function, type.TypeName(), type);
+    }
+
+    void write_non_activatable(writer& w, TypeDef const& type)
+    {
+        auto format = R"(
+static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
+{
+    PyErr_SetString(PyExc_TypeError, "% is not directly constructable");
+    return nullptr;
+}
+)";
+        w.write(format, type.TypeName(), type.TypeName());
     }
 
     void write_class(writer& w, TypeDef const& type)
@@ -698,9 +756,10 @@ static PyType_Spec @_Type_spec =
 
         w.write("\n// ----- % class --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
+        write_non_activatable(w, type);
         write_dealloc_function(w, type);
         write_method_functions(w, type);
-        write_as_function(w, type);
+        write_from_function(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
@@ -715,9 +774,10 @@ static PyType_Spec @_Type_spec =
 
         w.write("\n// ----- % interface --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
+        write_non_activatable(w, type);
         write_dealloc_function(w, type);
         write_method_functions(w, type);
-        write_as_function(w, type);
+        write_from_function(w, type);
         write_method_table(w, type);
         write_type_slot_table(w, type);
         write_type_spec(w, type);
@@ -984,7 +1044,7 @@ if (!return_value)
 
     void write_struct_constructor(writer& w, TypeDef const& type)
     {
-        w.write("\nPyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{", type.TypeName());
+        w.write("\nPyObject* _new_@(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{", type.TypeName());
         {
             writer::indent_guard g{ w };
 
@@ -1061,7 +1121,7 @@ return py::trycatch_invoker([=]() -> PyObject* {
 
     void write_struct_getset_table(writer& w, TypeDef const& type)
     {
-        w.write("\nstatic PyGetSetDef @_getset[] = {\n", type.TypeName());
+        w.write("\nstatic PyGetSetDef _getset_@[] = {\n", type.TypeName());
 
         {
             writer::indent_guard g{ w };
