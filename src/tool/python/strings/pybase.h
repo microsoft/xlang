@@ -208,6 +208,58 @@ namespace py
         return nullptr;
     }
 
+    template<typename F>
+    PyObject* trycatch_invoker(F func)
+    {
+        try
+        {
+            return func();
+        }
+        catch (...)
+        {
+            return py::to_PyErr();
+        }
+
+        return nullptr;
+    }
+
+    template<typename F>
+    PyObject* arg_count_invoker(PyObject* args, int expected_arg_count, F func)
+    {
+        Py_ssize_t arg_count = PyTuple_Size(args);
+
+        if (arg_count == expected_arg_count)
+        {
+            return trycatch_invoker([=]() { return func(args); });
+        }
+        else if (arg_count != -1)
+        {
+            PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+        }
+
+        return nullptr;
+    }
+
+    template<typename F>
+    int struct_set_invoker(PyObject* value, F func)
+    {
+        if (value == nullptr)
+        {
+            PyErr_SetString(PyExc_TypeError, "property delete not supported");
+            return -1;
+        }
+
+        try
+        {
+            func(value);
+            return 0;
+        }
+        catch (...)
+        {
+            return -1;
+        }
+    }
+
     void wrapped_instance(std::size_t key, PyObject* obj);
     PyObject* wrapped_instance(std::size_t key);
 

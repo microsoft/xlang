@@ -360,26 +360,6 @@ static void @_dealloc(%* self)
         }
     }
 
-    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::function<void(writer&)> catchfunc)
-    {
-        w.write("try\n{\n");
-        {
-            writer::indent_guard g{ w };
-            tryfunc(w);
-        }
-        w.write("}\ncatch (...)\n{\n");
-        {
-            writer::indent_guard g{ w };
-            catchfunc(w);
-        }
-        w.write("}\n");
-    }
-
-    void write_try_catch(writer& w, std::function<void(writer&)> func, std::string_view const& catch_return = "py::to_PyErr()")
-    {
-        write_try_catch(w, func, [&catch_return](writer& w) { w.write("return %;\n", catch_return); });
-    }
-
     void write_param_name(writer& w, method_signature::param_t param)
     {
         w.register_type_namespace(param.second->Type());
@@ -488,90 +468,86 @@ static void @_dealloc(%* self)
     {
         writer::indent_guard g{ w };
 
-        write_try_catch(w,
-            [&method](writer& w) 
-        { 
-            method_signature signature{ method };
+        method_signature signature{ method };
 
-            // convert in params from Python -> C++
-            for (auto&& param : signature.params())
-            {
-                write_method_param_definition(w, method, param);
-            }
-            if (signature.params().size() > 0)
-            {
-                w.write("\n");
-            }
-
-            // Invoke member
-            if (is_constructor(method))
-            {
-                w.write("% return_value{ % };\n",
-                    method.Parent(),
-                    bind_list<write_param_name>(", ", signature.params()));
-            }
-            else
-            {
-                if (signature.return_signature())
-                {
-                    w.register_type_namespace(signature.return_signature().Type());
-                    w.write("auto return_value = ");
-                }
-                w.write("%%(%);\n",
-                    bind<write_method_invoke_context>(method),
-                    bind<write_method_cpp_name>(method),
-                    bind_list<write_param_name>(", ", signature.params()));
-            }
+        // convert in params from Python -> C++
+        for (auto&& param : signature.params())
+        {
+            write_method_param_definition(w, method, param);
+        }
+        if (signature.params().size() > 0)
+        {
             w.write("\n");
+        }
 
-            // Convert return values and out parameters from C++ -> Python
-            std::vector<std::string> return_values{};
-            if (signature.return_signature() || is_constructor(method))
+        // Invoke member
+        if (is_constructor(method))
+        {
+            w.write("% return_value{ % };\n",
+                method.Parent(),
+                bind_list<write_param_name>(", ", signature.params()));
+        }
+        else
+        {
+            if (signature.return_signature())
             {
-                auto format = R"(py::pyobj_handle out_return_value{ py::convert(return_value) };
+                w.register_type_namespace(signature.return_signature().Type());
+                w.write("auto return_value = ");
+            }
+            w.write("%%(%);\n",
+                bind<write_method_invoke_context>(method),
+                bind<write_method_cpp_name>(method),
+                bind_list<write_param_name>(", ", signature.params()));
+        }
+        w.write("\n");
+
+        // Convert return values and out parameters from C++ -> Python
+        std::vector<std::string> return_values{};
+        if (signature.return_signature() || is_constructor(method))
+        {
+            auto format = R"(py::pyobj_handle out_return_value{ py::convert(return_value) };
 if (!out_return_value) 
 { 
     return nullptr;
 }
 )";
-                w.write(format);
-                return_values.push_back("out_return_value");
+            w.write(format);
+            return_values.push_back("out_return_value");
+        }
+            
+        for (auto&& param : signature.params())
+        {
+            if (!is_out_param(param))
+            {
+                continue;
             }
             
-            for (auto&& param : signature.params())
-            {
-                if (!is_out_param(param))
-                {
-                    continue;
-                }
+            auto sequence = param.first.Sequence() - 1;
+            auto out_param = w.write_temp("out%", sequence);
             
-                auto sequence = param.first.Sequence() - 1;
-                auto out_param = w.write_temp("out%", sequence);
-            
-                auto format = R"(py::pyobj_handle %{ py::convert(param%) };
+            auto format = R"(py::pyobj_handle %{ py::convert(param%) };
 if (!%) 
 {
     return nullptr;
 }
 )";
-                w.write(format, out_param, sequence, out_param);
-                return_values.push_back(out_param);
-            }
+            w.write(format, out_param, sequence, out_param);
+            return_values.push_back(out_param);
+        }
 
-            // Return Python projected return/out params
-            if (return_values.size() == 0)
-            {
-                w.write("Py_RETURN_NONE;\n");
-            }
-            else if (return_values.size() == 1)
-            {
-                w.write("return %;\n", bind<write_detach_param>(return_values[0]));
-            }
-            else
-            {
-                w.write("return %;\n", bind<write_py_tuple_pack>(return_values));
-            }
-        });
+        // Return Python projected return/out params
+        if (return_values.size() == 0)
+        {
+            w.write("Py_RETURN_NONE;\n");
+        }
+        else if (return_values.size() == 1)
+        {
+            w.write("return %;\n", bind<write_detach_param>(return_values[0]));
+        }
+        else
+        {
+            w.write("return %;\n", bind<write_py_tuple_pack>(return_values));
+        }
     }
 
     void write_method_functions(writer& w, TypeDef const& type)
@@ -591,23 +567,16 @@ if (!%)
                 if (arg_count == arg_count::variable)
                 {
                     writer::indent_guard g{ w };
-                    auto format = R"(Py_ssize_t arg_count = PyTuple_Size(args);
 
-if (arg_count == %)
-{
-%}
-else if (arg_count != -1)
-{
-     PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
-}
-
-return nullptr;
-)";
+                    auto format = "return py::arg_count_invoker(args, %, [=](PyObject* args) -> PyObject* {\n%});\n";
                     w.write(format, count_in_param(signature.params()), bind<write_method_body>(method));
                 }
                 else
                 {
-                    write_method_body(w, method);
+                    writer::indent_guard g{ w };
+
+                    auto format = "return py::trycatch_invoker([=]() -> PyObject* {\n%});\n";
+                    w.write(format, bind<write_method_body>(method));
                 }
             }
             w.write("};\n");
@@ -975,65 +944,77 @@ if (!return_value)
 
     void write_struct_constructor(writer& w, TypeDef const& type)
     {
-        w.write("\nPyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
+        w.write("\nPyObject* %_new(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{", type.TypeName());
         {
             writer::indent_guard g{ w };
 
-            w.write("auto tuple_size = PyTuple_Size(args);\n\nif ((tuple_size == 0) && (kwds == nullptr))\n{\n");
             {
-                writer::indent_guard gg{ w };
-                write_try_catch(w, [&type](writer& w)
-                {
-                    w.write(R"(% return_value{};
-return py::convert(return_value);
-)", type);
-                });
-            }
-            w.write("};\n\nif ((tuple_size == 1) && (kwds == nullptr))\n{\n");
+                auto format = R"(
+auto tuple_size = PyTuple_Size(args);
 
-            {
-                writer::indent_guard gg{ w };
-                w.write("auto arg = PyTuple_GetItem(args, 0);\nif (PyDict_Check(arg))\n{\n");
+if ((tuple_size == 0) && (kwds == nullptr))
+{
+    return py::trycatch_invoker([]() -> PyObject* {
+        % return_value{};
+        return py::convert(return_value);
+    });
+}
 
-                {
-                    writer::indent_guard ggg{ w };
-                    write_try_catch(w, [&type](writer& w)
-                    {
-                        w.write(R"(auto return_value = py::converter<%>::convert_to(arg);
-return py::convert(return_value);
-)", type);
-                    });
-                }
-                w.write("};\n");
+if ((tuple_size == 1) && (kwds == nullptr))
+{
+    auto arg = PyTuple_GetItem(args, 0);
+    if (PyDict_Check(arg)) 
+    {
+        return py::trycatch_invoker([arg]() -> PyObject* {
+            auto return_value = py::convert_to<%>(arg);
+            return py::convert(return_value);
+        });
+    };
+};
+
+)";
+                w.write(format, type, type);
             }
-            w.write("};\n\n");
 
             for (auto&& field : type.FieldList())
             {
                 w.write("% _%{};\n", bind<write_struct_field_var_type>(field), field.Name());
             }
 
-            w.write("\nstatic char* kwlist[] = {%nullptr};\n", bind_each<write_struct_field_keyword>(type.FieldList()));
-
-            w.write("if (!PyArg_ParseTupleAndKeywords(args, kwds, \"%\", kwlist%))\n{\n    return nullptr;\n}\n\n",
-                bind_each<write_struct_field_format>(type.FieldList()),
-                bind_each<write_struct_field_parameter>(type.FieldList()));
-
-            write_try_catch(w, [&type](writer& w)
             {
-                if (has_custom_conversion(type))
-                {
-                    w.write("% return_value{ };\ncustom_set(return_value, %);\n", type, bind<write_struct_field_initalizer>(type.FieldList().first));
-                }
-                else
-                {
-                    w.write("% return_value{ % };\n",
-                        type,
-                        bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
-                }
+                auto format = R"(
+static char* kwlist[] = {%nullptr};
+if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%)) {
+    return nullptr;
+}
+)";
+                w.write(format, 
+                    bind_each<write_struct_field_keyword>(type.FieldList()),
+                    bind_each<write_struct_field_format>(type.FieldList()),
+                    bind_each<write_struct_field_parameter>(type.FieldList()));
+            }
 
-                w.write("return py::convert(return_value);\n");
-            });
+            if (has_custom_conversion(type))
+            {
+                auto format = R"(
+return py::trycatch_invoker([=]() -> PyObject* {
+    % return_value{ };
+    custom_set(return_value, %);
+    return py::convert(return_value);
+});
+)";
+                w.write(format, type, bind<write_struct_field_initalizer>(type.FieldList().first));
+            }
+            else
+            {
+                auto format = R"(
+return py::trycatch_invoker([=]() -> PyObject* {
+    % return_value{ % };
+    return py::convert(return_value);
+});
+)";
+                w.write(format, type, bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
+            }
         }
         w.write("}\n");
     }
@@ -1088,17 +1069,23 @@ return py::convert(return_value);
             bind<write_wrapper_type>(type));
         {
             writer::indent_guard g{ w };
-            write_try_catch(w, [&type, &field](writer& w)
+
+            if (has_custom_conversion(type))
             {
-                if (has_custom_conversion(type))
-                {
-                    w.write("return py::convert(custom_get(self->obj));\n");
-                }
-                else
-                {
-                    w.write("return py::convert(self->obj.%);\n", bind<write_struct_field_name>(field));
-                }
-            });
+                auto format = R"(return py::trycatch_invoker([self]() -> PyObject* {
+    return py::convert(custom_get(self->obj));
+});
+)";
+                w.write(format);
+            }
+            else
+            {
+                auto format = R"(return py::trycatch_invoker([self]() -> PyObject* {
+    return py::convert(self->obj.%);
+});
+)";
+                w.write(format, bind<write_struct_field_name>(field));
+            }
         }
         w.write("}\n");
 
@@ -1109,28 +1096,23 @@ return py::convert(return_value);
         {
             writer::indent_guard g{ w };
 
-
-            w.write(R"(if (value == nullptr)
-{
-    PyErr_SetString(PyExc_TypeError, "property delete not supported");
-    return -1;
-}
-
-)");
-
-            write_try_catch(w, [&type, &field](writer& w)
+            if (has_custom_conversion(type))
             {
-                if (has_custom_conversion(type))
-                {
-                    w.write("custom_set(self->obj, py::converter<%>::convert_to(value));\n", field.Signature().Type());
-                }
-                else
-                {
-                    w.write("self->obj.% = py::converter<%>::convert_to(value);\n", bind<write_struct_field_name>(field), field.Signature().Type());
-                }
+                auto format = R"(py::struct_set_invoker(value, [=](PyObject* value) {
+    custom_set(self->obj, py::converter<%>::convert_to(value));
+});
+)";
+                w.write(format, field.Signature().Type());
+            }
+            else
+            {
+                auto format = R"(py::struct_set_invoker(value, [=](PyObject* value) {
+    self->obj.% = py::converter<%>::convert_to(value);
+});
+)";
 
-                w.write("return 0;\n");
-            }, "-1");
+                w.write(format, bind<write_struct_field_name>(field), field.Signature().Type());
+            }
         }
         w.write("}\n");
     }
