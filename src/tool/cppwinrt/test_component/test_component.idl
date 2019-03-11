@@ -224,4 +224,24 @@ namespace test_component
             };
         }
     }
+
+    namespace Parent
+    {
+        // This validates namespace inclusion rules. The "...Three.h" header must include the 
+        // "...Parent.h" header but skip over the intermediate namespaces as they are empty
+        // and won't be generated and those won't exist.
+
+        struct ParentStruct
+        {
+            Int32 Value;
+        };
+
+        namespace One.Two.Three
+        {
+            struct ThreeStruct
+            {
+                Int32 Value;
+            };
+        }
+    }
 }
