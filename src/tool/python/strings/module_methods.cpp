@@ -11,6 +11,12 @@ PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
 
+static PyObject* winrt_base_new(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
+{
+    PyErr_SetString(PyExc_TypeError, "winrt_base is not directly constructable");
+    return nullptr;
+}
+
 static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>* self)
 {
     // auto hash_value = std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj);
@@ -18,10 +24,9 @@ static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IIn
     self->obj = nullptr;
 }
 
-// TODO: need to write a tp_new function that throws so that winrt_base can't be created directly
-
 static PyType_Slot winrt_base_type_slots[] =
 {
+    { Py_tp_new, winrt_base_new },
     { Py_tp_dealloc, winrt_base_dealloc },
     { Py_tp_doc, winrt_base_doc},
     { 0, nullptr },
