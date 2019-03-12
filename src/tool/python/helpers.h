@@ -236,14 +236,16 @@ namespace xlang
 
     void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, TypeDef const& type)
     {
-        interface_info info;
-        info.type = type;
-        for (auto&& gp : type.GenericParam())
+        if (get_category(type) == category::interface_type)
         {
-            info.type_arguments.push_back(std::string{ gp.Name() });
+            interface_info info;
+            info.type = type;
+            for (auto&& gp : type.GenericParam())
+            {
+                info.type_arguments.push_back(std::string{ gp.Name() });
+            }
+            push_interface_info(interfaces, std::move(info));
         }
-
-        push_interface_info(interfaces, std::move(info));
 
         auto guard{ w.push_generic_params(type.GenericParam()) };
         for (auto&& ii : type.InterfaceImpl())
@@ -485,6 +487,73 @@ namespace xlang
     };
 
     bool is_constructor(MethodDef const& method);
+
+    auto get_member_name(MethodDef const& method)
+    {
+        auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
+        if (overload_attrib)
+        {
+            auto args = overload_attrib.Value().FixedArgs();
+            return std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
+        }
+        else
+        {
+            return method.Name();
+        }
+    }
+
+    int count_in_param(std::vector<method_signature::param_t> const& params);
+
+    auto get_members(TypeDef const& type)
+    {
+        std::map<std::string_view, std::map<int, std::vector<method_info>>> method_map{};
+        auto push_func = [&](method_info const& info)
+        {
+            auto name = get_member_name(info.method);
+
+            method_signature sig{ info.method };
+            auto param_count = count_in_param(sig.params());
+            method_map[name][param_count].push_back(info);
+        };
+
+        auto category = get_category(type);
+
+        if (category == category::class_type)
+        {
+            for (auto&& method : type.MethodList())
+            {
+                push_func(method_info{ method, std::vector<std::string> {} });
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            for (auto&& info : get_required_interfaces(type))
+            {
+                for (auto&& method : info.type.MethodList())
+                {
+                    push_func(method_info{ method, info.type_arguments });
+                }
+            }
+        }
+        else
+        {
+            throw_invalid("only classes and interfaces have methods");
+        }
+
+#ifdef XLANG_DEBUG
+        //for (auto&&[name, method_infos] : method_map)
+        //{
+        //    XLANG_ASSERT(method_infos.size() > 0);
+        //    auto static_method = method_infos[0].method.Flags().Static();
+        //    for (auto&& info : method_infos)
+        //    {
+        //        XLANG_ASSERT(info.method.Flags().Static() == static_method);
+        //    }
+        //}
+#endif
+
+        return std::move(method_map);
+    }
 
     auto get_methods(TypeDef const& type, bool include_special = false)
     {

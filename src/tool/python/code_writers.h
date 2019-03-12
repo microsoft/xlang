@@ -360,6 +360,51 @@ static void _dealloc_@(%* self)
 
     void write_method_table(writer& w, TypeDef const& type)
     {
+        for (auto&& attrib : type.CustomAttribute())
+        {
+            auto pair = attrib.TypeNamespaceAndName();
+            if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
+            {
+                auto fixed_args = attrib.Value().FixedArgs();
+                auto elem0 = std::get<ElemSig>(fixed_args[0].value);
+
+                // if the first param is SystemType, it holds the name of a factory interface
+                if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
+                {
+                    auto factory_type = type.get_cache().find_required(
+                        std::get<ElemSig::SystemType>(elem0.value).name);
+
+                    for (auto&& factory_method : factory_type.MethodList())
+                    {
+                        w.write("// Factory %.%.%\n", factory_type.TypeNamespace(), factory_type.TypeName(), factory_method.Name());
+                    }
+                }
+                else
+                {
+                    w.write("// %.%.default_ctor\n", type.TypeNamespace(), type.TypeName());
+                }
+            }
+            if (pair.second == "StaticAttribute" && pair.first == "Windows.Foundation.Metadata")
+            {
+                auto fixed_args = attrib.Value().FixedArgs();
+                auto elem0 = std::get<ElemSig>(fixed_args[0].value);
+                auto static_type = type.get_cache().find_required(std::get<ElemSig::SystemType>(elem0.value).name);
+
+                for (auto&& static_method : static_type.MethodList())
+                {
+                    w.write("// Static %.%.%\n", static_type.TypeNamespace(), static_type.TypeName(), static_method.Name());
+                }
+            }
+        }
+
+        for (auto&& ii : get_required_interfaces(type))
+        {
+            for (auto&& m : ii.type.MethodList())
+            {
+                w.write("// %.%.%\n", ii.type.TypeNamespace(), ii.type.TypeName(), get_member_name(m));
+            }
+        }
+
         w.write("\nstatic PyMethodDef _methods_@[] = {\n", type.TypeName());
         {
             writer::indent_guard g{ w };
