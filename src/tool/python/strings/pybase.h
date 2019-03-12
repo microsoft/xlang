@@ -1084,6 +1084,12 @@ namespace py
     };
 
     template<typename T>
+    PyObject* convert(T const& instance)
+    {
+        return converter<T>::convert(instance);
+    }
+    
+    template<typename T>
     auto convert_to(PyObject* value)
     {
         return converter<T>::convert_to(value);
