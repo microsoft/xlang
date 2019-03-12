@@ -1,4 +1,5 @@
-import find_projection
+import sys
+sys.path.append("./generated")
 
 import pyrt
 import asyncio

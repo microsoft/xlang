@@ -1,8 +1,9 @@
 add_subdirectory(abi)
-add_subdirectory(cpp)
 add_subdirectory(idl)
 add_subdirectory(python)
+add_subdirectory(cppxlang)
 
 if (WIN32)
     add_subdirectory(foo)
+    add_subdirectory(cppwinrt)
 endif()

@@ -1,4 +1,6 @@
-import find_projection
+import sys
+sys.path.append("./generated")
+
 import unittest
 
 import pyrt.windows.foundation as wf

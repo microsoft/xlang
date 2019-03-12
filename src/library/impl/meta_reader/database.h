@@ -95,7 +95,7 @@ namespace xlang::meta::reader
             return true;
         }
 
-        database(std::string_view const& path, cache const* cache) : file_view{ path }, m_path{ path }, m_cache{ cache }
+        explicit database(std::string_view const& path, cache const* cache = nullptr) : file_view{ path }, m_path{ path }, m_cache{ cache }
         {
             auto dos = as<impl::image_dos_header>();
 
