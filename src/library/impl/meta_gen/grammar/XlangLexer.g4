@@ -1,27 +1,27 @@
 lexer grammar XlangLexer;
 
-/* Line terminators */
-NEWLINE
-    : '\u000D'          // Carriage return character
-    | '\u000A'          // Line feed character
-    | '\u000D\u000A'    // Carriage return character followed by line feed character
-    | '\u0085'          // Next Line character
-    | '\u2028'          // Line Separator character
-    | '\u2029'          // Paragraph Separator character
-    ;
-
 /* Comments */
 DELIMITED_COMMENT: '/*' .*? '*/' -> channel(HIDDEN); // Haven't considered this case "/* sd */ */"
 SINGLE_LINE_COMMENT: '//' ~[\u000D\u000A\u0085\u2028\u2029]* -> channel(HIDDEN);
 
 /* Whitespace */
-WHITESPACE: (Whitespace | NEWLINE)+ -> channel(HIDDEN);
+WHITESPACE: (Whitespace | Newline)+ -> channel(HIDDEN);
 
 fragment Whitespace
     : UnicodeClassZS    // Any Character With Unicode Class Zs
     | '\u0009'          // Horizontal Tab Character
     | '\u000B'          // Vertical Tab Character
     | '\u000C'          // Form Feed Character
+    ;
+
+/* Line terminators */
+fragment Newline
+    : '\u000D'          // Carriage return character
+    | '\u000A'          // Line feed character
+    | '\u000D\u000A'    // Carriage return character followed by line feed character
+    | '\u0085'          // Next Line character
+    | '\u2028'          // Line Separator character
+    | '\u2029'          // Paragraph Separator character
     ;
 
 /* Keywords */
@@ -106,6 +106,7 @@ fragment UnicodeEscapeSequence
 // semantic checking.
 IDENTIFIER
     : IdentifierOrKeyword
+    | IdentifierOrKeyword ('.' IdentifierOrKeyword)*
     ;
 
 fragment IdentifierOrKeyword

@@ -5,12 +5,16 @@ options { tokenVocab=XlangLexer; }
 
 /* Entry Point */
 xlang
-    : xlang_body*
+    : compilation_unit
     ;
-
+    
+compilation_unit
+    : using_directive* namespace_declaration*
+    ;
+    
 // For lexer tests
-xlang_body
-    : COMMENT
+xlang_lexer_tests
+    : namespace_declaration*
     ;
 
 /* Basic Concepts */
@@ -137,12 +141,8 @@ variable_initializer
     ;
 
 /* Namespaces */
-compilation_unit
-    : using_directive*
-    ;
-
 namespace_declaration
-    : NAMEPSACE IDENTIFIER ('.' IDENTIFIER)* namespace_body SEMICOLON?
+    : NAMEPSACE IDENTIFIER namespace_body SEMICOLON?
     ;
 
 namespace_body
