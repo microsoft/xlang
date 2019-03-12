@@ -1,4 +1,6 @@
-import find_projection
+import sys
+sys.path.append("./generated")
+
 import unittest
 
 import pyrt.windows.foundation.numerics as wfn
@@ -55,7 +57,4 @@ class TestNumerics(unittest.TestCase):
         self.assertEqual(p.D, 4.0)
 
 if __name__ == '__main__':
-    import _pyrt
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()

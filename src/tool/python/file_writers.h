@@ -82,35 +82,34 @@ namespace xlang
         return std::move(w.needed_namespaces);
     }
 
-    inline void write_module_cpp(stdfs::path const& folder, std::string_view const& module_name)
+    inline void write_module_cpp(stdfs::path const& folder)
     {
         writer w;
 
         write_license_cpp(w);
-        w.write(strings::module_methods);
-        write_module_def(w, module_name, module_name, "module_methods");
+        w.write(strings::module_methods, settings.module, settings.module, settings.module, settings.module);
 
-        auto filename = w.write_temp("%.cpp", module_name);
+        auto filename = w.write_temp("_%.cpp", settings.module);
         create_directories(folder);
         w.flush_to_file(folder / filename);
     }
 
-    inline void write_setup_py(stdfs::path const& folder, std::string_view const& module_name, std::string_view const& native_module_name, std::vector<std::string> const& namespaces)
+    inline void write_setup_py(stdfs::path const& folder, std::vector<std::string> const& namespaces)
     {
         writer w;
 
         write_license_python(w);
-        w.write(strings::setup, module_name, native_module_name, bind<write_setup_filenames>(native_module_name, namespaces));
+        w.write(strings::setup, settings.module, settings.module, bind<write_setup_filenames>(namespaces));
         create_directories(folder);
         w.flush_to_file(folder / "setup.py");
     }
 
-    inline void write_package_dunder_init_py(stdfs::path const& folder, std::string_view const& module_name)
+    inline void write_package_dunder_init_py(stdfs::path const& folder)
     {
         writer w;
 
         write_license_python(w);
-        w.write(strings::package_init, module_name, module_name, module_name, module_name);
+        w.write(strings::package_init, settings.module, settings.module, settings.module, settings.module);
 
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");
@@ -148,7 +147,7 @@ except:
 
         w.write("\n");
 
-        //settings.filter.bind_each<write_python_enum>(members.enums)(w);
+        settings.filter.bind_each<write_python_enum>(members.enums)(w);
         settings.filter.bind_each<write_import_type>(members.classes)(w);
         settings.filter.bind_each<write_import_type>(members.interfaces)(w);
         settings.filter.bind_each<write_import_type>(members.structs)(w);

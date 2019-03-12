@@ -244,7 +244,7 @@ namespace xlang::cmd
             else if (arg[0] == '@')
             {
                 arg.remove_prefix(1);
-                extract_response_file(arg, options);
+                extract_response_file(arg, options, last);
             }
             else if (last == std::end(options))
             {
@@ -256,8 +256,8 @@ namespace xlang::cmd
             }
         }
 
-        template<typename O>
-        void extract_response_file(std::string_view const& arg, O const& options)
+        template<typename O, typename L>
+        void extract_response_file(std::string_view const& arg, O const& options, L& last)
         {
             std::experimental::filesystem::path response_path{ std::string{ arg } };
             std::string extension = response_path.extension().generic_string();
@@ -269,16 +269,15 @@ namespace xlang::cmd
             {
                 throw_invalid("'@' is reserved for response files");
             }
-            std::array<char, 8192> line_buf;
+            std::string line_buf;
             std::ifstream response_file(absolute(response_path));
-            while (response_file.getline(line_buf.data(), line_buf.size()))
+            while (getline(response_file, line_buf))
             {
                 size_t argc = 0;
                 std::vector<std::string> argv;
 
                 parse_command_line(line_buf.data(), argv, &argc);
 
-                auto last{ std::end(options) };
                 for (size_t i = 0; i < argc; i++)
                 {
                     extract_option(argv[i], options, last);

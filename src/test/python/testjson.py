@@ -1,4 +1,6 @@
-import find_projection
+import sys
+sys.path.append("./generated")
+
 import unittest
 
 import pyrt.windows.data.json as wdj
@@ -8,7 +10,7 @@ class TestJson(unittest.TestCase):
     def test_activate_JsonArray(self):
         a = wdj.JsonArray()
         self.assertEqual(a.Size, 0)
-        self.assertEqual(a.ValueType, 4)
+        self.assertEqual(a.ValueType, wdj.JsonValueType.Array)
         self.assertEqual(a.ToString(), "[]")
         self.assertEqual(a.Stringify(), "[]")
 
@@ -19,7 +21,7 @@ class TestJson(unittest.TestCase):
     def test_activate_JsonObject(self):
         o = wdj.JsonObject()
         self.assertEqual(o.Size, 0)
-        self.assertEqual(o.ValueType, 5)
+        self.assertEqual(o.ValueType, wdj.JsonValueType.Object)
         self.assertEqual(o.ToString(), "{}")
         self.assertEqual(o.Stringify(), "{}")
 
@@ -47,22 +49,22 @@ class TestJson(unittest.TestCase):
         self.assertTrue(a[0].GetBoolean())
         self.assertFalse(a[1].GetBoolean())
         self.assertEqual(42, a[2].GetNumber())
-        self.assertEqual(0, a[3].ValueType) # JsonValueType.Null
-        self.assertEqual(4, a[4].ValueType) # JsonValueType.Array
-        self.assertEqual(5, a[5].ValueType) # JsonValueType.Object
+        self.assertEqual(wdj.JsonValueType.Null, a[3].ValueType)
+        self.assertEqual(wdj.JsonValueType.Array, a[4].ValueType)
+        self.assertEqual(wdj.JsonValueType.Object, a[5].ValueType)
         self.assertEqual("plugh", a[6].GetString())
 
     def test_JsonArray_set_item(self):
         a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
 
-        self.assertEqual(0, a[3].ValueType) # JsonValueType.Null
+        self.assertEqual(wdj.JsonValueType.Null, a[3].ValueType)
         a[3] = wdj.JsonValue.CreateNumberValue(3.14)
-        self.assertEqual(2, a[3].ValueType) # JsonValueType.Number
+        self.assertEqual(wdj.JsonValueType.Number, a[3].ValueType)
         self.assertEqual(3.14, a[3].GetNumber())
 
     def test_JsonArray_parse(self):
         a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
-        self.assertEqual(a.ValueType, 4)
+        self.assertEqual(a.ValueType, wdj.JsonValueType.Array)
         self.assertEqual(a.Size, 7)
         self.assertTrue(a.GetBooleanAt(0))
         self.assertFalse(a.GetBooleanAt(1))
@@ -115,38 +117,38 @@ class TestJson(unittest.TestCase):
 
     def test_JsonValue_boolean(self):
         t = wdj.JsonValue.CreateBooleanValue(True)
-        self.assertEqual(t.ValueType, 1)
+        self.assertEqual(t.ValueType, wdj.JsonValueType.Boolean)
         self.assertTrue(t.GetBoolean())
 
         f = wdj.JsonValue.CreateBooleanValue(False)
-        self.assertEqual(f.ValueType, 1)
+        self.assertEqual(f.ValueType, wdj.JsonValueType.Boolean)
         self.assertFalse(f.GetBoolean())
 
     def test_JsonValue_null(self):
         n = wdj.JsonValue.CreateNullValue()
-        self.assertEqual(n.ValueType, 0)
+        self.assertEqual(n.ValueType, wdj.JsonValueType.Null)
 
     def test_JsonValue_number(self):
         t = wdj.JsonValue.CreateNumberValue(42)
-        self.assertEqual(t.ValueType, 2)
+        self.assertEqual(t.ValueType, wdj.JsonValueType.Number)
         self.assertEqual(t.GetNumber(), 42)
 
     def test_JsonValue_string(self):
         t = wdj.JsonValue.CreateStringValue("Plugh")
-        self.assertEqual(t.ValueType, 3)
+        self.assertEqual(t.ValueType, wdj.JsonValueType.String)
         self.assertEqual(t.GetString(), "Plugh")
 
     def test_JsonValue_parse(self):
         b = wdj.JsonValue.Parse("true")
-        self.assertEqual(b.ValueType, 1)
+        self.assertEqual(b.ValueType, wdj.JsonValueType.Boolean)
         self.assertTrue(b.GetBoolean())
 
         n = wdj.JsonValue.Parse("16")
-        self.assertEqual(n.ValueType, 2)
+        self.assertEqual(n.ValueType, wdj.JsonValueType.Number)
         self.assertEqual(n.GetNumber(), 16)
 
         s = wdj.JsonValue.Parse("\"plugh\"")
-        self.assertEqual(s.ValueType, 3)
+        self.assertEqual(s.ValueType, wdj.JsonValueType.String)
         self.assertEqual(s.GetString(), "plugh")
 
     def test_invalid_param_count_instance(self):
@@ -167,7 +169,7 @@ class TestJson(unittest.TestCase):
 
         self.assertFalse(items[0].GetBoolean())
         self.assertEqual(items[1].GetNumber(), 42)
-        self.assertEqual(items[2].ValueType, 0)
+        self.assertEqual(items[2].ValueType, wdj.JsonValueType.Null)
 
         # TODO: remove clear call after resolving leak issue
         items.clear()
@@ -188,7 +190,4 @@ class TestJson(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    import _pyrt
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()
