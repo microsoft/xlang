@@ -8,6 +8,7 @@
 #include "component_writers.h"
 #include "file_writers.h"
 #include "type_writers.h"
+#include "write_tests.h"
 
 namespace xlang
 {
@@ -35,6 +36,7 @@ namespace xlang
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
+        { "tests", 0, 0 }, // Generate internal test files
     };
 
     static void print_usage(writer& w)
@@ -92,6 +94,7 @@ Where <spec> is one or more of:
 
         settings.license = args.exists("license");
         settings.brackets = args.exists("brackets");
+        settings.tests = args.exists("tests");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / "winrt/impl");
@@ -260,43 +263,45 @@ Where <spec> is one or more of:
                 });
             }
 
-            group.add([&]
+            if (settings.base)
             {
-                if (settings.base)
+                write_base_h();
+                write_coroutine_h();
+            }
+
+            if (settings.component)
+            {
+                std::vector<TypeDef> classes;
+
+                for (auto&&[ns, members] : c.namespaces())
                 {
-                    write_base_h();
-                    write_coroutine_h();
-                }
-
-                if (settings.component)
-                {
-                    std::vector<TypeDef> classes;
-
-                    for (auto&&[ns, members] : c.namespaces())
+                    for (auto&& type : members.classes)
                     {
-                        for (auto&& type : members.classes)
+                        if (settings.component_filter.includes(type))
                         {
-                            if (settings.component_filter.includes(type))
-                            {
-                                classes.push_back(type);
-                            }
-                        }
-                    }
-
-                    if (!classes.empty())
-                    {
-                        write_module_g_cpp(classes);
-
-                        for (auto&& type : classes)
-                        {
-                            write_component_g_h(type);
-                            write_component_g_cpp(type);
-                            write_component_h(type);
-                            write_component_cpp(type);
+                            classes.push_back(type);
                         }
                     }
                 }
-            });
+
+                if (!classes.empty())
+                {
+                    write_module_g_cpp(classes);
+
+                    for (auto&& type : classes)
+                    {
+                        write_component_g_h(type);
+                        write_component_g_cpp(type);
+                        write_component_h(type);
+                        write_component_cpp(type);
+                    }
+                }
+            }
+
+            if (settings.tests)
+            {
+                write_tests(c);
+            }
 
             group.get();
 

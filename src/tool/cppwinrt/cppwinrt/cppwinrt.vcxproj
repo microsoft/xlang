@@ -76,6 +76,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="type_writers.h" />
+    <ClInclude Include="write_tests.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(OutDir)strings.cpp" />

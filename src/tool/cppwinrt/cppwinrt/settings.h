@@ -11,6 +11,7 @@ namespace xlang
         bool base{};
         bool license{};
         bool brackets{};
+        bool tests{};
 
         bool component{};
         std::string component_folder;
