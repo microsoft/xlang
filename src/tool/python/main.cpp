@@ -89,10 +89,10 @@ namespace xlang
             {
                 write_pybase_h(src_dir);
                 write_package_dunder_init_py(module_dir);
-				write_module_cpp(src_dir);
-			});
+                write_module_cpp(src_dir);
+            });
 
-			std::vector<std::string> generated_namespaces{};
+            std::vector<std::string> generated_namespaces{};
 
             for (auto&&[ns, members] : c.namespaces())
             {
