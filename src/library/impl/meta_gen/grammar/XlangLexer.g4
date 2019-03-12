@@ -11,12 +11,11 @@ NEWLINE
     ;
 
 /* Comments */
-COMMENT: DELIMITED_COMMENT | SINGLE_LINE_COMMENT;
-DELIMITED_COMMENT: '/*' .*? '*/'    -> channel(HIDDEN); // Haven't considered this case "/* sd */ */"
-SINGLE_LINE_COMMENT: '//' ~[\u000D\u000A\u0085\u2028\u2029]*    -> channel(HIDDEN);
+DELIMITED_COMMENT: '/*' .*? '*/' -> channel(HIDDEN); // Haven't considered this case "/* sd */ */"
+SINGLE_LINE_COMMENT: '//' ~[\u000D\u000A\u0085\u2028\u2029]* -> channel(HIDDEN);
 
 /* Whitespace */
-WHITESPACE: Whitespace -> channel(HIDDEN);
+WHITESPACE: (Whitespace | NEWLINE)+ -> channel(HIDDEN);
 
 fragment Whitespace
     : UnicodeClassZS    // Any Character With Unicode Class Zs
@@ -24,6 +23,76 @@ fragment Whitespace
     | '\u000B'          // Vertical Tab Character
     | '\u000C'          // Form Feed Character
     ;
+
+/* Keywords */
+ABSTRACT: 'abstract';
+ATTRIBUTE: 'attribute';
+CLASS: 'class';
+CONST: 'const';
+DEFAULT: 'default';
+DELEGATE: 'delegate';
+ENUM: 'enum';
+EVENT: 'event';
+INTERFACE: 'interface';
+INTERNAL: 'internal';
+NAMEPSACE: 'namespace';
+NULL: 'null';
+PARTIAL: 'partial';
+OBJECT: 'object';
+OUT: 'out';
+OVERRIDE: 'override';
+PROTECTED: 'protected';
+REF: 'ref';
+SEALED: 'sealed';
+STATIC: 'static';
+STRUCT: 'struct';
+TYPEOF: 'typeof';
+USING: 'using';
+VIRTUAL: 'virtual';
+VOID: 'void';
+
+PUBLIC: 'public';
+PRIVATE: 'private';
+NEW: 'new';
+
+ADD: 'add';
+REMOVE: 'remove';
+
+GET: 'get';
+SET: 'set';
+
+PLACEHOLDER_REMOVELATER: 'placeholder';
+
+// Xlang Type System
+INT16: 'Int16';
+INT32: 'Int32';
+INT64: 'Int64';
+UINT8: 'Uint8';
+UINT16: 'UInt16';
+UINT32: 'UInt32';
+UINT64: 'UInt64';
+SINGLE: 'Single';
+DOUBLE: 'Double';
+CHAR16: 'Char16';
+BOOLEAN: 'Boolean';
+STRING: 'String';
+GUID: 'Guid';
+
+SEMICOLON: ';';
+OPEN_BRACE: '{';
+CLOSE_BRACE: '}';
+OPEN_BRACKET: '[';
+CLOSE_BRACKET: ']';
+OPEN_PARENS: '(';
+CLOSE_PARENS: ')';
+DOT: '.';
+COMMA: ',';
+COLON: ':';
+QUESTION_MARK: '?';
+DOUBLE_COLON: '::';
+EQUAL: '=';
+LESS_THAN: '<';
+GREATER_THAN: '>';
 
 /* Unicode character escape sequences */
 fragment UnicodeEscapeSequence
@@ -214,78 +283,6 @@ fragment QuoteEscapeSequence
     ;
 
 fragment NullLiteral: 'null';
-
-/* Keywords */
-ABSTRACT: 'abstract';
-ATTRIBUTE: 'attribute';
-CLASS: 'class';
-CONST: 'const';
-DEFAULT: 'default';
-DELEGATE: 'delegate';
-ENUM: 'enum';
-EVENT: 'event';
-INTERFACE: 'interface';
-INTERNAL: 'internal';
-NAMEPSACE: 'namespace';
-NULL: 'null';
-PARTIAL: 'partial';
-OBJECT: 'object';
-OUT: 'out';
-OVERRIDE: 'override';
-PROTECTED: 'protected';
-REF: 'ref';
-SEALED: 'sealed';
-STATIC: 'static';
-STRUCT: 'struct';
-TYPEOF: 'typeof';
-USING: 'using';
-VIRTUAL: 'virtual';
-VOID: 'void';
-
-PUBLIC: 'public';
-PRIVATE: 'private';
-NEW: 'new';
-
-ADD: 'add';
-REMOVE: 'remove';
-
-GET: 'get';
-SET: 'set';
-
-PLACEHOLDER_REMOVELATER: 'placeholder';
-
-// Xlang Type System
-INT16: 'Int16';
-INT32: 'Int32';
-INT64: 'Int64';
-UINT8: 'Uint8';
-UINT16: 'UInt16';
-UINT32: 'UInt32';
-UINT64: 'UInt64';
-SINGLE: 'Single';
-DOUBLE: 'Double';
-CHAR16: 'Char16';
-BOOLEAN: 'Boolean';
-STRING: 'String';
-GUID: 'Guid';
-
-SEMICOLON: ';';
-OPEN_BRACE: '{';
-CLOSE_BRACE: '}';
-OPEN_BRACKET: '[';
-CLOSE_BRACKET: ']';
-OPEN_PARENS: '(';
-CLOSE_PARENS: ')';
-DOT: '.';
-COMMA: ',';
-COLON: ':';
-QUESTION_MARK: '?';
-DOUBLE_COLON: '::';
-EQUAL: '=';
-LESS_THAN: '<';
-GREATER_THAN: '>';
-
-
 
 /* Unicode character classes */
 fragment UnicodeClassLU
