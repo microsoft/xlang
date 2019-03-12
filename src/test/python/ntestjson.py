@@ -1,27 +1,8 @@
-import sys
-sys.path.append("./generated")
-
-import _pyrt
-_pyrt.init_apartment()
-
-def _import_ns(ns):
-    import importlib.machinery
-    import importlib.util
-    try:
-        module_name = "_pyrt_" + ns.replace('.', '_')
-        loader = importlib.machinery.ExtensionFileLoader(module_name, _pyrt.__file__)
-        spec = importlib.util.spec_from_loader(module_name, loader)
-        module = importlib.util.module_from_spec(spec)
-        loader.exec_module(module)
-        return module
-    except:
-        return None
-
-import unittest, enum
+import loader_native, unittest, enum
 
 # need to ensure WFC is initialized 
-wfc = _import_ns("Windows.Foundation.Collections")
-wdj = _import_ns("Windows.Data.Json")
+wfc = loader_native.import_ns("Windows.Foundation.Collections")
+wdj = loader_native.import_ns("Windows.Data.Json")
 
 class JsonValueType(enum.IntEnum):
     Null = 0
