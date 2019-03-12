@@ -3,6 +3,7 @@
  * can be found in the LICENSE.txt file in the project root.
  */
 
+
 //
 //  main.cpp
 //  antlr4-cpp-demo
@@ -13,7 +14,8 @@
 #include <iostream>
 
 #include "antlr4-runtime.h"
-#include "grammar/XlangLexer.h"
+#include "cpp/XlangLexer.h"
+#include "cpp/XlangParser.h"
 
 #include <Windows.h>
 
@@ -25,9 +27,9 @@ using namespace antlr4;
 int main(int argc, const char * argv[]) {
 
   ANTLRInputStream input("🍴 = 🍐 + \"😎\";(((x * π))) * µ + ∰; a + (x * (y ? 0 : 1) + z);");
-  TLexer lexer(&input);
+  XlangLexer lexer(&input);
   CommonTokenStream tokens(&lexer);
 
-  TParser parser(&tokens);
+  XLangParser parser(&tokens);
   return 0;
 }

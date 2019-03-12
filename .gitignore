@@ -342,3 +342,6 @@ src/test/python/__pycache__/
 
 # Ignore copied license
 src/package/vsix/LICENSE
+
+# Generated java files from Antlr
+src/tool/xmeta/java/Xlang*

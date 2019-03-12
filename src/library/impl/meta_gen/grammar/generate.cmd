@@ -1,1 +1,0 @@
-java org.antlr.v4.Tool -o ../java XlangLexer.g4 XlangParser.g4
