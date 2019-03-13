@@ -16,7 +16,7 @@ add_custom_command(OUTPUT ${cppwinrt_nupkg}
     DEPENDS ${XLANG_BUILD_VERSION_h} ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.CppWinRT.nuspec
 )
 
-add_custom_target(make_cppwinrt_nupkg ALL DEPENDS ${cppwinrt_nupkg} ${cppwinrt_exe})
+add_custom_target(make_cppwinrt_nupkg ALL DEPENDS ${cppwinrt_nupkg} cppwinrt)
 
 set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg_dir" ${cppwinrt_nupkg_dir})
 
