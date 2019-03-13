@@ -1,6 +1,6 @@
-parser grammar XlangParser;
+parser grammar xlang_parser;
 
-options { tokenVocab=XlangLexer; }
+options { tokenVocab=xlang_lexer; }
 
 
 /* Entry Point */
@@ -71,6 +71,7 @@ integral_type
     | UINT32
     | UINT64
     | CHAR16
+    | GUID
     ;
 
 enum_integral_type
@@ -97,6 +98,7 @@ reference_type
 class_type
     : type_name
     | OBJECT
+    | NILL
     ;
 
 interface_type

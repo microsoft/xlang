@@ -1,4 +1,4 @@
-lexer grammar XlangLexer;
+lexer grammar xlang_lexer;
 
 /* Comments */
 DELIMITED_COMMENT: '/*' .*? '*/' -> channel(HIDDEN); // Haven't considered this case "/* sd */ */"
@@ -36,7 +36,6 @@ EVENT: 'event';
 INTERFACE: 'interface';
 INTERNAL: 'internal';
 NAMEPSACE: 'namespace';
-NULL: 'null';
 PARTIAL: 'partial';
 OBJECT: 'object';
 OUT: 'out';
@@ -77,6 +76,7 @@ CHAR16: 'Char16';
 BOOLEAN: 'Boolean';
 STRING: 'String';
 GUID: 'Guid';
+NILL: 'NULL';
 
 SEMICOLON: ';';
 OPEN_BRACE: '{';

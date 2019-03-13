@@ -14,22 +14,21 @@
 #include <iostream>
 
 #include "antlr4-runtime.h"
-#include "cpp/XlangLexer.h"
-#include "cpp/XlangParser.h"
+#include "cpp/generated/xlang_lexer.h"
+#include "cpp/generated/xlang_parser.h"
 
 #include <Windows.h>
 
 #pragma execution_character_set("utf-8")
 
-using namespace antlrcpptest;
 using namespace antlr4;
 
 int main(int argc, const char * argv[]) {
 
   ANTLRInputStream input("🍴 = 🍐 + \"😎\";(((x * π))) * µ + ∰; a + (x * (y ? 0 : 1) + z);");
-  XlangLexer lexer(&input);
+  xlang_lexer lexer(&input);
   CommonTokenStream tokens(&lexer);
 
-  XLangParser parser(&tokens);
+  xlang_parser parser(&tokens);
   return 0;
 }

@@ -4,5 +4,7 @@ xmeta/java is the target directory for java code generation from the antlr tool.
 xmeta/cpp is the target directory for cpp code generation.
 
 #Generating Parser and Lexer
-1) Run the generate.cmd in xmeta/grammar. This will generate the xlang lexer, parser and all else you need in cpp. 
+1) Install the latest JDK. 
+
+2) Run the generate.cmd in xmeta/grammar. This will generate the xlang lexer, parser and all else you need in cpp. 
 
