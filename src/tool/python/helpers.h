@@ -51,7 +51,25 @@ namespace xlang
         }
     };
 
-    bool is_flags_enum(TypeDef const& type);
+    bool is_exclusive_to(TypeDef const& type)
+    {
+        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+    }
+
+    bool is_flags_enum(TypeDef const& type)
+    {
+        return get_category(type) == category::enum_type && get_attribute(type, "System", "FlagsAttribute");
+    }
+
+    bool is_ptype(TypeDef const& type)
+    {
+        return distance(type.GenericParam()) > 0;
+    }
+
+    bool is_static(TypeDef const& type)
+    {
+        return get_category(type) == category::class_type && type.Flags().Abstract();
+    }
 
     template <typename T>
     struct signature_handler_base
@@ -195,7 +213,7 @@ namespace xlang
             }
             else
             {
-                name = "winrt_impl_return_value";
+                name = "_return_value";
             }
 
             return name;
@@ -314,180 +332,6 @@ namespace xlang
         return std::move(interfaces);
     }
 
-    std::vector<std::string> get_type_arguments(TypeDef const& type, std::string_view const& ns, std::vector<std::string_view> const& names)
-    {
-        for (auto&& ii : get_required_interfaces(type))
-        {
-            if (ii.type.TypeNamespace() == ns && std::any_of(
-                names.begin(), names.end(), [type_name = ii.type.TypeName()](auto const& name){ return name == type_name; }))
-            {
-                return std::move(ii.type_arguments);
-            }
-        }
-
-        return {};
-    }
-
-    bool implements_interface(TypeDef const& type, std::string_view const& ns, std::string_view const& name)
-    {
-        auto category = get_category(type);
-
-        auto type_name_matches = [&ns, &name](TypeDef const& td) { return td.TypeNamespace() == ns && td.TypeName() == name; };
-
-        if (category == category::class_type)
-        {
-            for (auto&& ii : type.InterfaceImpl())
-            {
-                switch (ii.Interface().type())
-                {
-                case TypeDefOrRef::TypeDef:
-                {
-                    if (implements_interface(ii.Interface().TypeDef(), ns, name))
-                    {
-                        return true;
-                    }
-                }
-                break;
-                case TypeDefOrRef::TypeRef:
-                {
-                    if (implements_interface(find_required(ii.Interface().TypeRef()), ns, name))
-                    {
-                        return true;
-                    }
-                }
-                break;
-                case TypeDefOrRef::TypeSpec:
-                {
-                    auto generic_type = ii.Interface().TypeSpec().Signature().GenericTypeInst().GenericType();
-                    switch (generic_type.type())
-                    {
-                    case TypeDefOrRef::TypeDef:
-                    {
-                        if (implements_interface(generic_type.TypeDef(), ns, name))
-                        {
-                            return true;
-                        }
-                    }
-                    break;
-                    case TypeDefOrRef::TypeRef:
-                    {
-                        if (implements_interface(find_required(generic_type.TypeRef()), ns, name))
-                        {
-                            return true;
-                        }
-                    }
-                    break;
-                    case TypeDefOrRef::TypeSpec:
-                    {
-                        throw_invalid("generic type of a type spec can't be a type spec");
-                    }
-                    break;
-                    }
-                }
-                break;
-                }
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            if (type_name_matches(type))
-            {
-                return true;
-            }
-
-            for (auto&& i : get_required_interfaces(type))
-            {
-                if (type_name_matches(i.type))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    bool implements_any_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> names)
-    {
-        for (auto&&[ns, name] : names)
-        {
-            if (implements_interface(type, ns, name))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    bool implements_istringable(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation", "IStringable");
-    }
-
-    bool implements_iclosable(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation", "IClosable");
-    }
-
-    bool is_async_interface(TypeDef const& type)
-    {
-        return get_category(type) == category::interface_type &&
-            implements_any_interface(type, {
-                std::make_tuple("Windows.Foundation", "IAsyncAction"),
-                std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
-                std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
-                std::make_tuple("Windows.Foundation", "IAsyncOperationWithProgress`2") });
-    }
-
-    bool implements_iiterable(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation.Collections", "IIterable`1");
-    }
-
-    bool implements_iiterator(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation.Collections", "IIterator`1");
-    }
-
-    bool implements_ivector(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation.Collections", "IVector`1");
-    }
-
-    bool implements_ivectorview(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation.Collections", "IVectorView`1");
-    }
-
-    bool implements_sequence(TypeDef const& type)
-    {
-        return implements_ivector(type) || implements_ivectorview(type); 
-    }
-
-    bool implements_imap(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation.Collections", "IMap`2");
-    }
-
-    bool implements_imapview(TypeDef const& type)
-    {
-        return implements_interface(type, "Windows.Foundation.Collections", "IMapView`2");
-    }
-
-    bool implements_mapping(TypeDef const& type)
-    {
-        return implements_imap(type) || implements_imapview(type);
-    }
-
-    struct method_info
-    {
-        MethodDef method;
-        std::vector<std::string> type_arguments;
-    };
-
-    bool is_constructor(MethodDef const& method);
-
     auto get_member_name(MethodDef const& method)
     {
         auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
@@ -502,194 +346,10 @@ namespace xlang
         }
     }
 
-    int count_in_param(std::vector<method_signature::param_t> const& params);
-
-    auto get_members(TypeDef const& type)
-    {
-        std::map<std::string_view, std::map<int, std::vector<method_info>>> method_map{};
-        auto push_func = [&](method_info const& info)
-        {
-            auto name = get_member_name(info.method);
-
-            method_signature sig{ info.method };
-            auto param_count = count_in_param(sig.params());
-            method_map[name][param_count].push_back(info);
-        };
-
-        auto category = get_category(type);
-
-        if (category == category::class_type)
-        {
-            for (auto&& method : type.MethodList())
-            {
-                push_func(method_info{ method, std::vector<std::string> {} });
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            for (auto&& info : get_required_interfaces(type))
-            {
-                for (auto&& method : info.type.MethodList())
-                {
-                    push_func(method_info{ method, info.type_arguments });
-                }
-            }
-        }
-        else
-        {
-            throw_invalid("only classes and interfaces have methods");
-        }
-
-#ifdef XLANG_DEBUG
-        //for (auto&&[name, method_infos] : method_map)
-        //{
-        //    XLANG_ASSERT(method_infos.size() > 0);
-        //    auto static_method = method_infos[0].method.Flags().Static();
-        //    for (auto&& info : method_infos)
-        //    {
-        //        XLANG_ASSERT(info.method.Flags().Static() == static_method);
-        //    }
-        //}
-#endif
-
-        return std::move(method_map);
-    }
-
-    auto get_methods(TypeDef const& type, bool include_special = false)
-    {
-        std::map<std::string_view, std::vector<method_info>> method_map{};
-        auto category = get_category(type);
-
-        if (category == category::class_type)
-        {
-            for (auto&& method : type.MethodList())
-            {
-                if (is_constructor(method) || (method.SpecialName() && !include_special))
-                {
-                    continue;
-                }
-
-                method_map[method.Name()].push_back(method_info{ method, std::vector<std::string> {} });
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            for (auto&& info : get_required_interfaces(type))
-            {
-                for (auto&& method : info.type.MethodList())
-                {
-                    if (method.SpecialName() && !include_special)
-                    {
-                        continue;
-                    }
-
-                    method_map[method.Name()].push_back(method_info{ method, info.type_arguments });
-                }
-            }
-        }
-        else
-        {
-            throw_invalid("only classes and interfaces have methods");
-        }
-
-#ifdef XLANG_DEBUG
-        for (auto&&[name, method_infos] : method_map)
-        {
-            XLANG_ASSERT(method_infos.size() > 0);
-            auto static_method = method_infos[0].method.Flags().Static();
-            for (auto&& info : method_infos)
-            {
-                XLANG_ASSERT(info.method.Flags().Static() == static_method);
-            }
-        }
-#endif
-
-        return std::move(method_map);
-    }
-
-    struct property_info
-    {
-        Property property;
-        std::vector<std::string> type_arguments;
-    };
-
-    auto get_properties(TypeDef const& type)
-    {
-        std::vector<property_info> properties{};
-
-        auto category = get_category(type);
-        if (category == category::class_type)
-        {
-            for (auto&& prop : type.PropertyList())
-            {
-                properties.push_back(property_info{ prop, std::vector<std::string> {} });
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            for (auto&& info : get_required_interfaces(type))
-            {
-                for (auto&& prop : info.type.PropertyList())
-                {
-                    properties.push_back(property_info{ prop, info.type_arguments });
-                }
-            }
-        }
-
-        return std::move(properties);
-    }
-
-    struct event_info
-    {
-        Event event;
-        std::vector<std::string> type_arguments;
-    };
-
-    auto get_events(TypeDef const& type)
-    {
-        std::vector<event_info> events{};
-
-        auto category = get_category(type);
-        if (category == category::class_type)
-        {
-            for (auto&& event : type.EventList())
-            {
-                events.push_back(event_info{ event, std::vector<std::string> {} });
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            for (auto&& info : get_required_interfaces(type))
-            {
-                for (auto&& event : info.type.EventList())
-                {
-                    events.push_back(event_info{ event, info.type_arguments });
-                }
-            }
-        }
-
-        return std::move(events);
-    }
-
-    auto get_constructors(TypeDef const& type)
-    {
-        std::vector<MethodDef> constructors;
-
-        for (auto&& method : type.MethodList())
-        {
-            if (is_constructor(method))
-            {
-                constructors.push_back(method);
-            }
-        }
-
-        return std::move(constructors);
-    }
-
     auto get_delegate_invoke(TypeDef const& type)
     {
         XLANG_ASSERT(get_category(type) == category::delegate_type);
-
+    
         for (auto&& method : type.MethodList())
         {
             if (method.SpecialName() && (method.Name() == "Invoke"))
@@ -697,50 +357,18 @@ namespace xlang
                 return method;
             }
         }
-
+    
         throw_invalid("Invoke method not found");
     }
 
-    bool is_exclusive_to(TypeDef const& type)
-    {
-        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
-    }
-
-    bool is_flags_enum(TypeDef const& type)
-    {
-        return get_category(type) == category::enum_type && get_attribute(type, "System", "FlagsAttribute");
-    }
-
-    bool is_ptype(TypeDef const& type)
-    {
-        return distance(type.GenericParam()) > 0;
-    }
-
-    bool is_static(TypeDef const& type)
-    {
-        return get_category(type) == category::class_type && type.Flags().Abstract();
-    }
-
-    std::string_view get_method_abi_name(MethodDef const& method)
-    {
-        auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
-        if (overload_attrib)
-        {
-            auto args = overload_attrib.Value().FixedArgs();
-            return std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
-        }
-
-        return method.Name();
-    }
-
-    bool is_special(MethodDef const& method)
-    {
-        return method.SpecialName() || method.Flags().RTSpecialName();
-    }
-
-    bool is_constructor(MethodDef const& method)
+    inline bool is_constructor(MethodDef const& method)
     {
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";
+    }
+
+    inline bool is_static(MethodDef const& method)
+    {
+        return method.Flags().Static();
     }
 
     inline bool is_get_method(MethodDef const& method)
@@ -753,11 +381,6 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "put_");
     }
 
-    inline bool is_property_method(MethodDef const& method)
-    {
-        return method.SpecialName() && (starts_with(method.Name(), "get_") || starts_with(method.Name(), "put_"));
-    }
-
     inline bool is_add_method(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "add_");
@@ -766,157 +389,6 @@ namespace xlang
     inline bool is_remove_method(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "remove_");
-    }
-
-    inline bool is_event_method(MethodDef const& method)
-    {
-        return method.SpecialName() && (starts_with(method.Name(), "add_") || starts_with(method.Name(), "remove_"));
-    }
-
-    inline bool is_static(MethodDef const& method)
-    {
-        return method.Flags().Static();
-    }
-
-    struct property_type
-    {
-        MethodDef get;
-        MethodDef set;
-    };
-
-    property_type get_property_methods(Property const& prop)
-    {
-        MethodDef get_method{}, set_method{};
-
-        for (auto&& method_semantic : prop.MethodSemantic())
-        {
-            auto semantic = method_semantic.Semantic();
-
-            if (semantic.Getter())
-            {
-                get_method = method_semantic.Method();
-            }
-            else if (semantic.Setter())
-            {
-                set_method = method_semantic.Method();
-            }
-            else
-            {
-                throw_invalid("Properties can only have get and set methods");
-            }
-        }
-
-        XLANG_ASSERT(get_method);
-
-        if (set_method)
-        {
-            XLANG_ASSERT(get_method.Flags().Static() == set_method.Flags().Static());
-        }
-
-        return { get_method, set_method };
-    }
-
-    bool is_static(Property const& prop)
-    {
-        auto methods = get_property_methods(prop);
-        return is_static(methods.get);
-    }
-
-    bool is_static(property_info const& prop)
-    {
-        return is_static(prop.property);
-    }
-
-    struct event_type
-    {
-        MethodDef add;
-        MethodDef remove;
-    };
-
-    event_type get_event_methods(Event const& evt)
-    {
-        MethodDef add_method{}, remove_method{};
-
-        for (auto&& method_semantic : evt.MethodSemantic())
-        {
-            auto semantic = method_semantic.Semantic();
-
-            if (semantic.AddOn())
-            {
-                add_method = method_semantic.Method();
-            }
-            else if (semantic.RemoveOn())
-            {
-                remove_method = method_semantic.Method();
-            }
-            else
-            {
-                throw_invalid("Events can only have add and remove methods");
-            }
-        }
-
-        XLANG_ASSERT(add_method);
-        XLANG_ASSERT(remove_method);
-        XLANG_ASSERT(add_method.Flags().Static() == remove_method.Flags().Static());
-
-        return { add_method, remove_method };
-    }
-
-    bool is_static(Event const& evt)
-    {
-        auto methods = get_event_methods(evt);
-        return is_static(methods.add);
-    }
-
-    bool is_static(event_info const& evt)
-    {
-        return is_static(evt.event);
-    }
-
-    bool has_dealloc(TypeDef const& type)
-    {
-        auto category = get_category(type);
-        return category == category::struct_type ||
-            category == category::interface_type || 
-            (category == category::class_type && !type.Flags().Abstract());
-    }
-
-    TypeSig get_ireference_type(GenericTypeInstSig const& type)
-    {
-        TypeDef td{ };
-
-        switch (type.GenericType().type())
-        {
-        case TypeDefOrRef::TypeDef:
-            td = type.GenericType().TypeDef();
-            break;
-        case TypeDefOrRef::TypeRef:
-            td = find_required(type.GenericType().TypeRef());
-            break;
-        default:
-            throw_invalid("expecting TypeDef or TypeRef");
-        }
-
-        if ((td.TypeNamespace() != "Windows.Foundation") || (td.TypeName() != "IReference`1"))
-        {
-            throw_invalid("Expecting Windows.Foundation.IReference");
-        }
-
-        XLANG_ASSERT(type.GenericArgCount() == 1);
-
-        return *(type.GenericArgs().first);
-    }
-
-    bool is_customized_struct(TypeDef const& type)
-    {
-        if (type.TypeNamespace() == "Windows.Foundation")
-        {
-            static const std::set<std::string_view> custom_structs = { "DateTime", "EventRegistrationToken", "HResult", "TimeSpan" };
-
-            return custom_structs.find(type.TypeName()) != custom_structs.end();
-        }
-
-        return false;
     }
 
     enum class param_category
@@ -1009,45 +481,76 @@ namespace xlang
         return count;
     }
 
-    int count_out_param(std::vector<method_signature::param_t> const& params)
+    enum class argument_convention
     {
-        int count{ 0 };
-
-        for (auto&& param : params)
-        {
-            if (is_out_param(param))
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    enum class arg_count
-    {
-        none,
-        single,
-        variable
+        no_args,
+        single_arg,
+        variable_args
     };
 
-    arg_count get_arg_count(MethodDef const& method)
+    auto get_argument_convention(MethodDef const& method)
     {
         if (is_constructor(method) && empty(method.ParamList()))
         {
-            return arg_count::none;
+            return argument_convention::no_args;
         }
         else if (is_get_method(method))
         {
-            return arg_count::none;
+            return argument_convention::no_args;
         }
         else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
         {
-            return arg_count::single;
+            return argument_convention::single_arg;
         }
         else
         {
-            return arg_count::variable;
+            return argument_convention::variable_args;
         }
+    }
+
+    TypeSig get_ireference_type(GenericTypeInstSig const& type)
+    {
+        TypeDef td{ };
+
+        switch (type.GenericType().type())
+        {
+        case TypeDefOrRef::TypeDef:
+            td = type.GenericType().TypeDef();
+            break;
+        case TypeDefOrRef::TypeRef:
+            td = find_required(type.GenericType().TypeRef());
+            break;
+        default:
+            throw_invalid("expecting TypeDef or TypeRef");
+        }
+
+        if ((td.TypeNamespace() != "Windows.Foundation") || (td.TypeName() != "IReference`1"))
+        {
+            throw_invalid("Expecting Windows.Foundation.IReference");
+        }
+
+        XLANG_ASSERT(type.GenericArgCount() == 1);
+
+        return *(type.GenericArgs().first);
+    }
+
+    bool is_customized_struct(TypeDef const& type)
+    {
+        if (type.TypeNamespace() == "Windows.Foundation")
+        {
+            static const std::set<std::string_view> custom_structs = { "DateTime", "EventRegistrationToken", "HResult", "TimeSpan" };
+
+            return custom_structs.find(type.TypeName()) != custom_structs.end();
+        }
+
+        return false;
+    }
+
+    bool has_dealloc(TypeDef const& type)
+    {
+        auto category = get_category(type);
+        return category == category::struct_type ||
+            category == category::interface_type ||
+            (category == category::class_type && !type.Flags().Abstract());
     }
 }

@@ -145,39 +145,34 @@ namespace xlang
     inline void write_namespace_dunder_init_py(stdfs::path const& folder, std::string_view const& module_name, std::set<std::string> const& needed_namespaces, std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
+        w.current_namespace = ns;
         
         write_license_python(w);
 
-        w.write("from % import _import_ns\nimport typing\n", module_name);
+        w.write("import %\n", module_name);
 
         if (settings.filter.includes(members.enums))
         {
             w.write("import enum\n");
         }
 
-        w.write("\n__ns__ = _import_ns(\"%\")\n", ns);
+        w.write("\n_ns_module = %._import_ns_module(\"%\")\n\n", module_name, ns);
 
         if (!needed_namespaces.empty())
         {
             for (std::string needed_ns : needed_namespaces)
             {
                 std::transform(needed_ns.begin(), needed_ns.end(), needed_ns.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
-                auto format = R"(
-try:
-    import %.%
-except:
-    pass
-)";
-                w.write(format, module_name, needed_ns);
+                w.write("import %.%\n", module_name, needed_ns);
             }
         }
 
         w.write("\n");
 
         settings.filter.bind_each<write_python_enum>(members.enums)(w);
-        settings.filter.bind_each<write_import_type>(members.classes)(w);
-        settings.filter.bind_each<write_import_type>(members.interfaces)(w);
-        settings.filter.bind_each<write_import_type>(members.structs)(w);
+        settings.filter.bind_each<write_python_class>(members.classes)(w);
+        //settings.filter.bind_each<write_import_type>(members.interfaces)(w);
+        //settings.filter.bind_each<write_import_type>(members.structs)(w);
 
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");

@@ -293,17 +293,17 @@ static void _dealloc_@(%* self)
         w.write(std::to_string(method.index()));
     }
 
-    void write_method_args(writer& w, MethodDef const& method)
+    void write_method_table_row_flags(writer& w, MethodDef const& method)
     {
-        switch (get_arg_count(method))
+        switch (get_argument_convention(method))
         {
-        case arg_count::none:
+        case argument_convention::no_args:
             w.write("METH_NOARGS");
             break;
-        case arg_count::single:
+        case argument_convention::single_arg:
             w.write("METH_O");
             break;
-        case arg_count::variable:
+        case argument_convention::variable_args:
             w.write("METH_VARARGS");
             break;
         }
@@ -331,7 +331,7 @@ static void _dealloc_@(%* self)
         w.write("{ \"%\", (PyCFunction)%, %, nullptr },\n",
             bind<write_method_name>(method),
             bind<write_method_function_name>(type, method),
-            bind<write_method_args>(method));
+            bind<write_method_table_row_flags>(method));
     }
 
     void write_method_table(writer& w, TypeDef const& type)
@@ -430,15 +430,15 @@ static void _dealloc_@(%* self)
 
     void write_args_param_name(writer& w, MethodDef const& method)
     {
-        switch (get_arg_count(method))
+        switch (get_argument_convention(method))
         {
-        case arg_count::none:
+        case argument_convention::no_args:
             w.write("/* unused */");
             break;
-        case arg_count::single:
+        case argument_convention::single_arg:
             w.write("arg");
             break;
-        case arg_count::variable:
+        case argument_convention::variable_args:
             w.write("args");
             break;
         }
@@ -477,12 +477,12 @@ static void _dealloc_@(%* self)
 
     void write_convert_to_params(writer& w, MethodDef const& method, int sequence)
     {
-        switch (get_arg_count(method))
+        switch (get_argument_convention(method))
         {
-        case arg_count::single:
+        case argument_convention::single_arg:
             w.write("arg");
             break;
-        case arg_count::variable:
+        case argument_convention::variable_args:
             w.write("args, %", sequence);
             break;
         default:
@@ -666,9 +666,7 @@ if (!%)
 
     void write_method_body(writer& w, TypeDef const& type, MethodDef const& method)
     {
-        auto arg_count = get_arg_count(method);
-
-        if (arg_count == arg_count::variable)
+        if (get_argument_convention(method) == argument_convention::variable_args)
         {
             method_signature signature{ method };
             writer::indent_guard g{ w };
