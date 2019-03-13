@@ -11,7 +11,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
         <CanReferenceWinRT>true</CanReferenceWinRT>
-        <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">Generated Files\</GeneratedFilesDir>
         <CppWinRTPackage Condition="'$(CppWinRTEnabled)' != 'true'">true</CppWinRTPackage>
         <CppWinRTPackage Condition="'$(CppWinRTPackage)' != 'true'">false</CppWinRTPackage>
         <XamlLanguage>CppWinRT</XamlLanguage>
@@ -40,7 +39,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <TypeLibraryName Condition="'%(Midl.TypeLibraryName)'==''"></TypeLibraryName>
         </Midl>
         <Link>
-            <AdditionalDependencies Condition="'$(CppWinRTLibs)' != 'false'">WindowsApp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies Condition="'$(CppWinRTLibs)' != 'false'">onecoreuap.lib;%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
     </ItemDefinitionGroup>
 
