@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.9)
 
 project(xmeta)
 
+set(xmeta_gen_generated
+  ${PROJECT_SOURCE_DIR}/cpp/generated/xlang_lexer.cpp
+  ${PROJECT_SOURCE_DIR}/cpp/generated/xlang_parser.cpp
+ )
+
+
 include_directories(
   ${PROJECT_SOURCE_DIR}/antlr4-runtime/
   ${PROJECT_SOURCE_DIR}/antlr4-runtime/misc
@@ -12,8 +18,13 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/
   ${PROJECT_SOURCE_DIR}/libs/
   )
+  
+set(xmeta_gen_src
+  ${PROJECT_SOURCE_DIR}/main.cpp
+  ${xmeta_gen_generated}
+  )
 
-add_executable(xmeta main.cpp)
+add_executable(xmeta ${xmeta_gen_src})
 
 target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/libs/antlr4-runtime.lib")
 
