@@ -9,70 +9,70 @@ namespace xlang::meta::reader
         return get_database().template get_table<Row>()[index()];
     }
 
-	inline auto typed_index<CustomAttributeType>::MemberRef() const
-	{
-		return get_row<reader::MemberRef>();
-	}
+    inline auto typed_index<CustomAttributeType>::MemberRef() const
+    {
+        return get_row<reader::MemberRef>();
+    }
 
-	inline auto typed_index<CustomAttributeType>::MethodDef() const
-	{
-		return get_row<reader::MethodDef>();
-	}
+    inline auto typed_index<CustomAttributeType>::MethodDef() const
+    {
+        return get_row<reader::MethodDef>();
+    }
 
-	inline auto typed_index<HasConstant>::Field() const
-	{
-		return get_row<reader::Field>();
-	}
+    inline auto typed_index<HasConstant>::Field() const
+    {
+        return get_row<reader::Field>();
+    }
 
-	inline auto typed_index<HasConstant>::Param() const
-	{
-		return get_row<reader::Param>();
-	}
+    inline auto typed_index<HasConstant>::Param() const
+    {
+        return get_row<reader::Param>();
+    }
 
-	inline auto typed_index<HasConstant>::Property() const
-	{
-		return get_row<reader::Property>();
-	}
+    inline auto typed_index<HasConstant>::Property() const
+    {
+        return get_row<reader::Property>();
+    }
 
-	inline auto typed_index<HasSemantics>::Property() const
-	{
-		return get_row<reader::Property>();
-	}
+    inline auto typed_index<HasSemantics>::Property() const
+    {
+        return get_row<reader::Property>();
+    }
 
-	inline auto typed_index<HasSemantics>::Event() const
-	{
-		return get_row<reader::Event>();
-	}
+    inline auto typed_index<HasSemantics>::Event() const
+    {
+        return get_row<reader::Event>();
+    }
 
-	inline auto typed_index<MethodDefOrRef>::MethodDef() const
-	{
-		return get_row<reader::MethodDef>();
-	}
+    inline auto typed_index<MethodDefOrRef>::MethodDef() const
+    {
+        return get_row<reader::MethodDef>();
+    }
 
-	inline auto typed_index<MethodDefOrRef>::MemberRef() const
-	{
-		return get_row<reader::MemberRef>();
-	}
+    inline auto typed_index<MethodDefOrRef>::MemberRef() const
+    {
+        return get_row<reader::MemberRef>();
+    }
 
-	inline auto typed_index<ResolutionScope>::Module() const
-	{
-		return get_row<reader::Module>();
-	}
+    inline auto typed_index<ResolutionScope>::Module() const
+    {
+        return get_row<reader::Module>();
+    }
 
-	inline auto typed_index<ResolutionScope>::ModuleRef() const
-	{
-		return get_row<reader::ModuleRef>();
-	}
+    inline auto typed_index<ResolutionScope>::ModuleRef() const
+    {
+        return get_row<reader::ModuleRef>();
+    }
 
-	inline auto typed_index<ResolutionScope>::AssemblyRef() const
-	{
-		return get_row<reader::AssemblyRef>();
-	}
+    inline auto typed_index<ResolutionScope>::AssemblyRef() const
+    {
+        return get_row<reader::AssemblyRef>();
+    }
 
-	inline auto typed_index<ResolutionScope>::TypeRef() const
-	{
-		return get_row<reader::TypeRef>();
-	}
+    inline auto typed_index<ResolutionScope>::TypeRef() const
+    {
+        return get_row<reader::TypeRef>();
+    }
 
     inline auto typed_index<TypeDefOrRef>::TypeDef() const
     {
@@ -139,7 +139,7 @@ namespace xlang::meta::reader
         TypeDef m_typedef;
         ElementType m_underlying_type{};
     
-	};
+    };
 
     inline auto TypeDef::get_enum_definition() const
     {

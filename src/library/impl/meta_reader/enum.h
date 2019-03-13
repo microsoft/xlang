@@ -314,7 +314,7 @@ namespace xlang::meta::reader
     {
         PublicKey = 0x0001, // The assembly reference holds the full (unhashed) public key
         Retargetable = 0x0100,
-		WindowsRuntime = 0x0200,
+        WindowsRuntime = 0x0200,
         DisableJITcompileOptimizer = 0x4000,
         EnableJITcompileTracking = 0x8000,
     };
