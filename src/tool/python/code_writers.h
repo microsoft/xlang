@@ -293,33 +293,6 @@ static void _dealloc_@(%* self)
         w.write(std::to_string(method.index()));
     }
 
-    enum class arg_count
-    {
-        none,
-        single,
-        variable
-    };
-
-    arg_count get_arg_count(MethodDef const& method)
-    {
-        if (is_constructor(method) && empty(method.ParamList()))
-        {
-            return arg_count::none;
-        }
-        else if (is_get_method(method))
-        {
-            return arg_count::none;
-        }
-        else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
-        {
-            return arg_count::single;
-        }
-        else
-        {
-            return arg_count::variable;
-        }
-    }
-
     void write_method_args(writer& w, MethodDef const& method)
     {
         switch (get_arg_count(method))
@@ -455,9 +428,9 @@ static void _dealloc_@(%* self)
         }
     }
 
-    void write_args_param_name(writer& w, arg_count arg_count)
+    void write_args_param_name(writer& w, MethodDef const& method)
     {
-        switch (arg_count)
+        switch (get_arg_count(method))
         {
         case arg_count::none:
             w.write("/* unused */");
@@ -502,6 +475,21 @@ static void _dealloc_@(%* self)
         w.write(initializer.param_init);
     }
 
+    void write_convert_to_params(writer& w, MethodDef const& method, int sequence)
+    {
+        switch (get_arg_count(method))
+        {
+        case arg_count::single:
+            w.write("arg");
+            break;
+        case arg_count::variable:
+            w.write("args, %", sequence);
+            break;
+        default:
+            throw_invalid("write_convert_to_params");
+        }
+    }
+
     void write_method_param_definition(writer& w, MethodDef const& method, method_signature::param_t const& param)
     {
         auto sequence = param.first.Sequence() - 1;
@@ -509,30 +497,41 @@ static void _dealloc_@(%* self)
         switch (get_param_category(param))
         {
         case param_category::in:
-            // if method is special (i.e. get/put/add/remove) but not RTSpecial (i.e. ctor)
-            // treat the args value as a single value, not as a tuple
-            if (method.SpecialName() && !method.Flags().RTSpecialName())
-            {
-                w.write("auto % = py::convert_to<%>(arg);\n", bind<write_param_name>(param), param.second->Type());
-            }
-            else
-            {
-                w.write("auto % = py::convert_to<%>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
-            }
+            w.write("auto % = py::convert_to<%>(%);\n", 
+                bind<write_param_name>(param), 
+                param.second->Type(), 
+                bind<write_convert_to_params>(method, sequence));
             break;
         case param_category::out:
             w.write("% % { % };\n", param.second->Type(), bind<write_param_name>(param), bind<write_out_param_init>(param));
             break;
         case param_category::pass_array:
-            w.write("auto _param% = py::convert_to<winrt::com_array<%>>(args, %);\n", sequence, param.second->Type(), sequence);
-            w.write("auto param% = winrt::array_view<const %>(_param%.data(), _param%.data() + _param%.size());\n", sequence, param.second->Type(), sequence, sequence, sequence);
+            w.write("auto _% = py::convert_to<winrt::com_array<%>>(%);\n", 
+                bind<write_param_name>(param),
+                param.second->Type(), 
+                bind<write_convert_to_params>(method, sequence));
+            w.write("auto % = winrt::array_view<const %>(_%.data(), _%.data() + _%.size());\n", 
+                bind<write_param_name>(param),
+                param.second->Type(), 
+                bind<write_param_name>(param), 
+                bind<write_param_name>(param), 
+                bind<write_param_name>(param));
             break;
         case param_category::fill_array:
-            w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(args, %);\n", bind<write_param_name>(param), param.second->Type(), sequence);
-            w.write("winrt::com_array<%> % ( %_count, py::empty_instance<%>::get() );\n", param.second->Type(), bind<write_param_name>(param), bind<write_param_name>(param), param.second->Type());
+            w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(%);\n", 
+                bind<write_param_name>(param), 
+                param.second->Type(), 
+                bind<write_convert_to_params>(method, sequence));
+            w.write("winrt::com_array<%> % ( %_count, py::empty_instance<%>::get() );\n", 
+                param.second->Type(), 
+                bind<write_param_name>(param), 
+                bind<write_param_name>(param), 
+                param.second->Type());
             break;
         case param_category::receive_array:
-            w.write("winrt::com_array<%> % { };\n", param.second->Type(), bind<write_param_name>(param));
+            w.write("winrt::com_array<%> % { };\n", 
+                param.second->Type(), 
+                bind<write_param_name>(param));
             break;
         default:
             throw_invalid("invalid param_category");
@@ -688,13 +687,11 @@ if (!%)
 
     void write_method_function(writer& w, TypeDef const& type, MethodDef const& method)
     {
-        auto arg_count = get_arg_count(method);
-
         w.write("\nstatic PyObject* %(%* %, PyObject* %)\n{\n",
             bind<write_method_function_name>(type, method),
             bind<write_pywrapper_type>(type),
             bind<write_self_param_name>(method),
-            bind<write_args_param_name>(arg_count));
+            bind<write_args_param_name>(method));
         write_method_body(w, type, method);
         w.write("}\n");
     }
@@ -1475,10 +1472,9 @@ struct pinterface_python_type<%<%>>
                 auto gguard{ w.push_generic_params(ii.type_arguments) };
                 for (auto&& method : ii.type.MethodList())
                 {
-                    auto arg_count = get_arg_count(method);
                     w.write("\nPyObject* %(PyObject* %) override\n{\n", 
                         method.Name(), 
-                        bind<write_args_param_name>(arg_count));
+                        bind<write_args_param_name>(method));
                     write_method_body(w, type, method);
                     w.write("}\n");
                 }

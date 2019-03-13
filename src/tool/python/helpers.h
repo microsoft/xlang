@@ -1023,4 +1023,31 @@ namespace xlang
 
         return count;
     }
+
+    enum class arg_count
+    {
+        none,
+        single,
+        variable
+    };
+
+    arg_count get_arg_count(MethodDef const& method)
+    {
+        if (is_constructor(method) && empty(method.ParamList()))
+        {
+            return arg_count::none;
+        }
+        else if (is_get_method(method))
+        {
+            return arg_count::none;
+        }
+        else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
+        {
+            return arg_count::single;
+        }
+        else
+        {
+            return arg_count::variable;
+        }
+    }
 }
