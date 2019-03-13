@@ -40,6 +40,21 @@ namespace xlang::impl
 
 namespace xlang::meta::reader
 {
+    struct AssemblyAttributes : impl::AttributesBase<uint32_t>
+    {
+        constexpr bool WindowsRuntime() const noexcept
+        {
+            return get_bit(WindowsRuntime_bit);
+        }
+        void WindowsRuntime(bool arg) noexcept
+        {
+            set_bit(arg, WindowsRuntime_bit);
+        }
+
+    private:
+        static constexpr int WindowsRuntime_bit{ 9 };
+    };
+
     struct EventAttributes : impl::AttributesBase<uint16_t>
     {
         constexpr bool SpecialName() const noexcept
