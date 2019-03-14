@@ -394,12 +394,12 @@ namespace xlang::meta::reader
 
         auto MethodBody() const
         {
-            return get_value<MethodDefOrRef>(1);
+            return get_coded_index<MethodDefOrRef>(1);
         }
 
         auto MethodDeclaration() const
         {
-            return get_value<MethodDefOrRef>(2);
+            return get_coded_index<MethodDefOrRef>(2);
         }
     };
 
@@ -433,7 +433,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<AssemblyFlags>(2);
+            return AssemblyAttributes{{ get_value<uint32_t>(2) }};
         }
 
         auto PublicKey() const
@@ -492,7 +492,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<AssemblyFlags>(1);
+            return AssemblyAttributes{{ get_value<uint32_t>(1) }};
         }
 
         auto PublicKeyOrToken() const
