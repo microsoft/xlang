@@ -208,12 +208,11 @@ namespace py
         }
     }
 
-    template<typename F>
-    PyObject* trycatch_invoker(F func)
+    inline WINRT_NOINLINE PyObject* to_PyErr() noexcept
     {
         try
         {
-            return func();
+            throw;
         }
         catch (winrt::hresult_error const& e)
         {
@@ -237,6 +236,20 @@ namespace py
         }
 
         return nullptr;
+    }
+
+
+    template<typename F>
+    PyObject* trycatch_invoker(F func)
+    {
+        try
+        {
+            return func();
+        }
+        catch(...)
+        {
+            return to_PyErr();
+        }
     }
 
     template<typename F>
