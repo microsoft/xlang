@@ -11,6 +11,6 @@ setuptools.setup(
         # TODO: add /permissive- when pywinrt moves to a later C++/WinRT version
         extra_compile_args = ["/std:c++17", "/await", "/GR-"], 
         include_dirs = ['.'],
-        extra_link_args=['/MAP'],
+        extra_link_args=['/MAP', '/DEBUG', '/OPT:REF', '/OPT:ICF'],
         libraries = ['windowsapp']) ],
     packages = setuptools.find_namespace_packages())
