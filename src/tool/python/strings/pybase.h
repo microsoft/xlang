@@ -22,7 +22,6 @@ namespace py
         static T get() { return T{}; }
     };
 
-
     template <typename T>
     struct empty_instance<T, std::void_t<decltype(T{nullptr})>>
     {
@@ -207,6 +206,25 @@ namespace py
             return winrt_type<T>::get_python_type();
         }
     }
+
+    struct pyobj_ptr_traits
+    {
+        using type = PyObject*;
+
+        static void close(type value) noexcept
+        {
+            Py_CLEAR(value);
+        }
+
+        static constexpr type invalid() noexcept
+        {
+            return nullptr;
+        }
+    };
+
+    using pyobj_handle = winrt::handle_type<pyobj_ptr_traits>;
+
+    py::pyobj_handle register_python_type(PyObject* module, const char* type_name, PyType_Spec* type_spec, PyObject* base_type);
 
     inline WINRT_NOINLINE PyObject* to_PyErr() noexcept
     {
@@ -838,23 +856,6 @@ namespace py
             return reinterpret_cast<winrt_wrapper<T>*>(obj)->obj;
         }
     };
-
-    struct pyobj_ptr_traits
-    {
-        using type = PyObject*;
-
-        static void close(type value) noexcept
-        {
-            Py_CLEAR(value);
-        }
-
-        static constexpr type invalid() noexcept
-        {
-            return nullptr;
-        }
-    };
-
-    using pyobj_handle = winrt::handle_type<pyobj_ptr_traits>;
 
     template <typename T>
     struct python_iterable final :

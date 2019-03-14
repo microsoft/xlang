@@ -1,11 +1,36 @@
+#include "pybase.h"
 #include <winrt/base.h>
+
+PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type)
+{
+    if (base_type != nullptr)
+    {
+        return PyType_FromSpecWithBases(type_spec, base_type);
+    }
+    else
+    {
+        return PyType_FromSpec(type_spec);
+    }
+}
+
+py::pyobj_handle py::register_python_type(PyObject* module, const char* type_name, PyType_Spec* type_spec, PyObject* base_type)
+{
+    py::pyobj_handle type_object{ create_python_type(type_spec, base_type) };
+    if (!type_object)
+    {
+        throw winrt::hresult_error();
+    }
+    if (PyModule_AddObject(module, type_name, type_object.get()) != 0)
+    {
+        throw winrt::hresult_error();
+    }
+    return std::move(type_object);
+}
 
 WINRT_EXPORT namespace std 
 {
     template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
 }
-
-#include "pybase.h"
 
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 

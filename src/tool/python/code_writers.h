@@ -124,58 +124,53 @@ struct winrt_type<%>
             bind<write_python_wrapper_template_type>(type));
     }
 
+    void write_type_base(writer& w, TypeDef const& type)
+    {
+        if (has_dealloc(type))
+        {
+            w.write("bases.get()");
+        }
+        else
+        {
+            w.write("nullptr");
+        }
+    }
+
     void write_ns_module_exec_init_python_type(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type)) return;
 
-        w.write("\n{\n");
-        {
-            writer::indent_guard g{ w };
-
-            w.write("py::pyobj_handle type_object { ");
-            if (has_dealloc(type))
-            {
-                w.write("PyType_FromSpecWithBases(&_type_spec_@, bases.get())", type.TypeName());
-            }
-            else
-            {
-                w.write("PyType_FromSpec(&_type_spec_@)", type.TypeName());
-            }
-            w.write(" };\n");
-
-            auto format = R"(if (!type_object)
-{
-    return -1;
-}
-if (PyModule_AddObject(module, "@", type_object.get()) != 0)
-{
-    return -1;
-}
-py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(type_object.detach());)";
-            w.write(format,
-                type.TypeName(),
-                bind<write_python_type_type>(type));
-        }
-
-        w.write("\n}");
+        w.write("py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(py::register_python_type(module, _type_name_@, &_type_spec_@, %).detach());\n",
+            bind<write_python_type_type>(type),
+            type.TypeName(),
+            type.TypeName(),
+            bind<write_type_base>(type));
     }
 
     void write_ns_module_exec_func(writer& w, cache::namespace_members const& members)
     {
-        w.write(R"(
-static int module_exec(PyObject* module)
-{
-    py::pyobj_handle bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };
-)");
-
+        w.write("static int module_exec(PyObject* module)\n{\n");
         {
             writer::indent_guard g{ w };
+            w.write("py::pyobj_handle bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };\n\n");
+            w.write("try\n{\n");
 
-            settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.classes)(w);
-            settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.interfaces)(w);
-            settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.structs)(w);
+            {
+                writer::indent_guard gg{ w };
 
-            w.write("\nreturn 0;\n");
+                settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.classes)(w);
+                settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.interfaces)(w);
+                settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.structs)(w);
+            }
+
+            w.write(R"(}
+catch(...)
+{
+    return -1;
+}
+
+return 0;
+)");
         }
 
         w.write("}\n");
@@ -198,6 +193,7 @@ static int module_exec(PyObject* module)
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
     {
         w.write("\nPyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_python_type_type>(type));
+        w.write("const char* _type_name_@ = \"@\";\n", type.TypeName(), type.TypeName());
     }
 
     void write_dealloc_function(writer& w, TypeDef const& type)
@@ -848,7 +844,9 @@ static PyType_Spec _type_spec_@ =
         auto format = R"(
 static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
 {
-    PyErr_SetString(PyExc_TypeError, "@ is not directly constructable");
+    std::string msg{ _type_name_@ };
+    msg.append(" is not directly constructable");
+    PyErr_SetString(PyExc_TypeError, msg.c_str());
     return nullptr;
 }
 )";
