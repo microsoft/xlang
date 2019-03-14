@@ -149,14 +149,19 @@ namespace xlang::meta::reader
         return false;
     }
 
-    struct GenericTypeIndex
-    {
-        uint32_t index;
-    };
+	struct GenericTypeIndex
+	{
+		uint32_t index;
+	};
 
-    struct TypeSig
+	struct GenericMethodIndex
+	{
+		uint32_t index;
+	};
+
+	struct TypeSig
     {
-        using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>;
+        using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig, GenericMethodIndex>;
         TypeSig(table_base const* table, byte_view& data)
             : m_is_szarray(parse_szarray(table, data))
             , m_cmod(parse_cmods(table, data))
@@ -475,6 +480,10 @@ namespace xlang::meta::reader
 
         case ElementType::Var:
             return GenericTypeIndex{ uncompress_unsigned(data) };
+            break;
+
+        case ElementType::MVar:
+            return GenericMethodIndex{ uncompress_unsigned(data) };
             break;
 
         default:
