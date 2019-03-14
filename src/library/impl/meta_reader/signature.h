@@ -149,17 +149,17 @@ namespace xlang::meta::reader
         return false;
     }
 
-	struct GenericTypeIndex
-	{
-		uint32_t index;
-	};
+    struct GenericTypeIndex
+    {
+        uint32_t index;
+    };
 
-	struct GenericMethodIndex
-	{
-		uint32_t index;
-	};
+    struct GenericMethodIndex
+    {
+        uint32_t index;
+    };
 
-	struct TypeSig
+    struct TypeSig
     {
         using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig, GenericMethodIndex>;
         TypeSig(table_base const* table, byte_view& data)
