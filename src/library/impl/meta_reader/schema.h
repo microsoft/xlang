@@ -113,7 +113,7 @@ namespace xlang::meta::reader
         auto ParamList() const;
         auto CustomAttribute() const;
         auto Parent() const;
-		auto GenericParam() const;
+        auto GenericParam() const;
 
         bool SpecialName() const
         {
