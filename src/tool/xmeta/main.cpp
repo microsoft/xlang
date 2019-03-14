@@ -30,5 +30,7 @@ int main(int argc, const char * argv[]) {
   CommonTokenStream tokens(&lexer);
 
   xlang_parser parser(&tokens);
-  return 0;
+  printf("hello world");
+  std::cout << "Test" << std::endl;
+  return 4;
 }

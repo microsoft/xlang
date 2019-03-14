@@ -1,0 +1,13 @@
+// THis is a test
+
+namespace Windows.Test 
+{
+    namespace Foo {
+    }
+    namespace Fee {
+        namespace Far 
+        {
+        }
+    }
+}
+namespace Bar {}

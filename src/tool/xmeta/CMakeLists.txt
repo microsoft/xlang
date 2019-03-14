@@ -7,7 +7,6 @@ set(xmeta_gen_generated
   ${PROJECT_SOURCE_DIR}/cpp/generated/xlang_parser.cpp
  )
 
-
 include_directories(
   ${PROJECT_SOURCE_DIR}/antlr4-runtime/
   ${PROJECT_SOURCE_DIR}/antlr4-runtime/misc
@@ -18,10 +17,10 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/
   ${PROJECT_SOURCE_DIR}/libs/
   )
-  
+
 set(xmeta_gen_src
   ${PROJECT_SOURCE_DIR}/main.cpp
-  ${xmeta_gen_generated}
+  ${xmeta_gen_generated}       
   )
 
 add_executable(xmeta ${xmeta_gen_src})
@@ -32,10 +31,4 @@ add_custom_command(TARGET xmeta PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
   "${PROJECT_SOURCE_DIR}/libs/antlr4-runtime.dll"
   $<TARGET_FILE_DIR:xmeta>)
-
-install(TARGETS xmeta DESTINATION "test/xmeta")
-if (WIN32)
-    install(FILES $<TARGET_PDB_FILE:xmeta> DESTINATION "test/xmeta" OPTIONAL)
-endif ()
-
 

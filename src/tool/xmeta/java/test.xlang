@@ -1,0 +1,6 @@
+// THis is a test
+
+namespace Windows.Test 
+{
+    delegate HRESULT myDelegate(Double parameter1, double paramter2);
+}
