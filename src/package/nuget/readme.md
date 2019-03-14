@@ -7,12 +7,13 @@ Please visit [Microsoft.Windows.CppWinRT](https://www.nuget.org/packages/Microso
 To add build support for C++/WinRT vcxproj projects, add a reference to the Microsoft.Windows.CppWinRT NuGet package.  This customizes your project's build rules to automatically generate C++/WinRT projection headers, enabling you to both consume and produce Windows Runtime classes.
 
 C++/WinRT detects Windows metadata referenced by the project, from:
+* Platform winmd files in the SDK (both MSI and NuGet)
 * NuGet packages containing winmd files
 * Other projects producing winmd files
 * Raw winmd files
 * Interface definition language (IDL) files in the project 
 
-For any winmd file referenced by the project, C++/WinRT creates  reference (consuming) projection headers.  Client code can simply #include these headers, which are created in the generated files directory (see below).
+For any winmd file referenced by the project, C++/WinRT creates reference (consuming) projection headers.  Client code can simply #include these headers, which are created in the generated files directory (see below).
 
 For any IDL file contained in the project, C++/WinRT creates component (producing) projection headers.  In addition, C++/WinRT generates templates and skeleton implementations for each runtime class, under the generated files directory.
 
@@ -31,7 +32,7 @@ It sets the following project properties and item metadata:
 |-|-|-|
 | [PreferredToolArchitecture](https://docs.microsoft.com/en-us/cpp/build/msbuild-visual-cpp-overview?view=vs-2017) | x64 | Enables the compiler to use more memory |
 | CanReferenceWinRT | true | Enables native project references (e.g., to WinMD files) |
-| GeneratedFilesDir | *Generated Files\ | Sets the folder for C++/WinRT generated source files |
+| GeneratedFilesDir | *$(IntDir)Generated Files\ | Sets the folder for C++/WinRT generated source files |
 | XamlLanguage | CppWinRT | Directs the Xaml compiler to generate C++/WinRT code |
 | ClCompile.CompileAsWinRT | *false | Enables ISO C++ compilation (disables C++/CX) |
 | ClCompile.LanguageStandard | *stdcpp17 | Enables C++17 language features |
@@ -60,6 +61,7 @@ C++/WinRT behavior can be customized with these project properties:
 | CppWinRTVerbosity | low \| *normal \| high | Sets the [importance](https://docs.microsoft.com/en-us/visualstudio/msbuild/message-task?view=vs-2017) of C++/WinRT build messages (see below) |
 | CppWinRTNamespaceMergeDepth | *1 | Sets the depth of namespace merging (Xaml apps require 1) |
 | CppWinRTUsePrefixes | *false \| true | Uses a dotted prefix namespace convention (versus a nested folder convention) |
+| CppWinRTPath | ...\cppwinrt.exe | NuGet package-relative path to cppwinrt.exe, for custom build rule invocation |
 \*Default value
 
 ## Troubleshooting
