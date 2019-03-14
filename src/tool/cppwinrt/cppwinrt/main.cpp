@@ -36,6 +36,7 @@ namespace xlang
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
+        { "fastabi", 0, 0 }, // Enable support for the Fast ABI
         { "tests", 0, 0 }, // Generate internal test files
     };
 
@@ -85,6 +86,7 @@ Where <spec> is one or more of:
         }
 
         settings.verbose = args.exists("verbose");
+        settings.fastabi = args.exists("fastabi");
 
         settings.input = args.files("input", database::is_database);
         settings.reference = args.files("reference", database::is_database);
@@ -207,6 +209,36 @@ Where <spec> is one or more of:
 
     }
 
+    static void build_fastabi_cache(cache const& c)
+    {
+        if (!settings.fastabi)
+        {
+            return;
+        }
+
+        for (auto&& [ns, members] : c.namespaces())
+        {
+            for (auto&& type : members.classes)
+            {
+                if (!has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute"))
+                {
+                    continue;
+                }
+
+                auto default_interface = get_default_interface(type);
+
+                if (default_interface.type() == TypeDefOrRef::TypeDef)
+                {
+                    settings.fastabi_defaults.try_emplace(default_interface.TypeDef(), type);
+                }
+                else
+                {
+                    settings.fastabi_defaults.try_emplace(find_required(default_interface.TypeRef()), type);
+                }
+            }
+        }
+    }
+
     static int run(int const argc, char** argv)
     {
         int result{};
@@ -220,6 +252,7 @@ Where <spec> is one or more of:
             c.remove_cppwinrt_foundation_types();
             build_filters(c);
             settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
+            build_fastabi_cache(c);
 
             if (settings.verbose)
             {

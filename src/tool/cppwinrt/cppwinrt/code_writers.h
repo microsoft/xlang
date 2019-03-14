@@ -648,6 +648,30 @@ namespace xlang
         }
     }
 
+    static void write_interface_fastabi(writer& w, TypeDef const& type)
+    {
+        if (!settings.fastabi)
+        {
+            return;
+        }
+
+        // This is just an optional optimization - check whether it actually helps
+        if (!has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute"))
+        {
+            return;
+        }
+
+        auto pair = settings.fastabi_defaults.find(type);
+
+        if (pair == settings.fastabi_defaults.end())
+        {
+            return;
+        }
+
+
+
+    }
+
     static void write_interface_abi(writer& w, TypeDef const& type)
     {
         auto generics = type.GenericParam();
@@ -686,6 +710,8 @@ namespace xlang
             method_signature signature{ method };
             w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
         }
+
+        write_interface_fastabi(w, type);
 
         w.write(R"(        };
     };
