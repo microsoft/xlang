@@ -23,6 +23,11 @@ add_custom_command(TARGET test_xmeta PRE_BUILD
     "${CMAKE_SOURCE_DIR}/tool/xmeta/libs/x86debug/antlr4-runtime.dll"
     $<TARGET_FILE_DIR:test_xmeta>)
 
+add_custom_command(TARGET test_xmeta POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/test/xmeta/example"
+    $<TARGET_FILE_DIR:test_xmeta>/example)
+
 
 target_sources(test_xmeta
     PUBLIC pch.cpp lexer.cpp)

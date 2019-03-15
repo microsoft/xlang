@@ -14,12 +14,13 @@ using namespace antlr4;
 TEST_CASE("Simple lexer")
 {
     std::ifstream stream;
-    stream.open("../example/namespace_test.idl");
+    stream.open("example/namespace_test.idl");
 
     ANTLRInputStream input(stream);
     XlangLexer lexer(&input);       
     CommonTokenStream tokens(&lexer);
     XlangParser parser(&tokens);
+    tree::ParseTree *tree = parser.xlang();
 
     REQUIRE(parser.getNumberOfSyntaxErrors() == 0);
 }
