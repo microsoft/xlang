@@ -1,13 +1,13 @@
-parser grammar xlang_parser;
+parser grammar XlangParser;
 
-options { tokenVocab=xlang_lexer; }
+options { tokenVocab=XlangLexer; }
 
 
 /* Entry Point */
 xlang
     : compilation_unit
     ;
-    
+
 compilation_unit
     : using_directive* namespace_declaration*
     ;
@@ -144,7 +144,7 @@ variable_initializer
 
 /* Namespaces */
 namespace_declaration
-    : NAMEPSACE IDENTIFIER namespace_body SEMICOLON?
+    : NAMESPACE IDENTIFIER namespace_body SEMICOLON?
     ;
 
 namespace_body

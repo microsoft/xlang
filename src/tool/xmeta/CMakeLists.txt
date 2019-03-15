@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.9)
 project(xmeta)
 
 set(xmeta_gen_generated
-  ${PROJECT_SOURCE_DIR}/cpp/generated/xlang_lexer.cpp
-  ${PROJECT_SOURCE_DIR}/cpp/generated/xlang_parser.cpp
+  ${PROJECT_SOURCE_DIR}/cpp/generated/XlangLexer.cpp
+  ${PROJECT_SOURCE_DIR}/cpp/generated/XlangParser.cpp
  )
 
 include_directories(

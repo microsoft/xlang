@@ -14,8 +14,8 @@
 #include <iostream>
 
 #include "antlr4-runtime.h"
-#include "cpp/generated/xlang_lexer.h"
-#include "cpp/generated/xlang_parser.h"
+#include "cpp/generated/XlangParser.h"
+#include "cpp/generated/XlangLexer.h"
 
 #include <Windows.h>
 
@@ -25,17 +25,26 @@ using namespace antlr4;
 
 int main(int argc, const char * argv[]) {
 
-  std::ifstream stream;
-  printf("Opening %s \n", argv[1]);
-  stream.open(argv[1]);
+    std::ifstream stream;
+    printf("Opening %s \n", argv[1]);
+    stream.open(argv[1]);
 
-  ANTLRInputStream input(stream);
-  xlang_lexer lexer(&input);       
-  CommonTokenStream tokens(&lexer);
-  xlang_parser parser(&tokens);
-  parser.setBuildParseTree(true);
-  
-  tree::ParseTree *tree = parser.xlang();
-  std::string s = tree->toStringTree(&parser);
-  std::cout << s << std::endl;
+    ANTLRInputStream input(stream);
+    XlangLexer lexer(&input);       
+    CommonTokenStream tokens(&lexer);
+    XlangParser parser(&tokens);
+    parser.setBuildParseTree(true);
+
+    tree::ParseTree *tree = parser.xlang();
+    std::string s = tree->toStringTree(&parser);
+    std::cout << s << std::endl;
+
+    std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
+
+    // This gets the token stream and prints out all the tokens corresponding to the file
+    TokenStream * ts = parser.getTokenStream();
+    for (int i = 0; i < ts->size(); i++)
+    {
+        std::cout << ts->get(i)->getType() << std::endl;
+    }
 }
