@@ -25,12 +25,17 @@ using namespace antlr4;
 
 int main(int argc, const char * argv[]) {
 
-  ANTLRInputStream input("🍴 = 🍐 + \"😎\";(((x * π))) * µ + ∰; a + (x * (y ? 0 : 1) + z);");
-  xlang_lexer lexer(&input);
-  CommonTokenStream tokens(&lexer);
+  std::ifstream stream;
+  printf("Opening %s \n", argv[1]);
+  stream.open(argv[1]);
 
+  ANTLRInputStream input(stream);
+  xlang_lexer lexer(&input);       
+  CommonTokenStream tokens(&lexer);
   xlang_parser parser(&tokens);
-  printf("hello world");
-  std::cout << "Test" << std::endl;
-  return 4;
+  parser.setBuildParseTree(true);
+  
+  tree::ParseTree *tree = parser.xlang();
+  std::string s = tree->toStringTree(&parser);
+  std::cout << s << std::endl;
 }
