@@ -121,6 +121,12 @@ namespace xlang
         w.flush_to_file(folder / filename);
     }
 
+    void write_namespace_cpp_filename(writer& w, std::string const& ns)
+    {
+        w.write("\"./%/src/py.%.cpp\"", settings.module, ns);
+    }
+
+    
     inline void write_setup_py(stdfs::path const& folder, std::vector<std::string> const& namespaces)
     {
         writer w;
@@ -129,6 +135,23 @@ namespace xlang
         w.write(strings::setup, settings.module, settings.module, bind<write_setup_filenames>(namespaces));
         create_directories(folder);
         w.flush_to_file(folder / "setup.py");
+    }
+
+    inline void write_cmake_lists_txt(stdfs::path const& folder, std::vector<std::string> const& namespaces)
+    {
+        writer w;
+
+        write_license_python(w);
+        w.write("cmake_minimum_required(VERSION 3.9)\n\nadd_compile_options(/std:c++17 /await)\n\n");
+        w.write("set(sources\n    %\n    \"./%/src/_%.cpp\")\n\n",
+            bind_list<write_namespace_cpp_filename>("\n    ", namespaces),
+            settings.module, settings.module);
+        w.write("project(%)\n", settings.module);
+        w.write("add_library(% SHARED ${sources})\n", settings.module);
+        //TODO: don't hardcode python + link python lib
+        w.write("target_include_directories(% PUBLIC \"C:/Users/hpierson/AppData/Local/Programs/Python/Python37/include\")", settings.module);
+        create_directories(folder);
+        w.flush_to_file(folder / "CMakeLists.txt");
     }
 
     inline void write_package_dunder_init_py(stdfs::path const& folder)
