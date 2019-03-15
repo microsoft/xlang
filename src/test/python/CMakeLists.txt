@@ -9,14 +9,10 @@ set(winmd_files
 )
 
 set(included_namespaces
-    Windows.
-    # Windows.Foundation
-    # Windows.Devices.
-    # Windows.Devices
-    # Windows.Data.Json
-    # Windows.Devices.Geolocation
-    # 
-    # Windows.Graphics.DirectX
+    Windows.Data.Json
+    Windows.Devices.Geolocation
+    Windows.Foundation
+    Windows.Graphics.DirectX
 
     # uncomment out the following to run complete_winml_tutorial.py
     # Windows.AI.MachineLearning
@@ -26,10 +22,8 @@ set(included_namespaces
 )
 
 set(excluded_namespaces
-    Windows.UI.Composition
-    Windows.UI.Xaml
-    # Windows.Foundation.Diagnostics.
-    # Windows.Foundation.Metadata.
+    Windows.Foundation.Diagnostics.
+    Windows.Foundation.Metadata.
     # Windows.Media.Audio.
     # Windows.Media.Capture.
     # Windows.Media.Casting.
@@ -63,6 +57,15 @@ set(excluded_namespaces
     # Windows.Storage.Search.
     # Windows.Storage.Streams.
 )
+
+# set(included_namespaces
+#     Windows.
+# )
+
+# set(excluded_namespaces
+#     Windows.UI.Composition
+#     Windows.UI.Xaml
+# )
 
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files_folder)
 set(pywinrt_cmdline "-output ${generated_files_folder} -module ${python_module_name}")
