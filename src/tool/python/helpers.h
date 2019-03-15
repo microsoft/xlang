@@ -391,6 +391,66 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "remove_");
     }
 
+    std::string_view get_method_abi_name(MethodDef const& method)
+    {
+        if (is_constructor(method))
+        {
+            if (empty(method.ParamList()))
+            {
+                return "_default_ctor";
+            }
+            else
+            {
+                method_signature signature{ method };
+
+                auto type = method.Parent();
+                for (auto&& attrib : type.CustomAttribute())
+                {
+                    auto pair = attrib.TypeNamespaceAndName();
+                    if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
+                    {
+                        auto fixed_args = attrib.Value().FixedArgs();
+                        auto elem0 = std::get<ElemSig>(fixed_args[0].value);
+
+                        // if the first param is SystemType, it holds the name of a factory interface
+                        if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
+                        {
+                            auto factory_type = type.get_cache().find_required(
+                                std::get<ElemSig::SystemType>(elem0.value).name);
+
+                            for (auto&& factory_method : factory_type.MethodList())
+                            {
+                                method_signature factory_signature{ factory_method };
+                                if (signature.params().size() == factory_signature.params().size())
+                                {
+                                    // TODO: compare method param types
+                                    return get_method_abi_name(factory_method);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                std::string msg{ "couldn't find factory method " };
+                msg.append(type.TypeNamespace());
+                msg.append(".");
+                msg.append(type.TypeName());
+                throw_invalid(msg);
+            }
+        }
+        else
+        {
+            auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
+            if (overload_attrib)
+            {
+                auto args = overload_attrib.Value().FixedArgs();
+                return std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
+            }
+
+            return method.Name();
+        }
+    }
+
     enum class param_category
     {
         in,

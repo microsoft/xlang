@@ -193,7 +193,7 @@ return 0;
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
     {
         w.write("\nPyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_python_type_type>(type));
-        w.write("const char* _type_name_@ = \"@\";\n", type.TypeName(), type.TypeName());
+        w.write("static const char* _type_name_@ = \"@\";\n", type.TypeName(), type.TypeName());
     }
 
     void write_dealloc_function(writer& w, TypeDef const& type)
@@ -220,73 +220,9 @@ static void _dealloc_@(%* self)
         w.write("}\n");
     }
 
-    void write_constructor_name(writer& w, MethodDef const& ctor)
-    {
-        if (empty(ctor.ParamList()))
-        {
-            w.write("_ctor");
-        }
-        else
-        {
-            method_signature ctor_sig{ ctor };
-
-            auto type = ctor.Parent();
-            for (auto&& attrib : type.CustomAttribute())
-            {
-                auto pair = attrib.TypeNamespaceAndName();
-                if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
-                {
-                    auto fixed_args = attrib.Value().FixedArgs();
-                    auto elem0 = std::get<ElemSig>(fixed_args[0].value);
-
-                    // if the first param is SystemType, it holds the name of a factory interface
-                    if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
-                    {
-                        auto factory_type = type.get_cache().find_required(
-                            std::get<ElemSig::SystemType>(elem0.value).name);
-
-                        for (auto&& factory_method : factory_type.MethodList())
-                        {
-                            method_signature factory_method_sig{ factory_method };
-
-                            if (factory_method_sig.params().size() == ctor_sig.params().size())
-                            {
-                                // TODO, check and make sure param lists are same types
-                                w.write(factory_method.Name());
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
-            throw_invalid("couldn't find factory method");
-        }
-    }
-
     void write_method_name(writer& w, MethodDef const& method)
     {
-        if (is_constructor(method))
-        {
-            w.write("%", bind<write_constructor_name>(method));
-        }
-        else
-        {
-            auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
-            if (overload_attrib)
-            {
-                auto args = overload_attrib.Value().FixedArgs();
-                auto name = std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
-                w.write(name);
-            }
-            else
-            {
-                w.write(method.Name());
-            }
-        }
-
-        // temporarily append method index to disambiguate all methods
-        w.write(std::to_string(method.index()));
+        w.write(get_method_abi_name(method));
     }
 
     void write_method_table_row_flags(writer& w, MethodDef const& method)
@@ -330,44 +266,81 @@ static void _dealloc_@(%* self)
             bind<write_method_table_row_flags>(method));
     }
 
+    auto get_abi_overloads(TypeDef const& type)
+    {
+        std::set<std::string_view> method_names{};
+        std::set<std::string_view> overloads{};
+
+        for (auto&& method : type.MethodList())
+        {
+            auto name = get_method_abi_name(method);
+
+            if (method_names.find(name) == method_names.end())
+            {
+                method_names.insert(name);
+            }
+            else
+            {
+                overloads.insert(name);
+            }
+        }
+
+        return std::move(overloads);
+    }
+
     void write_method_table(writer& w, TypeDef const& type)
     {
-        //for (auto&& attrib : type.CustomAttribute())
-        //{
-        //    auto pair = attrib.TypeNamespaceAndName();
-        //    if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
-        //    {
-        //        auto fixed_args = attrib.Value().FixedArgs();
-        //        auto elem0 = std::get<ElemSig>(fixed_args[0].value);
+        w.write("\n");
 
-        //        // if the first param is SystemType, it holds the name of a factory interface
-        //        if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
-        //        {
-        //            auto factory_type = type.get_cache().find_required(
-        //                std::get<ElemSig::SystemType>(elem0.value).name);
+        for (auto&& overload : get_abi_overloads(type))
+        {
+            w.write("// abioverload %\n", overload);
+        }
 
-        //            for (auto&& factory_method : factory_type.MethodList())
-        //            {
-        //                w.write("// Factory %.%.%\n", factory_type.TypeNamespace(), factory_type.TypeName(), factory_method.Name());
-        //            }
-        //        }
-        //        else
-        //        {
-        //            w.write("// %.%.default_ctor\n", type.TypeNamespace(), type.TypeName());
-        //        }
-        //    }
-        //    if (pair.second == "StaticAttribute" && pair.first == "Windows.Foundation.Metadata")
-        //    {
-        //        auto fixed_args = attrib.Value().FixedArgs();
-        //        auto elem0 = std::get<ElemSig>(fixed_args[0].value);
-        //        auto static_type = type.get_cache().find_required(std::get<ElemSig::SystemType>(elem0.value).name);
+        w.write("\n");
 
-        //        for (auto&& static_method : static_type.MethodList())
-        //        {
-        //            w.write("// Static %.%.%\n", static_type.TypeNamespace(), static_type.TypeName(), static_method.Name());
-        //        }
-        //    }
-        //}
+        for (auto&& attrib : type.CustomAttribute())
+        {
+            auto pair = attrib.TypeNamespaceAndName();
+            if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
+            {
+                auto fixed_args = attrib.Value().FixedArgs();
+                auto elem0 = std::get<ElemSig>(fixed_args[0].value);
+
+                // if the first param is SystemType, it holds the name of a factory interface
+                if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
+                {
+                    auto factory_type = type.get_cache().find_required(
+                        std::get<ElemSig::SystemType>(elem0.value).name);
+
+                    for (auto&& factory_method : factory_type.MethodList())
+                    {
+                        w.write("// Factory %.%.%\n",
+                            factory_type.TypeNamespace(),
+                            factory_type.TypeName(),
+                            bind<write_method_name>(factory_method));
+                    }
+                }
+                else
+                {
+                    w.write("// %.%.default_ctor\n", type.TypeNamespace(), type.TypeName());
+                }
+            }
+            if (pair.second == "StaticAttribute" && pair.first == "Windows.Foundation.Metadata")
+            {
+                auto fixed_args = attrib.Value().FixedArgs();
+                auto elem0 = std::get<ElemSig>(fixed_args[0].value);
+                auto static_type = type.get_cache().find_required(std::get<ElemSig::SystemType>(elem0.value).name);
+
+                for (auto&& static_method : static_type.MethodList())
+                {
+                    w.write("// Static %.%.%\n", 
+                        static_type.TypeNamespace(), 
+                        static_type.TypeName(), 
+                        bind<write_method_name>(static_method));
+                }
+            }
+        }
 
         for (auto&& ii : get_required_interfaces(type))
         {
