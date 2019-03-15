@@ -1,0 +1,27 @@
+namespace Windows.Foundation
+{
+    class Uri : IStringable
+    {
+        Uri(String uri);
+        Uri(String baseUri, String relativeUri);
+
+        String  AbsoluteUri { get; }
+        String  DisplayUri { get; }
+        String  Domain { get; }
+        String  Extension { get; }
+        String  Fragment { get; }
+        String  Host { get; }
+        String  Password { get; }
+        String  Path { get; }
+        String  Query { get; }
+        String  RawUri { get; }
+        String  SchemeName { get; }
+        String  UserName { get; }
+        Int32   Port { get; }
+        Boolean Suspicious { get; }
+
+        Boolean Equals(Uri pUri);
+        Uri     CombineUri(String relativeUri);
+
+    }
+}
