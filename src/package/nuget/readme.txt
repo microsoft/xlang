@@ -4,6 +4,7 @@ enabling you to both consume and produce Windows Runtime classes.
 ========================================================================
 
 C++/WinRT detects Windows metadata referenced by the project, from:
+* Platform winmd files in the SDK (both MSI and NuGet)
 * NuGet packages containing winmd files
 * Other projects producing winmd files
 * Raw winmd files

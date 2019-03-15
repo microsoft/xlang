@@ -172,7 +172,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Target>
 
     <!--If building any Xaml content, include XamlMetaDataProvider in project metadata-->
-    <Target Name="CppWinRTAddXamlMetaDataProviderIdl" Condition="'$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
+    <Target Name="CppWinRTAddXamlMetaDataProviderIdl" Condition="'$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
         <PropertyGroup>
             <XamlMetaDataProviderIdl>
                 $(IntDir)XamlMetaDataProvider.idl
