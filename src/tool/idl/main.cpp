@@ -15,6 +15,7 @@ struct writer : writer_base<writer>
 {
     using writer_base<writer>::write;
     std::string_view current;
+    int32_t indent{ 0 };
 
     std::vector<std::pair<GenericParam, GenericParam>> generic_param_stack;
 
@@ -45,6 +46,30 @@ struct writer : writer_base<writer>
     {
         generic_param_stack.push_back(std::move(arg));
         return generic_param_guard{ this };
+    }
+
+    struct indent_guard
+    {
+        explicit indent_guard(writer& w) noexcept : _writer(w)
+        {
+            _writer.indent++;
+        }
+
+        ~indent_guard()
+        {
+            _writer.indent--;
+        }
+
+    private:
+        writer & _writer;
+    };
+
+    void write_indent()
+    {
+        for (int32_t i = 0; i < indent; i++)
+        {
+            write("    ");
+        }
     }
 
     void write_value(bool value)
@@ -365,35 +390,35 @@ struct writer : writer_base<writer>
     {
         std::visit(overloaded{
             [this](ElemSig::SystemType arg)
-        {
-            write(arg.name);
-        },
+            {
+                write(arg.name);
+            },
             [this](ElemSig::EnumValue arg)
-        {
-            auto const enumerators = find_enumerators(arg);
-            if (enumerators.empty())
             {
-                std::visit([this](auto&& value) { write_value(value); }, arg.value);
-            }
-            else
-            {
-                bool first = true;
-                for (auto const& enumerator : enumerators)
+                auto const enumerators = find_enumerators(arg);
+                if (enumerators.empty())
                 {
-                    if (!first)
-                    {
-                        write(" | ");
-                    }
-                    write("%.%.%", arg.type.m_typedef.TypeNamespace(), arg.type.m_typedef.TypeName(), enumerator.Name());
-                    first = false;
+                    std::visit([this](auto&& value) { write_value(value); }, arg.value);
                 }
-            }
-        },
+                else
+                {
+                    bool first = true;
+                    for (auto const& enumerator : enumerators)
+                    {
+                        if (!first)
+                        {
+                            write(" | ");
+                        }
+                        write("%.%.%", arg.type.m_typedef.TypeNamespace(), arg.type.m_typedef.TypeName(), enumerator.Name());
+                        first = false;
+                    }
+                }
+            },
             [this](auto&& arg)
-        {
-            write_value(arg);
-        }
-            }, std::get<ElemSig>(arg.value).value);
+            {
+                write_value(arg);
+            }
+        }, std::get<ElemSig>(arg.value).value);
     }
 
     void write(NamedArgSig const& arg)
@@ -405,19 +430,18 @@ struct writer : writer_base<writer>
     {
         auto const& args = arg.FixedArgs();
 
-        write_printf("\n    [Windows.Foundation.Metadata.GuidAttribute(%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X)]"
-            , std::get<uint32_t>(std::get<ElemSig>(args[0].value).value)
-            , std::get<uint16_t>(std::get<ElemSig>(args[1].value).value)
-            , std::get<uint16_t>(std::get<ElemSig>(args[2].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[3].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[4].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[5].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[6].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[7].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[8].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[9].value).value)
-            , std::get<uint8_t>(std::get<ElemSig>(args[10].value).value)
-        );
+        write_printf("[Windows.Foundation.Metadata.GuidAttribute(%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X)]",
+            std::get<uint32_t>(std::get<ElemSig>(args[0].value).value),
+            std::get<uint16_t>(std::get<ElemSig>(args[1].value).value),
+            std::get<uint16_t>(std::get<ElemSig>(args[2].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[3].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[4].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[5].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[6].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[7].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[8].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[9].value).value),
+            std::get<uint8_t>(std::get<ElemSig>(args[10].value).value));
     }
 
     void write(CustomAttribute const& attr)
@@ -431,7 +455,7 @@ struct writer : writer_base<writer>
             return;
         }
 
-        write("\n    [%.%", name.first, name.second);
+        write("[%.%", name.first, name.second);
 
         bool first = true;
         for (auto const& fixed_arg : sig.FixedArgs())
@@ -469,6 +493,18 @@ struct writer : writer_base<writer>
     }
 };
 
+void write_indent(writer& w)
+{
+    w.write_indent();
+}
+
+void write_custom_attribute(writer& w, CustomAttribute const& attr)
+{
+    w.write("\n%%",
+        bind<write_indent>(),
+        attr);
+}
+
 void write_type_name(writer& w, std::string_view name)
 {
     w.write(name);
@@ -493,9 +529,12 @@ void write_type_name(writer& w, std::string_view name)
 
 void write_enum_field(writer& w, Field const& field)
 {
+    writer::indent_guard indent{ w };
+
     if (auto const& constant = field.Constant())
     {
-        w.write("\n        % = %,",
+        w.write("\n%% = %,",
+            bind<write_indent>(),
             field.Name(),
             constant);
     }
@@ -503,39 +542,53 @@ void write_enum_field(writer& w, Field const& field)
 
 void write_enum(writer& w, TypeDef const& type)
 {
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
+    writer::indent_guard indent{ w };
 
-    w.write("\n    enum %\n    {%\n    };\n",
+    w.write("%"
+            "\n%enum %"
+            "\n%{"
+            "%"
+            "\n%};\n",
+        bind_each<write_custom_attribute>(type.CustomAttribute()),
+        bind<write_indent>(),
         type.TypeName(),
-        bind_each<write_enum_field>(type.FieldList()));
+        bind<write_indent>(),
+        bind_each<write_enum_field>(type.FieldList()),
+        bind<write_indent>());
 }
 
 void write_struct_field(writer& w, Field const& field)
 {
-    w.write("\n        % %;",
+    writer::indent_guard indent{ w };
+
+    w.write("\n%% %;",
+        bind<write_indent>(),
         field.Signature().Type(),
         field.Name());
 }
 
 void write_struct(writer& w, TypeDef const& type)
 {
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
+    writer::indent_guard indent{ w };
 
-    w.write("\n    struct %\n    {%\n    };\n",
+    w.write("%"
+            "\n%struct %"
+            "\n%{"
+            "%"
+            "\n%};\n",
+        bind_each<write_custom_attribute>(type.CustomAttribute()),
+        bind<write_indent>(),
         type.TypeName(),
-        bind_each<write_struct_field>(type.FieldList()));
+        bind<write_indent>(),
+        bind_each<write_struct_field>(type.FieldList()),
+        bind<write_indent>());
 }
 
 void write_delegate(writer& w, TypeDef const& type)
 {
     auto guard{ w.push_generic_params(type.GenericParam()) };
     auto methods = type.MethodList();
+    writer::indent_guard indent{ w };
 
     auto method = std::find_if(begin(methods), end(methods), [](auto&& method)
     {
@@ -547,22 +600,24 @@ void write_delegate(writer& w, TypeDef const& type)
         throw_invalid("Delegate's Invoke method not found");
     }
 
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
-
-    w.write("\n    delegate % %(%);\n", method.Signature().ReturnType(), bind<write_type_name>(type.TypeName()), method);
+    w.write("%"
+            "\n%delegate % %(%);\n",
+        bind_each<write_custom_attribute>(type.CustomAttribute()),
+        bind<write_indent>(),
+        method.Signature().ReturnType(),
+        bind<write_type_name>(type.TypeName()),
+        method);
 }
 
 void write_method(writer& w, MethodDef const& method)
 {
-    for (auto const& attr : method.CustomAttribute())
-    {
-        w.write(attr);
-    }
-
-    w.write("\n        % %(%);", method.Signature().ReturnType(), method.Name(), method);
+    w.write("%"
+            "\n%% %(%);",
+        bind_each<write_custom_attribute>(method.CustomAttribute()),
+        bind<write_indent>(),
+        method.Signature().ReturnType(),
+        method.Name(),
+        method);
 }
 
 void write_method_semantic(writer& w, MethodSemantics const& method_semantic, MethodDef& method)
@@ -591,10 +646,7 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
             if (method < other_method)
             {
                 // First accessor seen for this property
-                for (auto const& attr : property.CustomAttribute())
-                {
-                    w.write(attr);
-                }
+                w.write(bind_each<write_custom_attribute>(property.CustomAttribute()));
             }
 
             if (semantic.Getter())
@@ -605,36 +657,34 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                     {
                         xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
                     }
-                    w.write("\n        % %;", property.Type().Type(), property.Name());
+                    w.write("\n%% %;", bind<write_indent>(), property.Type().Type(), property.Name());
                     ++method;
                 }
                 else
                 {
                     XLANG_ASSERT(semantic.Getter());
-                    w.write("\n        % % { get; };", property.Type().Type(), property.Name());
+                    w.write("\n%% % { get; };", bind<write_indent>(), property.Type().Type(), property.Name());
                 }
             }
             else
             {
                 XLANG_ASSERT(semantic.Setter());
-                w.write("\n        % % { set; };", property.Type().Type(), property.Name());
+                w.write("\n%% % { set; };", bind<write_indent>(), property.Type().Type(), property.Name());
             }
         }
         else
         {
             XLANG_ASSERT(distance(accessors) == 1);
-            for (auto const& attr : property.CustomAttribute())
-            {
-                w.write(attr);
-            }
+            w.write(bind_each<write_custom_attribute>(property.CustomAttribute()));
+
             if (semantic.Getter())
             {
-                w.write("\n        % % { get; };", property.Type().Type(), property.Name());
+                w.write("\n%% % { get; };", bind<write_indent>(), property.Type().Type(), property.Name());
             }
             else
             {
                 XLANG_ASSERT(semantic.Setter());
-                w.write("\n        % % { set; };", property.Type().Type(), property.Name());
+                w.write("\n%% % { set; };", bind<write_indent>(), property.Type().Type(), property.Name());
             }
         }
     }
@@ -659,10 +709,7 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
             if (method < other_method)
             {
                 // First accessor seen for this event
-                for (auto const& attr : event.CustomAttribute())
-                {
-                    w.write(attr);
-                }
+                w.write(bind_each<write_custom_attribute>(event.CustomAttribute()));
             }
 
             if (semantic.AddOn())
@@ -673,41 +720,48 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                     {
                         xlang::throw_invalid("Invalid semantic: events can only have a add and/or remove");
                     }
-                    w.write("\n        % %;", event.EventType(), event.Name());
+                    w.write("\n%% %;", bind<write_indent>(), event.EventType(), event.Name());
                     ++method;
                 }
                 else
                 {
                     XLANG_ASSERT(semantic.AddOn());
-                    w.write("\n        % % { add; };", event.EventType(), event.Name());
+                    w.write("\n%% % { add; };", bind<write_indent>(), event.EventType(), event.Name());
                 }
             }
             else
             {
                 XLANG_ASSERT(semantic.RemoveOn());
-                w.write("\n        % % { remove; };", event.EventType(), event.Name());
+                w.write("\n%% % { remove; };", bind<write_indent>(), event.EventType(), event.Name());
             }
         }
         else
         {
             XLANG_ASSERT(distance(accessors) == 1);
-            for (auto const& attr : event.CustomAttribute())
-            {
-                w.write(attr);
-            }
+            w.write(bind_each<write_custom_attribute>(event.CustomAttribute()));
+
             if (semantic.AddOn())
             {
-                w.write("\n        % % { add; };", event.EventType(), event.Name());
+                w.write("\n%% % { add; };", bind<write_indent>(), event.EventType(), event.Name());
             }
             else
             {
                 XLANG_ASSERT(semantic.RemoveOn());
-                w.write("\n        % % { remove; };", event.EventType(), event.Name());
+                w.write("\n%% % { remove; };", bind<write_indent>(), event.EventType(), event.Name());
             }
         }
     }
 }
 
+
+void write_required_interface(writer& w, InterfaceImpl const& interface_impl)
+{
+    writer::indent_guard indent{ w };
+
+    w.write("\n%%",
+        bind<write_indent>(),
+        interface_impl.Interface());
+}
 
 void write_required(writer& w, std::string_view const& requires, TypeDef const& type)
 {
@@ -718,7 +772,9 @@ void write_required(writer& w, std::string_view const& requires, TypeDef const& 
         return;
     }
 
-    w.write(" %\n        %", requires, bind_list(",\n        ", interfaces));
+    w.write(" %%",
+        requires,
+        bind_list<write_required_interface>(",", interfaces));
 }
 
 void write_interface_methods(writer& w, TypeDef const& type)
@@ -726,6 +782,7 @@ void write_interface_methods(writer& w, TypeDef const& type)
     auto const& methods = type.MethodList();
     auto const& properties = type.PropertyList();
     auto const& events = type.EventList();
+    writer::indent_guard indent{ w };
 
     auto method_semantic = [&properties, &events](MethodDef const& method) -> MethodSemantics
     {
@@ -769,30 +826,37 @@ void write_interface_methods(writer& w, TypeDef const& type)
 void write_interface(writer& w, TypeDef const& type)
 {
     auto guard = w.push_generic_params(type.GenericParam());
+    writer::indent_guard indent{ w };
 
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
-
-    w.write("\n    interface %%\n    {%\n    };\n",
+    w.write("%"
+            "\n%interface %%"
+            "\n%{"
+            "%"
+            "\n%};\n",
+        bind_each<write_custom_attribute>(type.CustomAttribute()),
+        bind<write_indent>(),
         bind<write_type_name>(type.TypeName()),
         bind<write_required>("requires", type),
-        bind<write_interface_methods>(type));
+        bind<write_indent>(),
+        bind<write_interface_methods>(type),
+        bind<write_indent>());
 }
 
 void write_class(writer& w, TypeDef const& type)
 {
     auto guard = w.push_generic_params(type.GenericParam());
+    writer::indent_guard indent{ w };
 
-    for (auto const& attr : type.CustomAttribute())
-    {
-        w.write(attr);
-    }
-
-    w.write("\n    runtimeclass %%\n    {\n    };\n",
+    w.write("%"
+            "\n%runtimeclass %%"
+            "\n%{"
+            "\n%};\n",
+        bind_each<write_custom_attribute>(type.CustomAttribute()),
+        bind<write_indent>(),
         bind<write_type_name>(type.TypeName()),
-        bind<write_required>(":", type));
+        bind<write_required>(":", type),
+        bind<write_indent>(),
+        bind<write_indent>());
 }
 
 auto get_out(reader const& args)
@@ -853,28 +917,28 @@ int main(int const argc, char** argv)
         w.flush_to_console();
         task_group group;
 
-        for (auto&& ns : c.namespaces())
+        for (auto const& [ns, members] : c.namespaces())
         {
             group.add([&]
             {
-                if (!f.includes(ns.second))
+                if (!f.includes(members))
                 {
                     return;
                 }
 
                 writer w;
-                w.current = ns.first;
+                w.current = ns;
 
                 w.write("\nnamespace %\n{%%%%%}\n",
-                    w.current,
-                    f.bind_each<write_enum>(ns.second.enums),
-                    f.bind_each<write_struct>(ns.second.structs),
-                    f.bind_each<write_delegate>(ns.second.delegates),
-                    f.bind_each<write_interface>(ns.second.interfaces),
-                    f.bind_each<write_class>(ns.second.classes));
+                    ns,
+                    f.bind_each<write_enum>(members.enums),
+                    f.bind_each<write_struct>(members.structs),
+                    f.bind_each<write_delegate>(members.delegates),
+                    f.bind_each<write_interface>(members.interfaces),
+                    f.bind_each<write_class>(members.classes));
 
                 auto filename{ out };
-                filename += w.current;
+                filename += ns;
                 filename += ".idl";
                 w.flush_to_file(filename);
             });
