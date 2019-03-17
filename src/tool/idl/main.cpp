@@ -919,7 +919,7 @@ int main(int const argc, char** argv)
 
         for (auto const& [ns, members] : c.namespaces())
         {
-            group.add([&]
+            group.add([&, &ns = ns, &members = members]
             {
                 if (!f.includes(members))
                 {
