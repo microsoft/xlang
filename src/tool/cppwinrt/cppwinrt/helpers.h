@@ -157,6 +157,22 @@ namespace xlang
         return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptionAttribute");
     }
 
+    static bool is_always_disabled(TypeDef const& type)
+    {
+        auto feature = get_attribute(type, "Windows.Foundation.Metadata", "FeatureAttribute");
+
+        if (!feature)
+        {
+            return false;
+        }
+
+        // The first argument is a Windows.Foundation.Metadata.FeatureStage enum class.
+        auto stage = std::get<ElemSig::EnumValue>(std::get<ElemSig>(feature.Value().FixedArgs()[0].value).value);
+
+        // FeatureStage::AlwaysDisabled is zero.
+        return std::get<int32_t>(stage.value) == 0;
+    }
+
     static bool is_async(MethodDef const& method, method_signature const& method_signature)
     {
         if (is_put_overload(method))

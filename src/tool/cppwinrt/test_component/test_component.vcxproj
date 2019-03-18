@@ -332,6 +332,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Velocity.Class1.cpp" />
+    <ClCompile Include="Velocity.Class2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -340,6 +342,8 @@
     <ClInclude Include="Composition.Visual.h" />
     <ClInclude Include="Generated Files\Simple.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Velocity.Class1.h" />
+    <ClInclude Include="Velocity.Class2.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

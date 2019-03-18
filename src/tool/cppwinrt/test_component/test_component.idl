@@ -244,4 +244,53 @@ namespace test_component
             };
         }
     }
+
+    namespace Velocity
+    {
+        feature_name Feature_AlwaysDisabled = { AlwaysDisabled, TRUE };
+        feature_name Feature_AlwaysEnabled = { AlwaysEnabled, TRUE };
+
+        // The .cpp is included in the project but AlwaysDisabled and thus won't show up
+        // in the module.g.cpp so activation requests will fail.
+        [feature(Feature_AlwaysDisabled)]
+        runtimeclass Class1
+        {
+            Class1();
+            void Class1_Method();
+        }
+
+        // This class is AlwaysEnabled which is treated just like a class with no
+        // feature attribute, thus included and required for compilation.
+        [feature(Feature_AlwaysEnabled)]
+        runtimeclass Class2
+        {
+            Class2();
+            void Class2_Method();
+        }
+
+        // This class is has no source in the project but is AlwaysDisabled and thus
+        // not required for compilation.
+        [feature(Feature_AlwaysDisabled)]
+        runtimeclass Class3
+        {
+            Class3();
+            void Class3_Method();
+        }
+
+        // This interface is AlwaysDisabled thus in the type system but not
+        // included in any implementation by default.
+        [feature(Feature_AlwaysDisabled)]
+        runtimeclass IInterface1
+        {
+            void IInterface1_Method();
+        }
+
+        // This interface is AlwaysEnabled thus in the type system and thus
+        // always required for compilation.
+        [feature(Feature_AlwaysEnabled)]
+        runtimeclass IInterface2
+        {
+            void IInterface1_Method();
+        }
+    }
 }
