@@ -12,6 +12,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/tool/xmeta/
     ${CMAKE_SOURCE_DIR}/tool/xmeta/libs/
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/
 )
 
 add_executable(test_xmeta "")
@@ -30,7 +31,7 @@ add_custom_command(TARGET test_xmeta POST_BUILD
 
 
 target_sources(test_xmeta
-    PUBLIC pch.cpp lexer.cpp)
+    PUBLIC pch.cpp testlexer.cpp)
 
 target_include_directories(test_xmeta
     PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
@@ -40,7 +41,13 @@ if (MSVC)
     target_link_libraries(test_xmeta windowsapp ole32)
 endif()
 
-target_sources(test_xmeta PUBLIC main.cpp ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangLexer.cpp ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangParser.cpp)
+set(xmeta_gen_generated
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangLexer.cpp
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangParser.cpp
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/XlangBasicListener.cpp
+ )
+
+target_sources(test_xmeta PUBLIC main.cpp ${xmeta_gen_generated})
 
 # https://stackoverflow.com/questions/35310117/debug-assertion-failed-expression-acrt-first-block-header
 # Temporary measure

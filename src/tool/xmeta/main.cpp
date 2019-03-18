@@ -24,7 +24,7 @@ int main(int argc, const char * argv[]) {
 
     tree::ParseTree *tree = parser.xlang();
     std::string s = tree->toStringTree(&parser);
-    std::cout << s << std::endl;
+    std::cout << tree->toStringTree(&parser) << std::endl;
 
     std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
 
