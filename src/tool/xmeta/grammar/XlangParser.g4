@@ -200,9 +200,9 @@ type_parameter_list
     ;
 
 class_base
-    : class_type
-    | interface_type_list
-    | class_type COMMA interface_type_list
+    : COLON class_type
+    | COLON interface_type_list
+    | COLON class_type COMMA interface_type_list
     ;
 
 interface_type_list
