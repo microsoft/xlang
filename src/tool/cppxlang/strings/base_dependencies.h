@@ -2,9 +2,11 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cassert>
 #include <chrono>
 #include <clocale>
 #include <cstddef>
+#include <cwchar>
 #include <iterator>
 #include <limits>
 #include <map>
