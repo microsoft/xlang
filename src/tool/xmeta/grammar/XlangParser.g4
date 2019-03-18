@@ -221,7 +221,7 @@ class_member_declaration
     ;
 
 method_declaration
-    : return_type IDENTIFIER type_parameter_list OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 formal_parameter_list
@@ -253,10 +253,15 @@ property_accessors
     ;
 
 event_declaration
-    : EVENT type IDENTIFIER SEMICOLON
-    | EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    : event_modifier? EVENT type IDENTIFIER SEMICOLON
+    | event_modifier? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
-
+    
+event_modifier
+    : PROTECTED
+    | STATIC
+    ;
+    
 event_accessors
     : ADD SEMICOLON REMOVE SEMICOLON
     ;
@@ -282,6 +287,7 @@ struct_body
 
 struct_member_declaration
     : variable_declarator
+    | type IDENTIFIER SEMICOLON
     ;
 
 /* Arrays */
