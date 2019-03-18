@@ -1,0 +1,21 @@
+namespace Windows.Test
+{
+    enum Color
+    {
+       Red,
+       Green,
+       Blue
+    }
+// TODO: this cannot be -1 yet. Expressions unfinished
+enum Alignment
+{
+    Center = 0,
+    Right = 1
+}
+enum Permissions
+{
+    None = 0x0000,
+    Camera = 0x0001,
+    Microphone = 0x0002,
+}
+}

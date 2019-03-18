@@ -304,8 +304,8 @@ non_array_type
 
 /* Interfaces */
 interface_declaration
-    : interface_modifier* PARTIAL INTERFACE
-        IDENTIFIER variant_type_parameter_list? interface_base?
+    : interface_modifier* PARTIAL? INTERFACE
+        IDENTIFIER variant_type_parameter_list? interface_base? interface_body SEMICOLON?
     ;
 
 interface_modifier
@@ -318,7 +318,7 @@ variant_type_parameter_list
     ;
 
 interface_base
-    : interface_type_list
+    : COLON interface_type_list
     ;
 
 interface_body
@@ -337,12 +337,12 @@ enum_declaration
     ;
 
 enum_base
-    : enum_integral_type
+    : COLON enum_integral_type
     ;
 
 enum_body
     : OPEN_BRACE enum_member_declaration CLOSE_BRACE
-    | OPEN_BRACE enum_member_declaration (COMMA enum_member_declaration)* CLOSE_BRACE
+    | OPEN_BRACE enum_member_declaration (COMMA enum_member_declaration)* COMMA? CLOSE_BRACE
     ;
 
 enum_modifier
