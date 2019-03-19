@@ -391,13 +391,13 @@ def _instance(self):
             case category::enum_type:
                 break;
             default:
-                w.write("# return_value category for % not implemented \n", name);
+                w.write("# % category not implemented %\n", name, signature);
             }
         },
             [](fundamental_type) {},
             [&](auto)
         {
-            w.write("# return_value for % not implemented \n", name);
+            w.write("# % not implemented % \n", name, signature);
         });
     }
 
@@ -418,12 +418,17 @@ def _instance(self):
                 w.write("_% = %._instance\n", name, arg_name);
                 break;
             default:
-                w.write("# % in param category not implemented \n", name);
+                w.write("# % category not implemented % \n", name, signature);
                 w.write("_% = %\n", name, arg_name);
             }
         },
+            [&](fundamental_type) 
+        {
+            w.write("_% = %\n", name, arg_name);
+        },
             [&](auto) 
         {
+            w.write("# % not implemented % \n", name, signature);
             w.write("_% = %\n", name, arg_name);
         });
     }
