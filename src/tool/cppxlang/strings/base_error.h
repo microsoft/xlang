@@ -1,5 +1,5 @@
 
-__declspec(selectany) int32_t (WINRT_CALL *winrt_to_hresult_handler)(void* address) noexcept{};
+inline int32_t (WINRT_CALL *winrt_to_hresult_handler)(void* address) noexcept{};
 
 namespace winrt::impl
 {
