@@ -250,6 +250,22 @@ namespace test_component
         feature_name Feature_AlwaysDisabled = { AlwaysDisabled, TRUE };
         feature_name Feature_AlwaysEnabled = { AlwaysEnabled, TRUE };
 
+        // This interface is AlwaysDisabled thus in the type system but not
+        // included in any implementation by default.
+        [feature(Feature_AlwaysDisabled)]
+        interface IInterface1
+        {
+            void IInterface1_Method();
+        }
+
+        // This interface is AlwaysEnabled thus in the type system and thus
+        // always required for compilation.
+        [feature(Feature_AlwaysEnabled)]
+        interface IInterface2
+        {
+            void IInterface2_Method();
+        }
+
         // The .cpp is included in the project but AlwaysDisabled and thus won't show up
         // in the module.g.cpp so activation requests will fail.
         [feature(Feature_AlwaysDisabled)]
@@ -277,20 +293,24 @@ namespace test_component
             void Class3_Method();
         }
 
-        // This interface is AlwaysDisabled thus in the type system but not
-        // included in any implementation by default.
-        [feature(Feature_AlwaysDisabled)]
-        runtimeclass IInterface1
+        // This class has no feature attribute but requires interfaces with feature attributes.
+        // One interface is always disabled and the other is always enabled.
+        runtimeclass Class4 : IInterface1, IInterface2
         {
-            void IInterface1_Method();
-        }
+            Class4();
+            void Class4_Method();
 
-        // This interface is AlwaysEnabled thus in the type system and thus
-        // always required for compilation.
-        [feature(Feature_AlwaysEnabled)]
-        runtimeclass IInterface2
-        {
-            void IInterface1_Method();
+            [feature(Feature_AlwaysDisabled)]
+            {
+                Class4(Int32 one);
+                static void Class4_Static1();
+            }
+
+            [feature(Feature_AlwaysEnabled)]
+            {
+                Class4(Int32 one, Int32 two);
+                static void Class4_Static2();
+            }
         }
     }
 }

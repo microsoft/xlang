@@ -6,6 +6,5 @@ namespace winrt::test_component::Velocity::implementation
 {
     void Class2::Class2_Method()
     {
-        throw hresult_not_implemented();
     }
 }

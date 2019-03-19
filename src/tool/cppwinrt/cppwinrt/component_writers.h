@@ -317,6 +317,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : factories)
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable)
             {
                 if (!factory.type)
@@ -358,7 +363,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         for (auto&&[factory_name, factory] : factories)
         {
-            if (!factory.type)
+            if (!factory.type || is_always_disabled(factory.type))
             {
                 continue;
             }
@@ -396,6 +401,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : get_factories(w, type))
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable)
             {
                 if (!factory.type)
@@ -589,7 +599,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : get_factories(w, base_type))
         {
-            if (!factory.composable)
+            if (!factory.composable || is_always_disabled(factory.type))
             {
                 continue;
             }
@@ -804,6 +814,11 @@ namespace winrt::@::implementation
 
         for (auto&&[factory_name, factory] : get_factories(w, type))
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable || factory.composable)
             {
                 if (!factory.type)
@@ -850,7 +865,7 @@ namespace winrt::@::implementation
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            if (info.base)
+            if (info.base || is_always_disabled(info.type))
             {
                 continue;
             }
@@ -934,6 +949,11 @@ namespace winrt::@::implementation
 
         for (auto&&[factory_name, factory] : get_factories(w, type))
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable || factory.composable)
             {
                 if (!factory.type)
@@ -994,7 +1014,7 @@ namespace winrt::@::implementation
 
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            if (info.base)
+            if (info.base || is_always_disabled(info.type))
             {
                 continue;
             }
