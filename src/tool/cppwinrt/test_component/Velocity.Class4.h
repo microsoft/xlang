@@ -7,9 +7,12 @@ namespace winrt::test_component::Velocity::implementation
     {
         Class4() = default;
 
+        Class4(int32_t one);
         Class4(int32_t one, int32_t two);
+        static void Class4_Static1();
         static void Class4_Static2();
         void Class4_Method();
+        void IInterface1_Method();
         void IInterface2_Method();
     };
 }
