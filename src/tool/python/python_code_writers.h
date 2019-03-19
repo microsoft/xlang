@@ -162,7 +162,7 @@ namespace xlang
         {
             throw_invalid("not impl");
         }
-        else 
+        else
         {
             throw_invalid("only classes and interfaces have methods");
         }
@@ -260,29 +260,40 @@ namespace xlang
         return std::move(params);
     }
 */
+
     void write_python_class_init(writer& w, TypeDef const& type)
     {
-        if (is_static(type))
+        auto write_instance_prop = [&w]()
         {
-            w.write(R"(def __new__(cls):
+            w.write(R"(@property
+def _instance(self):
+    return self.__instance
+)");
+        };
+
+        auto write_wrap_dunder_init = [&w](TypeDef const& type)
+        {
+            w.write(R"(def __init__(self, *, _instance=None):
+    if type(_instance) != type(self).__type:
+        raise TypeError("_instance must be a @ native type")
+    self.__instance = _instance
+)", type.TypeName());
+        };
+
+        auto category = get_category(type);
+        if (category == category::class_type)
+        {
+            if (is_static(type))
+            {
+                w.write(R"(def __new__(cls):
     raise TypeError("% is a static class. It cannot be constructed")
 )", type.TypeName());
-        }
-        else
-        {
-            auto is_default_constructable = false;
-            for (auto&& method : type.MethodList())
-            {
-                if (is_constructor(method) && empty(method.ParamList()))
-                {
-                    is_default_constructable = true;
-                    break;
-                }
             }
-
-            if (is_default_constructable)
+            else
             {
-                w.write(R"(def __init__(self, *, _instance=None):
+                if (is_default_constructable(type))
+                {
+                    w.write(R"(def __init__(self, *, _instance=None):
     if _instance == None:
         self.__instance = type(self).__type._default_ctor()
     else:
@@ -290,23 +301,24 @@ namespace xlang
             raise TypeError("_instance must be a % native type")
         self.__instance = _instance
 )", type.TypeName());
+                }
+                else
+                {
+                    write_wrap_dunder_init(type);
+                }
 
+                write_instance_prop();
             }
-            else
-            {
-                w.write(R"(def __init__(self, *, _instance=None):
-    if type(_instance) != type(self).__type:
-        raise TypeError("_instance must be a % native type")
-    self.__instance = _instance
-)", type.TypeName());
-            }
-
-            w.write(R"(@property
-def _instance(self):
-    return self.__instance
-)");
         }
-
+        else if (category == category::interface_type)
+        {
+            write_wrap_dunder_init(type);
+            write_instance_prop();
+        }
+        else
+        {
+            throw_invalid("only classes and interfaces have class init");
+        }
     }
 
     void write_python_method_first_param(writer& w, MethodDef const& method)
@@ -340,14 +352,14 @@ def _instance(self):
     {
         bool write_equals = false;
         separator s{ w };
-     
+
         if (signature.return_signature())
         {
             s();
             w.write(signature.return_param_name());
             write_equals = true;
         }
-        
+
         for (auto&& p : signature.params())
         {
             if (is_out_param(p))
@@ -397,7 +409,7 @@ def _instance(self):
             switch (type.category)
             {
             case category::class_type:
-            //case category::interface_type:
+                //case category::interface_type:
                 w.write("% = %(_instance=%)\n", name, type.type.TypeName(), name);
                 break;
             case category::enum_type:
@@ -426,7 +438,7 @@ def _instance(self):
             switch (type.category)
             {
             case category::class_type:
-            //case category::interface_type:
+                //case category::interface_type:
                 w.write("_% = %._instance\n", name, arg_name);
                 break;
             default:
@@ -434,11 +446,11 @@ def _instance(self):
                 w.write("_% = %\n", name, arg_name);
             }
         },
-            [&](fundamental_type) 
+            [&](fundamental_type)
         {
             w.write("_% = %\n", name, arg_name);
         },
-            [&](auto) 
+            [&](auto)
         {
             w.write("# % not implemented % \n", name, signature);
             w.write("_% = %\n", name, arg_name);
@@ -463,10 +475,10 @@ def _instance(self):
             }
         }
 
-        w.write("%%.%(%)\n", 
+        w.write("%%.%(%)\n",
             bind<write_python_method_body_return_values>(signature),
             bind<write_python_method_body_calling_context>(method),
-            get_method_abi_name(method), 
+            get_method_abi_name(method),
             bind<write_python_method_body_call_args>(signature));
 
         std::vector<std::string_view> return_tuple{};
@@ -537,11 +549,10 @@ def _instance(self):
         {
             writer::indent_guard g{ w };
 
-            w.write("__type = _ns_module.%\n\n", type.TypeName());
+            w.write("__type = _ns_module.%\n", type.TypeName());
             write_python_class_init(w, type);
-            w.write("\n");
 
-            for (auto&& [name, methods] : get_methods(type))
+            for (auto&&[name, methods] : get_methods(type))
             {
                 write_python_method(w, name, methods);
             }
@@ -570,6 +581,19 @@ def _instance(self):
                 }
             }
 
+        }
+        w.write("\n");
+    }
+
+    void write_python_interface(writer& w, TypeDef const& type)
+    {
+        if (is_exclusive_to(type)) return;
+
+        w.write("class @:\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+            w.write("__type = _ns_module.@\n", type.TypeName());
+            write_python_class_init(w, type);
         }
         w.write("\n");
     }

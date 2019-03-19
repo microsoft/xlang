@@ -816,6 +816,22 @@ namespace xlang
             (category == category::class_type && !type.Flags().Abstract());
     }
 
+    bool is_default_constructable(TypeDef const& type)
+    {
+        if (get_category(type) == category::class_type)
+        {
+            for (auto&& method : type.MethodList())
+            {
+                if (is_constructor(method) && empty(method.ParamList()))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     bool implements_sequence_protocol(TypeDef const& type)
     {
         return implements_interface(type, "Windows.Foundation.Collections", "IVector`1") 
