@@ -128,6 +128,26 @@ class TestJson(unittest.TestCase):
     def test_JsonValue_create_null_value(self):
         v = wdj.JsonValue.create_null_value()
         self.assertEqual(v.value_type, wdj.JsonValueType.NULL)
+        
+    def test_JsonObject_get_named_boolean(self):
+        o = wdj.JsonObject.parse("{ \"spam\": true }")
+        v = o.get_named_boolean("spam")
+        self.assertTrue(v)
+
+    def test_JsonObject_get_named_boolean_default(self):
+        o = wdj.JsonObject.parse("{ \"spam\": true }")
+        v = o.get_named_boolean("more-spam", True)
+        self.assertTrue(v)
+
+    def test_JsonObject_get_named_number(self):
+        o = wdj.JsonObject.parse("{ \"spam\": 42 }")
+        v = o.get_named_number("spam")
+        self.assertEqual(v, 42)
+
+    def test_JsonObject_get_named_number_default(self):
+        o = wdj.JsonObject.parse("{ \"spam\": true }")
+        v = o.get_named_number("more-spam", 16)
+        self.assertEqual(v, 16)
 
 
     # def test_activate_JsonObject(self):

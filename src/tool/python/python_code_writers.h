@@ -401,8 +401,13 @@ def _instance(self):
         });
     }
 
-    void write_in_param_convert(writer& w, std::string_view name, TypeSig const& signature)
+    void write_in_param_convert(writer& w, std::string_view name, TypeSig const& signature, std::string_view arg_name = "")
     {
+        if (arg_name.size() == 0)
+        {
+            arg_name = name;
+        }
+
         call(handle_signature(signature),
             [&](metadata_type const& type)
         {
@@ -410,28 +415,34 @@ def _instance(self):
             {
             case category::class_type:
             //case category::interface_type:
-                w.write("_% = %._instance\n", name, name);
+                w.write("_% = %._instance\n", name, arg_name);
                 break;
             default:
                 w.write("# % in param category not implemented \n", name);
-                w.write("_% = %\n", name, name);
+                w.write("_% = %\n", name, arg_name);
             }
         },
             [&](auto) 
         {
-            w.write("_% = %\n", name, name);
+            w.write("_% = %\n", name, arg_name);
         });
     }
 
-    void write_python_method_body(writer& w, MethodDef const& method)
+    void write_python_method_body(writer& w, MethodDef const& method, std::string_view args = "")
     {
         method_signature signature{ method };
 
+        int count = 0;
         for (auto&& p : signature.params())
         {
             if (is_in_param(p))
             {
-                write_in_param_convert(w, p.first.Name(), p.second->Type());
+                std::string arg{};
+                if (!args.empty())
+                {
+                    arg = w.write_temp("%[%]", args, std::to_string(count++));
+                }
+                write_in_param_convert(w, p.first.Name(), p.second->Type(), arg);
             }
         }
 
@@ -483,10 +494,23 @@ def _instance(self):
         {
             for (auto&& method : methods)
             {
-                w.write("^@typing.overload\ndef %(%):\n    pass\n", name, bind<write_python_method_params>(method));
+                w.write("^@typing.overload\ndef %(%):\n    pass\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_params>(method));
             }
 
-            w.write("def %(%, *args):\n    pass\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_first_param>(methods[0]));
+            w.write("def %(%, *args):\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_first_param>(methods[0]));
+
+            {
+                writer::indent_guard g{ w };
+                w.write("_count = len(args)\n");
+                for (auto&& method : methods)
+                {
+                    method_signature sig{ method };
+                    w.write("if _count == %:\n", std::to_string(sig.params().size()));
+                    writer::indent_guard gg{ w };
+                    write_python_method_body(w, method, "args");
+                }
+                w.write("raise TypeError(\"invalid argument count\")\n");
+            }
         }
     }
 
