@@ -14,8 +14,30 @@ template <typename...T> overloaded(T...)->overloaded<T...>;
 struct writer : writer_base<writer>
 {
     using writer_base<writer>::write;
+
+    struct indentation {
+        int32_t value{ 0 };
+    };
+
+    struct indent_guard
+    {
+        explicit indent_guard(writer& w, int32_t offset = 1) noexcept : _writer(w), _offset(offset)
+        {
+            _writer.indent.value += _offset;
+        }
+
+        ~indent_guard()
+        {
+            _writer.indent.value -= _offset;
+        }
+
+    private:
+        writer& _writer;
+        int32_t _offset;
+    };
+
     std::string_view current;
-    int32_t indent{ 0 };
+    indentation indent;
 
     std::vector<std::pair<GenericParam, GenericParam>> generic_param_stack;
 
@@ -46,30 +68,6 @@ struct writer : writer_base<writer>
     {
         generic_param_stack.push_back(std::move(arg));
         return generic_param_guard{ this };
-    }
-
-    struct indent_guard
-    {
-        explicit indent_guard(writer& w) noexcept : _writer(w)
-        {
-            _writer.indent++;
-        }
-
-        ~indent_guard()
-        {
-            _writer.indent--;
-        }
-
-    private:
-        writer & _writer;
-    };
-
-    void write_indent()
-    {
-        for (int32_t i = 0; i < indent; i++)
-        {
-            write("    ");
-        }
     }
 
     void write_value(bool value)
@@ -491,18 +489,19 @@ struct writer : writer_base<writer>
             write(")]");
         }
     }
-};
 
-void write_indent(writer& w)
-{
-    w.write_indent();
-}
+    void write(indentation indent_level)
+    {
+        for (int32_t i = 0; i < indent_level.value; i++)
+        {
+            write("    ");
+        }
+    }
+};
 
 void write_custom_attribute(writer& w, CustomAttribute const& attr)
 {
-    w.write("\n%%",
-        bind<write_indent>(),
-        attr);
+    w.write("\n%%", w.indent, attr);
 }
 
 void write_type_name(writer& w, std::string_view name)
@@ -529,20 +528,17 @@ void write_type_name(writer& w, std::string_view name)
 
 void write_enum_field(writer& w, Field const& field)
 {
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
     if (auto const& constant = field.Constant())
     {
-        w.write("\n%% = %,",
-            bind<write_indent>(),
-            field.Name(),
-            constant);
+        w.write("\n%% = %,", w.indent, field.Name(), constant);
     }
 }
 
 void write_enum(writer& w, TypeDef const& type)
 {
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
     w.write("%"
             "\n%enum %"
@@ -550,26 +546,23 @@ void write_enum(writer& w, TypeDef const& type)
             "%"
             "\n%};\n",
         bind_each<write_custom_attribute>(type.CustomAttribute()),
-        bind<write_indent>(),
+        w.indent,
         type.TypeName(),
-        bind<write_indent>(),
+        w.indent,
         bind_each<write_enum_field>(type.FieldList()),
-        bind<write_indent>());
+        w.indent);
 }
 
 void write_struct_field(writer& w, Field const& field)
 {
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
-    w.write("\n%% %;",
-        bind<write_indent>(),
-        field.Signature().Type(),
-        field.Name());
+    w.write("\n%% %;", w.indent, field.Signature().Type(), field.Name());
 }
 
 void write_struct(writer& w, TypeDef const& type)
 {
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
     w.write("%"
             "\n%struct %"
@@ -577,18 +570,18 @@ void write_struct(writer& w, TypeDef const& type)
             "%"
             "\n%};\n",
         bind_each<write_custom_attribute>(type.CustomAttribute()),
-        bind<write_indent>(),
+        w.indent,
         type.TypeName(),
-        bind<write_indent>(),
+        w.indent,
         bind_each<write_struct_field>(type.FieldList()),
-        bind<write_indent>());
+        w.indent);
 }
 
 void write_delegate(writer& w, TypeDef const& type)
 {
     auto guard{ w.push_generic_params(type.GenericParam()) };
     auto methods = type.MethodList();
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
     auto method = std::find_if(begin(methods), end(methods), [](auto&& method)
     {
@@ -603,7 +596,7 @@ void write_delegate(writer& w, TypeDef const& type)
     w.write("%"
             "\n%delegate % %(%);\n",
         bind_each<write_custom_attribute>(type.CustomAttribute()),
-        bind<write_indent>(),
+        w.indent,
         method.Signature().ReturnType(),
         bind<write_type_name>(type.TypeName()),
         method);
@@ -614,7 +607,7 @@ void write_method(writer& w, MethodDef const& method)
     w.write("%"
             "\n%% %(%);",
         bind_each<write_custom_attribute>(method.CustomAttribute()),
-        bind<write_indent>(),
+        w.indent,
         method.Signature().ReturnType(),
         method.Name(),
         method);
@@ -657,19 +650,19 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                     {
                         xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
                     }
-                    w.write("\n%% %;", bind<write_indent>(), property.Type().Type(), property.Name());
+                    w.write("\n%% %;", w.indent, property.Type().Type(), property.Name());
                     ++method;
                 }
                 else
                 {
                     XLANG_ASSERT(semantic.Getter());
-                    w.write("\n%% % { get; };", bind<write_indent>(), property.Type().Type(), property.Name());
+                    w.write("\n%% % { get; };", w.indent, property.Type().Type(), property.Name());
                 }
             }
             else
             {
                 XLANG_ASSERT(semantic.Setter());
-                w.write("\n%% % { set; };", bind<write_indent>(), property.Type().Type(), property.Name());
+                w.write("\n%% % { set; };", w.indent, property.Type().Type(), property.Name());
             }
         }
         else
@@ -679,12 +672,12 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
 
             if (semantic.Getter())
             {
-                w.write("\n%% % { get; };", bind<write_indent>(), property.Type().Type(), property.Name());
+                w.write("\n%% % { get; };", w.indent, property.Type().Type(), property.Name());
             }
             else
             {
                 XLANG_ASSERT(semantic.Setter());
-                w.write("\n%% % { set; };", bind<write_indent>(), property.Type().Type(), property.Name());
+                w.write("\n%% % { set; };", w.indent, property.Type().Type(), property.Name());
             }
         }
     }
@@ -720,19 +713,19 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
                     {
                         xlang::throw_invalid("Invalid semantic: events can only have a add and/or remove");
                     }
-                    w.write("\n%% %;", bind<write_indent>(), event.EventType(), event.Name());
+                    w.write("\n%% %;", w.indent, event.EventType(), event.Name());
                     ++method;
                 }
                 else
                 {
                     XLANG_ASSERT(semantic.AddOn());
-                    w.write("\n%% % { add; };", bind<write_indent>(), event.EventType(), event.Name());
+                    w.write("\n%% % { add; };", w.indent, event.EventType(), event.Name());
                 }
             }
             else
             {
                 XLANG_ASSERT(semantic.RemoveOn());
-                w.write("\n%% % { remove; };", bind<write_indent>(), event.EventType(), event.Name());
+                w.write("\n%% % { remove; };", w.indent, event.EventType(), event.Name());
             }
         }
         else
@@ -742,12 +735,12 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
 
             if (semantic.AddOn())
             {
-                w.write("\n%% % { add; };", bind<write_indent>(), event.EventType(), event.Name());
+                w.write("\n%% % { add; };", w.indent, event.EventType(), event.Name());
             }
             else
             {
                 XLANG_ASSERT(semantic.RemoveOn());
-                w.write("\n%% % { remove; };", bind<write_indent>(), event.EventType(), event.Name());
+                w.write("\n%% % { remove; };", w.indent, event.EventType(), event.Name());
             }
         }
     }
@@ -756,11 +749,9 @@ void write_method_semantic(writer& w, MethodSemantics const& method_semantic, Me
 
 void write_required_interface(writer& w, InterfaceImpl const& interface_impl)
 {
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
-    w.write("\n%%",
-        bind<write_indent>(),
-        interface_impl.Interface());
+    w.write("\n%%", w.indent, interface_impl.Interface());
 }
 
 void write_required(writer& w, std::string_view const& requires, TypeDef const& type)
@@ -782,7 +773,7 @@ void write_interface_methods(writer& w, TypeDef const& type)
     auto const& methods = type.MethodList();
     auto const& properties = type.PropertyList();
     auto const& events = type.EventList();
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
     auto method_semantic = [&properties, &events](MethodDef const& method) -> MethodSemantics
     {
@@ -826,7 +817,7 @@ void write_interface_methods(writer& w, TypeDef const& type)
 void write_interface(writer& w, TypeDef const& type)
 {
     auto guard = w.push_generic_params(type.GenericParam());
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
     w.write("%"
             "\n%interface %%"
@@ -834,29 +825,29 @@ void write_interface(writer& w, TypeDef const& type)
             "%"
             "\n%};\n",
         bind_each<write_custom_attribute>(type.CustomAttribute()),
-        bind<write_indent>(),
+        w.indent,
         bind<write_type_name>(type.TypeName()),
         bind<write_required>("requires", type),
-        bind<write_indent>(),
+        w.indent,
         bind<write_interface_methods>(type),
-        bind<write_indent>());
+        w.indent);
 }
 
 void write_class(writer& w, TypeDef const& type)
 {
     auto guard = w.push_generic_params(type.GenericParam());
-    writer::indent_guard indent{ w };
+    writer::indent_guard _{ w };
 
     w.write("%"
             "\n%runtimeclass %%"
             "\n%{"
             "\n%};\n",
         bind_each<write_custom_attribute>(type.CustomAttribute()),
-        bind<write_indent>(),
+        w.indent,
         bind<write_type_name>(type.TypeName()),
         bind<write_required>(":", type),
-        bind<write_indent>(),
-        bind<write_indent>());
+        w.indent,
+        w.indent);
 }
 
 auto get_out(reader const& args)
