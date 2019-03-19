@@ -167,6 +167,152 @@ namespace xlang
         }
     };
 
+    enum class fundamental_type
+    {
+        Boolean = 0x02,
+        Char = 0x03,
+        I1 = 0x04,
+        U1 = 0x05,
+        I2 = 0x06,
+        U2 = 0x07,
+        I4 = 0x08,
+        U4 = 0x09,
+        I8 = 0x0a,
+        U8 = 0x0b,
+        R4 = 0x0c,
+        R8 = 0x0d,
+        String = 0x0e,
+    };
+
+    struct object_type{};
+
+    struct guid_type{};
+
+    struct metadata_type
+    {
+        category category;
+        TypeDef type;
+    };
+
+    struct generic_type_instance;
+
+    struct generic_type_index
+    {
+        uint32_t index;
+    };
+
+    using signature_handler_type = std::variant<
+        fundamental_type,
+        object_type,
+        guid_type,
+        metadata_type,
+        generic_type_instance,
+        generic_type_index>;
+
+    struct generic_type_instance
+    {
+        metadata_type generic_type;
+        std::vector<signature_handler_type> generic_args{};
+    };
+
+    signature_handler_type handle_signature(TypeSig const& signature);
+
+    signature_handler_type handle_signature(GenericTypeInstSig const& type)
+    {
+        auto generic_type_helper = [&type]()
+        {
+            switch (type.GenericType().type())
+            {
+            case TypeDefOrRef::TypeDef:
+            {
+                auto type_def = type.GenericType().TypeDef();
+                return metadata_type{ get_category(type_def) , type_def };
+            }
+            case TypeDefOrRef::TypeRef:
+            {
+                auto type_def = find_required(type.GenericType().TypeRef());
+                return metadata_type{ get_category(type_def) , type_def };
+            }
+            }
+
+            throw_invalid("invalid TypeDefOrRef value for GenericTypeInstSig.GenericType");
+        };
+
+        auto gti = generic_type_instance{ generic_type_helper() };
+
+        for (auto&& arg : type.GenericArgs())
+        {
+            gti.generic_args.push_back(handle_signature(arg));
+        }
+
+        return gti;
+    }
+
+    namespace impl
+    {
+        template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+        template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    }
+
+    signature_handler_type handle_signature(TypeSig const& signature)
+    {
+        return std::visit(
+            impl::overloaded{
+            [](ElementType type) -> signature_handler_type
+        {
+            switch (type)
+            {
+            case ElementType::Boolean:
+            case ElementType::Char:
+            case ElementType::I1:
+            case ElementType::U1:
+            case ElementType::I2:
+            case ElementType::U2:
+            case ElementType::I4:
+            case ElementType::U4:
+            case ElementType::I8:
+            case ElementType::U8:
+            case ElementType::R4:
+            case ElementType::R8:
+            case ElementType::String:
+                return (fundamental_type)type;
+            case ElementType::Object:
+                return object_type{};
+            }
+
+            throw_invalid("element type not supported");
+        },
+            [](coded_index<TypeDefOrRef> type) -> signature_handler_type
+        {
+            switch (type.type())
+            {
+            case TypeDefOrRef::TypeDef:
+            {
+                auto type_def = type.TypeDef();
+                return metadata_type{ get_category(type_def) , type_def };
+            }
+            case TypeDefOrRef::TypeRef:
+            {
+                auto type_ref = type.TypeRef();
+                if (type_ref.TypeName() == "Guid" && type_ref.TypeNamespace() == "System")
+                {
+                    return guid_type{};
+                }
+
+                auto type_def = find_required(type_ref);
+                return metadata_type{ get_category(type_def) , type_def };
+            }
+            case TypeDefOrRef::TypeSpec:
+                return handle_signature(type.TypeSpec().Signature().GenericTypeInst());
+            }
+
+            return object_type{};
+        },
+            [](GenericTypeIndex var) -> signature_handler_type { return generic_type_index{ var.index }; },
+            [](GenericTypeInstSig sig) -> signature_handler_type { return handle_signature(sig); }
+            }, signature.Type());
+    }
+
     struct method_signature
     {
         using param_t = std::pair<Param, ParamSig const*>;
