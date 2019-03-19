@@ -288,6 +288,11 @@ namespace xlang
     self.__instance = _instance
 )", type.TypeName());
             }
+
+            w.write(R"(@property
+def _instance(self):
+    return self.__instance
+)");
         }
 
     }
@@ -355,7 +360,7 @@ namespace xlang
             if (is_in_param(p))
             {
                 s();
-                w.write(p.first.Name());
+                w.write("_%", p.first.Name());
             }
         }
     }
@@ -374,53 +379,39 @@ namespace xlang
 
     void write_return_value_convert(writer& w, std::string_view name, TypeSig const& signature)
     {
-        struct return_value_convert : public signature_handler_base<return_value_convert>
+        call(handle_signature(signature),
+            [&](metadata_type const& type)
         {
-            writer& w;
-            std::string_view name;
-
-            return_value_convert(writer& _w, std::string_view _name) : w(_w), name(_name) {}
-
-            using signature_handler_base<return_value_convert>::handle;
-
-            void handle_class(TypeDef const& type) 
-            { 
-                if (w.current_namespace == type.TypeNamespace())
-                {
-                    w.write("% = %(_instance=%)\n", name, type.TypeName(), name);
-                }
-                else
-                {
-                    w.write("% = % # todo handle_class \n", name, name);
-                }
+            switch (type.category)
+            {
+            case category::class_type:
+            case category::interface_type:
+                w.write("% = %(_instance=%)\n", name, type.type.TypeName(), name);
+                break;
             }
-            void handle_delegate(TypeDef const& /*type*/) { w.write("% = % # todo handle_delegate \n", name, name); }
-            void handle_guid(TypeRef const& /*type*/) { w.write("% = % # todo handle_guid \n", name, name); }
-            void handle_interface(TypeDef const& /*type*/) { w.write("% = % # todo handle_interface \n", name, name); }
-            void handle_struct(TypeDef const& /*type*/) { w.write("% = % # todo handle_struct \n", name, name); }
-            void handle_enum(TypeDef const& type) 
-            { 
-                if (w.current_namespace == type.TypeNamespace())
-                {
-                    w.write("% = %(%)\n", name, type.TypeName(), name);
-                }
-                else
-                {
-                    w.write("% = % # todo handle_enum \n", name, name);
-                }
-            }
+        },
+            [&](auto){});
+    }
 
-            void handle(ElementType type) 
-            { 
-                if (type == ElementType::Object)
-                {
-                    w.write("% = % # todo convert ElementType::Object\n", name, name);
-                }
+    void write_in_param_convert(writer& w, std::string_view name, TypeSig const& signature)
+    {
+        call(handle_signature(signature),
+            [&](metadata_type const& type)
+        {
+            switch (type.category)
+            {
+            case category::class_type:
+            case category::interface_type:
+                w.write("_% = %._instance\n", name, name);
+                break;
+            default:
+                w.write("_% = %\n", name, name);
             }
-        };
-
-        return_value_convert rvc{ w, name };
-        //rvc.handle(signature);
+        },
+            [&](auto) 
+        {
+            w.write("_% = %\n", name, name);
+        });
     }
 
     void write_python_method_body(writer& w, MethodDef const& method)
@@ -429,16 +420,11 @@ namespace xlang
 
         for (auto&& p : signature.params())
         {
-            w.write("# % %\n", p.first.Name(), p.second->Type());
+            if (is_in_param(p))
+            {
+                write_in_param_convert(w, p.first.Name(), p.second->Type());
+            }
         }
-
-        if (signature.return_signature())
-        {
-            w.write("# % %\n", signature.return_param_name(), signature.return_signature().Type());
-        }
-
-        // ParamSig and RetTypeSig both have CustomMod, ByRef and Type, 
-
 
         w.write("%%.%(%)\n", 
             bind<write_python_method_body_return_values>(signature),

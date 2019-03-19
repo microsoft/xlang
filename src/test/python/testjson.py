@@ -3,7 +3,7 @@ sys.path.append("./generated")
 
 import unittest
 
-import pyrt.windows.data.json as wdj
+import winrt.windows.data.json as wdj
 
 class TestJson(unittest.TestCase):
 
