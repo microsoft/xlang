@@ -17,9 +17,19 @@ class TestJson(unittest.TestCase):
     def test_JsonArray_parse(self):
         a = wdj.JsonArray.parse("[1,2,3,4,5]")
         self.assertEqual(a.size, 5)
-        # self.assertEqual(a.value_type, wdj.JsonValueType.Array)
         for x in range(0,4):
             self.assertEqual(a.get_number_at(x), x+1)
+
+    def test_JsonArray_try_parse(self):
+        succeeded, a = wdj.JsonArray.try_parse("[1,2,3,4,5]")
+        self.assertTrue(succeeded)
+        self.assertEqual(a.size, 5)
+        for x in range(0,4):
+            self.assertEqual(a.get_number_at(x), x+1)
+
+    def test_JsonArray_try_parse_fail(self):
+        succeeded, a = wdj.JsonArray.try_parse("z[1,2,3,4,5]")
+        self.assertFalse(succeeded)
 
     def test_JsonArray_append(self):
         a = wdj.JsonArray()
@@ -27,6 +37,36 @@ class TestJson(unittest.TestCase):
         v = wdj.JsonValue.create_null_value()
         a.append(v)
         self.assertEqual(a.size, 1)
+
+    def test_JsonArray_clear(self):
+        a = wdj.JsonArray.parse("[1,2,3,4,5]")
+        self.assertEqual(a.size, 5)
+        a.clear()
+        self.assertEqual(a.size, 0)
+
+    def test_JsonArray_get_array_at(self):
+        a = wdj.JsonArray.parse("[true, [], false]")
+        v1 = a.get_array_at(1)
+        self.assertEqual(v1.size, 0)
+        self.assertEqual(v1.value_type, wdj.JsonValueType.ARRAY)
+
+    def test_JsonArray_get_object_at(self):
+        a = wdj.JsonArray.parse("[true, {}, false]")
+        v1 = a.get_object_at(1)
+        self.assertEqual(v1.size, 0)
+        self.assertEqual(v1.value_type, wdj.JsonValueType.OBJECT)
+
+    def test_JsonArray_get_string_at(self):
+        a = wdj.JsonArray.parse("[true, \"spam\", false]")
+        v1 = a.get_string_at(1)
+        self.assertEqual(v1, "spam")
+
+    def test_JsonArray_get_boolean_at(self):
+        a = wdj.JsonArray.parse("[true, false]")
+        v1 = a.get_boolean_at(0)
+        v2 = a.get_boolean_at(1)
+        self.assertTrue(v1)
+        self.assertFalse(v2)
 
     def test_JsonValue_create_number_value(self):
         v = wdj.JsonValue.create_number_value(42)
