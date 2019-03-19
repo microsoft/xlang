@@ -14,11 +14,19 @@ class TestJson(unittest.TestCase):
         self.assertEqual(a.to_string(), "[]")
         self.assertEqual(a.stringify(), "[]")
 
+    def test_JsonArray_dunder_str(self):
+        a = wdj.JsonArray()
+        self.assertEqual(str(a), "[]")
+
     def test_JsonArray_parse(self):
         a = wdj.JsonArray.parse("[1,2,3,4,5]")
         self.assertEqual(a.size, 5)
         for x in range(0,4):
             self.assertEqual(a.get_number_at(x), x+1)
+
+    def test_JsonArray_dunder_len(self):
+        a = wdj.JsonArray.parse("[1,2,3,4,5]")
+        self.assertEqual(len(a), 5)
 
     def test_JsonArray_remove_at(self):
         a = wdj.JsonArray.parse("[1,2,3,4,5]")
@@ -133,6 +141,10 @@ class TestJson(unittest.TestCase):
         o = wdj.JsonObject.parse("{ \"spam\": true }")
         v = o.get_named_boolean("spam")
         self.assertTrue(v)
+
+    def test_JsonObject_str(self):
+        a = wdj.JsonObject()
+        self.assertEqual(str(a), "{}")
 
     def test_JsonObject_get_named_boolean_default(self):
         o = wdj.JsonObject.parse("{ \"spam\": true }")

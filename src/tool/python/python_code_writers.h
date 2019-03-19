@@ -146,13 +146,25 @@ namespace xlang
     {
         std::map<std::string_view, std::vector<MethodDef>> methods{};
 
-        for (auto&& method : type.MethodList())
+        auto category = get_category(type);
+        if (category == category::class_type)
         {
-            if (is_constructor(method)) continue;
+            for (auto&& method : type.MethodList())
+            {
+                if (is_constructor(method)) continue;
 
-            auto& v = methods[method.Name()];
-            XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
-            v.push_back(method);
+                auto& v = methods[method.Name()];
+                XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
+                v.push_back(method);
+            }
+        }
+        else if (category == category::interface_type)
+        {
+            throw_invalid("not impl");
+        }
+        else 
+        {
+            throw_invalid("only classes and interfaces have methods");
         }
 
         return std::move(methods);
@@ -532,6 +544,16 @@ def _instance(self):
             for (auto&& [name, methods] : get_methods(type))
             {
                 write_python_method(w, name, methods);
+            }
+
+            if (has_dunder_str_method(type))
+            {
+                w.write("def __str__(self):\n    return self.to_string()\n");
+            }
+
+            if (has_dunder_len_method(type))
+            {
+                w.write("def __len__(self):\n    return self.__get_Size()\n");
             }
 
             for (auto&& prop : type.PropertyList())
