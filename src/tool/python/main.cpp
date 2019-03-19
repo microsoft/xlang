@@ -137,7 +137,7 @@ namespace xlang
             group.get();
 
             write_setup_py(settings.output_folder, generated_namespaces);
-            write_cmake_lists_txt(settings.output_folder, generated_namespaces);
+            //write_cmake_lists_txt(settings.output_folder, generated_namespaces);
 
             if (settings.verbose)
             {

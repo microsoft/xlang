@@ -10,9 +10,9 @@ set(winmd_files
 
 set(included_namespaces
     Windows.Data.Json
-    Windows.Devices.Geolocation
+    # Windows.Devices.Geolocation
     Windows.Foundation
-    Windows.Graphics.DirectX
+    # Windows.Graphics.DirectX
 
     # uncomment out the following to run complete_winml_tutorial.py
     # Windows.AI.MachineLearning

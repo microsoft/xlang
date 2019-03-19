@@ -70,38 +70,6 @@ namespace xlang
 
         w.write("\n");
     }
-    
-    void write_python_method_params(writer& w, MethodDef const& method)
-    {
-        separator s{ w };
-
-        if (!is_static(method) && !is_constructor(method))
-        {
-            s();
-            w.write("self");
-        }
-
-        method_signature signature{ method };
-        for (auto&& p : signature.params())
-        {
-            if (is_in_param(p))
-            {
-                s();
-                w.write("%", p.first.Name());
-            }
-        }
-    }
-
-    //void write_python_method_invoke_params(writer& w, MethodDef const& method)
-    //{
-    //    separator s{ w };
-    //    method_signature signature{ method };
-    //    for (auto&& p : signature.params())
-    //    {
-    //        s();
-    //        w.write("%", p.first.Name());
-    //    }
-    //}
 
     void write_python_method_name(writer& w, MethodDef const& method)
     {
@@ -124,101 +92,6 @@ namespace xlang
         }
     }
 
-    //void write_return_statement(writer& w, MethodDef const& method)
-    //{
-    //    struct return_stmt : public signature_handler_base<return_stmt>
-    //    {
-    //        writer& ww;
-
-    //        return_stmt(writer& w) : ww(w) {}
-
-    //        using signature_handler_base<return_stmt>::handle;
-    //        void write_return(std::string_view ns, std::string_view name)
-    //        {
-    //            if (ns == ww.current_namespace)
-    //            {
-    //                ww.write("return %(ret)\n", name);
-    //            }
-    //            else
-    //            {
-    //                ww.write("# wrongns return %.%(ret)\n", ns, name);
-    //            }
-    //        }
-
-    //        void handle(TypeDef const& type)
-    //        {
-    //            write_return(type.TypeNamespace(), type.TypeName());
-    //        }
-    //        void handle(TypeRef const& type)
-    //        {
-    //            write_return(type.TypeNamespace(), type.TypeName());
-    //        }
-    //        void handle(GenericTypeInstSig const& type)
-    //        {
-    //            ww.write("# return gtisig %\n", type.GenericType());
-    //        }
-
-    //        void handle(ElementType /*type*/)
-    //        {
-    //            ww.write("return ret\n");
-    //        }
-
-    //        // WinRT class, interface and delegate out params must be initialized as nullptr
-    //        //void handle_class(TypeDef const& /*type*/) { param_init = "nullptr"; }
-    //        //void handle_delegate(TypeDef const& /*type*/) { param_init = "nullptr"; }
-    //        //void handle_interface(TypeDef const& /*type*/) { param_init = "nullptr"; }
-    //        //void handle(GenericTypeInstSig const& /*type*/) { param_init = "nullptr"; }
-
-    //        //// WinRT guid, struct and fundamental types don't require an initialization value
-    //        //void handle_guid(TypeRef const& /*type*/) { /* no init needed */ }
-    //        //void handle_struct(TypeDef const& /*type*/) { /* no init needed */ }
-    //        //void handle(ElementType /*type*/) { /* no init needed */ }
-    //    };
-
-    //    method_signature signature{ method };
-    //    if (signature.return_signature())
-    //    {
-    //        return_stmt ret{ w };
-    //        ret.handle(signature.return_signature().Type());
-    //    }
-    //}
-
-    //void write_pyparam_name(writer& w, method_signature::param_t param)
-    //{
-    //    w.write(param.first.Name());
-    //}
-
-    //void write_in_params(writer& w, method_signature sig)
-    //{
-    //    separator s{ w };
-    //    for (auto&& p : sig.params())
-    //    {
-    //        if (is_in_param(p))
-    //        {
-    //            s();
-    //            w.write(p.first.Name());
-    //        }
-    //    }
-    //}
-
-    //void write_out_params(writer& w, method_signature sig)
-    //{
-    //    separator s{ w };
-    //    if (sig.return_signature())
-    //    {
-    //        s();
-    //        w.write(sig.return_param_name());
-    //    }
-
-    //    for (auto&& p : sig.params())
-    //    {
-    //        if (is_out_param(p))
-    //        {
-    //            s();
-    //            w.write(p.first.Name());
-    //        }
-    //    }
-    //}
 
     auto get_params(MethodDef const& method)
     {
@@ -254,43 +127,35 @@ namespace xlang
         return std::make_tuple(std::move(in_params), std::move(out_params));
     }
 
-    //auto get_constructors(TypeDef const& type)
-    //{
-    //    std::vector<MethodDef> ctors{};
-
-    //    for (auto&& method : type.MethodList())
-    //    {
-    //        if (is_constructor(method))
-    //        {
-    //            ctors.push_back(method);
-    //        }
-    //    }
-
-    //    return std::move(ctors);
-    //}
-
-    auto get_overloads(TypeDef const& type)
+    auto get_constructors(TypeDef const& type)
     {
-        std::set<std::string_view> method_names{};
-        std::set<std::string_view> overloads{};
+        std::vector<MethodDef> ctors{};
+
+        for (auto&& method : type.MethodList())
+        {
+            if (is_constructor(method))
+            {
+                ctors.push_back(method);
+            }
+        }
+
+        return std::move(ctors);
+    }
+
+    auto get_methods(TypeDef const& type)
+    {
+        std::map<std::string_view, std::vector<MethodDef>> methods{};
 
         for (auto&& method : type.MethodList())
         {
             if (is_constructor(method)) continue;
 
-            auto name = method.Name();
-
-            if (method_names.find(name) == method_names.end())
-            {
-                method_names.insert(name);
-            }
-            else
-            {
-                overloads.insert(name);
-            }
+            auto& v = methods[method.Name()];
+            XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
+            v.push_back(method);
         }
 
-        return std::move(overloads);
+        return std::move(methods);
     }
 
     template<typename T>
@@ -298,7 +163,7 @@ namespace xlang
     {
         return set.find(value) != set.end();
     }
-    
+
     auto get_property_methods(Property const& prop)
     {
         MethodDef get_method{}, set_method{};
@@ -331,7 +196,7 @@ namespace xlang
         return std::make_tuple(get_method, set_method);
     }
 
-    auto get_event_methods(Event const& evt)
+    /*auto get_event_methods(Event const& evt)
     {
         MethodDef add_method{}, remove_method{};
 
@@ -360,50 +225,303 @@ namespace xlang
         return std::make_tuple(add_method, remove_method);
     }
 
+    auto get_in_params(std::vector<MethodDef> const& methods)
+    {
+        std::map<std::string_view, uint32_t> params{};
+
+        for (auto&& method : methods)
+        {
+            auto[inparams, outparams] = get_params(method);
+            for (auto&& inparam : inparams)
+            {
+                if (params.find(inparam) == params.end())
+                {
+                    params[inparam] = 1;
+                }
+                else
+                {
+                    params[inparam] = params[inparam] + 1;
+                }
+            }
+        }
+
+        return std::move(params);
+    }
+*/
+    void write_python_class_init(writer& w, TypeDef const& type)
+    {
+        if (is_static(type))
+        {
+            w.write(R"(def __new__(cls):
+    raise TypeError("% is a static class. It cannot be constructed")
+)", type.TypeName());
+        }
+        else
+        {
+            auto is_default_constructable = false;
+            for (auto&& method : type.MethodList())
+            {
+                if (is_constructor(method) && empty(method.ParamList()))
+                {
+                    is_default_constructable = true;
+                    break;
+                }
+            }
+
+            if (is_default_constructable)
+            {
+                w.write(R"(def __init__(self, *, _instance=None):
+    if _instance == None:
+        self.__instance = type(self).__type._default_ctor()
+    else:
+        if type(_instance) != type(self).__type:
+            raise TypeError("_instance must be a % native type")
+        self.__instance = _instance
+)", type.TypeName());
+
+            }
+            else
+            {
+                w.write(R"(def __init__(self, *, _instance=None):
+    if type(_instance) != type(self).__type:
+        raise TypeError("_instance must be a % native type")
+    self.__instance = _instance
+)", type.TypeName());
+            }
+        }
+
+    }
+
+    void write_python_method_first_param(writer& w, MethodDef const& method)
+    {
+        if (is_static(method))
+        {
+            w.write("cls");
+        }
+        else
+        {
+            w.write("self");
+        }
+    }
+
+    void write_python_method_params(writer& w, MethodDef const& method)
+    {
+        separator s{ w };
+        s();
+        write_python_method_first_param(w, method);
+
+        auto[inparams, outparams] = get_params(method);
+        for (auto&& inp : inparams)
+        {
+            s();
+            w.write(inp);
+            // TODO: type hint
+        }
+    }
+
+    void write_python_method_body_return_values(writer& w, method_signature const& signature)
+    {
+        bool write_equals = false;
+        separator s{ w };
+     
+        if (signature.return_signature())
+        {
+            s();
+            w.write(signature.return_param_name());
+            write_equals = true;
+        }
+        
+        for (auto&& p : signature.params())
+        {
+            if (is_out_param(p))
+            {
+                s();
+                w.write(p.first.Name());
+                write_equals = true;
+            }
+        }
+
+        if (write_equals)
+        {
+            w.write(" = ");
+        }
+    }
+
+    void write_python_method_body_call_args(writer& w, method_signature const& signature)
+    {
+        separator s{ w };
+        for (auto&& p : signature.params())
+        {
+            if (is_in_param(p))
+            {
+                s();
+                w.write(p.first.Name());
+            }
+        }
+    }
+
+    void write_python_method_body_calling_context(writer& w, MethodDef const& method)
+    {
+        if (is_static(method))
+        {
+            w.write("cls.__type");
+        }
+        else
+        {
+            w.write("self.__instance");
+        }
+    }
+
+    void write_return_value_convert(writer& w, std::string_view name, TypeSig const& signature)
+    {
+        struct return_value_convert : public signature_handler_base<return_value_convert>
+        {
+            writer& w;
+            std::string_view name;
+
+            return_value_convert(writer& _w, std::string_view _name) : w(_w), name(_name) {}
+
+            using signature_handler_base<return_value_convert>::handle;
+
+            void handle_class(TypeDef const& type) 
+            { 
+                if (w.current_namespace == type.TypeNamespace())
+                {
+                    w.write("% = %(_instance=%)\n", name, type.TypeName(), name);
+                }
+                else
+                {
+                    w.write("% = % # todo handle_class \n", name, name);
+                }
+            }
+            void handle_delegate(TypeDef const& /*type*/) { w.write("% = % # todo handle_delegate \n", name, name); }
+            void handle_guid(TypeRef const& /*type*/) { w.write("% = % # todo handle_guid \n", name, name); }
+            void handle_interface(TypeDef const& /*type*/) { w.write("% = % # todo handle_interface \n", name, name); }
+            void handle_struct(TypeDef const& /*type*/) { w.write("% = % # todo handle_struct \n", name, name); }
+            void handle_enum(TypeDef const& type) 
+            { 
+                if (w.current_namespace == type.TypeNamespace())
+                {
+                    w.write("% = %(%)\n", name, type.TypeName(), name);
+                }
+                else
+                {
+                    w.write("% = % # todo handle_enum \n", name, name);
+                }
+            }
+
+            void handle(ElementType type) 
+            { 
+                if (type == ElementType::Object)
+                {
+                    w.write("% = % # todo convert ElementType::Object\n", name, name);
+                }
+            }
+        };
+
+        return_value_convert rvc{ w, name };
+        //rvc.handle(signature);
+    }
+
+    void write_python_method_body(writer& w, MethodDef const& method)
+    {
+        method_signature signature{ method };
+
+        for (auto&& p : signature.params())
+        {
+            w.write("# % %\n", p.first.Name(), p.second->Type());
+        }
+
+        if (signature.return_signature())
+        {
+            w.write("# % %\n", signature.return_param_name(), signature.return_signature().Type());
+        }
+
+        // ParamSig and RetTypeSig both have CustomMod, ByRef and Type, 
+
+
+        w.write("%%.%(%)\n", 
+            bind<write_python_method_body_return_values>(signature),
+            bind<write_python_method_body_calling_context>(method),
+            get_method_abi_name(method), 
+            bind<write_python_method_body_call_args>(signature));
+
+        std::vector<std::string_view> return_tuple{};
+
+        if (signature.return_signature())
+        {
+            write_return_value_convert(w, signature.return_param_name(), signature.return_signature().Type());
+            return_tuple.push_back(signature.return_param_name());
+        }
+
+        for (auto&& p : signature.params())
+        {
+            if (is_out_param(p))
+            {
+                write_return_value_convert(w, p.first.Name(), p.second->Type());
+                return_tuple.push_back(p.first.Name());
+            }
+        }
+
+        if (return_tuple.size() > 0)
+        {
+            w.write("return (%)\n", bind_list(", ", return_tuple));
+        }
+    }
+
+    void write_python_method(writer& w, std::string_view name, std::vector<MethodDef> const& methods)
+    {
+        XLANG_ASSERT(std::all_of(methods.begin(), methods.end(), [&methods](auto const& m) { return is_static(methods[0]) == is_static(m); }));
+
+        if (is_static(methods[0]))
+        {
+            w.write("@classmethod\n");
+        }
+
+        if (methods.size() == 1)
+        {
+            w.write("def %(%):\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_params>(methods[0]));
+            writer::indent_guard g{ w };
+            write_python_method_body(w, methods[0]);
+        }
+        else
+        {
+            for (auto&& method : methods)
+            {
+                w.write("^@typing.overload\ndef %(%):\n    pass\n", name, bind<write_python_method_params>(method));
+            }
+
+            w.write("def %(%, *args):\n    pass\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_first_param>(methods[0]));
+        }
+    }
+
     void write_python_class(writer& w, TypeDef const& type)
     {
         w.write("class %:\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
-            //auto ctors = get_constructors(type);
-            auto overloads = get_overloads(type);
+            w.write("__type = _ns_module.%\n\n", type.TypeName());
+            write_python_class_init(w, type);
+            w.write("\n");
 
-            for (auto&& method : type.MethodList())
+            for (auto&& [name, methods] : get_methods(type))
             {
-                if (is_constructor(method) || contains(overloads, method.Name()))
-                {
-                    w.write("# %\n", method.Name());
-                    continue;
-                }
-
-                if (is_static(method))
-                {
-                    w.write("@staticmethod\n");
-                }
-
-                w.write("def %(%):\n", 
-                    bind<write_python_method_name>(method),
-                    bind<write_python_method_params>(method));
-
-                {
-                    writer::indent_guard gg{ w };
-                    w.write("    pass\n");
-                }
+                write_python_method(w, name, methods);
             }
 
             for (auto&& prop : type.PropertyList())
             {
                 auto[getter, setter] = get_property_methods(prop);
 
-                if (is_static(getter))
+                // TODO: static properties
+                if (!is_static(getter))
                 {
-                    w.write("# staticprop ");
+                    w.write("% = property(fget=%, fset=%)\n",
+                        bind<write_lower_snake_case>(prop.Name()),
+                        bind<write_python_method_name>(getter),
+                        bind<write_python_method_name>(setter));
                 }
-                w.write("% = property(fget=%, fset=%)\n",
-                    prop.Name(),
-                    bind<write_python_method_name>(getter),
-                    bind<write_python_method_name>(setter));
             }
 
         }

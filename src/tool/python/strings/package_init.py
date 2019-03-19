@@ -1,6 +1,8 @@
 import _%
 _%.init_apartment()
 
+_missing = object()
+
 def _import_ns_module(ns):
     import importlib.machinery
     import importlib.util
