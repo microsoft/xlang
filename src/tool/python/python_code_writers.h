@@ -385,12 +385,20 @@ def _instance(self):
             switch (type.category)
             {
             case category::class_type:
-            case category::interface_type:
+            //case category::interface_type:
                 w.write("% = %(_instance=%)\n", name, type.type.TypeName(), name);
                 break;
+            case category::enum_type:
+                break;
+            default:
+                w.write("# return_value category for % not implemented \n", name);
             }
         },
-            [&](auto){});
+            [](fundamental_type) {},
+            [&](auto)
+        {
+            w.write("# return_value for % not implemented \n", name);
+        });
     }
 
     void write_in_param_convert(writer& w, std::string_view name, TypeSig const& signature)
@@ -401,10 +409,11 @@ def _instance(self):
             switch (type.category)
             {
             case category::class_type:
-            case category::interface_type:
+            //case category::interface_type:
                 w.write("_% = %._instance\n", name, name);
                 break;
             default:
+                w.write("# % in param category not implemented \n", name);
                 w.write("_% = %\n", name, name);
             }
         },

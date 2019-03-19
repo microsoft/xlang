@@ -20,6 +20,22 @@ class TestJson(unittest.TestCase):
         for x in range(0,4):
             self.assertEqual(a.get_number_at(x), x+1)
 
+    def test_JsonArray_remove_at(self):
+        a = wdj.JsonArray.parse("[1,2,3,4,5]")
+        self.assertEqual(a.size, 5)
+        a.remove_at(0)
+        self.assertEqual(a.size, 4)
+        for x in range(0,3):
+            self.assertEqual(a.get_number_at(x), x+2)
+
+    def test_JsonArray_remove_at_end(self):
+        a = wdj.JsonArray.parse("[1,2,3,4,5]")
+        self.assertEqual(a.size, 5)
+        a.remove_at_end()
+        self.assertEqual(a.size, 4)
+        for x in range(0,3):
+            self.assertEqual(a.get_number_at(x), x+1)
+
     def test_JsonArray_try_parse(self):
         succeeded, a = wdj.JsonArray.try_parse("[1,2,3,4,5]")
         self.assertTrue(succeeded)
@@ -31,12 +47,11 @@ class TestJson(unittest.TestCase):
         succeeded, a = wdj.JsonArray.try_parse("z[1,2,3,4,5]")
         self.assertFalse(succeeded)
 
-    def test_JsonArray_append(self):
-        a = wdj.JsonArray()
-        self.assertEqual(a.size, 0)
-        v = wdj.JsonValue.create_null_value()
-        a.append(v)
-        self.assertEqual(a.size, 1)
+    def test_JsonArray_get_array_at(self):
+        a = wdj.JsonArray.parse("[true, [], false]")
+        v1 = a.get_array_at(1)
+        self.assertEqual(v1.size, 0)
+        self.assertEqual(v1.value_type, wdj.JsonValueType.ARRAY)
 
     def test_JsonArray_clear(self):
         a = wdj.JsonArray.parse("[1,2,3,4,5]")
@@ -44,11 +59,38 @@ class TestJson(unittest.TestCase):
         a.clear()
         self.assertEqual(a.size, 0)
 
+
+    def test_JsonArray_get_array(self):
+        a = wdj.JsonArray.parse("[true, [], false]")
+        v1 = a.get_array()
+        self.assertEqual(v1.size, 3)
+        self.assertEqual(v1.value_type, wdj.JsonValueType.ARRAY)
+
+    def test_JsonArray_get_boolean(self):
+        a = wdj.JsonArray.parse("[true, [], false]")
+        with self.assertRaises(RuntimeError):
+            v1 = a.get_boolean()
+
+    def test_JsonArray_get_number(self):
+        a = wdj.JsonArray.parse("[true, [], false]")
+        with self.assertRaises(RuntimeError):
+            v1 = a.get_number()
+
+    def test_JsonArray_get_string(self):
+        a = wdj.JsonArray.parse("[true, [], false]")
+        with self.assertRaises(RuntimeError):
+            v1 = a.get_string()
+
     def test_JsonArray_get_array_at(self):
         a = wdj.JsonArray.parse("[true, [], false]")
         v1 = a.get_array_at(1)
         self.assertEqual(v1.size, 0)
         self.assertEqual(v1.value_type, wdj.JsonValueType.ARRAY)
+
+    def test_JsonArray_get_object(self):
+        a = wdj.JsonArray.parse("[true, {}, false]")
+        with self.assertRaises(RuntimeError):
+            v1 = a.get_object()
 
     def test_JsonArray_get_object_at(self):
         a = wdj.JsonArray.parse("[true, {}, false]")
