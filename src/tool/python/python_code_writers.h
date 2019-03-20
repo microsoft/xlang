@@ -545,6 +545,10 @@ def _instance(self):
 
     void write_python_class(writer& w, TypeDef const& type)
     {
+        if (is_exclusive_to(type)) return;
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
         w.write("class %:\n", type.TypeName());
         {
             writer::indent_guard g{ w };
@@ -559,12 +563,12 @@ def _instance(self):
 
             if (has_dunder_str_method(type))
             {
-                w.write("def __str__(self):\n    return self.to_string()\n");
+                w.write("__str__ = to_string\n");
             }
 
             if (has_dunder_len_method(type))
             {
-                w.write("def __len__(self):\n    return self.__get_Size()\n");
+                w.write("__len__ = __get_Size\n");
             }
 
             for (auto&& prop : type.PropertyList())

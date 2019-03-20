@@ -169,18 +169,18 @@ namespace xlang
 
     enum class fundamental_type
     {
-        Boolean = 0x02,
-        Char = 0x03,
-        I1 = 0x04,
-        U1 = 0x05,
-        I2 = 0x06,
-        U2 = 0x07,
-        I4 = 0x08,
-        U4 = 0x09,
-        I8 = 0x0a,
-        U8 = 0x0b,
-        R4 = 0x0c,
-        R8 = 0x0d,
+        Boolean,
+        Char,
+        Int8,
+        UInt8,
+        Int16,
+        UInt16,
+        Int32,
+        UInt32,
+        Int64,
+        UInt64,
+        Float,
+        Double,
         String = 0x0e,
     };
 
@@ -248,15 +248,17 @@ namespace xlang
         return gti;
     }
 
+    signature_handler_type handle_signature(TypeDef const& type)
+    {
+        return metadata_type{ get_category(type) , type };
+    }
+
     signature_handler_type handle_signature(coded_index<TypeDefOrRef> const& type)
     {
         switch (type.type())
         {
         case TypeDefOrRef::TypeDef:
-        {
-            auto type_def = type.TypeDef();
-            return metadata_type{ get_category(type_def) , type_def };
-        }
+            return handle_signature(type.TypeDef());
         case TypeDefOrRef::TypeRef:
         {
             auto type_ref = type.TypeRef();
@@ -265,8 +267,7 @@ namespace xlang
                 return guid_type{};
             }
 
-            auto type_def = find_required(type_ref);
-            return metadata_type{ get_category(type_def) , type_def };
+            return handle_signature(find_required(type_ref));
         }
         case TypeDefOrRef::TypeSpec:
             return handle_signature(type.TypeSpec().Signature().GenericTypeInst());
@@ -290,19 +291,31 @@ namespace xlang
             switch (type)
             {
             case ElementType::Boolean:
+                return fundamental_type::Boolean;
             case ElementType::Char:
+                return fundamental_type::Char;
             case ElementType::I1:
+                return fundamental_type::Int8;
             case ElementType::U1:
+                return fundamental_type::UInt8;
             case ElementType::I2:
+                return fundamental_type::Int16;
             case ElementType::U2:
+                return fundamental_type::UInt16;
             case ElementType::I4:
+                return fundamental_type::Int32;
             case ElementType::U4:
+                return fundamental_type::UInt32;
             case ElementType::I8:
+                return fundamental_type::Int64;
             case ElementType::U8:
+                return fundamental_type::UInt64;
             case ElementType::R4:
+                return fundamental_type::Float;
             case ElementType::R8:
+                return fundamental_type::Double;
             case ElementType::String:
-                return (fundamental_type)type;
+                return fundamental_type::String;
             case ElementType::Object:
                 return object_type{};
             }
