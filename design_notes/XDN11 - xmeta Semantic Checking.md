@@ -263,6 +263,19 @@ enum Circular
 results in a compile-time error because the declarations of A and B are circular. A depends on B explicitly, and B depends on A implicitly.
 
 4) The following operators can be used on values of enum types: binary + (§5.4.4), binary   (§5.4.5), ^, &, | (§5.6.2), and ~ (§5.3.3).
-### Delegates
 
-### Delegate members
+### Delegates
+1) Delegates require a GUID identifier. This identifier can be provided explicitly or generated implicitly from the type's name.
+
+2) Delegate types in CDL are name equivalent, not structurally equivalent. Specifically, two different delegate types that have the same parameter lists and return type are considered different delegate types.
+
+3) Type parameter Example:
+```
+delegate Boolean Predicate<T>(T value);
+class X
+{
+	static Boolean F(Int32 i);
+	static Boolean G(String s);
+}
+``` 
+The method X.F is compatible with the delegate type Predicate<Int32> and the method X.G is compatible with the delegate type Predicate<String> .
