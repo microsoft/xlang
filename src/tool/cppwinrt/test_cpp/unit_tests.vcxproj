@@ -241,6 +241,7 @@
     <ClCompile Include="scratch.cpp" />
     <ClCompile Include="structs.cpp" />
     <ClCompile Include="variadic_delegate.cpp" />
+    <ClCompile Include="velocity.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

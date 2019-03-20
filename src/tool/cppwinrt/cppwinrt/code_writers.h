@@ -400,9 +400,9 @@ namespace xlang
         if (auto default_interface = get_default_interface(type))
         {
             auto format = R"(    template <> struct default_interface<%>
-{
-    using type = %;
-};
+    {
+        using type = %;
+    };
 )";
             w.write(format, type, default_interface);
         }
