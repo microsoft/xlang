@@ -519,6 +519,11 @@ namespace xlang
             }, sht);
     };
 
+    TypeDef get_typedef(coded_index<TypeDefOrRef> const& type)
+    {
+        return get_typedef(handle_signature(type));
+    };
+
     void collect_required_interfaces(std::vector<signature_handler_type>& interfaces, signature_handler_type const& type)
     {
         auto type_def = get_typedef(type);
@@ -558,41 +563,20 @@ namespace xlang
     {
         auto type_name_matches = [&ns, &name](TypeDef const& td) { return td.TypeNamespace() == ns && td.TypeName() == name; };
 
-        auto category = get_category(type);
-        if (category == category::class_type)
-        {
-            for (auto&& ii : type.InterfaceImpl())
-            {
-                auto match = std::visit(
-                    impl::overloaded{
-                        [&](metadata_type const& type)
-                {
-                    return type_name_matches(type.type);
-                },
-                        [&](generic_type_instance const& instance)
-                {
-                    return type_name_matches(instance.generic_type.type);
-                },
-                        [](auto) { return false; }
-                    }, handle_signature(ii.Interface()));
+        if (get_category(type) == category::interface_type && type_name_matches(type))
+            return true;
 
-                if (match)
-                    return true;
-            }
-        }
-        else if (category == category::interface_type)
+        for (auto&& ii : type.InterfaceImpl())
         {
-            throw_invalid("not impl");
-        }
-        else
-        {
-            throw_invalid("only classes and interfaces can implement interfaces");
+            auto interface_type = get_typedef(ii.Interface());
+            if (implements_interface(interface_type, ns, name))
+                return true;
         }
 
         return false;
     }
 
-    bool implements_any_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> names)
+    bool implements_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> names)
     {
         for (auto&&[ns, name] : names)
         {
