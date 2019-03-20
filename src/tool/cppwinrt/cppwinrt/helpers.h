@@ -169,8 +169,7 @@ namespace xlang
         // The first argument is a Windows.Foundation.Metadata.FeatureStage enum class.
         auto stage = std::get<ElemSig::EnumValue>(std::get<ElemSig>(feature.Value().FixedArgs()[0].value).value);
 
-        // FeatureStage::AlwaysDisabled is zero.
-        return std::get<int32_t>(stage.value) == 0;
+        return stage.equals_enumerator("AlwaysDisabled");
     }
 
     static bool is_async(MethodDef const& method, method_signature const& method_signature)

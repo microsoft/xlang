@@ -254,7 +254,7 @@ namespace test_component
         feature_name Feature_AlwaysDisabled = { AlwaysDisabled, TRUE };
         feature_name Feature_AlwaysEnabled = { AlwaysEnabled, TRUE };
 
-        // This interface is AlwaysDisabled thus in the type system but not
+        // This interface is AlwaysDisabled in the type system but not
         // included in any implementation by default.
         [feature(Feature_AlwaysDisabled)]
         interface IInterface1
