@@ -113,6 +113,10 @@ For namespace alias qualifiers, they have the form `N::I<A1,...,Ak>`.
 ### Struct members
 
 ### Interfaces
+##### Definitions:
+The **required interfaces** of an interface are the explicit required interfaces and their required interfaces.
+
+##### Checks:
 1) It is a compile-time error for an interface to directly or indirectly inherit from itself.
 
 2) All Xlang interfaces must inherit directly from IInspectable, which in turn inherits from IUnknown.
@@ -157,12 +161,20 @@ class X<U,V>: I<U>, I<V>					// Error: I<U> and I<V> conflict
 ```
 
 To determine if the interface list of a generic type declaration is valid, the following steps are performed:
+
 •	Let L be the list of interfaces directly specified in a generic class, struct, or interface declaration C.
+
 •	Add to L any required interface of the interfaces already in L.
+
 •	Remove any duplicates from L.
+
 •	If any possible constructed type created from C would, after type arguments are substituted into L, cause two interfaces in L to be identical, then the declaration of C is invalid
 
 ### Interface members
+##### Definitions:
+The process of matching a declaration of a member in a class to the corresponding interface member is known as **interface mapping**.
+
+##### Checks:
 1) The name of a method must differ from the names of all properties and events declared in the same interface. 
 
 The signature of a method must differ from the signatures of all other methods declared in the same interface, and two methods declared in the same interface may not have signatures that differ solely by ref and out.
@@ -194,6 +206,10 @@ class CowboyArtist : ICowboy, IArtist
 This was not specified in the grammar and I am unsure whether we will support this in Xlang. 
 
 ### Enums
+##### Definitions:
+An **enum type** is a distinct value type that declares a set of named constants.
+
+##### Checks:
 1) Enums with an underlying type of UInt32 must carry the FlagsAttribute. Enums with an underlying type of Int32 must not carry the FlagsAttribute.
 
 2) Enums must have public visibility.
@@ -265,6 +281,10 @@ results in a compile-time error because the declarations of A and B are circular
 4) The following operators can be used on values of enum types: binary + (§5.4.4), binary   (§5.4.5), ^, &, | (§5.6.2), and ~ (§5.3.3).
 
 ### Delegates
+##### Definitions:
+**Delegates** enable scenarios that other languages—such as C++, Pascal, and Modula—have addressed with function pointers. 
+
+##### Checks:
 1) Delegates require a GUID identifier. This identifier can be provided explicitly or generated implicitly from the type's name.
 
 2) Delegate types in CDL are name equivalent, not structurally equivalent. Specifically, two different delegate types that have the same parameter lists and return type are considered different delegate types.
