@@ -409,45 +409,85 @@ def _instance(self):
                 break;
             default:
                 w.write("# % category not implemented % \n", name, type.type);
+                w.write("raise NotImplementedError\n");
             }
         },
             [](fundamental_type) {},
             [&](auto)
         {
             w.write("# % not implemented \n", name);
+            w.write("raise NotImplementedError\n");
         });
     }
 
-    void write_in_param_convert(writer& w, std::string_view name, TypeSig const& signature, std::string_view arg_name = "")
+    void write_return_value_convert(writer& w, method_signature::param_t const& param)
     {
+        switch (get_param_category(param))
+        {
+        case param_category::fill_array:
+            w.write("# return fill array % not impl\n", param.first.Name());
+            w.write("raise NotImplementedError\n");
+            break;
+        case param_category::receive_array:
+            w.write("# return recieve array % not impl\n", param.first.Name());
+            w.write("raise NotImplementedError\n");
+            break;
+        case param_category::out:
+            write_return_value_convert(w, param.first.Name(), param.second->Type());
+            break;
+        default:
+            throw_invalid("invalid out param category");
+        }
+    }
+
+    void write_in_param_convert(writer& w, method_signature::param_t const& param, std::string_view arg_name = "")
+    {
+        auto name = param.first.Name();
+
         if (arg_name.size() == 0)
         {
             arg_name = name;
         }
 
-        call(handle_signature(signature),
-            [&](metadata_type const& type)
+        switch (get_param_category(param))
         {
-            switch (type.category)
+        case param_category::fill_array:
+            w.write("# % fill array\n_% = %\n", name, name, arg_name);
+            break;
+        case param_category::pass_array:
+            w.write("# pass array % not impl\n", name);
+            w.write("raise NotImplementedError\n");
+            break;
+        case param_category::in:
+            call(handle_signature(param.second->Type()),
+                [&](metadata_type const& type)
             {
-            case category::class_type:
-            case category::interface_type:
-                w.write("_% = %._instance\n", name, arg_name);
-                break;
-            default:
-                w.write("# % category not implemented % \n", name, type.type);
+                switch (type.category)
+                {
+                case category::class_type:
+                case category::interface_type:
+                    w.write("_% = %._instance\n", name, arg_name);
+                    break;
+                default:
+                    w.write("# % category not implemented % \n", name, type.type);
+                    w.write("raise NotImplementedError\n");
+                    //w.write("_% = %\n", name, arg_name);
+                }
+            },
+                [&](fundamental_type)
+            {
                 w.write("_% = %\n", name, arg_name);
-            }
-        },
-            [&](fundamental_type)
-        {
-            w.write("_% = %\n", name, arg_name);
-        },
-            [&](auto)
-        {
-            w.write("# % not implemented \n", name);
-            w.write("_% = %\n", name, arg_name);
-        });
+            },
+                [&](auto)
+            {
+                w.write("# % not implemented \n", name);
+                w.write("raise NotImplementedError\n");
+                //w.write("_% = %\n", name, arg_name);
+            });
+            break;
+        default:
+            throw_invalid("invalid in param category");
+        }
     }
 
     void write_python_method_body(writer& w, MethodDef const& method, std::string_view args = "")
@@ -464,7 +504,7 @@ def _instance(self):
                 {
                     arg = w.write_temp("%[%]", args, std::to_string(count++));
                 }
-                write_in_param_convert(w, p.first.Name(), p.second->Type(), arg);
+                write_in_param_convert(w, p, arg);
             }
         }
 
@@ -486,7 +526,7 @@ def _instance(self):
         {
             if (is_out_param(p))
             {
-                write_return_value_convert(w, p.first.Name(), p.second->Type());
+                write_return_value_convert(w, p);
                 return_tuple.push_back(p.first.Name());
             }
         }
