@@ -37,7 +37,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <TypeLibraryName Condition="'%(Midl.TypeLibraryName)'==''"></TypeLibraryName>
         </Midl>
         <Link>
-            <AdditionalDependencies Condition="'$(CppWinRTLibs)' != 'false'">onecoreuap.lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies Condition="'$(CppWinRTLibs)' != 'false'">WindowsApp.lib;%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
     </ItemDefinitionGroup>
 
