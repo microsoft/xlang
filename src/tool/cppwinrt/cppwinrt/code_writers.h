@@ -919,7 +919,7 @@ namespace xlang
         }
         else if (can_take_ownership_of_return_type(signature))
         {
-            auto format = "\n        void* %;";
+            auto format = "\n        void* %{};";
             w.write(format, signature.return_param_name());
         }
         else if (std::holds_alternative<GenericTypeIndex>(signature.return_signature().Type().Type()))
