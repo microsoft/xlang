@@ -496,6 +496,64 @@ namespace xlang
         return std::move(interfaces);
     }
 
+    //void push_interface_info(std::vector<signature_handler_type>& interfaces, signature_handler_type&& info)
+    //{
+    //    auto iter = std::find_if(interfaces.begin(), interfaces.end(), [&info](auto i)
+    //    {
+    //        return i.type == info.type;
+    //    });
+
+    //    if (iter == interfaces.end())
+    //    {
+    //        interfaces.push_back(std::move(info));
+    //    }
+    //}
+
+    TypeDef get_typedef(signature_handler_type const& sht)
+    {
+        return std::visit(
+            impl::overloaded{
+                [](metadata_type mt) { return mt.type; },
+                [](generic_type_instance gti) { return gti.generic_type.type; },
+                [](auto) -> TypeDef { throw_invalid("type doesn't contain typedef"); }
+            }, sht);
+    };
+
+    void collect_required_interfaces(std::vector<signature_handler_type>& interfaces, signature_handler_type const& type)
+    {
+        auto type_def = get_typedef(type);
+
+        auto contains = std::any_of(interfaces.begin(), interfaces.end(), [&](auto sht)
+        {
+            return type_def == get_typedef(sht);
+        });
+
+        if (!contains)
+        {
+            interfaces.push_back(type);
+        }
+
+        for (auto&& ii : type_def.InterfaceImpl())
+        {
+            collect_required_interfaces(interfaces, handle_signature(ii.Interface()));
+        }
+    }
+
+    auto get_required_interfaces2(TypeDef const& type)
+    {
+        XLANG_ASSERT(get_category(type) == category::interface_type);
+
+        std::vector<signature_handler_type> interfaces{};
+        interfaces.push_back(handle_signature(type));
+
+        for (auto&& ii : type.InterfaceImpl())
+        {
+            collect_required_interfaces(interfaces, handle_signature(ii.Interface()));
+        }
+
+        return std::move(interfaces);
+    }
+
     bool implements_interface(TypeDef const& type, std::string_view const& ns, std::string_view const& name)
     {
         auto type_name_matches = [&ns, &name](TypeDef const& td) { return td.TypeNamespace() == ns && td.TypeName() == name; };
