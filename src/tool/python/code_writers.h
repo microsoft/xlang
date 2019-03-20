@@ -2,15 +2,38 @@
 
 namespace xlang
 {
-    bool has_custom_conversion(TypeDef const& type)
+    template<typename F>
+    void write_snake_case(writer& w, std::string_view const& name, F case_func)
     {
-        static const std::set<std::string_view> custom_converters = { "DateTime", "EventRegistrationToken", "HResult", "TimeSpan" };
-        if (type.TypeNamespace() == "Windows.Foundation")
+        w.write(case_func(name[0]));
+        for (std::string_view::size_type i = 1; i < name.size() - 1; i++)
         {
-            return custom_converters.find(type.TypeName()) != custom_converters.end();
-        }
+            if (name.substr(i, 4) == "UInt")
+            {
+                w.write('_');
+            }
 
-        return false;
+            if (isupper(name[i]) && islower(name[i + 1]))
+            {
+                if (name.substr(i - 1, 4) != "UInt")
+                {
+                    w.write('_');
+                }
+            }
+
+            w.write(case_func(name[i]));
+        }
+        w.write(case_func(name[name.size() - 1]));
+    }
+
+    void write_upper_snake_case(writer& w, std::string_view const& name)
+    {
+        write_snake_case(w, name, [](char c) { return static_cast<char>(::toupper(c)); });
+    }
+
+    void write_lower_snake_case(writer& w, std::string_view const& name)
+    {
+        write_snake_case(w, name, [](char c) { return static_cast<char>(::tolower(c)); });
     }
 
     void write_include(writer& w, std::string_view const& ns)
@@ -421,27 +444,20 @@ static void _dealloc_@(%* self)
 
     void write_out_param_init(writer& w, method_signature::param_t const& param)
     {
-        struct out_param_init : public signature_handler_base<out_param_init>
+        call(handle_signature(param.second->Type()),
+            [&](metadata_type const& type)
         {
-            std::string_view param_init{};
-
-            using signature_handler_base<out_param_init>::handle;
-
-            // WinRT class, interface and delegate out params must be initialized as nullptr
-            void handle_class(TypeDef const& /*type*/) { param_init = "nullptr"; }
-            void handle_delegate(TypeDef const& /*type*/) { param_init = "nullptr"; }
-            void handle_interface(TypeDef const& /*type*/) { param_init = "nullptr"; }
-            void handle(GenericTypeInstSig const& /*type*/) { param_init = "nullptr"; }
-
-            // WinRT guid, struct and fundamental types don't require an initialization value
-            void handle_guid(TypeRef const& /*type*/) { /* no init needed */ }
-            void handle_struct(TypeDef const& /*type*/) { /* no init needed */ }
-            void handle(ElementType /*type*/) { /* no init needed */ }
-        };
-
-        out_param_init initializer{};
-        initializer.handle(param.second->Type());
-        w.write(initializer.param_init);
+            switch (type.category)
+            {
+            case category::class_type:
+            case category::interface_type:
+            case category::delegate_type:
+                w.write("nullptr");
+                break;
+            }
+        },
+            [&](generic_type_instance const&) { w.write("nullptr"); },
+            [](auto) { });
     }
 
     void write_convert_to_params(writer& w, MethodDef const& method, int sequence)
@@ -1115,6 +1131,26 @@ if (!return_value)
     
         struct_field_initializer initializer{ w, field.Name() };
         initializer.handle(field.Signature().Type());
+
+
+        // TODO: make recursive lambda to handle GenericTypeInstSig/get_ireference_type branch
+        //call(handle_signature(field.Signature().Type()),
+        //    [&](fundamental_type) { w.write("_%", field.Name()); },
+        //    [&](metadata_type const& type)
+        //{
+        //    switch (type.category)
+        //    {
+        //    case category::enum_type:
+        //        w.write("static_cast<%>(_%)", type, field.Name());
+        //        break;
+        //    case category::struct_type:
+        //        w.write("py::converter<%>::convert_to(_%)", type, field.Name());
+        //        break;
+        //    default:
+        //        throw_invalid("invalid struct field type");
+        //    }
+        //},
+        //    [](auto) {throw_invalid("invalid struct field type"); });
     }
 
     void write_struct_constructor(writer& w, TypeDef const& type)

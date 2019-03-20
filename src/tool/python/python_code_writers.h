@@ -2,40 +2,6 @@
 
 namespace xlang
 {
-    template<typename F>
-    void write_snake_case(writer& w, std::string_view const& name, F case_func)
-    {
-        w.write(case_func(name[0]));
-        for (std::string_view::size_type i = 1; i < name.size() - 1; i++)
-        {
-            if (name.substr(i, 4) == "UInt")
-            {
-                w.write('_');
-            }
-
-            if (isupper(name[i]) && islower(name[i + 1]))
-            {
-                if (name.substr(i - 1, 4) != "UInt")
-                {
-                    w.write('_');
-                }
-            }
-
-            w.write(case_func(name[i]));
-        }
-        w.write(case_func(name[name.size() - 1]));
-    }
-
-    void write_upper_snake_case(writer& w, std::string_view const& name)
-    {
-        write_snake_case(w, name, [](char c) { return static_cast<char>(::toupper(c)); });
-    }
-
-    void write_lower_snake_case(writer& w, std::string_view const& name)
-    {
-        write_snake_case(w, name, [](char c) { return static_cast<char>(::tolower(c)); });
-    }
-
     void write_setup_filenames(writer& w, std::vector<std::string> const& namespaces)
     {
         XLANG_ASSERT(namespaces.size() > 0);
