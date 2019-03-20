@@ -908,4 +908,61 @@ namespace xlang
     {
         return implements_mapping_protocol(type) || implements_sequence_protocol(type);
     }
+
+    template<typename T>
+    bool contains(std::set<T> const& set, T const& value)
+    {
+        return set.find(value) != set.end();
+    }
+
+    template <typename F>
+    void enumerate_required_types(TypeDef const& type, F func)
+    {
+        std::set<TypeDef> types;
+
+        auto enumerate_types_impl = [&](TypeDef const& type, auto const& lambda) -> void
+        {
+            if (!contains(types, type))
+            {
+                types.insert(type);
+                func(type);
+            }
+
+            if (get_category(type) == category::interface_type)
+            {
+                for (auto&& ii : type.InterfaceImpl())
+                {
+                    lambda(get_typedef(ii.Interface()), lambda);
+                }
+            }
+        };
+
+        enumerate_types_impl(type, enumerate_types_impl);
+    }
+
+    auto get_overloaded_method_names(TypeDef const& type)
+    {
+        std::set<std::string_view> method_names;
+        std::set<std::string_view> overloaded_methods;
+
+        enumerate_required_types(type, [&](TypeDef const& type)
+        {
+            for (auto&& method : type.MethodList())
+            {
+                if (is_constructor(method)) continue;
+
+                auto name = method.Name();
+                if (contains(method_names, name))
+                {
+                    overloaded_methods.insert(name);
+                }
+                else
+                {
+                    method_names.insert(name);
+                }
+            }
+        });
+
+        return std::move(overloaded_methods);
+    }
 }

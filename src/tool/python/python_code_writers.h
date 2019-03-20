@@ -92,7 +92,6 @@ namespace xlang
         }
     }
 
-
     auto get_params(MethodDef const& method)
     {
         std::vector<std::string_view> in_params{};
@@ -168,12 +167,6 @@ namespace xlang
         }
 
         return std::move(methods);
-    }
-
-    template<typename T>
-    bool contains(std::set<T> const& set, T const& value)
-    {
-        return set.find(value) != set.end();
     }
 
     auto get_property_methods(Property const& prop)
@@ -409,19 +402,19 @@ def _instance(self):
             switch (type.category)
             {
             case category::class_type:
-                //case category::interface_type:
+            case category::interface_type:
                 w.write("% = %(_instance=%)\n", name, type.type.TypeName(), name);
                 break;
             case category::enum_type:
                 break;
             default:
-                w.write("# % category not implemented %\n", name, signature);
+                w.write("# % category not implemented % \n", name, type.type);
             }
         },
             [](fundamental_type) {},
             [&](auto)
         {
-            w.write("# % not implemented % \n", name, signature);
+            w.write("# % not implemented \n", name);
         });
     }
 
@@ -438,11 +431,11 @@ def _instance(self):
             switch (type.category)
             {
             case category::class_type:
-                //case category::interface_type:
+            case category::interface_type:
                 w.write("_% = %._instance\n", name, arg_name);
                 break;
             default:
-                w.write("# % category not implemented % \n", name, signature);
+                w.write("# % category not implemented % \n", name, type.type);
                 w.write("_% = %\n", name, arg_name);
             }
         },
@@ -452,7 +445,7 @@ def _instance(self):
         },
             [&](auto)
         {
-            w.write("# % not implemented % \n", name, signature);
+            w.write("# % not implemented \n", name);
             w.write("_% = %\n", name, arg_name);
         });
     }
@@ -504,62 +497,113 @@ def _instance(self):
         }
     }
 
-    void write_python_method(writer& w, std::string_view name, std::vector<MethodDef> const& methods)
+    void write_python_method(writer& w, MethodDef const& method, bool is_overload)
     {
-        XLANG_ASSERT(std::all_of(methods.begin(), methods.end(), [&methods](auto const& m) { return is_static(methods[0]) == is_static(m); }));
-
-        if (is_static(methods[0]))
+        if (is_static(method))
         {
             w.write("@classmethod\n");
         }
 
-        if (methods.size() == 1)
+        if (is_overload)
         {
-            w.write("def %(%):\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_params>(methods[0]));
-            writer::indent_guard g{ w };
-            write_python_method_body(w, methods[0]);
+            w.write("@typing.overload\n");
+        }
+
+        w.write("def %(%):\n", bind<write_python_method_name>(method), bind<write_python_method_params>(method));
+        writer::indent_guard g{ w };
+        if (is_overload)
+        {
+            w.write("pass\n");
         }
         else
         {
+            write_python_method_body(w, method);
+        }
+    }
+
+    void write_python_methods(writer& w, TypeDef const& type)
+    {
+        auto overloads = get_overloaded_method_names(type);
+
+        std::map<std::string_view, std::vector<MethodDef>> overloaded_methods{};
+
+        enumerate_required_types(type, [&](TypeDef const& type)
+        {
+            auto guard{ w.push_generic_params(type.GenericParam()) };
+
+            for (auto&& method : type.MethodList())
+            {
+                if (is_constructor(method)) continue;
+
+                auto overloaded = contains(overloads, method.Name());
+
+                if (overloaded)
+                {
+                    auto& v = overloaded_methods[method.Name()];
+                    XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
+                    v.push_back(method);
+                }
+
+                write_python_method(w, method, overloaded);
+            }
+        });
+
+        for (auto&&[name, methods] : overloaded_methods)
+        {
+            w.write("# overload\ndef %(%, *args):\n", 
+                bind<write_python_method_name>(methods[0]), 
+                bind<write_python_method_first_param>(methods[0]));
+
+            writer::indent_guard g{ w };
+            w.write("_count = len(args)\n");
             for (auto&& method : methods)
             {
-                w.write("^@typing.overload\ndef %(%):\n    pass\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_params>(method));
+                method_signature sig{ method };
+                w.write("if _count == %:\n", std::to_string(sig.params().size()));
+                writer::indent_guard gg{ w };
+                write_python_method_body(w, method, "args");
             }
-
-            w.write("def %(%, *args):\n", bind<write_python_method_name>(methods[0]), bind<write_python_method_first_param>(methods[0]));
-
-            {
-                writer::indent_guard g{ w };
-                w.write("_count = len(args)\n");
-                for (auto&& method : methods)
-                {
-                    method_signature sig{ method };
-                    w.write("if _count == %:\n", std::to_string(sig.params().size()));
-                    writer::indent_guard gg{ w };
-                    write_python_method_body(w, method, "args");
-                }
-                w.write("raise TypeError(\"invalid argument count\")\n");
-            }
+            w.write("raise TypeError(\"invalid argument count\")\n");
         }
+    }
+
+    void write_python_properties(writer& w, TypeDef const& type)
+    {
+        enumerate_required_types(type, [&](TypeDef const& type)
+        {
+            auto guard{ w.push_generic_params(type.GenericParam()) };
+
+            for (auto&& prop : type.PropertyList())
+            {
+                auto[getter, setter] = get_property_methods(prop);
+
+                if (is_static(getter))
+                {
+                    w.write("# staticprop %", prop.Name());
+                }
+                else
+                {
+                    w.write("% = property(fget=%, fset=%)\n",
+                        bind<write_lower_snake_case>(prop.Name()),
+                        bind<write_python_method_name>(getter),
+                        bind<write_python_method_name>(setter));
+                }
+            }
+        });
     }
 
     void write_python_class(writer& w, TypeDef const& type)
     {
         if (is_exclusive_to(type)) return;
 
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-
-        w.write("class %:\n", type.TypeName());
+        w.write("class @:\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
-            w.write("__type = _ns_module.%\n", type.TypeName());
+            w.write("__type = _ns_module.@\n", type.TypeName());
             write_python_class_init(w, type);
-
-            for (auto&&[name, methods] : get_methods(type))
-            {
-                write_python_method(w, name, methods);
-            }
+            write_python_methods(w, type);
+            write_python_properties(w, type);
 
             if (has_dunder_str_method(type))
             {
@@ -571,34 +615,34 @@ def _instance(self):
                 w.write("__len__ = __get_Size\n");
             }
 
-            for (auto&& prop : type.PropertyList())
-            {
-                auto[getter, setter] = get_property_methods(prop);
-
-                // TODO: static properties
-                if (!is_static(getter))
-                {
-                    w.write("% = property(fget=%, fset=%)\n",
-                        bind<write_lower_snake_case>(prop.Name()),
-                        bind<write_python_method_name>(getter),
-                        bind<write_python_method_name>(setter));
-                }
-            }
 
         }
         w.write("\n");
     }
 
-    void write_python_interface(writer& w, TypeDef const& type)
-    {
-        if (is_exclusive_to(type)) return;
+    //void write_python_interface(writer& w, TypeDef const& type)
+    //{
+    //    if (is_exclusive_to(type)) return;
 
-        w.write("class @:\n", type.TypeName());
-        {
-            writer::indent_guard g{ w };
-            w.write("__type = _ns_module.@\n", type.TypeName());
-            write_python_class_init(w, type);
-        }
-        w.write("\n");
-    }
+    //    auto guard{ w.push_generic_params(type.GenericParam()) };
+
+    //    w.write("class @:\n", type.TypeName());
+    //    {
+    //        writer::indent_guard g{ w };
+    //        w.write("__type = _ns_module.@\n", type.TypeName());
+    //        write_python_class_init(w, type);
+
+    //        if (has_dunder_str_method(type))
+    //        {
+    //            w.write("__str__ = to_string\n");
+    //        }
+
+    //        if (has_dunder_len_method(type))
+    //        {
+    //            w.write("__len__ = __get_Size\n");
+    //        }
+
+    //    }
+    //    w.write("\n");
+    //}
 }

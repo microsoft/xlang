@@ -209,7 +209,7 @@ namespace xlang
 
         settings.filter.bind_each<write_python_enum>(members.enums)(w);
         settings.filter.bind_each<write_python_class>(members.classes)(w);
-        settings.filter.bind_each<write_python_interface>(members.interfaces)(w);
+        settings.filter.bind_each<write_python_class>(members.interfaces)(w);
         //settings.filter.bind_each<write_import_type>(members.interfaces)(w);
         //settings.filter.bind_each<write_import_type>(members.structs)(w);
 
