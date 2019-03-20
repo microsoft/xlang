@@ -1200,7 +1200,7 @@ namespace winrt::impl
 
             static slim_mutex lock;
             slim_lock_guard const guard{ lock };
-            void* result;
+            void* result{};
             map->Lookup(get_abi(name), &result);
 
             if (result)
