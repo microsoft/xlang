@@ -542,6 +542,67 @@ namespace xlang
         }
     }
 
+    auto get_property_methods(Property const& prop)
+    {
+        MethodDef get_method{}, set_method{};
+
+        for (auto&& method_semantic : prop.MethodSemantic())
+        {
+            auto semantic = method_semantic.Semantic();
+
+            if (semantic.Getter())
+            {
+                get_method = method_semantic.Method();
+            }
+            else if (semantic.Setter())
+            {
+                set_method = method_semantic.Method();
+            }
+            else
+            {
+                throw_invalid("Properties can only have get and set methods");
+            }
+        }
+
+        XLANG_ASSERT(get_method);
+
+        if (set_method)
+        {
+            XLANG_ASSERT(get_method.Flags().Static() == set_method.Flags().Static());
+        }
+
+        return std::make_tuple(get_method, set_method);
+    }
+
+    auto get_event_methods(Event const& evt)
+    {
+        MethodDef add_method{}, remove_method{};
+
+        for (auto&& method_semantic : evt.MethodSemantic())
+        {
+            auto semantic = method_semantic.Semantic();
+
+            if (semantic.AddOn())
+            {
+                add_method = method_semantic.Method();
+            }
+            else if (semantic.RemoveOn())
+            {
+                remove_method = method_semantic.Method();
+            }
+            else
+            {
+                throw_invalid("Events can only have add and remove methods");
+            }
+        }
+
+        XLANG_ASSERT(add_method);
+        XLANG_ASSERT(remove_method);
+        XLANG_ASSERT(add_method.Flags().Static() == remove_method.Flags().Static());
+
+        return std::make_tuple(add_method, remove_method);
+    }
+
     enum class param_category
     {
         in,

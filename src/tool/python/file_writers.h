@@ -7,7 +7,7 @@ namespace xlang
     inline void write_pybase_h(stdfs::path const& folder)
     {
         writer w;
-        write_license_cpp(w);
+        write_license(w);
         w.write(strings::pybase);
         create_directories(folder);
         w.flush_to_file(folder / "pybase.h");
@@ -65,7 +65,7 @@ namespace xlang
 
         w.swap();
 
-        write_license_cpp(w);
+        write_license(w);
         {
             auto format = R"(#pragma once
 
@@ -93,7 +93,7 @@ namespace xlang
         w.current_namespace = ns;
         auto filename = w.write_temp("py.%.cpp", ns);
 
-        write_license_cpp(w);
+        write_license(w);
         w.write("#include \"py.%.h\"\n", ns);
         if (ns == "Windows.Foundation")
         {
@@ -113,7 +113,7 @@ namespace xlang
     {
         writer w;
 
-        write_license_cpp(w);
+        write_license(w);
         w.write(strings::module_methods, settings.module, settings.module, settings.module, settings.module);
 
         auto filename = w.write_temp("_%.cpp", settings.module);
@@ -131,7 +131,7 @@ namespace xlang
     {
         writer w;
 
-        write_license_python(w);
+        write_license(w, "#");
         w.write(strings::setup, settings.module, settings.module, bind<write_setup_filenames>(namespaces));
         create_directories(folder);
         w.flush_to_file(folder / "setup.py");
@@ -173,7 +173,7 @@ namespace xlang
     {
         writer w;
 
-        write_license_python(w);
+        write_license(w, "#");
         w.write(strings::package_init, settings.module, settings.module, settings.module, settings.module);
 
         create_directories(folder);
@@ -185,7 +185,7 @@ namespace xlang
         writer w;
         w.current_namespace = ns;
         
-        write_license_python(w);
+        write_license(w, "#");
 
         w.write("import typing, %\n", module_name);
 
