@@ -322,7 +322,7 @@ namespace winrt::impl
         hstring to_hstring()
         {
             WINRT_ASSERT(m_buffer != nullptr);
-            void* result;
+            void* result{};
             check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, &result));
             m_buffer = nullptr;
             return { result, take_ownership_from_abi };
