@@ -42,6 +42,13 @@ namespace xlang::meta::reader
             EnumDefinition type;
             using value_type = std::variant<bool, char16_t, uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t, uint64_t, int64_t>;
             value_type value;
+
+            bool equals_enumerator(std::string_view const& name) const
+            {
+                auto field = type.get_enumerator(name);
+                auto constant_value = std::visit([](auto&& v) { return Constant::constant_type{ v }; }, value);
+                return field.Constant().Value() == constant_value;
+            }
         };
 
         using value_type = std::variant<bool, char16_t, uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t, uint64_t, int64_t, float, double, std::string_view, SystemType, EnumValue>;

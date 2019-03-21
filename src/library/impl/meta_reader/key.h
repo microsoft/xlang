@@ -136,6 +136,20 @@ namespace xlang::meta::reader
                 }
             }
         }
+
+        auto get_enumerator(std::string_view const& name) const
+        {
+            auto fields = m_typedef.FieldList();
+
+            auto field = std::find_if(begin(fields), end(fields), [&](auto&& field)
+            {
+                return field.Name() == name;
+            });
+
+            XLANG_ASSERT(field != end(fields));
+            return field;
+        }
+
         TypeDef m_typedef;
         ElementType m_underlying_type{};
     
