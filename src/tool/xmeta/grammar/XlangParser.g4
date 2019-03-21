@@ -243,7 +243,7 @@ return_type
     ;
 
 property_declaration
-    : type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE
+    : type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
     ;
 
 property_accessors
@@ -347,7 +347,6 @@ enum_body
 
 enum_modifier
     : PUBLIC
-    | INTERNAL
     ;
 
 enum_member_declaration
