@@ -5,7 +5,10 @@ namespace xlang
     template<typename F>
     void write_snake_case(writer& w, std::string_view const& name, F case_func)
     {
+        XLANG_ASSERT(name.size() > 0);
+
         w.write(case_func(name[0]));
+
         for (std::string_view::size_type i = 1; i < name.size() - 1; i++)
         {
             if (name.substr(i, 4) == "UInt")
@@ -23,7 +26,11 @@ namespace xlang
 
             w.write(case_func(name[i]));
         }
-        w.write(case_func(name[name.size() - 1]));
+
+        if (name.size() > 1)
+        {
+            w.write(case_func(name[name.size() - 1]));
+        }
     }
 
     void write_upper_snake_case(writer& w, std::string_view const& name)
@@ -1291,7 +1298,7 @@ return py::trycatch_invoker([=]() -> PyObject* {
                 //       pywinrt currently targeting 3.6 because that's the version that ships with VS 2017 v15.8
                 //       https://github.com/python/cpython/commit/007d7ff73f4e6e65cfafd512f9c23f7b7119b803
                 w.write("{ const_cast<char*>(\"%\"), (getter)@_get_%, (setter)@_set_%, nullptr, nullptr },\n",
-                    field.Name(),
+                    bind<write_lower_snake_case>(field.Name()),
                     type.TypeName(), field.Name(),
                     type.TypeName(), field.Name());
             }
