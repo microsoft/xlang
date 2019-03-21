@@ -19,14 +19,14 @@ class TestJson(unittest.TestCase):
             e = wdj.JsonArray()
 
     def test_JsonArray_ctor(self):
-        a = wdj.JsonArray._ctor()
+        a = wdj.JsonArray._default_ctor()
         self.assertEqual(a.get_Size(), 0)
         self.assertEqual(a.get_ValueType(), JsonValueType.Array)
         self.assertEqual(a.ToString(), "[]")
         self.assertEqual(a.Stringify(), "[]")
 
     def test_JsonObject_ctor(self):
-        o = wdj.JsonObject._ctor()
+        o = wdj.JsonObject._default_ctor()
         self.assertEqual(o.get_Size(), 0)
         self.assertEqual(o.get_ValueType(), JsonValueType.Object)
         self.assertEqual(o.ToString(), "{}")
@@ -141,7 +141,7 @@ class TestJson(unittest.TestCase):
         self.assertEqual(s.GetString(), "plugh")
 
     def test_invalid_param_count_instance(self):
-        a = wdj.JsonArray._ctor()
+        a = wdj.JsonArray._default_ctor()
         with self.assertRaises(TypeError):
             a.Append(10, 20)
 
@@ -149,27 +149,27 @@ class TestJson(unittest.TestCase):
         with self.assertRaises(TypeError):
             wdj.JsonArray.Parse(10, 20)
 
-    def test_JsonArray_GetMany(self):
-        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
-        count, items = a.GetMany(1, 3)
+    # def test_JsonArray_GetMany(self):
+    #     a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+    #     count, items = a.GetMany(1, 3)
 
-        self.assertEqual(count, 3)
-        self.assertEqual(len(items), 3)
+    #     self.assertEqual(count, 3)
+    #     self.assertEqual(len(items), 3)
 
-        self.assertFalse(items[0].GetBoolean())
-        self.assertEqual(items[1].GetNumber(), 42)
-        self.assertEqual(items[2].get_ValueType(), JsonValueType.Null)
+    #     self.assertFalse(items[0].GetBoolean())
+    #     self.assertEqual(items[1].GetNumber(), 42)
+    #     self.assertEqual(items[2].get_ValueType(), JsonValueType.Null)
 
-    def test_JsonArray_GetMany2(self):
-        a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
-        count, items = a.GetMany(6, 3)
+    # def test_JsonArray_GetMany2(self):
+    #     a = wdj.JsonArray.Parse('[true, false, 42, null, [], {}, "plugh"]')
+    #     count, items = a.GetMany(6, 3)
 
-        self.assertEqual(count, 1)
-        self.assertEqual(len(items), 3)
+    #     self.assertEqual(count, 1)
+    #     self.assertEqual(len(items), 3)
 
-        self.assertEqual(items[0].GetString(), "plugh")
-        self.assertIsNone(items[1])
-        self.assertIsNone(items[2])
+    #     self.assertEqual(items[0].GetString(), "plugh")
+    #     self.assertIsNone(items[1])
+    #     self.assertIsNone(items[2])
 
 if __name__ == '__main__':
     unittest.main()

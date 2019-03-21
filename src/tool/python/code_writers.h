@@ -1097,7 +1097,7 @@ if (!return_value)
     
     void write_struct_field_keyword(writer& w, Field const& field)
     {
-        w.write("\"%\", ", field.Name());
+        w.write("\"%\", ", bind<write_lower_snake_case>(field.Name()));
     }
 
     void write_struct_field_format(writer& w, Field const& field)
@@ -1446,7 +1446,7 @@ if (!PyDict_Check(obj))
     
             for (auto&& field : type.FieldList())
             {
-                w.write("\nPyObject* py_% = PyDict_GetItemString(obj, \"%\");\n", field.Name(), field.Name());
+                w.write("\nPyObject* py_% = PyDict_GetItemString(obj, \"%\");\n", field.Name(), bind<write_lower_snake_case>(field.Name()));
                 w.write("if (!py_%) { throw winrt::hresult_invalid_argument(); }\n", field.Name());
     
                 if (has_custom_conversion(type))

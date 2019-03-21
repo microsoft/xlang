@@ -17,37 +17,35 @@ def async_test(test):
     return wrapper
 
 
-import pyrt.windows.foundation as wf
-
 class TestGeolocation(unittest.TestCase):
 
     def test_pinterface_qi(self):
-        locator = wdg.Geolocator._ctor()
+        locator = wdg.Geolocator._default_ctor()
         op = locator.GetGeopositionAsync()
         self.assertEqual(type(op), wf.IAsyncOperation)
         op.Cancel()
 
     def test_struct_ctor(self):
-        basic_pos = wdg.BasicGeoposition(Latitude = 47.1, Longitude = -122.1, Altitude = 0.0)
-        self.assertEqual(basic_pos.Latitude, 47.1)
-        self.assertEqual(basic_pos.Longitude, -122.1)
-        self.assertEqual(basic_pos.Altitude, 0.0)
+        basic_pos = wdg.BasicGeoposition(latitude = 47.1, longitude = -122.1, altitude = 0.0)
+        self.assertEqual(basic_pos.latitude, 47.1)
+        self.assertEqual(basic_pos.longitude, -122.1)
+        self.assertEqual(basic_pos.altitude, 0.0)
 
         geocircle = wdg.Geocircle.Create(basic_pos, 10)
         center = geocircle.get_Center()
 
         self.assertEqual(10, geocircle.get_Radius())
-        for x in ["Latitude", "Longitude", "Altitude"]:
+        for x in ["latitude", "longitude", "altitude"]:
             self.assertEqual(getattr(basic_pos, x), getattr(center, x))
 
     def test_struct_from_dict(self):
-        basic_pos = {"Latitude": 47.1, "Longitude": -122.1, "Altitude": 0.0}
+        basic_pos = {"latitude": 47.1, "longitude": -122.1, "altitude": 0.0}
 
         geocircle = wdg.Geocircle.Create(basic_pos, 10)
         center = geocircle.get_Center()
 
         self.assertEqual(10, geocircle.get_Radius())
-        for x in ["Latitude", "Longitude", "Altitude"]:
+        for x in ["latitude", "longitude", "altitude"]:
             self.assertEqual(basic_pos[x], getattr(center, x))
 
     def test_iiterable_wraping(self):
@@ -58,10 +56,10 @@ class TestGeolocation(unittest.TestCase):
         nw = box.get_NorthwestCorner()
         se = box.get_SoutheastCorner()
 
-        self.assertAlmostEqual(nw.Latitude, basic_pos2.Latitude)
-        self.assertAlmostEqual(nw.Longitude, basic_pos2.Longitude)
-        self.assertAlmostEqual(se.Latitude, basic_pos1.Latitude)
-        self.assertAlmostEqual(se.Longitude, basic_pos1.Longitude)
+        self.assertAlmostEqual(nw.latitude, basic_pos2.latitude)
+        self.assertAlmostEqual(nw.longitude, basic_pos2.longitude)
+        self.assertAlmostEqual(se.latitude, basic_pos1.latitude)
+        self.assertAlmostEqual(se.longitude, basic_pos1.longitude)
 
     def test_GetGeopositionAsync(self):
         """test async method using IAsyncOperation Completed callback"""
@@ -76,15 +74,15 @@ class TestGeolocation(unittest.TestCase):
             self.assertEqual(type(pos), wdg.Geoposition)
 
             coord = pos.get_Coordinate()
-            self.assertEqual(type(coord.get_Timestamp().UniversalTime), int)
+            self.assertEqual(type(coord.get_Timestamp().universal_time), int)
 
             basic_pos = coord.get_Point().get_Position()
-            lat = basic_pos.Latitude
+            lat = basic_pos.latitude
             self.assertEqual(type(lat), float)
 
             complete_event.set()
 
-        locator = wdg.Geolocator._ctor()
+        locator = wdg.Geolocator._default_ctor()
         op = locator.GetGeopositionAsync()
         op.put_Completed(callback)
 

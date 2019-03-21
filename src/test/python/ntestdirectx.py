@@ -9,25 +9,25 @@ class TestDirectX(unittest.TestCase):
         msd = wgdd.Direct3DMultisampleDescription(1, 2)
         sd = wgdd.Direct3DSurfaceDescription(4, 8, 10, msd) # 10 = DirectXPixelFormat.R16G16B16A16Float
 
-        self.assertEqual(sd.Width, 4)
-        self.assertEqual(sd.Height, 8)
-        self.assertEqual(sd.Format, 10)
+        self.assertEqual(sd.width, 4)
+        self.assertEqual(sd.height, 8)
+        self.assertEqual(sd.format, 10)
 
-        msd2 = sd.MultisampleDescription
-        self.assertEqual(msd.Count, 1)
-        self.assertEqual(msd.Quality, 2)
+        msd2 = sd.multisample_description
+        self.assertEqual(msd.count, 1)
+        self.assertEqual(msd.quality, 2)
     
     def test_struct_containing_enum_kwd(self):
         msd = wgdd.Direct3DMultisampleDescription(1, 2)
-        sd = wgdd.Direct3DSurfaceDescription(Format=10, Width=4, MultisampleDescription=msd, Height=8)
+        sd = wgdd.Direct3DSurfaceDescription(format=10, width=4, multisample_description=msd, height=8)
 
-        self.assertEqual(sd.Width, 4)
-        self.assertEqual(sd.Height, 8)
-        self.assertEqual(sd.Format, 10)
+        self.assertEqual(sd.width, 4)
+        self.assertEqual(sd.height, 8)
+        self.assertEqual(sd.format, 10)
 
-        msd2 = sd.MultisampleDescription
-        self.assertEqual(msd.Count, 1)
-        self.assertEqual(msd.Quality, 2)
+        msd2 = sd.multisample_description
+        self.assertEqual(msd.count, 1)
+        self.assertEqual(msd.quality, 2)
 
 if __name__ == '__main__':
     unittest.main()
