@@ -1,13 +1,13 @@
 ---
 id: XDN07
 title: xmeta Semantic Checking
-author: t-tiroma@microsoft.com
+authors: t-tiroma@microsoft.com, Kyaw.Thant@microsoft.com
 status: draft
 ---
 
 # Title: XDN11 - xmeta Semantic Checking
 
-- Author: Tim Romanski (t-tiroma@microsoft.com)
+- Authors: Tim Romanski (t-tiroma@microsoft.com) and Will Thant (Kyaw.Thant@microsoft.com)
 - Status: draft
 
 ## Abstract
@@ -16,11 +16,12 @@ This design note specifies the semantic checks performed when generating metadat
 
 Types include classes, structs, interfaces, enums, and delegates.
 
+Note that these are purely semantic checks, and not syntax.
+
 ### Namespaces
 
 ### Namespace members
-
-##### Definitions:
+#### Definitions:
 A **declaration space** is defined by namespace declarations. Each namespace has its own unique declaration space, and outside of all namespaces is a special declaration space called the **global declaration space**. The scope of the global declaration space is limited to the file it is contained in. 
 The scope defined by a file is called a **compilation unit**.
 **Namespace members** include nested namespace declarations and type declarations.
@@ -29,8 +30,8 @@ Namespaces can include other namespaces with a **using namespace directive**. Th
 You can also include namespaces or types through a **using alias directive**. This has syntax `using <identifier> = <namespace-or-type-name>;`.
 A **namespace alias qualifier** refers to a namespace or a type. It guarantees that type name lookups are unaffected by the introduction of new types and members. This has syntax `identifier::identifier<A1,...,Ak>` where `<A1,...,Ak>` is optional.
 
-##### Semantic checks:
-Only types from the declaration space of included namespaces can be referenced. This means that types from nested namespaces are unavailable, since they belong to a separate declaration space.
+#### Semantic checks:
+1) Only types from the declaration space of included namespaces can be referenced. This means that types from nested namespaces are unavailable, since they belong to a separate declaration space.
 For example:
 ```
 namespace N1
@@ -51,11 +52,13 @@ namespace N3
 ```
 Class B was referenced, but its declaration space was not included. This is an error.
 
-If two namespaces included define members with the same name, and the including namespace references that member name, it is ambiguous and is an error.
+2) If two namespaces included define members with the same name, and the including namespace references that member name, it is ambiguous and is an error.
 
-Namespace members in the same declaration space cannot have the same name.
+3) Namespace members in the same declaration space cannot have the same name.
 
-The identifier of a using alias directive must be unique within its declaration space, and cannot be the same as any member defined in the declaration space.
+4) Two namespace names cannot differ only by case.
+
+5) The identifier of a using alias directive must be unique within its declaration space, and cannot be the same as any member defined in the declaration space.
 For example:
 ```
 namespace N3
@@ -70,7 +73,7 @@ namespace N3
 }
 ```
 
-Any referenced using alias directive must be defined in the namespace body or compilation unit in which it occurs.
+6) Any referenced using alias directive must be defined in the namespace body or compilation unit in which it occurs.
 For example:
 ```
 using R = N1.N2;
@@ -85,9 +88,9 @@ namespace N3
 }
 ```
 
-Using aliases can name a closed constructed type like `using Y = N1.A<Int32>;`, however the type argument cannot be generic.
+7) Using aliases can name a closed constructed type like `using Y = N1.A<Int32>;`, however the type argument cannot be generic.
 
-For namespace alias qualifiers, they have the form `N::I<A1,...,Ak>`.
+8) For namespace alias qualifiers, they have the form `N::I<A1,...,Ak>`.
 * If N is the identifier 'global', then the global namespace is searched for I. One of the following must be true:
   * The global namespace contains a namespace named I and K is zero.
   * The global namespace contains a non-generic type named I and K is zero.
@@ -99,9 +102,7 @@ For namespace alias qualifiers, they have the form `N::I<A1,...,Ak>`.
 
 
 ### Classes
-
-##### Definitions:
-
+#### Definitions:
 A **class modifier** can be added to a class declaration. These include `sealed` and `static`.
 
 You can define a class as **partial** with syntax `partial <class-name>`.
@@ -120,34 +121,34 @@ class D: C { }
 ```
 Here, class D depends on classes A, B, and C.
 
-##### Semantic checks:
+#### Semantic checks:
+1) Classes must override all type members specified in all interfaces in its inheritance tree.
 
-Rules for sealed classes:
+2) Rules for sealed classes:
 * You cannot derive from a sealed class.
 
-Rules for static classes:
-* You cannot instantiate a static class.
+3) Rules for static classes:
 * It cannot be used as a type, and it can only contain static members. This means all members must explicitly include a `static` modifier.
 * You cannot define an instance constructor in a static class.
 * You cannot derive from a static class.
 * A static class can only inherit from static interfaces.
-* You may only reference static classes with the format `T.I` where T is the static class and I is a member of T.
+* You may only reference members of static classes with the format `T.I` where T is the static class and I is a member of T.
 
-Rules for type parameters:
+4) Rules for type parameters:
 * Type parameters cannot contain duplicates.
 * Type parameters cannot have the same name as a member declared in the class. 
 * Type parameters cannot have the same name as the type itself.
 
-Rules for base classes:
+5) Rules for base classes:
 * Base classes cannot be the same as a type parameter.
 * A class cannot depend on itself.
 
-Rules for partial classes:
-* As in regular cl
+6) Rules for partial classes:
+* Same as regular classes. 
 
 ### Class members
 
-##### Definitions:
+#### Definitions:
 
 Class members include **methods**, **properties**, **events**, and **instance constructors**.
 
@@ -163,17 +164,17 @@ The **formal parameters** of a method are the parameters enclosed by brackets `(
 
 An **overridden base method** is a method in a parent class that is being overridden. If class `A` overrides method `m`, the next direct parent class is checked for `m`, then the parent of the parent class if one exists, and so on. Only `public` and `protected` methods can be matched for an override.
 
-##### Semantic checks:
+#### Semantic checks:
 
 Note: inherited members are not considered to be within the class declaration space, so the names of these inherited members do not influence the following rules.
 
-No members other than instance constructors may have the same name as the immediately enclosing class.
+1) No members other than instance constructors may have the same name as the immediately enclosing class.
 
-A class member declaration can have at most one accessibility modifier, which can be one of `public` or `protected`.
+2) A class member declaration can have at most one accessibility modifier, which can be one of `public` or `protected`.
 
-The constituent types of a member must be at least as accessible as that member itself.
+3) The constituent types of a member must be at least as accessible as that member itself.
 
-Rules for methods:
+4) Rules for methods:
 * The name of each method must differ from all other non-method members declared in the same class.
 * The signature of each method must differ from the signatures of all other methods declared in the same class. It must also differ from methods declared in inherited classes, unless the override modifier is used. Signatures cannot differ solely by ref and out.
 * Methods may not match the signature of a reserved member name. Even if class B derives from class A, B's methods cannot match the signature of reserved member names created by A.
@@ -188,7 +189,7 @@ Rules for methods:
   * The method cannot change the accessibility of the overriden base method.
   * The overridden base method cannot be sealed.
 
-Rules for properties:
+5) Rules for properties:
 * The name of each property must differ from all other member names declared in the same class.
 * If a property is declared as `sealed`, it must also have the `override` modifier.
 * If a property is `partial`, it does not include the modifiers: `public`, `protected`, `sealed`, or `override`.
@@ -196,11 +197,11 @@ Rules for properties:
 * `get` and `set` accessors of properties can only be declared once.
 * A property cannot be passed as a parameter of type `ref` or `out`.
 
-Rules for events:
+6) Rules for events:
 * The name of each event must differ from all other member names declared in the same class.
 * The type of the event must be at least as accessible as the event itself.
 
-Rules for instance constructors:
+7) Rules for instance constructors:
 * Must have the same name as the immediately enclosing class.
 * The signatures of each instance constructor must be unique, and they cannot differ solely by ref and out.
 * All formal parameters of an instance constructor must have different names.
@@ -208,13 +209,18 @@ Rules for instance constructors:
 ### Structs
 
 ### Struct members
+#### Definitions:
+Struct members include: **fields**, **enums**, and **structs**.
+
+#### Semantic checks:
+1) The semantic checks of class members apply to struct members as well.
 
 ### Interfaces
-##### Definitions:
+#### Definitions:
 The **required interfaces** of an interface are the explicit required interfaces and their required interfaces.
 
-##### Checks:
-1) It is a compile-time error for an interface to directly or indirectly inherit from itself.
+#### Semantic checks:
+1) An interface cannot directly or indirectly inherit from itself.
 
 2) All Xlang interfaces must inherit directly from IInspectable, which in turn inherits from IUnknown.
 
@@ -268,17 +274,17 @@ To determine if the interface list of a generic type declaration is valid, the f
 •	If any possible constructed type created from C would, after type arguments are substituted into L, cause two interfaces in L to be identical, then the declaration of C is invalid
 
 ### Interface members
-##### Definitions:
+#### Definitions:
 The process of matching a declaration of a member in a class to the corresponding interface member is known as **interface mapping**.
 
-##### Checks:
+#### Semantic checks:
 1) The name of a method must differ from the names of all properties and events declared in the same interface. 
 
-The signature of a method must differ from the signatures of all other methods declared in the same interface, and two methods declared in the same interface may not have signatures that differ solely by ref and out.
+2) The signature of a method must differ from the signatures of all other methods declared in the same interface, and two methods declared in the same interface may not have signatures that differ solely by ref and out.
 
-The name of a property or event must differ from the names of all other members declared in the same interface.
+3) The name of a property or event must differ from the names of all other members declared in the same interface.
 
-2) Interface mapping
+4) Interface mapping
 For purposes of interface mapping, a class member A matches an interface member B when:
 •	A and B are methods, and the name, type, and formal parameter lists of A and B are identical.
 •	A and B are properties, the name and type of A and B are identical, and A has the same accessors as B.
@@ -303,10 +309,10 @@ class CowboyArtist : ICowboy, IArtist
 This was not specified in the grammar and I am unsure whether we will support this in Xlang. 
 
 ### Enums
-##### Definitions:
+#### Definitions:
 An **enum type** is a distinct value type that declares a set of named constants.
 
-##### Checks:
+#### Checks:
 1) Enums with an underlying type of UInt32 must carry the FlagsAttribute. Enums with an underlying type of Int32 must not carry the FlagsAttribute.
 
 2) Enums must have public visibility.
@@ -395,4 +401,4 @@ class X
 	static Boolean G(String s);
 }
 ``` 
-The method X.F is compatible with the delegate type Predicate<Int32> and the method X.G is compatible with the delegate type Predicate<String> .
+The method X.F is compatible with the delegate type Predicate<Int32> and the method X.G is compatible with the delegate type Predicate<String>.
