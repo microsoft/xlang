@@ -48,7 +48,7 @@ namespace
             return remaining;
         }
 
-        HRESULT __stdcall GetIids([[maybe_unused]] ULONG* count, [[maybe_unused]] IID** value)
+        HRESULT __stdcall GetIids(ULONG* count, IID** value)
         {
             REQUIRE(*value == nullptr); // C++/WinRT guards against invalid implementations.
             REQUIRE(*count == 0);
@@ -57,7 +57,7 @@ namespace
             return E_NOTIMPL;
         }
 
-        HRESULT __stdcall GetRuntimeClassName([[maybe_unused]] HSTRING* value)
+        HRESULT __stdcall GetRuntimeClassName(HSTRING* value)
         {
             REQUIRE(*value == nullptr); // C++/WinRT guards against invalid implementations.
 
@@ -73,7 +73,7 @@ namespace
 
     struct bad_empty : base_base
     {
-        HRESULT __stdcall ToString([[maybe_unused]] HSTRING* value)
+        HRESULT __stdcall ToString(HSTRING* value)
         {
             REQUIRE(*value == nullptr); // C++/WinRT guards against invalid implementations.
 
@@ -85,7 +85,7 @@ namespace
 
     struct bad_false : base_base
     {
-        HRESULT __stdcall ToString([[maybe_unused]] HSTRING* value)
+        HRESULT __stdcall ToString(HSTRING* value)
         {
             REQUIRE(*value == nullptr); // C++/WinRT guards against invalid implementations.
 
@@ -98,7 +98,7 @@ namespace
 
     struct bad_error : base_base
     {
-        HRESULT __stdcall ToString([[maybe_unused]] HSTRING* value)
+        HRESULT __stdcall ToString(HSTRING* value)
         {
             REQUIRE(*value == nullptr); // C++/WinRT guards against invalid implementations.
 
