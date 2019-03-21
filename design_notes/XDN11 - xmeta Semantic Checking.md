@@ -12,7 +12,7 @@ status: draft
 
 ## Abstract
 
-This design note specifies the semantic checks performed when generating metadata files from xlang IDL files. The checks are based on the Class Declaration Language (CDL) specification and the xlang Type System. The categories to be checked are namespaces, types, and members of namespaces and of each type.
+This design note specifies the semantic checks performed when generating metadata files from xlang IDL files. The checks are based on the Class Declaration Language (CDL) specification and the [xlang Type System](https://github.com/Microsoft/xlang/blob/master/design_notes/XDN03%20-%20xlang%20Type%20System.md). The categories to be checked are namespaces, types, and members of namespaces and of each type.
 
 Types include classes, structs, interfaces, enums, and delegates.
 
@@ -21,21 +21,15 @@ Types include classes, structs, interfaces, enums, and delegates.
 ### Namespace members
 
 ##### Definitions:
-A **declaration space** is defined by namespace declarations. Each namespace has its own unique declaration space, and outside of all namespaces is a special declaration space called the **global declaration space**. The scope of the global declaration space is limited to the IDL file it is contained in.
-
-The scope defined by an IDL file is called a **compilation unit**.
-
+A **declaration space** is defined by namespace declarations. Each namespace has its own unique declaration space, and outside of all namespaces is a special declaration space called the **global declaration space**. The scope of the global declaration space is limited to the file it is contained in. 
+The scope defined by a file is called a **compilation unit**.
 **Namespace members** include nested namespace declarations and type declarations.
-
 **Types** include classes, structs, interfaces, enums, and delegates.
-
 Namespaces can include other namespaces with a **using namespace directive**. This has syntax `using <namespace-name>`. This allows members from the included namespace to be referenced.
-
 You can also include namespaces or types through a **using alias directive**. This has syntax `using <identifier> = <namespace-or-type-name>;`.
+A **namespace alias qualifier** refers to a namespace or a type. It guarantees that type name lookups are unaffected by the introduction of new types and members. This has syntax `identifier::identifier<A1,...,Ak>` where `<A1,...,Ak>` is optional.
 
-A **namespace alias qualifier** refers to a namespace or a type. It guarantees that type name lookups are unaffected by the introduction of new types and members. This has syntax `identifier::identifier<A1,...,Ak>` where `<A1,...,Ak>` is optional.  
-
-##### Checks:
+##### Semantic checks:
 Only types from the declaration space of included namespaces can be referenced. This means that types from nested namespaces are unavailable, since they belong to a separate declaration space.
 For example:
 ```
@@ -106,7 +100,110 @@ For namespace alias qualifiers, they have the form `N::I<A1,...,Ak>`.
 
 ### Classes
 
+##### Definitions:
+
+A **class modifier** can be added to a class declaration. These include `sealed` and `static`.
+
+You can define a class as **partial** with syntax `partial <class-name>`.
+
+All classes are **public** by default without any keywords added, and you cannot modify that.
+
+A **type parameter** allows classes to have generic types. These have the form `class S<T1, ...,Tk>` where T1 through Tk are the type parameters.
+
+A class **depends** on classes it inherits from, all classes inherited from the classes it inherits from, and so on.
+For example:
+```
+class A { }
+class B { }
+class C: A, B { }
+class D: C { }
+```
+Here, class D depends on classes A, B, and C.
+
+##### Semantic checks:
+
+Rules for sealed classes:
+* You cannot derive from a sealed class.
+
+Rules for static classes:
+* You cannot instantiate a static class.
+* It cannot be used as a type, and it can only contain static members. This means all members must explicitly include a `static` modifier.
+* You cannot define an instance constructor in a static class.
+* You cannot derive from a static class.
+* A static class can only inherit from static interfaces.
+* You may only reference static classes with the format `T.I` where T is the static class and I is a member of T.
+
+Rules for type parameters:
+* Type parameters cannot contain duplicates.
+* Type parameters cannot have the same name as a member declared in the class. 
+* Type parameters cannot have the same name as the type itself.
+
+Rules for base classes:
+* Base classes cannot be the same as a type parameter.
+* A class cannot depend on itself.
+
+Rules for partial classes:
+* As in regular cl
+
 ### Class members
+
+##### Definitions:
+
+Class members include **methods**, **properties**, **events**, and **instance constructors**.
+
+Class members are either **staic members** or **instance members**. Static members belong to the class itself, and instance membes belong to object instances of the class.
+
+A **constituent type** is a type used in the declaration of a member. These includes the type of a property, an event, the return type of a method, and the parameter types of a method or instance constructor.
+
+Each property and event creates two **reserved member names**. For example, a property `P` of type `T` reserves `T get_P();` and `void set_P(T value);`. These are required by the Windows Runtime. The format will always remain the same, i.e. prepend `set_` and `get_` to the name, the return type of `get_` will be `T` and will have no parameters, and `set_` will have return type `void` and one parameter of type `T`. These get propagated to any inheriting class.
+
+The **formal parameters** of a method are the parameters enclosed by brackets `(` and `)`.
+
+**Type parameters** define a generic type used for constructed types. For a declaration of example method `m`: `void m<S,T>();`, `S` and `T` are the type parameters.
+
+An **overridden base method** is a method in a parent class that is being overridden. If class `A` overrides method `m`, the next direct parent class is checked for `m`, then the parent of the parent class if one exists, and so on. Only `public` and `protected` methods can be matched for an override.
+
+##### Semantic checks:
+
+Note: inherited members are not considered to be within the class declaration space, so the names of these inherited members do not influence the following rules.
+
+No members other than instance constructors may have the same name as the immediately enclosing class.
+
+A class member declaration can have at most one accessibility modifier, which can be one of `public` or `protected`.
+
+The constituent types of a member must be at least as accessible as that member itself.
+
+Rules for methods:
+* The name of each method must differ from all other non-method members declared in the same class.
+* The signature of each method must differ from the signatures of all other methods declared in the same class. It must also differ from methods declared in inherited classes, unless the override modifier is used. Signatures cannot differ solely by ref and out.
+* Methods may not match the signature of a reserved member name. Even if class B derives from class A, B's methods cannot match the signature of reserved member names created by A.
+* If a method is declared as `sealed`, it must also have the `override` modifier.
+* If a method is `partial`, it does not include the modifiers: `public`, `protcted`, `sealed`, or `override`.
+* The return type of each parameter type must be at least as accessible as the method itself.
+* All formal parameters and type parameters of a method declaration must have different names.
+* For overridden methods:
+  * An overridden base method must be found.
+  * There is exactly one overridden base method that matches.
+  * The overridden base method is not static.
+  * The method cannot change the accessibility of the overriden base method.
+  * The overridden base method cannot be sealed.
+
+Rules for properties:
+* The name of each property must differ from all other member names declared in the same class.
+* If a property is declared as `sealed`, it must also have the `override` modifier.
+* If a property is `partial`, it does not include the modifiers: `public`, `protected`, `sealed`, or `override`.
+* The type of a property must be at least as accessible as the property itself.
+* `get` and `set` accessors of properties can only be declared once.
+* A property cannot be passed as a parameter of type `ref` or `out`.
+
+Rules for events:
+* The name of each event must differ from all other member names declared in the same class.
+* The type of the event must be at least as accessible as the event itself.
+
+Rules for instance constructors:
+* Must have the same name as the immediately enclosing class.
+* The signatures of each instance constructor must be unique, and they cannot differ solely by ref and out.
+* All formal parameters of an instance constructor must have different names.
 
 ### Structs
 
