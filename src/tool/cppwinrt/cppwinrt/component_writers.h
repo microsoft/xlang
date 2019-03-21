@@ -20,7 +20,7 @@ namespace xlang
                     continue;
                 }
 
-                if (info.overridable)
+                if (info.overridable && !is_always_disabled(info.type))
                 {
                     interfaces.push_back(name);
                 }
@@ -71,7 +71,7 @@ namespace xlang
 
     static void write_component_include(writer& w, TypeDef const& type)
     {
-        if (!has_factory_members(w, type))
+        if (!has_factory_members(w, type) || is_always_disabled(type))
         {
             return;
         }
@@ -96,7 +96,7 @@ namespace xlang
 
     static void write_component_activation(writer& w, TypeDef const& type)
     {
-        if (!has_factory_members(w, type))
+        if (!has_factory_members(w, type) || is_always_disabled(type))
         {
             return;
         }
@@ -220,7 +220,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            if (!info.base && !info.is_default)
+            if (!info.base && !info.is_default && !is_always_disabled(info.type))
             {
                 w.write(", @", interface_name);
             }
@@ -247,7 +247,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[interface_name, info] : get_interfaces(w, base_type))
         {
-            if (info.overridable)
+            if (info.overridable && !is_always_disabled(info.type))
             {
                 w.write(", @", interface_name);
             }
@@ -294,7 +294,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             bind<write_consume_args>(signature));
     }
 
-        void write_component_static_forwarder(writer& w, MethodDef const& method)
+    void write_component_static_forwarder(writer& w, MethodDef const& method)
     {
         auto format = R"(        % %(%)
         {
@@ -319,6 +319,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : factories)
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable)
             {
                 if (!factory.type)
@@ -360,7 +365,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         for (auto&&[factory_name, factory] : factories)
         {
-            if (!factory.type)
+            if (!factory.type || is_always_disabled(factory.type))
             {
                 continue;
             }
@@ -398,6 +403,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : get_factories(w, type))
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable)
             {
                 if (!factory.type)
@@ -550,7 +560,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&& [name, info] : get_interfaces(w, type))
         {
-            if (!info.overridable)
+            if (!info.overridable || is_always_disabled(info.type))
             {
                 continue;
             }
@@ -591,7 +601,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : get_factories(w, base_type))
         {
-            if (!factory.composable)
+            if (!factory.composable || is_always_disabled(factory.type))
             {
                 continue;
             }
@@ -624,7 +634,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         auto type_name = type.TypeName();
         auto type_namespace = type.TypeNamespace();
-        auto interfaces = get_interfaces(w, type);
         auto factories = get_factories(w, type);
         bool const non_static = !empty(type.InterfaceImpl());
 
@@ -668,7 +677,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
                     for (auto&&[name, info] : base_interfaces)
                     {
-                        if (info.overridable)
+                        if (info.overridable || is_always_disabled(info.type))
                         {
                             continue;
                         }
