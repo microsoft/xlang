@@ -1008,57 +1008,79 @@ if (!return_value)
 
     void write_struct_field_var_type(writer& w, Field const& field)
     {
+        auto write_fundamental = [&](fundamental_type type)
+        {
+            switch (type)
+            {
+            case fundamental_type::Boolean:
+                w.write("bool");
+                break;
+            case fundamental_type::Char:
+                w.write("char16_t");
+                break;
+            case fundamental_type::Int8:
+                w.write("int8_t");
+                break;
+            case fundamental_type::UInt8:
+                w.write("uint8_t");
+                break;
+            case fundamental_type::Int16:
+                w.write("int16_t");
+                break;
+            case fundamental_type::UInt16:
+                w.write("uint16_t");
+                break;
+            case fundamental_type::Int32:
+                w.write("int32_t");
+                break;
+            case fundamental_type::UInt32:
+                w.write("uint32_t");
+                break;
+            case fundamental_type::Int64:
+                w.write("int64_t");
+                break;
+            case fundamental_type::UInt64:
+                w.write("uint64_t");
+                break;
+            case fundamental_type::Float:
+                w.write("float");
+                break;
+            case fundamental_type::Double:
+                w.write("double");
+                break;
+            case fundamental_type::String:
+                w.write("winrt::hstring");
+                break;
+            default:
+                throw_invalid("invalid fundamental type");
+            }
+        };
+
         auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
         {
             call(type,
-                [&](fundamental_type type) 
+                [&](fundamental_type type) { write_fundamental(type); },
+                [&](metadata_type const& type) 
             { 
-                switch (type)
+                switch (type.category)
                 {
-                case fundamental_type::Boolean:
-                    w.write("bool");
+                case category::enum_type:
+                    if (is_flags_enum(type.type))
+                    {
+                        write_fundamental(fundamental_type::UInt32);
+                    }
+                    else
+                    {
+                        write_fundamental(fundamental_type::Int32);
+                    }
                     break;
-                case fundamental_type::Char:
-                    w.write("char16_t");
-                    break;
-                case fundamental_type::Int8:
-                    w.write("int8_t");
-                    break;
-                case fundamental_type::UInt8:
-                    w.write("uint8_t");
-                    break;
-                case fundamental_type::Int16:
-                    w.write("int16_t");
-                    break;
-                case fundamental_type::UInt16:
-                    w.write("uint16_t");
-                    break;
-                case fundamental_type::Int32:
-                    w.write("int32_t");
-                    break;
-                case fundamental_type::UInt32:
-                    w.write("uint32_t");
-                    break;
-                case fundamental_type::Int64:
-                    w.write("int64_t");
-                    break;
-                case fundamental_type::UInt64:
-                    w.write("uint64_t");
-                    break;
-                case fundamental_type::Float:
-                    w.write("float");
-                    break;
-                case fundamental_type::Double:
-                    w.write("double");
-                    break;
-                case fundamental_type::String:
-                    w.write("winrt::hstring");
+                case category::struct_type:
+                    w.write("PyObject*");
                     break;
                 default:
-                    throw_invalid("invalid fundamental type");
+                    throw_invalid("invalid struct field type");
                 }
             },
-                [&](metadata_type const& type) { w.write("PyObject*"); },
                 [&](generic_type_instance const& gti)
             {
                 XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
@@ -1080,58 +1102,60 @@ if (!return_value)
 
     void write_struct_field_format(writer& w, Field const& field)
     {
+        auto write_fundamental = [&](fundamental_type type)
+        {
+            switch (type)
+            {
+            case fundamental_type::Boolean:
+                w.write("p");
+                break;
+                // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
+            case fundamental_type::Char:
+                w.write("u1");
+                break;
+            case fundamental_type::Int8:
+                w.write("y1");
+                break;
+            case fundamental_type::UInt8:
+                w.write("y1");
+                break;
+            case fundamental_type::Int16:
+                w.write("h");
+                break;
+            case fundamental_type::UInt16:
+                w.write("H");
+                break;
+            case fundamental_type::Int32:
+                w.write("i");
+                break;
+            case fundamental_type::UInt32:
+                w.write("I");
+                break;
+            case fundamental_type::Int64:
+                w.write("L");
+                break;
+            case fundamental_type::UInt64:
+                w.write("K");
+                break;
+            case fundamental_type::Float:
+                w.write("f");
+                break;
+            case fundamental_type::Double:
+                w.write("d");
+                break;
+                // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
+            case fundamental_type::String:
+                w.write("u");
+                break;
+            default:
+                throw_invalid("invalid fundamental type");
+            }
+        };
+
         auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
         {
             call(type,
-                [&](fundamental_type type) 
-            { 
-                switch (type)
-                {
-                case fundamental_type::Boolean:
-                    w.write("p");
-                    break;
-                // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
-                case fundamental_type::Char:
-                    w.write("u1");
-                    break;
-                case fundamental_type::Int8:
-                    w.write("y1");
-                    break;
-                case fundamental_type::UInt8:
-                    w.write("y1");
-                    break;
-                case fundamental_type::Int16:
-                    w.write("h");
-                    break;
-                case fundamental_type::UInt16:
-                    w.write("H");
-                    break;
-                case fundamental_type::Int32:
-                    w.write("i");
-                    break;
-                case fundamental_type::UInt32:
-                    w.write("I");
-                    break;
-                case fundamental_type::Int64:
-                    w.write("L");
-                    break;
-                case fundamental_type::UInt64:
-                    w.write("K");
-                    break;
-                case fundamental_type::Float:
-                    w.write("f");
-                    break;
-                case fundamental_type::Double:
-                    w.write("d");
-                    break;
-                // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
-                case fundamental_type::String:
-                    w.write("u");
-                    break;
-                default:
-                    throw_invalid("invalid fundamental type");
-                }
-            },
+                [&](fundamental_type type) { write_fundamental(type); },
                 [&](metadata_type const& type)
             {
                 switch (type.category)
@@ -1139,13 +1163,11 @@ if (!return_value)
                 case category::enum_type:
                     if (is_flags_enum(type.type))
                     {
-                        // treat as UInt32
-                        w.write("I");
+                        write_fundamental(fundamental_type::UInt32);
                     }
                     else
                     {
-                        // treat as Int32
-                        w.write("i");
+                        write_fundamental(fundamental_type::Int32);
                     }
                     break;
                 case category::struct_type:
