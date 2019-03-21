@@ -76,8 +76,6 @@ namespace xlang
             return;
         }
 
-        // TODO: if has feature attribute then add WIL feature macro ifdef
-
         if (settings.component_opt)
         {
             auto format = R"(void* winrt_make_%();
