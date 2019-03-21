@@ -71,102 +71,6 @@ namespace xlang
         return get_category(type) == category::class_type && type.Flags().Abstract();
     }
 
-    template <typename T>
-    struct signature_handler_base
-    {
-        void handle_class(TypeDef const& /*type*/) { throw_invalid("handle_class not implemented"); }
-        void handle_delegate(TypeDef const& /*type*/) { throw_invalid("handle_delegate not implemented"); }
-        void handle_guid(TypeRef const& /*type*/) { throw_invalid("handle_guid not implemented"); }
-        void handle_interface(TypeDef const& /*type*/) { throw_invalid("handle_interface not implemented"); }
-        void handle_struct(TypeDef const& /*type*/) { throw_invalid("handle_struct not implemented"); }
-
-        void handle_enum(TypeDef const& type)
-        {
-            if (is_flags_enum(type))
-            {
-                static_cast<T*>(this)->handle(ElementType::U4);
-            }
-            else
-            {
-                static_cast<T*>(this)->handle(ElementType::I4);
-            }
-        }
-
-        void handle(TypeRef const& type)
-        {
-            auto ns = type.TypeNamespace();
-            auto name = type.TypeName();
-
-            if (name == "Guid" && ns == "System")
-            {
-                static_cast<T*>(this)->handle_guid(type);
-            }
-            else
-            {
-                static_cast<T*>(this)->handle(find_required(type));
-            }
-        }
-
-        void handle(TypeDef const& type)
-        {
-            switch (get_category(type))
-            {
-            case category::class_type:
-                static_cast<T*>(this)->handle_class(type);
-                break;
-            case category::delegate_type:
-                static_cast<T*>(this)->handle_delegate(type);
-                break;
-            case category::interface_type:
-                static_cast<T*>(this)->handle_interface(type);
-                break;
-            case category::enum_type:
-                static_cast<T*>(this)->handle_enum(type);
-                break;
-            case category::struct_type:
-                static_cast<T*>(this)->handle_struct(type);
-                break;
-            }
-        }
-
-        void handle(coded_index<TypeDefOrRef> const& type)
-        {
-            switch (type.type())
-            {
-            case TypeDefOrRef::TypeDef:
-                static_cast<T*>(this)->handle(type.TypeDef());
-                break;
-
-            case TypeDefOrRef::TypeRef:
-                static_cast<T*>(this)->handle(type.TypeRef());
-                break;
-
-            case TypeDefOrRef::TypeSpec:
-                static_cast<T*>(this)->handle(type.TypeSpec().Signature().GenericTypeInst());
-                break;
-            }
-        }
-
-        void handle(GenericTypeInstSig const& type)
-        {
-            handle(type.GenericType());
-
-            for (auto&& arg : type.GenericArgs())
-            {
-                handle(arg);
-            }
-        }
-
-        void handle(ElementType /*type*/) { throw_invalid("handle(ElementType) not implemented"); }
-
-        void handle(GenericTypeIndex /*var*/) { throw_invalid("handle(GenericTypeIndex) not implemented"); }
-
-        void handle(TypeSig const& signature)
-        {
-            call(signature.Type(), [this](auto&& type) { static_cast<T*>(this)->handle(type); });
-        }
-    };
-
     enum class fundamental_type
     {
         Boolean,
@@ -181,7 +85,7 @@ namespace xlang
         UInt64,
         Float,
         Double,
-        String = 0x0e,
+        String,
     };
 
     struct object_type {};

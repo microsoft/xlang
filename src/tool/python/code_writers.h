@@ -1001,20 +1001,69 @@ if (!return_value)
 
     void write_struct_field_var_type(writer& w, Field const& field)
     {
-        struct struct_field_type : public signature_handler_base<struct_field_type>
+        auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
         {
-            std::string field_type{};
+            call(type,
+                [&](fundamental_type type) 
+            { 
+                switch (type)
+                {
+                case fundamental_type::Boolean:
+                    w.write("bool");
+                    break;
+                case fundamental_type::Char:
+                    w.write("char16_t");
+                    break;
+                case fundamental_type::Int8:
+                    w.write("int8_t");
+                    break;
+                case fundamental_type::UInt8:
+                    w.write("uint8_t");
+                    break;
+                case fundamental_type::Int16:
+                    w.write("int16_t");
+                    break;
+                case fundamental_type::UInt16:
+                    w.write("uint16_t");
+                    break;
+                case fundamental_type::Int32:
+                    w.write("int32_t");
+                    break;
+                case fundamental_type::UInt32:
+                    w.write("uint32_t");
+                    break;
+                case fundamental_type::Int64:
+                    w.write("int64_t");
+                    break;
+                case fundamental_type::UInt64:
+                    w.write("uint64_t");
+                    break;
+                case fundamental_type::Float:
+                    w.write("float");
+                    break;
+                case fundamental_type::Double:
+                    w.write("double");
+                    break;
+                case fundamental_type::String:
+                    w.write("winrt::hstring");
+                    break;
+                default:
+                    throw_invalid("invalid fundamental type");
+                }
+            },
+                [&](metadata_type const& type) { w.write("PyObject*"); },
+                [&](generic_type_instance const& gti)
+            {
+                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
+                    && (gti.generic_type.type.TypeName() == "IReference`1")
+                    && gti.generic_args.size() == 1);
 
-            using signature_handler_base<struct_field_type>::handle;
-
-            void handle(GenericTypeInstSig const& type) { handle(get_ireference_type(type)); }
-            void handle_struct(TypeDef const& /*type*/) { field_type = "PyObject*"; }
-            void handle(ElementType type) { field_type = writer::get_cpp_type(type); }
+                lambda(gti.generic_args[0], lambda);
+            },
+                [](auto) {throw_invalid("invalid struct field type"); });
         };
 
-        struct_field_type sft{};
-        sft.handle(field.Signature().Type());
-        w.write(sft.field_type);
+        write_impl(handle_signature(field.Signature().Type()), write_impl);
     }
     
     void write_struct_field_keyword(writer& w, Field const& field)
@@ -1024,72 +1073,94 @@ if (!return_value)
 
     void write_struct_field_format(writer& w, Field const& field)
     {
-        struct struct_format_field : public signature_handler_base<struct_format_field>
+        auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
         {
-            using signature_handler_base<struct_format_field>::handle;
-
-            std::string_view format_string{};
-
-            void handle_struct(TypeDef const& /*type*/) { format_string = "O"; }
-            //TODO: make IReference fields optional
-            void handle(GenericTypeInstSig const& type) { handle(get_ireference_type(type)); }
-
-            void handle(ElementType type)
-            {
+            call(type,
+                [&](fundamental_type type) 
+            { 
                 switch (type)
                 {
-                case ElementType::Boolean:
-                    format_string = "p";
+                case fundamental_type::Boolean:
+                    w.write("p");
                     break;
-                    // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
-                case ElementType::Char:
-                    format_string = "u1";
+                // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
+                case fundamental_type::Char:
+                    w.write("u1");
                     break;
-                case ElementType::I1:
-                    format_string = "y1";
+                case fundamental_type::Int8:
+                    w.write("y1");
                     break;
-                case ElementType::U1:
-                    format_string = "y1";
+                case fundamental_type::UInt8:
+                    w.write("y1");
                     break;
-                case ElementType::I2:
-                    format_string = "h";
+                case fundamental_type::Int16:
+                    w.write("h");
                     break;
-                case ElementType::U2:
-                    format_string = "H";
+                case fundamental_type::UInt16:
+                    w.write("H");
                     break;
-                case ElementType::I4:
-                    format_string = "i";
+                case fundamental_type::Int32:
+                    w.write("i");
                     break;
-                case ElementType::U4:
-                    format_string = "I";
+                case fundamental_type::UInt32:
+                    w.write("I");
                     break;
-                case ElementType::I8:
-                    format_string = "L";
+                case fundamental_type::Int64:
+                    w.write("L");
                     break;
-                case ElementType::U8:
-                    format_string = "K";
+                case fundamental_type::UInt64:
+                    w.write("K");
                     break;
-                case ElementType::R4:
-                    format_string = "f";
+                case fundamental_type::Float:
+                    w.write("f");
                     break;
-                case ElementType::R8:
-                    format_string = "d";
+                case fundamental_type::Double:
+                    w.write("d");
                     break;
-                    // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
-                case ElementType::String:
-                    format_string = "u";
+                // TODO: 'u' format string was deprecated in Python 3.3. Need to move to a supported construct
+                case fundamental_type::String:
+                    w.write("u");
                     break;
-                case ElementType::Object:
-                    throw_invalid("structs cannot contain ElementType::Object");
                 default:
-                    throw_invalid("write_struct_field_format element type not impl");
+                    throw_invalid("invalid fundamental type");
                 }
-            }
+            },
+                [&](metadata_type const& type)
+            {
+                switch (type.category)
+                {
+                case category::enum_type:
+                    if (is_flags_enum(type.type))
+                    {
+                        // treat as UInt32
+                        w.write("I");
+                    }
+                    else
+                    {
+                        // treat as Int32
+                        w.write("i");
+                    }
+                    break;
+                case category::struct_type:
+                    w.write("O");
+                    break;
+                default:
+                    throw_invalid("invalid struct field type");
+                }
+            },
+                [&](generic_type_instance const& gti)
+            {
+                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
+                    && (gti.generic_type.type.TypeName() == "IReference`1")
+                    && gti.generic_args.size() == 1);
+
+                //TODO: make IReference fields optional
+                lambda(gti.generic_args[0], lambda);
+            },
+                [](auto) {throw_invalid("invalid struct field type"); });
         };
 
-        struct_format_field field_format{};
-        field_format.handle(field.Signature().Type());
-        w.write(field_format.format_string);
+        write_impl(handle_signature(field.Signature().Type()), write_impl);
     }
 
     void write_struct_field_parameter(writer& w, Field const& field)
@@ -1099,58 +1170,36 @@ if (!return_value)
 
     void write_struct_field_initalizer(writer& w, Field const& field)
     {
-        struct struct_field_initializer : public signature_handler_base<struct_field_initializer>
+        auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
         {
-            using signature_handler_base<struct_field_initializer>::handle;
-    
-            struct_field_initializer(writer& wr, std::string_view fn) : w(wr), field_name(fn) {}
-    
-            std::string_view field_name;
-            writer& w;
-    
-            void handle_enum(TypeDef const& type)
+            call(type,
+                [&](fundamental_type) { w.write("_%", field.Name()); },
+                [&](metadata_type const& type)
             {
-                w.write("static_cast<%>(_%)", type, field_name);
-            }
-    
-            void handle_struct(TypeDef const& type)
+                switch (type.category)
+                {
+                case category::enum_type:
+                    w.write("static_cast<%>(_%)", type.type, field.Name());
+                    break;
+                case category::struct_type:
+                    w.write("py::converter<%>::convert_to(_%)", type.type, field.Name());
+                    break;
+                default:
+                    throw_invalid("invalid struct field type");
+                }
+            },
+                [&](generic_type_instance const& gti)
             {
-                w.write("py::converter<%>::convert_to(_%)", type, field_name);
-            }
-    
-            void handle(GenericTypeInstSig const& type)
-            {
-                handle(get_ireference_type(type));
-            }
-    
-            void handle(ElementType)
-            {
-                w.write("_%", field_name);
-            }
+                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
+                    && (gti.generic_type.type.TypeName() == "IReference`1")
+                    && gti.generic_args.size() == 1);
+
+                lambda(gti.generic_args[0], lambda);
+            },
+                [](auto) {throw_invalid("invalid struct field type"); });
         };
-    
-        struct_field_initializer initializer{ w, field.Name() };
-        initializer.handle(field.Signature().Type());
 
-
-        // TODO: make recursive lambda to handle GenericTypeInstSig/get_ireference_type branch
-        //call(handle_signature(field.Signature().Type()),
-        //    [&](fundamental_type) { w.write("_%", field.Name()); },
-        //    [&](metadata_type const& type)
-        //{
-        //    switch (type.category)
-        //    {
-        //    case category::enum_type:
-        //        w.write("static_cast<%>(_%)", type, field.Name());
-        //        break;
-        //    case category::struct_type:
-        //        w.write("py::converter<%>::convert_to(_%)", type, field.Name());
-        //        break;
-        //    default:
-        //        throw_invalid("invalid struct field type");
-        //    }
-        //},
-        //    [](auto) {throw_invalid("invalid struct field type"); });
+        write_impl(handle_signature(field.Signature().Type()), write_impl);
     }
 
     void write_struct_constructor(writer& w, TypeDef const& type)
