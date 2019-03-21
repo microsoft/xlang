@@ -24,7 +24,7 @@ namespace winrt::impl
             return nullptr;
         }
 
-        void* result;
+        void* result{};
         check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
         return wrap_as_result<To>(result);
     }
