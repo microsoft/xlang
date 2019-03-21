@@ -1313,11 +1313,12 @@ return py::trycatch_invoker([=]() -> PyObject* {
             {
                 auto format = R"(
 return py::trycatch_invoker([=]() -> PyObject* {
-    % return_value{ % };
+    % return_value{ 
+        % };
     return py::convert(return_value);
 });
 )";
-                w.write(format, type, bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
+                w.write(format, type, bind_list<write_struct_field_initalizer>(", \n        ", type.FieldList()));
             }
         }
         w.write("}\n");
