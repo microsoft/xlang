@@ -229,6 +229,7 @@
     <ClCompile Include="noexcept.cpp" />
     <ClCompile Include="out_params.cpp" />
     <ClCompile Include="out_params_abi.cpp" />
+    <ClCompile Include="out_params_bad.cpp" />
     <ClCompile Include="parent_includes.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

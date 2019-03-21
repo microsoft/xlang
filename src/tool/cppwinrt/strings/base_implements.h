@@ -51,7 +51,7 @@ namespace winrt::impl
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>> {};
+    struct is_interface : std::is_base_of<Windows::Foundation::IInspectable, T> {};
 
 #endif
 
