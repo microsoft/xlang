@@ -681,30 +681,38 @@ namespace xlang
         }
     }
 
-    TypeSig get_ireference_type(GenericTypeInstSig const& type)
+    signature_handler_type handle_struct_field(Field const& field, bool convert_enum_to_underlying)
     {
-        TypeDef td{ };
-
-        switch (type.GenericType().type())
+        return std::visit(impl::overloaded
         {
-        case TypeDefOrRef::TypeDef:
-            td = type.GenericType().TypeDef();
-            break;
-        case TypeDefOrRef::TypeRef:
-            td = find_required(type.GenericType().TypeRef());
-            break;
-        default:
-            throw_invalid("expecting TypeDef or TypeRef");
-        }
+            [&](metadata_type const& type) -> signature_handler_type
+            {
+                XLANG_ASSERT(type.category == category::enum_type || type.category == category::struct_type);
 
-        if ((td.TypeNamespace() != "Windows.Foundation") || (td.TypeName() != "IReference`1"))
-        {
-            throw_invalid("Expecting Windows.Foundation.IReference");
-        }
+                if ((type.category == category::enum_type) && convert_enum_to_underlying)
+                {
+                    if (is_flags_enum(type.type))
+                    {
+                        return fundamental_type::UInt32;
+                    }
+                    else
+                    {
+                        return fundamental_type::Int32;
+                    }
+                }
 
-        XLANG_ASSERT(type.GenericArgCount() == 1);
+                return type;
+            },
+            [](generic_type_instance const& gti) -> signature_handler_type
+            {
+                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
+                    && (gti.generic_type.type.TypeName() == "IReference`1")
+                    && gti.generic_args.size() == 1);
 
-        return *(type.GenericArgs().first);
+                return gti.generic_args[0];
+            },
+            [](auto v) -> signature_handler_type { return v; }
+        }, handle_signature(field.Signature().Type()));
     }
 
     bool is_customized_struct(TypeDef const& type)

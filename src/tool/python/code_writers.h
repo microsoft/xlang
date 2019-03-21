@@ -94,7 +94,7 @@ namespace xlang
         }
         else
         {
-           w.write("%", type);
+            w.write("%", type);
         }
 
     }
@@ -136,7 +136,7 @@ struct winrt_type<%>
     {
         if (is_ptype(type))
         {
-            w.write("py::proj::%::@", bind<write_type_namespace>(type) , type.TypeName());
+            w.write("py::proj::%::@", bind<write_type_namespace>(type), type.TypeName());
         }
         else
         {
@@ -149,8 +149,8 @@ struct winrt_type<%>
     {
         if (is_exclusive_to(type)) return;
 
-        w.write("using @ = py::%<%>;\n", type.TypeName(), 
-            bind<write_python_wrapper_type>(type), 
+        w.write("using @ = py::%<%>;\n", type.TypeName(),
+            bind<write_python_wrapper_type>(type),
             bind<write_python_wrapper_template_type>(type));
     }
 
@@ -364,9 +364,9 @@ static void _dealloc_@(%* self)
 
                 for (auto&& static_method : static_type.MethodList())
                 {
-                    w.write("// Static %.%.%\n", 
-                        static_type.TypeNamespace(), 
-                        static_type.TypeName(), 
+                    w.write("// Static %.%.%\n",
+                        static_type.TypeNamespace(),
+                        static_type.TypeName(),
                         bind<write_method_name>(static_method));
                 }
             }
@@ -464,7 +464,7 @@ static void _dealloc_@(%* self)
             }
         },
             [&](generic_type_instance const&) { w.write("nullptr"); },
-            [](auto) { });
+            [](auto) {});
     }
 
     void write_convert_to_params(writer& w, MethodDef const& method, int sequence)
@@ -489,40 +489,40 @@ static void _dealloc_@(%* self)
         switch (get_param_category(param))
         {
         case param_category::in:
-            w.write("auto % = py::convert_to<%>(%);\n", 
-                bind<write_param_name>(param), 
-                param.second->Type(), 
+            w.write("auto % = py::convert_to<%>(%);\n",
+                bind<write_param_name>(param),
+                param.second->Type(),
                 bind<write_convert_to_params>(method, sequence));
             break;
         case param_category::out:
             w.write("% % { % };\n", param.second->Type(), bind<write_param_name>(param), bind<write_out_param_init>(param));
             break;
         case param_category::pass_array:
-            w.write("auto _% = py::convert_to<winrt::com_array<%>>(%);\n", 
+            w.write("auto _% = py::convert_to<winrt::com_array<%>>(%);\n",
                 bind<write_param_name>(param),
-                param.second->Type(), 
+                param.second->Type(),
                 bind<write_convert_to_params>(method, sequence));
-            w.write("auto % = winrt::array_view<const %>(_%.data(), _%.data() + _%.size());\n", 
+            w.write("auto % = winrt::array_view<const %>(_%.data(), _%.data() + _%.size());\n",
                 bind<write_param_name>(param),
-                param.second->Type(), 
-                bind<write_param_name>(param), 
-                bind<write_param_name>(param), 
+                param.second->Type(),
+                bind<write_param_name>(param),
+                bind<write_param_name>(param),
                 bind<write_param_name>(param));
             break;
         case param_category::fill_array:
-            w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(%);\n", 
-                bind<write_param_name>(param), 
-                param.second->Type(), 
+            w.write("auto %_count = py::convert_to<winrt::com_array<%>::size_type>(%);\n",
+                bind<write_param_name>(param),
+                param.second->Type(),
                 bind<write_convert_to_params>(method, sequence));
-            w.write("winrt::com_array<%> % ( %_count, py::empty_instance<%>::get() );\n", 
-                param.second->Type(), 
-                bind<write_param_name>(param), 
-                bind<write_param_name>(param), 
+            w.write("winrt::com_array<%> % ( %_count, py::empty_instance<%>::get() );\n",
+                param.second->Type(),
+                bind<write_param_name>(param),
+                bind<write_param_name>(param),
                 param.second->Type());
             break;
         case param_category::receive_array:
-            w.write("winrt::com_array<%> % { };\n", 
-                param.second->Type(), 
+            w.write("winrt::com_array<%> % { };\n",
+                param.second->Type(),
                 bind<write_param_name>(param));
             break;
         default:
@@ -620,17 +620,17 @@ if (!out_return_value)
             w.write(format);
             return_values.push_back("out_return_value");
         }
-            
+
         for (auto&& param : signature.params())
         {
             if (!is_out_param(param))
             {
                 continue;
             }
-            
+
             auto sequence = param.first.Sequence() - 1;
             auto out_param = w.write_temp("out%", sequence);
-            
+
             auto format = R"(py::pyobj_handle %{ py::convert(param%) };
 if (!%) 
 {
@@ -908,8 +908,8 @@ struct delegate_python_type<%%>
 };
 
 )";
-        w.write(format, 
-            bind_list<write_pinterface_type_arg>(", ", type.GenericParam()), 
+        w.write(format,
+            bind_list<write_pinterface_type_arg>(", ", type.GenericParam()),
             type,
             bind<write_template_args>(type),
             bind<write_pyimpl_type>(type),
@@ -924,23 +924,23 @@ struct delegate_python_type<%%>
     void write_delegate_callable_wrapper(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
-    
+
         auto invoke = get_delegate_invoke(type);
         method_signature signature{ invoke };
-    
+
         if (is_ptype(type))
         {
             w.write("\ntemplate <%>", bind_list<write_pinterface_type_arg>(", ", type.GenericParam()));
         }
-    
+
         w.write("\nstruct @\n{\n", type.TypeName());
         {
             writer::indent_guard g{ w };
-    
+
             w.write("static %% get(PyObject* callable)\n{\n", type, bind<write_template_args>(type));
             {
                 writer::indent_guard gg{ w };
-    
+
                 {
                     auto format = R"(py::delegate_callable _delegate{ callable };
     
@@ -951,19 +951,19 @@ return [delegate = std::move(_delegate)](%)
                 }
                 {
                     writer::indent_guard ggg{ w };
-    
+
                     w.write("winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };\n\n");
-    
+
                     std::vector<std::string> tuple_params{};
                     for (auto&& p : signature.params())
                     {
                         auto param_name = w.write_temp("%", bind<write_param_name>(p));
                         auto py_param_name = "py_"s + param_name;
-    
+
                         w.write("py::pyobj_handle %{ py::convert(%) };\n", py_param_name, param_name);
                         tuple_params.push_back(py_param_name);
                     }
-    
+
                     if (tuple_params.size() > 0)
                     {
                         w.write("\npy::pyobj_handle args{ % };\n", bind<write_py_tuple_pack>(tuple_params));
@@ -972,7 +972,7 @@ return [delegate = std::move(_delegate)](%)
                     {
                         w.write("py::pyobj_handle args{ nullptr };\n");
                     }
-    
+
                     w.write(R"(py::pyobj_handle return_value{ PyObject_CallObject(delegate.callable(), args.get()) };
 
 if (!return_value) 
@@ -987,7 +987,7 @@ if (!return_value)
                         w.write("\nreturn py::convert<%>(return_value.get());\n", signature.return_signature().Type());
                     }
                 }
-    
+
                 w.write("};\n");
             }
             w.write("};\n");
@@ -1002,13 +1002,14 @@ if (!return_value)
             writer::indent_guard g{ w };
             w.write("static PyObject* convert(% instance) noexcept;\nstatic % convert_to(PyObject* obj);\n", type, type);
         }
-    
+
         w.write("};\n\n");
     }
 
     void write_struct_field_var_type(writer& w, Field const& field)
     {
-        auto write_fundamental = [&](fundamental_type type)
+        call(handle_struct_field(field, true),
+            [&](fundamental_type type)
         {
             switch (type)
             {
@@ -1054,47 +1055,15 @@ if (!return_value)
             default:
                 throw_invalid("invalid fundamental type");
             }
-        };
-
-        auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
+        },
+            [&](metadata_type const& type)
         {
-            call(type,
-                [&](fundamental_type type) { write_fundamental(type); },
-                [&](metadata_type const& type) 
-            { 
-                switch (type.category)
-                {
-                case category::enum_type:
-                    if (is_flags_enum(type.type))
-                    {
-                        write_fundamental(fundamental_type::UInt32);
-                    }
-                    else
-                    {
-                        write_fundamental(fundamental_type::Int32);
-                    }
-                    break;
-                case category::struct_type:
-                    w.write("py::pyobj_handle");
-                    break;
-                default:
-                    throw_invalid("invalid struct field type");
-                }
-            },
-                [&](generic_type_instance const& gti)
-            {
-                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
-                    && (gti.generic_type.type.TypeName() == "IReference`1")
-                    && gti.generic_args.size() == 1);
-
-                lambda(gti.generic_args[0], lambda);
-            },
-                [](auto) {throw_invalid("invalid struct field type"); });
-        };
-
-        write_impl(handle_signature(field.Signature().Type()), write_impl);
+            XLANG_ASSERT(type.category == category::struct_type);
+            w.write("py::pyobj_handle");
+        },
+            [](auto) { throw_invalid("invalid struct field type"); });
     }
-    
+
     void write_struct_field_keyword(writer& w, Field const& field)
     {
         w.write("\"%\", ", bind<write_lower_snake_case>(field.Name()));
@@ -1102,7 +1071,8 @@ if (!return_value)
 
     void write_struct_field_format(writer& w, Field const& field)
     {
-        auto write_fundamental = [&](fundamental_type type)
+        call(handle_struct_field(field, true),
+            [&](fundamental_type type)
         {
             switch (type)
             {
@@ -1150,100 +1120,57 @@ if (!return_value)
             default:
                 throw_invalid("invalid fundamental type");
             }
-        };
-
-        auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
-        {
-            call(type,
-                [&](fundamental_type type) { write_fundamental(type); },
-                [&](metadata_type const& type)
-            {
-                switch (type.category)
-                {
-                case category::enum_type:
-                    if (is_flags_enum(type.type))
-                    {
-                        write_fundamental(fundamental_type::UInt32);
-                    }
-                    else
-                    {
-                        write_fundamental(fundamental_type::Int32);
-                    }
-                    break;
-                case category::struct_type:
-                    w.write("O");
-                    break;
-                default:
-                    throw_invalid("invalid struct field type");
-                }
-            },
-                [&](generic_type_instance const& gti)
-            {
-                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
-                    && (gti.generic_type.type.TypeName() == "IReference`1")
-                    && gti.generic_args.size() == 1);
-
-                //TODO: make IReference fields optional
-                lambda(gti.generic_args[0], lambda);
-            },
-                [](auto) {throw_invalid("invalid struct field type"); });
-        };
-
-        write_impl(handle_signature(field.Signature().Type()), write_impl);
-    }
-
-    void write_struct_field_parameter(writer& w, Field const& field)
-    {
-        auto write_default = [&]() { w.write(", &_%", field.Name()); };
-
-        call(handle_signature(field.Signature().Type()),
+        },
             [&](metadata_type const& type)
         {
-            switch (type.category)
-            {
-            case category::struct_type:
-                w.write(", _%.put()", field.Name());
-                break;
-            default:
-                write_default();
-            }
+            XLANG_ASSERT(type.category == category::struct_type);
+            w.write("O");
         },
-            [&](auto) { write_default(); }
-        );
+            [](auto) { throw_invalid("invalid struct field type"); });
+    }
+
+    void write_struct_field_parse_parameter(writer& w, Field const& field)
+    {
+        call(handle_struct_field(field, true),
+            [&](fundamental_type) { w.write(", &_%", field.Name()); },
+            [&](metadata_type const& type)
+        {
+            XLANG_ASSERT(type.category == category::struct_type);
+            w.write(", _%.put()", field.Name());
+        },
+            [](auto) { throw_invalid("invalid struct field type"); });
     }
 
     void write_struct_field_initalizer(writer& w, Field const& field)
     {
-        auto write_impl = [&](signature_handler_type const& type, auto const& lambda) -> void
+        call(handle_struct_field(field, false),
+            [&](fundamental_type) { w.write("_%", field.Name()); },
+            [&](metadata_type const& type)
         {
-            call(type,
-                [&](fundamental_type) { w.write("_%", field.Name()); },
-                [&](metadata_type const& type)
+            XLANG_ASSERT((type.category == category::struct_type) || (type.category == category::enum_type));
+            switch (type.category)
             {
-                switch (type.category)
-                {
-                case category::enum_type:
-                    w.write("static_cast<%>(_%)", type.type, field.Name());
-                    break;
-                case category::struct_type:
-                    w.write("py::converter<%>::convert_to(_%.get())", type.type, field.Name());
-                    break;
-                default:
-                    throw_invalid("invalid struct field type");
-                }
-            },
-                [&](generic_type_instance const& gti)
-            {
-                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
-                    && (gti.generic_type.type.TypeName() == "IReference`1")
-                    && gti.generic_args.size() == 1);
+            case category::enum_type:
+                w.write("static_cast<%>(_%)", type.type, field.Name());
+                break;
+            case category::struct_type:
+                w.write("py::converter<%>::convert_to(_%.get())", type.type, field.Name());
+                break;
+            }
+        },
+            [](auto) { throw_invalid("invalid struct field type"); });
+    }
 
-                lambda(gti.generic_args[0], lambda);
-            },
-                [](auto) {throw_invalid("invalid struct field type"); });
-        };
-
-        write_impl(handle_signature(field.Signature().Type()), write_impl);
+    void write_struct_field_ref_capture(writer& w, Field const& field)
+    {
+        call(handle_struct_field(field, true),
+            [&](fundamental_type) { },
+            [&](metadata_type const& type)
+        {
+            XLANG_ASSERT(type.category == category::struct_type);
+            w.write(", &_%", field.Name());
+        },
+            [](auto) { throw_invalid("invalid struct field type"); });
     }
 
     void write_struct_constructor(writer& w, TypeDef const& type)
@@ -1292,10 +1219,10 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%)) {
     return nullptr;
 }
 )";
-                w.write(format, 
+                w.write(format,
                     bind_each<write_struct_field_keyword>(type.FieldList()),
                     bind_each<write_struct_field_format>(type.FieldList()),
-                    bind_each<write_struct_field_parameter>(type.FieldList()));
+                    bind_each<write_struct_field_parse_parameter>(type.FieldList()));
             }
 
             if (has_custom_conversion(type))
@@ -1312,13 +1239,16 @@ return py::trycatch_invoker([=]() -> PyObject* {
             else
             {
                 auto format = R"(
-return py::trycatch_invoker([=]() -> PyObject* {
+return py::trycatch_invoker([=%]() -> PyObject* {
     % return_value{ 
         % };
     return py::convert(return_value);
 });
 )";
-                w.write(format, type, bind_list<write_struct_field_initalizer>(", \n        ", type.FieldList()));
+                w.write(format,
+                    bind_each<write_struct_field_ref_capture>(type.FieldList()),
+                    type,
+                    bind_list<write_struct_field_initalizer>(", \n        ", type.FieldList()));
             }
         }
         w.write("}\n");
@@ -1438,11 +1368,11 @@ return py::trycatch_invoker([=]() -> PyObject* {
             w.write("return py::wrap_struct(instance, py::get_python_type<%>());\n", type);
         }
         w.write("}\n\n");
-    
+
         w.write("% py::converter<%>::convert_to(PyObject* obj)\n{\n", type, type);
         {
             writer::indent_guard g{ w };
-    
+
             auto format = R"(throw_if_pyobj_null(obj);
     
 if (Py_TYPE(obj) == py::get_python_type<%>())
@@ -1457,14 +1387,14 @@ if (!PyDict_Check(obj))
     
 )";
             w.write(format, type, type);
-    
+
             w.write("% return_value{};\n", type);
-    
+
             for (auto&& field : type.FieldList())
             {
                 w.write("\npy::pyobj_handle py_%{ PyDict_GetItemString(obj, \"%\") };\n", field.Name(), bind<write_lower_snake_case>(field.Name()));
                 w.write("if (!py_%) { throw winrt::hresult_invalid_argument(); }\n", field.Name());
-    
+
                 if (has_custom_conversion(type))
                 {
                     w.write("custom_set(return_value, converter<%>::convert_to(py_%.get()));\n", field.Signature().Type(), field.Name());
@@ -1474,17 +1404,17 @@ if (!PyDict_Check(obj))
                     w.write("return_value.% = converter<%>::convert_to(py_%.get());\n", bind<write_struct_field_name>(field), field.Signature().Type(), field.Name());
                 }
             }
-    
+
             w.write("\nreturn return_value;\n");
         }
         w.write("}\n");
     }
-    
+
 
     void write_struct(writer& w, TypeDef const& type)
     {
         auto guard{ w.push_generic_params(type.GenericParam()) };
-    
+
         w.write("\n// ----- % struct --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
         write_struct_convert_functions(w, type);
@@ -1552,9 +1482,9 @@ struct pinterface_python_type<%<%>>
 
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
-        w.write("\ntemplate<%>\nstruct @ : public py::proj::%::@\n{\n", 
-            bind_list<write_pinterface_type_arg>(", ", type.GenericParam()), 
-            type.TypeName(), 
+        w.write("\ntemplate<%>\nstruct @ : public py::proj::%::@\n{\n",
+            bind_list<write_pinterface_type_arg>(", ", type.GenericParam()),
+            type.TypeName(),
             bind<write_type_namespace>(type),
             type.TypeName());
 
@@ -1571,8 +1501,8 @@ struct pinterface_python_type<%<%>>
                 auto gguard{ w.push_generic_params(ii.type_arguments) };
                 for (auto&& method : ii.type.MethodList())
                 {
-                    w.write("\nPyObject* %(PyObject* %) override\n{\n", 
-                        method.Name(), 
+                    w.write("\nPyObject* %(PyObject* %) override\n{\n",
+                        method.Name(),
                         bind<write_args_param_name>(method));
                     write_method_body(w, type, method);
                     w.write("}\n");
