@@ -88,55 +88,38 @@ namespace xlang
         String,
     };
 
-    struct object_type {};
-
-    struct guid_type {};
-
-    struct metadata_type
-    {
-        category category;
-        TypeDef type;
-    };
-
     struct generic_type_instance;
+    struct object_type {};
+    struct guid_type {};
+    using type_definition = TypeDef;
+    using generic_type_index = GenericTypeIndex;
 
-    struct generic_type_index
-    {
-        uint32_t index;
-    };
-
-    using signature_handler_type = std::variant<
+    using type_semantics = std::variant<
         fundamental_type,
         object_type,
         guid_type,
-        metadata_type,
+        type_definition,
         generic_type_instance,
         generic_type_index>;
 
     struct generic_type_instance
     {
-        metadata_type generic_type;
-        std::vector<signature_handler_type> generic_args{};
+        type_definition generic_type;
+        std::vector<type_semantics> generic_args{};
     };
 
-    signature_handler_type handle_signature(TypeSig const& signature);
+    type_semantics get_type_semantics(TypeSig const& signature);
 
-    signature_handler_type handle_signature(GenericTypeInstSig const& type)
+    type_semantics get_type_semantics(GenericTypeInstSig const& type)
     {
         auto generic_type_helper = [&type]()
         {
             switch (type.GenericType().type())
             {
             case TypeDefOrRef::TypeDef:
-            {
-                auto type_def = type.GenericType().TypeDef();
-                return metadata_type{ get_category(type_def) , type_def };
-            }
+                return type.GenericType().TypeDef();
             case TypeDefOrRef::TypeRef:
-            {
-                auto type_def = find_required(type.GenericType().TypeRef());
-                return metadata_type{ get_category(type_def) , type_def };
-            }
+                return find_required(type.GenericType().TypeRef());
             }
 
             throw_invalid("invalid TypeDefOrRef value for GenericTypeInstSig.GenericType");
@@ -146,23 +129,18 @@ namespace xlang
 
         for (auto&& arg : type.GenericArgs())
         {
-            gti.generic_args.push_back(handle_signature(arg));
+            gti.generic_args.push_back(get_type_semantics(arg));
         }
 
         return gti;
     }
 
-    signature_handler_type handle_signature(TypeDef const& type)
-    {
-        return metadata_type{ get_category(type) , type };
-    }
-
-    signature_handler_type handle_signature(coded_index<TypeDefOrRef> const& type)
+    type_semantics get_type_semantics(coded_index<TypeDefOrRef> const& type)
     {
         switch (type.type())
         {
         case TypeDefOrRef::TypeDef:
-            return handle_signature(type.TypeDef());
+            return type.TypeDef();
         case TypeDefOrRef::TypeRef:
         {
             auto type_ref = type.TypeRef();
@@ -171,10 +149,10 @@ namespace xlang
                 return guid_type{};
             }
 
-            return handle_signature(find_required(type_ref));
+            return find_required(type_ref);
         }
         case TypeDefOrRef::TypeSpec:
-            return handle_signature(type.TypeSpec().Signature().GenericTypeInst());
+            return get_type_semantics(type.TypeSpec().Signature().GenericTypeInst());
         }
 
         throw_invalid("TypeDefOrRef not supported");
@@ -186,11 +164,11 @@ namespace xlang
         template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
     }
 
-    signature_handler_type handle_signature(TypeSig const& signature)
+    type_semantics get_type_semantics(TypeSig const& signature)
     {
         return std::visit(
             impl::overloaded{
-            [](ElementType type) -> signature_handler_type
+            [](ElementType type) -> type_semantics
         {
             switch (type)
             {
@@ -226,12 +204,12 @@ namespace xlang
 
             throw_invalid("element type not supported");
         },
-            [](coded_index<TypeDefOrRef> type) -> signature_handler_type
+            [](coded_index<TypeDefOrRef> type) -> type_semantics
         {
-            return handle_signature(type);
+            return get_type_semantics(type);
         },
-            [](GenericTypeIndex var) -> signature_handler_type { return generic_type_index{ var.index }; },
-            [](GenericTypeInstSig sig) -> signature_handler_type { return handle_signature(sig); }
+            [](GenericTypeIndex var) -> type_semantics { return generic_type_index{ var.index }; },
+            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); }
             }, signature.Type());
     }
 
@@ -400,19 +378,19 @@ namespace xlang
         return std::move(interfaces);
     }
 
-    TypeDef get_typedef(signature_handler_type const& sht)
+    TypeDef get_typedef(type_semantics const& sht)
     {
         return std::visit(
             impl::overloaded{
-                [](metadata_type mt) { return mt.type; },
-                [](generic_type_instance gti) { return gti.generic_type.type; },
+                [](type_definition type) { return type; },
+                [](generic_type_instance type_instance) { return type_instance.generic_type; },
                 [](auto) -> TypeDef { throw_invalid("type doesn't contain typedef"); }
             }, sht);
     };
 
     TypeDef get_typedef(coded_index<TypeDefOrRef> const& type)
     {
-        return get_typedef(handle_signature(type));
+        return get_typedef(get_type_semantics(type));
     };
 
     bool implements_interface(TypeDef const& type, std::string_view const& ns, std::string_view const& name)
@@ -681,17 +659,18 @@ namespace xlang
         }
     }
 
-    signature_handler_type handle_struct_field(Field const& field, bool convert_enum_to_underlying)
+    type_semantics get_struct_field_semantics(Field const& field, bool convert_enum_to_underlying)
     {
         return std::visit(impl::overloaded
         {
-            [&](metadata_type const& type) -> signature_handler_type
+            [&](type_definition const& type) -> type_semantics
             {
-                XLANG_ASSERT(type.category == category::enum_type || type.category == category::struct_type);
+                auto category = get_category(type);
+                XLANG_ASSERT(category == category::enum_type || category == category::struct_type);
 
-                if ((type.category == category::enum_type) && convert_enum_to_underlying)
+                if ((category == category::enum_type) && convert_enum_to_underlying)
                 {
-                    if (is_flags_enum(type.type))
+                    if (is_flags_enum(type))
                     {
                         return fundamental_type::UInt32;
                     }
@@ -703,16 +682,16 @@ namespace xlang
 
                 return type;
             },
-            [](generic_type_instance const& gti) -> signature_handler_type
+            [](generic_type_instance const& gti) -> type_semantics
             {
-                XLANG_ASSERT((gti.generic_type.type.TypeNamespace() == "Windows.Foundation")
-                    && (gti.generic_type.type.TypeName() == "IReference`1")
+                XLANG_ASSERT((gti.generic_type.TypeNamespace() == "Windows.Foundation")
+                    && (gti.generic_type.TypeName() == "IReference`1")
                     && gti.generic_args.size() == 1);
 
                 return gti.generic_args[0];
             },
-            [](auto v) -> signature_handler_type { return v; }
-        }, handle_signature(field.Signature().Type()));
+            [](auto v) -> type_semantics { return v; }
+        }, get_type_semantics(field.Signature().Type()));
     }
 
     bool is_customized_struct(TypeDef const& type)

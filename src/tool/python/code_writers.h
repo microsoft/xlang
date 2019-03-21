@@ -451,10 +451,10 @@ static void _dealloc_@(%* self)
 
     void write_out_param_init(writer& w, method_signature::param_t const& param)
     {
-        call(handle_signature(param.second->Type()),
-            [&](metadata_type const& type)
+        call(get_type_semantics(param.second->Type()),
+            [&](TypeDef const& type)
         {
-            switch (type.category)
+            switch (get_category(type))
             {
             case category::class_type:
             case category::interface_type:
@@ -1008,7 +1008,7 @@ if (!return_value)
 
     void write_struct_field_var_type(writer& w, Field const& field)
     {
-        call(handle_struct_field(field, true),
+        call(get_struct_field_semantics(field, true),
             [&](fundamental_type type)
         {
             switch (type)
@@ -1056,9 +1056,9 @@ if (!return_value)
                 throw_invalid("invalid fundamental type");
             }
         },
-            [&](metadata_type const& type)
+            [&](TypeDef const& type)
         {
-            XLANG_ASSERT(type.category == category::struct_type);
+            XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write("py::pyobj_handle");
         },
             [](auto) { throw_invalid("invalid struct field type"); });
@@ -1071,7 +1071,7 @@ if (!return_value)
 
     void write_struct_field_format(writer& w, Field const& field)
     {
-        call(handle_struct_field(field, true),
+        call(get_struct_field_semantics(field, true),
             [&](fundamental_type type)
         {
             switch (type)
@@ -1121,9 +1121,9 @@ if (!return_value)
                 throw_invalid("invalid fundamental type");
             }
         },
-            [&](metadata_type const& type)
+            [&](type_definition const& type)
         {
-            XLANG_ASSERT(type.category == category::struct_type);
+            XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write("O");
         },
             [](auto) { throw_invalid("invalid struct field type"); });
@@ -1131,11 +1131,11 @@ if (!return_value)
 
     void write_struct_field_parse_parameter(writer& w, Field const& field)
     {
-        call(handle_struct_field(field, true),
+        call(get_struct_field_semantics(field, true),
             [&](fundamental_type) { w.write(", &_%", field.Name()); },
-            [&](metadata_type const& type)
+            [&](type_definition const& type)
         {
-            XLANG_ASSERT(type.category == category::struct_type);
+            XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write(", _%.put()", field.Name());
         },
             [](auto) { throw_invalid("invalid struct field type"); });
@@ -1143,18 +1143,19 @@ if (!return_value)
 
     void write_struct_field_initalizer(writer& w, Field const& field)
     {
-        call(handle_struct_field(field, false),
+        call(get_struct_field_semantics(field, false),
             [&](fundamental_type) { w.write("_%", field.Name()); },
-            [&](metadata_type const& type)
+            [&](type_definition const& type)
         {
-            XLANG_ASSERT((type.category == category::struct_type) || (type.category == category::enum_type));
-            switch (type.category)
+            auto category = get_category(type);
+            XLANG_ASSERT((category == category::struct_type) || (category == category::enum_type));
+            switch (category)
             {
             case category::enum_type:
-                w.write("static_cast<%>(_%)", type.type, field.Name());
+                w.write("static_cast<%>(_%)", type, field.Name());
                 break;
             case category::struct_type:
-                w.write("py::converter<%>::convert_to(_%.get())", type.type, field.Name());
+                w.write("py::converter<%>::convert_to(_%.get())", type, field.Name());
                 break;
             }
         },
@@ -1163,11 +1164,11 @@ if (!return_value)
 
     void write_struct_field_ref_capture(writer& w, Field const& field)
     {
-        call(handle_struct_field(field, true),
+        call(get_struct_field_semantics(field, true),
             [&](fundamental_type) { },
-            [&](metadata_type const& type)
+            [&](TypeDef const& type)
         {
-            XLANG_ASSERT(type.category == category::struct_type);
+            XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write(", &_%", field.Name());
         },
             [](auto) { throw_invalid("invalid struct field type"); });

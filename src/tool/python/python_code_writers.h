@@ -367,19 +367,19 @@ def _instance(self):
 
     void write_return_value_convert(writer& w, std::string_view name, TypeSig const& signature)
     {
-        call(handle_signature(signature),
-            [&](metadata_type const& type)
+        call(get_type_semantics(signature),
+            [&](type_definition const& type)
         {
-            switch (type.category)
+            switch (get_category(type))
             {
             case category::class_type:
             case category::interface_type:
-                w.write("% = %(_instance=%)\n", name, type.type.TypeName(), name);
+                w.write("% = %(_instance=%)\n", name, type.TypeName(), name);
                 break;
             case category::enum_type:
                 break;
             default:
-                w.write("# % category not implemented % \n", name, type.type);
+                w.write("# % category not implemented % \n", name, type);
                 w.write("raise NotImplementedError\n");
             }
         },
@@ -430,17 +430,17 @@ def _instance(self):
             w.write("raise NotImplementedError\n");
             break;
         case param_category::in:
-            call(handle_signature(param.second->Type()),
-                [&](metadata_type const& type)
+            call(get_type_semantics(param.second->Type()),
+                [&](type_definition const& type)
             {
-                switch (type.category)
+                switch (get_category(type))
                 {
                 case category::class_type:
                 case category::interface_type:
                     w.write("_% = %._instance\n", name, arg_name);
                     break;
                 default:
-                    w.write("# % category not implemented % \n", name, type.type);
+                    w.write("# % category not implemented % \n", name, type);
                     w.write("raise NotImplementedError\n");
                     //w.write("_% = %\n", name, arg_name);
                 }
