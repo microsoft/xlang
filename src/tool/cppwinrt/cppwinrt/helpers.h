@@ -337,6 +337,18 @@ namespace xlang
         return result;
     }
 
+    static auto get_fastabi_interfaces(writer& w, TypeDef const& class_type)
+    {
+        std::vector<TypeDef> result;
+
+        for (auto&& [interface_name, info] : get_interfaces(w, class_type))
+        {
+
+        }
+
+        return result;
+    }
+
     struct factory_info
     {
         TypeDef type;
