@@ -1075,7 +1075,7 @@ if (!return_value)
                     }
                     break;
                 case category::struct_type:
-                    w.write("PyObject*");
+                    w.write("py::pyobj_handle");
                     break;
                 default:
                     throw_invalid("invalid struct field type");
@@ -1194,7 +1194,22 @@ if (!return_value)
 
     void write_struct_field_parameter(writer& w, Field const& field)
     {
-        w.write(", &_%", field.Name());
+        auto write_default = [&]() { w.write(", &_%", field.Name()); };
+
+        call(handle_signature(field.Signature().Type()),
+            [&](metadata_type const& type)
+        {
+            switch (type.category)
+            {
+            case category::struct_type:
+                w.write(", _%.put()", field.Name());
+                break;
+            default:
+                write_default();
+            }
+        },
+            [&](auto) { write_default(); }
+        );
     }
 
     void write_struct_field_initalizer(writer& w, Field const& field)
@@ -1211,7 +1226,7 @@ if (!return_value)
                     w.write("static_cast<%>(_%)", type.type, field.Name());
                     break;
                 case category::struct_type:
-                    w.write("py::converter<%>::convert_to(_%)", type.type, field.Name());
+                    w.write("py::converter<%>::convert_to(_%.get())", type.type, field.Name());
                     break;
                 default:
                     throw_invalid("invalid struct field type");
@@ -1446,16 +1461,16 @@ if (!PyDict_Check(obj))
     
             for (auto&& field : type.FieldList())
             {
-                w.write("\nPyObject* py_% = PyDict_GetItemString(obj, \"%\");\n", field.Name(), bind<write_lower_snake_case>(field.Name()));
+                w.write("\npy::pyobj_handle py_%{ PyDict_GetItemString(obj, \"%\") };\n", field.Name(), bind<write_lower_snake_case>(field.Name()));
                 w.write("if (!py_%) { throw winrt::hresult_invalid_argument(); }\n", field.Name());
     
                 if (has_custom_conversion(type))
                 {
-                    w.write("custom_set(return_value, converter<%>::convert_to(py_%));\n", field.Signature().Type(), field.Name());
+                    w.write("custom_set(return_value, converter<%>::convert_to(py_%.get()));\n", field.Signature().Type(), field.Name());
                 }
                 else
                 {
-                    w.write("return_value.% = converter<%>::convert_to(py_%);\n", bind<write_struct_field_name>(field), field.Signature().Type(), field.Name());
+                    w.write("return_value.% = converter<%>::convert_to(py_%.get());\n", bind<write_struct_field_name>(field), field.Signature().Type(), field.Name());
                 }
             }
     
