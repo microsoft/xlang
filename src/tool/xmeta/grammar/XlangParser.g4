@@ -33,37 +33,17 @@ namespace_or_type_name
     | qualified_alias_member
     ;
 
-/* Types */
+/* Types */ //TODO: Nullable Types?
 type
     : value_type
-    | reference_type
-    | type_parameter
+    | class_type
+    | array_type
     ;
 
 value_type
-    : struct_type
-    | enum_type
-    ;
-
-// Remove nullable type, Causing left resursive problems
-struct_type
-    : type_name
-    | simple_type
-    ;
-
-simple_type
-    : numeric_type
-    | BOOLEAN
+    : BOOLEAN
     | STRING
-    ;
-
-numeric_type
-    : integral_type
-    | floating_point_type
-    ;
-
-integral_type
-    : INT16
+    | INT16
     | INT32
     | INT64
     | UINT8
@@ -72,27 +52,8 @@ integral_type
     | UINT64
     | CHAR16
     | GUID
-    ;
-
-enum_integral_type
-    : INT32
-    | UINT32
-    ;
-
-floating_point_type
-    : SINGLE
+    | SINGLE
     | DOUBLE
-    ;
-
-enum_type
-    : type_name
-    ;
-
-reference_type
-    : class_type
-    | interface_type
-    | array_type
-    | delegate_type
     ;
 
 class_type
@@ -101,16 +62,23 @@ class_type
     | NILL
     ;
 
-interface_type
-    : type_name
+array_type
+    : non_array_type rank_specifier
+    ;
+
+non_array_type
+    : value_type
+    | class_type
     ;
 
 rank_specifier
     : OPEN_BRACKET CLOSE_BRACKET
     ;
 
-delegate_type
-    : type_name
+// Remove nullable type, Causing left resursive problems
+enum_integral_type
+    : INT32
+    | UINT32
     ;
 
 type_argument_list
@@ -288,18 +256,6 @@ struct_body
 struct_member_declaration
     : variable_declarator
     | type IDENTIFIER SEMICOLON
-    ;
-
-/* Arrays */
-array_type
-    : non_array_type rank_specifier
-    ;
-
-non_array_type
-    : value_type
-    | class_type
-    | interface_type
-    | delegate_type
     ;
 
 /* Interfaces */
