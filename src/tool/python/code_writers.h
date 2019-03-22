@@ -7,29 +7,18 @@ namespace xlang
     {
         XLANG_ASSERT(name.size() > 0);
 
-        w.write(case_func(name[0]));
-
-        for (std::string_view::size_type i = 1; i < name.size() - 1; i++)
+        for (std::string_view::size_type i = 0; i < name.size(); i++)
         {
-            if (name.substr(i, 4) == "UInt")
+            if (isupper(name[i]) && i > 0)
             {
-                w.write('_');
-            }
-
-            if (isupper(name[i]) && islower(name[i + 1]))
-            {
-                if (name.substr(i - 1, 4) != "UInt")
+                auto sub = name.substr(i - 1, 4);
+                if (sub != "UInt" && sub[0] != '_')
                 {
                     w.write('_');
                 }
             }
 
             w.write(case_func(name[i]));
-        }
-
-        if (name.size() > 1)
-        {
-            w.write(case_func(name[name.size() - 1]));
         }
     }
 
