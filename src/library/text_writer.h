@@ -236,14 +236,13 @@ namespace xlang::text
             if (next == '%' || next == '@')
             {
                 write(next);
-                offset++;
             }
             else
             {
                 write('^');
             }
 
-            write_segment(value.substr(offset + 1));
+            write_segment(value.substr(offset + 2));
         }
 
         template <typename First, typename... Rest>
@@ -262,13 +261,12 @@ namespace xlang::text
                 if (next == '%' || next == '@')
                 {
                     write(next);
-                    offset++;
                 }
                 else
                 {
                     write('^');
                 }
-                write_segment(value.substr(offset + 1), first, rest...);
+                write_segment(value.substr(offset + 2), first, rest...);
             }
             else
             {
