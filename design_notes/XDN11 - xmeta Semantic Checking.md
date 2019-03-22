@@ -22,12 +22,18 @@ Note that these are purely semantic checks, and not syntax.
 
 ### Namespace members
 #### Definitions:
-A **declaration space** is defined by namespace declarations. Each namespace has its own unique declaration space, and outside of all namespaces is a special declaration space called the **global declaration space**. The scope of the global declaration space is limited to the file it is contained in. 
+A **declaration space** is defined by namespace declarations. Each namespace has its own unique declaration space, and outside of all namespaces is a special declaration space called the **global declaration space**. The scope of the global declaration space is limited to the file it is contained in.
+
 The scope defined by a file is called a **compilation unit**.
+
 **Namespace members** include nested namespace declarations and type declarations.
+
 **Types** include classes, structs, interfaces, enums, and delegates.
+
 Namespaces can include other namespaces with a **using namespace directive**. This has syntax `using <namespace-name>`. This allows members from the included namespace to be referenced.
+
 You can also include namespaces or types through a **using alias directive**. This has syntax `using <identifier> = <namespace-or-type-name>;`.
+
 A **namespace alias qualifier** refers to a namespace or a type. It guarantees that type name lookups are unaffected by the introduction of new types and members. This has syntax `identifier::identifier<A1,...,Ak>` where `<A1,...,Ak>` is optional.
 
 #### Semantic checks:
