@@ -51,7 +51,7 @@ namespace winrt::impl
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>> {};
+    struct is_interface : std::is_base_of<Windows::Foundation::IInspectable, T> {};
 
 #endif
 
@@ -1200,7 +1200,7 @@ namespace winrt::impl
 
             static slim_mutex lock;
             slim_lock_guard const guard{ lock };
-            void* result;
+            void* result{};
             map->Lookup(get_abi(name), &result);
 
             if (result)
