@@ -229,6 +229,9 @@ namespace xlang::text
             }
 
             write(value.substr(0, offset));
+
+            XLANG_ASSERT(offset != value.size() - 1);
+
             auto next = value[offset + 1];
             if (next == '%' || next == '@')
             {
@@ -252,6 +255,8 @@ namespace xlang::text
 
             if (value[offset] == '^')
             {
+                XLANG_ASSERT(offset != value.size() - 1);
+
                 auto next = value[offset + 1];
 
                 if (next == '%' || next == '@')
@@ -263,7 +268,6 @@ namespace xlang::text
                 {
                     write('^');
                 }
-
                 write_segment(value.substr(offset + 1), first, rest...);
             }
             else
