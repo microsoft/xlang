@@ -154,17 +154,12 @@ namespace xlang::meta::reader
                     }
                 };
 
-                auto pos = members.types.find(name);
-                if (pos != members.types.end())
-                {
-                    members.types.erase(pos);
-                    remove(members.interfaces, name);
-                    remove(members.classes, name);
-                    remove(members.enums, name);
-                    remove(members.structs, name);
-                    remove(members.delegates, name);
-                    remove(members.classes, name);
-                }
+                remove(members.interfaces, name);
+                remove(members.classes, name);
+                remove(members.enums, name);
+                remove(members.structs, name);
+                remove(members.delegates, name);
+                remove(members.classes, name);
             };
 
             remove("Windows.Foundation", "DateTime");
