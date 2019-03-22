@@ -143,14 +143,12 @@ namespace xlang::text
 
         void flush_to_file(std::string const& filename)
         {
-            if (file_equal(filename))
+            if (!file_equal(filename))
             {
-                return;
+                std::ofstream file{ filename, std::ios::out | std::ios::binary };
+                file.write(m_first.data(), m_first.size());
+                file.write(m_second.data(), m_second.size());
             }
-
-            std::ofstream file{ filename, std::ios::out | std::ios::binary };
-            file.write(m_first.data(), m_first.size());
-            file.write(m_second.data(), m_second.size());
             m_first.clear();
             m_second.clear();
         }
