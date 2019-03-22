@@ -107,7 +107,7 @@ namespace xlang
         return std::move(ctors);
     }
 
-    auto get_methods(TypeDef const& type)
+    auto get_methodsz(TypeDef const& type)
     {
         std::map<std::string_view, std::vector<MethodDef>> methods{};
 
@@ -471,30 +471,30 @@ def _instance(self):
 
     void write_python_methods(writer& w, TypeDef const& type)
     {
-        auto overloads = get_overloaded_method_names(type);
+        //auto overloads = get_overloaded_method_names(type);
 
         std::map<std::string_view, std::vector<MethodDef>> overloaded_methods{};
 
-        enumerate_required_types(type, [&](TypeDef const& type)
-        {
-            auto guard{ w.push_generic_params(type.GenericParam()) };
+        //enumerate_required_types(type, [&](TypeDef const& type)
+        //{
+        //    auto guard{ w.push_generic_params(type.GenericParam()) };
 
-            for (auto&& method : type.MethodList())
-            {
-                if (is_constructor(method)) continue;
+        //    for (auto&& method : type.MethodList())
+        //    {
+        //        if (is_constructor(method)) continue;
 
-                auto overloaded = contains(overloads, method.Name());
+        //        auto overloaded = contains(overloads, method.Name());
 
-                if (overloaded)
-                {
-                    auto& v = overloaded_methods[method.Name()];
-                    XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
-                    v.push_back(method);
-                }
+        //        if (overloaded)
+        //        {
+        //            auto& v = overloaded_methods[method.Name()];
+        //            XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
+        //            v.push_back(method);
+        //        }
 
-                write_python_method(w, method, overloaded);
-            }
-        });
+        //        write_python_method(w, method, overloaded);
+        //    }
+        //});
 
         for (auto&&[name, methods] : overloaded_methods)
         {
@@ -517,27 +517,27 @@ def _instance(self):
 
     void write_python_properties(writer& w, TypeDef const& type)
     {
-        enumerate_required_types(type, [&](TypeDef const& type)
-        {
-            auto guard{ w.push_generic_params(type.GenericParam()) };
+        //enumerate_required_types(type, [&](TypeDef const& type)
+        //{
+        //    auto guard{ w.push_generic_params(type.GenericParam()) };
 
-            for (auto&& prop : type.PropertyList())
-            {
-                auto[getter, setter] = get_property_methods(prop);
+        //    for (auto&& prop : type.PropertyList())
+        //    {
+        //        auto[getter, setter] = get_property_methods(prop);
 
-                if (is_static(getter))
-                {
-                    w.write("# staticprop %", prop.Name());
-                }
-                else
-                {
-                    w.write("% = property(fget=%, fset=%)\n",
-                        bind<write_lower_snake_case>(prop.Name()),
-                        bind<write_python_method_name>(getter),
-                        bind<write_python_method_name>(setter));
-                }
-            }
-        });
+        //        if (is_static(getter))
+        //        {
+        //            w.write("# staticprop %", prop.Name());
+        //        }
+        //        else
+        //        {
+        //            w.write("% = property(fget=%, fset=%)\n",
+        //                bind<write_lower_snake_case>(prop.Name()),
+        //                bind<write_python_method_name>(getter),
+        //                bind<write_python_method_name>(setter));
+        //        }
+        //    }
+        //});
     }
 
     void write_python_class(writer& w, TypeDef const& type)

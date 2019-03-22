@@ -378,14 +378,14 @@ namespace xlang
         return std::move(interfaces);
     }
 
-    TypeDef get_typedef(type_semantics const& sht)
+    TypeDef get_typedef(type_semantics const& semantics)
     {
         return std::visit(
             impl::overloaded{
                 [](type_definition type) { return type; },
                 [](generic_type_instance type_instance) { return type_instance.generic_type; },
                 [](auto) -> TypeDef { throw_invalid("type doesn't contain typedef"); }
-            }, sht);
+            }, semantics);
     };
 
     TypeDef get_typedef(coded_index<TypeDefOrRef> const& type)
@@ -835,19 +835,20 @@ namespace xlang
     {
         std::set<TypeDef> types;
 
-        auto enumerate_types_impl = [&](TypeDef const& type, auto const& lambda) -> void
+        auto enumerate_types_impl = [&](type_semantics const& semantics, auto const& lambda) -> void
         {
+            auto type = get_typedef(semantics);
             if (!contains(types, type))
             {
                 types.insert(type);
-                func(type);
+                func(semantics);
             }
 
             if (get_category(type) == category::interface_type)
             {
                 for (auto&& ii : type.InterfaceImpl())
                 {
-                    lambda(get_typedef(ii.Interface()), lambda);
+                    lambda(get_type_semantics(ii.Interface()), lambda);
                 }
             }
         };
@@ -855,29 +856,29 @@ namespace xlang
         enumerate_types_impl(type, enumerate_types_impl);
     }
 
-    auto get_overloaded_method_names(TypeDef const& type)
+    auto get_methods(TypeDef const& type)
     {
-        std::set<std::string_view> method_names;
-        std::set<std::string_view> overloaded_methods;
+        using method_info = std::tuple<MethodDef, std::vector<type_semantics>>;
+        std::map<std::string_view, std::vector<method_info>> methods{};
 
-        enumerate_required_types(type, [&](TypeDef const& type)
+        enumerate_required_types(type, [&](type_semantics const& semantics)
         {
-            for (auto&& method : type.MethodList())
+            auto generic_args = std::visit(
+                impl::overloaded{
+                    [](type_definition type) -> std::vector<type_semantics> { return {}; },
+                    [](generic_type_instance type_instance) { return type_instance.generic_args; },
+                    [](auto) -> std::vector<type_semantics> { throw_invalid("type doesn't contain typedef"); }
+                }, semantics);
+
+            for (auto&& method : get_typedef(semantics).MethodList())
             {
                 if (is_constructor(method)) continue;
 
-                auto name = method.Name();
-                if (contains(method_names, name))
-                {
-                    overloaded_methods.insert(name);
-                }
-                else
-                {
-                    method_names.insert(name);
-                }
+                auto& v = methods[method.Name()];
+                XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& t) { return is_static(std::get<0>(t)) == is_static(method); }));
+                v.push_back(std::make_tuple(method, std::move(generic_args)));
             }
         });
-
-        return std::move(overloaded_methods);
+        return std::move(methods);
     }
 }
