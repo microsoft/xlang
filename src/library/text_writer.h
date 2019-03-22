@@ -200,17 +200,19 @@ namespace xlang::text
 
             for (auto c : format)
             {
-                if (c == '^')
+                if (!escape)
                 {
-                    escape = true;
-                    continue;
-                }
+                    if (c == '^')
+                    {
+                        escape = true;
+                        continue;
+                    }
 
-                if ((c == '%' || c == '@') && !escape)
-                {
-                    ++count;
+                    if (c == '%' || c == '@')
+                    {
+                        ++count;
+                    }
                 }
-
                 escape = false;
             }
 
