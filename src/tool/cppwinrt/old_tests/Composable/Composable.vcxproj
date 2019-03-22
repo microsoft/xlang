@@ -175,7 +175,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt.exe -in $(OutputPath)Composable.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref local -verbose -pch precomp.hpp</Command>
+      <Command>$(OutputPath)cppwinrt.exe -in $(OutputPath)Composable.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -pch precomp.hpp</Command>
       <Message>C++/WinRT compiler</Message>
       <Outputs>Generated Files\module.g.cpp</Outputs>
       <Inputs>$(OutputDir)Composable.winmd</Inputs>

@@ -4,7 +4,7 @@ namespace winrt
     template <typename Interface = Windows::Foundation::IActivationFactory>
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
-        void* result;
+        void* result{};
         hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
         if (hr == impl::error_not_initialized)
@@ -292,7 +292,7 @@ namespace winrt::impl
     impl::com_ref<Interface> try_get_activation_factory(hresult_error* exception = nullptr) noexcept
     {
         param::hstring const name{ name_of<Class>() };
-        void* result;
+        void* result{};
         hresult const hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
         if (hr < 0)
@@ -394,7 +394,7 @@ namespace winrt
     template <typename Interface>
     impl::com_ref<Interface> create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
     {
-        void* result;
+        void* result{};
         check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), &result));
         return { result, take_ownership_from_abi };
     }
