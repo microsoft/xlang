@@ -763,32 +763,15 @@ return nullptr;
 
     void write_method_table(writer& w, TypeDef const& type)
     {
-        auto get_argument_convention_flag = [](MethodDef const& method)
-        {
-            switch (get_argument_convention(method))
-            {
-            case argument_convention::no_args:
-                return "METH_NOARGS";
-            case argument_convention::single_arg:
-                return "METH_O";
-            case argument_convention::variable_args:
-                return "METH_VARARGS";
-            }
-
-            throw_invalid("invalid argument_convention");
-        };
-
         auto write_row = [&](MethodDef const& method)
         {
-            auto argument_convention_flag = get_argument_convention_flag(method);
             auto static_flag = is_static(method) || is_constructor(method)
                 ? " | METH_STATIC" 
                 : "";
 
-            w.write("{ \"%\", (PyCFunction)@_%, %%, nullptr },\n",
+            w.write("{ \"%\", (PyCFunction)@_%, METH_VARARGS%, nullptr },\n",
                 bind<write_lower_snake_case>(method.Name()),
                 type.TypeName(), method.Name(),
-                argument_convention_flag,
                 static_flag);
         };
 
@@ -798,15 +781,13 @@ return nullptr;
 
             for (auto&&[name, methods] : get_methods(type))
             {
-                auto& [method, semantics] = methods[0];
-
                 // non-static getters/putter are exposed as Python getsets (i.e. properties)
-                if ((is_get_method(method) || is_put_method(method)) && !is_static(method))
+                if ((is_get_method(methods) || is_put_method(methods)) && !is_static(methods))
                 {
                     continue;
                 }
 
-                write_row(method);
+                write_row(std::get<0>(methods[0]));
             }
 
             if (!is_static(type) && !is_ptype(type))
