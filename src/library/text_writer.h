@@ -160,6 +160,17 @@ namespace xlang::text
             flush_to_file(filename.string());
         }
 
+        std::string flush_to_string()
+        {
+            std::string result;
+            result.reserve(m_first.size() + m_second.size());
+            result.assign(m_first.begin(), m_first.end());
+            result.append(m_second.begin(), m_second.end());
+            m_first.clear();
+            m_second.clear();
+            return result;
+        }
+
         char back()
         {
             return m_first.empty() ? char{} : m_first.back();
