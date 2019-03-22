@@ -1,6 +1,6 @@
 #pragma once
 
-namespace xlang
+namespace pywinrt
 {
     void write_setup_filenames(writer& w, std::vector<std::string> const& namespaces)
     {

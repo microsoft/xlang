@@ -1,14 +1,17 @@
 #include "pch.h"
+#include "helpers.h"
+
 #include "strings.h"
 #include "settings.h"
 #include "type_writers.h"
-#include "helpers.h"
 #include "code_writers.h"
 #include "python_code_writers.h"
 #include "file_writers.h"
 
-namespace xlang
+namespace pywinrt
 {
+    using namespace xlang;
+
     settings_type settings;
 
     struct usage_exception {};
@@ -159,5 +162,5 @@ namespace xlang
 
 int main(int const argc, char** argv)
 {
-    return xlang::run(argc, argv);
+    return pywinrt::run(argc, argv);
 }

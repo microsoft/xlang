@@ -2,6 +2,8 @@
 
 namespace xlang
 {
+    using namespace meta::reader;
+
     inline auto get_start_time()
     {
         return std::chrono::high_resolution_clock::now();
@@ -30,25 +32,6 @@ namespace xlang
             segments.push_back(ns.substr(pos, new_pos - pos));
             pos = new_pos + 1;
         };
-    };
-
-    struct separator
-    {
-        writer& w;
-        std::string_view _separator{ ", " };
-        bool first{ true };
-
-        void operator()()
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                w.write(_separator);
-            }
-        }
     };
 
     bool is_exclusive_to(TypeDef const& type)
@@ -296,87 +279,87 @@ namespace xlang
         }
     }
 
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index);
+    //void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index);
 
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, TypeDef const& type)
-    {
-        if (get_category(type) == category::interface_type)
-        {
-            interface_info info;
-            info.type = type;
-            for (auto&& gp : type.GenericParam())
-            {
-                info.type_arguments.push_back(std::string{ gp.Name() });
-            }
-            push_interface_info(interfaces, std::move(info));
-        }
+    //void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, TypeDef const& type)
+    //{
+    //    if (get_category(type) == category::interface_type)
+    //    {
+    //        interface_info info;
+    //        info.type = type;
+    //        for (auto&& gp : type.GenericParam())
+    //        {
+    //            info.type_arguments.push_back(std::string{ gp.Name() });
+    //        }
+    //        push_interface_info(interfaces, std::move(info));
+    //    }
 
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-        for (auto&& ii : type.InterfaceImpl())
-        {
-            collect_required_interfaces(w, interfaces, ii.Interface());
-        }
-    }
+    //    auto guard{ w.push_generic_params(type.GenericParam()) };
+    //    for (auto&& ii : type.InterfaceImpl())
+    //    {
+    //        collect_required_interfaces(w, interfaces, ii.Interface());
+    //    }
+    //}
 
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, GenericTypeInstSig const& sig)
-    {
-        TypeDef type{};
-        switch (sig.GenericType().type())
-        {
-        case TypeDefOrRef::TypeDef:
-            type = sig.GenericType().TypeDef();
-            break;
-        case TypeDefOrRef::TypeRef:
-            type = find_required(sig.GenericType().TypeRef());
-            break;
-        case TypeDefOrRef::TypeSpec:
-            throw_invalid("collect_required_interfaces");
-        }
+    //void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, GenericTypeInstSig const& sig)
+    //{
+    //    TypeDef type{};
+    //    switch (sig.GenericType().type())
+    //    {
+    //    case TypeDefOrRef::TypeDef:
+    //        type = sig.GenericType().TypeDef();
+    //        break;
+    //    case TypeDefOrRef::TypeRef:
+    //        type = find_required(sig.GenericType().TypeRef());
+    //        break;
+    //    case TypeDefOrRef::TypeSpec:
+    //        throw_invalid("collect_required_interfaces");
+    //    }
 
-        interface_info info;
-        info.type = type;
+    //    interface_info info;
+    //    info.type = type;
 
-        for (auto&& gp : sig.GenericArgs())
-        {
-            auto q = w.write_temp("%", gp);
-            info.type_arguments.push_back(q);
-        }
+    //    for (auto&& gp : sig.GenericArgs())
+    //    {
+    //        auto q = w.write_temp("%", gp);
+    //        info.type_arguments.push_back(q);
+    //    }
 
-        push_interface_info(interfaces, std::move(info));
+    //    push_interface_info(interfaces, std::move(info));
 
-        auto guard{ w.push_generic_params(sig) };
-        for (auto&& ii : type.InterfaceImpl())
-        {
-            collect_required_interfaces(w, interfaces, ii.Interface());
-        }
-    }
+    //    auto guard{ w.push_generic_params(sig) };
+    //    for (auto&& ii : type.InterfaceImpl())
+    //    {
+    //        collect_required_interfaces(w, interfaces, ii.Interface());
+    //    }
+    //}
 
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index)
-    {
-        switch (index.type())
-        {
-        case TypeDefOrRef::TypeDef:
-            collect_required_interfaces(w, sigs, index.TypeDef());
-            break;
-        case TypeDefOrRef::TypeRef:
-            collect_required_interfaces(w, sigs, find_required(index.TypeRef()));
-            break;
-        case TypeDefOrRef::TypeSpec:
-            collect_required_interfaces(w, sigs, index.TypeSpec().Signature().GenericTypeInst());
-            break;
-        }
-    }
+    //void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index)
+    //{
+    //    switch (index.type())
+    //    {
+    //    case TypeDefOrRef::TypeDef:
+    //        collect_required_interfaces(w, sigs, index.TypeDef());
+    //        break;
+    //    case TypeDefOrRef::TypeRef:
+    //        collect_required_interfaces(w, sigs, find_required(index.TypeRef()));
+    //        break;
+    //    case TypeDefOrRef::TypeSpec:
+    //        collect_required_interfaces(w, sigs, index.TypeSpec().Signature().GenericTypeInst());
+    //        break;
+    //    }
+    //}
 
-    auto get_required_interfaces(TypeDef const& type)
-    {
-        writer w;
-        auto guard{ w.push_generic_params(type.GenericParam()) };
+    //auto get_required_interfaces(TypeDef const& type)
+    //{
+    //    writer w;
+    //    auto guard{ w.push_generic_params(type.GenericParam()) };
 
-        std::vector<interface_info> interfaces;
-        collect_required_interfaces(w, interfaces, type);
+    //    std::vector<interface_info> interfaces;
+    //    collect_required_interfaces(w, interfaces, type);
 
-        return std::move(interfaces);
-    }
+    //    return std::move(interfaces);
+    //}
 
     TypeDef get_typedef(type_semantics const& semantics)
     {
@@ -865,7 +848,7 @@ namespace xlang
         {
             auto generic_args = std::visit(
                 impl::overloaded{
-                    [](type_definition type) -> std::vector<type_semantics> { return {}; },
+                    [](type_definition) -> std::vector<type_semantics> { return {}; },
                     [](generic_type_instance type_instance) { return type_instance.generic_args; },
                     [](auto) -> std::vector<type_semantics> { throw_invalid("type doesn't contain typedef"); }
                 }, semantics);

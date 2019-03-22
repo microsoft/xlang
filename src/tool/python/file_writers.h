@@ -1,6 +1,6 @@
 #pragma once
 
-namespace xlang
+namespace pywinrt
 {
     namespace stdfs = std::experimental::filesystem;
 

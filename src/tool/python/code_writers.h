@@ -1,6 +1,6 @@
 #pragma once
 
-namespace xlang
+namespace pywinrt
 {
     template<typename F>
     void write_snake_case(writer& w, std::string_view const& name, F case_func)
@@ -584,24 +584,24 @@ static PyObject* %(%* self, PyObject* args)
 
     void write_interface_functions(writer& w, TypeDef const& type)
     {
-        auto ptype = is_ptype(type);
+        //auto ptype = is_ptype(type);
 
-        for (auto&& ii : get_required_interfaces(type))
-        {
-            auto guard{ w.push_generic_params(ii.type_arguments) };
+        //for (auto&& ii : get_required_interfaces(type))
+        //{
+        //    auto guard{ w.push_generic_params(ii.type_arguments) };
 
-            for (auto&& method : ii.type.MethodList())
-            {
-                if (ptype)
-                {
-                    write_pinterface_method_function(w, type, method);
-                }
-                else
-                {
-                    write_method_function(w, type, method);
-                }
-            }
-        }
+        //    for (auto&& method : ii.type.MethodList())
+        //    {
+        //        if (ptype)
+        //        {
+        //            write_pinterface_method_function(w, type, method);
+        //        }
+        //        else
+        //        {
+        //            write_method_function(w, type, method);
+        //        }
+        //    }
+        //}
     }
 
 
@@ -1491,14 +1491,14 @@ struct pinterface_python_type<%<%>>
             w.write("virtual std::size_t hash() = 0;\n");
 
             // TODO: use enumerate_required_types
-            for (auto&& ii : get_required_interfaces(type))
-            {
-                auto gguard{ w.push_generic_params(ii.type_arguments) };
-                for (auto&& method : ii.type.MethodList())
-                {
-                    w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
-                }
-            }
+            //for (auto&& ii : get_required_interfaces(type))
+            //{
+            //    auto gguard{ w.push_generic_params(ii.type_arguments) };
+            //    for (auto&& method : ii.type.MethodList())
+            //    {
+            //        w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
+            //    }
+            //}
         }
         w.write("};\n");
     }
@@ -1525,18 +1525,18 @@ struct pinterface_python_type<%<%>>
             w.write("\n%<%> _obj{ nullptr };\n", type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
 
             // TODO: use enumerate_required_types
-            for (auto&& ii : get_required_interfaces(type))
-            {
-                auto gguard{ w.push_generic_params(ii.type_arguments) };
-                for (auto&& method : ii.type.MethodList())
-                {
-                    w.write("\nPyObject* %(PyObject* %) override\n{\n",
-                        method.Name(),
-                        bind<write_args_param_name>(method));
-                    write_method_body(w, type, method);
-                    w.write("}\n");
-                }
-            }
+            //for (auto&& ii : get_required_interfaces(type))
+            //{
+            //    auto gguard{ w.push_generic_params(ii.type_arguments) };
+            //    for (auto&& method : ii.type.MethodList())
+            //    {
+            //        w.write("\nPyObject* %(PyObject* %) override\n{\n",
+            //            method.Name(),
+            //            bind<write_args_param_name>(method));
+            //        write_method_body(w, type, method);
+            //        w.write("}\n");
+            //    }
+            //}
         }
         w.write("};\n");
     }

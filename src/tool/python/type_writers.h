@@ -1,10 +1,12 @@
 #pragma once
 
-namespace xlang
+namespace pywinrt
 {
+    using namespace std::literals;
     using namespace std::experimental::filesystem;
-    using namespace text;
-    using namespace meta::reader;
+    using namespace xlang;
+    using namespace xlang::meta::reader;
+    using namespace xlang::text;
 
     template <typename First, typename...Rest>
     auto get_impl_name(First const& first, Rest const&... rest)
@@ -508,6 +510,25 @@ namespace xlang
             {
                 write(type);
             });
+        }
+    };
+
+    struct separator
+    {
+        writer& w;
+        std::string_view _separator{ ", " };
+        bool first{ true };
+
+        void operator()()
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                w.write(_separator);
+            }
         }
     };
 }
