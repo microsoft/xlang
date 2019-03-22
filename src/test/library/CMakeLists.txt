@@ -9,7 +9,6 @@ target_sources(test_library
 target_include_directories(test_library
     PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH})
 
-CONSUME_PAL(test_library)
 RPATH_ORIGIN(test_library)
 
 if (MSVC)
