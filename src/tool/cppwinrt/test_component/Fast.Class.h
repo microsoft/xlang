@@ -7,9 +7,9 @@ namespace winrt::test_component::Fast::implementation
     {
         Class() = default;
 
-        void Class_1();
-        void Class_2();
-        void Class_3();
+        hstring Class_1();
+        hstring Class_2();
+        hstring Class_3();
     };
 }
 namespace winrt::test_component::Fast::factory_implementation

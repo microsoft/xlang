@@ -337,16 +337,16 @@ namespace test_component
         runtimeclass Class
         {
             Class();
-            void Class_1();
+            String Class_1();
 
             [contract(FastContract, 2)]
             {
-                void Class_2();
+                String Class_2();
             }
 
             [contract(FastContract, 3)]
             {
-                void Class_3();
+                String Class_3();
             }
         }
     }

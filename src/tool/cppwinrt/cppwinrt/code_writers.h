@@ -1642,12 +1642,35 @@ namespace xlang
             bind<write_produce_upcall>(method, signature));
     }
 
+    static void write_produce_methods_fastabi(writer& w, TypeDef const& type)
+    {
+        if (!settings.fastabi)
+        {
+            return;
+        }
+
+        auto pair = settings.fastabi_defaults.find(type);
+
+        if (pair == settings.fastabi_defaults.end())
+        {
+            return;
+        }
+
+        // TODO: write any back pointer functions for bases. These need to used CRTP
+        // so that an implementation can override the back pointer functions if needed.
+
+        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        {
+            w.write_each<write_produce_method>(versioned.MethodList());
+        }
+    }
+
     static void write_produce(writer& w, TypeDef const& type)
     {
         auto format = R"(    template <typename D%>
     struct produce<D, %> : produce_base<D, %>
     {
-%    };
+%%    };
 )";
 
         auto generics = type.GenericParam();
@@ -1657,7 +1680,8 @@ namespace xlang
             bind<write_comma_generic_typenames>(generics),
             type,
             type,
-            bind_each<write_produce_method>(type.MethodList()));
+            bind_each<write_produce_method>(type.MethodList()),
+            bind<write_produce_methods_fastabi>(type));
     }
 
     static void write_dispatch_overridable_method(writer& w, MethodDef const& method)
