@@ -2,8 +2,13 @@
 #define CPPWINRT_VERSION "%"
 
 // WINRT_version is used by Microsoft to analyze C++/WinRT library adoption and inform future product decisions.
+#ifdef _WIN32
+extern "C"
+__declspec(selectany) char const * const WINRT_version = "C++/WinRT version:" CPPWINRT_VERSION;
+#else
 extern "C"
 inline char const * const WINRT_version = "C++/WinRT version:" CPPWINRT_VERSION;
+#endif
 
 #ifdef _M_IX86
 #pragma comment(linker, "/include:_WINRT_version")
