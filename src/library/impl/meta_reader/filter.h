@@ -3,8 +3,7 @@ namespace xlang::meta::reader
 {
     struct filter
     {
-        filter(filter const&) = delete;
-        filter& operator=(filter const&) = delete;
+        filter() noexcept = default;
 
         template <typename T>
         filter(T const& includes, T const& excludes)
@@ -28,6 +27,24 @@ namespace xlang::meta::reader
         bool includes(TypeDef const& type) const
         {
             return includes(type.TypeNamespace(), type.TypeName());
+        }
+
+        bool includes(std::vector<TypeDef> const& types) const
+        {
+            if (m_rules.empty())
+            {
+                return true;
+            }
+
+            for (auto&& type : types)
+            {
+                if (includes(type.TypeNamespace(), type.TypeName()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         bool includes(cache::namespace_members const& members) const

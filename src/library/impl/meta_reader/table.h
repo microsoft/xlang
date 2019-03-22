@@ -307,7 +307,6 @@ namespace xlang::meta::reader
 
         value_type operator+(difference_type offset) const noexcept
         {
-            row_base temp{ *this };
             return { m_table, m_index + offset };
         }
 
@@ -344,8 +343,7 @@ namespace xlang::meta::reader
 
         bool operator<(row_base const& other) const noexcept
         {
-            XLANG_ASSERT(m_table == other.m_table);
-            return m_index < other.m_index;
+            return m_table < other.m_table || (!(other.m_table < m_table) && m_index < other.m_index);
         }
 
         bool operator>(row_base const& other) const noexcept

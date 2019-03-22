@@ -36,6 +36,7 @@ bld/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
+generated
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -338,3 +339,6 @@ ASALocalRun/
 src/test/output/
 src/test/python/output/
 src/test/python/__pycache__/
+
+# Ignore copied license
+src/package/vsix/LICENSE

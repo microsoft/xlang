@@ -133,43 +133,62 @@ namespace xlang
             writer & _writer;
         };
 
-        template <typename... Args>
-        void write_indented(std::string_view const& value, Args const&... args)
+        void write_indent()
         {
-            if (indent == 0)
+            for (int32_t i = 0; i < indent; i++)
             {
-                write(value, args...);
+                writer_base::write_impl("    ");
             }
-            else
+        }
+
+        void write_impl(std::string_view const& value)
+        {
+            if (back() == '\n')
             {
-                auto indentation = std::string(indent * 4, ' ');
-                if (back() == '\n')
-                {
-                    write(indentation);
-                }
-
-                auto pos = value.find_last_of('\n', value.size() - 2);
-                if (pos == std::string_view::npos)
-                {
-                    write(value, args...);
-                }
-                else
-                {
-                    std::string value_{ value };
-
-                    while (pos != std::string::npos)
-                    {
-                        value_.insert(pos + 1, indentation);
-                        if (pos == 0)
-                        {
-                            break;
-                        }
-                        pos = value_.find_last_of('\n', pos - 1);
-                    }
-
-                    write(value_, args...);
-                }
+                write_indent();
             }
+
+            std::string_view::size_type current_pos{ 0 };
+            auto pos = value.find('\n', current_pos);
+
+            while(pos != std::string_view::npos)
+            {
+                writer_base::write_impl(value.substr(current_pos, pos + 1 - current_pos));
+                if (pos != value.size() - 1)
+                {
+                    write_indent();
+                }
+                current_pos = pos + 1;
+                pos = value.find('\n', current_pos);
+            }
+
+            if (pos == std::string_view::npos)
+            {
+                writer_base::write_impl(value.substr(current_pos));
+            }
+        }
+
+        void write_impl(char const value)
+        {
+            if (back() == '\n')
+            {
+                write_indent();
+            }
+
+            writer_base::write_impl(value);
+        }
+
+        template <typename... Args>
+        std::string write_temp(std::string_view const& value, Args const&... args)
+        {
+            auto restore_indent = indent;
+            indent = 0;
+
+            auto result = writer_base::write_temp(value, args...);
+
+            indent = restore_indent;
+
+            return result;
         }
 
         void write_value(bool value)
@@ -320,6 +339,55 @@ namespace xlang
             }
         }
 
+        void register_type_namespace(std::string_view ns)
+        {
+            if (ns != current_namespace && ns != "System")
+            {
+                needed_namespaces.emplace(ns);
+            }
+        }
+
+        void register_type_namespace(GenericTypeInstSig const& t)
+        {
+            register_type_namespace(t.GenericType());
+            for(auto&& type_arg : t.GenericArgs())
+            {
+                register_type_namespace(type_arg);
+            }
+        }
+
+        void register_type_namespace(coded_index<TypeDefOrRef> const& type)
+        {
+            switch (type.type())
+            {
+            case TypeDefOrRef::TypeDef:
+                register_type_namespace(type.TypeDef().TypeNamespace());
+                break;
+
+            case TypeDefOrRef::TypeRef:
+            {
+                auto tr = type.TypeRef();
+                if (tr.TypeName() != "Guid" || tr.TypeNamespace() != "System" )
+                {
+                    register_type_namespace(type.TypeRef().TypeNamespace());
+                }
+            }
+                break;
+
+            case TypeDefOrRef::TypeSpec:
+                write(type.TypeSpec().Signature().GenericTypeInst());
+                break;
+            }
+        }
+        
+        void register_type_namespace(TypeSig const& type)
+        {
+            call(type.Type(),
+                [&](ElementType) {},
+                [&](GenericTypeIndex) {},
+                [&](auto&& t) { register_type_namespace(t); });
+        }
+
         void write(TypeDef const& type)
         {
             auto ns = type.TypeNamespace();
@@ -386,55 +454,46 @@ namespace xlang
             write("%<%>", type.GenericType(), bind_list(", ", type.GenericArgs()));
         }
 
-        void write(ElementType type)
+        static std::string_view get_cpp_type(ElementType type)
         {
             switch (type)
             {
             case ElementType::Boolean:
-                write("bool");
-                break;
+                return "bool";
             case ElementType::Char:
-                write("char16_t");
-                break;
+                return "char16_t";
             case ElementType::I1:
-                write("int8_t");
-                break;
+                return "int8_t";
             case ElementType::U1:
-                write("uint8_t");
-                break;
+                return "uint8_t";
             case ElementType::I2:
-                write("int16_t");
-                break;
+                return "int16_t";
             case ElementType::U2:
-                write("uint16_t");
-                break;
+                return "uint16_t";
             case ElementType::I4:
-                write("int32_t");
-                break;
+                return "int32_t";
             case ElementType::U4:
-                write("uint32_t");
-                break;
+                return "uint32_t";
             case ElementType::I8:
-                write("int64_t");
-                break;
+                return "int64_t";
             case ElementType::U8:
-                write("uint64_t");
-                break;
+                return "uint64_t";
             case ElementType::R4:
-                write("float");
-                break;
+                return "float";
             case ElementType::R8:
-                write("double");
-                break;
+                return "double";
             case ElementType::String:
-                write("winrt::hstring");
-                break;
+                return "winrt::hstring";
             case ElementType::Object:
-                write("winrt::Windows::Foundation::IInspectable");
-                break;
-            default:
-                throw_invalid("write_method_comment_type element type not impl");
+                return "winrt::Windows::Foundation::IInspectable";
             }
+
+            throw_invalid("element type not supported");
+        }
+
+        void write(ElementType type)
+        {
+            write(writer::get_cpp_type(type));
         }
 
         void write(GenericTypeIndex var)
@@ -444,16 +503,11 @@ namespace xlang
 
         void write(TypeSig const& signature)
         {
-            xlang::visit(signature.Type(),
+            call(signature.Type(),
                 [&](auto&& type)
             {
                 write(type);
             });
-        }
-
-        void write_license()
-        {
-            write("// WARNING: Please don't edit this file. It was generated by Python/WinRT\n\n");
         }
     };
 }

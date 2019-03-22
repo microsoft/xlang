@@ -1,18 +1,20 @@
-import find_projection
+import sys
+sys.path.append("./generated")
 
-import _pyrt
 import unittest
 import asyncio
+
+import pyrt.windows.foundation.collections as wfc
 
 class TestCollections(unittest.TestCase):
 
     def test_stringmap(self):
-        m = _pyrt.StringMap()
+        m = wfc.StringMap()
         m.Insert("hello", "world")
 
         self.assertTrue(m.HasKey("hello"))
         self.assertFalse(m.HasKey("world"))
-        self.assertEqual(m.get_Size(), 1)
+        self.assertEqual(m.Size, 1)
         self.assertEqual(m.Lookup("hello"), "world")
 
 
@@ -24,16 +26,16 @@ class TestCollections(unittest.TestCase):
             future = loop.create_future()
 
             def onMapChanged(sender, args): 
-                self.assertEqual(args.get_CollectionChange(), 1)
-                self.assertEqual(args.get_Key(), "dr")
+                self.assertEqual(args.CollectionChange, wfc.CollectionChange.ItemInserted)
+                self.assertEqual(args.Key, "dr")
 
-                self.assertEqual(sender.get_Size(), 2)
+                self.assertEqual(sender.Size, 2)
                 self.assertTrue(sender.HasKey("dr"))
                 self.assertTrue(sender.HasKey("hello"))
                 
                 loop.call_soon_threadsafe(asyncio.Future.set_result, future, True)
 
-            m = _pyrt.StringMap()
+            m = wfc.StringMap()
             m.Insert("hello", "world")
             token = m.add_MapChanged(onMapChanged)
             m.Insert("dr", "who")
@@ -47,6 +49,4 @@ class TestCollections(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    _pyrt.init_apartment()
     unittest.main()
-    _pyrt.uninit_apartment()

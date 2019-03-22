@@ -48,7 +48,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return TypeAttributes{ get_value<uint32_t>(0) };
+            return TypeAttributes{{ get_value<uint32_t>(0) }};
         }
 
         auto TypeName() const
@@ -91,12 +91,12 @@ namespace xlang::meta::reader
 
         auto ImplFlags() const
         {
-            return MethodImplAttributes{ get_value<uint16_t>(1) };
+            return MethodImplAttributes{{ get_value<uint16_t>(1) }};
         }
 
         auto Flags() const
         {
-            return MethodAttributes{ get_value<uint16_t>(2) };
+            return MethodAttributes{{ get_value<uint16_t>(2) }};
         }
 
         auto Name() const
@@ -161,7 +161,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return FieldAttributes{ get_value<uint16_t>(0) };
+            return FieldAttributes{{ get_value<uint16_t>(0) }};
         }
 
         auto Name() const
@@ -186,7 +186,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return ParamAttributes{ get_value<uint16_t>(0) };
+            return ParamAttributes{{ get_value<uint16_t>(0) }};
         }
 
         auto Sequence() const
@@ -317,7 +317,7 @@ namespace xlang::meta::reader
 
         auto EventFlags() const
         {
-            return EventAttributes{ get_value<uint16_t>(0) };
+            return EventAttributes{{ get_value<uint16_t>(0) }};
         }
 
         auto Name() const
@@ -349,7 +349,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return PropertyAttributes{ get_value<uint16_t>(0) };
+            return PropertyAttributes{{ get_value<uint16_t>(0) }};
         }
 
         auto Name() const
@@ -375,7 +375,7 @@ namespace xlang::meta::reader
 
         auto Semantic() const
         {
-            return MethodSemanticsAttributes{ get_value<uint16_t>(0) };
+            return MethodSemanticsAttributes{{ get_value<uint16_t>(0) }};
         }
 
         auto Method() const;
@@ -394,12 +394,12 @@ namespace xlang::meta::reader
 
         auto MethodBody() const
         {
-            return get_value<MethodDefOrRef>(1);
+            return get_coded_index<MethodDefOrRef>(1);
         }
 
         auto MethodDeclaration() const
         {
-            return get_value<MethodDefOrRef>(2);
+            return get_coded_index<MethodDefOrRef>(2);
         }
     };
 
@@ -433,7 +433,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<AssemblyFlags>(2);
+            return AssemblyAttributes{{ get_value<uint32_t>(2) }};
         }
 
         auto PublicKey() const
@@ -492,7 +492,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return get_value<AssemblyFlags>(1);
+            return AssemblyAttributes{{ get_value<uint32_t>(1) }};
         }
 
         auto PublicKeyOrToken() const
@@ -589,7 +589,7 @@ namespace xlang::meta::reader
 
         auto Flags() const
         {
-            return GenericParamAttributes{ get_value<uint16_t>(1) };
+            return GenericParamAttributes{{ get_value<uint16_t>(1) }};
         }
 
         auto Owner() const

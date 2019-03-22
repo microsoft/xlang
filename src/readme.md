@@ -9,13 +9,16 @@ xlang uses CMake instead of vcxproj in order to support cross platform builds.
 ### Prerequisites
 
 Building xlang for Windows requires the following to be installed:
-
 * [Visual Studio 2017](https://developer.microsoft.com/windows/downloads), version 15.8.7 or later.
   * Visual Studio's Desktop Development with C++ workload installation is required.
 * [CMake](https://cmake.org/), version 3.9 or later
   * Visual Studio's Desktop Development with C++ workload includes CMake 3.11
 * [Ninja](https://ninja-build.org/), version 1.8 or later
   * Visual Studio's Desktop Development with C++ workload includes Ninja 1.8.2
+* [Windows 10 SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk), Version 1809 or later (Build Number 10.0.17763.0)
+  * Visual Studio does not install this by default with version 15.8.7 or 15.8.8. It is an optional component in Visual Studio 15.8
+* [Visual Studio SDK](https://docs.microsoft.com/en-us/visualstudio/extensibility/installing-the-visual-studio-sdk?view=vs-2017)
+  * The Visual Studio SDK is an optional component installed through Visual Studio setup
 
 Building xlang for Linux requires the following to be installed. The [ubuntu/configure.sh](/src/scripts/ubuntu/configure.sh) script will automatically install these depenencies via [apt](https://en.wikipedia.org/wiki/APT_(Debian)).
 
@@ -94,6 +97,11 @@ The **/library** folder contains the C++ header libraries provided by xlang for 
 
 * **text_writer.h** writes formatted text output.
 
+* **xlang.meta.natvis** provides Visual Studio debug visualizations of xlang::meta types.  Recommended install technique is to create a symlink:
+  > mklink "%USERPROFILE%\Documents\Visual Studio 2017\Visualizers\xlang.meta.natvis" c:\xlang\src\library\xlang.meta.natvis
+
+  See also [Deploying .natvis files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015#BKMK_natvis_location).
+
 ### /Platform
 
 The **/platform** folder contains the declaration and implementations of the common and minimal C API (and platform-specific implementations) used to support xlang on different platforms (otherwise known as the PAL or Platform Adaptation Layer).
@@ -131,3 +139,7 @@ The **/script** folder contains the scripts and tools used to build and bootstra
 * **scorch.cmake** cmake function to delete build artifacts not automatically removed by the clean target.
 
 * **genStringLiteralFiles.cmake** cmake function to generate C++ string literals from files.
+
+### /Package
+
+The **/package** folder contains projects for packaging reusable xlang artifacts.  Some of these, such as the C++/WinRT NuGet package and Visual Studio extension, are regularly built, signed, and published by Microsoft.

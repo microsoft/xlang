@@ -1,0 +1,320 @@
+import "Windows.Foundation.Numerics.idl";
+
+namespace Windows.Foundation.Metadata
+{
+    [attributeusage(target_method, target_property)]
+    [attributename("noexcept")]
+    attribute NoExceptionAttribute
+    {
+    }
+}
+
+namespace test_component
+{
+    delegate void AgileDelegate();
+
+    enum Signed
+    {
+        First = -1,
+        Second = 0,
+        Third = 1
+    };
+
+    [flags]
+    enum Unsigned
+    {
+        First = 0,
+        Second = 1,
+        Third = 2
+    };
+
+    struct Struct
+    {
+        String First;
+        String Second;
+    };
+
+    runtimeclass Simple
+    {
+        Simple();
+
+        void Method();
+    }
+
+    runtimeclass Class
+    {
+        Class();
+        Class(String name);
+
+        void Fail(Boolean value);
+
+        String InInt32(Int32 value);
+        String InString(String value);
+        String InObject(Object value);
+        String InStringable(Windows.Foundation.IStringable value);
+        String InStruct(Struct value);
+        String InStructRef(ref const Struct value);
+
+        void OutInt32(out Int32 value);
+        void OutString(out String value);
+        void OutObject(out Object value);
+        void OutStringable(out Windows.Foundation.IStringable value);
+        void OutStruct(out Struct value);
+
+        Int32 ReturnInt32();
+        String ReturnString();
+        Object ReturnObject();
+        Windows.Foundation.IStringable ReturnStringable();
+        Struct ReturnStruct();
+
+        String InInt32Array(Int32[] value);
+        String InStringArray(String[] value);
+        String InObjectArray(Object[] value);
+        String InStringableArray(Windows.Foundation.IStringable[] value);
+        String InStructArray(Struct[] value);
+
+        void OutInt32Array(out Int32[] value);
+        void OutStringArray(out String[] value);
+        void OutObjectArray(out Object[] value);
+        void OutStringableArray(out Windows.Foundation.IStringable[] value);
+        void OutStructArray(out Struct[] value);
+
+        void RefInt32Array(ref Int32[] value);
+        void RefStringArray(ref String[] value);
+        void RefObjectArray(ref Object[] value);
+        void RefStringableArray(ref Windows.Foundation.IStringable[] value);
+        void RefStructArray(ref Struct[] value);
+
+        Int32[] ReturnInt32Array();
+        String[] ReturnStringArray();
+        Object[] ReturnObjectArray();
+        Windows.Foundation.IStringable[] ReturnStringableArray();
+        Struct[] ReturnStructArray();
+
+        [noexcept] void NoexceptVoid();
+        [noexcept] Int32 NoexceptInt32();
+        [noexcept] String NoexceptString();
+    }
+
+    namespace Composition
+    {
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [exclusiveto(CompositionObject)]
+        [uuid(51205C5E-558A-4F2A-8D39-37BFE1E20DDD)]
+        interface ICompositionObjectFactory
+        {
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [exclusiveto(Visual)]
+        [uuid(AD0FF93E-B502-4EB5-87B4-9A38A71D0137)]
+        interface IVisualFactory
+        {
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [exclusiveto(CompositionObject)]
+        [uuid(BCB4AD45-7609-4550-934F-16002A68FDED)]
+        interface ICompositionObject
+        {
+            void Compositor();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3.0)]
+        [exclusiveto(CompositionObject)]
+        [uuid(EF874EA1-5CFF-4B68-9E30-A1519D08BA03)]
+        interface ICompositionObject2
+        {
+            void StartAnimationGroup();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [exclusiveto(Visual)]
+        [uuid(117E202D-A859-4C89-873B-C2AA566788E3)]
+        interface IVisual
+        {
+            void Offset();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4.0)]
+        [exclusiveto(Visual)]
+        [uuid(3052B611-56C3-4C3E-8BF3-F6E1AD473F06)]
+        interface IVisual2
+        {
+            void ParentForTransform(Visual value);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [exclusiveto(SpriteVisual)]
+        [uuid(08E05581-1AD1-4F97-9757-402D76E4233B)]
+        interface ISpriteVisual
+        {
+            void Brush();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3.0)]
+        [exclusiveto(SpriteVisual)]
+        [uuid(588C9664-997A-4850-91FE-53CB58F81CE9)]
+        interface ISpriteVisual2
+        {
+            void Shadow();
+        }
+
+        [composable(ICompositionObjectFactory, protected, Windows.Foundation.UniversalApiContract, 2.0)]
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [marshaling_behavior(agile)]
+        [threading(both)]
+        runtimeclass CompositionObject
+        {
+            [default] interface ICompositionObject;
+            interface Windows.Foundation.IClosable;
+            [contract(Windows.Foundation.UniversalApiContract, 3.0)] interface ICompositionObject2;
+        }
+
+        [composable(IVisualFactory, protected, Windows.Foundation.UniversalApiContract, 2.0)]
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [marshaling_behavior(agile)]
+        [threading(both)]
+        runtimeclass Visual : CompositionObject
+        {
+            [default] interface IVisual;
+            [contract(Windows.Foundation.UniversalApiContract, 4.0)] interface IVisual2;
+        }
+
+        [activatable(Windows.Foundation.UniversalApiContract, 2.0)]
+        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
+        [marshaling_behavior(agile)]
+        [threading(both)]
+        runtimeclass SpriteVisual : Visual
+        {
+            [default] interface ISpriteVisual;
+            [contract(Windows.Foundation.UniversalApiContract, 3.0)] interface ISpriteVisual2;
+        }
+    }
+
+    namespace Structs
+    {
+        struct All
+        {
+            Windows.Foundation.Numerics.Matrix3x2 A;
+            Windows.Foundation.Numerics.Matrix4x4 B;
+            Windows.Foundation.Numerics.Plane C;
+            Windows.Foundation.Numerics.Quaternion D;
+            Windows.Foundation.Numerics.Vector2 E;
+            Windows.Foundation.Numerics.Vector3 F;
+            Windows.Foundation.Numerics.Vector4 G;
+            Guid H;
+
+            // TODO: uncomment when build server has newer version of midlrt.
+            //HRESULT I;
+            //EventRegistrationToken J;
+        };
+
+        struct Inner
+        {
+            Int32 InnerValue;
+        };
+
+        namespace Nested
+        {
+            struct Outer
+            {
+                test_component.Structs.Inner Depends;
+                Int32 OuterValue;
+            };
+        }
+    }
+
+    namespace Parent
+    {
+        // This validates namespace inclusion rules. The "...Three.h" header must include the 
+        // "...Parent.h" header but skip over the intermediate namespaces as they are empty
+        // and won't be generated and those won't exist.
+
+        struct ParentStruct
+        {
+            Int32 Value;
+        };
+
+        namespace One.Two.Three
+        {
+            struct ThreeStruct
+            {
+                Int32 Value;
+            };
+        }
+    }
+
+    namespace Velocity
+    {
+        // Don't ever define these feature_name definitions yourself!
+        // This is only for testing.
+        // API authors must use the feature macros generated by the build in
+        // order to allow features to be disabled/enabled on given branches.
+        feature_name Feature_AlwaysDisabled = { AlwaysDisabled, TRUE };
+        feature_name Feature_AlwaysEnabled = { AlwaysEnabled, TRUE };
+
+        // This interface is AlwaysDisabled in the type system but not
+        // included in any implementation by default.
+        [feature(Feature_AlwaysDisabled)]
+        interface IInterface1
+        {
+            void IInterface1_Method();
+        }
+
+        // This interface is AlwaysEnabled thus in the type system and thus
+        // always required for compilation.
+        [feature(Feature_AlwaysEnabled)]
+        interface IInterface2
+        {
+            void IInterface2_Method();
+        }
+
+        // The .cpp is included in the project but AlwaysDisabled and thus won't show up
+        // in the module.g.cpp so activation requests will fail.
+        [feature(Feature_AlwaysDisabled)]
+        runtimeclass Class1
+        {
+            Class1();
+            void Class1_Method();
+        }
+
+        // This class is AlwaysEnabled which is treated just like a class with no
+        // feature attribute, thus included and required for compilation.
+        [feature(Feature_AlwaysEnabled)]
+        runtimeclass Class2
+        {
+            Class2();
+            void Class2_Method();
+        }
+
+        // This class is has no source in the project but is AlwaysDisabled and thus
+        // not required for compilation.
+        [feature(Feature_AlwaysDisabled)]
+        runtimeclass Class3
+        {
+            Class3();
+            void Class3_Method();
+        }
+
+        // This class has no feature attribute but requires interfaces with feature attributes.
+        // One interface is always disabled and the other is always enabled.
+        runtimeclass Class4 : IInterface1, IInterface2
+        {
+            Class4();
+            void Class4_Method();
+
+            [feature(Feature_AlwaysDisabled)]
+            {
+                Class4(Int32 one);
+                static void Class4_Static1();
+            }
+
+            [feature(Feature_AlwaysEnabled)]
+            {
+                Class4(Int32 one, Int32 two);
+                static void Class4_Static2();
+            }
+        }
+    }
+}

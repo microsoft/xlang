@@ -6,8 +6,10 @@
 #define XLANG_PLATFORM_WINDOWS 0
 #endif
 
-#if XLANG_PLATFORM_WINDOWS 
+#if XLANG_PLATFORM_WINDOWS
 #include <windows.h>
+#include <shlwapi.h>
+#include <xmllite.h>
 #else
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -24,12 +26,13 @@
 #include <list>
 #include <map>
 #include <optional>
+#include <regex>
+#include <string>
 #include <string_view>
 #include <variant>
 #include <vector>
 #include <set>
 #include <experimental/filesystem>
-#include <experimental/coroutine>
 
 #if defined(_DEBUG)
 #define XLANG_DEBUG
@@ -73,7 +76,7 @@ namespace xlang
     template <typename...T> struct visit_overload : T... { using T::operator()...; };
 
     template <typename V, typename...C>
-    void visit(V&& variant, C&&...call)
+    void call(V&& variant, C&&...call)
     {
         std::visit(visit_overload<C...>{ std::forward<C>(call)... }, std::forward<V>(variant));
     }

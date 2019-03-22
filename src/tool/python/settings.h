@@ -6,12 +6,13 @@ namespace xlang
     {
         std::set<std::string> input;
 
-        std::string output_folder;
+        std::experimental::filesystem::path output_folder;
         std::string module{ "pyrt" };
         bool verbose{};
 
         std::set<std::string> include;
         std::set<std::string> exclude;
+        meta::reader::filter filter;
     };
 
     extern settings_type settings;
