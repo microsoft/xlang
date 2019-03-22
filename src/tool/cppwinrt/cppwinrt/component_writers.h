@@ -558,7 +558,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&& [name, info] : get_interfaces(w, type))
         {
-            if (!info.overridable || is_always_disabled(info.type))
+            if (!info.overridable)
             {
                 continue;
             }
