@@ -839,9 +839,28 @@ namespace xlang
         enumerate_types_impl(type, enumerate_types_impl);
     }
 
+    using method_info = std::tuple<MethodDef, std::vector<type_semantics>>;
+
+    inline bool is_static(std::vector<method_info> const& methods)
+    {
+        XLANG_ASSERT(methods.size() > 0);
+        return is_static(std::get<0>(methods[0]));
+    }
+
+    inline bool is_get_method(std::vector<method_info> const& methods)
+    {
+        XLANG_ASSERT(methods.size() > 0);
+        return ((methods.size() == 1) && is_get_method(std::get<0>(methods[0])));
+    }
+
+    inline bool is_put_method(std::vector<method_info> const& methods)
+    {
+        XLANG_ASSERT(methods.size() > 0);
+        return ((methods.size() == 1) && is_put_method(std::get<0>(methods[0])));
+    }
+
     auto get_methods(TypeDef const& type)
     {
-        using method_info = std::tuple<MethodDef, std::vector<type_semantics>>;
         std::map<std::string_view, std::vector<method_info>> methods{};
 
         enumerate_required_types(type, [&](type_semantics const& semantics)

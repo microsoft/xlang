@@ -97,7 +97,7 @@ namespace pywinrt
             return generic_param_guard{ this };
         }
 
-        [[nodiscard]] auto push_generic_params(std::vector<std::string> const& type_arguments)
+        [[nodiscard]] auto push_generic_params(std::vector<type_semantics> const& type_arguments)
         {
             if (type_arguments.size() == 0)
             {
@@ -108,7 +108,8 @@ namespace pywinrt
 
             for (auto&& type_argument : type_arguments)
             {
-                names.push_back(type_argument);
+                // TODO real code here
+                names.push_back("");
             }
 
             generic_param_stack.push_back(std::move(names));
