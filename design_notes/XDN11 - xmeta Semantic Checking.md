@@ -319,15 +319,51 @@ This was not specified in the grammar and I am unsure whether we will support th
 An **enum type** is a distinct value type that declares a set of named constants.
 
 #### Checks:
-1) Enums with an underlying type of UInt32 must carry the FlagsAttribute. Enums with an underlying type of Int32 must not carry the FlagsAttribute.
+1) An enum type can only be Int32 or UInt32.
 
-2) Enums must have public visibility.
-
-3) Versioning:
-Enums are additively versionable. Subsequent versions of a given enum may add values (aka named constants). Pre-existing values may not be removed or changed. Enum values optionally carry the VersionAttribute to distinguish when specific values were added to the enum type. Enum values without a VersionAttribute are considered to have the same version value as the enclosing enum type.
+<!--
+Enums with an underlying type of UInt32 must carry the FlagsAttribute. Enums with an underlying type of Int32 must not carry the FlagsAttribute.
+Versioning: Enums are additively versionable. Subsequent versions of a given enum may add values (aka named constants). Pre-existing values may not be removed or changed. Enum values optionally carry the VersionAttribute to distinguish when specific values were added to the enum type. Enum values without a VersionAttribute are considered to have the same version value as the enclosing enum type.
+-->
 
 ### Enum members
-1) The constant value for each enum member must be in the range of the underlying type for the enum. The example
+
+#### Definitions:
+Each enum member has its own constant value. This can be assigned **explicitly** or **implicitly**. Explicitly the syntax is `<member-name> = <constant-expression>` followed by an optional comma. Implicitly you just leave the `<member-name>`. Implicit assignment works with the following rules:
+* If it is the first member, assign it zero.
+* Otherwise, assign it the value of the immediately preceding enum member plus one.
+
+For example:
+```
+enum Color
+{
+	   Red,
+	   Green = 10,
+	   Blue
+}
+```
+The associated values are: Red = 0, Green = 10, and Blue = 11 for the following reasons:
+* Red is 0 since it is the first member and is not assigned a constant expression.
+* Green is explicitly given the value 10;
+* Blue is automatically assigned the value one greater than the member that precedes it.
+
+An enum member can **explicitly depend** or **implicitly depend** on other members. It explicitly depends on another member if its assigned constant expression contains the member. A member implicitly depends on another member if it is not assigned a constant expression and it is not the first member. In this case, it implicitly depends on the directly preceding member.
+
+For example:
+```
+enum Color
+{
+	Red = 11,
+	Blue = Red,
+	Green
+}
+```
+Here, Blue explicitly depends on Red. Green implicitly depends on Blue.
+
+#### Semantic checks:
+1) The constant value for each enum member must be in the range of the underlying type for the enum. 
+
+For example:
 ```
 enum Color: UInt32
 {
@@ -338,46 +374,11 @@ enum Color: UInt32
 ```
 results in a compile-time error because the constant values -1, -2, and –3 are not in the range of the underlying integral type UInt32.
 
-2) Multiple enum members may share the same associated value. The example
-```
-enum Color 
-{
-	   Red,
-	   Green,
-	   Blue,
-	Max = Blue
-}
-```
-shows an enum in which two enum members—Blue and Max—have the same associated value.
+2) Member names must be unique to the enum.
 
-3) If the declaration of the enum member has a constant-expression initializer, the value of that constant expression, implicitly converted to the underlying type of the enum. 
+3) The dependency tree of an enum cannot contain itself.
 
-If the declaration has no initializer, it is set implicity as follows: 
-If the enum member is the first enum member declared in the enum type, its associated value is zero.
-
-Otherwise, the associated value of the enum member is obtained by increasing the associated value of the textually preceding enum member by one. This increased value must be within the range of values that can be represented by the underlying type, otherwise a compile-time error occurs.
-The example
-```
-using System;
-enum Color
-{
-	   Red,
-	   Green = 10,
-	   Blue
-}
-```
-The associated values are:
-Red = 0
-Green = 10
-Blue = 11
-for the following reasons:
-•	the enum member Red is automatically assigned the value zero (since it has no initializer and is the first enum member);
-•	the enum member Green is explicitly given the value 10;
-•	and the enum member Blue is automatically assigned the value one greater than the member that textually precedes it.
- 
-
-The associated value of an enum member may not, directly or indirectly, use the value of its own associated enum member. Other than this circularity restriction, enum member initializers may freely refer to other enum member initializers, regardless of their textual position. Within an enum member initializer, values of other enum members are always treated as having the type of their underlying type, so that casts are not necessary when referring to other enum members. 
-The example
+For example:
 ```
 enum Circular
 {
@@ -385,26 +386,15 @@ enum Circular
 	   B
 }
 ```
-results in a compile-time error because the declarations of A and B are circular. A depends on B explicitly, and B depends on A implicitly.
+B implicitly depends on A which explicitly depends on B. Thus, B is within its own dependency tree, which is an error.
 
 4) The following operators can be used on values of enum types: binary + (§5.4.4), binary   (§5.4.5), ^, &, | (§5.6.2), and ~ (§5.3.3).
 
 ### Delegates
-##### Definitions:
-**Delegates** enable scenarios that other languages—such as C++, Pascal, and Modula—have addressed with function pointers. 
+#### Definitions:
+**Delegates** enable scenarios that other languages—such as C++, Pascal, and Modula—have addressed with function pointers.
 
-##### Checks:
-1) Delegates require a GUID identifier. This identifier can be provided explicitly or generated implicitly from the type's name.
+#### Semantic checks:
+1) Delegate names must be unique in their declaration space.
 
-2) Delegate types in CDL are name equivalent, not structurally equivalent. Specifically, two different delegate types that have the same parameter lists and return type are considered different delegate types.
-
-3) Type parameter Example:
-```
-delegate Boolean Predicate<T>(T value);
-class X
-{
-	static Boolean F(Int32 i);
-	static Boolean G(String s);
-}
-``` 
-The method X.F is compatible with the delegate type Predicate<Int32> and the method X.G is compatible with the delegate type Predicate<String>.
+2) The delegate parameter list and type parameters follow the same rules as normal methods.
