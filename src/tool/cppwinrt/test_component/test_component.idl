@@ -7,6 +7,15 @@ namespace Windows.Foundation.Metadata
     attribute NoExceptionAttribute
     {
     }
+
+    [attributeusage(target_runtimeclass)]
+    [attributename("fastabi")]
+    [contract(Windows.Foundation.FoundationContract, 4)]
+    attribute FastAbiAttribute
+    {
+        type Contract;
+        unsigned __int32 Version;
+    }
 }
 
 namespace test_component
@@ -314,6 +323,30 @@ namespace test_component
             {
                 Class4(Int32 one, Int32 two);
                 static void Class4_Static2();
+            }
+        }
+    }
+
+    namespace Fast
+    {
+        [contractversion(3)]
+        apicontract FastContract{};
+
+        [fastabi(FastContract, 1)]
+        [contract(FastContract, 1)]
+        runtimeclass Class
+        {
+            Class();
+            void Class_1();
+
+            [contract(FastContract, 2)]
+            {
+                void Class_2();
+            }
+
+            [contract(FastContract, 3)]
+            {
+                void Class_3();
             }
         }
     }

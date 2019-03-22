@@ -326,6 +326,7 @@ namespace xlang
 
     static auto get_interfaces(writer& w, TypeDef const& type)
     {
+        w.abi_types = false;
         std::map<std::string, interface_info> result;
         get_interfaces_impl(w, result, false, false, false, {}, type.InterfaceImpl());
 
@@ -341,9 +342,14 @@ namespace xlang
     {
         std::vector<TypeDef> result;
 
+        // TODO: implement according to https://osgwiki.com/wiki/FastAbi
+        // The following is wrong and just to get started.
         for (auto&& [interface_name, info] : get_interfaces(w, class_type))
         {
-
+            if (!info.defaulted)
+            {
+                result.push_back(info.type);
+            }
         }
 
         return result;

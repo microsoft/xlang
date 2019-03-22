@@ -655,13 +655,6 @@ namespace xlang
             return;
         }
 
-        // This is just an optional optimization - check whether it actually helps,
-        // perhaps when fastabi_defaults is large.
-        if (!has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute"))
-        {
-            return;
-        }
-
         auto pair = settings.fastabi_defaults.find(type);
 
         if (pair == settings.fastabi_defaults.end())
@@ -669,8 +662,22 @@ namespace xlang
             return;
         }
 
+        w.write(R"(            // fastabi
+)");
 
+        // TODO: write any back pointer functions for bases
 
+        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        {
+            auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+)";
+
+            for (auto&& method : versioned.MethodList())
+            {
+                method_signature signature{ method };
+                w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
+            }
+        }
     }
 
     static void write_interface_abi(writer& w, TypeDef const& type)
