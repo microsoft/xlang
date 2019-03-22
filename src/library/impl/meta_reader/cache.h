@@ -159,7 +159,6 @@ namespace xlang::meta::reader
                 remove(members.enums, name);
                 remove(members.structs, name);
                 remove(members.delegates, name);
-                remove(members.classes, name);
             };
 
             remove("Windows.Foundation", "DateTime");
