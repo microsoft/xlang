@@ -209,17 +209,19 @@ namespace xlang::text
 
             for (auto c : format)
             {
-                if (c == '^')
+                if (!escape)
                 {
-                    escape = true;
-                    continue;
-                }
+                    if (c == '^')
+                    {
+                        escape = true;
+                        continue;
+                    }
 
-                if ((c == '%' || c == '@') && !escape)
-                {
-                    ++count;
+                    if (c == '%' || c == '@')
+                    {
+                        ++count;
+                    }
                 }
-
                 escape = false;
             }
 
@@ -236,18 +238,11 @@ namespace xlang::text
             }
 
             write(value.substr(0, offset));
-            auto next = value[offset + 1];
-            if (next == '%' || next == '@')
-            {
-                write(next);
-                offset++;
-            }
-            else
-            {
-                write('^');
-            }
 
-            write_segment(value.substr(offset + 1));
+            XLANG_ASSERT(offset != value.size() - 1);
+
+            write(value[offset + 1]);
+            write_segment(value.substr(offset + 2));
         }
 
         template <typename First, typename... Rest>
@@ -259,19 +254,10 @@ namespace xlang::text
 
             if (value[offset] == '^')
             {
-                auto next = value[offset + 1];
+                XLANG_ASSERT(offset != value.size() - 1);
 
-                if (next == '%' || next == '@')
-                {
-                    write(next);
-                    offset++;
-                }
-                else
-                {
-                    write('^');
-                }
-
-                write_segment(value.substr(offset + 1), first, rest...);
+                write(value[offset + 1]);
+                write_segment(value.substr(offset + 2), first, rest...);
             }
             else
             {
