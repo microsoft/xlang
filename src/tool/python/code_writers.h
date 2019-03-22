@@ -1490,15 +1490,10 @@ struct pinterface_python_type<%<%>>
             w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
             w.write("virtual std::size_t hash() = 0;\n");
 
-            // TODO: use enumerate_required_types
-            //for (auto&& ii : get_required_interfaces(type))
-            //{
-            //    auto gguard{ w.push_generic_params(ii.type_arguments) };
-            //    for (auto&& method : ii.type.MethodList())
-            //    {
-            //        w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
-            //    }
-            //}
+            for (auto&&[name, methods] : get_methods(type))
+            {
+                w.write("virtual PyObject* %(PyObject*) = 0;\n", name);
+            }
         }
         w.write("};\n");
     }
@@ -1522,20 +1517,37 @@ struct pinterface_python_type<%<%>>
             w.write("@(%<%> o) : _obj(o) {}\n", type.TypeName(), type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
             w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return _obj; }\n");
             w.write("std::size_t hash() override { return py::get_instance_hash(_obj); }\n");
+
+            for (auto&&[name, methods] : get_methods(type))
+            {
+                // TODO: real impl
+                w.write("PyObject* %(PyObject*) override\n{\n    return nullptr;\n}\n", name);
+            }
+
             w.write("\n%<%> _obj{ nullptr };\n", type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
+
+            //enumerate_required_types(type, [&](type_semantics const& semantics)
+            //{
+            //        auto gguard{ w.push_generic_params() };
+            //        for (auto&& method : ii.type.MethodList())
+            //        {
+            //            w.write("\nPyObject* %(PyObject* %) override\n{\n",
+            //                method.Name(),
+            //                bind<write_args_param_name>(method));
+            //            write_method_body(w, type, method);
+            //            w.write("}\n");
+            //        }
+
+            //    for (auto&& method : get_typedef(semantics).MethodList())
+            //    {
+            //        w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
+            //    }
+            //});
+
 
             // TODO: use enumerate_required_types
             //for (auto&& ii : get_required_interfaces(type))
             //{
-            //    auto gguard{ w.push_generic_params(ii.type_arguments) };
-            //    for (auto&& method : ii.type.MethodList())
-            //    {
-            //        w.write("\nPyObject* %(PyObject* %) override\n{\n",
-            //            method.Name(),
-            //            bind<write_args_param_name>(method));
-            //        write_method_body(w, type, method);
-            //        w.write("}\n");
-            //    }
             //}
         }
         w.write("};\n");
