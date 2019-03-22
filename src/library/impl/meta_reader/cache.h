@@ -134,7 +134,12 @@ namespace xlang::meta::reader
         {
             auto remove = [&](auto&& ns, auto&& name)
             {
-                auto& members = m_namespaces[ns];
+                auto m = m_namespaces.find(ns);
+                if (m == m_namespaces.end())
+                {
+                    return;
+                }
+                auto& members = m->second;
 
                 auto remove = [&](auto&& collection, auto&& name)
                 {
@@ -149,12 +154,17 @@ namespace xlang::meta::reader
                     }
                 };
 
-                remove(members.interfaces, name);
-                remove(members.classes, name);
-                remove(members.enums, name);
-                remove(members.structs, name);
-                remove(members.delegates, name);
-                remove(members.classes, name);
+                auto pos = members.types.find(name);
+                if (pos != members.types.end())
+                {
+                    members.types.erase(pos);
+                    remove(members.interfaces, name);
+                    remove(members.classes, name);
+                    remove(members.enums, name);
+                    remove(members.structs, name);
+                    remove(members.delegates, name);
+                    remove(members.classes, name);
+                }
             };
 
             remove("Windows.Foundation", "DateTime");
