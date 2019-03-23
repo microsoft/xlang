@@ -81,27 +81,23 @@ namespace xlang::meta::reader
 
         byte_view seek(uint32_t const offset) const
         {
-            check_available(offset);
-            return{ m_first + offset, m_last };
+            return{ as_array<uint8_t>(offset, 0), m_last };
         }
 
         byte_view sub(uint32_t const offset, uint32_t const size) const
         {
-            check_available(offset + size);
-            return{ m_first + offset, m_first + offset + size };
+            return{ m_first + offset, as_array<uint8_t>(offset + size, 0) };
         }
 
         template <typename T>
         T const& as(uint32_t const offset = 0) const
         {
-            check_available(offset + sizeof(T));
-            return reinterpret_cast<T const&>(*(m_first + offset));
+            return *as_array<T>(offset, 1);
         }
 
         std::string_view as_string(uint32_t const offset = 0) const
         {
             static_assert(sizeof(uint8_t) == 1);
-            check_available(offset + 1);
             auto const length = as<uint8_t>(offset);
             if (length == 0)
             {
@@ -113,8 +109,7 @@ namespace xlang::meta::reader
             }
             else
             {
-                check_available(offset + 1 + length);
-                return { reinterpret_cast<char const*>(m_first + offset + 1), length };
+                return { as_array<char>(offset + 1, length), length };
             }
         }
 
@@ -122,6 +117,10 @@ namespace xlang::meta::reader
         auto as_array(uint32_t const offset, uint32_t const count) const
         {
             check_available(offset + count * sizeof(T));
+            if (offset % alignof(T) != 0)
+            {
+                throw_invalid("Misaligned data");
+            }
             return reinterpret_cast<T const*>(m_first + offset);
         }
 

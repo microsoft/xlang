@@ -53,17 +53,45 @@ namespace xlang::meta::reader
             }
             case 2:
             {
-                uint16_t temp = *reinterpret_cast<uint16_t const*>(ptr);
+                uint16_t temp;
+                if (is_little_endian_processor())
+                {
+                    std::memcpy(&temp, ptr, sizeof(temp));
+                }
+                else
+                {
+                    temp = ptr[0] | (ptr[1] << 8);
+                }
                 return static_cast<T>(temp);
             }
             case 4:
             {
-                uint32_t temp = *reinterpret_cast<uint32_t const*>(ptr);
+                uint32_t temp;
+                if (is_little_endian_processor())
+                {
+                    std::memcpy(&temp, ptr, sizeof(temp));
+                }
+                else
+                {
+                    temp = ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24);
+                }
                 return static_cast<T>(temp);
             }
             default:
             {
-                uint64_t temp = *reinterpret_cast<uint64_t const*>(ptr);
+                uint64_t temp;
+                if (is_little_endian_processor())
+                {
+                    std::memcpy(&temp, ptr, sizeof(temp));
+                }
+                else
+                {
+                    temp = ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) | (ptr[3] << 24) |
+                        (static_cast<uint64_t>(ptr[4]) << 32) |
+                        (static_cast<uint64_t>(ptr[5]) << 40) |
+                        (static_cast<uint64_t>(ptr[6]) << 48) |
+                        (static_cast<uint64_t>(ptr[7]) << 56);
+                }
                 return static_cast<T>(temp);
             }
             }
@@ -128,6 +156,11 @@ namespace xlang::meta::reader
         uint8_t index_size() const noexcept
         {
             return m_row_count < (1 << 16) ? 2 : 4;
+        }
+
+        static constexpr bool is_little_endian_processor()
+        {
+            return *reinterpret_cast<uint16_t const*>("\1\0") == 1;
         }
     };
 
