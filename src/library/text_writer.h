@@ -143,14 +143,12 @@ namespace xlang::text
 
         void flush_to_file(std::string const& filename)
         {
-            if (file_equal(filename))
+            if (!file_equal(filename))
             {
-                return;
+                std::ofstream file{ filename, std::ios::out | std::ios::binary };
+                file.write(m_first.data(), m_first.size());
+                file.write(m_second.data(), m_second.size());
             }
-
-            std::ofstream file{ filename, std::ios::out | std::ios::binary };
-            file.write(m_first.data(), m_first.size());
-            file.write(m_second.data(), m_second.size());
             m_first.clear();
             m_second.clear();
         }
@@ -158,6 +156,17 @@ namespace xlang::text
         void flush_to_file(std::experimental::filesystem::path const& filename)
         {
             flush_to_file(filename.string());
+        }
+
+        std::string flush_to_string()
+        {
+            std::string result;
+            result.reserve(m_first.size() + m_second.size());
+            result.assign(m_first.begin(), m_first.end());
+            result.append(m_second.begin(), m_second.end());
+            m_first.clear();
+            m_second.clear();
+            return result;
         }
 
         char back()
@@ -200,17 +209,19 @@ namespace xlang::text
 
             for (auto c : format)
             {
-                if (c == '^')
+                if (!escape)
                 {
-                    escape = true;
-                    continue;
-                }
+                    if (c == '^')
+                    {
+                        escape = true;
+                        continue;
+                    }
 
-                if ((c == '%' || c == '@') && !escape)
-                {
-                    ++count;
+                    if (c == '%' || c == '@')
+                    {
+                        ++count;
+                    }
                 }
-
                 escape = false;
             }
 
@@ -227,18 +238,11 @@ namespace xlang::text
             }
 
             write(value.substr(0, offset));
-            auto next = value[offset + 1];
-            if (next == '%' || next == '@')
-            {
-                write(next);
-                offset++;
-            }
-            else
-            {
-                write('^');
-            }
 
-            write_segment(value.substr(offset + 1));
+            XLANG_ASSERT(offset != value.size() - 1);
+
+            write(value[offset + 1]);
+            write_segment(value.substr(offset + 2));
         }
 
         template <typename First, typename... Rest>
@@ -250,19 +254,10 @@ namespace xlang::text
 
             if (value[offset] == '^')
             {
-                auto next = value[offset + 1];
+                XLANG_ASSERT(offset != value.size() - 1);
 
-                if (next == '%' || next == '@')
-                {
-                    write(next);
-                    offset++;
-                }
-                else
-                {
-                    write('^');
-                }
-
-                write_segment(value.substr(offset + 1), first, rest...);
+                write(value[offset + 1]);
+                write_segment(value.substr(offset + 2), first, rest...);
             }
             else
             {
