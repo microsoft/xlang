@@ -322,70 +322,70 @@ namespace winrt
     inline hstring to_hstring(uint8_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%hhu", value);
+        swprintf(buffer, std::size(buffer), L"%hhu", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int8_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%hhd", value);
+        swprintf(buffer, std::size(buffer), L"%hhd", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint16_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%hu", value);
+        swprintf(buffer, std::size(buffer), L"%hu", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int16_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%hd", value);
+        swprintf(buffer, std::size(buffer), L"%hd", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint32_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%I32u", value);
+        swprintf(buffer, std::size(buffer), L"%I32u", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int32_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%I32d", value);
+        swprintf(buffer, std::size(buffer), L"%I32d", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint64_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%I64u", value);
+        swprintf(buffer, std::size(buffer), L"%I64u", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int64_t value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%I64d", value);
+        swprintf(buffer, std::size(buffer), L"%I64d", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(float value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%G", value);
+        swprintf(buffer, std::size(buffer), L"%G", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(double value)
     {
         wchar_t buffer[32];
-        swprintf(buffer, 32, L"%G", value);
+        swprintf(buffer, std::size(buffer), L"%G", value);
         return hstring{ buffer };
     }
 
@@ -417,7 +417,7 @@ namespace winrt
     {
         wchar_t buffer[40];
         //{00000000-0000-0000-0000-000000000000}
-        swprintf(buffer, 40, L"{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
+        swprintf(buffer, std::size(buffer), L"{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
             value.Data1, value.Data2, value.Data3, value.Data4[0], value.Data4[1],
             value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6], value.Data4[7]);
         return hstring{ buffer };
