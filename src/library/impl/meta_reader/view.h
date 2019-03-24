@@ -79,6 +79,17 @@ namespace xlang::meta::reader
             return size() > 0;
         }
 
+        template <typename T>
+        auto as_array(uint32_t const offset, uint32_t const count) const
+        {
+            check_available(offset + count * sizeof(T));
+            if (offset % alignof(T) != 0)
+            {
+                throw_invalid("Misaligned data");
+            }
+            return reinterpret_cast<T const*>(m_first + offset);
+        }
+
         byte_view seek(uint32_t const offset) const
         {
             return{ as_array<uint8_t>(offset, 0), m_last };
@@ -111,17 +122,6 @@ namespace xlang::meta::reader
             {
                 return { as_array<char>(offset + 1, length), length };
             }
-        }
-
-        template <typename T>
-        auto as_array(uint32_t const offset, uint32_t const count) const
-        {
-            check_available(offset + count * sizeof(T));
-            if (offset % alignof(T) != 0)
-            {
-                throw_invalid("Misaligned data");
-            }
-            return reinterpret_cast<T const*>(m_first + offset);
         }
 
     private:

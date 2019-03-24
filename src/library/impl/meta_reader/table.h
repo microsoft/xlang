@@ -160,6 +160,12 @@ namespace xlang::meta::reader
 
         static constexpr bool is_little_endian_processor()
         {
+            // C++20's std::endian will improve this
+#ifdef _WIN32
+            return true;
+#else
+            return __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__;
+#endif
             return *reinterpret_cast<uint16_t const*>("\1\0") == 1;
         }
     };
