@@ -164,9 +164,9 @@ namespace xlang
                 ++params.first;
             }
 
-            for (uint32_t i{}; i != m_method.Params().size(); ++i)
+            for (uint32_t i{}; i != size(m_method.Params()); ++i)
             {
-                m_params.emplace_back(params.first + i, m_method.Params().data() + i);
+                m_params.emplace_back(params.first + i, &m_method.Params().first[i]);
             }
         }
 
