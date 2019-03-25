@@ -212,6 +212,7 @@
     <ClCompile Include="Composition.cpp" />
     <ClCompile Include="custom_error.cpp" />
     <ClCompile Include="enum.cpp" />
+    <ClCompile Include="fastabi.cpp" />
     <ClCompile Include="final_release.cpp" />
     <ClCompile Include="GetMany.cpp" />
     <ClCompile Include="iid_ppv_args.cpp" />

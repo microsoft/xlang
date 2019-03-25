@@ -2702,11 +2702,24 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             {
                 if (!factory.type)
                 {
-                    auto format = R"(    inline %::%() :
+                    std::string_view format;
+
+                    if (has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute"))
+                    {
+                        format = R"(    inline %::%() :
+        %(impl::call_factory<%>([](auto&& f) { return impl::fast_activate<%>(f); }))
+    {
+    }
+)";
+                    }
+                    else
+                    {
+                        format = R"(    inline %::%() :
         %(impl::call_factory<%>([](auto&& f) { return f.template ActivateInstance<%>(); }))
     {
     }
 )";
+                    }
 
                     w.write(format,
                         type_name,

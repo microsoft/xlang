@@ -5,7 +5,7 @@ namespace winrt::test_component::Fast::implementation
 {
     struct Class : ClassT<Class>
     {
-        Class() = default;
+        Class();
 
         hstring Class_1();
         hstring Class_2();

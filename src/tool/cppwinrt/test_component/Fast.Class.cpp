@@ -4,6 +4,10 @@
 
 namespace winrt::test_component::Fast::implementation
 {
+    Class::Class()
+    {
+    }
+
     hstring Class::Class_1()
     {
         throw hresult_not_implemented();

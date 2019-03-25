@@ -413,3 +413,14 @@ namespace winrt
         };
     }
 }
+
+namespace winrt::impl
+{
+    template <typename T>
+    T fast_activate(Windows::Foundation::IActivationFactory const& factory)
+    {
+        void* result{};
+        check_hresult((*(impl::abi_t<Windows::Foundation::IActivationFactory>**)&factory)->ActivateInstance(&result));
+        return{ result, take_ownership_from_abi };
+    }
+}
