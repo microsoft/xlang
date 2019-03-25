@@ -313,9 +313,9 @@ namespace xlang::meta::reader
             return m_ret_type;
         }
 
-        auto const& Params() const noexcept
+        auto Params() const noexcept
         {
-            return m_params;
+            return std::pair{ m_params.cbegin(), m_params.cend() };
         }
 
     private:
