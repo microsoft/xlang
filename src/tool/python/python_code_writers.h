@@ -469,7 +469,7 @@ def _instance(self):
         }
     }
 
-    void write_python_methods(writer& w, TypeDef const& type)
+    void write_python_methods(writer& w, TypeDef const& /*type*/)
     {
         //auto overloads = get_overloaded_method_names(type);
 
@@ -515,7 +515,7 @@ def _instance(self):
         }
     }
 
-    void write_python_properties(writer& w, TypeDef const& type)
+    void write_python_properties(writer& /*w*/, TypeDef const& /*type*/)
     {
         //enumerate_required_types(type, [&](TypeDef const& type)
         //{

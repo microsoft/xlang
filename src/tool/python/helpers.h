@@ -455,6 +455,11 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "put_");
     }
 
+    bool is_python_setter(MethodDef const& method)
+    {
+        return is_put_method(method) && !is_static(method);
+    }
+
     inline bool is_add_method(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "add_");
@@ -839,11 +844,9 @@ namespace xlang
         enumerate_types_impl(type, enumerate_types_impl);
     }
 
-    using method_info = std::tuple<MethodDef, std::vector<type_semantics>>;
-    auto get_methods(TypeDef const& type, bool include_special = false)
+    template <typename F>
+    void enumerate_methods(TypeDef const& type, F func, bool include_special = false)
     {
-        std::map<std::string_view, std::vector<method_info>> methods{};
-
         enumerate_required_types(type, [&](type_semantics const& semantics)
         {
             auto generic_args = std::visit(
@@ -858,18 +861,41 @@ namespace xlang
                 if (is_constructor(method)) continue;
                 if (!include_special && method.SpecialName()) continue;
 
-                auto& v = methods[method.Name()];
-                XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& t) { return is_static(std::get<0>(t)) == is_static(method); }));
-                v.push_back(std::make_tuple(method, generic_args));
+                func(method, generic_args);
             }
         });
-        return std::move(methods);
     }
 
-    using property_info = std::tuple<Property, std::vector<type_semantics>>;
-    auto get_properties(TypeDef const& type)
+    template <typename F>
+    void enumerate_all_methods(TypeDef const& type, F func)
     {
-        std::vector<property_info> properties{};
+        enumerate_methods(type, func, true);
+    }
+
+    auto get_overloaded_method_names(TypeDef const& type)
+    {
+        std::set<std::string_view> method_names;
+        std::set<std::string_view> overloaded_methods;
+
+        enumerate_methods(type, [&](auto const& method, auto const& /*semantics*/)
+        {
+            auto name = method.Name();
+            if (contains(method_names, name))
+            {
+                overloaded_methods.insert(name);
+            }
+            else
+            {
+                method_names.insert(name);
+            }
+        });
+
+        return std::move(overloaded_methods);
+    }
+
+    template <typename F>
+    void enumerate_properties(TypeDef const& type, F func)
+    {
         enumerate_required_types(type, [&](type_semantics const& semantics)
         {
             auto generic_args = std::visit(
@@ -881,16 +907,14 @@ namespace xlang
 
             for (auto&& prop : get_typedef(semantics).PropertyList())
             {
-                properties.push_back(std::make_tuple(prop, generic_args));
+                func(prop, generic_args);
             }
         });
-        return std::move(properties);
     }
 
-    using event_info = std::tuple<Event, std::vector<type_semantics>>;
-    auto get_events(TypeDef const& type)
+    template <typename F>
+    void enumerate_events(TypeDef const& type, F func)
     {
-        std::vector<event_info> events{};
         enumerate_required_types(type, [&](type_semantics const& semantics)
         {
             auto generic_args = std::visit(
@@ -902,9 +926,8 @@ namespace xlang
 
             for (auto&& evt : get_typedef(semantics).EventList())
             {
-                events.push_back(std::make_tuple(evt, generic_args));
+                func(evt, generic_args);
             }
         });
-        return std::move(events);
     }
 }

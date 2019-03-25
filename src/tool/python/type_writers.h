@@ -106,10 +106,10 @@ namespace pywinrt
 
             std::vector<std::string> names;
 
-            for (auto&& type_argument : type_arguments)
+            for (auto&& arg : type_arguments)
             {
                 // TODO real code here
-                names.push_back("");
+                names.push_back(write_temp("%", arg));
             }
 
             generic_param_stack.push_back(std::move(names));
@@ -511,6 +511,73 @@ namespace pywinrt
             {
                 write(type);
             });
+        }
+
+        void write(fundamental_type type)
+        {
+            switch (type)
+            {
+            case fundamental_type::Boolean:
+                write(ElementType::Boolean);
+                break;
+            case fundamental_type::Char:
+                write(ElementType::Char);
+                break;
+            case fundamental_type::Int8:
+                write(ElementType::I1);
+                break;
+            case fundamental_type::UInt8:
+                write(ElementType::U1);
+                break;
+            case fundamental_type::Int16:
+                write(ElementType::I2);
+                break;
+            case fundamental_type::UInt16:
+                write(ElementType::U2);
+                break;
+            case fundamental_type::Int32:
+                write(ElementType::I4);
+                break;
+            case fundamental_type::UInt32:
+                write(ElementType::U4);
+                break;
+            case fundamental_type::Int64:
+                write(ElementType::I8);
+                break;
+            case fundamental_type::UInt64:
+                write(ElementType::U8);
+                break;
+            case fundamental_type::Float:
+                write(ElementType::R4);
+                break;
+            case fundamental_type::Double:
+                write(ElementType::R8);
+                break;
+            case fundamental_type::String:
+                write(ElementType::String);
+                break;
+            }
+        }
+
+        void write(object_type const&)
+        {
+            write(ElementType::Object);
+        }
+
+        void write(guid_type const&)
+        {
+            write("winrt::guid");
+        }
+
+        void write(generic_type_instance type)
+        {
+            write("%<%>", type.generic_type, bind_list(", ", type.generic_args));
+        }
+
+        void write(type_semantics semantics)
+        {
+            call(semantics,
+                [&](auto&& type) { write(type); });
         }
     };
 
