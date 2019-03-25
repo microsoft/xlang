@@ -298,9 +298,6 @@ namespace $(RootNamespace)
         <Message Text="CppWinRTMdMerge output: @(MdMergeOutput)" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
-  <!--TODO: Build platform projection from SDK WinMD files, possibly NuGet (doesn't support native)-->
-  <!--TODO: override SDK uap.props assignment of CppWinRT_IncludePath-->
-  <!--Build reference projection from WinMD project references and dynamic library project references-->
     <Target Name="CppWinRTMakePlatformProjection"
             DependsOnTargets="GetCppWinRTPlatformWinMDReferences;$(CppWinRTMakePlatformProjectionDependsOn)"
             Inputs="@(CppWinRTPlatformWinMDReferences)"
@@ -397,7 +394,6 @@ namespace $(RootNamespace)
             <_CppwinrtParameters>$(CppWinRTCommandVerbosity) -overwrite -name $(RootNamespace) $(CppWinRTCommandPrecompiledHeader) $(CppWinRTCommandUsePrefixes) -comp &quot;$(GeneratedFilesDir)sources&quot;</_CppwinrtParameters>
             <_CppwinrtParameters>$(_CppwinrtParameters) @(_CppwinrtCompInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
             <_CppwinrtParameters>$(_CppwinrtParameters) @(_CppwinrtCompRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
-            <!--<_CppwinrtParameters Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(_CppwinrtParameters) -ref $(CppWinRTTargetPlatformReferences)</_CppwinrtParameters>-->
             <_CppwinrtParameters>$(_CppwinrtParameters) -out &quot;$(GeneratedFilesDir).&quot;</_CppwinrtParameters>
         </PropertyGroup>
         <WriteLinesToFile Condition="!$(CppWinRTWriteOnlyWhenDifferent)"
