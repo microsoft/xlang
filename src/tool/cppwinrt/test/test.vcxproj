@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{D2961EA1-A8CA-4A62-B760-948403DC8494}</ProjectGuid>
     <RootNamespace>unittests</RootNamespace>
-    <ProjectName>test_cpp</ProjectName>
+    <ProjectName>test</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\cppwinrt.props" />
@@ -212,7 +212,6 @@
     <ClCompile Include="Composition.cpp" />
     <ClCompile Include="custom_error.cpp" />
     <ClCompile Include="enum.cpp" />
-    <ClCompile Include="fastabi.cpp" />
     <ClCompile Include="final_release.cpp" />
     <ClCompile Include="GetMany.cpp" />
     <ClCompile Include="iid_ppv_args.cpp" />

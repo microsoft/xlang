@@ -1,0 +1,38 @@
+import "Windows.Foundation.idl";
+
+namespace Windows.Foundation.Metadata
+{
+    [attributeusage(target_runtimeclass)]
+    [attributename("fastabi")]
+    [contract(Windows.Foundation.FoundationContract, 4)]
+    attribute FastAbiAttribute
+    {
+        type Contract;
+        unsigned __int32 Version;
+    }
+}
+
+namespace test_component_fast
+{
+    [contractversion(3)]
+    apicontract FastContract{};
+
+    [fastabi(FastContract, 1)]
+    [contract(FastContract, 1)]
+    runtimeclass Simple
+    {
+        Simple();
+
+        String Method1();
+
+        [contract(FastContract, 2)]
+        {
+            String Method2();
+        }
+
+        [contract(FastContract, 3)]
+        {
+            String Method3();
+        }
+    }
+}

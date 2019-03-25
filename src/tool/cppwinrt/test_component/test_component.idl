@@ -326,29 +326,4 @@ namespace test_component
             }
         }
     }
-
-    // TODO: move this to a separate test component with separate test apps for fast/slow consumption
-    namespace Fast
-    {
-        [contractversion(3)]
-        apicontract FastContract{};
-
-        [fastabi(FastContract, 1)]
-        [contract(FastContract, 1)]
-        runtimeclass Class
-        {
-            Class();
-            String Class_1();
-
-            [contract(FastContract, 2)]
-            {
-                String Class_2();
-            }
-
-            [contract(FastContract, 3)]
-            {
-                String Class_3();
-            }
-        }
-    }
 }
