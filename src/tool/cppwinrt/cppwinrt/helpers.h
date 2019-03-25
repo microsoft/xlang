@@ -157,6 +157,11 @@ namespace xlang
         return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptionAttribute");
     }
 
+    static bool has_fastabi(TypeDef const& type)
+    {
+        return settings.fastabi && has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute");
+    }
+
     static bool is_always_disabled(TypeDef const& type)
     {
         auto feature = get_attribute(type, "Windows.Foundation.Metadata", "FeatureAttribute");

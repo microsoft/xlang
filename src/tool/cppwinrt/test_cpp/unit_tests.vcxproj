@@ -153,7 +153,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component.winmd $(OutputPath)test_component_no_pch.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component.winmd $(OutputPath)test_component_no_pch.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

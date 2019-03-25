@@ -1020,6 +1020,67 @@ namespace xlang
         }
     }
 
+    static void write_consume_definition(writer& w, TypeDef const& type, MethodDef const& method, std::pair<GenericParam, GenericParam> const& generics, std::string_view const& type_impl_name)
+    {
+        auto method_name = get_name(method);
+        method_signature signature{ method };
+        w.async_types = is_async(method, signature);
+
+        std::string_view format;
+
+        if (is_noexcept(method))
+        {
+            format = R"(    template <typename D%> % consume_%<D%>::%(%) const noexcept
+    {%
+        WINRT_VERIFY_(0, WINRT_SHIM(%)->%(%));%
+    }
+)";
+        }
+        else
+        {
+            format = R"(    template <typename D%> % consume_%<D%>::%(%) const
+    {%
+        check_hresult(WINRT_SHIM(%)->%(%));%
+    }
+)";
+        }
+
+        w.write(format,
+            bind<write_comma_generic_typenames>(generics),
+            signature.return_signature(),
+            type_impl_name,
+            bind<write_comma_generic_types>(generics),
+            method_name,
+            bind<write_consume_params>(signature),
+            bind<write_consume_return_type>(signature),
+            type,
+            get_abi_name(method),
+            bind<write_abi_args>(signature),
+            bind<write_consume_return_statement>(signature));
+
+        if (is_add_overload(method))
+        {
+            format = R"(    template <typename D%> typename consume_%<D%>::%_revoker consume_%<D%>::%(auto_revoke_t, %) const
+    {
+        return impl::make_event_revoker<D, %_revoker>(this, %(%));
+    }
+)";
+
+            w.write(format,
+                bind<write_comma_generic_typenames>(generics),
+                type_impl_name,
+                bind<write_comma_generic_types>(generics),
+                method_name,
+                type_impl_name,
+                bind<write_comma_generic_types>(generics),
+                method_name,
+                bind<write_consume_params>(signature),
+                method_name,
+                method_name,
+                bind<write_consume_args>(signature));
+        }
+    }
+
     static void write_consume_definitions(writer& w, TypeDef const& type)
     {
         auto generics = type.GenericParam();
@@ -1036,62 +1097,26 @@ namespace xlang
 
         for (auto&& method : type.MethodList())
         {
-            auto method_name = get_name(method);
-            method_signature signature{ method };
-            w.async_types = is_async(method, signature);
+            write_consume_definition(w, type, method, generics, type_impl_name);
+        }
 
-            std::string_view format;
+        if (!settings.fastabi)
+        {
+            return;
+        }
 
-            if (is_noexcept(method))
+        auto pair = settings.fastabi_defaults.find(type);
+
+        if (pair == settings.fastabi_defaults.end())
+        {
+            return;
+        }
+
+        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        {
+            for (auto&& method : versioned.MethodList())
             {
-                format = R"(    template <typename D%> % consume_%<D%>::%(%) const noexcept
-    {%
-        WINRT_VERIFY_(0, WINRT_SHIM(%)->%(%));%
-    }
-)";
-            }
-            else
-            {
-                format = R"(    template <typename D%> % consume_%<D%>::%(%) const
-    {%
-        check_hresult(WINRT_SHIM(%)->%(%));%
-    }
-)";
-            }
-
-            w.write(format,
-                bind<write_comma_generic_typenames>(generics),
-                signature.return_signature(),
-                type_impl_name,
-                bind<write_comma_generic_types>(generics),
-                method_name,
-                bind<write_consume_params>(signature),
-                bind<write_consume_return_type>(signature),
-                type,
-                get_abi_name(method),
-                bind<write_abi_args>(signature),
-                bind<write_consume_return_statement>(signature));
-
-            if (is_add_overload(method))
-            {
-                format = R"(    template <typename D%> typename consume_%<D%>::%_revoker consume_%<D%>::%(auto_revoke_t, %) const
-    {
-        return impl::make_event_revoker<D, %_revoker>(this, %(%));
-    }
-)";
-
-                w.write(format,
-                    bind<write_comma_generic_typenames>(generics),
-                    type_impl_name,
-                    bind<write_comma_generic_types>(generics),
-                    method_name,
-                    type_impl_name,
-                    bind<write_comma_generic_types>(generics),
-                    method_name,
-                    bind<write_consume_params>(signature),
-                    method_name,
-                    method_name,
-                    bind<write_consume_args>(signature));
+                write_consume_definition(w, type, method, generics, type_impl_name);
             }
         }
     }
@@ -2077,7 +2102,11 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 }
             }
         }
+    }
 
+    static void write_fast_class_usings(writer& w, TypeDef const& type)
+    {
+        // TODO: write class usings excluding those the form part of the fast abi
     }
 
     static void write_interface(writer& w, TypeDef const& type)
@@ -2483,7 +2512,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         return promote;
     }
 
-    static void write_slow_class_requires(writer& w, TypeDef const& type)
+    static void write_class_requires(writer& w, TypeDef const& type)
     {
         bool first{ true };
 
@@ -2507,6 +2536,11 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
+    static void write_fast_class_requires(writer& w, TypeDef const& type)
+    {
+        // TODO: write required classes excluding any that form part of the fastabi
+    }
+
     static void write_class_base(writer& w, TypeDef const& type)
     {
         bool first{ true };
@@ -2526,6 +2560,12 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         {
             w.write('>');
         }
+    }
+
+    static void write_fast_class_base(writer& w, TypeDef const& type)
+    {
+        // TODO: something that returns a (non-copyable) producer_ref with the non-owning back pointer
+        // for each base...
     }
 
     static void write_constructor_declarations(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
@@ -2724,7 +2764,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 {
                     std::string_view format;
 
-                    if (has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute"))
+                    if (has_fastabi(type))
                     {
                         format = R"(    inline %::%() :
         %(impl::call_factory<%>([](auto&& f) { return impl::fast_activate<%>(f); }))
@@ -2780,12 +2820,37 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             type_name,
             base_type,
             bind<write_class_base>(type),
-            bind<write_slow_class_requires>(type),
+            bind<write_class_requires>(type),
             type_name,
             type_name,
             base_type,
             bind<write_constructor_declarations>(type, factories),
             bind<write_class_usings>(type),
+            bind_each<write_static_declaration>(factories));
+    }
+
+    static void write_fast_class(writer& w, TypeDef const& type, coded_index<TypeDefOrRef> const& base_type)
+    {
+        auto type_name = type.TypeName();
+        auto factories = get_factories(w, type);
+
+        auto format = R"(    struct WINRT_EBO % : %%%
+    {
+        %(std::nullptr_t) noexcept {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
+%%%    };
+)";
+
+        w.write(format,
+            type_name,
+            base_type,
+            bind<write_fast_class_base>(type),
+            bind<write_fast_class_requires>(type),
+            type_name,
+            type_name,
+            base_type,
+            bind<write_constructor_declarations>(type, factories),
+            bind<write_fast_class_usings>(type),
             bind_each<write_static_declaration>(factories));
     }
 
@@ -2810,7 +2875,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         if (auto default_interface = get_default_interface(type))
         {
-            write_slow_class(w, type, default_interface);
+            if (has_fastabi(type))
+            {
+                write_fast_class(w, type, default_interface);
+            }
+            else
+            {
+                write_slow_class(w, type, default_interface);
+            }
         }
         else
         {

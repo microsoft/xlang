@@ -220,7 +220,7 @@ Where <spec> is one or more of:
         {
             for (auto&& type : members.classes)
             {
-                if (!has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute"))
+                if (!has_fastabi(type))
                 {
                     continue;
                 }
