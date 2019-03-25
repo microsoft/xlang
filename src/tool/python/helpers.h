@@ -840,26 +840,7 @@ namespace xlang
     }
 
     using method_info = std::tuple<MethodDef, std::vector<type_semantics>>;
-
-    inline bool is_static(std::vector<method_info> const& methods)
-    {
-        XLANG_ASSERT(methods.size() > 0);
-        return is_static(std::get<0>(methods[0]));
-    }
-
-    inline bool is_get_method(std::vector<method_info> const& methods)
-    {
-        XLANG_ASSERT(methods.size() > 0);
-        return ((methods.size() == 1) && is_get_method(std::get<0>(methods[0])));
-    }
-
-    inline bool is_put_method(std::vector<method_info> const& methods)
-    {
-        XLANG_ASSERT(methods.size() > 0);
-        return ((methods.size() == 1) && is_put_method(std::get<0>(methods[0])));
-    }
-
-    auto get_methods(TypeDef const& type)
+    auto get_methods(TypeDef const& type, bool include_special = false)
     {
         std::map<std::string_view, std::vector<method_info>> methods{};
 
@@ -875,12 +856,55 @@ namespace xlang
             for (auto&& method : get_typedef(semantics).MethodList())
             {
                 if (is_constructor(method)) continue;
+                if (!include_special && method.SpecialName()) continue;
 
                 auto& v = methods[method.Name()];
                 XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& t) { return is_static(std::get<0>(t)) == is_static(method); }));
-                v.push_back(std::make_tuple(method, std::move(generic_args)));
+                v.push_back(std::make_tuple(method, generic_args));
             }
         });
         return std::move(methods);
+    }
+
+    using property_info = std::tuple<Property, std::vector<type_semantics>>;
+    auto get_properties(TypeDef const& type)
+    {
+        std::vector<property_info> properties{};
+        enumerate_required_types(type, [&](type_semantics const& semantics)
+        {
+            auto generic_args = std::visit(
+                impl::overloaded{
+                    [](type_definition) -> std::vector<type_semantics> { return {}; },
+                    [](generic_type_instance type_instance) { return type_instance.generic_args; },
+                    [](auto) -> std::vector<type_semantics> { throw_invalid("type doesn't contain typedef"); }
+                }, semantics);
+
+            for (auto&& prop : get_typedef(semantics).PropertyList())
+            {
+                properties.push_back(std::make_tuple(prop, generic_args));
+            }
+        });
+        return std::move(properties);
+    }
+
+    using event_info = std::tuple<Event, std::vector<type_semantics>>;
+    auto get_events(TypeDef const& type)
+    {
+        std::vector<event_info> events{};
+        enumerate_required_types(type, [&](type_semantics const& semantics)
+        {
+            auto generic_args = std::visit(
+                impl::overloaded{
+                    [](type_definition) -> std::vector<type_semantics> { return {}; },
+                    [](generic_type_instance type_instance) { return type_instance.generic_args; },
+                    [](auto) -> std::vector<type_semantics> { throw_invalid("type doesn't contain typedef"); }
+                }, semantics);
+
+            for (auto&& evt : get_typedef(semantics).EventList())
+            {
+                events.push_back(std::make_tuple(evt, generic_args));
+            }
+        });
+        return std::move(events);
     }
 }
