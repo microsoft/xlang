@@ -327,6 +327,7 @@ namespace test_component
         }
     }
 
+    // TODO: move this to a separate test component with separate test apps for fast/slow consumption
     namespace Fast
     {
         [contractversion(3)]

@@ -648,7 +648,7 @@ namespace xlang
         }
     }
 
-    static void write_interface_abi_fastabi(writer& w, TypeDef const& default_interface)
+    static void write_fast_interface_abi(writer& w, TypeDef const& default_interface)
     {
         if (!settings.fastabi)
         {
@@ -719,7 +719,7 @@ namespace xlang
             w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
         }
 
-        write_interface_abi_fastabi(w, type);
+        write_fast_interface_abi(w, type);
 
         w.write(R"(        };
     };
@@ -929,7 +929,7 @@ namespace xlang
         }
     }
 
-    static void write_consume_declarations_fastabi(writer& w, TypeDef const& default_interface)
+    static void write_fast_consume_declarations(writer& w, TypeDef const& default_interface)
     {
         auto pair = settings.fastabi_defaults.find(default_interface);
 
@@ -1334,7 +1334,7 @@ namespace xlang
             w.write(format,
                 impl_name,
                 bind_each<write_consume_declaration>(type.MethodList()),
-                bind<write_consume_declarations_fastabi>(type),
+                bind<write_fast_consume_declarations>(type),
                 bind<write_consume_extensions>(type),
                 type,
                 impl_name);
@@ -1356,7 +1356,7 @@ namespace xlang
                 bind<write_generic_typenames>(generics),
                 impl_name,
                 bind_each<write_consume_declaration>(type.MethodList()),
-                bind<write_consume_declarations_fastabi>(type),
+                bind<write_fast_consume_declarations>(type),
                 bind<write_consume_extensions>(type),
                 bind<write_generic_typenames>(generics),
                 type,
@@ -1684,7 +1684,7 @@ namespace xlang
             bind<write_produce_upcall>(method, signature));
     }
 
-    static void write_produce_methods_fastabi(writer& w, TypeDef const& default_interface)
+    static void write_fast_produce_methods(writer& w, TypeDef const& default_interface)
     {
         if (!settings.fastabi)
         {
@@ -1723,7 +1723,7 @@ namespace xlang
             type,
             type,
             bind_each<write_produce_method>(type.MethodList()),
-            bind<write_produce_methods_fastabi>(type));
+            bind<write_fast_produce_methods>(type));
     }
 
     static void write_dispatch_overridable_method(writer& w, MethodDef const& method)

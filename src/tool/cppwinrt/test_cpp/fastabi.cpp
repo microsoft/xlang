@@ -4,11 +4,20 @@
 using namespace winrt;
 using namespace test_component::Fast;
 
+namespace
+{
+    bool test()
+    {
+        Class c;
+
+        return 
+            c.Class_1() == L"one" &&
+            c.Class_2() == L"two" &&
+            c.Class_3() == L"three";
+    }
+}
+
 TEST_CASE("fastabi")
 {
-    Class c;
-
-    c.Class_1();
-    c.Class_2();
-    c.Class_3();
+    REQUIRE(test());
 }
