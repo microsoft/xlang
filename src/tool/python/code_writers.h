@@ -490,6 +490,14 @@ static void _dealloc_@(%* self)
                 bind<write_method_cpp_name>(method),
                 bind_list<write_param_name>(", ", signature.params()));
         }
+
+        // python setters never have a return. write_method_body_contents's caller is responsible 
+        // for writing the correct Python C API return value
+        if (is_python_setter(method))
+        {
+            return;
+        }
+
         w.write("\n");
 
         // Convert return values and out parameters from C++ -> Python
@@ -529,14 +537,7 @@ if (!%)
         // Return Python projected return/out params
         if (return_values.size() == 0)
         {
-            if (is_python_setter(method))
-            {
-                w.write("return 0;\n");
-            }
-            else
-            {
-                w.write("Py_RETURN_NONE;\n");
-            }
+            w.write("Py_RETURN_NONE;\n");
         }
         else if (return_values.size() == 1)
         {
@@ -548,88 +549,58 @@ if (!%)
         }
     }
 
-    void write_method_body(writer& w, TypeDef const& type, MethodDef const& method)
-    {
-        if (get_argument_convention(method) == argument_convention::variable_args)
-        {
-            method_signature signature{ method };
-            writer::indent_guard g{ w };
-
-            auto format = "return py::arg_count_invoker(args, %, [=](PyObject* args) -> PyObject* {\n%});\n";
-            w.write(format, count_in_param(signature.params()), bind<write_method_body_contents>(type, method));
-        }
-        else
-        {
-            writer::indent_guard g{ w };
-
-            auto format = "return py::trycatch_invoker([=]() -> PyObject* {\n%});\n";
-            w.write(format, bind<write_method_body_contents>(type, method));
-        }
-    }
-
-    void write_method_function(writer& w, TypeDef const& type, MethodDef const& method)
-    {
-        w.write("\nstatic PyObject* %(%* %, PyObject* %)\n{\n",
-            bind<write_method_function_name>(type, method),
-            bind<write_pywrapper_type>(type),
-            bind<write_self_param_name>(method),
-            bind<write_args_param_name>(method));
-        write_method_body(w, type, method);
-        w.write("}\n");
-    }
-
-    void write_pinterface_method_function(writer& w, TypeDef const& type, MethodDef const& method)
-    {
-        auto format = R"(
-static PyObject* %(%* self, PyObject* args)
-{
-    return self->obj->%(args);
-}
-)";
-        w.write(format,
-            bind<write_method_function_name>(type, method),
-            bind<write_pywrapper_type>(type),
-            method.Name());
-    }
-
-    void write_class_functions(writer& w, TypeDef const& type)
-    {
-        for (auto&& method : type.MethodList())
-        {
-            write_method_function(w, type, method);
-        }
-    }
-
-    void write_interface_functions(writer& /*w*/, TypeDef const& /*type*/)
-    {
-        //auto ptype = is_ptype(type);
-
-        //for (auto&& ii : get_required_interfaces(type))
-        //{
-        //    auto guard{ w.push_generic_params(ii.type_arguments) };
-
-        //    for (auto&& method : ii.type.MethodList())
-        //    {
-        //        if (ptype)
-        //        {
-        //            write_pinterface_method_function(w, type, method);
-        //        }
-        //        else
-        //        {
-        //            write_method_function(w, type, method);
-        //        }
-        //    }
-        //}
-    }
-
-
-    void write_from_function(writer& w, TypeDef const& type)
-    {
-        if (is_static(type) || is_ptype(type)) return;
-
-        w.write(strings::from_function, type.TypeName(), type);
-    }
-
+//    void write_method_body(writer& w, TypeDef const& type, MethodDef const& method)
+//    {
+//        if (get_argument_convention(method) == argument_convention::variable_args)
+//        {
+//            method_signature signature{ method };
+//            writer::indent_guard g{ w };
+//
+//            auto format = "return py::arg_count_invoker(args, %, [=](PyObject* args) -> PyObject* {\n%});\n";
+//            w.write(format, count_in_param(signature.params()), bind<write_method_body_contents>(type, method));
+//        }
+//        else
+//        {
+//            writer::indent_guard g{ w };
+//
+//            auto format = "return py::trycatch_invoker([=]() -> PyObject* {\n%});\n";
+//            w.write(format, bind<write_method_body_contents>(type, method));
+//        }
+//    }
+//
+//    void write_method_function(writer& w, TypeDef const& type, MethodDef const& method)
+//    {
+//        w.write("\nstatic PyObject* %(%* %, PyObject* %)\n{\n",
+//            bind<write_method_function_name>(type, method),
+//            bind<write_pywrapper_type>(type),
+//            bind<write_self_param_name>(method),
+//            bind<write_args_param_name>(method));
+//        write_method_body(w, type, method);
+//        w.write("}\n");
+//    }
+//
+//    void write_pinterface_method_function(writer& w, TypeDef const& type, MethodDef const& method)
+//    {
+//        auto format = R"(
+//static PyObject* %(%* self, PyObject* args)
+//{
+//    return self->obj->%(args);
+//}
+//)";
+//        w.write(format,
+//            bind<write_method_function_name>(type, method),
+//            bind<write_pywrapper_type>(type),
+//            method.Name());
+//    }
+//
+//
+//    void write_from_function(writer& w, TypeDef const& type)
+//    {
+//        if (is_static(type) || is_ptype(type)) return;
+//
+//        w.write(strings::from_function, type.TypeName(), type);
+//    }
+//
     void write_non_activatable(writer& w, TypeDef const& type)
     {
         // TODO fix
@@ -704,8 +675,65 @@ static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyOb
 
 
 
+#define PYWINRT_TEMPLATE_TRY_CATCH 
 
+    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc)
+    {
+#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+        w.write("return py::trycatch_invoker([=]() -> PyObject*\n{\n");
+        {
+            writer::indent_guard gg{ w };
+            tryfunc(w);
+        }
+        w.write("});\n");
+#else
+        w.write(R"(if (arg == nullptr)
+{
+    PyErr_SetString(PyExc_TypeError, "property delete not supported");
+    return -1;
+}
 
+)");
+
+        w.write("try\n{\n");
+        {
+            writer::indent_guard g{ w };
+            tryfunc(w);
+        }
+        w.write(R"(}
+catch (...)
+{
+    return py::to_PyErr();
+}
+)");
+#endif
+    }
+
+    void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
+    {
+#ifdef PYWINRT_TEMPLATE_TRY_CATCH
+        w.write("return py::setter_trycatch_invoker(arg, [=]()\n{\n");
+        {
+            writer::indent_guard gg{ w };
+            tryfunc(w);
+        }
+        w.write("});\n");
+#else
+        w.write("try\n{\n");
+        {
+            writer::indent_guard g{ w };
+            tryfunc(w);
+            w.write("\nreturn 0;\n")
+        }
+        w.write(R"(}
+catch (...)
+{
+    return -1;
+}
+)");
+#endif
+
+    }
 
     void write_method_overloads(writer& w, TypeDef const& type, std::string_view method_name)
     {
@@ -722,7 +750,7 @@ static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyOb
                 w.write("if (arg_count == %)\n{\n", count_in_param(signature.params()));
                 {
                     writer::indent_guard g{ w };
-                    write_method_body_contents(w, type, method);
+                    write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, method); });
                 }
                 w.write("}\n");
             }
@@ -752,7 +780,7 @@ return nullptr;
             }
             else
             {
-                write_method_body_contents(w, type, method);
+                write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, method); });
             }
         }
         w.write("}\n");
@@ -771,25 +799,21 @@ return nullptr;
             bind<write_method_self_param>(type, method));
         {
             writer::indent_guard g{ w };
-
-            if (!is_static(method))
-            {
-                w.write(R"(if (arg == nullptr)
-{
-    PyErr_SetString(PyExc_TypeError, "property delete not supported");
-    return -1;
-}
-
-)");
-            }
-
             if (is_ptype(type))
             {
                 w.write("return self->obj->%(arg);\n", method.Name());
             }
             else
             {
-                write_method_body_contents(w, type, method);
+                if (is_static(method))
+                {
+                    write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, method); });
+
+                }
+                else
+                { 
+                    write_setter_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, method); });
+                }
             }
         }
         w.write("}\n");
@@ -815,16 +839,16 @@ return nullptr;
 
     void write_method_functions(writer& w, TypeDef const& type)
     {
-        std::map<std::string_view, std::vector<MethodDef>> methods{};
-
+        // create a map of methods to determine overloads + ensure all overloads match instance/static 
+        std::map<std::string_view, std::vector<MethodDef>> method_map{};
         enumerate_methods(w, type, [&](auto const& method)
         {
-            auto& v = methods[method.Name()];
+            auto& v = method_map[method.Name()];
             XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
             v.push_back(method);
         });
 
-        for (auto&&[method_name, methods] : methods)
+        for (auto&&[method_name, methods] : method_map)
         {
             XLANG_ASSERT(methods.size() > 0);
 
@@ -904,29 +928,26 @@ return nullptr;
         {
             writer::indent_guard g{ w };
 
-            std::map<std::string_view, std::vector<MethodDef>> methods{};
-
+            std::set<std::string_view> method_names{};
             enumerate_methods(w, type, [&](auto const& method)
             {
-                if (methods.find(method.Name()) == methods.end())
+                if (method_names.find(method.Name()) == method_names.end())
                 {
                     write_row(method);
                 }
 
-                auto& v = methods[method.Name()];
-                XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
-                v.push_back(method);
+                method_names.insert(method.Name());
             });
 
             enumerate_properties(w, type, [&](auto const& prop)
             {
                 auto[get_method, put_method] = get_property_methods(prop);
-                if (is_static(get_method))
+                // instance properties are listed in the getset table, not the method table
+                if (is_static(get_method)) 
                 {
                     write_row(get_method);
                     if (put_method)
                     {
-                        XLANG_ASSERT(is_static(put_method));
                         write_row(put_method);
                     }
                 }
@@ -935,12 +956,13 @@ return nullptr;
             enumerate_events(w, type, [&](auto const& evt)
             {
                 auto [add_method, remove_method] = get_event_methods(evt);
-                XLANG_ASSERT(is_static(add_method) == is_static(remove_method));
                 write_row(add_method);
                 write_row(remove_method);
             });
 
-            // TODO: From, Enter, Exit rows
+            // TODO:
+            //  From
+            //  enter/exit
 
             w.write("{ nullptr }\n");
         }
@@ -981,6 +1003,7 @@ return nullptr;
                 {
                     auto[getter, setter] = get_property_methods(prop);
 
+                    // static properties are listed in the method table, not the getset table
                     if (!is_static(getter))
                     {
                         write_row(prop.Name(), getter.Name(), setter ? setter.Name() : "");
@@ -1012,6 +1035,12 @@ static PyType_Slot _type_slots_@[] =
     { 0, nullptr },
 };
 )";
+
+
+        // TODO:
+        //  str
+        //  await
+        //  iterator/sequence/mapping
 
         w.write(format,
             type.TypeName(),
@@ -1052,7 +1081,6 @@ static PyType_Spec _type_spec_@ =
         write_winrt_type_specialization_storage(w, type);
         write_non_activatable(w, type);
         write_dealloc_function(w, type);
-        //write_class_functions(w, type);
         //write_from_function(w, type);
 
         write_method_functions(w, type);
@@ -1072,7 +1100,6 @@ static PyType_Spec _type_spec_@ =
         write_winrt_type_specialization_storage(w, type);
         write_non_activatable(w, type);
         write_dealloc_function(w, type);
-        //write_interface_functions(w, type);
         //write_from_function(w, type);
 
         write_method_functions(w, type);
@@ -1270,6 +1297,7 @@ static PyType_Spec _type_spec_@ =
             writer::indent_guard g{ w };
 
             {
+                // TODO: write_try_catch
                 auto format = R"(
 auto tuple_size = PyTuple_Size(args);
 
@@ -1317,6 +1345,7 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%)) {
 
             if (has_custom_conversion(type))
             {
+                // TODO: write_try_catch
                 auto format = R"(
 return py::trycatch_invoker([=]() -> PyObject* {
     % return_value{ };
@@ -1328,6 +1357,7 @@ return py::trycatch_invoker([=]() -> PyObject* {
             }
             else
             {
+                // TODO: write_try_catch
                 auto format = R"(
 return py::trycatch_invoker([=%]() -> PyObject* {
     % return_value{ 
@@ -1374,6 +1404,7 @@ return py::trycatch_invoker([=%]() -> PyObject* {
 
             if (has_custom_conversion(type))
             {
+                // TODO: write_try_catch
                 auto format = R"(return py::trycatch_invoker([self]() -> PyObject* {
     return py::convert(custom_get(self->obj));
 });
@@ -1382,6 +1413,7 @@ return py::trycatch_invoker([=%]() -> PyObject* {
             }
             else
             {
+                // TODO: write_try_catch
                 auto format = R"(return py::trycatch_invoker([self]() -> PyObject* {
     return py::convert(self->obj.%);
 });
@@ -1400,7 +1432,8 @@ return py::trycatch_invoker([=%]() -> PyObject* {
 
             if (has_custom_conversion(type))
             {
-                auto format = R"(return py::struct_set_invoker(value, [=](PyObject* value) {
+                // TODO: write_try_catch
+                auto format = R"(return py::setter_trycatch_invoker(value, [=]() {
     custom_set(self->obj, py::converter<%>::convert_to(value));
 });
 )";
@@ -1408,7 +1441,8 @@ return py::trycatch_invoker([=%]() -> PyObject* {
             }
             else
             {
-                auto format = R"(return py::struct_set_invoker(value, [=](PyObject* value) {
+                // TODO: write_try_catch
+                auto format = R"(return py::setter_trycatch_invoker(value, [=]() {
     self->obj.% = py::converter<%>::convert_to(value);
 });
 )";
