@@ -486,9 +486,9 @@ namespace xlang
                 return "winrt::hstring";
             case ElementType::Object:
                 return "winrt::Windows::Foundation::IInspectable";
+            default:
+                throw_invalid("element type not supported");
             }
-
-            throw_invalid("element type not supported");
         }
 
         void write(ElementType type)
