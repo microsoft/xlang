@@ -599,4 +599,84 @@ namespace pywinrt
             }
         }
     };
+
+    template <typename F>
+    void enumerate_required_types(writer& w, TypeDef const& type, F func)
+    {
+        std::set<TypeDef> types;
+
+        auto enumerate_types_impl = [&](type_semantics const& semantics, auto const& lambda) -> void
+        {
+            auto type = get_typedef(semantics);
+            auto generic_args = std::visit(
+                impl::overloaded{
+                    [](type_definition) -> std::vector<type_semantics> { return {}; },
+                    [](generic_type_instance type_instance) { return type_instance.generic_args; },
+                    [](auto) -> std::vector<type_semantics> { throw_invalid("type doesn't contain typedef"); }
+                }, semantics);
+
+            auto guard{ w.push_generic_params(generic_args) };
+
+            if (!contains(types, type))
+            {
+                types.insert(type);
+                func(type);
+            }
+
+            if (get_category(type) == category::interface_type)
+            {
+                for (auto&& ii : type.InterfaceImpl())
+                {
+                    lambda(get_type_semantics(ii.Interface()), lambda);
+                }
+            }
+        };
+
+        enumerate_types_impl(type, enumerate_types_impl);
+    }
+
+    template <typename F>
+    void enumerate_methods(writer& w, TypeDef const& type, F func, bool include_special = false)
+    {
+        enumerate_required_types(w, type, [&](TypeDef const& required_type)
+        {
+            for (auto&& method : required_type.MethodList())
+            {
+                if (is_constructor(method)) continue;
+                if (!include_special && method.SpecialName()) continue;
+
+                func(method);
+            }
+        });
+    }
+
+    template <typename F>
+    void enumerate_all_methods(writer& w, TypeDef const& type, F func)
+    {
+        enumerate_methods(w, type, func, true);
+    }
+
+    template <typename F>
+    void enumerate_properties(writer& w, TypeDef const& type, F func)
+    {
+        enumerate_required_types(w, type, [&](TypeDef const& required_type)
+        {
+            for (auto&& prop : required_type.PropertyList())
+            {
+                func(prop);
+            }
+        });
+    }
+
+    template <typename F>
+    void enumerate_events(writer& w, TypeDef const& type, F func)
+    {
+        enumerate_required_types(w, type, [&](TypeDef const& required_type)
+        {
+            for (auto&& evt : required_type.EventList())
+            {
+                func(evt);
+            }
+        });
+    }
 }
