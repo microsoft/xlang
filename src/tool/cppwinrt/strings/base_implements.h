@@ -965,25 +965,19 @@ namespace winrt::impl
             return error_ok;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept
+        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept try
         {
-            try
-            {
-                *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
 
-        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
+        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept try
         {
-            try
-            {
-                *trustLevel = static_cast<D*>(this)->GetTrustLevel();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *trustLevel = static_cast<D*>(this)->GetTrustLevel();
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
 
         uint32_t subtract_reference() noexcept
         {

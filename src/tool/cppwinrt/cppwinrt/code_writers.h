@@ -1619,16 +1619,13 @@ namespace xlang
         }
         else
         {
-            format = R"(        int32_t WINRT_CALL %(%) noexcept final
+            format = R"(        int32_t WINRT_CALL %(%) noexcept final try
         {
-%            try
-            {
-                typename D::abi_guard guard(this->shim());
-                %
-                return 0;
-            }
-            catch (...) { return to_hresult(); }
+%            typename D::abi_guard guard(this->shim());
+            %
+            return 0;
         }
+        catch (...) { return to_hresult(); }
 )";
         }
 
