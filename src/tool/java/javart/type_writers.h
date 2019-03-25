@@ -357,11 +357,11 @@ namespace xlang
 
         void write(TypeDef const& type)
         {
-            if(auto exclusive_to = get_exclusive_to(type); exclusive_to.has_value())
-            {
-                write(exclusive_to.value());
-                return;
-            }
+            //if(auto exclusive_to = get_exclusive_to(type); exclusive_to.has_value())
+            //{
+            //    write(exclusive_to.value());
+            //    return;
+            //}
 
             auto name_space = std::string(type.TypeNamespace());
             if (name_space == current_namespace)
@@ -663,11 +663,11 @@ namespace xlang
 
         void write(TypeSig const& signature)
         {
-            //if (!abi_types && signature.is_szarray())
-            //{
-            //    write("com_array<%>", signature.Type());
-            //}
-            //else
+            if (signature.is_szarray())
+            {
+                write("%[]", signature.Type());
+            }
+            else
             {
                 write(signature.Type());
             }

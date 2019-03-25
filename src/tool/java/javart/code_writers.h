@@ -59,9 +59,17 @@ using namespace winrt;
     }
 
     template<type_system system>
-    static void write_param_as(writer& w, std::pair<Param, const ParamSig*> const& param, std::string_view const& format)
+    static void write_param_as(writer& w, std::pair<Param, const ParamSig*> const& param)
     {
-        w.write_as(system, format, param.second->Type(), param.first.Name());
+        w.write_as(system, "% %", param.second->Type(), param.first.Name());
+    }
+
+    template<type_system system>
+    static void write_params_as(writer& w, std::vector<std::pair<Param, const ParamSig*>> const& params, bool appending)
+    {
+        w.write("%%", 
+            !params.empty() && appending ? ", " : "",
+            bind_list<write_param_as<system>>(", ", params));
     }
 
     template<type_system system>
@@ -196,6 +204,26 @@ using namespace winrt;
         }
     }
 
+    static void write_jni_export(writer& w, std::string_view const& type, std::string_view const& ns)
+    {
+        auto format = R"(
+void JNICALL
+%(jni_env* env, jclass cls) noexcept try
+{
+    #pragma comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
+    %::jni_register(*env, cls);
+}
+catch (...)
+{
+    env->raise_java_exception("%");
+})";
+        auto export_name = std::string(ns) + "_" + std::string(type) + "_jni_register";
+        w.write(format,
+            export_name,
+            type,
+            export_name);
+    }
+
     static void write_jni_stub_iterator(writer& w, generic_iterator const& gi)
     {
         auto format = R"(struct % : Projection<Windows::Foundation::Collections::IIterator<%>>, Iterator<%>
@@ -209,7 +237,7 @@ using namespace winrt;
         Iterator::jni_register(env, cls);
     }
 };
-JNI_EXPORT(%);
+%
 
 )";
 
@@ -219,6 +247,7 @@ JNI_EXPORT(%);
             gi.name,
             java_type_name{ gi.name, w.current_namespace },
             gi.java_element,
+            bind<write_jni_export>(gi.name, w.current_namespace),
             gi.name
         );
 
@@ -283,23 +312,23 @@ JNI_EXPORT(%);
             }
             w.write(param.first.Name());
         },
-            [&](coded_index<TypeDefOrRef> const& type)
+        //    [&](coded_index<TypeDefOrRef> const& type)
+        //{
+        //    w.write(param.first.Name());
+        //},
+        //    [&](GenericTypeIndex var)
+        //{
+        //    w.write(param.first.Name());
+        //},
+            [&](auto&&)
         {
-            w.write(type);
-        },
-            [&](GenericTypeIndex var)
-        {
-            w.write(var);
-        },
-            [&](auto&& type)
-        {
-            w.write(type);
+            w.write(param.first.Name());
         });
     }
 
     static void write_jni_constructor(writer& w, MethodDef const& method)
     {
-        auto format = R"(    static auto jni_construct%(jni_env& env, jclass%)
+        auto format = R"(    static auto jni_construct%(jni_env&, jclass%)
     {
         return create_agile_ref(type{%});
     }
@@ -309,7 +338,7 @@ JNI_EXPORT(%);
         auto&& params = signature.params();
         w.write(format,
             bind_each<write_param_type_as<java_suffix>>(params),
-            bind_list<write_param_as<jni_type>>(", ", params, "% %"),
+            bind<write_params_as<jni_type>>(params, true),
             bind_list<write_jni_method_arg>(", ", params)
         );
     }
@@ -327,7 +356,7 @@ JNI_EXPORT(%);
         w.write(format,
             bind<write_method_name_as<java_type>>(method),
             bind_each<write_param_type_as<java_suffix>>(params),
-            bind_list<write_param_as<jni_type>>(", ", params, "% %"),
+            bind<write_params_as<jni_type>>(params, true),
             bind<write_method_name_as<jni_type>>(method),
             bind_list<write_jni_method_arg>(", ", params)
         );
@@ -423,11 +452,13 @@ JNI_EXPORT(%);
         env.register_natives(cls, methods);
     }
 };
-JNI_EXPORT(Inspectable);
+%
 
 )";
 
-        w.write(format);
+        w.write(format,
+            bind<write_jni_export>("Inspectable", "Windows_Foundation")
+        );
         w.add_unregister("Inspectable");
     }
 
@@ -451,7 +482,7 @@ JNI_EXPORT(Inspectable);
         env.register_natives(cls, methods);
     }
 };
-JNI_EXPORT(%);
+%
 
 )";
 
@@ -469,7 +500,7 @@ JNI_EXPORT(%);
             bind_each<write_jni_generic_register>(interfaces),
             bind_each<write_jni_constructor_registration>(get_constructors(type)),
             bind_each<write_jni_method_registrations>(interfaces),
-            type.TypeName()
+            bind<write_jni_export>(type.TypeName(), w.current_namespace)
         );
 
         w.add_unregister(type.TypeName());
@@ -503,7 +534,7 @@ JNI_EXPORT(%);
             return;
         }
 
-        auto format = R"(    %::jni_unregister(*env);
+        auto format = R"(    %::jni_unregister(env);
 )";
 
         w.write(format, type_name);
@@ -514,10 +545,14 @@ JNI_EXPORT(%);
         auto format = R"(void %_Unregister(jni_env& env)
 {
 %}
+extern "C" __declspec(allocate("javart$m")) 
+auto %_UnregisterFunc = &%_Unregister;
 )";
         w.write(format,
             java_export{ ns },
-            bind_each<write_jni_unregister>(w.unregisters)
+            bind_each<write_jni_unregister>(w.unregisters),
+            java_export{ ns },
+            java_export{ ns }
         );
     }
 
@@ -566,7 +601,7 @@ JNI_EXPORT(%);
         auto&& params = signature.params();
         w.write(format,
             type.TypeName(),
-            bind_list<write_param_as<java_type>>(", ", params, "% %"),
+            bind<write_params_as<java_type>>(params, false),
             bind_each<write_param_type_as<java_suffix>>(params),
             bind_list<write_method_arg>(", ", params)
         );
@@ -586,7 +621,7 @@ JNI_EXPORT(%);
         w.write(format,
             bind<write_return_type_as<java_type>>(signature.return_signature()),
             bind<write_method_name_as<java_type>>(method),
-            bind_list<write_param_as<java_type>>(", ", params, "% %"),
+            bind<write_params_as<java_type>>(params, false),
             has_return ? "return " : "",
             bind<write_method_name_as<java_type>>(method),
             bind_each<write_param_type_as<java_suffix>>(params),
@@ -637,7 +672,7 @@ JNI_EXPORT(%);
 //        w.write(format,
 //            bind<write_return_type_as<java_type>>(signature.return_signature()),
 //            bind<write_method_name_as<java_type>>(method),
-//            bind_list<write_param_as<java_type>>(", ", params, "% %"),
+//            bind_list<write_param_as<java_type>>(", ", params),
 //            has_return ? "return " : "",
 //            bind<write_method_name_as<java_type>>(method),
 //            bind_each<write_param_type_as<java_suffix>>(params),
@@ -660,7 +695,7 @@ JNI_EXPORT(%);
 //            bind<write_method_name_as<java_type>>(method),
 //            bind_each<write_param_type_as<java_suffix>>(params),
 //            isStatic ? "" : "long abi",
-//            bind_list<write_param_as<java_type>>(", ", params, isStatic ? "% %" : ", % %")
+//            bind_list<write_param_as<java_type>>(", ", params)
 //        );
 //    }
 
@@ -679,7 +714,7 @@ JNI_EXPORT(%);
             bind<write_method_name_as<java_type>>(method),
             bind_each<write_param_type_as<java_suffix>>(params),
             isStatic ? "" : "long abi",
-            bind_list<write_param_as<java_type>>(", ", params, isStatic ? "% %" : ", % %")
+            bind<write_params_as<java_type>>(params, !isStatic)
         );
     }
 
@@ -757,7 +792,7 @@ public class % extends Inspectable implements java.util.Iterator<%> {
             gi.name,
             java_class_descriptor,
             java_class_descriptor,
-            settings.shared_lib.empty() ? name_space : settings.shared_lib
+            settings.shared_lib.empty() ? w.write_temp("%", lower_case{ name_space }) : settings.shared_lib
         );
         return std::move(w);
     }
@@ -809,7 +844,7 @@ public class % extends Inspectable %
             //bind_each<write_java_public_method>(type.MethodList()),
             bind_each<write_java_native_methods>(interfaces),
             //bind_each<write_java_native_method>(type.MethodList()),
-            lower_case{ settings.shared_lib.empty() ? package : settings.shared_lib }
+            settings.shared_lib.empty() ? w.write_temp("%", lower_case{ package }) : settings.shared_lib
         );
         return std::move(w);
     }
@@ -824,7 +859,7 @@ public class % extends Inspectable %
         w.write(format,
             bind<write_return_type_as<java_type>>(signature.return_signature()),
             bind<write_method_name_as<java_type>>(method),
-            bind_list<write_param_as<java_type>>(", ", params, "% %")
+            bind<write_params_as<java_type>>(params, false)
         );
     }
 
@@ -879,7 +914,6 @@ public enum % {
 }
 )";
         // TODO: project flags enum to EnumSet?
-        // auto flags_enum = get_attribute(type, "System", "FlagsAttribute");
         writer w(type);
         auto underlying_type = "int";
         w.write(format,

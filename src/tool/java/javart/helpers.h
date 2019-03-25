@@ -204,12 +204,12 @@ namespace xlang
                             auto type_def = find_required(type_ref);
                             if(type_def.Flags().Semantics() == TypeSemantics::Interface)
                             {
-                                auto exclusive_to = get_exclusive_to(type_def);
-                                if (exclusive_to.has_value())
-                                {
-                                    names.push_back(w.write_temp("%", exclusive_to.value().TypeName()));
-                                    continue;
-                                }
+                                //auto exclusive_to = get_exclusive_to(type_def);
+                                //if (exclusive_to.has_value())
+                                //{
+                                //    names.push_back(w.write_temp("%", exclusive_to.value().TypeName()));
+                                //    continue;
+                                //}
                             }
                         }
                     }

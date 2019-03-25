@@ -8,26 +8,15 @@
 
 #include "winrt/Windows.Foundation.h"
 
-#define JNI_EXPORT_IMPL(jni_export, jni_class) \
-    extern "C" \
-    JNIEXPORT void JNICALL \
-    jni_export(jni_env* env, jclass cls) noexcept try \
-    { \
-        jni_class::jni_register(*env, cls); \
-    } \
-    catch (...) \
-    { \
-        env->raise_java_exception(#jni_export); \
-    }
-
-#define JNI_EXPORT_FULLNAME_IMPL(jni_namespace, jni_class) \
-    jni_namespace##_##jni_class##_##jni_register 
-
-#define JNI_EXPORT_FULLNAME(jni_namespace, jni_class) \
-    JNI_EXPORT_FULLNAME_IMPL(jni_namespace, jni_class)
-
-#define JNI_EXPORT(jni_class) \
-    JNI_EXPORT_IMPL(JNI_EXPORT_FULLNAME(JNI_EXPORT_NAMESPACE, jni_class), jni_class) 
+// Sections where namespace unloaders are stored so that DllMain can enumerate through them
+// NOTE: Sections with the same name before the '$' get merged into a single section. The order of data inside the
+// section gets sorted alphabetically w.r.t. the name after the '$'. Other than that, the only other guarantee is that
+// the "sub-sections" are pointer aligned and any extra data is initialized with zero. Therefore, we use sub-sections
+// 'a' and 'z' to indicate the start/end and sub-section 'm' to store the actual data. Internally, we store pointers to
+// the actual data to (1) ensure alignment and avoid splicing, and (2) leverage nullptr checks to ignore padded data
+#pragma section("javart$a", read)
+#pragma section("javart$m", read)
+#pragma section("javart$z", read)
 
 #define JNI_CHECK(Expr) do { auto jerr = Expr; if(jerr < JNI_OK){ return jerr; } } while(0)
 
@@ -596,7 +585,7 @@ struct jni_wrapper
     jni_wrapper<decltype(Func),Func>::make<[]{return Name;}>(Func) }
 
 // Default to function-name equivalence, no suffix
-#define JNI_METHOD0(Func, Sig) \
+#define JNI_METHOD_(Func, Sig) \
     JNI_METHODN(Func, #Func, Sig)
 
 // Overload 1, requiring function suffix "1"
@@ -815,8 +804,8 @@ struct Iterator
     {
         static JNINativeMethod methods[] =
         {
-            JNI_METHOD0(jni_hasNext, "(J)Z"),
-            JNI_METHOD0(jni_next, winrt::impl::combine("(J)L", D::element_type, ";\0").data()),
+            JNI_METHOD_(jni_hasNext, "(J)Z"),
+            JNI_METHOD_(jni_next, winrt::impl::combine("(J)L", D::element_type, ";\0").data()),
         };
         env.register_natives(cls, methods);
     }
@@ -834,7 +823,7 @@ struct Iterable
     {
         static JNINativeMethod methods[] =
         {
-            JNI_METHOD0(jni_iterator, "(J)Ljava/util/Iterator;"),
+            JNI_METHOD_(jni_iterator, "(J)Ljava/util/Iterator;"),
         };
         env.register_natives(cls, methods);
     }
@@ -927,17 +916,17 @@ struct Collection : public Iterable<D>
         __super::jni_register(env, cls);
         static JNINativeMethod methods[] =
         {
-            JNI_METHOD0(jni_add, "(JJ)Z"),
-            JNI_METHOD0(jni_addAll, "(JLjava/util/Collection;)Z"),
-            JNI_METHOD0(jni_clear, "(J)V"),
-            JNI_METHOD0(jni_contains, "(JLjava/lang/Object;)Z"),
-            JNI_METHOD0(jni_containsAll, "(JLjava/util/Collection;)Z"),
-            JNI_METHOD0(jni_isEmpty, "(J)Z"),
-            JNI_METHOD0(jni_remove, "(JLjava/lang/Object;)Z"),
-            JNI_METHOD0(jni_removeAll, "(JLjava/util/Collection;)Z"),
-            JNI_METHOD0(jni_retainAll, "(JLjava/util/Collection;)Z"),
-            JNI_METHOD0(jni_size, "(J)I"),
-            JNI_METHOD0(jni_toArray, "(J)[Ljava/lang/Object;"),
+            JNI_METHOD_(jni_add, "(JJ)Z"),
+            JNI_METHOD_(jni_addAll, "(JLjava/util/Collection;)Z"),
+            JNI_METHOD_(jni_clear, "(J)V"),
+            JNI_METHOD_(jni_contains, "(JLjava/lang/Object;)Z"),
+            JNI_METHOD_(jni_containsAll, "(JLjava/util/Collection;)Z"),
+            JNI_METHOD_(jni_isEmpty, "(J)Z"),
+            JNI_METHOD_(jni_remove, "(JLjava/lang/Object;)Z"),
+            JNI_METHOD_(jni_removeAll, "(JLjava/util/Collection;)Z"),
+            JNI_METHOD_(jni_retainAll, "(JLjava/util/Collection;)Z"),
+            JNI_METHOD_(jni_size, "(J)I"),
+            JNI_METHOD_(jni_toArray, "(J)[Ljava/lang/Object;"),
             JNI_METHOD1(jni_toArray, "(J[Ljava/lang/Object;)[Ljava/lang/Object;"),
         };
         env.register_natives(cls, methods);
@@ -1023,16 +1012,16 @@ struct List : public Collection<D>
         __super::jni_register(env, cls);
         static JNINativeMethod methods[] =
         {
-            JNI_METHOD0(jni_add, "(JIJ)V"),
-            JNI_METHOD0(jni_addAll, "(JILjava/util/Collection;)Z"),
-            JNI_METHOD0(jni_get, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
-            JNI_METHOD0(jni_indexOf, "(JLjava/lang/Object;)I"),
-            JNI_METHOD0(jni_lastIndexOf, "(JLjava/lang/Object;)I"),
-            JNI_METHOD0(jni_listIterator, "(J)Ljava/util/ListIterator;"),
+            JNI_METHOD_(jni_add, "(JIJ)V"),
+            JNI_METHOD_(jni_addAll, "(JILjava/util/Collection;)Z"),
+            JNI_METHOD_(jni_get, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
+            JNI_METHOD_(jni_indexOf, "(JLjava/lang/Object;)I"),
+            JNI_METHOD_(jni_lastIndexOf, "(JLjava/lang/Object;)I"),
+            JNI_METHOD_(jni_listIterator, "(J)Ljava/util/ListIterator;"),
             JNI_METHOD1(jni_listIterator, "(JI)Ljava/util/ListIterator;"),
-            JNI_METHOD0(jni_remove, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
-            JNI_METHOD0(jni_set, winrt::impl::combine("(JIJ)L", D::element_type, ";\0").data()),
-            JNI_METHOD0(jni_subList, "(JII)Ljava/util/List;"),
+            JNI_METHOD_(jni_remove, winrt::impl::combine("(JI)L", D::element_type, ";\0").data()),
+            JNI_METHOD_(jni_set, winrt::impl::combine("(JIJ)L", D::element_type, ";\0").data()),
+            JNI_METHOD_(jni_subList, "(JII)Ljava/util/List;"),
         };
         env.register_natives(cls, methods);
     }
@@ -1113,15 +1102,15 @@ struct ObservableList : List<D>
         __super::jni_register(env, cls);
         static JNINativeMethod methods[] =
         {
-            JNI_METHOD0(jni_addListener, "(JLjavafx/beans/InvalidationListener;)V"),
-            JNI_METHOD0(jni_removeListener, "(vLjavafx/beans/InvalidationListener;)V"),
-            JNI_METHOD0(jni_addAll, "(J[Ljava/lang/Object;)Z"),
+            JNI_METHOD_(jni_addListener, "(JLjavafx/beans/InvalidationListener;)V"),
+            JNI_METHOD_(jni_removeListener, "(vLjavafx/beans/InvalidationListener;)V"),
+            JNI_METHOD_(jni_addAll, "(J[Ljava/lang/Object;)Z"),
             JNI_METHOD1(jni_addListener, "(JLjavafx/collections/ListChangeListener;)V"),
-            JNI_METHOD0(jni_remove, "(JII)V"),
-            JNI_METHOD0(jni_removeAll, "(J[Ljava/lang/Object;)Z"),
+            JNI_METHOD_(jni_remove, "(JII)V"),
+            JNI_METHOD_(jni_removeAll, "(J[Ljava/lang/Object;)Z"),
             JNI_METHOD1(jni_removeListener, "(JLjavafx/collections/ListChangeListener;)V"),
-            JNI_METHOD0(jni_retainAll, "(J[Ljava/lang/Object;)Z"),
-            JNI_METHOD0(jni_setAll, "(J[Ljava/lang/Object;)Z"),
+            JNI_METHOD_(jni_retainAll, "(J[Ljava/lang/Object;)Z"),
+            JNI_METHOD_(jni_setAll, "(J[Ljava/lang/Object;)Z"),
             JNI_METHOD1(jni_setAll, "(JLjava/util/Collection;)Z"),
         };
         env.register_natives(cls, methods);
