@@ -648,14 +648,14 @@ namespace xlang
         }
     }
 
-    static void write_interface_abi_fastabi(writer& w, TypeDef const& type)
+    static void write_interface_abi_fastabi(writer& w, TypeDef const& default_interface)
     {
         if (!settings.fastabi)
         {
             return;
         }
 
-        auto pair = settings.fastabi_defaults.find(type);
+        auto pair = settings.fastabi_defaults.find(default_interface);
 
         if (pair == settings.fastabi_defaults.end())
         {
@@ -926,6 +926,24 @@ namespace xlang
                 method_name,
                 method_name,
                 bind<write_consume_params>(signature));
+        }
+    }
+
+    static void write_consume_declarations_fastabi(writer& w, TypeDef const& default_interface)
+    {
+        auto pair = settings.fastabi_defaults.find(default_interface);
+
+        if (pair == settings.fastabi_defaults.end())
+        {
+            return;
+        }
+
+        w.write(R"(        // fastabi
+)");
+
+        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        {
+            w.write_each<write_consume_declaration>(versioned.MethodList());
         }
     }
 
@@ -1280,7 +1298,7 @@ namespace xlang
             auto format = R"(    template <typename D>
     struct consume_%
     {
-%%    };
+%%%    };
     template <> struct consume<%>
     {
         template <typename D> using type = consume_%<D>;
@@ -1291,6 +1309,7 @@ namespace xlang
             w.write(format,
                 impl_name,
                 bind_each<write_consume_declaration>(type.MethodList()),
+                bind<write_consume_declarations_fastabi>(type),
                 bind<write_consume_extensions>(type),
                 type,
                 impl_name);
@@ -1300,7 +1319,7 @@ namespace xlang
             auto format = R"(    template <typename D, %>
     struct consume_%
     {
-%%    };
+%%%    };
     template <%> struct consume<%>
     {
         template <typename D> using type = consume_%<D, %>;
@@ -1312,6 +1331,7 @@ namespace xlang
                 bind<write_generic_typenames>(generics),
                 impl_name,
                 bind_each<write_consume_declaration>(type.MethodList()),
+                bind<write_consume_declarations_fastabi>(type),
                 bind<write_consume_extensions>(type),
                 bind<write_generic_typenames>(generics),
                 type,
@@ -1639,14 +1659,14 @@ namespace xlang
             bind<write_produce_upcall>(method, signature));
     }
 
-    static void write_produce_methods_fastabi(writer& w, TypeDef const& type)
+    static void write_produce_methods_fastabi(writer& w, TypeDef const& default_interface)
     {
         if (!settings.fastabi)
         {
             return;
         }
 
-        auto pair = settings.fastabi_defaults.find(type);
+        auto pair = settings.fastabi_defaults.find(default_interface);
 
         if (pair == settings.fastabi_defaults.end())
         {
