@@ -51,7 +51,7 @@ namespace winrt::impl
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>> {};
+    struct is_interface : std::is_base_of<Windows::Foundation::IInspectable, T> {};
 
 #endif
 
@@ -715,7 +715,7 @@ namespace winrt::impl
     protected:
         static constexpr inspectable_abi* outer() noexcept { return nullptr; }
 
-        template <typename T, typename D, typename I>
+        template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
     };
 
@@ -727,10 +727,10 @@ namespace winrt::impl
     private:
         inspectable_abi* m_outer = nullptr;
 
-        template <typename T, typename D, typename I>
+        template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
 
-        template <typename D>
+        template <typename>
         friend struct composable_factory;
     };
 
@@ -1173,10 +1173,10 @@ namespace winrt::impl
             return Windows::Foundation::TrustLevel::BaseTrust;
         }
 
-        template <typename D, typename I, typename Enable>
+        template <typename, typename, typename>
         friend struct impl::produce_base;
 
-        template <typename D, typename I>
+        template <typename, typename>
         friend struct impl::produce;
     };
 
@@ -1363,7 +1363,7 @@ namespace winrt
             return impl::runtime_class_name<typename impl::implements_default_interface<D>::type>::get();
         }
 
-        template <typename D, typename... I>
+        template <typename, typename...>
         friend struct impl::root_implements;
 
         template <typename T>

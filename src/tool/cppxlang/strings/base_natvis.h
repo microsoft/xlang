@@ -1,5 +1,5 @@
 
-#ifdef _DEBUG
+#if defined(_WIN32) && defined(_DEBUG)
 #define WINRT_NATVIS
 #endif
 
@@ -55,12 +55,10 @@ namespace winrt::impl
 }
 
 extern "C"
-__declspec(selectany)
-decltype(winrt::impl::natvis::abi_val) & WINRT_abi_val = winrt::impl::natvis::abi_val;
+__declspec(selectany) decltype(winrt::impl::natvis::abi_val) & WINRT_abi_val = winrt::impl::natvis::abi_val;
 
 extern "C"
-__declspec(selectany)
-decltype(winrt::impl::natvis::get_val) & WINRT_get_val = winrt::impl::natvis::get_val;
+__declspec(selectany) decltype(winrt::impl::natvis::get_val) & WINRT_get_val = winrt::impl::natvis::get_val;
 
 #ifdef _M_IX86
 #pragma comment(linker, "/include:_WINRT_abi_val")
