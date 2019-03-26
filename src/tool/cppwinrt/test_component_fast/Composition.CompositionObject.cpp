@@ -4,11 +4,17 @@
 
 namespace winrt::test_component_fast::Composition::implementation
 {
+    CompositionObject::CompositionObject(Composition::Compositor const& compositor) :
+        m_compositor(compositor)
+    {
+    }
+
     void CompositionObject::Close()
     {
     }
-    void CompositionObject::Compositor()
+    Compositor CompositionObject::Compositor()
     {
+        return m_compositor;
     }
     void CompositionObject::StartAnimationGroup()
     {

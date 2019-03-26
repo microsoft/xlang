@@ -320,10 +320,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Class.cpp" />
-    <ClCompile Include="Composition.CompositionObject.cpp" />
-    <ClCompile Include="Composition.SpriteVisual.cpp" />
-    <ClCompile Include="Composition.Visual.cpp" />
-    <ClCompile Include="Fast.Class.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
     <ClCompile Include="Generated Files\Simple.cpp" />
     <ClCompile Include="module.cpp" />
@@ -339,10 +335,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
-    <ClInclude Include="Composition.CompositionObject.h" />
-    <ClInclude Include="Composition.SpriteVisual.h" />
-    <ClInclude Include="Composition.Visual.h" />
-    <ClInclude Include="Fast.Class.h" />
     <ClInclude Include="Generated Files\Simple.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Velocity.Class1.h" />

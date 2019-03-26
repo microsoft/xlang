@@ -5,10 +5,14 @@ namespace winrt::test_component_fast::Composition::implementation
 {
     struct CompositionObject : CompositionObjectT<CompositionObject>
     {
-        CompositionObject() = default;
+        CompositionObject(Composition::Compositor const& compositor);
 
         void Close();
-        void Compositor();
+        Composition::Compositor Compositor();
         void StartAnimationGroup();
+
+    protected:
+
+        Composition::Compositor m_compositor{ nullptr };
     };
 }

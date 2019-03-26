@@ -7,15 +7,6 @@ namespace Windows.Foundation.Metadata
     attribute NoExceptionAttribute
     {
     }
-
-    [attributeusage(target_runtimeclass)]
-    [attributename("fastabi")]
-    [contract(Windows.Foundation.FoundationContract, 4)]
-    attribute FastAbiAttribute
-    {
-        type Contract;
-        unsigned __int32 Version;
-    }
 }
 
 namespace test_component
