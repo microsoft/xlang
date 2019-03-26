@@ -2595,13 +2595,13 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         for (auto&& base : get_bases(type))
         {
-            auto format = R"(        %::operator impl::producer_ref<%> const() const noexcept
-        {
-            return { WINRT_SHIM(%)->base_%() };
-        }
+            auto format = R"(    inline %::operator impl::producer_ref<%> const() const noexcept
+    {
+        return { (*(impl::abi_t<%>**)this)->base_%() };
+    }
 )";
 
-            w.write(format, type, base, get_default_interface(type), base.TypeName());
+            w.write(format, type.TypeName(), base, get_default_interface(type), base.TypeName());
         }
     }
 

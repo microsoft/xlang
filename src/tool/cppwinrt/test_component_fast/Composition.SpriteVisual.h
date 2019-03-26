@@ -17,9 +17,3 @@ namespace winrt::test_component_fast::Composition::implementation
         }
     };
 }
-namespace winrt::test_component_fast::Composition::factory_implementation
-{
-    struct SpriteVisual : SpriteVisualT<SpriteVisual, implementation::SpriteVisual>
-    {
-    };
-}

@@ -128,7 +128,6 @@ namespace test_component_fast
             [contract(test_component_fast.Composition.FastContract, 4.0)] interface test_component_fast.Composition.IVisual2;
         }
 
-        [activatable(test_component_fast.Composition.FastContract, 2.0)]
         [contract(test_component_fast.Composition.FastContract, 2.0)]
         [marshaling_behavior(agile)]
         [threading(both)]
