@@ -92,21 +92,6 @@ namespace pywinrt
         return std::make_tuple(std::move(in_params), std::move(out_params));
     }
 
-    auto get_constructors(TypeDef const& type)
-    {
-        std::vector<MethodDef> ctors{};
-
-        for (auto&& method : type.MethodList())
-        {
-            if (is_constructor(method))
-            {
-                ctors.push_back(method);
-            }
-        }
-
-        return std::move(ctors);
-    }
-
     auto get_methodsz(TypeDef const& type)
     {
         std::map<std::string_view, std::vector<MethodDef>> methods{};

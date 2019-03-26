@@ -440,6 +440,21 @@ namespace xlang
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";
     }
 
+    auto get_constructors(TypeDef const& type)
+    {
+        std::vector<MethodDef> ctors{};
+
+        for (auto&& method : type.MethodList())
+        {
+            if (is_constructor(method))
+            {
+                ctors.push_back(method);
+            }
+        }
+
+        return std::move(ctors);
+    }
+
     inline bool is_static(MethodDef const& method)
     {
         return method.Flags().Static();
@@ -812,11 +827,9 @@ namespace xlang
         return false;
     }
 
-    template<typename T>
-    bool contains(std::set<T> const& set, T const& value)
+    template<typename C, typename T>
+    bool contains(C const& set, T const& value)
     {
         return set.find(value) != set.end();
     }
-
-
 }

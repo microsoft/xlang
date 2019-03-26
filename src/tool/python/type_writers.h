@@ -636,24 +636,17 @@ namespace pywinrt
     }
 
     template <typename F>
-    void enumerate_methods(writer& w, TypeDef const& type, F func, bool include_special = false)
+    void enumerate_methods(writer& w, TypeDef const& type, F func)
     {
         enumerate_required_types(w, type, [&](TypeDef const& required_type)
         {
             for (auto&& method : required_type.MethodList())
             {
-                if (is_constructor(method)) continue;
-                if (!include_special && method.SpecialName()) continue;
+                if (is_constructor(method) || method.SpecialName()) continue;
 
                 func(method);
             }
         });
-    }
-
-    template <typename F>
-    void enumerate_all_methods(writer& w, TypeDef const& type, F func)
-    {
-        enumerate_methods(w, type, func, true);
     }
 
     template <typename F>

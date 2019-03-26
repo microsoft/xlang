@@ -20,10 +20,10 @@ def async_test(test):
 class TestGeolocation(unittest.TestCase):
 
     def test_pinterface_qi(self):
-        locator = wdg.Geolocator._default_ctor()
-        op = locator.GetGeopositionAsync()
+        locator = wdg.Geolocator()
+        op = locator.get_geoposition_async()
         self.assertEqual(type(op), wf.IAsyncOperation)
-        op.Cancel()
+        op.cancel()
 
     def test_struct_ctor(self):
         basic_pos = wdg.BasicGeoposition(latitude = 47.1, longitude = -122.1, altitude = 0.0)
@@ -31,20 +31,20 @@ class TestGeolocation(unittest.TestCase):
         self.assertEqual(basic_pos.longitude, -122.1)
         self.assertEqual(basic_pos.altitude, 0.0)
 
-        geocircle = wdg.Geocircle.Create(basic_pos, 10)
-        center = geocircle.get_Center()
+        geocircle = wdg.Geocircle(basic_pos, 10)
+        center = geocircle.center
 
-        self.assertEqual(10, geocircle.get_Radius())
+        self.assertEqual(10, geocircle.radius)
         for x in ["latitude", "longitude", "altitude"]:
             self.assertEqual(getattr(basic_pos, x), getattr(center, x))
 
     def test_struct_from_dict(self):
         basic_pos = {"latitude": 47.1, "longitude": -122.1, "altitude": 0.0}
 
-        geocircle = wdg.Geocircle.Create(basic_pos, 10)
-        center = geocircle.get_Center()
+        geocircle = wdg.Geocircle(basic_pos, 10)
+        center = geocircle.center
 
-        self.assertEqual(10, geocircle.get_Radius())
+        self.assertEqual(10, geocircle.radius)
         for x in ["latitude", "longitude", "altitude"]:
             self.assertEqual(basic_pos[x], getattr(center, x))
 
@@ -52,9 +52,9 @@ class TestGeolocation(unittest.TestCase):
         basic_pos1 = wdg.BasicGeoposition(47.1, -122.1, 0.0)
         basic_pos2 = wdg.BasicGeoposition(47.2, -122.2, 0.0)
 
-        box = wdg.GeoboundingBox.TryCompute([basic_pos1, basic_pos2])
-        nw = box.get_NorthwestCorner()
-        se = box.get_SoutheastCorner()
+        box = wdg.GeoboundingBox.try_compute([basic_pos1, basic_pos2])
+        nw = box.northwest_corner
+        se = box.southeast_corner
 
         self.assertAlmostEqual(nw.latitude, basic_pos2.latitude)
         self.assertAlmostEqual(nw.longitude, basic_pos2.longitude)

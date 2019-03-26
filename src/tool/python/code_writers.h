@@ -289,9 +289,9 @@ static void _dealloc_@(%* self)
         return std::move(overloads);
     }
 
-    void write_method_self_param(writer& w, TypeDef const& type, MethodDef const& method)
+    void write_method_self_param(writer& w, TypeDef const& type, bool is_static)
     {
-        if (is_static(method))
+        if (is_static)
         {
             w.write("PyObject* /*unused*/");
         }
@@ -601,20 +601,6 @@ if (!%)
 //        w.write(strings::from_function, type.TypeName(), type);
 //    }
 //
-    void write_non_activatable(writer& w, TypeDef const& type)
-    {
-        // TODO fix
-        auto format = R"(
-static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
-{
-    std::string msg{ _type_name_@ };
-    msg.append(" is not directly constructable");
-    PyErr_SetString(PyExc_TypeError, msg.c_str());
-    return nullptr;
-}
-)";
-        w.write(format, type.TypeName(), type.TypeName());
-    }
 
     
     //void write_getter_method(writer& w, TypeDef const& type, method_info const& info)
@@ -735,6 +721,97 @@ catch (...)
 
     }
 
+    void write_class_new_function(writer& w, TypeDef const& type)
+    {
+        w.write("\nstatic PyObject* _new_%(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
+
+        {
+            writer::indent_guard g{ w };
+
+            auto constructors = get_constructors(type);
+            if (is_static(type) || constructors.size() == 0)
+            {
+                auto format = R"(std::string msg{ _type_name_@ };
+msg.append(" is not activatable");
+PyErr_SetString(PyExc_TypeError, msg.c_str());
+return nullptr;
+)";
+                w.write(format, type.TypeName());
+            }
+            else
+            {
+                w.write(R"(if (kwds != nullptr)
+{
+    PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
+    return nullptr;
+}
+
+Py_ssize_t arg_count = PyTuple_Size(args);
+)");
+
+                separator s{ w, "else " };
+                for (auto&& ctor : constructors)
+                {
+                    method_signature signature{ ctor };
+
+                    s();
+                    w.write("if (arg_count == %)\n{\n", count_in_param(signature.params()));
+                    {
+                        writer::indent_guard g2{ w };
+                        write_try_catch(w, [&](writer& w) 
+                        { 
+                            for (auto&& param : signature.params())
+                            {
+                                write_method_param_definition(w, ctor, param);
+                            }
+
+                            if (signature.params().size() > 0)
+                            {
+                                w.write("\n");
+                            }
+
+                            w.write("% instance{ % };\nreturn py::wrap(instance, type);\n",
+                                type,
+                                bind_list<write_param_name>(", ", signature.params()));
+                        });
+                    }
+                    w.write("}\n");
+                }
+
+                w.write(R"(else if (arg_count != -1)
+{
+    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+}
+return nullptr;
+)");
+            }
+        }
+        w.write("}\n");
+    }
+
+    void write_new_function(writer& w, TypeDef const& type)
+    {
+        auto category = get_category(type);
+
+        if (category == category::interface_type)
+        {
+            auto format = R"(
+static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
+{
+    std::string msg{ _type_name_@ };
+    msg.append(" interface is not activatable");
+    PyErr_SetString(PyExc_TypeError, msg.c_str());
+    return nullptr;
+}
+)";
+            w.write(format, type.TypeName(), type.TypeName());
+        }
+        else if (category == category::class_type)
+        {
+            write_class_new_function(w, type);
+        }
+    }
+
     void write_method_overloads(writer& w, TypeDef const& type, std::string_view method_name)
     {
         w.write("Py_ssize_t arg_count = PyTuple_Size(args);\n\n");
@@ -764,13 +841,12 @@ return nullptr;
 )");
     }
 
-
     void write_get_property_function(writer& w, TypeDef const& type, MethodDef const& method)
     {
         w.write("\nstatic PyObject* @_%(%, void* /*unused*/)\n{\n",
             type.TypeName(),
             method.Name(),
-            bind<write_method_self_param>(type, method));
+            bind<write_method_self_param>(type, is_static(method)));
         {
             writer::indent_guard g{ w };
 
@@ -796,7 +872,7 @@ return nullptr;
             return_type,
             type.TypeName(),
             method.Name(),
-            bind<write_method_self_param>(type, method));
+            bind<write_method_self_param>(type, is_static(method)));
         {
             writer::indent_guard g{ w };
             if (is_ptype(type))
@@ -822,7 +898,7 @@ return nullptr;
     void write_event_function(writer& w, TypeDef const& type, MethodDef const& method)
     {
         w.write("\nstatic PyObject* @_%(%, PyObject* arg)\n{\n", 
-            type.TypeName(), method.Name(), bind<write_method_self_param>(type, method));
+            type.TypeName(), method.Name(), bind<write_method_self_param>(type, is_static(method)));
         {
             writer::indent_guard g{ w };
             if (is_ptype(type))
@@ -831,7 +907,7 @@ return nullptr;
             }
             else
             {
-                write_method_body_contents(w, type, method);
+                write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, method); });
             }
         }
         w.write("}\n");
@@ -840,22 +916,19 @@ return nullptr;
     void write_method_functions(writer& w, TypeDef const& type)
     {
         // create a map of methods to determine overloads + ensure all overloads match instance/static 
-        std::map<std::string_view, std::vector<MethodDef>> method_map{};
+        std::map<std::string_view, bool> method_map{};
         enumerate_methods(w, type, [&](auto const& method)
         {
-            auto& v = method_map[method.Name()];
-            XLANG_ASSERT(std::all_of(v.begin(), v.end(), [&method](auto const& m) { return is_static(m) == is_static(method); }));
-            v.push_back(method);
+            XLANG_ASSERT(contains(method_map, method.Name()) ? method_map[method.Name()] == is_static(method) : true);
+            method_map[method.Name()] = is_static(method);
         });
 
-        for (auto&&[method_name, methods] : method_map)
+        for (auto&&[method_name, method_is_static] : method_map)
         {
-            XLANG_ASSERT(methods.size() > 0);
-
             w.write("\nstatic PyObject* @_%(%, PyObject* args)\n{\n",
                 type.TypeName(),
                 method_name,
-                bind<write_method_self_param>(type, methods[0]));
+                bind<write_method_self_param>(type, method_is_static));
             {
                 writer::indent_guard g{ w };
 
@@ -931,7 +1004,7 @@ return nullptr;
             std::set<std::string_view> method_names{};
             enumerate_methods(w, type, [&](auto const& method)
             {
-                if (method_names.find(method.Name()) == method_names.end())
+                if (!contains(method_names, method.Name()))
                 {
                     write_row(method);
                 }
@@ -1079,7 +1152,7 @@ static PyType_Spec _type_spec_@ =
 
         w.write("\n// ----- % class --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
-        write_non_activatable(w, type);
+        write_new_function(w, type);
         write_dealloc_function(w, type);
         //write_from_function(w, type);
 
@@ -1098,7 +1171,7 @@ static PyType_Spec _type_spec_@ =
 
         w.write("\n// ----- @ interface --------------------\n", type.TypeName());
         write_winrt_type_specialization_storage(w, type);
-        write_non_activatable(w, type);
+        write_new_function(w, type);
         write_dealloc_function(w, type);
         //write_from_function(w, type);
 
@@ -1108,6 +1181,167 @@ static PyType_Spec _type_spec_@ =
         write_type_slot_table(w, type);
         write_type_spec(w, type);
     }
+
+#pragma region pinterface functions
+    void write_pinterface_type_mapper(writer& w, TypeDef const& type)
+    {
+        if (!is_ptype(type))
+            return;
+
+        auto format = R"(template <%>
+struct pinterface_python_type<%<%>>
+{
+    using abstract = %;
+    using concrete = %<%>;
+};
+
+)";
+        w.write(format,
+            bind_list<write_template_arg>(", ", type.GenericParam()),
+            type,
+            bind_list<write_template_arg_name>(", ", type.GenericParam()),
+            bind<write_pyproj_type>(type),
+            bind<write_pyimpl_type>(type),
+            bind_list<write_template_arg_name>(", ", type.GenericParam()));
+    }
+
+    void write_pinterface_decl(writer& w, TypeDef const& type)
+    {
+        if (!is_ptype(type))
+            return;
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        w.write("\nstruct @\n{\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+
+            w.write("virtual ~@() {};\n", type.TypeName());
+            w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
+            w.write("virtual std::size_t hash() = 0;\n");
+
+            std::set<std::string_view> method_names{};
+            enumerate_methods(w, type, [&](auto const& method)
+            {
+                if (!contains(method_names, method.Name()))
+                {
+                    w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
+                }
+
+                method_names.insert(method.Name());
+            });
+
+            enumerate_properties(w, type, [&](auto const& prop)
+            {
+                auto[get_method, put_method] = get_property_methods(prop);
+                w.write("virtual PyObject* %() = 0;\n", get_method.Name());
+                if (put_method)
+                {
+                    w.write("virtual int %(PyObject*) = 0;\n", put_method.Name());
+                }
+            });
+
+            enumerate_events(w, type, [&](auto const& evt)
+            {
+                auto[add_method, remove_method] = get_event_methods(evt);
+                w.write("virtual PyObject* %(PyObject*) = 0;\n", add_method.Name());
+                w.write("virtual PyObject* %(PyObject*) = 0;\n", remove_method.Name());
+            });
+
+            // TODO: async, iterator, iterable, sequence, map
+        }
+        w.write("};\n");
+    }
+
+    void write_pinterface_impl(writer& w, TypeDef const& type)
+    {
+        if (!is_ptype(type))
+            return;
+
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
+        w.write("\ntemplate<%>\nstruct @ : public py::proj::%::@\n{\n",
+            bind_list<write_template_arg>(", ", type.GenericParam()),
+            type.TypeName(),
+            bind<write_type_namespace>(type),
+            type.TypeName());
+
+        {
+            writer::indent_guard g{ w };
+
+            w.write("@(%<%> o) : _obj(o) {}\n", type.TypeName(), type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
+            w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return _obj; }\n");
+            w.write("std::size_t hash() override { return py::get_instance_hash(_obj); }\n");
+
+            std::set<std::string_view> method_names{};
+            enumerate_methods(w, type, [&](auto const& method)
+            {
+                method_names.insert(method.Name());
+            });
+
+            for (auto&& method_name : method_names)
+            {
+                w.write("PyObject* %(PyObject* args) override\n{\n", method_name);
+                {
+                    writer::indent_guard gg{ w };
+                    write_method_overloads(w, type, method_name);
+                }
+                w.write("}\n");
+            }
+
+            enumerate_properties(w, type, [&](auto const& prop)
+            {
+                auto methods = get_property_methods(prop);
+                auto get_method = std::get<0>(methods);
+                auto put_method = std::get<1>(methods);
+
+                w.write("PyObject* %() override\n{\n", get_method.Name());
+                {
+                    writer::indent_guard gg{ w };
+                    write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, get_method); });
+                }
+                w.write("}\n");
+
+                if (put_method)
+                {
+                    w.write("int %(PyObject* arg) override\n{\n", put_method.Name());
+                    {
+                        writer::indent_guard gg{ w };
+                        write_setter_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, put_method); });
+                    }
+                    w.write("}\n");
+
+                }
+            });
+
+            enumerate_events(w, type, [&](auto const& evt)
+            {
+                auto methods = get_event_methods(evt);
+                auto add_method = std::get<0>(methods);
+                auto remove_method = std::get<1>(methods);
+
+                w.write("PyObject* %(PyObject* arg) override\n{\n", add_method.Name());
+                {
+                    writer::indent_guard gg{ w };
+                    write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, add_method); });
+                }
+                w.write("}\n");
+
+                w.write("PyObject* %(PyObject* arg) override\n{\n", remove_method.Name());
+                {
+                    writer::indent_guard gg{ w };
+                    write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, remove_method); });
+                }
+                w.write("}\n");
+            });
+
+            // TODO: async, iterator, iterable, sequence, map
+
+            w.write("\n%<%> _obj{ nullptr };\n", type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
+        }
+        w.write("};\n");
+    }
+#pragma endregion
 
 #pragma region struct functions
 
@@ -1629,107 +1863,6 @@ if (!return_value)
                 w.write("};\n");
             }
             w.write("};\n");
-        }
-        w.write("};\n");
-    }
-#pragma endregion
-
-#pragma region pinterface functions
-    void write_pinterface_type_mapper(writer& w, TypeDef const& type)
-    {
-        if (!is_ptype(type))
-            return;
-
-        auto format = R"(template <%>
-struct pinterface_python_type<%<%>>
-{
-    using abstract = %;
-    using concrete = %<%>;
-};
-
-)";
-        w.write(format,
-            bind_list<write_template_arg>(", ", type.GenericParam()),
-            type,
-            bind_list<write_template_arg_name>(", ", type.GenericParam()),
-            bind<write_pyproj_type>(type),
-            bind<write_pyimpl_type>(type),
-            bind_list<write_template_arg_name>(", ", type.GenericParam()));
-    }
-
-    void write_pinterface_decl(writer& w, TypeDef const& type)
-    {
-        if (!is_ptype(type))
-            return;
-
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-
-        w.write("\nstruct @\n{\n", type.TypeName());
-        {
-            writer::indent_guard g{ w };
-
-            w.write("virtual ~@() {};\n", type.TypeName());
-            w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
-            w.write("virtual std::size_t hash() = 0;\n");
-
-            enumerate_all_methods(w, type, [&](auto const& method)
-            {
-                if (is_get_method(method))
-                {
-                    w.write("virtual PyObject* %() = 0;\n", method.Name());
-                }
-                else if (is_put_method(method))
-                {
-                    w.write("virtual int %(PyObject*) = 0;\n", method.Name());
-                }
-                else
-                {
-                    w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
-                }
-            });
-        }
-        w.write("};\n");
-    }
-
-    void write_pinterface_impl(writer& w, TypeDef const& type)
-    {
-        if (!is_ptype(type))
-            return;
-
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-
-        w.write("\ntemplate<%>\nstruct @ : public py::proj::%::@\n{\n",
-            bind_list<write_template_arg>(", ", type.GenericParam()),
-            type.TypeName(),
-            bind<write_type_namespace>(type),
-            type.TypeName());
-
-        {
-            writer::indent_guard g{ w };
-
-            w.write("@(%<%> o) : _obj(o) {}\n", type.TypeName(), type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
-            w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return _obj; }\n");
-            w.write("std::size_t hash() override { return py::get_instance_hash(_obj); }\n");
-
-            enumerate_all_methods(w, type, [&](auto const& method)
-            {
-            //    // TODO: real impl
-            //    // write_method_body(w, type, method);
-                if (is_get_method(method))
-                {
-                    w.write("PyObject* %() override\n{\n    return nullptr;\n}\n", method.Name());
-                }
-                else if (is_put_method(method))
-                {
-                    w.write("int %(PyObject* arg) override\n{\n    return 0;\n}\n", method.Name());
-                }
-                else
-                {
-                    w.write("PyObject* %(PyObject*) override\n{\n    return nullptr;\n}\n", method.Name());
-                }
-            });
-
-            w.write("\n%<%> _obj{ nullptr };\n", type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
         }
         w.write("};\n");
     }
