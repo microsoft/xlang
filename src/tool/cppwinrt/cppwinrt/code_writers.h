@@ -1119,24 +1119,21 @@ namespace xlang
 
         if (is_add_overload(method))
         {
-//            auto format = R"(    template <typename D%> typename consume_%<D%>::%_revoker consume_%<D%>::%(auto_revoke_t, %) const
-//    {
-//        return impl::make_event_revoker<D, %_revoker>(this, %(%));
-//    }
-//)";
-//
-//            w.write(format,
-//                bind<write_comma_generic_typenames>(generics),
-//                type_impl_name,
-//                bind<write_comma_generic_types>(generics),
-//                method_name,
-//                type_impl_name,
-//                bind<write_comma_generic_types>(generics),
-//                method_name,
-//                bind<write_consume_params>(signature),
-//                method_name,
-//                method_name,
-//                bind<write_consume_args>(signature));
+            format = R"(    inline %::%_revoker %::%(auto_revoke_t, %) const
+    {
+        return impl::make_event_revoker<D, %_revoker>(this, %(%));
+    }
+)";
+
+            w.write(format,
+                class_type.TypeName(),
+                method_name,
+                class_type.TypeName(),
+                method_name,
+                bind<write_consume_params>(signature),
+                method_name,
+                method_name,
+                bind<write_consume_args>(signature));
         }
     }
 
