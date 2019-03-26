@@ -2583,6 +2583,13 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 )";
 
             w.write(format, base);
+
+            w.write_each<write_consume_declaration>(get_exclusive_default_interface(base).MethodList());
+
+            for (auto&& versioned : get_fastabi_interfaces(w, base))
+            {
+                w.write_each<write_consume_declaration>(versioned.MethodList());
+            }
         }
     }
 
@@ -2602,6 +2609,8 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 )";
 
             w.write(format, type.TypeName(), base, get_default_interface(type), base.TypeName());
+
+            // TODO: write base method forwarder definitions
         }
     }
 

@@ -93,26 +93,6 @@ namespace xlang
         return static_cast<bool>(get_attribute(row, type_namespace, type_name));
     }
 
-    static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
-    {
-        auto impls = type.InterfaceImpl();
-
-        for (auto&& impl : impls)
-        {
-            if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
-            {
-                return impl.Interface();
-            }
-        }
-
-        if (!empty(impls))
-        {
-            throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
-        }
-
-        return {};
-    }
-
     static auto get_abi_name(MethodDef const& method)
     {
         if (auto overload = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute"))
@@ -157,6 +137,11 @@ namespace xlang
         return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptionAttribute");
     }
 
+    static bool is_exclusive(TypeDef const& type)
+    {
+        return settings.fastabi&& has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+    }
+
     static bool has_fastabi(TypeDef const& type)
     {
         return settings.fastabi && has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute");
@@ -175,6 +160,56 @@ namespace xlang
         auto stage = std::get<ElemSig::EnumValue>(std::get<ElemSig>(feature.Value().FixedArgs()[0].value).value);
 
         return stage.equals_enumerator("AlwaysDisabled");
+    }
+
+    static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
+    {
+        auto impls = type.InterfaceImpl();
+
+        for (auto&& impl : impls)
+        {
+            if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
+            {
+                return impl.Interface();
+            }
+        }
+
+        if (!empty(impls))
+        {
+            throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
+        }
+
+        return {};
+    }
+
+    TypeDef get_exclusive_default_interface(TypeDef const& type)
+    {
+        auto impls = type.InterfaceImpl();
+
+        for (auto&& impl : impls)
+        {
+            if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
+            {
+                auto impl_interface = impl.Interface();
+                TypeDef default_interface;
+
+                if (impl_interface.type() == TypeDefOrRef::TypeDef)
+                {
+                    default_interface = impl_interface.TypeDef();
+                }
+                else
+                {
+                    default_interface = find_required(impl_interface.TypeRef());
+                }
+
+                if (is_exclusive(default_interface))
+                {
+                    return default_interface;
+                }
+            }
+        }
+
+        throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have an exclusive default interface");
     }
 
     static bool is_async(MethodDef const& method, method_signature const& method_signature)
@@ -351,7 +386,7 @@ namespace xlang
         // The following is wrong and just to get started.
         for (auto&& [interface_name, info] : get_interfaces(w, class_type))
         {
-            if (!info.defaulted)
+            if (!info.defaulted && !info.base && !info.overridable && is_exclusive(info.type))
             {
                 result.push_back(info.type);
             }
