@@ -16,7 +16,6 @@ def async_test(test):
             asyncio.set_event_loop(original_loop)
     return wrapper
 
-
 class TestGeolocation(unittest.TestCase):
 
     def test_pinterface_qi(self):
@@ -69,24 +68,39 @@ class TestGeolocation(unittest.TestCase):
 
         def callback(operation, status):
             self.assertEqual(status, 1)
-            pos = operation.GetResults()
+            pos = operation.get_results()
 
             self.assertEqual(type(pos), wdg.Geoposition)
 
-            coord = pos.get_Coordinate()
-            self.assertEqual(type(coord.get_Timestamp().universal_time), int)
+            coord = pos.coordinate
+            self.assertEqual(type(coord.timestamp.universal_time), int)
 
-            basic_pos = coord.get_Point().get_Position()
+            basic_pos = coord.point.position
             lat = basic_pos.latitude
             self.assertEqual(type(lat), float)
 
             complete_event.set()
 
-        locator = wdg.Geolocator._default_ctor()
-        op = locator.GetGeopositionAsync()
-        op.put_Completed(callback)
+        locator = wdg.Geolocator()
+        op = locator.get_geoposition_async()
+        op.completed = callback
 
         self.assertTrue(complete_event.wait(5))
+
+    @async_test
+    async def test_GetGeopositionAsync_await(self):
+        """test async method by directly awaiting IAsyncOperation"""
+
+        locator = wdg.Geolocator()
+        pos = await locator.get_geoposition_async()
+        self.assertEqual(type(pos), wdg.Geoposition)
+
+        coord = pos.coordinate
+        self.assertEqual(type(coord.timestamp.universal_time), int)
+
+        basic_pos = coord.point.position
+        lat = basic_pos.latitude
+        self.assertEqual(type(lat), float)
 
 if __name__ == '__main__':
     unittest.main()

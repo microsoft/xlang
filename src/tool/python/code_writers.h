@@ -553,61 +553,102 @@ if (!%)
 
     void write_try_catch(writer& w, std::function<void(writer&)> tryfunc)
     {
-#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-        w.write("return py::trycatch_invoker([=]() -> PyObject*\n{\n");
+        w.write("try\n{\n");
         {
-            writer::indent_guard gg{ w };
+            writer::indent_guard g{ w };
             tryfunc(w);
         }
-        w.write("});\n");
-#else
+        w.write(R"(}
+catch (...)
+{
+    py::to_PyErr();
+    return nullptr;
+}
+)");
+    }
+
+    void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
+    {
         w.write(R"(if (arg == nullptr)
 {
     PyErr_SetString(PyExc_TypeError, "property delete not supported");
     return -1;
 }
 
+try
+{
 )");
-
-        w.write("try\n{\n");
         {
             writer::indent_guard g{ w };
             tryfunc(w);
+            w.write("return 0;\n");
         }
         w.write(R"(}
 catch (...)
 {
-    return py::to_PyErr();
-}
-)");
-#endif
-    }
-
-    void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
-    {
-#ifdef PYWINRT_TEMPLATE_TRY_CATCH
-        w.write("return py::setter_trycatch_invoker(arg, [=]()\n{\n");
-        {
-            writer::indent_guard gg{ w };
-            tryfunc(w);
-        }
-        w.write("});\n");
-#else
-        w.write("try\n{\n");
-        {
-            writer::indent_guard g{ w };
-            tryfunc(w);
-            w.write("\nreturn 0;\n")
-        }
-        w.write(R"(}
-catch (...)
-{
+    py::to_PyErr();
     return -1;
 }
 )");
-#endif
-
     }
+//    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc)
+//    {
+//#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+//        w.write("return py::trycatch_invoker([=]() -> PyObject*\n{\n");
+//        {
+//            writer::indent_guard gg{ w };
+//            tryfunc(w);
+//        }
+//        w.write("}, nullptr);\n");
+//#else
+//        w.write(R"(if (arg == nullptr)
+//{
+//    PyErr_SetString(PyExc_TypeError, "property delete not supported");
+//    return -1;
+//}
+//
+//)");
+//
+//        w.write("try\n{\n");
+//        {
+//            writer::indent_guard g{ w };
+//            tryfunc(w);
+//        }
+//        w.write(R"(}
+//catch (...)
+//{
+//    py::to_PyErr();
+//    return nullptr;
+//}
+//)");
+//#endif
+//    }
+//
+//    void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
+//    {
+//#ifdef PYWINRT_TEMPLATE_TRY_CATCH
+//        w.write("return py::setter_trycatch_invoker(arg, [=]()\n{\n");
+//        {
+//            writer::indent_guard gg{ w };
+//            tryfunc(w);
+//        }
+//        w.write("});\n");
+//#else
+//        w.write("try\n{\n");
+//        {
+//            writer::indent_guard g{ w };
+//            tryfunc(w);
+//            w.write("\nreturn 0;\n")
+//        }
+//        w.write(R"(}
+//catch (...)
+//{
+//    return -1;
+//}
+//)");
+//#endif
+//
+//    }
 
     void write_class_new_function(writer& w, TypeDef const& type)
     {
@@ -848,7 +889,16 @@ return nullptr;
 
         if (!(is_ptype(type) || is_static_class(type)))
         {
-            w.write(strings::from_function, type.TypeName(), type);
+            w.write("\nstatic PyObject* _from_@(PyObject* /*unused*/, PyObject* arg)\n{\n", type.TypeName());
+            {
+                writer::indent_guard g{ w };
+                write_try_catch(w, [&](writer& w)
+                {
+                    auto format = "auto return_value = py::convert_to<winrt::Windows::Foundation::IInspectable>(arg);\nreturn py::convert(return_value.as<%>());\n";
+                    w.write(format, type);
+                });
+            }
+            w.write("}\n");
         }
 
         if (implements_iclosable(type))
@@ -915,6 +965,73 @@ return nullptr;
                 type.TypeName(), bind<write_pywrapper_type>(type),
                 type.TypeName(), bind<write_pywrapper_type>(type));
         }
+
+ //       if (implements_sequence(type))
+ //       {
+ //           //auto type_args = get_type_arguments(type, "Windows.Foundation.Collections", { "IVector`1", "IVectorView`1" });
+ //           //auto col_type = type_args.at(0);
+
+ //           w.write("\nstatic Py_ssize_t _seq_length_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+ //           {
+ //               writer::indent_guard gg{ w };
+
+ //               if (is_ptype(type))
+ //               {
+ //                   w.write("return self->obj->_seq_length();\n");
+ //               }
+ //               else
+ //               {
+ //                   //write_try_catch(w,
+ //                   //    [](writer& w) { w.write("return static_cast<Py_ssize_t>(self->obj.Size());\n"); },
+ //                   //    [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
+ //               }
+ //           }
+ //           w.write("}\n");
+
+ //           w.write("\nstatic PyObject* _seq_item_@(%* self, Py_ssize_t i)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+ //           {
+ //               writer::indent_guard gg{ w };
+
+ //               if (is_ptype(type))
+ //               {
+ //                   w.write("return self->obj->_seq_item(i);\n");
+ //               }
+ //               else
+ //               {
+ //                   write_try_catch(w,
+ //                       [](writer& w) { w.write("return py::convert(self->obj.GetAt(static_cast<uint32_t>(i)));\n"); });
+ //               }
+ //           }
+ //           w.write("}\n");
+
+ //           if (implements_ivector(type))
+ //           {
+ //               w.write("\nstatic int _seq_assign_@(%* self, Py_ssize_t i, PyObject* value)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+ //               {
+ //                   writer::indent_guard gg{ w };
+
+ //                   if (is_ptype(type))
+ //                   {
+ //                       w.write("return self->obj->_seq_assign(i, value);\n");
+ //                   }
+ //                   else
+ //                   {
+ ////                       write_try_catch(w,
+ ////                           [&col_type](writer& w)
+ ////                       {
+ ////                           auto format = R"(if (value == nullptr) { self->obj.RemoveAt(static_cast<uint32_t>(i)); }
+ ////else { self->obj.SetAt(static_cast<uint32_t>(i), py::convert_to<%>(value)); }
+ ////return 0;
+ ////)";
+ ////                           w.write(format, col_type);
+ ////                       },
+ ////                           [](writer& w) { w.write("py::to_PyErr();\nreturn -1;\n"); });
+ //                   }
+ //               }
+ //               w.write("}\n");
+ //           }
+ //       }
+
         // TODO:
         //  sequence/mapping
     }
@@ -1085,26 +1202,26 @@ return nullptr;
             {
                 w.write("{ Py_tp_iternext, _iterator_next_@ },\n", name);
             }
-            if (implements_sequence(type))
-            {
-                w.write("{ Py_sq_length, _seq_length_@ },\n", name);
-                w.write("{ Py_sq_item, _seq_item_@ },\n", name);
+            //if (implements_sequence(type))
+            //{
+            //    w.write("{ Py_sq_length, _seq_length_@ },\n", name);
+            //    w.write("{ Py_sq_item, _seq_item_@ },\n", name);
 
-                if (implements_ivector(type))
-                {
-                    w.write("{ Py_sq_ass_item, _seq_assign_@ },\n", name);
-                }
-            }
-            if (implements_mapping(type))
-            {
-                w.write("{ Py_mp_length, _map_length_@ },\n", name);
-                w.write("{ Py_mp_subscript, _map_subscript_@ },\n", name);
+            //    if (implements_ivector(type))
+            //    {
+            //        w.write("{ Py_sq_ass_item, _seq_assign_@ },\n", name);
+            //    }
+            //}
+            //if (implements_mapping(type))
+            //{
+            //    w.write("{ Py_mp_length, _map_length_@ },\n", name);
+            //    w.write("{ Py_mp_subscript, _map_subscript_@ },\n", name);
 
-                if (implements_imap(type))
-                {
-                    w.write("{ Py_mp_ass_subscript, _map_assign_@ },\n", name);
-                }
-            }
+            //    if (implements_imap(type))
+            //    {
+            //        w.write("{ Py_mp_ass_subscript, _map_assign_@ },\n", name);
+            //    }
+            //}
             w.write("{ 0, nullptr },\n");
         }
         w.write("};\n");
@@ -1235,7 +1352,21 @@ struct pinterface_python_type<%<%>>
                 w.write("virtual PyObject* %(PyObject*) = 0;\n", remove_method.Name());
             });
 
-            // TODO: async, iterator, iterable, sequence, map
+            if (implements_iasync(type))
+            {
+                w.write("virtual PyObject* dunder_await() = 0;\n");
+            }
+
+            if (implements_iiterable(type) || implements_iiterator(type))
+            {
+                w.write("virtual PyObject* dunder_iter() = 0;\n");
+            }
+
+            if (implements_iiterator(type))
+            {
+                w.write("virtual PyObject* dunder_iternext() = 0;\n");
+            }
+            // TODO: sequence, map
         }
         w.write("};\n");
     }
@@ -1322,7 +1453,33 @@ struct pinterface_python_type<%<%>>
                 w.write("}\n");
             });
 
-            // TODO: async, iterator, iterable, sequence, map
+            if (implements_iasync(type))
+            {
+                w.write("PyObject* dunder_await() override { return py::dunder_await(_obj); }\n");
+            }
+
+            if (implements_iiterable(type))
+            {
+                w.write("PyObject* dunder_iter() override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+                    write_try_catch(w, [](writer& w) { w.write("return py::convert(_obj.First());\n"); });
+                }
+                w.write("}\n");
+            }
+
+            if (implements_iiterator(type))
+            {
+                w.write("PyObject* dunder_iter() override { return reinterpret_cast<PyObject*>(this); }\n");
+                w.write("PyObject* dunder_iternext() override\n{\n");
+                {
+                    writer::indent_guard gg{ w };
+                    write_try_catch(w, [](writer& w) { w.write(strings::pinterface_dunder_iternext); });
+                }
+                w.write("}\n");
+            }
+
+            // TODO: sequence, map
 
             w.write("\n%<%> _obj{ nullptr };\n", type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
         }
@@ -1516,35 +1673,34 @@ struct pinterface_python_type<%<%>>
         w.write("\nPyObject* _new_@(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{", type.TypeName());
         {
             writer::indent_guard g{ w };
-
-            {
-                // TODO: write_try_catch
-                auto format = R"(
+            w.write(R"(
 auto tuple_size = PyTuple_Size(args);
 
 if ((tuple_size == 0) && (kwds == nullptr))
 {
-    return py::trycatch_invoker([]() -> PyObject* {
-        % return_value{};
-        return py::convert(return_value);
-    });
-}
+)");
+            {
+                writer::indent_guard gg{ w };
+                write_try_catch(w, [&](writer& w) { w.write("% return_value{};\nreturn py::convert(return_value);\n", type); });
+            }
+            w.write(R"(}
 
 if ((tuple_size == 1) && (kwds == nullptr))
 {
-    auto arg = PyTuple_GetItem(args, 0);
-    if (PyDict_Check(arg)) 
-    {
-        return py::trycatch_invoker([arg]() -> PyObject* {
-            auto return_value = py::convert_to<%>(arg);
-            return py::convert(return_value);
-        });
-    };
-};
-
-)";
-                w.write(format, type, type);
+)");
+            {
+                writer::indent_guard gg{ w };
+                w.write(R"(auto arg = PyTuple_GetItem(args, 0);
+if (PyDict_Check(arg))
+{
+)");
+                {
+                    writer::indent_guard ggg{ w };
+                    write_try_catch(w, [&](writer& w) { w.write("auto return_value = py::convert_to<%>(arg);\nreturn py::convert(return_value);\n", type); });
+                }
+                w.write("}\n");
             }
+            w.write("}\n\n");
 
             for (auto&& field : type.FieldList())
             {
@@ -1557,6 +1713,7 @@ static char* kwlist[] = {%nullptr};
 if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%)) {
     return nullptr;
 }
+
 )";
                 w.write(format,
                     bind_each<write_struct_field_keyword>(type.FieldList()),
@@ -1566,30 +1723,14 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%)) {
 
             if (has_custom_conversion(type))
             {
-                // TODO: write_try_catch
-                auto format = R"(
-return py::trycatch_invoker([=]() -> PyObject* {
-    % return_value{ };
-    custom_set(return_value, %);
-    return py::convert(return_value);
-});
-)";
-                w.write(format, type, bind<write_struct_field_initalizer>(type.FieldList().first));
+                auto format = "% return_value{ };\ncustom_set(return_value, %);\nreturn py::convert(return_value);\n";
+                write_try_catch(w, [&](writer& w) { w.write(format, type, bind<write_struct_field_initalizer>(type.FieldList().first)); });
             }
             else
             {
-                // TODO: write_try_catch
-                auto format = R"(
-return py::trycatch_invoker([=%]() -> PyObject* {
-    % return_value{ 
-        % };
-    return py::convert(return_value);
-});
-)";
-                w.write(format,
-                    bind_each<write_struct_field_ref_capture>(type.FieldList()),
-                    type,
-                    bind_list<write_struct_field_initalizer>(", \n        ", type.FieldList()));
+                // TODO: ref capture still needed?
+                auto format = "% return_value{ % };\nreturn py::convert(return_value);\n";
+                write_try_catch(w, [&](writer& w) { w.write(format, type, bind_list<write_struct_field_initalizer>(", ", type.FieldList())); });
             }
         }
         w.write("}\n");
@@ -1625,26 +1766,16 @@ return py::trycatch_invoker([=%]() -> PyObject* {
 
             if (has_custom_conversion(type))
             {
-                // TODO: write_try_catch
-                auto format = R"(return py::trycatch_invoker([self]() -> PyObject* {
-    return py::convert(custom_get(self->obj));
-});
-)";
-                w.write(format);
+                write_try_catch(w, [](writer& w) { w.write("return py::convert(custom_get(self->obj));\n"); });
             }
             else
             {
-                // TODO: write_try_catch
-                auto format = R"(return py::trycatch_invoker([self]() -> PyObject* {
-    return py::convert(self->obj.%);
-});
-)";
-                w.write(format, bind<write_struct_field_name>(field));
+                write_try_catch(w, [&](writer& w) { w.write("return py::convert(self->obj.%);\n", bind<write_struct_field_name>(field)); });
             }
         }
         w.write("}\n");
 
-        w.write("\nstatic int @_set_%(%* self, PyObject* value, void* /*unused*/)\n{\n",
+        w.write("\nstatic int @_set_%(%* self, PyObject* arg, void* /*unused*/)\n{\n",
             type.TypeName(),
             field.Name(),
             bind<write_pywrapper_type>(type));
@@ -1653,22 +1784,19 @@ return py::trycatch_invoker([=%]() -> PyObject* {
 
             if (has_custom_conversion(type))
             {
-                // TODO: write_try_catch
-                auto format = R"(return py::setter_trycatch_invoker(value, [=]() {
-    custom_set(self->obj, py::converter<%>::convert_to(value));
-});
-)";
-                w.write(format, field.Signature().Type());
+                write_setter_try_catch(w, [&](writer& w)
+                {
+                    w.write("custom_set(self->obj, py::converter<%>::convert_to(arg));\n", field.Signature().Type());
+                });
             }
             else
             {
-                // TODO: write_try_catch
-                auto format = R"(return py::setter_trycatch_invoker(value, [=]() {
-    self->obj.% = py::converter<%>::convert_to(value);
-});
-)";
-
-                w.write(format, bind<write_struct_field_name>(field), field.Signature().Type());
+                write_setter_try_catch(w, [&](writer& w)
+                {
+                    w.write("self->obj.% = py::converter<%>::convert_to(arg);\n", 
+                        bind<write_struct_field_name>(field),
+                        field.Signature().Type());
+                });
             }
         }
         w.write("}\n");
