@@ -461,7 +461,6 @@ namespace xlang
         return implements_ivector(type) || implements_ivectorview(type);
     }
 
-
     bool implements_mapping(TypeDef const& type)
     {
         return implements_imap(type) || implements_imapview(type);
