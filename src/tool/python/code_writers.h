@@ -863,10 +863,60 @@ return nullptr;
             w.write("}\n");
         }
 
+        if (implements_istringable(type))
+        {
+            w.write("\nstatic PyObject* _str_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+                write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.ToString());\n"); });
+            }
+            w.write("}\n");
+        }
+
+        if (implements_iasync(type))
+        {
+            w.write("\nstatic PyObject* _await_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->dunder_await();\n");
+                }
+                else
+                {
+                    w.write("return py::dunder_await(self->obj);\n");
+                }
+            }
+            w.write("}\n");
+        }
+
+        if (implements_iiterable(type))
+        {
+            w.write("\nstatic PyObject* _iterator_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+
+                if (is_ptype(type))
+                {
+                    w.write("return self->obj->dunder_iter();\n");
+                }
+                else
+                {
+                    write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.First());\n"); });
+                }
+            }
+            w.write("}\n");
+        }
+
+        if (implements_iiterator(type))
+        {
+            w.write(strings::iiterator_functions, 
+                type.TypeName(), bind<write_pywrapper_type>(type),
+                type.TypeName(), bind<write_pywrapper_type>(type));
+        }
         // TODO:
-        //  str
-        //  await
-        //  iterator/sequence/mapping
+        //  sequence/mapping
     }
 
     void write_method_table(writer& w, TypeDef const& type)
