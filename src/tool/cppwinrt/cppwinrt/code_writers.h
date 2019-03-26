@@ -2575,10 +2575,34 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_fast_class_base(writer& w, TypeDef const& type)
+    static void write_fast_class_base_declarations(writer& w, TypeDef const& type)
     {
-        // TODO: something that returns a (non-copyable) producer_ref with the non-owning back pointer
-        // for each base...
+        for (auto&& base : get_bases(type))
+        {
+            auto format = R"(        operator impl::producer_ref<%> const() const noexcept;
+)";
+
+            w.write(format, base);
+        }
+    }
+
+    static void write_fast_class_base_definitions(writer& w, TypeDef const& type)
+    {
+        if (!has_fastabi(type))
+        {
+            return;
+        }
+
+        for (auto&& base : get_bases(type))
+        {
+            auto format = R"(        %::operator impl::producer_ref<%> const() const noexcept
+        {
+            return { WINRT_SHIM(%)->base_%() };
+        }
+)";
+
+            w.write(format, type, base, get_default_interface(type), base.TypeName());
+        }
     }
 
     static void write_constructor_declarations(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
@@ -2847,22 +2871,22 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto type_name = type.TypeName();
         auto factories = get_factories(w, type);
 
-        auto format = R"(    struct WINRT_EBO % : %%%
+        auto format = R"(    struct WINRT_EBO % : %%
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
-%%%    };
+%%%%    };
 )";
 
         w.write(format,
             type_name,
             base_type,
-            bind<write_fast_class_base>(type),
             bind<write_fast_class_requires>(type),
             type_name,
             type_name,
             base_type,
             bind<write_constructor_declarations>(type, factories),
+            bind<write_fast_class_base_declarations>(type),
             bind<write_fast_class_usings>(type),
             bind_each<write_static_declaration>(factories));
     }
