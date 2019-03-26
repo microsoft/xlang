@@ -227,7 +227,7 @@ return 0;
     void write_dealloc_function(writer& w, TypeDef const& type)
     {
         auto category = get_category(type);
-        if (category == category::class_type && is_static(type))
+        if (category == category::class_type && is_static_class(type))
         {
             return;
         }
@@ -617,7 +617,7 @@ catch (...)
             writer::indent_guard g{ w };
 
             auto constructors = get_constructors(type);
-            if (is_static(type) || constructors.size() == 0)
+            if (is_static_class(type) || constructors.size() == 0)
             {
                 auto format = R"(std::string msg{ _type_name_@ };
 msg.append(" is not activatable");
@@ -979,41 +979,67 @@ return nullptr;
     void write_type_slot_table(writer& w, TypeDef const& type)
     {
         auto category = get_category(type);
-        auto dealloc_value = ((category == category::class_type) && is_static(type)) 
-            ? "nullptr"
-            : w.write_temp("_dealloc_@", type.TypeName());
-        auto methods_value = ((category == category::class_type) || (category == category::interface_type))
-            ? w.write_temp("_methods_@", type.TypeName())
-            : "nullptr";
+        auto name = type.TypeName();
 
-        auto format = R"(
-static PyType_Slot _type_slots_@[] = 
-{
-    { Py_tp_new, _new_@ },
-    { Py_tp_dealloc, % },
-    { Py_tp_methods, % },
-    { Py_tp_getset, _getset_@ }, 
-    { 0, nullptr },
-};
-)";
+        w.write("\nstatic PyType_Slot _type_slots_@[] = \n{\n", name);
 
+        {
+            writer::indent_guard g{ w };
 
-        // TODO:
-        //  str
-        //  await
-        //  iterator/sequence/mapping
+            w.write("{ Py_tp_new, _new_@ },\n", name);
+            if (!is_static_class(type))
+            {
+                w.write("{ Py_tp_dealloc, _dealloc_@ },\n", name);
+            }
+            if ((category == category::class_type) || (category == category::interface_type))
+            {
+                w.write("{ Py_tp_methods, _methods_@ },\n", name);
+            }
+            w.write("{ Py_tp_getset, _getset_@ },\n", name);
+            if (implements_istringable(type))
+            {
+                w.write("{ Py_tp_str, _str_@ },\n", name);
+            }
+            if (implements_iasync(type))
+            {
+                w.write("{ Py_am_await, (unaryfunc)_await_@ },\n", name);
+            }
+            if (implements_iiterable(type) || implements_iiterator(type))
+            {
+                w.write("{ Py_tp_iter, _iterator_@ },\n", name);
+            }
+            if (implements_iiterator(type))
+            {
+                w.write("{ Py_tp_iternext, _iterator_next_@ },\n", name);
+            }
+            if (implements_sequence(type))
+            {
+                w.write("{ Py_sq_length, _seq_length_@ },\n", name);
+                w.write("{ Py_sq_item, _seq_item_@ },\n", name);
 
-        w.write(format,
-            type.TypeName(),
-            type.TypeName(),
-            dealloc_value,
-            methods_value,
-            type.TypeName());
+                if (implements_ivector(type))
+                {
+                    w.write("{ Py_sq_ass_item, _seq_assign_@ },\n", name);
+                }
+            }
+            if (implements_mapping(type))
+            {
+                w.write("{ Py_mp_length, _map_length_@ },\n", name);
+                w.write("{ Py_mp_subscript, _map_subscript_@ },\n", name);
+
+                if (implements_imap(type))
+                {
+                    w.write("{ Py_mp_ass_subscript, _map_assign_@ },\n", name);
+                }
+            }
+            w.write("{ 0, nullptr },\n");
+        }
+        w.write("};\n");
     }
 
     void write_type_spec(writer& w, TypeDef const& type)
     {
-        auto type_size = is_static(type) ? "0" : w.write_temp("sizeof(%)", bind<write_pywrapper_type>(type));
+        auto type_size = is_static_class(type) ? "0" : w.write_temp("sizeof(%)", bind<write_pywrapper_type>(type));
 
         auto format = R"(
 static PyType_Spec _type_spec_@ =

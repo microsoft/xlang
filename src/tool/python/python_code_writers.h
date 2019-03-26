@@ -169,7 +169,7 @@ def _instance(self):
         auto category = get_category(type);
         if (category == category::class_type)
         {
-            if (is_static(type))
+            if (is_static_class(type))
             {
                 w.write(R"(def __new__(cls):
     raise TypeError("% is a static class. It cannot be constructed")

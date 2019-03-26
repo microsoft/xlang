@@ -49,7 +49,7 @@ namespace xlang
         return distance(type.GenericParam()) > 0;
     }
 
-    bool is_static(TypeDef const& type)
+    bool is_static_class(TypeDef const& type)
     {
         return get_category(type) == category::class_type && type.Flags().Abstract();
     }
@@ -404,6 +404,67 @@ namespace xlang
         }
 
         return false;
+    }
+
+    bool implements_istringable(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation", "IStringable");
+    }
+
+    bool implements_iclosable(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation", "IClosable");
+    }
+
+    bool implements_iasync(TypeDef const& type)
+    {
+        return get_category(type) == category::interface_type &&
+            implements_interface(type, {
+                std::make_tuple("Windows.Foundation", "IAsyncAction"),
+                std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
+                std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
+                std::make_tuple("Windows.Foundation", "IAsyncOperationWithProgress`2") });
+    }
+
+    bool implements_iiterable(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IIterable`1");
+    }
+
+    bool implements_iiterator(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IIterator`1");
+    }
+
+    bool implements_ivector(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IVector`1");
+    }
+
+    bool implements_ivectorview(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IVectorView`1");
+    }
+
+    bool implements_imap(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IMap`2");
+    }
+
+    bool implements_imapview(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IMapView`2");
+    }
+
+    bool implements_sequence(TypeDef const& type)
+    {
+        return implements_ivector(type) || implements_ivectorview(type);
+    }
+
+
+    bool implements_mapping(TypeDef const& type)
+    {
+        return implements_imap(type) || implements_imapview(type);
     }
 
     auto get_member_name(MethodDef const& method)
