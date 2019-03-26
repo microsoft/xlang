@@ -846,10 +846,25 @@ return nullptr;
             write_event_function(w, type, remove_method);
         });
 
+        if (!(is_ptype(type) || is_static_class(type)))
+        {
+            w.write(strings::from_function, type.TypeName(), type);
+        }
+
+        if (implements_iclosable(type))
+        {
+            w.write(strings::enter_function, type.TypeName(), bind<write_pywrapper_type>(type));
+
+            w.write("\nstatic PyObject* _exit_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+                write_try_catch(w, [](auto& w) { w.write("self->obj.Close();\nPy_RETURN_FALSE;\n"); });
+            }
+            w.write("}\n");
+        }
+
         // TODO:
-        //  From
         //  str
-        //  enter/exit
         //  await
         //  iterator/sequence/mapping
     }
@@ -921,9 +936,17 @@ return nullptr;
                 write_row(remove_method);
             });
 
-            // TODO:
-            //  From
-            //  enter/exit
+            // TODO: support _from for ptypes
+            if (!(is_ptype(type) || is_static_class(type)))
+            {
+                w.write("{ \"_from\", (PyCFunction)_from_@, METH_O | METH_STATIC, nullptr },\n", type.TypeName());
+            }
+
+            if (implements_iclosable(type))
+            {
+                w.write("{ \"__enter__\", (PyCFunction)_enter_@, METH_O, nullptr },\n", type.TypeName());
+                w.write("{ \"__exit__\",  (PyCFunction)_exit_@,  METH_O, nullptr },\n", type.TypeName());
+            }
 
             w.write("{ nullptr }\n");
         }
