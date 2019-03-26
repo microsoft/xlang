@@ -1083,6 +1083,63 @@ namespace xlang
         }
     }
 
+    static void write_consume_fast_base_definition(writer& w, MethodDef const& method, TypeDef const& class_type, TypeDef const& base_type)
+    {
+        auto method_name = get_name(method);
+        method_signature signature{ method };
+        w.async_types = is_async(method, signature);
+
+        std::string_view format;
+
+        if (is_noexcept(method))
+        {
+            format = R"(    inline % %::%(%) const noexcept
+    {
+        return static_cast<% const&>(*this).%(%);
+    }
+)";
+        }
+        else
+        {
+            format = R"(    inline % %::%(%) const
+    {
+        return static_cast<% const&>(*this).%(%);
+    }
+)";
+        }
+
+        w.write(format,
+            signature.return_signature(),
+            class_type.TypeName(),
+            method_name,
+            bind<write_consume_params>(signature),
+            base_type,
+            method_name,
+            bind<write_consume_args>(signature));
+
+        if (is_add_overload(method))
+        {
+//            auto format = R"(    template <typename D%> typename consume_%<D%>::%_revoker consume_%<D%>::%(auto_revoke_t, %) const
+//    {
+//        return impl::make_event_revoker<D, %_revoker>(this, %(%));
+//    }
+//)";
+//
+//            w.write(format,
+//                bind<write_comma_generic_typenames>(generics),
+//                type_impl_name,
+//                bind<write_comma_generic_types>(generics),
+//                method_name,
+//                type_impl_name,
+//                bind<write_comma_generic_types>(generics),
+//                method_name,
+//                bind<write_consume_params>(signature),
+//                method_name,
+//                method_name,
+//                bind<write_consume_args>(signature));
+        }
+    }
+
     static void write_consume_definitions(writer& w, TypeDef const& type)
     {
         auto generics = type.GenericParam();
@@ -2610,7 +2667,12 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
             w.write(format, type.TypeName(), base, get_default_interface(type), base.TypeName());
 
-            // TODO: write base method forwarder definitions
+            w.write_each<write_consume_fast_base_definition>(get_exclusive_default_interface(base).MethodList(), type, base);
+
+            for (auto&& versioned : get_fastabi_interfaces(w, base))
+            {
+                w.write_each<write_consume_fast_base_definition>(versioned.MethodList(), type, base);
+            }
         }
     }
 
