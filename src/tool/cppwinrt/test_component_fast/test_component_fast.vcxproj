@@ -337,6 +337,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Composition.CompositionObject.h" />
+    <ClInclude Include="Composition.Compositor.h" />
+    <ClInclude Include="Composition.SpriteVisual.h" />
+    <ClInclude Include="Composition.Visual.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Simple.h" />
   </ItemGroup>

@@ -4,12 +4,17 @@
 
 namespace winrt::test_component_fast::Composition::implementation
 {
-    struct SpriteVisual : SpriteVisualT<SpriteVisual, test_component_fast::Composition::implementation::Visual>
+    struct SpriteVisual : SpriteVisualT<SpriteVisual, implementation::Visual>
     {
         SpriteVisual() = default;
 
         void Brush();
         void Shadow();
+
+        auto base_Visual()
+        {
+            return get_abi(static_cast<Composition::Visual const&>(*this));
+        }
     };
 }
 namespace winrt::test_component_fast::Composition::factory_implementation

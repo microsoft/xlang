@@ -4,8 +4,8 @@
 
 namespace winrt::test_component_fast::Composition::implementation
 {
-    test_component_fast::Composition::SpriteVisual Compositor::CreateSpriteVisual()
+    SpriteVisual Compositor::CreateSpriteVisual()
     {
-        throw hresult_not_implemented();
+        return SpriteVisual();
     }
 }

@@ -4,11 +4,16 @@
 
 namespace winrt::test_component_fast::Composition::implementation
 {
-    struct Visual : VisualT<Visual, test_component_fast::Composition::implementation::CompositionObject>
+    struct Visual : VisualT<Visual, implementation::CompositionObject>
     {
         Visual() = default;
 
         void Offset();
-        void ParentForTransform(test_component_fast::Composition::Visual const& value);
+        void ParentForTransform(Composition::Visual const& value);
+
+        auto base_CompositionObject()
+        {
+            return get_abi(static_cast<Composition::CompositionObject const&>(*this));
+        }
     };
 }

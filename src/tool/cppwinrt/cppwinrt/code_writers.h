@@ -662,10 +662,15 @@ namespace xlang
             return;
         }
 
-        w.write(R"(            // fastabi
-)");
+        auto bases = get_bases(pair->second);
 
-        // TODO: write any back pointer functions for bases
+        std::for_each(bases.rbegin(), bases.rend(), [&](auto&& base)
+        {
+            auto format = R"(            virtual void* WINRT_CALL base_%() noexcept = 0;
+)";
+
+            w.write(format, base.TypeName());
+        });
 
         for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
         {
@@ -937,9 +942,6 @@ namespace xlang
         {
             return;
         }
-
-        w.write(R"(        // fastabi
-)");
 
         for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
         {
@@ -1698,8 +1700,19 @@ namespace xlang
             return;
         }
 
-        // TODO: write any back pointer functions for bases. These need to used CRTP
-        // so that an implementation can override the back pointer functions if needed.
+        auto bases = get_bases(pair->second);
+
+        std::for_each(bases.rbegin(), bases.rend(), [&](auto && base)
+        {
+            auto format = R"(        void* WINRT_CALL base_%() noexcept final
+        {
+            return this->shim().base_%();
+        }
+)";
+
+            auto base_name = base.TypeName();
+            w.write(format, base_name, base_name);
+        });
 
         for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
         {

@@ -7,7 +7,7 @@ namespace winrt::test_component_fast::Composition::implementation
     {
         Compositor() = default;
 
-        test_component_fast::Composition::SpriteVisual CreateSpriteVisual();
+        SpriteVisual CreateSpriteVisual();
     };
 }
 namespace winrt::test_component_fast::Composition::factory_implementation

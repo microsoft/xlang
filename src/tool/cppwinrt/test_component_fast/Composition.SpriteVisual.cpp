@@ -6,10 +6,8 @@ namespace winrt::test_component_fast::Composition::implementation
 {
     void SpriteVisual::Brush()
     {
-        throw hresult_not_implemented();
     }
     void SpriteVisual::Shadow()
     {
-        throw hresult_not_implemented();
     }
 }
