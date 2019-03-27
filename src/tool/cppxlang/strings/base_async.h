@@ -13,19 +13,19 @@ namespace winrt::impl
     {
         WINRT_ASSERT(!is_sta());
 
-        slim_mutex m;
-        slim_condition_variable cv;
+        std::mutex m;
+        std::condition_variable cv;
         bool completed = false;
         async.Completed([&](auto && ...)
             {
                 {
-                    slim_lock_guard const guard(m);
+                    std::lock_guard const guard(m);
                     completed = true;
                 }
                 cv.notify_one();
             });
 
-        slim_lock_guard guard(m);
+        std::unique_lock guard(m);
         cv.wait(m, [&] { return completed; });
     }
 }
