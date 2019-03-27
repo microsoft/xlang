@@ -12,7 +12,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "prebuild", "prebuild\prebui
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "old_tests", "old_tests", "{515B4F38-FD07-4C8B-94D0-BE3A813BB3EE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "old_tests\UnitTests\Tests.vcxproj", "{C8B95FCB-9B0B-4E9F-B7D5-643883C192C9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_old", "old_tests\UnitTests\Tests.vcxproj", "{C8B95FCB-9B0B-4E9F-B7D5-643883C192C9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{559A7CF4-DC5F-4D62-BA6B-0C2B025593F8} = {559A7CF4-DC5F-4D62-BA6B-0C2B025593F8}
 	EndProjectSection
