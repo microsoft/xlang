@@ -355,6 +355,10 @@ namespace xlang::meta::reader
             }
 
             const auto num_named_args = read<uint16_t>(data);
+            if (num_named_args > data.size())
+            {
+                throw_invalid("Invalid blob array size");
+            }
             m_named_args.reserve(num_named_args);
 
             for (uint16_t i = 0; i < num_named_args; ++i)
