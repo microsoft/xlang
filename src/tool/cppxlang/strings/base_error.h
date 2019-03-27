@@ -1,38 +1,6 @@
 
 namespace winrt::impl
 {
-    struct heap_traits
-    {
-        using type = wchar_t*;
-
-        static void close(type value) noexcept
-        {
-            WINRT_VERIFY(WINRT_HeapFree(WINRT_GetProcessHeap(), 0, value));
-        }
-
-        static constexpr type invalid() noexcept
-        {
-            return nullptr;
-        }
-    };
-
-    struct bstr_traits
-    {
-        using type = wchar_t*;
-
-        static void close(type value) noexcept
-        {
-            WINRT_SysFreeString(value);
-        }
-
-        static constexpr type invalid() noexcept
-        {
-            return nullptr;
-        }
-    };
-
-    using bstr_handle = handle_type<bstr_traits>;
-
     inline hstring trim_hresult_message(wchar_t const* const message, uint32_t size) noexcept
     {
         wchar_t const* back = message + size - 1;
@@ -69,15 +37,13 @@ namespace winrt
         hresult_error& operator=(hresult_error&&) = default;
 
         hresult_error(hresult_error const& other) noexcept :
-            m_code(other.m_code),
-            m_info(other.m_info)
+            m_code(other.m_code)
         {
         }
 
         hresult_error& operator=(hresult_error const& other) noexcept
         {
             m_code = other.m_code;
-            m_info = other.m_info;
             return *this;
         }
 
@@ -93,21 +59,7 @@ namespace winrt
 
         hresult_error(hresult const code, take_ownership_from_abi_t) noexcept : m_code(code)
         {
-            WINRT_GetRestrictedErrorInfo(m_info.put_void());
-
-            if (m_info == nullptr)
-            {
-                originate(code, nullptr);
-            }
-            else
-            {
-                WINRT_VERIFY_(impl::error_ok, m_info->GetReference(m_debug_reference.put()));
-
-                if (auto info2 = m_info.try_as<impl::ILanguageExceptionErrorInfo2>())
-                {
-                    WINRT_VERIFY_(impl::error_ok, info2->CapturePropagationContext(nullptr));
-                }
-            }
+            originate(code, nullptr);
         }
 
         hresult code() const noexcept
@@ -115,66 +67,15 @@ namespace winrt
             return m_code;
         }
 
-        hstring message() const noexcept
-        {
-            if (m_info)
-            {
-                int32_t code{};
-                impl::bstr_handle fallback;
-                impl::bstr_handle message;
-                impl::bstr_handle unused;
-
-                if (impl::error_ok == m_info->GetErrorDetails(fallback.put(), &code, message.put(), unused.put()))
-                {
-                    if (code == m_code)
-                    {
-                        if (message)
-                        {
-                            return impl::trim_hresult_message(message.get(), WINRT_SysStringLen(message.get()));
-                        }
-                        else
-                        {
-                            return impl::trim_hresult_message(fallback.get(), WINRT_SysStringLen(fallback.get()));
-                        }
-                    }
-                }
-            }
-
-            handle_type<impl::heap_traits> message;
-
-            uint32_t const size = WINRT_FormatMessageW(0x00001300, // FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS
-                nullptr,
-                m_code,
-                0x00000400, // MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT)
-                reinterpret_cast<wchar_t*>(message.put()),
-                0,
-                nullptr);
-
-            return impl::trim_hresult_message(message.get(), size);
-        }
-
-        template <typename To>
-        auto try_as() const noexcept
-        {
-            return m_info.try_as<To>();
-        }
-
         hresult to_abi() const noexcept
         {
-            if (m_info)
-            {
-                WINRT_SetRestrictedErrorInfo(m_info.get());
-            }
-
             return m_code;
         }
 
     private:
 
-        void originate(hresult const code, void* message) noexcept
+        void originate(hresult const, void*) noexcept
         {
-            WINRT_VERIFY(WINRT_RoOriginateLanguageException(code, message, nullptr));
-            WINRT_VERIFY_(impl::error_ok, WINRT_GetRestrictedErrorInfo(m_info.put_void()));
         }
 
 #ifdef __clang__
@@ -182,10 +83,8 @@ namespace winrt
 #pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
-        impl::bstr_handle m_debug_reference;
         uint32_t const m_debug_magic{ 0xAABBCCDD };
         hresult m_code{ impl::error_fail };
-        com_ptr<impl::IRestrictedErrorInfo> m_info;
 
 #ifdef __clang__
 #pragma clang diagnostic pop

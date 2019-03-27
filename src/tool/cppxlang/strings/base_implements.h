@@ -587,21 +587,6 @@ namespace winrt::impl
                 return error_ok;
             }
 
-            if constexpr (Agile)
-            {
-                if (is_guid_of<IAgileObject>(id))
-                {
-                    *object = static_cast<unknown_abi*>(this);
-                    AddRef();
-                    return error_ok;
-                }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(this, object);
-                }
-            }
-
             *object = nullptr;
             return error_no_interface;
         }
@@ -1062,11 +1047,6 @@ namespace winrt::impl
                     AddRef();
                     return error_ok;
                 }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(get_unknown(), object);
-                }
             }
 
             if constexpr (is_inspectable::value)
@@ -1336,7 +1316,7 @@ namespace winrt
 
     private:
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_WIN32)
         bool is_stack_object() const noexcept
         {
             uintptr_t low_limit{};

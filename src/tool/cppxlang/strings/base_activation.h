@@ -7,13 +7,6 @@ namespace winrt
         void* result;
         hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
-        if (hr == impl::error_not_initialized)
-        {
-            void* cookie;
-            WINRT_CoIncrementMTAUsage(&cookie);
-            hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
-        }
-
         check_hresult(hr);
         return { result, take_ownership_from_abi };
     }
@@ -112,27 +105,6 @@ namespace winrt::impl
 
 namespace winrt
 {
-    enum class apartment_type : int32_t
-    {
-        single_threaded,
-        multi_threaded
-    };
-
-    inline void init_apartment(apartment_type const type = apartment_type::multi_threaded)
-    {
-        hresult const result = WINRT_RoInitialize(static_cast<uint32_t>(type));
-
-        if (result < 0)
-        {
-            throw_hresult(result);
-        }
-    }
-
-    inline void uninit_apartment() noexcept
-    {
-        WINRT_RoUninitialize();
-    }
-
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
     auto get_activation_factory()
     {

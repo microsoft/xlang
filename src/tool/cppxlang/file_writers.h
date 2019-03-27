@@ -23,17 +23,14 @@ namespace xlang
         w.write(strings::base_string_operators);
         w.write(strings::base_array);
         w.write(strings::base_weak_ref);
-        w.write(strings::base_agile_ref);
         w.write(strings::base_error);
         w.write(strings::base_delegate);
         w.write(strings::base_events);
-        w.write(strings::base_marshaler);
         w.write(strings::base_activation);
         w.write(strings::base_implements);
         w.write(strings::base_composable);
         w.write(strings::base_foundation);
         w.write(strings::base_chrono);
-        w.write(strings::base_security);
         w.write(strings::base_std_hash);
         w.write(strings::base_reflect);
         w.write(strings::base_natvis);

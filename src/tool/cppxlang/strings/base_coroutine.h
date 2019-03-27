@@ -186,7 +186,7 @@ namespace winrt::impl
 
                 if (m_status == AsyncStatus::Started)
                 {
-                    m_completed = make_agile_delegate(handler);
+                    m_completed = handler;
                     return;
                 }
 

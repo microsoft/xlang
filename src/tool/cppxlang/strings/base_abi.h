@@ -70,20 +70,6 @@ namespace winrt::impl
         virtual int32_t WINRT_CALL Resolve(guid const& id, void** object) noexcept = 0;
     };
 
-    struct WINRT_NOVTABLE IMarshal : unknown_abi
-    {
-        virtual int32_t WINRT_CALL GetUnmarshalClass(guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags, guid* pCid) noexcept = 0;
-        virtual int32_t WINRT_CALL GetMarshalSizeMax(guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags, uint32_t* pSize) noexcept = 0;
-        virtual int32_t WINRT_CALL MarshalInterface(void* pStm, guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags) noexcept = 0;
-        virtual int32_t WINRT_CALL UnmarshalInterface(void* pStm, guid const& riid, void** ppv) noexcept = 0;
-        virtual int32_t WINRT_CALL ReleaseMarshalData(void* pStm) noexcept = 0;
-        virtual int32_t WINRT_CALL DisconnectObject(uint32_t dwReserved) noexcept = 0;
-    };
-    template <> struct guid_storage<IMarshal>
-    {
-        static constexpr guid value{ 0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
-    };
-
     struct WINRT_NOVTABLE IStaticLifetime : inspectable_abi
     {
         virtual int32_t WINRT_CALL unused() noexcept = 0;
