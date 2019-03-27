@@ -6,7 +6,7 @@ namespace winrt::test_component_fast::Composition::implementation
 {
     struct SpriteVisual : SpriteVisualT<SpriteVisual, implementation::Visual>
     {
-        SpriteVisual() = default;
+        SpriteVisual(Composition::Compositor const& compositor);
 
         void Brush();
         void Shadow();

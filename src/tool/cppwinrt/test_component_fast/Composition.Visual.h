@@ -6,7 +6,7 @@ namespace winrt::test_component_fast::Composition::implementation
 {
     struct Visual : VisualT<Visual, implementation::CompositionObject>
     {
-        Visual() = default;
+        Visual(Composition::Compositor const& compositor);
 
         int32_t Offset();
         void Offset(int32_t value);
