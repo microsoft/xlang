@@ -588,65 +588,6 @@ catch (...)
         write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "int", "-1");
     }
 
-    //    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc)
-    //    {
-    //#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-    //        w.write("return py::trycatch_invoker([=]() -> PyObject*\n{\n");
-    //        {
-    //            writer::indent_guard gg{ w };
-    //            tryfunc(w);
-    //        }
-    //        w.write("}, nullptr);\n");
-    //#else
-    //        w.write(R"(if (arg == nullptr)
-    //{
-    //    PyErr_SetString(PyExc_TypeError, "property delete not supported");
-    //    return -1;
-    //}
-    //
-    //)");
-    //
-    //        w.write("try\n{\n");
-    //        {
-    //            writer::indent_guard g{ w };
-    //            tryfunc(w);
-    //        }
-    //        w.write(R"(}
-    //catch (...)
-    //{
-    //    py::to_PyErr();
-    //    return nullptr;
-    //}
-    //)");
-    //#endif
-    //    }
-    //
-    //    void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
-    //    {
-    //#ifdef PYWINRT_TEMPLATE_TRY_CATCH
-    //        w.write("return py::setter_trycatch_invoker(arg, [=]()\n{\n");
-    //        {
-    //            writer::indent_guard gg{ w };
-    //            tryfunc(w);
-    //        }
-    //        w.write("});\n");
-    //#else
-    //        w.write("try\n{\n");
-    //        {
-    //            writer::indent_guard g{ w };
-    //            tryfunc(w);
-    //            w.write("\nreturn 0;\n")
-    //        }
-    //        w.write(R"(}
-    //catch (...)
-    //{
-    //    return -1;
-    //}
-    //)");
-    //#endif
-    //
-    //    }
-
     void write_class_new_function(writer& w, TypeDef const& type)
     {
         w.write("\nstatic PyObject* _new_%(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
@@ -1862,6 +1803,7 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%))
             else
             {
 #ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+                // customized trycatch_invoker to enable capturing sub structs by ref
                 auto format = R"(return py::trycatch_invoker([=%]() -> PyObject* {
     % return_value{ % };
     return py::convert(return_value);
