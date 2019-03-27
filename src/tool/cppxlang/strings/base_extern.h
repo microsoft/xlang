@@ -49,19 +49,6 @@ extern "C"
     void*    WINRT_CALL WINRT_GetCurrentThread() noexcept;
     int32_t  WINRT_CALL WINRT_SetThreadToken(void** thread, void* token) noexcept;
 
-    void    WINRT_CALL WINRT_AcquireSRWLockExclusive(winrt::impl::srwlock* lock) noexcept;
-    void    WINRT_CALL WINRT_AcquireSRWLockShared(winrt::impl::srwlock* lock) noexcept;
-    uint8_t WINRT_CALL WINRT_TryAcquireSRWLockExclusive(winrt::impl::srwlock* lock) noexcept;
-    uint8_t WINRT_CALL WINRT_TryAcquireSRWLockShared(winrt::impl::srwlock* lock) noexcept;
-    void    WINRT_CALL WINRT_ReleaseSRWLockExclusive(winrt::impl::srwlock* lock) noexcept;
-    void    WINRT_CALL WINRT_ReleaseSRWLockShared(winrt::impl::srwlock* lock) noexcept;
-    int32_t WINRT_CALL WINRT_SleepConditionVariableSRW(winrt::impl::condition_variable* cv, winrt::impl::srwlock* lock, uint32_t milliseconds, uint32_t flags) noexcept;
-    void    WINRT_CALL WINRT_WakeConditionVariable(winrt::impl::condition_variable* cv) noexcept;
-    void    WINRT_CALL WINRT_WakeAllConditionVariable(winrt::impl::condition_variable* cv) noexcept;
-    void    WINRT_CALL WINRT_InitializeSListHead(void* head) noexcept;
-    void*   WINRT_CALL WINRT_InterlockedPushEntrySList(void* head, void* entry) noexcept;
-    void*   WINRT_CALL WINRT_InterlockedFlushSList(void* head) noexcept;
-
     uint32_t WINRT_CALL WINRT_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
     int32_t  WINRT_CALL WINRT_TrySubmitThreadpoolCallback(void(WINRT_CALL *callback)(void*, void* context), void* context, void*) noexcept;
     winrt::impl::ptp_timer WINRT_CALL WINRT_CreateThreadpoolTimer(void(WINRT_CALL *callback)(void*, void* context, void*), void* context, void*) noexcept;
@@ -126,19 +113,6 @@ WINRT_LINK(DuplicateToken, 12)
 WINRT_LINK(OpenThreadToken, 16)
 WINRT_LINK(GetCurrentThread, 0)
 WINRT_LINK(SetThreadToken, 8)
-
-WINRT_LINK(AcquireSRWLockExclusive, 4)
-WINRT_LINK(AcquireSRWLockShared, 4)
-WINRT_LINK(TryAcquireSRWLockExclusive, 4)
-WINRT_LINK(TryAcquireSRWLockShared, 4)
-WINRT_LINK(ReleaseSRWLockExclusive, 4)
-WINRT_LINK(ReleaseSRWLockShared, 4)
-WINRT_LINK(SleepConditionVariableSRW, 16)
-WINRT_LINK(WakeConditionVariable, 4)
-WINRT_LINK(WakeAllConditionVariable, 4)
-WINRT_LINK(InitializeSListHead, 4)
-WINRT_LINK(InterlockedPushEntrySList, 8)
-WINRT_LINK(InterlockedFlushSList, 4)
 
 WINRT_LINK(WaitForSingleObject, 8)
 WINRT_LINK(TrySubmitThreadpoolCallback, 12)
