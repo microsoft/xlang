@@ -19,13 +19,14 @@ TEST_CASE("scratch")
     SpriteVisual v2 = compositor.CreateSpriteVisual();
 
     // Under the slowabi, this needs a QI for ICompositionObject.
-    v1.Compositor();
+    assert(v1.Compositor() == compositor);
 
     // Under the slowabi, this needs a QI for ICompositionObject2.
     v1.StartAnimationGroup();
 
     // Under the slowabi, this needs a QI for IVisual.
-    v1.Offset();
+    v1.Offset(123);
+    assert(v1.Offset() == 123);
 
     // Under the slowabi, this needs a QI for IVisual2 to call ParentForTransform
     // *and* the v2 parameter needs a QI for IVisual.
