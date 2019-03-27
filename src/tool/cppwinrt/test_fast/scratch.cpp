@@ -3,10 +3,8 @@
 
 using namespace winrt::test_component_fast::Composition;
 
-
- //All, yes all, of the QIs in the test below are avoided by the fastabi.
- //That's 8 calls to QueryInterface and 8 calls to Release.
-
+ // All, yes all, of the QIs in the test below are avoided by the fastabi.
+ // That's 8 calls to QueryInterface and 8 calls to Release.
 
 TEST_CASE("scratch")
 {
@@ -24,7 +22,7 @@ TEST_CASE("scratch")
     // Under the slowabi, this needs a QI for ICompositionObject2.
     v1.StartAnimationGroup();
 
-    // Under the slowabi, this needs a QI for IVisual.
+    // Under the slowabi, this needs a QI for IVisual for each call.
     v1.Offset(123);
     assert(v1.Offset() == 123);
 
@@ -33,8 +31,7 @@ TEST_CASE("scratch")
     v1.ParentForTransform(v2);
 
     // Since Brush is on the default interface of SpriteVisual there's no QI here
-    // for both slowabi and fastabi. Literally the only statement in this whole
-    // function that doesn't inject at least one QI and Release.
+    // for both slowabi and fastabi.
     v1.Brush();
 
     // Under the slowabi, this needs a QI for ISpriteVisual2.
