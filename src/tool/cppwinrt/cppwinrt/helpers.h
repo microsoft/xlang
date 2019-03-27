@@ -139,7 +139,7 @@ namespace xlang
 
     static bool is_exclusive(TypeDef const& type)
     {
-        return settings.fastabi&& has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+        return has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
     }
 
     static bool has_fastabi(TypeDef const& type)
@@ -356,38 +356,39 @@ namespace xlang
 
             switch (type.type())
             {
-            case TypeDefOrRef::TypeDef:
-            {
-                info.type = type.TypeDef();
-                break;
-            }
-            case TypeDefOrRef::TypeRef:
-            {
-                info.type = find_required(type.TypeRef());
-                w.add_depends(info.type);
-                break;
-            }
-            case TypeDefOrRef::TypeSpec:
-            {
-                auto type_signature = type.TypeSpec().Signature();
-
-                std::vector<std::string> names;
-
-                for (auto&& arg : type_signature.GenericTypeInst().GenericArgs())
+                case TypeDefOrRef::TypeDef:
                 {
-                    names.push_back(w.write_temp("%", arg));
+                    info.type = type.TypeDef();
+                    break;
                 }
+                case TypeDefOrRef::TypeRef:
+                {
+                    info.type = find_required(type.TypeRef());
+                    w.add_depends(info.type);
+                    break;
+                }
+                case TypeDefOrRef::TypeSpec:
+                {
+                    auto type_signature = type.TypeSpec().Signature();
 
-                info.generic_param_stack.push_back(std::move(names));
+                    std::vector<std::string> names;
 
-                guard = w.push_generic_params(type_signature.GenericTypeInst());
-                auto signature = type_signature.GenericTypeInst();
-                info.type = find_required(signature.GenericType().TypeRef());
+                    for (auto&& arg : type_signature.GenericTypeInst().GenericArgs())
+                    {
+                        names.push_back(w.write_temp("%", arg));
+                    }
 
-                break;
+                    info.generic_param_stack.push_back(std::move(names));
+
+                    guard = w.push_generic_params(type_signature.GenericTypeInst());
+                    auto signature = type_signature.GenericTypeInst();
+                    info.type = find_required(signature.GenericType().TypeRef());
+
+                    break;
+                }
             }
-            }
 
+            info.exclusive = is_exclusive(info.type);
             get_interfaces_impl(w, result, info.defaulted, info.overridable, base, info.generic_param_stack, info.type.InterfaceImpl());
             insert_or_assign(result, name, std::move(info));
         }
@@ -402,6 +403,11 @@ namespace xlang
         for (auto&& base : get_bases(type))
         {
             get_interfaces_impl(w, result, false, false, true, {}, base.InterfaceImpl());
+        }
+
+        if (has_fastabi(type))
+        {
+            // TODO: sort (exclusive and non-overridable and non-base) interfaces according to https://osgwiki.com/wiki/FastAbi
         }
 
         return result;
