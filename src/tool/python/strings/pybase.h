@@ -226,7 +226,7 @@ namespace py
 
     py::pyobj_handle register_python_type(PyObject* module, const char* type_name, PyType_Spec* type_spec, PyObject* base_type);
 
-    inline WINRT_NOINLINE PyObject* to_PyErr() noexcept
+    inline WINRT_NOINLINE void to_PyErr() noexcept
     {
         try
         {
@@ -238,7 +238,7 @@ namespace py
         }
         catch (std::bad_alloc const&)
         {
-            return PyErr_NoMemory();
+            PyErr_SetNone(PyExc_MemoryError);
         }
         catch (std::out_of_range const& e)
         {
@@ -252,12 +252,10 @@ namespace py
         {
             PyErr_SetString(PyExc_RuntimeError, e.what());
         }
-
-        return nullptr;
     }
 
     template<typename F>
-    auto trycatch_invoker(F func, decltype(func()) return_value)
+    auto trycatch_invoker(F func, decltype(func()) return_value) -> decltype(func())
     {
         try
         {
@@ -1203,7 +1201,8 @@ namespace py
         }
         catch (...)
         {
-            return py::to_PyErr();
+            py::to_PyErr();
+            return nullptr;
         }
 
         return PyObject_GetIter(future.get());

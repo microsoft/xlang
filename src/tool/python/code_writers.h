@@ -551,8 +551,16 @@ if (!%)
 
 #define PYWINRT_TEMPLATE_TRY_CATCH 
 
-    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view exception_return_value = "nullptr")
+    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view return_type = "PyObject*", std::string_view exception_return_value = "nullptr")
     {
+#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+        w.write("return py::trycatch_invoker([=]() -> %\n{\n", return_type);
+        {
+            writer::indent_guard gg{ w };
+            tryfunc(w);
+        }
+        w.write("}, %);\n", exception_return_value);
+#else
         w.write("try\n{\n");
         {
             writer::indent_guard g{ w };
@@ -565,6 +573,7 @@ catch (...)
     return %;
 }
 )", exception_return_value);
+#endif
     }
 
     void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
@@ -576,7 +585,7 @@ catch (...)
 }
 
 )");
-        write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "-1");
+        write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "int", "-1");
     }
 
     //    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc)
@@ -835,7 +844,7 @@ return nullptr;
         write_try_catch(w, [&](writer& w) 
         { 
             w.write("return static_cast<Py_ssize_t>(%Size());\n", bind<write_method_invoke_context>(type, MethodDef{}));
-        }, "-1");
+        }, "Py_ssize_t", "-1");
     }
 
     void write_seq_item_body(writer& w, TypeDef const& type)
@@ -863,7 +872,7 @@ return nullptr;
 else { %SetAt(static_cast<uint32_t>(i), py::convert_to<%>(value)); }
 return 0;
 )", bind<write_method_invoke_context>(type, MethodDef{}), bind<write_method_invoke_context>(type, MethodDef{}), collection_type);
-        }, "-1");
+        }, "int", "-1");
     }
 
     void write_map_length_body(writer& w, TypeDef const& type)
@@ -871,7 +880,7 @@ return 0;
         write_try_catch(w, [&](writer& w) 
         { 
             w.write("return static_cast<Py_ssize_t>(%Size());\n", bind<write_method_invoke_context>(type, MethodDef{}));
-        }, "-1");
+        }, "Py_ssize_t", "-1");
     }
 
     void write_map_subscript_body(writer& w, TypeDef const& type)
@@ -914,7 +923,7 @@ else { %Insert(_key, py::convert_to<%>(value)); }
 return 0;
 )";
             w.write(format, key_type, bind<write_method_invoke_context>(type, MethodDef{}), bind<write_method_invoke_context>(type, MethodDef{}), value_type);
-        }, "-1");
+        }, "int", "-1");
     }
     
     void write_method_functions(writer& w, TypeDef const& type)
@@ -1833,7 +1842,8 @@ if (PyDict_Check(arg))
             {
                 auto format = R"(
 static char* kwlist[] = {%nullptr};
-if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%)) {
+if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%))
+{
     return nullptr;
 }
 
@@ -1851,9 +1861,20 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%)) {
             }
             else
             {
-                // TODO: ref capture still needed?
+#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+                auto format = R"(return py::trycatch_invoker([=%]() -> PyObject* {
+    % return_value{ % };
+    return py::convert(return_value);
+}, nullptr);
+)";
+                w.write(format,
+                    bind_each<write_struct_field_ref_capture>(type.FieldList()),
+                    type,
+                    bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
+#else
                 auto format = "% return_value{ % };\nreturn py::convert(return_value);\n";
                 write_try_catch(w, [&](writer& w) { w.write(format, type, bind_list<write_struct_field_initalizer>(", ", type.FieldList())); });
+#endif
             }
         }
         w.write("}\n");
