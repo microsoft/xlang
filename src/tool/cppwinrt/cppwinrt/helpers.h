@@ -288,10 +288,41 @@ namespace xlang
         bool defaulted{};
         bool overridable{};
         bool base{};
+        bool exclusive{};
         std::vector<std::vector<std::string>> generic_param_stack{};
     };
 
-    static void get_interfaces_impl(writer& w, std::map<std::string, interface_info>& result, bool defaulted, bool overridable, bool base, std::vector<std::vector<std::string>> const& generic_param_stack, std::pair<InterfaceImpl, InterfaceImpl>&& children)
+    using get_interfaces_t = std::vector<std::pair<std::string, interface_info>>;
+
+    static interface_info* find(get_interfaces_t& interfaces, std::string_view const& name)
+    {
+        auto pair = std::find_if(interfaces.begin(), interfaces.end(),
+            [&](auto && pair)
+        {
+            return pair.first == name;
+        });
+
+        if (pair == interfaces.end())
+        {
+            return nullptr;
+        }
+
+        return &pair->second;
+    }
+
+    static void insert_or_assign(get_interfaces_t& interfaces, std::string_view const& name, interface_info&& info)
+    {
+        if (auto existing = find(interfaces, name))
+        {
+            *existing = std::move(info);
+        }
+        else
+        {
+            interfaces.emplace_back(name, info);
+        }
+    }
+
+    static void get_interfaces_impl(writer& w, get_interfaces_t& result, bool defaulted, bool overridable, bool base, std::vector<std::vector<std::string>> const& generic_param_stack, std::pair<InterfaceImpl, InterfaceImpl>&& children)
     {
         for (auto&& impl : children)
         {
@@ -309,11 +340,9 @@ namespace xlang
                 // If it was previously captured as non-defaulted but now found as defaulted, we carry on and
                 // rediscover it as we need it to be defaulted recursively.
 
-                auto found = result.find(name);
-
-                if (found != result.end())
+                if (auto found = find(result, name))
                 {
-                    if (found->second.defaulted || !info.defaulted)
+                    if (found->defaulted || !info.defaulted)
                     {
                         continue;
                     }
@@ -360,14 +389,14 @@ namespace xlang
             }
 
             get_interfaces_impl(w, result, info.defaulted, info.overridable, base, info.generic_param_stack, info.type.InterfaceImpl());
-            result[name] = std::move(info);
+            insert_or_assign(result, name, std::move(info));
         }
     };
 
     static auto get_interfaces(writer& w, TypeDef const& type)
     {
         w.abi_types = false;
-        std::map<std::string, interface_info> result;
+        get_interfaces_t result;
         get_interfaces_impl(w, result, false, false, false, {}, type.InterfaceImpl());
 
         for (auto&& base : get_bases(type))

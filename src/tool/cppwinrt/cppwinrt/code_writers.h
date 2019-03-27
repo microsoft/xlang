@@ -1872,7 +1872,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         };
     }
 
-    static void write_class_override_implements(writer& w, std::map<std::string, interface_info> const& interfaces)
+    static void write_class_override_implements(writer& w, get_interfaces_t const& interfaces)
     {
         bool found{};
 
@@ -1891,7 +1891,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_class_override_requires(writer& w, std::map<std::string, interface_info> const& interfaces)
+    static void write_class_override_requires(writer& w, get_interfaces_t const& interfaces)
     {
         bool found{};
 
@@ -1905,7 +1905,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_class_override_defaults(writer& w, std::map<std::string, interface_info> const& interfaces)
+    static void write_class_override_defaults(writer& w, get_interfaces_t const& interfaces)
     {
         bool first{ true };
 
@@ -1996,7 +1996,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_class_override_usings(writer& w, std::map<std::string, interface_info> const& required_interfaces)
+    static void write_class_override_usings(writer& w, get_interfaces_t const& required_interfaces)
     {
         std::map<std::string_view, std::set<std::string>> method_usage;
 
@@ -2066,7 +2066,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             bind<write_class_override_defaults>(interfaces),
             type_name,
             bind<write_class_override_constructors>(type_name, factories),
-            bind< write_class_override_usings>(interfaces));
+            bind<write_class_override_usings>(interfaces));
     }
 
     static void write_interface_requires(writer& w, TypeDef const& type)
@@ -2092,7 +2092,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         auto type_name = type.TypeName();
         auto interfaces_plus_self = get_interfaces(w, type);
-        interfaces_plus_self[std::string{ type_name }] = interface_info{ type };
+        interfaces_plus_self.emplace_back(type_name, interface_info{ type });
         std::map<std::string_view, std::set<std::string>> method_usage;
 
         for (auto&& [interface_name, info] : interfaces_plus_self)
