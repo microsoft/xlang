@@ -19,253 +19,30 @@ namespace winrt
     }
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
 namespace winrt::impl
 {
-    inline int32_t interlocked_read_32(int32_t const volatile* target) noexcept
-    {
-#if defined _M_IX86 || defined _M_X64
-        int32_t const result = *target;
-        _ReadWriteBarrier();
-        return result;
-#elif defined _M_ARM || defined _M_ARM64
-        int32_t const result = __iso_volatile_load32(reinterpret_cast<int32_t const volatile*>(target));
-        WINRT_INTERLOCKED_READ_MEMORY_BARRIER
-            return result;
-#else
-#error Unsupported architecture
-#endif
-    }
-
-#if defined _WIN64
-    inline int64_t interlocked_read_64(int64_t const volatile* target) noexcept
-    {
-#if defined _M_X64
-        int64_t const result = *target;
-        _ReadWriteBarrier();
-        return result;
-#elif defined _M_ARM64
-        int64_t const result = __iso_volatile_load64(target);
-        WINRT_INTERLOCKED_READ_MEMORY_BARRIER
-            return result;
-#else
-#error Unsupported architecture
-#endif
-    }
-#endif
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-
-    template <typename T>
-    T* interlocked_read_pointer(T* const volatile* target) noexcept
-    {
-#ifdef _WIN64
-        return (T*)interlocked_read_64((int64_t*)target);
-#else
-        return (T*)interlocked_read_32((int32_t*)target);
-#endif
-    }
-
-#ifdef _WIN64
-    inline constexpr uint32_t memory_allocation_alignment{ 16 };
-#pragma warning(push)
-#pragma warning(disable:4324) // structure was padded due to alignment specifier
-    struct alignas(16) slist_entry
-    {
-        slist_entry* next;
-    };
-    union alignas(16) slist_header
-    {
-        struct
-        {
-            uint64_t reserved1;
-            uint64_t reserved2;
-        } reserved1;
-        struct
-        {
-            uint64_t reserved1 : 16;
-            uint64_t reserved2 : 48;
-            uint64_t reserved3 : 4;
-            uint64_t reserved4 : 60;
-        } reserved2;
-    };
-#pragma warning(pop)
-#else
-    inline constexpr uint32_t memory_allocation_alignment{ 8 };
-    struct slist_entry
-    {
-        slist_entry* next;
-    };
-    union slist_header
-    {
-        uint64_t reserved1;
-        struct
-        {
-            slist_entry reserved1;
-            uint16_t reserved2;
-            uint16_t reserved3;
-        } reserved2;
-    };
-#endif
-
-    struct factory_cache_typeless_entry
-    {
-        struct alignas(sizeof(void*) * 2) object_and_count
-        {
-            unknown_abi* pointer;
-            size_t count;
-        };
-
-        object_and_count value;
-        alignas(memory_allocation_alignment) slist_entry next {};
-
-        void clear() noexcept
-        {
-            unknown_abi* pointer_value = interlocked_read_pointer(&value.pointer);
-
-            if (pointer_value == nullptr)
-            {
-                return;
-            }
-
-            object_and_count current_value{ pointer_value, 0 };
-
-#if defined _WIN64
-            if (1 == _InterlockedCompareExchange128((int64_t*)this, 0, 0, (int64_t*)&current_value))
-            {
-                pointer_value->Release();
-            }
-#else
-            int64_t const result = _InterlockedCompareExchange64((int64_t*)this, 0, *(int64_t*)&current_value);
-
-            if (result == *(int64_t*)&current_value)
-            {
-                pointer_value->Release();
-            }
-#endif
-        }
-    };
-
-    struct factory_cache
-    {
-        factory_cache(factory_cache const&) = delete;
-        factory_cache& operator=(factory_cache const&) = delete;
-
-        factory_cache() noexcept
-        {
-            WINRT_InitializeSListHead(&m_list);
-        }
-
-        void add(factory_cache_typeless_entry* const entry) noexcept
-        {
-            WINRT_ASSERT(entry);
-            WINRT_InterlockedPushEntrySList(&m_list, &entry->next);
-        }
-
-        void clear() noexcept
-        {
-            slist_entry* entry = static_cast<slist_entry*>(WINRT_InterlockedFlushSList(&m_list));
-
-            while (entry != nullptr)
-            {
-                // entry->Next must be read before entry->clear() is called since the InterlockedCompareExchange
-                // inside clear() will allow another thread to add the entry back to the cache.
-                slist_entry* next = entry->next;
-                reinterpret_cast<factory_cache_typeless_entry*>(reinterpret_cast<uint8_t*>(entry) - offsetof(factory_cache_typeless_entry, next))->clear();
-                entry = next;
-            }
-        }
-
-    private:
-
-        alignas(memory_allocation_alignment) slist_header m_list;
-    };
-
-    inline factory_cache& get_factory_cache() noexcept
-    {
-        static factory_cache cache;
-        return cache;
-    }
-
     template <typename Class, typename Interface>
     struct factory_cache_entry
     {
         template <typename F>
         auto call(F&& callback)
         {
+            void* value = m_value.load(std::memory_order_acquire);
+            if (value)
             {
-                count_guard const guard(m_value.count);
-
-                if (m_value.object)
-                {
-                    return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
-                }
+                return callback(*reinterpret_cast<com_ref<Interface> const*>(&value));
             }
 
             auto object = get_activation_factory<Interface>(name_of<Class>());
-
-            if (!object.template try_as<IAgileObject>())
+            if (m_value.compare_exchange_strong(value, get_abi(object), std::memory_order_acq_rel))
             {
-                return callback(object);
+                value = detach_abi(object);
             }
-
-            {
-                count_guard const guard(m_value.count);
-
-                if (nullptr == _InterlockedCompareExchangePointer((void**)&m_value.object, get_abi(object), nullptr))
-                {
-                    detach_abi(object);
-                    get_factory_cache().add(reinterpret_cast<factory_cache_typeless_entry*>(this));
-                }
-
-                return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
-            }
+            return callback(*reinterpret_cast<com_ref<Interface> const*>(&value));
         }
 
     private:
-
-        struct count_guard
-        {
-            count_guard(count_guard const&) = delete;
-            count_guard& operator=(count_guard const&) = delete;
-
-            explicit count_guard(size_t& count) noexcept : m_count(count)
-            {
-#ifdef _WIN64
-                _InterlockedIncrement64((int64_t*)&m_count);
-#else
-                _InterlockedIncrement((long*)&m_count);
-#endif
-            }
-
-            ~count_guard() noexcept
-            {
-#ifdef _WIN64
-                _InterlockedDecrement64((int64_t*)&m_count);
-#else
-                _InterlockedDecrement((long*)&m_count);
-#endif
-            }
-
-        private:
-
-            size_t& m_count;
-        };
-
-        struct alignas(sizeof(void*) * 2) object_and_count
-        {
-            void* object;
-            size_t count;
-        };
-
-        object_and_count m_value;
-        alignas(memory_allocation_alignment) slist_entry m_next;
+        std::atomic<void*> m_value{};
     };
 
     template <typename Class, typename Interface>
@@ -280,9 +57,6 @@ namespace winrt::impl
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
     auto call_factory(F&& callback)
     {
-        static_assert(sizeof(factory_cache_typeless_entry) == sizeof(factory_cache_entry<Class, Interface>));
-        static_assert(std::alignment_of_v<factory_cache_typeless_entry> == std::alignment_of_v<factory_cache_entry<Class, Interface>>);
-        static_assert(std::is_standard_layout_v<factory_cache_typeless_entry>);
         static_assert(std::is_standard_layout_v<factory_cache_entry<Class, Interface>>);
 
         return factory_storage<Class, Interface>::factory.call(callback);
@@ -325,17 +99,14 @@ namespace winrt::impl
 
     template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
     {
-        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
+        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final try
         {
-            try
-            {
-                *instance = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *instance = detach_abi(this->shim().ActivateInstance());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *instance = nullptr;
+            typename D::abi_guard guard(this->shim());
+            *instance = detach_abi(this->shim().ActivateInstance());
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
     };
 }
 
@@ -384,11 +155,6 @@ namespace winrt
     auto try_get_activation_factory(hresult_error& exception) noexcept
     {
         return impl::try_get_activation_factory<Class, Interface>(&exception);
-    }
-
-    inline void clear_factory_cache() noexcept
-    {
-        impl::get_factory_cache().clear();
     }
 
     template <typename Interface>

@@ -25,9 +25,9 @@ namespace xlang
                 ++params.first;
             }
 
-            for (uint32_t i{}; i != m_method.Params().size(); ++i)
+            for (uint32_t i{}; i != size(m_method.Params()); ++i)
             {
-                m_params.emplace_back(params.first + i, m_method.Params().data() + i);
+                m_params.emplace_back(params.first + i, &m_method.Params().first[i]);
             }
         }
 
@@ -155,6 +155,21 @@ namespace xlang
     static bool is_noexcept(MethodDef const& method)
     {
         return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptionAttribute");
+    }
+
+    static bool is_always_disabled(TypeDef const& type)
+    {
+        auto feature = get_attribute(type, "Windows.Foundation.Metadata", "FeatureAttribute");
+
+        if (!feature)
+        {
+            return false;
+        }
+
+        // The first argument is a Windows.Foundation.Metadata.FeatureStage enum class.
+        auto stage = std::get<ElemSig::EnumValue>(std::get<ElemSig>(feature.Value().FixedArgs()[0].value).value);
+
+        return stage.equals_enumerator("AlwaysDisabled");
     }
 
     static bool is_async(MethodDef const& method, method_signature const& method_signature)
