@@ -175,7 +175,7 @@ namespace winrt::impl
             AsyncStatus status;
 
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_completed_assigned)
                 {
@@ -201,7 +201,7 @@ namespace winrt::impl
 
         CompletedHandler Completed() noexcept
         {
-            slim_lock_guard const guard(m_lock);
+            std::lock_guard const guard(m_lock);
             return m_completed;
         }
 
@@ -212,7 +212,7 @@ namespace winrt::impl
 
         AsyncStatus Status() noexcept
         {
-            slim_lock_guard const guard(m_lock);
+            std::lock_guard const guard(m_lock);
             return m_status;
         }
 
@@ -220,7 +220,7 @@ namespace winrt::impl
         {
             try
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
                 rethrow_if_failed();
                 return error_ok;
             }
@@ -235,7 +235,7 @@ namespace winrt::impl
             winrt::delegate<> cancel;
 
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_status == AsyncStatus::Started)
                 {
@@ -257,7 +257,7 @@ namespace winrt::impl
 
         auto GetResults()
         {
-            slim_lock_guard const guard(m_lock);
+            std::lock_guard const guard(m_lock);
 
             if (m_status == AsyncStatus::Completed)
             {
@@ -284,7 +284,7 @@ namespace winrt::impl
             AsyncStatus status;
 
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_status == AsyncStatus::Started)
                 {
@@ -340,7 +340,7 @@ namespace winrt::impl
 
         void unhandled_exception() noexcept
         {
-            slim_lock_guard const guard(m_lock);
+            std::lock_guard const guard(m_lock);
             WINRT_ASSERT(m_status == AsyncStatus::Started || m_status == AsyncStatus::Canceled);
             m_exception = std::current_exception();
 
@@ -382,7 +382,7 @@ namespace winrt::impl
         void cancellation_callback(winrt::delegate<>&& cancel) noexcept
         {
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_status != AsyncStatus::Canceled)
                 {
@@ -405,7 +405,7 @@ namespace winrt::impl
         }
 
         std::exception_ptr m_exception{};
-        slim_mutex m_lock;
+        std::mutex m_lock;
         CompletedHandler m_completed;
         winrt::delegate<> m_cancel;
         AsyncStatus m_status{ AsyncStatus::Started };

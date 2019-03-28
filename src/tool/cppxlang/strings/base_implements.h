@@ -1192,8 +1192,8 @@ namespace winrt::impl
             param::hstring const name{ name_of<typename D::instance_type>() };
             result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
 
-            static slim_mutex lock;
-            slim_lock_guard const guard{ lock };
+            static std::mutex lock;
+            std::lock_guard const guard{ lock };
             void* result;
             map->Lookup(get_abi(name), &result);
 

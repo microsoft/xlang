@@ -5,12 +5,14 @@
 #include <cassert>
 #include <chrono>
 #include <clocale>
+#include <condition_variable>
 #include <cstddef>
 #include <cwchar>
 #include <iterator>
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <optional>
 #include <shared_mutex>
