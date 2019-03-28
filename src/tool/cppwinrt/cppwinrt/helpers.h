@@ -93,11 +93,17 @@ namespace xlang
         return static_cast<bool>(get_attribute(row, type_namespace, type_name));
     }
 
+    template <typename T>
+    auto get_attribute_value(CustomAttribute const& attribute, uint32_t const arg)
+    {
+        return std::get<T>(std::get<ElemSig>(attribute.Value().FixedArgs()[arg].value).value);
+    }
+
     static auto get_abi_name(MethodDef const& method)
     {
         if (auto overload = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute"))
         {
-            return std::get<std::string_view>(std::get<ElemSig>(overload.Value().FixedArgs()[0].value).value);
+            return get_attribute_value<std::string_view>(overload, 0);
         }
         else
         {
@@ -157,7 +163,7 @@ namespace xlang
         }
 
         // The first argument is a Windows.Foundation.Metadata.FeatureStage enum class.
-        auto stage = std::get<ElemSig::EnumValue>(std::get<ElemSig>(feature.Value().FixedArgs()[0].value).value);
+        auto stage = get_attribute_value<ElemSig::EnumValue>(feature, 0);
 
         return stage.equals_enumerator("AlwaysDisabled");
     }
@@ -281,6 +287,31 @@ namespace xlang
         return bases;
     }
 
+    static uint32_t get_version(TypeDef const& type)
+    {
+        for (auto&& attribute : type.CustomAttribute())
+        {
+            auto name = attribute.TypeNamespaceAndName();
+
+            if (name.first != "Windows.Foundation.Metadata")
+            {
+                continue;
+            }
+
+            if (name.second == "ContractVersionAttribute")
+            {
+                return get_attribute_value<uint32_t>(attribute, 1);
+            }
+
+            if (name.second == "VersionAttribute")
+            {
+                return get_attribute_value<uint32_t>(attribute, 0);
+            }
+        }
+
+        return {};
+    }
+
     struct interface_info
     {
         TypeDef type;
@@ -289,6 +320,7 @@ namespace xlang
         bool overridable{};
         bool base{};
         bool exclusive{};
+        uint32_t version{};
         std::vector<std::vector<std::string>> generic_param_stack{};
     };
 
@@ -389,6 +421,7 @@ namespace xlang
             }
 
             info.exclusive = is_exclusive(info.type);
+            info.version = get_version(info.type);
             get_interfaces_impl(w, result, info.defaulted, info.overridable, base, info.generic_param_stack, info.type.InterfaceImpl());
             insert_or_assign(result, name, std::move(info));
         }
@@ -405,9 +438,18 @@ namespace xlang
             get_interfaces_impl(w, result, false, false, true, {}, base.InterfaceImpl());
         }
 
-        if (has_fastabi(type))
+        if (!has_fastabi(type))
         {
-            // TODO: sort (exclusive and non-overridable and non-base) interfaces according to https://osgwiki.com/wiki/FastAbi
+            return result;
+        }
+
+        // TODO: sort (exclusive and non-overridable and non-base) interfaces according to https://osgwiki.com/wiki/FastAbi
+
+        // patial_sort?
+
+        for (auto&& [name, info] : result)
+        {
+            
         }
 
         return result;
