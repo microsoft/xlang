@@ -763,6 +763,48 @@ return nullptr;
         w.write("}\n");
     }
 
+	void write_dunder_iter_body(writer& w, TypeDef const& type)
+	{
+		if (implements_iiterable(type))
+		{
+			write_try_catch(w, [&](writer& w) 
+			{ 
+				w.write("return py::convert(%First());\n", bind<write_method_invoke_context>(type, MethodDef{})); 
+			});
+		}
+		else if (implements_iiterator(type))
+		{
+			XLANG_ASSERT(!implements_iiterable(type));
+			w.write("return reinterpret_cast<PyObject*>(%);\n",
+				is_ptype(type) ? "this" : "self");
+		}
+		else
+		{
+			XLANG_ASSERT(false);
+		}
+	}
+
+	void write_dunder_iter_next_body(writer& w, TypeDef const& type)
+	{
+		write_try_catch(w, [&](writer& w)
+			{
+				auto format = R"(if (%HasCurrent())
+{
+    auto cur = %Current();
+    %MoveNext();
+    return py::convert(cur);
+}
+else
+{
+    return nullptr;
+})";
+				w.write(format, 
+					bind<write_method_invoke_context>(type, MethodDef{}),
+					bind<write_method_invoke_context>(type, MethodDef{}),
+					bind<write_method_invoke_context>(type, MethodDef{}));
+			}, "PyObject*", "nullptr");
+	}
+
     void write_seq_length_body(writer& w, TypeDef const& type)
     {
         write_try_catch(w, [&](writer& w) 
@@ -954,20 +996,22 @@ return 0;
             w.write("}\n");
         }
 
-        if (implements_iiterable(type))
+        if (implements_iiterable(type) || implements_iiterator(type))
         {
             w.write("\nstatic PyObject* _iterator_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
-                write_ptype_body("dunder_iter()", [&](auto& w) { write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.First());\n"); }); });
+				write_ptype_body("dunder_iter()", [&](auto& w) { write_dunder_iter_body(w, type); });
             }
             w.write("}\n");
         }
 
         if (implements_iiterator(type))
         {
-            w.write(strings::iiterator_functions,
-                type.TypeName(), bind<write_pywrapper_type>(type),
-                type.TypeName(), bind<write_pywrapper_type>(type));
+			w.write("\nstatic PyObject* _iterator_next_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+			{
+				write_ptype_body("dunder_iternext()", [&](auto& w) { write_dunder_iter_next_body(w, type); });
+			}
+			w.write("}\n");
         }
 
         if (implements_sequence(type))
@@ -1465,23 +1509,22 @@ struct pinterface_python_type<%<%>>
                 w.write("PyObject* dunder_await() override { return py::dunder_await(_obj); }\n");
             }
 
-            if (implements_iiterable(type))
+            if (implements_iiterable(type) || implements_iiterator(type))
             {
                 w.write("PyObject* dunder_iter() override\n{\n");
                 {
                     writer::indent_guard gg{ w };
-                    write_try_catch(w, [](writer& w) { w.write("return py::convert(_obj.First());\n"); });
+					write_dunder_iter_body(w, type);
                 }
                 w.write("}\n");
             }
 
             if (implements_iiterator(type))
             {
-                w.write("PyObject* dunder_iter() override { return reinterpret_cast<PyObject*>(this); }\n");
                 w.write("PyObject* dunder_iternext() override\n{\n");
                 {
                     writer::indent_guard gg{ w };
-                    write_try_catch(w, [](writer& w) { w.write(strings::pinterface_dunder_iternext); });
+					write_dunder_iter_next_body(w, type);
                 }
                 w.write("}\n");
             }
