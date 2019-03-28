@@ -31,12 +31,12 @@ namespace test_component_fast
 
         String Method1();
 
-        [contract(SimpleContract, 2)]
+        [contract(SimpleContract, 1.2)]
         {
             String Method2();
         }
 
-        [contract(SimpleContract, 3)]
+        [contract(SimpleContract, 2.1)]
         {
             String Method3();
         }

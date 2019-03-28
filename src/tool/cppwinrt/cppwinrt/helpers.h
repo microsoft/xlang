@@ -168,6 +168,21 @@ namespace xlang
         return stage.equals_enumerator("AlwaysDisabled");
     }
 
+    static bool is_always_enabled(TypeDef const& type)
+    {
+        auto feature = get_attribute(type, "Windows.Foundation.Metadata", "FeatureAttribute");
+
+        if (!feature)
+        {
+            return true;
+        }
+
+        // The first argument is a Windows.Foundation.Metadata.FeatureStage enum class.
+        auto stage = get_attribute_value<ElemSig::EnumValue>(feature, 0);
+
+        return stage.equals_enumerator("AlwaysEnabled");
+    }
+
     static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
     {
         auto impls = type.InterfaceImpl();
@@ -287,8 +302,10 @@ namespace xlang
         return bases;
     }
 
-    static uint32_t get_version(TypeDef const& type)
+    static std::pair<uint16_t, uint16_t> get_version(TypeDef const& type)
     {
+        uint32_t version{};
+
         for (auto&& attribute : type.CustomAttribute())
         {
             auto name = attribute.TypeNamespaceAndName();
@@ -300,16 +317,18 @@ namespace xlang
 
             if (name.second == "ContractVersionAttribute")
             {
-                return get_attribute_value<uint32_t>(attribute, 1);
+                version = get_attribute_value<uint32_t>(attribute, 1);
+                break;
             }
 
             if (name.second == "VersionAttribute")
             {
-                return get_attribute_value<uint32_t>(attribute, 0);
+                version = get_attribute_value<uint32_t>(attribute, 0);
+                break;
             }
         }
 
-        return {};
+        return { HIWORD(version), LOWORD(version) };
     }
 
     struct interface_info
@@ -320,7 +339,7 @@ namespace xlang
         bool overridable{};
         bool base{};
         bool exclusive{};
-        uint32_t version{};
+        std::pair<uint16_t, uint16_t> version{};
         std::vector<std::vector<std::string>> generic_param_stack{};
     };
 
@@ -452,19 +471,19 @@ namespace xlang
             auto& left = left_pair.second;
             auto& right = right_pair.second;
 
-            if (left.is_default)
+            if (left.base != right.base)
             {
-                return true;
+                return !left.base;
+            }
+
+            if (left.is_default != right.is_default)
+            {
+                return left.is_default;
             }
 
             if (left.overridable != right.overridable)
             {
-                return !left.overridable; 
-            }
-
-            if (left.base != right.base)
-            {
-                return !left.base;
+                return !left.overridable;
             }
 
             if (left.exclusive != right.exclusive)
@@ -472,12 +491,12 @@ namespace xlang
                 return left.exclusive;
             }
 
-            auto left_disable = is_always_disabled(left.type);
-            auto right_disable = is_always_disabled(right.type);
+            auto left_enabled = is_always_enabled(left.type);
+            auto right_enabled = is_always_enabled(right.type);
 
-            if (left_disable != right_disable)
+            if (left_enabled != right_enabled)
             {
-                return !left_disable;
+                return left_enabled;
             }
 
             if (left.version != right.version)
