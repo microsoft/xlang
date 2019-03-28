@@ -204,6 +204,7 @@ namespace winrt
         type* m_ptr{};
     };
 
+    template <typename T, typename F, typename...Args>
     impl::com_ref<T> capture(F function, Args&& ...args)
     {
         void* result{};
