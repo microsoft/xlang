@@ -30,7 +30,7 @@ a way to store any additional error context from any language that the error pro
 
 ## Translation of errors
 
-Xlang's goal is to allow a component to be written using natural and familiar code for the language
+xlang's goal is to allow a component to be written using natural and familiar code for the language
 it is implemented in and for it to be consumed using natural and familiar code for the language which
 the consumer is written in. To achieve this, xlang needs to translate errors from the natural form
 of one language to a natural form of that error in another language.
@@ -51,9 +51,9 @@ isn't an equivalent error to map to in a consumer's language, it is left to the 
 language to decide what error from its language to map to based on what makes sense for that language.
 This can end up being a generic error.
 
-## Xlang errors
+## xlang errors
 
-Xlang will use an Int32, xlang_result, to represent its errors. The representation of this 32-bit
+xlang will use an Int32, xlang_result, to represent its errors. The representation of this 32-bit
 value will be based on the same model used in COM for HRESULTs to assist with sharing error codes,
 but will not necessarily be defined in this design note on a bit by bit basis as is in COM.
 This is because xlang will not inherit all the errors used in COM and will instead define a set of
@@ -63,28 +63,28 @@ allow for projections to avoid needing to maintain a large mapping of errors.
 
 The following errors will be defined in xlang:
 
-``` 
-xlang_fail (0x80004005) - To be used as a generic error when no equivalent or better error mapping is available
-xlang_invalid_arg (0x80000003) - To be used to report any invalid parameter values in a call
-xlang_illegal_state_change (0x8000000d) - To be used to report any changes in state that are illegal
-xlang_out_of_memory (0x80000002) - To be used to report any allocation issue resulting from not enough memory
-xlang_pointer (0x80000005) - To be used to report null pointer related errors
-xlang_not_impl (0x80000001) - To be used when the function / feature is not implemented
-xlang_access_denied (0x80070005) - To be used when the requested operation / call is not allowed
-xlang_no_interface (0x80000004) - To be used to report a class or interface not being found
-xlang_handle (0x80000006) - To be used to report invalid handles
-xlang_abort (0x80000007) - To be used to report cancellations
-xlang_file_not_found (0x80070002) - To be used to report a file was not found
-xlang_path_not_found (0x80070003) - To be used to report a directory was not found
-xlang_arithmetic (0x80070216) - To be used to report any errors during arithmetic operations
-xlang_io (0x80131620) - To be used to report any IO errors than do not have a better error mapping
-xlang_bounds (0x8000000b) - To be used to report invalid indexes such as for arrays
-xlang_timeout (0x80131505) - To be used to report timeouts
-xlang_thread_state (0x80131520) - To be used to report that an operation can not be done due to the thread state
-xlang_thread_interrupted (0x80131519) - To be used to report an interrupt on a thread
-xlang_security (0x8013150A) - To be used to report any security related error
-xlang_type_load (0x80131522) - To be used to report syntax / type errors during runtime
-```
+xlang error                | Value      | Description
+-------------------------- | ---------- | ----------------------------------------------------------------------
+xlang_fail                 | 0x80004005 | Generic error when no equivalent or better error mapping is available
+xlang_invalid_arg          | 0x80000003 | Invalid argument in a call
+xlang_illegal_state_change | 0x8000000d | Change in state that is illegal
+xlang_out_of_memory        | 0x80000002 | Allocation issue resulting from not enough memory
+xlang_pointer              | 0x80000005 | Null pointer related errors
+xlang_not_impl             | 0x80000001 | Function / feature is not implemented
+xlang_access_denied        | 0x80070005 | Requested operation / call is not allowed
+xlang_no_interface         | 0x80000004 | Class or interface not found
+xlang_handle               | 0x80000006 | Invalid handle
+xlang_abort                | 0x80000007 | Operation / call has been canceled
+xlang_file_not_found       | 0x80070002 | File was not found
+xlang_path_not_found       | 0x80070003 | Directory was not found
+xlang_arithmetic           | 0x80070216 | Error during arithmetic operation
+xlang_io                   | 0x80131620 | IO error than does not have a better error mapping
+xlang_bounds               | 0x8000000b | Invalid index used such as when indexing arrays
+xlang_timeout              | 0x80131505 | Operation / call timed out
+xlang_thread_state         | 0x80131520 | Operation can not be done due to the thread state
+xlang_thread_interrupted   | 0x80131519 | Interrupt on thread
+xlang_security             | 0x8013150A | Security related error
+xlang_type_load            | 0x80131522 | Syntax / type error during runtime
 
 Even though xlang only defines these common errors, it will not prevent the use of other errors from
 the HRESULT family. But, it is likely that those errors will not get a natural mapping from
