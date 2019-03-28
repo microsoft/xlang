@@ -84,9 +84,8 @@ namespace winrt
 
         static time_point now() noexcept
         {
-            file_time ft;
-            WINRT_GetSystemTimePreciseAsFileTime(&ft);
-            return from_file_time(ft);
+            auto const sys_now = std::chrono::system_clock::now();
+            return time_t_epoch + std::chrono::duration_cast<duration>(sys_now.time_since_epoch());
         }
 
         static time_t to_time_t(time_point const& time) noexcept

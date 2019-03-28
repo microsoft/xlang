@@ -33,7 +33,6 @@ extern "C"
     int32_t  WINRT_CALL WINRT_MultiByteToWideChar(uint32_t codepage, uint32_t flags, char const* in_string, int32_t in_size, wchar_t* out_string, int32_t out_size) noexcept;
     int32_t  WINRT_CALL WINRT_WideCharToMultiByte(uint32_t codepage, uint32_t flags, wchar_t const* int_string, int32_t in_size, char* out_string, int32_t out_size, char const* default_char, int32_t* default_used) noexcept;
     uint32_t WINRT_CALL WINRT_GetLastError() noexcept;
-    void     WINRT_CALL WINRT_GetSystemTimePreciseAsFileTime(void* result) noexcept;
 
     uint32_t WINRT_CALL WINRT_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
     int32_t  WINRT_CALL WINRT_TrySubmitThreadpoolCallback(void(WINRT_CALL *callback)(void*, void* context), void* context, void*) noexcept;
@@ -66,7 +65,6 @@ WINRT_LINK(CoGetObjectContext, 8)
 WINRT_LINK(MultiByteToWideChar, 24)
 WINRT_LINK(WideCharToMultiByte, 32)
 WINRT_LINK(GetLastError, 0)
-WINRT_LINK(GetSystemTimePreciseAsFileTime, 4)
 
 WINRT_LINK(WaitForSingleObject, 8)
 WINRT_LINK(TrySubmitThreadpoolCallback, 12)
