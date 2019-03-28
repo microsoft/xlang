@@ -5,7 +5,7 @@ authors: t-tiroma@microsoft.com, Kyaw.Thant@microsoft.com
 status: draft
 ---
 
-# Title: XDN11 - xmeta Semantic Checking
+# Title: XDN12 - xmeta Semantic Checking
 
 - Authors: Tim Romanski (t-tiroma@microsoft.com) and Will Thant (Kyaw.Thant@microsoft.com)
 - Status: draft
