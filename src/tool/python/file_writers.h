@@ -194,14 +194,14 @@ namespace pywinrt
             w.write("import enum\n");
         }
 
-        w.write("\n_ns_module = %._import_ns_module(\"%\")\n\n", module_name, ns);
+        w.write("\n_ns_module = %._import_ns_module(\"%\")\n", module_name, ns);
 
         if (!needed_namespaces.empty())
         {
             for (std::string needed_ns : needed_namespaces)
             {
                 std::transform(needed_ns.begin(), needed_ns.end(), needed_ns.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
-                w.write("import %.%\n", module_name, needed_ns);
+                w.write("\ntry:\n    import %.%\nexcept:\n    pass\n", module_name, needed_ns);
             }
         }
 
