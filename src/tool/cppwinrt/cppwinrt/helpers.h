@@ -442,8 +442,6 @@ namespace xlang
             return result;
         }
 
-        // TODO: sort (exclusive and non-overridable and non-base) interfaces according to https://osgwiki.com/wiki/FastAbi
-
         auto count = std::count_if(result.begin(), result.end(), [](auto&& pair)
         {
             return pair.second.exclusive && !pair.second.base && !pair.second.overridable;
@@ -482,7 +480,12 @@ namespace xlang
                 return !left_disable;
             }
 
-            return left.version < right.version;
+            if (left.version != right.version)
+            {
+                return left.version < right.version;
+            }
+
+            return left_pair.first < right_pair.first;
         });
 
         return result;
