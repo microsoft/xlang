@@ -281,10 +281,14 @@ static void _dealloc_@(%* self)
         {
             writer::indent_guard g{ w };
 
-            w.write(R"(auto hash_value = std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj);
+            auto format = R"(auto hash_value = %;
 py::wrapped_instance(hash_value, nullptr);
-self->obj = nullptr;
-)");
+self->obj%;
+)";
+
+            w.write(format,
+                is_ptype(type) ? "self->obj->hash()" : "std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj)",
+                is_ptype(type) ? ".release()" : " = nullptr");
         }
         w.write("}\n");
     }
