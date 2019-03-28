@@ -260,107 +260,6 @@ namespace xlang
         Param m_return;
     };
 
-    struct interface_info
-    {
-        TypeDef type;
-        std::vector<std::string> type_arguments;
-    };
-
-    void push_interface_info(std::vector<interface_info>& interfaces, interface_info&& info)
-    {
-        auto iter = std::find_if(interfaces.begin(), interfaces.end(), [&info](auto i)
-        {
-            return i.type == info.type;
-        });
-
-        if (iter == interfaces.end())
-        {
-            interfaces.push_back(std::move(info));
-        }
-    }
-
-    //void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index);
-
-    //void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, TypeDef const& type)
-    //{
-    //    if (get_category(type) == category::interface_type)
-    //    {
-    //        interface_info info;
-    //        info.type = type;
-    //        for (auto&& gp : type.GenericParam())
-    //        {
-    //            info.type_arguments.push_back(std::string{ gp.Name() });
-    //        }
-    //        push_interface_info(interfaces, std::move(info));
-    //    }
-
-    //    auto guard{ w.push_generic_params(type.GenericParam()) };
-    //    for (auto&& ii : type.InterfaceImpl())
-    //    {
-    //        collect_required_interfaces(w, interfaces, ii.Interface());
-    //    }
-    //}
-
-    //void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, GenericTypeInstSig const& sig)
-    //{
-    //    TypeDef type{};
-    //    switch (sig.GenericType().type())
-    //    {
-    //    case TypeDefOrRef::TypeDef:
-    //        type = sig.GenericType().TypeDef();
-    //        break;
-    //    case TypeDefOrRef::TypeRef:
-    //        type = find_required(sig.GenericType().TypeRef());
-    //        break;
-    //    case TypeDefOrRef::TypeSpec:
-    //        throw_invalid("collect_required_interfaces");
-    //    }
-
-    //    interface_info info;
-    //    info.type = type;
-
-    //    for (auto&& gp : sig.GenericArgs())
-    //    {
-    //        auto q = w.write_temp("%", gp);
-    //        info.type_arguments.push_back(q);
-    //    }
-
-    //    push_interface_info(interfaces, std::move(info));
-
-    //    auto guard{ w.push_generic_params(sig) };
-    //    for (auto&& ii : type.InterfaceImpl())
-    //    {
-    //        collect_required_interfaces(w, interfaces, ii.Interface());
-    //    }
-    //}
-
-    //void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index)
-    //{
-    //    switch (index.type())
-    //    {
-    //    case TypeDefOrRef::TypeDef:
-    //        collect_required_interfaces(w, sigs, index.TypeDef());
-    //        break;
-    //    case TypeDefOrRef::TypeRef:
-    //        collect_required_interfaces(w, sigs, find_required(index.TypeRef()));
-    //        break;
-    //    case TypeDefOrRef::TypeSpec:
-    //        collect_required_interfaces(w, sigs, index.TypeSpec().Signature().GenericTypeInst());
-    //        break;
-    //    }
-    //}
-
-    //auto get_required_interfaces(TypeDef const& type)
-    //{
-    //    writer w;
-    //    auto guard{ w.push_generic_params(type.GenericParam()) };
-
-    //    std::vector<interface_info> interfaces;
-    //    collect_required_interfaces(w, interfaces, type);
-
-    //    return std::move(interfaces);
-    //}
-
     TypeDef get_typedef(type_semantics const& semantics)
     {
         return std::visit(
@@ -466,20 +365,6 @@ namespace xlang
         return implements_imap(type) || implements_imapview(type);
     }
 
-    auto get_member_name(MethodDef const& method)
-    {
-        auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
-        if (overload_attrib)
-        {
-            auto args = overload_attrib.Value().FixedArgs();
-            return std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
-        }
-        else
-        {
-            return method.Name();
-        }
-    }
-
     auto get_delegate_invoke(TypeDef const& type)
     {
         XLANG_ASSERT(get_category(type) == category::delegate_type);
@@ -543,66 +428,6 @@ namespace xlang
     inline bool is_remove_method(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "remove_");
-    }
-
-    std::string_view get_method_abi_name(MethodDef const& method)
-    {
-        if (is_constructor(method))
-        {
-            if (empty(method.ParamList()))
-            {
-                return "_default_ctor";
-            }
-            else
-            {
-                method_signature signature{ method };
-
-                auto type = method.Parent();
-                for (auto&& attrib : type.CustomAttribute())
-                {
-                    auto pair = attrib.TypeNamespaceAndName();
-                    if (pair.second == "ActivatableAttribute" && pair.first == "Windows.Foundation.Metadata")
-                    {
-                        auto fixed_args = attrib.Value().FixedArgs();
-                        auto elem0 = std::get<ElemSig>(fixed_args[0].value);
-
-                        // if the first param is SystemType, it holds the name of a factory interface
-                        if (std::holds_alternative<ElemSig::SystemType>(elem0.value))
-                        {
-                            auto factory_type = type.get_cache().find_required(
-                                std::get<ElemSig::SystemType>(elem0.value).name);
-
-                            for (auto&& factory_method : factory_type.MethodList())
-                            {
-                                method_signature factory_signature{ factory_method };
-                                if (signature.params().size() == factory_signature.params().size())
-                                {
-                                    // TODO: compare method param types
-                                    return get_method_abi_name(factory_method);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                std::string msg{ "couldn't find factory method " };
-                msg.append(type.TypeNamespace());
-                msg.append(".");
-                msg.append(type.TypeName());
-                throw_invalid(msg);
-            }
-        }
-        else
-        {
-            auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
-            if (overload_attrib)
-            {
-                auto args = overload_attrib.Value().FixedArgs();
-                return std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
-            }
-
-            return method.Name();
-        }
     }
 
     auto get_property_methods(Property const& prop)

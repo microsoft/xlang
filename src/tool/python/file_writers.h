@@ -99,8 +99,8 @@ namespace pywinrt
         {
             w.write(strings::custom_struct_convert);
         }
-        settings.filter.bind_each<write_class>(members.classes)(w);
-        settings.filter.bind_each<write_interface>(members.interfaces)(w);
+        settings.filter.bind_each<write_inspectable_type>(members.classes)(w);
+        settings.filter.bind_each<write_inspectable_type>(members.interfaces)(w);
         settings.filter.bind_each<write_struct>(members.structs)(w);
         write_namespace_initialization(w, ns, members);
 
