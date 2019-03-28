@@ -132,42 +132,10 @@ namespace pywinrt
         writer w;
 
         write_license(w, "#");
-        w.write(strings::setup, settings.module, settings.module, bind<write_setup_filenames>(namespaces));
+        w.write(strings::setup, settings.module, settings.module, bind<write_python_setup_filenames>(namespaces));
         create_directories(folder);
         w.flush_to_file(folder / "setup.py");
     }
-
-//    inline void write_cmake_lists_txt(stdfs::path const& folder, std::vector<std::string> const& namespaces)
-//    {
-//        writer w;
-//
-//        write_license_python(w);
-//        w.write(R"(cmake_minimum_required(VERSION 3.12)
-//
-//add_compile_options(/std:c++17 /await)
-//set(PYTHON_PATH "C:/Users/hpierson/AppData/Local/Programs/Python/Python37-32/")
-//
-//message(${PYTHON_PATH})
-//message(${UNSET_PYTHON_PATH})
-//
-//link_directories("${PYTHON_PATH}/libs")
-//
-//)");
-//        w.write("set(sources\n    %\n    \"./%/src/_%.cpp\")\n\n",
-//            bind_list<write_namespace_cpp_filename>("\n    ", namespaces),
-//            settings.module, settings.module);
-//
-//		auto format = R"(
-//project(%)
-//add_library(% SHARED ${sources})
-//target_include_directories(% PUBLIC "${PYTHON_PATH}/include")    
-//target_link_libraries(% windowsapp)
-//set_target_properties(% PROPERTIES SUFFIX ".pyd")
-//)";
-//		w.write(format, settings.module, settings.module, settings.module, settings.module, settings.module);
-//        create_directories(folder);
-//        w.flush_to_file(folder / "CMakeLists.txt");
-//    }
 
     inline void write_package_dunder_init_py(stdfs::path const& folder)
     {
@@ -196,21 +164,12 @@ namespace pywinrt
 
         w.write("\n_ns_module = %._import_ns_module(\"%\")\n", module_name, ns);
 
-        if (!needed_namespaces.empty())
-        {
-            for (std::string needed_ns : needed_namespaces)
-            {
-                std::transform(needed_ns.begin(), needed_ns.end(), needed_ns.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
-                w.write("\ntry:\n    import %.%\nexcept:\n    pass\n", module_name, needed_ns);
-            }
-        }
-
-        w.write("\n");
-
+		w.write_each<write_python_import_namespace>(needed_namespaces);
         settings.filter.bind_each<write_python_enum>(members.enums)(w);
-        settings.filter.bind_each<write_python_import>(members.structs)(w);
-        settings.filter.bind_each<write_python_import>(members.classes)(w);
-        settings.filter.bind_each<write_python_import>(members.interfaces)(w);
+		w.write("\n");
+        settings.filter.bind_each<write_python_import_type>(members.structs)(w);
+        settings.filter.bind_each<write_python_import_type>(members.classes)(w);
+        settings.filter.bind_each<write_python_import_type>(members.interfaces)(w);
 
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");

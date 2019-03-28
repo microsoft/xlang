@@ -5,7 +5,6 @@
 #include "settings.h"
 #include "type_writers.h"
 #include "code_writers.h"
-#include "python_code_writers.h"
 #include "file_writers.h"
 
 namespace pywinrt
