@@ -672,12 +672,22 @@ namespace xlang
             w.write(format, base.TypeName());
         });
 
-        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        for (auto&& [name, info] : get_interfaces(w, pair->second))
         {
+            if (info.is_default)
+            {
+                continue;
+            }
+            
+            if (!info.fastabi)
+            {
+                break;
+            }
+
             auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
 )";
 
-            for (auto&& method : versioned.MethodList())
+            for (auto&& method : info.type.MethodList())
             {
                 method_signature signature{ method };
                 w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
@@ -943,9 +953,19 @@ namespace xlang
             return;
         }
 
-        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        for (auto&& [name, info] : get_interfaces(w, pair->second))
         {
-            w.write_each<write_consume_declaration>(versioned.MethodList());
+            if (info.is_default)
+            {
+                continue;
+            }
+
+            if (!info.fastabi)
+            {
+                break;
+            }
+
+            w.write_each<write_consume_declaration>(info.type.MethodList());
         }
     }
 
@@ -1168,9 +1188,19 @@ namespace xlang
             return;
         }
 
-        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        for (auto&& [name, info] : get_interfaces(w, pair->second))
         {
-            for (auto&& method : versioned.MethodList())
+            if (info.is_default)
+            {
+                continue;
+            }
+
+            if (!info.fastabi)
+            {
+                break;
+            }
+
+            for (auto&& method : info.type.MethodList())
             {
                 write_consume_definition(w, type, method, generics, type_impl_name);
             }
@@ -1768,9 +1798,19 @@ namespace xlang
             w.write(format, base_name, base_name);
         });
 
-        for (auto&& versioned : get_fastabi_interfaces(w, pair->second))
+        for (auto&& [name, info] : get_interfaces(w, pair->second))
         {
-            w.write_each<write_produce_method>(versioned.MethodList());
+            if (info.is_default)
+            {
+                continue;
+            }
+
+            if (!info.fastabi)
+            {
+                break;
+            }
+
+            w.write_each<write_produce_method>(info.type.MethodList());
         }
     }
 
@@ -2638,11 +2678,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
             w.write(format, base);
 
-            w.write_each<write_consume_declaration>(get_exclusive_default_interface(base).MethodList());
-
-            for (auto&& versioned : get_fastabi_interfaces(w, base))
+            for (auto&& [name, info] : get_interfaces(w, base))
             {
-                w.write_each<write_consume_declaration>(versioned.MethodList());
+                if (!info.fastabi)
+                {
+                    break;
+                }
+
+                w.write_each<write_consume_declaration>(info.type.MethodList());
             }
         }
     }
@@ -2664,11 +2707,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
             w.write(format, type.TypeName(), base, get_default_interface(type), base.TypeName());
 
-            w.write_each<write_consume_fast_base_definition>(get_exclusive_default_interface(base).MethodList(), type, base);
-
-            for (auto&& versioned : get_fastabi_interfaces(w, base))
+            for (auto&& [name, info] : get_interfaces(w, base))
             {
-                w.write_each<write_consume_fast_base_definition>(versioned.MethodList(), type, base);
+                if (!info.fastabi)
+                {
+                    break;
+                }
+
+                w.write_each<write_consume_fast_base_definition>(info.type.MethodList(), type, base);
             }
         }
     }

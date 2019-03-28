@@ -203,36 +203,6 @@ namespace xlang
         return {};
     }
 
-    TypeDef get_exclusive_default_interface(TypeDef const& type)
-    {
-        auto impls = type.InterfaceImpl();
-
-        for (auto&& impl : impls)
-        {
-            if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
-            {
-                auto impl_interface = impl.Interface();
-                TypeDef default_interface;
-
-                if (impl_interface.type() == TypeDefOrRef::TypeDef)
-                {
-                    default_interface = impl_interface.TypeDef();
-                }
-                else
-                {
-                    default_interface = find_required(impl_interface.TypeRef());
-                }
-
-                if (is_exclusive(default_interface))
-                {
-                    return default_interface;
-                }
-            }
-        }
-
-        throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have an exclusive default interface");
-    }
-
     static bool is_async(MethodDef const& method, method_signature const& method_signature)
     {
         if (is_put_overload(method))
@@ -339,6 +309,7 @@ namespace xlang
         bool overridable{};
         bool base{};
         bool exclusive{};
+        bool fastabi{};
         std::pair<uint16_t, uint16_t> version{};
         std::vector<std::vector<std::string>> generic_param_stack{};
     };
@@ -507,22 +478,10 @@ namespace xlang
             return left_pair.first < right_pair.first;
         });
 
-        return result;
-    }
-
-    static auto get_fastabi_interfaces(writer& w, TypeDef const& class_type)
-    {
-        std::vector<TypeDef> result;
-
-        // TODO: implement according to https://osgwiki.com/wiki/FastAbi
-        // The following is wrong and just to get started.
-        for (auto&& [interface_name, info] : get_interfaces(w, class_type))
+        std::for_each_n(result.begin(), count, [](auto && pair)
         {
-            if (!info.defaulted && !info.base && !info.overridable && is_exclusive(info.type))
-            {
-                result.push_back(info.type);
-            }
-        }
+            pair.second.fastabi = true;
+        });
 
         return result;
     }
