@@ -37,5 +37,5 @@ TEST_CASE("scratch")
     // Under the slowabi, this needs a QI for ISpriteVisual2.
     v1.Shadow();
 
-    v1.Close();
+    //v1.Close();
 }

@@ -208,14 +208,14 @@ namespace winrt
     impl::com_ref<T> capture(F function, Args&& ...args)
     {
         void* result{};
-        check_hresult(function(args..., guid_of<T>(), &result);
+        check_hresult(function(args..., guid_of<T>(), &result));
         return { result, take_ownership_from_abi };
     }
     template <typename T, typename O, typename M, typename...Args>
     impl::com_ref<T> capture(com_ptr<O> const& object, M method, Args && ...args)
     {
         void* result{};
-        check_hresult((object.get()->*(method))(args..., guid_of<T>(), &result);
+        check_hresult((object.get()->*(method))(args..., guid_of<T>(), &result));
         return { result, take_ownership_from_abi };
     }
 
