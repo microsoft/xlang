@@ -209,8 +209,8 @@ namespace pywinrt
 
         settings.filter.bind_each<write_python_enum>(members.enums)(w);
         settings.filter.bind_each<write_python_import>(members.structs)(w);
-        settings.filter.bind_each<write_python_class>(members.classes)(w);
-        settings.filter.bind_each<write_python_class>(members.interfaces)(w);
+        settings.filter.bind_each<write_python_import>(members.classes)(w);
+        settings.filter.bind_each<write_python_import>(members.interfaces)(w);
 
         create_directories(folder);
         w.flush_to_file(folder / "__init__.py");

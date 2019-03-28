@@ -16,7 +16,10 @@ namespace pywinrt
 
     void write_python_import(writer& w, TypeDef const& type)
     {
-        w.write("% = _ns_module.%\n\n", type.TypeName(), type.TypeName());
+		if (!is_exclusive_to(type))
+		{
+			w.write("@ = _ns_module.@\n", type.TypeName(), type.TypeName());
+		}
     }
 
     void write_python_enum(writer& w, TypeDef const& type)
