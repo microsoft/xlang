@@ -270,12 +270,7 @@ return 0;
             return;
         }
 
-        auto format = R"(
-static void _dealloc_@(%* self)
-{
-)";
-
-        w.write(format, type.TypeName(), bind<write_pywrapper_type>(type));
+        w.write("\nstatic void _dealloc_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
 
         if (category == category::class_type || category == category::interface_type)
         {
