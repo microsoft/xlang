@@ -328,8 +328,7 @@ namespace xlang
 
     static interface_info* find(get_interfaces_t& interfaces, std::string_view const& name)
     {
-        auto pair = std::find_if(interfaces.begin(), interfaces.end(),
-            [&](auto && pair)
+        auto pair = std::find_if(interfaces.begin(), interfaces.end(), [&](auto&& pair)
         {
             return pair.first == name;
         });
@@ -473,6 +472,14 @@ namespace xlang
             if (left.exclusive != right.exclusive)
             {
                 return left.exclusive;
+            }
+
+            auto left_disable = is_always_disabled(left.type);
+            auto right_disable = is_always_disabled(right.type);
+
+            if (left_disable != right_disable)
+            {
+                return !left_disable;
             }
 
             return left.version < right.version;
