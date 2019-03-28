@@ -445,12 +445,38 @@ namespace xlang
 
         // TODO: sort (exclusive and non-overridable and non-base) interfaces according to https://osgwiki.com/wiki/FastAbi
 
-        // patial_sort?
-
-        for (auto&& [name, info] : result)
+        auto count = std::count_if(result.begin(), result.end(), [](auto&& pair)
         {
-            
-        }
+            return pair.second.exclusive && !pair.second.base && !pair.second.overridable;
+        });
+
+        std::partial_sort(result.begin(), result.begin() + count, result.end(), [](auto&& left_pair, auto&& right_pair)
+        {
+            auto& left = left_pair.second;
+            auto& right = right_pair.second;
+
+            if (left.is_default)
+            {
+                return true;
+            }
+
+            if (left.overridable != right.overridable)
+            {
+                return !left.overridable; 
+            }
+
+            if (left.base != right.base)
+            {
+                return !left.base;
+            }
+
+            if (left.exclusive != right.exclusive)
+            {
+                return left.exclusive;
+            }
+
+            return left.version < right.version;
+        });
 
         return result;
     }
