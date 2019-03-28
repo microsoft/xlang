@@ -19,6 +19,58 @@ Types include classes, structs, interfaces, enums, and delegates.
 Note that these are purely semantic checks, and not syntax.
 
 ### Namespaces
+#### Definitions:
+Namespaces can include other namespaces with a **using namespace directive**. This has syntax `using <namespace-name>`. This allows members from the included namespace to be referenced.
+
+You can also include namespaces or types through a **using alias directive**. This has syntax `using <identifier> = <namespace-or-type-name>;`.
+
+A **namespace alias qualifier** refers to a namespace or a type. It guarantees that type name lookups are unaffected by the introduction of new types and members. This has syntax `identifier::identifier<A1,...,Ak>` where `<A1,...,Ak>` is optional.
+
+#### Semantic checks:
+1) The identifier of a using alias directive must be unique within its containing namespace body. This does not include other namespace bodies from the same namespace.
+
+2) The identifier of a using alias directive cannot be the same as any member defined in its declaration space. This includes all other namespace bodies from the same namespace.
+For example:
+```
+namespace N3
+{
+    class B { }
+}
+namespace N3
+{
+    using E = N1.A;    // OK
+    using E = N1.N2.B; // Error, E already exists in N3.
+    using B = N1.N2.B; // Error, B already exists in N3.
+}
+```
+
+3) The identifier of a using alias directive cannot be `global`.
+
+4) Any referenced using alias directive must be defined in the namespace body or compilation unit in which it occurs.
+For example:
+```
+using R = N1.N2;
+namespace N3
+{
+    using S = N1;
+    class C: R.B { } // OK, since R is defined in the compilation unit.
+}
+namespace N3
+{
+    class D: S.A; // Error, since S is not defined in the current namespace body or compilation unit.
+}
+```
+
+5) Using aliases can name a closed constructed type like `using Y = N1.A<Int32>;`, however the type argument cannot be generic.
+
+6) For namespace alias qualifiers, they have the form `N::I<A1,...,Ak>`.
+* If N is the identifier 'global', then the global namespace is searched for I. One of the following must be true:
+  * The global namespace contains a namespace named I and K is zero.
+  * The global namespace contains a non-generic type named I and K is zero.
+  * The global namespace contains a type named I that has K type parameters.
+* Otherwise, search the immediate containing namespace then each enclosing namespace until the a matching entity is located. N must be associated with a namespace with an extern alias directive or using alias directive, and one of the following must be true:
+  * The namespace associated with N contains a namespace named I and K is zero.
+  * The namespace associated with N contains a type named I with K type arguments.
 
 ### Namespace members
 #### Definitions:
@@ -29,12 +81,6 @@ The scope defined by a file is called a **compilation unit**.
 **Namespace members** include nested namespace declarations and type declarations.
 
 **Types** include classes, structs, interfaces, enums, and delegates.
-
-Namespaces can include other namespaces with a **using namespace directive**. This has syntax `using <namespace-name>`. This allows members from the included namespace to be referenced.
-
-You can also include namespaces or types through a **using alias directive**. This has syntax `using <identifier> = <namespace-or-type-name>;`.
-
-A **namespace alias qualifier** refers to a namespace or a type. It guarantees that type name lookups are unaffected by the introduction of new types and members. This has syntax `identifier::identifier<A1,...,Ak>` where `<A1,...,Ak>` is optional.
 
 #### Semantic checks:
 1) Only types from the declaration space of included namespaces can be referenced. This means that types from nested namespaces are unavailable, since they belong to a separate declaration space.
@@ -63,48 +109,6 @@ Class B was referenced, but its declaration space was not included. This is an e
 3) Namespace members in the same declaration space cannot have the same name.
 
 4) Two namespace names cannot differ only by case.
-
-5) The identifier of a using alias directive must be unique within its declaration space, and cannot be the same as any member defined in the declaration space.
-For example:
-```
-namespace N3
-{
-    class B { }
-}
-namespace N3
-{
-    using E = N1.A;    // OK
-    using E = N1.N2.B; // Error, E already exists in N3.
-    using B = N1.N2.B; // Error, B already exists in N3.
-}
-```
-
-6) Any referenced using alias directive must be defined in the namespace body or compilation unit in which it occurs.
-For example:
-```
-using R = N1.N2;
-namespace N3
-{
-    using S = N1;
-    class C: R.B { } // OK, since R is defined in the compilation unit.
-}
-namespace N3
-{
-    class D: S.A; // Error, since S is not defined in the current namespace body or compilation unit.
-}
-```
-
-7) Using aliases can name a closed constructed type like `using Y = N1.A<Int32>;`, however the type argument cannot be generic.
-
-8) For namespace alias qualifiers, they have the form `N::I<A1,...,Ak>`.
-* If N is the identifier 'global', then the global namespace is searched for I. One of the following must be true:
-  * The global namespace contains a namespace named I and K is zero.
-  * The global namespace contains a non-generic type named I and K is zero.
-  * The global namespace contains a type named I that has K type parameters.
-* Otherwise, search the immediate containing namespace then each enclosing namespace until the a matching entity is located. N must be associated with a namespace with an extern alias directive or using alias directive, and one of the following must be true:
-  * The namespace associated with N contains a namespace named I and K is zero.
-  * The namespace associated with N contains a type named I with K type arguments.
-
 
 
 ### Classes
