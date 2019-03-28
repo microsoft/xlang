@@ -551,10 +551,12 @@ if (!%)
 
 #define PYWINRT_TEMPLATE_TRY_CATCH 
 
-    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view return_type = "PyObject*", std::string_view exception_return_value = "nullptr")
+    // All generated try/catch blocks go thru this function in order to have a single place
+    // to change as we test the binary size of different approaches
+    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view return_type = "PyObject*", std::string_view exception_return_value = "nullptr", std::string_view ref_capture = "")
     {
 #ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-        w.write("return py::trycatch_invoker([=]() -> %\n{\n", return_type);
+        w.write("return py::trycatch_invoker([=%]() -> %\n{\n", ref_capture, return_type);
         {
             writer::indent_guard gg{ w };
             tryfunc(w);
@@ -578,6 +580,16 @@ catch (...)
 
     void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
     {
+#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+        w.write("return py::setter_trycatch_invoker(arg, [=]() -> int\n{\n");
+        {
+            writer::indent_guard gg{ w };
+            tryfunc(w);
+            w.write("return 0;\n");
+        }
+        w.write("});\n");
+
+#else
         w.write(R"(if (arg == nullptr)
 {
     PyErr_SetString(PyExc_TypeError, "property delete not supported");
@@ -586,6 +598,7 @@ catch (...)
 
 )");
         write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "int", "-1");
+#endif
     }
 
     void write_class_new_function(writer& w, TypeDef const& type)
@@ -1802,21 +1815,11 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%))
             }
             else
             {
-#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-                // customized trycatch_invoker to enable capturing sub structs by ref
-                auto format = R"(return py::trycatch_invoker([=%]() -> PyObject* {
-    % return_value{ % };
-    return py::convert(return_value);
-}, nullptr);
-)";
-                w.write(format,
-                    bind_each<write_struct_field_ref_capture>(type.FieldList()),
-                    type,
-                    bind_list<write_struct_field_initalizer>(", ", type.FieldList()));
-#else
+                auto ref_captures = w.write_temp("%", bind_each<write_struct_field_ref_capture>(type.FieldList()));
                 auto format = "% return_value{ % };\nreturn py::convert(return_value);\n";
-                write_try_catch(w, [&](writer& w) { w.write(format, type, bind_list<write_struct_field_initalizer>(", ", type.FieldList())); });
-#endif
+                write_try_catch(w,
+                    [&](writer& w) { w.write(format, type, bind_list<write_struct_field_initalizer>(", ", type.FieldList())); },
+                    "PyObject*", "nullptr", ref_captures);
             }
         }
         w.write("}\n");
