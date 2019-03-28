@@ -383,7 +383,7 @@ namespace xlang::meta::reader
             return *m_cache;
         }
 
-        std::string_view path() const noexcept
+        std::string const& path() const noexcept
         {
             return m_path;
         }
