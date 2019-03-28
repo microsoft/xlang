@@ -25,6 +25,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <pal.h>
+
 #if __has_include(<WindowsNumerics.impl.h>)
 #define WINRT_NUMERICS
 #include <directxmath.h>

@@ -284,7 +284,7 @@ namespace winrt
 
             std::destroy(this->begin(), this->end());
 
-            WINRT_CoTaskMemFree(this->m_data);
+            xlang_mem_free(this->m_data);
             this->m_data = nullptr;
             this->m_size = 0;
         }
@@ -303,7 +303,7 @@ namespace winrt
 
             if (0 != size)
             {
-                this->m_data = static_cast<value_type*>(WINRT_CoTaskMemAlloc(size * sizeof(value_type)));
+                this->m_data = static_cast<value_type*>(xlang_mem_alloc(size * sizeof(value_type)));
 
                 if (this->m_data == nullptr)
                 {

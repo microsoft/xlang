@@ -5,6 +5,7 @@ project(cppx_base)
 add_executable(cppx_base "")
 target_sources(cppx_base PUBLIC main.cpp)
 target_include_directories(cppx_base PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(cppx_base pal)
 
 if (WIN32)
     target_compile_options(cppx_base PUBLIC /await)

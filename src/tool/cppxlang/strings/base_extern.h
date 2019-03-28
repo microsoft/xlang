@@ -29,12 +29,7 @@ extern "C"
     wchar_t const* WINRT_CALL WINRT_WindowsGetStringRawBuffer(void* string, uint32_t* length) noexcept;
     uint32_t WINRT_CALL WINRT_WindowsGetStringLen(void* string) noexcept;
 
-    int32_t  WINRT_CALL WINRT_CoCreateInstance(winrt::guid const& clsid, void* outer, uint32_t context, winrt::guid const& iid, void** object) noexcept;
-    int32_t  WINRT_CALL WINRT_CoGetCallContext(winrt::guid const& iid, void** object) noexcept;
     int32_t  WINRT_CALL WINRT_CoGetObjectContext(winrt::guid const& iid, void** object) noexcept;
-    void*    WINRT_CALL WINRT_CoTaskMemAlloc(std::size_t size) noexcept;
-    void     WINRT_CALL WINRT_CoTaskMemFree(void* ptr) noexcept;
-    int32_t  WINRT_CALL WINRT_CloseHandle(void* hObject) noexcept;
     int32_t  WINRT_CALL WINRT_MultiByteToWideChar(uint32_t codepage, uint32_t flags, char const* in_string, int32_t in_size, wchar_t* out_string, int32_t out_size) noexcept;
     int32_t  WINRT_CALL WINRT_WideCharToMultiByte(uint32_t codepage, uint32_t flags, wchar_t const* int_string, int32_t in_size, char* out_string, int32_t out_size, char const* default_char, int32_t* default_used) noexcept;
     uint32_t WINRT_CALL WINRT_GetLastError() noexcept;
@@ -48,10 +43,6 @@ extern "C"
     winrt::impl::ptp_wait WINRT_CALL WINRT_CreateThreadpoolWait(void(WINRT_CALL *callback)(void*, void* context, void*, uint32_t result), void* context, void*) noexcept;
     void     WINRT_CALL WINRT_SetThreadpoolWait(winrt::impl::ptp_wait wait, void* handle, void* timeout) noexcept;
     void     WINRT_CALL WINRT_CloseThreadpoolWait(winrt::impl::ptp_wait wait) noexcept;
-    winrt::impl::ptp_io WINRT_CALL WINRT_CreateThreadpoolIo(void* object, void(WINRT_CALL *callback)(void*, void* context, void* overlapped, uint32_t result, std::size_t bytes, void*) noexcept, void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_StartThreadpoolIo(winrt::impl::ptp_io io) noexcept;
-    void     WINRT_CALL WINRT_CancelThreadpoolIo(winrt::impl::ptp_io io) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolIo(winrt::impl::ptp_io io) noexcept;
 
     int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept;
     int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;
@@ -71,12 +62,7 @@ WINRT_LINK(WindowsConcatString, 12)
 WINRT_LINK(WindowsGetStringRawBuffer, 8)
 WINRT_LINK(WindowsGetStringLen, 4)
 
-WINRT_LINK(CoCreateInstance, 20)
-WINRT_LINK(CoGetCallContext, 8)
 WINRT_LINK(CoGetObjectContext, 8)
-WINRT_LINK(CoTaskMemAlloc, 4)
-WINRT_LINK(CoTaskMemFree, 4)
-WINRT_LINK(CloseHandle, 4)
 WINRT_LINK(MultiByteToWideChar, 24)
 WINRT_LINK(WideCharToMultiByte, 32)
 WINRT_LINK(GetLastError, 0)
@@ -90,7 +76,3 @@ WINRT_LINK(CloseThreadpoolTimer, 4)
 WINRT_LINK(CreateThreadpoolWait, 12)
 WINRT_LINK(SetThreadpoolWait, 12)
 WINRT_LINK(CloseThreadpoolWait, 4)
-WINRT_LINK(CreateThreadpoolIo, 16)
-WINRT_LINK(StartThreadpoolIo, 4)
-WINRT_LINK(CancelThreadpoolIo, 4)
-WINRT_LINK(CloseThreadpoolIo, 4)
