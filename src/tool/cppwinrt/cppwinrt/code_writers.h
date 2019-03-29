@@ -2645,7 +2645,26 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_fast_class_requires(writer& w, TypeDef const& type)
     {
-        // TODO: write required classes excluding any that form part of the fastabi
+        bool first{ true };
+
+        for (auto&& [interface_name, info] : get_interfaces(w, type))
+        {
+            if (!info.exclusive)
+            {
+                if (first)
+                {
+                    first = false;
+                    w.write(",\n        impl::require<%", type.TypeName());
+                }
+
+                w.write(", %", interface_name);
+            }
+        }
+
+        if (!first)
+        {
+            w.write('>');
+        }
     }
 
     static void write_class_base(writer& w, TypeDef const& type)
