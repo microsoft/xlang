@@ -126,19 +126,19 @@ extern "C"
         }
 # endif
 #endif
-    };
 
-	inline bool operator==(xlang_guid const& left, xlang_guid const& right) noexcept
-	{
-		auto const left_val = reinterpret_cast<uint32_t const*>(&left);
-		auto const right_val = reinterpret_cast<uint32_t const*>(&right);
-		return left_val[0] == right_val[0] && left_val[1] == right_val[1] && left_val[2] == right_val[2] && left_val[3] == right_val[3];
-	}
+		inline bool operator==(xlang_guid const& right) const noexcept
+		{
+			auto const left_val = reinterpret_cast<uint32_t const*>(this);
+			auto const right_val = reinterpret_cast<uint32_t const*>(&right);
+			return left_val[0] == right_val[0] && left_val[1] == right_val[1] && left_val[2] == right_val[2] && left_val[3] == right_val[3];
+		}
 
-	inline bool operator!=(xlang_guid const& left, xlang_guid const& right) noexcept
-	{
-		return !(left == right);
-	}
+		inline bool operator!=(xlang_guid const& right) const noexcept
+		{
+			return !(*this == right);
+		}
+	};
 
     struct XLANG_NOVTABLE xlang_unknown
     {
