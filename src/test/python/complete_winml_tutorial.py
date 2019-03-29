@@ -80,9 +80,8 @@ def print_results(results, labels):
     topProbabilities = [0.0 for x in range(3)]
     topProbabilityLabelIndexes = [0 for x in range(3)]
 
-    for i in range(results.size):
+    for i, result in enumerate(results):
         for j in range(3):
-            result = results.get_at(i)
             if result > topProbabilities[j]:
                 topProbabilityLabelIndexes[j] = i
                 topProbabilities[j] = result
