@@ -95,12 +95,12 @@ projections and end up as generic errors.
 Functions declared at the xlang ABI (i.e. language projections, PAL) need a way to indicate whether
 an error occurred. This will be done through the return parameter.
 
-```
+```cpp
 xlang_result functionName(param, ...)
 ```
 
-Returning one of the error codes will indicate that the function resulted in an error.
-Returning xlang_ok which has a value of 0 will indicate the function completed without errors.
+Returning one of the error codes indicates that the function resulted in an error.
+Returning xlang_ok which has the literal value of 0 indicates the function completed without errors.
 
 ## Alternative to errors
 
@@ -177,7 +177,7 @@ xlang_originate_error will be defined in the PAL and will take the following par
 - a xlang_string with an identifier for the projection
 - an IUnknown pointer with any additional language specific information (can be null)
 
-```
+```cpp
 void xlang_originate_error(
 	xlang_result error,
 	xlang_string languageError,
@@ -205,7 +205,7 @@ xlang_propagate_error will be defined in the PAL and will take the following par
 - a xlang_string indicating an identifier for the language
 - an IUnknown pointer with any additional language specific information (can be null)
 
-```
+```cpp
 void xlang_propagate_error(
 	IXlangErrorInfo* errorInfo,
 	xlang_string languageError,
@@ -225,7 +225,7 @@ the best effort work. Then after doing that work, it should set the retrieved er
 thread local store and then return the error. To help with this, xlang will provide the
 xlang_get_error_info and xlang_set_error_info API.
 
-```
+```cpp
 void xlang_get_error_info(IXLangErrorInfo** errorInfo)
 void xlang_set_error_info(IXLangErrorInfo* errorInfo)
 ```
@@ -242,7 +242,7 @@ has a GetValue function which, when implemented, will allow to provide the infor
 This design allows any projection that the error propagates through to make this information available
 without it needing to know the specifics of what additional information each projection provides.
 
-```
+```cpp
 interface IXlangErrorValue : IUnknown
 {
 	void GetValue(xlang_string * errorValue)
@@ -305,7 +305,7 @@ the function used in the language they project to log errors / exceptions (i.e. 
 This will allow consumers to get a full picture of the failure when they log an error using the natural and
 familiar code they would typically use. To achieve this, xlang provides the IXlangErrorInfo interface.
 
-```
+```cpp
 interface IXLangErrorInfo
 {
 	void GetError(xlang_result* error)
