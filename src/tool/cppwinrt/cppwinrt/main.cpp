@@ -333,7 +333,7 @@ Where <spec> is one or more of:
 
             if (settings.tests)
             {
-                write_tests(c);
+                write_tests(c, group);
             }
 
             group.get();
