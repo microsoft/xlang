@@ -16,3 +16,5 @@ add_custom_target(cppwinrt_test ALL DEPENDS cppwinrt
     COMMAND ${build} /t:test_cpp
     COMMAND ${build} /t:old_tests\\Tests
 )
+
+set_target_properties(cppwinrt PROPERTIES "cppwinrt_exe" ${cppwinrt_exe})
