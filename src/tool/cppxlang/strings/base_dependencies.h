@@ -5,6 +5,7 @@
 #include <cassert>
 #include <chrono>
 #include <clocale>
+#include <cinttypes>
 #include <condition_variable>
 #include <cstddef>
 #include <cwchar>

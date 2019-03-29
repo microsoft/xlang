@@ -8,27 +8,32 @@ namespace winrt::param
         hstring& operator=(hstring const& values) = delete;
         hstring(std::nullptr_t) = delete;
 
+		~hstring() noexcept
+		{
+			xlang_delete_string(m_handle);
+		}
+
         hstring(winrt::hstring const& value) noexcept : m_handle(get_abi(value))
         {
         }
 
-        hstring(std::wstring_view const& value) noexcept
-        {
-            if (impl::error_ok != WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle))
-            {
-                std::terminate();
-            }
-        }
+		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
+		hstring(std::basic_string_view<char_type> const& value) noexcept
+		{
+			init<false, char_type>(value);
+		}
 
-        hstring(std::wstring const& value) noexcept
-        {
-            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle));
-        }
+		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
+		hstring(std::basic_string<char_type> const& value) noexcept
+		{
+			init<true, char_type>(value);
+		}
 
-        hstring(wchar_t const* const value) noexcept
+		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
+        hstring(char_type const* const value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value, static_cast<uint32_t>(wcslen(value)), &m_header, &m_handle));
-        }
+			init<true, char_type>(value);
+		}
 
         operator winrt::hstring const&() const noexcept
         {
@@ -36,27 +41,49 @@ namespace winrt::param
         }
 
     private:
+		template <typename char_type, bool is_safe>
+		void init(std::basic_string_view<char_type> str) noexcept
+		{
+			static_assert(impl::is_char_type_supported<char_type>::value);
+			auto const value = normalize_char_type(str);
+			auto const length = static_cast<uint32_t>(value.size());
+			if constexpr (is_safe)
+			{
+				if constexpr (sizeof(char_type) == sizeof(xlang_char8))
+				{
+					WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf8(str.data(), length, &m_header, &m_handle));
+				}
+				else
+				{
+					WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf16(str.data(), length, &m_header, &m_handle));
+				}
+			}
+			else
+			{
+				if constexpr (sizeof(char_type) == sizeof(xlang_char8))
+				{
+					if (nullptr != xlang_create_string_reference_utf8(str.data(), length, &m_header, &m_handle))
+					{
+						std::terminate();
+					}
+				}
+				else
+				{
+					if (nullptr != xlang_create_string_reference_utf16(str.data(), length, &m_header, &m_handle))
+					{
+						std::terminate();
+					}
+				}
+			}
+		}
 
-        struct header
-        {
-            union
-            {
-                void* Reserved1;
-#ifdef _WIN64
-                char Reserved2[24];
-#else
-                char Reserved2[20];
-#endif
-            } Reserved;
-        };
-        
-        void* m_handle;
-        header m_header;
+        xlang_string m_handle;
+		xlang_string_header m_header;
     };
 
-    inline void* get_abi(hstring const& object) noexcept
+    inline xlang_string get_abi(hstring const& object) noexcept
     {
-        return *(void**)(&object);
+        return *(xlang_string*)(&object);
     }
 }
 

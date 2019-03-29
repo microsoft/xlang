@@ -38,7 +38,7 @@ namespace winrt::impl
         struct WINRT_NOVTABLE type : unknown_abi
         {
             virtual int32_t WINRT_CALL GetIids(uint32_t* count, guid** ids) noexcept = 0;
-            virtual int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept = 0;
+            virtual int32_t WINRT_CALL GetRuntimeClassName(xlang_string* name) noexcept = 0;
             virtual int32_t WINRT_CALL GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
         };
     };

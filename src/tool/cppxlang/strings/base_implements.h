@@ -453,7 +453,7 @@ namespace winrt::impl
             return shim().GetIids(count, array);
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept override
+        int32_t WINRT_CALL GetRuntimeClassName(xlang_string* name) noexcept override
         {
             return shim().abi_GetRuntimeClassName(name);
         }
@@ -511,7 +511,7 @@ namespace winrt::impl
             return this->shim().NonDelegatingGetIids(count, array);
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept final
+        int32_t WINRT_CALL GetRuntimeClassName(xlang_string* name) noexcept final
         {
             return this->shim().NonDelegatingGetRuntimeClassName(name);
         }
@@ -816,7 +816,7 @@ namespace winrt::impl
             return NonDelegatingGetIids(count, array);
         }
 
-        int32_t WINRT_CALL abi_GetRuntimeClassName(void** name) noexcept
+        int32_t WINRT_CALL abi_GetRuntimeClassName(xlang_string* name) noexcept
         {
             if (this->outer())
             {
@@ -950,7 +950,7 @@ namespace winrt::impl
             return error_ok;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept try
+        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(xlang_string* name) noexcept try
         {
             *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
             return error_ok;
@@ -1247,7 +1247,7 @@ namespace winrt
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_WIN32)
         implements() noexcept
         {
             WINRT_ASSERT(!is_stack_object());

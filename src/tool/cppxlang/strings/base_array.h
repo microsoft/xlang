@@ -456,7 +456,7 @@ namespace winrt
 
     inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
     {
-        void* value;
+        xlang_string value;
         check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(&value));
         return { value, take_ownership_from_abi };
     }

@@ -5,7 +5,7 @@ namespace winrt
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
         void* result;
-        hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
+        auto hr = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
 
         check_hresult(hr);
         return { result, take_ownership_from_abi };
@@ -60,12 +60,12 @@ namespace winrt::impl
     {
         param::hstring const name{ name_of<Class>() };
         void* result;
-        hresult const hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
+        auto const hr = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
 
-        if (hr < 0)
+        if (hr != nullptr)
         {
             // Ensure that the IRestrictedErrorInfo is not left on the thread.
-            hresult_error local_exception{ hr, take_ownership_from_abi };
+            hresult_error local_exception{ hr->error_code(), take_ownership_from_abi };
 
             if (exception)
             {

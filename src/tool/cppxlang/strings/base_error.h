@@ -278,11 +278,6 @@ namespace winrt
         }
     }
 
-    [[noreturn]] inline void throw_last_error()
-    {
-        throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
-    }
-
     inline void check_hresult(hresult const result)
     {
         if (result < 0)
@@ -290,6 +285,20 @@ namespace winrt
             throw_hresult(result);
         }
     }
+
+	inline void check_hresult(xlang_error_info* result)
+	{
+		if (result != nullptr)
+		{
+			throw_hresult(result->error_code());
+		}
+	}
+
+#ifdef _WIN32
+	[[noreturn]] inline void throw_last_error()
+	{
+		throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
+	}
 
     template<typename T>
     void check_nt(T result)
@@ -328,4 +337,5 @@ namespace winrt
 
         return pointer;
     }
+#endif
 }

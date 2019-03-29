@@ -1,4 +1,5 @@
 
+#ifdef _WIN32
 namespace winrt::impl
 {
     template <typename Async>
@@ -412,3 +413,5 @@ namespace winrt::impl
         bool m_completed_assigned{ false };
     };
 }
+
+#endif
