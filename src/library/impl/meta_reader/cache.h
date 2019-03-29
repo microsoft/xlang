@@ -7,7 +7,8 @@ namespace xlang::meta::reader
         cache(cache const&) = delete;
         cache& operator=(cache const&) = delete;
 
-        explicit cache(std::vector<std::string> const& files)
+        template<typename C, typename T = typename C::value_type>
+        explicit cache(C const& files)
         {
             for (auto&& file : files)
             {

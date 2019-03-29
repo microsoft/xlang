@@ -965,25 +965,19 @@ namespace winrt::impl
             return error_ok;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept
+        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept try
         {
-            try
-            {
-                *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
 
-        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
+        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept try
         {
-            try
-            {
-                *trustLevel = static_cast<D*>(this)->GetTrustLevel();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *trustLevel = static_cast<D*>(this)->GetTrustLevel();
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
 
         uint32_t subtract_reference() noexcept
         {
@@ -1198,8 +1192,8 @@ namespace winrt::impl
             param::hstring const name{ name_of<typename D::instance_type>() };
             result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
 
-            static slim_mutex lock;
-            slim_lock_guard const guard{ lock };
+            static std::mutex lock;
+            std::lock_guard const guard{ lock };
             void* result;
             map->Lookup(get_abi(name), &result);
 
