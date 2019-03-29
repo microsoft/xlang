@@ -13,7 +13,7 @@ namespace winrt::impl
 #ifdef _WIN32
 	template <>
 	struct is_char_type_supported<wchar_t> : std::true_type {};
-#else
+#endif
 
 	template <typename char_type>
 	auto normalize_char_type(std::basic_string_view<char_type> str) noexcept
@@ -50,6 +50,7 @@ namespace winrt::impl
 		{
 			check_hresult(xlang_create_string_utf16(normalized.data(), length, &result));
 		}
+		return result;
 	}
 
     struct hstring_traits

@@ -1165,7 +1165,7 @@ namespace winrt::impl
         }
         else
         {
-            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
+            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(u8"Windows.ApplicationModel.Core.CoreApplication");
             Windows::Foundation::IUnknown collection;
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
             auto const map = collection.as<IStaticLifetimeCollection>();

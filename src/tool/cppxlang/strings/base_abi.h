@@ -48,8 +48,8 @@ namespace winrt::impl
     };
     template <> struct name<Windows::Foundation::IInspectable>
     {
-        static constexpr auto & value{ L"Object" };
-        static constexpr auto & data{ "cinterface(IInspectable)" };
+        static constexpr auto & value{ u8"Object" };
+        static constexpr auto & data{ u8"cinterface(IInspectable)" };
     };
     template <> struct category<Windows::Foundation::IInspectable>
     {

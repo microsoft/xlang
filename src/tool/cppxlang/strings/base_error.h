@@ -1,19 +1,6 @@
 
 namespace winrt::impl
 {
-    inline hstring trim_hresult_message(wchar_t const* const message, uint32_t size) noexcept
-    {
-        wchar_t const* back = message + size - 1;
-
-        while (size&& iswspace(*back))
-        {
-            --size;
-            --back;
-        }
-
-        return { message, size };
-    }
-
     constexpr int32_t hresult_from_win32(uint32_t const x) noexcept
     {
         return (int32_t)(x) <= 0 ? (int32_t)(x) : (int32_t)(((x) & 0x0000FFFF) | (7 << 16) | 0x80000000);

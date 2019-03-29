@@ -109,6 +109,7 @@ extern "C"
             , Data4{ Arg4[0], Arg4[1],Arg4[2],Arg4[3],Arg4[4],Arg4[5],Arg4[6],Arg4[7] }
         {
         }
+
 # ifdef XLANG_WINDOWS_ABI
         constexpr xlang_guid(GUID const& value) noexcept
             : Data1(value.Data1)
@@ -126,6 +127,18 @@ extern "C"
 # endif
 #endif
     };
+
+	inline bool operator==(xlang_guid const& left, xlang_guid const& right) noexcept
+	{
+		auto const left_val = reinterpret_cast<uint32_t const*>(&left);
+		auto const right_val = reinterpret_cast<uint32_t const*>(&right);
+		return left_val[0] == right_val[0] && left_val[1] == right_val[1] && left_val[2] == right_val[2] && left_val[3] == right_val[3];
+	}
+
+	inline bool operator!=(xlang_guid const& left, xlang_guid const& right) noexcept
+	{
+		return !(left == right);
+	}
 
     struct XLANG_NOVTABLE xlang_unknown
     {

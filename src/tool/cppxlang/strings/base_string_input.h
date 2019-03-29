@@ -20,19 +20,19 @@ namespace winrt::param
 		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
 		hstring(std::basic_string_view<char_type> const& value) noexcept
 		{
-			init<false, char_type>(value);
+			init<char_type, false>(value);
 		}
 
 		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
 		hstring(std::basic_string<char_type> const& value) noexcept
 		{
-			init<true, char_type>(value);
+			init<char_type, true>(value);
 		}
 
 		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
         hstring(char_type const* const value) noexcept
         {
-			init<true, char_type>(value);
+			init<char_type, true>(value);
 		}
 
         operator winrt::hstring const&() const noexcept
@@ -45,7 +45,7 @@ namespace winrt::param
 		void init(std::basic_string_view<char_type> str) noexcept
 		{
 			static_assert(impl::is_char_type_supported<char_type>::value);
-			auto const value = normalize_char_type(str);
+			auto const value = impl::normalize_char_type(str);
 			auto const length = static_cast<uint32_t>(value.size());
 			if constexpr (is_safe)
 			{
