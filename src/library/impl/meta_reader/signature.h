@@ -291,6 +291,10 @@ namespace xlang::meta::reader
             , m_param_count(uncompress_unsigned(data))
             , m_ret_type(table, data)
         {
+            if (m_param_count > data.size())
+            {
+                throw_invalid("Invalid blob array size");
+            }
             m_params.reserve(m_param_count);
             for (uint32_t count = 0; count < m_param_count; ++count)
             {
@@ -367,6 +371,10 @@ namespace xlang::meta::reader
             , m_cmod(parse_cmods(table, data))
             , m_type(table, data)
         {
+            if (m_param_count > data.size())
+            {
+                throw_invalid("Invalid blob array size");
+            }
             m_params.reserve(m_param_count);
             for (uint32_t count = 0; count < m_param_count; ++count)
             {
@@ -433,6 +441,10 @@ namespace xlang::meta::reader
             throw_invalid("Generic type instantiation signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
         }
 
+        if (m_generic_arg_count > data.size())
+        {
+            throw_invalid("Invalid blob array size");
+        }
         m_generic_args.reserve(m_generic_arg_count);
         for (uint32_t arg = 0; arg < m_generic_arg_count; ++arg)
         {
