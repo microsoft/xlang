@@ -231,6 +231,10 @@ namespace xlang::meta::reader
                 auto const num_elements = read<uint32_t>(data);
                 if (num_elements != 0xffffffff)
                 {
+                    if (num_elements > data.size())
+                    {
+                        throw_invalid("Invalid blob array size");
+                    }
                     elems.reserve(num_elements);
                     for (uint32_t i = 0; i < num_elements; ++i)
                     {
@@ -253,6 +257,10 @@ namespace xlang::meta::reader
                 auto const num_elements = read<uint32_t>(data);
                 if (num_elements != 0xffffffff)
                 {
+                    if (num_elements > data.size())
+                    {
+                        throw_invalid("Invalid blob array size");
+                    }
                     elems.reserve(num_elements);
                     for (uint32_t i = 0; i < num_elements; ++i)
                     {
@@ -347,6 +355,10 @@ namespace xlang::meta::reader
             }
 
             const auto num_named_args = read<uint16_t>(data);
+            if (num_named_args > data.size())
+            {
+                throw_invalid("Invalid blob array size");
+            }
             m_named_args.reserve(num_named_args);
 
             for (uint16_t i = 0; i < num_named_args; ++i)
