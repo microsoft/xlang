@@ -74,17 +74,17 @@ namespace xlang::meta::reader
         return get_row<reader::TypeRef>();
     }
 
-    inline auto typed_index<TypeDefOrRef>::TypeDef() const
+    inline TypeDef typed_index<TypeDefOrRef>::TypeDef() const
     {
         return get_row<reader::TypeDef>();
     }
 
-    inline auto typed_index<TypeDefOrRef>::TypeRef() const
+    inline TypeRef typed_index<TypeDefOrRef>::TypeRef() const
     {
         return get_row<reader::TypeRef>();
     }
 
-    inline auto typed_index<TypeDefOrRef>::TypeSpec() const
+    inline TypeSpec typed_index<TypeDefOrRef>::TypeSpec() const
     {
         return get_row<reader::TypeSpec>();
     }
@@ -116,8 +116,7 @@ namespace xlang::meta::reader
 
     inline bool TypeDef::is_enum() const
     {
-        auto base = Extends().TypeRef();
-        return base.TypeNamespace() == "System" && base.TypeName() == "Enum";
+        return extends_type(*this, "System"sv, "Enum"sv);
     }
 
     struct EnumDefinition
