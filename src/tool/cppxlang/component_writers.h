@@ -106,7 +106,7 @@ namespace xlang
         if (settings.component_opt)
         {
             auto format = R"(
-    if (requal(name, L"%.%"))
+    if (requal(name, u8"%.%"))
     {
         return winrt_make_%();
     }
@@ -120,7 +120,7 @@ namespace xlang
         else
         {
             auto format = R"(
-    if (requal(name, L"%.%"))
+    if (requal(name, u8"%.%"))
     {
         return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
     }
@@ -138,9 +138,9 @@ namespace xlang
     {
         w.write_root_include("base");
         auto format = R"(%
-void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
+void* WINRT_CALL %_get_activation_factory(std::basic_string_view<xlang_char8> const& name)
 {
-    auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
+    auto requal = [](std::basic_string_view<xlang_char8> const& left, std::basic_string_view<xlang_char8> const& right) noexcept
     {
         return std::equal(left.rbegin(), left.rend(), right.rbegin(), right.rend());
     };
@@ -161,11 +161,12 @@ void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
         }
 
         format = R"(
-int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept try
+int32_t WINRT_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory) noexcept try
 {
     uint32_t length{};
-    wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
-    std::wstring_view const name{ buffer, length };
+    xlang_char8 const* const buffer{};
+    winrt::check_hresult(xlang_get_string_raw_buffer_utf8(class_name, &buffer, &length));
+    std::basic_string_view<xlang_char8> const name{ buffer, length };
     *factory = %_get_activation_factory(name);
 
     if (*factory)

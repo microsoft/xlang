@@ -94,7 +94,7 @@ Where <spec> is one or more of:
         settings.brackets = args.exists("brackets");
 
         auto output_folder = canonical(args.value("output"));
-        create_directories(output_folder / "winrt/impl");
+        create_directories(output_folder / "xlang/impl");
         output_folder += '/';
         settings.output_folder = output_folder.string();
 

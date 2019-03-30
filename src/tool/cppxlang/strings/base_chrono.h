@@ -29,7 +29,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::TimeSpan>
     {
-        static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };
+        static constexpr auto & value{ u8"Windows.Foundation.TimeSpan" };
     };
 
     template <> struct category<Windows::Foundation::TimeSpan>
@@ -39,7 +39,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::DateTime>
     {
-        static constexpr auto & value{ L"Windows.Foundation.DateTime" };
+        static constexpr auto & value{ u8"Windows.Foundation.DateTime" };
     };
 
     template <> struct category<Windows::Foundation::DateTime>

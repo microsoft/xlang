@@ -44,9 +44,8 @@ namespace std
     {
         size_t operator()(winrt::hstring const& value) const noexcept
         {
-            uint32_t length = 0;
-            const wchar_t* const buffer = WINRT_WindowsGetStringRawBuffer(get_abi(value), &length);
-            return winrt::impl::hash_data(buffer, length * sizeof(wchar_t));
+			std::basic_string_view<xlang_char8> view = value;
+            return winrt::impl::hash_data(view.data(), view.size() * sizeof(xlang_char8));
         }
     };
 

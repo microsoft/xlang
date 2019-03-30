@@ -36,35 +36,5 @@ WINRT_LINK(CloseThreadpoolWait, 4)
 
 extern "C"
 {
-    int32_t WINRT_CALL WINRT_WindowsCreateString(wchar_t const* sourceString, uint32_t length, void** string) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsCreateStringReference(wchar_t const* sourceString, uint32_t length, void* hstringHeader, void** string) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsDuplicateString(void* string, void** newString) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsDeleteString(void* string) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsStringHasEmbeddedNull(void* string, int* hasEmbedNull) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsPreallocateStringBuffer(uint32_t length, wchar_t** charBuffer, void** bufferHandle) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsDeleteStringBuffer(void* bufferHandle) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsPromoteStringBuffer(void* bufferHandle, void** string) noexcept;
-    int32_t WINRT_CALL WINRT_WindowsConcatString(void* string1, void* string2, void** newString) noexcept;
-    wchar_t const* WINRT_CALL WINRT_WindowsGetStringRawBuffer(void* string, uint32_t* length) noexcept;
-    uint32_t WINRT_CALL WINRT_WindowsGetStringLen(void* string) noexcept;
-
-    int32_t  WINRT_CALL WINRT_MultiByteToWideChar(uint32_t codepage, uint32_t flags, char const* in_string, int32_t in_size, wchar_t* out_string, int32_t out_size) noexcept;
-    int32_t  WINRT_CALL WINRT_WideCharToMultiByte(uint32_t codepage, uint32_t flags, wchar_t const* int_string, int32_t in_size, char* out_string, int32_t out_size, char const* default_char, int32_t* default_used) noexcept;
-
     int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;
 }
-
-WINRT_LINK(WindowsCreateString, 12)
-WINRT_LINK(WindowsCreateStringReference, 16)
-WINRT_LINK(WindowsDuplicateString, 8)
-WINRT_LINK(WindowsDeleteString, 4)
-WINRT_LINK(WindowsStringHasEmbeddedNull, 8)
-WINRT_LINK(WindowsPreallocateStringBuffer, 12)
-WINRT_LINK(WindowsDeleteStringBuffer, 4)
-WINRT_LINK(WindowsPromoteStringBuffer, 8)
-WINRT_LINK(WindowsConcatString, 12)
-WINRT_LINK(WindowsGetStringRawBuffer, 8)
-WINRT_LINK(WindowsGetStringLen, 4)
-
-WINRT_LINK(MultiByteToWideChar, 24)
-WINRT_LINK(WideCharToMultiByte, 32)

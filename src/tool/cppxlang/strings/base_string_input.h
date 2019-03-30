@@ -17,30 +17,61 @@ namespace winrt::param
         {
         }
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring(std::basic_string_view<char_type> const& value) noexcept
+		// char8_t overloads
+		hstring(std::basic_string_view<xlang_char8> const& value) noexcept
 		{
-			init<char_type, false>(value);
+			init<xlang_char8, false>(value);
 		}
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring(std::basic_string<char_type> const& value) noexcept
+		hstring(std::basic_string<xlang_char8> const& value) noexcept
 		{
-			init<char_type, true>(value);
+			init<xlang_char8, true>(value);
 		}
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-        hstring(char_type const* const value) noexcept
+        hstring(xlang_char8 const* const value) noexcept
         {
-			init<char_type, true>(value);
+			init<xlang_char8, true>(value);
 		}
 
-        operator winrt::hstring const&() const noexcept
-        {
-            return *reinterpret_cast<winrt::hstring const*>(this);
-        }
+		// char16_t overloads
+		hstring(std::basic_string_view<char16_t> const& value) noexcept
+		{
+			init<char16_t, false>(value);
+		}
 
-    private:
+		hstring(std::basic_string<char16_t> const& value) noexcept
+		{
+			init<char16_t, true>(value);
+		}
+
+		hstring(char16_t const* const value) noexcept
+		{
+			init<char16_t, true>(value);
+		}
+
+#ifdef _WIN32
+		// wchar_t overloads
+		hstring(std::basic_string_view<wchar_t> const& value) noexcept
+		{
+			init<wchar_t, false>(value);
+		}
+
+		hstring(std::basic_string<wchar_t> const& value) noexcept
+		{
+			init<wchar_t, true>(value);
+		}
+
+		hstring(wchar_t const* const value) noexcept
+		{
+			init<wchar_t, true>(value);
+		}
+#endif
+		operator winrt::hstring const&() const noexcept
+		{
+			return *reinterpret_cast<winrt::hstring const*>(this);
+		}
+
+	private:
 		template <typename char_type, bool is_safe>
 		void init(std::basic_string_view<char_type> str) noexcept
 		{
@@ -51,25 +82,25 @@ namespace winrt::param
 			{
 				if constexpr (sizeof(char_type) == sizeof(xlang_char8))
 				{
-					WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf8(str.data(), length, &m_header, &m_handle));
+					WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf8(value.data(), length, &m_header, &m_handle));
 				}
 				else
 				{
-					WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf16(str.data(), length, &m_header, &m_handle));
+					WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf16(value.data(), length, &m_header, &m_handle));
 				}
 			}
 			else
 			{
 				if constexpr (sizeof(char_type) == sizeof(xlang_char8))
 				{
-					if (nullptr != xlang_create_string_reference_utf8(str.data(), length, &m_header, &m_handle))
+					if (nullptr != xlang_create_string_reference_utf8(value.data(), length, &m_header, &m_handle))
 					{
 						std::terminate();
 					}
 				}
 				else
 				{
-					if (nullptr != xlang_create_string_reference_utf16(str.data(), length, &m_header, &m_handle))
+					if (nullptr != xlang_create_string_reference_utf16(value.data(), length, &m_header, &m_handle))
 					{
 						std::terminate();
 					}

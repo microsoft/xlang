@@ -25,6 +25,7 @@ namespace winrt::impl
 		{
 			return std::u16string_view{ reinterpret_cast<char16_t const*>(str.data()), str.size() };
 		}
+		else
 #endif
 		return str;
 	}
@@ -101,43 +102,103 @@ namespace winrt
         hstring& operator=(hstring&&) = default;
         hstring(std::nullptr_t) = delete;
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring(std::initializer_list<char_type> value) :
-			hstring(std::basic_string_view<char_type>(value.begin(), value.size()))
+		// char8_t overloads
+		hstring(std::initializer_list<xlang_char8> value) :
+			hstring(std::basic_string_view<xlang_char8>(value.begin(), value.size()))
 		{}
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring(char_type const* value) :
-            hstring(std::basic_string_view<char_type>(value))
+		hstring(xlang_char8 const* value) :
+            hstring(std::basic_string_view<xlang_char8>(value))
 		{}
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring(char_type const* value, size_type size) :
-            hstring(std::basic_string_view<char_type>(value, size))
+		hstring(xlang_char8 const* value, size_type size) :
+            hstring(std::basic_string_view<xlang_char8>(value, size))
 		{}
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		explicit hstring(std::basic_string_view<char_type> const& value) :
+		explicit hstring(std::basic_string_view<xlang_char8> const& value) :
             m_handle(impl::create_string(value))
 		{}
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring& operator=(std::basic_string_view<char_type> const& value)
+		hstring& operator=(std::basic_string_view<xlang_char8> const& value)
         {
 			return *this = hstring{ value };
         }
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring& operator=(char_type const* const value)
+		hstring& operator=(xlang_char8 const* const value)
         {
 			return *this = hstring{ value };
         }
 
-		template <typename char_type, typename = std::enable_if_t<impl::is_char_type_supported<char_type>::value>>
-		hstring& operator=(std::initializer_list<char_type> value)
+		hstring& operator=(std::initializer_list<xlang_char8> value)
         {
 			return *this = hstring{ value };
         }
+
+		// char16_t overloads
+		hstring(std::initializer_list<char16_t> value) :
+			hstring(std::basic_string_view<char16_t>(value.begin(), value.size()))
+		{}
+
+		hstring(char16_t const* value) :
+			hstring(std::basic_string_view<char16_t>(value))
+		{}
+
+		hstring(char16_t const* value, size_type size) :
+			hstring(std::basic_string_view<char16_t>(value, size))
+		{}
+
+		explicit hstring(std::basic_string_view<char16_t> const& value) :
+			m_handle(impl::create_string(value))
+		{}
+
+		hstring& operator=(std::basic_string_view<char16_t> const& value)
+		{
+			return *this = hstring{ value };
+		}
+
+		hstring& operator=(char16_t const* const value)
+		{
+			return *this = hstring{ value };
+		}
+
+		hstring& operator=(std::initializer_list<char16_t> value)
+		{
+			return *this = hstring{ value };
+		}
+
+		// wchar_t overloads, just for Windows
+#ifdef _WIN32
+		hstring(std::initializer_list<wchar_t> value) :
+			hstring(std::basic_string_view<wchar_t>(value.begin(), value.size()))
+		{}
+
+		hstring(wchar_t const* value) :
+			hstring(std::basic_string_view<wchar_t>(value))
+		{}
+
+		hstring(wchar_t const* value, size_type size) :
+			hstring(std::basic_string_view<wchar_t>(value, size))
+		{}
+
+		explicit hstring(std::basic_string_view<wchar_t> const& value) :
+			m_handle(impl::create_string(value))
+		{}
+
+		hstring& operator=(std::basic_string_view<wchar_t> const& value)
+		{
+			return *this = hstring{ value };
+		}
+
+		hstring& operator=(wchar_t const* const value)
+		{
+			return *this = hstring{ value };
+		}
+
+		hstring& operator=(std::initializer_list<wchar_t> value)
+		{
+			return *this = hstring{ value };
+		}
+#endif
 
         void clear() noexcept
         {
@@ -280,17 +341,37 @@ namespace winrt
         value = impl::duplicate_string(get_abi(object));
     }
 
-	template <typename char_type>
-    inline xlang_string detach_abi(std::basic_string_view<char_type> const& value)
-    {
-        return impl::create_string(value);
-    }
+	inline xlang_string detach_abi(std::basic_string_view<xlang_char8> const& value)
+	{
+		return impl::create_string(value);
+	}
 
-	template <typename char_type>
+	inline xlang_string detach_abi(xlang_char8 const* const value)
+	{
+		return impl::create_string(std::basic_string_view<xlang_char8>(value));
+	}
+
+	inline xlang_string detach_abi(std::basic_string_view<char16_t> const& value)
+	{
+		return impl::create_string(value);
+	}
+
+	inline xlang_string detach_abi(char16_t const* const value)
+	{
+		return impl::create_string(std::basic_string_view<char16_t>(value));
+	}
+
+#ifdef _WIN32
+	inline xlang_string detach_abi(std::basic_string_view<wchar_t> const& value)
+	{
+		return impl::create_string(value);
+	}
+
 	inline xlang_string detach_abi(wchar_t const* const value)
-    {
-        return impl::create_string(std::basic_string_view<char_type>(value));
-    }
+	{
+		return impl::create_string(std::basic_string_view<wchar_t>(value));
+	}
+#endif
 }
 
 namespace winrt::impl
@@ -302,8 +383,8 @@ namespace winrt::impl
 
     template <> struct name<hstring>
     {
-        static constexpr auto & value{ L"String" };
-        static constexpr auto & data{ "string" };
+        static constexpr auto & value{ u8"String" };
+        static constexpr auto & data{ u8"string" };
     };
 
     template <> struct category<hstring>
