@@ -13,10 +13,13 @@
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <license type="file">LICENSE</license>
     <projectUrl>https://github.com/Microsoft/xlang/tree/master/src/package/nuget</projectUrl>
+    <iconUrl>https://aka.ms/cppwinrt.ico</iconUrl>
   </metadata>
   <files>
     <file src="..\LICENSE"/>
+    <file src="$cppwinrt_exe$" target="bin"/>
     <file src="Microsoft.Windows.CppWinRT.targets" target="build\native"/>
     <file src="Microsoft.Windows.CppWinRT.props" target="build\native"/>
+    <file src="readme.txt" target="" />
   </files>
 </package>

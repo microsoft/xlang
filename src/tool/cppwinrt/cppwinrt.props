@@ -1,11 +1,6 @@
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Copyright (c) Microsoft. All rights reserved.
-Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-This file sets PlatformToolset/WindowsTargetPlatformVersion to allow this project to compile with multiple versions
-of Visual Studio.
--->
+  <!-- Set common MSBuild properties and item metadata for CppWinRT tool and tests -->
 
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '15.0'">
     <PlatformToolset>v141</PlatformToolset>
