@@ -3,24 +3,21 @@
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-<!--Set compiler and linker options for projects requiring C++/WinRT. As these options can
-    potentially break builds, they must be explicitly opted into by adding a reference to the 
-    Microsoft.Cpp.CppWinRT Nuget package, or by adding the CppWinRTEnabled project property. -->
+<!--Set compiler and linker options for projects requiring C++/WinRT. -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <PropertyGroup>
         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
         <CanReferenceWinRT>true</CanReferenceWinRT>
-        <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">Generated Files\</GeneratedFilesDir>
         <CppWinRTPackage Condition="'$(CppWinRTEnabled)' != 'true'">true</CppWinRTPackage>
         <CppWinRTPackage Condition="'$(CppWinRTPackage)' != 'true'">false</CppWinRTPackage>
-        <XamlLanguage>CppWinRT</XamlLanguage>
+        <XamlLanguage Condition="'$(CppWinRTProjectLanguage)' != 'C++/CX'">CppWinRT</XamlLanguage>
         <IsNativeLanguage>true</IsNativeLanguage>
     </PropertyGroup>
 
     <ItemDefinitionGroup>
         <ClCompile>
-            <CompileAsWinRT Condition="'%(ClCompile.CompileAsWinRT)' == ''">false</CompileAsWinRT>
+            <CompileAsWinRT Condition="'$(CppWinRTProjectLanguage)' != 'C++/CX' And '%(ClCompile.CompileAsWinRT)' == ''">false</CompileAsWinRT>
             <LanguageStandard Condition="'%(ClCompile.LanguageStandard)' == ''">stdcpp17</LanguageStandard>
             <AdditionalOptions>/bigobj /await %(AdditionalOptions)</AdditionalOptions>
             <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(GeneratedFilesDir)</AdditionalIncludeDirectories>

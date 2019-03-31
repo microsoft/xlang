@@ -272,29 +272,6 @@ namespace winrt::impl
         using type = basic_category;
     };
 
-    // Temporary workaround to support locale-independent numeric formatting
-    // until C++17's to_chars arrives
-    struct locale_handle_traits
-    {
-        using type = _locale_t;
-
-        static void close(type value) noexcept
-        {
-            _free_locale(value);
-        }
-
-        static constexpr type invalid() noexcept
-        {
-            return nullptr;
-        }
-    };
-
-    inline _locale_t get_default_locale()
-    {
-        static handle_type<locale_handle_traits> locale_handle{ _create_locale(LC_ALL, "C") };
-        return locale_handle.get();
-    }
-
     struct hstring_builder
     {
         hstring_builder(hstring_builder const&) = delete;
@@ -345,70 +322,70 @@ namespace winrt
     inline hstring to_hstring(uint8_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%hhu", value);
+        swprintf(buffer, std::size(buffer), L"%hhu", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int8_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%hhd", value);
+        swprintf(buffer, std::size(buffer), L"%hhd", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint16_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%hu", value);
+        swprintf(buffer, std::size(buffer), L"%hu", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int16_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%hd", value);
+        swprintf(buffer, std::size(buffer), L"%hd", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint32_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%I32u", value);
+        swprintf(buffer, std::size(buffer), L"%I32u", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int32_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%I32d", value);
+        swprintf(buffer, std::size(buffer), L"%I32d", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint64_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%I64u", value);
+        swprintf(buffer, std::size(buffer), L"%I64u", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int64_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%I64d", value);
+        swprintf(buffer, std::size(buffer), L"%I64d", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(float value)
     {
         wchar_t buffer[32];
-        _swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
+        swprintf(buffer, std::size(buffer), L"%G", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(double value)
     {
         wchar_t buffer[32];
-        _swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
+        swprintf(buffer, std::size(buffer), L"%G", value);
         return hstring{ buffer };
     }
 
@@ -440,7 +417,7 @@ namespace winrt
     {
         wchar_t buffer[40];
         //{00000000-0000-0000-0000-000000000000}
-        swprintf_s(buffer, L"{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
+        swprintf(buffer, std::size(buffer), L"{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
             value.Data1, value.Data2, value.Data3, value.Data4[0], value.Data4[1],
             value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6], value.Data4[7]);
         return hstring{ buffer };
