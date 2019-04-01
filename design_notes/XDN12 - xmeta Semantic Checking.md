@@ -406,21 +406,90 @@ B implicitly depends on A which explicitly depends on B. Thus, B is within its o
 
 ### Attributes
 #### Definitions:
-The attributes in the xlang grammar is generalized and does not specify any keywords in anyway except for the attributes_target that are listed.
-As such there is much work needed to semantically check the meaning of each attribute in the grammar. Particularly, there is no difference in grammar between global and regular attributes. We will have the check the attribute targets semantically to tell the difference and apply the right rules. 
+The attributes in the xlang grammar are generalized and do not specify any keywords except for the attributes_target that are listed.
+As such there is much work needed to semantically check the meaning of each attribute in the grammar. Particularly, there is no difference in the grammar between global and regular attributes. We will have the check the attribute targets semantically to tell the difference and apply the right rules. 
 
 **Positional parameters** are a sequence of parameters without a identifier
 **Named parameters** are parameters with a specified name
 
 ##### AttributeUsage
 **AttributeUsage** is used to describe how an attribute class can be used. It is not defined as a keyword in the grammar and it is the semantic checker's job to make sure it is used correctly on attribute declaration.
-**AttributeUsage** has positional parameters used to specify the kinds of declaration on which it can be used: AttributeTargets.Class | AttributeTarget.Interface
+**AttributeUsage** has positional parameters used to specify the types of declarations on which it can be used: AttributeTargets.Class | AttributeTarget.Interface
 It also has named parameters such as **AllowMultiple** and **Inherited**. 
 **AllowMultiple** allows the attribute to be specified more than once for a given entity. If unspecified, the attribute is always single use.
-**Inherited** indicates whether or not the attribute can also be Inherited by classes that derive from that base class. If unspecified, it's default value is true. 
+**Inherited** indicates whether or not the attribute is inherited by classes that derive from the class the attribute was originally defined on. If unspecified, its default value is true. 
 
+
+#### Semantic checks:
+1) The types of the input parameters passed into the attribute constructor must match the types specified in the constructor's declaration.
+
+2) References to attributes must refer to defined attributes within scope.
+
+For example:
 ```
-A class that is decorated with the AttributeUsage attribute must derive from System.Attribute, either directly or indirectly. Otherwise, a compile-time error occurs.
+class Class1 {}
+\[Class1\] class Class2 {} // Error
+```
+results in a compile-time error because it attempts to use Class1 as an attribute class when Class1 is not an attribute class. If an class wants to be an attribute, it must use the **AttributeUsage**. 
+
+3) Attribute targets
+Certain contexts permit the specification of an attribute on more than one target. A program can explicitly specify the target by including an attribute-target-specifier. When an attribute is placed at the global level, a global-attribute-target-specifier is required. In all other locations, a reasonable default is applied, but an attribute-target-specifier can be used to affirm or override the default in certain ambiguous cases (or to just affirm the default in non-ambiguous cases). Thus, typically, attribute-target-specifiers can be omitted except at the global level. 
+
+The potentially ambiguous contexts are resolved as follows:
+
+•	An attribute specified at global scope can apply either to the target assembly or the target module. No default exists for this context, so an attribute-target-specifier is always required in this context. The presence of the assembly attribute-target-specifier indicates that the attribute applies to the target assembly; the presence of the module attribute-target-specifier indicates that the attribute applies to the target module. 
+
+•	An attribute specified on a delegate declaration can apply either to the delegate being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the delegate. The presence of the type attribute-target-specifier indicates that the attribute applies to the delegate; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on a method declaration can apply either to the method being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on an operator declaration can apply either to the operator being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the operator. The presence of the method attribute-target-specifier indicates that the attribute applies to the operator; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on an event declaration that omits event accessors can apply to the event being declared, to the associated field (if the event is not abstract), or to the associated add and remove methods. In the absence of an attribute-target-specifier, the attribute applies to the event. The presence of the event attribute-target-specifier indicates that the attribute applies to the event; the presence of the field attribute-target-specifier indicates that the attribute applies to the field; and the presence of the method attribute-target-specifier indicates that the attribute applies to the methods.
+
+•	An attribute specified on a get accessor declaration for a property or indexer declaration can apply either to the associated method or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on a set accessor for a property or indexer declaration can apply either to the associated method or to its lone implicit parameter. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the param attribute-target-specifier indicates that the attribute applies to the parameter; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on an add or remove accessor declaration for an event declaration can apply either to the associated method or to its lone parameter. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the param attribute-target-specifier indicates that the attribute applies to the parameter; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+a) There are some invalid target attribute that can be applied to declarations
+Example: param cannot be used on a class declaration 
+```
+[param: Author("Brian Kernighan")]		// Error
+class Class1 {}
+```
+
+4) Attribute usages cannot be ambiguous. Ambiguities arise because by convention, attribute classes are named with a suffix of Attribute, and you can reference the attribute without this suffix. However, there may be another attribute with the same name without the Attribute suffix, which causes the ambiguity.
+
+For example:
+```
+[AttributeUsage(AttributeTargets.All)]
+attribute X
+{}
+[AttributeUsage(AttributeTargets.All)]
+attribute XAttribute
+{}
+[X]                 // Error: ambiguity
+class Class1 {}
+[XAttribute]        // Refers to XAttribute
+class Class2 {}
+[@X]                // Refers to X
+class Class3 {}
+[@XAttribute]       // Refers to XAttribute
+class Class4 {}
+```
+
+5) Single use attributes can only be used once on the same entity.
+
+6) TODO: More on expressions later
+
+7) Attributes cannot have the name of a reserved attribute. These include: AttributeUsageAttribute
+
+8) A class that is decorated with the AttributeUsage attribute must derive from System.Attribute, either directly or indirectly.
+
+The AttributeUseageAttribute is defined as follows:
+```
 namespace System
 {
     [AttributeUsage(AttributeTargets.Class)]
@@ -455,83 +524,3 @@ namespace System
 
 ```
 
-
-#### Semantic checks:
-1) The types of positional and named parameters for an attribute class are limited to the attribute parameter types, which are:
-•	Xlang's based types
-•	The type Object.
-•	An enum type.
-•	Single-dimensional arrays of the above types.
-A constructor argument field which does not have one of these types, cannot be used as a positional or named parameter in an attribute specification.
-
-2) The attribute-name identifies an attribute class. If the form of attribute-name is type-name then this name must refer to an attribute class. Otherwise, a compile-time error occurs. The example
-class Class1 {}
-\[Class1\] class Class2 {}	// Error
-results in a compile-time error because it attempts to use Class1 as an attribute class when Class1 is not an attribute class. If an class wants to be an attribute, it must use the **AttributeUsage**. 
-
-3) Attribute targets
-Certain contexts permit the specification of an attribute on more than one target. A program can explicitly specify the target by including an attribute-target-specifier. When an attribute is placed at the global level, a global-attribute-target-specifier is required. In all other locations, a reasonable default is applied, but an attribute-target-specifier can be used to affirm or override the default in certain ambiguous cases (or to just affirm the default in non-ambiguous cases). Thus, typically, attribute-target-specifiers can be omitted except at the global level. 
-
-The potentially ambiguous contexts are resolved as follows:
-
-•	An attribute specified at global scope can apply either to the target assembly or the target module. No default exists for this context, so an attribute-target-specifier is always required in this context. The presence of the assembly attribute-target-specifier indicates that the attribute applies to the target assembly; the presence of the module attribute-target-specifier indicates that the attribute applies to the target module. 
-
-•	An attribute specified on a delegate declaration can apply either to the delegate being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the delegate. The presence of the type attribute-target-specifier indicates that the attribute applies to the delegate; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
-
-•	An attribute specified on a method declaration can apply either to the method being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
-
-•	An attribute specified on an operator declaration can apply either to the operator being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the operator. The presence of the method attribute-target-specifier indicates that the attribute applies to the operator; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
-
-•	An attribute specified on an event declaration that omits event accessors can apply to the event being declared, to the associated field (if the event is not abstract), or to the associated add and remove methods. In the absence of an attribute-target-specifier, the attribute applies to the event. The presence of the event attribute-target-specifier indicates that the attribute applies to the event; the presence of the field attribute-target-specifier indicates that the attribute applies to the field; and the presence of the method attribute-target-specifier indicates that the attribute applies to the methods.
-
-•	An attribute specified on a get accessor declaration for a property or indexer declaration can apply either to the associated method or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
-
-•	An attribute specified on a set accessor for a property or indexer declaration can apply either to the associated method or to its lone implicit parameter. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the param attribute-target-specifier indicates that the attribute applies to the parameter; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
-
-•	An attribute specified on an add or remove accessor declaration for an event declaration can apply either to the associated method or to its lone parameter. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the param attribute-target-specifier indicates that the attribute applies to the parameter; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
-
-a) There are some invalid target attribute that can be applied to declarations
-Example: param cannot be used on a class declaration 
-```
-[param: Author("Brian Kernighan")]		// Error
-class Class1 {}
-```
-
-4) By convention, attribtues classes are named with a suffix of Attribute. The name of the attribute may sometimes omit this which causes ambiguities. Example listed below. 
-```
-Example 1:
-
-[AttributeUsage(AttributeTargets.All)]
-attribute X
-{}
-[AttributeUsage(AttributeTargets.All)]
-attribute XAttribute
-{}
-[X]						// Error: ambiguity
-class Class1 {}
-[XAttribute]			// Refers to XAttribute
-class Class2 {}
-[@X]						// Refers to X
-class Class3 {}
-[@XAttribute]			// Refers to XAttribute
-class Class4 {}
-
-Example 2:
-
-[AttributeUsage(AttributeTargets.All)]
-attribute XAttribute
-{}
-[X]						// Refers to XAttribute
-class Class1 {}
-[XAttribute]			// Refers to XAttribute
-class Class2 {}
-[@X]						// Error: no attribute named "X"
-class Class3 {}
-
-```
-
-5) Compile time error on single use attributes being used on a same entity more than once. 
-
-6) TODO: More on expressions later
-
-7) Reserved Attributes: AttributeUsageAttribute is reserved
