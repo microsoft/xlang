@@ -1,8 +1,7 @@
-import sys
-sys.path.append("./generated")
+import loader_native, unittest, asyncio
 
-import unittest
-import asyncio
+wf = loader_native.import_ns("Windows.Foundation")
+wdg = loader_native.import_ns("Windows.Devices.Geolocation")
 
 # async_test inspired by https://stackoverflow.com/a/23036785
 def async_test(test):
@@ -16,9 +15,6 @@ def async_test(test):
             test_loop.close()
             asyncio.set_event_loop(original_loop)
     return wrapper
-
-import winrt.windows.devices.geolocation as wdg
-import winrt.windows.foundation as wf
 
 class TestGeolocation(unittest.TestCase):
 
@@ -105,7 +101,6 @@ class TestGeolocation(unittest.TestCase):
         basic_pos = coord.point.position
         lat = basic_pos.latitude
         self.assertEqual(type(lat), float)
-
 
 if __name__ == '__main__':
     unittest.main()
