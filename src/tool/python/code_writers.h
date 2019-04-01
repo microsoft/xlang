@@ -234,6 +234,7 @@ struct winrt_type<%>
             w.write(R"(}
 catch(...)
 {
+    py::to_PyErr();
     return -1;
 }
 
