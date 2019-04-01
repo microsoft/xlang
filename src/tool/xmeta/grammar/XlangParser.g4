@@ -11,7 +11,7 @@ xlang
 compilation_unit
     : using_directive* namespace_declaration*
     ;
-    
+
 // For lexer tests
 xlang_lexer_tests
     : namespace_declaration*
@@ -100,11 +100,6 @@ constant_expression
     ;
 
 /* Variables */ // TODO: Later
-variable_declarator
-    : IDENTIFIER
-    | IDENTIFIER EQUAL variable_initializer
-    ;
-
 variable_initializer
     : expression
     | array_type
@@ -157,9 +152,7 @@ class_declaration
     ;
 
 class_modifier
-    : PUBLIC
-    | INTERNAL
-    | SEALED
+    : SEALED
     | STATIC
     ;
 
@@ -224,12 +217,12 @@ event_declaration
     : event_modifier? EVENT type IDENTIFIER SEMICOLON
     | event_modifier? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
-    
+
 event_modifier
     : PROTECTED
     | STATIC
     ;
-    
+
 event_accessors
     : ADD SEMICOLON REMOVE SEMICOLON
     ;
@@ -254,8 +247,7 @@ struct_body
     ;
 
 struct_member_declaration
-    : variable_declarator
-    | type IDENTIFIER SEMICOLON
+    : type IDENTIFIER SEMICOLON
     ;
 
 /* Interfaces */
