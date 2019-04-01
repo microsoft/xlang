@@ -273,19 +273,19 @@ namespace winrt
         }
     }
 
-	inline void check_hresult(xlang_error_info* result)
-	{
-		if (result != nullptr)
-		{
-			throw_hresult(result->error_code());
-		}
-	}
+    inline void check_hresult(xlang_error_info* result)
+    {
+        if (result != nullptr)
+        {
+            throw_hresult(result->error_code());
+        }
+    }
 
 #ifdef _WIN32
-	[[noreturn]] inline void throw_last_error()
-	{
-		throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
-	}
+    [[noreturn]] inline void throw_last_error()
+    {
+        throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
+    }
 
     template<typename T>
     void check_nt(T result)

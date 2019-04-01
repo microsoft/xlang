@@ -1,9 +1,9 @@
 
 namespace winrt
 {
-	void check_hresult(hresult const result);
-	void check_hresult(xlang_error_info* result);
-	hresult to_hresult() noexcept;
+    void check_hresult(hresult const result);
+    void check_hresult(xlang_error_info* result);
+    hresult to_hresult() noexcept;
 
     template <typename D, typename I>
     D* get_self(I const& from) noexcept;

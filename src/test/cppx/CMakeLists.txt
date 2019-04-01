@@ -25,6 +25,6 @@ if (WIN32)
 endif ()
 
 add_custom_target(test_cppx_base_projection
-	COMMAND cppxlang -base -out "${CMAKE_CURRENT_BINARY_DIR}")
+    COMMAND cppxlang -base -out "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_dependencies(test_cppx test_cppx_base_projection)

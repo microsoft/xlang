@@ -44,7 +44,7 @@ namespace std
     {
         size_t operator()(winrt::hstring const& value) const noexcept
         {
-			std::basic_string_view<xlang_char8> view = value;
+            std::basic_string_view<xlang_char8> view = value;
             return winrt::impl::hash_data(view.data(), view.size() * sizeof(xlang_char8));
         }
     };
