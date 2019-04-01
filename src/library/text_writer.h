@@ -97,6 +97,11 @@ namespace xlang::text
             write(std::to_string(value));
         }
 
+        void write(uint32_t const value)
+        {
+            write(std::to_string(value));
+        }
+
         void write(int64_t const value)
         {
             write(std::to_string(value));
