@@ -15,7 +15,7 @@ namespace xlang
             protected_method
         };
 
-        typedef std::vector<std::pair<type, std::string>> formal_params_t;
+        typedef std::vector<std::pair<xmeta_type, std::string>> formal_params_t;
 
         class method_model final : public base_model
         {
@@ -25,7 +25,7 @@ namespace xlang
             int arity;
             access_modifier_t access_modifier;
             bool is_partial;
-            type return_type;
+            xmeta_type return_type;
             std::vector<std::string> type_parameter_list;
             std::vector<formal_parameter_t> formal_parameter_list;
 

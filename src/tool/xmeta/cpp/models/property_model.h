@@ -19,7 +19,7 @@ namespace xlang
             property_model(const std::string &id, const size_t &decl_line) : base_model{ id, decl_line } { }
 
             property_modifier_t property_modifier;
-            type property_type;
+            xmeta_type property_type;
             bool get_declared;
             bool set_declared;
 

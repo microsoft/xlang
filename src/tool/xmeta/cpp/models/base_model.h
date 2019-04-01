@@ -17,7 +17,6 @@ namespace xlang
         protected:
             base_model() = delete;
 
-        private:
         };
 
         enum value_t
@@ -37,7 +36,7 @@ namespace xlang
             double_type,
         };
 
-        struct type
+        struct xmeta_type
         {
             bool is_void;
             bool is_array;
@@ -56,7 +55,7 @@ namespace xlang
         struct formal_parameter_t
         {
             parameter_modifier_t parameter_modifier;
-            type parameter_type;
+            xmeta_type parameter_type;
             std::string id;
         };
     }

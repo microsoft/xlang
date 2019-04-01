@@ -22,7 +22,7 @@ namespace xlang
 
         // The scope of a using directive extends over the namespace member declarations of
         // its immediately containing namespace body. The namespace_body_model struct
-        // will be used to differentiate them.
+        // will be used to differentiate the separate bodies.
         struct namespace_body_model
         {
             // Using directives
@@ -30,9 +30,9 @@ namespace xlang
             std::vector<std::string> using_namespace_directives;
 
             // Members
-            std::map<std::string, std::unique_ptr<class_model>> classes;
-            std::map<std::string, std::unique_ptr<struct_model>> structs;
-            std::map<std::string, std::unique_ptr<interface_model>> interfaces;
+            std::map<std::string, std::shared_ptr<class_model>> classes;
+            std::map<std::string, std::shared_ptr<struct_model>> structs;
+            std::map<std::string, std::shared_ptr<interface_model>> interfaces;
 
             std::shared_ptr<namespace_model> containing_namespace;
 

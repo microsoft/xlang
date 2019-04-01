@@ -16,7 +16,7 @@ namespace xlang
             struct_model(const std::string &id, const size_t &decl_line) : base_model{ id, decl_line } { }
 
             // Members
-            std::vector<std::pair<type, std::string>> fields;
+            std::vector<std::pair<xmeta_type, std::string>> fields;
 
         protected:
             struct_model() = delete;

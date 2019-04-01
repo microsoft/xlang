@@ -17,7 +17,7 @@ namespace xlang
             int arity;
             access_modifier_t access_modifier;
             bool is_partial;
-            type return_type;
+            xmeta_type return_type;
             std::vector<std::string> type_parameter_list;
             formal_params_t formal_parameter_list;
 

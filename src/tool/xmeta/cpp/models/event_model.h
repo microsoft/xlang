@@ -19,7 +19,7 @@ namespace xlang
             event_model(const std::string &id, const size_t &decl_line) : base_model{ id, decl_line } { }
 
             event_modifier_t event_modifier;
-            type event_type;
+            xmeta_type event_type;
             bool event_accessors_declared;
 
             // TODO: Add attributes to 'add' and 'remove' accessors.
