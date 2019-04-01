@@ -13,7 +13,7 @@ namespace std::experimental
             void Progress(ProgressHandler const& handler) noexcept
             {
                 std::lock_guard const guard(this->m_lock);
-                m_progress = winrt::impl::make_agile_delegate(handler);
+                m_progress = handler;
             }
 
             ProgressHandler Progress() noexcept

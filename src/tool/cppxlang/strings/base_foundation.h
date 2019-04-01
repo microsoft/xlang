@@ -104,7 +104,7 @@ namespace winrt::impl
 {
     template <> struct name<Windows::Foundation::Point>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Point" };
+        static constexpr auto & value{ u8"Windows.Foundation.Point" };
     };
 
     template <> struct category<Windows::Foundation::Point>
@@ -114,7 +114,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Size>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Size" };
+        static constexpr auto & value{ u8"Windows.Foundation.Size" };
     };
 
     template <> struct category<Windows::Foundation::Size>
@@ -124,7 +124,7 @@ namespace winrt::impl
     
     template <> struct name<Windows::Foundation::Rect>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Rect" };
+        static constexpr auto & value{ u8"Windows.Foundation.Rect" };
     };
 
     template <> struct category<Windows::Foundation::Rect>
@@ -136,7 +136,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float2>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector2" };
+        static constexpr auto & value{ u8"Windows.Foundation.Numerics.Vector2" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float2>
@@ -146,7 +146,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float3>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector3" };
+        static constexpr auto & value{ u8"Windows.Foundation.Numerics.Vector3" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float3>
@@ -156,7 +156,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float4>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector4" };
+        static constexpr auto & value{ u8"Windows.Foundation.Numerics.Vector4" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float4>
@@ -166,7 +166,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float3x2>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix3x2" };
+        static constexpr auto & value{ u8"Windows.Foundation.Numerics.Matrix3x2" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float3x2>
@@ -176,7 +176,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::float4x4>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix4x4" };
+        static constexpr auto & value{ u8"Windows.Foundation.Numerics.Matrix4x4" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float4x4>
@@ -191,7 +191,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::quaternion>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Quaternion" };
+        static constexpr auto & value{ u8"Windows.Foundation.Numerics.Quaternion" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::quaternion>
@@ -201,7 +201,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::Numerics::plane>
     {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Plane" };
+        static constexpr auto & value{ u8"Windows.Foundation.Numerics.Plane" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::plane>

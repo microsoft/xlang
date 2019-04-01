@@ -319,7 +319,7 @@ namespace xlang
             }
             else
             {
-                w.write(R"(, L", ")");
+                w.write(R"(, u8", ")");
             }
             w.write(", name_v<%>", param.Name());
         }
@@ -334,7 +334,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct name<%>
     {
-        static constexpr auto & value{ L"%.%" };
+        static constexpr auto & value{ u8"%.%" };
     };
 )";
 
@@ -344,7 +344,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct name<%>
     {
-        static constexpr auto value{ zcombine(L"%.%<"%, L">") };
+        static constexpr auto value{ zcombine(u8"%.%<"%, u8">") };
     };
 )";
 

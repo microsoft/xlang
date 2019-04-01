@@ -29,7 +29,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::TimeSpan>
     {
-        static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };
+        static constexpr auto & value{ u8"Windows.Foundation.TimeSpan" };
     };
 
     template <> struct category<Windows::Foundation::TimeSpan>
@@ -39,7 +39,7 @@ namespace winrt::impl
 
     template <> struct name<Windows::Foundation::DateTime>
     {
-        static constexpr auto & value{ L"Windows.Foundation.DateTime" };
+        static constexpr auto & value{ u8"Windows.Foundation.DateTime" };
     };
 
     template <> struct category<Windows::Foundation::DateTime>
@@ -84,9 +84,8 @@ namespace winrt
 
         static time_point now() noexcept
         {
-            file_time ft;
-            WINRT_GetSystemTimePreciseAsFileTime(&ft);
-            return from_file_time(ft);
+            auto const sys_now = std::chrono::system_clock::now();
+            return time_t_epoch + std::chrono::duration_cast<duration>(sys_now.time_since_epoch());
         }
 
         static time_t to_time_t(time_point const& time) noexcept
