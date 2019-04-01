@@ -453,7 +453,7 @@ namespace winrt::impl
             return shim().GetIids(count, array);
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept override
+        int32_t WINRT_CALL GetRuntimeClassName(xlang_string* name) noexcept override
         {
             return shim().abi_GetRuntimeClassName(name);
         }
@@ -511,7 +511,7 @@ namespace winrt::impl
             return this->shim().NonDelegatingGetIids(count, array);
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept final
+        int32_t WINRT_CALL GetRuntimeClassName(xlang_string* name) noexcept final
         {
             return this->shim().NonDelegatingGetRuntimeClassName(name);
         }
@@ -585,21 +585,6 @@ namespace winrt::impl
                 *object = static_cast<IWeakReference*>(this);
                 AddRef();
                 return error_ok;
-            }
-
-            if constexpr (Agile)
-            {
-                if (is_guid_of<IAgileObject>(id))
-                {
-                    *object = static_cast<unknown_abi*>(this);
-                    AddRef();
-                    return error_ok;
-                }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(this, object);
-                }
             }
 
             *object = nullptr;
@@ -831,7 +816,7 @@ namespace winrt::impl
             return NonDelegatingGetIids(count, array);
         }
 
-        int32_t WINRT_CALL abi_GetRuntimeClassName(void** name) noexcept
+        int32_t WINRT_CALL abi_GetRuntimeClassName(xlang_string* name) noexcept
         {
             if (this->outer())
             {
@@ -931,7 +916,7 @@ namespace winrt::impl
                 {
                     const com_array<guid>& inner_iids = get_interfaces(root_implements_type::m_inner);
                     *count = local_count + inner_iids.size();
-                    *array = static_cast<guid*>(WINRT_CoTaskMemAlloc(sizeof(guid)*(*count)));
+                    *array = static_cast<guid*>(xlang_mem_alloc(sizeof(guid)*(*count)));
                     if (*array == nullptr)
                     {
                         return error_bad_alloc;
@@ -949,7 +934,7 @@ namespace winrt::impl
                 if (local_count > 0)
                 {
                     *count = local_count;
-                    *array = static_cast<guid*>(WINRT_CoTaskMemAlloc(sizeof(guid)*(*count)));
+                    *array = static_cast<guid*>(xlang_mem_alloc(sizeof(guid)*(*count)));
                     if (*array == nullptr)
                     {
                         return error_bad_alloc;
@@ -965,7 +950,7 @@ namespace winrt::impl
             return error_ok;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept try
+        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(xlang_string* name) noexcept try
         {
             *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
             return error_ok;
@@ -1061,11 +1046,6 @@ namespace winrt::impl
                     *object = get_unknown();
                     AddRef();
                     return error_ok;
-                }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(get_unknown(), object);
                 }
             }
 
@@ -1185,7 +1165,7 @@ namespace winrt::impl
         }
         else
         {
-            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
+            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(u8"Windows.ApplicationModel.Core.CoreApplication");
             Windows::Foundation::IUnknown collection;
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
             auto const map = collection.as<IStaticLifetimeCollection>();
@@ -1267,7 +1247,7 @@ namespace winrt
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_WIN32)
         implements() noexcept
         {
             WINRT_ASSERT(!is_stack_object());
@@ -1336,7 +1316,7 @@ namespace winrt
 
     private:
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_WIN32)
         bool is_stack_object() const noexcept
         {
             uintptr_t low_limit{};

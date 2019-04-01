@@ -2,6 +2,7 @@
 namespace winrt
 {
     void check_hresult(hresult const result);
+    void check_hresult(xlang_error_info* result);
     hresult to_hresult() noexcept;
 
     template <typename D, typename I>

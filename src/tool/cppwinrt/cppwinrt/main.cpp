@@ -192,16 +192,8 @@ Where <spec> is one or more of:
         }
 
         settings.projection_filter = { include, {} };
-
-        if (settings.include.empty() && settings.exclude.empty())
-        {
-            settings.component_filter = { include, {} };
-        }
-        else
-        {
-            settings.component_filter = { settings.include, settings.exclude };
-        }
-
+        
+        settings.component_filter = { settings.include.empty() ? include : settings.include, settings.exclude };
     }
 
     static int run(int const argc, char** argv)

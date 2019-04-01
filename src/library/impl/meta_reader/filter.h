@@ -20,7 +20,8 @@ namespace xlang::meta::reader
 
             std::sort(m_rules.begin(), m_rules.end(), [](auto const& lhs, auto const& rhs)
             {
-                return lhs.first.size() > rhs.first.size();
+                auto size_compare = int(lhs.first.size()) - int(rhs.first.size());
+                return (size_compare > 0) || ((size_compare == 0) && !lhs.second);
             });
         }
 
