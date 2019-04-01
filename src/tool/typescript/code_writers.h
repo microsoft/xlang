@@ -82,10 +82,13 @@ namespace xlang
 
         for (auto&& method : type.MethodList())
         {
-            w.write(format,
-                method.Name(),
-                bind<write_parameters>(method),
-                method.Signature().ReturnType());
+            if (!is_put_overload(method) && !is_get_overload(method))
+            {
+                w.write(format,
+                    method.Name(),
+                    bind<write_parameters>(method),
+                    method.Signature().ReturnType());
+            }
         }
     }
 

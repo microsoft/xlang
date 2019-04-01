@@ -142,6 +142,11 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "remove_");
     }
 
+    static bool is_get_overload(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "get_");
+    }
+
     static bool is_add_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "add_");

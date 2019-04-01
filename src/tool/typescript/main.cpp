@@ -228,6 +228,11 @@ Where <spec> is one or more of:
                     w.write(" in:    %\n", file);
                 }
 
+                for (auto&& file : settings.include)
+                {
+                    w.write(" include: %\n", file);
+                }
+
                 for (auto&& file : settings.reference)
                 {
                     w.write(" ref:   %\n", file);
