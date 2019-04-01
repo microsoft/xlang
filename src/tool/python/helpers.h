@@ -143,6 +143,8 @@ namespace xlang
 
         void handle(GenericTypeIndex /*var*/) { throw_invalid("handle(GenericTypeIndex) not implemented"); }
 
+        void handle(GenericMethodIndex) { throw_invalid("Generic methods not supported"); }
+
         void handle(TypeSig const& signature)
         {
             call(signature.Type(), [this](auto&& type) { static_cast<T*>(this)->handle(type); });

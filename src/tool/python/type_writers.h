@@ -385,6 +385,7 @@ namespace xlang
             call(type.Type(),
                 [&](ElementType) {},
                 [&](GenericTypeIndex) {},
+                [&](GenericMethodIndex) { throw_invalid("Generic methods not supported"); },
                 [&](auto&& t) { register_type_namespace(t); });
         }
 
@@ -499,6 +500,11 @@ namespace xlang
         void write(GenericTypeIndex var)
         {
             write(generic_param_stack.back()[var.index]);
+        }
+
+        void write(GenericMethodIndex)
+        {
+            throw_invalid("Generic methods not supported");
         }
 
         void write(TypeSig const& signature)

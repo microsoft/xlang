@@ -248,6 +248,10 @@ struct writer : writer_base<writer>
                 {
                     write("%", begin(generic_param_stack.back())[var.index].Name());
                 },
+                [&](GenericMethodIndex)
+                {
+                    throw_invalid("Generic methods not supported.");
+                },
                 [&](auto&& type)
                 {
                     write(type);
