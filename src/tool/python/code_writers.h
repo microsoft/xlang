@@ -11,9 +11,11 @@ namespace pywinrt
         {
             if (isupper(name[i]) && i > 0)
             {
-                //TODO: special case IPAddress so that it doesn't get emitted as i_p_address
-                auto sub = name.substr(i - 1, 4);
-                if (sub != "UInt" && sub[0] != '_')
+                static const std::set<std::string_view> casing_exceptions = { "UInt", "IPAddress" };
+
+                auto sub = name.substr(i - 1);
+                if (sub[0] != '_' && std::none_of(casing_exceptions.begin(), casing_exceptions.end(), 
+                    [&sub](std::string_view v) { return sub.substr(0, v.length()) == v; }))
                 {
                     w.write('_');
                 }
