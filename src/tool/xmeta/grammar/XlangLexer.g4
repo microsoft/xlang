@@ -62,6 +62,16 @@ SET: 'set';
 
 PLACEHOLDER_REMOVELATER: 'placeholder';
 
+// Attributes Keyword
+ASSEMBLY: 'assembly';
+MODULE: 'module';
+FIELD: 'field';
+METHOD: 'method';
+PARAM: 'param';
+PROPERTY: 'property';
+RETURN: 'return';
+TYPE: 'type';
+
 // Xlang Type System
 INT16: 'Int16';
 INT32: 'Int32';

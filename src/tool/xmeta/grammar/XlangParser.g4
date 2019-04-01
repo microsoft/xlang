@@ -104,6 +104,59 @@ variable_initializer
     : expression
     | array_type
     ;
+    
+/* Attributes */
+attributes
+    : attribute_section*
+    ;
+
+attribute_section
+    : OPEN_BRACKET (attribute_target COLON)? attribute_list CLOSE_BRACKET
+    ;
+ 
+// Attributes targets are subject to change   
+attribute_target
+    : ASSEMBLY
+    | MODULE
+    | FIELD
+    | EVENT
+    | METHOD
+    | PARAM
+    | PROPERTY
+    | RETURN
+    | TYPE
+    | PUBLIC
+    ;
+
+attribute_list
+    : attribute (COMMA attribute)*
+    ;
+
+attribute
+    : type_name attribute_arguments?
+    ;
+
+attribute_arguments
+    : OPEN_PARENS positional_argument_list? CLOSE_PARENS
+    | OPEN_PARENS positional_argument_list COMMA named_argument_list CLOSE_PARENS
+    | OPEN_PARENS named_argument_list? CLOSE_PARENS
+    ;
+
+positional_argument_list
+    : positional_argument (COMMA positional_argument)* 
+    ;
+
+positional_argument
+    : IDENTIFIER? expression
+    ;
+
+named_argument_list
+    : named_argument (COMMA named_argument)* 
+    ;
+
+named_argument
+    : IDENTIFIER EQUAL expression
+    ;
 
 /* Namespaces */
 namespace_declaration
@@ -147,7 +200,7 @@ qualified_alias_member
 
 //* Classes *//
 class_declaration
-    : class_modifier* CLASS IDENTIFIER type_parameter_list?
+    : attributes? class_modifier* CLASS IDENTIFIER type_parameter_list?
         class_base? class_body SEMICOLON?
     ;
 
@@ -157,7 +210,7 @@ class_modifier
     ;
 
 type_parameter_list
-    : LESS_THAN IDENTIFIER (COMMA IDENTIFIER)* GREATER_THAN
+    : LESS_THAN attributes? IDENTIFIER (COMMA attributes? IDENTIFIER)* GREATER_THAN
     ;
 
 class_base
@@ -182,7 +235,7 @@ class_member_declaration
     ;
 
 method_declaration
-    : return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : attributes? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 formal_parameter_list
@@ -190,7 +243,7 @@ formal_parameter_list
     ;
 
 fixed_parameter
-    : parameter_modifier? type IDENTIFIER
+    : attributes? parameter_modifier? type IDENTIFIER
     ;
 
 parameter_modifier
@@ -204,18 +257,18 @@ return_type
     ;
 
 property_declaration
-    : type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : attributes? type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
     ;
 
 property_accessors
-    : GET SEMICOLON
-    | SET SEMICOLON
-    | GET SEMICOLON SET SEMICOLON
+    : attributes? GET SEMICOLON
+    | attributes? SET SEMICOLON
+    | attributes? GET SEMICOLON SET SEMICOLON
     ;
 
 event_declaration
-    : event_modifier? EVENT type IDENTIFIER SEMICOLON
-    | event_modifier? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    : attributes? event_modifier? EVENT type IDENTIFIER SEMICOLON
+    | attributes? event_modifier? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
 
 event_modifier
@@ -224,16 +277,16 @@ event_modifier
     ;
 
 event_accessors
-    : ADD SEMICOLON REMOVE SEMICOLON
+    : attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON
     ;
 
 class_constructor_declaration
-    : IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : attributes? IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 /* Structs */
 struct_declaration
-    : struct_modifier* STRUCT IDENTIFIER type_parameter_list?
+    : attributes? struct_modifier* STRUCT IDENTIFIER type_parameter_list?
         struct_body SEMICOLON
     ;
 
@@ -252,7 +305,7 @@ struct_member_declaration
 
 /* Interfaces */
 interface_declaration
-    : interface_modifier* PARTIAL? INTERFACE
+    : attributes? interface_modifier* PARTIAL? INTERFACE
         IDENTIFIER variant_type_parameter_list? interface_base? interface_body SEMICOLON?
     ;
 
@@ -262,7 +315,7 @@ interface_modifier
     ;
 
 variant_type_parameter_list
-    : LESS_THAN type_parameter (COMMA type_parameter)* GREATER_THAN
+    : LESS_THAN attributes? type_parameter (COMMA attributes? type_parameter)* GREATER_THAN
     ;
 
 interface_base
@@ -281,7 +334,7 @@ interface_member_declaration
 
 /* Enums */
 enum_declaration
-    : enum_modifier* ENUM IDENTIFIER enum_base? enum_body SEMICOLON?
+    : attributes? enum_modifier* ENUM IDENTIFIER enum_base? enum_body SEMICOLON?
     ;
 
 enum_base
@@ -298,13 +351,13 @@ enum_modifier
     ;
 
 enum_member_declaration
-    : IDENTIFIER
-    | IDENTIFIER EQUAL constant_expression
+    : attributes? IDENTIFIER
+    | attributes? IDENTIFIER EQUAL constant_expression
     ;
 
 /* Delegates */
 delegate_declaration
-    : delegate_modifier* DELEGATE return_type
+    : attributes? delegate_modifier* DELEGATE return_type
         IDENTIFIER variant_type_parameter_list?
         OPEN_PARENS formal_parameter_list CLOSE_PARENS type_parameter_constraint_clauses? SEMICOLON
     ;
