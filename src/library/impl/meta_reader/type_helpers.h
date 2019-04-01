@@ -1,10 +1,28 @@
 
 namespace xlang::meta::reader
 {
+    inline std::pair<std::string_view, std::string_view> get_base_class_namespace_and_name(TypeDef type)
+    {
+        auto const extends = type.Extends();
+        if (extends.type() == TypeDefOrRef::TypeDef)
+        {
+            auto const def = extends.TypeDef();
+            return { def.TypeNamespace(), def.TypeName() };
+        }
+        else if (extends.type() == TypeDefOrRef::TypeRef)
+        {
+            auto const ref = extends.TypeRef();
+            return { ref.TypeNamespace(), ref.TypeName() };
+        }
+        else
+        {
+            return {};
+        }
+    }
+
     inline auto extends_type(TypeDef type, std::string_view typeNamespace, std::string_view typeName)
     {
-        auto const extends = type.Extends().TypeRef();
-        return (extends.TypeNamespace() == typeNamespace && extends.TypeName() == typeName);
+        return get_base_class_namespace_and_name(type) == std::pair(typeNamespace, typeName);
     }
 
     enum class category
@@ -23,9 +41,7 @@ namespace xlang::meta::reader
             return category::interface_type;
         }
 
-        auto const extends = type.Extends().TypeRef();
-        auto extends_name = extends.TypeName();
-        auto extends_namespace = extends.TypeNamespace();
+        auto const& [extends_namespace, extends_name] = get_base_class_namespace_and_name(type);
 
         if (extends_name == "Enum"sv && extends_namespace == "System"sv)
         {
