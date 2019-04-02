@@ -1732,7 +1732,7 @@ namespace xlang
 
         method_signature signature{ method };
         w.async_types = is_async(method, signature);
-        std::string upcall = "this->shim().%";
+        std::string upcall = "this->shim().";
         upcall += get_name(method);
 
         w.write(format,
