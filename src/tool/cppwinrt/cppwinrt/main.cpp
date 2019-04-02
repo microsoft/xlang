@@ -38,6 +38,7 @@ namespace xlang
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
         { "fastabi", 0, 0 }, // Enable support for the Fast ABI
         { "tests", 0, 0 }, // Generate internal test files
+        { "ignore_velocity", 0, 0 }, // Ignore feature staging metadata and always include implementations
     };
 
     static void print_usage(writer& w)
@@ -140,6 +141,7 @@ Where <spec> is one or more of:
             settings.component_prefix = args.exists("prefix");
             settings.component_lib = args.value("lib", "winrt");
             settings.component_opt = args.exists("opt");
+            settings.component_ignore_velocity = args.exists("ignore_velocity");
 
             if (settings.component_pch == ".")
             {
@@ -197,16 +199,8 @@ Where <spec> is one or more of:
         }
 
         settings.projection_filter = { include, {} };
-
-        if (settings.include.empty() && settings.exclude.empty())
-        {
-            settings.component_filter = { include, {} };
-        }
-        else
-        {
-            settings.component_filter = { settings.include, settings.exclude };
-        }
-
+        
+        settings.component_filter = { settings.include.empty() ? include : settings.include, settings.exclude };
     }
 
     static void build_fastabi_cache(cache const& c)

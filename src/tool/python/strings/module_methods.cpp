@@ -1,15 +1,46 @@
+#include "pybase.h"
 #include <winrt/base.h>
+
+PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type)
+{
+    if (base_type != nullptr)
+    {
+        return PyType_FromSpecWithBases(type_spec, base_type);
+    }
+    else
+    {
+        return PyType_FromSpec(type_spec);
+    }
+}
+
+py::pyobj_handle py::register_python_type(PyObject* module, const char* type_name, PyType_Spec* type_spec, PyObject* base_type)
+{
+    py::pyobj_handle type_object{ create_python_type(type_spec, base_type) };
+    if (!type_object)
+    {
+        throw winrt::hresult_error();
+    }
+    if (PyModule_AddObject(module, type_name, type_object.get()) != 0)
+    {
+        throw winrt::hresult_error();
+    }
+    return std::move(type_object);
+}
 
 WINRT_EXPORT namespace std 
 {
     template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
 }
 
-#include "pybase.h"
-
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
+
+static PyObject* winrt_base_new(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
+{
+    PyErr_SetString(PyExc_TypeError, "winrt_base is not directly constructable");
+    return nullptr;
+}
 
 static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>* self)
 {
@@ -18,20 +49,21 @@ static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IIn
     self->obj = nullptr;
 }
 
-static PyType_Slot winrt_base_Type_slots[] =
+static PyType_Slot winrt_base_type_slots[] =
 {
+    { Py_tp_new, winrt_base_new },
     { Py_tp_dealloc, winrt_base_dealloc },
     { Py_tp_doc, winrt_base_doc},
     { 0, nullptr },
 };
 
-static PyType_Spec winrt_base_Type_spec =
+static PyType_Spec winrt_base_type_spec =
 {
     "_%._winrt_base",
     sizeof(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>),
     0,
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    winrt_base_Type_slots
+    winrt_base_type_slots
 };
 
 std::unordered_map<std::size_t, PyObject*> instance_map{};
@@ -88,7 +120,7 @@ static PyMethodDef module_methods[]{
 
 static int module_exec(PyObject* module)
 {
-    winrt::handle_type<py::pyobj_ptr_traits> type_object { PyType_FromSpec(&winrt_base_Type_spec) };
+    winrt::handle_type<py::pyobj_ptr_traits> type_object { PyType_FromSpec(&winrt_base_type_spec) };
     if (!type_object)
     {
         return -1;

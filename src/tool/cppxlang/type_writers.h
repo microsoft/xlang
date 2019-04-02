@@ -480,7 +480,7 @@ namespace xlang
 
         void write_root_include(std::string_view const& include)
         {
-            auto format = R"(#include %winrt/%.h%
+            auto format = R"(#include %xlang/%.h%
 )";
 
             write(format,
@@ -503,7 +503,7 @@ namespace xlang
 
         void save_header(char impl = 0)
         {
-            auto filename{ settings.output_folder + "winrt/" };
+            auto filename{ settings.output_folder + "xlang/" };
 
             if (impl)
             {

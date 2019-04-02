@@ -22,6 +22,7 @@ namespace xlang
         bool component_overwrite{};
         std::string component_lib;
         bool component_opt{};
+        bool component_ignore_velocity{};
 
         std::set<std::string> include;
         std::set<std::string> exclude;

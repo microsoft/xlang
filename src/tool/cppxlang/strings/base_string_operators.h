@@ -3,27 +3,27 @@ namespace winrt
 {
     inline bool operator==(hstring const& left, hstring const& right) noexcept
     {
-        return std::wstring_view(left) == std::wstring_view(right);
+        return std::basic_string_view<xlang_char8>(left) == std::basic_string_view<xlang_char8>(right);
     }
 
-    inline bool operator==(hstring const& left, std::wstring const& right) noexcept
+    inline bool operator==(hstring const& left, std::basic_string<xlang_char8> const& right) noexcept
     {
-        return std::wstring_view(left) == right;
+        return std::basic_string_view<xlang_char8>(left) == right;
     }
 
-    inline bool operator==(std::wstring const& left, hstring const& right) noexcept
+    inline bool operator==(std::basic_string<xlang_char8> const& left, hstring const& right) noexcept
     {
-        return left == std::wstring_view(right);
+        return left == std::basic_string_view<xlang_char8>(right);
     }
 
-    inline bool operator==(hstring const& left, wchar_t const* right) noexcept
+    inline bool operator==(hstring const& left, xlang_char8 const* right) noexcept
     {
-        return std::wstring_view(left) == right;
+        return std::basic_string_view<xlang_char8>(left) == right;
     }
 
-    inline bool operator==(wchar_t const* left, hstring const& right) noexcept
+    inline bool operator==(xlang_char8 const* left, hstring const& right) noexcept
     {
-        return left == std::wstring_view(right);
+        return left == std::basic_string_view<xlang_char8>(right);
     }
 
     bool operator==(hstring const& left, std::nullptr_t) = delete;
@@ -32,27 +32,27 @@ namespace winrt
 
     inline bool operator<(hstring const& left, hstring const& right) noexcept
     {
-        return std::wstring_view(left) < std::wstring_view(right);
+        return std::basic_string_view<xlang_char8>(left) < std::basic_string_view<xlang_char8>(right);
     }
 
-    inline bool operator<(std::wstring const& left, hstring const& right) noexcept
+    inline bool operator<(std::basic_string<xlang_char8> const& left, hstring const& right) noexcept
     {
-        return left < std::wstring_view(right);
+        return left < std::basic_string_view<xlang_char8>(right);
     }
 
-    inline bool operator<(hstring const& left, std::wstring const& right) noexcept
+    inline bool operator<(hstring const& left, std::basic_string<xlang_char8> const& right) noexcept
     {
-        return std::wstring_view(left) < right;
+        return std::basic_string_view<xlang_char8>(left) < right;
     }
 
-    inline bool operator<(hstring const& left, wchar_t const* right) noexcept
+    inline bool operator<(hstring const& left, xlang_char8 const* right) noexcept
     {
-        return std::wstring_view(left) < right;
+        return std::basic_string_view<xlang_char8>(left) < right;
     }
 
-    inline bool operator<(wchar_t const* left, hstring const& right) noexcept
+    inline bool operator<(xlang_char8 const* left, hstring const& right) noexcept
     {
-        return left < std::wstring_view(right);
+        return left < std::basic_string_view<xlang_char8>(right);
     }
 
     bool operator<(hstring const& left, std::nullptr_t) = delete;
@@ -63,25 +63,25 @@ namespace winrt
     inline bool operator<=(hstring const& left, hstring const& right) noexcept { return !(right < left); }
     inline bool operator>=(hstring const& left, hstring const& right) noexcept { return !(left < right); }
 
-    inline bool operator!=(hstring const& left, std::wstring const& right) noexcept { return !(left == right); }
-    inline bool operator>(hstring const& left, std::wstring const& right) noexcept { return right < left; }
-    inline bool operator<=(hstring const& left, std::wstring const& right) noexcept { return !(right < left); }
-    inline bool operator>=(hstring const& left, std::wstring const& right) noexcept { return !(left < right); }
+    inline bool operator!=(hstring const& left, std::basic_string<xlang_char8> const& right) noexcept { return !(left == right); }
+    inline bool operator>(hstring const& left, std::basic_string<xlang_char8> const& right) noexcept { return right < left; }
+    inline bool operator<=(hstring const& left, std::basic_string<xlang_char8> const& right) noexcept { return !(right < left); }
+    inline bool operator>=(hstring const& left, std::basic_string<xlang_char8> const& right) noexcept { return !(left < right); }
 
-    inline bool operator!=(std::wstring const& left, hstring const& right) noexcept { return !(left == right); }
-    inline bool operator>(std::wstring const& left, hstring const& right) noexcept { return right < left; }
-    inline bool operator<=(std::wstring const& left, hstring const& right) noexcept { return !(right < left); }
-    inline bool operator>=(std::wstring const& left, hstring const& right) noexcept { return !(left < right); }
+    inline bool operator!=(std::basic_string<xlang_char8> const& left, hstring const& right) noexcept { return !(left == right); }
+    inline bool operator>(std::basic_string<xlang_char8> const& left, hstring const& right) noexcept { return right < left; }
+    inline bool operator<=(std::basic_string<xlang_char8> const& left, hstring const& right) noexcept { return !(right < left); }
+    inline bool operator>=(std::basic_string<xlang_char8> const& left, hstring const& right) noexcept { return !(left < right); }
 
-    inline bool operator!=(hstring const& left, wchar_t const* right) noexcept { return !(left == right); }
-    inline bool operator>(hstring const& left, wchar_t const* right) noexcept { return right < left; }
-    inline bool operator<=(hstring const& left, wchar_t const* right) noexcept { return !(right < left); }
-    inline bool operator>=(hstring const& left, wchar_t const* right) noexcept { return !(left < right); }
+    inline bool operator!=(hstring const& left, xlang_char8 const* right) noexcept { return !(left == right); }
+    inline bool operator>(hstring const& left, xlang_char8 const* right) noexcept { return right < left; }
+    inline bool operator<=(hstring const& left, xlang_char8 const* right) noexcept { return !(right < left); }
+    inline bool operator>=(hstring const& left, xlang_char8 const* right) noexcept { return !(left < right); }
 
-    inline bool operator!=(wchar_t const* left, hstring const& right) noexcept { return !(left == right); }
-    inline bool operator>(wchar_t const* left, hstring const& right) noexcept { return right < left; }
-    inline bool operator<=(wchar_t const* left, hstring const& right) noexcept { return !(right < left); }
-    inline bool operator>=(wchar_t const* left, hstring const& right) noexcept { return !(left < right); }
+    inline bool operator!=(xlang_char8 const* left, hstring const& right) noexcept { return !(left == right); }
+    inline bool operator>(xlang_char8 const* left, hstring const& right) noexcept { return right < left; }
+    inline bool operator<=(xlang_char8 const* left, hstring const& right) noexcept { return !(right < left); }
+    inline bool operator>=(xlang_char8 const* left, hstring const& right) noexcept { return !(left < right); }
 
     bool operator!=(hstring const& left, std::nullptr_t right) = delete;
     bool operator>(hstring const& left, std::nullptr_t right) = delete;
@@ -96,7 +96,7 @@ namespace winrt
 
 namespace winrt::impl
 {
-    inline hstring concat_hstring(std::wstring_view const& left, std::wstring_view const& right)
+    inline hstring concat_hstring(std::basic_string_view<xlang_char8> const& left, std::basic_string_view<xlang_char8> const& right)
     {
         hstring_builder text(static_cast<uint32_t>(left.size() + right.size()));
         auto cursor = std::copy_n(left.data(), left.size(), text.data());
@@ -112,46 +112,46 @@ namespace winrt
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(hstring const& left, std::wstring const& right)
+    inline hstring operator+(hstring const& left, std::basic_string<xlang_char8> const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(std::wstring const& left, hstring const& right)
+    inline hstring operator+(std::basic_string<xlang_char8> const& left, hstring const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(hstring const& left, wchar_t const* right)
+    inline hstring operator+(hstring const& left, xlang_char8 const* right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(wchar_t const* left, hstring const& right)
+    inline hstring operator+(xlang_char8 const* left, hstring const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(hstring const& left, wchar_t right)
+    inline hstring operator+(hstring const& left, xlang_char8 right)
     {
-        return impl::concat_hstring(left, std::wstring_view(&right, 1));
+        return impl::concat_hstring(left, std::basic_string_view<xlang_char8>(&right, 1));
     }
 
-    inline hstring operator+(wchar_t left, hstring const& right)
+    inline hstring operator+(xlang_char8 left, hstring const& right)
     {
-        return impl::concat_hstring(std::wstring_view(&left, 1), right);
+        return impl::concat_hstring(std::basic_string_view<xlang_char8>(&left, 1), right);
     }
 
     hstring operator+(hstring const& left, std::nullptr_t) = delete;
 
     hstring operator+(std::nullptr_t, hstring const& right) = delete;
 
-    inline hstring operator+(hstring const& left, std::wstring_view const& right)
+    inline hstring operator+(hstring const& left, std::basic_string_view<xlang_char8> const& right)
     {
         return impl::concat_hstring(left, right);
     }
 
-    inline hstring operator+(std::wstring_view const& left, hstring const& right)
+    inline hstring operator+(std::basic_string_view<xlang_char8> const& left, hstring const& right)
     {
         return impl::concat_hstring(left, right);
     }

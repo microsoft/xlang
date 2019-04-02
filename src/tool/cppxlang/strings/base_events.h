@@ -361,7 +361,7 @@ namespace winrt
             delegate_array temp_targets;
 
             {
-                slim_lock_guard const change_guard(m_change);
+                std::lock_guard const change_guard(m_change);
                 delegate_array new_targets = impl::make_event_array<delegate_type>((!m_targets) ? 1 : m_targets->size() + 1);
 
                 if (m_targets)
@@ -369,10 +369,10 @@ namespace winrt
                     std::copy_n(m_targets->begin(), m_targets->size(), new_targets->begin());
                 }
 
-                new_targets->back() = impl::make_agile_delegate(delegate);
+                new_targets->back() = delegate;
                 token = get_token(new_targets->back());
 
-                slim_lock_guard const swap_guard(m_swap);
+                std::lock_guard const swap_guard(m_swap);
                 temp_targets = std::exchange(m_targets, std::move(new_targets));
             }
 
@@ -385,7 +385,7 @@ namespace winrt
             delegate_array temp_targets;
 
             {
-                slim_lock_guard const change_guard(m_change);
+                std::lock_guard const change_guard(m_change);
 
                 if (!m_targets)
                 {
@@ -430,7 +430,7 @@ namespace winrt
 
                 if (removed)
                 {
-                    slim_lock_guard const swap_guard(m_swap);
+                    std::lock_guard const swap_guard(m_swap);
                     temp_targets = std::exchange(m_targets, std::move(new_targets));
                 }
             }
@@ -442,7 +442,7 @@ namespace winrt
             delegate_array temp_targets;
 
             {
-                slim_lock_guard const swap_guard(m_swap);
+                std::lock_guard const swap_guard(m_swap);
                 temp_targets = m_targets;
             }
 
@@ -484,7 +484,7 @@ namespace winrt
         using delegate_array = com_ptr<impl::event_array<delegate_type>>;
 
         delegate_array m_targets;
-        slim_mutex m_swap;
-        slim_mutex m_change;
+        std::mutex m_swap;
+        std::mutex m_change;
     };
 }

@@ -5,12 +5,15 @@
 #include <cassert>
 #include <chrono>
 #include <clocale>
+#include <cinttypes>
+#include <condition_variable>
 #include <cstddef>
 #include <cwchar>
 #include <iterator>
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <optional>
 #include <shared_mutex>
@@ -22,6 +25,8 @@
 #include <utility>
 #include <unordered_map>
 #include <vector>
+
+#include <pal.h>
 
 #if __has_include(<WindowsNumerics.impl.h>)
 #define WINRT_NUMERICS
