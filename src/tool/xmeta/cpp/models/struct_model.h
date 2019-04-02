@@ -1,27 +1,20 @@
 #pragma once
 
-#include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include "base_model.h"
 #include "property_model.h"
 
-namespace xlang
+namespace xlang::xmeta
 {
-    namespace xmeta
+    struct struct_model : base_model
     {
-        typedef std::pair<xmeta_type, std::string> field_t;
-        class struct_model final : public base_model
-        {
-        public:
-            struct_model(const std::string &id, const size_t &decl_line) : base_model{ id, decl_line } { }
+        struct_model(std::string_view const& id, size_t decl_line) : base_model{ id, decl_line } { }
+        struct_model() = delete;
 
-            // Members
-            std::vector<field_t> fields;
-
-        protected:
-            struct_model() = delete;
-
-        };
-    }
+        // Members
+        std::vector<std::pair<xmeta_type, std::string_view>> fields;
+    };
 }

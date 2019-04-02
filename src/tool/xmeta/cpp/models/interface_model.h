@@ -1,7 +1,6 @@
 #pragma once
 
-#include <string>
-#include <memory>
+#include <string_view>
 #include <vector>
 
 #include "base_model.h"
@@ -9,26 +8,19 @@
 #include "method_model.h"
 #include "property_model.h"
 
-namespace xlang
+namespace xlang::xmeta
 {
-    namespace xmeta
+    struct interface_model : base_model
     {
-        class interface_model final : public base_model
-        {
-        public:
-            interface_model(const std::string &id, const size_t &decl_line) : base_model{ id, decl_line } { }
+        interface_model(std::string_view const& id, size_t decl_line) : base_model{ id, decl_line } { }
+        interface_model() = delete;
 
-            std::vector<std::string> interface_base_list;
-            std::vector<std::string> type_parameter_list;
+        std::vector<std::string_view> interface_bases;
+        std::vector<std::string_view> type_parameters;
 
-            // Members
-            std::vector<std::shared_ptr<event_model>> events;
-            std::vector<std::shared_ptr<method_model>> methods;
-            std::vector<std::shared_ptr<property_model>> properties;
-
-        protected:
-            interface_model() = delete;
-
-        };
-    }
+        // Members
+        std::vector<property_model> properties;
+        std::vector<method_model> methods;
+        std::vector<event_model> events;
+    };
 }
