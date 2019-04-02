@@ -38,7 +38,7 @@ namespace winrt::impl
         struct WINRT_NOVTABLE type : unknown_abi
         {
             virtual int32_t WINRT_CALL GetIids(uint32_t* count, guid** ids) noexcept = 0;
-            virtual int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept = 0;
+            virtual int32_t WINRT_CALL GetRuntimeClassName(xlang_string* name) noexcept = 0;
             virtual int32_t WINRT_CALL GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
         };
     };
@@ -48,8 +48,8 @@ namespace winrt::impl
     };
     template <> struct name<Windows::Foundation::IInspectable>
     {
-        static constexpr auto & value{ L"Object" };
-        static constexpr auto & data{ "cinterface(IInspectable)" };
+        static constexpr auto & value{ u8"Object" };
+        static constexpr auto & data{ u8"cinterface(IInspectable)" };
     };
     template <> struct category<Windows::Foundation::IInspectable>
     {
@@ -68,20 +68,6 @@ namespace winrt::impl
     struct WINRT_NOVTABLE IAgileReference : unknown_abi
     {
         virtual int32_t WINRT_CALL Resolve(guid const& id, void** object) noexcept = 0;
-    };
-
-    struct WINRT_NOVTABLE IMarshal : unknown_abi
-    {
-        virtual int32_t WINRT_CALL GetUnmarshalClass(guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags, guid* pCid) noexcept = 0;
-        virtual int32_t WINRT_CALL GetMarshalSizeMax(guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags, uint32_t* pSize) noexcept = 0;
-        virtual int32_t WINRT_CALL MarshalInterface(void* pStm, guid const& riid, void* pv, uint32_t dwDestContext, void* pvDestContext, uint32_t mshlflags) noexcept = 0;
-        virtual int32_t WINRT_CALL UnmarshalInterface(void* pStm, guid const& riid, void** ppv) noexcept = 0;
-        virtual int32_t WINRT_CALL ReleaseMarshalData(void* pStm) noexcept = 0;
-        virtual int32_t WINRT_CALL DisconnectObject(uint32_t dwReserved) noexcept = 0;
-    };
-    template <> struct guid_storage<IMarshal>
-    {
-        static constexpr guid value{ 0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
     };
 
     struct WINRT_NOVTABLE IStaticLifetime : inspectable_abi

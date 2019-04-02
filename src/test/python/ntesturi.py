@@ -1,9 +1,6 @@
-import sys
-sys.path.append("./generated")
+import loader_native, unittest
 
-import unittest
-
-import winrt.windows.foundation as wf
+wf = loader_native.import_ns("Windows.Foundation")
 
 class TestUri(unittest.TestCase):
 
@@ -60,12 +57,6 @@ class TestUri(unittest.TestCase):
         e1 = qp.get_at(1)
         self.assertEqual(e1.name, "platform")
         self.assertEqual(e1.value, "windows")
-
-        # t = qp.IndexOf(e0)
-        # self.assertTrue(t[0])
-        # self.assertEqual(t[1], 0)
-
-    
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,10 +1,12 @@
 #pragma once
 
-namespace xlang
+namespace pywinrt
 {
+    using namespace std::literals;
     using namespace std::experimental::filesystem;
-    using namespace text;
-    using namespace meta::reader;
+    using namespace xlang;
+    using namespace xlang::meta::reader;
+    using namespace xlang::text;
 
     template <typename First, typename...Rest>
     auto get_impl_name(First const& first, Rest const&... rest)
@@ -95,7 +97,7 @@ namespace xlang
             return generic_param_guard{ this };
         }
 
-        [[nodiscard]] auto push_generic_params(std::vector<std::string> const& type_arguments)
+        [[nodiscard]] auto push_generic_params(std::vector<type_semantics> const& type_arguments)
         {
             if (type_arguments.size() == 0)
             {
@@ -104,9 +106,10 @@ namespace xlang
 
             std::vector<std::string> names;
 
-            for (auto&& type_argument : type_arguments)
+            for (auto&& arg : type_arguments)
             {
-                names.push_back(type_argument);
+                // TODO real code here
+                names.push_back(write_temp("%", arg));
             }
 
             generic_param_stack.push_back(std::move(names));
@@ -375,7 +378,7 @@ namespace xlang
                 break;
 
             case TypeDefOrRef::TypeSpec:
-                write(type.TypeSpec().Signature().GenericTypeInst());
+                register_type_namespace(type.TypeSpec().Signature().GenericTypeInst());
                 break;
             }
         }
@@ -515,5 +518,164 @@ namespace xlang
                 write(type);
             });
         }
+
+        void write(fundamental_type type)
+        {
+            switch (type)
+            {
+            case fundamental_type::Boolean:
+                write(ElementType::Boolean);
+                break;
+            case fundamental_type::Char:
+                write(ElementType::Char);
+                break;
+            case fundamental_type::Int8:
+                write(ElementType::I1);
+                break;
+            case fundamental_type::UInt8:
+                write(ElementType::U1);
+                break;
+            case fundamental_type::Int16:
+                write(ElementType::I2);
+                break;
+            case fundamental_type::UInt16:
+                write(ElementType::U2);
+                break;
+            case fundamental_type::Int32:
+                write(ElementType::I4);
+                break;
+            case fundamental_type::UInt32:
+                write(ElementType::U4);
+                break;
+            case fundamental_type::Int64:
+                write(ElementType::I8);
+                break;
+            case fundamental_type::UInt64:
+                write(ElementType::U8);
+                break;
+            case fundamental_type::Float:
+                write(ElementType::R4);
+                break;
+            case fundamental_type::Double:
+                write(ElementType::R8);
+                break;
+            case fundamental_type::String:
+                write(ElementType::String);
+                break;
+            }
+        }
+
+        void write(object_type const&)
+        {
+            write(ElementType::Object);
+        }
+
+        void write(guid_type const&)
+        {
+            write("winrt::guid");
+        }
+
+        void write(generic_type_instance type)
+        {
+            write("%<%>", type.generic_type, bind_list(", ", type.generic_args));
+        }
+
+        void write(type_semantics semantics)
+        {
+            call(semantics,
+                [&](auto&& type) { write(type); });
+        }
     };
+
+    struct separator
+    {
+        writer& w;
+        std::string_view _separator{ ", " };
+        bool first{ true };
+
+        void operator()()
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                w.write(_separator);
+            }
+        }
+    };
+
+    template <typename F>
+    void enumerate_required_types(writer& w, TypeDef const& type, F func)
+    {
+        std::set<TypeDef> types;
+
+        auto enumerate_types_impl = [&](type_semantics const& semantics, auto const& lambda) -> void
+        {
+            auto type = get_typedef(semantics);
+            auto generic_args = std::visit(
+                impl::overloaded{
+                    [](type_definition) -> std::vector<type_semantics> { return {}; },
+                    [](generic_type_instance type_instance) { return type_instance.generic_args; },
+                    [](auto) -> std::vector<type_semantics> { throw_invalid("type doesn't contain typedef"); }
+                }, semantics);
+
+            auto guard{ w.push_generic_params(generic_args) };
+
+            if (!contains(types, type))
+            {
+                types.insert(type);
+                func(type);
+            }
+
+            if (get_category(type) == category::interface_type)
+            {
+                for (auto&& ii : type.InterfaceImpl())
+                {
+                    lambda(get_type_semantics(ii.Interface()), lambda);
+                }
+            }
+        };
+
+        enumerate_types_impl(type, enumerate_types_impl);
+    }
+
+    template <typename F>
+    void enumerate_methods(writer& w, TypeDef const& type, F func)
+    {
+        enumerate_required_types(w, type, [&](TypeDef const& required_type)
+        {
+            for (auto&& method : required_type.MethodList())
+            {
+                if (is_constructor(method) || method.SpecialName()) continue;
+
+                func(method);
+            }
+        });
+    }
+
+    template <typename F>
+    void enumerate_properties(writer& w, TypeDef const& type, F func)
+    {
+        enumerate_required_types(w, type, [&](TypeDef const& required_type)
+        {
+            for (auto&& prop : required_type.PropertyList())
+            {
+                func(prop);
+            }
+        });
+    }
+
+    template <typename F>
+    void enumerate_events(writer& w, TypeDef const& type, F func)
+    {
+        enumerate_required_types(w, type, [&](TypeDef const& required_type)
+        {
+            for (auto&& evt : required_type.EventList())
+            {
+                func(evt);
+            }
+        });
+    }
 }

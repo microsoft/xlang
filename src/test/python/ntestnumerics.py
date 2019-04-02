@@ -1,9 +1,6 @@
-import sys
-sys.path.append("./generated")
+import loader_native, unittest
 
-import unittest
-
-import winrt.windows.foundation.numerics as wfn
+wfn = loader_native.import_ns("Windows.Foundation.Numerics")
 
 class TestNumerics(unittest.TestCase):
     def test_struct_ctor_pos(self):

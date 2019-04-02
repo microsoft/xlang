@@ -8,16 +8,11 @@ namespace winrt::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-            if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
+            if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 *result = static_cast<abi_t<T>*>(this);
                 AddRef();
                 return error_ok;
-            }
-
-            if (is_guid_of<IMarshal>(id))
-            {
-                return make_marshaler(this, result);
             }
 
             *result = nullptr;
@@ -53,37 +48,6 @@ namespace winrt::impl
         return { static_cast<void*>(static_cast<abi_t<T>*>(new delegate_t<T, H>(std::forward<H>(handler)))), take_ownership_from_abi };
     }
 
-    template <typename T>
-    T make_agile_delegate(T const& delegate) noexcept
-    {
-        if constexpr (!has_category_v<T>)
-        {
-            return delegate;
-        }
-        else
-        {
-            if (delegate.template try_as<IAgileObject>())
-            {
-                return delegate;
-            }
-
-            com_ptr<IAgileReference> ref;
-            WINRT_RoGetAgileReference(0, guid_of<T>(), get_abi(delegate), ref.put_void());
-
-            if (ref)
-            {
-                return[ref = std::move(ref)](auto&&... args)
-                {
-                    T delegate;
-                    ref->Resolve(guid_of<T>(), put_abi(delegate));
-                    return delegate(args...);
-                };
-            }
-
-            return delegate;
-        }
-    }
-
     template <typename... T>
     struct WINRT_NOVTABLE variadic_delegate_abi : unknown_abi
     {
@@ -102,7 +66,7 @@ namespace winrt::impl
 
         int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
-            if (is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
+            if (is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 *result = static_cast<unknown_abi*>(this);
                 AddRef();

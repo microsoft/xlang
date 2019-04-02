@@ -2,6 +2,8 @@
 
 namespace xlang
 {
+    using namespace meta::reader;
+
     inline auto get_start_time()
     {
         return std::chrono::high_resolution_clock::now();
@@ -32,124 +34,167 @@ namespace xlang
         };
     };
 
-    struct separator
+    bool is_exclusive_to(TypeDef const& type)
     {
-        writer& w;
-        std::string_view _separator{ ", " };
-        bool first{ true };
+        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+    }
 
-        void operator()()
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                w.write(_separator);
-            }
-        }
+    bool is_flags_enum(TypeDef const& type)
+    {
+        return get_category(type) == category::enum_type && get_attribute(type, "System", "FlagsAttribute");
+    }
+
+    bool is_ptype(TypeDef const& type)
+    {
+        return distance(type.GenericParam()) > 0;
+    }
+
+    bool is_static_class(TypeDef const& type)
+    {
+        return get_category(type) == category::class_type && type.Flags().Abstract();
+    }
+
+    enum class fundamental_type
+    {
+        Boolean,
+        Char,
+        Int8,
+        UInt8,
+        Int16,
+        UInt16,
+        Int32,
+        UInt32,
+        Int64,
+        UInt64,
+        Float,
+        Double,
+        String,
     };
 
-    bool is_flags_enum(TypeDef const& type);
+    struct generic_type_instance;
+    struct object_type {};
+    struct guid_type {};
+    using type_definition = TypeDef;
+    using generic_type_index = GenericTypeIndex;
 
-    template <typename T>
-    struct signature_handler_base
+    using type_semantics = std::variant<
+        fundamental_type,
+        object_type,
+        guid_type,
+        type_definition,
+        generic_type_instance,
+        generic_type_index>;
+
+    struct generic_type_instance
     {
-        void handle_class(TypeDef const& /*type*/) { throw_invalid("handle_class not implemented"); }
-        void handle_delegate(TypeDef const& /*type*/) { throw_invalid("handle_delegate not implemented"); }
-        void handle_guid(TypeRef const& /*type*/) { throw_invalid("handle_guid not implemented"); }
-        void handle_interface(TypeDef const& /*type*/) { throw_invalid("handle_interface not implemented"); }
-        void handle_struct(TypeDef const& /*type*/) { throw_invalid("handle_struct not implemented"); }
+        type_definition generic_type;
+        std::vector<type_semantics> generic_args{};
+    };
 
-        void handle_enum(TypeDef const& type)
+    type_semantics get_type_semantics(TypeSig const& signature);
+
+    type_semantics get_type_semantics(GenericTypeInstSig const& type)
+    {
+        auto generic_type_helper = [&type]()
         {
-            if (is_flags_enum(type))
-            {
-                static_cast<T*>(this)->handle(ElementType::U4);
-            }
-            else
-            {
-                static_cast<T*>(this)->handle(ElementType::I4);
-            }
-        }
-
-        void handle(TypeRef const& type)
-        {
-            auto ns = type.TypeNamespace();
-            auto name = type.TypeName();
-
-            if (name == "Guid" && ns == "System")
-            {
-                static_cast<T*>(this)->handle_guid(type);
-            }
-            else
-            {
-                static_cast<T*>(this)->handle(find_required(type));
-            }
-        }
-
-        void handle(TypeDef const& type)
-        {
-            switch (get_category(type))
-            {
-            case category::class_type:
-                static_cast<T*>(this)->handle_class(type);
-                break;
-            case category::delegate_type:
-                static_cast<T*>(this)->handle_delegate(type);
-                break;
-            case category::interface_type:
-                static_cast<T*>(this)->handle_interface(type);
-                break;
-            case category::enum_type:
-                static_cast<T*>(this)->handle_enum(type);
-                break;
-            case category::struct_type:
-                static_cast<T*>(this)->handle_struct(type);
-                break;
-            }
-        }
-
-        void handle(coded_index<TypeDefOrRef> const& type)
-        {
-            switch (type.type())
+            switch (type.GenericType().type())
             {
             case TypeDefOrRef::TypeDef:
-                static_cast<T*>(this)->handle(type.TypeDef());
-                break;
-
+                return type.GenericType().TypeDef();
             case TypeDefOrRef::TypeRef:
-                static_cast<T*>(this)->handle(type.TypeRef());
-                break;
-
-            case TypeDefOrRef::TypeSpec:
-                static_cast<T*>(this)->handle(type.TypeSpec().Signature().GenericTypeInst());
-                break;
+                return find_required(type.GenericType().TypeRef());
             }
+
+            throw_invalid("invalid TypeDefOrRef value for GenericTypeInstSig.GenericType");
+        };
+
+        auto gti = generic_type_instance{ generic_type_helper() };
+
+        for (auto&& arg : type.GenericArgs())
+        {
+            gti.generic_args.push_back(get_type_semantics(arg));
         }
 
-        void handle(GenericTypeInstSig const& type)
-        {
-            handle(type.GenericType());
+        return gti;
+    }
 
-            for (auto&& arg : type.GenericArgs())
+    type_semantics get_type_semantics(coded_index<TypeDefOrRef> const& type)
+    {
+        switch (type.type())
+        {
+        case TypeDefOrRef::TypeDef:
+            return type.TypeDef();
+        case TypeDefOrRef::TypeRef:
+        {
+            auto type_ref = type.TypeRef();
+            if (type_ref.TypeName() == "Guid" && type_ref.TypeNamespace() == "System")
             {
-                handle(arg);
+                return guid_type{};
             }
+
+            return find_required(type_ref);
+        }
+        case TypeDefOrRef::TypeSpec:
+            return get_type_semantics(type.TypeSpec().Signature().GenericTypeInst());
         }
 
-        void handle(ElementType /*type*/) { throw_invalid("handle(ElementType) not implemented"); }
+        throw_invalid("TypeDefOrRef not supported");
+    }
 
-        void handle(GenericTypeIndex /*var*/) { throw_invalid("handle(GenericTypeIndex) not implemented"); }
+    namespace impl
+    {
+        template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+        template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    }
 
-        void handle(GenericMethodIndex) { throw_invalid("Generic methods not supported"); }
-
-        void handle(TypeSig const& signature)
+    type_semantics get_type_semantics(TypeSig const& signature)
+    {
+        return std::visit(
+            impl::overloaded{
+            [](ElementType type) -> type_semantics
         {
-            call(signature.Type(), [this](auto&& type) { static_cast<T*>(this)->handle(type); });
-        }
-    };
+            switch (type)
+            {
+            case ElementType::Boolean:
+                return fundamental_type::Boolean;
+            case ElementType::Char:
+                return fundamental_type::Char;
+            case ElementType::I1:
+                return fundamental_type::Int8;
+            case ElementType::U1:
+                return fundamental_type::UInt8;
+            case ElementType::I2:
+                return fundamental_type::Int16;
+            case ElementType::U2:
+                return fundamental_type::UInt16;
+            case ElementType::I4:
+                return fundamental_type::Int32;
+            case ElementType::U4:
+                return fundamental_type::UInt32;
+            case ElementType::I8:
+                return fundamental_type::Int64;
+            case ElementType::U8:
+                return fundamental_type::UInt64;
+            case ElementType::R4:
+                return fundamental_type::Float;
+            case ElementType::R8:
+                return fundamental_type::Double;
+            case ElementType::String:
+                return fundamental_type::String;
+            case ElementType::Object:
+                return object_type{};
+            }
+            throw_invalid("element type not supported");
+        },
+            [](coded_index<TypeDefOrRef> type) -> type_semantics
+        {
+            return get_type_semantics(type);
+        },
+            [](GenericTypeIndex var) -> type_semantics { return generic_type_index{ var.index }; },
+            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); },
+            [](GenericMethodIndex) { throw_invalid("Generic methods not supported"); }
+            }, signature.Type());
+    }
 
     struct method_signature
     {
@@ -197,7 +242,7 @@ namespace xlang
             }
             else
             {
-                name = "winrt_impl_return_value";
+                name = "_return_value";
             }
 
             return name;
@@ -215,199 +260,39 @@ namespace xlang
         Param m_return;
     };
 
-    struct interface_info
+    TypeDef get_typedef(type_semantics const& semantics)
     {
-        TypeDef type;
-        std::vector<std::string> type_arguments;
+        return std::visit(
+            impl::overloaded{
+                [](type_definition type) { return type; },
+                [](generic_type_instance type_instance) { return type_instance.generic_type; },
+                [](auto) -> TypeDef { throw_invalid("type doesn't contain typedef"); }
+            }, semantics);
     };
 
-    void push_interface_info(std::vector<interface_info>& interfaces, interface_info&& info)
+    TypeDef get_typedef(coded_index<TypeDefOrRef> const& type)
     {
-        auto iter = std::find_if(interfaces.begin(), interfaces.end(), [&info](auto i)
-        {
-            return i.type == info.type;
-        });
-
-        if (iter == interfaces.end())
-        {
-            interfaces.push_back(std::move(info));
-        }
-    }
-
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index);
-
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, TypeDef const& type)
-    {
-        interface_info info;
-        info.type = type;
-        for (auto&& gp : type.GenericParam())
-        {
-            info.type_arguments.push_back(std::string{ gp.Name() });
-        }
-
-        push_interface_info(interfaces, std::move(info));
-
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-        for (auto&& ii : type.InterfaceImpl())
-        {
-            collect_required_interfaces(w, interfaces, ii.Interface());
-        }
-    }
-
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& interfaces, GenericTypeInstSig const& sig)
-    {
-        TypeDef type{};
-        switch (sig.GenericType().type())
-        {
-        case TypeDefOrRef::TypeDef:
-            type = sig.GenericType().TypeDef();
-            break;
-        case TypeDefOrRef::TypeRef:
-            type = find_required(sig.GenericType().TypeRef());
-            break;
-        case TypeDefOrRef::TypeSpec:
-            throw_invalid("collect_required_interfaces");
-        }
-
-        interface_info info;
-        info.type = type;
-
-        for (auto&& gp : sig.GenericArgs())
-        {
-            auto q = w.write_temp("%", gp);
-            info.type_arguments.push_back(q);
-        }
-
-        push_interface_info(interfaces, std::move(info));
-
-        auto guard{ w.push_generic_params(sig) };
-        for (auto&& ii : type.InterfaceImpl())
-        {
-            collect_required_interfaces(w, interfaces, ii.Interface());
-        }
-    }
-
-    void collect_required_interfaces(writer& w, std::vector<interface_info>& sigs, coded_index<TypeDefOrRef> const& index)
-    {
-        switch (index.type())
-        {
-        case TypeDefOrRef::TypeDef:
-            collect_required_interfaces(w, sigs, index.TypeDef());
-            break;
-        case TypeDefOrRef::TypeRef:
-            collect_required_interfaces(w, sigs, find_required(index.TypeRef()));
-            break;
-        case TypeDefOrRef::TypeSpec:
-            collect_required_interfaces(w, sigs, index.TypeSpec().Signature().GenericTypeInst());
-            break;
-        }
-    }
-
-    auto get_required_interfaces(TypeDef const& type)
-    {
-        writer w;
-        auto guard{ w.push_generic_params(type.GenericParam()) };
-
-        std::vector<interface_info> interfaces;
-        collect_required_interfaces(w, interfaces, type);
-
-        return std::move(interfaces);
-    }
-
-    std::vector<std::string> get_type_arguments(TypeDef const& type, std::string_view const& ns, std::vector<std::string_view> const& names)
-    {
-        for (auto&& ii : get_required_interfaces(type))
-        {
-            if (ii.type.TypeNamespace() == ns && std::any_of(
-                names.begin(), names.end(), [type_name = ii.type.TypeName()](auto const& name){ return name == type_name; }))
-            {
-                return std::move(ii.type_arguments);
-            }
-        }
-
-        return {};
-    }
+        return get_typedef(get_type_semantics(type));
+    };
 
     bool implements_interface(TypeDef const& type, std::string_view const& ns, std::string_view const& name)
     {
-        auto category = get_category(type);
-
         auto type_name_matches = [&ns, &name](TypeDef const& td) { return td.TypeNamespace() == ns && td.TypeName() == name; };
 
-        if (category == category::class_type)
-        {
-            for (auto&& ii : type.InterfaceImpl())
-            {
-                switch (ii.Interface().type())
-                {
-                case TypeDefOrRef::TypeDef:
-                {
-                    if (implements_interface(ii.Interface().TypeDef(), ns, name))
-                    {
-                        return true;
-                    }
-                }
-                break;
-                case TypeDefOrRef::TypeRef:
-                {
-                    if (implements_interface(find_required(ii.Interface().TypeRef()), ns, name))
-                    {
-                        return true;
-                    }
-                }
-                break;
-                case TypeDefOrRef::TypeSpec:
-                {
-                    auto generic_type = ii.Interface().TypeSpec().Signature().GenericTypeInst().GenericType();
-                    switch (generic_type.type())
-                    {
-                    case TypeDefOrRef::TypeDef:
-                    {
-                        if (implements_interface(generic_type.TypeDef(), ns, name))
-                        {
-                            return true;
-                        }
-                    }
-                    break;
-                    case TypeDefOrRef::TypeRef:
-                    {
-                        if (implements_interface(find_required(generic_type.TypeRef()), ns, name))
-                        {
-                            return true;
-                        }
-                    }
-                    break;
-                    case TypeDefOrRef::TypeSpec:
-                    {
-                        throw_invalid("generic type of a type spec can't be a type spec");
-                    }
-                    break;
-                    }
-                }
-                break;
-                }
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            if (type_name_matches(type))
-            {
-                return true;
-            }
+        if (get_category(type) == category::interface_type && type_name_matches(type))
+            return true;
 
-            for (auto&& i : get_required_interfaces(type))
-            {
-                if (type_name_matches(i.type))
-                {
-                    return true;
-                }
-            }
+        for (auto&& ii : type.InterfaceImpl())
+        {
+            auto interface_type = get_typedef(ii.Interface());
+            if (implements_interface(interface_type, ns, name))
+                return true;
         }
 
         return false;
     }
 
-    bool implements_any_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> names)
+    bool implements_interface(TypeDef const& type, std::vector<std::tuple<std::string_view, std::string_view>> names)
     {
         for (auto&&[ns, name] : names)
         {
@@ -430,10 +315,10 @@ namespace xlang
         return implements_interface(type, "Windows.Foundation", "IClosable");
     }
 
-    bool is_async_interface(TypeDef const& type)
+    bool implements_iasync(TypeDef const& type)
     {
         return get_category(type) == category::interface_type &&
-            implements_any_interface(type, {
+            implements_interface(type, {
                 std::make_tuple("Windows.Foundation", "IAsyncAction"),
                 std::make_tuple("Windows.Foundation", "IAsyncActionWithProgress`1"),
                 std::make_tuple("Windows.Foundation", "IAsyncOperation`1"),
@@ -460,11 +345,6 @@ namespace xlang
         return implements_interface(type, "Windows.Foundation.Collections", "IVectorView`1");
     }
 
-    bool implements_sequence(TypeDef const& type)
-    {
-        return implements_ivector(type) || implements_ivectorview(type); 
-    }
-
     bool implements_imap(TypeDef const& type)
     {
         return implements_interface(type, "Windows.Foundation.Collections", "IMap`2");
@@ -475,148 +355,14 @@ namespace xlang
         return implements_interface(type, "Windows.Foundation.Collections", "IMapView`2");
     }
 
+    bool implements_sequence(TypeDef const& type)
+    {
+        return implements_ivector(type) || implements_ivectorview(type);
+    }
+
     bool implements_mapping(TypeDef const& type)
     {
         return implements_imap(type) || implements_imapview(type);
-    }
-
-    struct method_info
-    {
-        MethodDef method;
-        std::vector<std::string> type_arguments;
-    };
-
-    bool is_constructor(MethodDef const& method);
-
-    auto get_methods(TypeDef const& type, bool include_special = false)
-    {
-        std::map<std::string_view, std::vector<method_info>> method_map{};
-        auto category = get_category(type);
-
-        if (category == category::class_type)
-        {
-            for (auto&& method : type.MethodList())
-            {
-                if (is_constructor(method) || (method.SpecialName() && !include_special))
-                {
-                    continue;
-                }
-
-                method_map[method.Name()].push_back(method_info{ method, std::vector<std::string> {} });
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            for (auto&& info : get_required_interfaces(type))
-            {
-                for (auto&& method : info.type.MethodList())
-                {
-                    if (method.SpecialName() && !include_special)
-                    {
-                        continue;
-                    }
-
-                    method_map[method.Name()].push_back(method_info{ method, info.type_arguments });
-                }
-            }
-        }
-        else
-        {
-            throw_invalid("only classes and interfaces have methods");
-        }
-
-#ifdef XLANG_DEBUG
-        for (auto&&[name, method_infos] : method_map)
-        {
-            XLANG_ASSERT(method_infos.size() > 0);
-            auto static_method = method_infos[0].method.Flags().Static();
-            for (auto&& info : method_infos)
-            {
-                XLANG_ASSERT(info.method.Flags().Static() == static_method);
-            }
-        }
-#endif
-
-        return std::move(method_map);
-    }
-
-    struct property_info
-    {
-        Property property;
-        std::vector<std::string> type_arguments;
-    };
-
-    auto get_properties(TypeDef const& type)
-    {
-        std::vector<property_info> properties{};
-
-        auto category = get_category(type);
-        if (category == category::class_type)
-        {
-            for (auto&& prop : type.PropertyList())
-            {
-                properties.push_back(property_info{ prop, std::vector<std::string> {} });
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            for (auto&& info : get_required_interfaces(type))
-            {
-                for (auto&& prop : info.type.PropertyList())
-                {
-                    properties.push_back(property_info{ prop, info.type_arguments });
-                }
-            }
-        }
-
-        return std::move(properties);
-    }
-
-    struct event_info
-    {
-        Event event;
-        std::vector<std::string> type_arguments;
-    };
-
-    auto get_events(TypeDef const& type)
-    {
-        std::vector<event_info> events{};
-
-        auto category = get_category(type);
-        if (category == category::class_type)
-        {
-            for (auto&& event : type.EventList())
-            {
-                events.push_back(event_info{ event, std::vector<std::string> {} });
-            }
-        }
-        else if (category == category::interface_type)
-        {
-            for (auto&& info : get_required_interfaces(type))
-            {
-                for (auto&& event : info.type.EventList())
-                {
-                    events.push_back(event_info{ event, info.type_arguments });
-                }
-            }
-        }
-
-        return std::move(events);
-    }
-
-    auto get_constructors(TypeDef const& type)
-    {
-        std::vector<MethodDef> constructors;
-
-        for (auto&& method : type.MethodList())
-        {
-            if (is_constructor(method))
-            {
-                constructors.push_back(method);
-            }
-        }
-
-        return std::move(constructors);
     }
 
     auto get_delegate_invoke(TypeDef const& type)
@@ -634,46 +380,29 @@ namespace xlang
         throw_invalid("Invoke method not found");
     }
 
-    bool is_exclusive_to(TypeDef const& type)
-    {
-        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
-    }
-
-    bool is_flags_enum(TypeDef const& type)
-    {
-        return get_category(type) == category::enum_type && get_attribute(type, "System", "FlagsAttribute");
-    }
-
-    bool is_ptype(TypeDef const& type)
-    {
-        return distance(type.GenericParam()) > 0;
-    }
-
-    bool is_static(TypeDef const& type)
-    {
-        return get_category(type) == category::class_type && type.Flags().Abstract();
-    }
-
-    std::string_view get_method_abi_name(MethodDef const& method)
-    {
-        auto overload_attrib = get_attribute(method, "Windows.Foundation.Metadata", "OverloadAttribute");
-        if (overload_attrib)
-        {
-            auto args = overload_attrib.Value().FixedArgs();
-            return std::get<std::string_view>(std::get<ElemSig>(args[0].value).value);
-        }
-
-        return method.Name();
-    }
-
-    bool is_special(MethodDef const& method)
-    {
-        return method.SpecialName() || method.Flags().RTSpecialName();
-    }
-
-    bool is_constructor(MethodDef const& method)
+    inline bool is_constructor(MethodDef const& method)
     {
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";
+    }
+
+    auto get_constructors(TypeDef const& type)
+    {
+        std::vector<MethodDef> ctors{};
+
+        for (auto&& method : type.MethodList())
+        {
+            if (is_constructor(method))
+            {
+                ctors.push_back(method);
+            }
+        }
+
+        return std::move(ctors);
+    }
+
+    inline bool is_static(MethodDef const& method)
+    {
+        return method.Flags().Static();
     }
 
     inline bool is_get_method(MethodDef const& method)
@@ -686,9 +415,9 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "put_");
     }
 
-    inline bool is_property_method(MethodDef const& method)
+    bool is_python_setter(MethodDef const& method)
     {
-        return method.SpecialName() && (starts_with(method.Name(), "get_") || starts_with(method.Name(), "put_"));
+        return is_put_method(method) && !is_static(method);
     }
 
     inline bool is_add_method(MethodDef const& method)
@@ -701,23 +430,7 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "remove_");
     }
 
-    inline bool is_event_method(MethodDef const& method)
-    {
-        return method.SpecialName() && (starts_with(method.Name(), "add_") || starts_with(method.Name(), "remove_"));
-    }
-
-    inline bool is_static(MethodDef const& method)
-    {
-        return method.Flags().Static();
-    }
-
-    struct property_type
-    {
-        MethodDef get;
-        MethodDef set;
-    };
-
-    property_type get_property_methods(Property const& prop)
+    auto get_property_methods(Property const& prop)
     {
         MethodDef get_method{}, set_method{};
 
@@ -746,27 +459,10 @@ namespace xlang
             XLANG_ASSERT(get_method.Flags().Static() == set_method.Flags().Static());
         }
 
-        return { get_method, set_method };
+        return std::make_tuple(get_method, set_method);
     }
 
-    bool is_static(Property const& prop)
-    {
-        auto methods = get_property_methods(prop);
-        return is_static(methods.get);
-    }
-
-    bool is_static(property_info const& prop)
-    {
-        return is_static(prop.property);
-    }
-
-    struct event_type
-    {
-        MethodDef add;
-        MethodDef remove;
-    };
-
-    event_type get_event_methods(Event const& evt)
+    auto get_event_methods(Event const& evt)
     {
         MethodDef add_method{}, remove_method{};
 
@@ -792,64 +488,7 @@ namespace xlang
         XLANG_ASSERT(remove_method);
         XLANG_ASSERT(add_method.Flags().Static() == remove_method.Flags().Static());
 
-        return { add_method, remove_method };
-    }
-
-    bool is_static(Event const& evt)
-    {
-        auto methods = get_event_methods(evt);
-        return is_static(methods.add);
-    }
-
-    bool is_static(event_info const& evt)
-    {
-        return is_static(evt.event);
-    }
-
-    bool has_dealloc(TypeDef const& type)
-    {
-        auto category = get_category(type);
-        return category == category::struct_type ||
-            category == category::interface_type || 
-            (category == category::class_type && !type.Flags().Abstract());
-    }
-
-    TypeSig get_ireference_type(GenericTypeInstSig const& type)
-    {
-        TypeDef td{ };
-
-        switch (type.GenericType().type())
-        {
-        case TypeDefOrRef::TypeDef:
-            td = type.GenericType().TypeDef();
-            break;
-        case TypeDefOrRef::TypeRef:
-            td = find_required(type.GenericType().TypeRef());
-            break;
-        default:
-            throw_invalid("expecting TypeDef or TypeRef");
-        }
-
-        if ((td.TypeNamespace() != "Windows.Foundation") || (td.TypeName() != "IReference`1"))
-        {
-            throw_invalid("Expecting Windows.Foundation.IReference");
-        }
-
-        XLANG_ASSERT(type.GenericArgCount() == 1);
-
-        return *(type.GenericArgs().first);
-    }
-
-    bool is_customized_struct(TypeDef const& type)
-    {
-        if (type.TypeNamespace() == "Windows.Foundation")
-        {
-            static const std::set<std::string_view> custom_structs = { "DateTime", "EventRegistrationToken", "HResult", "TimeSpan" };
-
-            return custom_structs.find(type.TypeName()) != custom_structs.end();
-        }
-
-        return false;
+        return std::make_tuple(add_method, remove_method);
     }
 
     enum class param_category
@@ -914,14 +553,14 @@ namespace xlang
         return (category == param_category::in
             || category == param_category::pass_array
             // Note, fill array acts as in and out param in Python
-            || category == param_category::fill_array); 
+            || category == param_category::fill_array);
     }
 
     bool is_out_param(method_signature::param_t const& param)
     {
         auto category = get_param_category(param);
 
-        return (category == param_category::out 
+        return (category == param_category::out
             || category == param_category::receive_array
             // Note, fill array acts as in and out param in Python
             || category == param_category::fill_array);
@@ -942,18 +581,140 @@ namespace xlang
         return count;
     }
 
-    int count_out_param(std::vector<method_signature::param_t> const& params)
+    enum class argument_convention
     {
-        int count{ 0 };
+        no_args,
+        single_arg,
+        variable_args
+    };
 
-        for (auto&& param : params)
+    auto get_argument_convention(MethodDef const& method)
+    {
+        if (is_constructor(method) && empty(method.ParamList()))
         {
-            if (is_out_param(param))
+            return argument_convention::no_args;
+        }
+        else if (is_get_method(method))
+        {
+            return argument_convention::no_args;
+        }
+        else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
+        {
+            return argument_convention::single_arg;
+        }
+        else
+        {
+            return argument_convention::variable_args;
+        }
+    }
+
+    type_semantics get_struct_field_semantics(Field const& field, bool convert_enum_to_underlying)
+    {
+        return std::visit(impl::overloaded
+        {
+            [&](type_definition const& type) -> type_semantics
             {
-                count++;
+                auto category = get_category(type);
+                XLANG_ASSERT(category == category::enum_type || category == category::struct_type);
+
+                if ((category == category::enum_type) && convert_enum_to_underlying)
+                {
+                    if (is_flags_enum(type))
+                    {
+                        return fundamental_type::UInt32;
+                    }
+                    else
+                    {
+                        return fundamental_type::Int32;
+                    }
+                }
+
+                return type;
+            },
+            [](generic_type_instance const& gti) -> type_semantics
+            {
+                XLANG_ASSERT((gti.generic_type.TypeNamespace() == "Windows.Foundation")
+                    && (gti.generic_type.TypeName() == "IReference`1")
+                    && gti.generic_args.size() == 1);
+
+                return gti.generic_args[0];
+            },
+            [](auto v) -> type_semantics { return v; }
+        }, get_type_semantics(field.Signature().Type()));
+    }
+
+    bool is_customized_struct(TypeDef const& type)
+    {
+        if (type.TypeNamespace() == "Windows.Foundation")
+        {
+            static const std::set<std::string_view> custom_structs = { "DateTime", "EventRegistrationToken", "HResult", "TimeSpan" };
+
+            return custom_structs.find(type.TypeName()) != custom_structs.end();
+        }
+
+        return false;
+    }
+
+    bool has_dealloc(TypeDef const& type)
+    {
+        auto category = get_category(type);
+        return category == category::struct_type ||
+            category == category::interface_type ||
+            (category == category::class_type && !type.Flags().Abstract());
+    }
+
+    bool is_default_constructable(TypeDef const& type)
+    {
+        if (get_category(type) == category::class_type)
+        {
+            for (auto&& method : type.MethodList())
+            {
+                if (is_constructor(method) && empty(method.ParamList()))
+                {
+                    return true;
+                }
             }
         }
 
-        return count;
+        return false;
+    }
+
+    bool implements_sequence_protocol(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IVector`1") 
+            || implements_interface(type, "Windows.Foundation.Collections", "IVectorView`1");
+    }
+
+    bool implements_mapping_protocol(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation.Collections", "IMap`2")
+            || implements_interface(type, "Windows.Foundation.Collections", "IMapView`2");
+    }
+
+    bool has_dunder_str_method(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Foundation", "IStringable");
+    }
+
+    bool has_dunder_len_method(TypeDef const& type)
+    {
+        return implements_mapping_protocol(type) || implements_sequence_protocol(type);
+    }
+
+    bool has_custom_conversion(TypeDef const& type)
+    {
+        static const std::set<std::string_view> custom_converters = { "DateTime", "EventRegistrationToken", "HResult", "TimeSpan" };
+        if (type.TypeNamespace() == "Windows.Foundation")
+        {
+            return custom_converters.find(type.TypeName()) != custom_converters.end();
+        }
+
+        return false;
+    }
+
+    template<typename C, typename T>
+    bool contains(C const& set, T const& value)
+    {
+        return set.find(value) != set.end();
     }
 }

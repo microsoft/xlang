@@ -6,7 +6,7 @@ add_executable(pywinrt "")
 target_sources(pywinrt PUBLIC main.cpp pch.cpp "${PROJECT_BINARY_DIR}/strings.cpp")
 target_include_directories(pywinrt PUBLIC ${XLANG_LIBRARY_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
 
-GENERATE_STRING_LITERAL_FILES("${PROJECT_SOURCE_DIR}/strings/*" "strings" "xlang::strings" pywinrt)
+GENERATE_STRING_LITERAL_FILES("${PROJECT_SOURCE_DIR}/strings/*" "strings" "pywinrt::strings" pywinrt)
 
 if (WIN32)
     TARGET_CONFIG_MSVC_PCH(pywinrt pch.cpp pch.h)
