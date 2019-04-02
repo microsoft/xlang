@@ -159,6 +159,11 @@ namespace xlang
 
     static bool is_always_disabled(TypeDef const& type)
     {
+        if (settings.component_ignore_velocity)
+        {
+            return false;
+        }
+
         auto feature = get_attribute(type, "Windows.Foundation.Metadata", "FeatureAttribute");
 
         if (!feature)
