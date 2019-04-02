@@ -137,11 +137,6 @@ namespace xlang
         return name;
     }
 
-    static bool is_remove_overload(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "remove_");
-    }
-
     static bool is_get_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "get_");
@@ -150,6 +145,11 @@ namespace xlang
     static bool is_add_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "add_");
+    }
+
+    static bool is_remove_overload(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "remove_");
     }
 
     static bool is_put_overload(MethodDef const& method)
@@ -217,7 +217,6 @@ namespace xlang
 
         return find_required(base);
     };
-
 
     static auto get_bases(TypeDef const& type)
     {

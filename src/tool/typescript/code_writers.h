@@ -2,6 +2,14 @@
 
 namespace xlang
 {
+    static void write_lowercase(writer& w, std::string_view str)
+    {
+        for (auto ch : str)
+        {
+            w.write(static_cast<char>(::tolower(ch)));
+        }
+    }
+
     static void write_preamble(writer& w)
     {
         w.write(R"(// Copyright (c) Microsoft Corporation. All rights reserved.
@@ -63,13 +71,14 @@ namespace xlang
 
     static void write_interface_member_properties(writer& w, TypeDef const& type)
     {
-        auto format = R"(        %: %;
+        auto format = R"(        %%: %;
 )";
 
         for (auto&& property : type.PropertyList())
         {
             w.write(format,
-                property.Name(),
+                bind<write_lowercase>(property.Name().substr(0, 1)),
+                property.Name().substr(1),
                 property.Type().Type()
             );
         }
@@ -77,15 +86,36 @@ namespace xlang
 
     static void write_interface_member_methods(writer& w, TypeDef const& type)
     {
-        auto format = R"(        %(%): %;
+        auto format = 
+R"(        %%(%): %;
+)";
+        auto eventRegistrationFormat =
+R"(        addEventListener(eventName: "%", handler: %): void;
+        removeEventListener(eventName: "%", handler: %): void;
 )";
 
         for (auto&& method : type.MethodList())
         {
-            if (!is_put_overload(method) && !is_get_overload(method))
+            if (is_remove_overload(method))
+            {
+                continue;
+            }
+            else if (is_add_overload(method))
+            {
+                auto eventName = method.Name().substr(4);
+                auto eventHandlerType = method.Signature().Params().at(0).Type();
+                w.write(eventRegistrationFormat,
+                    bind<write_lowercase>(eventName),
+                    eventHandlerType,
+                    bind<write_lowercase>(eventName),
+                    eventHandlerType);
+
+            } 
+            else if (!is_put_overload(method) && !is_get_overload(method))
             {
                 w.write(format,
-                    method.Name(),
+                    bind<write_lowercase>(method.Name().substr(0, 1)),
+                    method.Name().substr(1),
                     bind<write_parameters>(method),
                     method.Signature().ReturnType());
             }
