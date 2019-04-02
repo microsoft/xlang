@@ -32,7 +32,7 @@ namespace xlang
         }
 
         settings.verbose = args.exists("verbose");
-        settings.module = args.value("module", "tsrt");
+        settings.module = args.value("module", "pyrt");
         settings.input = args.files("input");
 
         for (auto && include : args.values("include"))
