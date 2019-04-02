@@ -11,10 +11,13 @@ namespace Windows.Foundation.Metadata
 
 namespace test_component
 {
-    delegate void AgileDelegate();
-    delegate void InDelegate(String value);
-    delegate String ReturnDelegate();
-    delegate void OutDelegate(out String value);
+    namespace Delegates
+    {
+        delegate void AgileDelegate();
+        delegate void InDelegate(String value);
+        delegate String ReturnDelegate();
+        delegate void OutDelegate(out String value);
+    }
 
     enum Signed
     {

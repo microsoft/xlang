@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "winrt/test_component.h"
+#include "winrt/test_component.Delegates.h"
 
 using namespace winrt;
-using namespace test_component;
+using namespace test_component::Delegates;
 
 TEST_CASE("delegates")
 {

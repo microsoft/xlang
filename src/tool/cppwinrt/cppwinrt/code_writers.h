@@ -1661,7 +1661,7 @@ namespace xlang
         }
     }
 
-    static void write_produce_upcall(writer& w, MethodDef const& method, method_signature const& method_signature)
+    static void write_produce_upcall(writer& w, std::string_view const& upcall, method_signature const& method_signature)
     {
         w.abi_types = false;
 
@@ -1671,25 +1671,25 @@ namespace xlang
 
             if (method_signature.return_signature().Type().is_szarray())
             {
-                w.write("std::tie(*__%Size, *%) = detach_abi(this->shim().%(%));",
+                w.write("std::tie(*__%Size, *%) = detach_abi(%(%));",
                     name,
                     name,
-                    get_name(method),
+                    upcall,
                     bind<write_produce_args>(method_signature));
             }
             else
             {
-                w.write("*% = detach_from<%>(this->shim().%(%));",
+                w.write("*% = detach_from<%>(%(%));",
                     name,
                     method_signature.return_signature(),
-                    get_name(method),
+                    upcall,
                     bind<write_produce_args>(method_signature));
             }
         }
         else
         {
-            w.write("this->shim().%(%);",
-                get_name(method),
+            w.write("%(%);",
+                upcall,
                 bind<write_produce_args>(method_signature));
         }
 
@@ -1701,39 +1701,6 @@ namespace xlang
 
                 w.write("\n                if (%) *% = detach_abi(winrt_impl_%);", param_name, param_name, param_name);
             }
-        }
-    }
-
-    static void write_delegate_upcall(writer& w, method_signature const& method_signature)
-    {
-        // TODO: can this not just be replaced with write_produce_upcall?
-        // TODO: add test for delegate that returns a value and possibly has an out param.
-
-        w.abi_types = false;
-
-        if (method_signature.return_signature())
-        {
-            auto name = method_signature.return_param_name();
-
-            if (method_signature.return_signature().Type().is_szarray())
-            {
-                w.write("std::tie(*__%Size, *%) = detach_abi((*this)(%))",
-                    name,
-                    name,
-                    bind<write_produce_args>(method_signature));
-            }
-            else
-            {
-                w.write("*% = detach_from<%>((*this)(%))",
-                    name,
-                    method_signature.return_signature(),
-                    bind<write_produce_args>(method_signature));
-            }
-        }
-        else
-        {
-            w.write("(*this)(%)",
-                bind<write_produce_args>(method_signature));
         }
     }
 
@@ -1765,12 +1732,14 @@ namespace xlang
 
         method_signature signature{ method };
         w.async_types = is_async(method, signature);
+        std::string upcall = "this->shim().%";
+        upcall += get_name(method);
 
         w.write(format,
             get_abi_name(method),
             bind<write_produce_params>(signature),
             bind<write_produce_cleanup>(signature),
-            bind<write_produce_upcall>(method, signature));
+            bind<write_produce_upcall>(upcall, signature));
     }
 
     static void write_fast_produce_methods(writer& w, TypeDef const& default_interface)
@@ -2346,7 +2315,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             type,
             bind<write_abi_params>(signature),
             bind<write_produce_cleanup>(signature),
-            bind<write_delegate_upcall>(signature));
+            bind<write_produce_upcall>("(*this)", signature));
     }
 
     static void write_delegate_definition(writer& w, TypeDef const& type)
