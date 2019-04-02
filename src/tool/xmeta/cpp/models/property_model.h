@@ -16,7 +16,13 @@ namespace xlang
         class property_model final : public base_model
         {
         public:
-            property_model(const std::string &id, const size_t &decl_line) : base_model{ id, decl_line } { }
+            property_model(const std::string &id, const size_t &decl_line, const property_modifier_t &mod, const xmeta_type &type, bool get_declared, bool set_declared) :
+                base_model{ id, decl_line },
+                property_modifier{ mod },
+                property_type{ type },
+                get_declared{ get_declared },
+                set_declared{ set_declared }
+            { }
 
             property_modifier_t property_modifier;
             xmeta_type property_type;

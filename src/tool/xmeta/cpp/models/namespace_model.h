@@ -1,9 +1,9 @@
 #pragma once
 
 #include <string>
-#include <tuple>
-#include <vector>
 #include <map>
+#include <memory>
+#include <vector>
 
 #include "base_model.h"
 #include "class_model.h"

@@ -20,11 +20,13 @@ namespace xlang
         class method_model final : public base_model
         {
         public:
-            method_model(const std::string &id, const size_t &decl_line) : base_model{ id, decl_line } { }
+            method_model(const std::string &id, const size_t &decl_line, const access_modifier_t &mod, const xmeta_type &return_type) :
+                base_model{ id, decl_line },
+                access_modifier{ mod },
+                return_type{ return_type }
+            { }
 
-            int arity;
             access_modifier_t access_modifier;
-            bool is_partial;
             xmeta_type return_type;
             std::vector<std::string> type_parameter_list;
             std::vector<formal_parameter_t> formal_parameter_list;
