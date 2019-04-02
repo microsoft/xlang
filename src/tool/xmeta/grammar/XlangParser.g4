@@ -77,8 +77,14 @@ rank_specifier
 
 // Remove nullable type, Causing left resursive problems
 enum_integral_type
-    : INT32
+    : INT8
+    | UINT8
+    | INT16
+    | UINT16
+    | INT32
     | UINT32
+    | INT64
+    | UINT64
     ;
 
 type_argument_list
