@@ -417,7 +417,7 @@ As such there is much work needed to semantically check the meaning of each attr
 **AttributeUsage** has positional parameters used to specify the kinds of declaration on which it can be used: AttributeTargets.Class | AttributeTarget.Interface
 It also has named parameters such as **AllowMultiple** and **Inherited**. 
 **AllowMultiple** allows the attribute to be specified more than once for a given entity. If unspecified, the attribute is always single use.
-**Inherited** indicates whether or not the attribute can also be Inherited by classes that derive from that base class. If unspecified, it's default value is true. 
+**Inherited** indicates whether or not the attribute can also be inherited by other classes that derive from the base class which the attribute is used on. If unspecified, it's default value is true. 
 
 ```
 A class that is decorated with the AttributeUsage attribute must derive from System.Attribute, either directly or indirectly. Otherwise, a compile-time error occurs.
@@ -426,30 +426,30 @@ namespace System
     [AttributeUsage(AttributeTargets.Class)]
     class AttributeUsageAttribute: Attribute
     {
-           AttributeUsageAttribute(AttributeTargets validOn) {...}
+        AttributeUsageAttribute(AttributeTargets validOn) {...}
         Boolean AllowMultiple { get {...} set {...} }
         Boolean Inherited { get {...} set {...} }
         AttributeTargets ValidOn { get {...} }
     }
     enum AttributeTargets
     {
-            Assembly 	= 0x0001,
-               Module 	= 0x0002,
-               Class 	= 0x0004,
-               Struct 	= 0x0008,
-               Enum 	= 0x0010,
-            Constructor = 0x0020,
-               Method 	= 0x0040,
-            Property 	= 0x0080,
-               Field 	= 0x0100,
-               Event 	= 0x0200,
-            Interface 	= 0x0400,
-            Parameter 	= 0x0800,
-            Delegate 	= 0x1000,
-            ReturnValue = 0x2000,
-            All = Assembly | Module | Class | Struct | Enum | Constructor | 
-                             Method | Property | Field | Event | Interface | Parameter | 
-             Delegate | ReturnValue
+        Assembly = 0x0001,
+        Module = 0x0002,
+        Class = 0x0004,
+        Struct = 0x0008,
+        Enum = 0x0010,
+        Constructor = 0x0020,
+        Method = 0x0040,
+        Property = 0x0080,
+        Field = 0x0100,
+        Event = 0x0200,
+        Interface = 0x0400,
+        Parameter = 0x0800,
+        Delegate = 0x1000,
+        ReturnValue = 0x2000,
+        All = Assembly | Module | Class | Struct | Enum | Constructor | 
+                Method | Property | Field | Event | Interface | Parameter | 
+                Delegate | ReturnValue
     }
 }
 
@@ -467,7 +467,7 @@ A constructor argument field which does not have one of these types, cannot be u
 2) The attribute-name identifies an attribute class. If the form of attribute-name is type-name then this name must refer to an attribute class. Otherwise, a compile-time error occurs. The example
 class Class1 {}
 \[Class1\] class Class2 {}	// Error
-results in a compile-time error because it attempts to use Class1 as an attribute class when Class1 is not an attribute class. If an class wants to be an attribute, it must use the **AttributeUsage**. 
+results in a compile-time error because it attempts to use Class1 as an attribute class when Class1 is not an attribute class. If a class wants to be an attribute, it must use the **AttributeUsage**. 
 
 3) Attribute targets
 Certain contexts permit the specification of an attribute on more than one target. A program can explicitly specify the target by including an attribute-target-specifier. When an attribute is placed at the global level, a global-attribute-target-specifier is required. In all other locations, a reasonable default is applied, but an attribute-target-specifier can be used to affirm or override the default in certain ambiguous cases (or to just affirm the default in non-ambiguous cases). Thus, typically, attribute-target-specifiers can be omitted except at the global level. 
