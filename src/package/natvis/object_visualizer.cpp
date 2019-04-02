@@ -400,6 +400,10 @@ void GetInterfaceData(
                 {
                     // TODO: generic properties
                 },
+                [&](GenericMethodIndex /*var*/)
+                {
+                    throw_invalid("Generic methods not supported.");
+                },
                 [&](GenericTypeInstSig const& /*type*/)
                 {
                     // TODO: generic properties
