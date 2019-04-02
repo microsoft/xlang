@@ -23,24 +23,21 @@ namespace xlang
         w.write(strings::base_string_operators);
         w.write(strings::base_array);
         w.write(strings::base_weak_ref);
-        w.write(strings::base_agile_ref);
         w.write(strings::base_error);
         w.write(strings::base_delegate);
         w.write(strings::base_events);
-        w.write(strings::base_marshaler);
         w.write(strings::base_activation);
         w.write(strings::base_implements);
         w.write(strings::base_composable);
         w.write(strings::base_foundation);
         w.write(strings::base_chrono);
-        w.write(strings::base_security);
         w.write(strings::base_std_hash);
         w.write(strings::base_reflect);
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
         write_close_file_guard(w);
-        w.flush_to_file(settings.output_folder + "winrt/base.h");
+        w.flush_to_file(settings.output_folder + "xlang/base.h");
     }
 
     static void write_coroutine_h()
@@ -51,9 +48,9 @@ namespace xlang
 
         w.write(R"(
 #include <experimental/coroutine>
-#include "winrt/Windows.Foundation.h"
-#include "winrt/Windows.System.h"
-#include "winrt/Windows.UI.Core.h"
+#include "xlang/Windows.Foundation.h"
+#include "xlang/Windows.System.h"
+#include "xlang/Windows.UI.Core.h"
 )");
 
         w.write(strings::base_coroutine);
@@ -65,7 +62,7 @@ namespace xlang
         w.write(strings::base_coroutine_fire_and_forget);
 
         write_close_file_guard(w);
-        w.flush_to_file(settings.output_folder + "winrt/coroutine.h");
+        w.flush_to_file(settings.output_folder + "xlang/coroutine.h");
     }
 
     static void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)

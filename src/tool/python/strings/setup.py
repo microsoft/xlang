@@ -1,5 +1,3 @@
-# TODO: remove explicit debug settings in favor of build_ext --debug setting
-
 import setuptools
 
 setuptools.setup(
@@ -10,8 +8,8 @@ setuptools.setup(
     url="http://github.com/Microsoft/xlang",
     ext_modules = [ setuptools.Extension('_%', 
         sources = [%],
-        extra_compile_args = ["/std:c++17", "/await"],
+        # TODO: add /permissive- when pywinrt moves to a later C++/WinRT version
+        extra_compile_args = ["/std:c++17", "/await", "/GR-"], 
         include_dirs = ['.'],
-        extra_link_args=['/DEBUG'],
         libraries = ['windowsapp']) ],
     packages = setuptools.find_namespace_packages())

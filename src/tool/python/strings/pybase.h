@@ -22,7 +22,6 @@ namespace py
         static T get() { return T{}; }
     };
 
-
     template <typename T>
     struct empty_instance<T, std::void_t<decltype(T{nullptr})>>
     {
@@ -105,6 +104,36 @@ namespace py
     template<typename T>
     constexpr bool is_struct_category_v = struct_checker<typename winrt::impl::category<T>::type>::value;
 
+    struct delegate_callable
+    {
+        delegate_callable() noexcept = default;
+        
+        explicit delegate_callable(PyObject* callable)
+            : _callable(callable)
+        {
+            Py_INCREF(_callable);
+        }
+
+        delegate_callable(delegate_callable&& other) noexcept
+        {
+            std::swap(_callable, other._callable);
+        }
+
+        ~delegate_callable()
+        {
+            winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
+            Py_CLEAR(_callable);
+        }
+
+        PyObject* callable() const noexcept
+        {
+            return _callable;
+        }
+
+    private:
+        PyObject* _callable{};
+    };
+
     struct winrt_wrapper_base
     {
         PyObject_HEAD;
@@ -178,7 +207,26 @@ namespace py
         }
     }
 
-    inline __declspec(noinline) PyObject* to_PyErr() noexcept
+    struct pyobj_ptr_traits
+    {
+        using type = PyObject*;
+
+        static void close(type value) noexcept
+        {
+            Py_CLEAR(value);
+        }
+
+        static constexpr type invalid() noexcept
+        {
+            return nullptr;
+        }
+    };
+
+    using pyobj_handle = winrt::handle_type<pyobj_ptr_traits>;
+
+    py::pyobj_handle register_python_type(PyObject* module, const char* type_name, PyType_Spec* type_spec, PyObject* base_type);
+
+    inline WINRT_NOINLINE void to_PyErr() noexcept
     {
         try
         {
@@ -190,7 +238,7 @@ namespace py
         }
         catch (std::bad_alloc const&)
         {
-            return PyErr_NoMemory();
+            PyErr_SetNone(PyExc_MemoryError);
         }
         catch (std::out_of_range const& e)
         {
@@ -204,8 +252,32 @@ namespace py
         {
             PyErr_SetString(PyExc_RuntimeError, e.what());
         }
+    }
 
-        return nullptr;
+    template<typename F>
+    auto trycatch_invoker(F func, decltype(func()) return_value) -> decltype(func())
+    {
+        try
+        {
+            return func();
+        }
+        catch(...)
+        {
+            to_PyErr();
+            return return_value;
+        }
+    }
+
+    template<typename F>
+    int setter_trycatch_invoker(PyObject* value, F func)
+    {
+        if (value == nullptr)
+        {
+            PyErr_SetString(PyExc_TypeError, "property delete not supported");
+            return -1;
+        }
+
+        return trycatch_invoker(func, -1);
     }
 
     void wrapped_instance(std::size_t key, PyObject* obj);
@@ -758,23 +830,6 @@ namespace py
         }
     };
 
-    struct pyobj_ptr_traits
-    {
-        using type = PyObject*;
-
-        static void close(type value) noexcept
-        {
-            Py_CLEAR(value);
-        }
-
-        static constexpr type invalid() noexcept
-        {
-            return nullptr;
-        }
-    };
-
-    using pyobj_handle = winrt::handle_type<pyobj_ptr_traits>;
-
     template <typename T>
     struct python_iterable final :
         winrt::implements<python_iterable<T>, winrt::Windows::Foundation::Collections::IIterable<T>>
@@ -1020,7 +1075,7 @@ namespace py
     {
         return converter<T>::convert(instance);
     }
-
+    
     template<typename T>
     auto convert_to(PyObject* value)
     {
@@ -1032,36 +1087,6 @@ namespace py
     {
         return convert_to<T>(PyTuple_GetItem(args, index));
     }
-
-    struct delegate_callable
-    {
-        delegate_callable() noexcept = default;
-        
-        explicit delegate_callable(PyObject* callable)
-            : _callable(callable)
-        {
-            Py_INCREF(_callable);
-        }
-
-        delegate_callable(delegate_callable&& other) noexcept
-        {
-            std::swap(_callable, other._callable);
-        }
-
-        ~delegate_callable()
-        {
-            winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
-            Py_CLEAR(_callable);
-        }
-
-        PyObject* callable() const noexcept
-        {
-            return _callable;
-        }
-
-    private:
-        PyObject* _callable{};
-    };
 
     template <typename Async>
     PyObject* get_results(Async const& operation)
@@ -1080,32 +1105,32 @@ namespace py
     template <typename Async>
     PyObject* dunder_await(Async const& async)
     {
-        pyobj_handle asyncio { PyImport_ImportModule("asyncio") };
+        pyobj_handle asyncio{ PyImport_ImportModule("asyncio") };
         if (!asyncio)
         {
             return nullptr;
         }
 
-        pyobj_handle loop { PyObject_CallMethod(asyncio.get(), "get_event_loop", nullptr) };
+        pyobj_handle loop{ PyObject_CallMethod(asyncio.get(), "get_event_loop", nullptr) };
         if (!loop)
         {
             return nullptr;
         }
 
-        pyobj_handle future { PyObject_CallMethod(loop.get(), "create_future", nullptr) };
+        pyobj_handle future{ PyObject_CallMethod(loop.get(), "create_future", nullptr) };
         if (!future)
         {
             return nullptr;
         }
 
         // make a copy of future to pass into completed lambda
-        pyobj_handle future_copy { future.get() };
+        pyobj_handle future_copy{ future.get() };
         Py_INCREF(future_copy.get());
 
         struct completion_callback
         {
             completion_callback() noexcept = default;
-            
+
             explicit completion_callback(pyobj_handle& loop, pyobj_handle& future)
                 : _loop(loop.detach()), _future(future.detach())
             {
@@ -1145,30 +1170,30 @@ namespace py
         };
 
         completion_callback cb{ loop, future_copy };
-        
+
         try
         {
             async.Completed(
                 [cb = std::move(cb)]
-                (Async const& operation, winrt::Windows::Foundation::AsyncStatus status) mutable 
+            (Async const& operation, winrt::Windows::Foundation::AsyncStatus status) mutable
             {
                 winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
 
                 if (status == winrt::Windows::Foundation::AsyncStatus::Completed)
                 {
-                    pyobj_handle results { get_results(operation) };
+                    pyobj_handle results{ get_results(operation) };
 
-                    pyobj_handle set_result { PyObject_GetAttrString(cb.future_type(), "set_result") };
-                    pyobj_handle handle { PyObject_CallMethod(cb.loop(), "call_soon_threadsafe", "OOO", 
-                        set_result.get(), 
+                    pyobj_handle set_result{ PyObject_GetAttrString(cb.future_type(), "set_result") };
+                    pyobj_handle handle{ PyObject_CallMethod(cb.loop(), "call_soon_threadsafe", "OOO",
+                        set_result.get(),
                         cb.future(),
                         results.get()) };
                 }
                 else
                 {
-                    pyobj_handle set_exception { PyObject_GetAttrString(cb.future_type(), "set_exception") };
-                    pyobj_handle handle { PyObject_CallMethod(cb.loop(), "call_soon_threadsafe", "OOO", 
-                        set_exception.get(), 
+                    pyobj_handle set_exception{ PyObject_GetAttrString(cb.future_type(), "set_exception") };
+                    pyobj_handle handle{ PyObject_CallMethod(cb.loop(), "call_soon_threadsafe", "OOO",
+                        set_exception.get(),
                         cb.future(),
                         PyExc_RuntimeError) };
                 }
@@ -1176,7 +1201,8 @@ namespace py
         }
         catch (...)
         {
-            return py::to_PyErr();
+            py::to_PyErr();
+            return nullptr;
         }
 
         return PyObject_GetIter(future.get());

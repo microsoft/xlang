@@ -369,7 +369,7 @@ namespace winrt
                     std::copy_n(m_targets->begin(), m_targets->size(), new_targets->begin());
                 }
 
-                new_targets->back() = impl::make_agile_delegate(delegate);
+                new_targets->back() = delegate;
                 token = get_token(new_targets->back());
 
                 std::lock_guard const swap_guard(m_swap);

@@ -3,63 +3,63 @@ sys.path.append("./generated")
 
 import unittest
 
-import pyrt.windows.foundation as wf
+import winrt.windows.foundation as wf
 
 class TestUri(unittest.TestCase):
 
     def test_activate_uri(self):
         u = wf.Uri("http://microsoft.com")
-        self.assertEqual(u.Domain, "microsoft.com")
-        self.assertEqual(u.AbsoluteCanonicalUri, "http://microsoft.com/")
-        self.assertEqual(u.Port, 80)
-        self.assertEqual(u.SchemeName, "http")
-        self.assertEqual(u.Suspicious, False)
-        self.assertEqual(u.Path, "/")
-        self.assertEqual(u.Query, "")
-        self.assertEqual(u.QueryParsed.Size, 0)
+        self.assertEqual(u.domain, "microsoft.com")
+        self.assertEqual(u.absolute_canonical_uri, "http://microsoft.com/")
+        self.assertEqual(u.port, 80)
+        self.assertEqual(u.scheme_name, "http")
+        self.assertEqual(u.suspicious, False)
+        self.assertEqual(u.path, "/")
+        self.assertEqual(u.query, "")
+        self.assertEqual(u.query_parsed.size, 0)
 
 
     def test_activate_uri2(self):
         u = wf.Uri("http://microsoft.com", "surface/studio")
-        self.assertEqual(u.Domain, "microsoft.com")
-        self.assertEqual(u.AbsoluteCanonicalUri, "http://microsoft.com/surface/studio")
-        self.assertEqual(u.Port, 80)
-        self.assertEqual(u.SchemeName, "http")
-        self.assertEqual(u.Suspicious, False)
-        self.assertEqual(u.Path, "/surface/studio")
-        self.assertEqual(u.Query, "")
-        self.assertEqual(u.QueryParsed.Size, 0)
+        self.assertEqual(u.domain, "microsoft.com")
+        self.assertEqual(u.absolute_canonical_uri, "http://microsoft.com/surface/studio")
+        self.assertEqual(u.port, 80)
+        self.assertEqual(u.scheme_name, "http")
+        self.assertEqual(u.suspicious, False)
+        self.assertEqual(u.path, "/surface/studio")
+        self.assertEqual(u.query, "")
+        self.assertEqual(u.query_parsed.size, 0)
 
 
     def test_combine_uri(self):
         u1 = wf.Uri("http://microsoft.com")
-        u = u1.CombineUri("surface/studio")
-        self.assertEqual(u.Domain, "microsoft.com")
-        self.assertEqual(u.AbsoluteCanonicalUri, "http://microsoft.com/surface/studio")
-        self.assertEqual(u.Port, 80)
-        self.assertEqual(u.SchemeName, "http")
-        self.assertEqual(u.Suspicious, False)
-        self.assertEqual(u.Path, "/surface/studio")
-        self.assertEqual(u.Query, "")
-        self.assertEqual(u.QueryParsed.Size, 0)
+        u = u1.combine_uri("surface/studio")
+        self.assertEqual(u.domain, "microsoft.com")
+        self.assertEqual(u.absolute_canonical_uri, "http://microsoft.com/surface/studio")
+        self.assertEqual(u.port, 80)
+        self.assertEqual(u.scheme_name, "http")
+        self.assertEqual(u.suspicious, False)
+        self.assertEqual(u.path, "/surface/studio")
+        self.assertEqual(u.query, "")
+        self.assertEqual(u.query_parsed.size, 0)
 
     def test_activate_query_parsed(self):
         u = wf.Uri("http://microsoft.com?projection=python&platform=windows")
-        self.assertEqual(u.Query, "?projection=python&platform=windows")
+        self.assertEqual(u.query, "?projection=python&platform=windows")
 
-        qp = u.QueryParsed
-        self.assertEqual(qp.Size, 2)
+        qp = u.query_parsed
+        self.assertEqual(qp.size, 2)
 
-        self.assertEqual(qp.GetFirstValueByName("projection"), "python")
-        self.assertEqual(qp.GetFirstValueByName("platform"), "windows")
+        self.assertEqual(qp.get_first_value_by_name("projection"), "python")
+        self.assertEqual(qp.get_first_value_by_name("platform"), "windows")
 
-        e0 = qp.GetAt(0)
-        self.assertEqual(e0.Name, "projection")
-        self.assertEqual(e0.Value, "python")
+        e0 = qp.get_at(0)
+        self.assertEqual(e0.name, "projection")
+        self.assertEqual(e0.value, "python")
 
-        e1 = qp.GetAt(1)
-        self.assertEqual(e1.Name, "platform")
-        self.assertEqual(e1.Value, "windows")
+        e1 = qp.get_at(1)
+        self.assertEqual(e1.name, "platform")
+        self.assertEqual(e1.value, "windows")
 
         # t = qp.IndexOf(e0)
         # self.assertTrue(t[0])
