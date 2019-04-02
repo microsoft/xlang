@@ -35,6 +35,7 @@ namespace xlang
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
+        { "ignore_velocity", 0, 0 }, // Ignore feature staging metadata and always include implementations
     };
 
     static void print_usage(writer& w)
@@ -135,6 +136,7 @@ Where <spec> is one or more of:
             settings.component_prefix = args.exists("prefix");
             settings.component_lib = args.value("lib", "winrt");
             settings.component_opt = args.exists("opt");
+            settings.component_ignore_velocity = args.exists("ignore_velocity");
 
             if (settings.component_pch == ".")
             {

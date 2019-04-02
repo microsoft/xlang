@@ -20,6 +20,7 @@ namespace xlang
         bool component_overwrite{};
         std::string component_lib;
         bool component_opt{};
+        bool component_ignore_velocity{};
 
         bool verbose{};
 
