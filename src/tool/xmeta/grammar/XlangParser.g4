@@ -189,7 +189,18 @@ class_member_declaration
     ;
 
 method_declaration
-    : return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : method_modifiers? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    ;
+
+method_modifiers
+    : method_modifier
+    | method_modifiers method_modifier
+
+method_modifier
+    : OVERRIDE
+    | PROTECTED
+    | STATIC
+    | SEALED
     ;
 
 formal_parameter_list
