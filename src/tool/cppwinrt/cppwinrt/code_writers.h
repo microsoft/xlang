@@ -1706,6 +1706,9 @@ namespace xlang
 
     static void write_delegate_upcall(writer& w, method_signature const& method_signature)
     {
+        // TODO: can this not just be replaced with write_produce_upcall?
+        // TODO: add test for delegate that returns a value and possibly has an out param.
+
         w.abi_types = false;
 
         if (method_signature.return_signature())
@@ -2321,18 +2324,12 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         {
             type(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
-            int32_t WINRT_CALL Invoke(%) noexcept final
+            int32_t WINRT_CALL Invoke(%) noexcept final try
             {
-                try
-                {
-                    %;
-                    return 0;
-                }
-                catch (...)
-                {%
-                    return to_hresult();
-                }
+%                %;
+                return 0;
             }
+            catch (...) { return to_hresult(); }
         };
     };
 )";
@@ -2348,8 +2345,8 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             type,
             type,
             bind<write_abi_params>(signature),
-            bind<write_delegate_upcall>(signature),
-            ""); // TODO: resolve
+            bind<write_produce_cleanup>(signature),
+            bind<write_delegate_upcall>(signature));
     }
 
     static void write_delegate_definition(writer& w, TypeDef const& type)
