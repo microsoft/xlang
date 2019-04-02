@@ -176,6 +176,7 @@ class_body
 
 class_member_declaration
     : method_declaration
+    | field_declaration
     | property_declaration
     | event_declaration
     | class_constructor_declaration
@@ -243,10 +244,10 @@ struct_modifier
     ;
 
 struct_body
-    : OPEN_BRACE struct_member_declaration* CLOSE_BRACE
+    : OPEN_BRACE field_declaration* CLOSE_BRACE
     ;
 
-struct_member_declaration
+field_declaration
     : type IDENTIFIER SEMICOLON
     ;
 
