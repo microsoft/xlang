@@ -81,7 +81,7 @@ struct writer : writer_base<writer>
 
         while (true)
         {
-            auto pos = value.find('\n', current_pos);
+            const auto pos = value.find('\n', current_pos);
 
             if (pos == std::string_view::npos)
             {
@@ -101,7 +101,8 @@ struct writer : writer_base<writer>
             auto current_line = value.substr(current_pos, pos - current_pos + 1);
             auto empty_line = current_line[0] == '\n';
 
-            if (on_new_line && !empty_line) {
+            if (on_new_line && !empty_line)
+            {
                 write_indent();
             }
 
