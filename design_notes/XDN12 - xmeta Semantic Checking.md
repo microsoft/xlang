@@ -406,65 +406,27 @@ B implicitly depends on A which explicitly depends on B. Thus, B is within its o
 
 ### Attributes
 #### Definitions:
-The attributes in the xlang grammar is generalized and does not specify any keywords in anyway except for the attributes_target that are listed.
-As such there is much work needed to semantically check the meaning of each attribute in the grammar. Particularly, there is no difference in grammar between global and regular attributes. We will have the check the attribute targets semantically to tell the difference and apply the right rules. 
+The attributes in the xlang grammar are generalized and do not specify any keywords except for the attributes_target that are listed.
+As such there is much work needed to semantically check the meaning of each attribute in the grammar. Particularly, there is no difference in the grammar between global and regular attributes. We will have the check the attribute targets semantically to tell the difference and apply the right rules. 
 
 **Positional parameters** are a sequence of parameters without a identifier
 **Named parameters** are parameters with a specified name
 
 ##### AttributeUsage
 **AttributeUsage** is used to describe how an attribute class can be used. It is not defined as a keyword in the grammar and it is the semantic checker's job to make sure it is used correctly on attribute declaration.
-**AttributeUsage** has positional parameters used to specify the kinds of declaration on which it can be used: AttributeTargets.Class | AttributeTarget.Interface
+**AttributeUsage** has positional parameters used to specify the types of declarations on which it can be used: AttributeTargets.Class | AttributeTarget.Interface
 It also has named parameters such as **AllowMultiple** and **Inherited**. 
 **AllowMultiple** allows the attribute to be specified more than once for a given entity. If unspecified, the attribute is always single use.
-**Inherited** indicates whether or not the attribute can also be inherited by other classes that derive from the base class which the attribute is used on. If unspecified, it's default value is true. 
-
-```
-A class that is decorated with the AttributeUsage attribute must derive from System.Attribute, either directly or indirectly. Otherwise, a compile-time error occurs.
-namespace System
-{
-    [AttributeUsage(AttributeTargets.Class)]
-    class AttributeUsageAttribute: Attribute
-    {
-        AttributeUsageAttribute(AttributeTargets validOn) {...}
-        Boolean AllowMultiple { get {...} set {...} }
-        Boolean Inherited { get {...} set {...} }
-        AttributeTargets ValidOn { get {...} }
-    }
-    enum AttributeTargets
-    {
-        Assembly = 0x0001,
-        Module = 0x0002,
-        Class = 0x0004,
-        Struct = 0x0008,
-        Enum = 0x0010,
-        Constructor = 0x0020,
-        Method = 0x0040,
-        Property = 0x0080,
-        Field = 0x0100,
-        Event = 0x0200,
-        Interface = 0x0400,
-        Parameter = 0x0800,
-        Delegate = 0x1000,
-        ReturnValue = 0x2000,
-        All = Assembly | Module | Class | Struct | Enum | Constructor | 
-                Method | Property | Field | Event | Interface | Parameter | 
-                Delegate | ReturnValue
-    }
-}
-
-```
+**Inherited** indicates whether or not the attribute is inherited by classes that derive from the class the attribute was originally defined on. If unspecified, its default value is true. 
 
 
 #### Semantic checks:
-1) The types of positional and named parameters for an attribute class are limited to the attribute parameter types, which are:
-•	Xlang's based types
-•	The type Object.
-•	An enum type.
-•	Single-dimensional arrays of the above types.
-A constructor argument field which does not have one of these types, cannot be used as a positional or named parameter in an attribute specification.
+1) The types of the input parameters passed into the attribute constructor must match the types specified in the constructor's declaration.
 
-2) The attribute-name identifies an attribute class. If the form of attribute-name is type-name then this name must refer to an attribute class. Otherwise, a compile-time error occurs. The example
+2) References to attributes must refer to defined attributes within scope.
+
+For example:
+```
 class Class1 {}
 \[Class1\] class Class2 {}	// Error
 results in a compile-time error because it attempts to use Class1 as an attribute class when Class1 is not an attribute class. If a class wants to be an attribute, it must use the **AttributeUsage**. 
@@ -497,41 +459,66 @@ Example: param cannot be used on a class declaration
 class Class1 {}
 ```
 
-4) By convention, attribtues classes are named with a suffix of Attribute. The name of the attribute may sometimes omit this which causes ambiguities. Example listed below. 
-```
-Example 1:
+4) Attribute usages cannot be ambiguous. Ambiguities arise because by convention, attribute classes are named with a suffix of Attribute, and you can reference the attribute without this suffix. However, there may be another attribute with the same name without the Attribute suffix, which causes the ambiguity.
 
+For example:
+```
 [AttributeUsage(AttributeTargets.All)]
 attribute X
 {}
 [AttributeUsage(AttributeTargets.All)]
 attribute XAttribute
 {}
-[X]						// Error: ambiguity
+[X]                 // Error: ambiguity
 class Class1 {}
-[XAttribute]			// Refers to XAttribute
+[XAttribute]        // Refers to XAttribute
 class Class2 {}
-[@X]						// Refers to X
+[@X]                // Refers to X
 class Class3 {}
-[@XAttribute]			// Refers to XAttribute
+[@XAttribute]       // Refers to XAttribute
 class Class4 {}
-
-Example 2:
-
-[AttributeUsage(AttributeTargets.All)]
-attribute XAttribute
-{}
-[X]						// Refers to XAttribute
-class Class1 {}
-[XAttribute]			// Refers to XAttribute
-class Class2 {}
-[@X]						// Error: no attribute named "X"
-class Class3 {}
-
 ```
 
-5) Compile time error on single use attributes being used on a same entity more than once. 
+5) Single use attributes can only be used once on the same entity.
 
 6) TODO: More on expressions later
 
-7) Reserved Attributes: AttributeUsageAttribute is reserved
+7) Attributes cannot have the name of a reserved attribute. These include: AttributeUsageAttribute
+
+8) A class that is decorated with the AttributeUsage attribute must derive from System.Attribute, either directly or indirectly.
+
+The AttributeUseageAttribute is defined as follows:
+```
+namespace System
+{
+    [AttributeUsage(AttributeTargets.Class)]
+    class AttributeUsageAttribute: Attribute
+    {
+        AttributeUsageAttribute(AttributeTargets validOn) {...}
+        Boolean AllowMultiple { get {...} set {...} }
+        Boolean Inherited { get {...} set {...} }
+        AttributeTargets ValidOn { get {...} }
+    }
+    enum AttributeTargets
+    {
+        Assembly = 0x0001,
+        Module = 0x0002,
+        Class = 0x0004,
+        Struct = 0x0008,
+        Enum = 0x0010,
+        Constructor = 0x0020,
+        Method = 0x0040,
+        Property = 0x0080,
+        Field = 0x0100,
+        Event = 0x0200,
+        Interface = 0x0400,
+        Parameter = 0x0800,
+        Delegate = 0x1000,
+        ReturnValue = 0x2000,
+        All = Assembly | Module | Class | Struct | Enum | Constructor | 
+                Method | Property | Field | Event | Interface | Parameter | 
+                Delegate | ReturnValue
+    }
+}
+```
+
