@@ -41,7 +41,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             $(CleanDependsOn);CppWinRTClean
         </CleanDependsOn>
         <CAExcludePath>
-            $(CAExcludePath);$(GeneratedFilesDir)
+            $(CAExcludePath);$(GeneratedFilesDir);
         </CAExcludePath>
     </PropertyGroup>
 
