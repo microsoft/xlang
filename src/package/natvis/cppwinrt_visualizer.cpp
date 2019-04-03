@@ -45,7 +45,11 @@ cppwinrt_visualizer::cppwinrt_visualizer()
     try
     {
         std::array<char, MAX_PATH> local{};
+#ifdef _WIN64
         ExpandEnvironmentStringsA("%windir%\\System32\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+#else
+        ExpandEnvironmentStringsA("%windir%\\SysNative\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
+#endif
         for (auto&& file : std::experimental::filesystem::directory_iterator(local.data()))
         {
             if (std::experimental::filesystem::is_regular_file(file))
@@ -100,7 +104,8 @@ HRESULT cppwinrt_visualizer::EvaluateVisualizedExpression(
             isAbiObject = false;
         }
         // Visualize nested object properties via raw ABI pointers
-        else if (wcscmp(bstrTypeName, L"winrt::impl::IInspectable") == 0)
+        else if ((wcscmp(bstrTypeName, L"winrt::impl::IInspectable") == 0) ||
+                 (wcscmp(bstrTypeName, L"winrt::impl::inspectable_abi") == 0))
         {
             isAbiObject = true;
         }
