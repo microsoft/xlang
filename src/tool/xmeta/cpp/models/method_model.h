@@ -7,24 +7,24 @@
 
 namespace xlang::xmeta
 {
-    typedef std::vector<std::pair<xmeta_type, std::string>> formal_params_t;
-
-    enum class method_modifier_t
+    struct method_modifiers
     {
-        public_method,
-        protected_method
+        bool is_protected;
+        bool is_override;
+        bool is_static;
+        bool is_sealed;
     };
 
     struct method_model : base_model
     {
-        method_model(std::string_view const& id, size_t decl_line, method_modifier_t mod, xmeta_type const& return_type) :
+        method_model(std::string_view const& id, size_t decl_line, xmeta_type const& return_type, method_modifiers const& mods) :
             base_model{ id, decl_line },
-            access_modifier{ mod },
+            modifiers{ mods },
             return_type{ return_type }
         { }
         method_model() = delete;
 
-        method_modifier_t access_modifier;
+        method_modifiers modifiers;
         xmeta_type return_type;
         std::vector<std::string_view> type_parameters;
         std::vector<formal_parameter_t> formal_parameters;
