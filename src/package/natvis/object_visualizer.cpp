@@ -387,7 +387,7 @@ void GetInterfaceData(
                         if(get_category(type) == category::class_type)
                         {
                             propCategory = PropertyCategory::Class;
-                            propAbiType = L"winrt::impl::IInspectable*";
+                            propAbiType = L"winrt::impl::inspectable_abi*";
                         }
                         else
                         {
