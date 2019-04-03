@@ -39,16 +39,18 @@ But different languages have different errors which can occur and not all errors
 always directly map to errors from another language. In addition, maintaining a mapping of errors
 between each supported language is not scalable. Lastly, there are a lot of errors which are domain
 specific and may not make sense in other languages and thereby not have equivalent error codes natively
-available. Given this, xlang will support a limited set of common errors which can be used by the
-projection of a language to map to or from its error. If the error being mapped has an equivalent in
-this set of common errors and the projection of the consumer's language provides an equivalent mapping
-from that mapped error, then that error will have a natural mapping in the other language.
+available. Because of this, xlang will only support a limited set of errors which can be used by the
+projection of a language to map to or from its error. These errors are intended to be used to
+indicate an error during the translation of the call and not to indicate errors from components. Components are
+encouraged to avoid returning errors as discussed later in [Alternative to errors](#alternative-to-errors).
 
-In the case there isn't an equivalent error to map to in xlang, then a generic error, xlang_fail,
-will be available to be used. Note that in this case, the natural mapping of errors from one language
-to the other will be lost in the sense that it will not be an equivalent mapping. In the case there
-isn't an equivalent error to map to in a consumer's language, it is left to the projection of that
-language to decide what error from its language to map to based on what makes sense for that language.
+If the error being mapped has an equivalent in the set of errors and the projection of the consumer's
+language provides an equivalent mapping from that mapped error, then that error will have a natural
+mapping in the other language. In the case there isn't an equivalent error to map to in xlang, then a
+generic error, xlang_fail, will be available to be used. Note that in this case, the natural mapping of
+errors from one language to the other will be lost in the sense that it will not be an equivalent mapping.
+In the case there isn't an equivalent error to map to in a consumer's language, it is left to the projection
+of that language to decide what error from its language to map to based on what makes sense for that language.
 This can end up being a generic error.
 
 ## xlang errors
@@ -57,38 +59,29 @@ xlang will use an Int32, xlang_result, to represent its errors. The representati
 value will be based on the same model used in COM for HRESULTs to assist with sharing error codes,
 but will not necessarily be defined in this design note on a bit by bit basis as is in COM.
 This is because xlang will not inherit all the errors used in COM and will instead define a set of
-common errors with their values defined. This will allow xlang to avoid defining all the errors
-available in COM on each supported platform especially when most will not be used. This will also
-allow for projections to avoid needing to maintain a large mapping of errors.
+errors with their values defined. This will allow xlang to avoid defining all the errors available
+in COM on each supported platform especially when most will not be used and to scope its errors to ones
+that are likely to occur during translation of calls. This will also allow for projections to avoid
+needing to maintain a large mapping of errors.
 
 The following errors will be defined in xlang:
 
 xlang error                | Value      | Description
 -------------------------- | ---------- | ----------------------------------------------------------------------
+xlang_access_denied        | 0x80070005 | Requested operation / call is not allowed
+xlang_bounds               | 0x8000000b | Invalid index used such as when indexing arrays
 xlang_fail                 | 0x80004005 | Generic error when no equivalent or better error mapping is available
+xlang_handle               | 0x80000006 | Invalid handle
 xlang_invalid_arg          | 0x80000003 | Invalid argument in a call
-xlang_illegal_state_change | 0x8000000d | Change in state that is illegal
+xlang_no_interface         | 0x80000004 | Class or interface not found
+xlang_not_impl             | 0x80000001 | Function / feature is not implemented
 xlang_out_of_memory        | 0x80000002 | Allocation issue resulting from not enough memory
 xlang_pointer              | 0x80000005 | Null pointer related errors
-xlang_not_impl             | 0x80000001 | Function / feature is not implemented
-xlang_access_denied        | 0x80070005 | Requested operation / call is not allowed
-xlang_no_interface         | 0x80000004 | Class or interface not found
-xlang_handle               | 0x80000006 | Invalid handle
-xlang_abort                | 0x80000007 | Operation / call has been canceled
-xlang_file_not_found       | 0x80070002 | File was not found
-xlang_path_not_found       | 0x80070003 | Directory was not found
-xlang_arithmetic           | 0x80070216 | Error during arithmetic operation
-xlang_io                   | 0x80131620 | IO error than does not have a better error mapping
-xlang_bounds               | 0x8000000b | Invalid index used such as when indexing arrays
-xlang_timeout              | 0x80131505 | Operation / call timed out
-xlang_thread_state         | 0x80131520 | Operation can not be done due to the thread state
-xlang_thread_interrupted   | 0x80131519 | Interrupt on thread
-xlang_security             | 0x8013150A | Security related error
 xlang_type_load            | 0x80131522 | Syntax / type error during runtime
 
-Even though xlang only defines these common errors, it will not prevent the use of other errors from
-the HRESULT family. But, it is likely that those errors will not get a natural mapping from
-projections and end up as generic errors.
+Even though xlang only defines these errors, it will not explicitly prevent the use of other errors
+from the HRESULT family. But, those errors will not get a natural mapping from projections and likely
+end up as generic errors.
 
 ## How to indicate the result of a function
 
@@ -104,18 +97,19 @@ Returning xlang_ok which has the literal value of 0 indicates the function compl
 
 ## Alternative to errors
 
-Even though xlang does provide a set of errors to assist with the error translation from one language
-to another in an equivalent form, it is limited. In addition, when errors are translated from one language
-to another, there is a chance that the accuracy of the error is lost due to an exact error mapping is not
-available in the other language. This means the caller of an API may not always have the accurate and
-necessary information to decide what to do with a failure.
+Even though xlang does provide a set of errors to assist with translating errors from one language
+to another in an equivalent form, it is scoped to errors that occur in projections. This is because
+xlang encourages components to use the Try pattern instead of returning errors.
 
-Due to this, xlang encourages the use of errors only for diagnosing failures and not for controlling
-code flow. For controlling code flow, xlang encourages the use of the Try pattern in functions.
-The Try pattern can be used to pass back custom domain specific errors as parameters if necessary.
-The parameter type and its possible values are declared in the producing component and would be translated
-across languages as is. This means the consumer can rely on using it to make decisions without being
-concerned of the translation accuracy.
+The main reason for this is when errors are translated from one language to another, there is a chance that
+the accuracy of the error is lost due to an exact error mapping is not available in xlang or in the other
+language. This means the consumer of an API will not always have the accurate and necessary information that
+was available before translation to determine what the error represents and to decide what to do with it.
+
+With the Try pattern, custom domain specific errors can be passed back as parameters if necessary.
+The parameter type and its possible values are declared in the producing component and would be projected
+across languages as is. This means the consumer can rely on using it to make decisions without being concerned
+of the translation accuracy.
 
 ## Diagnosing application failures
 
