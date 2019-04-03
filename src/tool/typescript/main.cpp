@@ -1,11 +1,9 @@
 #include "pch.h"
 #include <time.h>
-#include "strings.h"
 #include "settings.h"
 #include "type_writers.h"
 #include "helpers.h"
 #include "code_writers.h"
-#include "component_writers.h"
 #include "file_writers.h"
 #include "type_writers.h"
 
