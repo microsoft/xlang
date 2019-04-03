@@ -15,8 +15,13 @@ namespace test_component
     {
         delegate void AgileDelegate();
         delegate void InDelegate(String value);
-        delegate String ReturnDelegate();
-        delegate void OutDelegate(out String value);
+        delegate String ReturnStringDelegate();
+        delegate Int32 ReturnInt32Delegate();
+        delegate void OutStringDelegate(out String value);
+        delegate void OutInt32Delegate(out Int32 value);
+        delegate String[] ReturnStringArrayDelegate();
+        delegate void OutStringArrayDelegate(out String[] value);
+        delegate void RefStringArrayDelegate(ref String[] value);
     }
 
     enum Signed

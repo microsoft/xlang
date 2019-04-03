@@ -979,8 +979,8 @@ namespace xlang
         if (signature.return_signature().Type().is_szarray())
         {
             auto format = R"(
-        uint32_t %_impl_size;
-        %* %;)";
+        uint32_t %_impl_size{};
+        %* %{};)";
 
             w.abi_types = true;
 
