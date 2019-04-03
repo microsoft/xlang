@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
+cmake_policy(SET CMP0076 NEW)
 
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt.exe" cppwinrt_exe)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" CmakeOutDir)
@@ -13,8 +14,9 @@ add_custom_target(cppwinrt ALL DEPENDS ${cppwinrt_exe})
 
 add_custom_target(cppwinrt_test ALL DEPENDS cppwinrt
     COMMAND ${cppwinrt_exe} -in sdk -out ${CMAKE_CURRENT_BINARY_DIR} -verbose
-    COMMAND ${build} /t:test_cpp
-    COMMAND ${build} /t:old_tests\\Tests
+    COMMAND ${build} /t:test
+    COMMAND ${build} /t:test_fast
+    COMMAND ${build} /t:old_tests\\test_old
 )
 
 set_target_properties(cppwinrt PROPERTIES "cppwinrt_exe" ${cppwinrt_exe})
