@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{F8A1FE5A-DC8A-49DF-B882-DEF76E38E484}</ProjectGuid>
+    <ProjectGuid>{B68C61C6-4699-41E6-A158-EA1BE029E7A0}</ProjectGuid>
     <RootNamespace>unittests</RootNamespace>
-    <ProjectName>test_fast</ProjectName>
+    <ProjectName>test_slow</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\cppwinrt.props" />
@@ -101,7 +101,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -127,7 +127,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -153,7 +153,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -183,7 +183,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
