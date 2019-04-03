@@ -241,15 +241,15 @@ The required interfaces of an interface are the explicit required interfaces and
 ```
 interface IControl
 {
-	void Paint();
+    void Paint();
 }
 interface ITextBox: IControl
 {
-	void SetText(String text);
+    void SetText(String text);
 }
 interface IListBox: IControl
 {
-	void SetItems(String[] items);
+    void SetItems(String[] items);
 }
 interface IComboBox: ITextBox, IListBox {}
 ```
@@ -268,7 +268,7 @@ The inherited members of an interface are specifically not part of the declarati
 ```
 interface I<T>
 {
-	   void F();
+       void F();
 }
 class X<U,V>: I<U>, I<V>					// Error: I<U> and I<V> conflict
 ```
@@ -304,16 +304,16 @@ NOTE: There is abit more to interface mapping then I thought. Apparently in the 
 ```
 interface IArtist
 {
-	void Draw();
+    void Draw();
 }
 interface ICowboy
 {
-	void Draw();
+    void Draw();
 }
 class CowboyArtist : ICowboy, IArtist
 {
-	void DrawWeapon() implements ICowboy.Draw;
-	void DrawPainting() implements IArtist.Draw;
+    void DrawWeapon() implements ICowboy.Draw;
+    void DrawPainting() implements IArtist.Draw;
 }
 ```
 This was not specified in the grammar and I am unsure whether we will support this in Xlang. 
@@ -341,9 +341,9 @@ For example:
 ```
 enum Color
 {
-	   Red,
-	   Green = 10,
-	   Blue
+       Red,
+       Green = 10,
+       Blue
 }
 ```
 The associated values are: Red = 0, Green = 10, and Blue = 11 for the following reasons:
@@ -357,9 +357,9 @@ For example:
 ```
 enum Color
 {
-	Red = 11,
-	Blue = Red,
-	Green
+    Red = 11,
+    Blue = Red,
+    Green
 }
 ```
 Here, Blue explicitly depends on Red. Green implicitly depends on Blue.
@@ -371,9 +371,9 @@ For example:
 ```
 enum Color: UInt32
 {
-	   Red = -1,
-	   Green = -2,
-	   Blue = -3
+       Red = -1,
+       Green = -2,
+       Blue = -3
 }
 ```
 results in a compile-time error because the constant values -1, -2, and –3 are not in the range of the underlying integral type UInt32.
@@ -386,8 +386,8 @@ For example:
 ```
 enum Circular
 {
-	   A = B,
-	   B
+       A = B,
+       B
 }
 ```
 B implicitly depends on A which explicitly depends on B. Thus, B is within its own dependency tree, which is an error.
@@ -402,3 +402,123 @@ B implicitly depends on A which explicitly depends on B. Thus, B is within its o
 1) Delegate names must be unique in their declaration space.
 
 2) The delegate parameter list and type parameters follow the same rules as normal methods.
+
+
+### Attributes
+#### Definitions:
+The attributes in the xlang grammar are generalized and do not specify any keywords except for the attributes_target that are listed.
+As such there is much work needed to semantically check the meaning of each attribute in the grammar. Particularly, there is no difference in the grammar between global and regular attributes. We will have the check the attribute targets semantically to tell the difference and apply the right rules. 
+
+**Positional parameters** are a sequence of parameters without a identifier
+**Named parameters** are parameters with a specified name
+
+##### AttributeUsage
+**AttributeUsage** is used to describe how an attribute class can be used. It is not defined as a keyword in the grammar and it is the semantic checker's job to make sure it is used correctly on attribute declaration.
+**AttributeUsage** has positional parameters used to specify the types of declarations on which it can be used: AttributeTargets.Class | AttributeTarget.Interface
+It also has named parameters such as **AllowMultiple** and **Inherited**. 
+**AllowMultiple** allows the attribute to be specified more than once for a given entity. If unspecified, the attribute is always single use.
+**Inherited** indicates whether or not the attribute is inherited by classes that derive from the class the attribute was originally defined on. If unspecified, its default value is true. 
+
+
+#### Semantic checks:
+1) The types of the input parameters passed into the attribute constructor must match the types specified in the constructor's declaration.
+
+2) References to attributes must refer to defined attributes within scope.
+
+For example:
+```
+class Class1 {}
+\[Class1\] class Class2 {}	// Error
+results in a compile-time error because it attempts to use Class1 as an attribute class when Class1 is not an attribute class. If a class wants to be an attribute, it must use the **AttributeUsage**. 
+
+3) Attribute targets
+Certain contexts permit the specification of an attribute on more than one target. A program can explicitly specify the target by including an attribute-target-specifier. When an attribute is placed at the global level, a global-attribute-target-specifier is required. In all other locations, a reasonable default is applied, but an attribute-target-specifier can be used to affirm or override the default in certain ambiguous cases (or to just affirm the default in non-ambiguous cases). Thus, typically, attribute-target-specifiers can be omitted except at the global level. 
+
+The potentially ambiguous contexts are resolved as follows:
+
+•	An attribute specified at global scope can apply either to the target assembly or the target module. No default exists for this context, so an attribute-target-specifier is always required in this context. The presence of the assembly attribute-target-specifier indicates that the attribute applies to the target assembly; the presence of the module attribute-target-specifier indicates that the attribute applies to the target module. 
+
+•	An attribute specified on a delegate declaration can apply either to the delegate being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the delegate. The presence of the type attribute-target-specifier indicates that the attribute applies to the delegate; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on a method declaration can apply either to the method being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on an operator declaration can apply either to the operator being declared or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the operator. The presence of the method attribute-target-specifier indicates that the attribute applies to the operator; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on an event declaration that omits event accessors can apply to the event being declared, to the associated field (if the event is not abstract), or to the associated add and remove methods. In the absence of an attribute-target-specifier, the attribute applies to the event. The presence of the event attribute-target-specifier indicates that the attribute applies to the event; the presence of the field attribute-target-specifier indicates that the attribute applies to the field; and the presence of the method attribute-target-specifier indicates that the attribute applies to the methods.
+
+•	An attribute specified on a get accessor declaration for a property or indexer declaration can apply either to the associated method or to its return value. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on a set accessor for a property or indexer declaration can apply either to the associated method or to its lone implicit parameter. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the param attribute-target-specifier indicates that the attribute applies to the parameter; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+•	An attribute specified on an add or remove accessor declaration for an event declaration can apply either to the associated method or to its lone parameter. In the absence of an attribute-target-specifier, the attribute applies to the method. The presence of the method attribute-target-specifier indicates that the attribute applies to the method; the presence of the param attribute-target-specifier indicates that the attribute applies to the parameter; the presence of the return attribute-target-specifier indicates that the attribute applies to the return value.
+
+a) There are some invalid target attribute that can be applied to declarations
+Example: param cannot be used on a class declaration 
+```
+[param: Author("Brian Kernighan")]		// Error
+class Class1 {}
+```
+
+4) Attribute usages cannot be ambiguous. Ambiguities arise because by convention, attribute classes are named with a suffix of Attribute, and you can reference the attribute without this suffix. However, there may be another attribute with the same name without the Attribute suffix, which causes the ambiguity.
+
+For example:
+```
+[AttributeUsage(AttributeTargets.All)]
+attribute X
+{}
+[AttributeUsage(AttributeTargets.All)]
+attribute XAttribute
+{}
+[X]                 // Error: ambiguity
+class Class1 {}
+[XAttribute]        // Refers to XAttribute
+class Class2 {}
+[@X]                // Refers to X
+class Class3 {}
+[@XAttribute]       // Refers to XAttribute
+class Class4 {}
+```
+
+5) Single use attributes can only be used once on the same entity.
+
+6) TODO: More on expressions later
+
+7) Attributes cannot have the name of a reserved attribute. These include: AttributeUsageAttribute
+
+8) A class that is decorated with the AttributeUsage attribute must derive from System.Attribute, either directly or indirectly.
+
+The AttributeUseageAttribute is defined as follows:
+```
+namespace System
+{
+    [AttributeUsage(AttributeTargets.Class)]
+    class AttributeUsageAttribute: Attribute
+    {
+        AttributeUsageAttribute(AttributeTargets validOn) {...}
+        Boolean AllowMultiple { get {...} set {...} }
+        Boolean Inherited { get {...} set {...} }
+        AttributeTargets ValidOn { get {...} }
+    }
+    enum AttributeTargets
+    {
+        Assembly = 0x0001,
+        Module = 0x0002,
+        Class = 0x0004,
+        Struct = 0x0008,
+        Enum = 0x0010,
+        Constructor = 0x0020,
+        Method = 0x0040,
+        Property = 0x0080,
+        Field = 0x0100,
+        Event = 0x0200,
+        Interface = 0x0400,
+        Parameter = 0x0800,
+        Delegate = 0x1000,
+        ReturnValue = 0x2000,
+        All = Assembly | Module | Class | Struct | Enum | Constructor | 
+                Method | Property | Field | Event | Interface | Parameter | 
+                Delegate | ReturnValue
+    }
+}
+```
+
