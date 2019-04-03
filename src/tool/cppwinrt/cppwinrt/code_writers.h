@@ -2286,20 +2286,16 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_delegate_implementation(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <%> struct delegate<%>
+        auto format = R"(    template <typename H%> struct delegate<%, H> : implements_delegate<%, H>
     {
-        template <typename H>
-        struct type : implements_delegate<%, H>
-        {
-            type(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
+        delegate(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
-            int32_t WINRT_CALL Invoke(%) noexcept final try
-            {
-%                %;
-                return 0;
-            }
-            catch (...) { return to_hresult(); }
-        };
+        int32_t WINRT_CALL Invoke(%) noexcept final try
+        {
+%            %
+            return 0;
+        }
+        catch (...) { return to_hresult(); }
     };
 )";
 
@@ -2309,7 +2305,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         method_signature signature{ get_delegate_method(type) };
 
         w.write(format,
-            bind<write_generic_typenames>(generics),
+            bind<write_comma_generic_typenames>(generics),
             type,
             type,
             type,
