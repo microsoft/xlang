@@ -2,7 +2,6 @@
 
 namespace xlang::xmeta
 {
-#pragma region namespace_body_model
     bool namespace_body_model::member_id_exists(std::string_view const& member_id)
     {
         return classes.find(member_id) != classes.end() ||
@@ -14,10 +13,8 @@ namespace xlang::xmeta
     {
         return containing_namespace->get_full_namespace_name();
     }
-#pragma endregion
 
 
-#pragma region namespace_model
     namespace_model::namespace_model(std::string_view const& id, size_t decl_line, std::shared_ptr<namespace_model> const& parent) :
         base_model{ id, decl_line },
         parent_namespace{ parent }
@@ -47,5 +44,4 @@ namespace xlang::xmeta
             return std::string(id);
         }
     }
-#pragma endregion namespace_model
 }
