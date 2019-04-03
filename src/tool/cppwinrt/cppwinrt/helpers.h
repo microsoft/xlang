@@ -7,9 +7,9 @@ namespace xlang
         return std::chrono::high_resolution_clock::now();
     }
 
-    static auto get_elapsed_time(std::chrono::time_point<std::chrono::high_resolution_clock> const& start)
+    static auto get_elapsed_time(decltype(get_start_time()) const& start)
     {
-        return std::chrono::duration_cast<std::chrono::duration<int64_t, std::milli>>(std::chrono::high_resolution_clock::now() - start).count();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
     }
 
     struct method_signature
