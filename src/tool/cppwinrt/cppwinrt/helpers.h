@@ -143,11 +143,6 @@ namespace xlang
         return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptionAttribute");
     }
 
-    static bool is_exclusive(TypeDef const& type)
-    {
-        return has_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
-    }
-
     static bool has_fastabi(TypeDef const& type)
     {
         return settings.fastabi && has_attribute(type, "Windows.Foundation.Metadata", "FastAbiAttribute");
@@ -167,9 +162,7 @@ namespace xlang
             return false;
         }
 
-        // The first argument is a Windows.Foundation.Metadata.FeatureStage enum class.
         auto stage = get_attribute_value<ElemSig::EnumValue>(feature, 0);
-
         return stage.equals_enumerator("AlwaysDisabled");
     }
 
@@ -182,9 +175,7 @@ namespace xlang
             return true;
         }
 
-        // The first argument is a Windows.Foundation.Metadata.FeatureStage enum class.
         auto stage = get_attribute_value<ElemSig::EnumValue>(feature, 0);
-
         return stage.equals_enumerator("AlwaysEnabled");
     }
 
@@ -414,7 +405,7 @@ namespace xlang
                 }
             }
 
-            info.exclusive = is_exclusive(info.type);
+            info.exclusive = has_attribute(info.type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
             info.version = get_version(info.type);
             get_interfaces_impl(w, result, info.defaulted, info.overridable, base, info.generic_param_stack, info.type.InterfaceImpl());
             insert_or_assign(result, name, std::move(info));
@@ -447,6 +438,7 @@ namespace xlang
             auto& left = left_pair.second;
             auto& right = right_pair.second;
 
+            // Sort by base before is_default because each base will have a default.
             if (left.base != right.base)
             {
                 return !left.base;
