@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.9)
-cmake_policy(SET CMP0076 NEW)
 
 set(python_module_name winrt)
 
