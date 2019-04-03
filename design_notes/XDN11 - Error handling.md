@@ -99,17 +99,22 @@ Returning xlang_ok which has the literal value of 0 indicates the function compl
 
 Even though xlang does provide a set of errors to assist with translating errors from one language
 to another in an equivalent form, it is scoped to errors that occur in projections. This is because
-xlang encourages components to use the Try pattern instead of returning errors.
+xlang encourages components to use the Try Pattern instead of returning / throwing errors.
 
 The main reason for this is when errors are translated from one language to another, there is a chance that
 the accuracy of the error is lost due to an exact error mapping is not available in xlang or in the other
 language. This means the consumer of an API will not always have the accurate and necessary information that
 was available before translation to determine what the error represents and to decide what to do with it.
-
-With the Try pattern, custom domain specific errors can be passed back as parameters if necessary.
+With the Try Pattern, custom domain specific errors can be passed back as parameters if necessary.
 The parameter type and its possible values are declared in the producing component and would be projected
 across languages as is. This means the consumer can rely on using it to make decisions without being concerned
 of the translation accuracy.
+
+But, this isn't to say that all errors should be passed back via the Try Pattern. If a component intends
+on returning / throwing an error which a consumer may use to control code flow, then the Try Pattern should be
+used. For errors which are considered fatal like out of memory and invalid argument, it would be fine to
+return / throw the error as that would allow for useful diagnostic information to be collected about it which
+would be available upon failure.
 
 ## Diagnosing application failures
 
