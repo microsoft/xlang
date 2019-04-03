@@ -29,8 +29,7 @@ namespace xlang::xmeta
         std::shared_ptr<class_model> class_base;
         std::vector<std::string_view> interface_bases;
         std::vector<std::string_view> type_parameters;
-        std::vector<formal_parameter_t> formal_parameters;
-        std::vector<std::string_view> generic_types;
+        class_modifier_t modifier;
 
         // Members
         std::vector<property_model> properties;
