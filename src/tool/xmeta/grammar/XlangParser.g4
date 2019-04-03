@@ -77,8 +77,14 @@ rank_specifier
 
 // Remove nullable type, Causing left resursive problems
 enum_integral_type
-    : INT32
+    : INT8
+    | UINT8
+    | INT16
+    | UINT16
+    | INT32
     | UINT32
+    | INT64
+    | UINT64
     ;
 
 type_argument_list
@@ -229,13 +235,25 @@ class_body
 
 class_member_declaration
     : method_declaration
+    | field_declaration
     | property_declaration
     | event_declaration
     | class_constructor_declaration
     ;
 
 method_declaration
-    : attributes? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : method_modifiers? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    ;
+
+method_modifiers
+    : method_modifier
+    | method_modifiers method_modifier
+
+method_modifier
+    : OVERRIDE
+    | PROTECTED
+    | STATIC
+    | SEALED
     ;
 
 formal_parameter_list
@@ -296,10 +314,10 @@ struct_modifier
     ;
 
 struct_body
-    : OPEN_BRACE struct_member_declaration* CLOSE_BRACE
+    : OPEN_BRACE field_declaration* CLOSE_BRACE
     ;
 
-struct_member_declaration
+field_declaration
     : type IDENTIFIER SEMICOLON
     ;
 
