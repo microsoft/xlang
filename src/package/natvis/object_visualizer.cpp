@@ -39,6 +39,16 @@ g_categoryData[] =
     { L"g", L"winrt::guid" },
 };
 
+HRESULT PostUserMessage(DkmProcess* process, wchar_t const* messageText)
+{
+    auto userMessage = std::wstring(L"Natvis: ") + messageText + L"\n";
+    winrt::com_ptr<DkmString> pUserMessageText;
+    IF_FAIL_RET(DkmString::Create(DkmSourceString(userMessage.c_str()), pUserMessageText.put()));
+    winrt::com_ptr<DkmUserMessage> pUserMessage;
+    IF_FAIL_RET(DkmUserMessage::Create(process->Connection(), process, DkmUserMessageOutputKind::UnfilteredOutputWindowMessage, pUserMessageText.get(), 0, 0, pUserMessage.put()));
+    return pUserMessage->Post();
+}
+
 static HRESULT EvaluatePropertyExpression(
     _In_ PropertyData const& prop,
     _In_ DkmVisualizedExpression* pExpression,
@@ -48,7 +58,8 @@ static HRESULT EvaluatePropertyExpression(
 )
 {
     wchar_t abiAddress[40];
-    bool is64Bit = ((pExpression->RuntimeInstance()->Process()->SystemInformation()->Flags() & DefaultPort::DkmSystemInformationFlags::Is64Bit) != 0);
+    auto process = pExpression->RuntimeInstance()->Process();
+    bool is64Bit = ((process->SystemInformation()->Flags() & DefaultPort::DkmSystemInformationFlags::Is64Bit) != 0);
     swprintf_s(abiAddress, is64Bit ? L"%s0x%I64x" : L"%s0x%08x", isAbiObject ? L"(::IUnknown*)" : L"*(::IUnknown**)", pObject->Address());
     wchar_t wszEvalText[500];
     std::wstring propCast;
@@ -63,16 +74,12 @@ static HRESULT EvaluatePropertyExpression(
         propCast = L"*(" + prop.abiType + L"*)";
     }
     swprintf_s(wszEvalText, L"%sWINRT_abi_val(%s, L\"{%s}\", %i).%s", propCast.c_str(), abiAddress, prop.iid.c_str(), prop.index, propField);
-#ifdef _DEBUG
-    OutputDebugStringW(wszEvalText);
-    OutputDebugStringW(L"\n");
-#endif
 
     winrt::com_ptr<DkmString> pEvalText;
     IF_FAIL_RET(DkmString::Create(DkmSourceString(wszEvalText), pEvalText.put()));
+    PostUserMessage(process, wszEvalText);
 
     auto evalFlags = DkmEvaluationFlags::TreatAsExpression | DkmEvaluationFlags::ForceEvaluationNow | DkmEvaluationFlags::ForceRealFuncEval;
-
     auto inspectionContext = pExpression->InspectionContext();
     winrt::com_ptr<DkmLanguageExpression> pLanguageExpression;
     IF_FAIL_RET(DkmLanguageExpression::Create(
