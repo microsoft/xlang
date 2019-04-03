@@ -1,0 +1,12 @@
+namespace Windows.Foundation
+{
+    class Pair<TFirst, TSecond> 
+    {
+        
+        Boolean Equals(Uri pUri);
+        Uri CombineUri(String relativeUri);
+        
+    	TFirst First;
+    	TSecond Second;
+    }
+}
