@@ -2183,11 +2183,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_fast_class_usings(writer& w, TypeDef const& type)
-    {
-        // TODO: write class usings excluding those the form part of the fast abi
-    }
-
     static void write_interface(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -2970,7 +2965,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
-%%%%    };
+%%%    };
 )";
 
         w.write(format,
@@ -2982,7 +2977,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             base_type,
             bind<write_constructor_declarations>(type, factories),
             bind<write_fast_class_base_declarations>(type),
-            bind<write_fast_class_usings>(type),
             bind_each<write_static_declaration>(factories));
     }
 
