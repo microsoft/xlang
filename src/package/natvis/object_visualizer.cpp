@@ -39,8 +39,58 @@ g_categoryData[] =
     { L"g", L"winrt::guid" },
 };
 
-HRESULT PostUserMessage(DkmProcess* process, wchar_t const* messageText)
+enum class NatvisDiagnosticLevel
 {
+    Unknown = -1,
+    Off,
+    Error,
+    Warning,
+    Verbose
+};
+
+NatvisDiagnosticLevel GetNatvisDiagnosticLevel()
+{
+    static NatvisDiagnosticLevel level = NatvisDiagnosticLevel::Unknown;
+    if (level != NatvisDiagnosticLevel::Unknown)
+    {
+        return level;
+    }
+    HKEY userSettingsKey;
+    if (FAILED(DkmGlobalSettings::OpenVSUserSettingsKey(L"Debugger\\NatvisDiagnostics", &userSettingsKey)))
+    {
+        level = NatvisDiagnosticLevel::Error;
+        return level;
+    }
+    char data[MAX_PATH];
+    DWORD dataSize = _countof(data);
+    if (RegGetValue(userSettingsKey, "", "Level", RRF_RT_REG_SZ, nullptr, data, &dataSize) == ERROR_SUCCESS)
+    {
+        switch (data[0])
+        {
+        case 'O':
+            level = NatvisDiagnosticLevel::Off;
+            break;
+        case 'E':
+            level = NatvisDiagnosticLevel::Error;
+            break;
+        case 'W':
+            level = NatvisDiagnosticLevel::Warning;
+            break;
+        case 'V':
+            level = NatvisDiagnosticLevel::Verbose;
+            break;
+        }
+    }
+    RegCloseKey(userSettingsKey);
+    return level;
+}
+
+HRESULT PostUserMessage(DkmProcess* process, wchar_t const* messageText, NatvisDiagnosticLevel level)
+{
+    if (GetNatvisDiagnosticLevel() < level)
+    {
+        return S_OK;
+    }
     auto userMessage = std::wstring(L"Natvis: ") + messageText + L"\n";
     winrt::com_ptr<DkmString> pUserMessageText;
     IF_FAIL_RET(DkmString::Create(DkmSourceString(userMessage.c_str()), pUserMessageText.put()));
@@ -77,7 +127,7 @@ static HRESULT EvaluatePropertyExpression(
 
     winrt::com_ptr<DkmString> pEvalText;
     IF_FAIL_RET(DkmString::Create(DkmSourceString(wszEvalText), pEvalText.put()));
-    PostUserMessage(process, wszEvalText);
+    PostUserMessage(process, wszEvalText, NatvisDiagnosticLevel::Verbose);
 
     auto evalFlags = DkmEvaluationFlags::TreatAsExpression | DkmEvaluationFlags::ForceEvaluationNow | DkmEvaluationFlags::ForceRealFuncEval;
     auto inspectionContext = pExpression->InspectionContext();
