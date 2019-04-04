@@ -4,3 +4,7 @@ void XlangBasicListener::enterNamespace_declaration(XlangParser::Namespace_decla
 {
     namespaces.insert(ctx->IDENTIFIER()->getText());
 }
+
+void XlangBasicListener::enterExpression(XlangParser::ExpressionContext * ctx) {
+    expressions.insert(ctx->getText());
+ }

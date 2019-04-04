@@ -90,10 +90,8 @@ TEST_CASE("Remove comments")
     XlangBasicListener listener;
                 
     tree::ParseTree *tree = parser.xlang();
-    std::cout << tree->toStringTree(&parser) << std::endl;
     tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
     std::set<std::string> namespaces = listener.namespaces;
-    std::cout << tree->toStringTree(&parser) << std::endl;
 
     REQUIRE(namespaces.find("test") != namespaces.end());
     REQUIRE(namespaces.find("test2") != namespaces.end());
@@ -115,10 +113,8 @@ TEST_CASE("Spacing")
     XlangBasicListener listener;
 
     tree::ParseTree *tree = parser.xlang();
-    std::cout << tree->toStringTree(&parser) << std::endl;
     tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
     std::set<std::string> namespaces = listener.namespaces;
-    std::cout << tree->toStringTree(&parser) << std::endl;
 
     REQUIRE(namespaces.find("test") != namespaces.end());
     REQUIRE(namespaces.find("test2") != namespaces.end());
@@ -127,5 +123,26 @@ TEST_CASE("Spacing")
 }
 
 
+TEST_CASE("Lexer uuid")
+{
+    std::string test_idl =
+        "namespace Windows.UI.ApplicationSettings \
+        { \
+            [contract(Windows.Foundation.UniversalApiContract, 1)] \
+            [uuid(b7de5527-4c8f-42dd-84da-5ec493abdb9a)] \
+            delegate void WebAccountProviderCommandInvokedHandler(WebAccountProviderCommand command); \
+        }";
 
+    ANTLRInputStream input(test_idl);
+    XlangLexer lexer(&input);
+    CommonTokenStream tokens(&lexer);
+    XlangParser parser(&tokens);
+    XlangBasicListener listener;
 
+    tree::ParseTree *tree = parser.xlang();
+    tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+    std::set<std::string> expressions = listener.expressions;
+
+    REQUIRE(expressions.find("b7de5527-4c8f-42dd-84da-5ec493abdb9a") != expressions.end());
+    REQUIRE(parser.getNumberOfSyntaxErrors() == 0);
+}

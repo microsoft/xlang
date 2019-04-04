@@ -14,9 +14,9 @@ compilation_unit
 
 // For lexer tests
 xlang_lexer_tests
-    : namespace_declaration*
+    : UUID
     ;
-
+    
 /* Basic Concepts */
 namespace_name
     : namespace_or_type_name
@@ -63,16 +63,12 @@ class_type
     ;
 
 array_type
-    : non_array_type rank_specifier
+    : non_array_type OPEN_BRACKET CLOSE_BRACKET
     ;
 
 non_array_type
     : value_type
     | class_type
-    ;
-
-rank_specifier
-    : OPEN_BRACKET CLOSE_BRACKET
     ;
 
 // Remove nullable type, Causing left resursive problems
@@ -95,6 +91,7 @@ type_argument_list
 expression
     : LITERAL
     | IDENTIFIER
+    | UUID
     ;
 
 constant_expression
@@ -189,11 +186,7 @@ using_namespace_directive
 
 namespace_member_declaration
     : namespace_declaration
-    | type_declaration
-    ;
-
-type_declaration
-    : class_declaration
+    | class_declaration
     | struct_declaration
     | interface_declaration
     | enum_declaration
@@ -203,7 +196,6 @@ type_declaration
 qualified_alias_member
     : IDENTIFIER DOUBLE_COLON IDENTIFIER type_argument_list?
     ;
-
 
 //* Classes *//
 class_declaration

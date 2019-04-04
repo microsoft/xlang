@@ -120,6 +120,9 @@ IDENTIFIER
     : IdentifierOrKeyword
     | IdentifierOrKeyword ('.' IdentifierOrKeyword)*
     ;
+    
+UUID
+   : HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit;
 
 fragment IdentifierOrKeyword
     : IdentifierStartCharacter IdentifierPartCharacter*
