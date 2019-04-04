@@ -55,12 +55,21 @@ NatvisDiagnosticLevel GetNatvisDiagnosticLevel()
     {
         return level;
     }
+    level = NatvisDiagnosticLevel::Error;
+
+    // If < VS16, look for private registry setting
+    if (!DkmComponentManager::IsApiVersionSupported(DkmApiVersion::VS16RTM))
+    {
+        return level;
+    }
+
+    // Else, use VS natvis diagnostics level directly
     HKEY userSettingsKey;
     if (FAILED(DkmGlobalSettings::OpenVSUserSettingsKey(L"Debugger\\NatvisDiagnostics", &userSettingsKey)))
     {
-        level = NatvisDiagnosticLevel::Error;
         return level;
     }
+
     char data[MAX_PATH];
     DWORD dataSize = _countof(data);
     if (RegGetValue(userSettingsKey, "", "Level", RRF_RT_REG_SZ, nullptr, data, &dataSize) == ERROR_SUCCESS)
@@ -85,7 +94,7 @@ NatvisDiagnosticLevel GetNatvisDiagnosticLevel()
     return level;
 }
 
-HRESULT PostUserMessage(DkmProcess* process, wchar_t const* messageText, NatvisDiagnosticLevel level)
+HRESULT NatvisDiagnostic(DkmProcess* process, wchar_t const* messageText, NatvisDiagnosticLevel level)
 {
     if (GetNatvisDiagnosticLevel() < level)
     {
@@ -127,7 +136,7 @@ static HRESULT EvaluatePropertyExpression(
 
     winrt::com_ptr<DkmString> pEvalText;
     IF_FAIL_RET(DkmString::Create(DkmSourceString(wszEvalText), pEvalText.put()));
-    PostUserMessage(process, wszEvalText, NatvisDiagnosticLevel::Verbose);
+    NatvisDiagnostic(process, wszEvalText, NatvisDiagnosticLevel::Verbose);
 
     auto evalFlags = DkmEvaluationFlags::TreatAsExpression | DkmEvaluationFlags::ForceEvaluationNow | DkmEvaluationFlags::ForceRealFuncEval;
     auto inspectionContext = pExpression->InspectionContext();
