@@ -48,7 +48,7 @@ NatvisDiagnosticLevel GetNatvisDiagnosticLevel()
     }
     level = NatvisDiagnosticLevel::Error;
 
-    // If < VS16, look for private registry setting
+    // If < VS16, just output errors
     if (!DkmComponentManager::IsApiVersionSupported(DkmApiVersion::VS16RTM))
     {
         return level;
