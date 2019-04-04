@@ -106,6 +106,58 @@ namespace pywinrt
         }
     }
 
+#define PYWINRT_TEMPLATE_TRY_CATCH 
+
+    // All generated try/catch blocks go thru this function in order to have a single place
+    // to change as we test the binary size of different approaches
+    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view return_type = "PyObject*", std::string_view exception_return_value = "nullptr", std::string_view ref_capture = "")
+    {
+#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+        w.write("return py::trycatch_invoker([=%]() -> %\n{\n", ref_capture, return_type);
+        {
+            writer::indent_guard gg{ w };
+            tryfunc(w);
+        }
+        w.write("}, %);\n", exception_return_value);
+#else
+        w.write("try\n{\n");
+        {
+            writer::indent_guard g{ w };
+            tryfunc(w);
+        }
+        w.write(R"(}
+catch (...)
+{
+    py::to_PyErr();
+    return %;
+}
+)", exception_return_value);
+#endif
+    }
+
+    void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
+    {
+#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
+        w.write("return py::setter_trycatch_invoker(arg, [=]() -> int\n{\n");
+        {
+            writer::indent_guard gg{ w };
+            tryfunc(w);
+            w.write("return 0;\n");
+        }
+        w.write("});\n");
+
+#else
+        w.write(R"(if (arg == nullptr)
+{
+    PyErr_SetString(PyExc_TypeError, "property delete not supported");
+    return -1;
+}
+
+)");
+        write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "int", "-1");
+#endif
+    }
+
     void write_template_arg_name(writer& w, GenericParam const& param)
     {
         w.write(param.Name());
@@ -220,26 +272,14 @@ struct winrt_type<%>
         w.write("static int module_exec(PyObject* module)\n{\n");
         {
             writer::indent_guard g{ w };
-            w.write("py::pyobj_handle bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };\n\n");
-            w.write("try\n{\n");
-
-            {
-                writer::indent_guard gg{ w };
-
-                settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.classes)(w);
-                settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.interfaces)(w);
-                settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.structs)(w);
-            }
-
-            w.write(R"(}
-catch(...)
-{
-    py::to_PyErr();
-    return -1;
-}
-
-return 0;
-)");
+            write_try_catch(w, [&](auto& w)
+                {
+                    w.write("py::pyobj_handle bases { PyTuple_Pack(1, py::winrt_type<py::winrt_base>::python_type) };\n\n");
+                    settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.classes)(w);
+                    settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.interfaces)(w);
+                    settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.structs)(w);
+                    w.write("\nreturn 0;\n");
+                }, "int", "-1");
         }
 
         w.write("}\n");
@@ -520,58 +560,6 @@ if (!%)
         {
             w.write("return %;\n", bind<write_py_tuple_pack>(return_values));
         }
-    }
-
-#define PYWINRT_TEMPLATE_TRY_CATCH 
-
-    // All generated try/catch blocks go thru this function in order to have a single place
-    // to change as we test the binary size of different approaches
-    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view return_type = "PyObject*", std::string_view exception_return_value = "nullptr", std::string_view ref_capture = "")
-    {
-#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-        w.write("return py::trycatch_invoker([=%]() -> %\n{\n", ref_capture, return_type);
-        {
-            writer::indent_guard gg{ w };
-            tryfunc(w);
-        }
-        w.write("}, %);\n", exception_return_value);
-#else
-        w.write("try\n{\n");
-        {
-            writer::indent_guard g{ w };
-            tryfunc(w);
-        }
-        w.write(R"(}
-catch (...)
-{
-    py::to_PyErr();
-    return %;
-}
-)", exception_return_value);
-#endif
-    }
-
-    void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
-    {
-#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-        w.write("return py::setter_trycatch_invoker(arg, [=]() -> int\n{\n");
-        {
-            writer::indent_guard gg{ w };
-            tryfunc(w);
-            w.write("return 0;\n");
-        }
-        w.write("});\n");
-
-#else
-        w.write(R"(if (arg == nullptr)
-{
-    PyErr_SetString(PyExc_TypeError, "property delete not supported");
-    return -1;
-}
-
-)");
-        write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "int", "-1");
-#endif
     }
 
     void write_class_new_function(writer& w, TypeDef const& type)
