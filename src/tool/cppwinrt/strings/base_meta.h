@@ -302,7 +302,7 @@ namespace winrt::impl
     template <typename T>
     struct bind_in
     {
-        bind_abi(T const& object) noexcept : object(object)
+        bind_in(T const& object) noexcept : object(object)
         {
         }
 
@@ -336,7 +336,7 @@ namespace winrt::impl
         }
 
         template <typename R>
-        operator R& () const noexcept
+        operator R* () const noexcept
         {
             if constexpr (!std::is_trivially_destructible_v<T>)
             {

@@ -600,7 +600,7 @@ namespace xlang
 
                     if (wrap_abi(param_signature->Type()))
                     {
-                        w.write("bind_abi(%)", param_name);
+                        w.write("impl::bind_in(%)", param_name);
                     }
                     else
                     {
@@ -614,7 +614,7 @@ namespace xlang
 
                     if (wrap_abi(param_signature->Type()))
                     {
-                        w.write("put_abi(%)", param_name);
+                        w.write("impl::bind_out(%)", param_name);
                     }
                     else
                     {
