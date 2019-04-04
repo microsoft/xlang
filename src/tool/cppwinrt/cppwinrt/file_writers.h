@@ -151,7 +151,6 @@ namespace xlang
         w.write_each<write_class>(members.classes);
         w.write_each<write_interface_override>(members.classes);
         write_close_namespace(w);
-        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();
@@ -191,6 +190,7 @@ namespace xlang
         w.write_each<write_std_hash>(members.interfaces);
         w.write_each<write_std_hash>(members.classes);
         write_close_namespace(w);
+        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();

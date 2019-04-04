@@ -298,6 +298,27 @@ namespace winrt::impl
             return (func(Types{}) || ...);
         }
     };
+
+    template <typename T>
+    struct bind_abi
+    {
+        bind_abi(T const& object) noexcept : object(object)
+        {
+        }
+
+        T const& object;
+
+        operator void* () const noexcept
+        {
+            return *(void**)(&object);
+        }
+
+        template <typename R>
+        operator R const& () const noexcept
+        {
+            return reinterpret_cast<R const&>(object);
+        }
+    };
 }
 
 template <typename T>

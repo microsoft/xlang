@@ -428,13 +428,13 @@ namespace xlang
 
         call(signature.Type(),
             [&](ElementType type)
-        {
-            wrap = type == ElementType::String || type == ElementType::Object;
-        },
+            {
+                wrap = type == ElementType::String || type == ElementType::Object;
+            },
             [&](auto&&)
-        {
-            wrap = true;
-        });
+            {
+                wrap = true;
+            });
 
         return wrap;
     }
