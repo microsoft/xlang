@@ -594,20 +594,23 @@ namespace xlang
                 continue;
             }
 
-            auto category = get_category(param_signature->Type());
+            TypeDef signature_type;
+            auto category = get_category(param_signature->Type(), &signature_type);
 
             if (param.Flags().In())
             {
                 switch (category)
                 {
-                case param_category::generic_type:
-                case param_category::enum_type:
-                case param_category::struct_type:
-                    w.write("impl::bind_in(%)", param_name);
-                    break;
                 case param_category::object_type:
                 case param_category::string_type:
                     w.write("*(void**)(&%)", param_name);
+                    break;
+                case param_category::generic_type:
+                case param_category::struct_type:
+                    w.write("impl::bind_in(%)", param_name);
+                    break;
+                case param_category::enum_type:
+                    w.write("static_cast<%>(%)", signature_type.FieldList().first.Signature().Type(), param_name);
                     break;
                 case param_category::fundamental_type:
                     w.write(param_name);

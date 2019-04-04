@@ -450,7 +450,7 @@ namespace xlang
         fundamental_type,
     };
 
-    inline param_category get_category(TypeSig const& signature)
+    inline param_category get_category(TypeSig const& signature, TypeDef* signature_type = nullptr)
     {
         if (signature.is_szarray())
         {
@@ -477,19 +477,11 @@ namespace xlang
             },
             [&](coded_index<TypeDefOrRef> const& type)
             {
-                auto index_type = type.type();
+                TypeDef type_def;
 
-                if (index_type == TypeDefOrRef::TypeSpec)
+                if (type.type() == TypeDefOrRef::TypeDef)
                 {
-                    result = param_category::object_type;
-                    return;
-                }
-
-                category type_category{};
-
-                if (index_type == TypeDefOrRef::TypeDef)
-                {
-                    type_category = get_category(type.TypeDef());
+                    type_def = type.TypeDef();
                 }
                 else
                 {
@@ -501,10 +493,15 @@ namespace xlang
                         return;
                     }
 
-                    type_category = get_category(find_required(type_ref));
+                    type_def = find_required(type_ref);
                 }
 
-                switch (type_category)
+                if (signature_type)
+                {
+                    *signature_type = type_def;
+                }
+
+                switch (get_category(type_def))
                 {
                 case category::interface_type:
                 case category::class_type:
@@ -518,6 +515,10 @@ namespace xlang
                     result = param_category::enum_type;
                     return;
                 }
+            },
+            [&](GenericTypeInstSig const&)
+            {
+                result = param_category::object_type;
             },
             [&](auto&&)
             {
