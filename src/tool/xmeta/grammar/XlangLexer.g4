@@ -73,6 +73,7 @@ RETURN: 'return';
 TYPE: 'type';
 
 // Xlang Type System
+INT8: 'Int8';
 INT16: 'Int16';
 INT32: 'Int32';
 INT64: 'Int64';

@@ -91,10 +91,6 @@ type_argument_list
     : LESS_THAN type (COMMA type)* GREATER_THAN
     ;
 
-type_parameter
-    : IDENTIFIER
-    ;
-
 /* Expression */
 expression
     : LITERAL
@@ -106,6 +102,11 @@ constant_expression
     ;
 
 /* Variables */ // TODO: Later
+variable_declarator
+    : IDENTIFIER
+    | IDENTIFIER = variable_initializer
+    ;
+
 variable_initializer
     : expression
     | array_type
@@ -235,7 +236,6 @@ class_body
 
 class_member_declaration
     : method_declaration
-    | field_declaration
     | property_declaration
     | event_declaration
     | class_constructor_declaration
@@ -248,6 +248,7 @@ method_declaration
 method_modifiers
     : method_modifier
     | method_modifiers method_modifier
+    ;
 
 method_modifier
     : OVERRIDE
@@ -324,16 +325,12 @@ field_declaration
 /* Interfaces */
 interface_declaration
     : attributes? interface_modifier* PARTIAL? INTERFACE
-        IDENTIFIER variant_type_parameter_list? interface_base? interface_body SEMICOLON?
+        IDENTIFIER type_parameter_list? interface_base? interface_body SEMICOLON?
     ;
 
 interface_modifier
     : PUBLIC
     | INTERNAL
-    ;
-
-variant_type_parameter_list
-    : LESS_THAN attributes? type_parameter (COMMA attributes? type_parameter)* GREATER_THAN
     ;
 
 interface_base
@@ -376,8 +373,8 @@ enum_member_declaration
 /* Delegates */
 delegate_declaration
     : attributes? delegate_modifier* DELEGATE return_type
-        IDENTIFIER variant_type_parameter_list?
-        OPEN_PARENS formal_parameter_list CLOSE_PARENS type_parameter_constraint_clauses? SEMICOLON
+        IDENTIFIER type_parameter_list?
+        OPEN_PARENS formal_parameter_list CLOSE_PARENS SEMICOLON
     ;
 
 delegate_modifier
@@ -386,9 +383,5 @@ delegate_modifier
     | PROTECTED
     | INTERNAL
     | PRIVATE
-    ;
-
-type_parameter_constraint_clauses
-    : PLACEHOLDER_REMOVELATER
     ;
 
