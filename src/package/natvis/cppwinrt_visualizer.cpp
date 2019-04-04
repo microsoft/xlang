@@ -6,9 +6,8 @@
 using namespace Microsoft::VisualStudio::Debugger;
 using namespace Microsoft::VisualStudio::Debugger::Evaluation;
 using namespace Microsoft::VisualStudio::Debugger::Telemetry;
-
 using namespace std::experimental::filesystem;
-
+using namespace winrt;
 using namespace xlang;
 using namespace xlang::meta;
 using namespace xlang::meta::reader;
@@ -19,15 +18,21 @@ std::unique_ptr<cache> db;
 // If type not indexed, simulate RoGetMetaDataFile's strategy for finding app-local metadata
 // and add to the database dynamically.  RoGetMetaDataFile looks for types in the current process
 // so cannot be called directly.
-void load_type_winmd(WCHAR const* processPath, std::string runtimeTypeName)
+void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string typeName)
 {
     auto winmd_path = path{ processPath };
-    auto probeFileName = runtimeTypeName;
+    auto probeFileName = typeName;
     do
     {
         winmd_path.replace_filename(probeFileName + ".winmd");
         if (exists(winmd_path))
         {
+            if (GetNatvisDiagnosticLevel() == NatvisDiagnosticLevel::Verbose)
+            {
+                auto winmd_path_str = winmd_path.string();
+                auto message = std::wstring(L"Loaded ") + std::wstring(winmd_path_str.begin(), winmd_path_str.end());
+                NatvisDiagnostic(process, message, NatvisDiagnosticLevel::Verbose);
+            }
             db_files.push_back(winmd_path.string());
         }
         auto pos = probeFileName.rfind('.');
@@ -38,6 +43,23 @@ void load_type_winmd(WCHAR const* processPath, std::string runtimeTypeName)
         probeFileName = probeFileName.substr(0, pos);
     } while (true);
     db.reset(new cache(db_files));
+}
+
+TypeDef FindType(DkmProcess* process, std::string const& typeName)
+{
+    auto type = db->find(typeName);
+    if (!type)
+    {
+        auto processPath = process->Path()->Value();
+        LoadMetadata(process, processPath, typeName);
+        type = db->find(typeName);
+        if (!type)
+        {
+            NatvisDiagnostic(process,
+                std::wstring(L"Could not find metadata for ") + std::wstring(typeName.begin(), typeName.end()), NatvisDiagnosticLevel::Error);
+        }
+    }
+    return type;
 }
 
 cppwinrt_visualizer::cppwinrt_visualizer()
@@ -65,10 +87,10 @@ cppwinrt_visualizer::cppwinrt_visualizer()
     }
 
     // Log an event for telemetry purposes when the visualizer is brought online
-    winrt::com_ptr<DkmString> eventName;
+    com_ptr<DkmString> eventName;
     if SUCCEEDED(DkmString::Create(DkmSourceString(L"vs/vc/diagnostics/cppwinrtvisualizer/objectconstructed"), eventName.put()))
     {
-        winrt::com_ptr<DkmTelemetryEvent> error;
+        com_ptr<DkmTelemetryEvent> error;
         if SUCCEEDED(DkmTelemetryEvent::Create(eventName.get(), nullptr, nullptr, error.put()))
         {
             error->Post();
@@ -89,10 +111,10 @@ HRESULT cppwinrt_visualizer::EvaluateVisualizedExpression(
 {
     try
     {
-        winrt::com_ptr<IUnknown> pUnkTypeSymbol;
+        com_ptr<IUnknown> pUnkTypeSymbol;
         IF_FAIL_RET(pVisualizedExpression->GetSymbolInterface(__uuidof(IDiaSymbol), pUnkTypeSymbol.put()));
 
-        winrt::com_ptr<IDiaSymbol> pTypeSymbol = pUnkTypeSymbol.as<IDiaSymbol>();
+        com_ptr<IDiaSymbol> pTypeSymbol = pUnkTypeSymbol.as<IDiaSymbol>();
 
         CComBSTR bstrTypeName;
         IF_FAIL_RET(pTypeSymbol->get_name(&bstrTypeName));
@@ -117,6 +139,8 @@ HRESULT cppwinrt_visualizer::EvaluateVisualizedExpression(
         else
         {
             // unrecognized type
+            NatvisDiagnostic(pVisualizedExpression, 
+                std::wstring(L"Unrecognized type: ") + (LPWSTR)bstrTypeName,  NatvisDiagnosticLevel::Error);
             return S_OK;
         }
 
@@ -127,6 +151,8 @@ HRESULT cppwinrt_visualizer::EvaluateVisualizedExpression(
     catch (...)
     {
         // If something goes wrong, just fail to display object/property.  Don't take down VS.
+        NatvisDiagnostic(pVisualizedExpression, 
+            L"Exception in cppwinrt_visualizer::EvaluateVisualizedExpression", NatvisDiagnosticLevel::Error, to_hresult());
         return E_FAIL;
     }
 }
@@ -153,7 +179,7 @@ HRESULT cppwinrt_visualizer::GetChildren(
 {
     try
     {
-        winrt::com_ptr<object_visualizer> pObjectVisualizer;
+        com_ptr<object_visualizer> pObjectVisualizer;
         HRESULT hr = pVisualizedExpression->GetDataItem(pObjectVisualizer.put());
         if (SUCCEEDED(hr))
         {
@@ -161,7 +187,7 @@ HRESULT cppwinrt_visualizer::GetChildren(
         }
         else
         {
-            winrt::com_ptr<property_visualizer> pPropertyVisualizer;
+            com_ptr<property_visualizer> pPropertyVisualizer;
             hr = pVisualizedExpression->GetDataItem(pPropertyVisualizer.put());
             if (SUCCEEDED(hr))
             {
@@ -174,6 +200,8 @@ HRESULT cppwinrt_visualizer::GetChildren(
     catch (...)
     {
         // If something goes wrong, just fail to display object/property.  Don't take down VS.
+        NatvisDiagnostic(pVisualizedExpression,
+            L"Exception in cppwinrt_visualizer::GetChildren", NatvisDiagnosticLevel::Error, to_hresult());
         return E_FAIL;
     }
 }
@@ -188,7 +216,7 @@ HRESULT cppwinrt_visualizer::GetItems(
 {
     try
     {
-        winrt::com_ptr<object_visualizer> pObjectVisualizer;
+        com_ptr<object_visualizer> pObjectVisualizer;
         HRESULT hr = pVisualizedExpression->GetDataItem(pObjectVisualizer.put());
         if (SUCCEEDED(hr))
         {
@@ -196,7 +224,7 @@ HRESULT cppwinrt_visualizer::GetItems(
         }
         else
         {
-            winrt::com_ptr<property_visualizer> pPropertyVisualizer;
+            com_ptr<property_visualizer> pPropertyVisualizer;
             hr = pVisualizedExpression->GetDataItem(pPropertyVisualizer.put());
             if (SUCCEEDED(hr))
             {
@@ -209,6 +237,8 @@ HRESULT cppwinrt_visualizer::GetItems(
     catch (...)
     {
         // If something goes wrong, just fail to display object/property.  Don't take down VS.
+        NatvisDiagnostic(pVisualizedExpression,
+            L"Exception in cppwinrt_visualizer::GetItems", NatvisDiagnosticLevel::Error, to_hresult());
         return E_FAIL;
     }
 }
@@ -222,7 +252,7 @@ HRESULT cppwinrt_visualizer::SetValueAsString(
 {
     try
     {
-        winrt::com_ptr<property_visualizer> pPropertyVisualizer;
+        com_ptr<property_visualizer> pPropertyVisualizer;
         HRESULT hr = pVisualizedExpression->GetDataItem(pPropertyVisualizer.put());
         if (SUCCEEDED(hr))
         {
@@ -234,6 +264,8 @@ HRESULT cppwinrt_visualizer::SetValueAsString(
     catch (...)
     {
         // If something goes wrong, just fail to update object/property.  Don't take down VS.
+        NatvisDiagnostic(pVisualizedExpression, 
+            L"Exception in cppwinrt_visualizer::SetValueAsString", NatvisDiagnosticLevel::Error, to_hresult());
         return E_FAIL;
     }
 }
@@ -245,7 +277,7 @@ HRESULT cppwinrt_visualizer::GetUnderlyingString(
 {
     try
     {
-        winrt::com_ptr<property_visualizer> pPropertyVisualizer;
+        com_ptr<property_visualizer> pPropertyVisualizer;
         HRESULT hr = pVisualizedExpression->GetDataItem(pPropertyVisualizer.put());
         if (SUCCEEDED(hr))
         {
@@ -257,6 +289,8 @@ HRESULT cppwinrt_visualizer::GetUnderlyingString(
     catch (...)
     {
         // If something goes wrong, just fail to display object/property.  Don't take down VS.
+        NatvisDiagnostic(pVisualizedExpression->RuntimeInstance()->Process(),
+            L"Exception in cppwinrt_visualizer::GetUnderlyingString", NatvisDiagnosticLevel::Error, to_hresult());
         return E_FAIL;
     }
 }

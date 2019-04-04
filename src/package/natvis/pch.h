@@ -31,5 +31,19 @@ winrt::com_ptr<T> make_com_ptr(T* ptr)
     return result;
 }
 
-extern std::unique_ptr<xlang::meta::reader::cache> db;
-void load_type_winmd(WCHAR const* processPath, std::string runtimeTypeName);
+xlang::meta::reader::TypeDef FindType(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string const& typeName);
+
+enum class NatvisDiagnosticLevel
+{
+    Unknown = -1,
+    Off,
+    Error,
+    Warning,
+    Verbose
+};
+NatvisDiagnosticLevel GetNatvisDiagnosticLevel();
+HRESULT NatvisDiagnostic(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::wstring_view const& messageText, NatvisDiagnosticLevel level, HRESULT errorCode = S_OK);
+inline HRESULT NatvisDiagnostic(Microsoft::VisualStudio::Debugger::Evaluation::DkmVisualizedExpression* expression, std::wstring_view const& messageText, NatvisDiagnosticLevel level, HRESULT errorCode = S_OK)
+{
+    return NatvisDiagnostic(expression->RuntimeInstance()->Process(), messageText, level, errorCode);
+}

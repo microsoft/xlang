@@ -5,7 +5,7 @@
 
 using namespace Microsoft::VisualStudio::Debugger;
 using namespace Microsoft::VisualStudio::Debugger::Evaluation;
-
+using namespace winrt;
 using namespace xlang;
 using namespace xlang::meta;
 using namespace xlang::meta::reader;
@@ -37,15 +37,6 @@ g_categoryData[] =
     { L"r8", L"double" },
     { L"s,sh", L"winrt::hstring" },
     { L"g", L"winrt::guid" },
-};
-
-enum class NatvisDiagnosticLevel
-{
-    Unknown = -1,
-    Off,
-    Error,
-    Warning,
-    Verbose
 };
 
 NatvisDiagnosticLevel GetNatvisDiagnosticLevel()
@@ -94,17 +85,17 @@ NatvisDiagnosticLevel GetNatvisDiagnosticLevel()
     return level;
 }
 
-HRESULT NatvisDiagnostic(DkmProcess* process, wchar_t const* messageText, NatvisDiagnosticLevel level)
+HRESULT NatvisDiagnostic(DkmProcess* process, std::wstring_view const& messageText, NatvisDiagnosticLevel level, HRESULT errorCode)
 {
     if (GetNatvisDiagnosticLevel() < level)
     {
         return S_OK;
     }
-    auto userMessage = std::wstring(L"Natvis: ") + messageText + L"\n";
-    winrt::com_ptr<DkmString> pUserMessageText;
+    auto userMessage = std::wstring(L"Natvis C++/WinRT: ") + std::wstring(messageText) + L"\n";
+    com_ptr<DkmString> pUserMessageText;
     IF_FAIL_RET(DkmString::Create(DkmSourceString(userMessage.c_str()), pUserMessageText.put()));
-    winrt::com_ptr<DkmUserMessage> pUserMessage;
-    IF_FAIL_RET(DkmUserMessage::Create(process->Connection(), process, DkmUserMessageOutputKind::UnfilteredOutputWindowMessage, pUserMessageText.get(), 0, 0, pUserMessage.put()));
+    com_ptr<DkmUserMessage> pUserMessage;
+    IF_FAIL_RET(DkmUserMessage::Create(process->Connection(), process, DkmUserMessageOutputKind::UnfilteredOutputWindowMessage, pUserMessageText.get(), 0, errorCode, pUserMessage.put()));
     return pUserMessage->Post();
 }
 
@@ -113,7 +104,7 @@ static HRESULT EvaluatePropertyExpression(
     _In_ DkmVisualizedExpression* pExpression,
     _In_ DkmPointerValueHome* pObject,
     bool isAbiObject,
-    _Out_ winrt::com_ptr<DkmEvaluationResult>& pEvaluationResult
+    _Out_ com_ptr<DkmEvaluationResult>& pEvaluationResult
 )
 {
     wchar_t abiAddress[40];
@@ -134,13 +125,13 @@ static HRESULT EvaluatePropertyExpression(
     }
     swprintf_s(wszEvalText, L"%sWINRT_abi_val(%s, L\"{%s}\", %i).%s", propCast.c_str(), abiAddress, prop.iid.c_str(), prop.index, propField);
 
-    winrt::com_ptr<DkmString> pEvalText;
+    com_ptr<DkmString> pEvalText;
     IF_FAIL_RET(DkmString::Create(DkmSourceString(wszEvalText), pEvalText.put()));
     NatvisDiagnostic(process, wszEvalText, NatvisDiagnosticLevel::Verbose);
 
     auto evalFlags = DkmEvaluationFlags::TreatAsExpression | DkmEvaluationFlags::ForceEvaluationNow | DkmEvaluationFlags::ForceRealFuncEval;
     auto inspectionContext = pExpression->InspectionContext();
-    winrt::com_ptr<DkmLanguageExpression> pLanguageExpression;
+    com_ptr<DkmLanguageExpression> pLanguageExpression;
     IF_FAIL_RET(DkmLanguageExpression::Create(
         inspectionContext->Language(),
         evalFlags,
@@ -149,7 +140,7 @@ static HRESULT EvaluatePropertyExpression(
         pLanguageExpression.put()
     ));
 
-    winrt::com_ptr<DkmInspectionContext> pInspectionContext;
+    com_ptr<DkmInspectionContext> pInspectionContext;
     if ( (pExpression->InspectionContext()->EvaluationFlags() & evalFlags) != evalFlags)
     {
         DkmInspectionContext::Create(
@@ -170,14 +161,17 @@ static HRESULT EvaluatePropertyExpression(
         pInspectionContext.copy_from(inspectionContext);
     }
 
-    IF_FAIL_RET(pExpression->EvaluateExpressionCallback(
+    auto hr = pExpression->EvaluateExpressionCallback(
         pInspectionContext.get(),
         pLanguageExpression.get(),
         pExpression->StackFrame(),
         pEvaluationResult.put()
-    ));
-
-    return S_OK;
+    );
+    if (hr != S_OK)
+    {
+        NatvisDiagnostic(process, L"EvaluateExpressionCallback failed", NatvisDiagnosticLevel::Warning, hr);
+    }
+    return hr;
 }
 
 static HRESULT EvaluatePropertyString(
@@ -185,16 +179,16 @@ static HRESULT EvaluatePropertyString(
     _In_ DkmVisualizedExpression* pExpression,
     _In_ DkmPointerValueHome* pObject,
     bool isAbiObject,
-    _Out_ winrt::com_ptr<DkmString>& pValue
+    _Out_ com_ptr<DkmString>& pValue
 )
 {
-    winrt::com_ptr<DkmEvaluationResult> pEvaluationResult;
+    com_ptr<DkmEvaluationResult> pEvaluationResult;
     IF_FAIL_RET(EvaluatePropertyExpression(prop, pExpression, pObject, isAbiObject, pEvaluationResult));
     if (pEvaluationResult->TagValue() != DkmEvaluationResult::Tag::SuccessResult)
     {
         return E_FAIL;
     }
-    winrt::com_ptr<DkmSuccessEvaluationResult> pSuccessEvaluationResult = pEvaluationResult.as<DkmSuccessEvaluationResult>();
+    com_ptr<DkmSuccessEvaluationResult> pSuccessEvaluationResult = pEvaluationResult.as<DkmSuccessEvaluationResult>();
     if (pSuccessEvaluationResult->Address()->Value() != 0)
     {
         pValue.copy_from(pSuccessEvaluationResult->Value());
@@ -206,7 +200,7 @@ static HRESULT ObjectToString(
     _In_ DkmVisualizedExpression* pExpression,
     _In_ DkmPointerValueHome* pObject,
     bool isAbiObject,
-    _Out_ winrt::com_ptr<DkmString>& pValue
+    _Out_ com_ptr<DkmString>& pValue
 )
 {
     if (SUCCEEDED(EvaluatePropertyString({ IID_IStringable, 0, PropertyCategory::String }, pExpression, pObject, isAbiObject, pValue)))
@@ -234,18 +228,18 @@ static HRESULT CreateChildVisualizedExpression(
 {
     *ppResult = nullptr;
 
-    winrt::com_ptr<DkmEvaluationResult> pEvaluationResult;
+    com_ptr<DkmEvaluationResult> pEvaluationResult;
     auto valueHome = make_com_ptr(pParent->ValueHome());
-    winrt::com_ptr<DkmPointerValueHome> pParentPointer = valueHome.as<DkmPointerValueHome>();
+    com_ptr<DkmPointerValueHome> pParentPointer = valueHome.as<DkmPointerValueHome>();
     IF_FAIL_RET(EvaluatePropertyExpression(prop, pParent, pParentPointer.get(), isAbiObject, pEvaluationResult));
     if (pEvaluationResult->TagValue() != DkmEvaluationResult::Tag::SuccessResult)
     {
         return E_FAIL;
     }
 
-    winrt::com_ptr<DkmSuccessEvaluationResult> pSuccessEvaluationResult = pEvaluationResult.as<DkmSuccessEvaluationResult>();
-    winrt::com_ptr<DkmString> pValue;
-    winrt::com_ptr<DkmPointerValueHome> pChildPointer;
+    com_ptr<DkmSuccessEvaluationResult> pSuccessEvaluationResult = pEvaluationResult.as<DkmSuccessEvaluationResult>();
+    com_ptr<DkmString> pValue;
+    com_ptr<DkmPointerValueHome> pChildPointer;
     bool isNonNullObject = false;
     if (prop.category == PropertyCategory::Class)
     {
@@ -259,12 +253,12 @@ static HRESULT CreateChildVisualizedExpression(
     }
     if(!isNonNullObject)
     {
-        winrt::com_ptr<DkmExpressionValueHome> expressionValueHome = make_com_ptr(pParent->ValueHome());
+        com_ptr<DkmExpressionValueHome> expressionValueHome = make_com_ptr(pParent->ValueHome());
         pChildPointer = expressionValueHome.as<DkmPointerValueHome>();
         pValue.copy_from(pSuccessEvaluationResult->Value());
     }
 
-    winrt::com_ptr<DkmString> pDisplayName;
+    com_ptr<DkmString> pDisplayName;
     IF_FAIL_RET(DkmString::Create(prop.displayName.c_str(), pDisplayName.put()));
 
     PCWSTR displayType;
@@ -276,10 +270,10 @@ static HRESULT CreateChildVisualizedExpression(
     {
         displayType = prop.displayType.c_str();
     }
-    winrt::com_ptr<DkmString> pDisplayType;
+    com_ptr<DkmString> pDisplayType;
     IF_FAIL_RET(DkmString::Create(displayType, pDisplayType.put()));
 
-    winrt::com_ptr<DkmSuccessEvaluationResult> pVisualizedResult;
+    com_ptr<DkmSuccessEvaluationResult> pVisualizedResult;
     IF_FAIL_RET(DkmSuccessEvaluationResult::Create(
         pParent->InspectionContext(),
         pParent->StackFrame(),
@@ -300,7 +294,7 @@ static HRESULT CreateChildVisualizedExpression(
         pVisualizedResult.put()
     ));
 
-    winrt::com_ptr<DkmChildVisualizedExpression> pChildVisualizedExpression;
+    com_ptr<DkmChildVisualizedExpression> pChildVisualizedExpression;
     IF_FAIL_RET(DkmChildVisualizedExpression::Create(
         pParent->InspectionContext(),
         pParent->VisualizerId(),
@@ -316,12 +310,12 @@ static HRESULT CreateChildVisualizedExpression(
 
     if (isNonNullObject)
     {
-        winrt::com_ptr<object_visualizer> pObjectVisualizer = winrt::make_self<object_visualizer>(pChildVisualizedExpression.get(), true);
+        com_ptr<object_visualizer> pObjectVisualizer = make_self<object_visualizer>(pChildVisualizedExpression.get(), true);
         IF_FAIL_RET(pChildVisualizedExpression->SetDataItem(DkmDataCreationDisposition::CreateNew, pObjectVisualizer.get()));
     }
     else
     {
-        winrt::com_ptr<property_visualizer> pPropertyVisualizer = winrt::make_self<property_visualizer>(pChildVisualizedExpression.get(), pSuccessEvaluationResult.get());
+        com_ptr<property_visualizer> pPropertyVisualizer = make_self<property_visualizer>(pChildVisualizedExpression.get(), pSuccessEvaluationResult.get());
         IF_FAIL_RET(pChildVisualizedExpression->SetDataItem(DkmDataCreationDisposition::CreateNew, pPropertyVisualizer.get()));
     }
 
@@ -337,6 +331,7 @@ struct property_type
 };
 
 void GetInterfaceData(
+    DkmProcess* process,
     coded_index<TypeDefOrRef> index,
     _Inout_ std::vector<PropertyData>& propertyData,
     _Out_ bool& isStringable
@@ -465,10 +460,12 @@ void GetInterfaceData(
                 [&](GenericTypeIndex /*var*/)
                 {
                     // TODO: generic properties
+                    NatvisDiagnostic(process, L"Generics are not yet supported", NatvisDiagnosticLevel::Verbose);
                 },
                 [&](GenericTypeInstSig const& /*type*/)
                 {
                     // TODO: generic properties
+                    NatvisDiagnostic(process, L"Generics are not yet supported", NatvisDiagnosticLevel::Verbose);
                 }
             },
             retType.Type().Type());
@@ -481,22 +478,16 @@ void GetInterfaceData(
 
 void object_visualizer::GetPropertyData()
 {
-    winrt::com_ptr<DkmString> pValue;
-    winrt::com_ptr<DkmChildVisualizedExpression> pPropertyVisualized;
+    com_ptr<DkmString> pValue;
+    com_ptr<DkmChildVisualizedExpression> pPropertyVisualized;
     if (FAILED(CreateChildVisualizedExpression({ IID_IInspectable, -2, PropertyCategory::String }, m_pVisualizedExpression.get(), m_isAbiObject, pPropertyVisualized.put())) ||
         FAILED(pPropertyVisualized->GetUnderlyingString(pValue.put())))
     {
         return;
     }
     
-    auto runtimeTypeName = winrt::to_string(pValue->Value());
-    auto type = db->find(runtimeTypeName);
-    if (!type)
-    {
-        auto processPath = m_pVisualizedExpression->RuntimeInstance()->Process()->Path()->Value();
-        load_type_winmd(processPath, runtimeTypeName);
-        type = db->find(runtimeTypeName);
-    }
+    auto process = m_pVisualizedExpression->RuntimeInstance()->Process();
+    auto type = FindType(process, to_string(pValue->Value()));
     if (!type)
     {
         return;
@@ -507,7 +498,7 @@ void object_visualizer::GetPropertyData()
         auto impls = type.InterfaceImpl();
         for (auto&& impl : impls)
         {
-            GetInterfaceData(impl.Interface(), m_propertyData, m_isStringable);
+            GetInterfaceData(process, impl.Interface(), m_propertyData, m_isStringable);
         }
     }
     else if (get_category(type) == category::interface_type)
@@ -515,15 +506,15 @@ void object_visualizer::GetPropertyData()
         auto impls = type.InterfaceImpl();
         for (auto&& impl : impls)
         {
-            GetInterfaceData(impl.Interface(), m_propertyData, m_isStringable);
+            GetInterfaceData(process, impl.Interface(), m_propertyData, m_isStringable);
         }
-        GetInterfaceData(type.coded_index<TypeDefOrRef>(), m_propertyData, m_isStringable);
+        GetInterfaceData(process, type.coded_index<TypeDefOrRef>(), m_propertyData, m_isStringable);
     }
 }
 
 HRESULT object_visualizer::CreateEvaluationResult(_In_ DkmVisualizedExpression* pVisualizedExpression, _In_ bool isAbiObject, _Deref_out_ DkmEvaluationResult** ppResultObject)
 {
-    winrt::com_ptr<object_visualizer> pObjectVisualizer = winrt::make_self<object_visualizer>(pVisualizedExpression, isAbiObject);
+    com_ptr<object_visualizer> pObjectVisualizer = make_self<object_visualizer>(pVisualizedExpression, isAbiObject);
 
     IF_FAIL_RET(pVisualizedExpression->SetDataItem(DkmDataCreationDisposition::CreateNew, pObjectVisualizer.get()));
 
@@ -536,18 +527,18 @@ HRESULT object_visualizer::CreateEvaluationResult(_In_ DkmVisualizedExpression* 
 
 HRESULT object_visualizer::CreateEvaluationResult(_Deref_out_ DkmEvaluationResult** ppResultObject)
 {
-    winrt::com_ptr<DkmRootVisualizedExpression> pRootVisualizedExpression = m_pVisualizedExpression.as<DkmRootVisualizedExpression>();
+    com_ptr<DkmRootVisualizedExpression> pRootVisualizedExpression = m_pVisualizedExpression.as<DkmRootVisualizedExpression>();
 
     auto valueHome = make_com_ptr(m_pVisualizedExpression->ValueHome());
-    winrt::com_ptr<DkmPointerValueHome> pPointerValueHome = valueHome.as<DkmPointerValueHome>();
+    com_ptr<DkmPointerValueHome> pPointerValueHome = valueHome.as<DkmPointerValueHome>();
 
-    winrt::com_ptr<DkmString> pValue;
+    com_ptr<DkmString> pValue;
     IF_FAIL_RET(ObjectToString(m_pVisualizedExpression.get(), pPointerValueHome.get(), m_isAbiObject, pValue));
 
-    winrt::com_ptr<DkmDataAddress> pAddress;
+    com_ptr<DkmDataAddress> pAddress;
     IF_FAIL_RET(DkmDataAddress::Create(m_pVisualizedExpression->StackFrame()->RuntimeInstance(), pPointerValueHome->Address(), nullptr, pAddress.put()));
 
-    winrt::com_ptr<DkmSuccessEvaluationResult> pSuccessEvaluationResult;
+    com_ptr<DkmSuccessEvaluationResult> pSuccessEvaluationResult;
     IF_FAIL_RET(DkmSuccessEvaluationResult::Create(
         m_pVisualizedExpression->InspectionContext(),
         m_pVisualizedExpression->StackFrame(),
@@ -589,9 +580,11 @@ HRESULT object_visualizer::GetChildren(
     }
     catch (...)
     {
+        NatvisDiagnostic(m_pVisualizedExpression.get(),
+            L"Exception in object_visualizer::GetPropertyData", NatvisDiagnosticLevel::Error, to_hresult());
     }
 
-    winrt::com_ptr<DkmEvaluationResultEnumContext> pEnumContext;
+    com_ptr<DkmEvaluationResultEnumContext> pEnumContext;
     IF_FAIL_RET(DkmEvaluationResultEnumContext::Create(
         static_cast<uint32_t>(m_propertyData.size()),
         m_pVisualizedExpression->StackFrame(),
@@ -613,22 +606,22 @@ HRESULT object_visualizer::GetItems(
     _Out_ DkmArray<DkmChildVisualizedExpression*>* pItems
 )
 {
-    std::list<winrt::com_ptr<DkmChildVisualizedExpression>> childItems;
+    std::list<com_ptr<DkmChildVisualizedExpression>> childItems;
 
     auto pParent = m_pVisualizedExpression.get();
     for( auto childIndex = StartIndex; childIndex < StartIndex + Count; ++childIndex)
     {
         auto& prop = m_propertyData[childIndex];
-        winrt::com_ptr<DkmChildVisualizedExpression> pPropertyVisualized;
+        com_ptr<DkmChildVisualizedExpression> pPropertyVisualized;
         if(FAILED(CreateChildVisualizedExpression(prop, pParent, m_isAbiObject, pPropertyVisualized.put())))
         {
-            winrt::com_ptr<DkmString> pErrorMessage;
+            com_ptr<DkmString> pErrorMessage;
             IF_FAIL_RET(DkmString::Create(L"<Property evaluation failed>", pErrorMessage.put()));
             
-            winrt::com_ptr<DkmString> pDisplayName;
+            com_ptr<DkmString> pDisplayName;
             IF_FAIL_RET(DkmString::Create(prop.displayName.c_str(), pDisplayName.put()));
 
-            winrt::com_ptr<DkmFailedEvaluationResult> pVisualizedResult;
+            com_ptr<DkmFailedEvaluationResult> pVisualizedResult;
             IF_FAIL_RET(DkmFailedEvaluationResult::Create(
                 pParent->InspectionContext(),
                 pParent->StackFrame(),
@@ -663,7 +656,7 @@ HRESULT object_visualizer::GetItems(
     auto pos = childItems.begin();
     while (pos != childItems.end())
     {
-        winrt::com_ptr<DkmChildVisualizedExpression> pCurr = *pos;
+        com_ptr<DkmChildVisualizedExpression> pCurr = *pos;
         resultValues.Members[j++] = pCurr.detach();
         pos++;
     }
