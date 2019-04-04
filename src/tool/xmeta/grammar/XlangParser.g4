@@ -104,7 +104,7 @@ constant_expression
 /* Variables */ // TODO: Later
 variable_declarator
     : IDENTIFIER
-    | IDENTIFIER = variable_initializer
+    | IDENTIFIER EQUAL variable_initializer
     ;
 
 variable_initializer
