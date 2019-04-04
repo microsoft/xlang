@@ -27,13 +27,6 @@ py::pyobj_handle py::register_python_type(PyObject* module, const char* const ty
     return std::move(type_object);
 }
 
-void py::set_invalid_activation_error(const char* const type_name)
-{
-    std::string msg{ type_name };
-    msg.append(" is not activatable");
-    PyErr_SetString(PyExc_TypeError, msg.c_str());
-}
-
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");

@@ -218,7 +218,25 @@ namespace py
 
     py::pyobj_handle register_python_type(PyObject* module, const char* const type_name, PyType_Spec* type_spec, PyObject* base_type);
 
-    void set_invalid_activation_error(const char* const type_name);
+    inline WINRT_NOINLINE void set_invalid_activation_error(const char* const type_name)
+    {
+        std::string msg{ type_name };
+        msg.append(" is not activatable");
+        PyErr_SetString(PyExc_TypeError, msg.c_str());
+    }
+
+    inline WINRT_NOINLINE void set_invalid_arg_count_error(Py_ssize_t arg_count)
+    {
+        if (arg_count != -1)
+        {
+            PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+        }
+    }
+
+    inline WINRT_NOINLINE void set_invalid_kwd_args_error()
+    {
+        PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
+    }
 
     inline WINRT_NOINLINE void to_PyErr() noexcept
     {

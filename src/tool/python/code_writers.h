@@ -578,7 +578,7 @@ if (!%)
             {
                 w.write(R"(if (kwds != nullptr)
 {
-    PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
+    py::set_invalid_kwd_args_error();
     return nullptr;
 }
 
@@ -614,11 +614,11 @@ Py_ssize_t arg_count = PyTuple_Size(args);
                     w.write("}\n");
                 }
 
-                w.write(R"(else if (arg_count != -1)
+                w.write(R"(else
 {
-    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+    py::set_invalid_arg_count_error(arg_count);
+    return nullptr;
 }
-return nullptr;
 )");
             }
         }
@@ -667,11 +667,11 @@ static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyOb
             }
         });
 
-        w.write(R"(else if (arg_count != -1)
+        w.write(R"(else
 {
-    PyErr_SetString(PyExc_TypeError, "Invalid parameter count");
+    py::set_invalid_arg_count_error(arg_count);
+    return nullptr;
 }
-return nullptr;
 )");
     }
 
