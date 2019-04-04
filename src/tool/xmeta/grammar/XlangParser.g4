@@ -276,7 +276,12 @@ return_type
     ;
 
 property_declaration
-    : attributes? type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : attributes? property_modifier* type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    ;
+
+property_modifier
+    : PROTECTED
+    | STATIC
     ;
 
 property_accessors
@@ -286,8 +291,8 @@ property_accessors
     ;
 
 event_declaration
-    : attributes? event_modifier? EVENT type IDENTIFIER SEMICOLON
-    | attributes? event_modifier? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
+    | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
 
 event_modifier
@@ -305,13 +310,8 @@ class_constructor_declaration
 
 /* Structs */
 struct_declaration
-    : attributes? struct_modifier* STRUCT IDENTIFIER type_parameter_list?
+    : attributes? STRUCT IDENTIFIER type_parameter_list?
         struct_body SEMICOLON
-    ;
-
-struct_modifier
-    : PUBLIC
-    | INTERNAL
     ;
 
 struct_body
@@ -320,17 +320,13 @@ struct_body
 
 field_declaration
     : type IDENTIFIER SEMICOLON
+    // TODO: Add variable initializers (<type> <id> = <expression>;)
     ;
 
 /* Interfaces */
 interface_declaration
-    : attributes? interface_modifier* PARTIAL? INTERFACE
+    : attributes? PARTIAL? INTERFACE
         IDENTIFIER type_parameter_list? interface_base? interface_body SEMICOLON?
-    ;
-
-interface_modifier
-    : PUBLIC
-    | INTERNAL
     ;
 
 interface_base
