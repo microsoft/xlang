@@ -246,32 +246,6 @@ namespace py
         }
     }
 
-    template<typename F>
-    auto trycatch_invoker(F func, decltype(func()) return_value) -> decltype(func())
-    {
-        try
-        {
-            return func();
-        }
-        catch(...)
-        {
-            to_PyErr();
-            return return_value;
-        }
-    }
-
-    template<typename F>
-    int setter_trycatch_invoker(PyObject* value, F func)
-    {
-        if (value == nullptr)
-        {
-            PyErr_SetString(PyExc_TypeError, "property delete not supported");
-            return -1;
-        }
-
-        return trycatch_invoker(func, -1);
-    }
-
     void wrapped_instance(std::size_t key, PyObject* obj);
     PyObject* wrapped_instance(std::size_t key);
 

@@ -106,20 +106,11 @@ namespace pywinrt
         }
     }
 
-#define PYWINRT_TEMPLATE_TRY_CATCH 
 
     // All generated try/catch blocks go thru this function in order to have a single place
     // to change as we test the binary size of different approaches
-    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view return_type = "PyObject*", std::string_view exception_return_value = "nullptr", std::string_view ref_capture = "")
+    void write_try_catch(writer& w, std::function<void(writer&)> tryfunc, std::string_view exception_return_value = "nullptr")
     {
-#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-        w.write("return py::trycatch_invoker([=%]() -> %\n{\n", ref_capture, return_type);
-        {
-            writer::indent_guard gg{ w };
-            tryfunc(w);
-        }
-        w.write("}, %);\n", exception_return_value);
-#else
         w.write("try\n{\n");
         {
             writer::indent_guard g{ w };
@@ -132,21 +123,10 @@ catch (...)
     return %;
 }
 )", exception_return_value);
-#endif
     }
 
     void write_setter_try_catch(writer& w, std::function<void(writer&)> tryfunc)
     {
-#ifdef PYWINRT_TEMPLATE_TRY_CATCH 
-        w.write("return py::setter_trycatch_invoker(arg, [=]() -> int\n{\n");
-        {
-            writer::indent_guard gg{ w };
-            tryfunc(w);
-            w.write("return 0;\n");
-        }
-        w.write("});\n");
-
-#else
         w.write(R"(if (arg == nullptr)
 {
     PyErr_SetString(PyExc_TypeError, "property delete not supported");
@@ -154,8 +134,7 @@ catch (...)
 }
 
 )");
-        write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "int", "-1");
-#endif
+        write_try_catch(w, [&](writer& w) { tryfunc(w); w.write("return 0;\n"); }, "-1");
     }
 
     void write_template_arg_name(writer& w, GenericParam const& param)
@@ -279,7 +258,7 @@ struct winrt_type<%>
                     settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.interfaces)(w);
                     settings.filter.bind_each<write_ns_module_exec_init_python_type>(members.structs)(w);
                     w.write("\nreturn 0;\n");
-                }, "int", "-1");
+                }, "-1");
         }
 
         w.write("}\n");
@@ -793,7 +772,7 @@ else
                     bind<write_method_invoke_context>(type, MethodDef{}),
                     bind<write_method_invoke_context>(type, MethodDef{}),
                     bind<write_method_invoke_context>(type, MethodDef{}));
-            }, "PyObject*", "nullptr");
+            }, "nullptr");
     }
 
     void write_seq_length_body(writer& w, TypeDef const& type)
@@ -801,7 +780,7 @@ else
         write_try_catch(w, [&](writer& w) 
         { 
             w.write("return static_cast<Py_ssize_t>(%Size());\n", bind<write_method_invoke_context>(type, MethodDef{}));
-        }, "Py_ssize_t", "-1");
+        }, "-1");
     }
 
     void write_seq_item_body(writer& w, TypeDef const& type)
@@ -829,7 +808,7 @@ else
 else { %SetAt(static_cast<uint32_t>(i), py::convert_to<%>(value)); }
 return 0;
 )", bind<write_method_invoke_context>(type, MethodDef{}), bind<write_method_invoke_context>(type, MethodDef{}), collection_type);
-        }, "int", "-1");
+        }, "-1");
     }
 
     void write_map_length_body(writer& w, TypeDef const& type)
@@ -837,7 +816,7 @@ return 0;
         write_try_catch(w, [&](writer& w) 
         { 
             w.write("return static_cast<Py_ssize_t>(%Size());\n", bind<write_method_invoke_context>(type, MethodDef{}));
-        }, "Py_ssize_t", "-1");
+        }, "-1");
     }
 
     void write_map_subscript_body(writer& w, TypeDef const& type)
@@ -880,7 +859,7 @@ else { %Insert(_key, py::convert_to<%>(value)); }
 return 0;
 )";
             w.write(format, key_type, bind<write_method_invoke_context>(type, MethodDef{}), bind<write_method_invoke_context>(type, MethodDef{}), value_type);
-        }, "int", "-1");
+        }, "-1");
     }
     
     void write_method_functions(writer& w, TypeDef const& type)
@@ -1826,7 +1805,7 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", const_cast<char**>(kwlist)%))
                 auto format = "% return_value{ % };\nreturn py::convert(return_value);\n";
                 write_try_catch(w,
                     [&](writer& w) { w.write(format, type, bind_list<write_struct_field_initalizer>(", ", type.FieldList())); },
-                    "PyObject*", "nullptr", ref_captures);
+                    "nullptr");
             }
         }
         w.write("}\n");
