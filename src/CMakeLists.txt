@@ -71,7 +71,7 @@ function(CONSUME_PAL target)
     target_link_libraries(${target} pal)
 endfunction()
 
-# set test_platform linker flags to look for .so files in the current directory 
+# set test_platform linker flags to look for .so files in the current directory
 # adapted from https://serverfault.com/a/926072
 function(RPATH_ORIGIN target)
     if (NOT WIN32)
@@ -113,7 +113,7 @@ if (MSVC)
         add_compile_options(/permissive- /await)
     endif()
 
-    # Explicitly configure _DEBUG preprocessor macro 
+    # Explicitly configure _DEBUG preprocessor macro
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " /D_DEBUG")
 else()
     add_compile_options(-stdlib=libc++)
@@ -124,6 +124,12 @@ endif()
 
 if (WIN32)
     add_definitions(-DNOMINMAX)
+
+    # By default, msbuild project files don't recognize RelWithDebInfo/MinSizeRel, so translate them to 'Release'
+    set (MSBUILD_CONFIGURATION ${CMAKE_BUILD_TYPE})
+    if ((${MSBUILD_CONFIGURATION} STREQUAL "RelWithDebInfo") OR (${MSBUILD_CONFIGURATION} STREQUAL "MinSizeRel"))
+        set(MSBUILD_CONFIGURATION Release)
+    endif()
 endif()
 
 add_subdirectory(tool)

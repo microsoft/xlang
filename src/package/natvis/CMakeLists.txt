@@ -7,13 +7,7 @@ file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/$ENV{VSCMD_ARG_TGT_ARCH}/${CMAKE_BUILD_TYPE}" cppwinrt_natvis_dir)
 file(TO_NATIVE_PATH ${cppwinrt_natvis_dir}/cppwinrtvisualizer.dll cppwinrtvisualizer_dll)
 
-# The vcxproj does not recognize RelWithDebInfo/MinSizeRel as valid build configurations, so translate them to 'Release'
-set (MSBUILD_CONFIGURATION ${CMAKE_BUILD_TYPE})
-if ((${MSBUILD_CONFIGURATION} STREQUAL "RelWithDebInfo") OR (${MSBUILD_CONFIGURATION} STREQUAL "MinSizeRel"))
-    set(MSBUILD_CONFIGURATION Release)
-endif()
-
-set(build_visualizer msbuild ${CMAKE_CURRENT_SOURCE_DIR}/cppwinrtvisualizer.vcxproj /nologo /m /p:Configuration=${MSBUILD_CONFIGURATION})
+set(build_visualizer msbuild ${CMAKE_CURRENT_SOURCE_DIR}/cppwinrtvisualizer.vcxproj /nologo /m /p:Configuration=${MSBUILD_CONFIGURATION},CmakeConfiguration=${CMAKE_BUILD_TYPE})
 
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 

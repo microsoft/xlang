@@ -14,12 +14,6 @@ file(TO_NATIVE_PATH "${cppwinrt_nupkg_dir}/Microsoft.Windows.CppWinRT.${XLANG_BU
 
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 
-# The csproj does not recognize RelWithDebInfo/MinSizeRel as valid build configurations, so translate them to 'Release'
-set (MSBUILD_CONFIGURATION ${CMAKE_BUILD_TYPE})
-if ((${MSBUILD_CONFIGURATION} STREQUAL "RelWithDebInfo") OR (${MSBUILD_CONFIGURATION} STREQUAL "MinSizeRel"))
-    set(MSBUILD_CONFIGURATION Release)
-endif()
-
 set(build_vsix msbuild ${CMAKE_CURRENT_SOURCE_DIR}/vsix.csproj /nologo /m /p:Configuration=${MSBUILD_CONFIGURATION},Platform=$ENV{VSCMD_ARG_TGT_ARCH})
 
 add_custom_command(OUTPUT ${cppwinrt_vsix}
