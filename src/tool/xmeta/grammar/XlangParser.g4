@@ -334,7 +334,7 @@ interface_modifier
     ;
 
 interface_base
-    : COLON interface_type_list
+    : REQUIRES interface_type_list
     ;
 
 interface_body

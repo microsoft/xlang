@@ -27,7 +27,7 @@ fragment Newline
 /* Keywords */
 ABSTRACT: 'abstract';
 ATTRIBUTE: 'attribute';
-CLASS: 'class';
+CLASS: 'runtimeclass';
 CONST: 'const';
 DEFAULT: 'default';
 DELEGATE: 'delegate';
@@ -42,6 +42,7 @@ OUT: 'out';
 OVERRIDE: 'override';
 PROTECTED: 'protected';
 REF: 'ref';
+REQUIRES: 'requires';
 SEALED: 'sealed';
 STATIC: 'static';
 STRUCT: 'struct';
