@@ -1,7 +1,7 @@
 #include "pybase.h"
 #include <winrt/base.h>
 
-PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type)
+PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type) noexcept
 {
     if (base_type != nullptr)
     {
@@ -13,7 +13,7 @@ PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type)
     }
 }
 
-py::pyobj_handle py::register_python_type(PyObject* module, const char* const type_name, PyType_Spec* type_spec, PyObject* base_type)
+PyTypeObject* py::register_python_type(PyObject* module, const char* const type_name, PyType_Spec* type_spec, PyObject* base_type)
 {
     py::pyobj_handle type_object{ create_python_type(type_spec, base_type) };
     if (!type_object)
@@ -24,16 +24,17 @@ py::pyobj_handle py::register_python_type(PyObject* module, const char* const ty
     {
         throw winrt::hresult_error();
     }
-    return std::move(type_object);
+    return reinterpret_cast<PyTypeObject*>(type_object.detach());
 }
 
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
+constexpr const char* const _type_name_winrt_base = "winrt_base";
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
 
-static PyObject* winrt_base_new(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
+static PyObject* winrt_base_new(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */) noexcept
 {
-    PyErr_SetString(PyExc_TypeError, "winrt_base is not directly constructable");
+    py::set_invalid_activation_error(_type_name_winrt_base);
     return nullptr;
 }
 
@@ -95,13 +96,21 @@ PyObject* py::wrapped_instance(std::size_t key)
     //return it->second;
 }
 
-static PyObject* init_apartment(PyObject* /*unused*/, PyObject* /*unused*/)
+static PyObject* init_apartment(PyObject* /*unused*/, PyObject* /*unused*/) noexcept
 {
-    winrt::init_apartment();
-    Py_RETURN_NONE;
+    try
+    {
+        winrt::init_apartment();
+        Py_RETURN_NONE;
+    }
+    catch (...)
+    {
+        py::to_PyErr();
+        return nullptr;
+    }
 }
 
-static PyObject* uninit_apartment(PyObject* /*unused*/, PyObject* /*unused*/)
+static PyObject* uninit_apartment(PyObject* /*unused*/, PyObject* /*unused*/) noexcept
 {
     winrt::uninit_apartment();
     Py_RETURN_NONE;
@@ -113,20 +122,19 @@ static PyMethodDef module_methods[]{
     { nullptr }
 };
 
-static int module_exec(PyObject* module)
+static int module_exec(PyObject* module) noexcept
 {
-    winrt::handle_type<py::pyobj_ptr_traits> type_object { PyType_FromSpec(&winrt_base_type_spec) };
-    if (!type_object)
+    try
     {
-        return -1;
-    }
-    if (PyModule_AddObject(module, "_winrt_base", type_object.get()) != 0)
-    {
-        return -1;
-    }
-    py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object.detach());
+        py::winrt_type<py::winrt_base>::python_type = py::register_python_type(module, _type_name_winrt_base, &winrt_base_type_spec, nullptr);
 
-    return 0;
+        return 0;
+    }
+    catch (...)
+    {
+        py::to_PyErr();
+        return -1;
+    }
 }
 
 static PyModuleDef_Slot module_slots[] = {
@@ -149,7 +157,7 @@ static PyModuleDef module_def = {
 };
 
 PyMODINIT_FUNC
-PyInit__%(void)
+PyInit__%(void) noexcept
 {
     return PyModuleDef_Init(&module_def);
 }

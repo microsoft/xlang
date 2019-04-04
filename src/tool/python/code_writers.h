@@ -239,7 +239,7 @@ struct winrt_type<%>
     {
         if (is_exclusive_to(type)) return;
 
-        w.write("py::winrt_type<%>::python_type = reinterpret_cast<PyTypeObject*>(py::register_python_type(module, _type_name_@, &_type_spec_@, %).detach());\n",
+        w.write("py::winrt_type<%>::python_type = py::register_python_type(module, _type_name_@, &_type_spec_@, %);\n",
             bind<write_python_wrapper_template_type>(type),
             type.TypeName(),
             type.TypeName(),
@@ -248,7 +248,7 @@ struct winrt_type<%>
 
     void write_ns_module_exec_func(writer& w, cache::namespace_members const& members)
     {
-        w.write("static int module_exec(PyObject* module)\n{\n");
+        w.write("static int module_exec(PyObject* module) noexcept\n{\n");
         {
             writer::indent_guard g{ w };
             write_try_catch(w, [&](auto& w)
@@ -564,7 +564,7 @@ if (!%)
 
     void write_class_new_function(writer& w, TypeDef const& type)
     {
-        w.write("\nstatic PyObject* _new_%(PyTypeObject* type, PyObject* args, PyObject* kwds)\n{\n", type.TypeName());
+        w.write("\nstatic PyObject* _new_%(PyTypeObject* type, PyObject* args, PyObject* kwds) noexcept\n{\n", type.TypeName());
 
         {
             writer::indent_guard g{ w };
@@ -677,7 +677,7 @@ static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyOb
 
     void write_get_property_function(writer& w, TypeDef const& type, MethodDef const& method)
     {
-        w.write("\nstatic PyObject* @_%(%, void* /*unused*/)\n{\n",
+        w.write("\nstatic PyObject* @_%(%, void* /*unused*/) noexcept\n{\n",
             type.TypeName(),
             method.Name(),
             bind<write_method_self_param>(type, is_static(method)));
@@ -702,7 +702,7 @@ static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyOb
 
         auto return_type = is_static(method) ? "PyObject*" : "int";
 
-        w.write("\nstatic % @_%(%, PyObject* arg, void* /*unused*/)\n{\n",
+        w.write("\nstatic % @_%(%, PyObject* arg, void* /*unused*/) noexcept\n{\n",
             return_type,
             type.TypeName(),
             method.Name(),
@@ -731,7 +731,7 @@ static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyOb
 
     void write_event_function(writer& w, TypeDef const& type, MethodDef const& method)
     {
-        w.write("\nstatic PyObject* @_%(%, PyObject* arg)\n{\n",
+        w.write("\nstatic PyObject* @_%(%, PyObject* arg) noexcept\n{\n",
             type.TypeName(), method.Name(), bind<write_method_self_param>(type, is_static(method)));
         {
             writer::indent_guard g{ w };
@@ -888,7 +888,7 @@ return 0;
 
         for (auto&&[method_name, method_is_static] : method_map)
         {
-            w.write("\nstatic PyObject* @_%(%, PyObject* args)\n{\n",
+            w.write("\nstatic PyObject* @_%(%, PyObject* args) noexcept\n{\n",
                 type.TypeName(),
                 method_name,
                 bind<write_method_self_param>(type, method_is_static));
@@ -923,7 +923,7 @@ return 0;
 
         if (!(is_ptype(type) || is_static_class(type)))
         {
-            w.write("\nstatic PyObject* _from_@(PyObject* /*unused*/, PyObject* arg)\n{\n", type.TypeName());
+            w.write("\nstatic PyObject* _from_@(PyObject* /*unused*/, PyObject* arg) noexcept\n{\n", type.TypeName());
             {
                 writer::indent_guard g{ w };
                 write_try_catch(w, [&](writer& w)
@@ -939,7 +939,7 @@ return 0;
         {
             w.write(strings::enter_function, type.TypeName(), bind<write_pywrapper_type>(type));
 
-            w.write("\nstatic PyObject* _exit_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic PyObject* _exit_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 writer::indent_guard g{ w };
                 write_try_catch(w, [](auto& w) { w.write("self->obj.Close();\nPy_RETURN_FALSE;\n"); });
@@ -949,7 +949,7 @@ return 0;
 
         if (implements_istringable(type))
         {
-            w.write("\nstatic PyObject* _str_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic PyObject* _str_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 writer::indent_guard g{ w };
                 write_try_catch(w, [](auto& w) { w.write("return py::convert(self->obj.ToString());\n"); });
@@ -973,7 +973,7 @@ return 0;
 
         if (implements_iasync(type))
         {
-            w.write("\nstatic PyObject* _await_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic PyObject* _await_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 write_ptype_body("dunder_await()", [&](auto& w) { w.write("return py::dunder_await(self->obj);\n"); });
             }
@@ -982,7 +982,7 @@ return 0;
 
         if (implements_iiterable(type) || implements_iiterator(type))
         {
-            w.write("\nstatic PyObject* _iterator_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic PyObject* _iterator_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 write_ptype_body("dunder_iter()", [&](auto& w) { write_dunder_iter_body(w, type); });
             }
@@ -991,7 +991,7 @@ return 0;
 
         if (implements_iiterator(type))
         {
-            w.write("\nstatic PyObject* _iterator_next_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic PyObject* _iterator_next_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 write_ptype_body("dunder_iternext()", [&](auto& w) { write_dunder_iter_next_body(w, type); });
             }
@@ -1000,13 +1000,13 @@ return 0;
 
         if (implements_sequence(type))
         {
-            w.write("\nstatic Py_ssize_t _seq_length_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic Py_ssize_t _seq_length_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 write_ptype_body("seq_length()", [&](auto& w) { write_seq_length_body(w, type); });
             }
             w.write("}\n");
 
-            w.write("\nstatic PyObject* _seq_item_@(%* self, Py_ssize_t i)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic PyObject* _seq_item_@(%* self, Py_ssize_t i) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 write_ptype_body("seq_item(i)", [&](auto& w) { write_seq_item_body(w, type); });
             }
@@ -1014,7 +1014,7 @@ return 0;
 
             if (implements_ivector(type))
             {
-                w.write("\nstatic int _seq_assign_@(%* self, Py_ssize_t i, PyObject* value)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+                w.write("\nstatic int _seq_assign_@(%* self, Py_ssize_t i, PyObject* value) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
                 {
                     write_ptype_body("seq_assign(i, value)", [&](auto& w) { write_seq_assign_body(w, type); });
                 }
@@ -1024,13 +1024,13 @@ return 0;
 
         if (implements_mapping(type))
         {
-            w.write("\nstatic Py_ssize_t _map_length_@(%* self)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic Py_ssize_t _map_length_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 write_ptype_body("map_length()", [&](auto& w) { write_map_length_body(w, type); });
             }
             w.write("}\n");
 
-            w.write("\nstatic PyObject* _map_subscript_@(%* self, PyObject* key)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            w.write("\nstatic PyObject* _map_subscript_@(%* self, PyObject* key) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
             {
                 write_ptype_body("map_subscript(key)", [&](auto& w) { write_map_subscript_body(w, type); });
             }
@@ -1038,7 +1038,7 @@ return 0;
 
             if (implements_imap(type))
             {
-                w.write("\nstatic int _map_assign_@(%* self, PyObject* key, PyObject* value)\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+                w.write("\nstatic int _map_assign_@(%* self, PyObject* key, PyObject* value) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
                 {
                     write_ptype_body("map_assign(key, value)", [&](auto& w) { write_map_assign_body(w, type); });
                 }
@@ -1335,15 +1335,15 @@ struct pinterface_python_type<%<%>>
             writer::indent_guard g{ w };
 
             w.write("virtual ~@() {};\n", type.TypeName());
-            w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() = 0;\n");
-            w.write("virtual std::size_t hash() = 0;\n");
+            w.write("virtual winrt::Windows::Foundation::IUnknown const& get_unknown() noexcept = 0;\n");
+            w.write("virtual std::size_t hash() noexcept = 0;\n");
 
             std::set<std::string_view> method_names{};
             enumerate_methods(w, type, [&](auto const& method)
             {
                 if (!contains(method_names, method.Name()))
                 {
-                    w.write("virtual PyObject* %(PyObject*) = 0;\n", method.Name());
+                    w.write("virtual PyObject* %(PyObject*) noexcept = 0;\n", method.Name());
                 }
 
                 method_names.insert(method.Name());
@@ -1352,54 +1352,54 @@ struct pinterface_python_type<%<%>>
             enumerate_properties(w, type, [&](auto const& prop)
             {
                 auto[get_method, put_method] = get_property_methods(prop);
-                w.write("virtual PyObject* %() = 0;\n", get_method.Name());
+                w.write("virtual PyObject* %() noexcept = 0;\n", get_method.Name());
                 if (put_method)
                 {
-                    w.write("virtual int %(PyObject*) = 0;\n", put_method.Name());
+                    w.write("virtual int %(PyObject*) noexcept = 0;\n", put_method.Name());
                 }
             });
 
             enumerate_events(w, type, [&](auto const& evt)
             {
                 auto[add_method, remove_method] = get_event_methods(evt);
-                w.write("virtual PyObject* %(PyObject*) = 0;\n", add_method.Name());
-                w.write("virtual PyObject* %(PyObject*) = 0;\n", remove_method.Name());
+                w.write("virtual PyObject* %(PyObject*) noexcept = 0;\n", add_method.Name());
+                w.write("virtual PyObject* %(PyObject*) noexcept = 0;\n", remove_method.Name());
             });
 
             if (implements_iasync(type))
             {
-                w.write("virtual PyObject* dunder_await() = 0;\n");
+                w.write("virtual PyObject* dunder_await() noexcept = 0;\n");
             }
 
             if (implements_iiterable(type) || implements_iiterator(type))
             {
-                w.write("virtual PyObject* dunder_iter() = 0;\n");
+                w.write("virtual PyObject* dunder_iter() noexcept = 0;\n");
             }
 
             if (implements_iiterator(type))
             {
-                w.write("virtual PyObject* dunder_iternext() = 0;\n");
+                w.write("virtual PyObject* dunder_iternext() noexcept = 0;\n");
             }
 
             if (implements_sequence(type))
             {
-                w.write("virtual Py_ssize_t seq_length() = 0;\n");
-                w.write("virtual PyObject* seq_item(Py_ssize_t i) = 0;\n");
+                w.write("virtual Py_ssize_t seq_length() noexcept = 0;\n");
+                w.write("virtual PyObject* seq_item(Py_ssize_t i) noexcept = 0;\n");
 
                 if (implements_ivector(type))
                 {
-                    w.write("virtual int seq_assign(Py_ssize_t i, PyObject* value) = 0;\n");
+                    w.write("virtual int seq_assign(Py_ssize_t i, PyObject* value) noexcept = 0;\n");
                 }
             }
 
             if (implements_mapping(type))
             {
-                w.write("virtual Py_ssize_t map_length() = 0;\n");
-                w.write("virtual PyObject* map_subscript(PyObject* key) = 0;\n");
+                w.write("virtual Py_ssize_t map_length() noexcept = 0;\n");
+                w.write("virtual PyObject* map_subscript(PyObject* key) noexcept = 0;\n");
 
                 if (implements_imap(type))
                 {
-                    w.write("virtual int map_assign(PyObject* key, PyObject* value) = 0;\n");
+                    w.write("virtual int map_assign(PyObject* key, PyObject* value) noexcept = 0;\n");
                 }
             }
         }
@@ -1423,8 +1423,8 @@ struct pinterface_python_type<%<%>>
             writer::indent_guard g{ w };
 
             w.write("@(%<%> o) : _obj(o) {}\n", type.TypeName(), type, bind_list<write_template_arg_name>(", ", type.GenericParam()));
-            w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() override { return _obj; }\n");
-            w.write("std::size_t hash() override { return py::get_instance_hash(_obj); }\n");
+            w.write("winrt::Windows::Foundation::IUnknown const& get_unknown() noexcept override { return _obj; }\n");
+            w.write("std::size_t hash() noexcept override { return py::get_instance_hash(_obj); }\n");
 
             std::set<std::string_view> method_names{};
             enumerate_methods(w, type, [&](auto const& method)
@@ -1434,7 +1434,7 @@ struct pinterface_python_type<%<%>>
 
             for (auto&& method_name : method_names)
             {
-                w.write("PyObject* %(PyObject* args) override\n{\n", method_name);
+                w.write("PyObject* %(PyObject* args) noexcept override\n{\n", method_name);
                 {
                     writer::indent_guard gg{ w };
                     write_method_overloads(w, type, method_name);
@@ -1448,7 +1448,7 @@ struct pinterface_python_type<%<%>>
                 auto get_method = std::get<0>(methods);
                 auto put_method = std::get<1>(methods);
 
-                w.write("PyObject* %() override\n{\n", get_method.Name());
+                w.write("PyObject* %() noexcept override\n{\n", get_method.Name());
                 {
                     writer::indent_guard gg{ w };
                     write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, get_method); });
@@ -1457,7 +1457,7 @@ struct pinterface_python_type<%<%>>
 
                 if (put_method)
                 {
-                    w.write("int %(PyObject* arg) override\n{\n", put_method.Name());
+                    w.write("int %(PyObject* arg) noexcept override\n{\n", put_method.Name());
                     {
                         writer::indent_guard gg{ w };
                         write_setter_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, put_method); });
@@ -1473,14 +1473,14 @@ struct pinterface_python_type<%<%>>
                 auto add_method = std::get<0>(methods);
                 auto remove_method = std::get<1>(methods);
 
-                w.write("PyObject* %(PyObject* arg) override\n{\n", add_method.Name());
+                w.write("PyObject* %(PyObject* arg) noexcept override\n{\n", add_method.Name());
                 {
                     writer::indent_guard gg{ w };
                     write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, add_method); });
                 }
                 w.write("}\n");
 
-                w.write("PyObject* %(PyObject* arg) override\n{\n", remove_method.Name());
+                w.write("PyObject* %(PyObject* arg) noexcept override\n{\n", remove_method.Name());
                 {
                     writer::indent_guard gg{ w };
                     write_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, remove_method); });
@@ -1490,12 +1490,12 @@ struct pinterface_python_type<%<%>>
 
             if (implements_iasync(type))
             {
-                w.write("PyObject* dunder_await() override { return py::dunder_await(_obj); }\n");
+                w.write("PyObject* dunder_await() noexcept override { return py::dunder_await(_obj); }\n");
             }
 
             if (implements_iiterable(type) || implements_iiterator(type))
             {
-                w.write("PyObject* dunder_iter() override\n{\n");
+                w.write("PyObject* dunder_iter() noexcept override\n{\n");
                 {
                     writer::indent_guard gg{ w };
                     write_dunder_iter_body(w, type);
@@ -1505,7 +1505,7 @@ struct pinterface_python_type<%<%>>
 
             if (implements_iiterator(type))
             {
-                w.write("PyObject* dunder_iternext() override\n{\n");
+                w.write("PyObject* dunder_iternext() noexcept override\n{\n");
                 {
                     writer::indent_guard gg{ w };
                     write_dunder_iter_next_body(w, type);
@@ -1515,14 +1515,14 @@ struct pinterface_python_type<%<%>>
 
             if (implements_sequence(type))
             {
-                w.write("Py_ssize_t seq_length() override\n{\n");
+                w.write("Py_ssize_t seq_length() noexcept override\n{\n");
                 {
                     writer::indent_guard gg{ w };
                     write_seq_length_body(w, type);
                 }
                 w.write("}\n");
 
-                w.write("PyObject* seq_item(Py_ssize_t i) override\n{\n");
+                w.write("PyObject* seq_item(Py_ssize_t i) noexcept override\n{\n");
                 {
                     writer::indent_guard gg{ w };
                     write_seq_item_body(w, type);
@@ -1531,7 +1531,7 @@ struct pinterface_python_type<%<%>>
 
                 if (implements_ivector(type))
                 {
-                    w.write("int seq_assign(Py_ssize_t i, PyObject* value) override\n{\n");
+                    w.write("int seq_assign(Py_ssize_t i, PyObject* value) noexcept override\n{\n");
                     {
                         writer::indent_guard gg{ w };
                         write_seq_assign_body(w, type);
@@ -1542,14 +1542,14 @@ struct pinterface_python_type<%<%>>
 
             if (implements_mapping(type))
             {
-                w.write("Py_ssize_t map_length() override\n{\n");
+                w.write("Py_ssize_t map_length() noexcept override\n{\n");
                 {
                     writer::indent_guard gg{ w };
                     write_map_length_body(w, type);
                 }
                 w.write("}\n");
 
-                w.write("PyObject* map_subscript(PyObject* key) override\n{\n");
+                w.write("PyObject* map_subscript(PyObject* key) noexcept override\n{\n");
                 {
                     writer::indent_guard gg{ w };
                     write_map_subscript_body(w, type);
@@ -1558,7 +1558,7 @@ struct pinterface_python_type<%<%>>
 
                 if (implements_imap(type))
                 {
-                    w.write("int map_assign(PyObject* key, PyObject* value) override\n{\n");
+                    w.write("int map_assign(PyObject* key, PyObject* value) noexcept override\n{\n");
                     {
                         writer::indent_guard gg{ w };
                         write_map_assign_body(w, type);
@@ -1846,7 +1846,7 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", const_cast<char**>(kwlist)%))
 
     void write_struct_getset_function(writer& w, TypeDef const& type, Field const& field)
     {
-        w.write("\nstatic PyObject* @_get_%(%* self, void* /*unused*/)\n{\n",
+        w.write("\nstatic PyObject* @_get_%(%* self, void* /*unused*/) noexcept\n{\n",
             type.TypeName(),
             field.Name(),
             bind<write_pywrapper_type>(type));
@@ -1864,7 +1864,7 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", const_cast<char**>(kwlist)%))
         }
         w.write("}\n");
 
-        w.write("\nstatic int @_set_%(%* self, PyObject* arg, void* /*unused*/)\n{\n",
+        w.write("\nstatic int @_set_%(%* self, PyObject* arg, void* /*unused*/) noexcept\n{\n",
             type.TypeName(),
             field.Name(),
             bind<write_pywrapper_type>(type));
