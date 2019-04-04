@@ -333,6 +333,22 @@ namespace winrt::impl
         wchar_t* m_data{ nullptr };
         void* m_buffer{ nullptr };
     };
+
+    template <>
+    struct bind_out<hstring>
+    {
+        bind_out(hstring& object) noexcept : object(object)
+        {
+        }
+
+        hstring& object;
+
+        operator void** () const noexcept
+        {
+            object.clear();
+            return (void**)(&object);
+        }
+    };
 }
 
 namespace winrt
