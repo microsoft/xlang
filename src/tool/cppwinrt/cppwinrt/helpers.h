@@ -439,6 +439,94 @@ namespace xlang
         return wrap;
     }
 
+    enum class param_category
+    {
+        generic_type,
+        object_type,
+        string_type,
+        enum_type,
+        struct_type,
+        array_type,
+        fundamental_type,
+    };
+
+    inline param_category get_category(TypeSig const& signature)
+    {
+        if (signature.is_szarray())
+        {
+            return param_category::array_type;
+        }
+
+        param_category result{};
+
+        call(signature.Type(),
+            [&](ElementType type)
+            {
+                if (type == ElementType::String)
+                {
+                    result = param_category::string_type;
+                }
+                else if (type == ElementType::Object)
+                {
+                    result = param_category::object_type;
+                }
+                else
+                {
+                    result = param_category::fundamental_type;
+                }
+            },
+            [&](coded_index<TypeDefOrRef> const& type)
+            {
+                auto index_type = type.type();
+
+                if (index_type == TypeDefOrRef::TypeSpec)
+                {
+                    result = param_category::object_type;
+                    return;
+                }
+
+                category type_category{};
+
+                if (index_type == TypeDefOrRef::TypeDef)
+                {
+                    type_category = get_category(type.TypeDef());
+                }
+                else
+                {
+                    auto type_ref = type.TypeRef();
+
+                    if (type_name(type_ref) == "System.Guid")
+                    {
+                        result = param_category::struct_type;
+                        return;
+                    }
+
+                    type_category = get_category(find_required(type_ref));
+                }
+
+                switch (type_category)
+                {
+                case category::interface_type:
+                case category::class_type:
+                case category::delegate_type:
+                    result = param_category::object_type;
+                    return;
+                case category::struct_type:
+                    result = param_category::struct_type;
+                    return;
+                case category::enum_type:
+                    result = param_category::enum_type;
+                    return;
+                }
+            },
+            [&](auto&&)
+            {
+                result = param_category::generic_type;
+            });
+
+        return result;
+    }
+
     static bool is_object(TypeSig const& signature)
     {
         bool object{};

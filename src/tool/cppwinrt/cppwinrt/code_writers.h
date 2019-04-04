@@ -591,35 +591,39 @@ namespace xlang
                 }
 
                 w.write(format, param_name, param_name);
+                continue;
+            }
+
+            auto category = get_category(param_signature->Type());
+
+            if (param.Flags().In())
+            {
+                switch (category)
+                {
+                case param_category::generic_type:
+                case param_category::enum_type:
+                case param_category::struct_type:
+                    w.write("impl::bind_in(%)", param_name);
+                    break;
+                case param_category::object_type:
+                case param_category::string_type:
+                    w.write("*(void**)(&%)", param_name);
+                    break;
+                case param_category::fundamental_type:
+                    w.write(param_name);
+                    break;
+                }
             }
             else
             {
-                if (param.Flags().In())
+                switch (category)
                 {
-                    XLANG_ASSERT(!param.Flags().Out());
-
-                    if (wrap_abi(param_signature->Type()))
-                    {
-                        w.write("impl::bind_in(%)", param_name);
-                    }
-                    else
-                    {
-                        w.write(param_name);
-                    }
-                }
-                else
-                {
-                    XLANG_ASSERT(!param.Flags().In());
-                    XLANG_ASSERT(param.Flags().Out());
-
-                    if (wrap_abi(param_signature->Type()))
-                    {
-                        w.write("impl::bind_out(%)", param_name);
-                    }
-                    else
-                    {
-                        w.write("&%", param_name);
-                    }
+                case param_category::fundamental_type:
+                    w.write("&%", param_name);
+                    break;
+                default:
+                    w.write("impl::bind_out(%)", param_name);
+                    break;
                 }
             }
         }
