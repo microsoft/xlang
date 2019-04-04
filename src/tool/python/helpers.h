@@ -581,6 +581,22 @@ namespace xlang
         return count;
     }
 
+    int count_out_param(std::vector<method_signature::param_t> const& params)
+    {
+        int count{ 0 };
+
+        for (auto&& param : params)
+        {
+            if (is_out_param(param))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+
     enum class argument_convention
     {
         no_args,

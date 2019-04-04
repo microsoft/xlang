@@ -451,6 +451,8 @@ self->obj%;
 
     void write_method_body_contents(writer& w, TypeDef const& type, MethodDef const& method)
     {
+        XLANG_ASSERT(!is_constructor(method));
+
         method_signature signature{ method };
 
         // convert in params from Python -> C++
@@ -463,25 +465,44 @@ self->obj%;
             w.write("\n");
         }
 
-        // Invoke member
-        if (is_constructor(method))
-        {
-            w.write("% return_value{ % };\n",
-                method.Parent(),
-                bind_list<write_param_name>(", ", signature.params()));
-        }
-        else
+        // Invoke member - simplified code path for methods w/ no out params
+        if (count_out_param(signature.params()) == 0)
         {
             if (signature.return_signature())
             {
                 w.register_type_namespace(signature.return_signature().Type());
-                w.write("auto return_value = ");
+
+                w.write("return py::convert(%%(%));\n",
+                    bind<write_method_invoke_context>(type, method),
+                    bind<write_method_cpp_name>(method),
+                    bind_list<write_param_name>(", ", signature.params()));
             }
-            w.write("%%(%);\n",
-                bind<write_method_invoke_context>(type, method),
-                bind<write_method_cpp_name>(method),
-                bind_list<write_param_name>(", ", signature.params()));
+            else
+            {
+                w.write("%%(%);\n",
+                    bind<write_method_invoke_context>(type, method),
+                    bind<write_method_cpp_name>(method),
+                    bind_list<write_param_name>(", ", signature.params()));
+
+                if (!is_python_setter(method))
+                {
+                    w.write("Py_RETURN_NONE;\n");
+                }
+            }
+
+            return;
         }
+
+        // Invoke member - code path for methods w/ out params
+        if (signature.return_signature())
+        {
+            w.register_type_namespace(signature.return_signature().Type());
+            w.write("auto return_value = ");
+        }
+        w.write("%%(%);\n",
+            bind<write_method_invoke_context>(type, method),
+            bind<write_method_cpp_name>(method),
+            bind_list<write_param_name>(", ", signature.params()));
 
         // python setters never have a return. write_method_body_contents's caller is responsible 
         // for writing the correct Python C API return value
