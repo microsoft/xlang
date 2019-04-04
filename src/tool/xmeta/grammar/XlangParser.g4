@@ -111,7 +111,7 @@ variable_initializer
     : expression
     | array_type
     ;
-    
+
 /* Attributes */
 attributes
     : attribute_section*
@@ -120,8 +120,8 @@ attributes
 attribute_section
     : OPEN_BRACKET (attribute_target COLON)? attribute_list CLOSE_BRACKET
     ;
- 
-// Attributes targets are subject to change   
+
+// Attributes targets are subject to change
 attribute_target
     : ASSEMBLY
     | MODULE
@@ -150,7 +150,7 @@ attribute_arguments
     ;
 
 positional_argument_list
-    : positional_argument (COMMA positional_argument)* 
+    : positional_argument (COMMA positional_argument)*
     ;
 
 positional_argument
@@ -158,7 +158,7 @@ positional_argument
     ;
 
 named_argument_list
-    : named_argument (COMMA named_argument)* 
+    : named_argument (COMMA named_argument)*
     ;
 
 named_argument
@@ -357,7 +357,7 @@ enum_base
     ;
 
 enum_body
-    : OPEN_BRACE enum_member_declaration CLOSE_BRACE
+    : OPEN_BRACE CLOSE_BRACE
     | OPEN_BRACE enum_member_declaration (COMMA enum_member_declaration)* COMMA? CLOSE_BRACE
     ;
 
