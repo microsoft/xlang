@@ -308,11 +308,6 @@ namespace winrt::impl
 
         T const& object;
 
-        operator void* () const noexcept
-        {
-            return *(void**)(&object);
-        }
-
         template <typename R>
         operator R const& () const noexcept
         {
