@@ -216,7 +216,9 @@ namespace py
 
     using pyobj_handle = winrt::handle_type<pyobj_ptr_traits>;
 
-    py::pyobj_handle register_python_type(PyObject* module, const char* type_name, PyType_Spec* type_spec, PyObject* base_type);
+    py::pyobj_handle register_python_type(PyObject* module, const char* const type_name, PyType_Spec* type_spec, PyObject* base_type);
+
+    void set_invalid_activation_error(const char* const type_name);
 
     inline WINRT_NOINLINE void to_PyErr() noexcept
     {

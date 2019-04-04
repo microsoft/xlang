@@ -13,7 +13,7 @@ PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type)
     }
 }
 
-py::pyobj_handle py::register_python_type(PyObject* module, const char* type_name, PyType_Spec* type_spec, PyObject* base_type)
+py::pyobj_handle py::register_python_type(PyObject* module, const char* const type_name, PyType_Spec* type_spec, PyObject* base_type)
 {
     py::pyobj_handle type_object{ create_python_type(type_spec, base_type) };
     if (!type_object)
@@ -25,6 +25,13 @@ py::pyobj_handle py::register_python_type(PyObject* module, const char* type_nam
         throw winrt::hresult_error();
     }
     return std::move(type_object);
+}
+
+void py::set_invalid_activation_error(const char* const type_name)
+{
+    std::string msg{ type_name };
+    msg.append(" is not activatable");
+    PyErr_SetString(PyExc_TypeError, msg.c_str());
 }
 
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;

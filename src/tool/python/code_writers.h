@@ -281,7 +281,7 @@ struct winrt_type<%>
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
     {
         w.write("\nPyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_python_wrapper_template_type>(type));
-        w.write("static const char* _type_name_@ = \"@\";\n", type.TypeName(), type.TypeName());
+        w.write("constexpr const char* const _type_name_@ = \"@\";\n", type.TypeName(), type.TypeName());
     }
 
     void write_dealloc_function(writer& w, TypeDef const& type)
@@ -551,12 +551,7 @@ if (!%)
             auto constructors = get_constructors(type);
             if (is_static_class(type) || constructors.size() == 0)
             {
-                auto format = R"(std::string msg{ _type_name_@ };
-msg.append(" is not activatable");
-PyErr_SetString(PyExc_TypeError, msg.c_str());
-return nullptr;
-)";
-                w.write(format, type.TypeName());
+                w.write("py::set_invalid_activation_error(_type_name_@);\nreturn nullptr;\n", type.TypeName());
             }
             else
             {
@@ -618,9 +613,7 @@ return nullptr;
             auto format = R"(
 static PyObject* _new_@(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */)
 {
-    std::string msg{ _type_name_@ };
-    msg.append(" interface is not activatable");
-    PyErr_SetString(PyExc_TypeError, msg.c_str());
+    py::set_invalid_activation_error(_type_name_@);
     return nullptr;
 }
 )";
