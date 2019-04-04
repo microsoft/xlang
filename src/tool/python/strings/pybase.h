@@ -4,15 +4,7 @@
 #include <Python.h>
 #include <structmember.h>
 
-#include <winrt/base.h>
-
-namespace winrt::impl
-{
-    // Bug 19167653: C++/WinRT missing category for AsyncStatus and CollectionChange. 
-    // The following lines can be removed after 19167653 is fixed
-    template <> struct category<winrt::Windows::Foundation::AsyncStatus> { using type = enum_category; };
-    template <> struct category<winrt::Windows::Foundation::Collections::CollectionChange> { using type = enum_category; };
-}
+#include <winrt/Windows.Foundation.h>
 
 namespace py
 {
@@ -1102,6 +1094,48 @@ namespace py
         }
     }
 
+    struct completion_callback
+    {
+        completion_callback() noexcept = default;
+
+        explicit completion_callback(pyobj_handle& loop, pyobj_handle& future)
+            : _loop(loop.detach()), _future(future.detach())
+        {
+        }
+
+        completion_callback(completion_callback&& other) noexcept
+        {
+            std::swap(_loop, other._loop);
+            std::swap(_future, other._future);
+        }
+
+        ~completion_callback()
+        {
+            winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
+            Py_CLEAR(_loop);
+            Py_CLEAR(_future);
+        }
+
+        PyObject* loop() const noexcept
+        {
+            return _loop;
+        }
+
+        PyObject* future() const noexcept
+        {
+            return _future;
+        }
+
+        PyObject* future_type() const noexcept
+        {
+            return (PyObject*)Py_TYPE(_future);
+        }
+
+    private:
+        PyObject* _loop{};
+        PyObject* _future{};
+    };
+
     template <typename Async>
     PyObject* dunder_await(Async const& async)
     {
@@ -1126,48 +1160,6 @@ namespace py
         // make a copy of future to pass into completed lambda
         pyobj_handle future_copy{ future.get() };
         Py_INCREF(future_copy.get());
-
-        struct completion_callback
-        {
-            completion_callback() noexcept = default;
-
-            explicit completion_callback(pyobj_handle& loop, pyobj_handle& future)
-                : _loop(loop.detach()), _future(future.detach())
-            {
-            }
-
-            completion_callback(completion_callback&& other) noexcept
-            {
-                std::swap(_loop, other._loop);
-                std::swap(_future, other._future);
-            }
-
-            ~completion_callback()
-            {
-                winrt::handle_type<py::gil_state_traits> gil_state{ PyGILState_Ensure() };
-                Py_CLEAR(_loop);
-                Py_CLEAR(_future);
-            }
-
-            PyObject* loop() const noexcept
-            {
-                return _loop;
-            }
-
-            PyObject* future() const noexcept
-            {
-                return _future;
-            }
-
-            PyObject* future_type() const noexcept
-            {
-                return (PyObject*)Py_TYPE(_future);
-            }
-
-        private:
-            PyObject* _loop{};
-            PyObject* _future{};
-        };
 
         completion_callback cb{ loop, future_copy };
 
