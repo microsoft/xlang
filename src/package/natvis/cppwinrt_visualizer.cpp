@@ -18,7 +18,7 @@ std::unique_ptr<cache> db;
 // If type not indexed, simulate RoGetMetaDataFile's strategy for finding app-local metadata
 // and add to the database dynamically.  RoGetMetaDataFile looks for types in the current process
 // so cannot be called directly.
-void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string typeName)
+void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string const& typeName)
 {
     auto winmd_path = path{ processPath };
     auto probeFileName = typeName;
