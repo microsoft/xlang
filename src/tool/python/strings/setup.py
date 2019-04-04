@@ -9,7 +9,7 @@ setuptools.setup(
     ext_modules = [ setuptools.Extension("_%", 
         sources = [%],
         extra_compile_args = ["/std:c++17", "/await", "/GR-", "/permissive-", "/d2FH4"], 
-        extra_link_args = ["/MAP"]
-        include_dirs = ["."],
+        extra_link_args = ["/MAP"],
+        include_dirs = [".", "cppwinrt"],
         libraries = ["windowsapp"]) ],
     packages = setuptools.find_namespace_packages())
