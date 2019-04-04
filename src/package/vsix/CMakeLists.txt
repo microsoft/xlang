@@ -14,7 +14,7 @@ file(TO_NATIVE_PATH "${cppwinrt_nupkg_dir}/Microsoft.Windows.CppWinRT.${XLANG_BU
 
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 
-set(build_vsix msbuild ${CMAKE_CURRENT_SOURCE_DIR}/vsix.csproj /nologo /m /p:Configuration=${MSBUILD_CONFIGURATION},Platform=$ENV{VSCMD_ARG_TGT_ARCH})
+set(build_vsix msbuild ${CMAKE_CURRENT_SOURCE_DIR}/vsix.csproj /nologo /m /p:Configuration=${MSBUILD_CONFIGURATION},CmakeConfiguration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH})
 
 add_custom_command(OUTPUT ${cppwinrt_vsix}
     COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} & ${nuget_exe} restore
