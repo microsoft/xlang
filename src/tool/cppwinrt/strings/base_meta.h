@@ -78,11 +78,8 @@ namespace winrt::impl
     template <typename D, typename I = D>
     using consume_t = typename consume<I>::template type<D>;
 
-    template <typename T>
-    struct delegate;
-
     template <typename T, typename H>
-    using delegate_t = typename delegate<T>::template type<H>;
+    struct delegate;
 
     template <typename T, typename = std::void_t<>>
     struct default_interface

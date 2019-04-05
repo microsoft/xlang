@@ -27,11 +27,6 @@ py::pyobj_handle py::register_python_type(PyObject* module, const char* type_nam
     return std::move(type_object);
 }
 
-WINRT_EXPORT namespace std 
-{
-    template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
-}
-
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");

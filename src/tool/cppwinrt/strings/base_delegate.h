@@ -36,7 +36,7 @@ namespace winrt::impl
             if (target == 0)
             {
                 std::atomic_thread_fence(std::memory_order_acquire);
-                delete static_cast<delegate_t<T, H>*>(this);
+                delete static_cast<delegate<T, H>*>(this);
             }
 
             return target;
@@ -50,7 +50,7 @@ namespace winrt::impl
     template <typename T, typename H>
     T make_delegate(H&& handler)
     {
-        return { static_cast<void*>(static_cast<abi_t<T>*>(new delegate_t<T, H>(std::forward<H>(handler)))), take_ownership_from_abi };
+        return { static_cast<void*>(static_cast<abi_t<T>*>(new delegate<T, H>(std::forward<H>(handler)))), take_ownership_from_abi };
     }
 
     template <typename T>
