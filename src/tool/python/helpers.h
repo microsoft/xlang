@@ -566,36 +566,15 @@ namespace xlang
             || category == param_category::fill_array);
     }
 
-    int count_in_param(std::vector<method_signature::param_t> const& params)
+    auto count_in_param(std::vector<method_signature::param_t> const& params)
     {
-        int count{ 0 };
-
-        for (auto&& param : params)
-        {
-            if (is_in_param(param))
-            {
-                count++;
-            }
-        }
-
-        return count;
+        return std::count_if(params.begin(), params.end(), [](auto const& param) { return is_in_param(param); });
     }
 
-    int count_out_param(std::vector<method_signature::param_t> const& params)
+    auto count_out_param(std::vector<method_signature::param_t> const& params)
     {
-        int count{ 0 };
-
-        for (auto&& param : params)
-        {
-            if (is_out_param(param))
-            {
-                count++;
-            }
-        }
-
-        return count;
+        return std::count_if(params.begin(), params.end(), [](auto const& param) { return is_out_param(param); });
     }
-
 
     enum class argument_convention
     {
