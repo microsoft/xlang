@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "winrt/test_component.h"
+#include "winrt/test_component.Delegates.h"
 
 //
 // These tests confirm the COM identity and other behaviours for agile implementations.
@@ -91,7 +91,7 @@ TEST_CASE("agility")
 
     // Test agile delegate
     {
-        IUnknown object = test_component::AgileDelegate([] {});
+        IUnknown object = test_component::Delegates::AgileDelegate([] {});
         com_ptr<IMarshal> marshal = object.as<IMarshal>();
         object = nullptr;
 

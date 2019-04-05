@@ -117,6 +117,7 @@
       <AdditionalDependencies>advapi32.lib;shell32.lib;windowsapp.lib;$(VsDebugEng_Lib);%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\cppwinrtvisualizer.def</ModuleDefinitionFile>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <DelayLoadDLLs>vsdebugeng.dll</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -141,6 +142,7 @@
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>advapi32.lib;shell32.lib;windowsapp.lib;$(VsDebugEng_Lib);%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\cppwinrtvisualizer.def</ModuleDefinitionFile>
+      <DelayLoadDLLs>vsdebugeng.dll</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -169,6 +171,7 @@
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>advapi32.lib;shell32.lib;windowsapp.lib;$(VsDebugEng_Lib);%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\cppwinrtvisualizer.def</ModuleDefinitionFile>
+      <DelayLoadDLLs>vsdebugeng.dll</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -197,6 +200,7 @@
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>advapi32.lib;shell32.lib;windowsapp.lib;$(VsDebugEng_Lib);%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\cppwinrtvisualizer.def</ModuleDefinitionFile>
+      <DelayLoadDLLs>vsdebugeng.dll</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

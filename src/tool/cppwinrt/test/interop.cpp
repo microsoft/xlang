@@ -36,7 +36,7 @@ struct MyDerived : implements<MyDerived, IDerived>
 {
 };
 
-struct MyMoreDerived : implements<MyMoreDerived, IMoreDerived>
+struct MyMoreDerived : implements<MyMoreDerived, IMoreDerived, Windows::Foundation::IInspectable>
 {
 };
 
@@ -59,6 +59,7 @@ TEST_CASE("interop")
         REQUIRE(a.try_as<IBase>() != nullptr);
         REQUIRE(a.try_as<IDerived>() == nullptr);
         REQUIRE(a.try_as<IMoreDerived>() == nullptr);
+        REQUIRE(a.try_as<::IInspectable>() == nullptr);
     }
     {
         com_ptr<IDerived> a = make<MyDerived>();
@@ -66,6 +67,7 @@ TEST_CASE("interop")
         REQUIRE(a.try_as<IBase>() != nullptr);
         REQUIRE(a.try_as<IDerived>() != nullptr);
         REQUIRE(a.try_as<IMoreDerived>() == nullptr);
+        REQUIRE(a.try_as<::IInspectable>() == nullptr);
     }
     {
         com_ptr<IMoreDerived> a = make<MyMoreDerived>();
@@ -73,5 +75,6 @@ TEST_CASE("interop")
         REQUIRE(a.try_as<IBase>() != nullptr);
         REQUIRE(a.try_as<IDerived>() != nullptr);
         REQUIRE(a.try_as<IMoreDerived>() != nullptr);
+        REQUIRE(a.try_as<::IInspectable>() != nullptr);
     }
 }

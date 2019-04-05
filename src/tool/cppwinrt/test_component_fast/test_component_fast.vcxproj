@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{A91B8BF3-28E4-4D9E-8DBA-64B70E4F0270}</ProjectGuid>
+    <ProjectGuid>{0E0ACA62-A92F-44CF-BD41-AEB541946DF8}</ProjectGuid>
     <RootNamespace>Component</RootNamespace>
-    <ProjectName>test_component</ProjectName>
+    <ProjectName>test_component_fast</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\cppwinrt.props" />
@@ -96,12 +96,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -111,14 +112,14 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_fast.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
       <SuppressStartupBanner />
       <DefaultCharType />
       <TargetEnvironment />
-      <HeaderFileName>$(OutputPath)test_component.h</HeaderFileName>
+      <HeaderFileName>nul</HeaderFileName>
       <GenerateTypeLibrary />
       <TypeLibraryName />
       <ErrorCheckAllocations />
@@ -133,7 +134,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref sdk -verbose -prefix -opt -lib test -fastabi -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -142,7 +143,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_fast.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -151,12 +152,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -166,14 +168,14 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_fast.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
       <SuppressStartupBanner />
       <DefaultCharType />
       <TargetEnvironment />
-      <HeaderFileName>$(OutputPath)test_component.h</HeaderFileName>
+      <HeaderFileName>nul</HeaderFileName>
       <GenerateTypeLibrary />
       <TypeLibraryName />
       <ErrorCheckAllocations />
@@ -188,7 +190,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref sdk -verbose -prefix -opt -lib test -fastabi -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -197,7 +199,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_fast.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -208,12 +210,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -225,14 +228,14 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_fast.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
       <SuppressStartupBanner />
       <DefaultCharType />
       <TargetEnvironment />
-      <HeaderFileName>$(OutputPath)test_component.h</HeaderFileName>
+      <HeaderFileName>nul</HeaderFileName>
       <GenerateTypeLibrary />
       <TypeLibraryName />
       <ErrorCheckAllocations />
@@ -247,7 +250,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref sdk -verbose -prefix -opt -lib test -fastabi -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -256,7 +259,7 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_fast.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -267,12 +270,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -284,14 +288,14 @@
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
     </Midl>
     <Midl>
-      <MetadataFileName>$(OutputPath)test_component.winmd</MetadataFileName>
+      <MetadataFileName>$(OutputPath)test_component_fast.winmd</MetadataFileName>
       <IgnoreStandardIncludePath />
       <WarningLevel />
       <WarnAsError />
       <SuppressStartupBanner />
       <DefaultCharType />
       <TargetEnvironment />
-      <HeaderFileName>$(OutputPath)test_component.h</HeaderFileName>
+      <HeaderFileName>nul</HeaderFileName>
       <GenerateTypeLibrary />
       <TypeLibraryName />
       <ErrorCheckAllocations />
@@ -306,7 +310,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -include test_component -ref sdk -verbose -prefix -opt -lib test -fastabi -overwrite</Command>
+      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -315,37 +319,36 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Inputs>$(OutputPath)test_component.winmd</Inputs>
+      <Inputs>$(OutputPath)test_component_fast.winmd</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Class.cpp" />
+    <ClCompile Include="Composition.CompositionObject.cpp" />
+    <ClCompile Include="Composition.Compositor.cpp" />
+    <ClCompile Include="Composition.SpriteVisual.cpp" />
+    <ClCompile Include="Composition.Visual.cpp" />
+    <ClCompile Include="Simple.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
-    <ClCompile Include="Generated Files\Simple.cpp" />
-    <ClCompile Include="module.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Velocity.Class1.cpp" />
-    <ClCompile Include="Velocity.Class2.cpp" />
-    <ClCompile Include="Velocity.Class4.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Class.h" />
-    <ClInclude Include="Generated Files\Simple.h" />
+    <ClInclude Include="Composition.CompositionObject.h" />
+    <ClInclude Include="Composition.Compositor.h" />
+    <ClInclude Include="Composition.SpriteVisual.h" />
+    <ClInclude Include="Composition.Visual.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Velocity.Class1.h" />
-    <ClInclude Include="Velocity.Class2.h" />
-    <ClInclude Include="Velocity.Class4.h" />
+    <ClInclude Include="Simple.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="test_component.idl" />
+    <Midl Include="test_component_fast.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
