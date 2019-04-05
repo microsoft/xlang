@@ -29,7 +29,6 @@ ABSTRACT: 'abstract';
 ATTRIBUTE: 'attribute';
 CLASS: 'runtimeclass';
 CONST: 'const';
-DEFAULT: 'default';
 DELEGATE: 'delegate';
 ENUM: 'enum';
 EVENT: 'event';
