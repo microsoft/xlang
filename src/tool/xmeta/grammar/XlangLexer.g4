@@ -120,9 +120,13 @@ UUID
 
 BOOLEAN_LITERAL: 'true' | 'false';
 
-INTEGER_LITERAL
-    : DecimalIntegerLiteral
-    | HexaDecmimalIntegerLiteral
+DECIMAL_INTEGER_LITERAL
+    : DecimalDigit+ IntegerTypeSuffix?
+    ;
+
+HEXADECIMAL_INTEGER_LITERAL
+    : '0x' HexDigit+ IntegerTypeSuffix?
+    | '0X' HexDigit+ IntegerTypeSuffix?
     ;
 
 REAL_LITERAL
@@ -183,10 +187,6 @@ fragment FormattingCharacter
     | '\u200d'
     ;
 
-fragment DecimalIntegerLiteral
-    : DecimalDigit+ IntegerTypeSuffix?
-    ;
-
 fragment DecimalDigit: [0-9];
 
 fragment IntegerTypeSuffix
@@ -202,11 +202,6 @@ fragment IntegerTypeSuffix
     | 'Lu'
     | 'lU'
     | 'lu'
-    ;
-
-fragment HexaDecmimalIntegerLiteral
-    : '0x' HexDigit+ IntegerTypeSuffix?
-    | '0X' HexDigit+ IntegerTypeSuffix?
     ;
     
 fragment UnicodeEscapeSequence

@@ -89,7 +89,8 @@ type_argument_list
 
 /* Expression */
 expression
-    : INTEGER_LITERAL
+    : DECIMAL_INTEGER_LITERAL
+    | HEXADECIMAL_INTEGER_LITERAL
     | BOOLEAN_LITERAL
     | REAL_LITERAL
     | CHARACTER_LITERAL
@@ -98,8 +99,6 @@ expression
     | UUID
     | NILL
     ;
-    
-enum_expression : INTEGER_LITERAL;
 
 /* Variables */ // TODO: Later
 variable_declarator
@@ -360,6 +359,20 @@ enum_member_declaration
     : attributes? IDENTIFIER
     | attributes? IDENTIFIER EQUAL enum_expression
     ;
+
+enum_expression 
+    : enum_decimal_integer
+    | enum_hexdecimal_integer
+    | enum_identifier;
+
+enum_decimal_integer
+    : DECIMAL_INTEGER_LITERAL;
+    
+enum_identifier
+    : IDENTIFIER;
+
+enum_hexdecimal_integer
+    : HEXADECIMAL_INTEGER_LITERAL;
 
 /* Delegates */
 delegate_declaration
