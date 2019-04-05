@@ -199,6 +199,10 @@ namespace winrt::impl
         template <typename F>
         auto call(F&& callback)
         {
+#ifdef WINRT_DIAGNOSTICS
+            get_diagnostics_info().add_factory<Class>();
+#endif
+
             {
                 count_guard const guard(m_value.count);
 
@@ -212,6 +216,10 @@ namespace winrt::impl
 
             if (!object.template try_as<IAgileObject>())
             {
+#ifdef WINRT_DIAGNOSTICS
+                get_diagnostics_info().non_agile_factory<Class>();
+#endif
+
                 return callback(object);
             }
 
@@ -411,5 +419,16 @@ namespace winrt
                 return instance.try_as<T>();
             }
         };
+    }
+}
+
+namespace winrt::impl
+{
+    template <typename T>
+    T fast_activate(Windows::Foundation::IActivationFactory const& factory)
+    {
+        void* result{};
+        check_hresult((*(impl::abi_t<Windows::Foundation::IActivationFactory>**)&factory)->ActivateInstance(&result));
+        return{ result, take_ownership_from_abi };
     }
 }
