@@ -11,7 +11,6 @@ namespace xlang
         bool base{};
         bool license{};
         bool brackets{};
-        bool tests{};
         bool verbose{};
 
         bool component{};
@@ -31,7 +30,7 @@ namespace xlang
         meta::reader::filter component_filter;
 
         bool fastabi{};
-        std::map<meta::reader::TypeDef, meta::reader::TypeDef> fastabi_defaults;
+        std::map<meta::reader::TypeDef, meta::reader::TypeDef> fastabi_cache;
     };
 
     extern settings_type settings;

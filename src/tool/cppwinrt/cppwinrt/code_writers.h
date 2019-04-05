@@ -655,9 +655,9 @@ namespace xlang
             return;
         }
 
-        auto pair = settings.fastabi_defaults.find(default_interface);
+        auto pair = settings.fastabi_cache.find(default_interface);
 
-        if (pair == settings.fastabi_defaults.end())
+        if (pair == settings.fastabi_cache.end())
         {
             return;
         }
@@ -946,9 +946,9 @@ namespace xlang
 
     static void write_fast_consume_declarations(writer& w, TypeDef const& default_interface)
     {
-        auto pair = settings.fastabi_defaults.find(default_interface);
+        auto pair = settings.fastabi_cache.find(default_interface);
 
-        if (pair == settings.fastabi_defaults.end())
+        if (pair == settings.fastabi_cache.end())
         {
             return;
         }
@@ -1181,9 +1181,9 @@ namespace xlang
             return;
         }
 
-        auto pair = settings.fastabi_defaults.find(type);
+        auto pair = settings.fastabi_cache.find(type);
 
-        if (pair == settings.fastabi_defaults.end())
+        if (pair == settings.fastabi_cache.end())
         {
             return;
         }
@@ -1749,9 +1749,9 @@ namespace xlang
             return;
         }
 
-        auto pair = settings.fastabi_defaults.find(default_interface);
+        auto pair = settings.fastabi_cache.find(default_interface);
 
-        if (pair == settings.fastabi_defaults.end())
+        if (pair == settings.fastabi_cache.end())
         {
             return;
         }

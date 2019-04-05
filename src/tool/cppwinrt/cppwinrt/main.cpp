@@ -8,7 +8,6 @@
 #include "component_writers.h"
 #include "file_writers.h"
 #include "type_writers.h"
-#include "write_tests.h"
 
 namespace xlang
 {
@@ -30,14 +29,13 @@ namespace xlang
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
-        { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
+        { "optimize", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "lib", 0, 1, "Specify library prefix (defaults to winrt)" },
+        { "library", 0, 1, "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
         { "fastabi", 0, 0 }, // Enable support for the Fast ABI
-        { "tests", 0, 0 }, // Generate internal test files
         { "ignore_velocity", 0, 0 }, // Ignore feature staging metadata and always include implementations
     };
 
@@ -97,7 +95,6 @@ Where <spec> is one or more of:
 
         settings.license = args.exists("license");
         settings.brackets = args.exists("brackets");
-        settings.tests = args.exists("tests");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / "winrt/impl");
@@ -223,11 +220,11 @@ Where <spec> is one or more of:
 
                 if (default_interface.type() == TypeDefOrRef::TypeDef)
                 {
-                    settings.fastabi_defaults.try_emplace(default_interface.TypeDef(), type);
+                    settings.fastabi_cache.try_emplace(default_interface.TypeDef(), type);
                 }
                 else
                 {
-                    settings.fastabi_defaults.try_emplace(find_required(default_interface.TypeRef()), type);
+                    settings.fastabi_cache.try_emplace(find_required(default_interface.TypeRef()), type);
                 }
             }
         }
@@ -323,11 +320,6 @@ Where <spec> is one or more of:
                         write_component_cpp(type);
                     }
                 }
-            }
-
-            if (settings.tests)
-            {
-                write_tests(c, group);
             }
 
             group.get();

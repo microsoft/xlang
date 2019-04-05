@@ -163,7 +163,6 @@
     <ClInclude Include="..\strings\base_xaml_typename.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="write_tests.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(OutDir)version.rc" />
