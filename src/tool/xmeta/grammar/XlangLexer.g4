@@ -106,12 +106,6 @@ EQUAL: '=';
 LESS_THAN: '<';
 GREATER_THAN: '>';
 
-/* Unicode character escape sequences */
-fragment UnicodeEscapeSequence
-    : '\\u' HexDigit HexDigit HexDigit HexDigit
-    | '\\U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
-    ;
-
 /* Identifiers */
 // Note: An identifier-or-keyword that is not a keyword
 // is not possible to do here. We have to check that during
@@ -123,6 +117,27 @@ IDENTIFIER
     
 UUID
    : HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit;
+
+BOOLEAN_LITERAL: 'true' | 'false';
+
+INTEGER_LITERAL
+    : DecimalIntegerLiteral
+    | HexaDecmimalIntegerLiteral
+    ;
+
+REAL_LITERAL
+    : DecimalDigit+ '.' DecimalDigit+ ExponentPart RealTypeSuffix
+    | '.' DecimalDigit+ ExponentPart RealTypeSuffix
+    | DecimalDigit ExponentPart RealTypeSuffix
+    | DecimalDigit RealTypeSuffix
+    ;
+    
+CHARACTER_LITERAL: '\'' Character '\'';
+
+STRING_LITERAL
+    : RegularStringLiteral
+    | VerbatimStringLiteral
+    ;
 
 fragment IdentifierOrKeyword
     : IdentifierStartCharacter IdentifierPartCharacter*
@@ -168,22 +183,6 @@ fragment FormattingCharacter
     | '\u200d'
     ;
 
-LITERAL
-    : BooleanLiteral
-    | IntegerLiteral
-    | RealLiteral
-    | CharacterLiteral
-    | StringLiteral
-    | NullLiteral
-    ;
-
-fragment BooleanLiteral: 'true' | 'false';
-
-fragment IntegerLiteral
-    : DecimalIntegerLiteral
-    | HexaDecmimalIntegerLiteral
-    ;
-
 fragment DecimalIntegerLiteral
     : DecimalDigit+ IntegerTypeSuffix?
     ;
@@ -209,15 +208,13 @@ fragment HexaDecmimalIntegerLiteral
     : '0x' HexDigit+ IntegerTypeSuffix?
     | '0X' HexDigit+ IntegerTypeSuffix?
     ;
-
-fragment HexDigit: [0-9A-Fa-f];
-
-fragment RealLiteral
-    : DecimalDigit+ '.' DecimalDigit+ ExponentPart RealTypeSuffix
-    | '.' DecimalDigit+ ExponentPart RealTypeSuffix
-    | DecimalDigit ExponentPart RealTypeSuffix
-    | DecimalDigit RealTypeSuffix
+    
+fragment UnicodeEscapeSequence
+    : '\\u' HexDigit HexDigit HexDigit HexDigit
+    | '\\U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
     ;
+    
+fragment HexDigit: [0-9A-Fa-f];
 
 fragment ExponentPart
     : 'e' Sign? DecimalDigit+
@@ -227,8 +224,6 @@ fragment ExponentPart
 fragment Sign: [+-];
 
 fragment RealTypeSuffix: [FfDd];
-
-fragment CharacterLiteral: '\'' Character '\'';
 
 fragment Character
     : SingleCharacter
@@ -259,11 +254,6 @@ fragment SimpleEscapeSequence
 
 fragment HexadecimalEscapeSequence
     : '\\x' HexDigit HexDigit? HexDigit? HexDigit?
-    ;
-
-fragment StringLiteral
-    : RegularStringLiteral
-    | VerbatimStringLiteral
     ;
 
 fragment RegularStringLiteral
@@ -297,8 +287,6 @@ fragment SingleVerbatimStringLiteralCharacter
 fragment QuoteEscapeSequence
     : '""'
     ;
-
-fragment NullLiteral: 'null';
 
 /* Unicode character classes */
 fragment UnicodeClassLU

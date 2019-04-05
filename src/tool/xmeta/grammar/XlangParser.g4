@@ -89,14 +89,17 @@ type_argument_list
 
 /* Expression */
 expression
-    : LITERAL
+    : INTEGER_LITERAL
+    | BOOLEAN_LITERAL
+    | REAL_LITERAL
+    | CHARACTER_LITERAL
+    | STRING_LITERAL
     | IDENTIFIER
     | UUID
+    | NILL
     ;
-
-constant_expression
-    : expression
-    ;
+    
+enum_expression : INTEGER_LITERAL;
 
 /* Variables */ // TODO: Later
 variable_declarator
@@ -355,7 +358,7 @@ enum_modifier
 
 enum_member_declaration
     : attributes? IDENTIFIER
-    | attributes? IDENTIFIER EQUAL constant_expression
+    | attributes? IDENTIFIER EQUAL enum_expression
     ;
 
 /* Delegates */
