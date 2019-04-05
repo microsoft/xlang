@@ -341,7 +341,7 @@ $(XamlMetaDataProviderPch)
     <Target Name="CppWinRTMakePlatformProjection"
             DependsOnTargets="GetCppWinRTPlatformWinMDInputs;$(CppWinRTMakePlatformProjectionDependsOn)"
             Inputs="@(CppWinRTPlatformWinMDInputs)"
-            Outputs="@(CppWinRTPlatformWinMDInputs->'$(GeneratedFilesDir)winrt\%(Filename).h')">
+            Outputs="$(GeneratedFilesDir)winrt\base.h">
         <PropertyGroup>
             <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(IntDir)cppwinrt_plat.rsp"</CppWinRTCommand>
         </PropertyGroup>
