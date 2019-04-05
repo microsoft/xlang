@@ -3,6 +3,7 @@
 #include "abi_writer.h"
 #include "code_writers.h"
 #include "metadata_cache.h"
+#include "versioning.h"
 
 using namespace std::literals;
 using namespace xlang::meta::reader;
@@ -179,7 +180,7 @@ void metadata_cache::process_namespace_dependencies(namespace_cache& target)
 template <typename T>
 static void process_contract_dependencies(namespace_cache& target, T const& type)
 {
-    if (auto attr = get_contracts(type))
+    if (auto attr = get_contract_history(type))
     {
         target.dependent_namespaces.emplace(decompose_type(attr->current_contract.type_name).first);
         for (auto const& prevContract : attr->previous_contracts)
@@ -283,15 +284,95 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
         auto ifaceType = &find_dependent_type(state, iface.Interface());
         type.required_interfaces.push_back(ifaceType);
 
-        if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
+        // NOTE: Types can have more than one default interface so long as they apply to different platforms. This is
+        //       not very useful, as we have to choose one to use for function argument types, but it technically is
+        //       allowed... If that's the case, just use the first one we encounter as this has the highest probability
+        //       of matching MIDLRT's behavior
+        if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv); attr && !type.default_interface)
         {
-            XLANG_ASSERT(!type.default_interface);
             type.default_interface = ifaceType;
         }
     }
 
-    if (get_attribute(type.type(), metadata_namespace, "FastAbiAttribute"sv))
+    if (auto fastAttr = get_attribute(type.type(), metadata_namespace, "FastAbiAttribute"sv))
     {
+        // Determine the versioning "scheme" used for the fast ABI attribute as this will determine which default
+        // interface we will be extending as well as which interfaces we will be using to extend it. There are three
+        // different constructors we need to consider here:
+        //      1.  .ctor(UInt32)                                       - version for Platform.Windows
+        //      2.  .ctor(UInt32, Windows.Foundation.Metadata.Platform) - platform + version
+        //      3.  .ctor(UInt32, String)                               - contract + version
+        std::uint32_t platform; // NOTE: -1 if contract versioned
+        std::uint32_t version;
+        auto ctorArgs = fastAttr.Value().FixedArgs();
+        if (ctorArgs.size() == 1)
+        {
+            platform = 0; // Platform.Windows
+            version = decode_integer<std::uint32_t>(std::get<ElemSig>(ctorArgs[0].value).value);
+        }
+        else if (ctorArgs.size() == 2)
+        {
+            version = decode_integer<std::uint32_t>(std::get<ElemSig>(ctorArgs[0].value).value);
+            auto const& elemSig = std::get<ElemSig>(ctorArgs[1].value);
+            if (std::holds_alternative<std::string_view>(elemSig.value))
+            {
+                platform = -1;
+            }
+            else
+            {
+                // Windows.Foundation.Metadata.Platform is an int
+                auto const& enumSig = std::get<ElemSig::EnumValue>(elemSig.value);
+                platform = static_cast<std::uint32_t>(decode_integer<int>(enumSig.value));
+            }
+        }
+        else
+        {
+            xlang::throw_invalid("Invalid fast ABI attribute");
+        }
+
+        // We'll be extending the default interface. Due to the behavior commented above, we cannot rely on
+        // 'default_interface' being the correct interface, so loop through again to find the default interface that
+        // corresponds to the platform calculated above
+        for (auto const& iface : type.type().InterfaceImpl())
+        {
+            if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
+            {
+                // Required interfaces can be versioned. If they are, they only apply to the specified platform(s). If
+                // they are not, then they apply to all platform(s) specified for the type
+                auto contractAttr = get_attribute(iface, metadata_namespace, "ContractVersionAttribute"sv);
+                if (!contractAttr && !get_attribute(iface, metadata_namespace, "VersionAttribute"sv))
+                {
+                    // No versioning information; this should be the only default interface that applies to all platforms
+                    type.fast_interface = &find_dependent_type(state, iface.Interface());
+                }
+                else if (platform != (std::uint32_t)-1)
+                {
+                    for_each_attribute(iface, metadata_namespace, "VersionAttribute"sv, [&](bool first, auto const& verAttr)
+                    {
+                        (void)first; (void)verAttr; // TODO
+                    });
+                }
+                else if (contractAttr)
+                {
+                    type.fast_interface = &find_dependent_type(state, iface.Interface());
+                }
+
+                if (type.fast_interface)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (!type.fast_interface)
+        {
+
+        }
+
+
+
+
+#if 0
         // The fast ABI interface for a default interface is the interface itself, so we don't go about re-defining it.
         // This will pose an issue, though, if the interface is defined in a different interface than the class since it
         // is ill-formed to derive from an undefined type
@@ -347,7 +428,7 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
 
         // We need to sort exclusive interfaces based off when they were added to the class. We accomplish this by
         // looking at when the interface was introduced relative to the class' contract history (if it has one)
-        auto contractHistory = get_contracts(type.type());
+        auto contractHistory = get_contract_history(type.type());
         auto contractPower = [&](interface_type const* iface)
         {
             auto initialContract = initial_contract(iface->type());
@@ -434,6 +515,7 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
             type.fastabi_interfaces.emplace_back(*base, *iface);
             base = &type.fastabi_interfaces.back();
         }
+#endif
     }
 }
 

@@ -112,7 +112,7 @@ void writer::pop_inline_namespace()
     }
 }
 
-void writer::push_contract_guard(contract_attributes& vers)
+void writer::push_contract_guard(contract_history const& vers)
 {
     auto [ns, name] = decompose_type(vers.current_contract.type_name);
     write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.current_contract.version });
@@ -322,14 +322,6 @@ static void write_cpp_type_definitions(writer& w, type_cache const& types)
 
     for (auto const& classType : types.classes)
     {
-        for (auto const& fastAbiType : classType.get().fastabi_interfaces)
-        {
-            fastAbiType.write_cpp_definition(w);
-        }
-    }
-
-    for (auto const& classType : types.classes)
-    {
         classType.get().write_cpp_definition(w);
     }
 }
@@ -402,14 +394,6 @@ static void write_c_type_definitions(writer& w, type_cache const& types)
     for (auto const& interfaceType : types.interfaces)
     {
         interfaceType.get().write_c_definition(w);
-    }
-
-    for (auto const& classType : types.classes)
-    {
-        for (auto const& fastAbiType : classType.get().fastabi_interfaces)
-        {
-            fastAbiType.write_c_definition(w);
-        }
     }
 
     for (auto const& classType : types.classes)
