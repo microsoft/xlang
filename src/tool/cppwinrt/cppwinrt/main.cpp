@@ -136,8 +136,8 @@ Where <spec> is one or more of:
 
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
-            settings.component_lib = args.value("lib", "winrt");
-            settings.component_opt = args.exists("opt");
+            settings.component_lib = args.value("library", "winrt");
+            settings.component_opt = args.exists("optimize");
             settings.component_ignore_velocity = args.exists("ignore_velocity");
 
             if (settings.component_pch == ".")
