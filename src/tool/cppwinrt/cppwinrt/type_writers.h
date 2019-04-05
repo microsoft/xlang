@@ -71,12 +71,20 @@ namespace xlang
     {
         using writer_base<writer>::write;
 
+        struct depends_compare
+        {
+            bool operator()(TypeDef const& left, TypeDef const& right) const
+            {
+                return left.TypeName() < right.TypeName();
+            }
+        };
+
         std::string type_namespace;
         bool abi_types{};
         bool param_names{};
         bool consume_types{};
         bool async_types{};
-        std::map<std::string_view, std::set<TypeDef>> depends;
+        std::map<std::string_view, std::set<TypeDef, depends_compare>> depends;
         std::vector<std::vector<std::string>> generic_param_stack;
 
         struct generic_param_guard
