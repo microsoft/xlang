@@ -69,12 +69,22 @@ namespace xlang
         w.write(format, type.TypeName(), bind_each<write_enum_field>(fields));
     }
 
-    static void write_interface_member_properties(writer& w, TypeDef const& type)
+    static void write_member_property(writer& w, Property const& property, boolean const& readonly = false)
     {
-        auto format = R"(        %%: %;
+        auto const& format = R"(        %%: %;
+)";
+        auto const& readonlyFormat = R"(        readonly %%: %;
 )";
 
-        for (auto&& property : type.PropertyList())
+        if (readonly)
+        {
+            w.write(readonlyFormat,
+                bind<write_lowercase>(property.Name().substr(0, 1)),
+                property.Name().substr(1),
+                property.Type().Type()
+            );
+        }
+        else
         {
             w.write(format,
                 bind<write_lowercase>(property.Name().substr(0, 1)),
@@ -84,47 +94,212 @@ namespace xlang
         }
     }
 
+    static void write_method_semantic(writer& w, MethodSemantics const& method_semantic, MethodDef& method)
+    {
+        auto const& target = method_semantic.Association();
+        auto const& semantic = method_semantic.Semantic();
+
+        if (target.type() == HasSemantics::Property)
+        {
+            if (!semantic.Getter() && !semantic.Setter())
+            {
+                xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
+            }
+            auto const& property = target.Property();
+            auto const& accessors = property.MethodSemantic();
+
+            if (distance(accessors) < 1 || 2 < distance(accessors))
+            {
+                xlang::throw_invalid("Properties can only have 1 or 2 accessors");
+            }
+
+            if (distance(accessors) == 2)
+            {
+                auto const& other_method_semantic = (accessors.first == method_semantic) ? accessors.first + 1 : accessors.first;
+                auto const& other_method = other_method_semantic.Method();
+
+                if (semantic.Getter())
+                {
+                    if (method + 1 == other_method)
+                    {
+                        if (!other_method_semantic.Semantic().Setter())
+                        {
+                            xlang::throw_invalid("Invalid semantic: properties can only have a setter and/or getter");
+                        }
+
+                        write_member_property(w, property);
+                        ++method;
+                    }
+                    else
+                    {
+                        XLANG_ASSERT(semantic.Getter());
+                        write_member_property(w, property, true);
+                    }
+                }
+                else
+                {
+                    xlang::throw_invalid("Write-only properties?");
+                }
+            }
+            else
+            {
+                XLANG_ASSERT(distance(accessors) == 1);
+                if (semantic.Getter())
+                {
+                    write_member_property(w, property, true);
+                }
+                else
+                {
+                    xlang::throw_invalid("Write-only properties?");
+                }
+            }
+        }
+        else
+        {
+            auto const& addEventRegistrationFormat =
+                R"(        addEventListener(eventName: "%", handler: %): void;
+)";
+            auto const& removeRegistrationFormat =
+                R"(        removeEventListener(eventName: "%", handler: %): void;
+)";
+
+            if (!semantic.AddOn() && !semantic.RemoveOn())
+            {
+                xlang::throw_invalid("Invalid semantic: events can only have an add and/or remove");
+            }
+            auto const& event = target.Event();
+            auto const& accessors = event.MethodSemantic();
+
+            if (distance(accessors) < 1 || 2 < distance(accessors))
+            {
+                xlang::throw_invalid("Events can only have 1 or 2 accessors");
+            }
+
+            if (distance(accessors) == 2)
+            {
+                auto const& other_method_semantic = (accessors.first == method_semantic) ? accessors.first + 1 : accessors.first;
+                auto const& other_method = other_method_semantic.Method();
+
+                if (semantic.AddOn())
+                {
+                    if (method + 1 == other_method)
+                    {
+                        if (!other_method_semantic.Semantic().RemoveOn())
+                        {
+                            xlang::throw_invalid("Invalid semantic: events can only have a add and/or remove");
+                        }
+                        w.write(addEventRegistrationFormat,
+                            bind<write_lowercase>(event.Name()),
+                            event.EventType());
+                        w.write(removeRegistrationFormat,
+                            bind<write_lowercase>(event.Name()),
+                            event.EventType());
+                        ++method;
+                    }
+                    else
+                    {
+                        XLANG_ASSERT(semantic.AddOn());
+                        w.write(addEventRegistrationFormat,
+                            bind<write_lowercase>(event.Name()),
+                            event.EventType());
+                    }
+                }
+                else
+                {
+                    XLANG_ASSERT(semantic.RemoveOn());
+                    w.write(removeRegistrationFormat,
+                        bind<write_lowercase>(event.Name()),
+                        event.EventType());
+                }
+            }
+            else
+            {
+                XLANG_ASSERT(distance(accessors) == 1);
+                if (semantic.AddOn())
+                {
+                    w.write(addEventRegistrationFormat,
+                        bind<write_lowercase>(event.Name()),
+                        event.EventType());
+                }
+                else
+                {
+                    XLANG_ASSERT(semantic.RemoveOn());
+                    w.write(removeRegistrationFormat,
+                        bind<write_lowercase>(event.Name()),
+                        event.EventType());
+                }
+            }
+        }
+    }
+    
+    static void write_method(writer& w, MethodDef const& method)
+    {
+        auto format =
+            R"(        %%(%): %;
+)";
+
+        w.write(format,
+            bind<write_lowercase>(method.Name().substr(0, 1)),
+            method.Name().substr(1),
+            bind<write_parameters>(method),
+            method.Signature().ReturnType());
+    }
+
+    static void write_interface_member_properties(writer& w, TypeDef const& type)
+    {
+        for (auto&& property : type.PropertyList())
+        {
+            write_member_property(w, property);
+        }
+    }
+
     static void write_interface_member_methods(writer& w, TypeDef const& type)
     {
-        auto format = 
-R"(        %%(%): %;
-)";
-        auto eventRegistrationFormat =
-R"(        addEventListener(eventName: "%", handler: %): void;
-        removeEventListener(eventName: "%", handler: %): void;
-)";
+        auto const& methods = type.MethodList();
+        auto const& properties = type.PropertyList();
+        auto const& events = type.EventList();
 
-        for (auto&& method : type.MethodList())
+        auto method_semantic = [&properties, &events](MethodDef const& method) -> MethodSemantics
         {
-            if (is_remove_overload(method))
+            for (auto const& prop : properties)
             {
-                continue;
+                for (auto const& semantic : prop.MethodSemantic())
+                {
+                    if (semantic.Method() == method)
+                    {
+                        return semantic;
+                    }
+                }
             }
-            else if (is_add_overload(method))
+            for (auto const& event : events)
             {
-                auto eventName = method.Name().substr(4);
-                auto eventHandlerType = method.Signature().Params().at(0).Type();
-                w.write(eventRegistrationFormat,
-                    bind<write_lowercase>(eventName),
-                    eventHandlerType,
-                    bind<write_lowercase>(eventName),
-                    eventHandlerType);
+                for (auto const& semantic : event.MethodSemantic())
+                {
+                    if (semantic.Method() == method)
+                    {
+                        return semantic;
+                    }
+                }
+            }
+            return {};
+        };
 
-            } 
-            else if (!is_put_overload(method) && !is_get_overload(method))
+        for (auto method = begin(methods); method != end(methods); ++method)
+        {
+            auto const& semantic = method_semantic(method);
+            if (semantic)
             {
-                w.write(format,
-                    bind<write_lowercase>(method.Name().substr(0, 1)),
-                    method.Name().substr(1),
-                    bind<write_parameters>(method),
-                    method.Signature().ReturnType());
+                write_method_semantic(w, semantic, method);
+            }
+            else
+            {
+                write_method(w, method);
             }
         }
     }
 
     static void write_interface_members(writer& w, TypeDef const& type)
     {
-        write_interface_member_properties(w, type);
         write_interface_member_methods(w, type);
     }
 

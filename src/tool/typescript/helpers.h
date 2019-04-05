@@ -93,21 +93,6 @@ namespace xlang
         return static_cast<bool>(get_attribute(row, type_namespace, type_name));
     }
 
-    static bool is_get_overload(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "get_");
-    }
-
-    static bool is_add_overload(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "add_");
-    }
-
-    static bool is_remove_overload(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "remove_");
-    }
-
     static bool is_put_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "put_");
