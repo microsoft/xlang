@@ -89,13 +89,15 @@ type_argument_list
 
 /* Expression */
 expression
-    : LITERAL
+    : DECIMAL_INTEGER_LITERAL
+    | HEXADECIMAL_INTEGER_LITERAL
+    | BOOLEAN_LITERAL
+    | REAL_LITERAL
+    | CHARACTER_LITERAL
+    | STRING_LITERAL
     | IDENTIFIER
     | UUID
-    ;
-
-constant_expression
-    : expression
+    | NILL
     ;
 
 /* Variables */ // TODO: Later
@@ -377,8 +379,22 @@ enum_modifier
 
 enum_member_declaration
     : attributes? IDENTIFIER
-    | attributes? IDENTIFIER EQUAL constant_expression
+    | attributes? IDENTIFIER EQUAL enum_expression
     ;
+
+enum_expression 
+    : enum_decimal_integer
+    | enum_hexdecimal_integer
+    | enum_identifier;
+
+enum_decimal_integer
+    : DECIMAL_INTEGER_LITERAL;
+    
+enum_identifier
+    : IDENTIFIER;
+
+enum_hexdecimal_integer
+    : HEXADECIMAL_INTEGER_LITERAL;
 
 /* Delegates */
 delegate_declaration
