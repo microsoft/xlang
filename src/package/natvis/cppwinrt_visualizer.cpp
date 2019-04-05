@@ -25,6 +25,12 @@ void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string con
     do
     {
         winmd_path.replace_filename(probeFileName + ".winmd");
+        if (GetNatvisDiagnosticLevel() == NatvisDiagnosticLevel::Verbose)
+        {
+            auto winmd_path_str = winmd_path.string();
+            auto message = std::wstring(L"Looking for ") + std::wstring(winmd_path_str.begin(), winmd_path_str.end());
+            NatvisDiagnostic(process, message, NatvisDiagnosticLevel::Verbose);
+        }
         if (exists(winmd_path))
         {
             if (GetNatvisDiagnosticLevel() == NatvisDiagnosticLevel::Verbose)
