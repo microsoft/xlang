@@ -246,11 +246,11 @@ class_body
     ;
 
 class_member_declarations
-    : attributes OPEN_BRACE class_member* CLOSE_BRACE
-    | class_member
+    : attributes OPEN_BRACE class_member_declaration* CLOSE_BRACE
+    | class_member_declaration
     ;
     
-class_member
+class_member_declaration
     : method_declaration
     | property_declaration
     | event_declaration
@@ -336,7 +336,6 @@ struct_body
 
 field_declaration
     : type IDENTIFIER SEMICOLON
-    // TODO: Add variable initializers (<type> <id> = <expression>;)
     ;
 
 /* Interfaces */
