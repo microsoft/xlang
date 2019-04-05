@@ -335,7 +335,7 @@ namespace xlang
         }
         else
         {
-            interfaces.emplace_back(name, info);
+            interfaces.emplace_back(name, std::move(info));
         }
     }
 
