@@ -36,7 +36,7 @@ namespace pywinrt
 
         settings.verbose = args.exists("verbose");
         settings.module = args.value("module", "winrt");
-        settings.input = args.files("input");
+        settings.input = args.files("input", database::is_database);
 
         for (auto && include : args.values("include"))
         {
@@ -57,6 +57,16 @@ namespace pywinrt
         std::vector<std::string> files;
         files.insert(files.end(), settings.input.begin(), settings.input.end());
         return files;
+    }
+
+    bool has_projected_types(cache::namespace_members const& members)
+    {
+        return
+            !members.interfaces.empty() ||
+            !members.classes.empty() ||
+            !members.enums.empty() ||
+            !members.structs.empty() ||
+            !members.delegates.empty();
     }
 
     int run(int const argc, char** argv)
@@ -98,7 +108,7 @@ namespace pywinrt
 
             for (auto&&[ns, members] : c.namespaces())
             {
-                if (!settings.filter.includes(members))
+                if (!has_projected_types(members) || !settings.filter.includes(members))
                 {
                     continue;
                 }

@@ -1814,8 +1814,8 @@ if (PyDict_Check(arg))
 
             {
                 auto format = R"(
-static char* kwlist[] = {%nullptr};
-if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", kwlist%))
+static const char* kwlist[] = {%nullptr};
+if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", const_cast<char**>(kwlist)%))
 {
     return nullptr;
 }

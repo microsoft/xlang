@@ -31,8 +31,8 @@
     <DisplayString>{m_handle.m_value,sh}</DisplayString>
     <StringView>m_handle.m_value,sh</StringView>
     <Expand>
-      <Item Name="Length">WindowsGetStringLen((HSTRING__*)m_handle.m_value)</Item>
-      <Item Name="[Pointer]">WindowsGetStringRawBuffer((HSTRING__*)m_handle.m_value, nullptr)</Item>
+      <Item Name="size">WindowsGetStringLen(m_handle.m_value)</Item>
+      <Item Name="[ptr]">WindowsGetStringRawBuffer(m_handle.m_value, nullptr)</Item>
     </Expand>
   </Type>
 </AutoVisualizer>
