@@ -51,7 +51,7 @@ endif()
 set(xmeta_gen_generated
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangLexer.cpp
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangParser.cpp
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/XlangBasicListener.cpp
+    ${CMAKE_SOURCE_DIR}/test/xmeta/xlangtestlistener.cpp
  )
 
 target_sources(test_xmeta PUBLIC main.cpp ${xmeta_gen_generated})
