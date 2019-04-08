@@ -184,7 +184,6 @@ namespace xlang
             case ElementType::Object:
                 return object_type{};
             }
-
             throw_invalid("element type not supported");
         },
             [](coded_index<TypeDefOrRef> type) -> type_semantics
@@ -192,7 +191,8 @@ namespace xlang
             return get_type_semantics(type);
         },
             [](GenericTypeIndex var) -> type_semantics { return generic_type_index{ var.index }; },
-            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); }
+            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); },
+            [](GenericMethodTypeIndex) -> type_semantics { throw_invalid("Generic methods not supported"); }
             }, signature.Type());
     }
 

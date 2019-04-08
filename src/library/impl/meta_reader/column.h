@@ -48,6 +48,11 @@ namespace xlang::meta::reader
         return equal_range(get_database().GenericParam, coded_index<TypeOrMethodDef>());
     }
 
+    inline auto MethodDef::GenericParam() const
+    {
+        return equal_range(get_database().GenericParam, coded_index<TypeOrMethodDef>());
+    }
+
     inline auto TypeDef::InterfaceImpl() const
     {
         struct compare
