@@ -1505,7 +1505,7 @@ namespace xlang
             {
                 clear = true;
             },
-            [](GenericMethodIndex)
+            [](GenericMethodTypeIndex)
             {
                 throw_invalid("Generic methods not supported.");
             },

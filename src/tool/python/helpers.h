@@ -192,7 +192,7 @@ namespace xlang
         },
             [](GenericTypeIndex var) -> type_semantics { return generic_type_index{ var.index }; },
             [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); },
-            [](GenericMethodIndex) -> type_semantics { throw_invalid("Generic methods not supported"); }
+            [](GenericMethodTypeIndex) -> type_semantics { throw_invalid("Generic methods not supported"); }
             }, signature.Type());
     }
 

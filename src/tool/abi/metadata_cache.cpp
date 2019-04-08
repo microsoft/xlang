@@ -503,7 +503,7 @@ metadata_type const& metadata_cache::find_dependent_type(init_state& state, Type
         {
             result = &find_dependent_type(state, t);
         },
-        [&](GenericMethodIndex)
+        [&](GenericMethodTypeIndex)
         {
             xlang::throw_invalid("Generic methods not supported");
         });

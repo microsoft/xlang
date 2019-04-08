@@ -388,7 +388,7 @@ namespace pywinrt
             call(type.Type(),
                 [&](ElementType) {},
                 [&](GenericTypeIndex) {},
-                [&](GenericMethodIndex) { throw_invalid("Generic methods not supported"); },
+                [&](GenericMethodTypeIndex) { throw_invalid("Generic methods not supported"); },
                 [&](auto&& t) { register_type_namespace(t); });
         }
 
@@ -505,7 +505,7 @@ namespace pywinrt
             write(generic_param_stack.back()[var.index]);
         }
 
-        void write(GenericMethodIndex)
+        void write(GenericMethodTypeIndex)
         {
             throw_invalid("Generic methods not supported");
         }

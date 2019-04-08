@@ -462,7 +462,7 @@ void GetInterfaceData(
                     // TODO: generic properties
                     NatvisDiagnostic(process, L"Generics are not yet supported", NatvisDiagnosticLevel::Verbose);
                 },
-                [&](GenericMethodIndex /*var*/)
+                [&](GenericMethodTypeIndex /*var*/)
                 {
                     throw_invalid("Generic methods not supported.");
                 },
