@@ -10,6 +10,10 @@
     <CustomVisualizer Condition="this != 0" VisualizerId="2ec1a02f-997c-4693-840e-88ffa1e21b56"/>
     <DisplayString Condition="this == 0">null</DisplayString>
   </Type>
+  <Type Name="winrt::impl::inspectable_abi">
+    <CustomVisualizer Condition="this != 0" VisualizerId="2ec1a02f-997c-4693-840e-88ffa1e21b56"/>
+    <DisplayString Condition="this == 0">null</DisplayString>
+  </Type>
   <!--Visualize all raw IInspectable pointers-->
   <Type Name="IInspectable">
     <CustomVisualizer Condition="this != 0" VisualizerId="2ec1a02f-997c-4693-840e-88ffa1e21b56"/>
@@ -27,8 +31,8 @@
     <DisplayString>{m_handle.m_value,sh}</DisplayString>
     <StringView>m_handle.m_value,sh</StringView>
     <Expand>
-      <Item Name="Length">WindowsGetStringLen((HSTRING__*)m_handle.m_value)</Item>
-      <Item Name="[Pointer]">WindowsGetStringRawBuffer((HSTRING__*)m_handle.m_value, nullptr)</Item>
+      <Item Name="size">WindowsGetStringLen(m_handle.m_value)</Item>
+      <Item Name="[ptr]">WindowsGetStringRawBuffer(m_handle.m_value, nullptr)</Item>
     </Expand>
   </Type>
 </AutoVisualizer>

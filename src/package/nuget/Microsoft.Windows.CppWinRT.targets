@@ -11,10 +11,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTProjectWinMD>$(OutDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
         <CppWinRTMergedDir>$(OutDir)Merged</CppWinRTMergedDir>
         <CppWinRTUnmergedDir>$(OutDir)Unmerged</CppWinRTUnmergedDir>
-        <CppWinRTTargetPlatformReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(WindowsTargetPlatformVersion)</CppWinRTTargetPlatformReferences>
+        <CppWinRTTargetPlatformReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(TargetPlatformVersion)</CppWinRTTargetPlatformReferences>
         <CppWinRTWriteOnlyWhenDifferent Condition="('$(CppWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</CppWinRTWriteOnlyWhenDifferent>
         <CppWinRTWriteOnlyWhenDifferent Condition="'$(CppWinRTWriteOnlyWhenDifferent)' != 'true'">false</CppWinRTWriteOnlyWhenDifferent>
-        <CppWinRTPath Condition="'$(CppWinRTPath)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\bin\</CppWinRTPath>
+        <CppWinRTPath Condition="'$(CppWinRTPath)'==''">"$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\bin\"</CppWinRTPath>
         
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
         <!--Override SDK's uap.props setting to ensure version-matched headers-->
@@ -40,12 +40,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CleanDependsOn>
             $(CleanDependsOn);CppWinRTClean
         </CleanDependsOn>
+        <CAExcludePath>
+            $(CAExcludePath);$(GeneratedFilesDir);
+        </CAExcludePath>
     </PropertyGroup>
 
     <Target Name="CppWinRTVerifyKitVersion" Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">
         <PropertyGroup>
             <_CppWinRT_RS4OrGreater>false</_CppWinRT_RS4OrGreater>
-            <_CppWinRT_RS4OrGreater Condition="'$(WindowsTargetPlatformVersion)' &gt;= '10.0.17134.0'">true</_CppWinRT_RS4OrGreater>
+            <_CppWinRT_RS4OrGreater Condition="'$(TargetPlatformVersion)' &gt;= '10.0.17134.0'">true</_CppWinRT_RS4OrGreater>
         </PropertyGroup>
         <VCMessage Code="MSB8036" Type="Error" Arguments="10.0.17134.0 (or later)" Condition="$(_CppWinRT_RS4OrGreater) != 'true'" />
     </Target>
@@ -62,6 +65,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <_FilesToDelete Include="$(CppWinRTUnmergedDir)\**"/>
         </ItemGroup>
         <Delete Files="@(_FilesToDelete)"/>
+    </Target>
+
+    <!--Define platform projection WinMD inputs-->
+    <Target Name="GetCppWinRTPlatformWinMDInputs"
+            DependsOnTargets="ResolveAssemblyReferences"
+            Returns="@(CppWinRTPlatformWinMDInputs)">
+        <ItemGroup>
+          <_CppWinRTPlatformWinMDInputs Remove="@(_CppWinRTPlatformWinMDInputs)" />
+          <_CppWinRTPlatformWinMDInputs Include="$(WindowsSDK_MetadataPathVersioned)\**\*.winmd" />
+          <CppWinRTPlatformWinMDInputs Include="@(_CppWinRTPlatformWinMDInputs)">
+            <WinMDPath>%(FullPath)</WinMDPath>
+          </CppWinRTPlatformWinMDInputs>
+        </ItemGroup>
+        <Message Text="CppWinRTPlatformWinMDInputs: @(CppWinRTPlatformWinMDInputs->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
     <!--Define platform WinMD references for modern IDL compilation-->
@@ -185,7 +202,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         </PropertyGroup>
         <PropertyGroup Condition="$(_HasXaml)">
             <_DisableReferences>false</_DisableReferences>
-            <_DisableReferences Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(WindowsTargetPlatformVersion)' &lt; '10.0.18310.0')">true</_DisableReferences>
+            <_DisableReferences Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.18310.0')">true</_DisableReferences>
             <FullXamlMetadataProviderAttribute Condition="$(XamlCodeGenerationControlFlags.Contains('FullXamlMetadataProvider'))">[Windows.UI.Xaml.Markup.FullXamlMetadataProvider] </FullXamlMetadataProviderAttribute>
             <XamlMarkupIdlImport Condition="$(_DisableReferences)">import "Windows.UI.Xaml.Markup.idl"%3b</XamlMarkupIdlImport>
             <XamlMetaDataProviderIdlLines>
@@ -322,19 +339,19 @@ $(XamlMetaDataProviderPch)
     </Target>
 
     <Target Name="CppWinRTMakePlatformProjection"
-            DependsOnTargets="GetCppWinRTPlatformWinMDReferences;$(CppWinRTMakePlatformProjectionDependsOn)"
-            Inputs="@(CppWinRTPlatformWinMDReferences)"
-            Outputs="@(CppWinRTPlatformWinMDReferences->'$(GeneratedFilesDir)winrt\%(Filename).h')">
+            DependsOnTargets="GetCppWinRTPlatformWinMDInputs;$(CppWinRTMakePlatformProjectionDependsOn)"
+            Inputs="@(CppWinRTPlatformWinMDInputs)"
+            Outputs="$(GeneratedFilesDir)winrt\base.h">
         <PropertyGroup>
             <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(IntDir)cppwinrt_plat.rsp"</CppWinRTCommand>
         </PropertyGroup>
         <ItemGroup>
-            <_CppwinrtRefInputs Remove="@(_CppwinrtRefInputs)"/>
-            <_CppwinrtRefInputs Include="@(CppWinRTPlatformWinMDReferences)"/>
+            <_CppwinrtInputs Remove="@(_CppwinrtInputs)"/>
+            <_CppwinrtInputs Include="@(CppWinRTPlatformWinMDInputs)"/>
         </ItemGroup>
         <PropertyGroup>
             <_CppwinrtParameters>$(CppWinRTCommandVerbosity)</_CppwinrtParameters>
-            <_CppwinrtParameters>$(_CppwinrtParameters) @(_CppwinrtRefInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
+            <_CppwinrtParameters>$(_CppwinrtParameters) @(_CppwinrtInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
             <_CppwinrtParameters>$(_CppwinrtParameters) -out &quot;$(GeneratedFilesDir).&quot;</_CppwinrtParameters>
         </PropertyGroup>
         <WriteLinesToFile Condition="!$(CppWinRTWriteOnlyWhenDifferent)"
@@ -389,9 +406,9 @@ $(XamlMetaDataProviderPch)
         <PropertyGroup>
             <_PCH>@(ClCompile->Metadata('PrecompiledHeaderFile')->Distinct())</_PCH>
         </PropertyGroup>
-        <Error Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(WindowsTargetPlatformVersion)' &lt; '10.0.17709.0') and ('$(_PCH)' != 'pch.h')"
+        <Error Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.17709.0') and ('$(_PCH)' != 'pch.h')"
             Text="Please retarget to 10.0.17709.0 or later, or rename your PCH to 'pch.h'."/>
-        <PropertyGroup Condition="('$(CppWinRTOverrideSDKReferences)' == 'true') or ('$(WindowsTargetPlatformVersion)' &gt; '10.0.17708.0')">
+        <PropertyGroup Condition="('$(CppWinRTOverrideSDKReferences)' == 'true') or ('$(TargetPlatformVersion)' &gt; '10.0.17708.0')">
             <CppWinRTUsePrefixes Condition="'$(CppWinRTUsePrefixes)' == ''">true</CppWinRTUsePrefixes>
             <CppWinRTPrecompiledHeader Condition="'$(CppWinRTPrecompiledHeader)' == ''">$(_PCH)</CppWinRTPrecompiledHeader>
         </PropertyGroup>
