@@ -1,7 +1,7 @@
 import _%
 _%.init_apartment()
 
-def _import_ns(ns):
+def _import_ns_module(ns):
     import importlib.machinery
     import importlib.util
 

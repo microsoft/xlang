@@ -1,4 +1,5 @@
 
+#ifdef _WIN32
 namespace winrt
 {
     [[nodiscard]] inline auto resume_background() noexcept
@@ -314,3 +315,5 @@ namespace winrt
         return awaitable{ dispatcher, priority };
     };
 }
+
+#endif

@@ -1,13 +1,16 @@
 #include "pch.h"
+#include "helpers.h"
+
 #include "strings.h"
 #include "settings.h"
 #include "type_writers.h"
-#include "helpers.h"
 #include "code_writers.h"
 #include "file_writers.h"
 
-namespace xlang
+namespace pywinrt
 {
+    using namespace xlang;
+
     settings_type settings;
 
     struct usage_exception {};
@@ -32,8 +35,8 @@ namespace xlang
         }
 
         settings.verbose = args.exists("verbose");
-        settings.module = args.value("module", "pyrt");
-        settings.input = args.files("input");
+        settings.module = args.value("module", "winrt");
+        settings.input = args.files("input", database::is_database);
 
         for (auto && include : args.values("include"))
         {
@@ -56,9 +59,19 @@ namespace xlang
         return files;
     }
 
+    bool has_projected_types(cache::namespace_members const& members)
+    {
+        return
+            !members.interfaces.empty() ||
+            !members.classes.empty() ||
+            !members.enums.empty() ||
+            !members.structs.empty() ||
+            !members.delegates.empty();
+    }
+
     int run(int const argc, char** argv)
     {
-        writer wc;
+        writer w;
 
         try
         {
@@ -71,15 +84,14 @@ namespace xlang
             {
                 for (auto&& file : settings.input)
                 {
-                    wc.write("input: %\n", file);
+                    w.write("input: %\n", file);
                 }
 
-                wc.write("output: %\n", settings.output_folder.string());
+                w.write("output: %\n", settings.output_folder.string());
             }
 
-            wc.flush_to_console();
+            w.flush_to_console();
 
-            std::vector<std::string> generated_namespaces{};
             task_group group;
 
             auto module_dir = settings.output_folder / settings.module;
@@ -89,11 +101,14 @@ namespace xlang
             {
                 write_pybase_h(src_dir);
                 write_package_dunder_init_py(module_dir);
+                write_module_cpp(src_dir);
             });
+
+            std::vector<std::string> generated_namespaces{};
 
             for (auto&&[ns, members] : c.namespaces())
             {
-                if (!settings.filter.includes(members))
+                if (!has_projected_types(members) || !settings.filter.includes(members))
                 {
                     continue;
                 }
@@ -121,9 +136,6 @@ namespace xlang
                     pos = new_pos + 1;
                 } 
 
-                std::string fqns{ ns };
-                auto h_filename = "py." + fqns + ".h";
-
                 generated_namespaces.emplace_back(ns);
 
                 group.add([&, &ns = ns, &members = members]
@@ -136,28 +148,28 @@ namespace xlang
 
             group.get();
 
-            write_module_cpp(src_dir);
             write_setup_py(settings.output_folder, generated_namespaces);
+            //write_cmake_lists_txt(settings.output_folder, generated_namespaces);
 
             if (settings.verbose)
             {
-                wc.write("time: %ms\n", get_elapsed_time(start));
+                w.write("time: %ms\n", get_elapsed_time(start));
             }
         }
         catch (std::exception const& e)
         {
-            wc.write("%\n", e.what());
-            wc.flush_to_console();
+            w.write("%\n", e.what());
+            w.flush_to_console();
             getchar();
             return -1;
         }
 
-        wc.flush_to_console();
+        w.flush_to_console();
         return 0;
     }
 }
 
 int main(int const argc, char** argv)
 {
-    return xlang::run(argc, argv);
+    return pywinrt::run(argc, argv);
 }

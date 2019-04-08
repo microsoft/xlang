@@ -324,7 +324,7 @@ catch (...) { return winrt::to_hresult(); }
                 {
                     default_constructor = true;
 
-                    w.write(R"(        Windows::Foundation::IInspectable ActivateInstance() const
+                    w.write(R"(        auto ActivateInstance() const
         {
             return make<T>();
         }
