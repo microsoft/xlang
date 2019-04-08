@@ -21,12 +21,12 @@
 /src/test/cpp/ @kennykerr
 /src/tool/cpp/ @kennykerr
 
-/src/tool/idl/ @kennykerr
-
 /src/tool/natvis/ @Scottj1s
 
 /src/test/python/ @devhawk  
 /src/tool/python/ @devhawk 
+
+/samples @devhawk
 /samples/python/ @devhawk 
 
 
