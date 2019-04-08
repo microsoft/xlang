@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 project(test_cppx)
 
 add_executable(test_cppx "")
