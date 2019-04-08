@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 # The C++/WinRT VSIX package is only targeted at Visual Studio (on Windows)
 if (WIN32 AND ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86"))
 
