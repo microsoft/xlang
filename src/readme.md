@@ -114,9 +114,7 @@ Eventually, source in the PAL will be split into separate folders based on under
 
 The **/tool** folder contains the tools provided in support of xlang development. This includes tools for working with idl and winmd files as well as for generating language projections.
 
-* **/tool/cpp** implements the tool that generates the C++ 17 language projection. Currently, the generated projection is Windows only, but the tool will be updated to generate cross-platform compatible code.
-
-* **/tool/idl** implements a tool that generates [MIDL 3](http://docs.microsoft.com/en-us/uwp/midl-3/) files from ECMA-335 metadata.
+* **/tool/cppwinrt** implements the tool that generates the C++ 17 language projection. Currently, the generated projection is Windows only, but the tool will be updated to generate cross-platform compatible code.
 
 * **/tool/natviz** implements a [Natvis visualization](http://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects) of C++/WinRT components for the Visual Studio debugger 2017. Over time, this tool will be updated to support visualization of xlang components.
 
