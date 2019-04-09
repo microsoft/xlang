@@ -33,8 +33,8 @@ endif()
 
 add_custom_command(TARGET test_xmeta POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_SOURCE_DIR}/test/xmeta/example/MoIdlConversion"
-    $<TARGET_FILE_DIR:test_xmeta>/MoIdlConversion)
+    "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test"
+    $<TARGET_FILE_DIR:test_xmeta>/midl3test)
 
 target_sources(test_xmeta
     PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp)
