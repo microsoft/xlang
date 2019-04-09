@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 set(python_module_name winrt)
 
 set(winmd_files

@@ -184,7 +184,6 @@ namespace xlang
             case ElementType::Object:
                 return object_type{};
             }
-
             throw_invalid("element type not supported");
         },
             [](coded_index<TypeDefOrRef> type) -> type_semantics
@@ -192,7 +191,8 @@ namespace xlang
             return get_type_semantics(type);
         },
             [](GenericTypeIndex var) -> type_semantics { return generic_type_index{ var.index }; },
-            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); }
+            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); },
+            [](GenericMethodTypeIndex) -> type_semantics { throw_invalid("Generic methods not supported"); }
             }, signature.Type());
     }
 
@@ -566,19 +566,14 @@ namespace xlang
             || category == param_category::fill_array);
     }
 
-    int count_in_param(std::vector<method_signature::param_t> const& params)
+    auto count_in_param(std::vector<method_signature::param_t> const& params)
     {
-        int count{ 0 };
+        return std::count_if(params.begin(), params.end(), [](auto const& param) { return is_in_param(param); });
+    }
 
-        for (auto&& param : params)
-        {
-            if (is_in_param(param))
-            {
-                count++;
-            }
-        }
-
-        return count;
+    auto count_out_param(std::vector<method_signature::param_t> const& params)
+    {
+        return std::count_if(params.begin(), params.end(), [](auto const& param) { return is_out_param(param); });
     }
 
     enum class argument_convention
