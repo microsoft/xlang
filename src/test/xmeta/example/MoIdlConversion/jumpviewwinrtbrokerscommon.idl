@@ -1,0 +1,224 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.JumpView
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.JumpView.IJumpViewParams", 1e7da368-00c5-499d-ad14-f2051c73cb3d)]
+    runtimeclass JumpViewParams
+    {
+        JumpViewParams();
+        String Serialize();
+        void Deserialize(String paramsString);
+        String TargetAppId{ get; };
+        String TargetAppId{ set; };
+        Boolean TargetAppIdIsExplicit{ get; };
+        Boolean TargetAppIdIsExplicit{ set; };
+        String TargetPath{ get; };
+        String TargetPath{ set; };
+        String TargetPreferredDisplayName{ get; };
+        String TargetPreferredDisplayName{ set; };
+        Windows.Foundation.Point WindowPosition{ get; };
+        Windows.Foundation.Point WindowPosition{ set; };
+        Windows.UI.Xaml.HorizontalAlignment WindowHorizontalAlign{ get; };
+        Windows.UI.Xaml.HorizontalAlignment WindowHorizontalAlign{ set; };
+        Windows.UI.Xaml.VerticalAlignment WindowVerticalAlign{ get; };
+        Windows.UI.Xaml.VerticalAlignment WindowVerticalAlign{ set; };
+        Boolean ShowAppActivateAction{ get; };
+        Boolean ShowAppActivateAction{ set; };
+        Windows.Internal.Shell.JumpView.AppCloseMode AppCloseActionMode{ get; };
+        Windows.Internal.Shell.JumpView.AppCloseMode AppCloseActionMode{ set; };
+        UInt64 TargetWindowHandle{ get; };
+        UInt64 TargetWindowHandle{ set; };
+        UInt64 TargetMonitorHandle{ get; };
+        UInt64 TargetMonitorHandle{ set; };
+        Windows.Internal.Shell.JumpView.AppPinMode AppPinActionMode{ get; };
+        Windows.Internal.Shell.JumpView.AppPinMode AppPinActionMode{ set; };
+        Boolean HideDestinationList{ get; };
+        Boolean HideDestinationList{ set; };
+        Windows.Internal.Shell.JumpView.JumpViewInvocationSurfaceType InvocationSurface{ get; };
+        Windows.Internal.Shell.JumpView.JumpViewInvocationSurfaceType InvocationSurface{ set; };
+        Windows.Internal.Shell.JumpView.JumpViewInvocationMethod InvocationMethod{ get; };
+        Windows.Internal.Shell.JumpView.JumpViewInvocationMethod InvocationMethod{ set; };
+        Int32 ZBand{ get; };
+        Int32 ZBand{ set; };
+        Boolean IgnoreForegroundErrors{ get; };
+        Boolean IgnoreForegroundErrors{ set; };
+    }
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.JumpView.IJumpViewExperienceWrapper", 068594ee-b0e1-4fe0-94c8-c87358614111)]
+    runtimeclass JumpViewExperienceWrapper
+    {
+        JumpViewExperienceWrapper();
+        Windows.Foundation.IAsyncAction EnsureExperienceManagerAsync();
+        Windows.Foundation.IAsyncAction ShowViewAsync(JumpViewParams params);
+        Windows.Foundation.IAsyncAction DismissViewAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.JumpView.JumpViewExperienceWrapper, String>  ViewShown;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.JumpView.JumpViewExperienceWrapper, String>  ViewDismissed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.JumpView.JumpViewExperienceWrapper, String>  ShowCancelled;
+    }
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    enum JumpViewInvocationSurfaceType
+    {
+        Unknown,
+        Start_MostUsed,
+        Start_TileGrid,
+        Taskbar,
+        PenWorkspace_RecentItem,
+    };
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    enum JumpViewInvocationMethod
+    {
+        Unknown,
+        Mouse,
+        Keyboard,
+        Touch,
+        Pen,
+    };
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    enum AppPinMode
+    {
+        Disabled,
+        TaskbarPin,
+        TaskbarUnpin,
+    };
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    enum AppCloseMode
+    {
+        Disabled,
+        CloseWindow,
+        CloseOnDisplay,
+        CloseAll,
+    };
+
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    enum JumpViewItemType
+    {
+        Unknown,
+        ShellItem,
+        ShellLink,
+    };
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    enum JumpViewTheme
+    {
+        Unknown,
+        Dark,
+        Light,
+        HighContrastBlack,
+        HighContrastWhite,
+    };
+
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.JumpView.IJumpViewItemInfo", 09e4b57c-c988-4015-a11c-af7ac3c64d9a)]
+    runtimeclass JumpViewItemInfo
+    {
+        JumpViewItemInfo();
+        String DisplayName{ get; };
+        String Description{ get; };
+        Boolean IsElevated{ get; };
+        Boolean IsPinnable{ get; };
+        Boolean IsPinnable{ set; };
+        Boolean IsPinned{ get; };
+        Boolean IsPinned{ set; };
+        Boolean IsRemovable{ get; };
+        Boolean IsRemovable{ set; };
+        Boolean IsSeparator{ get; };
+        String AppId{ get; };
+        String ExePath{ get; };
+        String LogoPath{ get; };
+        Windows.UI.Color IconBackgroundColor{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  LoadIconImageAsync(UInt32 imageSize, UInt32 imageScale);
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  LoadIconOrLogoImageAsync(UInt32 imageSize, UInt32 imageScale, JumpViewTheme imageTheme);
+        Windows.Internal.Shell.JumpView.JumpViewItemType DestinationType{ get; };
+        Boolean IsFolder{ get; };
+        Boolean IsSameDestination(JumpViewItemInfo pCompareTo);
+        String Path{ get; };
+        Single UsagePoints{ get; };
+        Windows.Foundation.DateTime LastAccessed{ get; };
+    }
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    enum JumpViewCategoryType
+    {
+        Recent,
+        Frequent,
+        Pinned,
+        Tasks,
+        Custom,
+    };
+
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.JumpView.IJumpViewCategoryInfo", 6c52ee51-55f0-4c40-825d-ccde152ad439)]
+    runtimeclass JumpViewCategoryInfo
+    {
+        JumpViewCategoryInfo();
+        String DisplayName{ get; };
+        Windows.Internal.Shell.JumpView.JumpViewCategoryType CategoryType{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.JumpView.JumpViewItemInfo>  Destinations{ get; };
+    }
+
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.JumpView.IContextMenuItemWrapper", d1273efa-b70c-4397-94a6-882233dcbb2f)]
+    runtimeclass ContextMenuItemWrapper
+    {
+        ContextMenuItemWrapper();
+        String CanonicalVerb{ get; };
+        String DisplayName{ get; };
+        Windows.Storage.Streams.IRandomAccessStream IconImage{ get; };
+        Boolean HasIconImage{ get; };
+        Boolean IsSeparator{ get; };
+        Boolean HasSubMenu{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.JumpView.ContextMenuItemWrapper>  SubMenuItems{ get; };
+        void Invoke(Windows.Foundation.Point invocationPoint, Windows.System.VirtualKeyModifiers modifiers);
+    }
+
+    [contract(Windows.Internal.Shell.JumpView.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.JumpView.IJumpViewBrokerStatics", 2f6a0f43-0153-4290-91a6-f0f9d64d7afc)]
+    runtimeclass JumpViewBroker
+    {
+        static Boolean HasList(String appId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.JumpView.JumpViewCategoryInfo>  EnumList(String appId, String path, UInt32 numMaxSlots);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.JumpView.JumpViewCategoryInfo>  TryEnumList(String appId, String path, UInt32 numMaxSlots);
+        static void PinItem(JumpViewItemInfo item, Int32 iPinPos);
+        static void RemoveItem(JumpViewItemInfo item);
+        static void ActivateItem(JumpViewItemInfo item, Boolean skipResolve, Boolean runElevated, Windows.Foundation.Point invocationPoint);
+        static Boolean TryResolveItem(JumpViewItemInfo item);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.JumpView.ContextMenuItemWrapper>  EnumItemContextMenu(JumpViewItemInfo item, Boolean extendedMenu);
+        static Boolean IsTaskbarPinnedApp(String appId, String path);
+        static void PinApp(String appId, Boolean appIdIsExplicit, String path, AppPinMode mode);
+        static void CloseTargetWindow(String appId, UInt64 windowHandle, UInt64 monitorHandle);
+        static String GetAppDisplayName(String appId, String path);
+        static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  GetAppIconImageAsync(String appId, String path, UInt32 imageSize, UInt32 imageScale);
+        static void ActivateApp(String appId, String path, Boolean runElevated, Windows.Foundation.Point invocationPoint);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.JumpView.ContextMenuItemWrapper>  EnumAppContextMenu(String appId, String path, Boolean extendedMenu);
+        static void AddTestCategory(String appId, String categoryName, UInt32 numItems, JumpViewCategoryType testCategoryType);
+        static Windows.Internal.Shell.JumpView.JumpViewItemInfo GetJumpViewItemInfo(String appId, String displayName, String path, JumpViewItemType itemType);
+        static Windows.Foundation.Collections.IMapView <String, Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.JumpView.JumpViewCategoryInfo> >  EnumListForMultipleApps(Windows.Foundation.Collections.IVectorView <String>  appIdList, UInt32 numMaxSlots);
+        static Windows.Internal.Shell.JumpView.JumpViewItemInfo GetJumpViewItemInfoInCategory(JumpViewCategoryType categoryType, UInt32 maxNumberOfItems, String appId, String displayName, String path, JumpViewItemType itemType);
+    }
+
+
+}

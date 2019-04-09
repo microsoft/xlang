@@ -1,0 +1,43 @@
+
+
+
+
+
+
+namespace Windows.Internal.Storage
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalStorageContract{};
+
+    [flags]
+    [contract(Windows.Internal.Storage.InternalStorageContract, 1)]
+    enum PathAccessChecks
+    {
+        None,
+        Disallow_AlternateStreams,
+        Disallow_ReparsePoints,
+        Disallow_ExecutableKinds = 4,
+        Disallow_LinkKinds = 8,
+        Allow_MostRecentlyUsed = 16,
+        Allow_FutureAccessList = 32,
+        Allow_Libraries = 64,
+        Default = 65535,
+        Hint_TreatPathAsFolder,
+    };
+
+    [uuid(684a703a-2827-4459-9944-644fb342097b)]
+    [contract(Windows.Internal.Storage.InternalStorageContract, 1)]
+    interface IStorageBrokerAccessCheck
+    {
+        Boolean CheckPathAccess(String Path, PathAccessChecks Checks);
+    };
+
+    [contract(Windows.Internal.Storage.InternalStorageContract, 1)]
+    runtimeclass Win32Broker
+        : [default]Windows.Internal.Storage.IStorageBrokerAccessCheck
+    {
+        Win32Broker();
+    }
+
+}

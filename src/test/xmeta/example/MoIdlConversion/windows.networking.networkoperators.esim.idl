@@ -1,0 +1,317 @@
+
+
+
+
+
+
+
+
+namespace Windows.Networking.NetworkOperators
+{
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum ESimAuthenticationPreference
+    {
+        OnEntry,
+        OnAction,
+        Never,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum ESimProfileClass
+    {
+        Operational,
+        Test,
+        Provisioning,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum ESimOperationStatus
+    {
+        Success,
+        NotAuthorized,
+        NotFound,
+        PolicyViolation,
+        InsufficientSpaceOnCard,
+        ServerFailure,
+        ServerNotReachable,
+        TimeoutWaitingForUserConsent,
+        IncorrectConfirmationCode,
+        ConfirmationCodeMaxRetriesExceeded,
+        CardRemoved,
+        CardBusy,
+        Other,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        CardGeneralFailure,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        ConfirmationCodeMissing,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        InvalidMatchingId,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        NoEligibleProfileForThisDevice,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        OperationAborted,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        EidMismatch,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        ProfileNotAvailableForNewBinding,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        ProfileNotReleasedByOperator,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        OperationProhibitedByProfileClass,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        ProfileNotPresent,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        NoCorrespondingRequest,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum ESimProfileMetadataState
+    {
+        Unknown,
+        WaitingForInstall,
+        Downloading,
+        Installing,
+        Expired,
+        RejectingDownload,
+        NoLongerAvailable,
+        DeniedByPolicy,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum ESimProfileState
+    {
+        Unknown,
+        Disabled,
+        Enabled,
+        Deleted,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum ESimState
+    {
+        Unknown,
+        Idle,
+        Removed,
+        Busy,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum ESimWatcherStatus
+    {
+        Created,
+        Started,
+        EnumerationCompleted,
+        Stopping,
+        Stopped,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum ESimDiscoverResultKind
+    {
+        None,
+        Events,
+        ProfileMetadata,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    struct ESimProfileInstallProgress
+    {
+        Int32 TotalSizeInBytes;
+        Int32 InstalledSizeInBytes;
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimPolicy", 41e1b99d-cf7e-4315-882b-6f1e74b0d38f)]
+    runtimeclass ESimPolicy
+    {
+        Boolean ShouldEnableManagingUi{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimProfile", ee1e7880-06a9-4027-b4f8-ddb23d7810e0)]
+    runtimeclass ESimProfile
+    {
+        Windows.Networking.NetworkOperators.ESimProfileClass Class{ get; };
+        String Nickname{ get; };
+        Windows.Networking.NetworkOperators.ESimProfilePolicy Policy{ get; };
+        String Id{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference ProviderIcon{ get; };
+        String ProviderId{ get; };
+        String ProviderName{ get; };
+        Windows.Networking.NetworkOperators.ESimProfileState State{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimOperationResult>  DisableAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimOperationResult>  EnableAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimOperationResult>  SetNicknameAsync(String newNickname);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimOperationResult", a67b63b1-309b-4e77-9e7e-cd93f1ddc7b9)]
+    runtimeclass ESimOperationResult
+    {
+        Windows.Networking.NetworkOperators.ESimOperationStatus Status{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimDownloadProfileMetadataResult", c4234d9e-5ad6-426d-8d00-4434f449afec)]
+    runtimeclass ESimDownloadProfileMetadataResult
+    {
+        Windows.Networking.NetworkOperators.ESimOperationResult Result{ get; };
+        Windows.Networking.NetworkOperators.ESimProfileMetadata ProfileMetadata{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESim", 6f6e6e26-f123-437d-8ced-dc1d2bc0c3a9)]
+    runtimeclass ESim
+    {
+        Windows.Foundation.IReference <Int32>  AvailableMemoryInBytes{ get; };
+        String Eid{ get; };
+        String FirmwareVersion{ get; };
+        String MobileBroadbandModemDeviceId{ get; };
+        Windows.Networking.NetworkOperators.ESimPolicy Policy{ get; };
+        Windows.Networking.NetworkOperators.ESimState State{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.NetworkOperators.ESimProfile>  GetProfiles();
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimOperationResult>  DeleteProfileAsync(String profileId);
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimDownloadProfileMetadataResult>  DownloadProfileMetadataAsync(String activationCode);
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimOperationResult>  ResetAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.NetworkOperators.ESim, Object>  ProfileChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Networking.NetworkOperators.IESim2", bd4fd0a0-c68f-56eb-b99b-8f34b8100299)]
+        {
+            [method_name("Discover")] Windows.Networking.NetworkOperators.ESimDiscoverResult Discover();
+            [method_name("DiscoverWithServerAddressAndMatchingId")] Windows.Networking.NetworkOperators.ESimDiscoverResult Discover(String serverAddress, String matchingId);
+            [method_name("DiscoverAsync")] Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimDiscoverResult>  DiscoverAsync();
+            [method_name("DiscoverWithServerAddressAndMatchingIdAsync")] Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimDiscoverResult>  DiscoverAsync(String serverAddress, String matchingId);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimDiscoverResult", 56b4bb5e-ab2f-5ac6-b359-dd5a8e237926)]
+    runtimeclass ESimDiscoverResult
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.NetworkOperators.ESimDiscoverEvent>  Events{ get; };
+        Windows.Networking.NetworkOperators.ESimDiscoverResultKind Kind{ get; };
+        Windows.Networking.NetworkOperators.ESimProfileMetadata ProfileMetadata{ get; };
+        Windows.Networking.NetworkOperators.ESimOperationResult Result{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimAddedEventArgs", 38bd0a58-4d5a-4d08-8da7-e73eff369ddd)]
+    runtimeclass ESimAddedEventArgs
+    {
+        Windows.Networking.NetworkOperators.ESim ESim{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimDiscoverEvent", e59ac3e3-39bc-5f6f-9321-0d4a182d261b)]
+    runtimeclass ESimDiscoverEvent
+    {
+        String MatchingId{ get; };
+        String RspServerAddress{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimProfileMetadata", ed25831f-90db-498d-a7b4-ebce807d3c23)]
+    runtimeclass ESimProfileMetadata
+    {
+        Boolean IsConfirmationCodeRequired{ get; };
+        Windows.Networking.NetworkOperators.ESimProfilePolicy Policy{ get; };
+        String Id{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference ProviderIcon{ get; };
+        String ProviderId{ get; };
+        String ProviderName{ get; };
+        Windows.Networking.NetworkOperators.ESimProfileMetadataState State{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimOperationResult>  DenyInstallAsync();
+        [method_name("ConfirmInstallAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Networking.NetworkOperators.ESimOperationResult, Windows.Networking.NetworkOperators.ESimProfileInstallProgress>  ConfirmInstallAsync();
+        [method_name("ConfirmInstallWithConfirmationCodeAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Networking.NetworkOperators.ESimOperationResult, Windows.Networking.NetworkOperators.ESimProfileInstallProgress>  ConfirmInstallAsync(String confirmationCode);
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ESimOperationResult>  PostponeInstallAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.NetworkOperators.ESimProfileMetadata, Object>  StateChanged;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimServiceInfo", f16aabcf-7f59-4a51-8494-bd89d5ff50ee)]
+    runtimeclass ESimServiceInfo
+    {
+        Windows.Networking.NetworkOperators.ESimAuthenticationPreference AuthenticationPreference{ get; };
+        Boolean IsESimUiEnabled{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimWatcher", c1f84ceb-a28d-4fbf-9771-6e31b81ccf22)]
+    runtimeclass ESimWatcher
+    {
+        Windows.Networking.NetworkOperators.ESimWatcherStatus Status{ get; };
+        void Start();
+        void Stop();
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.NetworkOperators.ESimWatcher, Windows.Networking.NetworkOperators.ESimAddedEventArgs>  Added;
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.NetworkOperators.ESimWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.NetworkOperators.ESimWatcher, Windows.Networking.NetworkOperators.ESimRemovedEventArgs>  Removed;
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.NetworkOperators.ESimWatcher, Object>  Stopped;
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.NetworkOperators.ESimWatcher, Windows.Networking.NetworkOperators.ESimUpdatedEventArgs>  Updated;
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [static_name("Windows.Networking.NetworkOperators.IESimManagerStatics", 0bfa2c0c-df88-4631-bf04-c12e281b3962)]
+    [threading(both)]
+    runtimeclass ESimManager
+    {
+        static Windows.Networking.NetworkOperators.ESimServiceInfo ServiceInfo{ get; };
+        static Windows.Networking.NetworkOperators.ESimWatcher TryCreateESimWatcher();
+        static event Windows.Foundation.EventHandler <Object>  ServiceInfoChanged;
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimProfilePolicy", e6dd0f1d-9c5c-46c5-a289-a948999bf062)]
+    runtimeclass ESimProfilePolicy
+    {
+        Boolean CanDelete{ get; };
+        Boolean CanDisable{ get; };
+        Boolean IsManagedByEnterprise{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimRemovedEventArgs", dec5277b-2fd9-4ed9-8376-d9b5e41278a3)]
+    runtimeclass ESimRemovedEventArgs
+    {
+        Windows.Networking.NetworkOperators.ESim ESim{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.NetworkOperators.IESimUpdatedEventArgs", 4c125cec-508d-4b88-83cb-68bef8168d12)]
+    runtimeclass ESimUpdatedEventArgs
+    {
+        Windows.Networking.NetworkOperators.ESim ESim{ get; };
+    }
+
+
+}

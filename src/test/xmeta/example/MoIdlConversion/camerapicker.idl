@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+namespace Windows.Media.Capture
+{
+    [contractversion(1)]
+    apicontract CameraCaptureUIContract{};
+
+
+    [contract(Windows.Media.Capture.CameraCaptureUIContract, 1)]
+    [static_name("Windows.Media.Capture.ICameraOptionsUIStatics", 3b0d5e34-3906-4b7d-946c-7bde844499ae)]
+    [threading(mta)]
+    runtimeclass CameraOptionsUI
+    {
+        static void Show(MediaCapture mediaCapture);
+    }
+
+}

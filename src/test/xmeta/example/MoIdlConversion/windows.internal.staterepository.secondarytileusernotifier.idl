@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.ISecondaryTileUserNotifierStatics", 0949e528-a186-4293-bdaa-a7aae678305d)]
+    [interface_name("Windows.Internal.StateRepository.ISecondaryTileUserNotifier", 07cfe943-62fd-4bfa-9e4b-0512e01cdabd)]
+    [threading(both)]
+    runtimeclass SecondaryTileUserNotifier
+    {
+        SecondaryTileUserNotifier();
+        static Windows.Internal.StateRepository.SecondaryTileUserNotifier CreateNotifierFilteredByUser(User user);
+        static Windows.Internal.StateRepository.SecondaryTileUserNotifier CreateNotifierFilteredByUserSid(String userSid);
+        static Windows.Internal.StateRepository.SecondaryTileUserNotifier CreateNotifierFilteredByUserSecurityIdentifier(UInt8[] userSecurityIdentifier);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.StateRepository.SecondaryTileUserNotifier, Windows.Internal.StateRepository.SecondaryTileUserChangedEventArgs>  Changed;
+        void InvokeListeners();
+    }
+
+
+}

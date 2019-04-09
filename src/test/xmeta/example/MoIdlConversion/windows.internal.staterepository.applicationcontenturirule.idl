@@ -1,0 +1,64 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IApplicationContentUriRuleStatics", 1b3b2aac-5702-4e2b-84c4-023232a529e1)]
+    [interface_name("Windows.Internal.StateRepository.IApplicationContentUriRule", 90077891-444f-47b4-8ffc-267a247a8dfa)]
+    [threading(both)]
+    runtimeclass ApplicationContentUriRule
+    {
+        ApplicationContentUriRule();
+        static Boolean Exists(Int64 applicationContentUriRuleID);
+        static Boolean ExistsByApplication(Application Application);
+        static Boolean ExistsByApplicationAndIndex(Application Application, UInt64 Index);
+        static Windows.Internal.StateRepository.ApplicationContentUriRule Get(Int64 applicationContentUriRuleID);
+        static Windows.Internal.StateRepository.ApplicationContentUriRule TryGet(Int64 applicationContentUriRuleID);
+        static Windows.Internal.StateRepository.ApplicationContentUriRule GetByApplicationAndIndex(Application Application, UInt64 Index);
+        static Windows.Internal.StateRepository.ApplicationContentUriRule TryGetByApplicationAndIndex(Application Application, UInt64 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ApplicationContentUriRule>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ApplicationContentUriRule>  FindByApplication(Application Application);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ApplicationContentUriRule>  FindByApplication_SortedByIndex(Application Application);
+        Int64 _ApplicationContentUriRuleID{ get; };
+        Int64 _ApplicationContentUriRuleID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Application{ get; };
+        Int64 Application{ set; };
+        Windows.Internal.StateRepository.Application GetApplication();
+        void SetApplication(Application value);
+        UInt64 Index{ get; };
+        UInt64 Index{ set; };
+        String Uri{ get; };
+        String Uri{ set; };
+        Windows.Foundation.Uri UriAsUri{ get; };
+        Windows.Foundation.Uri UriAsUri{ set; };
+        UInt8 Type{ get; };
+        UInt8 Type{ set; };
+        Windows.Internal.StateRepository.WindowsRuntimeAccess WindowsRuntimeAccess{ get; };
+        Windows.Internal.StateRepository.WindowsRuntimeAccess WindowsRuntimeAccess{ set; };
+        Windows.Internal.StateRepository.ApplicationContentUriRuleFlags Flags{ get; };
+        Windows.Internal.StateRepository.ApplicationContentUriRuleFlags Flags{ set; };
+        Boolean ServiceWorker{ get; };
+        Boolean ServiceWorker{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

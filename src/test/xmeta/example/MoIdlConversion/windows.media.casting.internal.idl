@@ -1,0 +1,434 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Casting.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [flags]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    enum CastingProtocols
+    {
+        None,
+        DLNA,
+        Miracast,
+        AudioEndpoint = 4,
+        All = 65535,
+    };
+
+    [uuid(287f2c8a-56ff-4e5b-944d-649a6c14256d)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingEngine
+    {
+        Windows.Media.Casting.Internal.CastingProtocols SupportedProtocols{ get; };
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(9ec2c9dc-dc6e-40df-a4d5-c95a1a641818)]
+    interface ICastingEngineFactory
+    {
+        Windows.Media.Casting.Internal.ICastingEngine CreateCastingEngine(String hstrDeviceId, CastingProtocols protocol, UInt32 dwUIThreadId);
+    };
+
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.Internal.ICastingConnectionStateChangedEventArgs", b44df48e-cd0c-406e-937e-69500aea1352)]
+    runtimeclass CastingConnectionStateChangedEventArgs
+    {
+        Windows.Media.Casting.CastingConnectionState NewState{ get; };
+    }
+
+    [uuid(594dbd7b-4bd1-45da-9c05-71baafee69b3)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingSourceWrapper
+    {
+        Windows.Media.Casting.CastingSource CastingSource{ get; };
+    };
+
+    [uuid(288c6bb7-06b5-45af-a970-a143a86cf27c)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingConnectionPriv
+    {
+        Windows.Media.Casting.Internal.CastingProtocols Protocol{ get; };
+        Windows.Media.Casting.Internal.CastingProtocols Protocol{ set; };
+        void SetUpCastingConnectionForSystemConnection(Windows.Media.Casting.CastingConnectionState value);
+        void SetSystemMiracastDisconnect();
+        void CopySystemMiracastStateToDeveloperConnection(Windows.Media.Casting.CastingConnectionState value);
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(8d599b95-f07a-41fe-8260-9658f0b375a1)]
+    interface ICastingSession
+    {
+        Windows.Media.Casting.CastingConnectionState State{ get; };
+        Windows.Media.Casting.CastingConnectionErrorStatus ErrorStatus{ get; };
+        Windows.Media.Casting.Internal.ICastingSourceWrapper CastingSource{ get; };
+        Windows.Media.Casting.Internal.ICastingSourceWrapper CastingSource{ set; };
+        Windows.Media.Casting.CastingDevice CastingDevice{ get; };
+        Windows.Media.Casting.Internal.CastingProtocols Protocol{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.Internal.ICastingSession, Windows.Media.Casting.Internal.CastingConnectionStateChangedEventArgs>  StateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.Internal.ICastingSession, Windows.Media.Casting.CastingConnectionErrorOccurredEventArgs>  ErrorOccurred;
+        void Connect();
+        void Disconnect();
+        Windows.Media.Casting.CastingConnectionState State{ set; };
+        Windows.Media.Casting.CastingConnectionErrorStatus ErrorStatus{ set; };
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    enum CastingSessionOperationType
+    {
+        Unknown,
+        Connect,
+        Disconnect,
+        CloseDeviceConnection,
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(150635c4-8184-40f5-8af1-93cb20ab6aa9)]
+    interface ICastingSessionOperation
+    {
+        Windows.Media.Casting.CastingConnectionState State{ get; };
+        Windows.Media.Casting.CastingConnectionState State{ set; };
+        Windows.Media.Casting.CastingConnectionErrorStatus ErrorStatus{ get; };
+        Windows.Media.Casting.Internal.CastingSessionOperationType OperationType{ get; };
+        Boolean IsCancelled{ get; };
+        Windows.Media.Casting.Internal.ICastingSourceWrapper CastingSource{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.Internal.ICastingSessionOperation, Windows.Media.Casting.Internal.CastingConnectionStateChangedEventArgs>  StateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.Internal.ICastingSessionOperation, Windows.Media.Casting.CastingConnectionErrorOccurredEventArgs>  ErrorOccurred;
+        void Run();
+        void Cancel();
+        void WaitForCompletion(out HRESULT operationResult);
+        Boolean IsEqual(ICastingSessionOperation operation);
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(fddac00e-3e80-4a8f-9ac2-cb029e3f6333)]
+    interface ICastingDevicePriv
+    {
+        Windows.Media.Casting.Internal.CastingProtocols SupportedProtocols{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Casting.CastingConnection>  Connections{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.CastingDevice, Windows.Media.Casting.Internal.CastingConnectionStateChangedEventArgs>  StateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.CastingDevice, Windows.Media.Casting.CastingConnectionErrorOccurredEventArgs>  ErrorOccurred;
+        void GetAepIdAndNameForCastingProtocol(CastingProtocols protocol, out String aepId, out String aepName);
+        void DisconnectAllConnections(Boolean fIsAppClose);
+        void StopUpdate();
+        Boolean SupportsProtocol(CastingProtocols protocol);
+        Windows.Media.Casting.Internal.ICastingSession GetSessionForProtocol(CastingProtocols protocol, UInt32 dwUIThreadId);
+        Windows.Media.Casting.Internal.CastingProtocols FindAnySupportedProtocol(CastingProtocols allowedProtocols);
+        Windows.Media.Casting.CastingConnection GetSystemCastingConnection();
+    };
+
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.Internal.ICastingDeviceFactoryPriv", 604f6b99-77bf-48df-bd60-84594a809682)]
+    runtimeclass CastingDeviceFactory
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingDevice>  FromAepContainerIdAsync(String aepContainerId);
+        Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingDevice>  FromAepContainerAsync(Windows.Devices.Enumeration.DeviceInformation aepContainer);
+    }
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(1663164a-27a5-4951-950f-118866b77401)]
+    interface IDeviceInformationCacheItem
+    {
+        Windows.Devices.Enumeration.DeviceInformation DeviceInformation{ get; };
+        Windows.Media.Casting.Internal.CastingProtocols Protocol{ get; };
+        Windows.Media.Casting.CastingPlaybackTypes SupportedCastingTypes{ get; };
+        void Update(Windows.Devices.Enumeration.DeviceInformation value);
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(7387a08f-c884-4804-807b-729dfd649183)]
+    interface IDeviceInformationCache
+    {
+        Windows.Media.Casting.Internal.CastingProtocols Protocols{ get; };
+        Windows.Media.Casting.CastingPlaybackTypes SupportedCastingTypes{ get; };
+        UInt32 Size{ get; };
+        void Add(Windows.Devices.Enumeration.DeviceInformation value);
+        Windows.Media.Casting.Internal.IDeviceInformationCacheItem Get(CastingProtocols protocol);
+        Windows.Media.Casting.Internal.IDeviceInformationCacheItem GetFromId(String deviceId);
+        Windows.Media.Casting.Internal.IDeviceInformationCacheItem GetAt(UInt32 index);
+        void Clear();
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [flags]
+    enum DeviceAssociationOperationsPerformed
+    {
+        None,
+        Paired,
+        Connected,
+        Disconnected = 4,
+        AccessChecked = 8,
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [flags]
+    enum DeviceAssociationAndAccessOptions
+    {
+        None,
+        DisconnectOnRelease,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [constructor_name("Windows.Media.Casting.Internal.IDeviceAssociationAndAccessHelperFactory", 88be3d07-60aa-4b16-b68b-6e4df3a2e426)]
+    [interface_name("Windows.Media.Casting.Internal.IDeviceAssociationAndAccessHelper", c70d5a22-7c6a-4606-b433-ab93d19a7c1b)]
+    [threading(both)]
+    runtimeclass DeviceAssociationAndAccessHelper
+    {
+        [method_name( "CreateDeviceAssociationAndAccessHelperForDevice" )] DeviceAssociationAndAccessHelper(Windows.Devices.Enumeration.DeviceInformation device, Windows.Devices.Enumeration.DeviceInformationKind deviceKind, UInt32 dwUIThreadId, CastingProtocols protocol);
+        [method_name( "CreateDeviceAssociationAndAccessHelperForDeviceId" )] DeviceAssociationAndAccessHelper(String deviceId, String aepDeviceName, Windows.Devices.Enumeration.DeviceInformationKind deviceKind, UInt32 dwUIThreadId, CastingProtocols protocol);
+        String DeviceInstanceId{ get; };
+        Windows.Media.Casting.Internal.DeviceAssociationOperationsPerformed OperationsPerformed{ get; };
+        Windows.Media.Casting.Internal.DeviceAssociationAndAccessOptions Options{ get; };
+        Windows.Media.Casting.Internal.DeviceAssociationAndAccessOptions Options{ set; };
+        void PairConnectAndAccessCheck();
+        void Pair();
+        void Connect();
+        void Disconnect();
+        void DisconnectIfExplicitlyConnected();
+        void AccessCheck();
+    }
+
+    [uuid(bfc7ee99-6859-4f59-92bc-701f98dd60b4)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingProtocolQueryProvider
+    {
+        Windows.Media.Casting.Internal.CastingProtocols CastingProtocol{ get; };
+        Guid ProtocolId{ get; };
+        String AepProtocolSelector{ get; };
+        Boolean RequiresConnection{ get; };
+        Boolean IsProtocolSupported{ get; };
+        void GenerateDeviceSelector(Windows.Foundation.Collections.IPropertySet castingSourceProperties, out String deviceSelector);
+        Boolean IsDeviceSupported(Windows.Devices.Enumeration.DeviceInformation device);
+        Windows.Media.Casting.CastingPlaybackTypes GetSupportedCastingTypesForDevice(Windows.Devices.Enumeration.DeviceInformation device);
+        String GetDeviceInstanceSelectorForAepId(String aepId);
+        String GetDeviceInterfaceSelectorForDeviceId(String deviceId);
+        String GetAepIdForDevice(Windows.Devices.Enumeration.DeviceInformation device);
+    };
+
+    [uuid(78a3e0d6-6977-4ed6-aed1-42dce6f560d9)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingManagerPriv
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingDevice>  CreateCastingDeviceAsync(String deviceId);
+        void DisconnectAllDevices(Boolean fIsAppClose);
+        void StopAllDeviceUpdates(Windows.Media.Casting.CastingDevice exclude);
+        void RefreshAllDeviceStatus();
+        Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingDevice>  CreateCastingDeviceFromDeviceInformationAsync(Windows.Devices.Enumeration.DeviceInformation device);
+        void SetAutoStatusUpdates(Boolean fAutoStatusUpdate);
+        void InitializeDevicesState(String aepContainerId);
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(f7396232-1abc-45c9-8faf-6f02546abdce)]
+    interface ICastingPlayToConnectionAdapter
+    {
+        Boolean IsRegisteredForDeviceConnectionEvents{ get; };
+        void Destroy();
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(02b735f5-a7e3-45f9-8544-1d447a52748a)]
+    interface ICachedCastingDeviceInfo
+    {
+        Windows.Media.Casting.CastingDevice CastingDevice{ get; };
+        EventRegistrationToken StateChangedEventToken{ get; };
+        EventRegistrationToken ErrorEventToken{ get; };
+        Guid DeviceContainerId{ get; };
+        Windows.Media.Casting.Internal.ICastingPlayToConnectionAdapter PlayToAdapter{ get; };
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(561cf9e3-9fbc-471c-b2a3-97f5dbabdcbb)]
+    interface ICachedCastingConnectionInfo
+    {
+        Windows.Media.Casting.CastingConnection Connection{ get; };
+        EventRegistrationToken StateChangedEventToken{ get; };
+        EventRegistrationToken ErrorEventToken{ get; };
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [uuid(a7814994-460e-4868-94c4-9426b92b5935)]
+    interface ICastingSourceProperties
+    {
+        Boolean IsProtectedContent{ get; };
+        Boolean IsProtectedContent{ set; };
+        Windows.Media.Casting.CastingPlaybackTypes SupportedCastingTypes{ get; };
+        Windows.Media.Casting.CastingPlaybackTypes SupportedCastingTypes{ set; };
+    };
+
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.Internal.ICastingDeviceContainer", 4005380c-f33c-4773-ac54-843174603e85)]
+    runtimeclass CastingDeviceContainer
+    {
+        String Id{ get; };
+        String FriendlyName{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamWithContentType Icon{ get; };
+        Windows.Media.Casting.CastingPlaybackTypes SupportedCastingPlaybackTypes{ get; };
+        Windows.Media.Casting.Internal.CastingProtocols SupportedProtocols{ get; };
+        void Initialize(String aepContainerId);
+        String GetAepIdForCastingProtocol(CastingProtocols protocol);
+        void StopUpdate();
+        Boolean SupportsProtocol(CastingProtocols protocol);
+        void InitializeWithDevice(Windows.Devices.Enumeration.DeviceInformation aepContainer);
+        Windows.Media.Casting.Internal.CastingProtocols FindAnySupportedProtocol(CastingProtocols allowedProtocols);
+    }
+
+    [flags]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    enum DeviceEnumerationOptions
+    {
+        None,
+        IgnoreEnumComplete,
+    };
+
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.Internal.IDeviceEnumerationHelper", 66436981-4c9a-44b9-bbce-76f187ce4e46)]
+    runtimeclass DeviceEnumerationHelper
+    {
+        Windows.Media.Casting.Internal.DeviceEnumerationOptions Options{ get; };
+        Windows.Media.Casting.Internal.DeviceEnumerationOptions Options{ set; };
+        UInt32 Timeout{ get; };
+        UInt32 Timeout{ set; };
+        Windows.Devices.Enumeration.DeviceInformationKind ResultType{ get; };
+        Windows.Devices.Enumeration.DeviceInformationKind ResultType{ set; };
+        Windows.Foundation.Collections.IVector <String>  Properties{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.Internal.DeviceEnumerationHelper, Windows.Devices.Enumeration.DeviceInformationUpdate>  DeviceUpdated;
+        void SetSupportedProtocols(Guid[] protocols);
+        Windows.Devices.Enumeration.DeviceInformation GetAepContainerForAepContainerId(String aepContainerId);
+        Windows.Devices.Enumeration.DeviceInformation GetSingleObject(String query);
+        String GetSingleObjectId(String query);
+        void WaitForComplete();
+        void WaitForProtocol(CastingProtocols protocol);
+        void Stop();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [interface_name("Windows.Media.Casting.Internal.IMiracastDeviceHelper", c8a31b3c-571f-4fa9-b75c-301ca03d5a9d)]
+    runtimeclass MiracastDeviceHelper
+    {
+        UInt64 MonitorHandle{ get; };
+        String FriendlyName{ get; };
+        String MonitorDeviceId{ get; };
+        Boolean InitializeWithMiracastDeviceId(String miracastDeviceInstanceId);
+        void ConnectMiracastDevice(String miracastDeviceInstanceId);
+        void DisconnectMiracastDevice(String miracastDeviceInstanceId);
+    }
+
+    [uuid(258781cf-973e-4534-864f-6f0f4fa3ab64)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface IPropertyContainer
+    {
+        Windows.Foundation.Collections.IMap <String, Object>  Properties{ get; };
+    };
+
+    [uuid(ce6b7982-4f48-4d28-9b77-a3224e881633)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingManagerTest
+    {
+        void ClearDeviceCache();
+    };
+
+    [uuid(22542b55-43be-4114-bafe-a12d78b9773f)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingApiPolicyManager
+    {
+        Boolean IsCastingApiSupported{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    runtimeclass CastingApiPolicyManager
+        : [default]Windows.Media.Casting.Internal.ICastingApiPolicyManager
+    {
+    }
+
+    [uuid(78d3e6d0-50c7-4715-a685-e32a6a8875ca)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    interface ICastingMediaPlayer
+    {
+        void Connect();
+        void Disconnect();
+        void InitializeCasting(Object pCastingEngine, Windows.Media.Casting.CastingSource pSource);
+    };
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    enum MiracastInfoToolUpdateType
+    {
+        OutputProfile,
+        DeviceInfo,
+        Bitrate,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [interface_name("Windows.Media.Casting.Internal.IMiracastInfoUpdatedEventArgs", 057f0ca1-6ef9-4cc4-bb27-3680a258eb4b)]
+    runtimeclass MiracastInfoUpdatedEventArgs
+    {
+        Windows.Media.Casting.Internal.MiracastInfoToolUpdateType UpdateType{ get; };
+    }
+
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.Internal.IMiracastInfoTool", 50dfe73f-8a48-48ad-8e79-922abaf7399d)]
+    [threading(both)]
+    runtimeclass MiracastInfoTool
+    {
+        MiracastInfoTool();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.Internal.MiracastInfoTool, Windows.Media.Casting.Internal.MiracastInfoUpdatedEventArgs>  MiracastInfoUpdated;
+        String SourceModelName{ get; };
+        String SourceOSVersion{ get; };
+        String SinkModelName{ get; };
+        String SinkOSVersion{ get; };
+        UInt32 ResolutionHeight{ get; };
+        UInt32 ResolutionWidth{ get; };
+        Single Framerate{ get; };
+        String MicrosoftVideoFormat{ get; };
+        Guid AudioCodecs{ get; };
+        String ClientRTPPorts{ get; };
+        UInt32 Profile{ get; };
+        UInt32 Level{ get; };
+        Boolean DiagnosticsCapacity{ get; };
+        String TeardownReason{ get; };
+        Boolean FormatChangeCapacity{ get; };
+        Boolean LatencyManagement{ get; };
+        Boolean IDRRequestCapacity{ get; };
+        Boolean RTCPCapability{ get; };
+        Boolean Connected{ get; };
+        String Bitrate{ get; };
+    }
+
+
+    [contract(Windows.Media.Casting.Internal.InternalContract, 1)]
+    [interface_name("Windows.Media.Casting.Internal.IMiracastInfoProxyFactory", 45fef72f-7398-49b7-bd3f-0f10871bd9eb)]
+    [threading(mta)]
+    runtimeclass MiracastInfoToolInternal
+    {
+        MiracastInfoToolInternal();
+        Windows.Media.Casting.Internal.MiracastInfoTool CreateMiracastInfoTool();
+    }
+
+}

@@ -1,0 +1,455 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.WiFiDirect
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectConnectionStatus
+    {
+        Disconnected,
+        Connected,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectError
+    {
+        Success,
+        RadioNotAvailable,
+        ResourceInUse,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectDeviceSelectorType
+    {
+        DeviceInterface,
+        AssociationEndpoint,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectAdvertisementListenStateDiscoverability
+    {
+        None,
+        Normal,
+        Intensive,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectAdvertisementPublisherStatus
+    {
+        Created,
+        Started,
+        Stopped,
+        Aborted,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum WiFiDirectConfigurationMethod
+    {
+        ProvidePin,
+        DisplayPin,
+        PushButton,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum WiFiDirectPairingProcedure
+    {
+        GroupOwnerNegotiation,
+        Invitation,
+    };
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.WiFiDirect.IWiFiDirectDeviceStatics2", 1a953e49-b103-437e-9226-ab67971342f9)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectDevice", 72deaaa8-72eb-4dae-8a28-8513355d2777)]
+    runtimeclass WiFiDirectDevice
+        : Windows.Foundation.IClosable
+    {
+        [method_name("GetDeviceSelector")] static String GetDeviceSelector(WiFiDirectDeviceSelectorType type);
+        [method_name("FromIdAsync")] [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.WiFiDirectDevice>  FromIdAsync(String deviceId, WiFiDirectConnectionParameters connectionParameters);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Devices.WiFiDirect.IWiFiDirectDeviceStatics", e86cb57c-3aac-4851-a792-482aaf931b04)]
+        {
+            [method_name("GetDeviceSelector")] static String GetDeviceSelector();
+            [method_name("FromIdAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.WiFiDirectDevice>  FromIdAsync(String deviceId);
+        }
+        Windows.Devices.WiFiDirect.WiFiDirectConnectionStatus ConnectionStatus{ get; };
+        String DeviceId{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.WiFiDirectDevice, Object>  ConnectionStatusChanged;
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.EndpointPair>  GetConnectionEndpointPairs();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectConnectionParameters", b2e55405-5702-4b16-a02c-bbcd21ef6098)]
+    runtimeclass WiFiDirectConnectionParameters
+        : [contract(Windows.Foundation.UniversalApiContract, 2)]
+        Windows.Devices.Enumeration.IDevicePairingSettings
+    {
+        WiFiDirectConnectionParameters();
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Devices.WiFiDirect.IWiFiDirectConnectionParametersStatics", 598af493-7642-456f-b9d8-e8a9eb1f401a)]
+        {
+            static Windows.Devices.Enumeration.DevicePairingKinds GetDevicePairingKinds(WiFiDirectConfigurationMethod configurationMethod);
+        }
+        Int16 GroupOwnerIntent{ get; };
+        Int16 GroupOwnerIntent{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectConnectionParameters2", ab3b0fbe-aa82-44b4-88c8-e3056b89801d)]
+        {
+            Windows.Foundation.Collections.IVector <Windows.Devices.WiFiDirect.WiFiDirectConfigurationMethod>  PreferenceOrderedConfigurationMethods{ get; };
+            Windows.Devices.WiFiDirect.WiFiDirectPairingProcedure PreferredPairingProcedure{ get; };
+            Windows.Devices.WiFiDirect.WiFiDirectPairingProcedure PreferredPairingProcedure{ set; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.WiFiDirect.IWiFiDirectInformationElementStatics", dbd02f16-11a5-4e60-8caa-34772148378a)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectInformationElement", affb72d6-76bb-497e-ac8b-dc72838bc309)]
+    runtimeclass WiFiDirectInformationElement
+    {
+        static Windows.Foundation.Collections.IVector <Windows.Devices.WiFiDirect.WiFiDirectInformationElement>  CreateFromBuffer(Windows.Storage.Streams.IBuffer buffer);
+        static Windows.Foundation.Collections.IVector <Windows.Devices.WiFiDirect.WiFiDirectInformationElement>  CreateFromDeviceInformation(Windows.Devices.Enumeration.DeviceInformation deviceInformation);
+        WiFiDirectInformationElement();
+        Windows.Storage.Streams.IBuffer Oui{ get; };
+        Windows.Storage.Streams.IBuffer Oui{ set; };
+        UInt8 OuiType{ get; };
+        UInt8 OuiType{ set; };
+        Windows.Storage.Streams.IBuffer Value{ get; };
+        Windows.Storage.Streams.IBuffer Value{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectLegacySettings", a64fdbba-f2fd-4567-a91b-f5c2f5321057)]
+    runtimeclass WiFiDirectLegacySettings
+    {
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        String Ssid{ get; };
+        String Ssid{ set; };
+        Windows.Security.Credentials.PasswordCredential Passphrase{ get; };
+        Windows.Security.Credentials.PasswordCredential Passphrase{ set; };
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectAdvertisement", ab511a2d-2a06-49a1-a584-61435c7905a6)]
+    runtimeclass WiFiDirectAdvertisement
+    {
+        Windows.Foundation.Collections.IVector <Windows.Devices.WiFiDirect.WiFiDirectInformationElement>  InformationElements{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Devices.WiFiDirect.WiFiDirectInformationElement>  InformationElements{ set; };
+        Windows.Devices.WiFiDirect.WiFiDirectAdvertisementListenStateDiscoverability ListenStateDiscoverability{ get; };
+        Windows.Devices.WiFiDirect.WiFiDirectAdvertisementListenStateDiscoverability ListenStateDiscoverability{ set; };
+        Boolean IsAutonomousGroupOwnerEnabled{ get; };
+        Boolean IsAutonomousGroupOwnerEnabled{ set; };
+        Windows.Devices.WiFiDirect.WiFiDirectLegacySettings LegacySettings{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectAdvertisement2", b759aa46-d816-491b-917a-b40d7dc403a2)]
+        {
+            Windows.Foundation.Collections.IVector <Windows.Devices.WiFiDirect.WiFiDirectConfigurationMethod>  SupportedConfigurationMethods{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectAdvertisementPublisherStatusChangedEventArgs", aafde53c-5481-46e6-90dd-32116518f192)]
+    runtimeclass WiFiDirectAdvertisementPublisherStatusChangedEventArgs
+    {
+        Windows.Devices.WiFiDirect.WiFiDirectAdvertisementPublisherStatus Status{ get; };
+        Windows.Devices.WiFiDirect.WiFiDirectError Error{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectAdvertisementPublisher", b35a2d1a-9b1f-45d9-925a-694d66df68ef)]
+    runtimeclass WiFiDirectAdvertisementPublisher
+    {
+        WiFiDirectAdvertisementPublisher();
+        Windows.Devices.WiFiDirect.WiFiDirectAdvertisement Advertisement{ get; };
+        Windows.Devices.WiFiDirect.WiFiDirectAdvertisementPublisherStatus Status{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.WiFiDirectAdvertisementPublisher, Windows.Devices.WiFiDirect.WiFiDirectAdvertisementPublisherStatusChangedEventArgs>  StatusChanged;
+        void Start();
+        void Stop();
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectConnectionRequest", 8eb99605-914f-49c3-a614-d18dc5b19b43)]
+    runtimeclass WiFiDirectConnectionRequest
+        : Windows.Foundation.IClosable
+    {
+        Windows.Devices.Enumeration.DeviceInformation DeviceInformation{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectConnectionRequestedEventArgs", f99d20be-d38d-484f-8215-e7b65abf244c)]
+    runtimeclass WiFiDirectConnectionRequestedEventArgs
+    {
+        Windows.Devices.WiFiDirect.WiFiDirectConnectionRequest GetConnectionRequest();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.IWiFiDirectConnectionListener", 699c1b0d-8d13-4ee9-b9ec-9c72f8251f7d)]
+    runtimeclass WiFiDirectConnectionListener
+    {
+        WiFiDirectConnectionListener();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.WiFiDirectConnectionListener, Windows.Devices.WiFiDirect.WiFiDirectConnectionRequestedEventArgs>  ConnectionRequested;
+    }
+
+}
+namespace Windows.Devices.WiFiDirect.Services
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectServiceConfigurationMethod
+    {
+        Default,
+        PinDisplay,
+        PinEntry,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectServiceStatus
+    {
+        Available,
+        Busy,
+        Custom,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectServiceSessionStatus
+    {
+        Closed,
+        Initiated,
+        Requested,
+        Open,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectServiceSessionErrorStatus
+    {
+        Ok,
+        Disassociated,
+        LocalClose,
+        RemoteClose,
+        SystemFailure,
+        NoResponseFromRemote,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectServiceAdvertisementStatus
+    {
+        Created,
+        Started,
+        Stopped,
+        Aborted,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectServiceError
+    {
+        Success,
+        RadioNotAvailable,
+        ResourceInUse,
+        UnsupportedHardware,
+        NoHardware,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiDirectServiceIPProtocol
+    {
+        Tcp = 6,
+        Udp = 17,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceProvisioningInfo", 8bdb7cfe-97d9-45a2-8e99-db50910fb6a6)]
+    runtimeclass WiFiDirectServiceProvisioningInfo
+    {
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceConfigurationMethod SelectedConfigurationMethod{ get; };
+        Boolean IsGroupFormationNeeded{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceSession", 81142163-e426-47cb-8640-e1b3588bf26f)]
+    runtimeclass WiFiDirectServiceSession
+        : Windows.Foundation.IClosable
+    {
+        String ServiceName{ get; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSessionStatus Status{ get; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSessionErrorStatus ErrorStatus{ get; };
+        UInt32 SessionId{ get; };
+        UInt32 AdvertisementId{ get; };
+        String ServiceAddress{ get; };
+        String SessionAddress{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.EndpointPair>  GetConnectionEndpointPairs();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSession, Object>  SessionStatusChanged;
+        Windows.Foundation.IAsyncAction AddStreamSocketListenerAsync(Windows.Networking.Sockets.StreamSocketListener value);
+        Windows.Foundation.IAsyncAction AddDatagramSocketAsync(Windows.Networking.Sockets.DatagramSocket value);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSession, Windows.Devices.WiFiDirect.Services.WiFiDirectServiceRemotePortAddedEventArgs>  RemotePortAdded;
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceAutoAcceptSessionConnectedEventArgs", dcd9e01e-83df-43e5-8f43-cbe8479e84eb)]
+    runtimeclass WiFiDirectServiceAutoAcceptSessionConnectedEventArgs
+    {
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSession Session{ get; };
+        Windows.Storage.Streams.IBuffer SessionInfo{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceRemotePortAddedEventArgs", d4cebac1-3fd3-4f0e-b7bd-782906f44411)]
+    runtimeclass WiFiDirectServiceRemotePortAddedEventArgs
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.EndpointPair>  EndpointPairs{ get; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceIPProtocol Protocol{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceSessionDeferredEventArgs", 8dfc197f-1201-4f1f-b6f4-5df1b7b9fb2e)]
+    runtimeclass WiFiDirectServiceSessionDeferredEventArgs
+    {
+        Windows.Storage.Streams.IBuffer DeferredSessionInfo{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceSessionRequest", a0e27c8b-50cb-4a58-9bcf-e472b99fba04)]
+    runtimeclass WiFiDirectServiceSessionRequest
+        : Windows.Foundation.IClosable
+    {
+        Windows.Devices.Enumeration.DeviceInformation DeviceInformation{ get; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceProvisioningInfo ProvisioningInfo{ get; };
+        Windows.Storage.Streams.IBuffer SessionInfo{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceSessionRequestedEventArgs", 74bdcc11-53d6-4999-b4f8-6c8ecc1771e7)]
+    runtimeclass WiFiDirectServiceSessionRequestedEventArgs
+    {
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSessionRequest GetSessionRequest();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceAdvertiserFactory", 3106ac0d-b446-4f13-9f9a-8ae925feba2b)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceAdvertiser", a4aa1ee1-9d8f-4f4f-93ee-7ddea2e37f46)]
+    runtimeclass WiFiDirectServiceAdvertiser
+    {
+        [method_name( "CreateWiFiDirectServiceAdvertiser" )] WiFiDirectServiceAdvertiser(String serviceName);
+        String ServiceName{ get; };
+        Windows.Foundation.Collections.IVector <String>  ServiceNamePrefixes{ get; };
+        Windows.Storage.Streams.IBuffer ServiceInfo{ get; };
+        Windows.Storage.Streams.IBuffer ServiceInfo{ set; };
+        Boolean AutoAcceptSession{ get; };
+        Boolean AutoAcceptSession{ set; };
+        Boolean PreferGroupOwnerMode{ get; };
+        Boolean PreferGroupOwnerMode{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceConfigurationMethod>  PreferredConfigurationMethods{ get; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceStatus ServiceStatus{ get; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceStatus ServiceStatus{ set; };
+        UInt32 CustomServiceStatusCode{ get; };
+        UInt32 CustomServiceStatusCode{ set; };
+        Windows.Storage.Streams.IBuffer DeferredSessionInfo{ get; };
+        Windows.Storage.Streams.IBuffer DeferredSessionInfo{ set; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceAdvertisementStatus AdvertisementStatus{ get; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceError ServiceError{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceAdvertiser, Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSessionRequestedEventArgs>  SessionRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceAdvertiser, Windows.Devices.WiFiDirect.Services.WiFiDirectServiceAutoAcceptSessionConnectedEventArgs>  AutoAcceptSessionConnected;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceAdvertiser, Object>  AdvertisementStatusChanged;
+        [method_name("ConnectAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSession>  ConnectAsync(Windows.Devices.Enumeration.DeviceInformation deviceInfo);
+        [method_name("ConnectAsyncWithPin")] Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSession>  ConnectAsync(Windows.Devices.Enumeration.DeviceInformation deviceInfo, String pin);
+        void Start();
+        void Stop();
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectServiceStatics", 7db40045-fd74-4688-b725-5dce86acf233)]
+    [interface_name("Windows.Devices.WiFiDirect.Services.IWiFiDirectService", 50aabbb8-5f71-45ec-84f1-a1e4fc7879a3)]
+    runtimeclass WiFiDirectService
+    {
+        [method_name("GetSelector")] static String GetSelector(String serviceName);
+        [method_name("GetSelectorWithFilter")] static String GetSelector(String serviceName, Windows.Storage.Streams.IBuffer serviceInfoFilter);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.Services.WiFiDirectService>  FromIdAsync(String deviceId);
+        Windows.Storage.Streams.IBuffer RemoteServiceInfo{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceConfigurationMethod>  SupportedConfigurationMethods{ get; };
+        Boolean PreferGroupOwnerMode{ get; };
+        Boolean PreferGroupOwnerMode{ set; };
+        Windows.Storage.Streams.IBuffer SessionInfo{ get; };
+        Windows.Storage.Streams.IBuffer SessionInfo{ set; };
+        Windows.Devices.WiFiDirect.Services.WiFiDirectServiceError ServiceError{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFiDirect.Services.WiFiDirectService, Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSessionDeferredEventArgs>  SessionDeferred;
+        Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceProvisioningInfo>  GetProvisioningInfoAsync(WiFiDirectServiceConfigurationMethod selectedConfigurationMethod);
+        [method_name("ConnectAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSession>  ConnectAsync();
+        [method_name("ConnectAsyncWithPin")] Windows.Foundation.IAsyncOperation <Windows.Devices.WiFiDirect.Services.WiFiDirectServiceSession>  ConnectAsync(String pin);
+    }
+
+
+
+}

@@ -1,0 +1,34 @@
+
+
+
+
+
+
+namespace WindowsInternal.Shell.DataStoreCache
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(WindowsInternal.Shell.DataStoreCache.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("WindowsInternal.Shell.DataStoreCache.IMRTResourceBroker", 41dd8330-e9bc-dc1b-3251-5fc433f9fe09)]
+    [threading(both)]
+    runtimeclass MRTResourceBroker
+    {
+    }
+
+
+    [contract(WindowsInternal.Shell.DataStoreCache.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("WindowsInternal.Shell.DataStoreCache.IEdpTileBroker", 5d1acb7d-45f4-41c9-9a31-78fa47326a94)]
+    [threading(both)]
+    runtimeclass EdpTileBroker
+    {
+        static void IsEdpEnabledForAumid(String aumid, out Boolean isEdpEnabled, out Boolean isEnterpriseOnlyApp);
+        static void IsEdpEnabledForWin32Application(String targetInstallPath, out Boolean isEdpEnabled, out Boolean isEnterpriseOnlyApp);
+        static void IsEdpEnabledForPackageFullName(String packageFullName, out Boolean isEdpEnabled, out Boolean isEnterpriseOnlyApp);
+    }
+
+}

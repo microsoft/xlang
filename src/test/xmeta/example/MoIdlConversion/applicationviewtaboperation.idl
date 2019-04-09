@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell.Tabs
+{
+    [contract(Windows.Internal.ComposableShell.Tabs.OnecoreUapInternalContract, 1)]
+    [uuid(abc3a46a-162a-4244-bf76-49364432cda1)]
+    interface IApplicationViewTabOperation
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroupId TabGroupId{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroupId TabGroupId{ set; };
+        Boolean ShouldReconnectTitleBar{ get; };
+        Boolean ShouldReconnectTitleBar{ set; };
+        Boolean ShouldRecreateTitleBar{ get; };
+        Boolean ShouldRecreateTitleBar{ set; };
+    };
+
+}

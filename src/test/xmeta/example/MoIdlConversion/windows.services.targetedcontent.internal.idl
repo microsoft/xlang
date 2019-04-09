@@ -1,0 +1,382 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Services.TargetedContent.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract TargetedContentInternalContract{};
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum TargetedContentConfigurationKinds
+    {
+        None,
+        PermittedToRunIfActive,
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum RemoveInvalidItemsReasonKind
+    {
+        Remediation,
+        Servicing,
+    };
+
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(118ec4a0-443d-467d-b568-de895db52e7b)]
+    interface INotifySubscription
+    {
+        void OnSubscriptionContentUpdated(Boolean contentExpired);
+        void OnSubscriptionContentAvailabilityChanged(Boolean contentExpired);
+        void OnSubscriptionContentStateChanged(Boolean contentExpired);
+    };
+
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(d57bf733-13bf-4dda-800c-4d5b5fd2ac12)]
+    interface ITargetedContentObjectInternal
+    {
+        void SelectSingleObjectFromRelativePath(String relativePath, out Windows.Services.TargetedContent.TargetedContentObject contentObject);
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(2b3a823f-4d5a-4980-a36f-107ca5a7ddbd)]
+    interface ITargetedContentItemInternalProperties
+    {
+        String ApplicationId{ get; };
+        String AppPackageFamilyName{ get; };
+        String EntityId{ get; };
+        String PackageRelativeAppId{ get; };
+        String ProductId{ get; };
+        String SkuId{ get; };
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(39fbb644-e218-4e45-ab28-d26a2cbe7446)]
+    interface ITargetedContentCollectionInternalProperties
+    {
+        String EntityId{ get; };
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(11a25863-dd58-4a33-a547-d481ef956f29)]
+    interface ITargetedContentObjectMetadataInternal
+    {
+        Windows.Foundation.Collections.IVectorView <String>  ReportableInteractions{ get; };
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(c766afef-ffdc-40be-8294-2297ae97f9c4)]
+    interface ITargetedContentFilePathInternal
+    {
+        String FilePath{ get; };
+    };
+
+
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.TargetedContent.Internal.ISubscriptionManager", 50a5378f-a64e-4d5a-a911-6342b5ff64c0)]
+    [threading(both)]
+    runtimeclass SubscriptionManager
+    {
+        SubscriptionManager();
+        void RegisterSubscription(String subscriptionId, INotifySubscription subscription);
+        void UnregisterSubscription(String subscriptionId, INotifySubscription subscription);
+        void UpdateSubscriptionOptions(Windows.Services.TargetedContent.TargetedContentSubscriptionOptions options);
+    }
+
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(e762b6be-f3b7-4977-bc20-4388a551b5b4)]
+    interface ITargetedContentActionInternal
+    {
+        Windows.Foundation.IAsyncAction InvokeAsync();
+        Windows.Foundation.IAsyncAction RevertAsync();
+        Windows.Foundation.IAsyncAction StageAsync();
+        Windows.Foundation.IAsyncAction UnstageAsync();
+        Windows.Foundation.IAsyncAction CommitAsync();
+    };
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [static_name("Windows.Services.TargetedContent.Internal.ITargetedContentActionStaticsInternal", 5095e466-bb07-4fb0-a18b-88f3bf86b2bd)]
+    [threading(both)]
+    runtimeclass TargetedContentActionInternal
+        : [default]Windows.Services.TargetedContent.Internal.ITargetedContentActionInternal
+    {
+        static Windows.Services.TargetedContent.Internal.ITargetedContentActionInternal CreateAction(String actionName, Windows.Foundation.Collections.IMapView <String, String>  parameters);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Services.TargetedContent.Internal.ITargetedContentCacheWriter", d85beb3b-a4e3-49e0-adb7-7de5b2b02a31)]
+    [threading(both)]
+    runtimeclass TargetedContentCacheWriter
+    {
+        TargetedContentCacheWriter();
+        Windows.Foundation.IAsyncAction AddContentToCacheAsync(String subscriptionId, String contentId, String jsonPayload, Boolean removeOtherSubscriptionContent);
+        Windows.Foundation.IAsyncAction RemoveContentForContentIdAsync(String contentId);
+        Windows.Foundation.IAsyncAction RemoveContentForSubscriptionAsync(String subscriptionId);
+        Windows.Foundation.IAsyncAction RemoveInvalidItemsAsync(Windows.Foundation.Collections.IVectorView <String>  validSubscriptions, RemoveInvalidItemsReasonKind reason);
+        Windows.Foundation.IAsyncAction RemoveInvalidContentAsync(String subscriptionId, Windows.Foundation.Collections.IVectorView <String>  validContentIds);
+        Boolean IsCacheCurrent{ get; };
+        void SetCacheVersionToCurrent();
+        Windows.Foundation.IAsyncAction SetSubscriptionMonitoringBaselineAsync(String subscriptionId);
+    }
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Services.TargetedContent.Internal.ITargetedContentCacheReader", ca2f34cf-283f-453e-b2d2-841b8c2f5c34)]
+    [threading(both)]
+    runtimeclass TargetedContentCacheReader
+    {
+        TargetedContentCacheReader();
+        Windows.Foundation.IAsyncOperation <String>  GetContentByContentIdAsync(String contentId);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <String> >  GetContentIdsForSubscriptionAsync(String subscriptionId);
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStreamReference>  GetCachedFileResourceStreamReferenceAsync(String path);
+    }
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Services.TargetedContent.Internal.ITargetedContentCacheChangeTracker", 7f4935e3-0135-4f14-8a1c-457877d80c66)]
+    [threading(both)]
+    runtimeclass TargetedContentCacheChangeTracker
+    {
+        TargetedContentCacheChangeTracker();
+        void NotifyContentUpdated(Guid guidClient, String folderPath);
+        Boolean AreChangesDetected(Guid guidClient, String folderPath);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Services.TargetedContent.Internal.ITargetedContentSubscriptionInternal", 1547dcdf-43fb-4ea7-b3c0-d10f3b1f34ff)]
+    [threading(both)]
+    runtimeclass TargetedContentSubscriptionInternal
+    {
+        TargetedContentSubscriptionInternal();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <String> >  GetAvailableContentIdsAsync(String subscriptionId);
+        Windows.Services.TargetedContent.Internal.TargetedContentConfigurationKinds GetSubscriptionConfiguration(String subscriptionId);
+        void SetSubscriptionConfiguration(String subscriptionId, TargetedContentConfigurationKinds value);
+        Windows.Foundation.IAsyncAction FlushReportedInteractionsAsync(String subscriptionId);
+    }
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum CollectionClass
+    {
+        None,
+        Empty,
+        Control,
+        Content,
+    };
+
+    [uuid(7ac134b9-9828-4a78-b1b6-f7eeba0d5256)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    interface ITargetedContentContainerInternal
+    {
+        Windows.Services.TargetedContent.Internal.CollectionClass CollectionClass{ get; };
+        String CreativeId{ get; };
+    };
+
+    [uuid(8145a2fe-9058-4371-90d7-599364f1dec2)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    interface ITargetedContentValueInternal
+    {
+        String AccessibleDescription{ get; };
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum TargetedContentKnownTrigger
+    {
+        None,
+        UserIdle,
+        AppOpen,
+        AppClose,
+        AppInstallComplete,
+        Render,
+        Rule,
+        SystemStateChange,
+        KnownEvent,
+        Timer,
+        FeatureUsage,
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum TargetedContentTriggerOptions
+    {
+        None,
+        AllowToRunOnDcPower,
+        OnlyRunOnDcPower,
+    };
+
+    [flags]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum TargetedContentTriggerConditionFlags
+    {
+        None,
+        InternetAvailable,
+        SessionConnected,
+        FreeNetworkAvailable = 4,
+        AllowWhenExecutionCostIsHigh = 8,
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum TargetedContentPredicateKind
+    {
+        None,
+        String,
+        Int,
+        Guid,
+        Base64,
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    enum TargetedContentTriggerState
+    {
+        None,
+        NotRegistered,
+        Registered,
+        Triggered,
+    };
+
+    [uuid(bd97ebc7-80e3-4470-a44f-f0d312b031f3)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    interface ITargetedContentTriggerStateTransition
+    {
+        String EventName{ get; };
+        String EventName{ set; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerState CurrentState{ get; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerState CurrentState{ set; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerState NextState{ get; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerState NextState{ set; };
+    };
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000005)]
+    [threading(both)]
+    runtimeclass TargetedContentTriggerStateTransition
+        : [default]Windows.Services.TargetedContent.Internal.ITargetedContentTriggerStateTransition
+    {
+        TargetedContentTriggerStateTransition();
+    }
+
+    [uuid(3b431df6-5dbc-4950-b51f-e8313d975159)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    interface ITargetedContentTriggerInternal
+    {
+        String Action{ get; };
+        String Action{ set; };
+        String Id{ get; };
+        String Id{ set; };
+        Windows.Services.TargetedContent.Internal.TargetedContentKnownTrigger Trigger{ get; };
+        Windows.Services.TargetedContent.Internal.TargetedContentKnownTrigger Trigger{ set; };
+        String Predicate{ get; };
+        String Predicate{ set; };
+        Windows.Services.TargetedContent.Internal.TargetedContentPredicateKind PredicateKind{ get; };
+        Windows.Services.TargetedContent.Internal.TargetedContentPredicateKind PredicateKind{ set; };
+        String Path{ get; };
+        String Path{ set; };
+        String Predecessor{ get; };
+        String Predecessor{ set; };
+        String Intent{ get; };
+        String Intent{ set; };
+        String CreativeId{ get; };
+        String CreativeId{ set; };
+        String PlacementName{ get; };
+        String PlacementName{ set; };
+        String RuleFilePath{ get; };
+        String RuleFilePath{ set; };
+        String EventName{ get; };
+        String EventName{ set; };
+        Windows.Foundation.TimeSpan Delay{ get; };
+        Windows.Foundation.TimeSpan Delay{ set; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerOptions Options{ get; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerOptions Options{ set; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerConditionFlags ConditionFlags{ get; };
+        Windows.Services.TargetedContent.Internal.TargetedContentTriggerConditionFlags ConditionFlags{ set; };
+        String ScoreName{ get; };
+        String ScoreName{ set; };
+        Double ScoreValue{ get; };
+        Double ScoreValue{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Services.TargetedContent.Internal.TargetedContentTriggerStateTransition>  StateTransitions{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Services.TargetedContent.Internal.TargetedContentTriggerStateTransition>  StateTransitions{ set; };
+    };
+
+    [dualapipartition(0xa000006)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass TargetedContentTriggerInternal
+        : [default]Windows.Services.TargetedContent.Internal.ITargetedContentTriggerInternal
+    {
+        TargetedContentTriggerInternal();
+    }
+
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Services.TargetedContent.Internal.ITargetedContentTriggerManagerStaticsInternal", caf66f56-2471-4426-b393-77a1640adf78)]
+    [threading(both)]
+    runtimeclass TargetedContentTriggerManagerInternal
+    {
+        static void RegisterTrigger(Windows.Foundation.Collections.IVectorView <Windows.Services.TargetedContent.Internal.TargetedContentTriggerInternal>  triggers, String currentStateName, String correlationVector);
+        static void UnregisterTrigger(Windows.Foundation.Collections.IVectorView <Windows.Services.TargetedContent.Internal.TargetedContentTriggerInternal>  triggers, String correlationVector, Boolean removeState);
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Services.TargetedContent.Internal.TargetedContentTriggerInternal> >  GetTriggeredItemsForStateAsync(String stateName, String predicate, String correlationVector);
+    }
+
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.TargetedContent.Internal.ITargetedContentIdAliasValue", 2b2f4770-d82c-4f27-a861-f821d3867fef)]
+    [threading(both)]
+    runtimeclass TargetedContentIdAliasValue
+    {
+        TargetedContentIdAliasValue();
+        String SubscriptionId{ get; };
+        String ContentId{ get; };
+        String Path{ get; };
+    }
+
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [uuid(d9a81b15-92ab-43ab-8412-6958df1810a3)]
+    interface ITargetedContentIdAliasStore
+    {
+        void SetAlias(String alias, String contentId, String path);
+        Boolean HasAlias(String alias);
+        Windows.Services.TargetedContent.Internal.TargetedContentIdAliasValue LookupAlias(String alias);
+        Windows.Foundation.Collections.IMapView <String, Windows.Services.TargetedContent.Internal.TargetedContentIdAliasValue>  GetAllAliases();
+        void RemoveAlias(String alias);
+        void RemoveAllAliases();
+    };
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Services.TargetedContent.Internal.TargetedContentInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Services.TargetedContent.Internal.ITargetedContentIdAliasStoreStatics", 42d1d3ce-0c01-4982-819d-07ab08924e8e)]
+    [threading(both)]
+    runtimeclass TargetedContentIdAliasStore
+    {
+        static Windows.Foundation.Collections.IMapView <String, Windows.Services.TargetedContent.Internal.TargetedContentIdAliasValue>  GetAliasesForAllSubscriptions();
+        static Boolean HasAliasStore(String subscriptionId);
+        static Windows.Services.TargetedContent.Internal.ITargetedContentIdAliasStore LookupAliasStore(String subscriptionId, Boolean createIfNeeded);
+        static void RemoveAliasStore(String subscriptionId);
+    }
+
+}

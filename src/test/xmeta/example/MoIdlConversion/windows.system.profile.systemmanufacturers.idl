@@ -1,0 +1,21 @@
+
+
+
+
+
+
+namespace Windows.System.Profile.SystemManufacturers
+{
+    [contractversion(3)]
+    apicontract SystemManufacturersContract{};
+
+
+    [contract(Windows.System.Profile.SystemManufacturers.SystemManufacturersContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Profile.SystemManufacturers.ISmbiosInformationStatics", 080cca7c-637c-48c4-b728-f9273812db8e)]
+    runtimeclass SmbiosInformation
+    {
+        static String SerialNumber{ get; };
+    }
+
+}

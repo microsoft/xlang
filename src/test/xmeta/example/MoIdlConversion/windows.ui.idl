@@ -1,0 +1,39 @@
+
+
+
+
+
+
+
+namespace Windows.UI
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct Color
+    {
+        UInt8 A;
+        UInt8 R;
+        UInt8 G;
+        UInt8 B;
+    };
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.IColorHelperStatics", 8504dbea-fb6a-4144-a6c2-33499c9284f5)]
+    [default_interface]
+    [interface_name("Windows.UI.IColorHelper", 193cfbe7-65c7-4540-ad08-6283ba76879a)]
+    [threading(both)]
+    runtimeclass ColorHelper
+    {
+        static Windows.UI.Color FromArgb(UInt8 a, UInt8 r, UInt8 g, UInt8 b);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.UI.IColorHelperStatics2", 24d9af02-6eb0-4b94-855c-fcf0818d9a16)]
+        {
+            static String ToDisplayName(Color color);
+        }
+    }
+
+}

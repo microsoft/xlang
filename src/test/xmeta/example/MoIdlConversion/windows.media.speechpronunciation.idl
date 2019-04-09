@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+
+namespace Windows.Media.SpeechPronunciation
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Media.SpeechPronunciation.InternalContract, 1)]
+    enum PronunciationPartOfSpeech
+    {
+        Unknown,
+        Noun,
+        Verb,
+        Modifier,
+        Function,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.SpeechPronunciation.InternalContract, 1)]
+    [interface_name("Windows.Media.SpeechPronunciation.ISpeechPronunciation", a95fe6ae-319a-4bcc-bfd5-1be4b650d0a8)]
+    runtimeclass SpeechPronunciation
+    {
+        Windows.Media.SpeechPronunciation.PronunciationPartOfSpeech PartOfSpeech{ get; };
+        String PhonemeString{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.SpeechPronunciation.InternalContract, 1)]
+    [interface_name("Windows.Media.SpeechPronunciation.ISpeechLexicon", 089d5e34-e346-4eff-8848-4d2d76ba36af)]
+    runtimeclass SpeechUserLexicon
+    {
+        void AddPronunciation(String word, PronunciationPartOfSpeech partOfSpeech, String phonemeString);
+        [method_name("RemovePronunciation")] void RemovePronunciation(String word, PronunciationPartOfSpeech partOfSpeech);
+        [method_name("RemoveAllPronunciationsForWord")] void RemovePronunciation(String word);
+        Windows.Foundation.Collections.IVectorView <Windows.Media.SpeechPronunciation.SpeechPronunciation>  GetPronunciation(String name);
+        Windows.Foundation.Collections.IVectorView <String>  GetWords();
+    }
+
+
+    [contract(Windows.Media.SpeechPronunciation.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.SpeechPronunciation.ISpeechLexiconManagerStatic", aec3872c-889f-44f9-9fe8-83d625e53110)]
+    runtimeclass SpeechLexiconManager
+    {
+        static Windows.Media.SpeechPronunciation.SpeechUserLexicon GetUserLexicon(Windows.Globalization.Language language);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.SpeechPronunciation.InternalContract, 1)]
+    [interface_name("Windows.Media.SpeechPronunciation.ISpeechPronunciator", 6f97c457-b499-4685-89bb-d5db492609a3)]
+    runtimeclass SpeechPronunciator
+    {
+        SpeechPronunciator();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <String> >  GetPhonemeStringsFromTextAsync(String soundsLike);
+    }
+
+}

@@ -1,0 +1,56 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Devices.SmartCards
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Devices.SmartCards.InternalContract, 1)]
+    enum SmartCardSecureElementUnlockStatus
+    {
+        Unsupported,
+        UserNotAuthenticated,
+        Success,
+    };
+
+
+    [contract(Windows.Internal.Devices.SmartCards.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Devices.SmartCards.ISmartCardSecureElementUnlockResult", 1cd0a341-6ba1-4b1c-8af2-99a33135ced6)]
+    runtimeclass SmartCardSecureElementUnlockResult
+    {
+        Windows.Internal.Devices.SmartCards.SmartCardSecureElementUnlockStatus Status{ get; };
+        Windows.Foundation.TimeSpan UnlockTimeRemaining{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Devices.SmartCards.InternalContract, 1)]
+    [static_name("Windows.Internal.Devices.SmartCards.ISmartCardSecureElementInternalStatics", b8d91fef-cd3e-4fd7-89be-b3aa780a3f31)]
+    [interface_name("Windows.Internal.Devices.SmartCards.ISmartCardSecureElementInternal", 7e0aad6c-5386-48e0-a734-10c56d4b14a7)]
+    [threading(both)]
+    runtimeclass SmartCardSecureElementInternal
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Internal.Devices.SmartCards.SmartCardSecureElementInternal>  FromSmartCardReaderIdAsync(String smartCardReaderId);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.Devices.SmartCards.SmartCardSecureElementUnlockResult>  UnlockAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Devices.SmartCards.SmartCardSecureElementInternal, Windows.Internal.Devices.SmartCards.SmartCardSecureElementLockedEventArgs>  Locked;
+    }
+
+    [contract(Windows.Internal.Devices.SmartCards.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Internal.Devices.SmartCards.ISmartCardSecureElementLockedEventArgs", 0e35e1f8-6755-4af0-ae04-291469326d67)]
+    runtimeclass SmartCardSecureElementLockedEventArgs
+    {
+    }
+
+
+
+
+}

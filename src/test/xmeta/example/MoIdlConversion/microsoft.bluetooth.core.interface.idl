@@ -1,0 +1,327 @@
+
+
+
+
+
+
+
+
+
+namespace Microsoft.Bluetooth.Interface
+{
+    [contractversion(1)]
+    [internal]
+    apicontract ApiContract{};
+
+}
+namespace Microsoft.Bluetooth.Core.Interface
+{
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [flags]
+    enum GapTransports
+    {
+        None,
+        Classic,
+        LowEnergy,
+        DualMode,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum GapAddressType
+    {
+        Classic,
+        LowEnergy,
+        Public,
+        Random,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    struct GapRemoteAddress
+    {
+        UInt64 address;
+        GapAddressType addressType;
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum GapRadioSessionStatus
+    {
+        Active,
+        Inactive,
+        Closed,
+        Aborted,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum GapAdvertisementWatcherStatus
+    {
+        Started,
+        Pending,
+        Stopped,
+        Aborted,
+    };
+
+    [flags]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum GapScanRequestCategories
+    {
+        None,
+        HighPriority,
+        Foreground,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum GapDeviceTrackingEventType
+    {
+        Added,
+        Updated,
+        Removed,
+        Dropped,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum GapAdvertisementType
+    {
+        ConnectableUndirected,
+        ConnectableDirected,
+        ScannableUndirected,
+        NonConnectableUndirected,
+        ScanResponse,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    struct GapConnectionParameters
+    {
+        UInt16 MinimumConnectionInterval;
+        UInt16 MaximumConnectionInterval;
+        UInt16 ConnectionLatency;
+        UInt16 ConnectionSupervisionTimeoutMultiplier;
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    struct GapPnpInfo
+    {
+        UInt8 VidSource;
+        UInt16 Vid;
+        UInt16 Pid;
+        UInt16 Revision;
+        Guid ContainerId;
+    };
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [static_name("Microsoft.Bluetooth.Core.Interface.IGapRadioStatics", 927dc86b-59e0-4d6d-ae5f-5a0ebe386ffc)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapRadio", 6978a8ee-ca71-4ce3-9289-c5038b267117)]
+    [threading(both)]
+    runtimeclass GapRadio
+    {
+        static Microsoft.Bluetooth.Core.Interface.GapRadio Create(UInt64 localAddress);
+        static Microsoft.Bluetooth.Core.Interface.GapRadio CreateDefault();
+        UInt64 LocalAddress{ get; };
+        String FriendlyName{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapTransports SupportedTransports{ get; };
+        UInt64 HciSupportedVendorFeatures{ get; };
+        UInt64 LmpSupportedFeatures{ get; };
+        Boolean CentralAddressResolutionSupported{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapConnectionParameters PreferredConnectionParameters{ get; };
+        UInt16 AppearanceValue{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapPnpInfo PnpInfo{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapRadioDiscoveryControl GetRadioDiscoveryControl(GapTransports transports);
+        Microsoft.Bluetooth.Core.Interface.GapDeviceDiscovery GetDeviceDiscovery(GapTransports transports);
+        Microsoft.Bluetooth.Core.Interface.GapRadioSession RequestConnectionParameters(GapConnectionParameters parameters);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapRadioDiscoveryControl", bb84220a-98c4-4f72-b7c6-0dca146adcbb)]
+    runtimeclass GapRadioDiscoveryControl
+    {
+        Microsoft.Bluetooth.Core.Interface.GapRadioSession RequestConnectableAndDiscoverableState(Boolean connectable, Boolean discoverable);
+        Microsoft.Bluetooth.Core.Interface.GapRadioSession AdvertiseServiceUuid(Guid serviceUuid);
+        Microsoft.Bluetooth.Core.Interface.GapRadioSession AdvertiseServiceData(Guid serviceUuid, Windows.Storage.Streams.IBuffer serviceData);
+    }
+
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapDeviceDiscovery", 4b6cebca-b71a-405d-8342-9febe8dbc9f8)]
+    runtimeclass GapDeviceDiscovery
+    {
+        Microsoft.Bluetooth.Core.Interface.GapDevice GetDeviceByRemoteAddress(UInt64 remoteAddress);
+        Microsoft.Bluetooth.Core.Interface.GapAdvertisementWatcher CreateAdvertisementWatcher(GapRssiFilterConstraint filterConstraint, GapRssiFilterConfiguration filterConfiguration);
+        Microsoft.Bluetooth.Core.Interface.GapAdvertisementWatcher CreateAdvertisementWatcherWithScanRequestCategories(GapRssiFilterConstraint filterConstraint, GapRssiFilterConfiguration filterConfiguration, GapScanRequestCategories scanRequestCategories);
+    }
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapRadioSession", c2e6a777-0631-48f7-a16a-c5465f7062cf)]
+    runtimeclass GapRadioSession
+        : Windows.Foundation.IClosable
+    {
+        Microsoft.Bluetooth.Core.Interface.GapRadioSessionStatus Status{ get; };
+        event Windows.Foundation.TypedEventHandler <Microsoft.Bluetooth.Core.Interface.GapRadioSession, Microsoft.Bluetooth.Core.Interface.GapRadioSessionStatusChangedArgs>  StatusChanged;
+    }
+
+
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapRadioSessionStatusChangedArgs", ae933b01-3913-4def-945f-234e06b6fc1c)]
+    runtimeclass GapRadioSessionStatusChangedArgs
+    {
+        Microsoft.Bluetooth.Core.Interface.GapRadioSessionStatus Status{ get; };
+        HRESULT Reason{ get; };
+    }
+
+
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapDevice", 6b0a785c-e7cc-4d1c-8953-da300616f30f)]
+    runtimeclass GapDevice
+        : Windows.Foundation.IClosable
+    {
+        Microsoft.Bluetooth.Core.Interface.GapRemoteAddress RemoteAddress{ get; };
+        String FriendlyName{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapPnpInfo PnpInfo{ get; };
+        UInt16 AppearanceValue{ get; };
+        Boolean CentralAddressResolutionSupported{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapConnectionParameters ConnectionParameters{ get; };
+        void UpdatePnpInfo(GapPnpInfo pnpInfo);
+        void UpdateFriendlyName(String name);
+        void UpdateAppearanceValue(UInt16 appearanceValue);
+        void UpdateCentralAddressResolutionSupported(Boolean supported);
+        Microsoft.Bluetooth.Core.Interface.GapDeviceSession RequestConnectionParameters(GapConnectionParameters parameters);
+    }
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [static_name("Microsoft.Bluetooth.Core.Interface.IGapRssiFilterConstraintStatics", 3eb6039c-79be-4a4a-8d5f-3fa4a7a6feb6)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapRssiFilterConstraint", 095b33d4-7edd-44d6-bd68-833c070aa4a8)]
+    [threading(both)]
+    runtimeclass GapRssiFilterConstraint
+    {
+        static Microsoft.Bluetooth.Core.Interface.GapRssiFilterConstraint CreateAdvertisementDataPatternConstraint(UInt8 sectionType, UInt8 offset, Windows.Storage.Streams.IBuffer data);
+        static Microsoft.Bluetooth.Core.Interface.GapRssiFilterConstraint CreateAdvertisementServiceUuidConstraint(Guid serviceUuid);
+        static Microsoft.Bluetooth.Core.Interface.GapRssiFilterConstraint CreateDeviceAddressConstraint(GapRemoteAddress address);
+        Windows.Foundation.IReference <Microsoft.Bluetooth.Core.Interface.GapRemoteAddress>  DeviceAddress{ get; };
+        Windows.Foundation.Collections.IVectorView <Guid>  ServiceUuids{ get; };
+        Windows.Foundation.Collections.IVectorView <Microsoft.Bluetooth.Core.Interface.GapAdvertisementDataSectionPattern>  DataPatterns{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [webhosthidden]
+    [static_name("Microsoft.Bluetooth.Core.Interface.IGapRssiFilterConfigurationStatics", bf1e67cb-9eb5-405e-bed7-898f2f91a482)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapRssiFilterConfiguration", d02d1108-0455-460f-808d-07081b7dc905)]
+    [threading(both)]
+    runtimeclass GapRssiFilterConfiguration
+    {
+        static Microsoft.Bluetooth.Core.Interface.GapRssiFilterConfiguration CreateDefault();
+        static Microsoft.Bluetooth.Core.Interface.GapRssiFilterConfiguration Create(Windows.Foundation.IReference <Int16>  inRangeThreshold, Windows.Foundation.IReference <Int16>  outOfRangeThreshold, Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  outOfRangeTimeout, Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  samplingInterval);
+        Windows.Foundation.IReference <Int16>  InRangeThresholdInDBm{ get; };
+        Windows.Foundation.IReference <Int16>  OutOfRangeThresholdInDBm{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  OutOfRangeTimeout{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  SamplingInterval{ get; };
+    }
+
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapAdvertisementWatcher", 6b277df1-cc4b-4bc1-a645-895ba4c049da)]
+    runtimeclass GapAdvertisementWatcher
+    {
+        void Start();
+        void Stop();
+        Guid SessionId{ get; };
+        event Windows.Foundation.TypedEventHandler <Microsoft.Bluetooth.Core.Interface.GapAdvertisementWatcher, Microsoft.Bluetooth.Core.Interface.GapAdvertisementWatcherStatusChangedArgs>  StatusChanged;
+        event Windows.Foundation.TypedEventHandler <Microsoft.Bluetooth.Core.Interface.GapAdvertisementWatcher, Microsoft.Bluetooth.Core.Interface.GapDeviceTrackingEventReceivedArgs>  DeviceTrackingEventReceived;
+    }
+
+
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapDeviceSession", 965a1d04-acba-4cbc-9ccc-823b3a8cbaa6)]
+    runtimeclass GapDeviceSession
+        : Windows.Foundation.IClosable
+    {
+    }
+
+
+
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapAdvertisementWatcherStatusChangedArgs", b028126c-daee-4b90-9e37-a6ebc477441d)]
+    runtimeclass GapAdvertisementWatcherStatusChangedArgs
+    {
+        Microsoft.Bluetooth.Core.Interface.GapAdvertisementWatcherStatus Status{ get; };
+        HRESULT Reason{ get; };
+    }
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapDeviceTrackingEventReceivedArgs", 5bb0012c-12b8-4e45-923e-4faed0573bfb)]
+    runtimeclass GapDeviceTrackingEventReceivedArgs
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapRemoteAddress DeviceAddress{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapDeviceTrackingEventType EventType{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapAdvertisement Advertisement{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  AdvertisementReceivedTimestamp{ get; };
+        Windows.Foundation.IReference <Int16>  Rssi{ get; };
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapAdvertisementDataSectionPattern", c55995e4-f2e2-4220-851c-cdfbbea21aec)]
+    runtimeclass GapAdvertisementDataSectionPattern
+    {
+        Windows.Foundation.IReference <UInt8>  SectionType{ get; };
+        Windows.Foundation.IReference <UInt8>  Offset{ get; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+    }
+
+
+
+
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapAdvertisement", b30726c4-214f-42b6-ae11-39506e0dfc56)]
+    runtimeclass GapAdvertisement
+    {
+        Microsoft.Bluetooth.Core.Interface.GapAdvertisementType AdvertisementType{ get; };
+        Windows.Foundation.Collections.IVectorView <Microsoft.Bluetooth.Core.Interface.GapAdvertisementSection>  Sections{ get; };
+        Boolean Equals(GapAdvertisement target);
+    }
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [interface_name("Microsoft.Bluetooth.Core.Interface.IGapAdvertisementSection", dd0d10b6-6421-4e2b-998d-9466839aa279)]
+    runtimeclass GapAdvertisementSection
+    {
+        UInt8 SectionType{ get; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Boolean Equals(GapAdvertisementSection target);
+    }
+
+
+}

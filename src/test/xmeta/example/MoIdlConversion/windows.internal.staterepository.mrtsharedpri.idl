@@ -1,0 +1,52 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IMrtSharedPriStatics", 223e9a8a-0b52-46c7-b8b8-34cda968f318)]
+    [interface_name("Windows.Internal.StateRepository.IMrtSharedPri", ced591f2-cf14-4b3e-b4da-6ece807905b2)]
+    [threading(both)]
+    runtimeclass MrtSharedPri
+    {
+        static Boolean Exists(Int64 mrtSharedPriID);
+        static Boolean ExistsByFilename(String Filename);
+        static Boolean ExistsByPackage(Package Package);
+        static Windows.Internal.StateRepository.MrtSharedPri Get(Int64 mrtSharedPriID);
+        static Windows.Internal.StateRepository.MrtSharedPri TryGet(Int64 mrtSharedPriID);
+        static Windows.Internal.StateRepository.MrtSharedPri GetByFilename(String Filename);
+        static Windows.Internal.StateRepository.MrtSharedPri TryGetByFilename(String Filename);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtSharedPri>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtSharedPri>  FindByPackage(Package Package);
+        MrtSharedPri();
+        Int64 _MrtSharedPriID{ get; };
+        Int64 _MrtSharedPriID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        String Filename{ get; };
+        String Filename{ set; };
+        Windows.Storage.StorageFile GetFilenameAsStorageFile();
+        void SetFilenameAsStorageFile(Windows.Storage.IStorageFile value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

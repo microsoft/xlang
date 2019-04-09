@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IAppUriHandlerGroupStatics", 663fe24b-04ad-4778-8c44-71a357b68188)]
+    [interface_name("Windows.Internal.StateRepository.IAppUriHandlerGroup", 45ffa0d2-c035-4279-a79b-0359be007bcf)]
+    [threading(both)]
+    runtimeclass AppUriHandlerGroup
+    {
+        static Boolean Exists(Int64 appUriHandlerGroupID);
+        static Boolean ExistsByExtension(ApplicationExtension Extension);
+        static Boolean ExistsByName(String Name);
+        static Boolean ExistsByNameAndExtension(String Name, ApplicationExtension Extension);
+        static Windows.Internal.StateRepository.AppUriHandlerGroup TryGet(Int64 appUriHandlerGroupID);
+        static Windows.Internal.StateRepository.AppUriHandlerGroup TryGetByNameAndExtension(String Name, ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppUriHandlerGroup>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppUriHandlerGroup>  FindByExtension(ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppUriHandlerGroup>  FindByName(String Name);
+        static Windows.Internal.StateRepository.AppUriHandlerGroup TryGetByUserAndPackageFamilyNameAndName(User User, String packageFamilyName, String Name);
+        AppUriHandlerGroup();
+        Int64 _AppUriHandlerGroupID{ get; };
+        Int64 _AppUriHandlerGroupID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        Int64 Extension{ get; };
+        Int64 Extension{ set; };
+        Windows.Internal.StateRepository.ApplicationExtension GetExtension();
+        void SetExtension(ApplicationExtension value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

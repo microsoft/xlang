@@ -1,0 +1,56 @@
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Popups
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.Popups.InternalContract, 1)]
+    struct ClientIdentifier
+    {
+        UInt32 viewId;
+        UInt32 windowId;
+        UInt32 processId;
+    };
+
+    [contract(Windows.Internal.Shell.Popups.InternalContract, 1)]
+    enum PopupClientPropertyChangedEventType
+    {
+        CanShowPopups,
+        TopLevelHost,
+        Destroyed,
+    };
+
+
+    [contract(Windows.Internal.Shell.Popups.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Popups.IPopupClientPropertyChangedEventArgs", d51e18a2-1df9-4307-804b-da3f01ce9b82)]
+    runtimeclass PopupClientPropertyChangedEventArgs
+    {
+        Windows.Internal.Shell.Popups.PopupClientPropertyChangedEventType EventType{ get; };
+    }
+
+
+    [contract(Windows.Internal.Shell.Popups.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Shell.Popups.IPopupClientStatics", b2571928-3f1d-4f6d-8930-fd9f7d5a69fc)]
+    [interface_name("Windows.Internal.Shell.Popups.IPopupClient", 56f0dd5a-a0d5-433a-8575-5baddbe704c3)]
+    [threading(both)]
+    runtimeclass PopupClient
+    {
+        static Windows.Internal.Shell.Popups.PopupClient GetForViewId(UInt32 viewId);
+        static Windows.Internal.Shell.Popups.PopupClient GetForWindowId(UInt32 windowId);
+        Boolean CanShowPopups{ get; };
+        void NotifyPopupShowing();
+        void NotifyPopupDismissed();
+        Windows.Internal.Shell.Popups.ClientIdentifier TopLevelHost{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Popups.PopupClient, Windows.Internal.Shell.Popups.PopupClientPropertyChangedEventArgs>  PropertyChanged;
+    }
+
+
+}

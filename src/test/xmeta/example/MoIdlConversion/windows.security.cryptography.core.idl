@@ -1,0 +1,441 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Security.Cryptography.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CryptographicPrivateKeyBlobType
+    {
+        Pkcs8RawPrivateKeyInfo,
+        Pkcs1RsaPrivateKey,
+        BCryptPrivateKey,
+        Capi1PrivateKey,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        BCryptEccFullPrivateKey,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CryptographicPublicKeyBlobType
+    {
+        X509SubjectPublicKeyInfo,
+        Pkcs1RsaPublicKey,
+        BCryptPublicKey,
+        Capi1PublicKey,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        BCryptEccFullPublicKey,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum Capi1KdfTargetAlgorithm
+    {
+        NotAes,
+        Aes,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CryptographicPadding
+    {
+        None,
+        RsaOaep,
+        RsaPkcs1V15,
+        RsaPss,
+    };
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Core.IKeyDerivationParametersStatics", ea961fbe-f37f-4146-9dfe-a456f1735f4b)]
+    [interface_name("Windows.Security.Cryptography.Core.IKeyDerivationParameters", 7bf05967-047b-4a8c-964a-469ffd5522e2)]
+    [threading(both)]
+    runtimeclass KeyDerivationParameters
+    {
+        static Windows.Security.Cryptography.Core.KeyDerivationParameters BuildForPbkdf2(Windows.Storage.Streams.IBuffer pbkdf2Salt, UInt32 iterationCount);
+        static Windows.Security.Cryptography.Core.KeyDerivationParameters BuildForSP800108(Windows.Storage.Streams.IBuffer label, Windows.Storage.Streams.IBuffer context);
+        static Windows.Security.Cryptography.Core.KeyDerivationParameters BuildForSP80056a(Windows.Storage.Streams.IBuffer algorithmId, Windows.Storage.Streams.IBuffer partyUInfo, Windows.Storage.Streams.IBuffer partyVInfo, Windows.Storage.Streams.IBuffer suppPubInfo, Windows.Storage.Streams.IBuffer suppPrivInfo);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Core.IKeyDerivationParametersStatics2", a5783dd5-58e3-4efb-b283-a1653126e1be)]
+        {
+            static Windows.Security.Cryptography.Core.KeyDerivationParameters BuildForCapi1Kdf(Capi1KdfTargetAlgorithm capi1KdfTargetAlgorithm);
+        }
+        Windows.Storage.Streams.IBuffer KdfGenericBinary{ get; };
+        Windows.Storage.Streams.IBuffer KdfGenericBinary{ set; };
+        UInt32 IterationCount{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Core.IKeyDerivationParameters2", cd4166d1-417e-4f4c-b666-c0d879f3f8e0)]
+        {
+            Windows.Security.Cryptography.Core.Capi1KdfTargetAlgorithm Capi1KdfTargetAlgorithm{ get; };
+            Windows.Security.Cryptography.Core.Capi1KdfTargetAlgorithm Capi1KdfTargetAlgorithm{ set; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.Cryptography.Core.ICryptographicKey", ed2a3b70-8e7b-4009-8401-ffd1a62eeb27)]
+    runtimeclass CryptographicKey
+    {
+        UInt32 KeySize{ get; };
+        [method_name("ExportDefaultPrivateKeyBlobType")] Windows.Storage.Streams.IBuffer Export();
+        [method_name("ExportPrivateKeyWithBlobType")] Windows.Storage.Streams.IBuffer Export(CryptographicPrivateKeyBlobType BlobType);
+        [method_name("ExportDefaultPublicKeyBlobType")] Windows.Storage.Streams.IBuffer ExportPublicKey();
+        [method_name("ExportPublicKeyWithBlobType")] Windows.Storage.Streams.IBuffer ExportPublicKey(CryptographicPublicKeyBlobType BlobType);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Security.Cryptography.Core.IHashComputation", 5904d1b6-ad31-4603-a3a4-b1bda98e2562)]
+    runtimeclass CryptographicHash
+    {
+        void Append(Windows.Storage.Streams.IBuffer data);
+        Windows.Storage.Streams.IBuffer GetValueAndReset();
+    }
+
+
+
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.Core.IPersistedKeyProviderStatics", 77274814-d9d4-4cf5-b668-e0457df30894)]
+    [threading(both)]
+    runtimeclass PersistedKeyProvider
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Security.Cryptography.Core.CryptographicKey>  OpenKeyPairFromCertificateAsync(Windows.Security.Cryptography.Certificates.Certificate certificate, String hashAlgorithmName, CryptographicPadding padding);
+        static Windows.Security.Cryptography.Core.CryptographicKey OpenPublicKeyFromCertificate(Windows.Security.Cryptography.Certificates.Certificate certificate, String hashAlgorithmName, CryptographicPadding padding);
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.Cryptography.Core.IEncryptedAndAuthenticatedData", 6fa42fe7-1ecb-4b00-bea5-60b83f862f17)]
+    runtimeclass EncryptedAndAuthenticatedData
+    {
+        Windows.Storage.Streams.IBuffer EncryptedData{ get; };
+        Windows.Storage.Streams.IBuffer AuthenticationTag{ get; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.Core.ICryptographicEngineStatics", 9fea0639-6ff7-4c85-a095-95eb31715eb9)]
+    [threading(both)]
+    runtimeclass CryptographicEngine
+    {
+        static Windows.Storage.Streams.IBuffer Encrypt(CryptographicKey key, Windows.Storage.Streams.IBuffer data, Windows.Storage.Streams.IBuffer iv);
+        static Windows.Storage.Streams.IBuffer Decrypt(CryptographicKey key, Windows.Storage.Streams.IBuffer data, Windows.Storage.Streams.IBuffer iv);
+        static Windows.Security.Cryptography.Core.EncryptedAndAuthenticatedData EncryptAndAuthenticate(CryptographicKey key, Windows.Storage.Streams.IBuffer data, Windows.Storage.Streams.IBuffer nonce, Windows.Storage.Streams.IBuffer authenticatedData);
+        static Windows.Storage.Streams.IBuffer DecryptAndAuthenticate(CryptographicKey key, Windows.Storage.Streams.IBuffer data, Windows.Storage.Streams.IBuffer nonce, Windows.Storage.Streams.IBuffer authenticationTag, Windows.Storage.Streams.IBuffer authenticatedData);
+        static Windows.Storage.Streams.IBuffer Sign(CryptographicKey key, Windows.Storage.Streams.IBuffer data);
+        static Boolean VerifySignature(CryptographicKey key, Windows.Storage.Streams.IBuffer data, Windows.Storage.Streams.IBuffer signature);
+        static Windows.Storage.Streams.IBuffer DeriveKeyMaterial(CryptographicKey key, KeyDerivationParameters parameters, UInt32 desiredKeySize);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Core.ICryptographicEngineStatics2", 675948fe-df9f-4191-92c7-6ce6f58420e0)]
+        {
+            static Windows.Storage.Streams.IBuffer SignHashedData(CryptographicKey key, Windows.Storage.Streams.IBuffer data);
+            static Boolean VerifySignatureWithHashInput(CryptographicKey key, Windows.Storage.Streams.IBuffer data, Windows.Storage.Streams.IBuffer signature);
+            static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  DecryptAsync(CryptographicKey key, Windows.Storage.Streams.IBuffer data, Windows.Storage.Streams.IBuffer iv);
+            static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  SignAsync(CryptographicKey key, Windows.Storage.Streams.IBuffer data);
+            static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  SignHashedDataAsync(CryptographicKey key, Windows.Storage.Streams.IBuffer data);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Core.IHashAlgorithmProviderStatics", 9fac9741-5cc4-4336-ae38-6212b75a915a)]
+    [interface_name("Windows.Security.Cryptography.Core.IHashAlgorithmProvider", be9b3080-b2c3-422b-bce1-ec90efb5d7b5)]
+    [threading(both)]
+    runtimeclass HashAlgorithmProvider
+    {
+        static Windows.Security.Cryptography.Core.HashAlgorithmProvider OpenAlgorithm(String algorithm);
+        String AlgorithmName{ get; };
+        UInt32 HashLength{ get; };
+        Windows.Storage.Streams.IBuffer HashData(Windows.Storage.Streams.IBuffer data);
+        Windows.Security.Cryptography.Core.CryptographicHash CreateHash();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Security.Cryptography.Core.IMacAlgorithmProviderStatics", c9bdc147-cc77-4df0-9e4e-b921e080644c)]
+    [interface_name("Windows.Security.Cryptography.Core.IMacAlgorithmProvider", 4a3fc5c3-1cbd-41ce-a092-aa0bc5d2d2f5)]
+    [threading(both)]
+    runtimeclass MacAlgorithmProvider
+    {
+        static Windows.Security.Cryptography.Core.MacAlgorithmProvider OpenAlgorithm(String algorithm);
+        String AlgorithmName{ get; };
+        UInt32 MacLength{ get; };
+        Windows.Security.Cryptography.Core.CryptographicKey CreateKey(Windows.Storage.Streams.IBuffer keyMaterial);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Core.IMacAlgorithmProvider2", 6da32a15-d931-42ed-8e7e-c301caee119c)]
+        {
+            Windows.Security.Cryptography.Core.CryptographicHash CreateHash(Windows.Storage.Streams.IBuffer keyMaterial);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Core.IKeyDerivationAlgorithmProviderStatics", 0a22097a-0a1c-443b-9418-b9498aeb1603)]
+    [interface_name("Windows.Security.Cryptography.Core.IKeyDerivationAlgorithmProvider", e1fba83b-4671-43b7-9158-763aaa98b6bf)]
+    [threading(both)]
+    runtimeclass KeyDerivationAlgorithmProvider
+    {
+        static Windows.Security.Cryptography.Core.KeyDerivationAlgorithmProvider OpenAlgorithm(String algorithm);
+        String AlgorithmName{ get; };
+        Windows.Security.Cryptography.Core.CryptographicKey CreateKey(Windows.Storage.Streams.IBuffer keyMaterial);
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.Core.ISymmetricKeyAlgorithmProviderStatics", 8d3b2326-1f37-491f-b60e-f5431b26b483)]
+    [interface_name("Windows.Security.Cryptography.Core.ISymmetricKeyAlgorithmProvider", 3d7e4a33-3bd0-4902-8ac8-470d50d21376)]
+    [threading(both)]
+    runtimeclass SymmetricKeyAlgorithmProvider
+    {
+        static Windows.Security.Cryptography.Core.SymmetricKeyAlgorithmProvider OpenAlgorithm(String algorithm);
+        String AlgorithmName{ get; };
+        UInt32 BlockLength{ get; };
+        Windows.Security.Cryptography.Core.CryptographicKey CreateSymmetricKey(Windows.Storage.Streams.IBuffer keyMaterial);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Security.Cryptography.Core.IAsymmetricKeyAlgorithmProviderStatics", 425bde18-a7f3-47a6-a8d2-c48d6033a65c)]
+    [interface_name("Windows.Security.Cryptography.Core.IAsymmetricKeyAlgorithmProvider", e8d2ff37-6259-4e88-b7e0-94191fde699e)]
+    [threading(both)]
+    runtimeclass AsymmetricKeyAlgorithmProvider
+    {
+        static Windows.Security.Cryptography.Core.AsymmetricKeyAlgorithmProvider OpenAlgorithm(String algorithm);
+        String AlgorithmName{ get; };
+        Windows.Security.Cryptography.Core.CryptographicKey CreateKeyPair(UInt32 keySize);
+        [method_name("ImportDefaultPrivateKeyBlob")] Windows.Security.Cryptography.Core.CryptographicKey ImportKeyPair(Windows.Storage.Streams.IBuffer keyBlob);
+        [method_name("ImportKeyPairWithBlobType")] Windows.Security.Cryptography.Core.CryptographicKey ImportKeyPair(Windows.Storage.Streams.IBuffer keyBlob, CryptographicPrivateKeyBlobType BlobType);
+        [method_name("ImportDefaultPublicKeyBlob")] Windows.Security.Cryptography.Core.CryptographicKey ImportPublicKey(Windows.Storage.Streams.IBuffer keyBlob);
+        [method_name("ImportPublicKeyWithBlobType")] Windows.Security.Cryptography.Core.CryptographicKey ImportPublicKey(Windows.Storage.Streams.IBuffer keyBlob, CryptographicPublicKeyBlobType BlobType);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Core.IAsymmetricKeyAlgorithmProvider2", 4e322a7e-7c4d-4997-ac4f-1b848b36306e)]
+        {
+            Windows.Security.Cryptography.Core.CryptographicKey CreateKeyPairWithCurveName(String curveName);
+            Windows.Security.Cryptography.Core.CryptographicKey CreateKeyPairWithCurveParameters([range(0, 65536)]UInt8[] parameters);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Core.IHashAlgorithmNamesStatics", 6b5e0516-de96-4f0a-8d57-dcc9dae36c76)]
+    runtimeclass HashAlgorithmNames
+    {
+        static String Md5{ get; };
+        static String Sha1{ get; };
+        static String Sha256{ get; };
+        static String Sha384{ get; };
+        static String Sha512{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.Core.IMacAlgorithmNamesStatics", 41412678-fb1e-43a4-895e-a9026e4390a3)]
+    runtimeclass MacAlgorithmNames
+    {
+        static String HmacMd5{ get; };
+        static String HmacSha1{ get; };
+        static String HmacSha256{ get; };
+        static String HmacSha384{ get; };
+        static String HmacSha512{ get; };
+        static String AesCmac{ get; };
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Core.ISymmetricAlgorithmNamesStatics", 6870727b-c996-4eae-84d7-79b2aeb73b9c)]
+    runtimeclass SymmetricAlgorithmNames
+    {
+        static String DesCbc{ get; };
+        static String DesEcb{ get; };
+        static String TripleDesCbc{ get; };
+        static String TripleDesEcb{ get; };
+        static String Rc2Cbc{ get; };
+        static String Rc2Ecb{ get; };
+        static String AesCbc{ get; };
+        static String AesEcb{ get; };
+        static String AesGcm{ get; };
+        static String AesCcm{ get; };
+        static String AesCbcPkcs7{ get; };
+        static String AesEcbPkcs7{ get; };
+        static String DesCbcPkcs7{ get; };
+        static String DesEcbPkcs7{ get; };
+        static String TripleDesCbcPkcs7{ get; };
+        static String TripleDesEcbPkcs7{ get; };
+        static String Rc2CbcPkcs7{ get; };
+        static String Rc2EcbPkcs7{ get; };
+        static String Rc4{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Core.IAsymmetricAlgorithmNamesStatics2", f141c0d6-4bff-4f23-ba66-6045b137d5df)]
+    runtimeclass AsymmetricAlgorithmNames
+    {
+        static String EcdsaSha256{ get; };
+        static String EcdsaSha384{ get; };
+        static String EcdsaSha512{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Core.IAsymmetricAlgorithmNamesStatics", caf6fce4-67c0-46aa-84f9-752e77449f9b)]
+        {
+            static String RsaPkcs1{ get; };
+            static String RsaOaepSha1{ get; };
+            static String RsaOaepSha256{ get; };
+            static String RsaOaepSha384{ get; };
+            static String RsaOaepSha512{ get; };
+            static String EcdsaP256Sha256{ get; };
+            static String EcdsaP384Sha384{ get; };
+            static String EcdsaP521Sha512{ get; };
+            static String DsaSha1{ get; };
+            static String DsaSha256{ get; };
+            static String RsaSignPkcs1Sha1{ get; };
+            static String RsaSignPkcs1Sha256{ get; };
+            static String RsaSignPkcs1Sha384{ get; };
+            static String RsaSignPkcs1Sha512{ get; };
+            static String RsaSignPssSha1{ get; };
+            static String RsaSignPssSha256{ get; };
+            static String RsaSignPssSha384{ get; };
+            static String RsaSignPssSha512{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.Core.IEccCurveNamesStatics", b3ff930c-aeeb-409e-b7d4-9b95295aaecf)]
+    runtimeclass EccCurveNames
+    {
+        static String BrainpoolP160r1{ get; };
+        static String BrainpoolP160t1{ get; };
+        static String BrainpoolP192r1{ get; };
+        static String BrainpoolP192t1{ get; };
+        static String BrainpoolP224r1{ get; };
+        static String BrainpoolP224t1{ get; };
+        static String BrainpoolP256r1{ get; };
+        static String BrainpoolP256t1{ get; };
+        static String BrainpoolP320r1{ get; };
+        static String BrainpoolP320t1{ get; };
+        static String BrainpoolP384r1{ get; };
+        static String BrainpoolP384t1{ get; };
+        static String BrainpoolP512r1{ get; };
+        static String BrainpoolP512t1{ get; };
+        static String Curve25519{ get; };
+        static String Ec192wapi{ get; };
+        static String NistP192{ get; };
+        static String NistP224{ get; };
+        static String NistP256{ get; };
+        static String NistP384{ get; };
+        static String NistP521{ get; };
+        static String NumsP256t1{ get; };
+        static String NumsP384t1{ get; };
+        static String NumsP512t1{ get; };
+        static String SecP160k1{ get; };
+        static String SecP160r1{ get; };
+        static String SecP160r2{ get; };
+        static String SecP192k1{ get; };
+        static String SecP192r1{ get; };
+        static String SecP224k1{ get; };
+        static String SecP224r1{ get; };
+        static String SecP256k1{ get; };
+        static String SecP256r1{ get; };
+        static String SecP384r1{ get; };
+        static String SecP521r1{ get; };
+        static String Wtls7{ get; };
+        static String Wtls9{ get; };
+        static String Wtls12{ get; };
+        static String X962P192v1{ get; };
+        static String X962P192v2{ get; };
+        static String X962P192v3{ get; };
+        static String X962P239v1{ get; };
+        static String X962P239v2{ get; };
+        static String X962P239v3{ get; };
+        static String X962P256v1{ get; };
+        static Windows.Foundation.Collections.IVectorView <String>  AllEccCurveNames{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.Core.IKeyDerivationAlgorithmNamesStatics2", 57953fab-6044-466f-97f4-337b7808384d)]
+    runtimeclass KeyDerivationAlgorithmNames
+    {
+        static String CapiKdfMd5{ get; };
+        static String CapiKdfSha1{ get; };
+        static String CapiKdfSha256{ get; };
+        static String CapiKdfSha384{ get; };
+        static String CapiKdfSha512{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Core.IKeyDerivationAlgorithmNamesStatics", 7b6e363e-94d2-4739-a57b-022e0c3a402a)]
+        {
+            static String Pbkdf2Md5{ get; };
+            static String Pbkdf2Sha1{ get; };
+            static String Pbkdf2Sha256{ get; };
+            static String Pbkdf2Sha384{ get; };
+            static String Pbkdf2Sha512{ get; };
+            static String Sp800108CtrHmacMd5{ get; };
+            static String Sp800108CtrHmacSha1{ get; };
+            static String Sp800108CtrHmacSha256{ get; };
+            static String Sp800108CtrHmacSha384{ get; };
+            static String Sp800108CtrHmacSha512{ get; };
+            static String Sp80056aConcatMd5{ get; };
+            static String Sp80056aConcatSha1{ get; };
+            static String Sp80056aConcatSha256{ get; };
+            static String Sp80056aConcatSha384{ get; };
+            static String Sp80056aConcatSha512{ get; };
+        }
+    }
+
+}

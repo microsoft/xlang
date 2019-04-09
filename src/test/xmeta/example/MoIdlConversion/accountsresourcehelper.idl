@@ -1,0 +1,21 @@
+namespace Windows.Internal.ApplicationModel.Sync
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ApplicationModel.Sync.InternalContract, 1)]
+    [static_name("Windows.Internal.ApplicationModel.Sync.IAccountsResourceHelperStatics", 7a2abf8a-1d2c-4311-9990-dcc14bf1d553)]
+    [threading(both)]
+    runtimeclass AccountsResourceHelper
+    {
+        static Windows.Storage.Streams.IRandomAccessStreamReference GetAccountIcon(String iconSpecifier);
+        static Windows.Storage.Streams.IRandomAccessStreamReference GetAccountIconForTheme(String iconSpecifier, Windows.UI.Xaml.ApplicationTheme applicationTheme);
+        static Windows.Storage.Streams.IRandomAccessStreamReference GetAccountIconForScale(String iconSpecifier, String callerPackageFullName, Int32 scaleFactor);
+        static Int32 GetScaleFactorForHwnd(Int32 hWnd);
+        static String GetAccountString(String stringSpecifier);
+    }
+
+}

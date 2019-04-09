@@ -1,0 +1,23 @@
+
+
+
+
+
+
+namespace SharedAccount.Setup
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(SharedAccount.Setup.InternalContract, 1)]
+    [interface_name("SharedAccount.Setup.ISharedAccountWorker", af811b05-f74b-46f3-aaf3-2a487f70ff6a)]
+    runtimeclass SharedAccountWorker
+    {
+        SharedAccountWorker();
+        Windows.Foundation.IAsyncOperation <String>  EnableSharedHomeAccountAsync();
+        void DisableSharedAccount();
+    }
+
+}

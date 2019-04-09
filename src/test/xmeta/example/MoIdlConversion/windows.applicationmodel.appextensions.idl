@@ -1,0 +1,103 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.AppExtensions
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.ApplicationModel.AppExtensions.IAppExtensionCatalogStatics", 3c36668a-5f18-4f0b-9ce5-cab61d196f11)]
+    [interface_name("Windows.ApplicationModel.AppExtensions.IAppExtensionCatalog", 97872032-8426-4ad1-9084-92e88c2da200)]
+    runtimeclass AppExtensionCatalog
+    {
+        static Windows.ApplicationModel.AppExtensions.AppExtensionCatalog Open(String appExtensionName);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.AppExtensions.AppExtension> >  FindAllAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  RequestRemovePackageAsync(String packageFullName);
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.AppExtensions.AppExtensionCatalog, Windows.ApplicationModel.AppExtensions.AppExtensionPackageInstalledEventArgs>  PackageInstalled;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.AppExtensions.AppExtensionCatalog, Windows.ApplicationModel.AppExtensions.AppExtensionPackageUpdatingEventArgs>  PackageUpdating;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.AppExtensions.AppExtensionCatalog, Windows.ApplicationModel.AppExtensions.AppExtensionPackageUpdatedEventArgs>  PackageUpdated;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.AppExtensions.AppExtensionCatalog, Windows.ApplicationModel.AppExtensions.AppExtensionPackageUninstallingEventArgs>  PackageUninstalling;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.AppExtensions.AppExtensionCatalog, Windows.ApplicationModel.AppExtensions.AppExtensionPackageStatusChangedEventArgs>  PackageStatusChanged;
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.AppExtensions.IAppExtension", 8450902c-15ed-4faf-93ea-2237bbf8cbd6)]
+    runtimeclass AppExtension
+    {
+        String Id{ get; };
+        String DisplayName{ get; };
+        String Description{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        Windows.ApplicationModel.AppInfo AppInfo{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IPropertySet>  GetExtensionPropertiesAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Storage.StorageFolder>  GetPublicFolderAsync();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.AppExtensions.IAppExtensionPackageInstalledEventArgs", 39e59234-3351-4a8d-9745-e7d3dd45bc48)]
+    runtimeclass AppExtensionPackageInstalledEventArgs
+    {
+        String AppExtensionName{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.AppExtensions.AppExtension>  Extensions{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.AppExtensions.IAppExtensionPackageUpdatingEventArgs", 7ed59329-1a65-4800-a700-b321009e306a)]
+    runtimeclass AppExtensionPackageUpdatingEventArgs
+    {
+        String AppExtensionName{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.AppExtensions.IAppExtensionPackageUpdatedEventArgs", 3a83c43f-797e-44b5-ba24-a4c8b5a543d7)]
+    runtimeclass AppExtensionPackageUpdatedEventArgs
+    {
+        String AppExtensionName{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.AppExtensions.AppExtension>  Extensions{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.AppExtensions.IAppExtensionPackageUninstallingEventArgs", 60f160c5-171e-40ff-ae98-ab2c20dd4d75)]
+    runtimeclass AppExtensionPackageUninstallingEventArgs
+    {
+        String AppExtensionName{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.ApplicationModel.AppExtensions.IAppExtensionPackageStatusChangedEventArgs", 1ce17433-1153-44fd-87b1-8ae1050303df)]
+    runtimeclass AppExtensionPackageStatusChangedEventArgs
+    {
+        String AppExtensionName{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+    }
+
+
+
+
+
+
+
+}

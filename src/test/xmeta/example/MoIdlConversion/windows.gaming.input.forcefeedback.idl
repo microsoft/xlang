@@ -1,0 +1,163 @@
+
+
+
+
+
+
+
+
+namespace Windows.Gaming.Input.ForceFeedback
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum ConditionForceEffectKind
+    {
+        Spring,
+        Damper,
+        Inertia,
+        Friction,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum ForceFeedbackEffectAxes
+    {
+        None,
+        X,
+        Y,
+        Z = 4,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum ForceFeedbackEffectState
+    {
+        Stopped,
+        Running,
+        Paused,
+        Faulted,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum ForceFeedbackLoadEffectResult
+    {
+        Succeeded,
+        EffectStorageFull,
+        EffectNotSupported,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum PeriodicForceEffectKind
+    {
+        SquareWave,
+        SineWave,
+        TriangleWave,
+        SawtoothWaveUp,
+        SawtoothWaveDown,
+    };
+
+    [uuid(a17fba0c-2ae4-48c2-8063-eabd0777cb89)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    interface IForceFeedbackEffect
+    {
+        Double Gain{ get; };
+        Double Gain{ set; };
+        Windows.Gaming.Input.ForceFeedback.ForceFeedbackEffectState State{ get; };
+        void Start();
+        void Stop();
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [constructor_name("Windows.Gaming.Input.ForceFeedback.IConditionForceEffectFactory", 91a99264-1810-4eb6-a773-bfd3b8cddbab)]
+    [threading(both)]
+    runtimeclass ConditionForceEffect
+        : [default]Windows.Gaming.Input.ForceFeedback.IForceFeedbackEffect
+    {
+        [method_name( "CreateInstance" )] ConditionForceEffect(ConditionForceEffectKind effectKind);
+
+        [interface_name("Windows.Gaming.Input.ForceFeedback.IConditionForceEffect", 32d1ea68-3695-4e69-85c0-cd1944189140)]
+        {
+            Windows.Gaming.Input.ForceFeedback.ConditionForceEffectKind Kind{ get; };
+            void SetParameters(Windows.Foundation.Numerics.Vector3 direction, Single positiveCoefficient, Single negativeCoefficient, Single maxPositiveMagnitude, Single maxNegativeMagnitude, Single deadZone, Single bias);
+        }
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [constructor_name("Windows.Gaming.Input.ForceFeedback.IPeriodicForceEffectFactory", 6f62eb1a-9851-477b-b318-35ecaa15070f)]
+    [threading(both)]
+    runtimeclass PeriodicForceEffect
+        : [default]Windows.Gaming.Input.ForceFeedback.IForceFeedbackEffect
+    {
+        [method_name( "CreateInstance" )] PeriodicForceEffect(PeriodicForceEffectKind effectKind);
+
+        [interface_name("Windows.Gaming.Input.ForceFeedback.IPeriodicForceEffect", 5c5138d7-fc75-4d52-9a0a-efe4cab5fe64)]
+        {
+            Windows.Gaming.Input.ForceFeedback.PeriodicForceEffectKind Kind{ get; };
+            void SetParameters(Windows.Foundation.Numerics.Vector3 vector, Single frequency, Single phase, Single bias, Windows.Foundation.TimeSpan duration);
+            void SetParametersWithEnvelope(Windows.Foundation.Numerics.Vector3 vector, Single frequency, Single phase, Single bias, Single attackGain, Single sustainGain, Single releaseGain, Windows.Foundation.TimeSpan startDelay, Windows.Foundation.TimeSpan attackDuration, Windows.Foundation.TimeSpan sustainDuration, Windows.Foundation.TimeSpan releaseDuration, UInt32 repeatCount);
+        }
+    }
+
+
+
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [threading(both)]
+    runtimeclass ConstantForceEffect
+        : [default]Windows.Gaming.Input.ForceFeedback.IForceFeedbackEffect
+    {
+        ConstantForceEffect();
+
+        [interface_name("Windows.Gaming.Input.ForceFeedback.IConstantForceEffect", 9bfa0140-f3c7-415c-b068-0f068734bce0)]
+        {
+            void SetParameters(Windows.Foundation.Numerics.Vector3 vector, Windows.Foundation.TimeSpan duration);
+            void SetParametersWithEnvelope(Windows.Foundation.Numerics.Vector3 vector, Single attackGain, Single sustainGain, Single releaseGain, Windows.Foundation.TimeSpan startDelay, Windows.Foundation.TimeSpan attackDuration, Windows.Foundation.TimeSpan sustainDuration, Windows.Foundation.TimeSpan releaseDuration, UInt32 repeatCount);
+        }
+    }
+
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass RampForceEffect
+        : [default]Windows.Gaming.Input.ForceFeedback.IForceFeedbackEffect
+    {
+        RampForceEffect();
+
+        [interface_name("Windows.Gaming.Input.ForceFeedback.IRampForceEffect", f1f81259-1ca6-4080-b56d-b43f3354d052)]
+        {
+            void SetParameters(Windows.Foundation.Numerics.Vector3 startVector, Windows.Foundation.Numerics.Vector3 endVector, Windows.Foundation.TimeSpan duration);
+            void SetParametersWithEnvelope(Windows.Foundation.Numerics.Vector3 startVector, Windows.Foundation.Numerics.Vector3 endVector, Single attackGain, Single sustainGain, Single releaseGain, Windows.Foundation.TimeSpan startDelay, Windows.Foundation.TimeSpan attackDuration, Windows.Foundation.TimeSpan sustainDuration, Windows.Foundation.TimeSpan releaseDuration, UInt32 repeatCount);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.Input.ForceFeedback.IForceFeedbackMotor", 8d3d417c-a5ea-4516-8026-2b00f74ef6e5)]
+    runtimeclass ForceFeedbackMotor
+    {
+        Boolean AreEffectsPaused{ get; };
+        Double MasterGain{ get; };
+        Double MasterGain{ set; };
+        Boolean IsEnabled{ get; };
+        Windows.Gaming.Input.ForceFeedback.ForceFeedbackEffectAxes SupportedAxes{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Gaming.Input.ForceFeedback.ForceFeedbackLoadEffectResult>  LoadEffectAsync(IForceFeedbackEffect effect);
+        void PauseAllEffects();
+        void ResumeAllEffects();
+        void StopAllEffects();
+        Windows.Foundation.IAsyncOperation <Boolean>  TryDisableAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  TryEnableAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  TryResetAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  TryUnloadEffectAsync(IForceFeedbackEffect effect);
+    }
+
+}

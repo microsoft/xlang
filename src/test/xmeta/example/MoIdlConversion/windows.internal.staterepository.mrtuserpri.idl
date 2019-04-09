@@ -1,0 +1,66 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IMrtUserPriStatics", 92d3e03a-c2a6-4074-8a36-7e44c09262bf)]
+    [interface_name("Windows.Internal.StateRepository.IMrtUserPri", 5159af2d-7f48-4383-9625-38a284ea6983)]
+    [threading(both)]
+    runtimeclass MrtUserPri
+    {
+        MrtUserPri();
+        static Boolean Exists(Int64 mrtUserPriID);
+        static Boolean ExistsByMrtSharedPri(MrtSharedPri MrtSharedPri);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByPackageAndUser(Package Package, User User);
+        static Boolean ExistsByUser(User User);
+        static Windows.Internal.StateRepository.MrtUserPri Get(Int64 mrtUserPriID);
+        static Windows.Internal.StateRepository.MrtUserPri TryGet(Int64 mrtUserPriID);
+        static Windows.Internal.StateRepository.MrtUserPri GetByPackageAndUser(Package Package, User User);
+        static Windows.Internal.StateRepository.MrtUserPri TryGetByPackageAndUser(Package Package, User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtUserPri>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtUserPri>  FindByMrtSharedPri(MrtSharedPri MrtSharedPri);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtUserPri>  FindByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtUserPri>  FindByUser(User User);
+        Int64 _MrtUserPriID{ get; };
+        Int64 _MrtUserPriID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        String Filename{ get; };
+        String Filename{ set; };
+        Windows.Storage.StorageFile GetFilenameAsStorageFile();
+        void SetFilenameAsStorageFile(Windows.Storage.IStorageFile value);
+        Int64 MrtSharedPri{ get; };
+        Int64 MrtSharedPri{ set; };
+        Windows.Internal.StateRepository.MrtSharedPri GetMrtSharedPri();
+        void SetMrtSharedPri(MrtSharedPri value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ServiceWorker
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalPrivateContract{};
+
+    [contract(Windows.Internal.ServiceWorker.InternalPrivateContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass ServiceWorkerBackgroundTask
+        : [default]Windows.ApplicationModel.Background.IBackgroundTask
+    {
+    }
+
+}

@@ -1,0 +1,356 @@
+
+
+
+
+
+
+namespace Windows.Foundation.Handles.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalHandlesContract{};
+
+    [flags]
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    enum CompositionAccessRights
+    {
+        Read = 1,
+        Write,
+        AllAccess,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.ICompositionHandleStatics", 011681b7-9ece-462e-89f5-be2215219abb)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.ICompositionHandle", cfde6f9a-4afe-45b3-81b5-20d13cd8a81a)]
+    [threading(both)]
+    runtimeclass CompositionHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.CompositionHandle Duplicate(CompositionHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.CompositionHandle Duplicate(CompositionHandle source, CompositionAccessRights desiredAccess);
+    }
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [flags]
+    enum EventAccessRights
+    {
+        QueryState = 1,
+        ModifyState,
+        AllAccess = 2031619,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [static_name("Windows.Foundation.Handles.Internal.IEventHandleStatics", 95a1d0a6-ebf0-4706-8d3b-138c35ef0aae)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IEventHandle", 41646d0b-8939-4a91-8832-1d65e446d685)]
+    [threading(both)]
+    runtimeclass EventHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.EventHandle Duplicate(EventHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.EventHandle Duplicate(EventHandle source, EventAccessRights desiredAccess);
+    }
+
+    [flags]
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    enum FileAccessRights
+    {
+        ReadData = 1,
+        ListDirectory = 1,
+        WriteData,
+        AddFile = 2,
+        AppendData = 4,
+        AddSubdirectory = 4,
+        CreatePipeInstance = 4,
+        ReadExtendedAttributes = 8,
+        WriteExtendedAttributes = 16,
+        Execute = 32,
+        Traverse = 32,
+        DeleteChild = 64,
+        ReadAttributes = 128,
+        WriteAttributes = 256,
+        AllAccess = 2032127,
+        GenericRead = 1179785,
+        GenericWrite = 1179926,
+        GenericExecute = 1179808,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.IFileHandleStatics", 1071d0a8-5a0b-4daa-a709-96f0fbba58b9)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IFileHandle", d5930edf-b20a-4e70-8a7d-96f5135069fb)]
+    [threading(both)]
+    runtimeclass FileHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.FileHandle Duplicate(FileHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.FileHandle Duplicate(FileHandle source, FileAccessRights desiredAccess);
+    }
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [flags]
+    enum JobAccessRights
+    {
+        AssignProcess = 1,
+        SetAttributes,
+        Query = 4,
+        Terminate = 8,
+        SetSecurityAttributes = 16,
+        Impersonate = 32,
+        AllAccess = 2031679,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [static_name("Windows.Foundation.Handles.Internal.IJobHandleStatics", d23f3cd4-351f-4b40-9dde-abd31e2d42ff)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IJobHandle", 20172e45-60ec-463a-82f1-b609eefcee14)]
+    [threading(both)]
+    runtimeclass JobHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.JobHandle Duplicate(JobHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.JobHandle Duplicate(JobHandle source, JobAccessRights desiredAccess);
+    }
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [flags]
+    enum MutexAccessRights
+    {
+        QueryState = 1,
+        AllAccess = 2031617,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.IMutexHandleStatics", b0316a3b-eac4-4c90-ab35-c8ed339990ff)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IMutexHandle", 89e25982-a30b-4c35-8547-9511d126e408)]
+    [threading(both)]
+    runtimeclass MutexHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.MutexHandle Duplicate(MutexHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.MutexHandle Duplicate(MutexHandle source, MutexAccessRights desiredAccess);
+    }
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.IPipeHandleStatics", a7827a53-03f2-4427-b059-73b022063228)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IPipeHandle", e262e13b-29f2-4ec6-a934-c9f6dd5d3ebf)]
+    [threading(both)]
+    runtimeclass PipeHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.PipeHandle Duplicate(PipeHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.PipeHandle Duplicate(PipeHandle source, FileAccessRights desiredAccess);
+    }
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [flags]
+    enum ProcessAccessRights
+    {
+        Terminate = 1,
+        CreateThread,
+        SetSessionId = 4,
+        VirtualMemoryOperation = 8,
+        VirtualMemoryRead = 16,
+        VirtualMemoryWrite = 32,
+        DuplicateHandle = 64,
+        CreateProcess = 128,
+        SetQuota = 256,
+        SetInformation = 512,
+        QueryInformation = 1024,
+        SuspendResume = 2048,
+        QueryLimitedInformation = 4096,
+        SetLimitedInformation = 8192,
+        AllAccess = 2097151,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.IProcessHandleStatics", 4315a8fc-97c6-4eee-8d6e-2d1ca4dad750)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IProcessHandle", 828d5f7a-169b-4f05-b33e-2dc118d9acf2)]
+    [threading(both)]
+    runtimeclass ProcessHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.ProcessHandle Duplicate(ProcessHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.ProcessHandle Duplicate(ProcessHandle source, ProcessAccessRights desiredAccess);
+    }
+
+    [flags]
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    enum RegistryKeyAccessRights
+    {
+        QueryValue = 1,
+        SetValue,
+        CreateSubKey = 4,
+        EnumerateSubKeys = 8,
+        Notify = 16,
+        CreateLink = 32,
+        Read = 131097,
+        Write = 131078,
+        Execute = 131097,
+        AllAccess = 983103,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.IRegistryKeyHandleStatics", 3f741e83-1d63-4e71-b532-146cfa65107c)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IRegistryKeyHandle", 1aedfe28-c6ed-409b-9deb-21c0f8e3a058)]
+    [threading(both)]
+    runtimeclass RegistryKeyHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.RegistryKeyHandle Duplicate(RegistryKeyHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.RegistryKeyHandle Duplicate(RegistryKeyHandle source, RegistryKeyAccessRights desiredAccess);
+    }
+
+    [flags]
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    enum SectionAccessRights
+    {
+        Query = 1,
+        MapWrite,
+        MapRead = 4,
+        MapExecute = 8,
+        ExtendSize = 16,
+        MapExecuteExplicit = 32,
+        AllAccess = 983071,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.ISectionHandleStatics", 724ee592-3d1c-4532-a469-5dbcf9810a0d)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.ISectionHandle", f9ab8571-c69b-418c-a29c-1171d306e3d4)]
+    [threading(both)]
+    runtimeclass SectionHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.SectionHandle Duplicate(SectionHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.SectionHandle Duplicate(SectionHandle source, SectionAccessRights desiredAccess);
+    }
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [flags]
+    enum SemaphoreAccessRights
+    {
+        QueryState = 1,
+        ModifyState,
+        AllAccess = 2031619,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.ISemaphoreHandleStatics", 2f868c93-8dba-4fb9-8830-d9eeae0db345)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.ISemaphoreHandle", 78cc1f8e-beda-4ea3-b5b7-4bef1fb1a9d5)]
+    [threading(both)]
+    runtimeclass SemaphoreHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.SemaphoreHandle Duplicate(SemaphoreHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.SemaphoreHandle Duplicate(SemaphoreHandle source, SemaphoreAccessRights desiredAccess);
+    }
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.ISocketHandleStatics", 86a60b2c-2f9a-45a1-a9e4-87c39b4891f0)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.ISocketHandle", 75968492-6151-48b0-ab12-2f0a06dcdb0e)]
+    [threading(both)]
+    runtimeclass SocketHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.SocketHandle Duplicate(SocketHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.SocketHandle Duplicate(SocketHandle source, FileAccessRights desiredAccess);
+    }
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [flags]
+    enum ThreadAccessRights
+    {
+        Terminate = 1,
+        SuspendResume,
+        GetContext = 8,
+        SetContext = 16,
+        QueryInformation = 64,
+        SetInformation = 32,
+        SetThreadToken = 128,
+        Impersonate = 256,
+        DirectImpersonation = 512,
+        SetLimitedInformation = 1024,
+        QueryLimitedInformation = 2048,
+        Resume = 4096,
+        AllAccess = 2097151,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.IThreadHandleStatics", d369df1c-1e0f-43d4-84b8-9bb6f7a1b937)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.IThreadHandle", 4115c584-6a94-48bc-8c7b-6c3e8d9717d6)]
+    [threading(both)]
+    runtimeclass ThreadHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.ThreadHandle Duplicate(ThreadHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.ThreadHandle Duplicate(ThreadHandle source, ThreadAccessRights desiredAccess);
+    }
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [flags]
+    enum TokenAccessRights
+    {
+        AssignPrimary = 1,
+        Duplicate,
+        Impersonate = 4,
+        Query = 8,
+        QuerySource = 16,
+        AdjustPrivileges = 32,
+        AdjustGroups = 64,
+        AdjustDefault = 128,
+        AdjustSessionId = 256,
+        AllAccess = 983551,
+        Read = 131080,
+        Write = 131296,
+        Execute = 131072,
+        TrustConstraintMask = 131096,
+    };
+
+
+
+    [contract(Windows.Foundation.Handles.Internal.InternalHandlesContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Foundation.Handles.Internal.ITokenHandleStatics", 2c06bcf6-8b76-4649-81c7-42f9e41f2f87)]
+    [default_interface]
+    [interface_name("Windows.Foundation.Handles.Internal.ITokenHandle", 28f61b65-979a-4ebc-882a-6006ebcbd52e)]
+    [threading(both)]
+    runtimeclass TokenHandle
+    {
+        [method_name("DuplicateWithSameAccess")] static Windows.Foundation.Handles.Internal.TokenHandle Duplicate(TokenHandle source);
+        [method_name("DuplicateWithRestrictedAccess")] static Windows.Foundation.Handles.Internal.TokenHandle Duplicate(TokenHandle source, TokenAccessRights desiredAccess);
+    }
+
+}

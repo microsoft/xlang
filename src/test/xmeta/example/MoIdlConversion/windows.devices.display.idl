@@ -1,0 +1,202 @@
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Display
+{
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum DisplayMonitorConnectionKind
+    {
+        Internal,
+        Wired,
+        Wireless,
+        Virtual,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum DisplayMonitorPhysicalConnectorKind
+    {
+        Unknown,
+        HD15,
+        AnalogTV,
+        Dvi,
+        Hdmi,
+        Lvds,
+        Sdi,
+        DisplayPort,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum DisplayMonitorDescriptorKind
+    {
+        Edid,
+        DisplayId,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum DisplayMonitorUsageKind
+    {
+        Standard,
+        HeadMounted,
+        SpecialPurpose,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000005)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [static_name("Windows.Devices.Display.IDisplayMonitorStatics", 6eae698f-a228-4c05-821d-b695d667de8e)]
+    [interface_name("Windows.Devices.Display.IDisplayMonitor", 1f6b15d4-1d01-4c51-87e2-6f954a772b59)]
+    [threading(both)]
+    runtimeclass DisplayMonitor
+    {
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Display.DisplayMonitor>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Display.DisplayMonitor>  FromInterfaceIdAsync(String deviceInterfaceId);
+        String DeviceId{ get; };
+        String DisplayName{ get; };
+        Windows.Devices.Display.DisplayMonitorConnectionKind ConnectionKind{ get; };
+        Windows.Devices.Display.DisplayMonitorPhysicalConnectorKind PhysicalConnector{ get; };
+        String DisplayAdapterDeviceId{ get; };
+        Windows.Graphics.DisplayAdapterId DisplayAdapterId{ get; };
+        UInt32 DisplayAdapterTargetId{ get; };
+        Windows.Devices.Display.DisplayMonitorUsageKind UsageKind{ get; };
+        Windows.Graphics.SizeInt32 NativeResolutionInRawPixels{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.Size>  PhysicalSizeInInches{ get; };
+        Single RawDpiX{ get; };
+        Single RawDpiY{ get; };
+        Windows.Foundation.Point RedPrimary{ get; };
+        Windows.Foundation.Point GreenPrimary{ get; };
+        Windows.Foundation.Point BluePrimary{ get; };
+        Windows.Foundation.Point WhitePoint{ get; };
+        Single MaxLuminanceInNits{ get; };
+        Single MinLuminanceInNits{ get; };
+        Single MaxAverageFullFrameLuminanceInNits{ get; };
+        UInt8[] GetDescriptor(DisplayMonitorDescriptorKind descriptorKind);
+    }
+
+}
+namespace Windows.Devices.Display.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    enum DisplayMonitorTechnology
+    {
+        Unknown,
+        Projector,
+        Lcd,
+        Crt,
+        Oled,
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    enum DisplayMonitorUsageSubKind
+    {
+        Unknown,
+        ProductivityDisplay,
+        GamingDisplay,
+        VirtualRealityDisplay,
+        AugmentedRealityDisplay,
+        MedicalImagingDisplay,
+        AccessoryDisplay,
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    enum MonitorPixelEncoding
+    {
+        Rgb444,
+        Ycc444,
+        Ycc422,
+        Ycc420,
+        Intensity,
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    struct MonitorPixelEncodingFormat
+    {
+        MonitorPixelEncoding Encoding;
+        UInt32 BitsPerColorChannel;
+    };
+
+    [flags]
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    enum MonitorColorSpaces
+    {
+        None,
+        BT709,
+        BT2020Ycc,
+        BT2020Rgb = 4,
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    [flags]
+    enum ElectroOpticalTransferFunctions
+    {
+        None,
+        DefaultSdr,
+        Smpte2084,
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    enum BrightnessSupport
+    {
+        None,
+        Legacy,
+        Uncalibrated,
+        Calibrated,
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    struct BrightnessNitLevelRange
+    {
+        UInt32 MinMillinits;
+        UInt32 MaxMillinits;
+        UInt32 StepSizeMillinits;
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    [flags]
+    enum HdrMetadataSupport
+    {
+        None,
+        Hdr10,
+        Hdr10Plus,
+        DolbyVisionLowLatency = 4,
+    };
+
+    [uuid(e67ffa71-c935-411f-ad77-b4f2a7bd4dee)]
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    interface IDisplayMonitorInternal
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Display.Internal.MonitorPixelEncodingFormat>  SupportedPixelEncodingFormats{ get; };
+        Windows.Devices.Display.Internal.MonitorColorSpaces SupportedColorSpaces{ get; };
+        Windows.Devices.Display.Internal.ElectroOpticalTransferFunctions SupportedElectroOpticalTransferFunctions{ get; };
+        Windows.Devices.Display.Internal.HdrMetadataSupport SupportedHdrMetadata{ get; };
+        Windows.Devices.Display.Internal.BrightnessSupport SupportedBrightness{ get; };
+        Boolean SupportsSmoothBrightness{ get; };
+        Boolean SupportsAdaptiveBrightness{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt8>  SupportedBrightnessLegacyLevels{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Display.Internal.BrightnessNitLevelRange>  SupportedBrightnessNormalNitRanges{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Display.Internal.BrightnessNitLevelRange>  SupportedBrightnessBoostNitRanges{ get; };
+        UInt32 PreferredMaximumBrightness{ get; };
+        Windows.Devices.Display.Internal.DisplayMonitorUsageSubKind UsageSubKind{ get; };
+        Windows.Devices.Display.Internal.DisplayMonitorTechnology DisplayTechnology{ get; };
+    };
+
+    [contract(Windows.Devices.Display.Internal.InternalContract, 1)]
+    [uuid(9b0afa0d-cf76-4fea-bdc5-88f6dd7a6986)]
+    interface IDisplayMonitorStaticsInternal
+    {
+        Windows.Devices.Display.DisplayMonitor FromId(String deviceId);
+        Windows.Devices.Display.DisplayMonitor FromTarget(UInt64 adapterId, UInt32 targetId);
+    };
+
+}

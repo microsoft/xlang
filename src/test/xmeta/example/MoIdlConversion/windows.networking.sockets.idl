@@ -1,0 +1,839 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Networking.Sockets
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketMessageType
+    {
+        Binary,
+        Utf8,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketProtectionLevel
+    {
+        PlainSocket,
+        [deprecated("Ssl may result in insecure connections and may be altered or unavailable for releases after Windows 8.1. Instead, use one of the TLS SocketProtectionLevel values.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Ssl,
+        SslAllowNullEncryption,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        BluetoothEncryptionAllowNullAuthentication,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        BluetoothEncryptionWithAuthentication,
+        [deprecated("Ssl3AllowWeakEncryption may result in insecure connections and may be altered or unavailable for releases after Windows 8.1. Instead, use one of the TLS SocketProtectionLevel values.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Ssl3AllowWeakEncryption,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Tls10,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Tls11,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Tls12,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Unspecified,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketQualityOfService
+    {
+        Normal,
+        LowLatency,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketErrorStatus
+    {
+        Unknown,
+        OperationAborted,
+        HttpInvalidServerResponse,
+        ConnectionTimedOut,
+        AddressFamilyNotSupported,
+        SocketTypeNotSupported,
+        HostNotFound,
+        NoDataRecordOfRequestedType,
+        NonAuthoritativeHostNotFound,
+        ClassTypeNotFound,
+        AddressAlreadyInUse,
+        CannotAssignRequestedAddress,
+        ConnectionRefused,
+        NetworkIsUnreachable,
+        UnreachableHost,
+        NetworkIsDown,
+        NetworkDroppedConnectionOnReset,
+        SoftwareCausedConnectionAbort,
+        ConnectionResetByPeer,
+        HostIsDown,
+        NoAddressesFound,
+        TooManyOpenFiles,
+        MessageTooLong,
+        CertificateExpired,
+        CertificateUntrustedRoot,
+        CertificateCommonNameIsIncorrect,
+        CertificateWrongUsage,
+        CertificateRevoked,
+        CertificateNoRevocationCheck,
+        CertificateRevocationServerOffline,
+        CertificateIsInvalid,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketSslErrorSeverity
+    {
+        None,
+        Ignorable,
+        Fatal,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct RoundTripTimeStatistics
+    {
+        UInt32 Variance;
+        UInt32 Max;
+        UInt32 Min;
+        UInt32 Sum;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct BandwidthStatistics
+    {
+        UInt64 OutboundBitsPerSecond;
+        UInt64 InboundBitsPerSecond;
+        UInt64 OutboundBitsPerSecondInstability;
+        UInt64 InboundBitsPerSecondInstability;
+        Boolean OutboundBandwidthPeaked;
+        Boolean InboundBandwidthPeaked;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketActivityKind
+    {
+        None,
+        StreamSocketListener,
+        DatagramSocket,
+        StreamSocket,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketActivityTriggerReason
+    {
+        None,
+        SocketActivity,
+        ConnectionAccepted,
+        KeepAliveTimerExpired,
+        SocketClosed,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SocketActivityConnectedStandbyAction
+    {
+        DoNotWake,
+        Wake,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum MessageWebSocketReceiveMode
+    {
+        FullMessage,
+        PartialMessage,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Networking.Sockets.ISocketActivityContextFactory", b99fc3c3-088c-4388-83ae-2525138e049a)]
+    [interface_name("Windows.Networking.Sockets.ISocketActivityContext", 43b04d64-4c85-4396-a637-1d973f6ebd49)]
+    [threading(both)]
+    runtimeclass SocketActivityContext
+    {
+        [method_name( "Create" )] SocketActivityContext(Windows.Storage.Streams.IBuffer data);
+        Windows.Storage.Streams.IBuffer Data{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Networking.Sockets.IDatagramSocketStatics", e9c62aee-1494-4a21-bb7e-8589fc751d9d)]
+    [interface_name("Windows.Networking.Sockets.IDatagramSocket", 7fe25bbb-c3bc-4677-8446-ca28a465a3af)]
+    [threading(both)]
+    runtimeclass DatagramSocket
+        : Windows.Foundation.IClosable
+    {
+        DatagramSocket();
+        [method_name("GetEndpointPairsAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Networking.EndpointPair> >  GetEndpointPairsAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName);
+        [method_name("GetEndpointPairsWithSortOptionsAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Networking.EndpointPair> >  GetEndpointPairsAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName, Windows.Networking.HostNameSortOptions sortOptions);
+        Windows.Networking.Sockets.DatagramSocketControl Control{ get; };
+        Windows.Networking.Sockets.DatagramSocketInformation Information{ get; };
+        Windows.Storage.Streams.IOutputStream OutputStream{ get; };
+        [method_name("ConnectAsync")] Windows.Foundation.IAsyncAction ConnectAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName);
+        [method_name("ConnectWithEndpointPairAsync")] [remote_sync]Windows.Foundation.IAsyncAction ConnectAsync(Windows.Networking.EndpointPair endpointPair);
+        Windows.Foundation.IAsyncAction BindServiceNameAsync(String localServiceName);
+        Windows.Foundation.IAsyncAction BindEndpointAsync(Windows.Networking.HostName localHostName, String localServiceName);
+        void JoinMulticastGroup(Windows.Networking.HostName host);
+        [method_name("GetOutputStreamAsync")] Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IOutputStream>  GetOutputStreamAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName);
+        [method_name("GetOutputStreamWithEndpointPairAsync")] Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IOutputStream>  GetOutputStreamAsync(Windows.Networking.EndpointPair endpointPair);
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.DatagramSocket, Windows.Networking.Sockets.DatagramSocketMessageReceivedEventArgs>  MessageReceived;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IDatagramSocket2", d83ba354-9a9d-4185-a20a-1424c9c2a7cd)]
+        {
+            [method_name("BindServiceNameAndAdapterAsync")] Windows.Foundation.IAsyncAction BindServiceNameAsync(String localServiceName, Windows.Networking.Connectivity.NetworkAdapter adapter);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IDatagramSocket3", 37544f09-ab92-4306-9ac1-0c381283d9c6)]
+        {
+            Windows.Foundation.IAsyncAction CancelIOAsync();
+            [method_name("EnableTransferOwnership")] void EnableTransferOwnership(Guid taskId);
+            [method_name("EnableTransferOwnershipWithConnectedStandbyAction")] void EnableTransferOwnership(Guid taskId, SocketActivityConnectedStandbyAction connectedStandbyAction);
+            [method_name("TransferOwnership")] void TransferOwnership(String socketId);
+            [method_name("TransferOwnershipWithContext")] void TransferOwnership(String socketId, SocketActivityContext data);
+            [method_name("TransferOwnershipWithContextAndKeepAliveTime")] void TransferOwnership(String socketId, SocketActivityContext data, Windows.Foundation.TimeSpan keepAliveTime);
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.Sockets.IStreamSocket", 69a22cf3-fc7b-4857-af38-f6e7de6a5b49)]
+    [threading(both)]
+    runtimeclass StreamSocket
+        : Windows.Foundation.IClosable
+    {
+        StreamSocket();
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Networking.Sockets.IStreamSocketStatics", a420bc4a-6e2e-4af5-b556-355ae0cd4f29)]
+        {
+            [method_name("GetEndpointPairsAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Networking.EndpointPair> >  GetEndpointPairsAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName);
+            [method_name("GetEndpointPairsWithSortOptionsAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Networking.EndpointPair> >  GetEndpointPairsAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName, Windows.Networking.HostNameSortOptions sortOptions);
+        }
+        Windows.Networking.Sockets.StreamSocketControl Control{ get; };
+        Windows.Networking.Sockets.StreamSocketInformation Information{ get; };
+        Windows.Storage.Streams.IInputStream InputStream{ get; };
+        Windows.Storage.Streams.IOutputStream OutputStream{ get; };
+        [method_name("ConnectWithEndpointPairAsync")] [remote_sync]Windows.Foundation.IAsyncAction ConnectAsync(Windows.Networking.EndpointPair endpointPair);
+        [method_name("ConnectAsync")] [default_overload]
+        Windows.Foundation.IAsyncAction ConnectAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName);
+        [method_name("ConnectWithEndpointPairAndProtectionLevelAsync")] [remote_sync]Windows.Foundation.IAsyncAction ConnectAsync(Windows.Networking.EndpointPair endpointPair, SocketProtectionLevel protectionLevel);
+        [method_name("ConnectWithProtectionLevelAsync")] Windows.Foundation.IAsyncAction ConnectAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName, SocketProtectionLevel protectionLevel);
+        Windows.Foundation.IAsyncAction UpgradeToSslAsync(SocketProtectionLevel protectionLevel, Windows.Networking.HostName validationHostName);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocket2", 29d0e575-f314-4d09-adf0-0fbd967fbd9f)]
+        {
+            [method_name("ConnectWithProtectionLevelAndAdapterAsync")] Windows.Foundation.IAsyncAction ConnectAsync(Windows.Networking.HostName remoteHostName, String remoteServiceName, SocketProtectionLevel protectionLevel, Windows.Networking.Connectivity.NetworkAdapter adapter);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocket3", 3f430b00-9d28-4854-bac3-2301941ec223)]
+        {
+            Windows.Foundation.IAsyncAction CancelIOAsync();
+            [method_name("EnableTransferOwnership")] void EnableTransferOwnership(Guid taskId);
+            [method_name("EnableTransferOwnershipWithConnectedStandbyAction")] void EnableTransferOwnership(Guid taskId, SocketActivityConnectedStandbyAction connectedStandbyAction);
+            [method_name("TransferOwnership")] void TransferOwnership(String socketId);
+            [method_name("TransferOwnershipWithContext")] void TransferOwnership(String socketId, SocketActivityContext data);
+            [method_name("TransferOwnershipWithContextAndKeepAliveTime")] void TransferOwnership(String socketId, SocketActivityContext data, Windows.Foundation.TimeSpan keepAliveTime);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IStreamSocketListener", ff513437-df9f-4df0-bf82-0ec5d7b35aae)]
+    [threading(both)]
+    runtimeclass StreamSocketListener
+        : Windows.Foundation.IClosable
+    {
+        StreamSocketListener();
+        Windows.Networking.Sockets.StreamSocketListenerControl Control{ get; };
+        Windows.Networking.Sockets.StreamSocketListenerInformation Information{ get; };
+        Windows.Foundation.IAsyncAction BindServiceNameAsync(String localServiceName);
+        Windows.Foundation.IAsyncAction BindEndpointAsync(Windows.Networking.HostName localHostName, String localServiceName);
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.StreamSocketListener, Windows.Networking.Sockets.StreamSocketListenerConnectionReceivedEventArgs>  ConnectionReceived;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocketListener2", 658dc13e-bb3e-4458-b232-ed1088694b98)]
+        {
+            [method_name("BindServiceNameWithProtectionLevelAsync")] Windows.Foundation.IAsyncAction BindServiceNameAsync(String localServiceName, SocketProtectionLevel protectionLevel);
+            [method_name("BindServiceNameWithProtectionLevelAndAdapterAsync")] Windows.Foundation.IAsyncAction BindServiceNameAsync(String localServiceName, SocketProtectionLevel protectionLevel, Windows.Networking.Connectivity.NetworkAdapter adapter);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocketListener3", 4798201c-bdf8-4919-8542-28d450e74507)]
+        {
+            Windows.Foundation.IAsyncAction CancelIOAsync();
+            [method_name("EnableTransferOwnership")] void EnableTransferOwnership(Guid taskId);
+            [method_name("EnableTransferOwnershipWithConnectedStandbyAction")] void EnableTransferOwnership(Guid taskId, SocketActivityConnectedStandbyAction connectedStandbyAction);
+            [method_name("TransferOwnership")] void TransferOwnership(String socketId);
+            [method_name("TransferOwnershipWithContext")] void TransferOwnership(String socketId, SocketActivityContext data);
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Networking.Sockets.ISocketActivityInformationStatics", 8570b47a-7e7d-4736-8041-1327a6543c56)]
+    [interface_name("Windows.Networking.Sockets.ISocketActivityInformation", 8d8a42e4-a87e-4b74-9968-185b2511defe)]
+    [threading(both)]
+    runtimeclass SocketActivityInformation
+    {
+        static Windows.Foundation.Collections.IMapView <String, Windows.Networking.Sockets.SocketActivityInformation>  AllSockets{ get; };
+        Guid TaskId{ get; };
+        String Id{ get; };
+        Windows.Networking.Sockets.SocketActivityKind SocketKind{ get; };
+        Windows.Networking.Sockets.SocketActivityContext Context{ get; };
+        Windows.Networking.Sockets.DatagramSocket DatagramSocket{ get; };
+        Windows.Networking.Sockets.StreamSocket StreamSocket{ get; };
+        Windows.Networking.Sockets.StreamSocketListener StreamSocketListener{ get; };
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.Sockets.IDatagramSocketControl", 52ac3f2e-349a-4135-bb58-b79b2647d390)]
+    runtimeclass DatagramSocketControl
+    {
+        Windows.Networking.Sockets.SocketQualityOfService QualityOfService{ get; };
+        Windows.Networking.Sockets.SocketQualityOfService QualityOfService{ set; };
+        UInt8 OutboundUnicastHopLimit{ get; };
+        UInt8 OutboundUnicastHopLimit{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IDatagramSocketControl2", 33ead5c2-979c-4415-82a1-3cfaf646c192)]
+        {
+            UInt32 InboundBufferSizeInBytes{ get; };
+            UInt32 InboundBufferSizeInBytes{ set; };
+            Boolean DontFragment{ get; };
+            Boolean DontFragment{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IDatagramSocketControl3", d4eb8256-1f6d-4598-9b57-d42a001df349)]
+        {
+            Boolean MulticastOnly{ get; };
+            Boolean MulticastOnly{ set; };
+        }
+    }
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.Sockets.IDatagramSocketInformation", 5f1a569a-55fb-48cd-9706-7a974f7b1585)]
+    runtimeclass DatagramSocketInformation
+    {
+        Windows.Networking.HostName LocalAddress{ get; };
+        String LocalPort{ get; };
+        Windows.Networking.HostName RemoteAddress{ get; };
+        String RemotePort{ get; };
+    }
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.Medium)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IDatagramSocketMessageReceivedEventArgs", 9e2ddca2-1712-4ce4-b179-8c652c6d107e)]
+    runtimeclass DatagramSocketMessageReceivedEventArgs
+    {
+        Windows.Networking.HostName RemoteAddress{ get; };
+        String RemotePort{ get; };
+        Windows.Networking.HostName LocalAddress{ get; };
+        Windows.Storage.Streams.DataReader GetDataReader();
+        Windows.Storage.Streams.IInputStream GetDataStream();
+    }
+
+
+
+
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IStreamSocketControl", fe25adf1-92ab-4af3-9992-0f4c85e36cc4)]
+    runtimeclass StreamSocketControl
+    {
+        Boolean NoDelay{ get; };
+        Boolean NoDelay{ set; };
+        Boolean KeepAlive{ get; };
+        Boolean KeepAlive{ set; };
+        UInt32 OutboundBufferSizeInBytes{ get; };
+        UInt32 OutboundBufferSizeInBytes{ set; };
+        Windows.Networking.Sockets.SocketQualityOfService QualityOfService{ get; };
+        Windows.Networking.Sockets.SocketQualityOfService QualityOfService{ set; };
+        UInt8 OutboundUnicastHopLimit{ get; };
+        UInt8 OutboundUnicastHopLimit{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocketControl2", c2d09a56-060f-44c1-b8e2-1fbf60bd62c5)]
+        {
+            Windows.Foundation.Collections.IVector <Windows.Security.Cryptography.Certificates.ChainValidationResult>  IgnorableServerCertificateErrors{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocketControl3", c56a444c-4e74-403e-894c-b31cae5c7342)]
+        {
+            Boolean SerializeConnectionAttempts{ get; };
+            Boolean SerializeConnectionAttempts{ set; };
+            Windows.Security.Cryptography.Certificates.Certificate ClientCertificate{ get; };
+            Windows.Security.Cryptography.Certificates.Certificate ClientCertificate{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocketControl4", 964e2b3d-ec27-4888-b3ce-c74b418423ad)]
+        {
+            Windows.Networking.Sockets.SocketProtectionLevel MinProtectionLevel{ get; };
+            Windows.Networking.Sockets.SocketProtectionLevel MinProtectionLevel{ set; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IStreamSocketInformation", 3b80ae30-5e68-4205-88f0-dc85d2e25ded)]
+    runtimeclass StreamSocketInformation
+    {
+        Windows.Networking.HostName LocalAddress{ get; };
+        String LocalPort{ get; };
+        Windows.Networking.HostName RemoteHostName{ get; };
+        Windows.Networking.HostName RemoteAddress{ get; };
+        String RemoteServiceName{ get; };
+        String RemotePort{ get; };
+        Windows.Networking.Sockets.RoundTripTimeStatistics RoundTripTimeStatistics{ get; };
+        Windows.Networking.Sockets.BandwidthStatistics BandwidthStatistics{ get; };
+        Windows.Networking.Sockets.SocketProtectionLevel ProtectionLevel{ get; };
+        Windows.Storage.Streams.IBuffer SessionKey{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocketInformation2", 12c28452-4bdc-4ee4-976a-cf130e9d92e3)]
+        {
+            Windows.Networking.Sockets.SocketSslErrorSeverity ServerCertificateErrorSeverity{ get; };
+            Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.ChainValidationResult>  ServerCertificateErrors{ get; };
+            Windows.Security.Cryptography.Certificates.Certificate ServerCertificate{ get; };
+            Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  ServerIntermediateCertificates{ get; };
+        }
+    }
+
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.Sockets.IStreamSocketListenerControl", 20d8c576-8d8a-4dba-9722-a16c4d984980)]
+    runtimeclass StreamSocketListenerControl
+    {
+        Windows.Networking.Sockets.SocketQualityOfService QualityOfService{ get; };
+        Windows.Networking.Sockets.SocketQualityOfService QualityOfService{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Networking.Sockets.IStreamSocketListenerControl2", 948bb665-2c3e-404b-b8b0-8eb249a2b0a1)]
+        {
+            Boolean NoDelay{ get; };
+            Boolean NoDelay{ set; };
+            Boolean KeepAlive{ get; };
+            Boolean KeepAlive{ set; };
+            UInt32 OutboundBufferSizeInBytes{ get; };
+            UInt32 OutboundBufferSizeInBytes{ set; };
+            UInt8 OutboundUnicastHopLimit{ get; };
+            UInt8 OutboundUnicastHopLimit{ set; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Networking.Sockets.IStreamSocketListenerInformation", e62ba82f-a63a-430b-bf62-29e93e5633b4)]
+    runtimeclass StreamSocketListenerInformation
+    {
+        String LocalPort{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IStreamSocketListenerConnectionReceivedEventArgs", 0c472ea9-373f-447b-85b1-ddd4548803ba)]
+    runtimeclass StreamSocketListenerConnectionReceivedEventArgs
+    {
+        Windows.Networking.Sockets.StreamSocket Socket{ get; };
+    }
+
+
+
+
+    [uuid(2ec4bdc3-d9a5-455a-9811-de24d45337e9)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IWebSocketControl
+    {
+        UInt32 OutboundBufferSizeInBytes{ get; };
+        UInt32 OutboundBufferSizeInBytes{ set; };
+        Windows.Security.Credentials.PasswordCredential ServerCredential{ get; };
+        Windows.Security.Credentials.PasswordCredential ServerCredential{ set; };
+        Windows.Security.Credentials.PasswordCredential ProxyCredential{ get; };
+        Windows.Security.Credentials.PasswordCredential ProxyCredential{ set; };
+        Windows.Foundation.Collections.IVector <String>  SupportedProtocols{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [uuid(79c3be03-f2ca-461e-af4e-9665bc2d0620)]
+    interface IWebSocketControl2 requires Windows.Networking.Sockets.IWebSocketControl
+    {
+        Windows.Foundation.Collections.IVector <Windows.Security.Cryptography.Certificates.ChainValidationResult>  IgnorableServerCertificateErrors{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(5e01e316-c92a-47a5-b25f-07847639d181)]
+    interface IWebSocketInformation
+    {
+        Windows.Networking.HostName LocalAddress{ get; };
+        Windows.Networking.Sockets.BandwidthStatistics BandwidthStatistics{ get; };
+        String Protocol{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [uuid(ce1d39ce-a1b7-4d43-8269-8d5b981bd47a)]
+    interface IWebSocketInformation2 requires Windows.Networking.Sockets.IWebSocketInformation
+    {
+        Windows.Security.Cryptography.Certificates.Certificate ServerCertificate{ get; };
+        Windows.Networking.Sockets.SocketSslErrorSeverity ServerCertificateErrorSeverity{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.ChainValidationResult>  ServerCertificateErrors{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  ServerIntermediateCertificates{ get; };
+    };
+
+    [uuid(f877396f-99b1-4e18-bc08-850c9adf156e)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IWebSocket requires Windows.Foundation.IClosable
+    {
+        Windows.Storage.Streams.IOutputStream OutputStream{ get; };
+        Windows.Foundation.IAsyncAction ConnectAsync(Windows.Foundation.Uri uri);
+        void SetRequestHeader(String headerName, String headerValue);
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.IWebSocket, Windows.Networking.Sockets.WebSocketClosedEventArgs>  Closed;
+        [method_name("CloseWithStatus")] void Close(UInt16 code, String reason);
+    };
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IWebSocketClosedEventArgs", ceb78d07-d0a8-4703-a091-c8c2c0915bc3)]
+    runtimeclass WebSocketClosedEventArgs
+    {
+        UInt16 Code{ get; };
+        String Reason{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.Sockets.IMessageWebSocketControl", 8118388a-c629-4f0a-80fb-81fc05538862)]
+    runtimeclass MessageWebSocketControl
+        : Windows.Networking.Sockets.IWebSocketControl
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.Networking.Sockets.IWebSocketControl2
+    {
+        UInt32 MaxMessageSize{ get; };
+        UInt32 MaxMessageSize{ set; };
+        Windows.Networking.Sockets.SocketMessageType MessageType{ get; };
+        Windows.Networking.Sockets.SocketMessageType MessageType{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Networking.Sockets.IMessageWebSocketControl2", e30fd791-080c-400a-a712-27dfa9e744d8)]
+        {
+            Windows.Foundation.TimeSpan DesiredUnsolicitedPongInterval{ get; };
+            Windows.Foundation.TimeSpan DesiredUnsolicitedPongInterval{ set; };
+            Windows.Foundation.TimeSpan ActualUnsolicitedPongInterval{ get; };
+            Windows.Networking.Sockets.MessageWebSocketReceiveMode ReceiveMode{ get; };
+            Windows.Networking.Sockets.MessageWebSocketReceiveMode ReceiveMode{ set; };
+            Windows.Security.Cryptography.Certificates.Certificate ClientCertificate{ get; };
+            Windows.Security.Cryptography.Certificates.Certificate ClientCertificate{ set; };
+        }
+    }
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass MessageWebSocketInformation
+        : [default]Windows.Networking.Sockets.IWebSocketInformation
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.Networking.Sockets.IWebSocketInformation2
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.Sockets.IMessageWebSocket", 33727d08-34d5-4746-ad7b-8dde5bc2ef88)]
+    [threading(both)]
+    runtimeclass MessageWebSocket
+        : Windows.Networking.Sockets.IWebSocket
+        , Windows.Foundation.IClosable
+    {
+        MessageWebSocket();
+        Windows.Networking.Sockets.MessageWebSocketControl Control{ get; };
+        Windows.Networking.Sockets.MessageWebSocketInformation Information{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.MessageWebSocket, Windows.Networking.Sockets.MessageWebSocketMessageReceivedEventArgs>  MessageReceived;
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Networking.Sockets.IMessageWebSocket2", bed0cee7-f9c8-440a-9ad5-737281d9742e)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.MessageWebSocket, Windows.Networking.Sockets.WebSocketServerCustomValidationRequestedEventArgs>  ServerCustomValidationRequested;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Networking.Sockets.IMessageWebSocket3", 59d9defb-71af-4349-8487-911fcf681597)]
+        {
+            Windows.Foundation.IAsyncOperationWithProgress <UInt32, UInt32>  SendNonfinalFrameAsync(Windows.Storage.Streams.IBuffer data);
+            Windows.Foundation.IAsyncOperationWithProgress <UInt32, UInt32>  SendFinalFrameAsync(Windows.Storage.Streams.IBuffer data);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.Medium)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Networking.Sockets.IMessageWebSocketMessageReceivedEventArgs", 478c22ac-4c4b-42ed-9ed7-1ef9f94fa3d5)]
+    runtimeclass MessageWebSocketMessageReceivedEventArgs
+    {
+        Windows.Networking.Sockets.SocketMessageType MessageType{ get; };
+        Windows.Storage.Streams.DataReader GetDataReader();
+        Windows.Storage.Streams.IInputStream GetDataStream();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Networking.Sockets.IMessageWebSocketMessageReceivedEventArgs2", 89ce06fd-dd6f-4a07-87f9-f9eb4d89d83d)]
+        {
+            Boolean IsMessageComplete{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IWebSocketServerCustomValidationRequestedEventArgs", ffeffe48-022a-4ab7-8b36-e10af4640e6b)]
+    runtimeclass WebSocketServerCustomValidationRequestedEventArgs
+    {
+        Windows.Security.Cryptography.Certificates.Certificate ServerCertificate{ get; };
+        Windows.Networking.Sockets.SocketSslErrorSeverity ServerCertificateErrorSeverity{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.ChainValidationResult>  ServerCertificateErrors{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  ServerIntermediateCertificates{ get; };
+        void Reject();
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IStreamWebSocketControl", b4f478b1-a45a-48db-953a-645b7d964c07)]
+    runtimeclass StreamWebSocketControl
+        : Windows.Networking.Sockets.IWebSocketControl
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.Networking.Sockets.IWebSocketControl2
+    {
+        Boolean NoDelay{ get; };
+        Boolean NoDelay{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Networking.Sockets.IStreamWebSocketControl2", 215d9f7e-fa58-40da-9f11-a48dafe95037)]
+        {
+            Windows.Foundation.TimeSpan DesiredUnsolicitedPongInterval{ get; };
+            Windows.Foundation.TimeSpan DesiredUnsolicitedPongInterval{ set; };
+            Windows.Foundation.TimeSpan ActualUnsolicitedPongInterval{ get; };
+            Windows.Security.Cryptography.Certificates.Certificate ClientCertificate{ get; };
+            Windows.Security.Cryptography.Certificates.Certificate ClientCertificate{ set; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    runtimeclass StreamWebSocketInformation
+        : [default]Windows.Networking.Sockets.IWebSocketInformation
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.Networking.Sockets.IWebSocketInformation2
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Networking.Sockets.IStreamWebSocket", bd4a49d8-b289-45bb-97eb-c7525205a843)]
+    [threading(both)]
+    runtimeclass StreamWebSocket
+        : Windows.Networking.Sockets.IWebSocket
+        , Windows.Foundation.IClosable
+    {
+        StreamWebSocket();
+        Windows.Networking.Sockets.StreamWebSocketControl Control{ get; };
+        Windows.Networking.Sockets.StreamWebSocketInformation Information{ get; };
+        Windows.Storage.Streams.IInputStream InputStream{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Networking.Sockets.IStreamWebSocket2", aa4d08cb-93f5-4678-8236-57cce5417ed5)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.StreamWebSocket, Windows.Networking.Sockets.WebSocketServerCustomValidationRequestedEventArgs>  ServerCustomValidationRequested;
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.Sockets.IServerMessageWebSocket", e3ac9240-813b-5efd-7e11-ae2305fc77f1)]
+    runtimeclass ServerMessageWebSocket
+        : Windows.Foundation.IClosable
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.ServerMessageWebSocket, Windows.Networking.Sockets.MessageWebSocketMessageReceivedEventArgs>  MessageReceived;
+        Windows.Networking.Sockets.ServerMessageWebSocketControl Control{ get; };
+        Windows.Networking.Sockets.ServerMessageWebSocketInformation Information{ get; };
+        Windows.Storage.Streams.IOutputStream OutputStream{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.ServerMessageWebSocket, Windows.Networking.Sockets.WebSocketClosedEventArgs>  Closed;
+        [method_name("CloseWithStatus")] void Close(UInt16 code, String reason);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Networking.Sockets.IServerMessageWebSocketControl", 69c2f051-1c1f-587a-4519-2181610192b7)]
+    runtimeclass ServerMessageWebSocketControl
+    {
+        Windows.Networking.Sockets.SocketMessageType MessageType{ get; };
+        Windows.Networking.Sockets.SocketMessageType MessageType{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Networking.Sockets.IServerMessageWebSocketInformation", fc32b45f-4448-5505-6cc9-09afa8915f5d)]
+    runtimeclass ServerMessageWebSocketInformation
+    {
+        Windows.Networking.Sockets.BandwidthStatistics BandwidthStatistics{ get; };
+        String Protocol{ get; };
+        Windows.Networking.HostName LocalAddress{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Networking.Sockets.IServerStreamWebSocketInformation", fc32b45f-4448-5505-6cc9-09aba8915f5d)]
+    runtimeclass ServerStreamWebSocketInformation
+    {
+        Windows.Networking.Sockets.BandwidthStatistics BandwidthStatistics{ get; };
+        String Protocol{ get; };
+        Windows.Networking.HostName LocalAddress{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Networking.Sockets.IServerStreamWebSocket", 2ced5bbf-74f6-55e4-79df-9132680dfee8)]
+    runtimeclass ServerStreamWebSocket
+        : Windows.Foundation.IClosable
+    {
+        Windows.Networking.Sockets.ServerStreamWebSocketInformation Information{ get; };
+        Windows.Storage.Streams.IInputStream InputStream{ get; };
+        Windows.Storage.Streams.IOutputStream OutputStream{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.Sockets.ServerStreamWebSocket, Windows.Networking.Sockets.WebSocketClosedEventArgs>  Closed;
+        [method_name("CloseWithStatus")] void Close(UInt16 code, String reason);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [threading(both)]
+    runtimeclass WebSocketKeepAlive
+        : [default]Windows.ApplicationModel.Background.IBackgroundTask
+    {
+        WebSocketKeepAlive();
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Networking.Sockets.ISocketErrorStatics", 828337f4-7d56-4d8e-b7b4-a07dd7c1bca9)]
+    [threading(both)]
+    runtimeclass SocketError
+    {
+        static Windows.Networking.Sockets.SocketErrorStatus GetStatus(Int32 hresult);
+    }
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Networking.Sockets.IWebSocketErrorStatics", 27cdf35b-1f61-4709-8e02-61283ada4e9d)]
+    [threading(both)]
+    runtimeclass WebSocketError
+    {
+        static Windows.Web.WebErrorStatus GetStatus(Int32 hresult);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.Sockets.ISocketActivityTriggerDetails", 45f406a7-fc9f-4f81-acad-355fef51e67b)]
+    runtimeclass SocketActivityTriggerDetails
+    {
+        Windows.Networking.Sockets.SocketActivityTriggerReason Reason{ get; };
+        Windows.Networking.Sockets.SocketActivityInformation SocketInformation{ get; };
+    }
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass SocketActivityTrigger
+        : [default]Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        SocketActivityTrigger();
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.Background.ISocketActivityTrigger", a9bbf810-9dde-4f8a-83e3-b0e0e7a50d70)]
+        {
+            Boolean IsWakeFromLowPowerSupported{ get; };
+        }
+    }
+
+}

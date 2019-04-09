@@ -1,0 +1,27 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.System.Inventory
+{
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Inventory.IInstalledDesktopAppStatics", 264cf74e-21cd-5f9b-6056-7866ad72489a)]
+    [interface_name("Windows.System.Inventory.IInstalledDesktopApp", 75eab8ed-c0bc-5364-4c28-166e0545167a)]
+    [threading(both)]
+    runtimeclass InstalledDesktopApp
+        : Windows.Foundation.IStringable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.System.Inventory.InstalledDesktopApp> >  GetInventoryAsync();
+        String Id{ get; };
+        String DisplayName{ get; };
+        String Publisher{ get; };
+        String DisplayVersion{ get; };
+    }
+
+}

@@ -1,0 +1,77 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IProtocolStatics", 0f2f217e-7957-4262-a74c-df03d9e9e9c1)]
+    [interface_name("Windows.Internal.StateRepository.IProtocol", fdd7e51e-d1cc-41d9-ae36-a5fac6fe5216)]
+    [threading(both)]
+    runtimeclass Protocol
+    {
+        Protocol();
+        static Boolean Exists(Int64 protocolID);
+        static Boolean ExistsByExtension(ApplicationExtension Extension);
+        static Boolean ExistsByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Boolean ExistsByProgID(String ProgID);
+        static Boolean ExistsByProgIDAndExtension(String ProgID, ApplicationExtension Extension);
+        static Boolean ExistsByProtocolName(String ProtocolName);
+        static Boolean ExistsByProtocolNameAndExtension(String ProtocolName, ApplicationExtension Extension);
+        static Boolean ExistsByProtocolNameAndReturnResults(String ProtocolName, ProtocolReturnResults ReturnResults);
+        static Windows.Internal.StateRepository.Protocol Get(Int64 protocolID);
+        static Windows.Internal.StateRepository.Protocol TryGet(Int64 protocolID);
+        static Windows.Internal.StateRepository.Protocol GetByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Windows.Internal.StateRepository.Protocol TryGetByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  FindByExtension(ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  FindByProgID(String ProgID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  FindByProgIDAndExtension(String ProgID, ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  FindByProtocolName(String ProtocolName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  FindByProtocolNameAndExtension(String ProtocolName, ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  FindByProtocolNameAndReturnResults(String ProtocolName, ProtocolReturnResults ReturnResults);
+        static Boolean ExistsByUserAndProtocolName(User user, String protocolName);
+        static Boolean ExistsByUserOrDefaultAccountAndProtocolName(User user, String protocolName);
+        static Boolean ExistsByUserOrDefaultAccountAndProtocolNameAndPackageFamilyName(User user, String protocolName, String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Protocol>  FindByUserAndProtocolName(User user, String protocolName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ProtocolLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndProtocolName(User user, String protocolName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ProtocolLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndProtocolNameAndPackageFamilyName(User user, String protocolName, String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ProtocolLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndProgId(User user, String progId);
+        Int64 _ProtocolID{ get; };
+        Int64 _ProtocolID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        String ProtocolName{ get; };
+        String ProtocolName{ set; };
+        Windows.Internal.StateRepository.ProtocolReturnResults ReturnResults{ get; };
+        Windows.Internal.StateRepository.ProtocolReturnResults ReturnResults{ set; };
+        Int64 Extension{ get; };
+        Int64 Extension{ set; };
+        Windows.Internal.StateRepository.ApplicationExtension GetExtension();
+        void SetExtension(ApplicationExtension value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Boolean IsProgIDNull{ get; };
+        void SetProgIDToNull();
+        String ProgID{ get; };
+        String ProgID{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

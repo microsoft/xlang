@@ -1,0 +1,194 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Tiles
+{
+    [contractversion(1)]
+    [internal]
+    apicontract TileContract{};
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    enum TileTypes
+    {
+        Primary,
+        Secondary,
+    };
+
+    [flags]
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    enum TileCapabilities
+    {
+        None,
+        VisibleInAppList,
+        VisibleInSettings,
+        SupportsKidZone = 4,
+        SupportsLockScreen = 8,
+        All = 15,
+    };
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    enum TileChangeTypes
+    {
+        Modified,
+        Deleted,
+    };
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    enum TileApplicationTypes
+    {
+        Appx,
+        SL80,
+        SL81MPNS,
+        SL81WNS,
+    };
+
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [uuid(ae6f8ce6-aa23-4e52-a076-b32cb6f58241)]
+    interface ITileWritableInternal
+    {
+        Windows.Foundation.Collections.ValueSet WritableProperties{ get; };
+        Windows.Foundation.Collections.ValueSet WritableProperties{ set; };
+        Windows.Internal.Tiles.TileCapabilities WritableCapabilities{ get; };
+        Windows.Internal.Tiles.TileCapabilities WritableCapabilities{ set; };
+    };
+
+
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Tiles.ITileQueryFilter", ffb7d4af-e8e8-49d1-992e-50e5b4d8615f)]
+    [threading(both)]
+    runtimeclass TileQueryFilter
+    {
+        TileQueryFilter();
+        Windows.Foundation.Collections.IVector <Windows.Internal.Tiles.TileTypes>  Types{ get; };
+        Windows.Internal.Tiles.TileCapabilities Capabilities{ get; };
+        Windows.Internal.Tiles.TileCapabilities Capabilities{ set; };
+        Windows.Foundation.Collections.IVector <Guid>  Ids{ get; };
+        String AppUserModelId{ get; };
+        String AppUserModelId{ set; };
+        String ApplicationSpecifiedId{ get; };
+        String ApplicationSpecifiedId{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [interface_name("Windows.Internal.Tiles.ITileNotification", 6822fa7f-ecbb-4181-a1e1-c8e1d30de3a4)]
+    runtimeclass TileNotification
+    {
+        Windows.System.User User{ get; };
+        Guid Id{ get; };
+        Windows.Internal.Tiles.TileChangeTypes ChangeType{ get; };
+        Int64 RevisionNumber{ get; };
+        Windows.Internal.Tiles.ITile Tile{ get; };
+    }
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [uuid(49bcda17-b260-4d21-9264-fab8d7b43636)]
+    interface ITile
+    {
+        Guid Id{ get; };
+        Windows.Internal.Tiles.TileTypes Type{ get; };
+        Windows.Internal.Tiles.TileCapabilities Capabilities{ get; };
+        Int64 RevisionNumber{ get; };
+        Windows.Foundation.Collections.ValueSet Properties{ get; };
+        UInt32 TemplateType{ get; };
+        String AppSpecifiedId{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [constructor_name("Windows.Internal.Tiles.ITileStoreFactory", 3a1f4546-cb54-4968-a3f8-fa93f2fe6b40)]
+    [interface_name("Windows.Internal.Tiles.ITileStore", 8bc11f75-7a92-4a55-9921-bf3604dce721)]
+    [threading(both)]
+    runtimeclass TileStore
+    {
+        [method_name( "Create" )] TileStore(Windows.System.User user);
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Tiles.TileNotification>  FindTileNotifications(Int64 revisionNumber, TileQueryFilter tileQueryFilter);
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Tiles.ITile>  FindTiles(Int64 revisionNumber, TileQueryFilter tileQueryFilter);
+        Int64 GetCurrentRevisionNumber();
+        Windows.ApplicationModel.AppInfo GetApplicationInfoByTileId(Guid tileId);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Internal.Tiles.TileNotification> >  FindTileNotificationsAsync(Int64 revisionNumber, TileQueryFilter tileQueryFilter);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Internal.Tiles.ITile> >  FindTilesAsync(Int64 revisionNumber, TileQueryFilter tileQueryFilter);
+        Windows.Foundation.IAsyncOperation <Int64>  GetCurrentRevisionNumberAsync();
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.AppInfo>  GetApplicationInfoByTileIdAsync(Guid tileId);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Tiles.TileStore, Windows.Internal.Tiles.TileStoreChangedEventArgs>  TileStoreChanged;
+
+        [interface_name("Windows.Internal.Tiles.ITileStoreInternal", 02aaa733-b525-40b7-b783-b152de7d75cc)]
+        {
+            void UpdatePrimaryTileUser(ITileWritableInternal writableTile);
+        }
+    }
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Tiles.ITileStoreChangedEventArgs", 58d22175-5c80-439e-b2ba-2818a8686f4b)]
+    runtimeclass TileStoreChangedEventArgs
+    {
+        Int64 NewRevisionNumber{ get; };
+    }
+
+
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [uuid(d5eea516-5cff-4341-9540-5246cd4352c8)]
+    interface ISecondaryTile requires Windows.Internal.Tiles.ITile
+    {
+        UInt32 TemplateType{ set; };
+        String AppSpecifiedId{ set; };
+        String Arguments{ get; };
+        String Arguments{ set; };
+        Int32 ReferenceCount{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [threading(both)]
+    runtimeclass SecondaryTile
+        : [default]Windows.Internal.Tiles.ITile
+        , Windows.Internal.Tiles.ISecondaryTile
+    {
+        SecondaryTile();
+    }
+
+
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Internal.Tiles.ISecondaryTileStoreFactory", 626a7b4f-7c03-4b36-aa37-0fb71979e091)]
+    [interface_name("Windows.Internal.Tiles.ISecondaryTileStore", f9f1e6de-1d11-4be6-89f5-befee3e22e23)]
+    [threading(both)]
+    runtimeclass SecondaryTileStore
+    {
+        [method_name( "Create" )] SecondaryTileStore(String appUserModelId);
+        [method_name( "CreateForUser" )] SecondaryTileStore(Windows.System.User user, String appUserModelId);
+        Boolean Exists(String appSpecifiedId);
+        Windows.Internal.Tiles.ISecondaryTile Find(String appSpecifiedId);
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Tiles.SecondaryTile>  FindAll();
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Tiles.SecondaryTile>  FindAllForPackage(String packageFamilyName);
+        void Create(ISecondaryTile tile);
+        void Update(ISecondaryTile tile);
+        void Delete(ISecondaryTile tile);
+        void DeleteById(Guid id);
+        void DeleteByAppSpecifiedId(String appSpecifiedId);
+        Int32 IncrementTileReference(String appSpecifiedId);
+        Int32 DecrementTileReference(String appSpecifiedId);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Tiles.TileContract, 1)]
+    runtimeclass PrimaryTile
+        : [default]Windows.Internal.Tiles.ITile
+        , Windows.Internal.Tiles.ITileWritableInternal
+    {
+    }
+
+}

@@ -1,0 +1,204 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Imaging
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BitmapBufferAccessMode
+    {
+        Read,
+        ReadWrite,
+        Write,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.High)]
+    [interface_name("Windows.Graphics.Imaging.IBitmapBuffer", a53e04c4-399c-438c-b28f-a63a6b83d1a1)]
+    runtimeclass BitmapBuffer
+        : Windows.Foundation.IMemoryBuffer
+        , Windows.Foundation.IClosable
+    {
+        Int32 GetPlaneCount();
+        Windows.Graphics.Imaging.BitmapPlaneDescription GetPlaneDescription(Int32 index);
+    }
+
+    [dualapipartition(0xa000000)]
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.High)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Graphics.Imaging.ISoftwareBitmapStatics", df0385db-672f-4a9d-806e-c2442f343e86)]
+    [constructor_name("Windows.Graphics.Imaging.ISoftwareBitmapFactory", c99feb69-2d62-4d47-a6b3-4fdb6a07fdf8)]
+    [interface_name("Windows.Graphics.Imaging.ISoftwareBitmap", 689e0708-7eef-483f-963f-da938818e073)]
+    [threading(both)]
+    runtimeclass SoftwareBitmap
+        : Windows.Foundation.IClosable
+    {
+        static Windows.Graphics.Imaging.SoftwareBitmap Copy(SoftwareBitmap source);
+        [method_name("Convert")] static Windows.Graphics.Imaging.SoftwareBitmap Convert(SoftwareBitmap source, BitmapPixelFormat format);
+        [method_name("ConvertWithAlpha")] static Windows.Graphics.Imaging.SoftwareBitmap Convert(SoftwareBitmap source, BitmapPixelFormat format, BitmapAlphaMode alpha);
+        [method_name("CreateCopyFromBuffer")] static Windows.Graphics.Imaging.SoftwareBitmap CreateCopyFromBuffer(Windows.Storage.Streams.IBuffer source, BitmapPixelFormat format, Int32 width, Int32 height);
+        [method_name("CreateCopyWithAlphaFromBuffer")] static Windows.Graphics.Imaging.SoftwareBitmap CreateCopyFromBuffer(Windows.Storage.Streams.IBuffer source, BitmapPixelFormat format, Int32 width, Int32 height, BitmapAlphaMode alpha);
+        [method_name("CreateCopyFromSurfaceAsync")] static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.SoftwareBitmap>  CreateCopyFromSurfaceAsync(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface surface);
+        [method_name("CreateCopyWithAlphaFromSurfaceAsync")] static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.SoftwareBitmap>  CreateCopyFromSurfaceAsync(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface surface, BitmapAlphaMode alpha);
+        [method_name( "Create" )] SoftwareBitmap(BitmapPixelFormat format, Int32 width, Int32 height);
+        [method_name( "CreateWithAlpha" )] SoftwareBitmap(BitmapPixelFormat format, Int32 width, Int32 height, BitmapAlphaMode alpha);
+        Windows.Graphics.Imaging.BitmapPixelFormat BitmapPixelFormat{ get; };
+        Windows.Graphics.Imaging.BitmapAlphaMode BitmapAlphaMode{ get; };
+        Int32 PixelWidth{ get; };
+        Int32 PixelHeight{ get; };
+        Boolean IsReadOnly{ get; };
+        Double DpiX{ set; };
+        Double DpiX{ get; };
+        Double DpiY{ set; };
+        Double DpiY{ get; };
+        Windows.Graphics.Imaging.BitmapBuffer LockBuffer(BitmapBufferAccessMode mode);
+        void CopyTo(SoftwareBitmap bitmap);
+        void CopyFromBuffer(Windows.Storage.Streams.IBuffer buffer);
+        void CopyToBuffer(Windows.Storage.Streams.IBuffer buffer);
+        Windows.Graphics.Imaging.SoftwareBitmap GetReadOnlyView();
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct BitmapPlaneDescription
+    {
+        Int32 StartIndex;
+        Int32 Width;
+        Int32 Height;
+        Int32 Stride;
+    };
+
+
+}
+namespace Windows.Media
+{
+    [uuid(bfb52f8c-5943-47d8-8e10-05308aa5fbd0)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IMediaFrame requires Windows.Foundation.IClosable
+    {
+        String Type{ get; };
+        Boolean IsReadOnly{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  RelativeTime{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  RelativeTime{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  SystemRelativeTime{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  SystemRelativeTime{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Duration{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Duration{ get; };
+        Boolean IsDiscontinuous{ set; };
+        Boolean IsDiscontinuous{ get; };
+        Windows.Foundation.Collections.IPropertySet ExtendedProperties{ get; };
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.High)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.IVideoFrameFactory", 014b6d69-2228-4c92-92ff-50c380d3e776)]
+    [interface_name("Windows.Media.IVideoFrame", 0cc06625-90fc-4c92-bd95-7ded21819d1c)]
+    [threading(both)]
+    runtimeclass VideoFrame
+        : Windows.Media.IMediaFrame
+        , Windows.Foundation.IClosable
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.Media.IVideoFrameStatics", ab2a556f-6111-4b33-8ec3-2b209a02e17a)]
+        {
+            [method_name("CreateAsDirect3D11SurfaceBacked")] static Windows.Media.VideoFrame CreateAsDirect3D11SurfaceBacked(Windows.Graphics.DirectX.DirectXPixelFormat format, Int32 width, Int32 height);
+            [method_name("CreateAsDirect3D11SurfaceBackedWithDevice")] static Windows.Media.VideoFrame CreateAsDirect3D11SurfaceBacked(Windows.Graphics.DirectX.DirectXPixelFormat format, Int32 width, Int32 height, Windows.Graphics.DirectX.Direct3D11.IDirect3DDevice device);
+            static Windows.Media.VideoFrame CreateWithSoftwareBitmap(Windows.Graphics.Imaging.SoftwareBitmap bitmap);
+            static Windows.Media.VideoFrame CreateWithDirect3D11Surface(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface surface);
+        }
+        [method_name( "Create" )] VideoFrame(Windows.Graphics.Imaging.BitmapPixelFormat format, Int32 width, Int32 height);
+        [method_name( "CreateWithAlpha" )] VideoFrame(Windows.Graphics.Imaging.BitmapPixelFormat format, Int32 width, Int32 height, Windows.Graphics.Imaging.BitmapAlphaMode alpha);
+        Windows.Graphics.Imaging.SoftwareBitmap SoftwareBitmap{ get; };
+        Windows.Foundation.IAsyncAction CopyToAsync(VideoFrame frame);
+        Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface Direct3DSurface{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.IVideoFrame2", 3837840d-336c-4366-8d46-060798736c5d)]
+        {
+            [method_name("CopyToWithBoundsAsync")] Windows.Foundation.IAsyncAction CopyToAsync(VideoFrame frame, Windows.Foundation.IReference <Windows.Graphics.Imaging.BitmapBounds>  sourceBounds, Windows.Foundation.IReference <Windows.Graphics.Imaging.BitmapBounds>  destinationBounds);
+        }
+    }
+
+
+
+
+}
+namespace Windows.Media.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [uuid(2eb3a4a2-2c77-4f3c-9828-166af473f79c)]
+    [contract(Windows.Media.Internal.InternalContract, 1)]
+    interface IVideoFrameInternal
+    {
+        Windows.Foundation.IAsyncAction CopyFromAsync(Windows.Media.VideoFrame frame, Windows.Foundation.IReference <Windows.Graphics.Imaging.BitmapBounds>  sourceBounds, Windows.Foundation.IReference <Windows.Graphics.Imaging.BitmapBounds>  destinationBounds);
+    };
+
+    [uuid(3c3b9d78-020d-487c-bce9-ba3339bf35ce)]
+    [contract(Windows.Media.Internal.InternalContract, 1)]
+    interface IVideoFrameInternalFactory
+    {
+        Windows.Media.VideoFrame CreateFromSoftwareBitmap(Windows.Graphics.Imaging.SoftwareBitmap bitmap, Boolean forceReadOnly);
+    };
+
+}
+namespace Windows.Media
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AudioBufferAccessMode
+    {
+        Read,
+        ReadWrite,
+        Write,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.Low)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.IAudioBuffer", 35175827-724b-4c6a-b130-f6537f9ae0d0)]
+    runtimeclass AudioBuffer
+        : Windows.Foundation.IMemoryBuffer
+        , Windows.Foundation.IClosable
+    {
+        UInt32 Capacity{ get; };
+        UInt32 Length{ get; };
+        UInt32 Length{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.IAudioFrameFactory", 91a90ade-2422-40a6-b9ad-30d02404317d)]
+    [interface_name("Windows.Media.IAudioFrame", e36ac304-aab2-4277-9ed0-43cedf8e29c6)]
+    [threading(both)]
+    runtimeclass AudioFrame
+        : Windows.Media.IMediaFrame
+        , Windows.Foundation.IClosable
+    {
+        [method_name( "Create" )] AudioFrame([range(0, 2147483647)]UInt32 capacity);
+        Windows.Media.AudioBuffer LockBuffer(AudioBufferAccessMode mode);
+    }
+
+
+}

@@ -1,0 +1,53 @@
+
+
+namespace Windows.Internal.AddFolderSuggestion
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.AddFolderSuggestion.InternalContract, 1)]
+    enum AddFolderSuggestionLibraryType
+    {
+        Pictures,
+        Music,
+        Video,
+    };
+
+    [contract(Windows.Internal.AddFolderSuggestion.InternalContract, 1)]
+    enum AddFolderSuggestionCompleteType
+    {
+        AddSelected,
+        RejectAll,
+        AskAgain,
+    };
+
+    [contract(Windows.Internal.AddFolderSuggestion.InternalContract, 1)]
+    [uuid(94569fa9-d3bb-4d01-bf7c-b8e1d8f8b30c)]
+    interface IAddFolderSuggestionActivatedArgs requires Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        Windows.Internal.AddFolderSuggestion.AddFolderSuggestionLibraryType LibraryType{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Storage.IStorageFolder>  FolderSuggestions{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Storage.IStorageFolder>  SelectedFolders{ get; };
+        void Complete(AddFolderSuggestionCompleteType completeAction);
+        Windows.Internal.AddFolderSuggestion.AddFolderSuggestionCompleteType CompleteAction{ get; };
+        String CallingAppPackageFullName{ get; };
+    };
+
+    [contract(Windows.Internal.AddFolderSuggestion.InternalContract, 1)]
+    runtimeclass AddFolderSuggestionActivatedArgs
+        : [default]Windows.Internal.AddFolderSuggestion.IAddFolderSuggestionActivatedArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+    }
+
+    [uuid(6362d2dc-cb7e-4c61-a17f-c962790c307e)]
+    [contract(Windows.Internal.AddFolderSuggestion.InternalContract, 1)]
+    interface IAddFolderSuggestionUI
+    {
+        [return_name("selectedFolders")] Windows.Foundation.Collections.IVectorView <Windows.Storage.IStorageFolder>  ShowAddFolderSuggestions(Windows.Foundation.Collections.IVectorView <Windows.Storage.IStorageFolder>  suggestedFolders, UInt32 callerWindow, AddFolderSuggestionLibraryType libraryTypeId, String callingPackageFullName, out AddFolderSuggestionCompleteType completeAction);
+        Windows.Storage.IStorageFolder PickFolder(UInt32 callerWindow, String callingAppId, String callingPackageFullName);
+        void CancelAddFolder();
+    };
+
+}

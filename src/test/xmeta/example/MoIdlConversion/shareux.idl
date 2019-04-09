@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Share
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.Share.InternalContract, 1)]
+    [uuid(bd8defd0-d961-4f83-8e79-a0f50c52c63c)]
+    interface IShareExperienceCallbacks
+    {
+        void OnShareExperienceDismissed();
+        void OnAppExtensionSelected(Windows.ApplicationModel.Internal.DataTransfer.IShareAppExtension shareAppExtension);
+        void OnShareProviderSelected(Windows.ApplicationModel.DataTransfer.ShareProvider shareProvider);
+        void OnCopyToClipboardSelected();
+        void OnContactSelected(String serializedContact);
+        void OnDeviceSelected(Windows.System.RemoteSystems.RemoteSystem device);
+    };
+
+    [contract(Windows.Internal.Shell.Share.InternalContract, 1)]
+    [uuid(92ab3caa-b6f2-48be-aa64-4af79309f541)]
+    interface IPeopleShareLaunchActivatedEventArgs requires Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs, Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        Windows.ApplicationModel.Internal.DataTransfer.ISharingOperation SharingOperation{ get; };
+        Windows.Internal.Shell.Share.IShareExperienceCallbacks ShareExperienceCallbacks{ get; };
+        Windows.ApplicationModel.Internal.DataTransfer.ShareTargetType TargetType{ get; };
+        String SerializedContact{ get; };
+        String ContactId{ get; };
+        String CorrelationVector{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Share.InternalContract, 1)]
+    runtimeclass PeopleShareLaunchActivatedEventArgs
+        : [default]Windows.Internal.Shell.Share.IPeopleShareLaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+    }
+
+}

@@ -1,0 +1,75 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Background.IDeviceUseDetails", 7d565141-557e-4154-b994-e4f7a11fb323)]
+    runtimeclass DeviceUseDetails
+    {
+        String DeviceId{ get; };
+        String Arguments{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Background.IDeviceServicingDetails", 4aabee29-2344-4ac4-8527-4a8ef6905645)]
+    runtimeclass DeviceServicingDetails
+    {
+        String DeviceId{ get; };
+        String Arguments{ get; };
+        Windows.Foundation.TimeSpan ExpectedDuration{ get; };
+    }
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeviceTriggerResult
+    {
+        Allowed,
+        DeniedByUser,
+        DeniedBySystem,
+        LowBattery,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Background.IDeviceUseTrigger", 0da68011-334f-4d57-b6ec-6dca64b412e4)]
+    [threading(both)]
+    runtimeclass DeviceUseTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        DeviceUseTrigger();
+        [method_name("RequestAsyncSimple")] [default_overload]
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.DeviceTriggerResult>  RequestAsync(String deviceId);
+        [default_overload]
+        [method_name("RequestAsyncWithArguments")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.DeviceTriggerResult>  RequestAsync(String deviceId, String arguments);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Background.IDeviceServicingTrigger", 1ab217ad-6e34-49d3-9e6f-17f1b6dfa881)]
+    [threading(both)]
+    runtimeclass DeviceServicingTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        DeviceServicingTrigger();
+        [default_overload]
+        [method_name("RequestAsyncSimple")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.DeviceTriggerResult>  RequestAsync(String deviceId, Windows.Foundation.TimeSpan expectedDuration);
+        [method_name("RequestAsyncWithArguments")] [default_overload]
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.DeviceTriggerResult>  RequestAsync(String deviceId, Windows.Foundation.TimeSpan expectedDuration, String arguments);
+    }
+
+}

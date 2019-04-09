@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Holographic
+{
+    [contract(Windows.Internal.Shell.Holographic.ShellCommonContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Holographic.ISlatePositionGuardian", 2b21efb0-1ca4-449a-ad47-69344ea174b2)]
+    runtimeclass SlatePositionGuardian
+    {
+        void Enable();
+        void Disable();
+        void RegisterWindow(UInt32 windowId, Windows.Foundation.Rect position);
+        void ForgetWindow(UInt32 windowId);
+    }
+
+}

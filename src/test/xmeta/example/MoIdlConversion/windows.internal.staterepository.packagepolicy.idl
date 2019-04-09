@@ -1,0 +1,151 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IPackagePolicyStatics", f7a88ec3-6f33-46bf-83b8-78aaf94ac396)]
+    [interface_name("Windows.Internal.StateRepository.IPackagePolicy", 7619d03f-b9b1-446c-aeb9-f126825fd333)]
+    [threading(both)]
+    runtimeclass PackagePolicy
+    {
+        PackagePolicy();
+        static void Add(PackagePolicy value);
+        static void Update(PackagePolicy value);
+        static void Delete(PackagePolicy value);
+        static void DeleteById(Int64 packagePolicyID);
+        static void DeleteByPackageAndNameAndIndex(Package Package, String Name, Int32 Index);
+        static void DeleteByUserAndPackageAndNameAndIndex(User User, Package Package, String Name, Int32 Index);
+        static Boolean Exists(Int64 packagePolicyID);
+        static Boolean ExistsByName(String Name);
+        static Boolean ExistsByNameAndIndex(String Name, Int32 Index);
+        static Boolean ExistsByNameAndIndexAndValueNumber(String Name, Int32 Index, UInt64 ValueNumber);
+        static Boolean ExistsByNameAndIndexAndValueString(String Name, Int32 Index, String ValueString);
+        static Boolean ExistsByNameAndValueNumber(String Name, UInt64 ValueNumber);
+        static Boolean ExistsByNameAndValueString(String Name, String ValueString);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByPackageAndName(Package Package, String Name);
+        static Boolean ExistsByPackageAndNameAndIndex(Package Package, String Name, Int32 Index);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndName(User User, String Name);
+        static Boolean ExistsByUserAndNameAndIndex(User User, String Name, Int32 Index);
+        static Boolean ExistsByUserAndNameAndIndexAndValueNumber(User User, String Name, Int32 Index, UInt64 ValueNumber);
+        static Boolean ExistsByUserAndNameAndIndexAndValueString(User User, String Name, Int32 Index, String ValueString);
+        static Boolean ExistsByUserAndNameAndValueNumber(User User, String Name, UInt64 ValueNumber);
+        static Boolean ExistsByUserAndNameAndValueString(User User, String Name, String ValueString);
+        static Boolean ExistsByUserAndPackage(User User, Package Package);
+        static Boolean ExistsByUserAndPackageAndName(User User, Package Package, String Name);
+        static Boolean ExistsByUserAndPackageAndNameAndIndex(User User, Package Package, String Name, Int32 Index);
+        static Boolean ExistsByUserAndPackageAndNameAndValueNumber(User User, Package Package, String Name, UInt64 ValueNumber);
+        static Boolean ExistsByUserAndPackageAndNameAndValueString(User User, Package Package, String Name, String ValueString);
+        static Windows.Internal.StateRepository.PackagePolicy Get(Int64 packagePolicyID);
+        static Windows.Internal.StateRepository.PackagePolicy TryGet(Int64 packagePolicyID);
+        static Windows.Internal.StateRepository.PackagePolicy GetByPackageAndNameAndIndex(Package Package, String Name, Int32 Index);
+        static Windows.Internal.StateRepository.PackagePolicy TryGetByPackageAndNameAndIndex(Package Package, String Name, Int32 Index);
+        static Windows.Internal.StateRepository.PackagePolicy GetByUserAndPackageAndNameAndIndex(User User, Package Package, String Name, Int32 Index);
+        static Windows.Internal.StateRepository.PackagePolicy TryGetByUserAndPackageAndNameAndIndex(User User, Package Package, String Name, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByName(String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByNameAndIndex(String Name, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByNameAndIndexAndValueNumber(String Name, Int32 Index, UInt64 ValueNumber);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByNameAndIndexAndValueString(String Name, Int32 Index, String ValueString);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByNameAndValueNumber(String Name, UInt64 ValueNumber);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByNameAndValueString(String Name, String ValueString);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByPackageAndName(Package Package, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndName(User User, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndex(User User, String Name, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndexAndValueNumber(User User, String Name, Int32 Index, UInt64 ValueNumber);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndexAndValueString(User User, String Name, Int32 Index, String ValueString);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndValueNumber(User User, String Name, UInt64 ValueNumber);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndValueString(User User, String Name, String ValueString);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackage(User User, Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndName(User User, Package Package, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndNameAndValueNumber(User User, Package Package, String Name, UInt64 ValueNumber);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndNameAndValueString(User User, Package Package, String Name, String ValueString);
+        static void UpdateWorkId(Int64 packagePolicyID, Int64 workId);
+        static void ClearWorkByWorkId(Int64 workId);
+        static void DeleteByWorkId(Int64 workId);
+        static Boolean ExistsByUserAndNameAndIndexAndValueBoolean(User user, String name, Int32 index, Boolean value);
+        static Boolean ExistsByUserAndNameAndIndexAndValueInt32(User user, String name, Int32 index, Int32 value);
+        static Boolean ExistsByUserAndNameAndIndexAndValueInt64(User user, String name, Int32 index, Int64 value);
+        static Boolean ExistsByUserAndNameAndIndexAndValueUInt32(User user, String name, Int32 index, UInt32 value);
+        static Boolean ExistsByUserAndNameAndIndexAndValueUInt64(User user, String name, Int32 index, UInt64 value);
+        static Boolean ExistsByUserAndNameAndValueBoolean(User user, String name, Boolean value);
+        static Boolean ExistsByUserAndNameAndValueInt32(User user, String name, Int32 value);
+        static Boolean ExistsByUserAndNameAndValueInt64(User user, String name, Int64 value);
+        static Boolean ExistsByUserAndNameAndValueUInt32(User user, String name, UInt32 value);
+        static Boolean ExistsByUserAndNameAndValueUInt64(User user, String name, UInt64 value);
+        static Boolean ExistsByUserAndPackageAndNameAndValueBoolean(User user, Package package, String name, Boolean value);
+        static Boolean ExistsByUserAndPackageAndNameAndValueInt32(User user, Package package, String name, Int32 value);
+        static Boolean ExistsByUserAndPackageAndNameAndValueInt64(User user, Package package, String name, Int64 value);
+        static Boolean ExistsByUserAndPackageAndNameAndValueUInt32(User user, Package package, String name, UInt32 value);
+        static Boolean ExistsByUserAndPackageAndNameAndValueUInt64(User user, Package package, String name, UInt64 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndexAndValueBoolean(User user, String name, Int32 index, Boolean value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndexAndValueInt32(User user, String name, Int32 index, Int32 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndexAndValueInt64(User user, String name, Int32 index, Int64 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndexAndValueUInt32(User user, String name, Int32 index, UInt32 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndIndexAndValueUInt64(User user, String name, Int32 index, UInt64 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndValueBoolean(User user, String name, Boolean value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndValueInt32(User user, String name, Int32 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndValueInt64(User user, String name, Int64 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndValueUInt32(User user, String name, UInt32 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndNameAndValueUInt64(User user, String name, UInt64 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndNameAndValueBoolean(User user, Package package, String name, Boolean value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndNameAndValueInt32(User user, Package package, String name, Int32 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndNameAndValueInt64(User user, Package package, String name, Int64 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndNameAndValueUInt32(User user, Package package, String name, UInt32 value);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackagePolicy>  FindByUserAndPackageAndNameAndValueUInt64(User user, Package package, String name, UInt64 value);
+        Int64 _PackagePolicyID{ get; };
+        Int64 _PackagePolicyID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        String Name{ get; };
+        String Name{ set; };
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Boolean IsValueStringNull{ get; };
+        void SetValueStringToNull();
+        String ValueString{ get; };
+        String ValueString{ set; };
+        UInt64 ValueNumber{ get; };
+        UInt64 ValueNumber{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        void SetValueToNull();
+        Boolean ValueBoolean{ get; };
+        Boolean ValueBoolean{ set; };
+        Int32 ValueInt32{ get; };
+        Int32 ValueInt32{ set; };
+        Int64 ValueInt64{ get; };
+        Int64 ValueInt64{ set; };
+        UInt32 ValueUInt32{ get; };
+        UInt32 ValueUInt32{ set; };
+        UInt64 ValueUInt64{ get; };
+        UInt64 ValueUInt64{ set; };
+    }
+
+
+}

@@ -1,0 +1,70 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Composition.Effects
+{
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum SceneLightingEffectReflectanceModel
+    {
+        BlinnPhong,
+        PhysicallyBasedBlinnPhong,
+    };
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Composition.Effects.ISceneLightingEffect", 91bb5e52-95d1-4f8b-9a5a-6408b24b8c6a)]
+    [threading(both)]
+    runtimeclass SceneLightingEffect
+        : Windows.Graphics.Effects.IGraphicsEffect
+        , Windows.Graphics.Effects.IGraphicsEffectSource
+    {
+        SceneLightingEffect();
+        Single AmbientAmount{ get; };
+        Single AmbientAmount{ set; };
+        Single DiffuseAmount{ get; };
+        Single DiffuseAmount{ set; };
+        Windows.Graphics.Effects.IGraphicsEffectSource NormalMapSource{ get; };
+        Windows.Graphics.Effects.IGraphicsEffectSource NormalMapSource{ set; };
+        Single SpecularAmount{ get; };
+        Single SpecularAmount{ set; };
+        Single SpecularShine{ get; };
+        Single SpecularShine{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.UI.Composition.Effects.ISceneLightingEffect2", 9e270e81-72f0-4c5c-95f8-8a6e0024f409)]
+        {
+            Windows.UI.Composition.Effects.SceneLightingEffectReflectanceModel ReflectanceModel{ get; };
+            Windows.UI.Composition.Effects.SceneLightingEffectReflectanceModel ReflectanceModel{ set; };
+        }
+    }
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.UI.Composition.Effects.IWhiteNoiseEffect", b6a6feb4-45ee-4702-afd8-862c2a84ef32)]
+    [threading(both)]
+    runtimeclass WhiteNoiseEffect
+        : Windows.Graphics.Effects.IGraphicsEffect
+        , Windows.Graphics.Effects.IGraphicsEffectSource
+    {
+        WhiteNoiseEffect();
+        Windows.Foundation.Numerics.Vector2 Frequency{ get; };
+        Windows.Foundation.Numerics.Vector2 Frequency{ set; };
+        Windows.Foundation.Numerics.Vector2 Offset{ get; };
+        Windows.Foundation.Numerics.Vector2 Offset{ set; };
+    }
+
+}

@@ -1,0 +1,30 @@
+
+
+
+
+
+
+
+
+
+namespace WindowsInternal.Shell.UnifiedTile.Notifications
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.Notifications.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("WindowsInternal.Shell.UnifiedTile.Notifications.INotificationQueueManagerStatics", 8dc8bb31-36b1-4093-890b-3d5f64e1cea4)]
+    [default_interface]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.Notifications.INotificationQueueManager", 94bb2fe8-35f2-418b-b9a6-0f6def35d3c5)]
+    [threading(both)]
+    runtimeclass NotificationQueueManager
+    {
+        static WindowsInternal.Shell.UnifiedTile.Notifications.NotificationQueueManager CreateForUser(Windows.System.User user);
+        static WindowsInternal.Shell.UnifiedTile.Notifications.NotificationQueueManager CreateWithUnifiedTileManager(WindowsInternal.Shell.UnifiedTile.UnifiedTileManager tileManager);
+    }
+
+
+}

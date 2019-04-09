@@ -1,0 +1,48 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IPackageMachineStatusStatics", b1677485-d790-41d0-875b-931207fdd467)]
+    [interface_name("Windows.Internal.StateRepository.IPackageMachineStatus", 31215309-a129-4ff8-b5f3-13c852091e29)]
+    [threading(both)]
+    runtimeclass PackageMachineStatus
+    {
+        PackageMachineStatus();
+        static Boolean Exists(Int64 packageMachineStatusID);
+        static Boolean ExistsByPackageIdentity(PackageIdentity PackageIdentity);
+        static Windows.Internal.StateRepository.PackageMachineStatus TryGet(Int64 packageMachineStatusID);
+        static Windows.Internal.StateRepository.PackageMachineStatus TryGetByPackageIdentity(PackageIdentity PackageIdentity);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageMachineStatus>  Find();
+        static void DeleteByPackageFullName(String packageFullName);
+        static void UpdateStatusByPackageFullName(String packageFullName, UInt32 statusToClear, UInt32 statusToSet);
+        Int64 _PackageMachineStatusID{ get; };
+        Int64 _PackageMachineStatusID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 PackageIdentity{ get; };
+        Int64 PackageIdentity{ set; };
+        Windows.Internal.StateRepository.PackageIdentity GetPackageIdentity();
+        void SetPackageIdentity(PackageIdentity value);
+        Windows.Internal.StateRepository.PackageStatus Status{ get; };
+        Windows.Internal.StateRepository.PackageStatus Status{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

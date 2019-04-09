@@ -1,0 +1,34 @@
+
+
+
+
+
+
+
+
+namespace Windows.System.Profile
+{
+    [contractversion(1)]
+    apicontract ProfileHardwareTokenContract{};
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.System.Profile.ProfileHardwareTokenContract, 1)]
+    [interface_name("Windows.System.Profile.IHardwareToken", 28f6d4c0-fb12-40a4-8167-7f4e03d2724c)]
+    runtimeclass HardwareToken
+    {
+        Windows.Storage.Streams.IBuffer Id{ get; };
+        Windows.Storage.Streams.IBuffer Signature{ get; };
+        Windows.Storage.Streams.IBuffer Certificate{ get; };
+    }
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.System.Profile.ProfileHardwareTokenContract, 1)]
+    [static_name("Windows.System.Profile.IHardwareIdentificationStatics", 971260e0-f170-4a42-bd55-a900b212dae2)]
+    runtimeclass HardwareIdentification
+    {
+        static Windows.System.Profile.HardwareToken GetPackageSpecificToken(Windows.Storage.Streams.IBuffer nonce);
+    }
+
+}

@@ -1,0 +1,532 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.System
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ProcessorArchitecture
+    {
+        X86,
+        Arm = 5,
+        X64 = 9,
+        Neutral = 11,
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        Arm64,
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        X86OnArm64 = 14,
+        Unknown = 65535,
+    };
+
+}
+namespace Windows.ApplicationModel
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum PackageSignatureKind
+    {
+        None,
+        Developer,
+        Enterprise,
+        Store,
+        System,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct PackageVersion
+    {
+        UInt16 Major;
+        UInt16 Minor;
+        UInt16 Build;
+        UInt16 Revision;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    struct PackageInstallProgress
+    {
+        UInt32 PercentComplete;
+    };
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.IPackageStatus", 5fe74f71-a365-4c09-a02d-046d525ea1da)]
+    runtimeclass PackageStatus
+    {
+        Boolean VerifyIsOK();
+        Boolean NotAvailable{ get; };
+        Boolean PackageOffline{ get; };
+        Boolean DataOffline{ get; };
+        Boolean Disabled{ get; };
+        Boolean NeedsRemediation{ get; };
+        Boolean LicenseIssue{ get; };
+        Boolean Modified{ get; };
+        Boolean Tampered{ get; };
+        Boolean DependencyIssue{ get; };
+        Boolean Servicing{ get; };
+        Boolean DeploymentInProgress{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.IPackageStatus2", f428fa93-7c56-4862-acfa-abaedcc0694d)]
+        {
+            Boolean IsPartiallyStaged{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.ApplicationModel.IPackageId", 1adb665e-37c7-4790-9980-dd7ae74e8bb2)]
+    runtimeclass PackageId
+    {
+        String Name{ get; };
+        Windows.ApplicationModel.PackageVersion Version{ get; };
+        Windows.System.ProcessorArchitecture Architecture{ get; };
+        String ResourceId{ get; };
+        String Publisher{ get; };
+        String PublisherId{ get; };
+        String FullName{ get; };
+        String FamilyName{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.IPackageIdWithMetadata", 40577a7c-0c9e-443d-9074-855f5ce0a08d)]
+        {
+            String ProductId{ get; };
+            String Author{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.ApplicationModel.IPackageStatics", 4e534bdf-2960-4878-97a4-9624deb72f2d)]
+    [interface_name("Windows.ApplicationModel.IPackage", 163c792f-bd75-413c-bf23-b1fe7b95d825)]
+    [threading(both)]
+    runtimeclass Package
+    {
+        static Windows.ApplicationModel.Package Current{ get; };
+        Windows.ApplicationModel.PackageId Id{ get; };
+        Windows.Storage.StorageFolder InstalledLocation{ get; };
+        Boolean IsFramework{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Package>  Dependencies{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.IPackage2", a6612fb6-7688-4ace-95fb-359538e7aa01)]
+        {
+            String DisplayName{ get; };
+            String PublisherDisplayName{ get; };
+            String Description{ get; };
+            Windows.Foundation.Uri Logo{ get; };
+            Boolean IsResourcePackage{ get; };
+            Boolean IsBundle{ get; };
+            Boolean IsDevelopmentMode{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.IPackage3", 5f738b61-f86a-4917-93d1-f1ee9d3b35d9)]
+        {
+            Windows.ApplicationModel.PackageStatus Status{ get; };
+            Windows.Foundation.DateTime InstalledDate{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Core.AppListEntry> >  GetAppListEntriesAsync();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.IPackageWithMetadata", 95949780-1de9-40f2-b452-0de9f1910012)]
+        {
+            Windows.Foundation.DateTime InstallDate{ get; };
+            String GetThumbnailToken();
+            [deprecated("Launch may be altered or unavailable for releases after Windows 8.1. Instead, for SmartCardTrigger scenarios use SmartCardTriggerDetails.TryLaunchSelfAsync", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+            void Launch(String parameters);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.IPackage4", 65aed1ae-b95b-450c-882b-6255187f397e)]
+        {
+            Windows.ApplicationModel.PackageSignatureKind SignatureKind{ get; };
+            Boolean IsOptional{ get; };
+            Windows.Foundation.IAsyncOperation <Boolean>  VerifyContentIntegrityAsync();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.IPackage5", 0e842dd4-d9ac-45ed-9a1e-74ce056b2635)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.ApplicationModel.PackageContentGroup> >  GetContentGroupsAsync();
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.PackageContentGroup>  GetContentGroupAsync(String name);
+            [method_name("StageContentGroupsAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.ApplicationModel.PackageContentGroup> >  StageContentGroupsAsync(Windows.Foundation.Collections.IIterable <String>  names);
+            [method_name("StageContentGroupsWithPriorityAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.ApplicationModel.PackageContentGroup> >  StageContentGroupsAsync(Windows.Foundation.Collections.IIterable <String>  names, Boolean moveToHeadOfQueue);
+            Windows.Foundation.IAsyncOperation <Boolean>  SetInUseAsync(Boolean inUse);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.ApplicationModel.IPackage6", 8b1ad942-12d7-4754-ae4e-638cbc0e3a2e)]
+        {
+            Windows.ApplicationModel.AppInstallerInfo GetAppInstallerInfo();
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.PackageUpdateAvailabilityResult>  CheckUpdateAvailabilityAsync();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.ApplicationModel.IPackage7", 86ff8d31-a2e4-45e0-9732-283a6d88fde1)]
+        {
+            Windows.Storage.StorageFolder MutableLocation{ get; };
+            Windows.Storage.StorageFolder EffectiveLocation{ get; };
+        }
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.IPackageContentGroupStatics", 70ee7619-5f12-4b92-b9ea-6ccada13bc75)]
+    [interface_name("Windows.ApplicationModel.IPackageContentGroup", 8f62695d-120a-4798-b5e1-5800dda8f2e1)]
+    [threading(both)]
+    runtimeclass PackageContentGroup
+    {
+        static String RequiredGroupName{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        String Name{ get; };
+        Windows.ApplicationModel.PackageContentGroupState State{ get; };
+        Boolean IsRequired{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum PackageUpdateAvailability
+    {
+        Unknown,
+        NoUpdates,
+        Available,
+        Required,
+        Error,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.ApplicationModel.IPackageUpdateAvailabilityResult", 114e5009-199a-48a1-a079-313c45634a71)]
+    runtimeclass PackageUpdateAvailabilityResult
+    {
+        Windows.ApplicationModel.PackageUpdateAvailability Availability{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x1)]
+    [interface_name("Windows.ApplicationModel.IAppInstallerInfo", 29ab2ac0-d4f6-42a3-adcd-d6583c659508)]
+    runtimeclass AppInstallerInfo
+    {
+        Windows.Foundation.Uri Uri{ get; };
+    }
+
+
+
+
+
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.IPackageStagingEventArgs", 1041682d-54e2-4f51-b828-9ef7046c210f)]
+    runtimeclass PackageStagingEventArgs
+    {
+        Guid ActivityId{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        Double Progress{ get; };
+        Boolean IsComplete{ get; };
+        HRESULT ErrorCode{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.ApplicationModel.IPackageInstallingEventArgs", 97741eb7-ab7a-401a-8b61-eb0e7faff237)]
+    runtimeclass PackageInstallingEventArgs
+    {
+        Guid ActivityId{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        Double Progress{ get; };
+        Boolean IsComplete{ get; };
+        HRESULT ErrorCode{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.ApplicationModel.IPackageUpdatingEventArgs", cd7b4228-fd74-443e-b114-23e677b0e86f)]
+    runtimeclass PackageUpdatingEventArgs
+    {
+        Guid ActivityId{ get; };
+        Windows.ApplicationModel.Package SourcePackage{ get; };
+        Windows.ApplicationModel.Package TargetPackage{ get; };
+        Double Progress{ get; };
+        Boolean IsComplete{ get; };
+        HRESULT ErrorCode{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.ApplicationModel.IPackageUninstallingEventArgs", 4443aa52-ab22-44cd-82bb-4ec9b827367a)]
+    runtimeclass PackageUninstallingEventArgs
+    {
+        Guid ActivityId{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        Double Progress{ get; };
+        Boolean IsComplete{ get; };
+        HRESULT ErrorCode{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.ApplicationModel.IPackageStatusChangedEventArgs", 437d714d-bd80-4a70-bc50-f6e796509575)]
+    runtimeclass PackageStatusChangedEventArgs
+    {
+        Windows.ApplicationModel.Package Package{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.ApplicationModel.IPackageContentGroupStagingEventArgs", 3d7bc27e-6f27-446c-986e-d4733d4d9113)]
+    runtimeclass PackageContentGroupStagingEventArgs
+    {
+        Guid ActivityId{ get; };
+        Windows.ApplicationModel.Package Package{ get; };
+        Double Progress{ get; };
+        Boolean IsComplete{ get; };
+        HRESULT ErrorCode{ get; };
+        String ContentGroupName{ get; };
+        Boolean IsContentGroupRequired{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.ApplicationModel.IPackageCatalogStatics", a18c9696-e65b-4634-ba21-5e63eb7244a7)]
+    [interface_name("Windows.ApplicationModel.IPackageCatalog", 230a3751-9de3-4445-be74-91fb325abefe)]
+    runtimeclass PackageCatalog
+    {
+        static Windows.ApplicationModel.PackageCatalog OpenForCurrentPackage();
+        static Windows.ApplicationModel.PackageCatalog OpenForCurrentUser();
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.PackageCatalog, Windows.ApplicationModel.PackageStagingEventArgs>  PackageStaging;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.PackageCatalog, Windows.ApplicationModel.PackageInstallingEventArgs>  PackageInstalling;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.PackageCatalog, Windows.ApplicationModel.PackageUpdatingEventArgs>  PackageUpdating;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.PackageCatalog, Windows.ApplicationModel.PackageUninstallingEventArgs>  PackageUninstalling;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.PackageCatalog, Windows.ApplicationModel.PackageStatusChangedEventArgs>  PackageStatusChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.IPackageCatalog2", 96a60c36-8ff7-4344-b6bf-ee64c2207ed2)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.PackageCatalog, Windows.ApplicationModel.PackageContentGroupStagingEventArgs>  PackageContentGroupStaging;
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.PackageCatalogAddOptionalPackageResult>  AddOptionalPackageAsync(String optionalPackageFamilyName);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.ApplicationModel.IPackageCatalog3", 96dd5c88-8837-43f9-9015-033434ba14f3)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.PackageCatalogRemoveOptionalPackagesResult>  RemoveOptionalPackagesAsync(Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.ApplicationModel.IPackageCatalog4", c37c399b-44cc-4b7b-8baf-796c04ead3b9)]
+        {
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.ApplicationModel.PackageCatalogAddResourcePackageResult, Windows.ApplicationModel.PackageInstallProgress>  AddResourcePackageAsync(String resourcePackageFamilyName, String resourceID, AddResourcePackageOptions options);
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.PackageCatalogRemoveResourcePackagesResult>  RemoveResourcePackagesAsync(Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  resourcePackages);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.ApplicationModel.IPackageCatalogAddOptionalPackageResult", 3bf10cd4-b4df-47b3-a963-e2fa832f7dd3)]
+    runtimeclass PackageCatalogAddOptionalPackageResult
+    {
+        Windows.ApplicationModel.Package Package{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.ApplicationModel.IPackageCatalogRemoveOptionalPackagesResult", 29d2f97b-d974-4e64-9359-22cadfd79828)]
+    runtimeclass PackageCatalogRemoveOptionalPackagesResult
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Package>  PackagesRemoved{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.ApplicationModel.IPackageCatalogRemoveResourcePackagesResult", ae719709-1a52-4321-87b3-e5a1a17981a7)]
+    runtimeclass PackageCatalogRemoveResourcePackagesResult
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Package>  PackagesRemoved{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [flags]
+    enum AddResourcePackageOptions
+    {
+        None,
+        ForceTargetAppShutdown,
+        ApplyUpdateIfAvailable,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.ApplicationModel.IPackageCatalogAddResourcePackageResult", 9636ce0d-3e17-493f-aa08-ccec6fdef699)]
+    runtimeclass PackageCatalogAddResourcePackageResult
+    {
+        Windows.ApplicationModel.Package Package{ get; };
+        Boolean IsComplete{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum PackageContentGroupState
+    {
+        NotStaged,
+        Queued,
+        Staging,
+        Staged,
+    };
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.IDesignModeStatics", 2c3893cc-f81a-4e7a-b857-76a80887e185)]
+    [threading(both)]
+    runtimeclass DesignMode
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.ApplicationModel.IDesignModeStatics2", 80cf8137-b064-4858-bec8-3eba22357535)]
+        {
+            static Boolean DesignMode2Enabled{ get; };
+        }
+        static Boolean DesignModeEnabled{ get; };
+    }
+
+    [contractversion(1)]
+    apicontract FullTrustAppContract{};
+
+
+    [contract(Windows.ApplicationModel.FullTrustAppContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.IFullTrustProcessLauncherStatics", d784837f-1100-3c6b-a455-f6262cc331b6)]
+    [threading(both)]
+    runtimeclass FullTrustProcessLauncher
+    {
+        [method_name("LaunchFullTrustProcessForCurrentAppAsync")] static Windows.Foundation.IAsyncAction LaunchFullTrustProcessForCurrentAppAsync();
+        [method_name("LaunchFullTrustProcessForCurrentAppWithParametersAsync")] static Windows.Foundation.IAsyncAction LaunchFullTrustProcessForCurrentAppAsync(String parameterGroupId);
+        [method_name("LaunchFullTrustProcessForAppAsync")] static Windows.Foundation.IAsyncAction LaunchFullTrustProcessForAppAsync(String fullTrustPackageRelativeAppId);
+        [method_name("LaunchFullTrustProcessForAppWithParametersAsync")] static Windows.Foundation.IAsyncAction LaunchFullTrustProcessForAppAsync(String fullTrustPackageRelativeAppId, String parameterGroupId);
+    }
+
+    [contractversion(3)]
+    apicontract StartupTaskContract{};
+
+    [contract(Windows.ApplicationModel.StartupTaskContract, 1)]
+    enum StartupTaskState
+    {
+        Disabled,
+        DisabledByUser,
+        Enabled,
+        [contract(Windows.ApplicationModel.StartupTaskContract, 2)]
+        DisabledByPolicy,
+        [contract(Windows.ApplicationModel.StartupTaskContract, 3)]
+        EnabledByPolicy,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.StartupTaskContract, 1)]
+    [static_name("Windows.ApplicationModel.IStartupTaskStatics", ee5b60bd-a148-41a7-b26e-e8b88a1e62f8)]
+    [interface_name("Windows.ApplicationModel.IStartupTask", f75c23c8-b5f2-4f6c-88dd-36cb1d599d17)]
+    [threading(both)]
+    runtimeclass StartupTask
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.StartupTask> >  GetForCurrentPackageAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.StartupTask>  GetAsync(String taskId);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.StartupTaskState>  RequestEnableAsync();
+        void Disable();
+        Windows.ApplicationModel.StartupTaskState State{ get; };
+        String TaskId{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum LimitedAccessFeatureStatus
+    {
+        Unavailable,
+        Available,
+        AvailableWithoutToken,
+        Unknown,
+    };
+
+
+    [feature(Velocity_AlwaysAlwaysEnabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.ILimitedAccessFeatureRequestResult", d45156a6-1e24-5ddd-abb4-6188aba4d5bf)]
+    runtimeclass LimitedAccessFeatureRequestResult
+    {
+        String FeatureId{ get; };
+        Windows.ApplicationModel.LimitedAccessFeatureStatus Status{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  EstimatedRemovalDate{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysEnabled)]
+    [static_name("Windows.ApplicationModel.ILimitedAccessFeaturesStatics", 8be612d4-302b-5fbf-a632-1a99e43e8925)]
+    [threading(both)]
+    runtimeclass LimitedAccessFeatures
+    {
+        static Windows.ApplicationModel.LimitedAccessFeatureRequestResult TryUnlockFeature(String featureId, String token, String attestation);
+    }
+
+}
+namespace Windows.ApplicationModel.InternalApi
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [uuid(c481e47b-6ad7-5311-8d14-ee4f1dcdd8ee)]
+    [contract(Windows.ApplicationModel.InternalApi.InternalContract, 1)]
+    interface ILimitedAccessFeaturesInternal
+    {
+        void EnsureAppAccessRequest(String featureId);
+        UInt32 GetAccessStatus(String featureId);
+        void ResetAccessRequests();
+    };
+
+}

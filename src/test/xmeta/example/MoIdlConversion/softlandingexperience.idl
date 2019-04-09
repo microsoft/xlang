@@ -1,0 +1,109 @@
+
+
+
+
+
+
+namespace Windows.Internal.UI.SoftLanding
+{
+    [contractversion(1)]
+    [internal]
+    apicontract SoftLandingContract{};
+
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    enum SoftLandingTemplateType
+    {
+        SmallImageAndText,
+        LargeImageAndText,
+        SmallImageAndTwoButtons,
+        SmallImageAndTwoButtonsAndRating,
+    };
+
+    [flags]
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    enum SoftLandingOptions
+    {
+        None,
+        ActionCenterItem,
+        HighPriority,
+        AlignLeft = 16,
+        AlignRight = 32,
+        AlignHorizontal = 48,
+        AlignTop = 64,
+        AlignBottom = 128,
+        AlignVertical = 192,
+        Persistent = 256,
+        UseRawTreeWalker = 512,
+    };
+
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    struct SOFTLANDING_NOTIFICATION
+    {
+        String Title;
+        String Content;
+        String ImageUri;
+        String ImageAltText;
+        String ActivateUri;
+        SoftLandingTemplateType Template;
+        SoftLandingOptions Options;
+        String EventTrackingUri;
+    };
+
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    struct SOFTLANDING_BUTTON
+    {
+        String TextLabel;
+        String Uri;
+    };
+
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    struct SOFTLANDING_BUBBLE
+    {
+        String VisualObject;
+        String AnchorText;
+        String AnchorUri;
+        String DismissUri;
+        SOFTLANDING_BUTTON Button1;
+        SOFTLANDING_BUTTON Button2;
+        String Rating;
+        String Subtitle;
+        String ImageBackgroundColor;
+    };
+
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    struct SOFTLANDING_CREATIVE
+    {
+        String Id;
+        String RuleId;
+        SOFTLANDING_NOTIFICATION ToastContent;
+        SOFTLANDING_NOTIFICATION BubbleContent;
+        SOFTLANDING_BUBBLE BubbleSpecificContent;
+    };
+
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    enum CourtesyEngineState
+    {
+        Available,
+        LastItemNotExpired,
+        ItemCountExceeded,
+        ItemVisible,
+        InQuietTime,
+    };
+
+
+
+    [contract(Windows.Internal.UI.SoftLanding.SoftLandingContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.UI.SoftLanding.ISoftLandingExperience", f667b6f7-7bb8-4c98-a7de-574cee3e98a1)]
+    [threading(both)]
+    runtimeclass SoftLandingExperience
+    {
+        static void ActivateCreative(SOFTLANDING_CREATIVE creative);
+        static void WithdrawCreative(String Id, String RuleId, Int32 CreativeWithdrawn);
+
+        [interface_name("Windows.Internal.UI.SoftLanding.ISoftLandingExperienceUnused", 3472b1ee-bfc1-4533-996d-f3031d5f76a1)]
+        {
+        }
+    }
+
+}

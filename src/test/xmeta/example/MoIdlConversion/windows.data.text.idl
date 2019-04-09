@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+namespace Windows.Data.Text
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct TextSegment
+    {
+        UInt32 StartPosition;
+        UInt32 Length;
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Data.Text.ISemanticTextQueryFactory", 238c0503-f995-4587-8777-a2b7d80acfef)]
+    [interface_name("Windows.Data.Text.ISemanticTextQuery", 6a1cab51-1fb2-4909-80b8-35731a2b3e7f)]
+    runtimeclass SemanticTextQuery
+    {
+        [method_name( "Create" )] SemanticTextQuery(String aqsFilter);
+        [method_name( "CreateWithLanguage" )] SemanticTextQuery(String aqsFilter, String filterLanguage);
+        Windows.Foundation.Collections.IVectorView <Windows.Data.Text.TextSegment>  Find(String content);
+        Windows.Foundation.Collections.IVectorView <Windows.Data.Text.TextSegment>  FindInProperty(String propertyContent, String propertyName);
+    }
+
+
+}

@@ -1,0 +1,72 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IAppxExtensionStatics", 12ec6ae1-d289-452d-9802-2306cc0e0f6d)]
+    [interface_name("Windows.Internal.StateRepository.IAppxExtension", ddce4f61-6426-4143-927c-e95afc2b17c5)]
+    [threading(both)]
+    runtimeclass AppxExtension
+    {
+        AppxExtension();
+        static Boolean Exists(Int64 appxExtensionID);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndCategory(User User, String Category);
+        static Boolean ExistsByUserAndCategoryAndKeyString(User User, String Category, String KeyString);
+        static Boolean ExistsByUserAndPackage(User User, Package Package);
+        static Boolean ExistsByUserAndPackageAndCategory(User User, Package Package, String Category);
+        static Boolean ExistsByUserAndPackageAndCategoryAndKeyString(User User, Package Package, String Category, String KeyString);
+        static Boolean ExistsByUserAndPackageAndCategoryAndKeyStringAndRegistrationInformation(User User, Package Package, String Category, String KeyString, String RegistrationInformation);
+        static Windows.Internal.StateRepository.AppxExtension Get(Int64 appxExtensionID);
+        static Windows.Internal.StateRepository.AppxExtension TryGet(Int64 appxExtensionID);
+        static Windows.Internal.StateRepository.AppxExtension GetByUserAndPackageAndCategoryAndKeyStringAndRegistrationInformation(User User, Package Package, String Category, String KeyString, String RegistrationInformation);
+        static Windows.Internal.StateRepository.AppxExtension TryGetByUserAndPackageAndCategoryAndKeyStringAndRegistrationInformation(User User, Package Package, String Category, String KeyString, String RegistrationInformation);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxExtension>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxExtension>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxExtension>  FindByUserAndCategory(User User, String Category);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxExtension>  FindByUserAndCategoryAndKeyString(User User, String Category, String KeyString);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxExtension>  FindByUserAndPackage(User User, Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxExtension>  FindByUserAndPackageAndCategory(User User, Package Package, String Category);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxExtension>  FindByUserAndPackageAndCategoryAndKeyString(User User, Package Package, String Category, String KeyString);
+        Int64 _AppxExtensionID{ get; };
+        Int64 _AppxExtensionID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        String Category{ get; };
+        String Category{ set; };
+        Boolean IsKeyStringNull{ get; };
+        void SetKeyStringToNull();
+        String KeyString{ get; };
+        String KeyString{ set; };
+        String RegistrationInformation{ get; };
+        String RegistrationInformation{ set; };
+        UInt16 ExtensionStatus{ get; };
+        UInt16 ExtensionStatus{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

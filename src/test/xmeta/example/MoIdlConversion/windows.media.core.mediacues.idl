@@ -1,0 +1,332 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextScrollMode
+    {
+        Popon,
+        Rollup,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextUnit
+    {
+        Pixels,
+        Percentage,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextWritingMode
+    {
+        LeftRightTopBottom,
+        RightLeftTopBottom,
+        TopBottomRightLeft,
+        TopBottomLeftRight,
+        LeftRight,
+        RightLeft,
+        TopBottom,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextDisplayAlignment
+    {
+        Before,
+        After,
+        Center,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextLineAlignment
+    {
+        Start,
+        End,
+        Center,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextWrapping
+    {
+        NoWrap,
+        Wrap,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextWeight
+    {
+        Normal = 400,
+        Bold = 700,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedTextFlowDirection
+    {
+        LeftToRight,
+        RightToLeft,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum TimedTextFontStyle
+    {
+        Normal,
+        Oblique,
+        Italic,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct TimedTextPadding
+    {
+        Double Before;
+        Double After;
+        Double Start;
+        Double End;
+        TimedTextUnit Unit;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct TimedTextSize
+    {
+        Double Height;
+        Double Width;
+        TimedTextUnit Unit;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct TimedTextDouble
+    {
+        Double Value;
+        TimedTextUnit Unit;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct TimedTextPoint
+    {
+        Double X;
+        Double Y;
+        TimedTextUnit Unit;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(c7d15e5d-59dc-431f-a0ee-27744323b36d)]
+    interface IMediaCue
+    {
+        Windows.Foundation.TimeSpan StartTime{ set; };
+        Windows.Foundation.TimeSpan StartTime{ get; };
+        Windows.Foundation.TimeSpan Duration{ set; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        String Id{ set; };
+        String Id{ get; };
+    };
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.ITimedTextRegion", 1ed0881f-8a06-4222-9f59-b21bf40124b4)]
+    [threading(both)]
+    runtimeclass TimedTextRegion
+    {
+        TimedTextRegion();
+        String Name{ get; };
+        String Name{ set; };
+        Windows.Media.Core.TimedTextPoint Position{ get; };
+        Windows.Media.Core.TimedTextPoint Position{ set; };
+        Windows.Media.Core.TimedTextSize Extent{ get; };
+        Windows.Media.Core.TimedTextSize Extent{ set; };
+        Windows.UI.Color Background{ get; };
+        Windows.UI.Color Background{ set; };
+        Windows.Media.Core.TimedTextWritingMode WritingMode{ get; };
+        Windows.Media.Core.TimedTextWritingMode WritingMode{ set; };
+        Windows.Media.Core.TimedTextDisplayAlignment DisplayAlignment{ get; };
+        Windows.Media.Core.TimedTextDisplayAlignment DisplayAlignment{ set; };
+        Windows.Media.Core.TimedTextDouble LineHeight{ get; };
+        Windows.Media.Core.TimedTextDouble LineHeight{ set; };
+        Boolean IsOverflowClipped{ get; };
+        Boolean IsOverflowClipped{ set; };
+        Windows.Media.Core.TimedTextPadding Padding{ get; };
+        Windows.Media.Core.TimedTextPadding Padding{ set; };
+        Windows.Media.Core.TimedTextWrapping TextWrapping{ get; };
+        Windows.Media.Core.TimedTextWrapping TextWrapping{ set; };
+        Int32 ZIndex{ get; };
+        Int32 ZIndex{ set; };
+        Windows.Media.Core.TimedTextScrollMode ScrollMode{ get; };
+        Windows.Media.Core.TimedTextScrollMode ScrollMode{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.ITimedTextStyle", 1bb2384d-a825-40c2-a7f5-281eaedf3b55)]
+    [threading(both)]
+    runtimeclass TimedTextStyle
+    {
+        TimedTextStyle();
+        String Name{ get; };
+        String Name{ set; };
+        String FontFamily{ get; };
+        String FontFamily{ set; };
+        Windows.Media.Core.TimedTextDouble FontSize{ get; };
+        Windows.Media.Core.TimedTextDouble FontSize{ set; };
+        Windows.Media.Core.TimedTextWeight FontWeight{ get; };
+        Windows.Media.Core.TimedTextWeight FontWeight{ set; };
+        Windows.UI.Color Foreground{ get; };
+        Windows.UI.Color Foreground{ set; };
+        Windows.UI.Color Background{ get; };
+        Windows.UI.Color Background{ set; };
+        Boolean IsBackgroundAlwaysShown{ get; };
+        Boolean IsBackgroundAlwaysShown{ set; };
+        Windows.Media.Core.TimedTextFlowDirection FlowDirection{ get; };
+        Windows.Media.Core.TimedTextFlowDirection FlowDirection{ set; };
+        Windows.Media.Core.TimedTextLineAlignment LineAlignment{ get; };
+        Windows.Media.Core.TimedTextLineAlignment LineAlignment{ set; };
+        Windows.UI.Color OutlineColor{ get; };
+        Windows.UI.Color OutlineColor{ set; };
+        Windows.Media.Core.TimedTextDouble OutlineThickness{ get; };
+        Windows.Media.Core.TimedTextDouble OutlineThickness{ set; };
+        Windows.Media.Core.TimedTextDouble OutlineRadius{ get; };
+        Windows.Media.Core.TimedTextDouble OutlineRadius{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Core.ITimedTextStyle2", 655f492d-6111-4787-89cc-686fece57e14)]
+        {
+            Windows.Media.Core.TimedTextFontStyle FontStyle{ get; };
+            Windows.Media.Core.TimedTextFontStyle FontStyle{ set; };
+            Boolean IsUnderlineEnabled{ get; };
+            Boolean IsUnderlineEnabled{ set; };
+            Boolean IsLineThroughEnabled{ get; };
+            Boolean IsLineThroughEnabled{ set; };
+            Boolean IsOverlineEnabled{ get; };
+            Boolean IsOverlineEnabled{ set; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.ITimedTextLine", 978d7ce2-7308-4c66-be50-65777289f5df)]
+    [threading(both)]
+    runtimeclass TimedTextLine
+    {
+        TimedTextLine();
+        String Text{ get; };
+        String Text{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Media.Core.TimedTextSubformat>  Subformats{ get; };
+    }
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Core.ITimedTextSubformat", d713502f-3261-4722-a0c2-b937b2390f14)]
+    [threading(both)]
+    runtimeclass TimedTextSubformat
+    {
+        TimedTextSubformat();
+        Int32 StartIndex{ get; };
+        Int32 StartIndex{ set; };
+        Int32 Length{ get; };
+        Int32 Length{ set; };
+        Windows.Media.Core.TimedTextStyle SubformatStyle{ get; };
+        Windows.Media.Core.TimedTextStyle SubformatStyle{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Core.ITimedTextCue", 51c79e51-3b86-494d-b359-bb2ea7aca9a9)]
+    [threading(both)]
+    runtimeclass TimedTextCue
+        : Windows.Media.Core.IMediaCue
+    {
+        TimedTextCue();
+        Windows.Media.Core.TimedTextRegion CueRegion{ get; };
+        Windows.Media.Core.TimedTextRegion CueRegion{ set; };
+        Windows.Media.Core.TimedTextStyle CueStyle{ get; };
+        Windows.Media.Core.TimedTextStyle CueStyle{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Media.Core.TimedTextLine>  Lines{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IDataCue", 7c7f676d-1fbc-4e2d-9a87-ee38bd1dc637)]
+    [threading(both)]
+    runtimeclass DataCue
+        : Windows.Media.Core.IMediaCue
+    {
+        DataCue();
+        Windows.Storage.Streams.IBuffer Data{ set; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Core.IDataCue2", bc561b15-95f2-49e8-96f1-8dd5dac68d93)]
+        {
+            Windows.Foundation.Collections.PropertySet Properties{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IChapterCue", 72a98001-d38a-4c0a-8fa6-75cddaf4664c)]
+    [threading(both)]
+    runtimeclass ChapterCue
+        : Windows.Media.Core.IMediaCue
+    {
+        ChapterCue();
+        String Title{ set; };
+        String Title{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IImageCue", 52828282-367b-440b-9116-3c84570dd270)]
+    [threading(both)]
+    runtimeclass ImageCue
+        : Windows.Media.Core.IMediaCue
+    {
+        ImageCue();
+        Windows.Media.Core.TimedTextPoint Position{ get; };
+        Windows.Media.Core.TimedTextPoint Position{ set; };
+        Windows.Media.Core.TimedTextSize Extent{ get; };
+        Windows.Media.Core.TimedTextSize Extent{ set; };
+        Windows.Graphics.Imaging.SoftwareBitmap SoftwareBitmap{ set; };
+        Windows.Graphics.Imaging.SoftwareBitmap SoftwareBitmap{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Media.Core.ISpeechCue", aee254dc-1725-4bad-8043-a98499b017a2)]
+    [threading(both)]
+    runtimeclass SpeechCue
+        : Windows.Media.Core.IMediaCue
+    {
+        SpeechCue();
+        String Text{ get; };
+        String Text{ set; };
+        Windows.Foundation.IReference <Int32>  StartPositionInInput{ get; };
+        Windows.Foundation.IReference <Int32>  StartPositionInInput{ set; };
+        Windows.Foundation.IReference <Int32>  EndPositionInInput{ get; };
+        Windows.Foundation.IReference <Int32>  EndPositionInInput{ set; };
+    }
+
+}

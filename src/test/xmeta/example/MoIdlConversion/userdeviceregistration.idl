@@ -1,0 +1,193 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.UserDeviceRegistration
+{
+    [contractversion(1)]
+    [internal]
+    apicontract UserDeviceRegContract{};
+
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    struct DiscoveryMetadata
+    {
+        String RegistrationServiceVersion;
+        String RegistrationEndpointReference;
+        String RegistrationResourceId;
+        String AuthCodeUrl;
+        String AccessTokenUrl;
+        String DeviceJoinServiceVersion;
+        String DeviceJoinEndpointReference;
+        String DeviceJoinResourceId;
+        String KeyProvisioningServiceVersion;
+        String KeyProvisioningEndpointReference;
+        String KeyProvisioningResourceId;
+        String WebAuthNServiceVersion;
+        String WebAuthNEndpointReference;
+        String WebAuthNResourceId;
+        String DeviceManagementServiceVersion;
+        String DeviceManagementEndpointReference;
+        String DeviceManagementResourceId;
+        String MsaProviderSiteUrl;
+        String PrecreateServiceVersion;
+        String PrecreateEndpointReference;
+        String PrecreateResourceId;
+        String Domain;
+        String TenantId;
+        String RbacPolicyEndpoint;
+        String DeviceJoinResourceEndpointReference;
+        String DeviceJoinResourceResourceId;
+        String DeviceJoinResourceServiceVersion;
+    };
+
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    struct ExtendedTokenProperties
+    {
+        String UserEmail;
+        String UserSid;
+        String TenantId;
+        String TenantDisplayName;
+        String MdmEnrollmentUrl;
+        String MdmTermsOfUseUrl;
+        String MdmComplianceUrl;
+        String UserSettingSyncUrl;
+    };
+
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    enum JoinType
+    {
+        DeviceJoin = 1,
+        WorkplaceJoin,
+    };
+
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    enum CertificateStoreLocation
+    {
+        CurrentUser,
+        LocalMachine,
+    };
+
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    struct UserInfo
+    {
+        String UserEmail;
+        String UserKeyId;
+        String UserKeyName;
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UserDeviceRegistration.IJoinInfo", 1f689aee-6c63-4e61-b9f6-d19f59b27b73)]
+    [threading(both)]
+    runtimeclass JoinInfo
+    {
+        JoinInfo();
+        Windows.Internal.UserDeviceRegistration.JoinType Type{ get; };
+        String CertificateIssuer{ get; };
+        String CertificateSubject{ get; };
+        Windows.Internal.UserDeviceRegistration.CertificateStoreLocation CertificateStoreLocation{ get; };
+        String CertificateStoreName{ get; };
+        UInt8[] CertificateThumbprint{ get; };
+        UInt8[] EncodedCertificate{ get; };
+        String DeviceId{ get; };
+        String IdpDomain{ get; };
+        String TenantId{ get; };
+        String JoinUserEmail{ get; };
+        String TenantDisplayName{ get; };
+        String MdmEnrollmentUrl{ get; };
+        String MdmTermsOfUseUrl{ get; };
+        String MdmComplianceUrl{ get; };
+        String UserSettingSyncUrl{ get; };
+        String RegistrationServiceVersion{ get; };
+        String RegistrationEndpointReference{ get; };
+        String RegistrationResourceId{ get; };
+        String AuthCodeUrl{ get; };
+        String AccessTokenUrl{ get; };
+        String DeviceJoinServiceVersion{ get; };
+        String DeviceJoinEndpointReference{ get; };
+        String DeviceJoinResourceId{ get; };
+        String KeyProvisioningServiceVersion{ get; };
+        String KeyProvisioningEndpointReference{ get; };
+        String KeyProvisioningResourceId{ get; };
+        Windows.Internal.UserDeviceRegistration.UserInfo[] UserInfo{ get; };
+    }
+
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    struct ServerResponse
+    {
+        String RequestId;
+        String Time;
+        UInt32 HttpStatus;
+        String ErrorCode;
+        String ErrorSubcode;
+        String ServerMessage;
+        String ServerOperation;
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UserDeviceRegistration.IDiscoverResult", 3cbbac2b-d2cd-4d6e-a902-43e788ab5f4f)]
+    [threading(both)]
+    runtimeclass DiscoverResult
+    {
+        DiscoverResult();
+        HRESULT ResultCode{ get; };
+        Windows.Internal.UserDeviceRegistration.ServerResponse Response{ get; };
+        Windows.Internal.UserDeviceRegistration.DiscoveryMetadata Metadata{ get; };
+    }
+
+
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UserDeviceRegistration.IJoinResult", 98182753-772a-406b-9ecc-9874a65235fe)]
+    [threading(both)]
+    runtimeclass JoinResult
+    {
+        JoinResult();
+        HRESULT ResultCode{ get; };
+        Windows.Internal.UserDeviceRegistration.ServerResponse Response{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UserDeviceRegistration.UserDeviceRegContract, 1)]
+    [static_name("Windows.Internal.UserDeviceRegistration.IUserDeviceRegManagerStatics", b5decd05-58ef-4cd3-ae25-d177bcbcea9e)]
+    [threading(both)]
+    runtimeclass UserDeviceRegManager
+    {
+        [method_name("Discover")] static Windows.Internal.UserDeviceRegistration.DiscoveryMetadata Discover(String userEmail);
+        static Windows.Foundation.IAsyncOperation <Windows.Internal.UserDeviceRegistration.DiscoveryMetadata>  DiscoverAsync(String userEmail);
+        [method_name("WorkplaceJoin")] static void WorkplaceJoin(String accessToken, ExtendedTokenProperties tokenProperties, DiscoveryMetadata discoveryMetadata);
+        static Windows.Foundation.IAsyncOperation <Int32>  WorkplaceJoinAsync(String accessToken, ExtendedTokenProperties tokenProperties, DiscoveryMetadata discoveryMetadata);
+        [method_name("WorkplaceUnjoin")] static void WorkplaceUnjoin(String tenantId, Boolean forceContainerDeletion);
+        static Windows.Foundation.IAsyncOperation <Int32>  WorkplaceUnjoinAsync(String tenantId);
+        [method_name("IsDeviceJoined")] [default_overload]
+        static Boolean IsDeviceJoined();
+        [method_name("IsDeviceJoinedAndCompleted")] [return_name("joined")] static Boolean IsDeviceJoined(out Boolean pRegistrationCompleted);
+        [method_name("IsWorkplaceJoined")] [default_overload]
+        static Boolean IsWorkplaceJoined(String tenantId);
+        [method_name("IsWorkplaceJoinedAndCompleted")] [return_name("joined")] static Boolean IsWorkplaceJoined(String tenantId, out Boolean pRegistrationCompleted);
+        static Windows.Internal.UserDeviceRegistration.JoinInfo GetJoinInfo(String tenantId);
+        static void SaveDeviceTokenProperties(ExtendedTokenProperties tokenProperties);
+        static void SaveWorkplaceTokenProperties(ExtendedTokenProperties tokenProperties);
+        static UInt8[] SignHash(String tenantId, String hashAlgorithmId, UInt8[] hashValue);
+        static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  SignHashAsync(String tenantId, String hashAlgorithmId, UInt8[] hashValue);
+        [method_name("DelegatedWorkplaceJoin")] static void DelegatedWorkplaceJoin(String accessToken, ExtendedTokenProperties tokenProperties, DiscoveryMetadata discoveryMetadata);
+        [method_name("DiscoverWithRequestId")] static Windows.Internal.UserDeviceRegistration.DiscoverResult Discover(String userEmail, String clientRequestId);
+        [method_name("WorkplaceJoinWithRequestId")] static Windows.Internal.UserDeviceRegistration.JoinResult WorkplaceJoin(String accessToken, ExtendedTokenProperties tokenProperties, DiscoveryMetadata discoveryMetadata, String clientRequestId);
+        [method_name("WorkplaceUnjoinWithRequestId")] static Windows.Internal.UserDeviceRegistration.JoinResult WorkplaceUnjoin(String tenantId, Boolean forceContainerDeletion, String clientRequestId);
+        [method_name("DelegatedWorkplaceJoinWithRequestId")] static Windows.Internal.UserDeviceRegistration.JoinResult DelegatedWorkplaceJoin(String accessToken, ExtendedTokenProperties tokenProperties, DiscoveryMetadata discoveryMetadata, String clientRequestId);
+    }
+
+}

@@ -1,0 +1,209 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Phone.Networking.Voip
+{
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [flags]
+    enum VoipCallMedia
+    {
+        None,
+        Audio,
+        Video,
+    };
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    enum VoipCallRejectReason
+    {
+        UserIgnored,
+        TimedOut,
+        OtherIncomingCall,
+        EmergencyCallExists,
+        InvalidCallState,
+    };
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    enum VoipCallState
+    {
+        Ended,
+        Held,
+        Active,
+        Incoming,
+        Outgoing,
+    };
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    enum VoipOperationType
+    {
+        QueryRemotePartySeamless,
+    };
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    enum SeamlessCallUpgradeSupport
+    {
+        Unknown,
+        NotSupported,
+        Supported,
+    };
+
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Phone.Networking.Voip.ICallStateChangeEventArgs", 1f3e87b0-d371-4395-8b6c-1786a42e2f18)]
+    runtimeclass CallStateChangeEventArgs
+    {
+        Windows.Phone.Networking.Voip.VoipCallState State{ get; };
+    }
+
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Phone.Networking.Voip.ICallAnswerEventArgs", 61f132aa-f92a-48fa-aa8f-4f3a17662980)]
+    runtimeclass CallAnswerEventArgs
+    {
+        Windows.Phone.Networking.Voip.VoipCallMedia AcceptedMedia{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [interface_name("Windows.Phone.Networking.Voip.ICallRejectEventArgs", 3e04061a-ce7d-49c2-a2b8-7f49b6eaebc5)]
+    runtimeclass CallRejectEventArgs
+    {
+        Windows.Phone.Networking.Voip.VoipCallRejectReason RejectReason{ get; };
+    }
+
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Phone.Networking.Voip.IVoipPhoneCall", 716654be-28e8-495e-b657-8053074b4150)]
+    runtimeclass VoipPhoneCall
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.Networking.Voip.VoipPhoneCall, Windows.Phone.Networking.Voip.CallStateChangeEventArgs>  EndRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.Networking.Voip.VoipPhoneCall, Windows.Phone.Networking.Voip.CallStateChangeEventArgs>  HoldRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.Networking.Voip.VoipPhoneCall, Windows.Phone.Networking.Voip.CallStateChangeEventArgs>  ResumeRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.Networking.Voip.VoipPhoneCall, Windows.Phone.Networking.Voip.CallAnswerEventArgs>  AnswerRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.Networking.Voip.VoipPhoneCall, Windows.Phone.Networking.Voip.CallRejectEventArgs>  RejectRequested;
+        void NotifyCallHeld();
+        void NotifyCallActive();
+        void NotifyCallEnded();
+        String ContactName{ get; };
+        String ContactName{ set; };
+        Windows.Foundation.DateTime StartTime{ get; };
+        Windows.Foundation.DateTime StartTime{ set; };
+        Windows.Phone.Networking.Voip.VoipCallMedia CallMedia{ get; };
+        Windows.Phone.Networking.Voip.VoipCallMedia CallMedia{ set; };
+
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipPhoneCallReady", b3f5ac79-f40f-4e52-a8ee-e8a9a71f511a)]
+        {
+            void NotifyCallReady();
+        }
+
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipPhoneCall2", 1ac5b7dc-c83f-4862-8393-1ea14af7efea)]
+        {
+            void TryShowAppUI();
+        }
+
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipPhoneCall3", a92ab1d1-52fb-4adf-8225-4d289b866fe0)]
+        {
+            void NotifyCallAccepted(VoipCallMedia media);
+        }
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [interface_name("Windows.Phone.Networking.Voip.IMuteChangeEventArgs", f914ead4-1c94-458c-acb7-1926a233f74c)]
+    runtimeclass MuteChangeEventArgs
+    {
+        Boolean Muted{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [static_name("Windows.Phone.Networking.Voip.IVoipCallCoordinatorStatics", 10fb55bb-e07d-407e-bc39-f7cc3641d979)]
+    [interface_name("Windows.Phone.Networking.Voip.IVoipCallCoordinator", 0d5f3579-f6dd-4e10-9f25-3d8c91376ee8)]
+    runtimeclass VoipCallCoordinator
+    {
+        static Windows.Phone.Networking.Voip.VoipCallCoordinator GetDefault();
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.Networking.Voip.VoipCallCoordinator, Windows.Phone.Networking.Voip.MuteChangeEventArgs>  MuteRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.Networking.Voip.VoipCallCoordinator, Windows.Phone.Networking.Voip.MuteChangeEventArgs>  UnmuteRequested;
+        void RequestNewIncomingCall(String context, String contactName, String contactNumber, Windows.Foundation.Uri contactImage, String serviceName, Windows.Foundation.Uri brandingImage, String callDetails, Windows.Foundation.Uri ringtone, VoipCallMedia media, Windows.Foundation.TimeSpan ringTimeout, out VoipPhoneCall call);
+        void RequestNewOutgoingCall(String context, String contactName, String serviceName, VoipCallMedia media, out VoipPhoneCall call);
+        void NotifyMuted();
+        void NotifyUnmuted();
+
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipCallCoordinatorWithUpgrade", 6172ccbc-6dd1-4f8e-b938-5393530c31ca)]
+        {
+            void RequestOutgoingUpgradeToVideoCall(Guid callUpgradeGuid, String context, String contactName, String serviceName, out VoipPhoneCall call);
+            void RequestIncomingUpgradeToVideoCall(String context, String contactName, String contactNumber, Windows.Foundation.Uri contactImage, String serviceName, Windows.Foundation.Uri brandingImage, String callDetails, Windows.Foundation.Uri ringtone, Windows.Foundation.TimeSpan ringTimeout, out VoipPhoneCall call);
+        }
+
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipOperationsManager", ba77e23c-38d9-4dfb-853f-f901978ff7fa)]
+        {
+            Windows.Phone.Networking.Voip.IVoipOperation GetNextOperation();
+        }
+
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipCallCoordinatorWithAppDeterminedUpgrade", 4ec3eda6-9cf0-405c-bccd-cb7a8632a456)]
+        {
+            void ConfirmNonSeamlessUpgrade(Guid callUpgradeGuid);
+            void CancelUpgrade(Guid callUpgradeGuid);
+        }
+
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipCallCoordinator2", 0290a9b8-645d-4711-8e32-926bfabf6928)]
+        {
+            void SetupNewAcceptedCall(String context, String contactName, String contactNumber, String serviceName, VoipCallMedia media, out VoipPhoneCall call);
+        }
+
+        [webhosthidden]
+        [contract(Windows.Phone.PhoneInternalContract, 1)]
+        [interface_name("Windows.Phone.Networking.Voip.IVoipCallCoordinator3", 80a2ede6-0d02-40cd-8891-b4cec6472c82)]
+        {
+            [method_name("RequestNewIncomingCallWithContactRemoteId")] Windows.Phone.Networking.Voip.VoipPhoneCall RequestNewIncomingCall(String context, String contactName, String contactNumber, Windows.Foundation.Uri contactImage, String serviceName, Windows.Foundation.Uri brandingImage, String callDetails, Windows.Foundation.Uri ringtone, VoipCallMedia media, Windows.Foundation.TimeSpan ringTimeout, String contactRemoteId);
+            void RequestNewAppInitiatedCall(String context, String contactName, String contactNumber, String serviceName, VoipCallMedia media, out VoipPhoneCall call);
+        }
+    }
+
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [uuid(559b526d-c2cb-44d9-83a5-60cda4b71d36)]
+    interface IVoipOperation
+    {
+        UInt32 Id{ get; };
+        Windows.Phone.Networking.Voip.VoipOperationType Type{ get; };
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [interface_name("Windows.Phone.Networking.Voip.IQuerySeamlessUpgradeSupportOperation", 7e7adcce-cf2b-4ea0-8475-e1bdb4140379)]
+    runtimeclass QuerySeamlessUpgradeSupportOperation
+        : Windows.Phone.Networking.Voip.IVoipOperation
+    {
+        String RemoteId{ get; };
+        void NotifyCompletion(Boolean succeeded, SeamlessCallUpgradeSupport seamlessCallUpgradeSupport);
+    }
+
+
+
+
+
+
+}

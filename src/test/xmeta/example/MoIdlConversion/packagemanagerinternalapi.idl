@@ -1,0 +1,290 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Management.Deployment.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [interface_name("Windows.Management.Deployment.Internal.IDiskUsageInformation", c51181c9-b056-450d-a183-2061e588e557)]
+    runtimeclass DiskUsageInformation
+    {
+        Windows.Management.Deployment.PackageVolume Volume{ get; };
+        UInt64 PackageFileUsage{ get; };
+        UInt64 AppDataUsage{ get; };
+    }
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [flags]
+    enum DeploymentOperationPriority
+    {
+        None,
+        BackgroundService,
+        Background,
+        Default,
+        Interactive = 3,
+        InteractiveHigh,
+    };
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [flags]
+    enum DeploymentOptionsInternal
+    {
+        None,
+        ForceApplicationShutdown,
+        DevelopmentMode,
+        RepositoryRecoveryOption = 4,
+        PushButtonResetOption = 8,
+        BackgroundTaskOption = 16,
+        InstallAllResources = 32,
+        ForceTargetApplicationShutdown = 64,
+        RequiredContentGroupOnly = 256,
+        SkipReregisterIfPackageStatusOk = 512,
+        PackageIsCoServicing = 1024,
+        RegisterHighestVersion = 2048,
+        PreserveApplicationData = 4096,
+        RegisterProvisionedApp = 8192,
+        FailIfNeedsRemediation = 16384,
+        SkipSignatureValidationOption = 32768,
+        SkipStagingForMoveOption = 65536,
+        PreRegisterApplyTrustAce = 131072,
+        ForceUpdateFromAnyVersion = 262144,
+        RemoveForAllUsers = 524288,
+        RetainFilesOnFailure = 2097152,
+        NormalPriorityRequest = 33554432,
+        LowPriorityRequest = 67108864,
+        AppRestoreRequest = 134217728,
+        ImmediatePriorityRequest = 268435456,
+        RepairAppRegistrationOption = 1073741824,
+        FirstLogonInstall = 0x80000000,
+    };
+
+    [flags]
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    enum DeploymentOptionsInternal2
+    {
+        None,
+        StageFromUpdateAgent = 256,
+    };
+
+    [flags]
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    enum DeploymentOperationInternal
+    {
+        InvalidOperation,
+        AddOperation,
+        RemoveOperation,
+        UpdateOperation,
+        StageOperation,
+        DeStageOperation,
+        RegisterOperation,
+        GetSortedRegisterPackageOperation,
+        FixStagedPackagesOperation,
+        DeletePackageFilesOperation,
+        RegisterByPackageFullNameOperation,
+        StageUserDataOperation,
+        PreRegisterPackageOperation,
+        MovePackageOperation,
+        AddVolumeOperation,
+        DeleteVolumeOperation,
+        SetVolumeOfflineOperation,
+        SetVolumeOnlineOperation,
+        GetDefaultVolumeOperation,
+        SetDefaultVolumeOperation,
+        RegisterByPackageFamilyNameOperation,
+        RegisterByPackageFamilyNameForApplicableUsersOperation,
+        GeneratePreviewTiles,
+        ResetApplicationDataOperation,
+        ResetAllApplicationDataForUserOperation,
+        ResumeOperation,
+        ResetSingleApplicationDataOperation,
+        OnDemandRegisterOperation,
+        AddByPackageFamilyNameOperation,
+        ProvisionPackageOperation,
+        AddByAppInstallerOperation,
+        UpdateByAppInstallerOperation,
+        RegisterPackageOnLogonForUserOperation,
+        DeprovisionPackageOperation,
+        StageInContainerOperation,
+        RegisterInContainerOperation,
+        SetMutablePackagesOnlineOperation,
+    };
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [flags]
+    enum PackageManagerStateInternal
+    {
+        ReQueued = -1,
+        Queued,
+        DeQueued,
+        SharedAppsRedirect,
+        OptionalDependenciesHandled,
+        BundleProcessed,
+        Indexed,
+        Resolved,
+        Approved,
+        PreEvaluatePackagesInUseClosed,
+        Evaluated,
+        PrerequisitesChecked,
+        PreStagePackagesInUseClosed,
+        Staged,
+        TilesProcessed,
+        MRTDataPopulated,
+        MutablePackageDirectoryAdd,
+        MachineRegisterAdd,
+        StageUserDataProcessed,
+        PackagesInUseClosed,
+        ResolvedDeferredRegistrations,
+        SingletonRegisterAdd,
+        RegistrationChanged,
+        PackagesInUseRestarted,
+        VersionSuperceded,
+        SingletonRegisterRemove,
+        MachineRegisterRemove,
+        DeIndexed,
+        Committed,
+        MutablePackageDirectoryRemove,
+        MRTDataRemoved,
+        DeStaged,
+        DeStagedUserData,
+        PostCommitVersionSuperceded,
+        DataFlushed,
+        PreSharedAppsSync,
+        SharedAppsSync,
+    };
+
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [interface_name("Windows.Management.Deployment.Internal.IMonikerInternal", 2ba4e3a9-0d85-4bfc-8dbb-c5f9f3cc4f27)]
+    runtimeclass ClientMonikerInternal
+    {
+        String PackageFullName{ get; };
+        String PackageFamilyName{ get; };
+    }
+
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [interface_name("Windows.Management.Deployment.Internal.IDeploymentQueueRequestInfoInternal", 1125385b-38cd-4b16-aa24-2a0eb886d766)]
+    runtimeclass ClientDeploymentQueueRequestInfoInternal
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Management.Deployment.Internal.ClientMonikerInternal>  PackageMonikers{ get; };
+        String ClientUserSid{ get; };
+        String TargetUserSid{ get; };
+        String OriginalTargetUserSid{ get; };
+        Windows.Management.Deployment.Internal.DeploymentOptionsInternal DeploymentOptions{ get; };
+        Windows.Management.Deployment.Internal.DeploymentOperationInternal DeploymentOperation{ get; };
+        Windows.Management.Deployment.Internal.PackageManagerStateInternal PackageManagerState{ get; };
+        UInt64 TotalTicksCount{ get; };
+        UInt64 CurrentTicksCount{ get; };
+        String CallingProcess{ get; };
+    }
+
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [interface_name("Windows.Management.Deployment.Internal.IPackageManagerInternal", f98abce0-136c-401b-b82f-916c145c73b8)]
+    [threading(both)]
+    runtimeclass PackageManagerInternal
+    {
+        PackageManagerInternal();
+        Windows.Foundation.Collections.IIterable <Windows.Management.Deployment.Internal.DiskUsageInformation>  GetDiskSpaceFreedOnPackageRemoval(String packageFullName);
+        Windows.Foundation.Collections.IIterable <Windows.Management.Deployment.Internal.DiskUsageInformation>  GetDiskSpaceFreedOnPackageMove(String packageFullName);
+        Windows.Foundation.Collections.IIterable <Windows.Management.Deployment.Internal.ClientDeploymentQueueRequestInfoInternal>  GetDeploymentRequestsFromQueue();
+        Windows.Management.Deployment.Internal.DiskUsageInformation GetDiskSpaceRequiredForPackageMove(String packageFullName, Windows.Management.Deployment.PackageVolume targetVolume);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageAsync(Windows.Foundation.Uri manifestUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume appDataVolume);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageByFullNameAsync(String mainPackageFullName, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFullNames, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume appDataVolume);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageByFamilyNameAsync(String mainPackageFamilyName, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFamilyNames, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume appDataVolume, String targetingData);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemovePackageAsync(String packageFullName, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority);
+        [method_name("StagePackageAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume targetVolume, String targetingData);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StageUserDataAsync(String packageFullName, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority);
+        Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesByPackageFamilyName(String packageFamilyName);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  GeneratePreviewTiles();
+        void SetPackageStatusBlockingForUser(String packageFullName);
+        void SetPackageStatusBlocking(String packageFullName);
+        [method_name("AddPackageAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume targetVolume, String targetingData);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  ResetAllAppDataAsync(Windows.Foundation.Collections.IIterable <String>  exemptPackageFamilyNames);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  ResetAppDataAsync(String packageFamilyName);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageByFullNameForUserAsync(String mainPackageFullName, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFullNames, DeploymentOptionsInternal DeploymentOptionsInternal, UInt64 userContextToken);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemovePackageForUserAsync(String packageFullName, UInt64 userContextToken);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemovePackageWithOptionsForUserAsync(String packageFullName, DeploymentOptionsInternal DeploymentOptionsInternal, UInt64 userContextToken);
+        Windows.Management.Deployment.PackageVolume FindPackageVolumeByMediaId(String volumeMediaId);
+        void SetPackageOffline(String packageFullName);
+        void SetPackageOnline(String packageFullName);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  OnDemandRegisterPackageAsync(String packageFullName, DeploymentOptionsInternal deploymentOptions, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume appDataVolume);
+        void EnsurePackageIsRegistered(String packageFullName);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  OnDemandRegisterPackagesAsync(Windows.Foundation.Collections.IIterable <String>  packageFullNames, DeploymentOptionsInternal deploymentOptions);
+        void EnsurePackageIsRegisteredByAumid(String aumid);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackagesByFamilyNameAsync(Windows.Foundation.Collections.IIterable <String>  packageFamilyNames, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFamilyNames, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume appDataVolume, String targetingData, String correlationVector, String containerId);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  EnsurePackageIsRegisteredByFamilyNameAsync(String packageFamilyName);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  EnsurePackageIsRegisteredByFamilyNameWithOptionsAsync(String packageFamilyName, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority);
+        [method_name("AddPackageToVolumeAndOptionalPackagesAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume targetVolume, String targetingData, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  externalPackageUris);
+        void ReIndexPackages(UInt64 PreUpgradeOSVersion);
+        void SetupPackagesForReRegistration(UInt64 PreUpgradeOSVersion, String userSid);
+        void SetupOutdatedPackagesForReRegistration(String userSid, Windows.Foundation.Collections.IIterable <String>  packageFullNames);
+        void MarkUplevelProvisionedPausedPackagesAsStaged(Windows.Foundation.Collections.IIterable <String>  packageFullNames);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddOptionalPackageToVolumeByPackageFullNameAsync(String mainPackageFullName, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume targetVolume, String targetingData, String optionalPackageFamilyName);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemoveOptionalPackagesByFullNameAsync(Windows.Foundation.Collections.IIterable <String>  packageFullNames, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority);
+        void UpdatePackageUsingAppInstallerFile(String packageFullName);
+        [method_name("StagePackageToVolumeAndOptionalPackagesAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume targetVolume, String targetingData, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, String correlationVector);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageByFamilyNameForUserAsync(String mainPackageFamilyName, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFamilyNames, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume appDataVolume, String targetingData, UInt64 userContextToken);
+        void EnsurePackageIsRegisteredForUser(String packageFullName, UInt64 userContextToken);
+        void EnsurePackageIsRegisteredByAumidForUser(String aumid, UInt64 userContextToken);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  EnsurePackageIsRegisteredByFamilyNameForUserAsync(String packageFamilyName, UInt64 userContextToken);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  EnsurePackageIsRegisteredByFamilyNameForUserWithOptionsAsync(String packageFamilyName, UInt64 userContextToken, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageOnLogonForUserAsync(String packageFamilyName, String userSid, DeploymentOptionsInternal deploymentOptionsInternal, String targetingData);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemovePackagesByFullNameAsync(Windows.Foundation.Collections.IIterable <String>  packageFullNames, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAndOptionalPackagesAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptionsInternal deploymentOptionsInternal, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  externalPackageUris);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackagesByFamilyNameAsync(Windows.Foundation.Collections.IIterable <String>  packageFamilyNames, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFamilyNames, DeploymentOptionsInternal deploymentOptionsInternal, DeploymentOperationPriority priority, String containerId);
+        UInt32 GetPackageFullNameStatusForUser(String packageFullName, String userSid);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  MoveMainPackageWithOptionalPackagesToVolumeAsync(String mainPackageFullName, DeploymentOptionsInternal deploymentOptions, Windows.Management.Deployment.PackageVolume targetVolume);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageToVolumeAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptionsInternal deploymentOptionsInternal, DeploymentOptionsInternal2 deploymentOptionsInternal2, DeploymentOperationPriority priority, Windows.Management.Deployment.PackageVolume targetVolume, String targetingData);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  SetMutablePackagesOnlineAsync(Windows.Management.Deployment.PackageVolume volume);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackagesByFamilyNameForUserAsync(Windows.Foundation.Collections.IIterable <String>  packageFamilyNames, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFamilyNames, DeploymentOptionsInternal DeploymentOptionsInternal, DeploymentOperationPriority priority, UInt64 userContextToken, Windows.Management.Deployment.PackageVolume appDataVolume, String targetingData, String correlationVector, String containerId);
+    }
+
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [interface_name("Windows.Management.Deployment.Internal.IPackageManagerStateCreationInternal", 5f24a915-c717-4b7b-b1b1-79793e7d817c)]
+    [threading(both)]
+    runtimeclass PackageManagerStateCreationInternal
+    {
+        PackageManagerStateCreationInternal();
+        void UpdateStateLocations(String packageFullName, UInt64 userContextToken);
+        void FixStateLocationsAccess(String packageFullName, UInt64 userContextToken);
+        void RepairAppRegistration(String packageFullName, UInt64 userContextToken);
+        void RepairStateLocations(String packageFullName, UInt64 userContextToken);
+    }
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [uuid(d3e215de-c654-4759-9308-8be0d554881a)]
+    interface IPackageVolumeInternal
+    {
+        String MediaId{ get; };
+    };
+
+
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    [interface_name("Windows.Management.Deployment.Internal.IPackageManagerRepairAclsInternal", 522bd202-7231-4b88-8440-11bdede449a3)]
+    runtimeclass PackageManagerRepairAclsInternal
+    {
+        void RepairResourcesPriAcls(String packageFullName);
+        String MergeSystemResourceFiles(String priFilePath);
+    }
+
+    [uuid(77e6dded-33e7-44e1-a466-c4fb06b7630d)]
+    [contract(Windows.Management.Deployment.Internal.InternalContract, 1)]
+    interface IDeploymentOperationInternal
+    {
+        Windows.ApplicationModel.PackageCatalog GetPackageCatalog();
+    };
+
+}

@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Data.Html
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(standard)]
+    [static_name("Windows.Data.Html.IHtmlUtilities", fec00add-2399-4fac-b5a7-05e9acd7181d)]
+    [threading(both)]
+    runtimeclass HtmlUtilities
+    {
+        static String ConvertToText(String html);
+    }
+
+}

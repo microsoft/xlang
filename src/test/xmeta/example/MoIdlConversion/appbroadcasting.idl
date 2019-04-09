@@ -1,0 +1,72 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.AppBroadcasting
+{
+    [contractversion(1)]
+    apicontract AppBroadcastingContract{};
+
+
+    [contract(Windows.Media.AppBroadcasting.AppBroadcastingContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.Media.AppBroadcasting.IAppBroadcastingStatus", 1225e4df-03a1-42f8-8b80-c9228cd9cf2e)]
+    runtimeclass AppBroadcastingStatus
+    {
+        Boolean CanStartBroadcast{ get; };
+        Windows.Media.AppBroadcasting.AppBroadcastingStatusDetails Details{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Media.AppBroadcasting.AppBroadcastingContract, 1)]
+    [static_name("Windows.Media.AppBroadcasting.IAppBroadcastingUIStatics", 55a8a79d-23cb-4579-9c34-886fe02c045a)]
+    [interface_name("Windows.Media.AppBroadcasting.IAppBroadcastingUI", e56f9f8f-ee99-4dca-a3c3-70af3db44f5f)]
+    [threading(both)]
+    runtimeclass AppBroadcastingUI
+    {
+        static Windows.Media.AppBroadcasting.AppBroadcastingUI GetDefault();
+        static Windows.Media.AppBroadcasting.AppBroadcastingUI GetForUser(Windows.System.User user);
+        Windows.Media.AppBroadcasting.AppBroadcastingStatus GetStatus();
+        void ShowBroadcastUI();
+    }
+
+
+    [contract(Windows.Media.AppBroadcasting.AppBroadcastingContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.Media.AppBroadcasting.IAppBroadcastingMonitor", 00f95a68-8907-48a0-b8ef-24d208137542)]
+    [threading(both)]
+    runtimeclass AppBroadcastingMonitor
+    {
+        AppBroadcastingMonitor();
+        Boolean IsCurrentAppBroadcasting{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.AppBroadcasting.AppBroadcastingMonitor, Object>  IsCurrentAppBroadcastingChanged;
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.AppBroadcasting.AppBroadcastingContract, 1)]
+    [interface_name("Windows.Media.AppBroadcasting.IAppBroadcastingStatusDetails", 069dada4-b573-4e3c-8e19-1bafacd09713)]
+    runtimeclass AppBroadcastingStatusDetails
+    {
+        Boolean IsAnyAppBroadcasting{ get; };
+        Boolean IsCaptureResourceUnavailable{ get; };
+        Boolean IsGameStreamInProgress{ get; };
+        Boolean IsGpuConstrained{ get; };
+        Boolean IsAppInactive{ get; };
+        Boolean IsBlockedForApp{ get; };
+        Boolean IsDisabledByUser{ get; };
+        Boolean IsDisabledBySystem{ get; };
+    }
+
+
+}

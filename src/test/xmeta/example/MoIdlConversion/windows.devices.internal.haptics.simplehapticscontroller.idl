@@ -1,0 +1,53 @@
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Internal.Haptics
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Devices.Internal.Haptics.InternalContract, 1)]
+    [uuid(36aefd67-73ff-11e6-a60e-2c27d7404e85)]
+    interface ISimpleHapticsControllerPrivate
+    {
+        String Id{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Haptics.SimpleHapticsControllerFeedback>  SupportedFeedback{ get; };
+        Boolean IsIntensitySupported{ get; };
+        Boolean IsPlayCountSupported{ get; };
+        Boolean IsPlayDurationSupported{ get; };
+        Boolean IsReplayPauseIntervalSupported{ get; };
+        void StopFeedback();
+        void SendHapticFeedback(Windows.Devices.Haptics.SimpleHapticsControllerFeedback feedback);
+        void SendHapticFeedbackWithIntensity(Windows.Devices.Haptics.SimpleHapticsControllerFeedback feedback, Double intensity);
+        void SendHapticFeedbackForDuration(Windows.Devices.Haptics.SimpleHapticsControllerFeedback feedback, Double intensity, Windows.Foundation.TimeSpan playDuration);
+        void SendHapticFeedbackForPlayCount(Windows.Devices.Haptics.SimpleHapticsControllerFeedback feedback, Double intensity, Int32 playCount, Windows.Foundation.TimeSpan replayPauseInterval);
+    };
+
+    [uuid(36aefd68-73ff-11e6-a60e-2c27d7404e85)]
+    [contract(Windows.Devices.Internal.Haptics.InternalContract, 1)]
+    interface ISimpleHapticsControllerPrivateStatics
+    {
+        Windows.Devices.Haptics.SimpleHapticsController CreateHapticsController(ISimpleHapticsControllerPrivate hapticsControllerPriv);
+    };
+
+    [uuid(36aefd69-73ff-11e6-a60e-2c27d7404e85)]
+    [contract(Windows.Devices.Internal.Haptics.InternalContract, 1)]
+    interface ISimpleHapticsControllerFeedbackPrivateStatics
+    {
+        Windows.Devices.Haptics.SimpleHapticsControllerFeedback CreateFeedbackInstance(UInt16 ordinal, UInt16 waveform, Windows.Foundation.TimeSpan duration);
+    };
+
+    [contract(Windows.Devices.Internal.Haptics.InternalContract, 1)]
+    [uuid(c21768be-3673-4921-abd3-11f006413e50)]
+    interface ISimpleHapticsControllerFeedbackPrivate
+    {
+        UInt16 Ordinal{ get; };
+    };
+
+}

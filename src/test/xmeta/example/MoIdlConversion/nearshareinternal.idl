@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Internal.DataTransfer.NearShare
+{
+    [contractversion(1)]
+    [internal]
+    apicontract NearShareInternalContract{};
+
+    [contract(Windows.ApplicationModel.Internal.DataTransfer.NearShare.NearShareInternalContract, 1)]
+    enum NearShareStatus
+    {
+        Unknown,
+        Completed,
+        InProgress,
+        TimedOut,
+        Canceled,
+        DeniedByRemoteSystem,
+        VersionMismatch,
+        ConnectionEstablished,
+        NoSignedInUser,
+        NetworkError,
+        PlatformError,
+    };
+
+    [contract(Windows.ApplicationModel.Internal.DataTransfer.NearShare.NearShareInternalContract, 1)]
+    struct SendDataProgress
+    {
+        NearShareStatus Status;
+        UInt64 TotalBytesToSend;
+        UInt64 BytesSent;
+        UInt32 TotalFilesToSend;
+        UInt32 FilesSent;
+    };
+
+
+    [contract(Windows.ApplicationModel.Internal.DataTransfer.NearShare.NearShareInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Internal.DataTransfer.NearShare.IShareSenderBroker", 898d173c-121d-42a1-835c-0f315e380402)]
+    runtimeclass ShareSenderBroker
+    {
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.ApplicationModel.Internal.DataTransfer.NearShare.NearShareStatus, Windows.ApplicationModel.Internal.DataTransfer.NearShare.SendDataProgress>  ShareDataWithProgressAsync(String correlationVector, Windows.System.RemoteSystems.RemoteSystem device, Windows.ApplicationModel.DataTransfer.DataPackage datapackage, String format);
+    }
+
+}

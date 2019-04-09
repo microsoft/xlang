@@ -1,0 +1,13 @@
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+}

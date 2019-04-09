@@ -1,0 +1,530 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Composition.Interactions
+{
+    [flags]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum InteractionBindingAxisModes
+    {
+        None,
+        PositionX,
+        PositionY,
+        Scale = 4,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum InteractionChainingMode
+    {
+        Auto,
+        Always,
+        Never,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [webhosthidden]
+    enum InteractionSourceMode
+    {
+        Disabled,
+        EnabledWithInertia,
+        EnabledWithoutInertia,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [webhosthidden]
+    enum VisualInteractionSourceRedirectionMode
+    {
+        Off,
+        CapableTouchpadOnly,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        PointerWheelOnly,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        CapableTouchpadAndPointerWheel,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [webhosthidden]
+    enum InteractionSourceRedirectionMode
+    {
+        Disabled,
+        Enabled,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [webhosthidden]
+    enum InteractionTrackerClampingOption
+    {
+        Auto,
+        Disabled,
+    };
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum InteractionTrackerPositionUpdateOption
+    {
+        Default,
+        AllowActiveCustomScaleAnimation,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Composition.Interactions.ICompositionConditionalValueStatics", 090c4b72-8467-4d0a-9065-ac46b80a5522)]
+    [interface_name("Windows.UI.Composition.Interactions.ICompositionConditionalValue", 43250538-eb73-4561-a71d-1a43eaeb7a9b)]
+    [threading(both)]
+    runtimeclass CompositionConditionalValue
+        : Windows.UI.Composition.CompositionObject
+    {
+        static Windows.UI.Composition.Interactions.CompositionConditionalValue Create(Windows.UI.Composition.Compositor compositor);
+        Windows.UI.Composition.ExpressionAnimation Condition{ get; };
+        Windows.UI.Composition.ExpressionAnimation Condition{ set; };
+        Windows.UI.Composition.ExpressionAnimation Value{ get; };
+        Windows.UI.Composition.ExpressionAnimation Value{ set; };
+    }
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [uuid(043b2431-06e3-495a-ba54-409f0017fac0)]
+    interface ICompositionInteractionSource
+    {
+    };
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaNaturalMotionStatics", cfda55b0-5e3e-4289-932d-ee5f50e74283)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaNaturalMotion", 70acdaae-27dc-48ed-a3c3-6d61c9a029d2)]
+    [threading(both)]
+    runtimeclass InteractionTrackerInertiaNaturalMotion
+        : Windows.UI.Composition.Interactions.InteractionTrackerInertiaModifier
+    {
+        static Windows.UI.Composition.Interactions.InteractionTrackerInertiaNaturalMotion Create(Windows.UI.Composition.Compositor compositor);
+        Windows.UI.Composition.ExpressionAnimation Condition{ get; };
+        Windows.UI.Composition.ExpressionAnimation Condition{ set; };
+        Windows.UI.Composition.ScalarNaturalMotionAnimation NaturalMotion{ get; };
+        Windows.UI.Composition.ScalarNaturalMotionAnimation NaturalMotion{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [static_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaRestingValueStatics", 18ed4699-0745-4096-bcab-3a4e99569bcf)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaRestingValue", 86f7ec09-5096-4170-9cc8-df2fe101bb93)]
+    [threading(both)]
+    runtimeclass InteractionTrackerInertiaRestingValue
+        : Windows.UI.Composition.Interactions.InteractionTrackerInertiaModifier
+    {
+        static Windows.UI.Composition.Interactions.InteractionTrackerInertiaRestingValue Create(Windows.UI.Composition.Compositor compositor);
+        Windows.UI.Composition.ExpressionAnimation Condition{ get; };
+        Windows.UI.Composition.ExpressionAnimation Condition{ set; };
+        Windows.UI.Composition.ExpressionAnimation RestingValue{ get; };
+        Windows.UI.Composition.ExpressionAnimation RestingValue{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaMotionStatics", 8cc83dd6-ba7b-431a-844b-6eac9130f99a)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaMotion", 04922fdc-f154-4cb8-bf33-cc1ba611e6db)]
+    [threading(both)]
+    runtimeclass InteractionTrackerInertiaMotion
+        : Windows.UI.Composition.Interactions.InteractionTrackerInertiaModifier
+    {
+        static Windows.UI.Composition.Interactions.InteractionTrackerInertiaMotion Create(Windows.UI.Composition.Compositor compositor);
+        Windows.UI.Composition.ExpressionAnimation Condition{ get; };
+        Windows.UI.Composition.ExpressionAnimation Condition{ set; };
+        Windows.UI.Composition.ExpressionAnimation Motion{ get; };
+        Windows.UI.Composition.ExpressionAnimation Motion{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [uuid(db2e8af3-4deb-4e53-b29c-b06c9f96d651)]
+    [webhosthidden]
+    interface IInteractionTrackerOwner
+    {
+        void CustomAnimationStateEntered(InteractionTracker sender, InteractionTrackerCustomAnimationStateEnteredArgs args);
+        void IdleStateEntered(InteractionTracker sender, InteractionTrackerIdleStateEnteredArgs args);
+        void InertiaStateEntered(InteractionTracker sender, InteractionTrackerInertiaStateEnteredArgs args);
+        void InteractingStateEntered(InteractionTracker sender, InteractionTrackerInteractingStateEnteredArgs args);
+        void RequestIgnored(InteractionTracker sender, InteractionTrackerRequestIgnoredArgs args);
+        void ValuesChanged(InteractionTracker sender, InteractionTrackerValuesChangedArgs args);
+    };
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.UI.Composition.Interactions.IInteractionTrackerStatics", bba5d7b7-6590-4498-8d6c-eb62b514c92a)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTracker", 2a8e8cb1-1000-4416-8363-cc27fb877308)]
+    [threading(both)]
+    runtimeclass InteractionTracker
+        : Windows.UI.Composition.CompositionObject
+    {
+        static Windows.UI.Composition.Interactions.InteractionTracker Create(Windows.UI.Composition.Compositor compositor);
+        static Windows.UI.Composition.Interactions.InteractionTracker CreateWithOwner(Windows.UI.Composition.Compositor compositor, IInteractionTrackerOwner owner);
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [static_name("Windows.UI.Composition.Interactions.IInteractionTrackerStatics2", 35e53720-46b7-5cb0-b505-f3d6884a6163)]
+        {
+            static void SetBindingMode(InteractionTracker boundTracker1, InteractionTracker boundTracker2, InteractionBindingAxisModes axisMode);
+            static Windows.UI.Composition.Interactions.InteractionBindingAxisModes GetBindingMode(InteractionTracker boundTracker1, InteractionTracker boundTracker2);
+        }
+        Windows.UI.Composition.Interactions.CompositionInteractionSourceCollection InteractionSources{ get; };
+        Boolean IsPositionRoundingSuggested{ get; };
+        Windows.Foundation.Numerics.Vector3 MaxPosition{ get; };
+        Windows.Foundation.Numerics.Vector3 MaxPosition{ set; };
+        Single MaxScale{ get; };
+        Single MaxScale{ set; };
+        Windows.Foundation.Numerics.Vector3 MinPosition{ get; };
+        Windows.Foundation.Numerics.Vector3 MinPosition{ set; };
+        Single MinScale{ get; };
+        Single MinScale{ set; };
+        Windows.Foundation.Numerics.Vector3 NaturalRestingPosition{ get; };
+        Single NaturalRestingScale{ get; };
+        Windows.UI.Composition.Interactions.IInteractionTrackerOwner Owner{ get; };
+        Windows.Foundation.Numerics.Vector3 Position{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.Numerics.Vector3>  PositionInertiaDecayRate{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.Numerics.Vector3>  PositionInertiaDecayRate{ set; };
+        Windows.Foundation.Numerics.Vector3 PositionVelocityInPixelsPerSecond{ get; };
+        Single Scale{ get; };
+        Windows.Foundation.IReference <Single>  ScaleInertiaDecayRate{ get; };
+        Windows.Foundation.IReference <Single>  ScaleInertiaDecayRate{ set; };
+        Single ScaleVelocityInPercentPerSecond{ get; };
+        void AdjustPositionXIfGreaterThanThreshold(Single adjustment, Single positionThreshold);
+        void AdjustPositionYIfGreaterThanThreshold(Single adjustment, Single positionThreshold);
+        void ConfigurePositionXInertiaModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.InteractionTrackerInertiaModifier>  modifiers);
+        void ConfigurePositionYInertiaModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.InteractionTrackerInertiaModifier>  modifiers);
+        void ConfigureScaleInertiaModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.InteractionTrackerInertiaModifier>  modifiers);
+        Int32 TryUpdatePosition(Windows.Foundation.Numerics.Vector3 value);
+        Int32 TryUpdatePositionBy(Windows.Foundation.Numerics.Vector3 amount);
+        Int32 TryUpdatePositionWithAnimation(Windows.UI.Composition.CompositionAnimation animation);
+        Int32 TryUpdatePositionWithAdditionalVelocity(Windows.Foundation.Numerics.Vector3 velocityInPixelsPerSecond);
+        Int32 TryUpdateScale(Single value, Windows.Foundation.Numerics.Vector3 centerPoint);
+        Int32 TryUpdateScaleWithAnimation(Windows.UI.Composition.CompositionAnimation animation, Windows.Foundation.Numerics.Vector3 centerPoint);
+        Int32 TryUpdateScaleWithAdditionalVelocity(Single velocityInPercentPerSecond, Windows.Foundation.Numerics.Vector3 centerPoint);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTracker2", 25769a3e-ce6d-448c-8386-92620d240756)]
+        {
+            void ConfigureCenterPointXInertiaModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.CompositionConditionalValue>  conditionalValues);
+            void ConfigureCenterPointYInertiaModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.CompositionConditionalValue>  conditionalValues);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTracker3", e6c5d7a2-5c4b-42c6-84b7-f69441b18091)]
+        {
+            void ConfigureVector2PositionInertiaModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.InteractionTrackerVector2InertiaModifier>  modifiers);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTracker4", ebd222bc-04af-4ac7-847d-06ea36e80a16)]
+        {
+            [method_name("TryUpdatePositionWithOption")] Int32 TryUpdatePosition(Windows.Foundation.Numerics.Vector3 value, InteractionTrackerClampingOption option);
+            [method_name("TryUpdatePositionByWithOption")] Int32 TryUpdatePositionBy(Windows.Foundation.Numerics.Vector3 amount, InteractionTrackerClampingOption option);
+            Boolean IsInertiaFromImpulse{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerWithAllowActiveCustomScaleAnimationFromTUP", d3ef5da2-a254-40e4-88d5-44e4e16b5809)]
+        {
+            [method_name("TryUpdatePositionWithOption")] Int32 TryUpdatePosition(Windows.Foundation.Numerics.Vector3 value, InteractionTrackerClampingOption option, InteractionTrackerPositionUpdateOption posUpdateOption);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerCustomAnimationStateEnteredArgs", 8d1c8cf1-d7b0-434c-a5d2-2d7611864834)]
+    runtimeclass InteractionTrackerCustomAnimationStateEnteredArgs
+    {
+        Int32 RequestId{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerCustomAnimationStateEnteredArgs2", 47d579b7-0985-5e99-b024-2f32c380c1a4)]
+        {
+            Boolean IsFromBinding{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerIdleStateEnteredArgs", 50012faa-1510-4142-a1a5-019b09f8857b)]
+    runtimeclass InteractionTrackerIdleStateEnteredArgs
+    {
+        Int32 RequestId{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerIdleStateEnteredArgs2", f2e771ed-b803-5137-9435-1c96e48721e9)]
+        {
+            Boolean IsFromBinding{ get; };
+        }
+    }
+
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaStateEnteredArgs", 87108cf2-e7ff-4f7d-9ffd-d72f1e409b63)]
+    runtimeclass InteractionTrackerInertiaStateEnteredArgs
+    {
+        Windows.Foundation.IReference <Windows.Foundation.Numerics.Vector3>  ModifiedRestingPosition{ get; };
+        Windows.Foundation.IReference <Single>  ModifiedRestingScale{ get; };
+        Windows.Foundation.Numerics.Vector3 NaturalRestingPosition{ get; };
+        Single NaturalRestingScale{ get; };
+        Windows.Foundation.Numerics.Vector3 PositionVelocityInPixelsPerSecond{ get; };
+        Int32 RequestId{ get; };
+        Single ScaleVelocityInPercentPerSecond{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaStateEnteredArgs2", b1eb32f6-c26c-41f6-a189-fabc22b323cc)]
+        {
+            Boolean IsInertiaFromImpulse{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaStateEnteredArgs3", 48ac1c2f-47bd-59af-a58c-79bd2eb9ef71)]
+        {
+            Boolean IsFromBinding{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInteractingStateEnteredArgs", a7263939-a17b-4011-99fd-b5c24f143748)]
+    runtimeclass InteractionTrackerInteractingStateEnteredArgs
+    {
+        Int32 RequestId{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInteractingStateEnteredArgs2", 509652d6-d488-59cd-819f-f52310295b11)]
+        {
+            Boolean IsFromBinding{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerRequestIgnoredArgs", 80dd82f1-ce25-488f-91dd-cb6455ccff2e)]
+    runtimeclass InteractionTrackerRequestIgnoredArgs
+    {
+        Int32 RequestId{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerValuesChangedArgs", cf1578ef-d3df-4501-b9e6-f02fb22f73d0)]
+    runtimeclass InteractionTrackerValuesChangedArgs
+    {
+        Windows.Foundation.Numerics.Vector3 Position{ get; };
+        Int32 RequestId{ get; };
+        Single Scale{ get; };
+    }
+
+
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Composition.Interactions.ICompositionInteractionSourceCollection", 1b468e4b-a5bf-47d8-a547-3894155a158c)]
+    runtimeclass CompositionInteractionSourceCollection
+        : Windows.UI.Composition.CompositionObject
+        , Windows.Foundation.Collections.IIterable<Windows.UI.Composition.Interactions.ICompositionInteractionSource>
+    {
+        Int32 Count{ get; };
+        void Add(ICompositionInteractionSource value);
+        void Remove(ICompositionInteractionSource value);
+        void RemoveAll();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [constructor_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaModifierFactory", 993818fe-c94e-4b86-87f3-922665ba46b9)]
+    [default_interface]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerInertiaModifier", a0e2c920-26b4-4da2-8b61-5e683979bbe2)]
+    [threading(both)]
+    unsealed runtimeclass InteractionTrackerInertiaModifier
+        : Windows.UI.Composition.CompositionObject
+    {
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [dualapipartition(0xa000004)]
+    [constructor_name("Windows.UI.Composition.Interactions.IInteractionTrackerVector2InertiaModifierFactory", 7401d6c4-6c6d-48df-bc3e-171e227e7d7f)]
+    [default_interface]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerVector2InertiaModifier", 87e08ab0-3086-4853-a4b7-77882ad5d7e3)]
+    [threading(both)]
+    unsealed runtimeclass InteractionTrackerVector2InertiaModifier
+        : Windows.UI.Composition.CompositionObject
+    {
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [static_name("Windows.UI.Composition.Interactions.IInteractionTrackerVector2InertiaNaturalMotionStatics", 82001a48-09c0-434f-8189-141c66df362f)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionTrackerVector2InertiaNaturalMotion", 5f17695c-162d-4c07-9400-c282b28276ca)]
+    [threading(both)]
+    runtimeclass InteractionTrackerVector2InertiaNaturalMotion
+        : Windows.UI.Composition.Interactions.InteractionTrackerVector2InertiaModifier
+    {
+        static Windows.UI.Composition.Interactions.InteractionTrackerVector2InertiaNaturalMotion Create(Windows.UI.Composition.Compositor compositor);
+        Windows.UI.Composition.ExpressionAnimation Condition{ get; };
+        Windows.UI.Composition.ExpressionAnimation Condition{ set; };
+        Windows.UI.Composition.Vector2NaturalMotionAnimation NaturalMotion{ get; };
+        Windows.UI.Composition.Vector2NaturalMotionAnimation NaturalMotion{ set; };
+    }
+
+
+
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000006)]
+    [interface_name("Windows.UI.Composition.Interactions.IInteractionSourceConfiguration", a78347e5-a9d1-4d02-985e-b930cd0b9da4)]
+    runtimeclass InteractionSourceConfiguration
+        : Windows.UI.Composition.CompositionObject
+    {
+        Windows.UI.Composition.Interactions.InteractionSourceRedirectionMode PositionXSourceMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionSourceRedirectionMode PositionXSourceMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionSourceRedirectionMode PositionYSourceMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionSourceRedirectionMode PositionYSourceMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionSourceRedirectionMode ScaleSourceMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionSourceRedirectionMode ScaleSourceMode{ set; };
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.UI.Composition.Interactions.IVisualInteractionSourceStatics", 369965e1-8645-4f75-ba00-6479cd10c8e6)]
+    [interface_name("Windows.UI.Composition.Interactions.IVisualInteractionSource", ca0e8a86-d8d6-4111-b088-70347bd2b0ed)]
+    [threading(both)]
+    unsealed runtimeclass VisualInteractionSource
+        : Windows.UI.Composition.CompositionObject
+        , Windows.UI.Composition.Interactions.ICompositionInteractionSource
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [constructor_name("Windows.UI.Composition.Interactions.IVisualInteractionSourceObjectFactory", b2ca917c-e98a-41f2-b3c9-891c9266c8f6)]
+        {
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [static_name("Windows.UI.Composition.Interactions.IVisualInteractionSourceStatics2", a979c032-5764-55e0-bc1f-0778786dcfde)]
+        {
+            static Windows.UI.Composition.Interactions.VisualInteractionSource CreateFromIVisualElement(Windows.UI.Composition.IVisualElement source);
+        }
+        static Windows.UI.Composition.Interactions.VisualInteractionSource Create(Windows.UI.Composition.Visual source);
+        Boolean IsPositionXRailsEnabled{ get; };
+        Boolean IsPositionXRailsEnabled{ set; };
+        Boolean IsPositionYRailsEnabled{ get; };
+        Boolean IsPositionYRailsEnabled{ set; };
+        Windows.UI.Composition.Interactions.VisualInteractionSourceRedirectionMode ManipulationRedirectionMode{ get; };
+        Windows.UI.Composition.Interactions.VisualInteractionSourceRedirectionMode ManipulationRedirectionMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionChainingMode PositionXChainingMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionChainingMode PositionXChainingMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionSourceMode PositionXSourceMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionSourceMode PositionXSourceMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionChainingMode PositionYChainingMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionChainingMode PositionYChainingMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionSourceMode PositionYSourceMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionSourceMode PositionYSourceMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionChainingMode ScaleChainingMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionChainingMode ScaleChainingMode{ set; };
+        Windows.UI.Composition.Interactions.InteractionSourceMode ScaleSourceMode{ get; };
+        Windows.UI.Composition.Interactions.InteractionSourceMode ScaleSourceMode{ set; };
+        Windows.UI.Composition.Visual Source{ get; };
+        void TryRedirectForManipulation(Windows.UI.Input.PointerPoint pointerPoint);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Composition.Interactions.IVisualInteractionSource2", aa914893-a73c-414d-80d0-249bad2fbd93)]
+        {
+            Windows.Foundation.Numerics.Vector3 DeltaPosition{ get; };
+            Single DeltaScale{ get; };
+            Windows.Foundation.Numerics.Vector3 Position{ get; };
+            Windows.Foundation.Numerics.Vector3 PositionVelocity{ get; };
+            Single Scale{ get; };
+            Single ScaleVelocity{ get; };
+            void ConfigureCenterPointXModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.CompositionConditionalValue>  conditionalValues);
+            void ConfigureCenterPointYModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.CompositionConditionalValue>  conditionalValues);
+            void ConfigureDeltaPositionXModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.CompositionConditionalValue>  conditionalValues);
+            void ConfigureDeltaPositionYModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.CompositionConditionalValue>  conditionalValues);
+            void ConfigureDeltaScaleModifiers(Windows.Foundation.Collections.IIterable <Windows.UI.Composition.Interactions.CompositionConditionalValue>  conditionalValues);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Composition.Interactions.IVisualInteractionSource3", d941ef2a-0d5c-4057-92d7-c9711533204f)]
+        {
+            Windows.UI.Composition.Interactions.InteractionSourceConfiguration PointerWheelConfig{ get; };
+        }
+    }
+
+
+
+
+}

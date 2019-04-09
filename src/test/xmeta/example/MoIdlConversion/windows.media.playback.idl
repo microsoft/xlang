@@ -1,0 +1,713 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Playback
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [deprecated("Use MediaPlaybackState instead of MediaPlayerState.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+    enum MediaPlayerState
+    {
+        Closed,
+        Opening,
+        Buffering,
+        Playing,
+        Paused,
+        Stopped,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MediaPlaybackState
+    {
+        None,
+        Opening,
+        Buffering,
+        Playing,
+        Paused,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPlayerError
+    {
+        Unknown,
+        Aborted,
+        NetworkError,
+        DecodingError,
+        SourceNotSupported,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPlayerAudioCategory
+    {
+        Other,
+        Communications = 3,
+        Alerts,
+        SoundEffects,
+        GameEffects,
+        GameMedia,
+        GameChat,
+        Speech,
+        Movie,
+        Media,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPlayerAudioDeviceType
+    {
+        Console,
+        Multimedia,
+        Communications,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum StereoscopicVideoRenderMode
+    {
+        Mono,
+        Stereo,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MediaCommandEnablingRule
+    {
+        Auto,
+        Always,
+        Never,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum MediaPlaybackSessionVideoConstrictionReason
+    {
+        None,
+        VirtualMachine,
+        UnsupportedDisplayAdapter,
+        UnsignedDriver,
+        FrameServerEnabled,
+        OutputProtectionFailed,
+        Unknown,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Playback.IPlaybackMediaMarkerFactory", 8c530a78-e0ae-4e1a-a8c8-e23f982a937b)]
+    [interface_name("Windows.Media.Playback.IPlaybackMediaMarker", c4d22f5c-3c1c-4444-b6b9-778b0422d41a)]
+    runtimeclass PlaybackMediaMarker
+    {
+        [return_name("marker")] [method_name( "CreateFromTime" )] PlaybackMediaMarker(Windows.Foundation.TimeSpan value);
+        [return_name("marker")] [method_name( "Create" )] PlaybackMediaMarker(Windows.Foundation.TimeSpan value, String mediaMarketType, String text);
+        Windows.Foundation.TimeSpan Time{ get; };
+        String MediaMarkerType{ get; };
+        String Text{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IPlaybackMediaMarkerSequence", f2810cee-638b-46cf-8817-1d111fe9d8c4)]
+    runtimeclass PlaybackMediaMarkerSequence
+        : Windows.Foundation.Collections.IIterable<Windows.Media.Playback.PlaybackMediaMarker>
+    {
+        UInt32 Size{ get; };
+        void Insert(PlaybackMediaMarker value);
+        void Clear();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlayerFailedEventArgs", 2744e9b9-a7e3-4f16-bac4-7914ebc08301)]
+    runtimeclass MediaPlayerFailedEventArgs
+    {
+        Windows.Media.Playback.MediaPlayerError Error{ get; };
+        HRESULT ExtendedErrorCode{ get; };
+        String ErrorMessage{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Playback.IMediaPlayerRateChangedEventArgs", 40600d58-3b61-4bb2-989f-fc65608b6cab)]
+    runtimeclass MediaPlayerRateChangedEventArgs
+    {
+        Double NewRate{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Playback.IPlaybackMediaMarkerReachedEventArgs", 578cd1b9-90e2-4e60-abc4-8740b01f6196)]
+    runtimeclass PlaybackMediaMarkerReachedEventArgs
+    {
+        Windows.Media.Playback.PlaybackMediaMarker PlaybackMediaMarker{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlayerDataReceivedEventArgs", c75a9405-c801-412a-835b-83fc0e622a8e)]
+    runtimeclass MediaPlayerDataReceivedEventArgs
+    {
+        Windows.Foundation.Collections.ValueSet Data{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Playback.IMediaPlayer", 381a83cb-6fff-499b-8d64-2885dfc1249e)]
+    [threading(both)]
+    runtimeclass MediaPlayer
+        : [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.Foundation.IClosable
+    {
+        MediaPlayer();
+        Boolean AutoPlay{ get; };
+        Boolean AutoPlay{ set; };
+        [deprecated("Use PlaybackSession.NaturalDuration instead of NaturalDuration.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Windows.Foundation.TimeSpan NaturalDuration{ get; };
+        [deprecated("Use PlaybackSession.Position instead of Position.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Windows.Foundation.TimeSpan Position{ get; };
+        [deprecated("Use PlaybackSession.Position instead of Position.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Windows.Foundation.TimeSpan Position{ set; };
+        [deprecated("Use PlaybackSession.BufferingProgress instead of BufferingProgress.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Double BufferingProgress{ get; };
+        [deprecated("Use PlaybackSession.State instead of CurrentState.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Windows.Media.Playback.MediaPlayerState CurrentState{ get; };
+        [deprecated("Use PlaybackSession.CanSeek instead of CanSeek.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Boolean CanSeek{ get; };
+        [deprecated("Use PlaybackSession.CanPause instead of CanPause.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Boolean CanPause{ get; };
+        Boolean IsLoopingEnabled{ get; };
+        Boolean IsLoopingEnabled{ set; };
+        [deprecated("Use PlaybackSession.IsProtected instead of IsProtected.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Boolean IsProtected{ get; };
+        Boolean IsMuted{ get; };
+        Boolean IsMuted{ set; };
+        [deprecated("Use PlaybackSession.PlaybackRate instead of PlaybackRate.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Double PlaybackRate{ get; };
+        [deprecated("Use PlaybackSession.PlaybackRate instead of PlaybackRate.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Double PlaybackRate{ set; };
+        Double Volume{ get; };
+        Double Volume{ set; };
+        [deprecated("Use media tracks on MediaPlaybackItem instead of PlaybackMediaMarkers.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x20000)]
+        Windows.Media.Playback.PlaybackMediaMarkerSequence PlaybackMediaMarkers{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  MediaOpened;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  MediaEnded;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Windows.Media.Playback.MediaPlayerFailedEventArgs>  MediaFailed;
+        [deprecated("Use PlaybackSession.PlaybackStateChanged instead of CurrentStateChanged.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  CurrentStateChanged;
+        [deprecated("Use media tracks on MediaPlaybackItem instead of PlaybackMediaMarkers.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x20000)]
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Windows.Media.Playback.PlaybackMediaMarkerReachedEventArgs>  PlaybackMediaMarkerReached;
+        [deprecated("Use PlaybackSession.PlaybackRateChanged instead of MediaPlayerRateChanged.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Windows.Media.Playback.MediaPlayerRateChangedEventArgs>  MediaPlayerRateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  VolumeChanged;
+        [deprecated("Use PlaybackSession.SeekCompleted instead of SeekCompleted.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  SeekCompleted;
+        [deprecated("Use PlaybackSession.BufferingStarted instead of BufferingStarted.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  BufferingStarted;
+        [deprecated("Use PlaybackSession.BufferingEnded instead of BufferingEnded.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  BufferingEnded;
+        void Play();
+        void Pause();
+        [deprecated("Use Source instead of SetUriSource.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x20000)]
+        void SetUriSource(Windows.Foundation.Uri value);
+
+        [interface_name("Windows.Media.Playback.IMediaPlayerSource", bd4f8897-1423-4c3e-82c5-0fb1af94f715)]
+        {
+            Windows.Media.Protection.MediaProtectionManager ProtectionManager{ get; };
+            Windows.Media.Protection.MediaProtectionManager ProtectionManager{ set; };
+            [deprecated("Use Source instead of SetFileSource.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x20000)]
+            void SetFileSource(Windows.Storage.IStorageFile file);
+            [deprecated("Use Source instead of SetStreamSource.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x20000)]
+            void SetStreamSource(Windows.Storage.Streams.IRandomAccessStream stream);
+            [deprecated("Use Source instead of SetMediaSource.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x20000)]
+            void SetMediaSource(Windows.Media.Core.IMediaSource source);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Playback.IMediaPlayerSource2", 82449b9f-7322-4c0b-b03b-3e69a48260c5)]
+        {
+            Windows.Media.Playback.IMediaPlaybackSource Source{ get; };
+            Windows.Media.Playback.IMediaPlaybackSource Source{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Playback.IMediaPlayer2", 3c841218-2123-4fc5-9082-2f883f77bdf5)]
+        {
+            Windows.Media.SystemMediaTransportControls SystemMediaTransportControls{ get; };
+            Windows.Media.Playback.MediaPlayerAudioCategory AudioCategory{ get; };
+            Windows.Media.Playback.MediaPlayerAudioCategory AudioCategory{ set; };
+            Windows.Media.Playback.MediaPlayerAudioDeviceType AudioDeviceType{ get; };
+            Windows.Media.Playback.MediaPlayerAudioDeviceType AudioDeviceType{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Media.Playback.IMediaPlayerEffects", 85a1deda-cab6-4cc0-8be3-6035f4de2591)]
+        {
+            void AddAudioEffect(String activatableClassId, Boolean effectOptional, Windows.Foundation.Collections.IPropertySet configuration);
+            void RemoveAllEffects();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Playback.IMediaPlayer3", ee0660da-031b-4feb-bd9b-92e0a0a8d299)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  IsMutedChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  SourceChanged;
+            Double AudioBalance{ get; };
+            Double AudioBalance{ set; };
+            Boolean RealTimePlayback{ get; };
+            Boolean RealTimePlayback{ set; };
+            Windows.Media.Playback.StereoscopicVideoRenderMode StereoscopicVideoRenderMode{ get; };
+            Windows.Media.Playback.StereoscopicVideoRenderMode StereoscopicVideoRenderMode{ set; };
+            Windows.Media.Playback.MediaBreakManager BreakManager{ get; };
+            Windows.Media.Playback.MediaPlaybackCommandManager CommandManager{ get; };
+            Windows.Devices.Enumeration.DeviceInformation AudioDevice{ get; };
+            Windows.Devices.Enumeration.DeviceInformation AudioDevice{ set; };
+            Windows.Media.MediaTimelineController TimelineController{ get; };
+            Windows.Media.MediaTimelineController TimelineController{ set; };
+            Windows.Foundation.TimeSpan TimelineControllerPositionOffset{ get; };
+            Windows.Foundation.TimeSpan TimelineControllerPositionOffset{ set; };
+            Windows.Media.Playback.MediaPlaybackSession PlaybackSession{ get; };
+            void StepForwardOneFrame();
+            void StepBackwardOneFrame();
+            Windows.Media.Casting.CastingSource GetAsCastingSource();
+        }
+
+        [webhosthidden]
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Playback.IMediaPlayer4", 80035db0-7448-4770-afcf-2a57450914c5)]
+        {
+            void SetSurfaceSize(Windows.Foundation.Size size);
+            Windows.Media.Playback.MediaPlayerSurface GetSurface(Windows.UI.Composition.Compositor compositor);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Playback.IMediaPlayerEffects2", fa419a79-1bbe-46c5-ae1f-8ee69fb3c2c7)]
+        {
+            void AddVideoEffect(String activatableClassId, Boolean effectOptional, Windows.Foundation.Collections.IPropertySet effectConfiguration);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Playback.IMediaPlayer5", cfe537fd-f86a-4446-bf4d-c8e792b7b4b3)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  VideoFrameAvailable;
+            Boolean IsVideoFrameServerEnabled{ get; };
+            Boolean IsVideoFrameServerEnabled{ set; };
+            [method_name("CopyFrameToVideoSurface")] void CopyFrameToVideoSurface(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface destination);
+            [method_name("CopyFrameToVideoSurfaceWithTargetRectangle")] void CopyFrameToVideoSurface(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface destination, Windows.Foundation.Rect targetRectangle);
+            void CopyFrameToStereoscopicVideoSurfaces(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface destinationLeftEye, Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface destinationRightEye);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Media.Playback.IMediaPlayer6", e0caa086-ae65-414c-b010-8bc55f00e692)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlayer, Object>  SubtitleFrameChanged;
+            [method_name("RenderSubtitlesToSurface")] Boolean RenderSubtitlesToSurface(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface destination);
+            [method_name("RenderSubtitlesToSurfaceWithTargetRectangle")] Boolean RenderSubtitlesToSurface(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface destination, Windows.Foundation.Rect targetRectangle);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Playback.IMediaPlayer7", 5d1dc478-4500-4531-b3f4-777a71491f7f)]
+        {
+            Windows.Media.Audio.AudioStateMonitor AudioStateMonitor{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaBreakManager", a854ddb1-feb4-4d9b-9d97-0fdbe58e5e39)]
+    runtimeclass MediaBreakManager
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaBreakManager, Windows.Media.Playback.MediaBreakSeekedOverEventArgs>  BreaksSeekedOver;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaBreakManager, Windows.Media.Playback.MediaBreakStartedEventArgs>  BreakStarted;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaBreakManager, Windows.Media.Playback.MediaBreakEndedEventArgs>  BreakEnded;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaBreakManager, Windows.Media.Playback.MediaBreakSkippedEventArgs>  BreakSkipped;
+        Windows.Media.Playback.MediaBreak CurrentBreak{ get; };
+        Windows.Media.Playback.MediaPlaybackSession PlaybackSession{ get; };
+        void PlayBreak(MediaBreak value);
+        void SkipCurrentBreak();
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManager", 5acee5a6-5cb6-4a5a-8521-cc86b1c1ed37)]
+    runtimeclass MediaPlaybackCommandManager
+    {
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Windows.Media.Playback.MediaPlayer MediaPlayer{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior PlayBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior PauseBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior NextBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior PreviousBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior FastForwardBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior RewindBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior ShuffleBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior AutoRepeatModeBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior PositionBehavior{ get; };
+        Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior RateBehavior{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerPlayReceivedEventArgs>  PlayReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerPauseReceivedEventArgs>  PauseReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerNextReceivedEventArgs>  NextReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerPreviousReceivedEventArgs>  PreviousReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerFastForwardReceivedEventArgs>  FastForwardReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerRewindReceivedEventArgs>  RewindReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerShuffleReceivedEventArgs>  ShuffleReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerAutoRepeatModeReceivedEventArgs>  AutoRepeatModeReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerPositionReceivedEventArgs>  PositionReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManager, Windows.Media.Playback.MediaPlaybackCommandManagerRateReceivedEventArgs>  RateReceived;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackSession", c32b683d-0407-41ba-8946-8b345a5a5435)]
+    runtimeclass MediaPlaybackSession
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  PlaybackStateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  PlaybackRateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  SeekCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  BufferingStarted;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  BufferingEnded;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  BufferingProgressChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  DownloadProgressChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  NaturalDurationChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  PositionChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  NaturalVideoSizeChanged;
+        Windows.Media.Playback.MediaPlayer MediaPlayer{ get; };
+        Windows.Foundation.TimeSpan NaturalDuration{ get; };
+        Windows.Foundation.TimeSpan Position{ get; };
+        Windows.Foundation.TimeSpan Position{ set; };
+        Windows.Media.Playback.MediaPlaybackState PlaybackState{ get; };
+        Boolean CanSeek{ get; };
+        Boolean CanPause{ get; };
+        Boolean IsProtected{ get; };
+        Double PlaybackRate{ get; };
+        Double PlaybackRate{ set; };
+        Double BufferingProgress{ get; };
+        Double DownloadProgress{ get; };
+        UInt32 NaturalVideoHeight{ get; };
+        UInt32 NaturalVideoWidth{ get; };
+        Windows.Foundation.Rect NormalizedSourceRect{ get; };
+        Windows.Foundation.Rect NormalizedSourceRect{ set; };
+        Windows.Media.MediaProperties.StereoscopicVideoPackingMode StereoscopicVideoPackingMode{ get; };
+        Windows.Media.MediaProperties.StereoscopicVideoPackingMode StereoscopicVideoPackingMode{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Playback.IMediaPlaybackSession2", f8ba7c79-1fc8-4097-ad70-c0fa18cc0050)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  BufferedRangesChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  PlayedRangesChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  SeekableRangesChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackSession, Object>  SupportedPlaybackRatesChanged;
+            Windows.Media.Playback.MediaPlaybackSphericalVideoProjection SphericalVideoProjection{ get; };
+            Boolean IsMirroring{ get; };
+            Boolean IsMirroring{ set; };
+            Windows.Foundation.Collections.IVectorView <Windows.Media.MediaTimeRange>  GetBufferedRanges();
+            Windows.Foundation.Collections.IVectorView <Windows.Media.MediaTimeRange>  GetPlayedRanges();
+            Windows.Foundation.Collections.IVectorView <Windows.Media.MediaTimeRange>  GetSeekableRanges();
+            Boolean IsSupportedPlaybackRateRange(Double rate1, Double rate2);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Playback.IMediaPlaybackSession3", 7ba2b41a-a3e2-405f-b77b-a4812c238b66)]
+        {
+            Windows.Media.MediaProperties.MediaRotation PlaybackRotation{ get; };
+            Windows.Media.MediaProperties.MediaRotation PlaybackRotation{ set; };
+            Windows.Media.Playback.MediaPlaybackSessionOutputDegradationPolicyState GetOutputDegradationPolicyState();
+        }
+    }
+
+
+    [webhosthidden]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlayerSurface", 0ed653bc-b736-49c3-830b-764a3845313a)]
+    runtimeclass MediaPlayerSurface
+        : Windows.Foundation.IClosable
+    {
+        Windows.UI.Composition.ICompositionSurface CompositionSurface{ get; };
+        Windows.UI.Composition.Compositor Compositor{ get; };
+        Windows.Media.Playback.MediaPlayer MediaPlayer{ get; };
+    }
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackSphericalVideoProjection", d405b37c-6f0e-4661-b8ee-d487ba9752d5)]
+    runtimeclass MediaPlaybackSphericalVideoProjection
+    {
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Windows.Media.MediaProperties.SphericalVideoFrameFormat FrameFormat{ get; };
+        Windows.Media.MediaProperties.SphericalVideoFrameFormat FrameFormat{ set; };
+        Double HorizontalFieldOfViewInDegrees{ get; };
+        Double HorizontalFieldOfViewInDegrees{ set; };
+        Windows.Foundation.Numerics.Quaternion ViewOrientation{ get; };
+        Windows.Foundation.Numerics.Quaternion ViewOrientation{ set; };
+        Windows.Media.Playback.SphericalVideoProjectionMode ProjectionMode{ get; };
+        Windows.Media.Playback.SphericalVideoProjectionMode ProjectionMode{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackSessionOutputDegradationPolicyState", 558e727d-f633-49f9-965a-abaa1db709be)]
+    runtimeclass MediaPlaybackSessionOutputDegradationPolicyState
+    {
+        Windows.Media.Playback.MediaPlaybackSessionVideoConstrictionReason VideoConstrictionReason{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackSessionBufferingStartedEventArgs", cd6aafed-74e2-43b5-b115-76236c33791a)]
+    runtimeclass MediaPlaybackSessionBufferingStartedEventArgs
+    {
+        Boolean IsPlaybackInterruption{ get; };
+    }
+
+
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaBreakSeekedOverEventArgs", e5aa6746-0606-4492-b9d3-c3c8fde0a4ea)]
+    runtimeclass MediaBreakSeekedOverEventArgs
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Playback.MediaBreak>  SeekedOverBreaks{ get; };
+        Windows.Foundation.TimeSpan OldPosition{ get; };
+        Windows.Foundation.TimeSpan NewPosition{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaBreakStartedEventArgs", a87efe71-dfd4-454a-956e-0a4a648395f8)]
+    runtimeclass MediaBreakStartedEventArgs
+    {
+        Windows.Media.Playback.MediaBreak MediaBreak{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaBreakEndedEventArgs", 32b93276-1c5d-4fee-8732-236dc3a88580)]
+    runtimeclass MediaBreakEndedEventArgs
+    {
+        Windows.Media.Playback.MediaBreak MediaBreak{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaBreakSkippedEventArgs", 6ee94c05-2f54-4a3e-a3ab-24c3b270b4a3)]
+    runtimeclass MediaBreakSkippedEventArgs
+    {
+        Windows.Media.Playback.MediaBreak MediaBreak{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [static_name("Windows.Media.Playback.IBackgroundMediaPlayerStatics", 856ddbc1-55f7-471f-a0f2-68ac4c904592)]
+    [threading(both)]
+    runtimeclass BackgroundMediaPlayer
+    {
+        [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static Windows.Media.Playback.MediaPlayer Current{ get; };
+        [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static event Windows.Foundation.EventHandler <Windows.Media.Playback.MediaPlayerDataReceivedEventArgs>  MessageReceivedFromBackground;
+        [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static event Windows.Foundation.EventHandler <Windows.Media.Playback.MediaPlayerDataReceivedEventArgs>  MessageReceivedFromForeground;
+        [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void SendMessageToBackground(Windows.Foundation.Collections.ValueSet value);
+        [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void SendMessageToForeground(Windows.Foundation.Collections.ValueSet value);
+        [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static Boolean IsMediaPlaying();
+        [deprecated("Use MediaPlayer instead of BackgroundMediaPlayer.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void Shutdown();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerPlayReceivedEventArgs", 9af0004e-578b-4c56-a006-16159d888a48)]
+    runtimeclass MediaPlaybackCommandManagerPlayReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerPauseReceivedEventArgs", 5ceccd1c-c25c-4221-b16c-c3c98ce012d6)]
+    runtimeclass MediaPlaybackCommandManagerPauseReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerNextReceivedEventArgs", e1504433-a2b0-45d4-b9de-5f42ac14a839)]
+    runtimeclass MediaPlaybackCommandManagerNextReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerPreviousReceivedEventArgs", 525e3081-4632-4f76-99b1-d771623f6287)]
+    runtimeclass MediaPlaybackCommandManagerPreviousReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerFastForwardReceivedEventArgs", 30f064d9-b491-4d0a-bc21-3098bd1332e9)]
+    runtimeclass MediaPlaybackCommandManagerFastForwardReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerRewindReceivedEventArgs", 9f085947-a3c0-425d-aaef-97ba7898b141)]
+    runtimeclass MediaPlaybackCommandManagerRewindReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerShuffleReceivedEventArgs", 50a05cef-63ee-4a96-b7b5-fee08b9ff90c)]
+    runtimeclass MediaPlaybackCommandManagerShuffleReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Boolean IsShuffleRequested{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerAutoRepeatModeReceivedEventArgs", 3d6f4f23-5230-4411-a0e9-bad94c2a045c)]
+    runtimeclass MediaPlaybackCommandManagerAutoRepeatModeReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Media.MediaPlaybackAutoRepeatMode AutoRepeatMode{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerPositionReceivedEventArgs", 5591a754-d627-4bdd-a90d-86a015b24902)]
+    runtimeclass MediaPlaybackCommandManagerPositionReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.TimeSpan Position{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerRateReceivedEventArgs", 18ea3939-4a16-4169-8b05-3eb9f5ff78eb)]
+    runtimeclass MediaPlaybackCommandManagerRateReceivedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Double PlaybackRate{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackCommandManagerCommandBehavior", 786c1e78-ce78-4a10-afd6-843fcbb90c2e)]
+    runtimeclass MediaPlaybackCommandManagerCommandBehavior
+    {
+        Windows.Media.Playback.MediaPlaybackCommandManager CommandManager{ get; };
+        Boolean IsEnabled{ get; };
+        Windows.Media.Playback.MediaCommandEnablingRule EnablingRule{ get; };
+        Windows.Media.Playback.MediaCommandEnablingRule EnablingRule{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackCommandManagerCommandBehavior, Object>  IsEnabledChanged;
+    }
+
+
+}

@@ -1,0 +1,4076 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AudioProcessing
+    {
+        Default,
+        Raw,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    struct MediaTimeRange
+    {
+        Windows.Foundation.TimeSpan Start;
+        Windows.Foundation.TimeSpan End;
+    };
+
+}
+namespace Windows.Media.Capture
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaStreamType
+    {
+        VideoPreview,
+        VideoRecord,
+        Audio,
+        Photo,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PowerlineFrequency
+    {
+        Disabled,
+        FiftyHertz,
+        SixtyHertz,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Auto,
+    };
+
+}
+namespace Windows.Media.Transcoding
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaVideoProcessingAlgorithm
+    {
+        Default,
+        MrfCrf444,
+    };
+
+}
+namespace Windows.Media.Devices
+{
+    [deprecated("IsoSpeedPreset may not be available in future versions of Windows Phone. Starting with Windows Phone 8.1, use SetAutoAsync, Auto, SetValueAsync, and Value instead", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum IsoSpeedPreset
+    {
+        Auto,
+        Iso50,
+        Iso80,
+        Iso100,
+        Iso200,
+        Iso400,
+        Iso800,
+        Iso1600,
+        Iso3200,
+        Iso6400,
+        Iso12800,
+        Iso25600,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CaptureSceneMode
+    {
+        Auto,
+        Manual,
+        Macro,
+        Portrait,
+        Sport,
+        Snow,
+        Night,
+        Beach,
+        Sunset,
+        Candlelight,
+        Landscape,
+        NightPortrait,
+        Backlit,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaCaptureFocusState
+    {
+        Uninitialized,
+        Lost,
+        Searching,
+        Focused,
+        Failed,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CameraStreamState
+    {
+        NotStreaming,
+        Streaming,
+        BlockedForPrivacy,
+        Shutdown,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaCapturePauseBehavior
+    {
+        RetainHardwareResources,
+        ReleaseHardwareResources,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AdvancedPhotoMode
+    {
+        Auto,
+        Standard,
+        Hdr,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        LowLight,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum InfraredTorchMode
+    {
+        Off,
+        On,
+        AlternatingFrameIllumination,
+    };
+
+}
+namespace Windows.Media.MediaProperties
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum StereoscopicVideoPackingMode
+    {
+        None,
+        SideBySide,
+        TopBottom,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum SphericalVideoFrameFormat
+    {
+        None,
+        Unsupported,
+        Equirectangular,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.MediaProperties.IMediaRatio", d2d0fee5-8929-401d-ac78-7d357e378163)]
+    runtimeclass MediaRatio
+    {
+        UInt32 Numerator{ set; };
+        UInt32 Numerator{ get; };
+        UInt32 Denominator{ set; };
+        UInt32 Denominator{ get; };
+    }
+
+    [hasvariant][contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [threading(both)]
+    runtimeclass MediaPropertySet
+        : [default]Windows.Foundation.Collections.IMap<Guid, Object>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<Guid, Object> >
+    {
+        MediaPropertySet();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(b4002af6-acd4-4e5a-a24b-5d7498a8b8c4)]
+    interface IMediaEncodingProperties
+    {
+        Windows.Media.MediaProperties.MediaPropertySet Properties{ get; };
+        String Type{ get; };
+        String Subtype{ set; };
+        String Subtype{ get; };
+    };
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.MediaProperties.IAudioEncodingPropertiesStatics", 0cad332c-ebe9-4527-b36d-e42a13cf38db)]
+    [interface_name("Windows.Media.MediaProperties.IAudioEncodingProperties", 62bc7a16-005c-4b3b-8a0b-0a090e9687f3)]
+    [threading(both)]
+    runtimeclass AudioEncodingProperties
+        : Windows.Media.MediaProperties.IMediaEncodingProperties
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Media.MediaProperties.IAudioEncodingPropertiesStatics2", 7489316f-77a0-433d-8ed5-4040280e8665)]
+        {
+            static Windows.Media.MediaProperties.AudioEncodingProperties CreateAlac(UInt32 sampleRate, UInt32 channelCount, UInt32 bitsPerSample);
+            static Windows.Media.MediaProperties.AudioEncodingProperties CreateFlac(UInt32 sampleRate, UInt32 channelCount, UInt32 bitsPerSample);
+        }
+        AudioEncodingProperties();
+        static Windows.Media.MediaProperties.AudioEncodingProperties CreateAac(UInt32 sampleRate, UInt32 channelCount, UInt32 bitrate);
+        static Windows.Media.MediaProperties.AudioEncodingProperties CreateAacAdts(UInt32 sampleRate, UInt32 channelCount, UInt32 bitrate);
+        static Windows.Media.MediaProperties.AudioEncodingProperties CreateMp3(UInt32 sampleRate, UInt32 channelCount, UInt32 bitrate);
+        static Windows.Media.MediaProperties.AudioEncodingProperties CreatePcm(UInt32 sampleRate, UInt32 channelCount, UInt32 bitsPerSample);
+        static Windows.Media.MediaProperties.AudioEncodingProperties CreateWma(UInt32 sampleRate, UInt32 channelCount, UInt32 bitrate);
+        UInt32 Bitrate{ set; };
+        UInt32 Bitrate{ get; };
+        UInt32 ChannelCount{ set; };
+        UInt32 ChannelCount{ get; };
+        UInt32 SampleRate{ set; };
+        UInt32 SampleRate{ get; };
+        UInt32 BitsPerSample{ set; };
+        UInt32 BitsPerSample{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.MediaProperties.IAudioEncodingPropertiesWithFormatUserData", 98f10d79-13ea-49ff-be70-2673db69702c)]
+        {
+            void SetFormatUserData(UInt8[] value);
+            void GetFormatUserData(out UInt8[] value);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.MediaProperties.IAudioEncodingProperties2", c45d54da-80bd-4c23-80d5-72d4a181e894)]
+        {
+            Boolean IsSpatial{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.MediaProperties.IAudioEncodingProperties3", 87600341-748c-4f8d-b0fd-10caf08ff087)]
+        {
+            Windows.Media.MediaProperties.AudioEncodingProperties Copy();
+        }
+    }
+
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.MediaProperties.IMediaEncodingSubtypesStatics", 37b6580e-a171-4464-ba5a-53189e48c1c8)]
+    [threading(both)]
+    runtimeclass MediaEncodingSubtypes
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Media.MediaProperties.IMediaEncodingSubtypesStatics3", ba2414e4-883d-464e-a44f-097da08ef7ff)]
+        {
+            static String Alac{ get; };
+            static String Flac{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Media.MediaProperties.IMediaEncodingSubtypesStatics2", 4b7cd23d-42ff-4d33-8531-0626bee4b52d)]
+        {
+            static String Vp9{ get; };
+            static String L8{ get; };
+            static String L16{ get; };
+            static String D16{ get; };
+        }
+        static String Aac{ get; };
+        static String AacAdts{ get; };
+        static String Ac3{ get; };
+        static String AmrNb{ get; };
+        static String AmrWb{ get; };
+        static String Argb32{ get; };
+        static String Asf{ get; };
+        static String Avi{ get; };
+        static String Bgra8{ get; };
+        static String Bmp{ get; };
+        static String Eac3{ get; };
+        static String Float{ get; };
+        static String Gif{ get; };
+        static String H263{ get; };
+        static String H264{ get; };
+        static String H264Es{ get; };
+        static String Hevc{ get; };
+        static String HevcEs{ get; };
+        static String Iyuv{ get; };
+        static String Jpeg{ get; };
+        static String JpegXr{ get; };
+        static String Mjpg{ get; };
+        static String Mpeg{ get; };
+        static String Mpeg1{ get; };
+        static String Mpeg2{ get; };
+        static String Mp3{ get; };
+        static String Mpeg4{ get; };
+        static String Nv12{ get; };
+        static String Pcm{ get; };
+        static String Png{ get; };
+        static String Rgb24{ get; };
+        static String Rgb32{ get; };
+        static String Tiff{ get; };
+        static String Wave{ get; };
+        static String Wma8{ get; };
+        static String Wma9{ get; };
+        static String Wmv3{ get; };
+        static String Wvc1{ get; };
+        static String Yuy2{ get; };
+        static String Yv12{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.Media.MediaProperties.IMediaEncodingSubtypesStatics4", ddece58a-3949-4644-8a2c-59ef02c642fa)]
+        {
+            static String P010{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Media.MediaProperties.IMediaEncodingSubtypesStatics5", 5ad4a007-ffce-4760-9828-5d0c99637e6a)]
+        {
+            static String Heif{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.MediaProperties.IH264ProfileIdsStatics", 38654ca7-846a-4f97-a2e5-c3a15bbf70fd)]
+    [threading(both)]
+    runtimeclass H264ProfileIds
+    {
+        static Int32 ConstrainedBaseline{ get; };
+        static Int32 Baseline{ get; };
+        static Int32 Extended{ get; };
+        static Int32 Main{ get; };
+        static Int32 High{ get; };
+        static Int32 High10{ get; };
+        static Int32 High422{ get; };
+        static Int32 High444{ get; };
+        static Int32 StereoHigh{ get; };
+        static Int32 MultiviewHigh{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.MediaProperties.IMpeg2ProfileIdsStatics", a461ff85-e57a-4128-9b21-d5331b04235c)]
+    [threading(both)]
+    runtimeclass Mpeg2ProfileIds
+    {
+        static Int32 Simple{ get; };
+        static Int32 Main{ get; };
+        static Int32 SignalNoiseRatioScalable{ get; };
+        static Int32 SpatiallyScalable{ get; };
+        static Int32 High{ get; };
+    }
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.MediaProperties.IVideoEncodingPropertiesStatics", 3ce14d44-1dc5-43db-9f38-ebebf90152cb)]
+    [interface_name("Windows.Media.MediaProperties.IVideoEncodingProperties", 76ee6c9a-37c2-4f2a-880a-1282bbb4373d)]
+    [threading(both)]
+    runtimeclass VideoEncodingProperties
+        : Windows.Media.MediaProperties.IMediaEncodingProperties
+    {
+        VideoEncodingProperties();
+        static Windows.Media.MediaProperties.VideoEncodingProperties CreateH264();
+        static Windows.Media.MediaProperties.VideoEncodingProperties CreateMpeg2();
+        static Windows.Media.MediaProperties.VideoEncodingProperties CreateUncompressed(String subtype, UInt32 width, UInt32 height);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Media.MediaProperties.IVideoEncodingPropertiesStatics2", cf1ebd5d-49fe-4d00-b59a-cfa4dfc51944)]
+        {
+            static Windows.Media.MediaProperties.VideoEncodingProperties CreateHevc();
+        }
+        UInt32 Bitrate{ set; };
+        UInt32 Bitrate{ get; };
+        UInt32 Width{ set; };
+        UInt32 Width{ get; };
+        UInt32 Height{ set; };
+        UInt32 Height{ get; };
+        Windows.Media.MediaProperties.MediaRatio FrameRate{ get; };
+        Windows.Media.MediaProperties.MediaRatio PixelAspectRatio{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.MediaProperties.IVideoEncodingProperties2", f743a1ef-d465-4290-a94b-ef0f1528f8e3)]
+        {
+            void SetFormatUserData(UInt8[] value);
+            void GetFormatUserData(out UInt8[] value);
+            Int32 ProfileId{ set; };
+            Int32 ProfileId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.MediaProperties.IVideoEncodingProperties3", 386bcdc4-873a-479f-b3eb-56c1fcbec6d7)]
+        {
+            Windows.Media.MediaProperties.StereoscopicVideoPackingMode StereoscopicVideoPackingMode{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.MediaProperties.IVideoEncodingProperties4", 724ef014-c10c-40f2-9d72-3ee13b45fa8e)]
+        {
+            Windows.Media.MediaProperties.SphericalVideoFrameFormat SphericalVideoFrameFormat{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.MediaProperties.IVideoEncodingProperties5", 4959080f-272f-4ece-a4df-c0ccdb33d840)]
+        {
+            Windows.Media.MediaProperties.VideoEncodingProperties Copy();
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass TimedMetadataEncodingProperties
+        : [default]Windows.Media.MediaProperties.IMediaEncodingProperties
+    {
+        TimedMetadataEncodingProperties();
+
+        [interface_name("Windows.Media.MediaProperties.ITimedMetadataEncodingProperties", 51cd30d3-d690-4cfa-97f4-4a398e9db420)]
+        {
+            void SetFormatUserData(UInt8[] value);
+            void GetFormatUserData(out UInt8[] value);
+            Windows.Media.MediaProperties.TimedMetadataEncodingProperties Copy();
+        }
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.MediaProperties.IImageEncodingPropertiesStatics2", f6c25b29-3824-46b0-956e-501329e1be3c)]
+    [interface_name("Windows.Media.MediaProperties.IImageEncodingProperties", 78625635-f331-4189-b1c3-b48d5ae034f1)]
+    [threading(both)]
+    runtimeclass ImageEncodingProperties
+        : Windows.Media.MediaProperties.IMediaEncodingProperties
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Media.MediaProperties.IImageEncodingPropertiesStatics3", 48f4814d-a2ff-48dc-8ea0-e90680663656)]
+        {
+            static Windows.Media.MediaProperties.ImageEncodingProperties CreateHeif();
+        }
+        static Windows.Media.MediaProperties.ImageEncodingProperties CreateUncompressed(MediaPixelFormat format);
+        static Windows.Media.MediaProperties.ImageEncodingProperties CreateBmp();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Media.MediaProperties.IImageEncodingPropertiesStatics", 257c68dc-8b99-439e-aa59-913a36161297)]
+        {
+            static Windows.Media.MediaProperties.ImageEncodingProperties CreateJpeg();
+            static Windows.Media.MediaProperties.ImageEncodingProperties CreatePng();
+            static Windows.Media.MediaProperties.ImageEncodingProperties CreateJpegXR();
+        }
+        ImageEncodingProperties();
+        UInt32 Width{ set; };
+        UInt32 Width{ get; };
+        UInt32 Height{ set; };
+        UInt32 Height{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.MediaProperties.IImageEncodingProperties2", c854a2df-c923-469b-ac8e-6a9f3c1cd9e3)]
+        {
+            Windows.Media.MediaProperties.ImageEncodingProperties Copy();
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPixelFormat
+    {
+        Nv12,
+        Bgra8,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        P010,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaThumbnailFormat
+    {
+        Bmp,
+        Bgra8,
+    };
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.Media.MediaProperties.IContainerEncodingProperties", 59ac2a57-b32a-479e-8a61-4b7f2e9e7ea0)]
+    [threading(both)]
+    runtimeclass ContainerEncodingProperties
+        : Windows.Media.MediaProperties.IMediaEncodingProperties
+    {
+        ContainerEncodingProperties();
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.MediaProperties.IContainerEncodingProperties2", b272c029-ae26-4819-baad-ad7a49b0a876)]
+        {
+            Windows.Media.MediaProperties.ContainerEncodingProperties Copy();
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AudioEncodingQuality
+    {
+        Auto,
+        High,
+        Medium,
+        Low,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum VideoEncodingQuality
+    {
+        Auto,
+        HD1080p,
+        HD720p,
+        Wvga,
+        Ntsc,
+        Pal,
+        Vga,
+        Qvga,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Uhd2160p,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Uhd4320p,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Media.MediaProperties.IMediaEncodingProfileStatics", 197f352c-2ede-4a45-a896-817a4854f8fe)]
+    [interface_name("Windows.Media.MediaProperties.IMediaEncodingProfile", e7dbf5a8-1db9-4783-876b-3dfe12acfdb3)]
+    [threading(mta)]
+    runtimeclass MediaEncodingProfile
+    {
+        static Windows.Media.MediaProperties.MediaEncodingProfile CreateM4a(AudioEncodingQuality quality);
+        static Windows.Media.MediaProperties.MediaEncodingProfile CreateMp3(AudioEncodingQuality quality);
+        static Windows.Media.MediaProperties.MediaEncodingProfile CreateWma(AudioEncodingQuality quality);
+        static Windows.Media.MediaProperties.MediaEncodingProfile CreateMp4(VideoEncodingQuality quality);
+        static Windows.Media.MediaProperties.MediaEncodingProfile CreateWmv(VideoEncodingQuality quality);
+        static Windows.Foundation.IAsyncOperation <Windows.Media.MediaProperties.MediaEncodingProfile>  CreateFromFileAsync(Windows.Storage.IStorageFile file);
+        static Windows.Foundation.IAsyncOperation <Windows.Media.MediaProperties.MediaEncodingProfile>  CreateFromStreamAsync(Windows.Storage.Streams.IRandomAccessStream stream);
+        MediaEncodingProfile();
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Media.MediaProperties.IMediaEncodingProfileStatics3", 90dac5aa-cf76-4294-a9ed-1a1420f51f6b)]
+        {
+            static Windows.Media.MediaProperties.MediaEncodingProfile CreateAlac(AudioEncodingQuality quality);
+            static Windows.Media.MediaProperties.MediaEncodingProfile CreateFlac(AudioEncodingQuality quality);
+            static Windows.Media.MediaProperties.MediaEncodingProfile CreateHevc(VideoEncodingQuality quality);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Media.MediaProperties.IMediaEncodingProfileStatics2", ce8de74f-6af4-4288-8fe2-79adf1f79a43)]
+        {
+            static Windows.Media.MediaProperties.MediaEncodingProfile CreateWav(AudioEncodingQuality quality);
+            static Windows.Media.MediaProperties.MediaEncodingProfile CreateAvi(VideoEncodingQuality quality);
+        }
+        Windows.Media.MediaProperties.AudioEncodingProperties Audio{ set; };
+        Windows.Media.MediaProperties.AudioEncodingProperties Audio{ get; };
+        Windows.Media.MediaProperties.VideoEncodingProperties Video{ set; };
+        Windows.Media.MediaProperties.VideoEncodingProperties Video{ get; };
+        Windows.Media.MediaProperties.ContainerEncodingProperties Container{ set; };
+        Windows.Media.MediaProperties.ContainerEncodingProperties Container{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Media.MediaProperties.IMediaEncodingProfile2", 349b3e0a-4035-488e-9877-85632865ed10)]
+        {
+            void SetAudioTracks(Windows.Foundation.Collections.IIterable <Windows.Media.Core.AudioStreamDescriptor>  value);
+            Windows.Foundation.Collections.IVector <Windows.Media.Core.AudioStreamDescriptor>  GetAudioTracks();
+            void SetVideoTracks(Windows.Foundation.Collections.IIterable <Windows.Media.Core.VideoStreamDescriptor>  value);
+            Windows.Foundation.Collections.IVector <Windows.Media.Core.VideoStreamDescriptor>  GetVideoTracks();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.MediaProperties.IMediaEncodingProfile3", ba6ebe88-7570-4e69-accf-5611ad015f88)]
+        {
+            void SetTimedMetadataTracks(Windows.Foundation.Collections.IIterable <Windows.Media.Core.TimedMetadataStreamDescriptor>  value);
+            Windows.Foundation.Collections.IVector <Windows.Media.Core.TimedMetadataStreamDescriptor>  GetTimedMetadataTracks();
+        }
+    }
+
+
+
+
+
+}
+namespace Windows.Media.Core
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [constructor_name("Windows.Media.Core.IAudioStreamDescriptorFactory", 4a86ce9e-4cb1-4380-8e0c-83504b7f5bf3)]
+    [interface_name("Windows.Media.Core.IAudioStreamDescriptor", 1e3692e4-4027-4847-a70b-df1d9a2a7b04)]
+    [threading(both)]
+    runtimeclass AudioStreamDescriptor
+        : Windows.Media.Core.IMediaStreamDescriptor
+        , [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Windows.Media.Core.IMediaStreamDescriptor2
+    {
+        [method_name( "Create" )] AudioStreamDescriptor(Windows.Media.MediaProperties.AudioEncodingProperties encodingProperties);
+        Windows.Media.MediaProperties.AudioEncodingProperties EncodingProperties{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Core.IAudioStreamDescriptor2", 2e68f1f6-a448-497b-8840-85082665acf9)]
+        {
+            Windows.Foundation.IReference <UInt32>  LeadingEncoderPadding{ set; };
+            Windows.Foundation.IReference <UInt32>  LeadingEncoderPadding{ get; };
+            Windows.Foundation.IReference <UInt32>  TrailingEncoderPadding{ set; };
+            Windows.Foundation.IReference <UInt32>  TrailingEncoderPadding{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Core.IAudioStreamDescriptor3", 4d220da1-8e83-44ef-8973-2f63e993f36b)]
+        {
+            Windows.Media.Core.AudioStreamDescriptor Copy();
+        }
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.Core.IVideoStreamDescriptorFactory", 494ef6d1-bb75-43d2-9e5e-7b79a3afced4)]
+    [interface_name("Windows.Media.Core.IVideoStreamDescriptor", 12ee0d55-9c2b-4440-8057-2c7a90f0cbec)]
+    [threading(both)]
+    runtimeclass VideoStreamDescriptor
+        : Windows.Media.Core.IMediaStreamDescriptor
+        , [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Windows.Media.Core.IMediaStreamDescriptor2
+    {
+        [method_name( "Create" )] VideoStreamDescriptor(Windows.Media.MediaProperties.VideoEncodingProperties encodingProperties);
+        Windows.Media.MediaProperties.VideoEncodingProperties EncodingProperties{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Core.IVideoStreamDescriptor2", 8b306e10-453e-4088-832d-c36fa4f94af3)]
+        {
+            Windows.Media.Core.VideoStreamDescriptor Copy();
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.Core.ITimedMetadataStreamDescriptorFactory", c027de30-7362-4ff9-98b1-2dfd0b8d1cae)]
+    [threading(both)]
+    runtimeclass TimedMetadataStreamDescriptor
+        : Windows.Media.Core.IMediaStreamDescriptor2
+        , [default]Windows.Media.Core.IMediaStreamDescriptor
+    {
+        [method_name( "Create" )] TimedMetadataStreamDescriptor(Windows.Media.MediaProperties.TimedMetadataEncodingProperties encodingProperties);
+
+        [interface_name("Windows.Media.Core.ITimedMetadataStreamDescriptor", 133336bf-296a-463e-9ff9-01cd25691408)]
+        {
+            Windows.Media.MediaProperties.TimedMetadataEncodingProperties EncodingProperties{ get; };
+            Windows.Media.Core.TimedMetadataStreamDescriptor Copy();
+        }
+    }
+
+}
+namespace Windows.Media.MediaProperties
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaRotation
+    {
+        None,
+        Clockwise90Degrees,
+        Clockwise180Degrees,
+        Clockwise270Degrees,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum MediaMirroringOptions
+    {
+        None,
+        Horizontal,
+        Vertical,
+    };
+
+
+}
+namespace Windows.Media.Devices
+{
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.ISceneModeControl", d48e5af7-8d59-4854-8c62-12c70ba89b7c)]
+    runtimeclass SceneModeControl
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.CaptureSceneMode>  SupportedModes{ get; };
+        Windows.Media.Devices.CaptureSceneMode Value{ get; };
+        Windows.Foundation.IAsyncAction SetValueAsync(CaptureSceneMode sceneMode);
+    }
+
+
+    [marshaling_behavior(standard)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.ITorchControl", a6053665-8250-416c-919a-724296afa306)]
+    runtimeclass TorchControl
+    {
+        Boolean Supported{ get; };
+        Boolean PowerSupported{ get; };
+        Boolean Enabled{ get; };
+        Boolean Enabled{ set; };
+        Single PowerPercent{ get; };
+        Single PowerPercent{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IInfraredTorchControl", 1cba2c83-6cb6-5a04-a6fc-3be7b33ff056)]
+    runtimeclass InfraredTorchControl
+    {
+        Boolean IsSupported{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.InfraredTorchMode>  SupportedModes{ get; };
+        Windows.Media.Devices.InfraredTorchMode CurrentMode{ get; };
+        Windows.Media.Devices.InfraredTorchMode CurrentMode{ set; };
+        Int32 MinPower{ get; };
+        Int32 MaxPower{ get; };
+        Int32 PowerStep{ get; };
+        Int32 Power{ get; };
+        Int32 Power{ set; };
+    }
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.IFlashControl", def41dbe-7d68-45e3-8c0f-be7bb32837d0)]
+    runtimeclass FlashControl
+    {
+        Boolean Supported{ get; };
+        Boolean PowerSupported{ get; };
+        Boolean RedEyeReductionSupported{ get; };
+        Boolean Enabled{ get; };
+        Boolean Enabled{ set; };
+        Boolean Auto{ get; };
+        Boolean Auto{ set; };
+        Boolean RedEyeReduction{ get; };
+        Boolean RedEyeReduction{ set; };
+        Single PowerPercent{ get; };
+        Single PowerPercent{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IFlashControl2", 7d29cc9e-75e1-4af7-bd7d-4e38e1c06cd6)]
+        {
+            Boolean AssistantLightSupported{ get; };
+            Boolean AssistantLightEnabled{ get; };
+            Boolean AssistantLightEnabled{ set; };
+        }
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.IExposureCompensationControl", 81c8e834-dcec-4011-a610-1f3847e64aca)]
+    runtimeclass ExposureCompensationControl
+    {
+        Boolean Supported{ get; };
+        Single Min{ get; };
+        Single Max{ get; };
+        Single Step{ get; };
+        Single Value{ get; };
+        Windows.Foundation.IAsyncAction SetValueAsync(Single value);
+    }
+
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.IIsoSpeedControl", 27b6c322-25ad-4f1b-aaab-524ab376ca33)]
+    runtimeclass IsoSpeedControl
+    {
+        Boolean Supported{ get; };
+        [deprecated("SupportedPresets may not be available in future versions of Windows Phone. Starting with Windows Phone 8.1, use SetAutoAsync, Auto, SetValueAsync, and Value instead", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.IsoSpeedPreset>  SupportedPresets{ get; };
+        [deprecated("Preset may not be available in future versions of Windows Phone. Starting with Windows Phone 8.1, use SetAutoAsync, Auto, SetValueAsync, and Value instead", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Media.Devices.IsoSpeedPreset Preset{ get; };
+        [deprecated("SetPresetAsync may not be available in future versions of Windows Phone. Starting with Windows Phone 8.1, use SetAutoAsync, Auto, SetValueAsync, and Value instead", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.IAsyncAction SetPresetAsync(IsoSpeedPreset preset);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IIsoSpeedControl2", 6f1578f2-6d77-4f8a-8c2f-6130b6395053)]
+        {
+            UInt32 Min{ get; };
+            UInt32 Max{ get; };
+            UInt32 Step{ get; };
+            UInt32 Value{ get; };
+            Windows.Foundation.IAsyncAction SetValueAsync(UInt32 isoSpeed);
+            Boolean Auto{ get; };
+            Windows.Foundation.IAsyncAction SetAutoAsync();
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ColorTemperaturePreset
+    {
+        Auto,
+        Manual,
+        Cloudy,
+        Daylight,
+        Flash,
+        Fluorescent,
+        Tungsten,
+        Candlelight,
+    };
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.IWhiteBalanceControl", 781f047e-7162-49c8-a8f9-9481c565363e)]
+    runtimeclass WhiteBalanceControl
+    {
+        Boolean Supported{ get; };
+        Windows.Media.Devices.ColorTemperaturePreset Preset{ get; };
+        Windows.Foundation.IAsyncAction SetPresetAsync(ColorTemperaturePreset preset);
+        UInt32 Min{ get; };
+        UInt32 Max{ get; };
+        UInt32 Step{ get; };
+        UInt32 Value{ get; };
+        Windows.Foundation.IAsyncAction SetValueAsync(UInt32 temperature);
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.IExposureControl", 09e8cbe2-ad96-4f28-a0e0-96ed7e1b5fd2)]
+    runtimeclass ExposureControl
+    {
+        Boolean Supported{ get; };
+        Boolean Auto{ get; };
+        Windows.Foundation.IAsyncAction SetAutoAsync(Boolean value);
+        Windows.Foundation.TimeSpan Min{ get; };
+        Windows.Foundation.TimeSpan Max{ get; };
+        Windows.Foundation.TimeSpan Step{ get; };
+        Windows.Foundation.TimeSpan Value{ get; };
+        Windows.Foundation.IAsyncAction SetValueAsync(Windows.Foundation.TimeSpan shutterDuration);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ZoomTransitionMode
+    {
+        Auto,
+        Direct,
+        Smooth,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IZoomSettings", 6ad66b24-14b4-4bfd-b18f-88fe24463b52)]
+    [threading(both)]
+    runtimeclass ZoomSettings
+    {
+        ZoomSettings();
+        Windows.Media.Devices.ZoomTransitionMode Mode{ get; };
+        Windows.Media.Devices.ZoomTransitionMode Mode{ set; };
+        Single Value{ get; };
+        Single Value{ set; };
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.IZoomControl", 3a1e0b12-32da-4c17-bfd7-8d0c73c8f5a5)]
+    runtimeclass ZoomControl
+    {
+        Boolean Supported{ get; };
+        Single Min{ get; };
+        Single Max{ get; };
+        Single Step{ get; };
+        Single Value{ get; };
+        Single Value{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IZoomControl2", 69843db0-2e99-4641-8529-184f319d1671)]
+        {
+            Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.ZoomTransitionMode>  SupportedModes{ get; };
+            Windows.Media.Devices.ZoomTransitionMode Mode{ get; };
+            void Configure(ZoomSettings settings);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum FocusPreset
+    {
+        Auto,
+        Manual,
+        AutoMacro,
+        AutoNormal,
+        AutoInfinity,
+        AutoHyperfocal,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum FocusMode
+    {
+        Auto,
+        Single,
+        Continuous,
+        Manual,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ManualFocusDistance
+    {
+        Infinity,
+        Hyperfocal,
+        Nearest,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AutoFocusRange
+    {
+        FullRange,
+        Macro,
+        Normal,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Devices.IFocusSettings", 79958f6b-3263-4275-85d6-aeae891c96ee)]
+    [threading(both)]
+    runtimeclass FocusSettings
+    {
+        FocusSettings();
+        Windows.Media.Devices.FocusMode Mode{ get; };
+        Windows.Media.Devices.FocusMode Mode{ set; };
+        Windows.Media.Devices.AutoFocusRange AutoFocusRange{ get; };
+        Windows.Media.Devices.AutoFocusRange AutoFocusRange{ set; };
+        Windows.Foundation.IReference <UInt32>  Value{ get; };
+        Windows.Foundation.IReference <UInt32>  Value{ set; };
+        Windows.Foundation.IReference <Windows.Media.Devices.ManualFocusDistance>  Distance{ get; };
+        Windows.Foundation.IReference <Windows.Media.Devices.ManualFocusDistance>  Distance{ set; };
+        Boolean WaitForFocus{ get; };
+        Boolean WaitForFocus{ set; };
+        Boolean DisableDriverFallback{ get; };
+        Boolean DisableDriverFallback{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Media.Devices.IFocusControl", c0d889f6-5228-4453-b153-85606592b238)]
+    runtimeclass FocusControl
+    {
+        Boolean Supported{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.FocusPreset>  SupportedPresets{ get; };
+        Windows.Media.Devices.FocusPreset Preset{ get; };
+        [method_name("SetPresetAsync")] Windows.Foundation.IAsyncAction SetPresetAsync(FocusPreset preset);
+        [method_name("SetPresetWithCompletionOptionAsync")] Windows.Foundation.IAsyncAction SetPresetAsync(FocusPreset preset, Boolean completeBeforeFocus);
+        UInt32 Min{ get; };
+        UInt32 Max{ get; };
+        UInt32 Step{ get; };
+        UInt32 Value{ get; };
+        Windows.Foundation.IAsyncAction SetValueAsync(UInt32 focus);
+        Windows.Foundation.IAsyncAction FocusAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IFocusControl2", 3f7cff48-c534-4e9e-94c3-52ef2afd5d07)]
+        {
+            Boolean FocusChangedSupported{ get; };
+            Boolean WaitForFocusSupported{ get; };
+            Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.FocusMode>  SupportedFocusModes{ get; };
+            Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.ManualFocusDistance>  SupportedFocusDistances{ get; };
+            Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.AutoFocusRange>  SupportedFocusRanges{ get; };
+            Windows.Media.Devices.FocusMode Mode{ get; };
+            Windows.Media.Devices.MediaCaptureFocusState FocusState{ get; };
+            Windows.Foundation.IAsyncAction UnlockAsync();
+            Windows.Foundation.IAsyncAction LockAsync();
+            void Configure(FocusSettings settings);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum RegionOfInterestType
+    {
+        Unknown,
+        Face,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IRegionOfInterest", e5ecc834-ce66-4e05-a78f-cf391a5ec2d1)]
+    [threading(both)]
+    runtimeclass RegionOfInterest
+    {
+        RegionOfInterest();
+        Boolean AutoFocusEnabled{ get; };
+        Boolean AutoFocusEnabled{ set; };
+        Boolean AutoWhiteBalanceEnabled{ get; };
+        Boolean AutoWhiteBalanceEnabled{ set; };
+        Boolean AutoExposureEnabled{ get; };
+        Boolean AutoExposureEnabled{ set; };
+        Windows.Foundation.Rect Bounds{ get; };
+        Windows.Foundation.Rect Bounds{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IRegionOfInterest2", 19fe2a91-73aa-4d51-8a9d-56ccf7db7f54)]
+        {
+            Windows.Media.Devices.RegionOfInterestType Type{ get; };
+            Windows.Media.Devices.RegionOfInterestType Type{ set; };
+            Boolean BoundsNormalized{ get; };
+            Boolean BoundsNormalized{ set; };
+            UInt32 Weight{ get; };
+            UInt32 Weight{ set; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.IRegionsOfInterestControl", c323f527-ab0b-4558-8b5b-df5693db0378)]
+    runtimeclass RegionsOfInterestControl
+    {
+        UInt32 MaxRegions{ get; };
+        [method_name("SetRegionsAsync")] [remote_sync]Windows.Foundation.IAsyncAction SetRegionsAsync(Windows.Foundation.Collections.IIterable <Windows.Media.Devices.RegionOfInterest>  regions);
+        [method_name("SetRegionsWithLockAsync")] [remote_sync]Windows.Foundation.IAsyncAction SetRegionsAsync(Windows.Foundation.Collections.IIterable <Windows.Media.Devices.RegionOfInterest>  regions, Boolean lockValues);
+        Windows.Foundation.IAsyncAction ClearRegionsAsync();
+        Boolean AutoFocusSupported{ get; };
+        Boolean AutoWhiteBalanceSupported{ get; };
+        Boolean AutoExposureSupported{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IExposurePriorityVideoControl", 2cb240a3-5168-4271-9ea5-47621a98a352)]
+    runtimeclass ExposurePriorityVideoControl
+    {
+        Boolean Supported{ get; };
+        Boolean Enabled{ get; };
+        Boolean Enabled{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum HdrVideoMode
+    {
+        Off,
+        On,
+        Auto,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Devices.IHdrVideoControl", 55d8e2d0-30c0-43bf-9b9a-9799d70ced94)]
+    runtimeclass HdrVideoControl
+    {
+        Boolean Supported{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.HdrVideoMode>  SupportedModes{ get; };
+        Windows.Media.Devices.HdrVideoMode Mode{ get; };
+        Windows.Media.Devices.HdrVideoMode Mode{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.IAdvancedPhotoCaptureSettings", 08f3863a-0018-445b-93d2-646d1c5ed05c)]
+    [threading(both)]
+    runtimeclass AdvancedPhotoCaptureSettings
+    {
+        AdvancedPhotoCaptureSettings();
+        Windows.Media.Devices.AdvancedPhotoMode Mode{ get; };
+        Windows.Media.Devices.AdvancedPhotoMode Mode{ set; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IAdvancedPhotoControl", c5b15486-9001-4682-9309-68eae0080eec)]
+    runtimeclass AdvancedPhotoControl
+    {
+        Boolean Supported{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.AdvancedPhotoMode>  SupportedModes{ get; };
+        Windows.Media.Devices.AdvancedPhotoMode Mode{ get; };
+        void Configure(AdvancedPhotoCaptureSettings settings);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum OpticalImageStabilizationMode
+    {
+        Off,
+        On,
+        Auto,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IOpticalImageStabilizationControl", bfad9c1d-00bc-423b-8eb2-a0178ca94247)]
+    runtimeclass OpticalImageStabilizationControl
+    {
+        Boolean Supported{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.OpticalImageStabilizationMode>  SupportedModes{ get; };
+        Windows.Media.Devices.OpticalImageStabilizationMode Mode{ get; };
+        Windows.Media.Devices.OpticalImageStabilizationMode Mode{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum VideoTemporalDenoisingMode
+    {
+        Off,
+        On,
+        Auto,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IVideoTemporalDenoisingControl", 7ab34735-3e2a-4a32-baff-4358c4fbdd57)]
+    runtimeclass VideoTemporalDenoisingControl
+    {
+        Boolean Supported{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.VideoTemporalDenoisingMode>  SupportedModes{ get; };
+        Windows.Media.Devices.VideoTemporalDenoisingMode Mode{ get; };
+        Windows.Media.Devices.VideoTemporalDenoisingMode Mode{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(f6f8f5ce-209a-48fb-86fc-d44578f317e6)]
+    interface IMediaDeviceController
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.MediaProperties.IMediaEncodingProperties>  GetAvailableMediaStreamProperties(Windows.Media.Capture.MediaStreamType mediaStreamType);
+        Windows.Media.MediaProperties.IMediaEncodingProperties GetMediaStreamProperties(Windows.Media.Capture.MediaStreamType mediaStreamType);
+        [remote_sync]Windows.Foundation.IAsyncAction SetMediaStreamPropertiesAsync(Windows.Media.Capture.MediaStreamType mediaStreamType, Windows.Media.MediaProperties.IMediaEncodingProperties mediaEncodingProperties);
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.IMediaDeviceControl", efa8dfa9-6f75-4863-ba0b-583f3036b4de)]
+    runtimeclass MediaDeviceControl
+    {
+        Windows.Media.Devices.MediaDeviceControlCapabilities Capabilities{ get; };
+        [return_name("succeeded")] Boolean TryGetValue(out Double value);
+        Boolean TrySetValue(Double value);
+        [return_name("succeeded")] Boolean TryGetAuto(out Boolean value);
+        Boolean TrySetAuto(Boolean value);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CaptureUse
+    {
+        None,
+        Photo,
+        Video,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaCaptureOptimization
+    {
+        Default,
+        Quality,
+        Latency,
+        Power,
+        LatencyThenQuality,
+        LatencyThenPower,
+        PowerAndQuality,
+    };
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Media.Devices.ILowLagPhotoSequenceControl", 3dcf909d-6d16-409c-bafe-b9a594c6fde6)]
+    runtimeclass LowLagPhotoSequenceControl
+    {
+        Boolean Supported{ get; };
+        UInt32 MaxPastPhotos{ get; };
+        Single MaxPhotosPerSecond{ get; };
+        UInt32 PastPhotoLimit{ get; };
+        UInt32 PastPhotoLimit{ set; };
+        Single PhotosPerSecondLimit{ get; };
+        Single PhotosPerSecondLimit{ set; };
+        Windows.Media.MediaProperties.MediaRatio GetHighestConcurrentFrameRate(Windows.Media.MediaProperties.IMediaEncodingProperties captureProperties);
+        Windows.Media.MediaProperties.MediaRatio GetCurrentFrameRate();
+        Boolean ThumbnailEnabled{ get; };
+        Boolean ThumbnailEnabled{ set; };
+        Windows.Media.MediaProperties.MediaThumbnailFormat ThumbnailFormat{ get; };
+        Windows.Media.MediaProperties.MediaThumbnailFormat ThumbnailFormat{ set; };
+        UInt32 DesiredThumbnailSize{ get; };
+        UInt32 DesiredThumbnailSize{ set; };
+        UInt32 HardwareAcceleratedThumbnailSupported{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Media.Devices.ILowLagPhotoControl", 6d5c4dd0-fadf-415d-aee6-3baa529300c9)]
+    runtimeclass LowLagPhotoControl
+    {
+        Windows.Media.MediaProperties.MediaRatio GetHighestConcurrentFrameRate(Windows.Media.MediaProperties.IMediaEncodingProperties captureProperties);
+        Windows.Media.MediaProperties.MediaRatio GetCurrentFrameRate();
+        Boolean ThumbnailEnabled{ get; };
+        Boolean ThumbnailEnabled{ set; };
+        Windows.Media.MediaProperties.MediaThumbnailFormat ThumbnailFormat{ get; };
+        Windows.Media.MediaProperties.MediaThumbnailFormat ThumbnailFormat{ set; };
+        UInt32 DesiredThumbnailSize{ get; };
+        UInt32 DesiredThumbnailSize{ set; };
+        UInt32 HardwareAcceleratedThumbnailSupported{ get; };
+    }
+
+
+}
+namespace Windows.Media.Devices.Core
+{
+    [marshaling_behavior(standard)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.Core.IVariablePhotoSequenceController", 7fbff880-ed8c-43fd-a7c3-b35809e4229a)]
+    runtimeclass VariablePhotoSequenceController
+    {
+        Boolean Supported{ get; };
+        Single MaxPhotosPerSecond{ get; };
+        Single PhotosPerSecondLimit{ get; };
+        Single PhotosPerSecondLimit{ set; };
+        Windows.Media.MediaProperties.MediaRatio GetHighestConcurrentFrameRate(Windows.Media.MediaProperties.IMediaEncodingProperties captureProperties);
+        Windows.Media.MediaProperties.MediaRatio GetCurrentFrameRate();
+        Windows.Media.Devices.Core.FrameControlCapabilities FrameCapabilities{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Media.Devices.Core.FrameController>  DesiredFrameControllers{ get; };
+    }
+
+}
+namespace Windows.Media.Devices
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.IPhotoConfirmationControl", c8f3f363-ff5e-4582-a9a8-0550f85a4a76)]
+    runtimeclass PhotoConfirmationControl
+    {
+        Boolean Supported{ get; };
+        Boolean Enabled{ get; };
+        Boolean Enabled{ set; };
+        Windows.Media.MediaProperties.MediaPixelFormat PixelFormat{ get; };
+        Windows.Media.MediaProperties.MediaPixelFormat PixelFormat{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum VideoDeviceControllerSetDevicePropertyStatus
+    {
+        Success,
+        UnknownFailure,
+        NotSupported,
+        InvalidValue,
+        DeviceNotAvailable,
+        NotInControl,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum VideoDeviceControllerGetDevicePropertyStatus
+    {
+        Success,
+        UnknownFailure,
+        BufferTooSmall,
+        NotSupported,
+        DeviceNotAvailable,
+        MaxPropertyValueSizeTooSmall,
+        MaxPropertyValueSizeRequired,
+    };
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IVideoDeviceControllerGetDevicePropertyResult", c5d88395-6ed5-4790-8b5d-0ef13935d0f8)]
+    runtimeclass VideoDeviceControllerGetDevicePropertyResult
+    {
+        Windows.Media.Devices.VideoDeviceControllerGetDevicePropertyStatus Status{ get; };
+        [variant]Object Value{ get; };
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Media.Devices.IMediaDeviceControlCapabilities", 23005816-eb85-43e2-b92b-8240d5ee70ec)]
+    runtimeclass MediaDeviceControlCapabilities
+    {
+        Boolean Supported{ get; };
+        Double Min{ get; };
+        Double Max{ get; };
+        Double Step{ get; };
+        Double Default{ get; };
+        Boolean AutoModeSupported{ get; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.IVideoDeviceController", 99555575-2e2e-40b8-b6c7-f82d10013210)]
+    runtimeclass VideoDeviceController
+        : Windows.Media.Devices.IMediaDeviceController
+    {
+        Windows.Media.Devices.MediaDeviceControl Brightness{ get; };
+        Windows.Media.Devices.MediaDeviceControl Contrast{ get; };
+        Windows.Media.Devices.MediaDeviceControl Hue{ get; };
+        Windows.Media.Devices.MediaDeviceControl WhiteBalance{ get; };
+        Windows.Media.Devices.MediaDeviceControl BacklightCompensation{ get; };
+        Windows.Media.Devices.MediaDeviceControl Pan{ get; };
+        Windows.Media.Devices.MediaDeviceControl Tilt{ get; };
+        Windows.Media.Devices.MediaDeviceControl Zoom{ get; };
+        Windows.Media.Devices.MediaDeviceControl Roll{ get; };
+        Windows.Media.Devices.MediaDeviceControl Exposure{ get; };
+        Windows.Media.Devices.MediaDeviceControl Focus{ get; };
+        Boolean TrySetPowerlineFrequency(Windows.Media.Capture.PowerlineFrequency value);
+        [return_name("succeeded")] Boolean TryGetPowerlineFrequency(out Windows.Media.Capture.PowerlineFrequency value);
+
+        [interface_name("Windows.Media.Devices.IAdvancedVideoCaptureDeviceController", de6ff4d3-2b96-4583-80ab-b5b01dc6a8d7)]
+        {
+            void SetDeviceProperty(String propertyId, [variant]Object propertyValue);
+            [variant]Object GetDeviceProperty(String propertyId);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IAdvancedVideoCaptureDeviceController2", 8bb94f8f-f11a-43db-b402-11930b80ae56)]
+        {
+            Windows.Media.Devices.LowLagPhotoSequenceControl LowLagPhotoSequence{ get; };
+            Windows.Media.Devices.LowLagPhotoControl LowLagPhoto{ get; };
+            Windows.Media.Devices.SceneModeControl SceneModeControl{ get; };
+            Windows.Media.Devices.TorchControl TorchControl{ get; };
+            Windows.Media.Devices.FlashControl FlashControl{ get; };
+            Windows.Media.Devices.WhiteBalanceControl WhiteBalanceControl{ get; };
+            Windows.Media.Devices.ExposureControl ExposureControl{ get; };
+            Windows.Media.Devices.FocusControl FocusControl{ get; };
+            Windows.Media.Devices.ExposureCompensationControl ExposureCompensationControl{ get; };
+            Windows.Media.Devices.IsoSpeedControl IsoSpeedControl{ get; };
+            Windows.Media.Devices.RegionsOfInterestControl RegionsOfInterestControl{ get; };
+            Windows.Media.Devices.CaptureUse PrimaryUse{ get; };
+            Windows.Media.Devices.CaptureUse PrimaryUse{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IAdvancedVideoCaptureDeviceController3", a98b8f34-ee0d-470c-b9f0-4229c4bbd089)]
+        {
+            Windows.Media.Devices.Core.VariablePhotoSequenceController VariablePhotoSequenceController{ get; };
+            Windows.Media.Devices.PhotoConfirmationControl PhotoConfirmationControl{ get; };
+            Windows.Media.Devices.ZoomControl ZoomControl{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.IAdvancedVideoCaptureDeviceController4", ea9fbfaf-d371-41c3-9a17-824a87ebdfd2)]
+        {
+            Windows.Media.Devices.ExposurePriorityVideoControl ExposurePriorityVideoControl{ get; };
+            Windows.Media.Devices.MediaCaptureOptimization DesiredOptimization{ get; };
+            Windows.Media.Devices.MediaCaptureOptimization DesiredOptimization{ set; };
+            Windows.Media.Devices.HdrVideoControl HdrVideoControl{ get; };
+            Windows.Media.Devices.OpticalImageStabilizationControl OpticalImageStabilizationControl{ get; };
+            Windows.Media.Devices.AdvancedPhotoControl AdvancedPhotoControl{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Devices.IAdvancedVideoCaptureDeviceController5", 33512b17-b9cb-4a23-b875-f9eaab535492)]
+        {
+            String Id{ get; };
+            Windows.Media.Devices.VideoDeviceControllerGetDevicePropertyResult GetDevicePropertyById(String propertyId, Windows.Foundation.IReference <UInt32>  maxPropertyValueSize);
+            Windows.Media.Devices.VideoDeviceControllerSetDevicePropertyStatus SetDevicePropertyById(String propertyId, [variant]Object propertyValue);
+            Windows.Media.Devices.VideoDeviceControllerGetDevicePropertyResult GetDevicePropertyByExtendedId(UInt8[] extendedPropertyId, Windows.Foundation.IReference <UInt32>  maxPropertyValueSize);
+            Windows.Media.Devices.VideoDeviceControllerSetDevicePropertyStatus SetDevicePropertyByExtendedId(UInt8[] extendedPropertyId, UInt8[] propertyValue);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Devices.IAdvancedVideoCaptureDeviceController6", b6563a53-68a1-44b7-9f89-b5fa97ac0cbe)]
+        {
+            Windows.Media.Devices.VideoTemporalDenoisingControl VideoTemporalDenoisingControl{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Media.Devices.IAdvancedVideoCaptureDeviceController7", 8d2927f0-a054-50e7-b7df-7c04234d10f0)]
+        {
+            Windows.Media.Devices.InfraredTorchControl InfraredTorchControl{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.IAudioDeviceController", edd4a388-79c7-4f7c-90e8-ef934b21580a)]
+    runtimeclass AudioDeviceController
+        : Windows.Media.Devices.IMediaDeviceController
+    {
+        Boolean Muted{ set; };
+        Boolean Muted{ get; };
+        Single VolumePercent{ set; };
+        Single VolumePercent{ get; };
+    }
+
+
+
+
+
+}
+namespace Windows.Media.Devices.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Devices.Core.IFrameExposureCapabilities", bdbe9ce3-3985-4e72-97c2-0590d61307a1)]
+    runtimeclass FrameExposureCapabilities
+    {
+        Boolean Supported{ get; };
+        Windows.Foundation.TimeSpan Min{ get; };
+        Windows.Foundation.TimeSpan Max{ get; };
+        Windows.Foundation.TimeSpan Step{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.Core.IFrameExposureCompensationCapabilities", b988a823-8065-41ee-b04f-722265954500)]
+    runtimeclass FrameExposureCompensationCapabilities
+    {
+        Boolean Supported{ get; };
+        Single Min{ get; };
+        Single Max{ get; };
+        Single Step{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.Core.IFrameIsoSpeedCapabilities", 16bdff61-6df6-4ac9-b92a-9f6ecd1ad2fa)]
+    runtimeclass FrameIsoSpeedCapabilities
+    {
+        Boolean Supported{ get; };
+        UInt32 Min{ get; };
+        UInt32 Max{ get; };
+        UInt32 Step{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.Core.IFrameFocusCapabilities", 7b25cd58-01c0-4065-9c40-c1a721425c1a)]
+    runtimeclass FrameFocusCapabilities
+    {
+        Boolean Supported{ get; };
+        UInt32 Min{ get; };
+        UInt32 Max{ get; };
+        UInt32 Step{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum FrameFlashMode
+    {
+        Disable,
+        Enable,
+        Global,
+    };
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Devices.Core.IFrameFlashCapabilities", bb9341a2-5ebe-4f62-8223-0e2b05bfbbd0)]
+    runtimeclass FrameFlashCapabilities
+    {
+        Boolean Supported{ get; };
+        Boolean RedEyeReductionSupported{ get; };
+        Boolean PowerSupported{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Devices.Core.IFrameControlCapabilities", a8ffae60-4e9e-4377-a789-e24c4ae7e544)]
+    runtimeclass FrameControlCapabilities
+    {
+        Windows.Media.Devices.Core.FrameExposureCapabilities Exposure{ get; };
+        Windows.Media.Devices.Core.FrameExposureCompensationCapabilities ExposureCompensation{ get; };
+        Windows.Media.Devices.Core.FrameIsoSpeedCapabilities IsoSpeed{ get; };
+        Windows.Media.Devices.Core.FrameFocusCapabilities Focus{ get; };
+        Boolean PhotoConfirmationSupported{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.Core.IFrameControlCapabilities2", ce9b0464-4730-440f-bd3e-efe8a8f230a8)]
+        {
+            Windows.Media.Devices.Core.FrameFlashCapabilities Flash{ get; };
+        }
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.Core.IFrameExposureControl", b1605a61-ffaf-4752-b621-f5b6f117f432)]
+    runtimeclass FrameExposureControl
+    {
+        Boolean Auto{ get; };
+        Boolean Auto{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Value{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Value{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Devices.Core.IFrameExposureCompensationControl", e95896c9-f7f9-48ca-8591-a26531cb1578)]
+    runtimeclass FrameExposureCompensationControl
+    {
+        Windows.Foundation.IReference <Single>  Value{ get; };
+        Windows.Foundation.IReference <Single>  Value{ set; };
+    }
+
+
+    [marshaling_behavior(standard)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.Core.IFrameIsoSpeedControl", 1a03efed-786a-4c75-a557-7ab9a85f588c)]
+    runtimeclass FrameIsoSpeedControl
+    {
+        Boolean Auto{ get; };
+        Boolean Auto{ set; };
+        Windows.Foundation.IReference <UInt32>  Value{ get; };
+        Windows.Foundation.IReference <UInt32>  Value{ set; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Media.Devices.Core.IFrameFocusControl", 272df1d0-d912-4214-a67b-e38a8d48d8c6)]
+    runtimeclass FrameFocusControl
+    {
+        Windows.Foundation.IReference <UInt32>  Value{ get; };
+        Windows.Foundation.IReference <UInt32>  Value{ set; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Devices.Core.IFrameFlashControl", 75d5f6c7-bd45-4fab-9375-45ac04b332c2)]
+    runtimeclass FrameFlashControl
+    {
+        Windows.Media.Devices.Core.FrameFlashMode Mode{ get; };
+        Windows.Media.Devices.Core.FrameFlashMode Mode{ set; };
+        Boolean Auto{ get; };
+        Boolean Auto{ set; };
+        Boolean RedEyeReduction{ get; };
+        Boolean RedEyeReduction{ set; };
+        Single PowerPercent{ get; };
+        Single PowerPercent{ set; };
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.Core.IFrameController", c16459d9-baef-4052-9177-48aff2af7522)]
+    [threading(both)]
+    runtimeclass FrameController
+    {
+        FrameController();
+        Windows.Media.Devices.Core.FrameExposureControl ExposureControl{ get; };
+        Windows.Media.Devices.Core.FrameExposureCompensationControl ExposureCompensationControl{ get; };
+        Windows.Media.Devices.Core.FrameIsoSpeedControl IsoSpeedControl{ get; };
+        Windows.Media.Devices.Core.FrameFocusControl FocusControl{ get; };
+        Windows.Foundation.IReference <Boolean>  PhotoConfirmationEnabled{ get; };
+        Windows.Foundation.IReference <Boolean>  PhotoConfirmationEnabled{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Devices.Core.IFrameController2", 00d3bc75-d87c-485b-8a09-5c358568b427)]
+        {
+            Windows.Media.Devices.Core.FrameFlashControl FlashControl{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Devices.Core.ICameraIntrinsics", 0aa6ed32-6589-49da-afde-594270ca0aac)]
+    [threading(both)]
+    runtimeclass CameraIntrinsics
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [constructor_name("Windows.Media.Devices.Core.ICameraIntrinsicsFactory", c0ddc486-2132-4a34-a659-9bfe2a055712)]
+        {
+            [method_name( "Create" )] CameraIntrinsics(Windows.Foundation.Numerics.Vector2 focalLength, Windows.Foundation.Numerics.Vector2 principalPoint, Windows.Foundation.Numerics.Vector3 radialDistortion, Windows.Foundation.Numerics.Vector2 tangentialDistortion, UInt32 imageWidth, UInt32 imageHeight);
+        }
+        Windows.Foundation.Numerics.Vector2 FocalLength{ get; };
+        Windows.Foundation.Numerics.Vector2 PrincipalPoint{ get; };
+        Windows.Foundation.Numerics.Vector3 RadialDistortion{ get; };
+        Windows.Foundation.Numerics.Vector2 TangentialDistortion{ get; };
+        UInt32 ImageWidth{ get; };
+        UInt32 ImageHeight{ get; };
+        Windows.Foundation.Point ProjectOntoFrame(Windows.Foundation.Numerics.Vector3 coordinate);
+        Windows.Foundation.Numerics.Vector2 UnprojectAtUnitDepth(Windows.Foundation.Point pixelCoordinate);
+        void ProjectManyOntoFrame(Windows.Foundation.Numerics.Vector3[] coordinates, ref Windows.Foundation.Point[] results);
+        void UnprojectPixelsAtUnitDepth(Windows.Foundation.Point[] pixelCoordinates, ref Windows.Foundation.Numerics.Vector2[] results);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Devices.Core.ICameraIntrinsics2", 0cdaa447-0798-4b4d-839f-c5ec414db27a)]
+        {
+            Windows.Foundation.Numerics.Matrix4x4 UndistortedProjectionTransform{ get; };
+            Windows.Foundation.Point DistortPoint(Windows.Foundation.Point input);
+            void DistortPoints(Windows.Foundation.Point[] inputs, ref Windows.Foundation.Point[] results);
+            Windows.Foundation.Point UndistortPoint(Windows.Foundation.Point input);
+            void UndistortPoints(Windows.Foundation.Point[] inputs, ref Windows.Foundation.Point[] results);
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.Core.IDepthCorrelatedCoordinateMapper", f95d89fb-8af0-4cb0-926d-696866e5046a)]
+    runtimeclass DepthCorrelatedCoordinateMapper
+        : Windows.Foundation.IClosable
+    {
+        Windows.Foundation.Numerics.Vector3 UnprojectPoint(Windows.Foundation.Point sourcePoint, Windows.Perception.Spatial.SpatialCoordinateSystem targetCoordinateSystem);
+        void UnprojectPoints(Windows.Foundation.Point[] sourcePoints, Windows.Perception.Spatial.SpatialCoordinateSystem targetCoordinateSystem, ref Windows.Foundation.Numerics.Vector3[] results);
+        Windows.Foundation.Point MapPoint(Windows.Foundation.Point sourcePoint, Windows.Perception.Spatial.SpatialCoordinateSystem targetCoordinateSystem, CameraIntrinsics targetCameraIntrinsics);
+        void MapPoints(Windows.Foundation.Point[] sourcePoints, Windows.Perception.Spatial.SpatialCoordinateSystem targetCoordinateSystem, CameraIntrinsics targetCameraIntrinsics, ref Windows.Foundation.Point[] results);
+    }
+
+}
+namespace Windows.Media.Playback
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum SphericalVideoProjectionMode
+    {
+        Spherical,
+        Flat,
+    };
+
+}
+namespace Windows.Media
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(07915118-45df-442b-8a3f-f7826a6370ab)]
+    interface IMediaExtension
+    {
+        void SetProperties(Windows.Foundation.Collections.IPropertySet configuration);
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.IMediaExtensionManager", 4a25eaf5-242d-4dfb-97f4-69b7c42576ff)]
+    [threading(both)]
+    runtimeclass MediaExtensionManager
+    {
+        MediaExtensionManager();
+        [method_name("RegisterSchemeHandler")] void RegisterSchemeHandler(String activatableClassId, String scheme);
+        [method_name("RegisterSchemeHandlerWithSettings")] void RegisterSchemeHandler(String activatableClassId, String scheme, Windows.Foundation.Collections.IPropertySet configuration);
+        [method_name("RegisterByteStreamHandler")] void RegisterByteStreamHandler(String activatableClassId, String fileExtension, String mimeType);
+        [method_name("RegisterByteStreamHandlerWithSettings")] void RegisterByteStreamHandler(String activatableClassId, String fileExtension, String mimeType, Windows.Foundation.Collections.IPropertySet configuration);
+        [method_name("RegisterAudioDecoder")] void RegisterAudioDecoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype);
+        [method_name("RegisterAudioDecoderWithSettings")] void RegisterAudioDecoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype, Windows.Foundation.Collections.IPropertySet configuration);
+        [method_name("RegisterAudioEncoder")] void RegisterAudioEncoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype);
+        [method_name("RegisterAudioEncoderWithSettings")] void RegisterAudioEncoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype, Windows.Foundation.Collections.IPropertySet configuration);
+        [method_name("RegisterVideoDecoder")] void RegisterVideoDecoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype);
+        [method_name("RegisterVideoDecoderWithSettings")] void RegisterVideoDecoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype, Windows.Foundation.Collections.IPropertySet configuration);
+        [method_name("RegisterVideoEncoder")] void RegisterVideoEncoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype);
+        [method_name("RegisterVideoEncoderWithSettings")] void RegisterVideoEncoder(String activatableClassId, Guid inputSubtype, Guid outputSubtype, Windows.Foundation.Collections.IPropertySet configuration);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.IMediaExtensionManager2", 5bcebf47-4043-4fed-acaf-54ec29dfb1f7)]
+        {
+            void RegisterMediaExtensionForAppService(IMediaExtension extension, Windows.ApplicationModel.AppService.AppServiceConnection connection);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Media.IVideoEffectsStatics", 1fcda5e8-baf1-4521-980c-3bcebb44cf38)]
+    [threading(both)]
+    runtimeclass VideoEffects
+    {
+        static String VideoStabilization{ get; };
+    }
+
+}
+namespace Windows.Media.Effects
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(39f38cf0-8d0f-4f3e-84fc-2d46a5297943)]
+    interface IVideoEffectDefinition
+    {
+        String ActivatableClassId{ get; };
+        Windows.Foundation.Collections.IPropertySet Properties{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Effects.IVideoEffectDefinitionFactory", 81439b4e-6e33-428f-9d21-b5aafef7617c)]
+    [threading(both)]
+    runtimeclass VideoEffectDefinition
+        : [default]Windows.Media.Effects.IVideoEffectDefinition
+    {
+        [method_name( "Create" )] VideoEffectDefinition(String activatableClassId);
+        [method_name( "CreateWithProperties" )] VideoEffectDefinition(String activatableClassId, Windows.Foundation.Collections.IPropertySet props);
+    }
+
+
+    [uuid(e4d7f974-7d80-4f73-9089-e31c9db9c294)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IAudioEffectDefinition
+    {
+        String ActivatableClassId{ get; };
+        Windows.Foundation.Collections.IPropertySet Properties{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.Effects.IAudioEffectDefinitionFactory", 8e1da646-e705-45ed-8a2b-fc4e4f405a97)]
+    [threading(both)]
+    runtimeclass AudioEffectDefinition
+        : [default]Windows.Media.Effects.IAudioEffectDefinition
+    {
+        [method_name( "Create" )] AudioEffectDefinition(String activatableClassId);
+        [method_name( "CreateWithProperties" )] AudioEffectDefinition(String activatableClassId, Windows.Foundation.Collections.IPropertySet props);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaMemoryTypes
+    {
+        Gpu,
+        Cpu,
+        GpuAndCpu,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaEffectClosedReason
+    {
+        Done,
+        UnknownError,
+        UnsupportedEncodingFormat,
+        EffectCurrentlyUnloaded,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(8262c7ef-b360-40be-949b-2ff42ff35693)]
+    interface IBasicVideoEffect requires Windows.Media.IMediaExtension
+    {
+        Boolean IsReadOnly{ get; };
+        Windows.Media.Effects.MediaMemoryTypes SupportedMemoryTypes{ get; };
+        Boolean TimeIndependent{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.MediaProperties.VideoEncodingProperties>  SupportedEncodingProperties{ get; };
+        void SetEncodingProperties(Windows.Media.MediaProperties.VideoEncodingProperties encodingProperties, Windows.Graphics.DirectX.Direct3D11.IDirect3DDevice device);
+        void ProcessFrame(ProcessVideoFrameContext context);
+        void Close(MediaEffectClosedReason reason);
+        void DiscardQueuedFrames();
+    };
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.High)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Effects.IProcessVideoFrameContext", 276f0e2b-6461-401e-ba78-0fdad6114eec)]
+    runtimeclass ProcessVideoFrameContext
+    {
+        Windows.Media.VideoFrame InputFrame{ get; };
+        Windows.Media.VideoFrame OutputFrame{ get; };
+    }
+
+
+    [uuid(8c062c53-6bc0-48b8-a99a-4b41550f1359)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IBasicAudioEffect requires Windows.Media.IMediaExtension
+    {
+        Boolean UseInputFrameForOutput{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.MediaProperties.AudioEncodingProperties>  SupportedEncodingProperties{ get; };
+        void SetEncodingProperties(Windows.Media.MediaProperties.AudioEncodingProperties encodingProperties);
+        void ProcessFrame(ProcessAudioFrameContext context);
+        void Close(MediaEffectClosedReason reason);
+        void DiscardQueuedFrames();
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Effects.IProcessAudioFrameContext", 4cd92946-1222-4a27-a586-fb3e20273255)]
+    runtimeclass ProcessAudioFrameContext
+    {
+        Windows.Media.AudioFrame InputFrame{ get; };
+        Windows.Media.AudioFrame OutputFrame{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Media.Effects.IVideoTransformSphericalProjection", cf4401f0-9bf2-4c39-9f41-e022514a8468)]
+    runtimeclass VideoTransformSphericalProjection
+    {
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Windows.Media.MediaProperties.SphericalVideoFrameFormat FrameFormat{ get; };
+        Windows.Media.MediaProperties.SphericalVideoFrameFormat FrameFormat{ set; };
+        Windows.Media.Playback.SphericalVideoProjectionMode ProjectionMode{ get; };
+        Windows.Media.Playback.SphericalVideoProjectionMode ProjectionMode{ set; };
+        Double HorizontalFieldOfViewInDegrees{ get; };
+        Double HorizontalFieldOfViewInDegrees{ set; };
+        Windows.Foundation.Numerics.Quaternion ViewOrientation{ get; };
+        Windows.Foundation.Numerics.Quaternion ViewOrientation{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass VideoTransformEffectDefinition
+        : [default]Windows.Media.Effects.IVideoEffectDefinition
+    {
+        VideoTransformEffectDefinition();
+
+        [interface_name("Windows.Media.Effects.IVideoTransformEffectDefinition", 9664bb6a-1ea6-4aa6-8074-abe8851ecae2)]
+        {
+            Windows.UI.Color PaddingColor{ get; };
+            Windows.UI.Color PaddingColor{ set; };
+            Windows.Foundation.Size OutputSize{ get; };
+            Windows.Foundation.Size OutputSize{ set; };
+            Windows.Foundation.Rect CropRectangle{ get; };
+            Windows.Foundation.Rect CropRectangle{ set; };
+            Windows.Media.MediaProperties.MediaRotation Rotation{ get; };
+            Windows.Media.MediaProperties.MediaRotation Rotation{ set; };
+            Windows.Media.MediaProperties.MediaMirroringOptions Mirror{ get; };
+            Windows.Media.MediaProperties.MediaMirroringOptions Mirror{ set; };
+            Windows.Media.Transcoding.MediaVideoProcessingAlgorithm ProcessingAlgorithm{ set; };
+            Windows.Media.Transcoding.MediaVideoProcessingAlgorithm ProcessingAlgorithm{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Effects.IVideoTransformEffectDefinition2", f0a8089f-66c8-4694-9fd9-1136abf7444a)]
+        {
+            Windows.Media.Effects.VideoTransformSphericalProjection SphericalProjection{ get; };
+        }
+    }
+
+}
+namespace Windows.Media.Protection
+{
+    [contractversion(1)]
+    apicontract ProtectionRenewalContract{};
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.IMediaProtectionManager", 45694947-c741-434b-a79e-474c12d93d2f)]
+    [threading(mta)]
+    runtimeclass MediaProtectionManager
+    {
+        MediaProtectionManager();
+        event Windows.Media.Protection.ServiceRequestedEventHandler ServiceRequested;
+        event Windows.Media.Protection.RebootNeededEventHandler RebootNeeded;
+        event Windows.Media.Protection.ComponentLoadFailedEventHandler ComponentLoadFailed;
+        Windows.Foundation.Collections.IPropertySet Properties{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Protection.IServiceRequestedEventArgs", 34283baf-abb4-4fc1-bd89-93f106573a49)]
+    runtimeclass ServiceRequestedEventArgs
+    {
+        Windows.Media.Protection.IMediaProtectionServiceRequest Request{ get; };
+        Windows.Media.Protection.MediaProtectionServiceCompletion Completion{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Protection.IServiceRequestedEventArgs2", 553c69d6-fafe-4128-8dfa-130e398a13a7)]
+        {
+            Windows.Media.Playback.MediaPlaybackItem MediaPlaybackItem{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.IComponentLoadFailedEventArgs", 95972e93-7746-417e-8495-f031bbc5862c)]
+    runtimeclass ComponentLoadFailedEventArgs
+    {
+        Windows.Media.Protection.RevocationAndRenewalInformation Information{ get; };
+        Windows.Media.Protection.MediaProtectionServiceCompletion Completion{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Protection.IMediaProtectionServiceCompletion", 8b5cca18-cfd5-44ee-a2ed-df76010c14b5)]
+    runtimeclass MediaProtectionServiceCompletion
+    {
+        void Complete(Boolean success);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.IRevocationAndRenewalInformation", f3a1937b-2501-439e-a6e7-6fc95e175fcf)]
+    runtimeclass RevocationAndRenewalInformation
+    {
+        Windows.Foundation.Collections.IVector <Windows.Media.Protection.RevocationAndRenewalItem>  Items{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.IRevocationAndRenewalItem", 3099c20c-3cf0-49ea-902d-caf32d2dde2c)]
+    runtimeclass RevocationAndRenewalItem
+    {
+        Windows.Media.Protection.RevocationAndRenewalReasons Reasons{ get; };
+        String HeaderHash{ get; };
+        String PublicKeyHash{ get; };
+        String Name{ get; };
+        String RenewalId{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.Protection.IMediaProtectionPMPServerFactory", 602c8e5e-f7d2-487e-af91-dbc4252b2182)]
+    [interface_name("Windows.Media.Protection.IMediaProtectionPMPServer", 0c111226-7b26-4d31-95bb-9c1b08ef7fc0)]
+    [threading(both)]
+    runtimeclass MediaProtectionPMPServer
+    {
+        [method_name( "CreatePMPServer" )] MediaProtectionPMPServer(Windows.Foundation.Collections.IPropertySet pProperties);
+        Windows.Foundation.Collections.IPropertySet Properties{ get; };
+    }
+
+    [uuid(d2d690ba-cac9-48e1-95c0-d38495a84055)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    delegate void ServiceRequestedEventHandler(MediaProtectionManager sender, ServiceRequestedEventArgs e);
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(64e12a45-973b-4a3a-b260-91898a49a82c)]
+    delegate void RebootNeededEventHandler(MediaProtectionManager sender);
+
+    [uuid(95da643c-6db9-424b-86ca-091af432081c)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    delegate void ComponentLoadFailedEventHandler(MediaProtectionManager sender, ComponentLoadFailedEventArgs e);
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(b1de0ea6-2094-478d-87a4-8b95200f85c6)]
+    interface IMediaProtectionServiceRequest
+    {
+        Guid ProtectionSystem{ get; };
+        Guid Type{ get; };
+    };
+
+
+}
+namespace Windows.Media.Playback
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Playback.IMediaPlaybackItemFactory", 7133fce1-1769-4ff9-a7c1-38d2c4d42360)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackItem", 047097d2-e4af-48ab-b283-6929e674ece2)]
+    [threading(both)]
+    runtimeclass MediaPlaybackItem
+        : Windows.Media.Playback.IMediaPlaybackSource
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Media.Playback.IMediaPlaybackItemStatics", 4b1be7f4-4345-403c-8a67-f5de91df4c86)]
+        {
+            static Windows.Media.Playback.MediaPlaybackItem FindFromMediaSource(Windows.Media.Core.MediaSource source);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [constructor_name("Windows.Media.Playback.IMediaPlaybackItemFactory2", d77cdf3a-b947-4972-b35d-adfb931a71e6)]
+        {
+            [method_name( "CreateWithStartTime" )] MediaPlaybackItem(Windows.Media.Core.MediaSource source, Windows.Foundation.TimeSpan startTime);
+            [method_name( "CreateWithStartTimeAndDurationLimit" )] MediaPlaybackItem(Windows.Media.Core.MediaSource source, Windows.Foundation.TimeSpan startTime, Windows.Foundation.TimeSpan durationLimit);
+        }
+        [method_name( "Create" )] MediaPlaybackItem(Windows.Media.Core.MediaSource source);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackItem, Windows.Foundation.Collections.IVectorChangedEventArgs>  AudioTracksChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackItem, Windows.Foundation.Collections.IVectorChangedEventArgs>  VideoTracksChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackItem, Windows.Foundation.Collections.IVectorChangedEventArgs>  TimedMetadataTracksChanged;
+        Windows.Media.Core.MediaSource Source{ get; };
+        Windows.Media.Playback.MediaPlaybackAudioTrackList AudioTracks{ get; };
+        Windows.Media.Playback.MediaPlaybackVideoTrackList VideoTracks{ get; };
+        Windows.Media.Playback.MediaPlaybackTimedMetadataTrackList TimedMetadataTracks{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Playback.IMediaPlaybackItem2", d859d171-d7ef-4b81-ac1f-f40493cbb091)]
+        {
+            Windows.Media.Playback.MediaBreakSchedule BreakSchedule{ get; };
+            Windows.Foundation.TimeSpan StartTime{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  DurationLimit{ get; };
+            Boolean CanSkip{ get; };
+            Boolean CanSkip{ set; };
+            Windows.Media.Playback.MediaItemDisplayProperties GetDisplayProperties();
+            void ApplyDisplayProperties(MediaItemDisplayProperties value);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Playback.IMediaPlaybackItem3", 0d328220-b80a-4d09-9ff8-f87094a1c831)]
+        {
+            Boolean IsDisabledInPlaybackList{ get; };
+            Boolean IsDisabledInPlaybackList{ set; };
+            Double TotalDownloadProgress{ get; };
+            Windows.Media.Playback.AutoLoadedDisplayPropertyKind AutoLoadedDisplayProperties{ get; };
+            Windows.Media.Playback.AutoLoadedDisplayPropertyKind AutoLoadedDisplayProperties{ set; };
+        }
+    }
+
+
+
+}
+namespace Windows.Media.Protection
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum RevocationAndRenewalReasons
+    {
+        UserModeComponentLoad = 1,
+        KernelModeComponentLoad,
+        AppComponent = 4,
+        GlobalRevocationListLoadFailed = 16,
+        InvalidGlobalRevocationListSignature = 32,
+        GlobalRevocationListAbsent = 4096,
+        ComponentRevoked = 8192,
+        InvalidComponentCertificateExtendedKeyUse = 16384,
+        ComponentCertificateRevoked = 32768,
+        InvalidComponentCertificateRoot = 65536,
+        ComponentHighSecurityCertificateRevoked = 131072,
+        ComponentLowSecurityCertificateRevoked = 262144,
+        BootDriverVerificationFailed = 1048576,
+        ComponentSignedWithTestCertificate = 16777216,
+        EncryptionFailure = 268435456,
+    };
+
+
+    [contract(Windows.Media.Protection.ProtectionRenewalContract, 1)]
+    [static_name("Windows.Media.Protection.IComponentRenewalStatics", 6ffbcd67-b795-48c5-8b7b-a7c4efe202e3)]
+    runtimeclass ComponentRenewal
+    {
+        static Windows.Foundation.IAsyncOperationWithProgress <Windows.Media.Protection.RenewalStatus, UInt32>  RenewSystemComponentsAsync(RevocationAndRenewalInformation information);
+    }
+
+    [contract(Windows.Media.Protection.ProtectionRenewalContract, 1)]
+    enum RenewalStatus
+    {
+        NotStarted,
+        UpdatesInProgress,
+        UserCancelled,
+        AppComponentsMayNeedUpdating,
+        NoComponentsFound,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum GraphicsTrustStatus
+    {
+        TrustNotRequired,
+        TrustEstablished,
+        EnvironmentNotSupported,
+        DriverNotSupported,
+        DriverSigningFailure,
+        UnknownFailure,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum ProtectionCapabilityResult
+    {
+        NotSupported,
+        Maybe,
+        Probably,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Protection.IProtectionCapabilities", c7ac5d7e-7480-4d29-a464-7bcd913dd8e4)]
+    [threading(both)]
+    runtimeclass ProtectionCapabilities
+    {
+        ProtectionCapabilities();
+        Windows.Media.Protection.ProtectionCapabilityResult IsTypeSupported(String type, String keySystem);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum HdcpProtection
+    {
+        Off,
+        On,
+        OnWithTypeEnforcement,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum HdcpSetProtectionResult
+    {
+        Success,
+        TimedOut,
+        NotSupported,
+        UnknownFailure,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.Media.Protection.IHdcpSession", 718845e9-64d7-426d-809b-1be461941a2a)]
+    [threading(both)]
+    runtimeclass HdcpSession
+        : Windows.Foundation.IClosable
+    {
+        HdcpSession();
+        Boolean IsEffectiveProtectionAtLeast(HdcpProtection protection);
+        Windows.Foundation.IReference <Windows.Media.Protection.HdcpProtection>  GetEffectiveProtection();
+        Windows.Foundation.IAsyncOperation <Windows.Media.Protection.HdcpSetProtectionResult>  SetDesiredMinProtectionAsync(HdcpProtection protection);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Protection.HdcpSession, Object>  ProtectionChanged;
+    }
+
+}
+namespace Windows.Media.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaStreamSourceClosedReason
+    {
+        Done,
+        UnknownError,
+        AppReportedError,
+        UnsupportedProtectionSystem,
+        ProtectionSystemFailure,
+        UnsupportedEncodingFormat,
+        MissingSampleRequestedEventHandler,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaStreamSourceErrorStatus
+    {
+        Other,
+        OutOfMemory,
+        FailedToOpenFile,
+        FailedToConnectToServer,
+        ConnectionToServerLost,
+        UnspecifiedNetworkError,
+        DecodeError,
+        UnsupportedMediaFormat,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [uuid(5073010f-e8b2-4071-b00b-ebf337a76b58)]
+    interface IMediaStreamDescriptor2 requires Windows.Media.Core.IMediaStreamDescriptor
+    {
+        String Label{ set; };
+        String Label{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(80f16e6e-92f7-451e-97d2-afd80742da70)]
+    interface IMediaStreamDescriptor
+    {
+        Boolean IsSelected{ get; };
+        String Name{ set; };
+        String Name{ get; };
+        String Language{ set; };
+        String Language{ get; };
+    };
+
+
+
+
+
+
+
+
+
+
+    [uuid(e7bfb599-a09d-4c21-bcdf-20af4f86b3d9)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IMediaSource
+    {
+    };
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.Core.IMediaStreamSourceFactory", ef77e0d9-d158-4b7a-863f-203342fbfd41)]
+    [interface_name("Windows.Media.Core.IMediaStreamSource", 3712d543-45eb-4138-aa62-c01e26f3843f)]
+    [threading(both)]
+    runtimeclass MediaStreamSource
+        : Windows.Media.Core.IMediaSource
+    {
+        [method_name( "CreateFromDescriptor" )] MediaStreamSource(IMediaStreamDescriptor descriptor);
+        [method_name( "CreateFromDescriptors" )] MediaStreamSource(IMediaStreamDescriptor descriptor, IMediaStreamDescriptor descriptor2);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaStreamSource, Windows.Media.Core.MediaStreamSourceClosedEventArgs>  Closed;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaStreamSource, Windows.Media.Core.MediaStreamSourceStartingEventArgs>  Starting;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaStreamSource, Object>  Paused;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaStreamSource, Windows.Media.Core.MediaStreamSourceSampleRequestedEventArgs>  SampleRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaStreamSource, Windows.Media.Core.MediaStreamSourceSwitchStreamsRequestedEventArgs>  SwitchStreamsRequested;
+        void NotifyError(MediaStreamSourceErrorStatus errorStatus);
+        void AddStreamDescriptor(IMediaStreamDescriptor descriptor);
+        Windows.Media.Protection.MediaProtectionManager MediaProtectionManager{ set; };
+        Windows.Media.Protection.MediaProtectionManager MediaProtectionManager{ get; };
+        Windows.Foundation.TimeSpan Duration{ set; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Boolean CanSeek{ set; };
+        Boolean CanSeek{ get; };
+        Windows.Foundation.TimeSpan BufferTime{ set; };
+        Windows.Foundation.TimeSpan BufferTime{ get; };
+        void SetBufferedRange(Windows.Foundation.TimeSpan startOffset, Windows.Foundation.TimeSpan endOffset);
+        Windows.Storage.FileProperties.MusicProperties MusicProperties{ get; };
+        Windows.Storage.FileProperties.VideoProperties VideoProperties{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ set; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ get; };
+        void AddProtectionKey(IMediaStreamDescriptor streamDescriptor, UInt8[] keyIdentifier, UInt8[] licenseData);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Core.IMediaStreamSource2", ec55d0ad-2e6a-4f74-adbb-b562d1533849)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaStreamSource, Windows.Media.Core.MediaStreamSourceSampleRenderedEventArgs>  SampleRendered;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Core.IMediaStreamSource3", 6a2a2746-3ddd-4ddf-a121-94045ecf9440)]
+        {
+            Windows.Foundation.IReference <Double>  MaxSupportedPlaybackRate{ set; };
+            Windows.Foundation.IReference <Double>  MaxSupportedPlaybackRate{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Media.Core.IMediaStreamSource4", 1d0cfcab-830d-417c-a3a9-2454fd6415c7)]
+        {
+            Boolean IsLive{ set; };
+            Boolean IsLive{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceClosedEventArgs", cd8c7eb2-4816-4e24-88f0-491ef7386406)]
+    runtimeclass MediaStreamSourceClosedEventArgs
+    {
+        Windows.Media.Core.MediaStreamSourceClosedRequest Request{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceStartingEventArgs", f41468f2-c274-4940-a5bb-28a572452fa7)]
+    runtimeclass MediaStreamSourceStartingEventArgs
+    {
+        Windows.Media.Core.MediaStreamSourceStartingRequest Request{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceSampleRequestedEventArgs", 10f9bb9e-71c5-492f-847f-0da1f35e81f8)]
+    runtimeclass MediaStreamSourceSampleRequestedEventArgs
+    {
+        Windows.Media.Core.MediaStreamSourceSampleRequest Request{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceSwitchStreamsRequestedEventArgs", 42202b72-6ea1-4677-981e-350a0da412aa)]
+    runtimeclass MediaStreamSourceSwitchStreamsRequestedEventArgs
+    {
+        Windows.Media.Core.MediaStreamSourceSwitchStreamsRequest Request{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceSampleRenderedEventArgs", 9d697b05-d4f2-4c7a-9dfe-8d6cd0b3ee84)]
+    runtimeclass MediaStreamSourceSampleRenderedEventArgs
+    {
+        Windows.Foundation.TimeSpan SampleLag{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [hasvariant][marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    runtimeclass MediaStreamSamplePropertySet
+        : [default]Windows.Foundation.Collections.IMap<Guid, Object>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<Guid, Object> >
+    {
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Core.IMediaStreamSampleStatics", dfdf218f-a6cf-4579-be41-73dd941ad972)]
+    [interface_name("Windows.Media.Core.IMediaStreamSample", 5c8db627-4b80-4361-9837-6cb7481ad9d6)]
+    [threading(both)]
+    runtimeclass MediaStreamSample
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Media.Core.IMediaStreamSampleStatics2", 9efe9521-6d46-494c-a2f8-d662922e2dd7)]
+        {
+            static Windows.Media.Core.MediaStreamSample CreateFromDirect3D11Surface(Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface surface, Windows.Foundation.TimeSpan timestamp);
+        }
+        static Windows.Media.Core.MediaStreamSample CreateFromBuffer(Windows.Storage.Streams.IBuffer buffer, Windows.Foundation.TimeSpan timestamp);
+        static Windows.Foundation.IAsyncOperation <Windows.Media.Core.MediaStreamSample>  CreateFromStreamAsync(Windows.Storage.Streams.IInputStream stream, UInt32 count, Windows.Foundation.TimeSpan timestamp);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaStreamSample, Object>  Processed;
+        Windows.Storage.Streams.Buffer Buffer{ get; };
+        Windows.Foundation.TimeSpan Timestamp{ get; };
+        Windows.Media.Core.MediaStreamSamplePropertySet ExtendedProperties{ get; };
+        Windows.Media.Core.MediaStreamSampleProtectionProperties Protection{ get; };
+        Windows.Foundation.TimeSpan DecodeTimestamp{ set; };
+        Windows.Foundation.TimeSpan DecodeTimestamp{ get; };
+        Windows.Foundation.TimeSpan Duration{ set; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Boolean KeyFrame{ set; };
+        Boolean KeyFrame{ get; };
+        Boolean Discontinuous{ set; };
+        Boolean Discontinuous{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Media.Core.IMediaStreamSample2", 45078691-fce8-4746-a1c8-10c25d3d7cd3)]
+        {
+            Windows.Graphics.DirectX.Direct3D11.IDirect3DSurface Direct3D11Surface{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IMediaStreamSampleProtectionProperties", 4eb88292-ecdf-493e-841d-dd4add7caca2)]
+    runtimeclass MediaStreamSampleProtectionProperties
+    {
+        void SetKeyIdentifier(UInt8[] value);
+        void GetKeyIdentifier(out UInt8[] value);
+        void SetInitializationVector(UInt8[] value);
+        void GetInitializationVector(out UInt8[] value);
+        void SetSubSampleMapping(UInt8[] value);
+        void GetSubSampleMapping(out UInt8[] value);
+    }
+
+
+
+
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceClosedRequest", 907c00e9-18a3-4951-887a-2c1eebd5c69e)]
+    runtimeclass MediaStreamSourceClosedRequest
+    {
+        Windows.Media.Core.MediaStreamSourceClosedReason Reason{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceStartingRequestDeferral", 3f1356a5-6340-4dc4-9910-068ed9f598f8)]
+    runtimeclass MediaStreamSourceStartingRequestDeferral
+    {
+        void Complete();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceStartingRequest", 2a9093e4-35c4-4b1b-a791-0d99db56dd1d)]
+    runtimeclass MediaStreamSourceStartingRequest
+    {
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  StartPosition{ get; };
+        Windows.Media.Core.MediaStreamSourceStartingRequestDeferral GetDeferral();
+        void SetActualStartPosition(Windows.Foundation.TimeSpan position);
+    }
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceSampleRequestDeferral", 7895cc02-f982-43c8-9d16-c62d999319be)]
+    runtimeclass MediaStreamSourceSampleRequestDeferral
+    {
+        void Complete();
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceSampleRequest", 4db341a9-3501-4d9b-83f9-8f235c822532)]
+    runtimeclass MediaStreamSourceSampleRequest
+    {
+        Windows.Media.Core.IMediaStreamDescriptor StreamDescriptor{ get; };
+        Windows.Media.Core.MediaStreamSourceSampleRequestDeferral GetDeferral();
+        Windows.Media.Core.MediaStreamSample Sample{ set; };
+        Windows.Media.Core.MediaStreamSample Sample{ get; };
+        void ReportSampleProgress(UInt32 progress);
+    }
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceSwitchStreamsRequestDeferral", bee3d835-a505-4f9a-b943-2b8cb1b4bbd9)]
+    runtimeclass MediaStreamSourceSwitchStreamsRequestDeferral
+    {
+        void Complete();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IMediaStreamSourceSwitchStreamsRequest", 41b8808e-38a9-4ec3-9ba0-b69b85501e90)]
+    runtimeclass MediaStreamSourceSwitchStreamsRequest
+    {
+        Windows.Media.Core.IMediaStreamDescriptor OldStreamDescriptor{ get; };
+        Windows.Media.Core.IMediaStreamDescriptor NewStreamDescriptor{ get; };
+        Windows.Media.Core.MediaStreamSourceSwitchStreamsRequestDeferral GetDeferral();
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct MseTimeRange
+    {
+        Windows.Foundation.TimeSpan Start;
+        Windows.Foundation.TimeSpan End;
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MseReadyState
+    {
+        Closed,
+        Open,
+        Ended,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MseEndOfStreamStatus
+    {
+        Success,
+        NetworkError,
+        DecodeError,
+        UnknownError,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum MseAppendMode
+    {
+        Segments,
+        Sequence,
+    };
+
+
+
+    [webhosthidden]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Core.IMseStreamSourceStatics", 465c679d-d570-43ce-ba21-0bff5f3fbd0a)]
+    [interface_name("Windows.Media.Core.IMseStreamSource", b0b4198d-02f4-4923-88dd-81bc3f360ffa)]
+    [threading(both)]
+    runtimeclass MseStreamSource
+        : Windows.Media.Core.IMediaSource
+    {
+        MseStreamSource();
+        static Boolean IsContentTypeSupported(String contentType);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseStreamSource, Object>  Opened;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseStreamSource, Object>  Ended;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseStreamSource, Object>  Closed;
+        Windows.Media.Core.MseSourceBufferList SourceBuffers{ get; };
+        Windows.Media.Core.MseSourceBufferList ActiveSourceBuffers{ get; };
+        Windows.Media.Core.MseReadyState ReadyState{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Duration{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Duration{ set; };
+        Windows.Media.Core.MseSourceBuffer AddSourceBuffer(String mimeType);
+        void RemoveSourceBuffer(MseSourceBuffer buffer);
+        void EndOfStream(MseEndOfStreamStatus status);
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Media.Core.IMseStreamSource2", 66f57d37-f9e7-418a-9cde-a020e956552b)]
+        {
+            Windows.Foundation.IReference <Windows.Media.Core.MseTimeRange>  LiveSeekableRange{ get; };
+            Windows.Foundation.IReference <Windows.Media.Core.MseTimeRange>  LiveSeekableRange{ set; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IMseSourceBufferList", 95fae8e7-a8e7-4ebf-8927-145e940ba511)]
+    runtimeclass MseSourceBufferList
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseSourceBufferList, Object>  SourceBufferAdded;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseSourceBufferList, Object>  SourceBufferRemoved;
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Core.MseSourceBuffer>  Buffers{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.Media.Core.IMseSourceBuffer", 0c1aa3e3-df8d-4079-a3fe-6849184b4e2f)]
+    runtimeclass MseSourceBuffer
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseSourceBuffer, Object>  UpdateStarting;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseSourceBuffer, Object>  Updated;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseSourceBuffer, Object>  UpdateEnded;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseSourceBuffer, Object>  ErrorOccurred;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MseSourceBuffer, Object>  Aborted;
+        Windows.Media.Core.MseAppendMode Mode{ get; };
+        Windows.Media.Core.MseAppendMode Mode{ set; };
+        Boolean IsUpdating{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Core.MseTimeRange>  Buffered{ get; };
+        Windows.Foundation.TimeSpan TimestampOffset{ get; };
+        Windows.Foundation.TimeSpan TimestampOffset{ set; };
+        Windows.Foundation.TimeSpan AppendWindowStart{ get; };
+        Windows.Foundation.TimeSpan AppendWindowStart{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  AppendWindowEnd{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  AppendWindowEnd{ set; };
+        void AppendBuffer(Windows.Storage.Streams.IBuffer buffer);
+        [method_name("AppendStream")] void AppendStream(Windows.Storage.Streams.IInputStream stream);
+        [method_name("AppendStreamMaxSize")] void AppendStream(Windows.Storage.Streams.IInputStream stream, UInt64 maxSize);
+        void Abort();
+        void Remove(Windows.Foundation.TimeSpan start, Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  end);
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.Media.Core.IMediaSourceAppServiceConnectionFactory", 65b912eb-80b9-44f9-9c1e-e120f6d92838)]
+    [interface_name("Windows.Media.Core.IMediaSourceAppServiceConnection", 61e1ea97-1916-4810-b7f4-b642be829596)]
+    runtimeclass MediaSourceAppServiceConnection
+    {
+        [method_name( "Create" )] MediaSourceAppServiceConnection(Windows.ApplicationModel.AppService.AppServiceConnection appServiceConnection);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaSourceAppServiceConnection, Windows.Media.Core.InitializeMediaStreamSourceRequestedEventArgs>  InitializeMediaStreamSourceRequested;
+        void Start();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.Media.Core.IInitializeMediaStreamSourceRequestedEventArgs", 25bc45e1-9b08-4c2e-a855-4542f1a75deb)]
+    runtimeclass InitializeMediaStreamSourceRequestedEventArgs
+    {
+        Windows.Media.Core.MediaStreamSource Source{ get; };
+        Windows.Storage.Streams.IRandomAccessStream RandomAccessStream{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+}
+namespace Windows.Media.Transcoding
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TranscodeFailureReason
+    {
+        None,
+        Unknown,
+        InvalidProfile,
+        CodecNotFound,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Media.Transcoding.IPrepareTranscodeResult", 05f25dce-994f-4a34-9d68-97ccce1730d6)]
+    runtimeclass PrepareTranscodeResult
+    {
+        Boolean CanTranscode{ get; };
+        Windows.Media.Transcoding.TranscodeFailureReason FailureReason{ get; };
+        Windows.Foundation.IAsyncActionWithProgress <Double>  TranscodeAsync();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Transcoding.IMediaTranscoder", 190c99d2-a0aa-4d34-86bc-eed1b12c2f5b)]
+    [threading(both)]
+    runtimeclass MediaTranscoder
+    {
+        MediaTranscoder();
+        Windows.Foundation.TimeSpan TrimStartTime{ set; };
+        Windows.Foundation.TimeSpan TrimStartTime{ get; };
+        Windows.Foundation.TimeSpan TrimStopTime{ set; };
+        Windows.Foundation.TimeSpan TrimStopTime{ get; };
+        Boolean AlwaysReencode{ set; };
+        Boolean AlwaysReencode{ get; };
+        Boolean HardwareAccelerationEnabled{ set; };
+        Boolean HardwareAccelerationEnabled{ get; };
+        [method_name("AddAudioEffect")] void AddAudioEffect(String activatableClassId);
+        [method_name("AddAudioEffectWithSettings")] void AddAudioEffect(String activatableClassId, Boolean effectRequired, Windows.Foundation.Collections.IPropertySet configuration);
+        [method_name("AddVideoEffect")] void AddVideoEffect(String activatableClassId);
+        [method_name("AddVideoEffectWithSettings")] void AddVideoEffect(String activatableClassId, Boolean effectRequired, Windows.Foundation.Collections.IPropertySet configuration);
+        void ClearEffects();
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Media.Transcoding.PrepareTranscodeResult>  PrepareFileTranscodeAsync(Windows.Storage.IStorageFile source, Windows.Storage.IStorageFile destination, Windows.Media.MediaProperties.MediaEncodingProfile profile);
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Media.Transcoding.PrepareTranscodeResult>  PrepareStreamTranscodeAsync(Windows.Storage.Streams.IRandomAccessStream source, Windows.Storage.Streams.IRandomAccessStream destination, Windows.Media.MediaProperties.MediaEncodingProfile profile);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Transcoding.IMediaTranscoder2", 40531d74-35e0-4f04-8574-ca8bc4e5a082)]
+        {
+            [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Media.Transcoding.PrepareTranscodeResult>  PrepareMediaStreamSourceTranscodeAsync(Windows.Media.Core.IMediaSource source, Windows.Storage.Streams.IRandomAccessStream destination, Windows.Media.MediaProperties.MediaEncodingProfile profile);
+            Windows.Media.Transcoding.MediaVideoProcessingAlgorithm VideoProcessingAlgorithm{ set; };
+            Windows.Media.Transcoding.MediaVideoProcessingAlgorithm VideoProcessingAlgorithm{ get; };
+        }
+    }
+
+
+}
+namespace Windows.Media.Core
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Core.IHighDynamicRangeControl", 55f1a7ae-d957-4dc9-9d1c-8553a82a7d99)]
+    runtimeclass HighDynamicRangeControl
+    {
+        Boolean Enabled{ set; };
+        Boolean Enabled{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.ISceneAnalysisEffect", c04ba319-ca41-4813-bffd-7b08b0ed2557)]
+    runtimeclass SceneAnalysisEffect
+        : Windows.Media.IMediaExtension
+    {
+        Windows.Media.Core.HighDynamicRangeControl HighDynamicRangeAnalyzer{ get; };
+        Windows.Foundation.TimeSpan DesiredAnalysisInterval{ set; };
+        Windows.Foundation.TimeSpan DesiredAnalysisInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.SceneAnalysisEffect, Windows.Media.Core.SceneAnalyzedEventArgs>  SceneAnalyzed;
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.ISceneAnalyzedEventArgs", 146b9588-2851-45e4-ad55-44cf8df8db4d)]
+    runtimeclass SceneAnalyzedEventArgs
+    {
+        Windows.Media.Core.SceneAnalysisEffectFrame ResultFrame{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IHighDynamicRangeOutput", 0f57806b-253b-4119-bb40-3a90e51384f7)]
+    runtimeclass HighDynamicRangeOutput
+    {
+        Double Certainty{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Devices.Core.FrameController>  FrameControllers{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum SceneAnalysisRecommendation
+    {
+        Standard,
+        Hdr,
+        LowLight,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.ISceneAnalysisEffectFrame", d8b10e4c-7fd9-42e1-85eb-6572c297c987)]
+    runtimeclass SceneAnalysisEffectFrame
+        : Windows.Media.IMediaFrame
+        , Windows.Foundation.IClosable
+    {
+        Windows.Media.Capture.CapturedFrameControlValues FrameControlValues{ get; };
+        Windows.Media.Core.HighDynamicRangeOutput HighDynamicRange{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Media.Core.ISceneAnalysisEffectFrame2", 2d4e29be-061f-47ae-9915-02524b5f9a5f)]
+        {
+            Windows.Media.Core.SceneAnalysisRecommendation AnalysisRecommendation{ get; };
+        }
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [threading(both)]
+    runtimeclass SceneAnalysisEffectDefinition
+        : [default]Windows.Media.Effects.IVideoEffectDefinition
+    {
+        SceneAnalysisEffectDefinition();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IFaceDetectionEffectFrame", 8ab08993-5dc8-447b-a247-5270bd802ece)]
+    runtimeclass FaceDetectionEffectFrame
+        : Windows.Media.IMediaFrame
+        , Windows.Foundation.IClosable
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.FaceAnalysis.DetectedFace>  DetectedFaces{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IFaceDetectedEventArgs", 19918426-c65b-46ba-85f8-13880576c90a)]
+    runtimeclass FaceDetectedEventArgs
+    {
+        Windows.Media.Core.FaceDetectionEffectFrame ResultFrame{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IFaceDetectionEffect", ae15ebd2-0542-42a9-bc90-f283a29f46c1)]
+    runtimeclass FaceDetectionEffect
+        : Windows.Media.IMediaExtension
+    {
+        Boolean Enabled{ set; };
+        Boolean Enabled{ get; };
+        Windows.Foundation.TimeSpan DesiredDetectionInterval{ set; };
+        Windows.Foundation.TimeSpan DesiredDetectionInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.FaceDetectionEffect, Windows.Media.Core.FaceDetectedEventArgs>  FaceDetected;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum FaceDetectionMode
+    {
+        HighPerformance,
+        Balanced,
+        HighQuality,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass FaceDetectionEffectDefinition
+        : [default]Windows.Media.Effects.IVideoEffectDefinition
+    {
+        FaceDetectionEffectDefinition();
+
+        [interface_name("Windows.Media.Core.IFaceDetectionEffectDefinition", 43dca081-b848-4f33-b702-1fd2624fb016)]
+        {
+            Windows.Media.Core.FaceDetectionMode DetectionMode{ set; };
+            Windows.Media.Core.FaceDetectionMode DetectionMode{ get; };
+            Boolean SynchronousDetectionEnabled{ set; };
+            Boolean SynchronousDetectionEnabled{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum VideoStabilizationEffectEnabledChangedReason
+    {
+        Programmatic,
+        PixelRateTooHigh,
+        RunningSlowly,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IVideoStabilizationEffectEnabledChangedEventArgs", 187eff28-67bb-4713-b900-4168da164529)]
+    runtimeclass VideoStabilizationEffectEnabledChangedEventArgs
+    {
+        Windows.Media.Core.VideoStabilizationEffectEnabledChangedReason Reason{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IVideoStabilizationEffect", 0808a650-9698-4e57-877b-bd7cb2ee0f8a)]
+    runtimeclass VideoStabilizationEffect
+        : Windows.Media.IMediaExtension
+    {
+        Boolean Enabled{ set; };
+        Boolean Enabled{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.VideoStabilizationEffect, Windows.Media.Core.VideoStabilizationEffectEnabledChangedEventArgs>  EnabledChanged;
+        Windows.Media.Capture.VideoStreamConfiguration GetRecommendedStreamConfiguration(Windows.Media.Devices.VideoDeviceController controller, Windows.Media.MediaProperties.VideoEncodingProperties desiredProperties);
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass VideoStabilizationEffectDefinition
+        : [default]Windows.Media.Effects.IVideoEffectDefinition
+    {
+        VideoStabilizationEffectDefinition();
+    }
+
+}
+namespace Windows.Media.ClosedCaptioning
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ClosedCaptionStyle
+    {
+        Default,
+        MonospacedWithSerifs,
+        ProportionalWithSerifs,
+        MonospacedWithoutSerifs,
+        ProportionalWithoutSerifs,
+        Casual,
+        Cursive,
+        SmallCapitals,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ClosedCaptionEdgeEffect
+    {
+        Default,
+        None,
+        Raised,
+        Depressed,
+        Uniform,
+        DropShadow,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ClosedCaptionOpacity
+    {
+        Default,
+        OneHundredPercent,
+        SeventyFivePercent,
+        TwentyFivePercent,
+        ZeroPercent,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ClosedCaptionColor
+    {
+        Default,
+        White,
+        Black,
+        Red,
+        Green,
+        Blue,
+        Yellow,
+        Magenta,
+        Cyan,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ClosedCaptionSize
+    {
+        Default,
+        FiftyPercent,
+        OneHundredPercent,
+        OneHundredFiftyPercent,
+        TwoHundredPercent,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.ClosedCaptioning.IClosedCaptionPropertiesStatics", 10aa1f84-cc30-4141-b503-5272289e0c20)]
+    [threading(both)]
+    runtimeclass ClosedCaptionProperties
+    {
+        static Windows.Media.ClosedCaptioning.ClosedCaptionColor FontColor{ get; };
+        static Windows.UI.Color ComputedFontColor{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionOpacity FontOpacity{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionSize FontSize{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionStyle FontStyle{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionEdgeEffect FontEffect{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionColor BackgroundColor{ get; };
+        static Windows.UI.Color ComputedBackgroundColor{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionOpacity BackgroundOpacity{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionColor RegionColor{ get; };
+        static Windows.UI.Color ComputedRegionColor{ get; };
+        static Windows.Media.ClosedCaptioning.ClosedCaptionOpacity RegionOpacity{ get; };
+    }
+
+}
+namespace Windows.Media.Streaming.Adaptive
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AdaptiveMediaSourceCreationStatus
+    {
+        Success,
+        ManifestDownloadFailure,
+        ManifestParseFailure,
+        UnsupportedManifestContentType,
+        UnsupportedManifestVersion,
+        UnsupportedManifestProfile,
+        UnknownFailure,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceStatics", 50a6bd5d-66ef-4cd3-9579-9e660507dc3f)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSource", 4c7332ef-d39f-4396-b4d9-043957a7c964)]
+    [threading(both)]
+    runtimeclass AdaptiveMediaSource
+        : Windows.Media.Core.IMediaSource
+        , [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.Foundation.IClosable
+    {
+        static Boolean IsContentTypeSupported(String contentType);
+        [method_name("CreateFromUriAsync")] static Windows.Foundation.IAsyncOperation <Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceCreationResult>  CreateFromUriAsync(Windows.Foundation.Uri uri);
+        [method_name("CreateFromUriWithDownloaderAsync")] static Windows.Foundation.IAsyncOperation <Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceCreationResult>  CreateFromUriAsync(Windows.Foundation.Uri uri, Windows.Web.Http.HttpClient httpClient);
+        [method_name("CreateFromStreamAsync")] static Windows.Foundation.IAsyncOperation <Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceCreationResult>  CreateFromStreamAsync(Windows.Storage.Streams.IInputStream stream, Windows.Foundation.Uri uri, String contentType);
+        [method_name("CreateFromStreamWithDownloaderAsync")] static Windows.Foundation.IAsyncOperation <Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceCreationResult>  CreateFromStreamAsync(Windows.Storage.Streams.IInputStream stream, Windows.Foundation.Uri uri, String contentType, Windows.Web.Http.HttpClient httpClient);
+        Boolean IsLive{ get; };
+        Windows.Foundation.TimeSpan DesiredLiveOffset{ get; };
+        Windows.Foundation.TimeSpan DesiredLiveOffset{ set; };
+        UInt32 InitialBitrate{ get; };
+        UInt32 InitialBitrate{ set; };
+        UInt32 CurrentDownloadBitrate{ get; };
+        UInt32 CurrentPlaybackBitrate{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  AvailableBitrates{ get; };
+        Windows.Foundation.IReference <UInt32>  DesiredMinBitrate{ get; };
+        Windows.Foundation.IReference <UInt32>  DesiredMinBitrate{ set; };
+        Windows.Foundation.IReference <UInt32>  DesiredMaxBitrate{ get; };
+        Windows.Foundation.IReference <UInt32>  DesiredMaxBitrate{ set; };
+        Boolean AudioOnlyPlayback{ get; };
+        UInt64 InboundBitsPerSecond{ get; };
+        Windows.Foundation.TimeSpan InboundBitsPerSecondWindow{ get; };
+        Windows.Foundation.TimeSpan InboundBitsPerSecondWindow{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Streaming.Adaptive.AdaptiveMediaSource, Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadBitrateChangedEventArgs>  DownloadBitrateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Streaming.Adaptive.AdaptiveMediaSource, Windows.Media.Streaming.Adaptive.AdaptiveMediaSourcePlaybackBitrateChangedEventArgs>  PlaybackBitrateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Streaming.Adaptive.AdaptiveMediaSource, Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadRequestedEventArgs>  DownloadRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Streaming.Adaptive.AdaptiveMediaSource, Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadCompletedEventArgs>  DownloadCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Streaming.Adaptive.AdaptiveMediaSource, Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadFailedEventArgs>  DownloadFailed;
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSource2", 17890342-6760-4bb9-a58a-f7aa98b08c0e)]
+        {
+            Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceAdvancedSettings AdvancedSettings{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSource3", ba7023fd-c334-461b-a36e-c99f54f7174a)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  MinLiveOffset{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  MaxSeekableWindowSize{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  DesiredSeekableWindowSize{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  DesiredSeekableWindowSize{ set; };
+            Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDiagnostics Diagnostics{ get; };
+            Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceCorrelatedTimes GetCorrelatedTimes();
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceCreationResult", 4686b6b2-800f-4e31-9093-76d4782013e7)]
+    runtimeclass AdaptiveMediaSourceCreationResult
+    {
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceCreationStatus Status{ get; };
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSource MediaSource{ get; };
+        Windows.Web.Http.HttpResponseMessage HttpResponseMessage{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceCreationResult2", 1c3243bf-1c44-404b-a201-df45ac7898e8)]
+        {
+            HRESULT ExtendedError{ get; };
+        }
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadBitrateChangedEventArgs", 670c0a44-e04e-4eff-816a-17399f78f4ba)]
+    runtimeclass AdaptiveMediaSourceDownloadBitrateChangedEventArgs
+    {
+        UInt32 OldValue{ get; };
+        UInt32 NewValue{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadBitrateChangedEventArgs2", f3f1f444-96ae-4de0-b540-2b3246e6968c)]
+        {
+            Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadBitrateChangedReason Reason{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourcePlaybackBitrateChangedEventArgs", 23a29f6d-7dda-4a51-87a9-6fa8c5b292be)]
+    runtimeclass AdaptiveMediaSourcePlaybackBitrateChangedEventArgs
+    {
+        UInt32 OldValue{ get; };
+        UInt32 NewValue{ get; };
+        Boolean AudioOnly{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadRequestedEventArgs", c83fdffd-44a9-47a2-bf96-03398b4bfaaf)]
+    runtimeclass AdaptiveMediaSourceDownloadRequestedEventArgs
+    {
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceResourceType ResourceType{ get; };
+        Windows.Foundation.Uri ResourceUri{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeOffset{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeLength{ get; };
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadResult Result{ get; };
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadRequestedDeferral GetDeferral();
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadRequestedEventArgs2", b37d8bfe-aa44-4d82-825b-611de3bcfecb)]
+        {
+            Int32 RequestId{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Position{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadRequestedEventArgs3", 333c50fd-4f62-4481-ab44-1e47b0574225)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  ResourceDuration{ get; };
+            String ResourceContentType{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadCompletedEventArgs", 19240dc3-5b37-4a1a-8970-d621cb6ca83b)]
+    runtimeclass AdaptiveMediaSourceDownloadCompletedEventArgs
+    {
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceResourceType ResourceType{ get; };
+        Windows.Foundation.Uri ResourceUri{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeOffset{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeLength{ get; };
+        Windows.Web.Http.HttpResponseMessage HttpResponseMessage{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadCompletedEventArgs2", 704744c4-964a-40e4-af95-9177dd6dfa00)]
+        {
+            Int32 RequestId{ get; };
+            Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadStatistics Statistics{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Position{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadCompletedEventArgs3", 0f8a8bd1-93b2-47c6-badc-8be2c8f7f6e8)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  ResourceDuration{ get; };
+            String ResourceContentType{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadFailedEventArgs", 37739048-f4ab-40a4-b135-c6dfd8bd7ff1)]
+    runtimeclass AdaptiveMediaSourceDownloadFailedEventArgs
+    {
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceResourceType ResourceType{ get; };
+        Windows.Foundation.Uri ResourceUri{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeOffset{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeLength{ get; };
+        Windows.Web.Http.HttpResponseMessage HttpResponseMessage{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadFailedEventArgs2", 70919568-967c-4986-90c5-c6fc4b31e2d8)]
+        {
+            Int32 RequestId{ get; };
+            HRESULT ExtendedError{ get; };
+            Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDownloadStatistics Statistics{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Position{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadFailedEventArgs3", d0354549-1132-4a10-915a-c2211b5b9409)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  ResourceDuration{ get; };
+            String ResourceContentType{ get; };
+        }
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceAdvancedSettings", 55db1680-1aeb-47dc-aa08-9a11610ba45a)]
+    runtimeclass AdaptiveMediaSourceAdvancedSettings
+    {
+        Boolean AllSegmentsIndependent{ get; };
+        Boolean AllSegmentsIndependent{ set; };
+        Windows.Foundation.IReference <Double>  DesiredBitrateHeadroomRatio{ get; };
+        Windows.Foundation.IReference <Double>  DesiredBitrateHeadroomRatio{ set; };
+        Windows.Foundation.IReference <Double>  BitrateDowngradeTriggerRatio{ get; };
+        Windows.Foundation.IReference <Double>  BitrateDowngradeTriggerRatio{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDiagnostics", 9b24ee68-962e-448c-aebf-b29b56098e23)]
+    runtimeclass AdaptiveMediaSourceDiagnostics
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDiagnostics, Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDiagnosticAvailableEventArgs>  DiagnosticAvailable;
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceCorrelatedTimes", 05108787-e032-48e1-ab8d-002b0b3051df)]
+    runtimeclass AdaptiveMediaSourceCorrelatedTimes
+    {
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Position{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PresentationTimeStamp{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  ProgramDateTime{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum AdaptiveMediaSourceDownloadBitrateChangedReason
+    {
+        SufficientInboundBitsPerSecond,
+        InsufficientInboundBitsPerSecond,
+        LowBufferLevel,
+        PositionChanged,
+        TrackSelectionChanged,
+        DesiredBitratesChanged,
+        ErrorInPreviousBitrate,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AdaptiveMediaSourceResourceType
+    {
+        Manifest,
+        InitializationSegment,
+        MediaSegment,
+        Key,
+        InitializationVector,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        MediaSegmentIndex,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadResult", f4afdc73-bcee-4a6a-9f0a-fec41e2339b0)]
+    runtimeclass AdaptiveMediaSourceDownloadResult
+    {
+        Windows.Foundation.Uri ResourceUri{ get; };
+        Windows.Foundation.Uri ResourceUri{ set; };
+        Windows.Storage.Streams.IInputStream InputStream{ get; };
+        Windows.Storage.Streams.IInputStream InputStream{ set; };
+        Windows.Storage.Streams.IBuffer Buffer{ get; };
+        Windows.Storage.Streams.IBuffer Buffer{ set; };
+        String ContentType{ get; };
+        String ContentType{ set; };
+        UInt32 ExtendedStatus{ get; };
+        UInt32 ExtendedStatus{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadResult2", 15552cb7-7b80-4ac4-8660-a4b97f7c70f0)]
+        {
+            Windows.Foundation.IReference <UInt64>  ResourceByteRangeOffset{ get; };
+            Windows.Foundation.IReference <UInt64>  ResourceByteRangeOffset{ set; };
+            Windows.Foundation.IReference <UInt64>  ResourceByteRangeLength{ get; };
+            Windows.Foundation.IReference <UInt64>  ResourceByteRangeLength{ set; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadRequestedDeferral", 05c68f64-fa20-4dbd-9821-4bf4c9bf77ab)]
+    runtimeclass AdaptiveMediaSourceDownloadRequestedDeferral
+    {
+        void Complete();
+    }
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDownloadStatistics", a306cefb-e96a-4dff-a9b8-1ae08c01ae98)]
+    runtimeclass AdaptiveMediaSourceDownloadStatistics
+    {
+        UInt64 ContentBytesReceivedCount{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  TimeToHeadersReceived{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  TimeToFirstByteReceived{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  TimeToLastByteReceived{ get; };
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum AdaptiveMediaSourceDiagnosticType
+    {
+        ManifestUnchangedUponReload,
+        ManifestMismatchUponReload,
+        ManifestSignaledEndOfLiveEventUponReload,
+        MediaSegmentSkipped,
+        ResourceNotFound,
+        ResourceTimedOut,
+        ResourceParsingError,
+        BitrateDisabled,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        FatalMediaSourceError,
+    };
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDiagnosticAvailableEventArgs", 3af64f06-6d9c-494a-b7a9-b3a5dee6ad68)]
+    runtimeclass AdaptiveMediaSourceDiagnosticAvailableEventArgs
+    {
+        Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceDiagnosticType DiagnosticType{ get; };
+        Windows.Foundation.IReference <Int32>  RequestId{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Position{ get; };
+        Windows.Foundation.IReference <UInt64>  SegmentId{ get; };
+        Windows.Foundation.IReference <Windows.Media.Streaming.Adaptive.AdaptiveMediaSourceResourceType>  ResourceType{ get; };
+        Windows.Foundation.Uri ResourceUri{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeOffset{ get; };
+        Windows.Foundation.IReference <UInt64>  ResourceByteRangeLength{ get; };
+        Windows.Foundation.IReference <UInt32>  Bitrate{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDiagnosticAvailableEventArgs2", 8c6dd857-16a5-4d9f-810e-00bd901b3ef9)]
+        {
+            HRESULT ExtendedError{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Streaming.Adaptive.IAdaptiveMediaSourceDiagnosticAvailableEventArgs3", c3650cd5-daeb-4103-84da-68769ad513ff)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  ResourceDuration{ get; };
+            String ResourceContentType{ get; };
+        }
+    }
+
+
+}
+namespace Windows.Media.Playback
+{
+    [uuid(ef9dc2bc-9317-4696-b051-2bad643177b5)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IMediaPlaybackSource
+    {
+    };
+
+}
+namespace Windows.Media.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaTrackKind
+    {
+        Audio,
+        Video,
+        TimedMetadata,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedMetadataKind
+    {
+        Caption,
+        Chapter,
+        Custom,
+        Data,
+        Description,
+        Subtitle,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        ImageSubtitle,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Speech,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedMetadataTrackErrorCode
+    {
+        None,
+        DataFormatError,
+        NetworkError,
+        InternalError,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MediaDecoderStatus
+    {
+        FullySupported,
+        UnsupportedSubtype,
+        UnsupportedEncoderProperties,
+        Degraded,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum AudioDecoderDegradation
+    {
+        None,
+        DownmixTo2Channels,
+        DownmixTo6Channels,
+        DownmixTo8Channels,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum AudioDecoderDegradationReason
+    {
+        None,
+        LicensingRequirement,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        SpatialAudioNotSupported,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MediaSourceStatus
+    {
+        FullySupported,
+        Unknown,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum MediaSourceState
+    {
+        Initial,
+        Opening,
+        Opened,
+        Failed,
+        Closed,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IMediaSourceError", 5c0a8965-37c5-4e9d-8d21-1cdee90cecc6)]
+    runtimeclass MediaSourceError
+    {
+        HRESULT ExtendedError{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Core.IMediaSourceStatics", f77d6fa4-4652-410e-b1d8-e9a5e245a45c)]
+    [interface_name("Windows.Media.Core.IMediaSource2", 2eb61048-655f-4c37-b813-b4e45dfa0abe)]
+    [threading(both)]
+    runtimeclass MediaSource
+        : Windows.Foundation.IClosable
+        , Windows.Media.Playback.IMediaPlaybackSource
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.Media.Core.IMediaSourceStatics4", 281b3bfc-e50a-4428-a500-9c4ed918d3f0)]
+        {
+            static Windows.Media.Core.MediaSource CreateFromDownloadOperation(Windows.Networking.BackgroundTransfer.DownloadOperation downloadOperation);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Media.Core.IMediaSourceStatics3", 453a30d6-2bea-4122-9f73-eace04526e35)]
+        {
+            static Windows.Media.Core.MediaSource CreateFromMediaFrameSource(Windows.Media.Capture.Frames.MediaFrameSource frameSource);
+        }
+        static Windows.Media.Core.MediaSource CreateFromAdaptiveMediaSource(Windows.Media.Streaming.Adaptive.AdaptiveMediaSource mediaSource);
+        static Windows.Media.Core.MediaSource CreateFromMediaStreamSource(MediaStreamSource mediaSource);
+        static Windows.Media.Core.MediaSource CreateFromMseStreamSource(MseStreamSource mediaSource);
+        static Windows.Media.Core.MediaSource CreateFromIMediaSource(IMediaSource mediaSource);
+        static Windows.Media.Core.MediaSource CreateFromStorageFile(Windows.Storage.IStorageFile file);
+        static Windows.Media.Core.MediaSource CreateFromStream(Windows.Storage.Streams.IRandomAccessStream stream, String contentType);
+        static Windows.Media.Core.MediaSource CreateFromStreamReference(Windows.Storage.Streams.IRandomAccessStreamReference stream, String contentType);
+        static Windows.Media.Core.MediaSource CreateFromUri(Windows.Foundation.Uri uri);
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Media.Core.IMediaSourceStatics2", eee161a4-7f13-4896-b8cb-df0de5bcb9f1)]
+        {
+            static Windows.Media.Core.MediaSource CreateFromMediaBinder(MediaBinder binder);
+        }
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaSource, Windows.Media.Core.MediaSourceOpenOperationCompletedEventArgs>  OpenOperationCompleted;
+        Windows.Foundation.Collections.ValueSet CustomProperties{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  Duration{ get; };
+        Boolean IsOpen{ get; };
+        Windows.Foundation.Collections.IObservableVector <Windows.Media.Core.TimedTextSource>  ExternalTimedTextSources{ get; };
+        Windows.Foundation.Collections.IObservableVector <Windows.Media.Core.TimedMetadataTrack>  ExternalTimedMetadataTracks{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Media.Core.IMediaSource3", b59f0d9b-4b6e-41ed-bbb4-7c7509a994ad)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaSource, Windows.Media.Core.MediaSourceStateChangedEventArgs>  StateChanged;
+            Windows.Media.Core.MediaSourceState State{ get; };
+            void Reset();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Core.IMediaSource4", bdafad57-8eff-4c63-85a6-84de0ae3e4f2)]
+        {
+            Windows.Media.Streaming.Adaptive.AdaptiveMediaSource AdaptiveMediaSource{ get; };
+            Windows.Media.Core.MediaStreamSource MediaStreamSource{ get; };
+            Windows.Media.Core.MseStreamSource MseStreamSource{ get; };
+            Windows.Foundation.Uri Uri{ get; };
+            Windows.Foundation.IAsyncAction OpenAsync();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Core.IMediaSource5", 331a22ae-ed2e-4a22-94c8-b743a92b3022)]
+        {
+            Windows.Networking.BackgroundTransfer.DownloadOperation DownloadOperation{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Media.Core.IMediaBinder", 2b7e40aa-de07-424f-83f1-f1de46c4fa2e)]
+    [threading(both)]
+    runtimeclass MediaBinder
+    {
+        MediaBinder();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaBinder, Windows.Media.Core.MediaBindingEventArgs>  Binding;
+        String Token{ get; };
+        String Token{ set; };
+        Windows.Media.Core.MediaSource Source{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IMediaBindingEventArgs", b61cb25a-1b6d-4630-a86d-2f0837f712e5)]
+    runtimeclass MediaBindingEventArgs
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.MediaBindingEventArgs, Object>  Canceled;
+        Windows.Media.Core.MediaBinder MediaBinder{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+        void SetUri(Windows.Foundation.Uri uri);
+        void SetStream(Windows.Storage.Streams.IRandomAccessStream stream, String contentType);
+        void SetStreamReference(Windows.Storage.Streams.IRandomAccessStreamReference stream, String contentType);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Core.IMediaBindingEventArgs2", 0464cceb-bb5a-482f-b8ba-f0284c696567)]
+        {
+            void SetAdaptiveMediaSource(Windows.Media.Streaming.Adaptive.AdaptiveMediaSource mediaSource);
+            void SetStorageFile(Windows.Storage.IStorageFile file);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.Core.IMediaBindingEventArgs3", f8eb475e-19be-44fc-a5ed-7aba315037f9)]
+        {
+            void SetDownloadOperation(Windows.Networking.BackgroundTransfer.DownloadOperation downloadOperation);
+        }
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IMediaSourceOpenOperationCompletedEventArgs", fc682ceb-e281-477c-a8e0-1acd654114c8)]
+    runtimeclass MediaSourceOpenOperationCompletedEventArgs
+    {
+        Windows.Media.Core.MediaSourceError Error{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Core.ITimedTextSourceStatics", 7e311853-9aba-4ac4-bb98-2fb176c3bfdd)]
+    [interface_name("Windows.Media.Core.ITimedTextSource", c4ed9ba6-101f-404d-a949-82f33fcd93b7)]
+    [threading(both)]
+    runtimeclass TimedTextSource
+    {
+        [method_name("CreateFromStream")] static Windows.Media.Core.TimedTextSource CreateFromStream(Windows.Storage.Streams.IRandomAccessStream stream);
+        [method_name("CreateFromUri")] static Windows.Media.Core.TimedTextSource CreateFromUri(Windows.Foundation.Uri uri);
+        [method_name("CreateFromStreamWithLanguage")] static Windows.Media.Core.TimedTextSource CreateFromStream(Windows.Storage.Streams.IRandomAccessStream stream, String defaultLanguage);
+        [method_name("CreateFromUriWithLanguage")] static Windows.Media.Core.TimedTextSource CreateFromUri(Windows.Foundation.Uri uri, String defaultLanguage);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Media.Core.ITimedTextSourceStatics2", b66b7602-923e-43fa-9633-587075812db5)]
+        {
+            [method_name("CreateFromStreamWithIndex")] static Windows.Media.Core.TimedTextSource CreateFromStreamWithIndex(Windows.Storage.Streams.IRandomAccessStream stream, Windows.Storage.Streams.IRandomAccessStream indexStream);
+            [method_name("CreateFromUriWithIndex")] static Windows.Media.Core.TimedTextSource CreateFromUriWithIndex(Windows.Foundation.Uri uri, Windows.Foundation.Uri indexUri);
+            [method_name("CreateFromStreamWithIndexAndLanguage")] static Windows.Media.Core.TimedTextSource CreateFromStreamWithIndex(Windows.Storage.Streams.IRandomAccessStream stream, Windows.Storage.Streams.IRandomAccessStream indexStream, String defaultLanguage);
+            [method_name("CreateFromUriWithIndexAndLanguage")] static Windows.Media.Core.TimedTextSource CreateFromUriWithIndex(Windows.Foundation.Uri uri, Windows.Foundation.Uri indexUri, String defaultLanguage);
+        }
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.TimedTextSource, Windows.Media.Core.TimedTextSourceResolveResultEventArgs>  Resolved;
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Core.ITimedMetadataTrackFactory", 8dd57611-97b3-4e1f-852c-0f482c81ad26)]
+    [interface_name("Windows.Media.Core.ITimedMetadataTrack", 9e6aed9e-f67a-49a9-b330-cf03b0e9cf07)]
+    [threading(both)]
+    runtimeclass TimedMetadataTrack
+        : Windows.Media.Core.IMediaTrack
+    {
+        [method_name( "Create" )] TimedMetadataTrack(String id, String language, TimedMetadataKind kind);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.TimedMetadataTrack, Windows.Media.Core.MediaCueEventArgs>  CueEntered;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.TimedMetadataTrack, Windows.Media.Core.MediaCueEventArgs>  CueExited;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.TimedMetadataTrack, Windows.Media.Core.TimedMetadataTrackFailedEventArgs>  TrackFailed;
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Core.IMediaCue>  Cues{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Core.IMediaCue>  ActiveCues{ get; };
+        Windows.Media.Core.TimedMetadataKind TimedMetadataKind{ get; };
+        String DispatchType{ get; };
+        void AddCue(IMediaCue cue);
+        void RemoveCue(IMediaCue cue);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Core.ITimedMetadataTrack2", 21b4b648-9f9d-40ba-a8f3-1a92753aef0b)]
+        {
+            Windows.Media.Playback.MediaPlaybackItem PlaybackItem{ get; };
+            String Name{ get; };
+        }
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Media.Core.IMediaSourceStateChangedEventArgs", 0a30af82-9071-4bac-bc39-ca2a93b717a9)]
+    runtimeclass MediaSourceStateChangedEventArgs
+    {
+        Windows.Media.Core.MediaSourceState OldState{ get; };
+        Windows.Media.Core.MediaSourceState NewState{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(77206f1f-c34f-494f-8077-2bad9ff4ecf1)]
+    interface ISingleSelectMediaTrackList
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Core.ISingleSelectMediaTrackList, Object>  SelectedIndexChanged;
+        Int32 SelectedIndex{ set; };
+        Int32 SelectedIndex{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(03e1fafc-c931-491a-b46b-c10ee8c256b7)]
+    interface IMediaTrack
+    {
+        String Id{ get; };
+        String Language{ get; };
+        Windows.Media.Core.MediaTrackKind TrackKind{ get; };
+        String Label{ set; };
+        String Label{ get; };
+    };
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.ITimedMetadataTrackError", b3767915-4114-4819-b9d9-dd76089e72f8)]
+    runtimeclass TimedMetadataTrackError
+    {
+        Windows.Media.Core.TimedMetadataTrackErrorCode ErrorCode{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [uuid(3b7f2024-f74e-4ade-93c5-219da05b6856)]
+    interface ITimedMetadataTrackProvider
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Core.TimedMetadataTrack>  TimedMetadataTracks{ get; };
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IMediaCueEventArgs", d12f47f7-5fa4-4e68-9fe5-32160dcee57e)]
+    runtimeclass MediaCueEventArgs
+    {
+        Windows.Media.Core.IMediaCue Cue{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.ITimedMetadataTrackFailedEventArgs", a57fc9d1-6789-4d4d-b07f-84b4f31acb70)]
+    runtimeclass TimedMetadataTrackFailedEventArgs
+    {
+        Windows.Media.Core.TimedMetadataTrackError Error{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.ITimedTextSourceResolveResultEventArgs", 48907c9c-dcd8-4c33-9ad3-6cdce7b1c566)]
+    runtimeclass TimedTextSourceResolveResultEventArgs
+    {
+        Windows.Media.Core.TimedMetadataTrackError Error{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Core.TimedMetadataTrack>  Tracks{ get; };
+    }
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass VideoTrack
+        : [default]Windows.Media.Core.IMediaTrack
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Core.IVideoTrack", 99f3b7f3-e298-4396-bb6a-a51be6a2a20a)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Core.VideoTrack, Windows.Media.Core.VideoTrackOpenFailedEventArgs>  OpenFailed;
+            Windows.Media.MediaProperties.VideoEncodingProperties GetEncodingProperties();
+            Windows.Media.Playback.MediaPlaybackItem PlaybackItem{ get; };
+            String Name{ get; };
+            Windows.Media.Core.VideoTrackSupportInfo SupportInfo{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IVideoTrackOpenFailedEventArgs", 7679e231-04f9-4c82-a4ee-8602c8bb4754)]
+    runtimeclass VideoTrackOpenFailedEventArgs
+    {
+        HRESULT ExtendedError{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.IVideoTrackSupportInfo", 4bb534a0-fc5f-450d-8ff0-778d590486de)]
+    runtimeclass VideoTrackSupportInfo
+    {
+        Windows.Media.Core.MediaDecoderStatus DecoderStatus{ get; };
+        Windows.Media.Core.MediaSourceStatus MediaSourceStatus{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass AudioTrack
+        : [default]Windows.Media.Core.IMediaTrack
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Core.IAudioTrack", f23b6e77-3ef7-40de-b943-068b1321701d)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Core.AudioTrack, Windows.Media.Core.AudioTrackOpenFailedEventArgs>  OpenFailed;
+            Windows.Media.MediaProperties.AudioEncodingProperties GetEncodingProperties();
+            Windows.Media.Playback.MediaPlaybackItem PlaybackItem{ get; };
+            String Name{ get; };
+            Windows.Media.Core.AudioTrackSupportInfo SupportInfo{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Media.Core.IAudioTrackOpenFailedEventArgs", eeddb9b9-bb7c-4112-bf76-9384676f824b)]
+    runtimeclass AudioTrackOpenFailedEventArgs
+    {
+        HRESULT ExtendedError{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Core.IAudioTrackSupportInfo", 178beff7-cc39-44a6-b951-4a5653f073fa)]
+    runtimeclass AudioTrackSupportInfo
+    {
+        Windows.Media.Core.MediaDecoderStatus DecoderStatus{ get; };
+        Windows.Media.Core.AudioDecoderDegradation Degradation{ get; };
+        Windows.Media.Core.AudioDecoderDegradationReason DegradationReason{ get; };
+        Windows.Media.Core.MediaSourceStatus MediaSourceStatus{ get; };
+    }
+
+
+}
+namespace Windows.Media.Playback
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPlaybackItemErrorCode
+    {
+        None,
+        Aborted,
+        NetworkError,
+        DecodeError,
+        SourceNotSupportedError,
+        EncryptionError,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum FailedMediaStreamKind
+    {
+        Unknown,
+        Audio,
+        Video,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TimedMetadataTrackPresentationMode
+    {
+        Disabled,
+        Hidden,
+        ApplicationPresented,
+        PlatformPresented,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MediaBreakInsertionMethod
+    {
+        Interrupt,
+        Replace,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum MediaPlaybackItemChangedReason
+    {
+        InitialItem,
+        EndOfStream,
+        Error,
+        AppRequested,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum AutoLoadedDisplayPropertyKind
+    {
+        None,
+        MusicOrVideo,
+        Music,
+        Video,
+    };
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass MediaPlaybackAudioTrackList
+        : [default]Windows.Foundation.Collections.IVectorView<Windows.Media.Core.AudioTrack>
+        , Windows.Foundation.Collections.IIterable<Windows.Media.Core.AudioTrack>
+        , Windows.Media.Core.ISingleSelectMediaTrackList
+    {
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass MediaPlaybackVideoTrackList
+        : [default]Windows.Foundation.Collections.IVectorView<Windows.Media.Core.VideoTrack>
+        , Windows.Foundation.Collections.IIterable<Windows.Media.Core.VideoTrack>
+        , Windows.Media.Core.ISingleSelectMediaTrackList
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    runtimeclass MediaPlaybackTimedMetadataTrackList
+        : [default]Windows.Foundation.Collections.IVectorView<Windows.Media.Core.TimedMetadataTrack>
+        , Windows.Foundation.Collections.IIterable<Windows.Media.Core.TimedMetadataTrack>
+    {
+
+        [interface_name("Windows.Media.Playback.IMediaPlaybackTimedMetadataTrackList", 72b41319-bbfb-46a3-9372-9c9c744b9438)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackTimedMetadataTrackList, Windows.Media.Playback.TimedMetadataPresentationModeChangedEventArgs>  PresentationModeChanged;
+            Windows.Media.Playback.TimedMetadataTrackPresentationMode GetPresentationMode(UInt32 index);
+            void SetPresentationMode(UInt32 index, TimedMetadataTrackPresentationMode value);
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Media.Playback.IMediaBreakSchedule", a19a5813-98b6-41d8-83da-f971d22b7bba)]
+    runtimeclass MediaBreakSchedule
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaBreakSchedule, Object>  ScheduleChanged;
+        void InsertMidrollBreak(MediaBreak mediaBreak);
+        void RemoveMidrollBreak(MediaBreak mediaBreak);
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Playback.MediaBreak>  MidrollBreaks{ get; };
+        Windows.Media.Playback.MediaBreak PrerollBreak{ set; };
+        Windows.Media.Playback.MediaBreak PrerollBreak{ get; };
+        Windows.Media.Playback.MediaBreak PostrollBreak{ set; };
+        Windows.Media.Playback.MediaBreak PostrollBreak{ get; };
+        Windows.Media.Playback.MediaPlaybackItem PlaybackItem{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Media.Playback.IMediaItemDisplayProperties", 1e3c1b48-7097-4384-a217-c1291dfa8c16)]
+    runtimeclass MediaItemDisplayProperties
+    {
+        Windows.Media.MediaPlaybackType Type{ get; };
+        Windows.Media.MediaPlaybackType Type{ set; };
+        Windows.Media.MusicDisplayProperties MusicProperties{ get; };
+        Windows.Media.VideoDisplayProperties VideoProperties{ get; };
+        Windows.Storage.Streams.RandomAccessStreamReference Thumbnail{ get; };
+        Windows.Storage.Streams.RandomAccessStreamReference Thumbnail{ set; };
+        void ClearAll();
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.Playback.IMediaBreakFactory", 4516e002-18e0-4079-8b5f-d33495c15d2e)]
+    [interface_name("Windows.Media.Playback.IMediaBreak", 714be270-0def-4ebc-a489-6b34930e1558)]
+    [threading(both)]
+    runtimeclass MediaBreak
+    {
+        [method_name( "Create" )] MediaBreak(MediaBreakInsertionMethod insertionMethod);
+        [method_name( "CreateWithPresentationPosition" )] MediaBreak(MediaBreakInsertionMethod insertionMethod, Windows.Foundation.TimeSpan presentationPosition);
+        Windows.Media.Playback.MediaPlaybackList PlaybackList{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PresentationPosition{ get; };
+        Windows.Media.Playback.MediaBreakInsertionMethod InsertionMethod{ get; };
+        Windows.Foundation.Collections.ValueSet CustomProperties{ get; };
+        Boolean CanStart{ get; };
+        Boolean CanStart{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackList", 7f77ee9c-dc42-4e26-a98d-7850df8ec925)]
+    [threading(both)]
+    runtimeclass MediaPlaybackList
+        : Windows.Media.Playback.IMediaPlaybackSource
+    {
+        MediaPlaybackList();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackList, Windows.Media.Playback.MediaPlaybackItemFailedEventArgs>  ItemFailed;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackList, Windows.Media.Playback.CurrentMediaPlaybackItemChangedEventArgs>  CurrentItemChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Playback.MediaPlaybackList, Windows.Media.Playback.MediaPlaybackItemOpenedEventArgs>  ItemOpened;
+        Windows.Foundation.Collections.IObservableVector <Windows.Media.Playback.MediaPlaybackItem>  Items{ get; };
+        Boolean AutoRepeatEnabled{ get; };
+        Boolean AutoRepeatEnabled{ set; };
+        Boolean ShuffleEnabled{ get; };
+        Boolean ShuffleEnabled{ set; };
+        Windows.Media.Playback.MediaPlaybackItem CurrentItem{ get; };
+        UInt32 CurrentItemIndex{ get; };
+        Windows.Media.Playback.MediaPlaybackItem MoveNext();
+        Windows.Media.Playback.MediaPlaybackItem MovePrevious();
+        Windows.Media.Playback.MediaPlaybackItem MoveTo(UInt32 itemIndex);
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Media.Playback.IMediaPlaybackList2", 0e09b478-600a-4274-a14b-0b6723d0f48b)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  MaxPrefetchTime{ get; };
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  MaxPrefetchTime{ set; };
+            Windows.Media.Playback.MediaPlaybackItem StartingItem{ get; };
+            Windows.Media.Playback.MediaPlaybackItem StartingItem{ set; };
+            Windows.Foundation.Collections.IVectorView <Windows.Media.Playback.MediaPlaybackItem>  ShuffledItems{ get; };
+            void SetShuffledItems(Windows.Foundation.Collections.IIterable <Windows.Media.Playback.MediaPlaybackItem>  value);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Playback.IMediaPlaybackList3", dd24bba9-bc47-4463-aa90-c18b7e5ffde1)]
+        {
+            Windows.Foundation.IReference <UInt32>  MaxPlayedItemsToKeepOpen{ get; };
+            Windows.Foundation.IReference <UInt32>  MaxPlayedItemsToKeepOpen{ set; };
+        }
+    }
+
+
+
+    [deprecated("Use MediaPlayer instead of MediaEngine. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(5c1d0ba7-3856-48b9-8dc6-244bf107bf8c)]
+    interface IMediaEnginePlaybackSource
+    {
+        [deprecated("Use MediaPlayer instead of MediaEngine. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Windows.Media.Playback.MediaPlaybackItem CurrentItem{ get; };
+        [deprecated("Use MediaPlayer instead of MediaEngine. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        void SetPlaybackSource(IMediaPlaybackSource source);
+    };
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackItemError", 69fbef2b-dcd6-4df9-a450-dbf4c6f1c2c2)]
+    runtimeclass MediaPlaybackItemError
+    {
+        Windows.Media.Playback.MediaPlaybackItemErrorCode ErrorCode{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackItemFailedEventArgs", 7703134a-e9a7-47c3-862c-c656d30683d4)]
+    runtimeclass MediaPlaybackItemFailedEventArgs
+    {
+        Windows.Media.Playback.MediaPlaybackItem Item{ get; };
+        Windows.Media.Playback.MediaPlaybackItemError Error{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Playback.ICurrentMediaPlaybackItemChangedEventArgs", 1743a892-5c43-4a15-967a-572d2d0f26c6)]
+    runtimeclass CurrentMediaPlaybackItemChangedEventArgs
+    {
+        Windows.Media.Playback.MediaPlaybackItem NewItem{ get; };
+        Windows.Media.Playback.MediaPlaybackItem OldItem{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Playback.ICurrentMediaPlaybackItemChangedEventArgs2", 1d80a51e-996e-40a9-be48-e66ec90b2b7d)]
+        {
+            Windows.Media.Playback.MediaPlaybackItemChangedReason Reason{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.IMediaPlaybackItemOpenedEventArgs", cbd9bd82-3037-4fbe-ae8f-39fc39edf4ef)]
+    runtimeclass MediaPlaybackItemOpenedEventArgs
+    {
+        Windows.Media.Playback.MediaPlaybackItem Item{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.Playback.ITimedMetadataPresentationModeChangedEventArgs", d1636099-65df-45ae-8cef-dc0b53fdc2bb)]
+    runtimeclass TimedMetadataPresentationModeChangedEventArgs
+    {
+        Windows.Media.Core.TimedMetadataTrack Track{ get; };
+        Windows.Media.Playback.TimedMetadataTrackPresentationMode OldPresentationMode{ get; };
+        Windows.Media.Playback.TimedMetadataTrackPresentationMode NewPresentationMode{ get; };
+    }
+
+
+}

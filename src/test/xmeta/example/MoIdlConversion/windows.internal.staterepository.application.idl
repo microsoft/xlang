@@ -1,0 +1,218 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IApplicationStatics", d81e96f1-a89c-417e-9335-59531026309d)]
+    [interface_name("Windows.Internal.StateRepository.IApplication", b15abd7e-4d7e-49e4-9cda-d564220fef0c)]
+    [threading(both)]
+    runtimeclass Application
+    {
+        Application();
+        static Boolean Exists(Int64 applicationID);
+        static Boolean ExistsByApplicationUserModelId(String ApplicationUserModelId);
+        static Boolean ExistsByEditionId(String EditionId);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByPackageAndPackageRelativeApplicationId(Package Package, String PackageRelativeApplicationId);
+        static Windows.Internal.StateRepository.Application Get(Int64 applicationID);
+        static Windows.Internal.StateRepository.Application TryGet(Int64 applicationID);
+        static Windows.Internal.StateRepository.Application GetByPackageAndPackageRelativeApplicationId(Package Package, String PackageRelativeApplicationId);
+        static Windows.Internal.StateRepository.Application TryGetByPackageAndPackageRelativeApplicationId(Package Package, String PackageRelativeApplicationId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByApplicationUserModelId(String ApplicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByEditionId(String EditionId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByPackage(Package Package);
+        static Windows.Internal.StateRepository.Application GetCurrent();
+        static Windows.Internal.StateRepository.Application GetByUserAnd_ApplicationId(User user, Int64 _applicationID);
+        static Boolean ExistsByPackageFamilyName(String packageFamilyName);
+        static Boolean ExistsByPackageFullName(String packageFullName);
+        static Boolean ExistsByUserAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Boolean ExistsByUserAndPackageFamily(User user, PackageFamily packageFamily);
+        static Boolean ExistsByUserAndPackageFamilyAndPackageType(User user, PackageFamily packageFamily, PackageType packageType);
+        static Boolean ExistsByUserAndPackageFamilyName(User user, String packageFamilyName);
+        static Boolean ExistsByUserAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Boolean ExistsByUserAndPackage(User user, Package package);
+        static Boolean ExistsByUserAndPackageFullName(User user, String packageFullName);
+        static Windows.Internal.StateRepository.Application GetByUserAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Windows.Internal.StateRepository.Application TryGetByUserAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByPackageFamilyName(String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByPackageFullName(String packageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndPackageFamily(User user, PackageFamily packageFamily);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndPackageFamilyAndPackageType(User user, PackageFamily packageFamily, PackageType packageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndPackageFamilyName(User user, String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndPackage(User user, Package package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndPackageFullName(User user, String packageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUser(User user);
+        static Windows.Internal.StateRepository.ApplicationType GetApplicationTypeByUserAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Boolean ExistsByUserOrDefaultAccountAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Boolean ExistsByUserOrDefaultAccountAndPackageFullName(User user, String packageFullName);
+        static Boolean ExistsByUserOrDefaultAccountAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserOrDefaultAccountAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserOrDefaultAccountAndPackageFullName(User user, String packageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserOrDefaultAccountAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserOrDefaultAccountAnd_ApplicationID(User user, Int64 _applicationID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserOrDefaultAccount(User user);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndAppListEntry(User user, AppListEntry appListEntry);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserOrDefaultAccountAndAppListEntry(User user, AppListEntry appListEntry);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Application>  FindByUserAndAnyAppExecutionAlias(User user);
+        static void TryGetActivationInfoByUserAndApplicationUserModelId(User user, String applicationUserModelId, out ActivationInfoFlags activationInfoFlags, out String absoluteExecutable, out String entrypoint, out Boolean found);
+        Int64 _ApplicationID{ get; };
+        Int64 _ApplicationID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Windows.Internal.StateRepository.ApplicationType ApplicationType{ get; };
+        Windows.Internal.StateRepository.ApplicationType ApplicationType{ set; };
+        Windows.Internal.StateRepository.ApplicationFlags Flags{ get; };
+        Windows.Internal.StateRepository.ApplicationFlags Flags{ set; };
+        Boolean SplashScreenIsOptional{ get; };
+        Boolean SplashScreenIsOptional{ set; };
+        Boolean IsServerApplication{ get; };
+        Boolean IsServerApplication{ set; };
+        Boolean IsCentennialFullTrust{ get; };
+        Boolean IsCentennialFullTrust{ set; };
+        Boolean SupportsMultipleInstances{ get; };
+        Boolean SupportsMultipleInstances{ set; };
+        Boolean IsCentennialPartialTrust{ get; };
+        Boolean IsCentennialPartialTrust{ set; };
+        Windows.Internal.StateRepository.Subsystem Subsystem{ get; };
+        Windows.Internal.StateRepository.Subsystem Subsystem{ set; };
+        String PackageRelativeApplicationId{ get; };
+        String PackageRelativeApplicationId{ set; };
+        String ApplicationUserModelId{ get; };
+        String ApplicationUserModelId{ set; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        String Description{ get; };
+        String Description{ set; };
+        Boolean IsSquare150x150LogoNull{ get; };
+        void SetSquare150x150LogoToNull();
+        String Square150x150Logo{ get; };
+        String Square150x150Logo{ set; };
+        String Square44x44Logo{ get; };
+        String Square44x44Logo{ set; };
+        Boolean IsWide310x150LogoNull{ get; };
+        void SetWide310x150LogoToNull();
+        String Wide310x150Logo{ get; };
+        String Wide310x150Logo{ set; };
+        Boolean IsSquare310x310LogoNull{ get; };
+        void SetSquare310x310LogoToNull();
+        String Square310x310Logo{ get; };
+        String Square310x310Logo{ set; };
+        Boolean IsSquare71x71LogoNull{ get; };
+        void SetSquare71x71LogoToNull();
+        String Square71x71Logo{ get; };
+        String Square71x71Logo{ set; };
+        Boolean IsForegroundTextNull{ get; };
+        void SetForegroundTextToNull();
+        String ForegroundText{ get; };
+        String ForegroundText{ set; };
+        UInt32 BackgroundColor{ get; };
+        UInt32 BackgroundColor{ set; };
+        Boolean IsExecutableNull{ get; };
+        void SetExecutableToNull();
+        String Executable{ get; };
+        String Executable{ set; };
+        Windows.Storage.StorageFile GetExecutableAsStorageFile();
+        void SetExecutableAsStorageFile(Windows.Storage.IStorageFile value);
+        Boolean IsEntrypointNull{ get; };
+        void SetEntrypointToNull();
+        String Entrypoint{ get; };
+        String Entrypoint{ set; };
+        Boolean IsStartPageNull{ get; };
+        void SetStartPageToNull();
+        String StartPage{ get; };
+        String StartPage{ set; };
+        Boolean IsResourceGroupNull{ get; };
+        void SetResourceGroupToNull();
+        String ResourceGroup{ get; };
+        String ResourceGroup{ set; };
+        Windows.Internal.StateRepository.LockScreenNotification LockScreenNotification{ get; };
+        Windows.Internal.StateRepository.LockScreenNotification LockScreenNotification{ set; };
+        Boolean IsLockScreenBadgeLogoNull{ get; };
+        void SetLockScreenBadgeLogoToNull();
+        String LockScreenBadgeLogo{ get; };
+        String LockScreenBadgeLogo{ set; };
+        Boolean IsSplashScreenImageNull{ get; };
+        void SetSplashScreenImageToNull();
+        String SplashScreenImage{ get; };
+        String SplashScreenImage{ set; };
+        Windows.Storage.StorageFile GetSplashScreenImageAsStorageFile();
+        void SetSplashScreenImageAsStorageFile(Windows.Storage.IStorageFile value);
+        UInt32 SplashScreenBackgroundColor{ get; };
+        UInt32 SplashScreenBackgroundColor{ set; };
+        Windows.Internal.StateRepository.RotationPreference InitialRotationPreference{ get; };
+        Windows.Internal.StateRepository.RotationPreference InitialRotationPreference{ set; };
+        Windows.Internal.StateRepository.ApplicationViewWidth ApplicationViewMinWidth{ get; };
+        Windows.Internal.StateRepository.ApplicationViewWidth ApplicationViewMinWidth{ set; };
+        Windows.Internal.StateRepository.AppListEntry AppListEntry{ get; };
+        Windows.Internal.StateRepository.AppListEntry AppListEntry{ set; };
+        Boolean IsEditionIdNull{ get; };
+        void SetEditionIdToNull();
+        String EditionId{ get; };
+        String EditionId{ set; };
+        Boolean IsVisualGroupNull{ get; };
+        void SetVisualGroupToNull();
+        String VisualGroup{ get; };
+        String VisualGroup{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        String GetDisplayNameReference();
+        String GetDisplayNameLocalized();
+        String GetDescriptionReference();
+        String GetDescriptionLocalized();
+        String GetSquare150x150LogoReference();
+        String GetSquare150x150LogoLocalized();
+        Windows.Foundation.Uri GetSquare150x150LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare150x150LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSquare44x44LogoReference();
+        String GetSquare44x44LogoLocalized();
+        Windows.Foundation.Uri GetSquare44x44LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare44x44LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetWide310x150LogoReference();
+        String GetWide310x150LogoLocalized();
+        Windows.Foundation.Uri GetWide310x150LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetWide310x150LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSquare310x310LogoReference();
+        String GetSquare310x310LogoLocalized();
+        Windows.Foundation.Uri GetSquare310x310LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare310x310LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSquare71x71LogoReference();
+        String GetSquare71x71LogoLocalized();
+        Windows.Foundation.Uri GetSquare71x71LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare71x71LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSplashScreenImageReference();
+        String GetSplashScreenImageLocalized();
+        Windows.Foundation.Uri GetSplashScreenImageLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSplashScreenImageLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        Boolean IsCentennial{ get; };
+        String GetVisualGroupReference();
+        String GetVisualGroupLocalized();
+    }
+
+
+}

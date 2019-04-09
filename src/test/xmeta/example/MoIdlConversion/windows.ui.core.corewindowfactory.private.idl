@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Core
+{
+    [webhosthidden]
+    [contract(Windows.UI.Core.CoreWindowFactoryContract, 1)]
+    runtimeclass UAPCoreWindowFactory
+        : [default]Windows.UI.Core.ICoreWindowFactory
+    {
+    }
+
+}

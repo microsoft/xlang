@@ -1,0 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.PlatformExtensions
+{
+    [contract(Windows.Internal.Shell.PlatformExtensions.InternalContract, 1)]
+    [uuid(f0264b59-f6d5-4729-a0d7-97ddc5563ef1)]
+    interface ICapturePickerItemDataSource
+    {
+        void Initialize(Windows.Foundation.Collections.IIterable <Windows.Internal.PlatformExtensions.Capture.CapturableItem>  items);
+        Windows.Internal.ComposableShell.Multitasking.ISwitchItemDataSource DataSource{ get; };
+    };
+
+}

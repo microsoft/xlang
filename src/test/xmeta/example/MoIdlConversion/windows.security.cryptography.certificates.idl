@@ -1,0 +1,654 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Security.Cryptography.Certificates
+{
+    [contractversion(1)]
+    [internal]
+    apicontract CertficatesInternalContract{};
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum EnrollKeyUsages
+    {
+        None,
+        Decryption,
+        Signing,
+        KeyAgreement = 4,
+        All = 16777215,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum KeyProtectionLevel
+    {
+        NoConsent,
+        ConsentOnly,
+        ConsentWithPassword,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        ConsentWithFingerprint,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExportOption
+    {
+        NotExportable,
+        Exportable,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum KeySize
+    {
+        Invalid,
+        Rsa2048 = 2048,
+        Rsa4096 = 4096,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum InstallOptions
+    {
+        None,
+        DeleteExpired,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CertificateChainPolicy
+    {
+        Base,
+        Ssl,
+        NTAuthentication,
+        MicrosoftRoot,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChainValidationResult
+    {
+        Success,
+        Untrusted,
+        Revoked,
+        Expired,
+        IncompleteChain,
+        InvalidSignature,
+        WrongUsage,
+        InvalidName,
+        InvalidCertificateAuthorityPolicy,
+        BasicConstraintsError,
+        UnknownCriticalExtension,
+        RevocationInformationMissing,
+        RevocationFailure,
+        OtherErrors,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SignatureValidationResult
+    {
+        Success,
+        InvalidParameter,
+        BadMessage,
+        InvalidSignature,
+        OtherErrors,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICertificateExtension", 84cf0656-a9e6-454d-8e45-2ea7c4bcd53b)]
+    [threading(both)]
+    runtimeclass CertificateExtension
+    {
+        CertificateExtension();
+        String ObjectId{ get; };
+        String ObjectId{ set; };
+        Boolean IsCritical{ get; };
+        Boolean IsCritical{ set; };
+        void EncodeValue(String value);
+        UInt8[] Value{ get; };
+        UInt8[] Value{ set; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Security.Cryptography.Certificates.ICertificateFactory", 17b4221c-4baf-44a2-9608-04fb62b16942)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICertificate", 333f740c-04d8-43b3-b278-8c5fcc9be5a0)]
+    [threading(both)]
+    runtimeclass Certificate
+    {
+        [method_name( "CreateCertificate" )] Certificate(Windows.Storage.Streams.IBuffer certBlob);
+        [method_name("BuildChainAsync")] Windows.Foundation.IAsyncOperation <Windows.Security.Cryptography.Certificates.CertificateChain>  BuildChainAsync(Windows.Foundation.Collections.IIterable <Windows.Security.Cryptography.Certificates.Certificate>  certificates);
+        [method_name("BuildChainWithParametersAsync")] Windows.Foundation.IAsyncOperation <Windows.Security.Cryptography.Certificates.CertificateChain>  BuildChainAsync(Windows.Foundation.Collections.IIterable <Windows.Security.Cryptography.Certificates.Certificate>  certificates, ChainBuildingParameters parameters);
+        UInt8[] SerialNumber{ get; };
+        [method_name("GetHashValue")] UInt8[] GetHashValue();
+        [method_name("GetHashValueWithAlgorithm")] UInt8[] GetHashValue(String hashAlgorithmName);
+        Windows.Storage.Streams.IBuffer GetCertificateBlob();
+        String Subject{ get; };
+        String Issuer{ get; };
+        Boolean HasPrivateKey{ get; };
+        Boolean IsStronglyProtected{ get; };
+        Windows.Foundation.DateTime ValidFrom{ get; };
+        Windows.Foundation.DateTime ValidTo{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  EnhancedKeyUsages{ get; };
+        String FriendlyName{ set; };
+        String FriendlyName{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ICertificate2", 17b8374c-8a25-4d96-a492-8fc29ac4fda6)]
+        {
+            Boolean IsSecurityDeviceBound{ get; };
+            Windows.Security.Cryptography.Certificates.CertificateKeyUsages KeyUsages{ get; };
+            String KeyAlgorithmName{ get; };
+            String SignatureAlgorithmName{ get; };
+            String SignatureHashAlgorithmName{ get; };
+            Windows.Security.Cryptography.Certificates.SubjectAlternativeNameInfo SubjectAlternativeName{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ICertificate3", be51a966-ae5f-4652-ace7-c6d7e7724cf3)]
+        {
+            Boolean IsPerUser{ get; };
+            String StoreName{ get; };
+            String KeyStorageProviderName{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ISubjectAlternativeNameInfo", 582859f1-569d-4c20-be7b-4e1c9a0bc52b)]
+    [threading(both)]
+    runtimeclass SubjectAlternativeNameInfo
+    {
+        SubjectAlternativeNameInfo();
+        Windows.Foundation.Collections.IVectorView <String>  EmailName{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  IPAddress{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  Url{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  DnsName{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  DistinguishedName{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  PrincipalName{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ISubjectAlternativeNameInfo2", 437a78c6-1c51-41ea-b34a-3d654398a370)]
+        {
+            Windows.Foundation.Collections.IVector <String>  EmailNames{ get; };
+            Windows.Foundation.Collections.IVector <String>  IPAddresses{ get; };
+            Windows.Foundation.Collections.IVector <String>  Urls{ get; };
+            Windows.Foundation.Collections.IVector <String>  DnsNames{ get; };
+            Windows.Foundation.Collections.IVector <String>  DistinguishedNames{ get; };
+            Windows.Foundation.Collections.IVector <String>  PrincipalNames{ get; };
+            Windows.Security.Cryptography.Certificates.CertificateExtension Extension{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICertificateRequestProperties", 487e84f6-94e2-4dce-8833-1a700a37a29a)]
+    [threading(both)]
+    runtimeclass CertificateRequestProperties
+    {
+        CertificateRequestProperties();
+        String Subject{ get; };
+        String Subject{ set; };
+        String KeyAlgorithmName{ get; };
+        String KeyAlgorithmName{ set; };
+        UInt32 KeySize{ get; };
+        UInt32 KeySize{ set; };
+        String FriendlyName{ get; };
+        String FriendlyName{ set; };
+        String HashAlgorithmName{ get; };
+        String HashAlgorithmName{ set; };
+        Windows.Security.Cryptography.Certificates.ExportOption Exportable{ get; };
+        Windows.Security.Cryptography.Certificates.ExportOption Exportable{ set; };
+        Windows.Security.Cryptography.Certificates.EnrollKeyUsages KeyUsages{ get; };
+        Windows.Security.Cryptography.Certificates.EnrollKeyUsages KeyUsages{ set; };
+        Windows.Security.Cryptography.Certificates.KeyProtectionLevel KeyProtectionLevel{ get; };
+        Windows.Security.Cryptography.Certificates.KeyProtectionLevel KeyProtectionLevel{ set; };
+        String KeyStorageProviderName{ get; };
+        String KeyStorageProviderName{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ICertificateRequestProperties2", 3da0c954-d73f-4ff3-a0a6-0677c0ada05b)]
+        {
+            String SmartcardReaderName{ get; };
+            String SmartcardReaderName{ set; };
+            Windows.Security.Cryptography.Certificates.Certificate SigningCertificate{ get; };
+            Windows.Security.Cryptography.Certificates.Certificate SigningCertificate{ set; };
+            Windows.Security.Cryptography.Certificates.Certificate AttestationCredentialCertificate{ get; };
+            Windows.Security.Cryptography.Certificates.Certificate AttestationCredentialCertificate{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ICertificateRequestProperties3", e687f616-734d-46b1-9d4c-6edfdbfc845b)]
+        {
+            String CurveName{ get; };
+            String CurveName{ set; };
+            UInt8[] CurveParameters{ get; };
+            UInt8[] CurveParameters{ set; };
+            String ContainerNamePrefix{ get; };
+            String ContainerNamePrefix{ set; };
+            String ContainerName{ get; };
+            String ContainerName{ set; };
+            Boolean UseExistingKey{ get; };
+            Boolean UseExistingKey{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ICertificateRequestProperties4", 4e429ad2-1c61-4fea-b8fe-135fb19cdce4)]
+        {
+            Windows.Foundation.Collections.IVector <String>  SuppressedDefaults{ get; };
+            Windows.Security.Cryptography.Certificates.SubjectAlternativeNameInfo SubjectAlternativeName{ get; };
+            Windows.Foundation.Collections.IVector <Windows.Security.Cryptography.Certificates.CertificateExtension>  Extensions{ get; };
+        }
+    }
+
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.Cryptography.Certificates.IUserCertificateEnrollmentManager", 96313718-22e1-4819-b20b-ab46a6eca06e)]
+    runtimeclass UserCertificateEnrollmentManager
+    {
+        Windows.Foundation.IAsyncOperation <String>  CreateRequestAsync(CertificateRequestProperties request);
+        Windows.Foundation.IAsyncAction InstallCertificateAsync(String certificate, InstallOptions installOption);
+        [method_name("ImportPfxDataAsync")] Windows.Foundation.IAsyncAction ImportPfxDataAsync(String pfxData, String password, ExportOption exportable, KeyProtectionLevel keyProtectionLevel, InstallOptions installOption, String friendlyName);
+        [method_name("ImportPfxDataToKspAsync")] Windows.Foundation.IAsyncAction ImportPfxDataAsync(String pfxData, String password, ExportOption exportable, KeyProtectionLevel keyProtectionLevel, InstallOptions installOption, String friendlyName, String keyStorageProvider);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Certificates.IUserCertificateEnrollmentManager2", 0dad9cb1-65de-492a-b86d-fc5c482c3747)]
+        {
+            [method_name("ImportPfxDataToKspWithParametersAsync")] Windows.Foundation.IAsyncAction ImportPfxDataAsync(String pfxData, String password, PfxImportParameters pfxImportParameters);
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Security.Cryptography.Certificates.IPfxImportParameters", 680d3511-9a08-47c8-864a-2edd4d8eb46c)]
+    [threading(both)]
+    runtimeclass PfxImportParameters
+    {
+        PfxImportParameters();
+        Windows.Security.Cryptography.Certificates.ExportOption Exportable{ get; };
+        Windows.Security.Cryptography.Certificates.ExportOption Exportable{ set; };
+        Windows.Security.Cryptography.Certificates.KeyProtectionLevel KeyProtectionLevel{ get; };
+        Windows.Security.Cryptography.Certificates.KeyProtectionLevel KeyProtectionLevel{ set; };
+        Windows.Security.Cryptography.Certificates.InstallOptions InstallOptions{ get; };
+        Windows.Security.Cryptography.Certificates.InstallOptions InstallOptions{ set; };
+        String FriendlyName{ get; };
+        String FriendlyName{ set; };
+        String KeyStorageProviderName{ get; };
+        String KeyStorageProviderName{ set; };
+        String ContainerNamePrefix{ get; };
+        String ContainerNamePrefix{ set; };
+        String ReaderName{ get; };
+        String ReaderName{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Security.Cryptography.Certificates.ICertificateEnrollmentManagerStatics3", fdec82be-617c-425a-b72d-398b26ac7264)]
+    [threading(both)]
+    runtimeclass CertificateEnrollmentManager
+    {
+        [method_name("ImportPfxDataToKspWithParametersAsync")] static Windows.Foundation.IAsyncAction ImportPfxDataAsync(String pfxData, String password, PfxImportParameters pfxImportParameters);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Certificates.ICertificateEnrollmentManagerStatics2", dc5b1c33-6429-4014-999c-5d9735802d1d)]
+        {
+            static Windows.Security.Cryptography.Certificates.UserCertificateEnrollmentManager UserCertificateEnrollmentManager{ get; };
+            [method_name("ImportPfxDataToKspAsync")] static Windows.Foundation.IAsyncAction ImportPfxDataAsync(String pfxData, String password, ExportOption exportable, KeyProtectionLevel keyProtectionLevel, InstallOptions installOption, String friendlyName, String keyStorageProvider);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Certificates.ICertificateEnrollmentManagerStatics", 8846ef3f-a986-48fb-9fd7-9aec06935bf1)]
+        {
+            static Windows.Foundation.IAsyncOperation <String>  CreateRequestAsync(CertificateRequestProperties request);
+            static Windows.Foundation.IAsyncAction InstallCertificateAsync(String certificate, InstallOptions installOption);
+            [method_name("ImportPfxDataAsync")] static Windows.Foundation.IAsyncAction ImportPfxDataAsync(String pfxData, String password, ExportOption exportable, KeyProtectionLevel keyProtectionLevel, InstallOptions installOption, String friendlyName);
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Certificates.IKeyAttestationHelperStatics", 1648e246-f644-4326-88be-3af102d30e0c)]
+    [threading(both)]
+    runtimeclass KeyAttestationHelper
+    {
+        [method_name("DecryptTpmAttestationCredentialAsync")] static Windows.Foundation.IAsyncOperation <String>  DecryptTpmAttestationCredentialAsync(String credential);
+        static String GetTpmAttestationCredentialId(String credential);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Certificates.IKeyAttestationHelperStatics2", 9c590b2c-a6c6-4a5e-9e64-e85d5279df97)]
+        {
+            [method_name("DecryptTpmAttestationCredentialWithContainerNameAsync")] static Windows.Foundation.IAsyncOperation <String>  DecryptTpmAttestationCredentialAsync(String credential, String containerName);
+        }
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICertificateQuery", 5b082a31-a728-4916-b5ee-ffcb8acf2417)]
+    [threading(both)]
+    runtimeclass CertificateQuery
+    {
+        CertificateQuery();
+        Windows.Foundation.Collections.IVector <String>  EnhancedKeyUsages{ get; };
+        String IssuerName{ get; };
+        String IssuerName{ set; };
+        String FriendlyName{ get; };
+        String FriendlyName{ set; };
+        UInt8[] Thumbprint{ get; };
+        UInt8[] Thumbprint{ set; };
+        Boolean HardwareOnly{ get; };
+        Boolean HardwareOnly{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ICertificateQuery2", 935a0af7-0bd9-4f75-b8c2-e27a7f74eecd)]
+        {
+            Boolean IncludeDuplicates{ get; };
+            Boolean IncludeDuplicates{ set; };
+            Boolean IncludeExpiredCertificates{ get; };
+            Boolean IncludeExpiredCertificates{ set; };
+            String StoreName{ get; };
+            String StoreName{ set; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICertificateStore", b0bff720-344e-4331-af14-a7f7a7ebc93a)]
+    runtimeclass CertificateStore
+    {
+        void Add(Certificate certificate);
+        void Delete(Certificate certificate);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Cryptography.Certificates.ICertificateStore2", c7e68e4a-417d-4d1a-babd-15687e549974)]
+        {
+            String Name{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.Security.Cryptography.Certificates.IUserCertificateStore", c9fb1d83-789f-4b4e-9180-045a757aac6d)]
+    runtimeclass UserCertificateStore
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  RequestAddAsync(Certificate certificate);
+        Windows.Foundation.IAsyncOperation <Boolean>  RequestDeleteAsync(Certificate certificate);
+        String Name{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Certificates.ICertificateStoresStatics", fbecc739-c6fe-4de7-99cf-74c3e596e032)]
+    [threading(both)]
+    runtimeclass CertificateStores
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Security.Cryptography.Certificates.ICertificateStoresStatics2", fa900b79-a0d4-4b8c-bc55-c0a37eb141ed)]
+        {
+            static Windows.Security.Cryptography.Certificates.UserCertificateStore GetUserStoreByName(String storeName);
+        }
+        [method_name("FindAllAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate> >  FindAllAsync();
+        [method_name("FindAllWithQueryAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate> >  FindAllAsync(CertificateQuery query);
+        static Windows.Security.Cryptography.Certificates.CertificateStore TrustedRootCertificationAuthorities{ get; };
+        static Windows.Security.Cryptography.Certificates.CertificateStore IntermediateCertificationAuthorities{ get; };
+        static Windows.Security.Cryptography.Certificates.CertificateStore GetStoreByName(String storeName);
+    }
+
+
+
+
+
+
+    [contract(Windows.Security.Cryptography.Certificates.CertficatesInternalContract, 1)]
+    [uuid(99fb4ab1-6309-44ce-8b48-aeb981f5b109)]
+    interface IUserCertificateStoreInternal
+    {
+        void OpenStore(String storeName);
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.Security.Cryptography.Certificates.IStandardCertificateStoreNamesStatics", 0c154adb-a496-41f8-8fe5-9e96f36efbf8)]
+    [threading(both)]
+    runtimeclass StandardCertificateStoreNames
+    {
+        static String Personal{ get; };
+        static String TrustedRootCertificationAuthorities{ get; };
+        static String IntermediateCertificationAuthorities{ get; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Certificates.IKeyAlgorithmNamesStatics2", c99b5686-e1fd-4a4a-893d-a26f33dd8bb4)]
+    [threading(both)]
+    runtimeclass KeyAlgorithmNames
+    {
+        static String Ecdsa{ get; };
+        static String Ecdh{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Certificates.IKeyAlgorithmNamesStatics", 479065d7-7ac7-4581-8c3b-d07027140448)]
+        {
+            static String Rsa{ get; };
+            static String Dsa{ get; };
+            static String Ecdh256{ get; };
+            static String Ecdh384{ get; };
+            static String Ecdh521{ get; };
+            static String Ecdsa256{ get; };
+            static String Ecdsa384{ get; };
+            static String Ecdsa521{ get; };
+        }
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Cryptography.Certificates.IKeyStorageProviderNamesStatics2", 262d743d-9c2e-41cc-8812-c4d971dd7c60)]
+    [threading(both)]
+    runtimeclass KeyStorageProviderNames
+    {
+        static String PassportKeyStorageProvider{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Security.Cryptography.Certificates.IKeyStorageProviderNamesStatics", af186ae0-5529-4602-bd94-0aab91957b5c)]
+        {
+            static String SoftwareKeyStorageProvider{ get; };
+            static String SmartcardKeyStorageProvider{ get; };
+            static String PlatformKeyStorageProvider{ get; };
+        }
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Cryptography.Certificates.IChainBuildingParameters", 422ba922-7c8d-47b7-b59b-b12703733ac3)]
+    [threading(both)]
+    runtimeclass ChainBuildingParameters
+    {
+        ChainBuildingParameters();
+        Windows.Foundation.Collections.IVector <String>  EnhancedKeyUsages{ get; };
+        Windows.Foundation.DateTime ValidationTimestamp{ get; };
+        Windows.Foundation.DateTime ValidationTimestamp{ set; };
+        Boolean RevocationCheckEnabled{ get; };
+        Boolean RevocationCheckEnabled{ set; };
+        Boolean NetworkRetrievalEnabled{ get; };
+        Boolean NetworkRetrievalEnabled{ set; };
+        Boolean AuthorityInformationAccessEnabled{ get; };
+        Boolean AuthorityInformationAccessEnabled{ set; };
+        Boolean CurrentTimeValidationEnabled{ get; };
+        Boolean CurrentTimeValidationEnabled{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Security.Cryptography.Certificates.Certificate>  ExclusiveTrustRoots{ get; };
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.Cryptography.Certificates.IChainValidationParameters", c4743b4a-7eb0-4b56-a040-b9c8e655ddf3)]
+    [threading(both)]
+    runtimeclass ChainValidationParameters
+    {
+        ChainValidationParameters();
+        Windows.Security.Cryptography.Certificates.CertificateChainPolicy CertificateChainPolicy{ get; };
+        Windows.Security.Cryptography.Certificates.CertificateChainPolicy CertificateChainPolicy{ set; };
+        Windows.Networking.HostName ServerDnsName{ get; };
+        Windows.Networking.HostName ServerDnsName{ set; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICertificateChain", 20bf5385-3691-4501-a62c-fd97278b31ee)]
+    runtimeclass CertificateChain
+    {
+        [method_name("Validate")] Windows.Security.Cryptography.Certificates.ChainValidationResult Validate();
+        [method_name("ValidateWithParameters")] Windows.Security.Cryptography.Certificates.ChainValidationResult Validate(ChainValidationParameters parameter);
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  GetCertificates(Boolean includeRoot);
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICertificateKeyUsages", 6ac6206f-e1cf-486a-b485-a69c83e46fd1)]
+    [threading(both)]
+    runtimeclass CertificateKeyUsages
+    {
+        CertificateKeyUsages();
+        Boolean EncipherOnly{ get; };
+        Boolean EncipherOnly{ set; };
+        Boolean CrlSign{ get; };
+        Boolean CrlSign{ set; };
+        Boolean KeyCertificateSign{ get; };
+        Boolean KeyCertificateSign{ set; };
+        Boolean KeyAgreement{ get; };
+        Boolean KeyAgreement{ set; };
+        Boolean DataEncipherment{ get; };
+        Boolean DataEncipherment{ set; };
+        Boolean KeyEncipherment{ get; };
+        Boolean KeyEncipherment{ set; };
+        Boolean NonRepudiation{ get; };
+        Boolean NonRepudiation{ set; };
+        Boolean DigitalSignature{ get; };
+        Boolean DigitalSignature{ set; };
+    }
+
+
+    [uuid(0d1d910f-d275-472a-8198-aa2b3a8a23aa)]
+    [contract(Windows.Security.Cryptography.Certificates.CertficatesInternalContract, 1)]
+    interface ICertificateInternal2
+    {
+        UInt8[] GetSerializedCertContext();
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICmsTimestampInfo", 2f5f00f2-2c18-4f88-8435-c534086076f5)]
+    runtimeclass CmsTimestampInfo
+    {
+        Windows.Security.Cryptography.Certificates.Certificate SigningCertificate{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  Certificates{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICmsSignerInfo", 50d020db-1d2f-4c1a-b5c5-d0188ff91f47)]
+    [threading(both)]
+    runtimeclass CmsSignerInfo
+    {
+        CmsSignerInfo();
+        Windows.Security.Cryptography.Certificates.Certificate Certificate{ get; };
+        Windows.Security.Cryptography.Certificates.Certificate Certificate{ set; };
+        String HashAlgorithmName{ get; };
+        String HashAlgorithmName{ set; };
+        Windows.Security.Cryptography.Certificates.CmsTimestampInfo TimestampInfo{ get; };
+    }
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Security.Cryptography.Certificates.ICmsAttachedSignatureFactory", d0c8fc15-f757-4c64-a362-52cc1c77cffb)]
+    [static_name("Windows.Security.Cryptography.Certificates.ICmsAttachedSignatureStatics", 87989c8e-b0ad-498d-a7f5-78b59bce4b36)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICmsAttachedSignature", 61899d9d-3757-4ecb-bddc-0ca357d7a936)]
+    [threading(both)]
+    runtimeclass CmsAttachedSignature
+    {
+        [method_name( "CreateCmsAttachedSignature" )] CmsAttachedSignature(Windows.Storage.Streams.IBuffer inputBlob);
+        static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  GenerateSignatureAsync(Windows.Storage.Streams.IBuffer data, Windows.Foundation.Collections.IIterable <Windows.Security.Cryptography.Certificates.CmsSignerInfo>  signers, Windows.Foundation.Collections.IIterable <Windows.Security.Cryptography.Certificates.Certificate>  certificates);
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  Certificates{ get; };
+        UInt8[] Content{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.CmsSignerInfo>  Signers{ get; };
+        Windows.Security.Cryptography.Certificates.SignatureValidationResult VerifySignature();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.Certificates.ICmsDetachedSignatureStatics", 3d114cfd-bf9b-4682-9be6-91f57c053808)]
+    [constructor_name("Windows.Security.Cryptography.Certificates.ICmsDetachedSignatureFactory", c4ab3503-ae7f-4387-ad19-00f150e48ebb)]
+    [interface_name("Windows.Security.Cryptography.Certificates.ICmsDetachedSignature", 0f1ef154-f65e-4536-8339-5944081db2ca)]
+    [threading(both)]
+    runtimeclass CmsDetachedSignature
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  GenerateSignatureAsync(Windows.Storage.Streams.IInputStream data, Windows.Foundation.Collections.IIterable <Windows.Security.Cryptography.Certificates.CmsSignerInfo>  signers, Windows.Foundation.Collections.IIterable <Windows.Security.Cryptography.Certificates.Certificate>  certificates);
+        [method_name( "CreateCmsDetachedSignature" )] CmsDetachedSignature(Windows.Storage.Streams.IBuffer inputBlob);
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  Certificates{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.CmsSignerInfo>  Signers{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Security.Cryptography.Certificates.SignatureValidationResult>  VerifySignatureAsync(Windows.Storage.Streams.IInputStream data);
+    }
+
+
+}

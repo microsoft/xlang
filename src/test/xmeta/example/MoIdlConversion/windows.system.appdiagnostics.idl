@@ -1,0 +1,250 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.System
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.IAppDiagnosticInfoStatics", ce6925bf-10ca-40c8-a9ca-c5c96501866e)]
+    [interface_name("Windows.System.IAppDiagnosticInfo", e348a69a-8889-4ca3-be07-d5ffff5f0804)]
+    [threading(both)]
+    runtimeclass AppDiagnosticInfo
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.System.IAppDiagnosticInfoStatics2", 05b24b86-1000-4c90-bb9f-7235071c50fe)]
+        {
+            static Windows.System.AppDiagnosticInfoWatcher CreateWatcher();
+            static Windows.Foundation.IAsyncOperation <Windows.System.DiagnosticAccessStatus>  RequestAccessAsync();
+            static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.System.AppDiagnosticInfo> >  RequestInfoForPackageAsync(String packageFamilyName);
+            [default_overload]
+            [method_name("RequestInfoForAppAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.System.AppDiagnosticInfo> >  RequestInfoForAppAsync();
+            [method_name("RequestInfoForAppUserModelId")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.System.AppDiagnosticInfo> >  RequestInfoForAppAsync(String appUserModelId);
+        }
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.System.AppDiagnosticInfo> >  RequestInfoAsync();
+        Windows.ApplicationModel.AppInfo AppInfo{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.System.IAppDiagnosticInfo2", df46fbd7-191a-446c-9473-8fbc2374a354)]
+        {
+            Windows.Foundation.Collections.IVector <Windows.System.AppResourceGroupInfo>  GetResourceGroups();
+            Windows.System.AppResourceGroupInfoWatcher CreateResourceGroupWatcher();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.System.IAppDiagnosticInfo3", c895c63d-dd61-4c65-babd-81a10b4f9815)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.System.AppActivationResult>  LaunchAsync();
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum DiagnosticAccessStatus
+    {
+        Unspecified,
+        Denied,
+        Limited,
+        Allowed,
+    };
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IAppDiagnosticInfoWatcher", 75575070-01d3-489a-9325-52f9cc6ede0a)]
+    runtimeclass AppDiagnosticInfoWatcher
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppDiagnosticInfoWatcher, Windows.System.AppDiagnosticInfoWatcherEventArgs>  Added;
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppDiagnosticInfoWatcher, Windows.System.AppDiagnosticInfoWatcherEventArgs>  Removed;
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppDiagnosticInfoWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppDiagnosticInfoWatcher, Object>  Stopped;
+        Windows.System.AppDiagnosticInfoWatcherStatus Status{ get; };
+        void Start();
+        void Stop();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.System.IAppResourceGroupInfo", b913f77a-e807-49f4-845e-7b8bdcfe8ee7)]
+    runtimeclass AppResourceGroupInfo
+    {
+        Guid InstanceId{ get; };
+        Boolean IsShared{ get; };
+        Windows.Foundation.Collections.IVector <Windows.System.AppResourceGroupBackgroundTaskReport>  GetBackgroundTaskReports();
+        Windows.System.AppResourceGroupMemoryReport GetMemoryReport();
+        Windows.Foundation.Collections.IVector <Windows.System.Diagnostics.ProcessDiagnosticInfo>  GetProcessDiagnosticInfos();
+        Windows.System.AppResourceGroupStateReport GetStateReport();
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.System.IAppResourceGroupInfo2", ee9b236d-d305-4d6b-92f7-6afdad72dedc)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.System.AppExecutionStateChangeResult>  StartSuspendAsync();
+            Windows.Foundation.IAsyncOperation <Windows.System.AppExecutionStateChangeResult>  StartResumeAsync();
+            Windows.Foundation.IAsyncOperation <Windows.System.AppExecutionStateChangeResult>  StartTerminateAsync();
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000005)]
+    [interface_name("Windows.System.IAppActivationResult", 6b528900-f46e-4eb0-aa6c-38af557cf9ed)]
+    runtimeclass AppActivationResult
+    {
+        HRESULT ExtendedError{ get; };
+        Windows.System.AppResourceGroupInfo AppResourceGroupInfo{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.System.IAppResourceGroupInfoWatcher", d9b0a0fd-6e5a-4c72-8b17-09fec4a212bd)]
+    runtimeclass AppResourceGroupInfoWatcher
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppResourceGroupInfoWatcher, Windows.System.AppResourceGroupInfoWatcherEventArgs>  Added;
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppResourceGroupInfoWatcher, Windows.System.AppResourceGroupInfoWatcherEventArgs>  Removed;
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppResourceGroupInfoWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppResourceGroupInfoWatcher, Object>  Stopped;
+        event Windows.Foundation.TypedEventHandler <Windows.System.AppResourceGroupInfoWatcher, Windows.System.AppResourceGroupInfoWatcherExecutionStateChangedEventArgs>  ExecutionStateChanged;
+        Windows.System.AppResourceGroupInfoWatcherStatus Status{ get; };
+        void Start();
+        void Stop();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum AppDiagnosticInfoWatcherStatus
+    {
+        Created,
+        Started,
+        EnumerationCompleted,
+        Stopping,
+        Stopped,
+        Aborted,
+    };
+
+
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.System.IAppDiagnosticInfoWatcherEventArgs", 7017c716-e1da-4c65-99df-046dff5be71a)]
+    runtimeclass AppDiagnosticInfoWatcherEventArgs
+    {
+        Windows.System.AppDiagnosticInfo AppDiagnosticInfo{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum AppResourceGroupExecutionState
+    {
+        Unknown,
+        Running,
+        Suspending,
+        Suspended,
+        NotRunning,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [dualapipartition(0xa000005)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IAppExecutionStateChangeResult", 6f039bf0-f91b-4df8-ae77-3033ccb69114)]
+    runtimeclass AppExecutionStateChangeResult
+    {
+        HRESULT ExtendedError{ get; };
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IAppResourceGroupBackgroundTaskReport", 2566e74e-b05d-40c2-9dc1-1a4f039ea120)]
+    runtimeclass AppResourceGroupBackgroundTaskReport
+    {
+        Guid TaskId{ get; };
+        String Name{ get; };
+        String Trigger{ get; };
+        String EntryPoint{ get; };
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IAppResourceGroupMemoryReport", 2c8c06b1-7db1-4c51-a225-7fae2d49e431)]
+    runtimeclass AppResourceGroupMemoryReport
+    {
+        UInt64 CommitUsageLimit{ get; };
+        Windows.System.AppMemoryUsageLevel CommitUsageLevel{ get; };
+        UInt64 PrivateCommitUsage{ get; };
+        UInt64 TotalCommitUsage{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.System.IAppResourceGroupStateReport", 52849f18-2f70-4236-ab40-d04db0c7b931)]
+    runtimeclass AppResourceGroupStateReport
+    {
+        Windows.System.AppResourceGroupExecutionState ExecutionState{ get; };
+        Windows.System.AppResourceGroupEnergyQuotaState EnergyQuotaState{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum AppResourceGroupInfoWatcherStatus
+    {
+        Created,
+        Started,
+        EnumerationCompleted,
+        Stopping,
+        Stopped,
+        Aborted,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.System.IAppResourceGroupInfoWatcherEventArgs", 7a787637-6302-4d2f-bf89-1c12d0b2a6b9)]
+    runtimeclass AppResourceGroupInfoWatcherEventArgs
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.System.AppDiagnosticInfo>  AppDiagnosticInfos{ get; };
+        Windows.System.AppResourceGroupInfo AppResourceGroupInfo{ get; };
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IAppResourceGroupInfoWatcherExecutionStateChangedEventArgs", 1bdbedd7-fee6-4fd4-98dd-e92a2cc299f3)]
+    runtimeclass AppResourceGroupInfoWatcherExecutionStateChangedEventArgs
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.System.AppDiagnosticInfo>  AppDiagnosticInfos{ get; };
+        Windows.System.AppResourceGroupInfo AppResourceGroupInfo{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum AppResourceGroupEnergyQuotaState
+    {
+        Unknown,
+        Over,
+        Under,
+    };
+
+
+}

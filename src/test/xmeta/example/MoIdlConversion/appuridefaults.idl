@@ -1,0 +1,21 @@
+
+
+
+
+
+
+namespace Windows.Internal.AppUriDefaults
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.AppUriDefaults.InternalContract, 1)]
+    [static_name("Windows.Internal.AppUriDefaults.IAppUriDefaultStatics", ade3f92b-54ca-4dbe-8cb2-e841824ac26a)]
+    runtimeclass AppUriDefaultHelpers
+    {
+        static void SetAppUriChoice(String progId, String host, Boolean value);
+    }
+
+}

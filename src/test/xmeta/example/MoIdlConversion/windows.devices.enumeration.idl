@@ -1,0 +1,518 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.IDeviceWatcherTrigger", a4617fdd-8573-4260-befc-5bec89cb693d)]
+    runtimeclass DeviceWatcherTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+    }
+
+}
+namespace Windows.Devices.Enumeration
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeviceClass
+    {
+        All,
+        AudioCapture,
+        AudioRender,
+        PortableStorageDevice,
+        VideoCapture,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        ImageScanner,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Location,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeviceWatcherStatus
+    {
+        Created,
+        Started,
+        EnumerationCompleted,
+        Stopping,
+        Stopped,
+        Aborted,
+    };
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass DeviceThumbnail
+        : [default]Windows.Storage.Streams.IRandomAccessStreamWithContentType
+        , Windows.Storage.Streams.IContentTypeProvider
+        , Windows.Storage.Streams.IRandomAccessStream
+        , Windows.Storage.Streams.IOutputStream
+        , Windows.Foundation.IClosable
+        , Windows.Storage.Streams.IInputStream
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum Panel
+    {
+        Unknown,
+        Front,
+        Back,
+        Top,
+        Bottom,
+        Left,
+        Right,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Enumeration.IEnclosureLocation", 42340a27-5810-459c-aabb-c65e1f813ecf)]
+    runtimeclass EnclosureLocation
+    {
+        Boolean InDock{ get; };
+        Boolean InLid{ get; };
+        Windows.Devices.Enumeration.Panel Panel{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.Enumeration.IEnclosureLocation2", 2885995b-e07d-485d-8a9e-bdf29aef4f66)]
+        {
+            UInt32 RotationAngleInDegreesClockwise{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeviceInformationKind
+    {
+        Unknown,
+        DeviceInterface,
+        DeviceContainer,
+        Device,
+        DeviceInterfaceClass,
+        AssociationEndpoint,
+        AssociationEndpointContainer,
+        AssociationEndpointService,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        DevicePanel,
+    };
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceInformationUpdate", 8f315305-d972-44b7-a37e-9e822c78213b)]
+    runtimeclass DeviceInformationUpdate
+    {
+        String Id{ get; };
+        [hasvariant]Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Enumeration.IDeviceInformationUpdate2", 5d9d148c-a873-485e-baa6-aa620788e3cc)]
+        {
+            Windows.Devices.Enumeration.DeviceInformationKind Kind{ get; };
+        }
+    }
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass DeviceInformationCollection
+        : [default]Windows.Foundation.Collections.IVectorView<Windows.Devices.Enumeration.DeviceInformation>
+        , Windows.Foundation.Collections.IIterable<Windows.Devices.Enumeration.DeviceInformation>
+    {
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceWatcher", c9eab97d-8f6b-4f96-a9f4-abc814e22271)]
+    runtimeclass DeviceWatcher
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.DeviceWatcher, Windows.Devices.Enumeration.DeviceInformation>  Added;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.DeviceWatcher, Windows.Devices.Enumeration.DeviceInformationUpdate>  Updated;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.DeviceWatcher, Windows.Devices.Enumeration.DeviceInformationUpdate>  Removed;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.DeviceWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.DeviceWatcher, Object>  Stopped;
+        Windows.Devices.Enumeration.DeviceWatcherStatus Status{ get; };
+        void Start();
+        void Stop();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Enumeration.IDeviceWatcher2", ff08456e-ed14-49e9-9a69-8117c54ae971)]
+        {
+            Windows.ApplicationModel.Background.DeviceWatcherTrigger GetBackgroundTrigger(Windows.Foundation.Collections.IIterable <Windows.Devices.Enumeration.DeviceWatcherEventKind>  requestedEventKinds);
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Enumeration.IDeviceInformationStatics2", 493b4f34-a84f-45fd-9167-15d1cb1bd1f9)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceInformation", aba0fb95-4398-489d-8e44-e6130927011f)]
+    [threading(both)]
+    runtimeclass DeviceInformation
+    {
+        static String GetAqsFilterFromDeviceClass(DeviceClass deviceClass);
+        [method_name("CreateFromIdAsyncWithKindAndAdditionalProperties")] [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformation>  CreateFromIdAsync(String deviceId, Windows.Foundation.Collections.IIterable <String>  additionalProperties, DeviceInformationKind kind);
+        [method_name("FindAllAsyncWithKindAqsFilterAndAdditionalProperties")] [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformationCollection>  FindAllAsync(String aqsFilter, Windows.Foundation.Collections.IIterable <String>  additionalProperties, DeviceInformationKind kind);
+        [method_name("CreateWatcherWithKindAqsFilterAndAdditionalProperties")] static Windows.Devices.Enumeration.DeviceWatcher CreateWatcher(String aqsFilter, Windows.Foundation.Collections.IIterable <String>  additionalProperties, DeviceInformationKind kind);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Devices.Enumeration.IDeviceInformationStatics", c17f100e-3a46-4a78-8013-769dc9b97390)]
+        {
+            [method_name("CreateFromIdAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformation>  CreateFromIdAsync(String deviceId);
+            [method_name("CreateFromIdAsyncAdditionalProperties")] [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformation>  CreateFromIdAsync(String deviceId, Windows.Foundation.Collections.IIterable <String>  additionalProperties);
+            [method_name("FindAllAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformationCollection>  FindAllAsync();
+            [method_name("FindAllAsyncDeviceClass")] [default_overload]
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformationCollection>  FindAllAsync(DeviceClass deviceClass);
+            [method_name("FindAllAsyncAqsFilter")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformationCollection>  FindAllAsync(String aqsFilter);
+            [method_name("FindAllAsyncAqsFilterAndAdditionalProperties")] [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceInformationCollection>  FindAllAsync(String aqsFilter, Windows.Foundation.Collections.IIterable <String>  additionalProperties);
+            [method_name("CreateWatcher")] static Windows.Devices.Enumeration.DeviceWatcher CreateWatcher();
+            [method_name("CreateWatcherDeviceClass")] [default_overload]
+            static Windows.Devices.Enumeration.DeviceWatcher CreateWatcher(DeviceClass deviceClass);
+            [method_name("CreateWatcherAqsFilter")] static Windows.Devices.Enumeration.DeviceWatcher CreateWatcher(String aqsFilter);
+            [method_name("CreateWatcherAqsFilterAndAdditionalProperties")] static Windows.Devices.Enumeration.DeviceWatcher CreateWatcher(String aqsFilter, Windows.Foundation.Collections.IIterable <String>  additionalProperties);
+        }
+        String Id{ get; };
+        String Name{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsDefault{ get; };
+        Windows.Devices.Enumeration.EnclosureLocation EnclosureLocation{ get; };
+        [hasvariant]Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        void Update(DeviceInformationUpdate updateInfo);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceThumbnail>  GetThumbnailAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceThumbnail>  GetGlyphThumbnailAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Enumeration.IDeviceInformation2", f156a638-7997-48d9-a10c-269d46533f48)]
+        {
+            Windows.Devices.Enumeration.DeviceInformationKind Kind{ get; };
+            Windows.Devices.Enumeration.DeviceInformationPairing Pairing{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeviceWatcherEventKind
+    {
+        Add,
+        Update,
+        Remove,
+    };
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [flags]
+    enum DevicePairingKinds
+    {
+        None,
+        ConfirmOnly,
+        DisplayPin,
+        ProvidePin = 4,
+        ConfirmPinMatch = 8,
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        ProvidePasswordCredential = 16,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DevicePairingResultStatus
+    {
+        Paired,
+        NotReadyToPair,
+        NotPaired,
+        AlreadyPaired,
+        ConnectionRejected,
+        TooManyConnections,
+        HardwareFailure,
+        AuthenticationTimeout,
+        AuthenticationNotAllowed,
+        AuthenticationFailure,
+        NoSupportedProfiles,
+        ProtectionLevelCouldNotBeMet,
+        AccessDenied,
+        InvalidCeremonyData,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        PairingCanceled,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        OperationAlreadyInProgress,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        RequiredHandlerNotRegistered,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        RejectedByHandler,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        RemoteDeviceHasAssociation,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        Failed,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum DeviceUnpairingResultStatus
+    {
+        Unpaired,
+        AlreadyUnpaired,
+        OperationAlreadyInProgress,
+        AccessDenied,
+        Failed,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DevicePairingProtectionLevel
+    {
+        Default,
+        None,
+        Encryption,
+        EncryptionAndAuthentication,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Enumeration.IDevicePairingResult", 072b02bf-dd95-4025-9b37-de51adba37b7)]
+    runtimeclass DevicePairingResult
+    {
+        Windows.Devices.Enumeration.DevicePairingResultStatus Status{ get; };
+        Windows.Devices.Enumeration.DevicePairingProtectionLevel ProtectionLevelUsed{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceUnpairingResult", 66f44ad3-79d9-444b-92cf-a92ef72571c7)]
+    runtimeclass DeviceUnpairingResult
+    {
+        Windows.Devices.Enumeration.DeviceUnpairingResultStatus Status{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [uuid(482cb27c-83bb-420e-be51-6602b222de54)]
+    interface IDevicePairingSettings
+    {
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Enumeration.IDevicePairingRequestedEventArgs", f717fc56-de6b-487f-8376-0180aca69963)]
+    runtimeclass DevicePairingRequestedEventArgs
+    {
+        Windows.Devices.Enumeration.DeviceInformation DeviceInformation{ get; };
+        Windows.Devices.Enumeration.DevicePairingKinds PairingKind{ get; };
+        String Pin{ get; };
+        [method_name("Accept")] void Accept();
+        [method_name("AcceptWithPin")] void Accept(String pin);
+        Windows.Foundation.Deferral GetDeferral();
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.Enumeration.IDevicePairingRequestedEventArgs2", c83752d9-e4d3-4db0-a360-a105e437dbdc)]
+        {
+            void AcceptWithPasswordCredential(Windows.Security.Credentials.PasswordCredential passwordCredential);
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceInformationCustomPairing", 85138c02-4ee6-4914-8370-107a39144c0e)]
+    runtimeclass DeviceInformationCustomPairing
+    {
+        [method_name("PairAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DevicePairingResult>  PairAsync(DevicePairingKinds pairingKindsSupported);
+        [method_name("PairWithProtectionLevelAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DevicePairingResult>  PairAsync(DevicePairingKinds pairingKindsSupported, DevicePairingProtectionLevel minProtectionLevel);
+        [method_name("PairWithProtectionLevelAndSettingsAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DevicePairingResult>  PairAsync(DevicePairingKinds pairingKindsSupported, DevicePairingProtectionLevel minProtectionLevel, IDevicePairingSettings devicePairingSettings);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.DeviceInformationCustomPairing, Windows.Devices.Enumeration.DevicePairingRequestedEventArgs>  PairingRequested;
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceInformationPairing", 2c4769f5-f684-40d5-8469-e8dbaab70485)]
+    [threading(both)]
+    runtimeclass DeviceInformationPairing
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Devices.Enumeration.IDeviceInformationPairingStatics", e915c408-36d4-49a1-bf13-514173799b6b)]
+        {
+            static Boolean TryRegisterForAllInboundPairingRequests(DevicePairingKinds pairingKindsSupported);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Devices.Enumeration.IDeviceInformationPairingStatics2", 04de5372-b7b7-476b-a74f-c5836a704d98)]
+        {
+            static Boolean TryRegisterForAllInboundPairingRequestsWithProtectionLevel(DevicePairingKinds pairingKindsSupported, DevicePairingProtectionLevel minProtectionLevel);
+        }
+        Boolean IsPaired{ get; };
+        Boolean CanPair{ get; };
+        [method_name("PairAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DevicePairingResult>  PairAsync();
+        [method_name("PairWithProtectionLevelAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DevicePairingResult>  PairAsync(DevicePairingProtectionLevel minProtectionLevel);
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Devices.Enumeration.IDeviceInformationPairing2", f68612fd-0aee-4328-85cc-1c742bb1790d)]
+        {
+            Windows.Devices.Enumeration.DevicePairingProtectionLevel ProtectionLevel{ get; };
+            Windows.Devices.Enumeration.DeviceInformationCustomPairing Custom{ get; };
+            [method_name("PairWithProtectionLevelAndSettingsAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DevicePairingResult>  PairAsync(DevicePairingProtectionLevel minProtectionLevel, IDevicePairingSettings devicePairingSettings);
+            [method_name("UnpairAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceUnpairingResult>  UnpairAsync();
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeviceAccessStatus
+    {
+        Unspecified,
+        Allowed,
+        DeniedByUser,
+        DeniedBySystem,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceAccessChangedEventArgs", deda0bcc-4f9d-4f58-9dba-a9bc800408d5)]
+    runtimeclass DeviceAccessChangedEventArgs
+    {
+        Windows.Devices.Enumeration.DeviceAccessStatus Status{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.Enumeration.IDeviceAccessChangedEventArgs2", 82523262-934b-4b30-a178-adc39f2f2be3)]
+        {
+            String Id{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Enumeration.IDeviceAccessInformationStatics", 574bd3d3-5f30-45cd-8a94-724fe5973084)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceAccessInformation", 0baa9a73-6de5-4915-8ddd-9a0554a6f545)]
+    [threading(both)]
+    runtimeclass DeviceAccessInformation
+    {
+        static Windows.Devices.Enumeration.DeviceAccessInformation CreateFromId(String deviceId);
+        static Windows.Devices.Enumeration.DeviceAccessInformation CreateFromDeviceClassId(Guid deviceClassId);
+        static Windows.Devices.Enumeration.DeviceAccessInformation CreateFromDeviceClass(DeviceClass deviceClass);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.DeviceAccessInformation, Windows.Devices.Enumeration.DeviceAccessChangedEventArgs>  AccessChanged;
+        Windows.Devices.Enumeration.DeviceAccessStatus CurrentStatus{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceWatcherEvent", 74aa9c0b-1dbd-47fd-b635-3cc556d0ff8b)]
+    runtimeclass DeviceWatcherEvent
+    {
+        Windows.Devices.Enumeration.DeviceWatcherEventKind Kind{ get; };
+        Windows.Devices.Enumeration.DeviceInformation DeviceInformation{ get; };
+        Windows.Devices.Enumeration.DeviceInformationUpdate DeviceInformationUpdate{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceWatcherTriggerDetails", 38808119-4cb7-4e57-a56d-776d07cbfef9)]
+    runtimeclass DeviceWatcherTriggerDetails
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Enumeration.DeviceWatcherEvent>  DeviceWatcherEvents{ get; };
+    }
+
+}
+namespace Windows.Devices.Enumeration.Pnp
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PnpObjectType
+    {
+        Unknown,
+        DeviceInterface,
+        DeviceContainer,
+        Device,
+        DeviceInterfaceClass,
+        AssociationEndpoint,
+        AssociationEndpointContainer,
+        AssociationEndpointService,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        DevicePanel,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Devices.Enumeration.Pnp.IPnpObjectUpdate", 6f59e812-001e-4844-bcc6-432886856a17)]
+    runtimeclass PnpObjectUpdate
+    {
+        Windows.Devices.Enumeration.Pnp.PnpObjectType Type{ get; };
+        String Id{ get; };
+        [hasvariant]Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PnpObjectCollection
+        : [default]Windows.Foundation.Collections.IVectorView<Windows.Devices.Enumeration.Pnp.PnpObject>
+        , Windows.Foundation.Collections.IIterable<Windows.Devices.Enumeration.Pnp.PnpObject>
+    {
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Enumeration.Pnp.IPnpObjectWatcher", 83c95ca8-4772-4a7a-aca8-e48c42a89c44)]
+    runtimeclass PnpObjectWatcher
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.Pnp.PnpObjectWatcher, Windows.Devices.Enumeration.Pnp.PnpObject>  Added;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.Pnp.PnpObjectWatcher, Windows.Devices.Enumeration.Pnp.PnpObjectUpdate>  Updated;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.Pnp.PnpObjectWatcher, Windows.Devices.Enumeration.Pnp.PnpObjectUpdate>  Removed;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.Pnp.PnpObjectWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Enumeration.Pnp.PnpObjectWatcher, Object>  Stopped;
+        Windows.Devices.Enumeration.DeviceWatcherStatus Status{ get; };
+        void Start();
+        void Stop();
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Enumeration.Pnp.IPnpObjectStatics", b3c32a3d-d168-4660-bbf3-a733b14b6e01)]
+    [interface_name("Windows.Devices.Enumeration.Pnp.IPnpObject", 95c66258-733b-4a8f-93a3-db078ac870c1)]
+    [threading(both)]
+    runtimeclass PnpObject
+    {
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.Pnp.PnpObject>  CreateFromIdAsync(PnpObjectType type, String id, Windows.Foundation.Collections.IIterable <String>  requestedProperties);
+        [method_name("FindAllAsync")] [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.Pnp.PnpObjectCollection>  FindAllAsync(PnpObjectType type, Windows.Foundation.Collections.IIterable <String>  requestedProperties);
+        [method_name("FindAllAsyncAqsFilter")] [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.Pnp.PnpObjectCollection>  FindAllAsync(PnpObjectType type, Windows.Foundation.Collections.IIterable <String>  requestedProperties, String aqsFilter);
+        [method_name("CreateWatcher")] static Windows.Devices.Enumeration.Pnp.PnpObjectWatcher CreateWatcher(PnpObjectType type, Windows.Foundation.Collections.IIterable <String>  requestedProperties);
+        [method_name("CreateWatcherAqsFilter")] static Windows.Devices.Enumeration.Pnp.PnpObjectWatcher CreateWatcher(PnpObjectType type, Windows.Foundation.Collections.IIterable <String>  requestedProperties, String aqsFilter);
+        Windows.Devices.Enumeration.Pnp.PnpObjectType Type{ get; };
+        String Id{ get; };
+        [hasvariant]Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        void Update(PnpObjectUpdate updateInfo);
+    }
+
+
+
+}

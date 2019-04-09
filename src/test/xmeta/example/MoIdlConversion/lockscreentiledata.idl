@@ -1,0 +1,63 @@
+
+
+
+
+
+
+
+namespace lockframework
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalLockScreenDataContract{};
+
+    [contract(lockframework.InternalLockScreenDataContract, 1)]
+    [flags]
+    enum TileRole
+    {
+        None,
+        DetailedStatus,
+        QuickStatus,
+        DetailedAndQuickStatus,
+        Mask = 255,
+    };
+
+
+    [contract(lockframework.InternalLockScreenDataContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [interface_name("lockframework.ILockScreenSettingsTileData", 989cf24a-b405-4403-8c1c-887ae20410cd)]
+    runtimeclass LockScreenSettingsTileData
+    {
+        String DisplayName{ get; };
+        String IconPath{ get; };
+        Guid Guid{ get; };
+        lockframework.TileRole Role{ get; };
+        UInt32 Slot{ get; };
+        event Windows.Foundation.TypedEventHandler <lockframework.LockScreenSettingsTileData, Object>  TileUpdated;
+    }
+
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [contract(lockframework.InternalLockScreenDataContract, 1)]
+    [static_name("lockframework.ILockScreenSettingsTileManagerStatics", 8788183f-abd2-4af4-9c40-65f1c8d77b16)]
+    [interface_name("lockframework.ILockScreenSettingsTileManager", 6b50c789-18d2-4356-9545-a43c10dbbc2b)]
+    [threading(both)]
+    runtimeclass LockScreenSettingsTileManager
+    {
+        static lockframework.LockScreenSettingsTileManager CreateTileManager();
+        static void MigrateSettings();
+        Windows.Foundation.Collections.IVectorView <lockframework.LockScreenSettingsTileData>  GetAvailableDetailedStatusTiles();
+        Windows.Foundation.Collections.IVectorView <lockframework.LockScreenSettingsTileData>  GetAvailableQuickStatusTiles();
+        Windows.Foundation.Collections.IVectorView <lockframework.LockScreenSettingsTileData>  GetAvailableProviders();
+        void GetIsInitialized(out Boolean value);
+        Windows.Foundation.Collections.IVectorView <lockframework.LockScreenSettingsTileData>  GetPinnedStatusTiles();
+        lockframework.LockScreenSettingsTileData GetTileForDetailedStatus();
+        lockframework.LockScreenSettingsTileData GetTileForQuickStatusAtSlot(UInt32 slot);
+        void PinTileToSlot(Guid id, UInt32 packedSlotInfo);
+        event Windows.Foundation.TypedEventHandler <lockframework.LockScreenSettingsTileManager, Object>  TilesAddedOrRemoved;
+    }
+
+
+
+}

@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [uuid(436c57c0-0c9c-4652-9902-2d9c10aadee0)]
+    interface IServiceContainer
+    {
+        void AddService(String runtimeClassName, Object service);
+        Object TryFindService(String runtimeClassName);
+        void RemoveService(String runtimeClassName);
+    };
+
+}

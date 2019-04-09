@@ -1,0 +1,198 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Experience
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.IShellExperienceProperties", c56c5799-4bb3-7fae-7fad-4db2f6a53eff)]
+    [threading(both)]
+    runtimeclass ShellExperienceProperties
+        : Windows.Foundation.Collections.IPropertySet
+        , Windows.Foundation.Collections.IObservableMap<String, Object>
+        , Windows.Foundation.Collections.IMap<String, Object>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Object> >
+    {
+        ShellExperienceProperties();
+        Windows.Foundation.Size DesiredSize{ set; };
+        Windows.Foundation.Size DesiredSize{ get; };
+        Boolean FullScreen{ set; };
+        Boolean FullScreen{ get; };
+    }
+
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    enum TitleBarButtons
+    {
+        None,
+        Minimize,
+        MaxRestore,
+        Close = 4,
+        Annotate = 8,
+        EnterFullScreen = 16,
+        ExitFullScreen = 32,
+        Actions = 64,
+        Back = 128,
+        All = 255,
+    };
+
+
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IShellExperienceReactivatedEventArgs", c1707d4e-b7cf-4c02-8c49-e72509ea16f5)]
+    [threading(both)]
+    runtimeclass ShellExperienceReactivatedEventArgs
+    {
+        ShellExperienceReactivatedEventArgs();
+        String Arguments{ get; };
+        Windows.Foundation.Collections.ValueSet ValueSet{ get; };
+        Windows.Foundation.Collections.IPropertySet PropertySet{ get; };
+    }
+
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [uuid(db37659c-5741-4985-a443-dda995e92f5f)]
+    interface IShellExperience
+    {
+        String ExperienceID{ set; };
+        String ExperienceID{ get; };
+        Windows.Internal.Shell.Experience.ShellExperienceProperties Properties{ set; };
+        Windows.Internal.Shell.Experience.ShellExperienceProperties Properties{ get; };
+        void SetExperienceId(String experienceId);
+        void UpdateProperties(Windows.Foundation.Collections.IPropertySet propertySet);
+        void QueueEvent(String eventName, Windows.Foundation.Collections.IPropertySet propertySet);
+        void AllowSetForeground();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.ShellExperience, Windows.Internal.Shell.Experience.ShellExperienceReactivatedEventArgs>  Reactivated;
+    };
+
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Shell.Experience.IShellExperienceStatics", 82badb30-4e84-4ab7-817c-46691c8a6d1c)]
+    [threading(both)]
+    runtimeclass ShellExperience
+        : [default]Windows.Internal.Shell.Experience.IShellExperience
+    {
+        static Windows.Internal.Shell.Experience.ShellExperience GetForCurrentView();
+    }
+
+
+    [uuid(4aaaff25-9e49-4ab5-b2af-c798c01c536c)]
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    interface IQuickConnectViewService
+    {
+        void PopulateContact(Windows.ApplicationModel.Contacts.Contact contact, Windows.ApplicationModel.Contacts.ContactCardOptions contactCardOptions, Boolean isDelayloadMode);
+        void PopulateDelayLoadedContact(Windows.ApplicationModel.Contacts.Contact contact);
+    };
+
+    [uuid(cb2ddc0d-d9ed-46c2-955a-d9eb426a8595)]
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    interface IQuickConnectViewService2
+    {
+        Boolean DismissHandled{ get; };
+        Boolean DismissHandled{ set; };
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.ISharedVisualEventArgs", 22a200f6-1d83-4c2a-b992-49a21c3f80a4)]
+    [threading(both)]
+    runtimeclass SharedVisualEventArgs
+    {
+        SharedVisualEventArgs();
+        Int64 SharedVisual{ get; };
+        Int64 ParentWindow{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroupId TabGroupId{ get; };
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ITitleBar", aa1c8d37-8f33-47d7-8db3-2556846ecdd9)]
+    [threading(both)]
+    runtimeclass TitleBar
+    {
+        TitleBar();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TitleBar, Windows.Internal.Shell.Experience.SharedVisualEventArgs>  SharedVisualProvided;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TitleBar, Windows.Internal.Shell.Experience.SharedVisualEventArgs>  SharedVisualRemoved;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TitleBar, Object>  SizeMetricsChanged;
+        Windows.Foundation.Size SharedVisualSize{ get; };
+        Guid Id{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TitleBar, Object>  InputSinkWindowChanged;
+        UInt64 InputSinkWindow{ get; };
+        UInt64 InputSinkWindow{ set; };
+        UInt32 SharedVisualScaleFactor{ get; };
+        void SetSharedVisualSize(Windows.Foundation.Size newSize, UInt32 scaleFactor);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TitleBar, Object>  WindowStateChanged;
+        Boolean IsWindowMaximized{ get; };
+        Boolean IsWindowMaximized{ set; };
+        Boolean IsWindowActive{ get; };
+        Boolean IsWindowActive{ set; };
+        Guid IslandId{ get; };
+        Guid IslandId{ set; };
+        Windows.Internal.Shell.Experience.TitleBarButtons VisibleButtons{ get; };
+        Windows.Internal.Shell.Experience.TitleBarButtons VisibleButtons{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TitleBar, Object>  SetFocusRequested;
+        void SetFocus();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.ITitleBarFactoryWatcher", 5b60b4ee-7d93-4b5b-a780-59cad821e93c)]
+    runtimeclass TitleBarFactoryWatcher
+    {
+        event Windows.Foundation.EventHandler <Object>  TitleBarsLost;
+        event Windows.Foundation.EventHandler <Object>  TitleBarsCreated;
+    }
+
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [uuid(b4f5885b-54f3-4caf-beea-7d34c351f19d)]
+    interface ITitleBarIslandLookup
+    {
+        [return_name("isValid")] Boolean TryGetTitleBarIslandId(UInt64 window, out Guid result);
+        [return_name("isValid")] Boolean TryGetTitleBarIslandSelectedHost(Guid islandId, out UInt64 result);
+    };
+
+
+
+    [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Shell.Experience.ITitleBarFactoryStatics", 8d99c789-bf9b-4d04-a028-fccdcdab52f9)]
+    [threading(both)]
+    runtimeclass TitleBarFactory
+        : Windows.Internal.Shell.Experience.ITitleBarIslandLookup
+    {
+        static Windows.Internal.Shell.Experience.TitleBarFactory GetForCurrentView();
+        static Windows.Internal.Shell.Experience.TitleBarFactoryWatcher GetWatcher();
+        static Windows.Internal.Shell.Experience.TitleBarFactory TryGet();
+        static Windows.Foundation.IAsyncOperation <Windows.Internal.Shell.Experience.TitleBarFactory>  GetAsync();
+
+        [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+        [interface_name("Windows.Internal.Shell.Experience.ITitleBarIslandLookupHost", 9160975c-3bbc-5611-a057-208d4a1783ba)]
+        {
+            void SetTitleBarIslandLookupHost(ITitleBarIslandLookup titleBarIslandLookup);
+        }
+
+        [contract(Windows.Internal.Shell.Experience.InternalContract, 1)]
+        [default]
+        [interface_name("Windows.Internal.Shell.Experience.ITitleBarFactory", 6c790002-9730-5d5c-a8a6-671e846d074c)]
+        {
+            Windows.Internal.Shell.Experience.TitleBar Create();
+            event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TitleBarFactory, Windows.Internal.Shell.Experience.TitleBar>  TitleBarCreated;
+        }
+    }
+
+
+}

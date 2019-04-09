@@ -1,0 +1,13 @@
+
+
+
+
+
+
+namespace Windows.Internal.Devices.Input
+{
+    [contractversion(1)]
+    [internal]
+    apicontract ISMInternalContract{};
+
+}

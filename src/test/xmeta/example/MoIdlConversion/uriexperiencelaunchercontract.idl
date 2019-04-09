@@ -1,0 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(8011190a-441a-4c05-9d4e-f3251f86c61e)]
+    interface IUriExperienceLauncherContract
+    {
+        void LaunchAsync(String contractId, String launchExtension, String targetExperienceAumId, String packageId, String displayName, Guid activationEventArgumentFactoryId, Object activationEventArgumentContext, Object protocolForResultsOperation, Windows.Internal.ApplicationModel.WindowManagement.WindowId callerWindowId, Windows.System.LauncherUIOptions launcherUIOptions, UInt64 userContext);
+        void DismissExperience(EventRegistrationToken dismissToken);
+    };
+
+}

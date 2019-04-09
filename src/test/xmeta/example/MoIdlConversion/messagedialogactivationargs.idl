@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.MessageDialog
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.Shell.MessageDialog.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.MessageDialog.IMessageDialogActivatedEventArgs", b586ef39-dddc-410c-8d0e-6dc5f6740e1e)]
+    runtimeclass MessageDialogActivatedEventArgs
+        : Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        String Title{ get; };
+        Windows.Foundation.Collections.IVector <String>  Commands{ get; };
+        UInt32 DefaultCommandIndex{ get; };
+        UInt32 CancelCommandIndex{ get; };
+        String Content{ get; };
+        Windows.UI.Popups.MessageDialogOptions Options{ get; };
+        UInt32 SelectedCommandIndex{ get; };
+        void OnCommandSelected(UInt32 commandIndex);
+    }
+
+}

@@ -1,0 +1,147 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Composition
+{
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [default_interface]
+    [interface_name("Windows.UI.Composition.IApplicationContentVisibilityChangedEventArgs", 048ed2fc-3ebf-5bf3-abd1-9dc8ce13952e)]
+    runtimeclass ApplicationContentVisibilityChangedEventArgs
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [default_interface]
+    [interface_name("Windows.UI.Composition.IApplicationContentClosedEventArgs", 478c2ac5-3fcb-59aa-96fa-8168c626d993)]
+    runtimeclass ApplicationContentClosedEventArgs
+    {
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Composition.IContentOutputFactory", 8e8d944a-7a36-52e5-a35c-e6bb79162c45)]
+    [static_name("Windows.UI.Composition.IContentOutputStatics", 89b35b3a-4a1a-5d3c-a8c8-b68506c16432)]
+    [interface_name("Windows.UI.Composition.IContentOutput", ff8fae80-a96c-5f50-adc6-854b2b5b705d)]
+    [threading(both)]
+    unsealed runtimeclass ContentOutput
+    {
+        static Windows.UI.Composition.ContentOutput GetForContent(Windows.UI.UIContentRoot content);
+        Windows.Foundation.Numerics.Vector3 CompositionOrientation{ get; };
+        Windows.UI.UIContentRoot Content{ get; };
+        Boolean IsScreenCaptureEnabled{ get; };
+        Boolean IsScreenCaptureEnabled{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [static_name("Windows.UI.Composition.IContentLayoutStatics", 454bde0d-9c54-533d-9d18-c098761e5fd4)]
+    [interface_name("Windows.UI.Composition.IContentLayout", 64ee39ef-80f5-59c4-9b16-628349877a30)]
+    [threading(both)]
+    runtimeclass ContentLayout
+    {
+        static Windows.UI.Composition.ContentLayout CreateForContent(Windows.UI.UIContentRoot content);
+        static Windows.UI.Composition.ContentLayout GetForContent(Windows.UI.UIContentRoot content);
+        Windows.UI.UIContentRoot Content{ get; };
+        Windows.System.DispatcherQueue DispatcherQueue{ get; };
+        Single DisplayScale{ get; };
+        Windows.UI.Core.CoreWindowFlowDirection FlowDirection{ get; };
+        Windows.UI.Core.CoreWindowFlowDirection FlowDirection{ set; };
+        Single RasterizationScale{ get; };
+        Windows.Foundation.Numerics.Vector3 Size{ get; };
+        event Windows.Foundation.EventHandler <Windows.UI.Composition.ContentLayout>  LayoutChanged;
+        Windows.Foundation.Numerics.Vector3 PreferredSize{ get; };
+        Windows.Foundation.Numerics.Vector3 PreferredSize{ set; };
+        Windows.Foundation.Numerics.Vector2 SnapToPixelAdjustment{ get; };
+        Windows.Foundation.Numerics.Vector2 SnapToPixelAdjustment{ set; };
+        void Invalidate();
+        Windows.Foundation.Deferral CreateLayoutChangedDeferral();
+    }
+
+
+
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Composition.IContentAutomationStatics", 29ef1cb8-9fab-5317-8c20-9fac153d8381)]
+    [interface_name("Windows.UI.Composition.IContentAutomation", 74307401-3c46-5334-ae17-2b7b619f09c0)]
+    [threading(both)]
+    runtimeclass ContentAutomation
+    {
+        static Windows.UI.Composition.ContentAutomation CreateForContent(Windows.UI.UIContentRoot content);
+        static Windows.UI.Composition.ContentAutomation GetForContent(Windows.UI.UIContentRoot content);
+        Object AutomationHostProvider{ get; };
+        Windows.UI.UIContentRoot Content{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Composition.ContentAutomation, Windows.UI.Core.AutomationProviderRequestedEventArgs>  AutomationProviderRequested;
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [static_name("Windows.UI.Composition.IVisualOutputStatics", 6ffa6da9-d013-530b-a83e-ba6b39ecfae1)]
+    [interface_name("Windows.UI.Composition.IVisualOutput", 408c72bd-6044-5678-a857-2dea00cf1e9a)]
+    [threading(both)]
+    runtimeclass VisualOutput
+        : Windows.UI.Composition.ContentOutput
+    {
+        static Windows.UI.Composition.VisualOutput CreateForContent(Windows.UI.UIContentRoot content);
+        static Windows.UI.Composition.VisualOutput GetForContent(Windows.UI.UIContentRoot content);
+        Windows.UI.Composition.VisualCollection Children{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [static_name("Windows.UI.Composition.ISwapChainOutputStatics", 684db0fe-5080-5ef8-83ce-0f7d940c7a4a)]
+    [default_interface]
+    [interface_name("Windows.UI.Composition.ISwapChainOutput", 26cd4fb9-9843-5b8c-a2dd-dc692c5ccc7e)]
+    [threading(both)]
+    runtimeclass SwapChainOutput
+        : Windows.UI.Composition.ContentOutput
+    {
+        static Windows.UI.Composition.SwapChainOutput CreateForContent(Windows.UI.UIContentRoot content);
+        static Windows.UI.Composition.SwapChainOutput GetForContent(Windows.UI.UIContentRoot content);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [static_name("Windows.UI.Composition.IModelOutputStatics", cd224728-d658-52e3-a2a3-81b9b4ea80bb)]
+    [default_interface]
+    [interface_name("Windows.UI.Composition.IModelOutput", a1c25d67-e137-55f4-997b-7461ed8433b4)]
+    [threading(both)]
+    runtimeclass ModelOutput
+        : Windows.UI.Composition.ContentOutput
+    {
+        static Windows.UI.Composition.ModelOutput CreateForContent(Windows.UI.UIContentRoot content);
+        static Windows.UI.Composition.ModelOutput GetForContent(Windows.UI.UIContentRoot content);
+    }
+
+}

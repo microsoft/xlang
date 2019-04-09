@@ -1,0 +1,62 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.ICustomInstallProcessStatics", 3ab021df-b455-426e-8a1a-3fbff5364e13)]
+    [interface_name("Windows.Internal.StateRepository.ICustomInstallProcess", e82e7395-69d9-4c7f-8abb-89b33489aca7)]
+    [threading(both)]
+    runtimeclass CustomInstallProcess
+    {
+        CustomInstallProcess();
+        static Boolean Exists(Int64 customInstallProcessID);
+        static Boolean ExistsByCustomInstall(CustomInstall CustomInstall);
+        static Boolean ExistsByCustomInstallAndIndex(CustomInstall CustomInstall, Int32 Index);
+        static Windows.Internal.StateRepository.CustomInstallProcess TryGet(Int64 customInstallProcessID);
+        static Windows.Internal.StateRepository.CustomInstallProcess TryGetByCustomInstallAndIndex(CustomInstall CustomInstall, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.CustomInstallProcess>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.CustomInstallProcess>  FindByCustomInstall(CustomInstall CustomInstall);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.CustomInstallProcess>  FindByCustomInstallAnd_WorkId(CustomInstall customInstall, Int64 workId);
+        Int64 _CustomInstallProcessID{ get; };
+        Int64 _CustomInstallProcessID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 CustomInstall{ get; };
+        Int64 CustomInstall{ set; };
+        Windows.Internal.StateRepository.CustomInstall GetCustomInstall();
+        void SetCustomInstall(CustomInstall value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Windows.Internal.StateRepository.CustomInstallProcessFlags Flags{ get; };
+        Windows.Internal.StateRepository.CustomInstallProcessFlags Flags{ set; };
+        Boolean UninstallOnUpdate{ get; };
+        Boolean UninstallOnUpdate{ set; };
+        String File{ get; };
+        String File{ set; };
+        Windows.Storage.StorageFile GetFileAsStorageFile();
+        void SetFileAsStorageFile(Windows.Storage.IStorageFile value);
+        Boolean IsArgumentsNull{ get; };
+        void SetArgumentsToNull();
+        String Arguments{ get; };
+        String Arguments{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

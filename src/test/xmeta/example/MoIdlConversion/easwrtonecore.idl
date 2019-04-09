@@ -1,0 +1,33 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Security.ExchangeActiveSyncProvisioning
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.ExchangeActiveSyncProvisioning.IEasClientDeviceInformation", 54dfd981-1968-4ca3-b958-e595d16505eb)]
+    [threading(both)]
+    runtimeclass EasClientDeviceInformation
+    {
+        EasClientDeviceInformation();
+        Guid Id{ get; };
+        String OperatingSystem{ get; };
+        String FriendlyName{ get; };
+        String SystemManufacturer{ get; };
+        String SystemProductName{ get; };
+        String SystemSku{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.ExchangeActiveSyncProvisioning.IEasClientDeviceInformation2", ffb35923-bb26-4d6a-81bc-165aee0ad754)]
+        {
+            String SystemHardwareVersion{ get; };
+            String SystemFirmwareVersion{ get; };
+        }
+    }
+
+}

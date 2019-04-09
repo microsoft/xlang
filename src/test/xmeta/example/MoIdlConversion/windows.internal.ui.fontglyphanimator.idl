@@ -1,0 +1,73 @@
+
+
+
+
+
+
+namespace Windows.Internal.UI.FontGlyphAnimator.Data
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.UI.FontGlyphAnimator.Data.InternalContract, 1)]
+    struct AnimationId
+    {
+        UInt32 stateAnimationId;
+        UInt32 subAnimationId;
+    };
+
+
+    [contract(Windows.Internal.UI.FontGlyphAnimator.Data.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.FontGlyphAnimator.Data.ISubAnimation", 4fb75ae7-5217-4cf0-835a-36185065a660)]
+    runtimeclass SubAnimation
+    {
+        UInt32 SubAnimationId{ get; };
+        Char BeginningCharacter{ get; };
+        Char EndingCharacter{ get; };
+        UInt32 FrameDurationInMS{ get; };
+    }
+
+
+    [contract(Windows.Internal.UI.FontGlyphAnimator.Data.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.FontGlyphAnimator.Data.ITransition", bb2c6664-254a-4c2e-9024-6aef33021603)]
+    runtimeclass Transition
+    {
+        Windows.Internal.UI.FontGlyphAnimator.Data.AnimationId AnimationId{ get; };
+        UInt32 HoldDurationInMS{ get; };
+    }
+
+
+    [contract(Windows.Internal.UI.FontGlyphAnimator.Data.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.FontGlyphAnimator.Data.IAnimationDataSet", ab972cc5-5821-4715-879f-1578127418f5)]
+    runtimeclass AnimationDataSet
+    {
+        UInt32 StateAnimationId{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.UI.FontGlyphAnimator.Data.SubAnimation>  SubAnimations{ get; };
+        String FontFamily{ get; };
+    }
+
+
+    [contract(Windows.Internal.UI.FontGlyphAnimator.Data.InternalContract, 1)]
+    enum AnimationFamily
+    {
+        BioFeedback,
+    };
+
+
+    [contract(Windows.Internal.UI.FontGlyphAnimator.Data.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.FontGlyphAnimator.Data.IAnimationDataProvider", 9bd9ae65-3764-45f1-9834-7d911fcdf841)]
+    runtimeclass AnimationDataProvider
+    {
+        AnimationDataProvider();
+
+        [contract(Windows.Internal.UI.FontGlyphAnimator.Data.InternalContract, 1)]
+        [constructor_name("Windows.Internal.UI.FontGlyphAnimator.Data.IAnimationDataProviderFactory", 317b7fe3-3002-4a5b-a8f8-a6456da47d5c)]
+        {
+            [method_name( "CreateAnimationDataProvider" )] AnimationDataProvider(AnimationFamily animationFamily);
+        }
+        Windows.Internal.UI.FontGlyphAnimator.Data.Transition GetNextSequence(AnimationId currentSequence, UInt32 targetStateAnimationId);
+        Windows.Internal.UI.FontGlyphAnimator.Data.AnimationDataSet GetDataForSequence(AnimationId sequence);
+    }
+
+}

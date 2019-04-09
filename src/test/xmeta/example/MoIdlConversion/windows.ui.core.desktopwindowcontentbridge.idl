@@ -1,0 +1,26 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Core
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [interface_name("Windows.UI.Core.IDesktopWindowContentBridge", 55931d08-14c7-50b4-8998-86d6339b9bb5)]
+    runtimeclass DesktopWindowContentBridge
+        : Windows.Foundation.IClosable
+    {
+        Windows.UI.UIContentRoot Content{ get; };
+        Single ScaleFactor{ get; };
+        Single ScaleFactor{ set; };
+        void Connect(Windows.UI.UIContentRoot content);
+    }
+
+}

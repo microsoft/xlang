@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IAppExtensionStatics", 21374459-f51f-462a-a7c1-53b8c35dd20b)]
+    [interface_name("Windows.Internal.StateRepository.IAppExtension", a1266eb4-3ea3-4295-bc22-e19961c7957e)]
+    [threading(both)]
+    runtimeclass AppExtension
+    {
+        AppExtension();
+        static Boolean Exists(Int64 appExtensionID);
+        static Boolean ExistsByExtension(ApplicationExtension Extension);
+        static Boolean ExistsByExtensionAndName(ApplicationExtension Extension, String Name);
+        static Boolean ExistsByName(String Name);
+        static Windows.Internal.StateRepository.AppExtension Get(Int64 appExtensionID);
+        static Windows.Internal.StateRepository.AppExtension TryGet(Int64 appExtensionID);
+        static Windows.Internal.StateRepository.AppExtension GetByExtensionAndName(ApplicationExtension Extension, String Name);
+        static Windows.Internal.StateRepository.AppExtension TryGetByExtensionAndName(ApplicationExtension Extension, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppExtension>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppExtension>  FindByExtension(ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppExtension>  FindByName(String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppExtension>  FindByUserOrDefaultAccountAndPackageFullNameAndName(User user, String packageFullName, String name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppExtension>  FindByUserOrDefaultAccountAndName(User user, String name);
+        Int64 _AppExtensionID{ get; };
+        Int64 _AppExtensionID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        String Id{ get; };
+        String Id{ set; };
+        String PublicFolder{ get; };
+        String PublicFolder{ set; };
+        Windows.Storage.StorageFolder GetPublicFolderAsStorageFolder();
+        void SetPublicFolderAsStorageFolder(Windows.Storage.IStorageFolder value);
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        Boolean IsDescriptionNull{ get; };
+        void SetDescriptionToNull();
+        String Description{ get; };
+        String Description{ set; };
+        Int64 Extension{ get; };
+        Int64 Extension{ set; };
+        Windows.Internal.StateRepository.ApplicationExtension GetExtension();
+        void SetExtension(ApplicationExtension value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

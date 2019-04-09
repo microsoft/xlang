@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(c945ef08-8259-456f-bfd3-b6e5312582ae)]
+    interface IAppResolverContract
+    {
+        void LaunchAsync(Windows.System.Private.IPendingLaunch pendingLaunch);
+    };
+
+}

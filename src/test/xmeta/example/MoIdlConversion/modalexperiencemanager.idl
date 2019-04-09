@@ -1,0 +1,97 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.ModalExperience
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.ModalExperience.InternalContract, 1)]
+    enum ModalExperienceViewState
+    {
+        Abnormal,
+        ViewCreated,
+        ViewVisible,
+        ViewClosed,
+        ViewHidden,
+    };
+
+    [contract(Windows.Internal.Shell.ModalExperience.InternalContract, 1)]
+    [uuid(64ea1e5c-e838-43eb-bdde-09bc5aee78c0)]
+    interface IModalExperienceEventArgs
+    {
+        EventRegistrationToken ExperienceID{ get; };
+        UInt32 ExperienceOwnerWindowId{ get; };
+        Windows.Internal.Shell.ModalExperience.ModalExperienceViewState State{ get; };
+    };
+
+    [uuid(faacf24c-7de0-4ea3-9d2a-0dcc7475e219)]
+    [contract(Windows.Internal.Shell.ModalExperience.InternalContract, 1)]
+    interface IModalWindowExperienceManager
+    {
+        EventRegistrationToken ShowForLaunch(String appUserModelID, String launchArguments, ModalExperienceOptions pExperienceCustomizationProperties, UInt32 parentWindowInstanceID, Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager, Windows.Internal.Shell.ModalExperience.IModalExperienceEventArgs>  pModalExperienceHandler);
+        EventRegistrationToken ShowForContractByAppID(String appUserModelID, String contractID, Object pActivatedEventArgs, ModalExperienceOptions pExperienceCustomizationProperties, UInt32 parentWindowInstanceID, Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager, Windows.Internal.Shell.ModalExperience.IModalExperienceEventArgs>  pModalExperienceHandler);
+        EventRegistrationToken ShowForContractWithPlugin(String appUserModelID, String extensionID, String contractID, Guid activationEventArgumentFactoryId, Object activationEventArgumentContext, ModalExperienceOptions pExperienceCustomizationProperties, UInt32 parentWindowInstanceID, Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager, Windows.Internal.Shell.ModalExperience.IModalExperienceEventArgs>  pModalExperienceHandler);
+        void ChangeModalExperienceProperties(EventRegistrationToken token, ModalExperienceOptions pExperienceCustomizationProperties);
+        void UnregisterFromModalExperienceEvents(EventRegistrationToken token);
+        void Dismiss(EventRegistrationToken token);
+        EventRegistrationToken GetExistingExperienceForOwnerWindow(UInt32 parentWindowInstanceID);
+        void ShowExperience(EventRegistrationToken token);
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.ModalExperience.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.ModalExperience.IModalExperienceDefaultOptions", 074e185b-ef4b-4231-9a8e-eb1bb4ef2099)]
+    runtimeclass ModalExperienceOptions
+        : Windows.Foundation.Collections.IPropertySet
+        , Windows.Foundation.Collections.IObservableMap<String, Object>
+        , Windows.Foundation.Collections.IMap<String, Object>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Object> >
+    {
+        Windows.Foundation.Size ExperienceDefaultSize{ set; };
+        Windows.Foundation.Size ExperienceDefaultSize{ get; };
+        Windows.Foundation.Point RelativeTopCornerPosition{ set; };
+        Windows.Foundation.Point RelativeTopCornerPosition{ get; };
+        Boolean Centered{ set; };
+        Boolean Centered{ get; };
+        String ExperienceTitle{ set; };
+        String ExperienceTitle{ get; };
+        UInt32 SuspendExemptionType{ set; };
+        UInt32 SuspendExemptionType{ get; };
+        Boolean ViewVisibilitySetByCaller{ set; };
+        Boolean ViewVisibilitySetByCaller{ get; };
+        Boolean AllowWin32Owner{ set; };
+        Boolean AllowWin32Owner{ get; };
+        Windows.Foundation.Size ExperienceMinimumSize{ set; };
+        Windows.Foundation.Size ExperienceMinimumSize{ get; };
+        Windows.Foundation.Size ExperienceMaximumSize{ set; };
+        Windows.Foundation.Size ExperienceMaximumSize{ get; };
+    }
+
+    [contract(Windows.Internal.Shell.ModalExperience.InternalContract, 1)]
+    [uuid(50c6090b-023e-4fde-b226-57c3e26d2881)]
+    interface IModalWindowExperienceManagerAsUser requires Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager
+    {
+        EventRegistrationToken ShowForContractByAppIDAsUser(String appUserModelID, String contractID, Object activatedEventArgs, ModalExperienceOptions experienceCustomizationProperties, UInt32 parentWindowInstanceID, Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager, Windows.Internal.Shell.ModalExperience.IModalExperienceEventArgs>  modalExperienceHandler, UInt64 userContext);
+        EventRegistrationToken ShowForContractWithPluginAsUser(String appUserModelID, String extensionID, String contractID, Guid ActivationEventArgumentFactoryId, Object ActivationEventArgumentContext, ModalExperienceOptions experienceCustomizationProperties, UInt32 parentWindowInstanceID, Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager, Windows.Internal.Shell.ModalExperience.IModalExperienceEventArgs>  modalExperienceHandler, UInt64 userContext);
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.ModalExperience.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.ModalExperience.IModalExperienceManagerStatic", 9bee8350-74a1-45c1-a90b-f263581b945b)]
+    runtimeclass ModalExperienceManager
+        : [default]Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager
+        , [contract(Windows.Internal.Shell.ModalExperience.InternalContract, 1)]
+        Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManagerAsUser
+    {
+        static Windows.Internal.Shell.ModalExperience.IModalWindowExperienceManager GetModalExperienceManager();
+    }
+
+
+}

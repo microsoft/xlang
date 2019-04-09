@@ -1,0 +1,836 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Chat
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatMessageStatus
+    {
+        Draft,
+        Sending,
+        Sent,
+        SendRetryNeeded,
+        SendFailed,
+        Received,
+        ReceiveDownloadNeeded,
+        ReceiveDownloadFailed,
+        ReceiveDownloading,
+        Deleted,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Declined,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Cancelled,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Recalled,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        ReceiveRetryNeeded,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatMessageKind
+    {
+        Standard,
+        FileTransferRequest,
+        TransportCustom,
+        JoinedConversation,
+        LeftConversation,
+        OtherParticipantJoinedConversation,
+        OtherParticipantLeftConversation,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatMessageOperatorKind
+    {
+        Unspecified,
+        Sms,
+        Mms,
+        Rcs,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatMessageChangeType
+    {
+        MessageCreated,
+        MessageModified,
+        MessageDeleted,
+        ChangeTrackingLost,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatMessageValidationStatus
+    {
+        Valid,
+        NoRecipients,
+        InvalidData,
+        MessageTooLarge,
+        TooManyRecipients,
+        TransportInactive,
+        TransportNotFound,
+        TooManyAttachments,
+        InvalidRecipients,
+        InvalidBody,
+        InvalidOther,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        ValidWithLargeMessage,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        VoiceRoamingRestriction,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        DataRoamingRestriction,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatConversationThreadingKind
+    {
+        Participants,
+        ContactId,
+        ConversationId,
+        Custom,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatStoreChangedEventKind
+    {
+        NotificationsMissed,
+        StoreModified,
+        MessageCreated,
+        MessageModified,
+        MessageDeleted,
+        ConversationModified,
+        ConversationDeleted,
+        ConversationTransportDeleted,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatTransportErrorCodeCategory
+    {
+        None,
+        Http,
+        Network,
+        MmsServer,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatTransportInterpretedErrorCode
+    {
+        None,
+        Unknown,
+        InvalidRecipientAddress,
+        NetworkConnectivity,
+        ServiceDenied,
+        Timeout,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatMessageTransportKind
+    {
+        Text,
+        Untriaged,
+        Blocked,
+        Custom,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum RcsServiceKind
+    {
+        Chat,
+        GroupChat,
+        FileTransfer,
+        Capability,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ChatItemKind
+    {
+        Message,
+        Conversation,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum ChatRestoreHistorySpan
+    {
+        LastMonth,
+        LastYear,
+        AnyTime,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageTransportConfiguration", 879ff725-1a08-4aca-a075-3355126312e6)]
+    runtimeclass ChatMessageTransportConfiguration
+    {
+        Int32 MaxAttachmentCount{ get; };
+        Int32 MaxMessageSizeInKilobytes{ get; };
+        Int32 MaxRecipientCount{ get; };
+        Windows.Media.MediaProperties.MediaEncodingProfile SupportedVideoFormat{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  ExtendedProperties{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessage", 4b39052a-1142-5089-76da-f2db3d17cd05)]
+    [threading(both)]
+    runtimeclass ChatMessage
+        : [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Chat.IChatItem
+    {
+        ChatMessage();
+        Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Chat.ChatMessageAttachment>  Attachments{ get; };
+        String Body{ get; };
+        String Body{ set; };
+        String From{ get; };
+        String Id{ get; };
+        Boolean IsForwardingDisabled{ get; };
+        Boolean IsIncoming{ get; };
+        Boolean IsRead{ get; };
+        Windows.Foundation.DateTime LocalTimestamp{ get; };
+        Windows.Foundation.DateTime NetworkTimestamp{ get; };
+        Windows.Foundation.Collections.IVector <String>  Recipients{ get; };
+        Windows.Foundation.Collections.IMapView <String, Windows.ApplicationModel.Chat.ChatMessageStatus>  RecipientSendStatuses{ get; };
+        Windows.ApplicationModel.Chat.ChatMessageStatus Status{ get; };
+        String Subject{ get; };
+        String TransportFriendlyName{ get; };
+        String TransportId{ get; };
+        String TransportId{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessage2", 86668332-543f-49f5-ac71-6c2afc6565fd)]
+        {
+            UInt64 EstimatedDownloadSize{ get; };
+            UInt64 EstimatedDownloadSize{ set; };
+            String From{ set; };
+            Boolean IsAutoReply{ get; };
+            Boolean IsAutoReply{ set; };
+            Boolean IsForwardingDisabled{ set; };
+            Boolean IsReplyDisabled{ get; };
+            Boolean IsIncoming{ set; };
+            Boolean IsRead{ set; };
+            Boolean IsSeen{ get; };
+            Boolean IsSeen{ set; };
+            Boolean IsSimMessage{ get; };
+            Windows.Foundation.DateTime LocalTimestamp{ set; };
+            Windows.ApplicationModel.Chat.ChatMessageKind MessageKind{ get; };
+            Windows.ApplicationModel.Chat.ChatMessageKind MessageKind{ set; };
+            Windows.ApplicationModel.Chat.ChatMessageOperatorKind MessageOperatorKind{ get; };
+            Windows.ApplicationModel.Chat.ChatMessageOperatorKind MessageOperatorKind{ set; };
+            Windows.Foundation.DateTime NetworkTimestamp{ set; };
+            Boolean IsReceivedDuringQuietHours{ get; };
+            Boolean IsReceivedDuringQuietHours{ set; };
+            String RemoteId{ set; };
+            Windows.ApplicationModel.Chat.ChatMessageStatus Status{ set; };
+            String Subject{ set; };
+            Boolean ShouldSuppressNotification{ get; };
+            Boolean ShouldSuppressNotification{ set; };
+            Windows.ApplicationModel.Chat.ChatConversationThreadingInfo ThreadingInfo{ get; };
+            Windows.ApplicationModel.Chat.ChatConversationThreadingInfo ThreadingInfo{ set; };
+            Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Chat.ChatRecipientDeliveryInfo>  RecipientsDeliveryInfos{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessage3", 74eb2fb0-3ba7-459f-8e0b-e8af0febd9ad)]
+        {
+            String RemoteId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessage4", 2d144b0f-d2bf-460c-aa68-6d3f8483c9bf)]
+        {
+            String SyncId{ get; };
+            String SyncId{ set; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageChange", 1c18c355-421e-54b8-6d38-6b3a6c82fccc)]
+    runtimeclass ChatMessageChange
+    {
+        Windows.ApplicationModel.Chat.ChatMessageChangeType ChangeType{ get; };
+        Windows.ApplicationModel.Chat.ChatMessage Message{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageChangeReader", 14267020-28ce-5f26-7b05-9a5c7cce87ca)]
+    runtimeclass ChatMessageChangeReader
+    {
+        void AcceptChanges();
+        void AcceptChangesThrough(ChatMessageChange lastChangeToAcknowledge);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.ChatMessageChange> >  ReadBatchAsync();
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.ApplicationModel.Chat.IChatMessageAttachmentFactory", 205852a2-a356-5b71-6ca9-66c985b7d0d5)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageAttachment", c7c4fd74-bf63-58eb-508c-8b863ff16b67)]
+    [threading(both)]
+    runtimeclass ChatMessageAttachment
+    {
+        [method_name( "CreateChatMessageAttachment" )] ChatMessageAttachment(String mimeType, Windows.Storage.Streams.IRandomAccessStreamReference dataStreamReference);
+        Windows.Storage.Streams.IRandomAccessStreamReference DataStreamReference{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference DataStreamReference{ set; };
+        UInt32 GroupId{ get; };
+        UInt32 GroupId{ set; };
+        String MimeType{ get; };
+        String MimeType{ set; };
+        String Text{ get; };
+        String Text{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessageAttachment2", 5ed99270-7dd1-4a87-a8ce-acdd87d80dc8)]
+        {
+            Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ get; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ set; };
+            Double TransferProgress{ get; };
+            Double TransferProgress{ set; };
+            String OriginalFileName{ get; };
+            String OriginalFileName{ set; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatConversationThreadingInfo", 331c21dc-7a07-4422-a32c-24be7c6dab24)]
+    [threading(both)]
+    runtimeclass ChatConversationThreadingInfo
+    {
+        ChatConversationThreadingInfo();
+        String ContactId{ get; };
+        String ContactId{ set; };
+        String Custom{ get; };
+        String Custom{ set; };
+        String ConversationId{ get; };
+        String ConversationId{ set; };
+        Windows.Foundation.Collections.IVector <String>  Participants{ get; };
+        Windows.ApplicationModel.Chat.ChatConversationThreadingKind Kind{ get; };
+        Windows.ApplicationModel.Chat.ChatConversationThreadingKind Kind{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatRecipientDeliveryInfo", ffc7b2a2-283c-4c0a-8a0e-8c33bdbf0545)]
+    [threading(both)]
+    runtimeclass ChatRecipientDeliveryInfo
+    {
+        ChatRecipientDeliveryInfo();
+        String TransportAddress{ get; };
+        String TransportAddress{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  DeliveryTime{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  DeliveryTime{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  ReadTime{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  ReadTime{ set; };
+        Windows.ApplicationModel.Chat.ChatTransportErrorCodeCategory TransportErrorCodeCategory{ get; };
+        Windows.ApplicationModel.Chat.ChatTransportInterpretedErrorCode TransportInterpretedErrorCode{ get; };
+        Int32 TransportErrorCode{ get; };
+        Boolean IsErrorPermanent{ get; };
+        Windows.ApplicationModel.Chat.ChatMessageStatus Status{ get; };
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageChangeTracker", 60b7f066-70a0-5224-508c-242ef7c1d06f)]
+    runtimeclass ChatMessageChangeTracker
+    {
+        void Enable();
+        Windows.ApplicationModel.Chat.ChatMessageChangeReader GetChangeReader();
+        void Reset();
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageReader", b6ea78ce-4489-56f9-76aa-e204682514cf)]
+    runtimeclass ChatMessageReader
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.ChatMessage> >  ReadBatchAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessageReader2", 89643683-64bb-470d-9df4-0de8be1a05bf)]
+        {
+            [method_name("ReadBatchWithCountAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.ChatMessage> >  ReadBatchAsync(Int32 count);
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageValidationResult", 25e93a03-28ec-5889-569b-7e486b126f18)]
+    runtimeclass ChatMessageValidationResult
+    {
+        Windows.Foundation.IReference <UInt32>  MaxPartCount{ get; };
+        Windows.Foundation.IReference <UInt32>  PartCount{ get; };
+        Windows.Foundation.IReference <UInt32>  RemainingCharacterCountInPart{ get; };
+        Windows.ApplicationModel.Chat.ChatMessageValidationStatus Status{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageStore", 31f2fd01-ccf6-580b-4976-0a07dd5d3b47)]
+    runtimeclass ChatMessageStore
+    {
+        Windows.ApplicationModel.Chat.ChatMessageChangeTracker ChangeTracker{ get; };
+        Windows.Foundation.IAsyncAction DeleteMessageAsync(String localMessageId);
+        Windows.Foundation.IAsyncAction DownloadMessageAsync(String localChatMessageId);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatMessage>  GetMessageAsync(String localChatMessageId);
+        [method_name("GetMessageReader1")] Windows.ApplicationModel.Chat.ChatMessageReader GetMessageReader();
+        [method_name("GetMessageReader2")] Windows.ApplicationModel.Chat.ChatMessageReader GetMessageReader(Windows.Foundation.TimeSpan recentTimeLimit);
+        Windows.Foundation.IAsyncAction MarkMessageReadAsync(String localChatMessageId);
+        Windows.Foundation.IAsyncAction RetrySendMessageAsync(String localChatMessageId);
+        [remote_sync]Windows.Foundation.IAsyncAction SendMessageAsync(ChatMessage chatMessage);
+        Windows.ApplicationModel.Chat.ChatMessageValidationResult ValidateMessage(ChatMessage chatMessage);
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Chat.ChatMessageStore, Windows.ApplicationModel.Chat.ChatMessageChangedEventArgs>  MessageChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessageStore2", ad4dc4ee-3ad4-491b-b311-abdf9bb22768)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatMessage>  ForwardMessageAsync(String localChatMessageId, Windows.Foundation.Collections.IIterable <String>  addresses);
+            [method_name("GetConversationAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatConversation>  GetConversationAsync(String conversationId);
+            [method_name("GetConversationForTransportsAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatConversation>  GetConversationAsync(String conversationId, Windows.Foundation.Collections.IIterable <String>  transportIds);
+            [remote_sync]Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatConversation>  GetConversationFromThreadingInfoAsync(ChatConversationThreadingInfo threadingInfo);
+            [method_name("GetConversationReader")] Windows.ApplicationModel.Chat.ChatConversationReader GetConversationReader();
+            [method_name("GetConversationForTransportsReader")] Windows.ApplicationModel.Chat.ChatConversationReader GetConversationReader(Windows.Foundation.Collections.IIterable <String>  transportIds);
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatMessage>  GetMessageByRemoteIdAsync(String transportId, String remoteId);
+            [method_name("GetUnseenCountAsync")] Windows.Foundation.IAsyncOperation <Int32>  GetUnseenCountAsync();
+            [method_name("GetUnseenCountForTransportsReaderAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Int32>  GetUnseenCountAsync(Windows.Foundation.Collections.IIterable <String>  transportIds);
+            [method_name("MarkAsSeenAsync")] Windows.Foundation.IAsyncAction MarkAsSeenAsync();
+            [method_name("MarkAsSeenForTransportsAsync")] [remote_sync]Windows.Foundation.IAsyncAction MarkAsSeenAsync(Windows.Foundation.Collections.IIterable <String>  transportIds);
+            Windows.ApplicationModel.Chat.ChatSearchReader GetSearchReader(ChatQueryOptions value);
+            [remote_sync]Windows.Foundation.IAsyncAction SaveMessageAsync(ChatMessage chatMessage);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryCancelDownloadMessageAsync(String localChatMessageId);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryCancelSendMessageAsync(String localChatMessageId);
+            event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Chat.ChatMessageStore, Windows.ApplicationModel.Chat.ChatMessageStoreChangedEventArgs>  StoreChanged;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessageStore3", 9adbbb09-4345-4ec1-8b74-b7338243719c)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatMessage>  GetMessageBySyncIdAsync(String syncId);
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageChangedEventArgs", b6b73e2d-691c-4edf-8660-6eb9896892e3)]
+    runtimeclass ChatMessageChangedEventArgs
+    {
+        Windows.ApplicationModel.Chat.ChatMessageChangedDeferral GetDeferral();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatConversation", a58c080d-1a6f-46dc-8f3d-f5028660b6ee)]
+    runtimeclass ChatConversation
+        : [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Chat.IChatItem
+    {
+        Boolean HasUnreadMessages{ get; };
+        String Id{ get; };
+        String Subject{ get; };
+        String Subject{ set; };
+        Boolean IsConversationMuted{ get; };
+        Boolean IsConversationMuted{ set; };
+        String MostRecentMessageId{ get; };
+        Windows.Foundation.Collections.IVector <String>  Participants{ get; };
+        Windows.ApplicationModel.Chat.ChatConversationThreadingInfo ThreadingInfo{ get; };
+        Windows.Foundation.IAsyncAction DeleteAsync();
+        Windows.ApplicationModel.Chat.ChatMessageReader GetMessageReader();
+        [method_name("MarkAllMessagesAsReadAsync")] Windows.Foundation.IAsyncAction MarkMessagesAsReadAsync();
+        [method_name("MarkMessagesAsReadAsync")] Windows.Foundation.IAsyncAction MarkMessagesAsReadAsync(Windows.Foundation.DateTime value);
+        Windows.Foundation.IAsyncAction SaveAsync();
+        void NotifyLocalParticipantComposing(String transportId, String participantAddress, Boolean isComposing);
+        void NotifyRemoteParticipantComposing(String transportId, String participantAddress, Boolean isComposing);
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Chat.ChatConversation, Windows.ApplicationModel.Chat.RemoteParticipantComposingChangedEventArgs>  RemoteParticipantComposingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatConversation2", 0a030cd1-983a-47aa-9a90-ee48ee997b59)]
+        {
+            Boolean CanModifyParticipants{ get; };
+            Boolean CanModifyParticipants{ set; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatConversationReader", 055136d2-de32-4a47-a93a-b3dc0833852b)]
+    runtimeclass ChatConversationReader
+    {
+        [method_name("ReadBatchAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.ChatConversation> >  ReadBatchAsync();
+        [method_name("ReadBatchWithCountAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.ChatConversation> >  ReadBatchAsync(Int32 count);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatQueryOptions", 2fd364a6-bf36-42f7-b7e7-923c0aabfe16)]
+    [threading(both)]
+    runtimeclass ChatQueryOptions
+    {
+        ChatQueryOptions();
+        String SearchString{ get; };
+        String SearchString{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatSearchReader", 4665fe49-9020-4752-980d-39612325f589)]
+    runtimeclass ChatSearchReader
+    {
+        [method_name("ReadBatchAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.IChatItem> >  ReadBatchAsync();
+        [method_name("ReadBatchWithCountAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.IChatItem> >  ReadBatchAsync(Int32 count);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageStoreChangedEventArgs", 65c66fac-fe8c-46d4-9119-57b8410311d5)]
+    runtimeclass ChatMessageStoreChangedEventArgs
+    {
+        String Id{ get; };
+        Windows.ApplicationModel.Chat.ChatStoreChangedEventKind Kind{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageChangedDeferral", fbc6b30c-788c-4dcc-ace7-6282382968cf)]
+    runtimeclass ChatMessageChangedDeferral
+    {
+        void Complete();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageTransport", 63a9dbf8-e6b3-5c9a-5f85-d47925b9bd18)]
+    runtimeclass ChatMessageTransport
+    {
+        Boolean IsAppSetAsNotificationProvider{ get; };
+        Boolean IsActive{ get; };
+        String TransportFriendlyName{ get; };
+        String TransportId{ get; };
+        Windows.Foundation.IAsyncAction RequestSetAsNotificationProviderAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessageTransport2", 90a75622-d84a-4c22-a94d-544444edc8a1)]
+        {
+            Windows.ApplicationModel.Chat.ChatMessageTransportConfiguration Configuration{ get; };
+            Windows.ApplicationModel.Chat.ChatMessageTransportKind TransportKind{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatSyncManager", 7ba52c63-2650-486f-b4b4-6bd9d3d63c84)]
+    runtimeclass ChatSyncManager
+    {
+        Windows.ApplicationModel.Chat.ChatSyncConfiguration Configuration{ get; };
+        Windows.Foundation.IAsyncAction AssociateAccountAsync(Windows.Security.Credentials.WebAccount webAccount);
+        Windows.Foundation.IAsyncAction UnassociateAccountAsync();
+        Boolean IsAccountAssociated(Windows.Security.Credentials.WebAccount webAccount);
+        void StartSync();
+        Windows.Foundation.IAsyncAction SetConfigurationAsync(ChatSyncConfiguration configuration);
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(8751d000-ceb1-4243-b803-15d45a1dd428)]
+    interface IChatItem
+    {
+        Windows.ApplicationModel.Chat.ChatItemKind ItemKind{ get; };
+    };
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatCapabilities", 3aff77bc-39c9-4dd1-ad2d-3964dd9d403f)]
+    runtimeclass ChatCapabilities
+    {
+        Boolean IsOnline{ get; };
+        Boolean IsChatCapable{ get; };
+        Boolean IsFileTransferCapable{ get; };
+        Boolean IsGeoLocationPushCapable{ get; };
+        Boolean IsIntegratedMessagingCapable{ get; };
+    }
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IRemoteParticipantComposingChangedEventArgs", 1ec045a7-cfc9-45c9-9876-449f2bc180f5)]
+    runtimeclass RemoteParticipantComposingChangedEventArgs
+    {
+        String TransportId{ get; };
+        String ParticipantAddress{ get; };
+        Boolean IsComposing{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatSyncConfiguration", 09f869b2-69f4-4aff-82b6-06992ff402d2)]
+    runtimeclass ChatSyncConfiguration
+    {
+        Boolean IsSyncEnabled{ get; };
+        Boolean IsSyncEnabled{ set; };
+        Windows.ApplicationModel.Chat.ChatRestoreHistorySpan RestoreHistorySpan{ get; };
+        Windows.ApplicationModel.Chat.ChatRestoreHistorySpan RestoreHistorySpan{ set; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsEndUserMessageManager", 3054ae5a-4d1f-4b59-9433-126c734e86a6)]
+    runtimeclass RcsEndUserMessageManager
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Chat.RcsEndUserMessageManager, Windows.ApplicationModel.Chat.RcsEndUserMessageAvailableEventArgs>  MessageAvailableChanged;
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsTransport", fea34759-f37c-4319-8546-ec84d21d30ff)]
+    runtimeclass RcsTransport
+    {
+        Windows.Foundation.Collections.IMapView <String, Object>  ExtendedProperties{ get; };
+        Boolean IsActive{ get; };
+        String TransportFriendlyName{ get; };
+        String TransportId{ get; };
+        Windows.ApplicationModel.Chat.RcsTransportConfiguration Configuration{ get; };
+        Boolean IsStoreAndForwardEnabled(RcsServiceKind serviceKind);
+        Boolean IsServiceKindSupported(RcsServiceKind serviceKind);
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Chat.RcsTransport, Windows.ApplicationModel.Chat.RcsServiceKindSupportedChangedEventArgs>  ServiceKindSupportedChanged;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsTransportConfiguration", 1fccb102-2472-4bb9-9988-c1211c83e8a9)]
+    runtimeclass RcsTransportConfiguration
+    {
+        Int32 MaxAttachmentCount{ get; };
+        Int32 MaxMessageSizeInKilobytes{ get; };
+        Int32 MaxGroupMessageSizeInKilobytes{ get; };
+        Int32 MaxRecipientCount{ get; };
+        Int32 MaxFileSizeInKilobytes{ get; };
+        Int32 WarningFileSizeInKilobytes{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsServiceKindSupportedChangedEventArgs", f47ea244-e783-4866-b3a7-4e5ccf023070)]
+    runtimeclass RcsServiceKindSupportedChangedEventArgs
+    {
+        Windows.ApplicationModel.Chat.RcsServiceKind ServiceKind{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsEndUserMessageAvailableEventArgs", 2d45ae01-3f89-41ea-9702-9e9ed411aa98)]
+    runtimeclass RcsEndUserMessageAvailableEventArgs
+    {
+        Boolean IsMessageAvailable{ get; };
+        Windows.ApplicationModel.Chat.RcsEndUserMessage Message{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsEndUserMessageAction", 92378737-9b42-46d3-9d5e-3c1b2dae7cb8)]
+    runtimeclass RcsEndUserMessageAction
+    {
+        String Label{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsEndUserMessage", d7cda5eb-cbd7-4f3b-8526-b506dec35c53)]
+    runtimeclass RcsEndUserMessage
+    {
+        String TransportId{ get; };
+        String Title{ get; };
+        String Text{ get; };
+        Boolean IsPinRequired{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.RcsEndUserMessageAction>  Actions{ get; };
+        Windows.Foundation.IAsyncAction SendResponseAsync(RcsEndUserMessageAction action);
+        Windows.Foundation.IAsyncAction SendResponseWithPinAsync(RcsEndUserMessageAction action, String pin);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Chat.IChatMessageManager2Statics", 1d45390f-9f4f-4e35-964e-1b9ca61ac044)]
+    [threading(both)]
+    runtimeclass ChatMessageManager
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.ApplicationModel.Chat.IChatMessageManagerStatics3", 208b830d-6755-48cc-9ab3-fd03c463fc92)]
+        {
+            static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatSyncManager>  RequestSyncManagerAsync();
+        }
+        static Windows.Foundation.IAsyncOperation <String>  RegisterTransportAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatMessageTransport>  GetTransportAsync(String transportId);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.ApplicationModel.Chat.IChatMessageManagerStatic", f15c60f7-d5e8-5e92-556d-e03b60253104)]
+        {
+            static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.ChatMessageTransport> >  GetTransportsAsync();
+            static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatMessageStore>  RequestStoreAsync();
+            [remote_sync]static Windows.Foundation.IAsyncAction ShowComposeSmsMessageAsync(ChatMessage message);
+            static void ShowSmsSettings();
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IChatMessageNotificationTriggerDetails", fd344dfb-3063-4e17-8586-c6c08262e6c0)]
+    runtimeclass ChatMessageNotificationTriggerDetails
+    {
+        Windows.ApplicationModel.Chat.ChatMessage ChatMessage{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Chat.IChatMessageNotificationTriggerDetails2", 6bb522e0-aa07-4fd1-9471-77934fb75ee6)]
+        {
+            Boolean ShouldDisplayToast{ get; };
+            Boolean ShouldUpdateDetailText{ get; };
+            Boolean ShouldUpdateBadge{ get; };
+            Boolean ShouldUpdateActionCenter{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Chat.IChatMessageBlockingStatic", f6b9a380-cdea-11e4-8830-0800200c9a66)]
+    [threading(both)]
+    runtimeclass ChatMessageBlocking
+    {
+        static Windows.Foundation.IAsyncAction MarkMessageAsBlockedAsync(String localChatMessageId, Boolean blocked);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.Chat.IChatCapabilitiesManagerStatics", b57a2f30-7041-458e-b0cf-7c0d9fea333a)]
+    [threading(both)]
+    runtimeclass ChatCapabilitiesManager
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.ApplicationModel.Chat.IChatCapabilitiesManagerStatics2", e30d4274-d5c1-4ac9-9ffc-40e69184fec8)]
+        {
+            [method_name("GetCachedCapabilitiesForTransportAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatCapabilities>  GetCachedCapabilitiesAsync(String address, String transportId);
+            [method_name("GetCapabilitiesFromNetworkForTransportAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatCapabilities>  GetCapabilitiesFromNetworkAsync(String address, String transportId);
+        }
+        [method_name("GetCachedCapabilitiesAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatCapabilities>  GetCachedCapabilitiesAsync(String address);
+        [method_name("GetCapabilitiesFromNetworkAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.ChatCapabilities>  GetCapabilitiesFromNetworkAsync(String address);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.Chat.IRcsManagerStatics", 7d270ac5-0abd-4f31-9b99-a59e71a7b731)]
+    [threading(both)]
+    runtimeclass RcsManager
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.ApplicationModel.Chat.IRcsManagerStatics2", cd49ad18-ad8a-42aa-8eeb-a798a8808959)]
+        {
+            static event Windows.Foundation.EventHandler <Object>  TransportListChanged;
+        }
+        static Windows.ApplicationModel.Chat.RcsEndUserMessageManager GetEndUserMessageManager();
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Chat.RcsTransport> >  GetTransportsAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Chat.RcsTransport>  GetTransportAsync(String transportId);
+        [remote_sync]static Windows.Foundation.IAsyncAction LeaveConversationAsync(ChatConversation conversation);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Chat.IRcsEndUserMessageAvailableTriggerDetails", 5b97742d-351f-4692-b41e-1b035dc18986)]
+    runtimeclass RcsEndUserMessageAvailableTriggerDetails
+    {
+        String Title{ get; };
+        String Text{ get; };
+    }
+
+
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.IChatMessageNotificationTrigger", 513b43bf-1d40-5c5d-78f5-c923fee3739e)]
+    [threading(both)]
+    runtimeclass ChatMessageNotificationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        ChatMessageNotificationTrigger();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.IChatMessageReceivedNotificationTrigger", 3ea3760e-baf5-4077-88e9-060cf6f0c6d5)]
+    [threading(both)]
+    runtimeclass ChatMessageReceivedNotificationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        ChatMessageReceivedNotificationTrigger();
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.IRcsEndUserMessageAvailableTrigger", 986d0d6a-b2f6-467f-a978-a44091c11a66)]
+    [threading(both)]
+    runtimeclass RcsEndUserMessageAvailableTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        RcsEndUserMessageAvailableTrigger();
+    }
+
+}

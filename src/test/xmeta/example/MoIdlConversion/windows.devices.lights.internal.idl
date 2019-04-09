@@ -1,0 +1,33 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Lights.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [uuid(4d1e80f9-fa8e-4203-8cb0-e91c0108713d)]
+    [contract(Windows.Devices.Lights.Internal.InternalContract, 1)]
+    interface ILampArrayPrivate
+    {
+        void SetExclusiveLock(UInt32 processId);
+        void ClearExclusiveLock();
+        void CacheLampStateAndBlend(Windows.UI.Color[] desiredColors, Int32[] lampIndexes);
+        void SetColorsFromCachedLampState();
+    };
+
+    [contract(Windows.Devices.Lights.Internal.InternalContract, 1)]
+    [uuid(64652a6a-1d85-45b9-84f0-b7a1316ac766)]
+    interface ILampArrayStaticsPrivate
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Lights.LampArray>  FromIdAsync(String deviceId, Boolean exclusiveModeOnly);
+    };
+
+}

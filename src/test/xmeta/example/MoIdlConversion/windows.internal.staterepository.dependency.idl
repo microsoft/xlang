@@ -1,0 +1,71 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IDependencyStatics", 429d8042-e1a9-403d-8572-631f3349dde3)]
+    [interface_name("Windows.Internal.StateRepository.IDependency", 9b860b1e-eec4-4399-b6b5-54ce0df50d62)]
+    [threading(both)]
+    runtimeclass Dependency
+    {
+        Dependency();
+        static Boolean Exists(Int64 dependencyID);
+        static Boolean ExistsByDependentPackage(Package DependentPackage);
+        static Boolean ExistsByDependentPackageAndIndex(Package DependentPackage, UInt64 Index);
+        static Boolean ExistsByDependentPackageAndName(Package DependentPackage, String Name);
+        static Boolean ExistsByName(String Name);
+        static Windows.Internal.StateRepository.Dependency Get(Int64 dependencyID);
+        static Windows.Internal.StateRepository.Dependency TryGet(Int64 dependencyID);
+        static Windows.Internal.StateRepository.Dependency GetByDependentPackageAndIndex(Package DependentPackage, UInt64 Index);
+        static Windows.Internal.StateRepository.Dependency TryGetByDependentPackageAndIndex(Package DependentPackage, UInt64 Index);
+        static Windows.Internal.StateRepository.Dependency GetByDependentPackageAndName(Package DependentPackage, String Name);
+        static Windows.Internal.StateRepository.Dependency TryGetByDependentPackageAndName(Package DependentPackage, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Dependency>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Dependency>  FindByDependentPackage(Package DependentPackage);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Dependency>  FindByName(String Name);
+        Int64 _DependencyID{ get; };
+        Int64 _DependencyID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 DependentPackage{ get; };
+        Int64 DependentPackage{ set; };
+        Windows.Internal.StateRepository.Package GetDependentPackage();
+        void SetDependentPackage(Package value);
+        UInt64 Index{ get; };
+        UInt64 Index{ set; };
+        Windows.Internal.StateRepository.DependencyType DependencyType{ get; };
+        Windows.Internal.StateRepository.DependencyType DependencyType{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        Boolean IsPublisherNull{ get; };
+        void SetPublisherToNull();
+        String Publisher{ get; };
+        String Publisher{ set; };
+        UInt64 MinVersion{ get; };
+        UInt64 MinVersion{ set; };
+        UInt64 MaxVersion{ get; };
+        UInt64 MaxVersion{ set; };
+        Windows.Internal.StateRepository.DependencyFlags Flags{ get; };
+        Windows.Internal.StateRepository.DependencyFlags Flags{ set; };
+        Boolean Optional{ get; };
+        Boolean Optional{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

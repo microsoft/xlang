@@ -1,0 +1,109 @@
+
+
+
+
+
+
+namespace Windows.Internal.QuickActions
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    enum QuickActionType
+    {
+        Setting,
+        Launcher,
+    };
+
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    [uuid(1089de08-4584-4386-8583-3edaf365700d)]
+    interface IQuickAction
+    {
+        Windows.Internal.QuickActions.QuickActionType ActionType{ get; };
+        String Id{ get; };
+        String FriendlyName{ get; };
+        String CustomTemplateKey{ get; };
+        Boolean IsApplicable{ get; };
+        Boolean IsEnabled{ get; };
+        String QuickActionTitle{ get; };
+        String QuickActionStatus{ get; };
+        String QuickActionIcon{ get; };
+        Boolean QuickActionIsActive{ get; };
+        Boolean QuickActionIsAttentionRequired{ get; };
+        Boolean QuickActionIsBlinking{ get; };
+        Boolean QuickActionIsAllowedAboveLock{ get; };
+        void Invoke();
+        void SecondaryInvoke();
+        event Windows.Foundation.TypedEventHandler <Object, String>  QuickActionPropertyChanged;
+        Object GetValue(String name);
+        void SetValue(String name, Object pValue);
+    };
+
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    [uuid(4a9e79ec-7ea9-4e31-bf67-a783e2ead933)]
+    interface IQuickActionsProvider
+    {
+        Windows.Foundation.Collections.IVector <Windows.Internal.QuickActions.IQuickAction>  AllQuickActions{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.QuickActions.IQuickAction>  AvailableQuickActions{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.QuickActions.IQuickAction>  PinnedQuickActions{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.QuickActions.IQuickAction>  ExpandedQuickActions{ get; };
+        Object SettingsDatabase{ get; };
+        Object SettingsDatabase{ set; };
+        Object SettingsEnvironment{ get; };
+        Object SettingsEnvironment{ set; };
+        UInt32 SlotsPerRow{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.QuickActions.IQuickAction>  AllFlowQuickActions{ get; };
+        void InitializeQuickActionLayout();
+        void PinQuickActionAfterSlot(Int32 slot, String id);
+        void UnpinQuickActionAtSlot(UInt32 slot);
+        Windows.Internal.QuickActions.IQuickAction GetQuickActionAtSlot(Int32 slot);
+        void PinQuickActionAtSlot(Int32 slot, String id);
+        Windows.Internal.QuickActions.IQuickAction GetQuickActionById(String id);
+        Windows.Internal.QuickActions.IQuickAction GetQuickActionByFriendlyName(String friendlyName);
+        void RestoreDefaultQuickActions();
+        void LoadFlowQuickActions();
+        event Windows.Foundation.TypedEventHandler <Object, String>  QuickActionsChanged;
+    };
+
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    runtimeclass QuickActionsProvider
+        : [default]Windows.Internal.QuickActions.IQuickActionsProvider
+    {
+    }
+
+    [uuid(09356adf-f60c-4b5b-a6fa-9919c83d336d)]
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    interface IControlCenterSettings
+    {
+        Windows.Foundation.Collections.IVector <String>  UnpinnedQuickActions{ get; };
+        void PinQuickAction(String friendlyName);
+        void UnpinQuickAction(String friendlyName);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.QuickActions.IControlCenterSettings, String>  SettingsChanged;
+        void ApplyDefaultPins();
+    };
+
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    runtimeclass ControlCenterSettings
+        : [default]Windows.Internal.QuickActions.IControlCenterSettings
+    {
+        ControlCenterSettings();
+    }
+
+    [uuid(f9b6dd9b-e737-4a61-8ba9-3551faf0dd32)]
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    interface IFlowQuickActionsHelper
+    {
+        Windows.Foundation.IAsyncOperation <String>  Authenticate();
+        Windows.Foundation.IAsyncOperation <Boolean>  QueryFlows();
+    };
+
+    [contract(Windows.Internal.QuickActions.InternalContract, 1)]
+    runtimeclass FlowQuickActionsHelper
+        : [default]Windows.Internal.QuickActions.IFlowQuickActionsHelper
+    {
+        FlowQuickActionsHelper();
+    }
+
+}

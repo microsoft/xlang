@@ -1,0 +1,112 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [flags]
+    enum DropTargetChangedEventType
+    {
+        None,
+        Operation,
+        OperationVisible,
+        Caption = 4,
+        CaptionVisible = 8,
+        DragSourceVisible = 16,
+        DragTargetVisible = 32,
+        DragSourceAnchorPoint = 64,
+        DragTargetAnchorPoint = 128,
+        DragSourceSize = 256,
+        DragTargetSize = 512,
+        Position = 1024,
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [uuid(cc38401a-1ffe-48db-883d-1793c1bd64d3)]
+    interface IDropTargetChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.DropTargetChangedEventType EventType{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass DropTargetChangedEventArgs
+        : [default]Windows.Internal.ComposableShell.IDropTargetChangedEventArgs
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [interface_name("Windows.Internal.ComposableShell.IDragDropItem", 81a8cdd1-5ab0-4509-b77a-807c72d1f49f)]
+    runtimeclass DragDropItem
+    {
+        UInt32 AllowedOperations{ get; };
+        UInt32 PointerId{ get; };
+        Windows.ApplicationModel.DataTransfer.DataPackageOperation Operation{ get; };
+        Boolean OperationVisible{ get; };
+        String Caption{ get; };
+        Boolean CaptionVisible{ get; };
+        Boolean DragSourceVisible{ get; };
+        Boolean DragTargetVisible{ get; };
+        Windows.Foundation.Point DragSourceAnchorPoint{ get; };
+        Windows.Foundation.Point DragTargetAnchorPoint{ get; };
+        Windows.Storage.Streams.IRandomAccessStream DragSourceMask{ get; };
+        Windows.Storage.Streams.IRandomAccessStream DragTargetMask{ get; };
+        Boolean IsPaused{ get; };
+        Boolean IsPaused{ set; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.ApplicationModel.DataTransfer.DataPackageView DataPackageView{ get; };
+        Windows.Foundation.Size DragSourceSize{ get; };
+        Windows.Foundation.Size DragTargetSize{ get; };
+        void SetSharedVisualHandles(UInt64 dragSourceVisualHandle, UInt64 dragTargetVisualHandle);
+        void ForceCompleteDrop(Windows.ApplicationModel.DataTransfer.DataPackageOperation dragResult);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.DragDropItem, Windows.Internal.ComposableShell.DropTargetChangedEventArgs>  UpdatedDropTarget;
+    }
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum DragDropCollectionChangedEventType
+    {
+        Created,
+        Destroyed,
+    };
+
+    [uuid(613d16ff-4276-47ec-93ab-f6a1749d5fa3)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    interface IDragDropCollectionChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.DragDropCollectionChangedEventType EventType{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass DragDropCollectionChangedEventArgs
+        : [default]Windows.Internal.ComposableShell.IDragDropCollectionChangedEventArgs
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [interface_name("Windows.Internal.ComposableShell.IDragDropManager", 5a1a0ce3-940e-4540-a1e9-648d5998f980)]
+    [threading(both)]
+    runtimeclass DragDropManager
+    {
+        DragDropManager();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.DragDropItem, Windows.Internal.ComposableShell.DragDropCollectionChangedEventArgs>  DragDropCollectionChanged;
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.DragDropItem>  DragDropItems{ get; };
+        void StartDrag(DragDropItem item);
+        void CancelDrag(DragDropItem item);
+        void PauseDrag(DragDropItem item);
+        void ResumeDragAfterPause(DragDropItem item);
+        void ResumeWithNewDrag(DragDropItem originalItem);
+    }
+
+}

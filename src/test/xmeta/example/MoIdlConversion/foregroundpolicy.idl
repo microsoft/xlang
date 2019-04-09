@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum ForegroundRightsTokenSourceKind
+    {
+        Unknown,
+        Process,
+        View,
+        Window,
+        ComposerContext,
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    struct ForegroundRightsToken
+    {
+        ForegroundRightsTokenSourceKind kind;
+        UInt32 sourceId;
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum ForegroundPolicyResult
+    {
+        Succeeded,
+        Denied,
+        Failed,
+    };
+
+    [uuid(a0c468da-f582-42e8-886b-d3cc317a5fcb)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [internal]
+    interface IForegroundTarget
+    {
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [static_name("Windows.Internal.ComposableShell.IForegroundPolicyManager", a195b603-f0f3-4515-b043-6d715fc54e11)]
+    [threading(both)]
+    runtimeclass ForegroundPolicyManager
+    {
+        [method_name("TrySetForeground")] static Windows.Internal.ComposableShell.ForegroundPolicyResult TrySetForeground(IForegroundTarget target);
+        [method_name("TrySetForegroundWithToken")] static Windows.Internal.ComposableShell.ForegroundPolicyResult TrySetForeground(IForegroundTarget target, ForegroundRightsToken token);
+        static Windows.Internal.ComposableShell.IForegroundTarget CurrentForegroundTarget{ get; };
+        static event Windows.Foundation.EventHandler <Windows.Internal.ComposableShell.IForegroundTarget>  CurrentForegroundTargetChanged;
+    }
+
+}

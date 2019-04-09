@@ -1,0 +1,184 @@
+
+
+
+
+
+
+
+
+
+
+namespace WindowsInternal.Shell.UnifiedTile.VisualCache
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    enum VisualCacheContentType
+    {
+        Empty,
+        TileBrandingIcon,
+        TileLogo,
+        AppItemLogo_StartMenu_Mouse,
+        AppItemLogo_StartMenu_Touch,
+        AppItemLogo_StartScreen,
+        AppSpace,
+        FolderSubtileLogo,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    enum VisualCacheAppspaceType
+    {
+        None,
+        SmallTile,
+        MediumTile,
+        WideTile,
+        LargeTile,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    enum TileThemeSelector
+    {
+        Default,
+        HighContrastBlack,
+        HighContrastWhite,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    struct CacheVisualStates
+    {
+        UInt32 scaleFactor;
+        TileThemeSelector theme;
+        Boolean isRTL;
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    [flags]
+    enum VisualCacheOptions
+    {
+        None,
+        RTL,
+        TabletMode,
+        PNGEncodeImageData = 4,
+        TimelineMode = 8,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    [uuid(70209ccb-6d7f-1d72-371e-dfdea455a2be)]
+    interface IStartVisualCacheEntryHeader
+    {
+        WindowsInternal.Shell.UnifiedTile.VisualCache.VisualCacheAppspaceType SubContentType{ get; };
+        UInt32 NotificationId{ get; };
+        UInt64 ThumbnailCacheId{ get; };
+        Windows.Foundation.DateTime ArrivalTime{ get; };
+        UInt32 BrandingFlags{ get; };
+        UInt32 AccentColor{ get; };
+        WindowsInternal.Shell.UnifiedTile.VisualCache.VisualCacheContentType VisualCacheContentType{ get; };
+        Windows.Foundation.Size CachedBitmapDimensions{ get; };
+    };
+
+    [uuid(36b593e7-7e5e-98ac-04b0-787c593450f9)]
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    interface IStartVisualCacheEntryHeaderWriter
+    {
+        WindowsInternal.Shell.UnifiedTile.VisualCache.VisualCacheAppspaceType SubContentType{ set; };
+        UInt32 NotificationId{ set; };
+        UInt64 ThumbnailCacheId{ set; };
+        Windows.Foundation.DateTime ArrivalTime{ set; };
+        UInt32 BrandingFlags{ set; };
+        UInt32 AccentColor{ set; };
+        Windows.Foundation.Size CachedBitmapDimensions{ set; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    runtimeclass StartVisualCacheEntryHeader
+        : [default]WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheEntryHeader
+        , WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheEntryHeaderWriter
+    {
+    }
+
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheEntry", 6a037645-3605-fa20-0612-5ea43fee5ab2)]
+    runtimeclass StartVisualCacheEntry
+    {
+        UInt32 EntrySize{ get; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Boolean IsInMemory{ get; };
+        Object GetSoftwareBitmapReference(UInt32 dataOffset, UInt32 dataSize, UInt32 width, UInt32 height, Boolean isPNGEncoded);
+        WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheEntryHeader Header{ get; };
+
+        [interface_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheEntryWriter", 38cecc70-065f-09a8-596f-699d2a8a601e)]
+        {
+            Windows.Storage.Streams.IBuffer Data{ set; };
+            WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheEntryHeaderWriter HeaderWriter{ get; };
+        }
+    }
+
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCache", e138b001-a1d2-b5de-fec1-a7f01c246f0e)]
+    runtimeclass StartVisualCache
+    {
+        [return_name("value")] UInt32 GetEntryID(Guid guid, VisualCacheContentType type, UInt32 index, out Boolean entryExists);
+        WindowsInternal.Shell.UnifiedTile.VisualCache.StartVisualCacheEntry GetEntryReader(UInt32 uID);
+        void PreLoad(UInt32 idToPreload);
+        WindowsInternal.Shell.UnifiedTile.VisualCache.CacheVisualStates VisualStates{ get; };
+        Boolean NeedsCompaction{ get; };
+        UInt32 AllAppsCount{ get; };
+        UInt32 PinnedAppsCount{ get; };
+
+        [interface_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheWriter", 0b626e71-481e-2b9b-9554-af510bcca490)]
+        {
+            UInt32 AddEntry(Guid id, VisualCacheContentType type, UInt32 index, UInt32 byteCount);
+            void DeleteEntry(UInt32 value);
+            WindowsInternal.Shell.UnifiedTile.VisualCache.StartVisualCacheEntry GetEntryWriter(UInt32 uID);
+            UInt32 AllAppsCount{ set; };
+            UInt32 PinnedAppsCount{ set; };
+        }
+    }
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheReaderLock", be358e5c-693c-4fea-c76e-7e867b0b5bd7)]
+    runtimeclass StartVisualCacheReaderLock
+    {
+        WindowsInternal.Shell.UnifiedTile.VisualCache.StartVisualCache Reader{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheWriterLock", b8edbe5b-d3f1-873e-8d41-1379a8721b08)]
+    runtimeclass StartVisualCacheWriterLock
+    {
+        WindowsInternal.Shell.UnifiedTile.VisualCache.StartVisualCache Writer{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.VisualCache.InternalContract, 1)]
+    [static_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheStatics", d21027ea-840d-4138-8aa9-df046b16e538)]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.VisualCache.IStartVisualCacheManager", 5f3c6865-6d76-5a52-0db1-c8b6eee8b68f)]
+    [threading(both)]
+    runtimeclass StartVisualCacheManager
+    {
+        static WindowsInternal.Shell.UnifiedTile.VisualCache.StartVisualCacheManager GetInstance(Windows.System.User user, String rootFilePath, UInt32 scaleFactor, TileThemeSelector theme, VisualCacheOptions options);
+        static void DeleteAllAppsListContent(StartVisualCacheManager cacheManager, Guid tileId);
+        static void DeletePinnedAppsContent(StartVisualCacheManager cacheManager, Guid tileId);
+        [return_name("notificationId")] static UInt32 FindMostRecentNotification(StartVisualCacheManager cacheManager, Guid tileId, VisualCacheAppspaceType appSpaceType, out Boolean exists);
+        [return_name("cacheId")] static UInt32 FindExistingAppSpaceEntry(StartVisualCacheManager cacheManager, Guid tileId, VisualCacheAppspaceType appSpaceType, UInt32 notificationId, out UInt32 tickleIndex, out Boolean exists);
+        static UInt32 FindAppSpaceEntryToReUse(StartVisualCache reader, Guid tileId, VisualCacheAppspaceType appSpaceType, UInt32 notificationId);
+        WindowsInternal.Shell.UnifiedTile.VisualCache.StartVisualCacheReaderLock ReaderLock{ get; };
+        WindowsInternal.Shell.UnifiedTile.VisualCache.StartVisualCacheWriterLock WriterLock{ get; };
+    }
+
+}

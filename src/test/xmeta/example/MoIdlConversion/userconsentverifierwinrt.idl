@@ -1,0 +1,45 @@
+
+
+
+
+
+
+
+
+namespace Windows.Security.Credentials.UI
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UserConsentVerifierAvailability
+    {
+        Available,
+        DeviceNotPresent,
+        NotConfiguredForUser,
+        DisabledByPolicy,
+        DeviceBusy,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UserConsentVerificationResult
+    {
+        Verified,
+        DeviceNotPresent,
+        NotConfiguredForUser,
+        DisabledByPolicy,
+        DeviceBusy,
+        RetriesExhausted,
+        Canceled,
+    };
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Credentials.UI.IUserConsentVerifierStatics", af4f3f91-564c-4ddc-b8b5-973447627c65)]
+    [threading(both)]
+    runtimeclass UserConsentVerifier
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Security.Credentials.UI.UserConsentVerifierAvailability>  CheckAvailabilityAsync();
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Security.Credentials.UI.UserConsentVerificationResult>  RequestVerificationAsync(String message);
+    }
+
+}

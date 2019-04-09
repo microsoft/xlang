@@ -1,0 +1,687 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Capture.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract AppBroadcastContractInternal{};
+
+    [contractversion(1)]
+    [internal]
+    apicontract AppBroadcastContract_Proposed{};
+
+}
+namespace Windows.Media.Capture
+{
+    [contractversion(2)]
+    apicontract AppBroadcastContract{};
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastCameraOverlayLocation
+    {
+        TopLeft,
+        TopCenter,
+        TopRight,
+        MiddleLeft,
+        MiddleCenter,
+        MiddleRight,
+        BottomLeft,
+        BottomCenter,
+        BottomRight,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastCameraOverlaySize
+    {
+        Small,
+        Medium,
+        Large,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastVideoEncodingBitrateMode
+    {
+        Custom,
+        Auto,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastVideoEncodingResolutionMode
+    {
+        Custom,
+        Auto,
+    };
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastGlobalSettings", b2cb27a5-70fc-4e17-80bd-6ba0fd3ff3a0)]
+    runtimeclass AppBroadcastGlobalSettings
+    {
+        Boolean IsBroadcastEnabled{ get; };
+        Boolean IsDisabledByPolicy{ get; };
+        Boolean IsGpuConstrained{ get; };
+        Boolean HasHardwareEncoder{ get; };
+        Boolean IsAudioCaptureEnabled{ set; };
+        Boolean IsAudioCaptureEnabled{ get; };
+        Boolean IsMicrophoneCaptureEnabledByDefault{ set; };
+        Boolean IsMicrophoneCaptureEnabledByDefault{ get; };
+        Boolean IsEchoCancellationEnabled{ set; };
+        Boolean IsEchoCancellationEnabled{ get; };
+        Double SystemAudioGain{ set; };
+        Double SystemAudioGain{ get; };
+        Double MicrophoneGain{ set; };
+        Double MicrophoneGain{ get; };
+        Boolean IsCameraCaptureEnabledByDefault{ set; };
+        Boolean IsCameraCaptureEnabledByDefault{ get; };
+        String SelectedCameraId{ set; };
+        String SelectedCameraId{ get; };
+        Windows.Media.Capture.AppBroadcastCameraOverlayLocation CameraOverlayLocation{ set; };
+        Windows.Media.Capture.AppBroadcastCameraOverlayLocation CameraOverlayLocation{ get; };
+        Windows.Media.Capture.AppBroadcastCameraOverlaySize CameraOverlaySize{ set; };
+        Windows.Media.Capture.AppBroadcastCameraOverlaySize CameraOverlaySize{ get; };
+        Boolean IsCursorImageCaptureEnabled{ set; };
+        Boolean IsCursorImageCaptureEnabled{ get; };
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastProviderSettings", c30bdf62-9948-458f-ad50-aa06ec03da08)]
+    runtimeclass AppBroadcastProviderSettings
+    {
+        String DefaultBroadcastTitle{ set; };
+        String DefaultBroadcastTitle{ get; };
+        UInt32 AudioEncodingBitrate{ set; };
+        UInt32 AudioEncodingBitrate{ get; };
+        UInt32 CustomVideoEncodingBitrate{ set; };
+        UInt32 CustomVideoEncodingBitrate{ get; };
+        UInt32 CustomVideoEncodingHeight{ set; };
+        UInt32 CustomVideoEncodingHeight{ get; };
+        UInt32 CustomVideoEncodingWidth{ set; };
+        UInt32 CustomVideoEncodingWidth{ get; };
+        Windows.Media.Capture.AppBroadcastVideoEncodingBitrateMode VideoEncodingBitrateMode{ set; };
+        Windows.Media.Capture.AppBroadcastVideoEncodingBitrateMode VideoEncodingBitrateMode{ get; };
+        Windows.Media.Capture.AppBroadcastVideoEncodingResolutionMode VideoEncodingResolutionMode{ set; };
+        Windows.Media.Capture.AppBroadcastVideoEncodingResolutionMode VideoEncodingResolutionMode{ get; };
+    }
+
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [static_name("Windows.Media.Capture.IAppBroadcastManagerStatics", 364e018b-1e4e-411f-ab3e-92959844c156)]
+    [threading(both)]
+    runtimeclass AppBroadcastManager
+    {
+        static Windows.Media.Capture.AppBroadcastGlobalSettings GetGlobalSettings();
+        static void ApplyGlobalSettings(AppBroadcastGlobalSettings value);
+        static Windows.Media.Capture.AppBroadcastProviderSettings GetProviderSettings();
+        static void ApplyProviderSettings(AppBroadcastProviderSettings value);
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastPlugInState
+    {
+        Unknown,
+        Initialized,
+        MicrosoftSignInRequired,
+        OAuthSignInRequired,
+        ProviderSignInRequired,
+        InBandwidthTest,
+        ReadyToBroadcast,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastStreamState
+    {
+        Initializing,
+        StreamReady,
+        Started,
+        Paused,
+        Terminated,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastSignInState
+    {
+        NotSignedIn,
+        MicrosoftSignInInProgress,
+        MicrosoftSignInComplete,
+        OAuthSignInInProgress,
+        OAuthSignInComplete,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastTerminationReason
+    {
+        NormalTermination,
+        LostConnectionToService,
+        NoNetworkConnectivity,
+        ServiceAbort,
+        ServiceError,
+        ServiceUnavailable,
+        InternalError,
+        UnsupportedFormat,
+        BackgroundTaskTerminated,
+        BackgroundTaskUnresponsive,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastSignInResult
+    {
+        Success,
+        AuthenticationFailed,
+        Unauthorized,
+        ServiceUnavailable,
+        Unknown,
+    };
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastBackgroundServiceSignInInfo", 5e735275-88c8-4eca-89ba-4825985db880)]
+    runtimeclass AppBroadcastBackgroundServiceSignInInfo
+    {
+        Windows.Media.Capture.AppBroadcastSignInState SignInState{ get; };
+        Windows.Foundation.Uri OAuthRequestUri{ set; };
+        Windows.Foundation.Uri OAuthRequestUri{ get; };
+        Windows.Foundation.Uri OAuthCallbackUri{ set; };
+        Windows.Foundation.Uri OAuthCallbackUri{ get; };
+        Windows.Security.Authentication.Web.WebAuthenticationResult AuthenticationResult{ get; };
+        String UserName{ set; };
+        String UserName{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundServiceSignInInfo, Windows.Media.Capture.AppBroadcastSignInStateChangedEventArgs>  SignInStateChanged;
+
+        [contract(Windows.Media.Capture.AppBroadcastContract, 2)]
+        [interface_name("Windows.Media.Capture.IAppBroadcastBackgroundServiceSignInInfo2", 9104285c-62cf-4a3c-a7ee-aeb507404645)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundServiceSignInInfo, Object>  UserNameChanged;
+        }
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastSignInStateChangedEventArgs", 02b692a4-5919-4a9e-8d5e-c9bb0dd3377a)]
+    runtimeclass AppBroadcastSignInStateChangedEventArgs
+    {
+        Windows.Media.Capture.AppBroadcastSignInState SignInState{ get; };
+        Windows.Media.Capture.AppBroadcastSignInResult Result{ get; };
+    }
+
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastStreamReader", b338bcf9-3364-4460-b5f1-3cc2796a8aa2)]
+    runtimeclass AppBroadcastStreamReader
+    {
+        UInt32 AudioChannels{ get; };
+        UInt32 AudioSampleRate{ get; };
+        Windows.Storage.Streams.IBuffer AudioAacSequence{ get; };
+        UInt32 AudioBitrate{ get; };
+        Windows.Media.Capture.AppBroadcastStreamAudioFrame TryGetNextAudioFrame();
+        UInt32 VideoWidth{ get; };
+        UInt32 VideoHeight{ get; };
+        UInt32 VideoBitrate{ get; };
+        Windows.Media.Capture.AppBroadcastStreamVideoFrame TryGetNextVideoFrame();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastStreamReader, Object>  AudioFrameArrived;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastStreamReader, Object>  VideoFrameArrived;
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastBackgroundServiceStreamInfo", 31dc02bc-990a-4904-aa96-fe364381f136)]
+    runtimeclass AppBroadcastBackgroundServiceStreamInfo
+    {
+        Windows.Media.Capture.AppBroadcastStreamState StreamState{ get; };
+        UInt64 DesiredVideoEncodingBitrate{ set; };
+        UInt64 DesiredVideoEncodingBitrate{ get; };
+        UInt64 BandwidthTestBitrate{ set; };
+        UInt64 BandwidthTestBitrate{ get; };
+        String AudioCodec{ set; };
+        String AudioCodec{ get; };
+        Windows.Media.Capture.AppBroadcastStreamReader BroadcastStreamReader{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundServiceStreamInfo, Windows.Media.Capture.AppBroadcastStreamStateChangedEventArgs>  StreamStateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundServiceStreamInfo, Object>  VideoEncodingResolutionChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundServiceStreamInfo, Object>  VideoEncodingBitrateChanged;
+
+        [contract(Windows.Media.Capture.AppBroadcastContract, 2)]
+        [interface_name("Windows.Media.Capture.IAppBroadcastBackgroundServiceStreamInfo2", bd1e9f6d-94dc-4fce-9541-a9f129596334)]
+        {
+            void ReportProblemWithStream();
+        }
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastStreamStateChangedEventArgs", 5108a733-d008-4a89-93be-58aed961374e)]
+    runtimeclass AppBroadcastStreamStateChangedEventArgs
+    {
+        Windows.Media.Capture.AppBroadcastStreamState StreamState{ get; };
+    }
+
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastBackgroundService", bad1e72a-fa94-46f9-95fc-d71511cda70b)]
+    runtimeclass AppBroadcastBackgroundService
+    {
+        Windows.Media.Capture.AppBroadcastPlugInState PlugInState{ set; };
+        Windows.Media.Capture.AppBroadcastPlugInState PlugInState{ get; };
+        Windows.Media.Capture.AppBroadcastBackgroundServiceSignInInfo SignInInfo{ set; };
+        Windows.Media.Capture.AppBroadcastBackgroundServiceSignInInfo SignInInfo{ get; };
+        Windows.Media.Capture.AppBroadcastBackgroundServiceStreamInfo StreamInfo{ set; };
+        Windows.Media.Capture.AppBroadcastBackgroundServiceStreamInfo StreamInfo{ get; };
+        String AppId{ get; };
+        String BroadcastTitle{ get; };
+        UInt32 ViewerCount{ set; };
+        UInt32 ViewerCount{ get; };
+        void TerminateBroadcast(AppBroadcastTerminationReason reason, UInt32 providerSpecificReason);
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundService, Windows.Media.Capture.AppBroadcastHeartbeatRequestedEventArgs>  HeartbeatRequested;
+        String TitleId{ get; };
+
+        [contract(Windows.Media.Capture.AppBroadcastContract, 2)]
+        [interface_name("Windows.Media.Capture.IAppBroadcastBackgroundService2", fc8ccbbf-5549-4b87-959f-23ca401fd473)]
+        {
+            String BroadcastTitle{ set; };
+            String BroadcastLanguage{ get; };
+            String BroadcastLanguage{ set; };
+            String BroadcastChannel{ get; };
+            String BroadcastChannel{ set; };
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundService, Object>  BroadcastTitleChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundService, Object>  BroadcastLanguageChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastBackgroundService, Object>  BroadcastChannelChanged;
+        }
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastHeartbeatRequestedEventArgs", cea54283-ee51-4dbf-9472-79a9ed4e2165)]
+    runtimeclass AppBroadcastHeartbeatRequestedEventArgs
+    {
+        Boolean Handled{ set; };
+        Boolean Handled{ get; };
+    }
+
+
+
+
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastStreamAudioFrame", efab4ac8-21ba-453f-8bb7-5e938a2e9a74)]
+    runtimeclass AppBroadcastStreamAudioFrame
+    {
+        Windows.Media.Capture.AppBroadcastStreamAudioHeader AudioHeader{ get; };
+        Windows.Storage.Streams.IBuffer AudioBuffer{ get; };
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastStreamVideoFrame", 0f97cf2b-c9e4-4e88-8194-d814cbd585d8)]
+    runtimeclass AppBroadcastStreamVideoFrame
+    {
+        Windows.Media.Capture.AppBroadcastStreamVideoHeader VideoHeader{ get; };
+        Windows.Storage.Streams.IBuffer VideoBuffer{ get; };
+    }
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastStreamVideoHeader", 0b9ebece-7e32-432d-8ca2-36bf10b9f462)]
+    runtimeclass AppBroadcastStreamVideoHeader
+    {
+        Windows.Foundation.DateTime AbsoluteTimestamp{ get; };
+        Windows.Foundation.TimeSpan RelativeTimestamp{ get; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Boolean IsKeyFrame{ get; };
+        Boolean HasDiscontinuity{ get; };
+        UInt64 FrameId{ get; };
+    }
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastStreamAudioHeader", bf21a570-6b78-4216-9f07-5aff5256f1b7)]
+    runtimeclass AppBroadcastStreamAudioHeader
+    {
+        Windows.Foundation.DateTime AbsoluteTimestamp{ get; };
+        Windows.Foundation.TimeSpan RelativeTimestamp{ get; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Boolean HasDiscontinuity{ get; };
+        UInt64 FrameId{ get; };
+    }
+
+
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastTriggerDetails", deebab35-ec5e-4d8f-b1c0-5da6e8c75638)]
+    runtimeclass AppBroadcastTriggerDetails
+    {
+        Windows.Media.Capture.AppBroadcastBackgroundService BackgroundService{ get; };
+    }
+
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Background.IAppBroadcastTriggerProviderInfo", f219352d-9de8-4420-9ce2-5eff8f17376b)]
+    runtimeclass AppBroadcastTriggerProviderInfo
+    {
+        String DisplayNameResource{ set; };
+        String DisplayNameResource{ get; };
+        String LogoResource{ set; };
+        String LogoResource{ get; };
+        Windows.Foundation.TimeSpan VideoKeyFrameInterval{ set; };
+        Windows.Foundation.TimeSpan VideoKeyFrameInterval{ get; };
+        UInt32 MaxVideoBitrate{ set; };
+        UInt32 MaxVideoBitrate{ get; };
+        UInt32 MaxVideoWidth{ set; };
+        UInt32 MaxVideoWidth{ get; };
+        UInt32 MaxVideoHeight{ set; };
+        UInt32 MaxVideoHeight{ get; };
+    }
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.ApplicationModel.Background.IAppBroadcastTriggerFactory", 280b9f44-22f4-4618-a02e-e7e411eb7238)]
+    [interface_name("Windows.ApplicationModel.Background.IAppBroadcastTrigger", 74d4f496-8d37-44ec-9481-2a0b9854eb48)]
+    [threading(both)]
+    runtimeclass AppBroadcastTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "CreateAppBroadcastTrigger" )] AppBroadcastTrigger(String providerKey);
+        Windows.ApplicationModel.Background.AppBroadcastTriggerProviderInfo ProviderInfo{ set; };
+        Windows.ApplicationModel.Background.AppBroadcastTriggerProviderInfo ProviderInfo{ get; };
+    }
+
+}
+namespace Windows.Media.Capture
+{
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum ForegroundActivationArgument
+    {
+        SignInRequired,
+        MoreSettings,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastMicrophoneCaptureState
+    {
+        Stopped,
+        Started,
+        Failed,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastCameraCaptureState
+    {
+        Stopped,
+        Started,
+        Failed,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastExitBroadcastModeReason
+    {
+        NormalExit,
+        UserCanceled,
+        AuthorizationFail,
+        ForegroundAppActivated,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastPreviewState
+    {
+        Started,
+        Stopped,
+        Failed,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum AppBroadcastCaptureTargetType
+    {
+        AppView,
+        EntireDisplay,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [static_name("Windows.Media.Capture.IAppBroadcastPlugInManagerStatics", f2645c20-5c76-4cdc-9364-82fe9eb6534d)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPlugInManager", e550d979-27a1-49a7-bbf4-d7a9e9d07668)]
+    [threading(both)]
+    runtimeclass AppBroadcastPlugInManager
+    {
+        static Windows.Media.Capture.AppBroadcastPlugInManager GetDefault();
+        static Windows.Media.Capture.AppBroadcastPlugInManager GetForUser(Windows.System.User user);
+        Boolean IsBroadcastProviderAvailable{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Capture.AppBroadcastPlugIn>  PlugInList{ get; };
+        Windows.Media.Capture.AppBroadcastPlugIn DefaultPlugIn{ get; };
+        Windows.Media.Capture.AppBroadcastPlugIn DefaultPlugIn{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPlugIn", 520c1e66-6513-4574-ac54-23b79729615b)]
+    runtimeclass AppBroadcastPlugIn
+    {
+        String AppId{ get; };
+        Windows.Media.Capture.AppBroadcastProviderSettings ProviderSettings{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Logo{ get; };
+        String DisplayName{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPreview", 14b60f5a-6e4a-4b80-a14f-67ee77d153e7)]
+    runtimeclass AppBroadcastPreview
+    {
+        void StopPreview();
+        Windows.Media.Capture.AppBroadcastPreviewState PreviewState{ get; };
+        Windows.Foundation.IReference <UInt32>  ErrorCode{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastPreview, Windows.Media.Capture.AppBroadcastPreviewStateChangedEventArgs>  PreviewStateChanged;
+        Windows.Media.Capture.AppBroadcastPreviewStreamReader PreviewStreamReader{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastState", ee08056d-8099-4ddd-922e-c56dac58abfb)]
+    runtimeclass AppBroadcastState
+    {
+        Boolean IsCaptureTargetRunning{ get; };
+        UInt32 ViewerCount{ get; };
+        Boolean ShouldCaptureMicrophone{ get; };
+        Boolean ShouldCaptureMicrophone{ set; };
+        void RestartMicrophoneCapture();
+        Boolean ShouldCaptureCamera{ get; };
+        Boolean ShouldCaptureCamera{ set; };
+        void RestartCameraCapture();
+        Windows.Foundation.Size EncodedVideoSize{ get; };
+        Windows.Media.Capture.AppBroadcastMicrophoneCaptureState MicrophoneCaptureState{ get; };
+        UInt32 MicrophoneCaptureError{ get; };
+        Windows.Media.Capture.AppBroadcastCameraCaptureState CameraCaptureState{ get; };
+        UInt32 CameraCaptureError{ get; };
+        Windows.Media.Capture.AppBroadcastStreamState StreamState{ get; };
+        Windows.Media.Capture.AppBroadcastPlugInState PlugInState{ get; };
+        Windows.Foundation.Uri OAuthRequestUri{ get; };
+        Windows.Foundation.Uri OAuthCallbackUri{ get; };
+        Windows.Security.Authentication.Web.WebAuthenticationResult AuthenticationResult{ get; };
+        Windows.Security.Authentication.Web.WebAuthenticationResult AuthenticationResult{ set; };
+        Windows.Media.Capture.AppBroadcastSignInState SignInState{ set; };
+        Windows.Media.Capture.AppBroadcastSignInState SignInState{ get; };
+        Windows.Media.Capture.AppBroadcastTerminationReason TerminationReason{ get; };
+        UInt32 TerminationReasonPlugInSpecific{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastState, Windows.Media.Capture.AppBroadcastViewerCountChangedEventArgs>  ViewerCountChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastState, Windows.Media.Capture.AppBroadcastMicrophoneCaptureStateChangedEventArgs>  MicrophoneCaptureStateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastState, Windows.Media.Capture.AppBroadcastCameraCaptureStateChangedEventArgs>  CameraCaptureStateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastState, Windows.Media.Capture.AppBroadcastPlugInStateChangedEventArgs>  PlugInStateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastState, Windows.Media.Capture.AppBroadcastStreamStateChangedEventArgs>  StreamStateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastState, Object>  CaptureTargetClosed;
+    }
+
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastViewerCountChangedEventArgs", e6e11825-5401-4ade-8bd2-c14ecee6807d)]
+    runtimeclass AppBroadcastViewerCountChangedEventArgs
+    {
+        UInt32 ViewerCount{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastMicrophoneCaptureStateChangedEventArgs", a86ad5e9-9440-4908-9d09-65b7e315d795)]
+    runtimeclass AppBroadcastMicrophoneCaptureStateChangedEventArgs
+    {
+        Windows.Media.Capture.AppBroadcastMicrophoneCaptureState State{ get; };
+        UInt32 ErrorCode{ get; };
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastCameraCaptureStateChangedEventArgs", 1e334cd0-b882-4b88-8692-05999aceb70f)]
+    runtimeclass AppBroadcastCameraCaptureStateChangedEventArgs
+    {
+        Windows.Media.Capture.AppBroadcastCameraCaptureState State{ get; };
+        UInt32 ErrorCode{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPlugInStateChangedEventArgs", 4881d0f2-abc5-4fc6-84b0-89370bb47212)]
+    runtimeclass AppBroadcastPlugInStateChangedEventArgs
+    {
+        Windows.Media.Capture.AppBroadcastPlugInState PlugInState{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPreviewStateChangedEventArgs", 5a57f2de-8dea-4e86-90ad-03fc26b9653c)]
+    runtimeclass AppBroadcastPreviewStateChangedEventArgs
+    {
+        Windows.Media.Capture.AppBroadcastPreviewState PreviewState{ get; };
+        UInt32 ErrorCode{ get; };
+    }
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPreviewStreamReader", 92228d50-db3f-40a8-8cd4-f4e371ddab37)]
+    runtimeclass AppBroadcastPreviewStreamReader
+    {
+        UInt32 VideoWidth{ get; };
+        UInt32 VideoHeight{ get; };
+        UInt32 VideoStride{ get; };
+        Windows.Graphics.Imaging.BitmapPixelFormat VideoBitmapPixelFormat{ get; };
+        Windows.Graphics.Imaging.BitmapAlphaMode VideoBitmapAlphaMode{ get; };
+        Windows.Media.Capture.AppBroadcastPreviewStreamVideoFrame TryGetNextVideoFrame();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppBroadcastPreviewStreamReader, Object>  VideoFrameArrived;
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPreviewStreamVideoFrame", 010fbea1-94fe-4499-b8c0-8d244279fb12)]
+    runtimeclass AppBroadcastPreviewStreamVideoFrame
+    {
+        Windows.Media.Capture.AppBroadcastPreviewStreamVideoHeader VideoHeader{ get; };
+        Windows.Storage.Streams.IBuffer VideoBuffer{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastPreviewStreamVideoHeader", 8bef6113-da84-4499-a7ab-87118cb4a157)]
+    runtimeclass AppBroadcastPreviewStreamVideoHeader
+    {
+        Windows.Foundation.DateTime AbsoluteTimestamp{ get; };
+        Windows.Foundation.TimeSpan RelativeTimestamp{ get; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        UInt64 FrameId{ get; };
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    [interface_name("Windows.Media.Capture.IAppBroadcastServices", 8660b4d6-969b-4e3c-ac3a-8b042ee4ee63)]
+    runtimeclass AppBroadcastServices
+    {
+        Windows.Media.Capture.AppBroadcastCaptureTargetType CaptureTargetType{ get; };
+        Windows.Media.Capture.AppBroadcastCaptureTargetType CaptureTargetType{ set; };
+        String BroadcastTitle{ get; };
+        String BroadcastTitle{ set; };
+        String BroadcastLanguage{ get; };
+        String BroadcastLanguage{ set; };
+        String UserName{ get; };
+        Boolean CanCapture{ get; };
+        Windows.Foundation.IAsyncOperation <UInt32>  EnterBroadcastModeAsync(AppBroadcastPlugIn plugIn);
+        void ExitBroadcastMode(AppBroadcastExitBroadcastModeReason reason);
+        void StartBroadcast();
+        void PauseBroadcast();
+        void ResumeBroadcast();
+        Windows.Media.Capture.AppBroadcastPreview StartPreview(Windows.Foundation.Size desiredSize);
+        Windows.Media.Capture.AppBroadcastState State{ get; };
+    }
+
+}
+namespace Windows.Media.Capture.Internal
+{
+    [contract(Windows.Media.Capture.Internal.AppBroadcastContractInternal, 1)]
+    enum AppBroadcastRunningState
+    {
+        NotRunning,
+        Running,
+    };
+
+    [uuid(cf40dc9d-5b0a-454f-a971-c40d59cf3469)]
+    [contract(Windows.Media.Capture.Internal.AppBroadcastContractInternal, 1)]
+    interface IAppBroadcastServicesPrivate
+    {
+        Windows.System.User GetUser();
+        String BroadcastChannel{ get; };
+        String BroadcastChannel{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.Internal.IAppBroadcastServicesPrivate, Object>  UserNameChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.Internal.IAppBroadcastServicesPrivate, Object>  ProblemWithStreamReported;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.Internal.IAppBroadcastServicesPrivate, Object>  BroadcastTitleChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.Internal.IAppBroadcastServicesPrivate, Object>  BroadcastLanguageChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.Internal.IAppBroadcastServicesPrivate, Object>  BroadcastChannelChanged;
+    };
+
+
+    [contract(Windows.Media.Capture.Internal.AppBroadcastContractInternal, 1)]
+    [uuid(af9ad48a-0cb9-4076-9472-c97e764429ff)]
+    interface IAppBroadcastBackgroundServicePrivate
+    {
+        Windows.System.User GetUser();
+        String BroadcastTitle{ set; };
+        String BroadcastTitle{ get; };
+        UInt32 BroadcastFPS{ get; };
+    };
+
+    [contract(Windows.Media.Capture.Internal.AppBroadcastContractInternal, 1)]
+    [static_name("Windows.Media.Capture.Internal.IAppBroadcastServicesPrivateStatics", eedb2692-10ce-4a66-b67c-35f97551b775)]
+    [threading(both)]
+    runtimeclass AppBroadcastServicesPrivate
+    {
+        static Windows.Media.Capture.AppBroadcastServices GetAppBroadcastServicesForUser(Windows.System.User user);
+        static Windows.Media.Capture.AppBroadcastServices GetAppBroadcastServicesForWindow(UInt64 window);
+        static Windows.Media.Capture.AppBroadcastStreamState BroadcastStreamState{ get; };
+        static Windows.Media.Capture.AppBroadcastServices GetActiveAppBroadcastServices();
+    }
+
+}

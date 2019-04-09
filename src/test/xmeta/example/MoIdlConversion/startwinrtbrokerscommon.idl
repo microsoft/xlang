@@ -1,0 +1,185 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.StartUI
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.StartUI.ITileDragAndDropHelperStatics", 6337f02d-c2bc-4b0b-b6ae-a0b017200566)]
+    runtimeclass TileDragAndDropHelpers
+    {
+        static Windows.Foundation.Collections.IVectorView <Windows.Storage.IStorageItem>  GetStorageItemsForTiles(Windows.Foundation.Collections.IVectorView <String>  serializedTileIds);
+        static String TryGetTileIdFromStorageItem(Windows.Storage.IStorageItem storageItem);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.StartUI.IUserTileInfo", 22c9ef4c-a7dc-476c-bb5c-dc03de666fd3)]
+    runtimeclass UserTileInfo
+    {
+        UserTileInfo();
+        String GetDisplayName();
+        Windows.Storage.Streams.IRandomAccessStream GetAccountPicture(UInt32 imageSize);
+        event Windows.Foundation.EventHandler <Object>  AccountInfoChanged;
+    }
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    enum UserTileCommandId
+    {
+        OpenSettings,
+        LockPC,
+        SignOut,
+        SwitchAccount,
+        NumCommands,
+    };
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [uuid(65d0daac-bc3d-45ab-8628-d3f30415135c)]
+    interface IUserTileCommand
+    {
+        Windows.Internal.Shell.StartUI.UserTileCommandId Id{ get; };
+        void Invoke();
+    };
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    runtimeclass UserTileCommand
+        : [default]Windows.Internal.Shell.StartUI.IUserTileCommand
+    {
+    }
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [uuid(94432454-c6ac-40c0-ba40-d5c31a0c5136)]
+    interface IUserTileSwitchUser
+    {
+        String DisplayName{ get; };
+        String UserSid{ get; };
+        Boolean IsLoggedIn{ get; };
+        Windows.Storage.IStorageFile GetAccountPicture();
+        void SwitchTo();
+    };
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    runtimeclass UserTileSwitchUser
+        : [default]Windows.Internal.Shell.StartUI.IUserTileSwitchUser
+    {
+    }
+
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.StartUI.IUserTileMenuStatics", 1727f7b0-3bd5-4256-8e75-680f9f6cadb4)]
+    runtimeclass UserTileMenu
+    {
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.StartUI.UserTileCommand>  GetCommands();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.StartUI.UserTileSwitchUser>  GetSwitchUserList();
+        [return_name("value")] static Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.StartUI.UserTileSwitchUser>  GetSwitchUserListWithCurrentUser(out IUserTileSwitchUser currentUser);
+    }
+
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.StartUI.IStartPlacesLauncherStatics", 8dad2fb1-aed0-4873-80d7-db4eafed3187)]
+    runtimeclass StartPlacesLauncher
+    {
+        static void LaunchPlaceById(Guid placesId);
+    }
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [flags]
+    enum ResolveImageOptions
+    {
+        None,
+        UsePackagePath,
+        UseTargetSize,
+        UseThemeOverride = 4,
+    };
+
+    [flags]
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    enum IconOptions
+    {
+        None,
+        CanTryOutOfProc,
+        UseExtractIcon,
+        AllowBindToFileName = 4,
+        UseSharedStream = 8,
+        AsPngEncodedStream = 16,
+        TryPackageInstallPathSubstitution = 32,
+        TryAdjustForWhiteBackground = 64,
+        CanTrySTA = 128,
+    };
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    enum IconSizing
+    {
+        None,
+        Pad,
+        Fill,
+        Fit,
+    };
+
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Shell.StartUI.ITileImageHelperStatics", fafd0ef2-a207-43c0-8134-23e35b2b9099)]
+    [threading(both)]
+    runtimeclass TileImageHelpers
+    {
+        static String ResolveImagePath(String imageUriString, String package, UInt32 sizing, UInt32 theme, ResolveImageOptions options);
+        static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  LoadDesktopTileImageAsync(Windows.Foundation.Size imageSize, String appID);
+        static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  LoadDesktopTileImageExAsync(Windows.Foundation.Size imageSize, String appID, IconSizing sizing, IconOptions options);
+    }
+
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.StartUI.IStartExperienceAnimationRequestedEventArgs", 3eafee73-b241-4b19-ac9a-32f202f8e21a)]
+    runtimeclass StartExperienceAnimationRequestedEventArgs
+    {
+        UInt32 GlobalAnimationType{ get; };
+        UInt32 TransitionType{ get; };
+        UInt32 TaskbarEdge{ get; };
+    }
+
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.StartUI.IShellModeChangedEventArgs", 881a8656-783e-170e-b39a-0f7f2f675c94)]
+    runtimeclass ShellModeChangedEventArgs
+    {
+        Boolean IsTabletMode{ get; };
+    }
+
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [uuid(4c4d0c66-5bd5-fd8c-617f-3c7778f46bb6)]
+    interface IStartExperience
+    {
+        Int64 ProcessBackgroundImage(Object background, Int32 systemScalePercent);
+        UInt64 WaitableExplorerProcessHandle{ get; };
+        void PromoteAppsToTopOfFrequentList(Windows.Foundation.Collections.IVector <String>  applicationUsermodelIds);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.StartUI.StartExperience, Windows.Internal.Shell.StartUI.StartExperienceAnimationRequestedEventArgs>  GlobalAnimationRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.StartUI.StartExperience, Windows.Internal.Shell.StartUI.ShellModeChangedEventArgs>  ShellModeChanged;
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.StartUI.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.StartUI.IStartExperienceStatics", fb2e3e59-b442-4b5b-9128-2319bf8de3b0)]
+    [threading(both)]
+    runtimeclass StartExperience
+        : [default]Windows.Internal.Shell.StartUI.IStartExperience
+    {
+        static Windows.Internal.Shell.StartUI.StartExperience GetForCurrentView();
+        static Windows.Internal.Shell.StartUI.StartExperience GetIfNoCurrentView();
+    }
+
+
+}

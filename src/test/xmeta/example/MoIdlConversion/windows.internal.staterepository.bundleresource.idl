@@ -1,0 +1,52 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IBundleResourceStatics", 2ce50bec-9ca5-4a53-9973-464ad50c134f)]
+    [interface_name("Windows.Internal.StateRepository.IBundleResource", 9415fc42-6646-49f8-afaa-69b41dc0dc71)]
+    [threading(both)]
+    runtimeclass BundleResource
+    {
+        static Boolean Exists(Int64 bundleResourceID);
+        static Boolean ExistsByBundlePackage(BundlePackage BundlePackage);
+        static Windows.Internal.StateRepository.BundleResource Get(Int64 bundleResourceID);
+        static Windows.Internal.StateRepository.BundleResource TryGet(Int64 bundleResourceID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.BundleResource>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.BundleResource>  FindByBundlePackage(BundlePackage BundlePackage);
+        BundleResource();
+        Int64 _BundleResourceID{ get; };
+        Int64 _BundleResourceID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 BundlePackage{ get; };
+        Int64 BundlePackage{ set; };
+        Windows.Internal.StateRepository.BundlePackage GetBundlePackage();
+        void SetBundlePackage(BundlePackage value);
+        Boolean IsLanguageNull{ get; };
+        void SetLanguageToNull();
+        String Language{ get; };
+        String Language{ set; };
+        UInt32 Scale{ get; };
+        UInt32 Scale{ set; };
+        Int32 DXFeatureLevel{ get; };
+        Int32 DXFeatureLevel{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

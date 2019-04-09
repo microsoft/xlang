@@ -1,0 +1,2058 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Bluetooth
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothCacheMode
+    {
+        Cached,
+        Uncached,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothMajorClass
+    {
+        Miscellaneous,
+        Computer,
+        Phone,
+        NetworkAccessPoint,
+        AudioVideo,
+        Peripheral,
+        Imaging,
+        Wearable,
+        Toy,
+        Health,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothMinorClass
+    {
+        Uncategorized,
+        ComputerDesktop,
+        ComputerServer,
+        ComputerLaptop,
+        ComputerHandheld,
+        ComputerPalmSize,
+        ComputerWearable,
+        ComputerTablet,
+        PhoneCellular = 1,
+        PhoneCordless,
+        PhoneSmartPhone,
+        PhoneWired,
+        PhoneIsdn,
+        NetworkFullyAvailable = 0,
+        NetworkUsed01To17Percent = 8,
+        NetworkUsed17To33Percent = 16,
+        NetworkUsed33To50Percent = 24,
+        NetworkUsed50To67Percent = 32,
+        NetworkUsed67To83Percent = 40,
+        NetworkUsed83To99Percent = 48,
+        NetworkNoServiceAvailable = 56,
+        AudioVideoWearableHeadset = 1,
+        AudioVideoHandsFree,
+        AudioVideoMicrophone = 4,
+        AudioVideoLoudspeaker,
+        AudioVideoHeadphones,
+        AudioVideoPortableAudio,
+        AudioVideoCarAudio,
+        AudioVideoSetTopBox,
+        AudioVideoHifiAudioDevice,
+        AudioVideoVcr,
+        AudioVideoVideoCamera,
+        AudioVideoCamcorder,
+        AudioVideoVideoMonitor,
+        AudioVideoVideoDisplayAndLoudspeaker,
+        AudioVideoVideoConferencing,
+        AudioVideoGamingOrToy = 18,
+        PeripheralJoystick = 1,
+        PeripheralGamepad,
+        PeripheralRemoteControl,
+        PeripheralSensing,
+        PeripheralDigitizerTablet,
+        PeripheralCardReader,
+        PeripheralDigitalPen,
+        PeripheralHandheldScanner,
+        PeripheralHandheldGesture,
+        WearableWristwatch = 1,
+        WearablePager,
+        WearableJacket,
+        WearableHelmet,
+        WearableGlasses,
+        ToyRobot = 1,
+        ToyVehicle,
+        ToyDoll,
+        ToyController,
+        ToyGame,
+        HealthBloodPressureMonitor = 1,
+        HealthThermometer,
+        HealthWeighingScale,
+        HealthGlucoseMeter,
+        HealthPulseOximeter,
+        HealthHeartRateMonitor,
+        HealthHealthDataDisplay,
+        HealthStepCounter,
+        HealthBodyCompositionAnalyzer,
+        HealthPeakFlowMonitor,
+        HealthMedicationMonitor,
+        HealthKneeProsthesis,
+        HealthAnkleProsthesis,
+        HealthGenericHealthManager,
+        HealthPersonalMobilityDevice,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum BluetoothServiceCapabilities
+    {
+        None,
+        LimitedDiscoverableMode,
+        PositioningService = 8,
+        NetworkingService = 16,
+        RenderingService = 32,
+        CapturingService = 64,
+        ObjectTransferService = 128,
+        AudioService = 256,
+        TelephoneService = 512,
+        InformationService = 1024,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothConnectionStatus
+    {
+        Disconnected,
+        Connected,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothError
+    {
+        Success,
+        RadioNotAvailable,
+        ResourceInUse,
+        DeviceNotConnected,
+        OtherError,
+        DisabledByPolicy,
+        NotSupported,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        DisabledByUser,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        ConsentRequired,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        TransportNotSupported,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum BluetoothAddressType
+    {
+        Public,
+        Random,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Unspecified,
+    };
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothAdapterStatics", 8b02fb6a-ac4c-4741-8661-8eab7d17ea9f)]
+    [interface_name("Windows.Devices.Bluetooth.IBluetoothAdapter", 7974f04c-5f7a-4a34-9225-a855f84b1a8b)]
+    [threading(both)]
+    runtimeclass BluetoothAdapter
+    {
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothAdapter>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothAdapter>  GetDefaultAsync();
+        String DeviceId{ get; };
+        UInt64 BluetoothAddress{ get; };
+        Boolean IsClassicSupported{ get; };
+        Boolean IsLowEnergySupported{ get; };
+        Boolean IsPeripheralRoleSupported{ get; };
+        Boolean IsCentralRoleSupported{ get; };
+        Boolean IsAdvertisementOffloadSupported{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Radios.Radio>  GetRadioAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothAdapter2", ac94cecc-24d5-41b3-916d-1097c50b102b)]
+        {
+            Boolean AreClassicSecureConnectionsSupported{ get; };
+            Boolean AreLowEnergySecureConnectionsSupported{ get; };
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.IBluetoothDeviceId", c17949af-57c1-4642-bcce-e6c06b20ae76)]
+    [threading(both)]
+    runtimeclass BluetoothDeviceId
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Bluetooth.IBluetoothDeviceIdStatics", a7884e67-3efb-4f31-bbc2-810e09977404)]
+        {
+            static Windows.Devices.Bluetooth.BluetoothDeviceId FromId(String deviceId);
+        }
+        String Id{ get; };
+        Boolean IsClassicDevice{ get; };
+        Boolean IsLowEnergyDevice{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothUuidHelperStatics", 17df0cd8-cf74-4b21-afe6-f57a11bcdea0)]
+    [threading(both)]
+    runtimeclass BluetoothUuidHelper
+    {
+        static Guid FromShortId(UInt32 shortId);
+        static Windows.Foundation.IReference <UInt32>  TryGetShortId(Guid uuid);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothDeviceStatics", 0991df51-57db-4725-bbd7-84f64327ec2c)]
+    [interface_name("Windows.Devices.Bluetooth.IBluetoothDevice", 2335b156-90d2-4a04-aef5-0e20b9e6b707)]
+    [threading(both)]
+    runtimeclass BluetoothDevice
+        : [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothDevice>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothDevice>  FromHostNameAsync(Windows.Networking.HostName hostName);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothDevice>  FromBluetoothAddressAsync(UInt64 address);
+        static String GetDeviceSelector();
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Devices.Bluetooth.IBluetoothDeviceStatics2", c29e8e2f-4e14-4477-aa1b-b8b47e5b7ece)]
+        {
+            static String GetDeviceSelectorFromPairingState(Boolean pairingState);
+            static String GetDeviceSelectorFromConnectionStatus(BluetoothConnectionStatus connectionStatus);
+            static String GetDeviceSelectorFromDeviceName(String deviceName);
+            static String GetDeviceSelectorFromBluetoothAddress(UInt64 bluetoothAddress);
+            static String GetDeviceSelectorFromClassOfDevice(BluetoothClassOfDevice classOfDevice);
+        }
+        String DeviceId{ get; };
+        Windows.Networking.HostName HostName{ get; };
+        String Name{ get; };
+        Windows.Devices.Bluetooth.BluetoothClassOfDevice ClassOfDevice{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Storage.Streams.IBuffer>  SdpRecords{ get; };
+        [deprecated("Use GetRfcommServicesAsync instead of RfcommServices.  For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceService>  RfcommServices{ get; };
+        Windows.Devices.Bluetooth.BluetoothConnectionStatus ConnectionStatus{ get; };
+        UInt64 BluetoothAddress{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.BluetoothDevice, Object>  NameChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.BluetoothDevice, Object>  SdpRecordsChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.BluetoothDevice, Object>  ConnectionStatusChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothDevice2", 0133f954-b156-4dd0-b1f5-c11bc31a5163)]
+        {
+            Windows.Devices.Enumeration.DeviceInformation DeviceInformation{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothDevice3", 57fff78b-651a-4454-b90f-eb21ef0b0d71)]
+        {
+            Windows.Devices.Enumeration.DeviceAccessInformation DeviceAccessInformation{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceAccessStatus>  RequestAccessAsync();
+            [method_name("GetRfcommServicesAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceServicesResult>  GetRfcommServicesAsync();
+            [method_name("GetRfcommServicesWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceServicesResult>  GetRfcommServicesAsync(BluetoothCacheMode cacheMode);
+            [method_name("GetRfcommServicesForIdAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceServicesResult>  GetRfcommServicesForIdAsync(Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId serviceId);
+            [method_name("GetRfcommServicesForIdWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceServicesResult>  GetRfcommServicesForIdAsync(Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId serviceId, BluetoothCacheMode cacheMode);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothDevice4", 817c34ad-0e9c-42b2-a8dc-3e8094940d12)]
+        {
+            Windows.Devices.Bluetooth.BluetoothDeviceId BluetoothDeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothDevice5", b5e0b385-5e85-4559-a10d-1c7281379f96)]
+        {
+            Boolean WasSecureConnectionUsedForPairing{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothClassOfDeviceStatics", e46135bd-0fa2-416c-91b4-c1e48ca061c1)]
+    [interface_name("Windows.Devices.Bluetooth.IBluetoothClassOfDevice", d640227e-d7d7-4661-9454-65039ca17a2b)]
+    [threading(both)]
+    runtimeclass BluetoothClassOfDevice
+    {
+        static Windows.Devices.Bluetooth.BluetoothClassOfDevice FromRawValue(UInt32 rawValue);
+        static Windows.Devices.Bluetooth.BluetoothClassOfDevice FromParts(BluetoothMajorClass majorClass, BluetoothMinorClass minorClass, BluetoothServiceCapabilities serviceCapabilities);
+        UInt32 RawValue{ get; };
+        Windows.Devices.Bluetooth.BluetoothMajorClass MajorClass{ get; };
+        Windows.Devices.Bluetooth.BluetoothMinorClass MinorClass{ get; };
+        Windows.Devices.Bluetooth.BluetoothServiceCapabilities ServiceCapabilities{ get; };
+    }
+
+
+}
+namespace Windows.Devices.Bluetooth.Rfcomm
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommDeviceServiceStatics", a4a149ef-626d-41ac-b253-87ac5c27e28a)]
+    [interface_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommDeviceService", ae81ff1f-c5a1-4c40-8c28-f3efd69062f3)]
+    [threading(both)]
+    runtimeclass RfcommDeviceService
+        : [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceService>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector(RfcommServiceId serviceId);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommDeviceServiceStatics2", aa8cb1c9-e78d-4be4-8076-0a3d87a0a05f)]
+        {
+            [method_name("GetDeviceSelectorForBluetoothDevice")] static String GetDeviceSelectorForBluetoothDevice(Windows.Devices.Bluetooth.BluetoothDevice bluetoothDevice);
+            [method_name("GetDeviceSelectorForBluetoothDeviceWithCacheMode")] static String GetDeviceSelectorForBluetoothDevice(Windows.Devices.Bluetooth.BluetoothDevice bluetoothDevice, Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+            [method_name("GetDeviceSelectorForBluetoothDeviceAndServiceId")] static String GetDeviceSelectorForBluetoothDeviceAndServiceId(Windows.Devices.Bluetooth.BluetoothDevice bluetoothDevice, RfcommServiceId serviceId);
+            [method_name("GetDeviceSelectorForBluetoothDeviceAndServiceIdWithCacheMode")] static String GetDeviceSelectorForBluetoothDeviceAndServiceId(Windows.Devices.Bluetooth.BluetoothDevice bluetoothDevice, RfcommServiceId serviceId, Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+        }
+        Windows.Networking.HostName ConnectionHostName{ get; };
+        String ConnectionServiceName{ get; };
+        Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId ServiceId{ get; };
+        Windows.Networking.Sockets.SocketProtectionLevel ProtectionLevel{ get; };
+        Windows.Networking.Sockets.SocketProtectionLevel MaxProtectionLevel{ get; };
+        [method_name("GetSdpRawAttributesAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IMapView <UInt32, Windows.Storage.Streams.IBuffer> >  GetSdpRawAttributesAsync();
+        [method_name("GetSdpRawAttributesWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IMapView <UInt32, Windows.Storage.Streams.IBuffer> >  GetSdpRawAttributesAsync(Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommDeviceService2", 536ced14-ebcd-49fe-bf9f-40efc689b20d)]
+        {
+            Windows.Devices.Bluetooth.BluetoothDevice Device{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommDeviceService3", 1c22ace6-dd44-4d23-866d-8f3486ee6490)]
+        {
+            Windows.Devices.Enumeration.DeviceAccessInformation DeviceAccessInformation{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceAccessStatus>  RequestAccessAsync();
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommDeviceServicesResult", 3b48388c-7ccf-488e-9625-d259a5732d55)]
+    runtimeclass RfcommDeviceServicesResult
+    {
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.Rfcomm.RfcommDeviceService>  Services{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommServiceIdStatics", 2a179eba-a975-46e3-b56b-08ffd783a5fe)]
+    [interface_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommServiceId", 22629204-7e02-4017-8136-da1b6a1b9bbf)]
+    [threading(both)]
+    runtimeclass RfcommServiceId
+    {
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId FromUuid(Guid uuid);
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId FromShortId(UInt32 shortId);
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId SerialPort{ get; };
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId ObexObjectPush{ get; };
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId ObexFileTransfer{ get; };
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId PhoneBookAccessPce{ get; };
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId PhoneBookAccessPse{ get; };
+        static Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId GenericFileTransfer{ get; };
+        Guid Uuid{ get; };
+        UInt32 AsShortId();
+        String AsString();
+    }
+
+
+
+
+}
+namespace Windows.Devices.Bluetooth
+{
+    [dualapipartition(0xa000001)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothLEAppearanceCategoriesStatics", 6d4d54fe-046a-4185-aab6-824cf0610861)]
+    [threading(both)]
+    runtimeclass BluetoothLEAppearanceCategories
+    {
+        static UInt16 Uncategorized{ get; };
+        static UInt16 Phone{ get; };
+        static UInt16 Computer{ get; };
+        static UInt16 Watch{ get; };
+        static UInt16 Clock{ get; };
+        static UInt16 Display{ get; };
+        static UInt16 RemoteControl{ get; };
+        static UInt16 EyeGlasses{ get; };
+        static UInt16 Tag{ get; };
+        static UInt16 Keyring{ get; };
+        static UInt16 MediaPlayer{ get; };
+        static UInt16 BarcodeScanner{ get; };
+        static UInt16 Thermometer{ get; };
+        static UInt16 HeartRate{ get; };
+        static UInt16 BloodPressure{ get; };
+        static UInt16 HumanInterfaceDevice{ get; };
+        static UInt16 GlucoseMeter{ get; };
+        static UInt16 RunningWalking{ get; };
+        static UInt16 Cycling{ get; };
+        static UInt16 PulseOximeter{ get; };
+        static UInt16 WeightScale{ get; };
+        static UInt16 OutdoorSportActivity{ get; };
+    }
+
+
+    [dualapipartition(0xa000001)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothLEAppearanceSubcategoriesStatics", e57ba606-2144-415a-8312-71ccf291f8d1)]
+    [threading(both)]
+    runtimeclass BluetoothLEAppearanceSubcategories
+    {
+        static UInt16 Generic{ get; };
+        static UInt16 SportsWatch{ get; };
+        static UInt16 ThermometerEar{ get; };
+        static UInt16 HeartRateBelt{ get; };
+        static UInt16 BloodPressureArm{ get; };
+        static UInt16 BloodPressureWrist{ get; };
+        static UInt16 Keyboard{ get; };
+        static UInt16 Mouse{ get; };
+        static UInt16 Joystick{ get; };
+        static UInt16 Gamepad{ get; };
+        static UInt16 DigitizerTablet{ get; };
+        static UInt16 CardReader{ get; };
+        static UInt16 DigitalPen{ get; };
+        static UInt16 BarcodeScanner{ get; };
+        static UInt16 RunningWalkingInShoe{ get; };
+        static UInt16 RunningWalkingOnShoe{ get; };
+        static UInt16 RunningWalkingOnHip{ get; };
+        static UInt16 CyclingComputer{ get; };
+        static UInt16 CyclingSpeedSensor{ get; };
+        static UInt16 CyclingCadenceSensor{ get; };
+        static UInt16 CyclingPowerSensor{ get; };
+        static UInt16 CyclingSpeedCadenceSensor{ get; };
+        static UInt16 OximeterFingertip{ get; };
+        static UInt16 OximeterWristWorn{ get; };
+        static UInt16 LocationDisplay{ get; };
+        static UInt16 LocationNavigationDisplay{ get; };
+        static UInt16 LocationPod{ get; };
+        static UInt16 LocationNavigationPod{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000001)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothLEAppearanceStatics", a193c0c7-4504-4f4a-9ba5-cd1054e5e065)]
+    [interface_name("Windows.Devices.Bluetooth.IBluetoothLEAppearance", 5d2079f2-66a8-4258-985e-02b4d9509f18)]
+    [threading(both)]
+    runtimeclass BluetoothLEAppearance
+    {
+        static Windows.Devices.Bluetooth.BluetoothLEAppearance FromRawValue(UInt16 rawValue);
+        static Windows.Devices.Bluetooth.BluetoothLEAppearance FromParts(UInt16 appearanceCategory, UInt16 appearanceSubCategory);
+        UInt16 RawValue{ get; };
+        UInt16 Category{ get; };
+        UInt16 SubCategory{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Bluetooth.IBluetoothLEDeviceStatics", c8cf1a19-f0b6-4bf0-8689-41303de2d9f4)]
+    [interface_name("Windows.Devices.Bluetooth.IBluetoothLEDevice", b5ee2f7b-4ad8-4642-ac48-80a0b500e887)]
+    [threading(both)]
+    runtimeclass BluetoothLEDevice
+        : [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Foundation.IClosable
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Devices.Bluetooth.IBluetoothLEDeviceStatics2", 5f12c06b-3bac-43e8-ad16-563271bd41c2)]
+        {
+            static String GetDeviceSelectorFromPairingState(Boolean pairingState);
+            static String GetDeviceSelectorFromConnectionStatus(BluetoothConnectionStatus connectionStatus);
+            static String GetDeviceSelectorFromDeviceName(String deviceName);
+            [method_name("GetDeviceSelectorFromBluetoothAddress")] static String GetDeviceSelectorFromBluetoothAddress(UInt64 bluetoothAddress);
+            [method_name("GetDeviceSelectorFromBluetoothAddressWithBluetoothAddressType")] static String GetDeviceSelectorFromBluetoothAddress(UInt64 bluetoothAddress, BluetoothAddressType bluetoothAddressType);
+            static String GetDeviceSelectorFromAppearance(BluetoothLEAppearance appearance);
+            [method_name("FromBluetoothAddressWithBluetoothAddressTypeAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothLEDevice>  FromBluetoothAddressAsync(UInt64 bluetoothAddress, BluetoothAddressType bluetoothAddressType);
+        }
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothLEDevice>  FromIdAsync(String deviceId);
+        [method_name("FromBluetoothAddressAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.BluetoothLEDevice>  FromBluetoothAddressAsync(UInt64 bluetoothAddress);
+        static String GetDeviceSelector();
+        String DeviceId{ get; };
+        String Name{ get; };
+        [deprecated("Use GetGattServicesAsync instead of GattServices.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService>  GattServices{ get; };
+        Windows.Devices.Bluetooth.BluetoothConnectionStatus ConnectionStatus{ get; };
+        UInt64 BluetoothAddress{ get; };
+        [deprecated("Use GetGattServicesForUuidAsync instead of GetGattService.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService GetGattService(Guid serviceUuid);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.BluetoothLEDevice, Object>  NameChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.BluetoothLEDevice, Object>  GattServicesChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.BluetoothLEDevice, Object>  ConnectionStatusChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothLEDevice2", 26f062b3-7aee-4d31-baba-b1b9775f5916)]
+        {
+            Windows.Devices.Enumeration.DeviceInformation DeviceInformation{ get; };
+            Windows.Devices.Bluetooth.BluetoothLEAppearance Appearance{ get; };
+            Windows.Devices.Bluetooth.BluetoothAddressType BluetoothAddressType{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothLEDevice3", aee9e493-44ac-40dc-af33-b2c13c01ca46)]
+        {
+            Windows.Devices.Enumeration.DeviceAccessInformation DeviceAccessInformation{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceAccessStatus>  RequestAccessAsync();
+            [method_name("GetGattServicesAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetGattServicesAsync();
+            [method_name("GetGattServicesWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetGattServicesAsync(BluetoothCacheMode cacheMode);
+            [method_name("GetGattServicesForUuidAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetGattServicesForUuidAsync(Guid serviceUuid);
+            [method_name("GetGattServicesForUuidWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetGattServicesForUuidAsync(Guid serviceUuid, BluetoothCacheMode cacheMode);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothLEDevice4", 2b605031-2248-4b2f-acf0-7cee36fc5870)]
+        {
+            Windows.Devices.Bluetooth.BluetoothDeviceId BluetoothDeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Devices.Bluetooth.IBluetoothLEDevice5", 9d6a1260-5287-458e-95ba-17c8b7bb326e)]
+        {
+            Boolean WasSecureConnectionUsedForPairing{ get; };
+        }
+    }
+
+
+
+}
+namespace Windows.Devices.Bluetooth.GenericAttributeProfile
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDeviceServiceStatics", 196d0022-faad-45dc-ae5b-2ac3184e84db)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDeviceService", ac7b7c05-b33c-47cf-990f-6b8f5577df71)]
+    [threading(both)]
+    runtimeclass GattDeviceService
+        : Windows.Foundation.IClosable
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDeviceServiceStatics2", 0604186e-24a6-4b0d-a2f2-30cc01545d25)]
+        {
+            [method_name("FromIdWithSharingModeAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService>  FromIdAsync(String deviceId, GattSharingMode sharingMode);
+            [method_name("GetDeviceSelectorForBluetoothDeviceId")] static String GetDeviceSelectorForBluetoothDeviceId(Windows.Devices.Bluetooth.BluetoothDeviceId bluetoothDeviceId);
+            [method_name("GetDeviceSelectorForBluetoothDeviceIdWithCacheMode")] static String GetDeviceSelectorForBluetoothDeviceId(Windows.Devices.Bluetooth.BluetoothDeviceId bluetoothDeviceId, Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+            [method_name("GetDeviceSelectorForBluetoothDeviceIdAndUuid")] static String GetDeviceSelectorForBluetoothDeviceIdAndUuid(Windows.Devices.Bluetooth.BluetoothDeviceId bluetoothDeviceId, Guid serviceUuid);
+            [method_name("GetDeviceSelectorForBluetoothDeviceIdAndUuidWithCacheMode")] static String GetDeviceSelectorForBluetoothDeviceIdAndUuid(Windows.Devices.Bluetooth.BluetoothDeviceId bluetoothDeviceId, Guid serviceUuid, Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+        }
+        [method_name("FromIdAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService>  FromIdAsync(String deviceId);
+        static String GetDeviceSelectorFromUuid(Guid serviceUuid);
+        [deprecated("Use GetDeviceSelectorFromUuid instead of GetDeviceSelectorFromShortId.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static String GetDeviceSelectorFromShortId(UInt16 serviceShortId);
+        [deprecated("Use BluetoothUuidHelper instead of ConvertShortIdToUuid.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static Guid ConvertShortIdToUuid(UInt16 shortId);
+        [deprecated("Use GetCharacteristicsForUuidAsync instead of GetCharacteristics.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic>  GetCharacteristics(Guid characteristicUuid);
+        [deprecated("Use GetIncludedServicesForUuidAsync instead of GetIncludedServices.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService>  GetIncludedServices(Guid serviceUuid);
+        String DeviceId{ get; };
+        Guid Uuid{ get; };
+        UInt16 AttributeHandle{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDeviceService2", fc54520b-0b0d-4708-bae0-9ffd9489bc59)]
+        {
+            [deprecated("Use Session instead of Device property.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+            Windows.Devices.Bluetooth.BluetoothLEDevice Device{ get; };
+            [deprecated("ParentServices may be altered or unavailable in future releases.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+            Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService>  ParentServices{ get; };
+            [deprecated("Use GetCharacteristicsAsync instead of GetAllCharacteristics.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+            Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic>  GetAllCharacteristics();
+            [deprecated("Use GetIncludedServicesAsync instead of GetAllIncludedServices.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+            Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService>  GetAllIncludedServices();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDeviceService3", b293a950-0c53-437c-a9b3-5c3210c6e569)]
+        {
+            Windows.Devices.Enumeration.DeviceAccessInformation DeviceAccessInformation{ get; };
+            Windows.Devices.Bluetooth.GenericAttributeProfile.GattSession Session{ get; };
+            Windows.Devices.Bluetooth.GenericAttributeProfile.GattSharingMode SharingMode{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceAccessStatus>  RequestAccessAsync();
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattOpenStatus>  OpenAsync(GattSharingMode sharingMode);
+            [method_name("GetCharacteristicsAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicsResult>  GetCharacteristicsAsync();
+            [method_name("GetCharacteristicsWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicsResult>  GetCharacteristicsAsync(Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+            [method_name("GetCharacteristicsForUuidAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicsResult>  GetCharacteristicsForUuidAsync(Guid characteristicUuid);
+            [method_name("GetCharacteristicsForUuidWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicsResult>  GetCharacteristicsForUuidAsync(Guid characteristicUuid, Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+            [method_name("GetIncludedServicesAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetIncludedServicesAsync();
+            [method_name("GetIncludedServicesWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetIncludedServicesAsync(Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+            [method_name("GetIncludedServicesForUuidAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetIncludedServicesForUuidAsync(Guid serviceUuid);
+            [method_name("GetIncludedServicesForUuidWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceServicesResult>  GetIncludedServicesForUuidAsync(Guid serviceUuid, Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+        }
+    }
+
+
+
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDeviceServicesResult", 171dd3ee-016d-419d-838a-576cf475a3d8)]
+    runtimeclass GattDeviceServicesResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus Status{ get; };
+        Windows.Foundation.IReference <UInt8>  ProtocolError{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService>  Services{ get; };
+    }
+
+
+
+
+
+
+}
+namespace Windows.Devices.Bluetooth
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Bluetooth.IBluetoothSignalStrengthFilter", df7b7391-6bb5-4cfe-90b1-5d7324edcf7f)]
+    [threading(both)]
+    runtimeclass BluetoothSignalStrengthFilter
+    {
+        BluetoothSignalStrengthFilter();
+        Windows.Foundation.IReference <Int16>  InRangeThresholdInDBm{ get; };
+        Windows.Foundation.IReference <Int16>  InRangeThresholdInDBm{ set; };
+        Windows.Foundation.IReference <Int16>  OutOfRangeThresholdInDBm{ get; };
+        Windows.Foundation.IReference <Int16>  OutOfRangeThresholdInDBm{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  OutOfRangeTimeout{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  OutOfRangeTimeout{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  SamplingInterval{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  SamplingInterval{ set; };
+    }
+
+}
+namespace Windows.Devices.Bluetooth.GenericAttributeProfile
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum GattSessionStatus
+    {
+        Closed,
+        Active,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GattCharacteristicProperties
+    {
+        None,
+        Broadcast,
+        Read,
+        WriteWithoutResponse = 4,
+        Write = 8,
+        Notify = 16,
+        Indicate = 32,
+        AuthenticatedSignedWrites = 64,
+        ExtendedProperties = 128,
+        ReliableWrites = 256,
+        WritableAuxiliaries = 512,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GattClientCharacteristicConfigurationDescriptorValue
+    {
+        None,
+        Notify,
+        Indicate,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GattProtectionLevel
+    {
+        Plain,
+        AuthenticationRequired,
+        EncryptionRequired,
+        EncryptionAndAuthenticationRequired,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GattWriteOption
+    {
+        WriteWithResponse,
+        WriteWithoutResponse,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GattCommunicationStatus
+    {
+        Success,
+        Unreachable,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        ProtocolError,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        AccessDenied,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum GattSharingMode
+    {
+        Unspecified,
+        Exclusive,
+        SharedReadOnly,
+        SharedReadAndWrite,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum GattOpenStatus
+    {
+        Unspecified,
+        Success,
+        AlreadyOpened,
+        NotFound,
+        SharingViolation,
+        AccessDenied,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum GattRequestState
+    {
+        Pending,
+        Completed,
+        Canceled,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum GattServiceProviderAdvertisementStatus
+    {
+        Created,
+        Stopped,
+        Started,
+        Aborted,
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        StartedWithoutAllAdvertisementData,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattProtocolErrorStatics", ca46c5c5-0ecc-4809-bea3-cf79bc991e37)]
+    [threading(both)]
+    runtimeclass GattProtocolError
+    {
+        static UInt8 InvalidHandle{ get; };
+        static UInt8 ReadNotPermitted{ get; };
+        static UInt8 WriteNotPermitted{ get; };
+        static UInt8 InvalidPdu{ get; };
+        static UInt8 InsufficientAuthentication{ get; };
+        static UInt8 RequestNotSupported{ get; };
+        static UInt8 InvalidOffset{ get; };
+        static UInt8 InsufficientAuthorization{ get; };
+        static UInt8 PrepareQueueFull{ get; };
+        static UInt8 AttributeNotFound{ get; };
+        static UInt8 AttributeNotLong{ get; };
+        static UInt8 InsufficientEncryptionKeySize{ get; };
+        static UInt8 InvalidAttributeValueLength{ get; };
+        static UInt8 UnlikelyError{ get; };
+        static UInt8 InsufficientEncryption{ get; };
+        static UInt8 UnsupportedGroupType{ get; };
+        static UInt8 InsufficientResources{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattSessionStatics", 2e65b95c-539f-4db7-82a8-73bdbbf73ebf)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattSession", d23b5143-e04e-4c24-999c-9c256f9856b1)]
+    [threading(both)]
+    runtimeclass GattSession
+        : Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattSession>  FromDeviceIdAsync(Windows.Devices.Bluetooth.BluetoothDeviceId deviceId);
+        Windows.Devices.Bluetooth.BluetoothDeviceId DeviceId{ get; };
+        Boolean CanMaintainConnection{ get; };
+        Boolean MaintainConnection{ set; };
+        Boolean MaintainConnection{ get; };
+        UInt16 MaxPduSize{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattSessionStatus SessionStatus{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattSession, Object>  MaxPduSizeChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattSession, Windows.Devices.Bluetooth.GenericAttributeProfile.GattSessionStatusChangedEventArgs>  SessionStatusChanged;
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattSessionStatusChangedEventArgs", 7605b72e-837f-404c-ab34-3163f39ddf32)]
+    runtimeclass GattSessionStatusChangedEventArgs
+    {
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattSessionStatus Status{ get; };
+    }
+
+
+
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattCharacteristicStatics", 59cb50c3-5934-4f68-a198-eb864fa44e6b)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattCharacteristic", 59cb50c1-5934-4f68-a198-eb864fa44e6b)]
+    [threading(both)]
+    runtimeclass GattCharacteristic
+    {
+        [deprecated("Use BluetoothUuidHelper instead of ConvertShortIdToUuid.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static Guid ConvertShortIdToUuid(UInt16 shortId);
+        [deprecated("Use GetDescriptorsForUuidAsync instead of GetDescriptors.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDescriptor>  GetDescriptors(Guid descriptorUuid);
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicProperties CharacteristicProperties{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ProtectionLevel{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ProtectionLevel{ set; };
+        String UserDescription{ get; };
+        Guid Uuid{ get; };
+        UInt16 AttributeHandle{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattPresentationFormat>  PresentationFormats{ get; };
+        [method_name("ReadValueAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadResult>  ReadValueAsync();
+        [method_name("ReadValueWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadResult>  ReadValueAsync(Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+        [method_name("WriteValueAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus>  WriteValueAsync(Windows.Storage.Streams.IBuffer value);
+        [method_name("WriteValueWithOptionAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus>  WriteValueAsync(Windows.Storage.Streams.IBuffer value, GattWriteOption writeOption);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadClientCharacteristicConfigurationDescriptorResult>  ReadClientCharacteristicConfigurationDescriptorAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus>  WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue clientCharacteristicConfigurationDescriptorValue);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic, Windows.Devices.Bluetooth.GenericAttributeProfile.GattValueChangedEventArgs>  ValueChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattCharacteristic2", ae1ab578-ec06-4764-b780-9835a1d35d6e)]
+        {
+            Windows.Devices.Bluetooth.GenericAttributeProfile.GattDeviceService Service{ get; };
+            [deprecated("Use GetDescriptorsAsync instead of GetAllDescriptors.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+            Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDescriptor>  GetAllDescriptors();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattCharacteristic3", 3f3c663e-93d4-406b-b817-db81f8ed53b3)]
+        {
+            [method_name("GetDescriptorsAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDescriptorsResult>  GetDescriptorsAsync();
+            [method_name("GetDescriptorsWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDescriptorsResult>  GetDescriptorsAsync(Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+            [method_name("GetDescriptorsForUuidAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDescriptorsResult>  GetDescriptorsForUuidAsync(Guid descriptorUuid);
+            [method_name("GetDescriptorsForUuidWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDescriptorsResult>  GetDescriptorsForUuidAsync(Guid descriptorUuid, Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+            [method_name("WriteValueWithResultAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteResult>  WriteValueWithResultAsync(Windows.Storage.Streams.IBuffer value);
+            [method_name("WriteValueWithResultAndOptionAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteResult>  WriteValueWithResultAsync(Windows.Storage.Streams.IBuffer value, GattWriteOption writeOption);
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteResult>  WriteClientCharacteristicConfigurationDescriptorWithResultAsync(GattClientCharacteristicConfigurationDescriptorValue clientCharacteristicConfigurationDescriptorValue);
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattCharacteristicsResult", 1194945c-b257-4f3e-9db7-f68bc9a9aef2)]
+    runtimeclass GattCharacteristicsResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus Status{ get; };
+        Windows.Foundation.IReference <UInt8>  ProtocolError{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic>  Characteristics{ get; };
+    }
+
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDescriptorStatics", 92055f2d-8084-4344-b4c2-284de19a8506)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDescriptor", 92055f2b-8084-4344-b4c2-284de19a8506)]
+    [threading(both)]
+    runtimeclass GattDescriptor
+    {
+        [deprecated("Use BluetoothUuidHelper instead of ConvertShortIdToUuid.  For more information, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static Guid ConvertShortIdToUuid(UInt16 shortId);
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ProtectionLevel{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ProtectionLevel{ set; };
+        Guid Uuid{ get; };
+        UInt16 AttributeHandle{ get; };
+        [method_name("ReadValueAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadResult>  ReadValueAsync();
+        [method_name("ReadValueWithCacheModeAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadResult>  ReadValueAsync(Windows.Devices.Bluetooth.BluetoothCacheMode cacheMode);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus>  WriteValueAsync(Windows.Storage.Streams.IBuffer value);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDescriptor2", 8f563d39-d630-406c-ba11-10cdd16b0e5e)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteResult>  WriteValueWithResultAsync(Windows.Storage.Streams.IBuffer value);
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattPresentationFormatStatics", 196d0020-faad-45dc-ae5b-2ac3184e84db)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattPresentationFormat", 196d0021-faad-45dc-ae5b-2ac3184e84db)]
+    [threading(both)]
+    runtimeclass GattPresentationFormat
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattPresentationFormatStatics2", a9c21713-b82f-435e-b634-21fd85a43c07)]
+        {
+            static Windows.Devices.Bluetooth.GenericAttributeProfile.GattPresentationFormat FromParts(UInt8 formatType, Int32 exponent, UInt16 unit, UInt8 namespaceId, UInt16 description);
+        }
+        static UInt8 BluetoothSigAssignedNumbers{ get; };
+        UInt8 FormatType{ get; };
+        Int32 Exponent{ get; };
+        UInt16 Unit{ get; };
+        UInt8 Namespace{ get; };
+        UInt16 Description{ get; };
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReadResult", 63a66f08-1aea-4c4c-a50f-97bae474b348)]
+    runtimeclass GattReadResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus Status{ get; };
+        Windows.Storage.Streams.IBuffer Value{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReadResult2", a10f50a0-fb43-48af-baaa-638a5c6329fe)]
+        {
+            Windows.Foundation.IReference <UInt8>  ProtocolError{ get; };
+        }
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReadClientCharacteristicConfigurationDescriptorResult", 63a66f09-1aea-4c4c-a50f-97bae474b348)]
+    runtimeclass GattReadClientCharacteristicConfigurationDescriptorResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus Status{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattClientCharacteristicConfigurationDescriptorValue ClientCharacteristicConfigurationDescriptor{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReadClientCharacteristicConfigurationDescriptorResult2", 1bf1a59d-ba4d-4622-8651-f4ee150d0a5d)]
+        {
+            Windows.Foundation.IReference <UInt8>  ProtocolError{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattValueChangedEventArgs", d21bdb54-06e3-4ed8-a263-acfac8ba7313)]
+    runtimeclass GattValueChangedEventArgs
+    {
+        Windows.Storage.Streams.IBuffer CharacteristicValue{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+    }
+
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDescriptorsResult", 9bc091f3-95e7-4489-8d25-ff81955a57b9)]
+    runtimeclass GattDescriptorsResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus Status{ get; };
+        Windows.Foundation.IReference <UInt8>  ProtocolError{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattDescriptor>  Descriptors{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattWriteResult", 4991ddb1-cb2b-44f7-99fc-d29a2871dc9b)]
+    runtimeclass GattWriteResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus Status{ get; };
+        Windows.Foundation.IReference <UInt8>  ProtocolError{ get; };
+    }
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattPresentationFormatTypesStatics", faf1ba0a-30ba-409c-bef7-cffb6d03b8fb)]
+    [threading(both)]
+    runtimeclass GattPresentationFormatTypes
+    {
+        static UInt8 Boolean{ get; };
+        static UInt8 Bit2{ get; };
+        static UInt8 Nibble{ get; };
+        static UInt8 UInt8{ get; };
+        static UInt8 UInt12{ get; };
+        static UInt8 UInt16{ get; };
+        static UInt8 UInt24{ get; };
+        static UInt8 UInt32{ get; };
+        static UInt8 UInt48{ get; };
+        static UInt8 UInt64{ get; };
+        static UInt8 UInt128{ get; };
+        static UInt8 SInt8{ get; };
+        static UInt8 SInt12{ get; };
+        static UInt8 SInt16{ get; };
+        static UInt8 SInt24{ get; };
+        static UInt8 SInt32{ get; };
+        static UInt8 SInt48{ get; };
+        static UInt8 SInt64{ get; };
+        static UInt8 SInt128{ get; };
+        static UInt8 Float32{ get; };
+        static UInt8 Float64{ get; };
+        static UInt8 SFloat{ get; };
+        static UInt8 Float{ get; };
+        static UInt8 DUInt16{ get; };
+        static UInt8 Utf8{ get; };
+        static UInt8 Utf16{ get; };
+        static UInt8 Struct{ get; };
+    }
+
+
+
+
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceUuidsStatics", 6dc57058-9aba-4417-b8f2-dce016d34ee2)]
+    [threading(both)]
+    runtimeclass GattServiceUuids
+    {
+        static Guid Battery{ get; };
+        static Guid BloodPressure{ get; };
+        static Guid CyclingSpeedAndCadence{ get; };
+        static Guid GenericAccess{ get; };
+        static Guid GenericAttribute{ get; };
+        static Guid Glucose{ get; };
+        static Guid HealthThermometer{ get; };
+        static Guid HeartRate{ get; };
+        static Guid RunningSpeedAndCadence{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceUuidsStatics2", d2ae94f5-3d15-4f79-9c0c-eaafa675155c)]
+        {
+            static Guid AlertNotification{ get; };
+            static Guid CurrentTime{ get; };
+            static Guid CyclingPower{ get; };
+            static Guid DeviceInformation{ get; };
+            static Guid HumanInterfaceDevice{ get; };
+            static Guid ImmediateAlert{ get; };
+            static Guid LinkLoss{ get; };
+            static Guid LocationAndNavigation{ get; };
+            static Guid NextDstChange{ get; };
+            static Guid PhoneAlertStatus{ get; };
+            static Guid ReferenceTimeUpdate{ get; };
+            static Guid ScanParameters{ get; };
+            static Guid TxPower{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattCharacteristicUuidsStatics2", 1855b425-d46e-4a2c-9c3f-ed6dea29e7be)]
+    [threading(both)]
+    runtimeclass GattCharacteristicUuids
+    {
+        static Guid AlertCategoryId{ get; };
+        static Guid AlertCategoryIdBitMask{ get; };
+        static Guid AlertLevel{ get; };
+        static Guid AlertNotificationControlPoint{ get; };
+        static Guid AlertStatus{ get; };
+        static Guid GapAppearance{ get; };
+        static Guid BootKeyboardInputReport{ get; };
+        static Guid BootKeyboardOutputReport{ get; };
+        static Guid BootMouseInputReport{ get; };
+        static Guid CurrentTime{ get; };
+        static Guid CyclingPowerControlPoint{ get; };
+        static Guid CyclingPowerFeature{ get; };
+        static Guid CyclingPowerMeasurement{ get; };
+        static Guid CyclingPowerVector{ get; };
+        static Guid DateTime{ get; };
+        static Guid DayDateTime{ get; };
+        static Guid DayOfWeek{ get; };
+        static Guid GapDeviceName{ get; };
+        static Guid DstOffset{ get; };
+        static Guid ExactTime256{ get; };
+        static Guid FirmwareRevisionString{ get; };
+        static Guid HardwareRevisionString{ get; };
+        static Guid HidControlPoint{ get; };
+        static Guid HidInformation{ get; };
+        static Guid Ieee1107320601RegulatoryCertificationDataList{ get; };
+        static Guid LnControlPoint{ get; };
+        static Guid LnFeature{ get; };
+        static Guid LocalTimeInformation{ get; };
+        static Guid LocationAndSpeed{ get; };
+        static Guid ManufacturerNameString{ get; };
+        static Guid ModelNumberString{ get; };
+        static Guid Navigation{ get; };
+        static Guid NewAlert{ get; };
+        static Guid GapPeripheralPreferredConnectionParameters{ get; };
+        static Guid GapPeripheralPrivacyFlag{ get; };
+        static Guid PnpId{ get; };
+        static Guid PositionQuality{ get; };
+        static Guid ProtocolMode{ get; };
+        static Guid GapReconnectionAddress{ get; };
+        static Guid ReferenceTimeInformation{ get; };
+        static Guid Report{ get; };
+        static Guid ReportMap{ get; };
+        static Guid RingerControlPoint{ get; };
+        static Guid RingerSetting{ get; };
+        static Guid ScanIntervalWindow{ get; };
+        static Guid ScanRefresh{ get; };
+        static Guid SerialNumberString{ get; };
+        static Guid GattServiceChanged{ get; };
+        static Guid SoftwareRevisionString{ get; };
+        static Guid SupportedNewAlertCategory{ get; };
+        static Guid SupportUnreadAlertCategory{ get; };
+        static Guid SystemId{ get; };
+        static Guid TimeAccuracy{ get; };
+        static Guid TimeSource{ get; };
+        static Guid TimeUpdateControlPoint{ get; };
+        static Guid TimeUpdateState{ get; };
+        static Guid TimeWithDst{ get; };
+        static Guid TimeZone{ get; };
+        static Guid TxPowerLevel{ get; };
+        static Guid UnreadAlertStatus{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattCharacteristicUuidsStatics", 58fa4586-b1de-470c-b7de-0d11ff44f4b7)]
+        {
+            static Guid BatteryLevel{ get; };
+            static Guid BloodPressureFeature{ get; };
+            static Guid BloodPressureMeasurement{ get; };
+            static Guid BodySensorLocation{ get; };
+            static Guid CscFeature{ get; };
+            static Guid CscMeasurement{ get; };
+            static Guid GlucoseFeature{ get; };
+            static Guid GlucoseMeasurement{ get; };
+            static Guid GlucoseMeasurementContext{ get; };
+            static Guid HeartRateControlPoint{ get; };
+            static Guid HeartRateMeasurement{ get; };
+            static Guid IntermediateCuffPressure{ get; };
+            static Guid IntermediateTemperature{ get; };
+            static Guid MeasurementInterval{ get; };
+            static Guid RecordAccessControlPoint{ get; };
+            static Guid RscFeature{ get; };
+            static Guid RscMeasurement{ get; };
+            static Guid SCControlPoint{ get; };
+            static Guid SensorLocation{ get; };
+            static Guid TemperatureMeasurement{ get; };
+            static Guid TemperatureType{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattDescriptorUuidsStatics", a6f862ce-9cfc-42f1-9185-ff37b75181d3)]
+    [threading(both)]
+    runtimeclass GattDescriptorUuids
+    {
+        static Guid CharacteristicAggregateFormat{ get; };
+        static Guid CharacteristicExtendedProperties{ get; };
+        static Guid CharacteristicPresentationFormat{ get; };
+        static Guid CharacteristicUserDescription{ get; };
+        static Guid ClientCharacteristicConfiguration{ get; };
+        static Guid ServerCharacteristicConfiguration{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReliableWriteTransaction", 63a66f07-1aea-4c4c-a50f-97bae474b348)]
+    [threading(both)]
+    runtimeclass GattReliableWriteTransaction
+    {
+        GattReliableWriteTransaction();
+        void WriteValue(GattCharacteristic characteristic, Windows.Storage.Streams.IBuffer value);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus>  CommitAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReliableWriteTransaction2", 51113987-ef12-462f-9fb2-a1a43a679416)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteResult>  CommitWithResultAsync();
+        }
+    }
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceProviderAdvertisingParameters", e2ce31ab-6315-4c22-9bd7-781dbc3d8d82)]
+    [threading(both)]
+    runtimeclass GattServiceProviderAdvertisingParameters
+    {
+        GattServiceProviderAdvertisingParameters();
+        Boolean IsConnectable{ set; };
+        Boolean IsConnectable{ get; };
+        Boolean IsDiscoverable{ set; };
+        Boolean IsDiscoverable{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceProviderAdvertisingParameters2", ff68468d-ca92-4434-9743-0e90988ad879)]
+        {
+            Windows.Storage.Streams.IBuffer ServiceData{ set; };
+            Windows.Storage.Streams.IBuffer ServiceData{ get; };
+        }
+    }
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattLocalCharacteristicParameters", faf73db4-4cff-44c7-8445-040e6ead0063)]
+    [threading(both)]
+    runtimeclass GattLocalCharacteristicParameters
+    {
+        GattLocalCharacteristicParameters();
+        Windows.Storage.Streams.IBuffer StaticValue{ set; };
+        Windows.Storage.Streams.IBuffer StaticValue{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicProperties CharacteristicProperties{ set; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicProperties CharacteristicProperties{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ReadProtectionLevel{ set; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ReadProtectionLevel{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel WriteProtectionLevel{ set; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel WriteProtectionLevel{ get; };
+        String UserDescription{ set; };
+        String UserDescription{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Devices.Bluetooth.GenericAttributeProfile.GattPresentationFormat>  PresentationFormats{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattLocalDescriptorParameters", 5fdede6a-f3c1-4b66-8c4b-e3d2293b40e9)]
+    [threading(both)]
+    runtimeclass GattLocalDescriptorParameters
+    {
+        GattLocalDescriptorParameters();
+        Windows.Storage.Streams.IBuffer StaticValue{ set; };
+        Windows.Storage.Streams.IBuffer StaticValue{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ReadProtectionLevel{ set; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ReadProtectionLevel{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel WriteProtectionLevel{ set; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel WriteProtectionLevel{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceProviderResult", 764696d8-c53e-428c-8a48-67afe02c3ae6)]
+    runtimeclass GattServiceProviderResult
+    {
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProvider ServiceProvider{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattLocalService", f513e258-f7f7-4902-b803-57fcc7d6fe83)]
+    runtimeclass GattLocalService
+    {
+        Guid Uuid{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalCharacteristicResult>  CreateCharacteristicAsync(Guid characteristicUuid, GattLocalCharacteristicParameters parameters);
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalCharacteristic>  Characteristics{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [static_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceProviderStatics", 31794063-5256-4054-a4f4-7bbe7755a57e)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceProvider", 7822b3cd-2889-4f86-a051-3f0aed1c2760)]
+    [threading(both)]
+    runtimeclass GattServiceProvider
+    {
+        [method_name("CreateAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProviderResult>  CreateAsync(Guid serviceUuid);
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalService Service{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProviderAdvertisementStatus AdvertisementStatus{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProvider, Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProviderAdvertisementStatusChangedEventArgs>  AdvertisementStatusChanged;
+        [method_name("StartAdvertising")] void StartAdvertising();
+        [method_name("StartAdvertisingWithParameters")] void StartAdvertising(GattServiceProviderAdvertisingParameters parameters);
+        void StopAdvertising();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattServiceProviderAdvertisementStatusChangedEventArgs", 59a5aa65-fa21-4ffc-b155-04d928012686)]
+    runtimeclass GattServiceProviderAdvertisementStatusChangedEventArgs
+    {
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProviderAdvertisementStatus Status{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattLocalCharacteristicResult", 7975de9b-0170-4397-9666-92f863f12ee6)]
+    runtimeclass GattLocalCharacteristicResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalCharacteristic Characteristic{ get; };
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+    }
+
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattLocalCharacteristic", aede376d-5412-4d74-92a8-8deb8526829c)]
+    runtimeclass GattLocalCharacteristic
+    {
+        Guid Uuid{ get; };
+        Windows.Storage.Streams.IBuffer StaticValue{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristicProperties CharacteristicProperties{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ReadProtectionLevel{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel WriteProtectionLevel{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalDescriptorResult>  CreateDescriptorAsync(Guid descriptorUuid, GattLocalDescriptorParameters parameters);
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalDescriptor>  Descriptors{ get; };
+        String UserDescription{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattPresentationFormat>  PresentationFormats{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattSubscribedClient>  SubscribedClients{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalCharacteristic, Object>  SubscribedClientsChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalCharacteristic, Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadRequestedEventArgs>  ReadRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalCharacteristic, Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteRequestedEventArgs>  WriteRequested;
+        [method_name("NotifyValueAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattClientNotificationResult> >  NotifyValueAsync(Windows.Storage.Streams.IBuffer value);
+        [method_name("NotifyValueForSubscribedClientAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattClientNotificationResult>  NotifyValueAsync(Windows.Storage.Streams.IBuffer value, GattSubscribedClient subscribedClient);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattLocalDescriptorResult", 375791be-321f-4366-bfc1-3bc6b82c79f8)]
+    runtimeclass GattLocalDescriptorResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalDescriptor Descriptor{ get; };
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattLocalDescriptor", f48ebe06-789d-4a4b-8652-bd017b5d2fc6)]
+    runtimeclass GattLocalDescriptor
+    {
+        Guid Uuid{ get; };
+        Windows.Storage.Streams.IBuffer StaticValue{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel ReadProtectionLevel{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattProtectionLevel WriteProtectionLevel{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalDescriptor, Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadRequestedEventArgs>  ReadRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalDescriptor, Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteRequestedEventArgs>  WriteRequested;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattSubscribedClient", 736e9001-15a4-4ec2-9248-e3f20d463be9)]
+    runtimeclass GattSubscribedClient
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattSession Session{ get; };
+        UInt16 MaxNotificationSize{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattSubscribedClient, Object>  MaxNotificationSizeChanged;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReadRequestedEventArgs", 93497243-f39c-484b-8ab6-996ba486cfa3)]
+    runtimeclass GattReadRequestedEventArgs
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattSession Session{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadRequest>  GetRequestAsync();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattWriteRequestedEventArgs", 2dec8bbe-a73a-471a-94d5-037deadd0806)]
+    runtimeclass GattWriteRequestedEventArgs
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattSession Session{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteRequest>  GetRequestAsync();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattClientNotificationResult", 506d5599-0112-419a-8e3b-ae21afabd2c2)]
+    runtimeclass GattClientNotificationResult
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattSubscribedClient SubscribedClient{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCommunicationStatus Status{ get; };
+        Windows.Foundation.IReference <UInt8>  ProtocolError{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattClientNotificationResult2", 8faec497-45e0-497e-9582-29a1fe281ad5)]
+        {
+            UInt16 BytesSent{ get; };
+        }
+    }
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattReadRequest", f1dd6535-6acd-42a6-a4bb-d789dae0043e)]
+    runtimeclass GattReadRequest
+    {
+        UInt32 Offset{ get; };
+        UInt32 Length{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattRequestState State{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattReadRequest, Windows.Devices.Bluetooth.GenericAttributeProfile.GattRequestStateChangedEventArgs>  StateChanged;
+        void RespondWithValue(Windows.Storage.Streams.IBuffer value);
+        void RespondWithProtocolError(UInt8 protocolError);
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattRequestStateChangedEventArgs", e834d92c-27be-44b3-9d0d-4fc6e808dd3f)]
+    runtimeclass GattRequestStateChangedEventArgs
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattRequestState State{ get; };
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Devices.Bluetooth.GenericAttributeProfile.IGattWriteRequest", aeb6a9ed-de2f-4fc2-a9a8-94ea7844f13d)]
+    runtimeclass GattWriteRequest
+    {
+        Windows.Storage.Streams.IBuffer Value{ get; };
+        UInt32 Offset{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteOption Option{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattRequestState State{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.GenericAttributeProfile.GattWriteRequest, Windows.Devices.Bluetooth.GenericAttributeProfile.GattRequestStateChangedEventArgs>  StateChanged;
+        void Respond();
+        void RespondWithProtocolError(UInt8 protocolError);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+namespace Windows.Devices.Bluetooth.Rfcomm
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [static_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommServiceProviderStatics", 98888303-69ca-413a-84f7-4344c7292997)]
+    [interface_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommServiceProvider", eadbfdc4-b1f6-44ff-9f7c-e7a82ab86821)]
+    [threading(both)]
+    runtimeclass RfcommServiceProvider
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Bluetooth.Rfcomm.RfcommServiceProvider>  CreateAsync(RfcommServiceId serviceId);
+        Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId ServiceId{ get; };
+        Windows.Foundation.Collections.IMap <UInt32, Windows.Storage.Streams.IBuffer>  SdpRawAttributes{ get; };
+        void StartAdvertising(Windows.Networking.Sockets.StreamSocketListener listener);
+        void StopAdvertising();
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Devices.Bluetooth.Rfcomm.IRfcommServiceProvider2", 736bdfc6-3c81-4d1e-baf2-ddbb81284512)]
+        {
+            [method_name("StartAdvertisingWithRadioDiscoverability")] void StartAdvertising(Windows.Networking.Sockets.StreamSocketListener listener, Boolean radioDiscoverable);
+        }
+    }
+
+
+
+}
+namespace Windows.Devices.Bluetooth.Advertisement
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothLEScanningMode
+    {
+        Passive,
+        Active,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum BluetoothLEAdvertisementFlags
+    {
+        None,
+        LimitedDiscoverableMode,
+        GeneralDiscoverableMode,
+        ClassicNotSupported = 4,
+        DualModeControllerCapable = 8,
+        DualModeHostCapable = 16,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothLEAdvertisementType
+    {
+        ConnectableUndirected,
+        ConnectableDirected,
+        ScannableUndirected,
+        NonConnectableUndirected,
+        ScanResponse,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothLEAdvertisementWatcherStatus
+    {
+        Created,
+        Started,
+        Stopping,
+        Stopped,
+        Aborted,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEManufacturerDataFactory", c09b39f8-319a-441e-8de5-66a81e877a6c)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEManufacturerData", 912dba18-6963-4533-b061-4694dafb34e5)]
+    [threading(both)]
+    runtimeclass BluetoothLEManufacturerData
+    {
+        [method_name( "Create" )] BluetoothLEManufacturerData(UInt16 companyId, Windows.Storage.Streams.IBuffer data);
+        BluetoothLEManufacturerData();
+        UInt16 CompanyId{ get; };
+        UInt16 CompanyId{ set; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Windows.Storage.Streams.IBuffer Data{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementDataSection", d7213314-3a43-40f9-b6f0-92bfefc34ae3)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementDataSection
+    {
+        BluetoothLEAdvertisementDataSection();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementDataSectionFactory", e7a40942-a845-4045-bf7e-3e9971db8a6b)]
+        {
+            [method_name( "Create" )] BluetoothLEAdvertisementDataSection(UInt8 dataType, Windows.Storage.Streams.IBuffer data);
+        }
+        UInt8 DataType{ get; };
+        UInt8 DataType{ set; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Windows.Storage.Streams.IBuffer Data{ set; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisement", 066fb2b7-33d1-4e7d-8367-cf81d0f79653)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisement
+    {
+        BluetoothLEAdvertisement();
+        Windows.Foundation.IReference <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFlags>  Flags{ get; };
+        Windows.Foundation.IReference <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFlags>  Flags{ set; };
+        String LocalName{ get; };
+        String LocalName{ set; };
+        Windows.Foundation.Collections.IVector <Guid>  ServiceUuids{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Devices.Bluetooth.Advertisement.BluetoothLEManufacturerData>  ManufacturerData{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementDataSection>  DataSections{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.Advertisement.BluetoothLEManufacturerData>  GetManufacturerDataByCompanyId(UInt16 companyId);
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementDataSection>  GetSectionsByType(UInt8 type);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementBytePattern", fbfad7f2-b9c5-4a08-bc51-502f8ef68a79)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementBytePattern
+    {
+        BluetoothLEAdvertisementBytePattern();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementBytePatternFactory", c2e24d73-fd5c-4ec3-be2a-9ca6fa11b7bd)]
+        {
+            [method_name( "Create" )] BluetoothLEAdvertisementBytePattern(UInt8 dataType, Int16 offset, Windows.Storage.Streams.IBuffer data);
+        }
+        UInt8 DataType{ get; };
+        UInt8 DataType{ set; };
+        Int16 Offset{ get; };
+        Int16 Offset{ set; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Windows.Storage.Streams.IBuffer Data{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementFilter", 131eb0d3-d04e-47b1-837e-49405bf6f80f)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementFilter
+    {
+        BluetoothLEAdvertisementFilter();
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisement Advertisement{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisement Advertisement{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementBytePattern>  BytePatterns{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementWatcherStoppedEventArgs", dd40f84d-e7b9-43e3-9c04-0685d085fd8c)]
+    runtimeclass BluetoothLEAdvertisementWatcherStoppedEventArgs
+    {
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementWatcher", a6ac336f-f3d3-4297-8d6c-c81ea6623f40)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementWatcher
+    {
+        BluetoothLEAdvertisementWatcher();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementWatcherFactory", 9aaf2d56-39ac-453e-b32a-85c657e017f1)]
+        {
+            [method_name( "Create" )] BluetoothLEAdvertisementWatcher(BluetoothLEAdvertisementFilter advertisementFilter);
+        }
+        Windows.Foundation.TimeSpan MinSamplingInterval{ get; };
+        Windows.Foundation.TimeSpan MaxSamplingInterval{ get; };
+        Windows.Foundation.TimeSpan MinOutOfRangeTimeout{ get; };
+        Windows.Foundation.TimeSpan MaxOutOfRangeTimeout{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementWatcherStatus Status{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEScanningMode ScanningMode{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEScanningMode ScanningMode{ set; };
+        Windows.Devices.Bluetooth.BluetoothSignalStrengthFilter SignalStrengthFilter{ get; };
+        Windows.Devices.Bluetooth.BluetoothSignalStrengthFilter SignalStrengthFilter{ set; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFilter AdvertisementFilter{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFilter AdvertisementFilter{ set; };
+        void Start();
+        void Stop();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementWatcher, Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementReceivedEventArgs>  Received;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementWatcher, Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementWatcherStoppedEventArgs>  Stopped;
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementReceivedEventArgs", 27987ddf-e596-41be-8d43-9e6731d4a913)]
+    runtimeclass BluetoothLEAdvertisementReceivedEventArgs
+    {
+        Int16 RawSignalStrengthInDBm{ get; };
+        UInt64 BluetoothAddress{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementType AdvertisementType{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisement Advertisement{ get; };
+    }
+
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementDataTypesStatics", 3bb6472f-0606-434b-a76e-74159f0684d3)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementDataTypes
+    {
+        static UInt8 Flags{ get; };
+        static UInt8 IncompleteService16BitUuids{ get; };
+        static UInt8 CompleteService16BitUuids{ get; };
+        static UInt8 IncompleteService32BitUuids{ get; };
+        static UInt8 CompleteService32BitUuids{ get; };
+        static UInt8 IncompleteService128BitUuids{ get; };
+        static UInt8 CompleteService128BitUuids{ get; };
+        static UInt8 ShortenedLocalName{ get; };
+        static UInt8 CompleteLocalName{ get; };
+        static UInt8 TxPowerLevel{ get; };
+        static UInt8 SlaveConnectionIntervalRange{ get; };
+        static UInt8 ServiceSolicitation16BitUuids{ get; };
+        static UInt8 ServiceSolicitation32BitUuids{ get; };
+        static UInt8 ServiceSolicitation128BitUuids{ get; };
+        static UInt8 ServiceData16BitUuids{ get; };
+        static UInt8 ServiceData32BitUuids{ get; };
+        static UInt8 ServiceData128BitUuids{ get; };
+        static UInt8 PublicTargetAddress{ get; };
+        static UInt8 RandomTargetAddress{ get; };
+        static UInt8 Appearance{ get; };
+        static UInt8 AdvertisingInterval{ get; };
+        static UInt8 ManufacturerSpecificData{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BluetoothLEAdvertisementPublisherStatus
+    {
+        Created,
+        Waiting,
+        Started,
+        Stopping,
+        Stopped,
+        Aborted,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementPublisherStatusChangedEventArgs", 09c2bd9f-2dff-4b23-86ee-0d14fb94aeae)]
+    runtimeclass BluetoothLEAdvertisementPublisherStatusChangedEventArgs
+    {
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementPublisherStatus Status{ get; };
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementPublisher", cde820f9-d9fa-43d6-a264-ddd8b7da8b78)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementPublisher
+    {
+        BluetoothLEAdvertisementPublisher();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Devices.Bluetooth.Advertisement.IBluetoothLEAdvertisementPublisherFactory", 5c5f065e-b863-4981-a1af-1c544d8b0c0d)]
+        {
+            [method_name( "Create" )] BluetoothLEAdvertisementPublisher(BluetoothLEAdvertisement advertisement);
+        }
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementPublisherStatus Status{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisement Advertisement{ get; };
+        void Start();
+        void Stop();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementPublisher, Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementPublisherStatusChangedEventArgs>  StatusChanged;
+    }
+
+
+}
+namespace Windows.Devices.Bluetooth.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum BluetoothEventTriggeringMode
+    {
+        Serial,
+        Batch,
+        KeepLatest,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IRfcommInboundConnectionInformation", 6d3e75a8-5429-4059-92e3-1e8b65528707)]
+    runtimeclass RfcommInboundConnectionInformation
+    {
+        Windows.Storage.Streams.IBuffer SdpRecord{ get; };
+        Windows.Storage.Streams.IBuffer SdpRecord{ set; };
+        Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId LocalServiceId{ get; };
+        Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId LocalServiceId{ set; };
+        Windows.Devices.Bluetooth.BluetoothServiceCapabilities ServiceCapabilities{ get; };
+        Windows.Devices.Bluetooth.BluetoothServiceCapabilities ServiceCapabilities{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IRfcommOutboundConnectionInformation", b091227b-f434-4cb0-99b1-4ab8cedaedd7)]
+    runtimeclass RfcommOutboundConnectionInformation
+    {
+        Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId RemoteServiceId{ get; };
+        Windows.Devices.Bluetooth.Rfcomm.RfcommServiceId RemoteServiceId{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IRfcommConnectionTriggerDetails", f922734d-2e3c-4efc-ab59-fc5cf96f97e3)]
+    runtimeclass RfcommConnectionTriggerDetails
+    {
+        Windows.Networking.Sockets.StreamSocket Socket{ get; };
+        Boolean Incoming{ get; };
+        Windows.Devices.Bluetooth.BluetoothDevice RemoteDevice{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IGattCharacteristicNotificationTriggerDetails", 9ba03b18-0fec-436a-93b1-f46c697532a2)]
+    runtimeclass GattCharacteristicNotificationTriggerDetails
+    {
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic Characteristic{ get; };
+        Windows.Storage.Streams.IBuffer Value{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.Bluetooth.Background.IGattCharacteristicNotificationTriggerDetails2", 727a50dc-949d-454a-b192-983467e3d50f)]
+        {
+            Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+            Windows.Devices.Bluetooth.Background.BluetoothEventTriggeringMode EventTriggeringMode{ get; };
+            Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.GenericAttributeProfile.GattValueChangedEventArgs>  ValueChangedEvents{ get; };
+        }
+    }
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Bluetooth.Background.IGattServiceProviderConnectionStatics", 3d509f4b-0b0e-4466-b8cd-6ebdda1fa17d)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IGattServiceProviderConnection", 7fa1b9b9-2f13-40b5-9582-8eb78e98ef13)]
+    [threading(both)]
+    runtimeclass GattServiceProviderConnection
+    {
+        static Windows.Foundation.Collections.IMapView <String, Windows.Devices.Bluetooth.Background.GattServiceProviderConnection>  AllServices{ get; };
+        String TriggerId{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalService Service{ get; };
+        void Start();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IGattServiceProviderTriggerDetails", ae8c0625-05ff-4afb-b16a-de95f3cf0158)]
+    runtimeclass GattServiceProviderTriggerDetails
+    {
+        Windows.Devices.Bluetooth.Background.GattServiceProviderConnection Connection{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IBluetoothLEAdvertisementWatcherTriggerDetails", a7db5ad7-2257-4e69-9784-fee645c1dce0)]
+    runtimeclass BluetoothLEAdvertisementWatcherTriggerDetails
+    {
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementReceivedEventArgs>  Advertisements{ get; };
+        Windows.Devices.Bluetooth.BluetoothSignalStrengthFilter SignalStrengthFilter{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Bluetooth.Background.IBluetoothLEAdvertisementPublisherTriggerDetails", 610eca86-3480-41c9-a918-7ddadf207e00)]
+    runtimeclass BluetoothLEAdvertisementPublisherTriggerDetails
+    {
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementPublisherStatus Status{ get; };
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+    }
+
+
+}
+namespace Windows.Devices.Enumeration
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Enumeration.IDeviceConnectionChangeTriggerDetails", b8578c0c-bbc1-484b-bffa-7b31dcc200b2)]
+    runtimeclass DeviceConnectionChangeTriggerDetails
+    {
+        String DeviceId{ get; };
+    }
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Background.IRfcommConnectionTrigger", e8c4cae2-0b53-4464-9394-fd875654de64)]
+    [threading(both)]
+    runtimeclass RfcommConnectionTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        RfcommConnectionTrigger();
+        Windows.Devices.Bluetooth.Background.RfcommInboundConnectionInformation InboundConnection{ get; };
+        Windows.Devices.Bluetooth.Background.RfcommOutboundConnectionInformation OutboundConnection{ get; };
+        Boolean AllowMultipleConnections{ get; };
+        Boolean AllowMultipleConnections{ set; };
+        Windows.Networking.Sockets.SocketProtectionLevel ProtectionLevel{ get; };
+        Windows.Networking.Sockets.SocketProtectionLevel ProtectionLevel{ set; };
+        Windows.Networking.HostName RemoteHostName{ get; };
+        Windows.Networking.HostName RemoteHostName{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.Background.IDeviceConnectionChangeTriggerStatics", c3ea246a-4efd-4498-aa60-a4e4e3b17ab9)]
+    [interface_name("Windows.ApplicationModel.Background.IDeviceConnectionChangeTrigger", 90875e64-3cdd-4efb-ab1c-5b3b6a60ce34)]
+    [threading(both)]
+    runtimeclass DeviceConnectionChangeTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.DeviceConnectionChangeTrigger>  FromIdAsync(String deviceId);
+        String DeviceId{ get; };
+        Boolean CanMaintainConnection{ get; };
+        Boolean MaintainConnection{ get; };
+        Boolean MaintainConnection{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.ApplicationModel.Background.IGattCharacteristicNotificationTriggerFactory", 57ba1995-b143-4575-9f6b-fd59d93ace1a)]
+    [interface_name("Windows.ApplicationModel.Background.IGattCharacteristicNotificationTrigger", e25f8fc8-0696-474f-a732-f292b0cebc5d)]
+    [threading(both)]
+    runtimeclass GattCharacteristicNotificationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name("Create")] [overload( "Create" )] GattCharacteristicNotificationTrigger(Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic characteristic);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [constructor_name("Windows.ApplicationModel.Background.IGattCharacteristicNotificationTriggerFactory2", 5998e91f-8a53-4e9f-a32c-23cd33664cee)]
+        {
+            [method_name("CreateWithEventTriggeringMode")] [overload( "Create" )] GattCharacteristicNotificationTrigger(Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic characteristic, Windows.Devices.Bluetooth.Background.BluetoothEventTriggeringMode eventTriggeringMode);
+        }
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic Characteristic{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.Background.IGattCharacteristicNotificationTrigger2", 9322a2c4-ae0e-42f2-b28c-f51372e69245)]
+        {
+            Windows.Devices.Bluetooth.Background.BluetoothEventTriggeringMode EventTriggeringMode{ get; };
+        }
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Background.IGattServiceProviderTriggerStatics", b413a36a-e294-4591-a5a6-64891a828153)]
+    [interface_name("Windows.ApplicationModel.Background.IGattServiceProviderTrigger", ddc6a3e9-1557-4bd8-8542-468aa0c696f6)]
+    [threading(both)]
+    runtimeclass GattServiceProviderTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name("CreateAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.GattServiceProviderTriggerResult>  CreateAsync(String triggerId, Guid serviceUuid);
+        String TriggerId{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattLocalService Service{ get; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProviderAdvertisingParameters AdvertisingParameters{ set; };
+        Windows.Devices.Bluetooth.GenericAttributeProfile.GattServiceProviderAdvertisingParameters AdvertisingParameters{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.ApplicationModel.Background.IGattServiceProviderTriggerResult", 3c4691b1-b198-4e84-bad4-cf4ad299ed3a)]
+    runtimeclass GattServiceProviderTriggerResult
+    {
+        Windows.ApplicationModel.Background.GattServiceProviderTrigger Trigger{ get; };
+        Windows.Devices.Bluetooth.BluetoothError Error{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Background.IBluetoothLEAdvertisementWatcherTrigger", 1aab1819-bce1-48eb-a827-59fb7cee52a6)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementWatcherTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        BluetoothLEAdvertisementWatcherTrigger();
+        Windows.Foundation.TimeSpan MinSamplingInterval{ get; };
+        Windows.Foundation.TimeSpan MaxSamplingInterval{ get; };
+        Windows.Foundation.TimeSpan MinOutOfRangeTimeout{ get; };
+        Windows.Foundation.TimeSpan MaxOutOfRangeTimeout{ get; };
+        Windows.Devices.Bluetooth.BluetoothSignalStrengthFilter SignalStrengthFilter{ get; };
+        Windows.Devices.Bluetooth.BluetoothSignalStrengthFilter SignalStrengthFilter{ set; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFilter AdvertisementFilter{ get; };
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementFilter AdvertisementFilter{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Background.IBluetoothLEAdvertisementPublisherTrigger", ab3e2612-25d3-48ae-8724-d81877ae6129)]
+    [threading(both)]
+    runtimeclass BluetoothLEAdvertisementPublisherTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        BluetoothLEAdvertisementPublisherTrigger();
+        Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisement Advertisement{ get; };
+    }
+
+}

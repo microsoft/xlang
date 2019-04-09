@@ -1,0 +1,135 @@
+
+
+
+
+
+
+
+namespace WindowsInternal.Shell.Data.Activities.WebApi
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    [interface_name("WindowsInternal.Shell.Data.Activities.WebApi.IActivity", 098f06a8-53c7-5cf5-82d0-27c1cd4a40ae)]
+    runtimeclass Activity
+    {
+        String AsJson();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    [constructor_name("WindowsInternal.Shell.Data.Activities.WebApi.ICrossPlatformAppIdFactory", 5dd0f08c-a93c-5ebc-a2ca-06707cabcad5)]
+    [interface_name("WindowsInternal.Shell.Data.Activities.WebApi.ICrossPlatformAppId", 3bd8a72d-a5d3-5863-ad63-998638bf5d46)]
+    [threading(both)]
+    runtimeclass CrossPlatformAppId
+    {
+        [method_name( "CreateInstance" )] CrossPlatformAppId(Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.Data.Activities.WebApi.AppId>  appIds);
+        Windows.Foundation.Collections.IVector <WindowsInternal.Shell.Data.Activities.WebApi.AppId>  AppIds{ get; };
+        Windows.Foundation.Collections.IVector <WindowsInternal.Shell.Data.Activities.WebApi.AppId>  AppIds{ set; };
+    }
+
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("WindowsInternal.Shell.Data.Activities.WebApi.IActivityHelperStatics", 9e42f501-b0f2-5881-adf9-4cf7cb0f81c5)]
+    [threading(both)]
+    runtimeclass ActivityHelper
+    {
+        static Windows.Foundation.IAsyncOperation <String>  GetLogoDataUriAsync(CrossPlatformAppId appIds);
+    }
+
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    enum ActivityType
+    {
+        UserActivity = 5,
+        TimeEngagement,
+        Clipboard = 10,
+        Annotation = 16,
+    };
+
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    enum ActivityPublishState
+    {
+        Unknown,
+        Queued,
+        Uploaded,
+    };
+
+
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("WindowsInternal.Shell.Data.Activities.WebApi.IActivityStoreSubscriptionOptions", 97ea9860-5f60-5884-b0c6-ff295aab291c)]
+    [threading(both)]
+    runtimeclass ActivityStoreSubscriptionOptions
+    {
+        ActivityStoreSubscriptionOptions();
+        WindowsInternal.Shell.Data.Activities.WebApi.ActivityPublishState PublishState{ get; };
+        WindowsInternal.Shell.Data.Activities.WebApi.ActivityPublishState PublishState{ set; };
+        WindowsInternal.Shell.Data.Activities.WebApi.CrossPlatformAppId AppId{ get; };
+        WindowsInternal.Shell.Data.Activities.WebApi.CrossPlatformAppId AppId{ set; };
+        String AppActivityId{ get; };
+        String AppActivityId{ set; };
+        String PayloadName{ get; };
+        String PayloadName{ set; };
+    }
+
+
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    [uuid(23382b4d-66a6-5ded-a4e9-a833b7f0f079)]
+    interface IActivityDismissCallback
+    {
+        void OnDismissComplete(Guid activityId, HRESULT error);
+    };
+
+    [uuid(056d67f5-2d35-554d-9944-a936604f07e7)]
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    interface IActivityStoreCallback
+    {
+        void OnActivityCreated(Activity activity);
+        void OnActivityUpdated(Activity activity);
+        void OnActivityDismissed(Activity activity);
+    };
+
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("WindowsInternal.Shell.Data.Activities.WebApi.IActivityStore", 0c2ef64e-73f5-5adf-8214-cd3cc4d97e15)]
+    [threading(both)]
+    runtimeclass ActivityStore
+    {
+        ActivityStore();
+        void DismissActivitiesForTypeAsync(ActivityType type, CrossPlatformAppId appId, String appActivityId, Boolean includeSubResources, Boolean originatedOnCurentDeviceOnly, IActivityDismissCallback callback);
+        void DismissActivitiesForTypeAndTimeRangeAsync(ActivityType type, CrossPlatformAppId appId, String appActivityId, UInt64 startTime, UInt64 endTime, Boolean includeSubResources, Boolean originatedOnCurentDeviceOnly, IActivityDismissCallback callback);
+        void DismissAsync(Guid activityId, UInt64 deleteTime, IActivityDismissCallback callback);
+        WindowsInternal.Shell.Data.Activities.WebApi.Activity GetActivity(Guid activityId);
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.Data.Activities.WebApi.Activity>  GetActivities(ActivityType type, CrossPlatformAppId appId, String appActivityId, String payloadName, Boolean visibleActivitiesOnly, UInt16 maxActivityCount);
+        [return_name("result")] Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.Data.Activities.WebApi.Activity>  GetActivitiesByETag(UInt64 startingSequenceId, Boolean visibleActivitiesOnly, ActivityType type, UInt16 maxActivityCount, out UInt64 lastSequence);
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.Data.Activities.WebApi.Activity>  GetActivitiesTimeIntersection(ActivityType type, CrossPlatformAppId appId, String appActivityId, Windows.Foundation.DateTime startTime, Windows.Foundation.DateTime endTime, UInt16 maxActivityCount);
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.Data.Activities.WebApi.Activity>  GetActivitiesOrderedByEndTime(CrossPlatformAppId appId, Boolean visibleActivitiesOnly, UInt16 maxActivityCount);
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.Data.Activities.WebApi.Activity>  GetActivitiesForTypeAndTimeRange(ActivityType type, CrossPlatformAppId appId, String appActivityId, Windows.Foundation.DateTime startTime, UInt16 maxActivityCount);
+        void SubscribeWithOptions(ActivityType type, ActivityStoreSubscriptionOptions subscriptionOptions, IActivityStoreCallback callback, out UInt32 token);
+        void Unsubscribe(UInt32 token);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.Data.Activities.WebApi.InternalContract, 1)]
+    [constructor_name("WindowsInternal.Shell.Data.Activities.WebApi.IAppIdFactory", 274ff5c4-a5c3-58a4-8a7a-21ef52d7271b)]
+    [interface_name("WindowsInternal.Shell.Data.Activities.WebApi.IAppId", 11b73653-e0ef-5b7c-9421-884b2271d465)]
+    [threading(both)]
+    runtimeclass AppId
+    {
+        [method_name( "CreateInstance" )] AppId(String platform, String id);
+        String Platform{ get; };
+        String Platform{ set; };
+        String Id{ get; };
+        String Id{ set; };
+    }
+
+
+
+}

@@ -1,0 +1,179 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Printing.PrintTicket
+{
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum PrintTicketFeatureSelectionType
+    {
+        PickOne,
+        PickMany,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum PrintTicketParameterDataType
+    {
+        Integer,
+        NumericString,
+        String,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum PrintTicketValueType
+    {
+        Integer,
+        String,
+        Unknown,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IPrintTicketValue", 66b30a32-244d-4e22-a98b-bb3cf1f2dd91)]
+    runtimeclass PrintTicketValue
+    {
+        Windows.Graphics.Printing.PrintTicket.PrintTicketValueType Type{ get; };
+        Int32 GetValueAsInteger();
+        String GetValueAsString();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IPrintTicketOption", b086cf90-b367-4e4b-bd48-9c78a0bb31ce)]
+    runtimeclass PrintTicketOption
+    {
+        String Name{ get; };
+        String XmlNamespace{ get; };
+        Windows.Data.Xml.Dom.IXmlNode XmlNode{ get; };
+        String DisplayName{ get; };
+        Windows.Data.Xml.Dom.IXmlNode GetPropertyNode(String name, String xmlNamespace);
+        Windows.Data.Xml.Dom.IXmlNode GetScoredPropertyNode(String name, String xmlNamespace);
+        Windows.Graphics.Printing.PrintTicket.PrintTicketValue GetPropertyValue(String name, String xmlNamespace);
+        Windows.Graphics.Printing.PrintTicket.PrintTicketValue GetScoredPropertyValue(String name, String xmlNamespace);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IPrintTicketFeature", e7607d6a-59f5-4103-8858-b97710963d39)]
+    runtimeclass PrintTicketFeature
+    {
+        String Name{ get; };
+        String XmlNamespace{ get; };
+        Windows.Data.Xml.Dom.IXmlNode XmlNode{ get; };
+        String DisplayName{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketOption GetOption(String name, String xmlNamespace);
+        Windows.Foundation.Collections.IVectorView <Windows.Graphics.Printing.PrintTicket.PrintTicketOption>  Options{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketOption GetSelectedOption();
+        void SetSelectedOption(PrintTicketOption value);
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeatureSelectionType SelectionType{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IPrintTicketParameterDefinition", d6bab4e4-2962-4c01-b7f3-9a9294eb8335)]
+    runtimeclass PrintTicketParameterDefinition
+    {
+        String Name{ get; };
+        String XmlNamespace{ get; };
+        Windows.Data.Xml.Dom.IXmlNode XmlNode{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketParameterDataType DataType{ get; };
+        String UnitType{ get; };
+        Int32 RangeMin{ get; };
+        Int32 RangeMax{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IPrintTicketCapabilities", 8c45508b-bbdc-4256-a142-2fd615ecb416)]
+    runtimeclass PrintTicketCapabilities
+    {
+        String Name{ get; };
+        String XmlNamespace{ get; };
+        Windows.Data.Xml.Dom.IXmlNode XmlNode{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentBindingFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentCollateFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentDuplexFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentHolePunchFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentInputBinFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentNUpFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentStapleFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature JobPasscodeFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageBorderlessFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageMediaSizeFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageMediaTypeFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageOrientationFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageOutputColorFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageOutputQualityFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageResolutionFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature GetFeature(String name, String xmlNamespace);
+        Windows.Graphics.Printing.PrintTicket.PrintTicketParameterDefinition GetParameterDefinition(String name, String xmlNamespace);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IPrintTicketParameterInitializer", 5e3335bb-a0a5-48b1-9d5c-07116ddc597a)]
+    runtimeclass PrintTicketParameterInitializer
+    {
+        String Name{ get; };
+        String XmlNamespace{ get; };
+        Windows.Data.Xml.Dom.IXmlNode XmlNode{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketValue Value{ set; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketValue Value{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IWorkflowPrintTicketValidationResult", 0ad1f392-da7b-4a36-bf36-6a99a62e2059)]
+    runtimeclass WorkflowPrintTicketValidationResult
+    {
+        Boolean Validated{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.PrintTicket.IWorkflowPrintTicket", 41d52285-35e8-448e-a8c5-e4b6a2cf826c)]
+    runtimeclass WorkflowPrintTicket
+    {
+        String Name{ get; };
+        String XmlNamespace{ get; };
+        Windows.Data.Xml.Dom.IXmlNode XmlNode{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketCapabilities GetCapabilities();
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentBindingFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentCollateFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentDuplexFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentHolePunchFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentInputBinFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentNUpFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature DocumentStapleFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature JobPasscodeFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageBorderlessFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageMediaSizeFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageMediaTypeFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageOrientationFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageOutputColorFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageOutputQualityFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature PageResolutionFeature{ get; };
+        Windows.Graphics.Printing.PrintTicket.PrintTicketFeature GetFeature(String name, String xmlNamespace);
+        Windows.Foundation.IAsyncAction NotifyXmlChangedAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Graphics.Printing.PrintTicket.WorkflowPrintTicketValidationResult>  ValidateAsync();
+        Windows.Graphics.Printing.PrintTicket.PrintTicketParameterInitializer GetParameterInitializer(String name, String xmlNamespace);
+        Windows.Graphics.Printing.PrintTicket.PrintTicketParameterInitializer SetParameterInitializerAsInteger(String name, String xmlNamespace, Int32 integerValue);
+        Windows.Graphics.Printing.PrintTicket.PrintTicketParameterInitializer SetParameterInitializerAsString(String name, String xmlNamespace, String stringValue);
+        Windows.Graphics.Printing.PrintTicket.WorkflowPrintTicket MergeAndValidateTicket(WorkflowPrintTicket deltaShemaTicket);
+    }
+
+}

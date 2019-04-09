@@ -1,0 +1,40 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.PPI.Shell.SessionManagement
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalSessionManagementContract{};
+
+    [uuid(df5bd2f9-330f-4625-aaa4-89f448554510)]
+    [contract(Windows.Internal.PPI.Shell.SessionManagement.InternalSessionManagementContract, 1)]
+    interface IMeetingData
+    {
+        Boolean AllDay{ get; };
+        String CalendarId{ get; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        String LocalId{ get; };
+        String Location{ get; };
+        String OnlineMeetingLink{ get; };
+        String OrganizerAddress{ get; };
+        String OrganizerDisplayName{ get; };
+        Windows.Foundation.DateTime OriginalStartTime{ get; };
+        String RoamingId{ get; };
+        Windows.Foundation.DateTime StartTime{ get; };
+        String Subject{ get; };
+    };
+
+    [contract(Windows.Internal.PPI.Shell.SessionManagement.InternalSessionManagementContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass MeetingData
+        : Windows.Internal.PPI.Shell.SessionManagement.IMeetingData
+    {
+        MeetingData();
+    }
+
+}

@@ -1,0 +1,478 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Security.EnterpriseData
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ProtectionPolicyEvaluationResult
+    {
+        Allowed,
+        Blocked,
+        ConsentRequired,
+    };
+
+
+
+
+}
+namespace Windows.ApplicationModel.DataTransfer
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.DataTransfer.IStandardDataFormatsStatics", 7ed681a1-a880-40c9-b4ed-0bee1e15f549)]
+    runtimeclass StandardDataFormats
+    {
+        static String Text{ get; };
+        [deprecated("Uri may be altered or unavailable for releases after Windows Phone 'OSVersion' (TBD). Instead, use WebLink or ApplicationLink.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        static String Uri{ get; };
+        static String Html{ get; };
+        static String Rtf{ get; };
+        static String Bitmap{ get; };
+        static String StorageItems{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.ApplicationModel.DataTransfer.IStandardDataFormatsStatics3", 3b57b069-01d4-474c-8b5f-bc8e27f38b21)]
+        {
+            static String UserActivityJsonArray{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.ApplicationModel.DataTransfer.IStandardDataFormatsStatics2", 42a254f4-9d76-42e8-861b-47c25dd0cf71)]
+        {
+            static String WebLink{ get; };
+            static String ApplicationLink{ get; };
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass DataPackagePropertySetView
+        : Windows.Foundation.Collections.IMapView<String, Object>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Object> >
+    {
+
+        [hasvariant]
+        [default]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySetView", b94cec01-0c1a-4c57-be55-75d01289735d)]
+        {
+            String Title{ get; };
+            String Description{ get; };
+            Windows.Storage.Streams.RandomAccessStreamReference Thumbnail{ get; };
+            Windows.Foundation.Collections.IVectorView <String>  FileTypes{ get; };
+            String ApplicationName{ get; };
+            Windows.Foundation.Uri ApplicationListingUri{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySetView2", 6054509b-8ebe-4feb-9c1e-75e69de54b84)]
+        {
+            String PackageFamilyName{ get; };
+            Windows.Foundation.Uri ContentSourceWebLink{ get; };
+            Windows.Foundation.Uri ContentSourceApplicationLink{ get; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Square30x30Logo{ get; };
+            Windows.UI.Color LogoBackgroundColor{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySetView3", db764ce5-d174-495c-84fc-1a51f6ab45d7)]
+        {
+            String EnterpriseId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySetView4", 4474c80d-d16f-40ae-9580-6f8562b94235)]
+        {
+            String ContentSourceUserActivityJson{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySetView5", 6f0a9445-3760-50bb-8523-c4202ded7d78)]
+        {
+            Boolean IsFromRoamingClipboard{ get; };
+        }
+    }
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass DataPackagePropertySet
+        : Windows.Foundation.Collections.IMap<String, Object>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Object> >
+    {
+
+        [hasvariant]
+        [default]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySet", cd1c93eb-4c4c-443a-a8d3-f5c241e91689)]
+        {
+            String Title{ get; };
+            String Title{ set; };
+            String Description{ get; };
+            String Description{ set; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ get; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ set; };
+            Windows.Foundation.Collections.IVector <String>  FileTypes{ get; };
+            String ApplicationName{ get; };
+            String ApplicationName{ set; };
+            Windows.Foundation.Uri ApplicationListingUri{ get; };
+            Windows.Foundation.Uri ApplicationListingUri{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySet2", eb505d4a-9800-46aa-b181-7b6f0f2b919a)]
+        {
+            Windows.Foundation.Uri ContentSourceWebLink{ get; };
+            Windows.Foundation.Uri ContentSourceWebLink{ set; };
+            Windows.Foundation.Uri ContentSourceApplicationLink{ get; };
+            Windows.Foundation.Uri ContentSourceApplicationLink{ set; };
+            String PackageFamilyName{ get; };
+            String PackageFamilyName{ set; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Square30x30Logo{ get; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Square30x30Logo{ set; };
+            Windows.UI.Color LogoBackgroundColor{ get; };
+            Windows.UI.Color LogoBackgroundColor{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySet3", 9e87fd9b-5205-401b-874a-455653bd39e8)]
+        {
+            String EnterpriseId{ get; };
+            String EnterpriseId{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackagePropertySet4", 6390ebf5-1739-4c74-b22f-865fab5e8545)]
+        {
+            String ContentSourceUserActivityJson{ get; };
+            String ContentSourceUserActivityJson{ set; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IDataProviderDeferral", c2cf2373-2d26-43d9-b69d-dcb86d03f6da)]
+    runtimeclass DataProviderDeferral
+    {
+        void Complete();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IDataProviderRequest", ebbc7157-d3c8-47da-acde-f82388d5f716)]
+    runtimeclass DataProviderRequest
+    {
+        String FormatId{ get; };
+        Windows.Foundation.DateTime Deadline{ get; };
+        Windows.ApplicationModel.DataTransfer.DataProviderDeferral GetDeferral();
+        void SetData([hasvariant]Object value);
+    }
+
+    [uuid(e7ecd720-f2f4-4a2d-920e-170a2f482a27)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    delegate void DataProviderHandler(DataProviderRequest request);
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum DataPackageOperation
+    {
+        None,
+        Copy,
+        Move,
+        Link = 4,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IOperationCompletedEventArgs", e7af329d-051d-4fab-b1a9-47fd77f70a41)]
+    runtimeclass OperationCompletedEventArgs
+    {
+        Windows.ApplicationModel.DataTransfer.DataPackageOperation Operation{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IOperationCompletedEventArgs2", 858fa073-1e19-4105-b2f7-c8478808d562)]
+        {
+            String AcceptedFormatId{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [uuid(e7f9d9ba-e1ba-4e4d-bd65-d43845d3212f)]
+    delegate void ShareProviderHandler(ShareProviderOperation operation);
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IShareProviderOperation", 19cef937-d435-4179-b6af-14e0492b69f6)]
+    runtimeclass ShareProviderOperation
+    {
+        Windows.ApplicationModel.DataTransfer.DataPackageView Data{ get; };
+        Windows.ApplicationModel.DataTransfer.ShareProvider Provider{ get; };
+        void ReportCompleted();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [constructor_name("Windows.ApplicationModel.DataTransfer.IShareProviderFactory", 172a174c-e79e-4f6d-b07d-128f469e0296)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IShareProvider", 2fabe026-443e-4cda-af25-8d81070efd80)]
+    runtimeclass ShareProvider
+    {
+        [method_name( "Create" )] ShareProvider(String title, Windows.Storage.Streams.RandomAccessStreamReference displayIcon, Windows.UI.Color backgroundColor, ShareProviderHandler handler);
+        String Title{ get; };
+        Windows.Storage.Streams.RandomAccessStreamReference DisplayIcon{ get; };
+        Windows.UI.Color BackgroundColor{ get; };
+        Object Tag{ get; };
+        Object Tag{ set; };
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackageView", 7b840471-5900-4d85-a90b-10cb85fe3552)]
+    runtimeclass DataPackageView
+    {
+        Windows.ApplicationModel.DataTransfer.DataPackagePropertySetView Properties{ get; };
+        Windows.ApplicationModel.DataTransfer.DataPackageOperation RequestedOperation{ get; };
+        void ReportOperationCompleted(DataPackageOperation value);
+        Windows.Foundation.Collections.IVectorView <String>  AvailableFormats{ get; };
+        Boolean Contains(String formatId);
+        [hasvariant]Windows.Foundation.IAsyncOperation <Object>  GetDataAsync(String formatId);
+        [method_name("GetTextAsync")] Windows.Foundation.IAsyncOperation <String>  GetTextAsync();
+        [method_name("GetCustomTextAsync")] Windows.Foundation.IAsyncOperation <String>  GetTextAsync(String formatId);
+        [deprecated("GetUriAsync may be altered or unavailable for releases after Windows 8.1. Instead, use GetWebLinkAsync or GetApplicationLinkAsync.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Uri>  GetUriAsync();
+        Windows.Foundation.IAsyncOperation <String>  GetHtmlFormatAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IMapView <String, Windows.Storage.Streams.RandomAccessStreamReference> >  GetResourceMapAsync();
+        Windows.Foundation.IAsyncOperation <String>  GetRtfAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.RandomAccessStreamReference>  GetBitmapAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Storage.IStorageItem> >  GetStorageItemsAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackageView2", 40ecba95-2450-4c1d-b6b4-ed45463dee9c)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Uri>  GetApplicationLinkAsync();
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Uri>  GetWebLinkAsync();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackageView3", d37771a8-ddad-4288-8428-d1cae394128b)]
+        {
+            [method_name("RequestAccessAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Security.EnterpriseData.ProtectionPolicyEvaluationResult>  RequestAccessAsync();
+            [method_name("RequestAccessWithEnterpriseIdAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Security.EnterpriseData.ProtectionPolicyEvaluationResult>  RequestAccessAsync(String enterpriseId);
+            Windows.Security.EnterpriseData.ProtectionPolicyEvaluationResult UnlockAndAssumeEnterpriseIdentity();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackageView4", dfe96f1f-e042-4433-a09f-26d6ffda8b85)]
+        {
+            void SetAcceptedFormatId(String formatId);
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IShareTargetInfo", 385be607-c6e8-4114-b294-28f3bb6f9904)]
+    runtimeclass ShareTargetInfo
+    {
+        String AppUserModelId{ get; };
+        Windows.ApplicationModel.DataTransfer.ShareProvider ShareProvider{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IShareCompletedEventArgs", 4574c442-f913-4f60-9df7-cc4060ab1916)]
+    runtimeclass ShareCompletedEventArgs
+    {
+        Windows.ApplicationModel.DataTransfer.ShareTargetInfo ShareTarget{ get; };
+    }
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackage", 61ebf5c7-efea-4346-9554-981d7e198ffe)]
+    runtimeclass DataPackage
+    {
+        DataPackage();
+        Windows.ApplicationModel.DataTransfer.DataPackageView GetView();
+        Windows.ApplicationModel.DataTransfer.DataPackagePropertySet Properties{ get; };
+        Windows.ApplicationModel.DataTransfer.DataPackageOperation RequestedOperation{ get; };
+        Windows.ApplicationModel.DataTransfer.DataPackageOperation RequestedOperation{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.DataTransfer.DataPackage, Windows.ApplicationModel.DataTransfer.OperationCompletedEventArgs>  OperationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.DataTransfer.DataPackage, Object>  Destroyed;
+        void SetData(String formatId, [hasvariant]Object value);
+        void SetDataProvider(String formatId, DataProviderHandler delayRenderer);
+        void SetText(String value);
+        [deprecated("SetUri may be altered or unavailable for releases after Windows Phone 'OSVersion' (TBD). Instead, use SetWebLink or SetApplicationLink.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        void SetUri(Windows.Foundation.Uri value);
+        void SetHtmlFormat(String value);
+        Windows.Foundation.Collections.IMap <String, Windows.Storage.Streams.RandomAccessStreamReference>  ResourceMap{ get; };
+        void SetRtf(String value);
+        void SetBitmap(Windows.Storage.Streams.RandomAccessStreamReference value);
+        [method_name("SetStorageItemsReadOnly")] void SetStorageItems(Windows.Foundation.Collections.IIterable <Windows.Storage.IStorageItem>  value);
+        [method_name("SetStorageItems")] void SetStorageItems(Windows.Foundation.Collections.IIterable <Windows.Storage.IStorageItem>  value, Boolean readOnly);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackage2", 041c1fe9-2409-45e1-a538-4c53eeee04a7)]
+        {
+            void SetApplicationLink(Windows.Foundation.Uri value);
+            void SetWebLink(Windows.Foundation.Uri value);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.DataTransfer.IDataPackage3", 88f31f5d-787b-4d32-965a-a9838105a056)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.DataTransfer.DataPackage, Windows.ApplicationModel.DataTransfer.ShareCompletedEventArgs>  ShareCompleted;
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.DataTransfer.IHtmlFormatHelperStatics", e22e7749-dd70-446f-aefc-61cee59f655e)]
+    runtimeclass HtmlFormatHelper
+    {
+        static String GetStaticFragment(String htmlFormat);
+        static String CreateHtmlFormat(String htmlFragment);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IClipboardHistoryItem", 0173bd8a-afff-5c50-ab92-3d19f481ec58)]
+    runtimeclass ClipboardHistoryItem
+    {
+        String Id{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.ApplicationModel.DataTransfer.DataPackageView Content{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum ClipboardHistoryItemsResultStatus
+    {
+        Success,
+        AccessDenied,
+        ClipboardHistoryDisabled,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum SetHistoryItemAsContentStatus
+    {
+        Success,
+        AccessDenied,
+        ItemDeleted,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IClipboardHistoryChangedEventArgs", c0be453f-8ea2-53ce-9aba-8d2212573452)]
+    runtimeclass ClipboardHistoryChangedEventArgs
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IClipboardHistoryItemsResult", e6dfdee6-0ee2-52e3-852b-f295db65939a)]
+    runtimeclass ClipboardHistoryItemsResult
+    {
+        Windows.ApplicationModel.DataTransfer.ClipboardHistoryItemsResultStatus Status{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.DataTransfer.ClipboardHistoryItem>  Items{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.DataTransfer.IClipboardContentOptions", e888a98c-ad4b-5447-a056-ab3556276d2b)]
+    [threading(both)]
+    runtimeclass ClipboardContentOptions
+    {
+        ClipboardContentOptions();
+        Boolean IsRoamable{ get; };
+        Boolean IsRoamable{ set; };
+        Boolean IsAllowedInHistory{ get; };
+        Boolean IsAllowedInHistory{ set; };
+        Windows.Foundation.Collections.IVector <String>  RoamingFormats{ get; };
+        Windows.Foundation.Collections.IVector <String>  HistoryFormats{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(standard)]
+    [static_name("Windows.ApplicationModel.DataTransfer.IClipboardStatics", c627e291-34e2-4963-8eed-93cbb0ea3d70)]
+    [threading(both)]
+    runtimeclass Clipboard
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.ApplicationModel.DataTransfer.IClipboardStatics2", d2ac1b6a-d29f-554b-b303-f0452345fe02)]
+        {
+            static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.DataTransfer.ClipboardHistoryItemsResult>  GetHistoryItemsAsync();
+            static Boolean ClearHistory();
+            static Boolean DeleteItemFromHistory(ClipboardHistoryItem item);
+            static Windows.ApplicationModel.DataTransfer.SetHistoryItemAsContentStatus SetHistoryItemAsContent(ClipboardHistoryItem item);
+            static Boolean IsHistoryEnabled();
+            static Boolean IsRoamingEnabled();
+            static Boolean SetContentWithOptions(DataPackage content, ClipboardContentOptions options);
+            static event Windows.Foundation.EventHandler <Windows.ApplicationModel.DataTransfer.ClipboardHistoryChangedEventArgs>  HistoryChanged;
+            static event Windows.Foundation.EventHandler <Object>  RoamingEnabledChanged;
+            static event Windows.Foundation.EventHandler <Object>  HistoryEnabledChanged;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [static_name("Windows.ApplicationModel.DataTransfer.IClipboardStatics3", 6c4e9666-4ad5-596a-96ac-0ee6c0be4d98)]
+        {
+            [method_name("SetContentForUser")] static Boolean SetContentForUser(Windows.System.User user, DataPackage content);
+            [method_name("SetContentForUserWithOptions")] static Boolean SetContentForUser(Windows.System.User user, DataPackage content, ClipboardContentOptions contentOptions);
+        }
+        static Windows.ApplicationModel.DataTransfer.DataPackageView GetContent();
+        static void SetContent(DataPackage content);
+        static void Flush();
+        static void Clear();
+        static event Windows.Foundation.EventHandler <Object>  ContentChanged;
+    }
+
+}

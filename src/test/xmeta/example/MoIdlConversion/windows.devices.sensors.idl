@@ -1,0 +1,1495 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Sensors
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MagnetometerAccuracy
+    {
+        Unknown,
+        Unreliable,
+        Approximate,
+        High,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ActivityType
+    {
+        Unknown,
+        Idle,
+        Stationary,
+        Fidgeting,
+        Walking,
+        Running,
+        InVehicle,
+        Biking,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ActivitySensorReadingConfidence
+    {
+        High,
+        Low,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SensorReadingType
+    {
+        Absolute,
+        Relative,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum AccelerometerReadingType
+    {
+        Standard,
+        Linear,
+        Gravity,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SensorOptimizationGoal
+    {
+        Precision,
+        PowerEfficiency,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum SensorType
+    {
+        Accelerometer,
+        ActivitySensor,
+        Barometer,
+        Compass,
+        CustomSensor,
+        Gyroscope,
+        ProximitySensor,
+        Inclinometer,
+        LightSensor,
+        OrientationSensor,
+        Pedometer,
+        RelativeInclinometer,
+        RelativeOrientationSensor,
+        SimpleOrientationSensor,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [uuid(54daec61-fe4b-4e07-b260-3a4cdfbe396e)]
+    interface ISensorDataThreshold
+    {
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Devices.Sensors.ISensorDataThresholdTriggerDetails", 9106f1b7-e88d-48b1-bc90-619c7b349391)]
+    runtimeclass SensorDataThresholdTriggerDetails
+    {
+        String DeviceId{ get; };
+        Windows.Devices.Sensors.SensorType SensorType{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Devices.Sensors.IAccelerometerStatics", a5e28b74-5a87-4a2d-becc-0f906ea061dd)]
+    [interface_name("Windows.Devices.Sensors.IAccelerometer", df184548-2711-4da7-8098-4b82205d3c7d)]
+    [threading(both)]
+    runtimeclass Accelerometer
+    {
+        [method_name("GetDefault")] static Windows.Devices.Sensors.Accelerometer GetDefault();
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Devices.Sensors.IAccelerometerStatics2", c4c4842f-d86b-4685-b2d7-3396f798d57b)]
+        {
+            [method_name("GetDefaultWithAccelerometerReadingType")] static Windows.Devices.Sensors.Accelerometer GetDefault(AccelerometerReadingType readingType);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.IAccelerometerStatics3", 9de218cf-455d-4cf3-8200-70e1410340f8)]
+        {
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Accelerometer>  FromIdAsync(String deviceId);
+            static String GetDeviceSelector(AccelerometerReadingType readingType);
+        }
+        Windows.Devices.Sensors.AccelerometerReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Accelerometer, Windows.Devices.Sensors.AccelerometerReadingChangedEventArgs>  ReadingChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Accelerometer, Windows.Devices.Sensors.AccelerometerShakenEventArgs>  Shaken;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IAccelerometerDeviceId", 7eac64a9-97d5-446d-ab5a-917df9b96a2c)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IAccelerometer2", e8f092ee-4964-401a-b602-220d7153c60a)]
+        {
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ set; };
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IAccelerometer3", 87e0022a-ed80-49eb-bf8a-a4ea31e5cd84)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.Sensors.IAccelerometer4", 1d373c4f-42d3-45b2-8144-ab7fb665eb59)]
+        {
+            Windows.Devices.Sensors.AccelerometerReadingType ReadingType{ get; };
+        }
+    }
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IAccelerometerReading", b9fe7acb-d351-40af-8bb6-7aa9ae641fb7)]
+    runtimeclass AccelerometerReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Double AccelerationX{ get; };
+        Double AccelerationY{ get; };
+        Double AccelerationZ{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IAccelerometerReading2", 0a864aa2-15ae-4a40-be55-db58d7de7389)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Devices.Sensors.IAccelerometerReadingChangedEventArgs", 0095c65b-b6ac-475a-9f44-8b32d35a3f25)]
+    runtimeclass AccelerometerReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.AccelerometerReading Reading{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Devices.Sensors.IAccelerometerShakenEventArgs", 95ff01d1-4a28-4f35-98e8-8178aae4084a)]
+    runtimeclass AccelerometerShakenEventArgs
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+    }
+
+
+
+
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.IInclinometerStatics2", 043f9775-6a1e-499c-86e0-638c1a864b00)]
+    [interface_name("Windows.Devices.Sensors.IInclinometer", 2648ca6f-2286-406f-9161-f0c4bd806ebf)]
+    [threading(both)]
+    runtimeclass Inclinometer
+    {
+        static Windows.Devices.Sensors.Inclinometer GetDefaultForRelativeReadings();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.IInclinometerStatics4", e8ba96f9-6e85-4a83-aed0-d7cdcc9856c8)]
+        {
+            static String GetDeviceSelector(SensorReadingType readingType);
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Inclinometer>  FromIdAsync(String deviceId);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Devices.Sensors.IInclinometerStatics3", bd9a4280-b91a-4829-9392-abc0b6bdf2b4)]
+        {
+            [method_name("GetDefaultWithSensorReadingType")] static Windows.Devices.Sensors.Inclinometer GetDefault(SensorReadingType sensorReadingtype);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Devices.Sensors.IInclinometerStatics", f22ec551-9c30-453a-8b49-3c3eeb33cb61)]
+        {
+            static Windows.Devices.Sensors.Inclinometer GetDefault();
+        }
+        Windows.Devices.Sensors.InclinometerReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Inclinometer, Windows.Devices.Sensors.InclinometerReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IInclinometerDeviceId", 01e91982-41ff-4406-ae83-62210ff16fe3)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IInclinometer2", 029f3393-28b2-45f8-bb16-61e86a7fae6e)]
+        {
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ set; };
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ get; };
+            Windows.Devices.Sensors.SensorReadingType ReadingType{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IInclinometer3", 3a095004-d765-4384-a3d7-0283f3abe6ae)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Devices.Sensors.IInclinometerReading", 9f44f055-b6f6-497f-b127-1a775e501458)]
+    runtimeclass InclinometerReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Single PitchDegrees{ get; };
+        Single RollDegrees{ get; };
+        Single YawDegrees{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IInclinometerReadingYawAccuracy", b453e880-1fe3-4986-a257-e6ece2723949)]
+        {
+            Windows.Devices.Sensors.MagnetometerAccuracy YawAccuracy{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IInclinometerReading2", 4f164781-e90b-4658-8915-0103e08a805a)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IInclinometerReadingChangedEventArgs", 4ae91dc1-e7eb-4938-8511-ae0d6b440438)]
+    runtimeclass InclinometerReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.InclinometerReading Reading{ get; };
+    }
+
+
+
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Sensors.IGyrometerStatics", 83b6e7c9-e49d-4b39-86e6-cd554be4c5c1)]
+    [interface_name("Windows.Devices.Sensors.IGyrometer", fdb9a9c4-84b1-4ca2-9763-9b589506c70c)]
+    [threading(both)]
+    runtimeclass Gyrometer
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.IGyrometerStatics2", ef83f7a1-d700-4204-9613-79c6b161df4e)]
+        {
+            static String GetDeviceSelector();
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Gyrometer>  FromIdAsync(String deviceId);
+        }
+        static Windows.Devices.Sensors.Gyrometer GetDefault();
+        Windows.Devices.Sensors.GyrometerReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Gyrometer, Windows.Devices.Sensors.GyrometerReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IGyrometerDeviceId", 1ee5e978-89a2-4275-9e95-7126f4708760)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IGyrometer2", 63df2443-8ce8-41c3-ac44-8698810b557f)]
+        {
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ set; };
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IGyrometer3", 5d6f88d5-8fbc-4484-914b-528adfd947b1)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Devices.Sensors.IGyrometerReading", b3d6de5c-1ee4-456f-9de7-e2493b5c8e03)]
+    runtimeclass GyrometerReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Double AngularVelocityX{ get; };
+        Double AngularVelocityY{ get; };
+        Double AngularVelocityZ{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IGyrometerReading2", 16afe13c-2b89-44bb-822b-d1e1556ff09b)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IGyrometerReadingChangedEventArgs", 0fdf1895-6f9e-42ce-8d58-388c0ab8356d)]
+    runtimeclass GyrometerReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.GyrometerReading Reading{ get; };
+    }
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.ICompassStatics", 9abc97df-56ec-4c25-b54d-40a68bb5b269)]
+    [interface_name("Windows.Devices.Sensors.ICompass", 292ffa94-1b45-403c-ba06-b106dba69a64)]
+    [threading(both)]
+    runtimeclass Compass
+    {
+        static Windows.Devices.Sensors.Compass GetDefault();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.ICompassStatics2", 0ace0ead-3baa-4990-9ce4-be0913754ed2)]
+        {
+            static String GetDeviceSelector();
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Compass>  FromIdAsync(String deviceId);
+        }
+        Windows.Devices.Sensors.CompassReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Compass, Windows.Devices.Sensors.CompassReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.ICompassDeviceId", d181ca29-b085-4b1d-870a-4ff57ba74fd4)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.ICompass2", 36f26d09-c7d7-434f-b461-979ddfc2322f)]
+        {
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ set; };
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.ICompass3", a424801b-c5ea-4d45-a0ec-4b791f041a89)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.ICompassReading", 82911128-513d-4dc9-b781-5eedfbf02d0c)]
+    runtimeclass CompassReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Double HeadingMagneticNorth{ get; };
+        Windows.Foundation.IReference <Double>  HeadingTrueNorth{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.ICompassReadingHeadingAccuracy", e761354e-8911-40f7-9e16-6ecc7daec5de)]
+        {
+            Windows.Devices.Sensors.MagnetometerAccuracy HeadingAccuracy{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.ICompassReading2", b13a661e-51bb-4a12-bedd-ad47ff87d2e8)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.ICompassReadingChangedEventArgs", 8f1549b0-e8bc-4c7e-b009-4e41df137072)]
+    runtimeclass CompassReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.CompassReading Reading{ get; };
+    }
+
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Devices.Sensors.ILightSensorStatics", 45db8c84-c3a8-471e-9a53-6457fad87c0e)]
+    [interface_name("Windows.Devices.Sensors.ILightSensor", f84c0718-0c54-47ae-922e-789f57fb03a0)]
+    [threading(both)]
+    runtimeclass LightSensor
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.ILightSensorStatics2", 0ec0a650-ddc6-40ab-ace3-ec3359d42c51)]
+        {
+            static String GetDeviceSelector();
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.LightSensor>  FromIdAsync(String deviceId);
+        }
+        static Windows.Devices.Sensors.LightSensor GetDefault();
+        Windows.Devices.Sensors.LightSensorReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.LightSensor, Windows.Devices.Sensors.LightSensorReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.ILightSensorDeviceId", 7fee49f8-0afb-4f51-87f0-6c26375ce94f)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.ILightSensor2", 486b24e8-a94c-4090-8f48-09f782a9f7d5)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.ILightSensorReading", ffdf6300-227c-4d2b-b302-fc0142485c68)]
+    runtimeclass LightSensorReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Single IlluminanceInLux{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.ILightSensorReading2", b7512185-44a3-44c9-8190-9ef6de0a8a74)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.ILightSensorReadingChangedEventArgs", a3a2f4cf-258b-420c-b8ab-8edd601ecf50)]
+    runtimeclass LightSensorReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.LightSensorReading Reading{ get; };
+    }
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Devices.Sensors.ISensorRotationMatrix", 0a3d5a67-22f4-4392-9538-65d0bd064aa6)]
+    runtimeclass SensorRotationMatrix
+    {
+        Single M11{ get; };
+        Single M12{ get; };
+        Single M13{ get; };
+        Single M21{ get; };
+        Single M22{ get; };
+        Single M23{ get; };
+        Single M31{ get; };
+        Single M32{ get; };
+        Single M33{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.ISensorQuaternion", c9c5c827-c71c-46e7-9da3-36a193b232bc)]
+    runtimeclass SensorQuaternion
+    {
+        Single W{ get; };
+        Single X{ get; };
+        Single Y{ get; };
+        Single Z{ get; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.IOrientationSensorStatics2", 59da0d0b-d40a-4c71-9276-8a272a0a6619)]
+    [interface_name("Windows.Devices.Sensors.IOrientationSensor", 5e354635-cf6b-4c63-abd8-10252b0bf6ec)]
+    [threading(both)]
+    runtimeclass OrientationSensor
+    {
+        static Windows.Devices.Sensors.OrientationSensor GetDefaultForRelativeReadings();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Devices.Sensors.IOrientationSensorStatics", 10ef8712-fb4c-428a-898b-2765e409e669)]
+        {
+            [method_name("GetDefault")] static Windows.Devices.Sensors.OrientationSensor GetDefault();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.IOrientationSensorStatics4", a67feb55-2c85-4b28-a0fe-58c4b20495f5)]
+        {
+            [method_name("GetDeviceSelector")] static String GetDeviceSelector(SensorReadingType readingType);
+            [method_name("GetDeviceSelectorWithSensorReadingTypeAndSensorOptimizationGoal")] static String GetDeviceSelector(SensorReadingType readingType, SensorOptimizationGoal optimizationGoal);
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.OrientationSensor>  FromIdAsync(String deviceId);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Devices.Sensors.IOrientationSensorStatics3", d82ce920-2777-40ff-9f59-d654b085f12f)]
+        {
+            [method_name("GetDefaultWithSensorReadingType")] static Windows.Devices.Sensors.OrientationSensor GetDefault(SensorReadingType sensorReadingtype);
+            [method_name("GetDefaultWithSensorReadingTypeAndSensorOptimizationGoal")] static Windows.Devices.Sensors.OrientationSensor GetDefault(SensorReadingType sensorReadingType, SensorOptimizationGoal optimizationGoal);
+        }
+        Windows.Devices.Sensors.OrientationSensorReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.OrientationSensor, Windows.Devices.Sensors.OrientationSensorReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IOrientationSensorDeviceId", 5a69b648-4c29-49ec-b28f-ea1d117b66f0)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IOrientationSensor2", 0d924cf9-2f1f-49c9-8042-4a1813d67760)]
+        {
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ set; };
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ get; };
+            Windows.Devices.Sensors.SensorReadingType ReadingType{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IOrientationSensor3", 2cce578d-646b-48c5-b7ee-44fdc4c6aafd)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IOrientationSensorReading", 4756c993-6595-4897-bcc6-d537ee757564)]
+    runtimeclass OrientationSensorReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Devices.Sensors.SensorRotationMatrix RotationMatrix{ get; };
+        Windows.Devices.Sensors.SensorQuaternion Quaternion{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IOrientationSensorReadingYawAccuracy", d1ac9824-3f5a-49a2-bc7b-1180bc38cd2b)]
+        {
+            Windows.Devices.Sensors.MagnetometerAccuracy YawAccuracy{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IOrientationSensorReading2", 00576e5f-49f8-4c05-9e07-24fac79408c3)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IOrientationSensorReadingChangedEventArgs", 012c1186-c3ba-46bc-ae65-7a98996cbfb8)]
+    runtimeclass OrientationSensorReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.OrientationSensorReading Reading{ get; };
+    }
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SimpleOrientation
+    {
+        NotRotated,
+        Rotated90DegreesCounterclockwise,
+        Rotated180DegreesCounterclockwise,
+        Rotated270DegreesCounterclockwise,
+        Faceup,
+        Facedown,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Devices.Sensors.ISimpleOrientationSensorStatics", 72ed066f-70aa-40c6-9b1b-3433f7459b4e)]
+    [interface_name("Windows.Devices.Sensors.ISimpleOrientationSensor", 5ff53856-214a-4dee-a3f9-616f1ab06ffd)]
+    [threading(both)]
+    runtimeclass SimpleOrientationSensor
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Devices.Sensors.ISimpleOrientationSensorStatics2", 848f9c7f-b138-4e11-8910-a2a2a3b56d83)]
+        {
+            static String GetDeviceSelector();
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.SimpleOrientationSensor>  FromIdAsync(String deviceId);
+        }
+        static Windows.Devices.Sensors.SimpleOrientationSensor GetDefault();
+        Windows.Devices.Sensors.SimpleOrientation GetCurrentOrientation();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.SimpleOrientationSensor, Windows.Devices.Sensors.SimpleOrientationSensorOrientationChangedEventArgs>  OrientationChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.ISimpleOrientationSensorDeviceId", fbc00acb-3b76-41f6-8091-30efe646d3cf)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.ISimpleOrientationSensor2", a277a798-8870-453e-8bd6-b8f5d8d7941b)]
+        {
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ set; };
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Devices.Sensors.ISimpleOrientationSensorOrientationChangedEventArgs", bcd5c660-23d4-4b4c-a22e-ba81ade0c601)]
+    runtimeclass SimpleOrientationSensorOrientationChangedEventArgs
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Devices.Sensors.SimpleOrientation Orientation{ get; };
+    }
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.IMagnetometerStatics", 853c64cc-0698-4dda-a6df-9cb9cc4ab40a)]
+    [interface_name("Windows.Devices.Sensors.IMagnetometer", 484f626e-d3c9-4111-b3f6-2cf1faa418d5)]
+    [threading(both)]
+    runtimeclass Magnetometer
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.IMagnetometerStatics2", 2c0819f0-ffc6-4f89-a06f-18fa10792933)]
+        {
+            static String GetDeviceSelector();
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Magnetometer>  FromIdAsync(String deviceId);
+        }
+        static Windows.Devices.Sensors.Magnetometer GetDefault();
+        Windows.Devices.Sensors.MagnetometerReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Magnetometer, Windows.Devices.Sensors.MagnetometerReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IMagnetometerDeviceId", 58b498c2-7e4b-404c-9fc5-5de8b40ebae3)]
+        {
+            String DeviceId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Sensors.IMagnetometer2", b4656c85-26f6-444b-a9e2-a23f966cd368)]
+        {
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ set; };
+            Windows.Graphics.Display.DisplayOrientations ReadingTransform{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IMagnetometer3", be93db7c-a625-48ef-acf7-fac104832671)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IMagnetometerReading", 0c2cc40d-ebfd-4e5c-bb11-afc29b3cae61)]
+    runtimeclass MagnetometerReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Single MagneticFieldX{ get; };
+        Single MagneticFieldY{ get; };
+        Single MagneticFieldZ{ get; };
+        Windows.Devices.Sensors.MagnetometerAccuracy DirectionalAccuracy{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IMagnetometerReading2", d4c95c61-61d9-404b-a328-066f177a1409)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IMagnetometerReadingChangedEventArgs", 17eae872-2eb9-4ee7-8ad0-3127537d949b)]
+    runtimeclass MagnetometerReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.MagnetometerReading Reading{ get; };
+    }
+
+
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.IActivitySensorStatics", a71e0e9d-ee8b-45d1-b25b-08cc0df92ab6)]
+    [interface_name("Windows.Devices.Sensors.IActivitySensor", cd7a630c-fb5f-48eb-b09b-a2708d1c61ef)]
+    [threading(both)]
+    runtimeclass ActivitySensor
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.ActivitySensor>  GetDefaultAsync();
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.ActivitySensor>  FromIdAsync(String deviceId);
+        [method_name("GetSystemHistoryAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.ActivitySensorReading> >  GetSystemHistoryAsync(Windows.Foundation.DateTime fromTime);
+        [method_name("GetSystemHistoryWithDurationAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.ActivitySensorReading> >  GetSystemHistoryAsync(Windows.Foundation.DateTime fromTime, Windows.Foundation.TimeSpan duration);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.ActivitySensorReading>  GetCurrentReadingAsync();
+        Windows.Foundation.Collections.IVector <Windows.Devices.Sensors.ActivityType>  SubscribedActivities{ get; };
+        Double PowerInMilliwatts{ get; };
+        String DeviceId{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.ActivityType>  SupportedActivities{ get; };
+        UInt32 MinimumReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.ActivitySensor, Windows.Devices.Sensors.ActivitySensorReadingChangedEventArgs>  ReadingChanged;
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IActivitySensorReading", 85125a96-1472-40a2-b2ae-e1ef29226c78)]
+    runtimeclass ActivitySensorReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Devices.Sensors.ActivityType Activity{ get; };
+        Windows.Devices.Sensors.ActivitySensorReadingConfidence Confidence{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IActivitySensorReadingChangedEventArgs", de386717-aeb6-4ec7-946a-d9cc19b951ec)]
+    runtimeclass ActivitySensorReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.ActivitySensorReading Reading{ get; };
+    }
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IActivitySensorReadingChangeReport", 4f3c2915-d93b-47bd-960a-f20fb2f322b9)]
+    runtimeclass ActivitySensorReadingChangeReport
+    {
+        Windows.Devices.Sensors.ActivitySensorReading Reading{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IActivitySensorTriggerDetails", 2c9e6612-b9ca-4677-b263-243297f79d3a)]
+    runtimeclass ActivitySensorTriggerDetails
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.ActivitySensorReadingChangeReport>  ReadReports();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.IBarometerStatics", 286b270a-02e3-4f86-84fc-fdd892b5940f)]
+    [interface_name("Windows.Devices.Sensors.IBarometer", 934475a8-78bf-452f-b017-f0209ce6dab4)]
+    [threading(both)]
+    runtimeclass Barometer
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.Sensors.IBarometerStatics2", 8fc6b1e7-95ff-44ac-878e-d65c8308c34c)]
+        {
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Barometer>  FromIdAsync(String deviceId);
+            static String GetDeviceSelector();
+        }
+        static Windows.Devices.Sensors.Barometer GetDefault();
+        Windows.Devices.Sensors.BarometerReading GetCurrentReading();
+        String DeviceId{ get; };
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Barometer, Windows.Devices.Sensors.BarometerReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IBarometer2", 32bcc418-3eeb-4d04-9574-7633a8781f9f)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IBarometerReading", f5b9d2e6-1df6-4a1a-a7ad-321d4f5db247)]
+    runtimeclass BarometerReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Double StationPressureInHectopascals{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IBarometerReading2", 85a244eb-90c5-4875-891c-3865b4c357e7)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IBarometerReadingChangedEventArgs", 3d84945f-037b-404f-9bbb-6232d69543c3)]
+    runtimeclass BarometerReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.BarometerReading Reading{ get; };
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PedometerStepKind
+    {
+        Unknown,
+        Walking,
+        Running,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IPedometerReading", 2245dcf4-a8e1-432f-896a-be0dd9b02d24)]
+    runtimeclass PedometerReading
+    {
+        Windows.Devices.Sensors.PedometerStepKind StepKind{ get; };
+        Int32 CumulativeSteps{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Foundation.TimeSpan CumulativeStepsDuration{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Sensors.IPedometerStatics", 82980a2f-4083-4dfb-b411-938ea0f4b946)]
+    [interface_name("Windows.Devices.Sensors.IPedometer", 9a1e013d-3d98-45f8-8920-8e4ecaca5f97)]
+    runtimeclass Pedometer
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Devices.Sensors.IPedometerStatics2", 79f5c6bb-ce0e-4133-b47e-8627ea72f677)]
+        {
+            static Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.PedometerReading>  GetReadingsFromTriggerDetails(SensorDataThresholdTriggerDetails triggerDetails);
+        }
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Pedometer>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Pedometer>  GetDefaultAsync();
+        static String GetDeviceSelector();
+        [method_name("GetSystemHistoryAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.PedometerReading> >  GetSystemHistoryAsync(Windows.Foundation.DateTime fromTime);
+        [method_name("GetSystemHistoryWithDurationAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.PedometerReading> >  GetSystemHistoryAsync(Windows.Foundation.DateTime fromTime, Windows.Foundation.TimeSpan duration);
+        String DeviceId{ get; };
+        Double PowerInMilliwatts{ get; };
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Pedometer, Windows.Devices.Sensors.PedometerReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Devices.Sensors.IPedometer2", e5a406df-2b81-4add-b2ff-77ab6c98ba19)]
+        {
+            Windows.Foundation.Collections.IMapView <Windows.Devices.Sensors.PedometerStepKind, Windows.Devices.Sensors.PedometerReading>  GetCurrentReadings();
+        }
+    }
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IPedometerReadingChangedEventArgs", f855e47e-abbc-4456-86a8-25cf2b333742)]
+    runtimeclass PedometerReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.PedometerReading Reading{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Sensors.IPedometerDataThresholdFactory", cbad8f50-7a54-466b-9010-77a162fca5d7)]
+    [threading(both)]
+    runtimeclass PedometerDataThreshold
+        : [default]Windows.Devices.Sensors.ISensorDataThreshold
+    {
+        [method_name( "Create" )] PedometerDataThreshold(Pedometer sensor, Int32 stepGoal);
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.IProximitySensorStatics", 29186649-6269-4e57-a5ad-82be80813392)]
+    [interface_name("Windows.Devices.Sensors.IProximitySensor", 54c076b8-ecfb-4944-b928-74fc504d47ee)]
+    [threading(both)]
+    runtimeclass ProximitySensor
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.Devices.Sensors.IProximitySensorStatics2", cbf473ae-e9ca-422f-ad67-4c3d25df350c)]
+        {
+            static Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.ProximitySensorReading>  GetReadingsFromTriggerDetails(SensorDataThresholdTriggerDetails triggerDetails);
+        }
+        static String GetDeviceSelector();
+        static Windows.Devices.Sensors.ProximitySensor FromId(String sensorId);
+        String DeviceId{ get; };
+        Windows.Foundation.IReference <UInt32>  MaxDistanceInMillimeters{ get; };
+        Windows.Foundation.IReference <UInt32>  MinDistanceInMillimeters{ get; };
+        Windows.Devices.Sensors.ProximitySensorReading GetCurrentReading();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.ProximitySensor, Windows.Devices.Sensors.ProximitySensorReadingChangedEventArgs>  ReadingChanged;
+        Windows.Devices.Sensors.ProximitySensorDisplayOnOffController CreateDisplayOnOffController();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.IProximitySensorReading", 71228d59-132d-4d5f-8ff9-2f0db8751ced)]
+    runtimeclass ProximitySensorReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Boolean IsDetected{ get; };
+        Windows.Foundation.IReference <UInt32>  DistanceInMillimeters{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IProximitySensorReadingChangedEventArgs", cfc2f366-c3e8-40fd-8cc3-67e289004938)]
+    runtimeclass ProximitySensorReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.ProximitySensorReading Reading{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass ProximitySensorDisplayOnOffController
+        : [default]Windows.Foundation.IClosable
+    {
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [constructor_name("Windows.Devices.Sensors.IProximitySensorDataThresholdFactory", 905ac121-6d27-4ad3-9db5-6467f2a5ad9d)]
+    [threading(both)]
+    runtimeclass ProximitySensorDataThreshold
+        : [default]Windows.Devices.Sensors.ISensorDataThreshold
+    {
+        [method_name( "Create" )] ProximitySensorDataThreshold(ProximitySensor sensor);
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Sensors.IAltimeterStatics", 9eb4d7c3-e5ac-47ce-8eef-d3718168c01f)]
+    [interface_name("Windows.Devices.Sensors.IAltimeter", 72f057fd-8f04-49f1-b4a7-f4e363b701a2)]
+    [threading(both)]
+    runtimeclass Altimeter
+    {
+        static Windows.Devices.Sensors.Altimeter GetDefault();
+        Windows.Devices.Sensors.AltimeterReading GetCurrentReading();
+        String DeviceId{ get; };
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Altimeter, Windows.Devices.Sensors.AltimeterReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IAltimeter2", c9471bf9-2add-48f5-9f08-3d0c7660d938)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Sensors.IAltimeterReading", fbe8ef73-7f5e-48c8-aa1a-f1f3befc1144)]
+    runtimeclass AltimeterReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Double AltitudeChangeInMeters{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.IAltimeterReading2", 543a1bd9-6d0b-42b2-bd69-bc8fae0f782c)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+            Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IAltimeterReadingChangedEventArgs", 7069d077-446d-47f7-998c-ebc23b45e4a2)]
+    runtimeclass AltimeterReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.AltimeterReading Reading{ get; };
+    }
+
+
+
+
+
+
+    [feature(Velocity_AlwaysAlwaysEnabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.Devices.Sensors.IHingeAngleSensorStatics", b7b63910-fbb1-4123-89ce-4ea34eb0dfca)]
+    [interface_name("Windows.Devices.Sensors.IHingeAngleSensor", e9d3be02-bfdf-437f-8c29-88c77393d309)]
+    [threading(both)]
+    runtimeclass HingeAngleSensor
+    {
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.HingeAngleSensor>  GetDefaultAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.HingeAngleSensor>  GetRelatedToAdjacentPanelsAsync(String firstPanelId, String secondPanelId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.HingeAngleSensor>  FromIdAsync(String deviceId);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.HingeAngleReading>  GetCurrentReadingAsync();
+        String DeviceId{ get; };
+        Double MinReportThresholdInDegrees{ get; };
+        Double ReportThresholdInDegrees{ get; };
+        Double ReportThresholdInDegrees{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.HingeAngleSensor, Windows.Devices.Sensors.HingeAngleSensorReadingChangedEventArgs>  ReadingChanged;
+    }
+
+
+    [feature(Velocity_AlwaysAlwaysEnabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IHingeAngleReading", a3cd45b9-1bf1-4f65-a704-e2da04f182c0)]
+    runtimeclass HingeAngleReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Double AngleInDegrees{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+    }
+
+    [feature(Velocity_AlwaysAlwaysEnabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.IHingeAngleSensorReadingChangedEventArgs", 24d9558b-fad0-42b8-a854-78923049a1ba)]
+    runtimeclass HingeAngleSensorReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.HingeAngleReading Reading{ get; };
+    }
+
+
+
+}
+namespace Windows.Devices.Sensors.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract SensorsInternalContract{};
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    enum ElevationChangeMode
+    {
+        Unknown,
+        Any,
+        Elevator,
+        Stepping,
+    };
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    enum ElevationChangeDirection
+    {
+        Unknown,
+        Up,
+        Down,
+    };
+
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.Sensors.Internal.IFloorElevationSensorStatics", 18d02f2c-d6b3-4116-a2d9-adac6c1f4876)]
+    [interface_name("Windows.Devices.Sensors.Internal.IFloorElevationSensor", 227df9e6-af6d-4c67-b300-f1e31a785c81)]
+    [threading(both)]
+    runtimeclass FloorElevationSensor
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Internal.FloorElevationSensor>  GetDefaultAsync();
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Internal.FloorElevationSensor>  FromIdAsync(String deviceId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.Internal.FloorElevationChangeReading>  GetReadingsFromTriggerDetails(Windows.Devices.Sensors.SensorDataThresholdTriggerDetails triggerDetails);
+        Windows.Devices.Sensors.Internal.FloorElevationChangeReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        String DeviceId{ get; };
+        Windows.Devices.Sensors.Internal.FloorsChangedThreshold Threshold{ set; };
+        Windows.Devices.Sensors.Internal.FloorsChangedThreshold Threshold{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Internal.FloorElevationSensor, Windows.Devices.Sensors.Internal.FloorElevationChangeReadingChangedEventArgs>  ReadingChanged;
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.Internal.IFloorElevationChangeReading", c959ca74-4ad9-4ab0-8b43-920c34cadf42)]
+    runtimeclass FloorElevationChangeReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Devices.Sensors.Internal.ElevationChangeDirection Direction{ get; };
+        Windows.Devices.Sensors.Internal.ElevationChangeMode Mode{ get; };
+        Double CumulativeMeters{ get; };
+        UInt32 CumulativeFloors{ get; };
+        Windows.Foundation.IReference <UInt32>  CumulativeSteps{ get; };
+    }
+
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Sensors.Internal.IFloorsChangedThresholdFactory", 05a074e2-ff95-4a11-84cb-077477fe996a)]
+    [threading(both)]
+    runtimeclass FloorsChangedThreshold
+        : [default]Windows.Devices.Sensors.ISensorDataThreshold
+    {
+        [method_name( "Create" )] FloorsChangedThreshold(FloorElevationSensor sensor, UInt32 changeInFloorCounts);
+    }
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Sensors.Internal.IFloorElevationChangeReadingChangedEventArgs", 97c544fc-9f93-4c43-8bd7-6c059ca575e0)]
+    runtimeclass FloorElevationChangeReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.Internal.FloorElevationChangeReading Reading{ get; };
+    }
+
+
+
+
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.Internal.ISimpleOrientationSensorStaticsInternal", 97e8f60d-bf19-4c92-9fb9-72ecc22e37ea)]
+    [threading(both)]
+    runtimeclass SimpleOrientationSensor
+    {
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.SimpleOrientationSensor>  FromIdAsync(String deviceId);
+    }
+
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Sensors.Internal.ISensorStatics", 2fff9836-4322-4e40-bd63-d10f52d668a5)]
+    [interface_name("Windows.Devices.Sensors.Internal.ISensor", 1e603430-42f4-40f0-b63b-9bcaf4aa2bbb)]
+    [threading(both)]
+    runtimeclass Sensor
+    {
+        static Windows.Devices.Sensors.Internal.Sensor GetDefault(Guid type);
+        static Windows.Devices.Sensors.Internal.Sensor FromId(String id);
+        UInt8 GetDyanmicProperties();
+        UInt8 GetSupportedDataFields();
+        UInt8 GetCurrentReading();
+        UInt8 GetDefaultThresholds();
+        UInt8 GetThresholds();
+        UInt8 SetThresholds();
+        UInt8 SetSubscribedEvents();
+        UInt8 GetDatafieldProperties(Guid id, UInt32 pid);
+        UInt32 GetDatafieldPropertiesListSize(Guid id, UInt32 pid);
+        void ExtractAccelerometerVector(UInt8[] collectionList, out Windows.Foundation.Numerics.Vector3 value, out UInt8 timestamp);
+        void ExtractShakeData(UInt8[] collectionList, out Int32 shake, out UInt8 timestamp);
+        void ExtractBarometerData(UInt8[] collectionList, out Single barometerData, out UInt8 timestamp);
+        void ExtractGyroscopeVector(UInt8[] collectionList, out Windows.Foundation.Numerics.Vector3 value, out UInt8 timestamp);
+        void ExtractMagnetometerVector(UInt8[] collectionList, out Windows.Foundation.Numerics.Vector3 value, out UInt8 timestamp);
+        void ExtractMagnetometerAccuracy(UInt8[] collectionList, out UInt32 accuracy, out UInt8 timestamp);
+        void ExtractDeclinationAngle(UInt8[] collectionList, out Single declAngle, out UInt8 timestamp);
+        void ExtractFusionData(UInt8[] collectionList, out Windows.Foundation.Numerics.Quaternion value, out UInt8 timestamp);
+        void ExtractProximitySignal(UInt8[] collectionList, out Int32 value, out UInt8 timestamp);
+        void ExtractProximityDetectionDistance(UInt8[] collectionList, out UInt32 value, out UInt8 timestamp);
+        void ExtractLuxData(UInt8[] collectionList, out Single value, out UInt64 timestamp, out Boolean isValid);
+        String DeviceId{ get; };
+        UInt32 ReportIntervalInMs{ get; };
+        UInt32 ReportIntervalInMs{ set; };
+        UInt32 MinimumReportIntervalInMs{ get; };
+        UInt32 ReportLatencyInMs{ get; };
+        UInt32 ReportLatencyInMs{ set; };
+        UInt32 MaxBatchSampleCount{ get; };
+        Boolean ActiveInLowPowerMode{ get; };
+        Boolean ActiveInLowPowerMode{ set; };
+        UInt32 DyanmicPropertiesSizeInBytes{ get; };
+        UInt32 SupportedDataFieldsListSize{ get; };
+        UInt32 ThresholdsSizeInBytes{ get; };
+        UInt32 MaxDataFieldSizeInBytes{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Internal.Sensor, Windows.Devices.Sensors.Internal.SensorReadingChangedEventArgs>  ReadingChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Internal.Sensor, Windows.Devices.Sensors.Internal.SensorEventReceivedEventArgs>  SensorEventReceived;
+    }
+
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Sensors.Internal.ISensorReadingChangedEventArgs", 3fba511a-d59c-4598-b84d-e3e53c700754)]
+    runtimeclass SensorReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.Internal.SensorReading Reading{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [interface_name("Windows.Devices.Sensors.Internal.ISensorEventReceivedEventArgs", eb5a77db-087d-4104-a3c6-a59294b0f96e)]
+    runtimeclass SensorEventReceivedEventArgs
+    {
+        Windows.Devices.Sensors.Internal.SensorReading Reading{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [interface_name("Windows.Devices.Sensors.Internal.ISensorReading", 460f6fbc-7813-44c0-a06c-7f6aa7fcf2eb)]
+    runtimeclass SensorReading
+    {
+        void GetCollectionsList(out UInt8[] value);
+    }
+
+
+    [uuid(456ac832-04f4-4b2d-ad5d-941293572d6a)]
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    interface ISensorPowerPolicy
+    {
+        Boolean ActiveInLowPowerMode{ get; };
+        Boolean ActiveInLowPowerMode{ set; };
+    };
+
+    [uuid(77c0fd76-99fb-4c7d-afee-aaf6270b0e48)]
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    interface ILightSensorReadingExtended
+    {
+        Boolean IsValid{ get; };
+    };
+
+    [contract(Windows.Devices.Sensors.Internal.SensorsInternalContract, 1)]
+    [uuid(236eae96-c23b-415a-9bdb-87296816e12c)]
+    interface ILightSensorThresholds
+    {
+        Double ReportLuxThresholdPercentage{ get; };
+        Double ReportLuxThresholdPercentage{ set; };
+        Double ReportLuxThresholdAbsolute{ get; };
+        Double ReportLuxThresholdAbsolute{ set; };
+        Double ReportThresholdChromaticity{ get; };
+        Double ReportThresholdChromaticity{ set; };
+        Double ReportThresholdTemperature{ get; };
+        Double ReportThresholdTemperature{ set; };
+    };
+
+
+}
+namespace Windows.Devices.Sensors.Custom
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.Sensors.Custom.ICustomSensorStatics", 992052cf-f422-4c7d-836b-e7dc74a7124b)]
+    [interface_name("Windows.Devices.Sensors.Custom.ICustomSensor", a136f9ad-4034-4b4d-99dd-531aac649c09)]
+    [threading(both)]
+    runtimeclass CustomSensor
+    {
+        static String GetDeviceSelector(Guid interfaceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Sensors.Custom.CustomSensor>  FromIdAsync(String sensorId);
+        Windows.Devices.Sensors.Custom.CustomSensorReading GetCurrentReading();
+        UInt32 MinimumReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        UInt32 ReportInterval{ get; };
+        String DeviceId{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sensors.Custom.CustomSensor, Windows.Devices.Sensors.Custom.CustomSensorReadingChangedEventArgs>  ReadingChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.Custom.ICustomSensor2", 20db3111-ec58-4d9f-bfbd-e77825088510)]
+        {
+            UInt32 ReportLatency{ set; };
+            UInt32 ReportLatency{ get; };
+            UInt32 MaxBatchSize{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Sensors.Custom.ICustomSensorReading", 64004f4d-446a-4366-a87a-5f963268ec53)]
+    runtimeclass CustomSensorReading
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.Sensors.Custom.ICustomSensorReading2", 223c98ea-bf73-4992-9a48-d3c897594ccb)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  PerformanceCount{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Sensors.Custom.ICustomSensorReadingChangedEventArgs", 6b202023-cffd-4cc1-8ff0-e21823d76fcc)]
+    runtimeclass CustomSensorReadingChangedEventArgs
+    {
+        Windows.Devices.Sensors.Custom.CustomSensorReading Reading{ get; };
+    }
+
+
+
+
+
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.ApplicationModel.Background.IActivitySensorTriggerFactory", a72691c3-3837-44f7-831b-0132cc872bc3)]
+    [interface_name("Windows.ApplicationModel.Background.IActivitySensorTrigger", d0dd4342-e37b-4823-a5fe-6b31dfefdeb0)]
+    [threading(both)]
+    runtimeclass ActivitySensorTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] ActivitySensorTrigger(UInt32 reportIntervalInMilliseconds);
+        Windows.Foundation.Collections.IVector <Windows.Devices.Sensors.ActivityType>  SubscribedActivities{ get; };
+        UInt32 ReportInterval{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Sensors.ActivityType>  SupportedActivities{ get; };
+        UInt32 MinimumReportInterval{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [constructor_name("Windows.ApplicationModel.Background.ISensorDataThresholdTriggerFactory", 921fe675-7df0-4da3-97b3-e544ee857fe6)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.ISensorDataThresholdTrigger", 5bc0f372-d48b-4b7f-abec-15f9bacc12e2)]
+    [threading(both)]
+    runtimeclass SensorDataThresholdTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] SensorDataThresholdTrigger(Windows.Devices.Sensors.ISensorDataThreshold threshold);
+    }
+
+}

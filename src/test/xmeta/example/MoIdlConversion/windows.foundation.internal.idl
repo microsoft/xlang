@@ -1,0 +1,39 @@
+
+
+
+
+
+
+
+
+namespace Windows.Foundation.Collections.Detail
+{
+    [contractversion(1)]
+    [internal]
+    apicontract PropertySetSerializerInternalContract{};
+
+    [uuid(6e8ebf1c-ef3d-4376-b20e-5be638aeac77)]
+    [contract(Windows.Foundation.Collections.Detail.PropertySetSerializerInternalContract, 1)]
+    interface IPropertySetSerializer
+    {
+        Windows.Storage.Streams.IBuffer Serialize(Windows.Foundation.Collections.IPropertySet propertySet);
+        void Deserialize(Windows.Foundation.Collections.IPropertySet propertySet, Windows.Storage.Streams.IBuffer buffer);
+    };
+
+    [contract(Windows.Foundation.Collections.Detail.PropertySetSerializerInternalContract, 1)]
+    enum MarshalMode
+    {
+        ByReference,
+        ByValue,
+        ByValueEvenInProc,
+    };
+
+    [contract(Windows.Foundation.Collections.Detail.PropertySetSerializerInternalContract, 1)]
+    [uuid(deab70f3-3a9c-40e6-a680-2ee376c5eaed)]
+    interface IMarshalingBehaviorControl
+    {
+        Windows.Foundation.Collections.Detail.MarshalMode Mode{ set; };
+        Windows.Foundation.Collections.Detail.MarshalMode Mode{ get; };
+    };
+
+}

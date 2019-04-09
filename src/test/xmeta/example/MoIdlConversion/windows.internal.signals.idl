@@ -1,0 +1,172 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Signals
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [flags]
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    enum TriggerOptions
+    {
+        None,
+        OneShot,
+    };
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [uuid(609ed331-cda6-4869-95eb-f5107e53ec24)]
+    interface ISignalManager
+    {
+        void Register(String tag, String signalName, String trigger, Windows.Foundation.Collections.IVector <Windows.Internal.Signals.SignalCondition>  signalConditions, TriggerOptions options, String signalsCollectionId, Windows.Foundation.Collections.IVector <String>  actions, String expirationDate);
+        void UnregisterAllWithTag(String tag);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Signals.ISignalManager, Windows.Internal.Signals.SignalEvaluatedEventArgs>  SignalEvaluated;
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [static_name("Windows.Internal.Signals.ISignalConditionStatics", ebd57c1e-6916-4236-afc4-2148629b17e2)]
+    [interface_name("Windows.Internal.Signals.ISignalCondition", 16de95f7-6ed1-43fa-a8a9-f0d40a6251a0)]
+    [threading(both)]
+    runtimeclass SignalCondition
+    {
+        static Windows.Internal.Signals.SignalCondition CreateSystemState(String key, OperatorType operatorType, String value);
+        static Windows.Internal.Signals.SignalCondition CreateModel(String contentId, String contentPath);
+        static Windows.Internal.Signals.SignalCondition CreateUsageHistory(String key, OperatorType operatorType, String value);
+        static Windows.Internal.Signals.SignalCondition CreateIndexerQuery(String sqlQuery, OperatorType operatorType, UInt16 value);
+        static Windows.Internal.Signals.SignalCondition CreateSignalMemory(String collectionName, String valueName, OperatorType operatorType, UInt16 value);
+        static Windows.Internal.Signals.SignalCondition CreateTimestamp(String collectionName, String valueName, OperatorType operatorType, UInt64 value);
+        static Windows.Internal.Signals.SignalCondition CreatePredictionEngineFile(String modelPath, String mdlPath, String assetPath, Double threshold);
+        Windows.Internal.Signals.SignalConditionCostProfile CostProfile{ get; };
+        [method_name("Evaluate")] Windows.Internal.Signals.ConditionResult Evaluate(String correlationVector, Windows.Foundation.Collections.IPropertySet evaluationContext);
+        [method_name("EvaluateWithCustomFeatures")] Windows.Internal.Signals.ConditionResult Evaluate(String correlationVector, Windows.Foundation.Collections.IPropertySet evaluationContext, Windows.Foundation.Collections.IPropertySet customFeatures);
+        [method_name("EvaluateWithThreshold")] Windows.Internal.Signals.ConditionResult EvaluateWithThreshold(String correlationVector, Windows.Foundation.Collections.IPropertySet evaluationContext, Double threshold);
+        [method_name("EvaluateWithCustomFeaturesAndThreshold")] Windows.Internal.Signals.ConditionResult EvaluateWithThreshold(String correlationVector, Windows.Foundation.Collections.IPropertySet evaluationContext, Windows.Foundation.Collections.IPropertySet customFeatures, Double threshold);
+    }
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Signals.ISignalEvaluatedEventArgs", b8a0d8cc-38b3-43a6-b1bb-49d2942ea541)]
+    runtimeclass SignalEvaluatedEventArgs
+    {
+        String SignalName{ get; };
+        Boolean EvaluationResult{ get; };
+    }
+
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    enum OperatorType
+    {
+        Unknown,
+        Equal,
+        NotEqual,
+        LessThan,
+        GreaterThan,
+        LessThanOrEqual,
+        GreaterThanOrEqual,
+        DoesExist,
+        Contains,
+        ContainsCI,
+    };
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    enum ConditionType
+    {
+        Unknown,
+        MLModel,
+        SystemState,
+        UsageHistory,
+        IndexerQuery,
+        SignalMemory,
+        Timestamp,
+        PredictionEngineFile,
+    };
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    struct ConditionResult
+    {
+        Boolean Result;
+        ConditionType Kind;
+        Double RawValue;
+    };
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [uuid(7ad03801-0294-47ea-a859-c48bc91e7981)]
+    interface ISignalEvaluationResult
+    {
+        Boolean Result{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Signals.ConditionResult>  ConditionResults{ get; };
+        String CorrelationVector{ get; };
+    };
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass SignalEvaluationResult
+        : [default]Windows.Internal.Signals.ISignalEvaluationResult
+    {
+        SignalEvaluationResult();
+    }
+
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    enum SignalConditionCostProfile
+    {
+        Unknown,
+        Small,
+        Medium,
+        Large,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [interface_name("Windows.Internal.Signals.IQueryManager", a2cfcca9-80e8-420d-b691-77e89f5c496f)]
+    [threading(both)]
+    runtimeclass QueryManager
+    {
+        QueryManager();
+        Windows.Foundation.Collections.IMapView <String, Object>  GetCurrentAppState(Windows.Foundation.Collections.IPropertySet context);
+        Windows.Foundation.Collections.IMapView <String, Object>  GetCurrentSystemState();
+        Windows.Foundation.Collections.IVectorView <String>  GetAllKnownSignalNames(Windows.Foundation.Collections.IPropertySet context);
+        Windows.Foundation.Collections.IMapView <String, Object>  GetAllKnownSignals(Windows.Foundation.Collections.IPropertySet context);
+        Int32 GetSingleFeatureUsage(Int32 featureId, Int32 usageKind, Int32 lookBackInMinutes);
+    }
+
+
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Signals.ISignalRegistrationManager", 1c158aad-6813-4106-9aa4-6f7e2ba31d6c)]
+    [threading(both)]
+    runtimeclass SignalRegistrationManager
+    {
+        SignalRegistrationManager();
+        void Register(Windows.Data.Json.JsonObject signalJson, String tag, String signalName, String signalCollectionID, String assetPath);
+        void UnregisterAllWithTag(String tag);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Signals.InternalContract, 1)]
+    [static_name("Windows.Internal.Signals.ISignalEvaluatorStatics", 11db2e9e-9197-4419-8ad4-d28e6932a40c)]
+    [interface_name("Windows.Internal.Signals.ISignalEvaluator", b469f226-ac83-46b4-95de-32a4d589a03e)]
+    [threading(both)]
+    runtimeclass SignalEvaluator
+    {
+        SignalEvaluator();
+        static void Resolve(String correlationVector, Boolean overservedResult);
+        [method_name("EvaluateSignalAsync")] Windows.Foundation.IAsyncOperation <Windows.Internal.Signals.ISignalEvaluationResult>  EvaluateSignalAsync(String tag, String signalName, String signalCollectionID);
+        [method_name("EvaluateSignalWithCustomFeaturesAsync")] Windows.Foundation.IAsyncOperation <Windows.Internal.Signals.ISignalEvaluationResult>  EvaluateSignalAsync(String tag, String signalName, String signalCollectionID, Windows.Foundation.Collections.IPropertySet customFeatures);
+        [method_name("EvaluateSignalWithThresholdAsync")] Windows.Foundation.IAsyncOperation <Windows.Internal.Signals.ISignalEvaluationResult>  EvaluateSignalWithThresholdAsync(String tag, String signalName, String signalCollectionID, Double threshold);
+        [method_name("EvaluateSignalWithCustomFeaturesAndThresholdAsync")] Windows.Foundation.IAsyncOperation <Windows.Internal.Signals.ISignalEvaluationResult>  EvaluateSignalWithThresholdAsync(String tag, String signalName, String signalCollectionID, Windows.Foundation.Collections.IPropertySet customFeatures, Double threshold);
+    }
+
+}

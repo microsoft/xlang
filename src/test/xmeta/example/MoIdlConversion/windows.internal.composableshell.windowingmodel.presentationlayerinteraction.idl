@@ -1,0 +1,153 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [uuid(cde14d7b-5d52-47a0-910d-05836b70d6f6)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [internal]
+    interface IWindowUXPresentationState
+    {
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(1ed8e465-f2e6-5de5-b625-4fcce87d271d)]
+    interface IWindowPresentationState
+    {
+        Windows.Internal.ComposableShell.WindowingModel.WindowId Id{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.WindowId NextWindow{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.WindowId PreviousWindow{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.WindowId OwnerWindow{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.WindowingModel.WindowId>  OwnedWindows{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.Visibility Visibility{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.WindowPosition Position{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.WindowSize Size{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.EnabledState EnabledState{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowUXPresentationState UXState{ get; };
+    };
+
+    [uuid(ccd29912-ccbc-4dad-8278-92cd4c7cee2a)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [internal]
+    interface IPresentationStateChange
+    {
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(1f4528b2-891c-4da4-a686-b0fa3c7d726e)]
+    [internal]
+    interface IUXPresentationStateChange requires Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange
+    {
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    enum WindowPresentationStateChangeKind
+    {
+        Created,
+        Destroyed,
+        PositionSize,
+        ZOrder,
+        Visibility,
+        ClientArea,
+        UXState,
+    };
+
+    [uuid(75f5e05b-edf6-59cc-a7df-5a2859f3080a)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    interface IWindowPresentationStateChange requires Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange
+    {
+        Windows.Internal.ComposableShell.WindowingModel.WindowId Id{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.WindowPresentationStateChangeKind Kind{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(6833559f-12ec-5a8a-a481-8003a26608c9)]
+    interface IWindowPresentationStateCreation requires Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowPresentationStateChange, Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange
+    {
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowPresentationState InitialState{ get; };
+    };
+
+    [uuid(1b782f81-d2b4-5983-a12e-2dec4887fbf9)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    interface IWindowPositionSizePresentationStateChange requires Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowPresentationStateChange, Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange
+    {
+        Windows.Internal.ComposableShell.WindowingModel.WindowPosition NewPosition{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.WindowSize NewSize{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(d28c5faf-9a1f-534d-a430-68a92c994b69)]
+    interface IWindowZOrderPresentationStateChange requires Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowPresentationStateChange, Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange
+    {
+        Windows.Internal.ComposableShell.WindowingModel.WindowId NewNextWindowId{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.WindowId NewPrevWindowId{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(3610b626-adf9-5fc2-9077-7718afdb3860)]
+    interface IWindowVisibilityPresentationStateChange requires Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowPresentationStateChange, Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange
+    {
+        Windows.Internal.ComposableShell.WindowingModel.Visibility Visibility{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(30430cf7-a6bf-4244-8d39-6da8408424f7)]
+    [internal]
+    interface IWindowUXPresentationStateChangePayload
+    {
+    };
+
+    [uuid(8ffa6378-bd1d-5468-a962-e91e10b84ff0)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    interface IWindowUXPresentationStateChange requires Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowPresentationStateChange, Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange, Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IUXPresentationStateChange
+    {
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IWindowUXPresentationStateChangePayload Payload{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    struct PresentationStateSequenceNumber
+    {
+        UInt64 Value;
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(9d2e4f4f-946a-5812-a0c4-93a746cf9a95)]
+    interface IPresentationStateChanges
+    {
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.PresentationStateSequenceNumber SequenceNumber{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChange>  Changes{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(2cdd5d50-740a-4f77-96e1-0049fc8f5170)]
+    [internal]
+    interface IUXPresentationState
+    {
+    };
+
+    [uuid(e4fffbf9-8712-57be-8b60-2f040c67bff5)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    interface IPresentationStateSnapshot
+    {
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.PresentationStateSequenceNumber SequenceNumber{ get; };
+        Windows.Foundation.Collections.IVectorView <Object>  Windows{ get; };
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IUXPresentationState UX{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.InternalContract, 1)]
+    [uuid(ec7b0879-5a11-5741-b983-e8e005eade62)]
+    interface IPresentationStateService
+    {
+        Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateSnapshot GetPresentationStateSnapshot();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateService, Windows.Internal.ComposableShell.WindowingModel.PresentationLayerInteraction.IPresentationStateChanges>  PresentationStateChanged;
+    };
+
+}

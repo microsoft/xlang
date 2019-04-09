@@ -1,0 +1,216 @@
+
+
+
+
+
+
+
+
+
+namespace Microsoft.Bluetooth.Profiles.Hfp.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract ApiContract{};
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    enum HandsFreeIndicatorType
+    {
+        Service,
+        SignalStrength,
+        Roaming,
+        BatteryLevel,
+        MicrophoneMute,
+        InBandRingingStatus,
+        AudioTransferStatus,
+        Connected,
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    enum HfpAudioStatus
+    {
+        AudioCanRouteToLocalDevice,
+        AudioRoutedToLocalDevice,
+        AudioCannotRouteToLocalDevice,
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    enum HandsFreeCallState
+    {
+        Active,
+        Held,
+        OutgoingDialing,
+        OutgoingAlerting,
+        Incoming,
+        Waiting,
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    enum HandsFreeCommandResult
+    {
+        Success,
+        RemoteFailure,
+        CommandTimedOut,
+        ConnectionLost,
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    enum HfpAudioGatewaySupportedFeatureFlags
+    {
+        ThreeWayCalling = 1,
+        EchoCancellationNoiceReduction,
+        VoiceRecognitionActivation = 4,
+        InBandRingTone = 8,
+        AttachPhoneNumberToVoiceTag = 16,
+        AbilityToRejectCall = 32,
+        EnhancedCallStatus = 64,
+        EnhancedCallControl = 128,
+        ExtendedErrorResultCode = 256,
+        CodecNegotiation = 512,
+        HfIndicators = 1024,
+        EscoS4SettingsSupported = 2048,
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    struct HfpHandsFreeDeviceInformation
+    {
+        UInt32 SupportedFeatures;
+        String Number;
+        String Model;
+        String Manufacturer;
+        String Version;
+        String Carrier;
+        String Name;
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    struct HfpHandsFreeIndicator
+    {
+        HandsFreeIndicatorType Type;
+        UInt8 Value;
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    struct HfpHandsFreePhoneCallInformation
+    {
+        UInt32 Id;
+        String Number;
+        String ContactName;
+        HandsFreeCallState CallState;
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    struct HfpAllowedUser
+    {
+        String UserSid;
+        String AppId;
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [static_name("Microsoft.Bluetooth.Profiles.Hfp.Internal.IHfpTransportDeviceStatics", 6410e692-41b6-458c-9a0c-894a373ff3a3)]
+    [interface_name("Microsoft.Bluetooth.Profiles.Hfp.Internal.IHfpTransportDevice", 3514e650-c277-435d-b5ba-eb76f36ec370)]
+    [threading(both)]
+    runtimeclass HfpTransportDevice
+    {
+        static Microsoft.Bluetooth.Profiles.Hfp.Internal.HfpTransportDevice FromId(String deviceId);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceAccessStatus>  RequestAccessAsync();
+        void Register();
+        void RegisterForUser(Windows.System.User user);
+        void Unregister();
+        void UnregisterForUser(Windows.System.User user);
+        Boolean IsRegistered();
+        Boolean Connect();
+        Windows.Foundation.IAsyncOperation <Boolean>  ConnectAsync();
+        UInt64 RegisterForAutoConnect();
+        void UnregisterAutoConnect(UInt64 registrationToken);
+        Microsoft.Bluetooth.Profiles.Hfp.Internal.HfpHandsFreeDevice HandsFreeDevice{ get; };
+    }
+
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Profiles.Hfp.Internal.IHfpHandsFreeDevice", c7975e09-f9fc-4361-b2d8-d495fc2da743)]
+    runtimeclass HfpHandsFreeDevice
+    {
+        UInt64 BluetoothAddress{ get; };
+        String DeviceId{ get; };
+        Microsoft.Bluetooth.Profiles.Hfp.Internal.HfpHandsFreeDeviceInformation DeviceInfo{ get; };
+        Windows.Foundation.Collections.IVectorView <Microsoft.Bluetooth.Profiles.Hfp.Internal.HfpAllowedUser>  AllowedUsers{ get; };
+        Windows.Foundation.Collections.IVectorView <Microsoft.Bluetooth.Profiles.Hfp.Internal.HfpHandsFreeIndicator>  IndicatorValues{ get; };
+        UInt8 get_IndicatorValue(HandsFreeIndicatorType type);
+        Windows.Foundation.Collections.IVectorView <Microsoft.Bluetooth.Profiles.Hfp.Internal.HfpHandsFreePhoneCallInformation>  CallList{ get; };
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  SetAudioTransferAsync(Boolean pullToHf);
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  SetMicMuteAsync(Boolean value);
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  DialNumberAsync(String numberToDial);
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  SendDTMFAsync(UInt8 dtmfCode);
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  AcceptCallAsync();
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  RejectCallAsync();
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  HangupCallAsync();
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  SwapActiveAndHeldAsync();
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  AcceptIncomingAndDropActiveCallAsync();
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  AcceptIncomingAndDropHeldCallAsync();
+        EventRegistrationToken RegisterWatcher(IHfpHandsFreeDeviceStateWatcher watcher);
+        void Unregister(EventRegistrationToken token);
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  JoinCallsAsync();
+        Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Profiles.Hfp.Internal.HandsFreeCommandResult>  DisjoinCallsAsync();
+        void ToggleVoiceRecognitionSession();
+    }
+
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [uuid(7b7d491d-fa66-437e-90a7-42071431c105)]
+    interface IHfpHandsFreeDeviceStateWatcher
+    {
+        void OnIndicatorValueChanged(HfpHandsFreeIndicator indicator);
+        void OnPhoneCallAdded(HfpHandsFreePhoneCallInformation callInfo);
+        void OnPhoneCallRemoved(UInt32 callId);
+        void OnPhoneCallStateChanged(UInt32 callId, HandsFreeCallState newState);
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [uuid(47aaa96a-5a36-4f58-85aa-3e87a8a28062)]
+    delegate void HfpHandsFreeDeviceIndicatorValueChangedEventHandler(HfpHandsFreeIndicator inidicator);
+
+    [uuid(7bc0cb4c-4894-4c35-b19b-4e41f4f608f8)]
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    delegate void HfpHandsFreeDevicePhoneCallAddedEventHandler(HfpHandsFreePhoneCallInformation callInfo);
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [uuid(473eee97-678a-4b1d-b449-99055a134b31)]
+    delegate void HfpHandsFreeDevicePhoneCallRemovedEventHandler(UInt32 callId);
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [uuid(220b0157-95f6-4b92-8a51-7a3860c3c269)]
+    delegate void HfpHandsFreeDevicePhoneCallStateChangedEventHandler(UInt32 callId, HandsFreeCallState newState);
+
+    [uuid(5b9329fa-03d6-464d-85a8-0173be38017e)]
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    interface IHfpHandsFreeDeviceWatcher
+    {
+        void OnDeviceAdded(HfpHandsFreeDevice device);
+        void OnDeviceRemoved(UInt64 bluetoothAddress);
+    };
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [uuid(94d75364-d604-4510-b26f-dddc066cfba0)]
+    delegate void HfpHandsFreeDeviceAddedEventHandler(HfpHandsFreeDevice addedDevice);
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [uuid(4d78ebb8-0bce-466c-a852-0dd7c27b8275)]
+    delegate void HfpHandsFreeDeviceRemovedEventHandler(UInt64 bluetoothAddress);
+
+
+    [contract(Microsoft.Bluetooth.Profiles.Hfp.Internal.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Profiles.Hfp.Internal.IHfpHandsFreeDeviceRegistrar", 1fb44129-4188-464f-bbb0-05a3afeb8d82)]
+    [threading(both)]
+    runtimeclass HfpHandsFreeDeviceRegistrar
+    {
+        HfpHandsFreeDeviceRegistrar();
+        EventRegistrationToken RegisterDeviceWatcher(IHfpHandsFreeDeviceWatcher watcher);
+        void Unregister(EventRegistrationToken token);
+    }
+
+}

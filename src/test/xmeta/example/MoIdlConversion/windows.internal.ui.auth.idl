@@ -1,0 +1,254 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.UI.Auth
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum CredentialKind
+    {
+        Password,
+        PIN,
+        Fingerprint,
+        Face,
+        Iris,
+        BioGeneral,
+        SecurityKey,
+        PicturePassword,
+    };
+
+
+}
+namespace Windows.Internal.UI.Auth.DeviceLock
+{
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.Auth.DeviceLock.ICredentialTimeoutOption", 1c441621-232c-44b1-8a42-18565798bb9e)]
+    runtimeclass CredentialTimeoutOption
+    {
+        String Label{ get; };
+        Int32 TimeoutValueInSeconds{ get; };
+    }
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum PolicyType
+    {
+        None,
+        EasPolicy,
+        BioEnrolled,
+    };
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.Auth.DeviceLock.IDeviceLockSettings", 58bb5ec6-13b1-467e-9e97-f4379ecf0260)]
+    runtimeclass DeviceLockSettings
+    {
+        DeviceLockSettings();
+        Boolean CredentialsRequiredToUnlock{ get; };
+        Boolean CredentialsRequiredToUnlock{ set; };
+        Windows.Foundation.Collections.IObservableVector <Windows.Internal.UI.Auth.DeviceLock.CredentialTimeoutOption>  AvailableTimeoutOptions{ get; };
+        Windows.Internal.UI.Auth.DeviceLock.PolicyType PolicyType{ get; };
+        Windows.Internal.UI.Auth.DeviceLock.CredentialTimeoutOption SelectedTimeout{ get; };
+        Windows.Internal.UI.Auth.DeviceLock.CredentialTimeoutOption SelectedTimeout{ set; };
+        String LockMessageTitle{ get; };
+        String LockMessageTitle{ set; };
+        String LockMessageBody{ get; };
+        String LockMessageBody{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.Auth.DeviceLock.DeviceLockSettings, Object>  CredentialsRequirementOrSelectedTimeoutChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.Auth.DeviceLock.DeviceLockSettings, Windows.Internal.UI.Auth.DeviceLock.PolicyType>  PolicyChanged;
+    }
+
+}
+namespace Windows.Internal.UI.Auth.Enrollment
+{
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum UserEnrollmentUpdateResult
+    {
+        CompletedSuccessfully,
+        UserCancelled,
+        UpdateFailed,
+    };
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.Auth.Enrollment.IEnrollmentUpdateResult", 79f9d72c-8ae1-4745-8dfe-642085d429de)]
+    runtimeclass EnrollmentUpdateResult
+    {
+        Windows.Internal.UI.Auth.Enrollment.UserEnrollmentUpdateResult UserResult{ get; };
+        String ErrorMessage{ get; };
+    }
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum EnrollmentStateChangeReason
+    {
+        UserAction,
+        PolicyUpdate,
+        PrerequisiteUpdate,
+        AccountRemoval,
+        HardwareDetection,
+    };
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.Auth.Enrollment.IEnrollmentStateChangeArgs", 8ab9aed7-3899-41ae-8a06-95153c1d0d0e)]
+    runtimeclass EnrollmentStateChangeArgs
+    {
+        Windows.Internal.UI.Auth.Enrollment.EnrollmentStateChangeReason Reason{ get; };
+    }
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [uuid(7def6705-d204-45d4-8712-339d6518383e)]
+    interface ICredentialEnrollment
+    {
+        Windows.Internal.UI.Auth.CredentialKind Kind{ get; };
+        Boolean IsSupported{ get; };
+        Boolean CanEnroll{ get; };
+        Boolean IsEnrolled{ get; };
+        Boolean IsEnrollmentInProgress{ get; };
+        Boolean CanRemove{ get; };
+        Boolean IsDisabledByPolicy{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment, Windows.Internal.UI.Auth.Enrollment.EnrollmentStateChangeArgs>  EnrollmentUpdated;
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  RemoveAsync(UInt32 callingHwnd);
+    };
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum PinDisabledReason
+    {
+        None,
+        Generic,
+        NGCPolicyNotYetApplied,
+        MissingTPM,
+        NoNetwork,
+        NotOnCorpNet,
+        BlankPassword,
+        ServerSku,
+        GuestAccount,
+    };
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.Auth.Enrollment.IPinCredentialEnrollment", bddb9d40-0a85-4897-966c-7ea7dc4fe988)]
+    runtimeclass PinCredentialEnrollment
+        : Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  UpdatePinAsync(UInt32 callingHwnd);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  ForgotPinAsync(UInt32 callingHwnd);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  FixPinAsync(UInt32 callingHwnd);
+        void RefreshEnrollment();
+        Windows.Internal.UI.Auth.Enrollment.PinDisabledReason PinPolicyReason{ get; };
+        Boolean IsForgotPinSupported{ get; };
+        Boolean CanForgetPin{ get; };
+        Boolean CanFixPin{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.Auth.Enrollment.PinCredentialEnrollment, Object>  PinRemoved;
+    }
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.Auth.Enrollment.IPasswordCredentialEnrollment", cf9da5ad-59aa-414d-9223-cd5f12e31119)]
+    runtimeclass PasswordCredentialEnrollment
+        : Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  UpdatePasswordAsync(UInt32 callingHwnd);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  UpdateSecurityQuestionSecurityAnswerAsync(UInt32 callingHwnd);
+        String PasswordDescription{ get; };
+        Boolean IsSecurityQuestionSecurityAnswerSupported{ get; };
+        Boolean CanUpdateSecurityQuestionSecurityAnswer{ get; };
+        Boolean IsDefaultPasswordLessMode{ get; };
+        Boolean IsLogonAllowedInPasswordLessMode{ get; };
+        Boolean IsLogonAllowedInPasswordLessMode{ set; };
+        Boolean IsPasswordSupported{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.Auth.Enrollment.PasswordCredentialEnrollment, Object>  PasswordChanged;
+    }
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum PicturePasswordDisabledReason
+    {
+        None,
+        BlankPassword,
+    };
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.Auth.Enrollment.IPicturePasswordCredentialEnrollment", b350f361-bef5-4f75-aa88-1c2870bda397)]
+    runtimeclass PicturePasswordCredentialEnrollment
+        : Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  UpdatePicturePasswordAsync(UInt32 callingHwnd);
+        void RefreshEnrollment();
+        String PicturePasswordDescription{ get; };
+        Windows.Internal.UI.Auth.Enrollment.PicturePasswordDisabledReason PicturePasswordDisabledReason{ get; };
+    }
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum BioDisabledReason
+    {
+        None,
+        Generic,
+        NGCPolicyNotYetApplied,
+        MissingTPM,
+        BlankPassword,
+        MissingHardware,
+        ServerSku,
+        GuestAccount,
+        NoNetwork,
+    };
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.Auth.Enrollment.IBioCredentialEnrollment", b39a12bb-ced4-4693-8a91-74f62767ac60)]
+    runtimeclass BioCredentialEnrollment
+        : Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  UpdateBioAsync(UInt32 callingHwnd);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  UpdateBioInOobeAsync(UInt32 callingHwnd);
+        void RefreshEnrollment();
+        Windows.Internal.UI.Auth.Enrollment.BioDisabledReason BioPolicyReason{ get; };
+        Boolean HasBioBeenUpsold{ get; };
+        Boolean IsLockscreenAutoDismissConfigurable{ get; };
+        Boolean IsLockscreenAutoDismissSet{ get; };
+        Boolean IsLockscreenAutoDismissSet{ set; };
+    }
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    enum SecurityKeyDisabledReason
+    {
+        None,
+        Generic,
+    };
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.Auth.Enrollment.ISecurityKeyCredentialEnrollment", 05c6b2b4-a0ef-4015-b373-fc454568d9c9)]
+    runtimeclass SecurityKeyCredentialEnrollment
+        : Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.EnrollmentUpdateResult>  ManageSecurityKeyAsync(UInt32 callingHwnd);
+        Windows.Internal.UI.Auth.Enrollment.SecurityKeyDisabledReason SecurityKeyPolicyReason{ get; };
+    }
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [static_name("Windows.Internal.UI.Auth.Enrollment.IUserCredentialEnrollmentManagerStatics", 0e1855aa-9224-4c9e-820f-85bae6371e2e)]
+    runtimeclass UserCredentialEnrollmentManager
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment>  GetEnrollmentAsync(Windows.Internal.UI.Auth.CredentialKind kind);
+    }
+
+
+    [contract(Windows.Internal.UI.Auth.InternalContract, 1)]
+    [static_name("Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollmentManagerStatics", 00a38e35-5df3-434f-9168-c0c532ef9798)]
+    runtimeclass CredentialEnrollmentManager
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Internal.UI.Auth.Enrollment.ICredentialEnrollment>  GetEnrollmentForUserAsync(Windows.System.User user, Windows.Internal.UI.Auth.CredentialKind kind);
+    }
+
+}

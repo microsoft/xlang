@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input.ExpressiveInput
+{
+    [contractversion(1)]
+    [internal]
+    apicontract ExpInternalContract{};
+
+    [contract(Windows.UI.Internal.Input.ExpressiveInput.ExpInternalContract, 1)]
+    enum ExpExtensionType
+    {
+        unknownExtension,
+        stickerExtension,
+        emojiExtension,
+    };
+
+
+    [contract(Windows.UI.Internal.Input.ExpressiveInput.ExpInternalContract, 1)]
+    runtimeclass ExpExtension
+        : [default]Windows.UI.Internal.Input.ExpressiveInput.IExpExtension
+    {
+    }
+
+    [uuid(0c179064-0899-48e3-b74f-979c25f93f2e)]
+    [contract(Windows.UI.Internal.Input.ExpressiveInput.ExpInternalContract, 1)]
+    interface IExpExtension
+    {
+        String PackageFullName{ get; };
+        Windows.Storage.Streams.IRandomAccessStream ExtensionIcon{ get; };
+        String ExtensionIconPlainText{ get; };
+        Windows.Foundation.Collections.IMapView <String, String>  Properties{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Input.ExpressiveInput.ExpExtensionContentMetaData>  ExtensionContentMetaData{ get; };
+    };
+
+    [contract(Windows.UI.Internal.Input.ExpressiveInput.ExpInternalContract, 1)]
+    runtimeclass ExpExtensionContentMetaData
+        : [default]Windows.UI.Internal.Input.ExpressiveInput.IExpExtensionContentMetaData
+    {
+    }
+
+    [uuid(a44f4dda-9743-4570-a153-fa2ed9ad5b19)]
+    [contract(Windows.UI.Internal.Input.ExpressiveInput.ExpInternalContract, 1)]
+    interface IExpExtensionContentMetaData
+    {
+        String Description{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  ReadExtensionContentStreamAsync{ get; };
+        String DisplayString{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  Keywords{ get; };
+    };
+
+    [contract(Windows.UI.Internal.Input.ExpressiveInput.ExpInternalContract, 1)]
+    [interface_name("Windows.UI.Internal.Input.ExpressiveInput.IExpExtensionManager", d3f7682c-a371-4f29-8eb0-c36007fd425c)]
+    runtimeclass ExpExtensionManager
+    {
+        ExpExtensionManager();
+        void SetLocaleId(Int32 localeId);
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Input.ExpressiveInput.ExpExtension>  QueryExtension(ExpExtensionType type, String packageFullName);
+        event Windows.Foundation.EventHandler <Object>  PackageUpdated;
+    }
+
+}

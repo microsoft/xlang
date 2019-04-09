@@ -1,0 +1,34 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Core.Preview
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.UI.Core.Preview.ISystemNavigationCloseRequestedPreviewEventArgs", 83d00de1-cbe5-4f31-8414-361da046518f)]
+    runtimeclass SystemNavigationCloseRequestedPreviewEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.UI.Core.Preview.ISystemNavigationManagerPreviewStatics", 0e971360-df74-4bce-84cb-bd1181ac0a71)]
+    [interface_name("Windows.UI.Core.Preview.ISystemNavigationManagerPreview", ec5f0488-6425-4777-a536-cb5634427f0d)]
+    runtimeclass SystemNavigationManagerPreview
+    {
+        static Windows.UI.Core.Preview.SystemNavigationManagerPreview GetForCurrentView();
+        event Windows.Foundation.EventHandler <Windows.UI.Core.Preview.SystemNavigationCloseRequestedPreviewEventArgs>  CloseRequested;
+    }
+
+
+}

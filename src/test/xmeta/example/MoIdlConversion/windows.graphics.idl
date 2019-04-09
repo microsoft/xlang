@@ -1,0 +1,47 @@
+
+
+
+
+
+
+
+namespace Windows.Graphics
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    struct PointInt32
+    {
+        Int32 X;
+        Int32 Y;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    struct SizeInt32
+    {
+        Int32 Width;
+        Int32 Height;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    struct RectInt32
+    {
+        Int32 X;
+        Int32 Y;
+        Int32 Width;
+        Int32 Height;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [uuid(caff7902-670c-4181-a624-da977203b845)]
+    [webhosthidden]
+    interface IGeometrySource2D
+    {
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    struct DisplayAdapterId
+    {
+        UInt32 LowPart;
+        Int32 HighPart;
+    };
+
+}

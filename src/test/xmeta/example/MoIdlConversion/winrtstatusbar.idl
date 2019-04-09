@@ -1,0 +1,35 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.ViewManagement
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Phone.PhoneContract, 1)]
+    [static_name("Windows.UI.ViewManagement.IStatusBarStatics", 8b463fdf-422f-4561-8806-fb1289cadfb7)]
+    [interface_name("Windows.UI.ViewManagement.IStatusBar", 0ffcc5bf-98d0-4864-b1e8-b3f4020be8b4)]
+    runtimeclass StatusBar
+    {
+        static Windows.UI.ViewManagement.StatusBar GetForCurrentView();
+        Windows.Foundation.IAsyncAction ShowAsync();
+        Windows.Foundation.IAsyncAction HideAsync();
+        Double BackgroundOpacity{ get; };
+        Double BackgroundOpacity{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  ForegroundColor{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  ForegroundColor{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  BackgroundColor{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  BackgroundColor{ set; };
+        Windows.UI.ViewManagement.StatusBarProgressIndicator ProgressIndicator{ get; };
+        Windows.Foundation.Rect OccludedRect{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.StatusBar, Object>  Showing;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.StatusBar, Object>  Hiding;
+    }
+
+
+}

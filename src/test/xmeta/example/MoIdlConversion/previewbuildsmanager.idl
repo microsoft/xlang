@@ -1,0 +1,36 @@
+
+
+
+
+
+
+
+
+namespace Windows.Management.Update
+{
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Management.Update.IPreviewBuildsState", a2f2903e-b223-5f63-7546-3e8eac070a2e)]
+    runtimeclass PreviewBuildsState
+    {
+        Windows.Foundation.Collections.ValueSet Properties{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [static_name("Windows.Management.Update.IPreviewBuildsManagerStatics", 3e422887-b112-5a70-7da1-97d78d32aa29)]
+    [interface_name("Windows.Management.Update.IPreviewBuildsManager", fa07dd61-7e4f-59f7-7c9f-def9051c5f62)]
+    [threading(both)]
+    runtimeclass PreviewBuildsManager
+    {
+        static Windows.Management.Update.PreviewBuildsManager GetDefault();
+        static Boolean IsSupported();
+        Boolean ArePreviewBuildsAllowed{ get; };
+        Boolean ArePreviewBuildsAllowed{ set; };
+        Windows.Management.Update.PreviewBuildsState GetCurrentState();
+        Windows.Foundation.IAsyncOperation <Boolean>  SyncAsync();
+    }
+
+}

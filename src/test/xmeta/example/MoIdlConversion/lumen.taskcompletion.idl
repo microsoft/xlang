@@ -1,0 +1,47 @@
+
+
+
+
+
+
+namespace Lumen.TaskCompletion.AppLaunching
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [uuid(62e959ed-1110-47bf-8964-994d7e93062d)]
+    [contract(Lumen.TaskCompletion.AppLaunching.InternalContract, 1)]
+    interface IAppInfo
+    {
+        String AppFullName{ get; };
+        String AppDisplayName{ get; };
+        Boolean IsModernApp{ get; };
+    };
+
+    [contract(Lumen.TaskCompletion.AppLaunching.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass AppInfo
+        : [default]Lumen.TaskCompletion.AppLaunching.IAppInfo
+    {
+        AppInfo();
+    }
+
+    [contract(Lumen.TaskCompletion.AppLaunching.InternalContract, 1)]
+    [uuid(78615437-ccd6-4e38-839a-3cc17e003f62)]
+    interface IAppLauncher
+    {
+        void LaunchAppByAumid(String appId, Boolean isModernApp);
+        void LaunchAppByName(String appName, Boolean isModernApp);
+        Windows.Foundation.Collections.IVectorView <Lumen.TaskCompletion.AppLaunching.IAppInfo>  EnumerateApps();
+    };
+
+    [contract(Lumen.TaskCompletion.AppLaunching.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass AppLauncher
+        : [default]Lumen.TaskCompletion.AppLaunching.IAppLauncher
+    {
+        AppLauncher();
+    }
+
+}

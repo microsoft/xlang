@@ -1,0 +1,36 @@
+
+
+
+
+
+
+
+
+namespace WindowsInternal.MeetingInfo
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalMeetingInfoContract{};
+
+
+    [contract(WindowsInternal.MeetingInfo.InternalMeetingInfoContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("WindowsInternal.MeetingInfo.IMeetingData", 238947cb-05b2-4f3d-98ea-c9d62589637b)]
+    runtimeclass MeetingData
+    {
+        Windows.ApplicationModel.Appointments.Appointment Appointment{ get; };
+        String Provider{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.MeetingInfo.InternalMeetingInfoContract, 1)]
+    [interface_name("WindowsInternal.MeetingInfo.IMeetingInfo", 43d395cf-db21-4f82-9f6c-d633525daa96)]
+    runtimeclass MeetingInfo
+    {
+        MeetingInfo();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IObservableVector <WindowsInternal.MeetingInfo.MeetingData> >  GetCurrentMeetingAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IObservableVector <WindowsInternal.MeetingInfo.MeetingData> >  GetMeetingsAsync(Windows.Foundation.DateTime rangeStart, Windows.Foundation.TimeSpan rangeLength);
+    }
+
+}

@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.SimPinExperience
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    enum SimPinExperienceStatus
+    {
+        Uninitialized,
+        Failed,
+        Executing,
+        TerminatedOk,
+        TerminatedUnexpectedly,
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(4df75a5f-5107-4ffa-8318-15519307addf)]
+    interface ISimPinExperience
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.PlatformExtensions.SimPinExperience.SimPinExperienceStatus>  LaunchAsync(String arguments, Windows.System.User user);
+        void Cancel();
+        Windows.Internal.PlatformExtensions.SimPinExperience.SimPinExperienceStatus Status{ get; };
+    };
+
+}

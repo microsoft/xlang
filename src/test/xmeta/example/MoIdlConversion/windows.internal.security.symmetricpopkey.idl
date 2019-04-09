@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Security.Cryptography.Core
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.Security.Cryptography.Core.InternalContract, 1)]
+    [static_name("Windows.Internal.Security.Cryptography.Core.ISymmetricPopKeyStatics", 89b2a8ea-23f0-433f-8999-fddd0cd1d7c1)]
+    [threading(both)]
+    runtimeclass SymmetricPopKey
+    {
+        static Windows.Storage.Streams.IBuffer Import(String domainName, String tenantName, String userSid, Boolean isDeviceKey, Windows.Storage.Streams.IBuffer keyTransportKeyProtectedKey);
+        static Windows.Storage.Streams.IBuffer Sign(Windows.Storage.Streams.IBuffer protectedKey, Windows.Storage.Streams.IBuffer label, Windows.Storage.Streams.IBuffer context, Windows.Storage.Streams.IBuffer message);
+        static Boolean Verify(Windows.Storage.Streams.IBuffer protectedKey, Windows.Storage.Streams.IBuffer label, Windows.Storage.Streams.IBuffer context, Windows.Storage.Streams.IBuffer message, Windows.Storage.Streams.IBuffer signature);
+        static Windows.Storage.Streams.IBuffer Encrypt(Windows.Storage.Streams.IBuffer protectedKey, Windows.Storage.Streams.IBuffer label, Windows.Storage.Streams.IBuffer context, Windows.Storage.Streams.IBuffer iv, Windows.Storage.Streams.IBuffer data);
+        static Windows.Storage.Streams.IBuffer Decrypt(Windows.Storage.Streams.IBuffer protectedKey, Windows.Storage.Streams.IBuffer label, Windows.Storage.Streams.IBuffer context, Windows.Storage.Streams.IBuffer iv, Windows.Storage.Streams.IBuffer data);
+    }
+
+}

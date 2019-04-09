@@ -1,0 +1,30 @@
+
+
+
+
+
+
+
+
+namespace Windows.Media.Capture
+{
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [static_name("Windows.Media.Capture.IAppCaptureStatics", f922dd6c-0a7e-4e74-8b20-9c1f902d08a1)]
+    [interface_name("Windows.Media.Capture.IAppCapture", 9749d453-a29a-45ed-8f29-22d09942cff7)]
+    runtimeclass AppCapture
+    {
+        static Windows.Media.Capture.AppCapture GetForCurrentView();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Media.Capture.IAppCaptureStatics2", b2d881d4-836c-4da4-afd7-facc041e1cf3)]
+        {
+            static Windows.Foundation.IAsyncAction SetAllowedAsync(Boolean allowed);
+        }
+        Boolean IsCapturingAudio{ get; };
+        Boolean IsCapturingVideo{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.AppCapture, Object>  CapturingChanged;
+    }
+
+
+
+}

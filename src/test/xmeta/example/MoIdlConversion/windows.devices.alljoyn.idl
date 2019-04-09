@@ -1,0 +1,475 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.AllJoyn
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AllJoynAuthenticationMechanism
+    {
+        None,
+        [deprecated("SrpAnonymous is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        SrpAnonymous,
+        [deprecated("SrpLogon is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        SrpLogon,
+        EcdheNull,
+        [deprecated("EcdhePsk is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        EcdhePsk,
+        EcdheEcdsa,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        EcdheSpeke,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.AllJoyn.IAllJoynStatusStatics", d0b7a17e-0d29-4da9-8ac6-54c554bedbc5)]
+    runtimeclass AllJoynStatus
+    {
+        static Int32 Ok{ get; };
+        static Int32 Fail{ get; };
+        static Int32 OperationTimedOut{ get; };
+        static Int32 OtherEndClosed{ get; };
+        static Int32 ConnectionRefused{ get; };
+        static Int32 AuthenticationFailed{ get; };
+        static Int32 AuthenticationRejectedByUser{ get; };
+        static Int32 SslConnectFailed{ get; };
+        static Int32 SslIdentityVerificationFailed{ get; };
+        static Int32 InsufficientSecurity{ get; };
+        static Int32 InvalidArgument1{ get; };
+        static Int32 InvalidArgument2{ get; };
+        static Int32 InvalidArgument3{ get; };
+        static Int32 InvalidArgument4{ get; };
+        static Int32 InvalidArgument5{ get; };
+        static Int32 InvalidArgument6{ get; };
+        static Int32 InvalidArgument7{ get; };
+        static Int32 InvalidArgument8{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AllJoynBusAttachmentState
+    {
+        Disconnected,
+        Connecting,
+        Connected,
+        Disconnecting,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynAboutData", e5a9bf00-1fa2-4839-93ef-f9df404890f7)]
+    runtimeclass AllJoynAboutData
+    {
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        String DefaultAppName{ get; };
+        String DefaultAppName{ set; };
+        Windows.Foundation.Collections.IMap <String, String>  AppNames{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  DateOfManufacture{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  DateOfManufacture{ set; };
+        String DefaultDescription{ get; };
+        String DefaultDescription{ set; };
+        Windows.Foundation.Collections.IMap <String, String>  Descriptions{ get; };
+        String DefaultManufacturer{ get; };
+        String DefaultManufacturer{ set; };
+        Windows.Foundation.Collections.IMap <String, String>  Manufacturers{ get; };
+        String ModelNumber{ get; };
+        String ModelNumber{ set; };
+        String SoftwareVersion{ get; };
+        String SoftwareVersion{ set; };
+        Windows.Foundation.Uri SupportUrl{ get; };
+        Windows.Foundation.Uri SupportUrl{ set; };
+        Guid AppId{ get; };
+        Guid AppId{ set; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynBusAttachment", f309f153-1eed-42c3-a20e-436d41fe62f6)]
+    runtimeclass AllJoynBusAttachment
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Devices.AllJoyn.IAllJoynBusAttachmentStatics", 839d4d3d-1051-40d7-872a-8d0141115b1f)]
+        {
+            static Windows.Devices.AllJoyn.AllJoynBusAttachment GetDefault();
+            static Windows.Devices.Enumeration.DeviceWatcher GetWatcher(Windows.Foundation.Collections.IIterable <String>  requiredInterfaces);
+        }
+        AllJoynBusAttachment();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Devices.AllJoyn.IAllJoynBusAttachmentFactory", 642ef1a4-ad85-4ddf-90ae-604452b22288)]
+        {
+            [method_name( "Create" )] AllJoynBusAttachment(String connectionSpecification);
+        }
+        Windows.Devices.AllJoyn.AllJoynAboutData AboutData{ get; };
+        String ConnectionSpecification{ get; };
+        Windows.Devices.AllJoyn.AllJoynBusAttachmentState State{ get; };
+        String UniqueName{ get; };
+        Windows.Foundation.IAsyncOperation <Int32>  PingAsync(String uniqueName);
+        void Connect();
+        void Disconnect();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynBusAttachment, Windows.Devices.AllJoyn.AllJoynBusAttachmentStateChangedEventArgs>  StateChanged;
+        Windows.Foundation.Collections.IVector <Windows.Devices.AllJoyn.AllJoynAuthenticationMechanism>  AuthenticationMechanisms{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynBusAttachment, Windows.Devices.AllJoyn.AllJoynCredentialsRequestedEventArgs>  CredentialsRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynBusAttachment, Windows.Devices.AllJoyn.AllJoynCredentialsVerificationRequestedEventArgs>  CredentialsVerificationRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynBusAttachment, Windows.Devices.AllJoyn.AllJoynAuthenticationCompleteEventArgs>  AuthenticationComplete;
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.AllJoyn.IAllJoynBusAttachment2", 3474cb1e-2368-43b2-b43e-6a3ac1278d98)]
+        {
+            [method_name("GetAboutDataAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.AllJoyn.AllJoynAboutDataView>  GetAboutDataAsync(AllJoynServiceInfo serviceInfo);
+            [method_name("GetAboutDataWithLanguageAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.AllJoyn.AllJoynAboutDataView>  GetAboutDataAsync(AllJoynServiceInfo serviceInfo, Windows.Globalization.Language language);
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynBusAttachment, Windows.Devices.AllJoyn.AllJoynAcceptSessionJoinerEventArgs>  AcceptSessionJoinerRequested;
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynBusAttachment, Windows.Devices.AllJoyn.AllJoynSessionJoinedEventArgs>  SessionJoined;
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynBusAttachmentStateChangedEventArgs", d82e75f4-c02a-41ec-a8d5-eab1558953aa)]
+    runtimeclass AllJoynBusAttachmentStateChangedEventArgs
+    {
+        Windows.Devices.AllJoyn.AllJoynBusAttachmentState State{ get; };
+        Int32 Status{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynCredentialsRequestedEventArgs", 6a87e34e-b069-4b80-9e1a-41bc837c65d2)]
+    runtimeclass AllJoynCredentialsRequestedEventArgs
+    {
+        UInt16 AttemptCount{ get; };
+        Windows.Devices.AllJoyn.AllJoynCredentials Credentials{ get; };
+        String PeerUniqueName{ get; };
+        String RequestedUserName{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynCredentialsVerificationRequestedEventArgs", 800a7612-b805-44af-a2e1-792ab655a2d0)]
+    runtimeclass AllJoynCredentialsVerificationRequestedEventArgs
+    {
+        Windows.Devices.AllJoyn.AllJoynAuthenticationMechanism AuthenticationMechanism{ get; };
+        String PeerUniqueName{ get; };
+        Windows.Security.Cryptography.Certificates.Certificate PeerCertificate{ get; };
+        Windows.Networking.Sockets.SocketSslErrorSeverity PeerCertificateErrorSeverity{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.ChainValidationResult>  PeerCertificateErrors{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Cryptography.Certificates.Certificate>  PeerIntermediateCertificates{ get; };
+        void Accept();
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynAuthenticationCompleteEventArgs", 97b4701c-15dc-4b53-b6a4-7d134300d7bf)]
+    runtimeclass AllJoynAuthenticationCompleteEventArgs
+    {
+        Windows.Devices.AllJoyn.AllJoynAuthenticationMechanism AuthenticationMechanism{ get; };
+        String PeerUniqueName{ get; };
+        Boolean Succeeded{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynServiceInfoFactory", 7581dabd-fe03-4f4b-94a4-f02fdcbd11b8)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynServiceInfo", 4cbe8209-b93e-4182-999b-ddd000f9c575)]
+    runtimeclass AllJoynServiceInfo
+    {
+        [method_name( "Create" )] AllJoynServiceInfo(String uniqueName, String objectPath, UInt16 sessionPort);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Devices.AllJoyn.IAllJoynServiceInfoStatics", 5678570a-603a-49fc-b750-0ef13609213c)]
+        {
+            static Windows.Foundation.IAsyncOperation <Windows.Devices.AllJoyn.AllJoynServiceInfo>  FromIdAsync(String deviceId);
+        }
+        String UniqueName{ get; };
+        String ObjectPath{ get; };
+        UInt16 SessionPort{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.AllJoyn.IAllJoynAboutDataViewStatics", 57edb688-0c5e-416e-88b5-39b32d25c47d)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynAboutDataView", 6823111f-6212-4934-9c48-e19ca4984288)]
+    runtimeclass AllJoynAboutDataView
+    {
+        [method_name("GetDataBySessionPortAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.AllJoyn.AllJoynAboutDataView>  GetDataBySessionPortAsync(String uniqueName, AllJoynBusAttachment busAttachment, UInt16 sessionPort);
+        [method_name("GetDataBySessionPortWithLanguageAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.AllJoyn.AllJoynAboutDataView>  GetDataBySessionPortAsync(String uniqueName, AllJoynBusAttachment busAttachment, UInt16 sessionPort, Windows.Globalization.Language language);
+        Int32 Status{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        String AJSoftwareVersion{ get; };
+        Guid AppId{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  DateOfManufacture{ get; };
+        Windows.Globalization.Language DefaultLanguage{ get; };
+        String DeviceId{ get; };
+        String HardwareVersion{ get; };
+        String ModelNumber{ get; };
+        String SoftwareVersion{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Globalization.Language>  SupportedLanguages{ get; };
+        Windows.Foundation.Uri SupportUrl{ get; };
+        String AppName{ get; };
+        String Description{ get; };
+        String DeviceName{ get; };
+        String Manufacturer{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynAcceptSessionJoinerEventArgsFactory", b4435bc0-6145-429e-84db-d5bfe772b14f)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynAcceptSessionJoinerEventArgs", 4efb5365-3e8a-4257-8f10-539ce0d56c0f)]
+    runtimeclass AllJoynAcceptSessionJoinerEventArgs
+    {
+        [method_name( "Create" )] AllJoynAcceptSessionJoinerEventArgs(String uniqueName, UInt16 sessionPort, AllJoynTrafficType trafficType, UInt8 proximity, IAllJoynAcceptSessionJoiner acceptSessionJoiner);
+        String UniqueName{ get; };
+        UInt16 SessionPort{ get; };
+        Windows.Devices.AllJoyn.AllJoynTrafficType TrafficType{ get; };
+        Boolean SamePhysicalNode{ get; };
+        Boolean SameNetwork{ get; };
+        void Accept();
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynSessionJoinedEventArgsFactory", 6824d689-d6cb-4d9e-a09e-35806870b17f)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynSessionJoinedEventArgs", 9e9f5bd0-b5d7-47c5-8dab-b040cc192871)]
+    runtimeclass AllJoynSessionJoinedEventArgs
+    {
+        [method_name( "Create" )] AllJoynSessionJoinedEventArgs(AllJoynSession session);
+        Windows.Devices.AllJoyn.AllJoynSession Session{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynCredentials", 824650f2-a190-40b1-abab-349ec244dfaa)]
+    runtimeclass AllJoynCredentials
+    {
+        Windows.Devices.AllJoyn.AllJoynAuthenticationMechanism AuthenticationMechanism{ get; };
+        Windows.Security.Cryptography.Certificates.Certificate Certificate{ get; };
+        Windows.Security.Cryptography.Certificates.Certificate Certificate{ set; };
+        Windows.Security.Credentials.PasswordCredential PasswordCredential{ get; };
+        Windows.Security.Credentials.PasswordCredential PasswordCredential{ set; };
+        Windows.Foundation.TimeSpan Timeout{ get; };
+        Windows.Foundation.TimeSpan Timeout{ set; };
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.AllJoyn.IAllJoynSessionStatics", 9e05d604-a06c-46d4-b46c-0b0b54105b44)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynSession", e8d11b0c-c0d4-406c-88a9-a93efa85d4b1)]
+    runtimeclass AllJoynSession
+    {
+        [method_name("GetFromServiceInfoAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.AllJoyn.AllJoynSession>  GetFromServiceInfoAsync(AllJoynServiceInfo serviceInfo);
+        [method_name("GetFromServiceInfoAndBusAttachmentAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.AllJoyn.AllJoynSession>  GetFromServiceInfoAsync(AllJoynServiceInfo serviceInfo, AllJoynBusAttachment busAttachment);
+        Int32 Id{ get; };
+        Int32 Status{ get; };
+        Windows.Foundation.IAsyncOperation <Int32>  RemoveMemberAsync(String uniqueName);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynSession, Windows.Devices.AllJoyn.AllJoynSessionMemberAddedEventArgs>  MemberAdded;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynSession, Windows.Devices.AllJoyn.AllJoynSessionMemberRemovedEventArgs>  MemberRemoved;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynSession, Windows.Devices.AllJoyn.AllJoynSessionLostEventArgs>  Lost;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynSessionMemberAddedEventArgsFactory", 341de352-1d33-40a1-a1d3-e5777020e1f1)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynSessionMemberAddedEventArgs", 49a2798a-0dd1-46c1-9cd6-27190e503a5e)]
+    runtimeclass AllJoynSessionMemberAddedEventArgs
+    {
+        [method_name( "Create" )] AllJoynSessionMemberAddedEventArgs(String uniqueName);
+        String UniqueName{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynSessionMemberRemovedEventArgsFactory", c4d355e8-42b8-4b67-b757-d0cfcad59280)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynSessionMemberRemovedEventArgs", 409a219f-aa4a-4893-b430-baa1b63c6219)]
+    runtimeclass AllJoynSessionMemberRemovedEventArgs
+    {
+        [method_name( "Create" )] AllJoynSessionMemberRemovedEventArgs(String uniqueName);
+        String UniqueName{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynSessionLostEventArgsFactory", 13bbfd32-d2f4-49c9-980e-2805e13586b1)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynSessionLostEventArgs", e766a48a-8bb8-4954-ae67-d2fa43d1f96b)]
+    runtimeclass AllJoynSessionLostEventArgs
+    {
+        [method_name( "Create" )] AllJoynSessionLostEventArgs(AllJoynSessionLostReason reason);
+        Windows.Devices.AllJoyn.AllJoynSessionLostReason Reason{ get; };
+    }
+
+
+    [uuid(9d084679-469b-495a-a710-ac50f123069f)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    interface IAllJoynProducer
+    {
+        void SetBusObject(AllJoynBusObject busObject);
+    };
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynBusObjectFactory", 2c2f9f0b-8e02-4f9c-ac27-ea6dad5d3b50)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynBusObject", e8fd825e-f73a-490c-8804-04e026643047)]
+    runtimeclass AllJoynBusObject
+    {
+        [method_name( "Create" )] AllJoynBusObject(String objectPath);
+        [method_name( "CreateWithBusAttachment" )] AllJoynBusObject(String objectPath, AllJoynBusAttachment busAttachment);
+        AllJoynBusObject();
+        void Start();
+        void Stop();
+        void AddProducer(IAllJoynProducer producer);
+        Windows.Devices.AllJoyn.AllJoynBusAttachment BusAttachment{ get; };
+        Windows.Devices.AllJoyn.AllJoynSession Session{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.AllJoyn.AllJoynBusObject, Windows.Devices.AllJoyn.AllJoynBusObjectStoppedEventArgs>  Stopped;
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000000)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynBusObjectStoppedEventArgsFactory", 6b22fd48-d0a3-4255-953a-4772b4028073)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynBusObjectStoppedEventArgs", de102115-ef8e-4d42-b93b-a2ae74519766)]
+    runtimeclass AllJoynBusObjectStoppedEventArgs
+    {
+        [method_name( "Create" )] AllJoynBusObjectStoppedEventArgs(Int32 status);
+        Int32 Status{ get; };
+    }
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AllJoynTrafficType
+    {
+        Unknown,
+        Messages,
+        RawUnreliable,
+        RawReliable = 4,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(4da817d2-cd1d-4023-a7c4-16def89c28df)]
+    interface IAllJoynAcceptSessionJoiner
+    {
+        void Accept();
+    };
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AllJoynSessionLostReason
+    {
+        None,
+        ProducerLeftSession,
+        ProducerClosedAbruptly,
+        RemovedByProducer,
+        LinkTimeout,
+        Other,
+    };
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynProducerStoppedEventArgsFactory", 56529961-b219-4d6e-9f78-fa3f99fa8fe5)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynProducerStoppedEventArgs", 51309770-4937-492d-8080-236439987ceb)]
+    runtimeclass AllJoynProducerStoppedEventArgs
+    {
+        [method_name( "Create" )] AllJoynProducerStoppedEventArgs(Int32 status);
+        Int32 Status{ get; };
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynWatcherStoppedEventArgsFactory", 878fa5a8-2d50-47e1-904a-20bf0d48c782)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynWatcherStoppedEventArgs", c9fca03b-701d-4aa8-97dd-a2bb0a8f5fa3)]
+    runtimeclass AllJoynWatcherStoppedEventArgs
+    {
+        [method_name( "Create" )] AllJoynWatcherStoppedEventArgs(Int32 status);
+        Int32 Status{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynServiceInfoRemovedEventArgsFactory", 0dbf8627-9aff-4955-9227-6953baf41569)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynServiceInfoRemovedEventArgs", 3057a95f-1d3f-41f3-8969-e32792627396)]
+    runtimeclass AllJoynServiceInfoRemovedEventArgs
+    {
+        [method_name( "Create" )] AllJoynServiceInfoRemovedEventArgs(String uniqueName);
+        String UniqueName{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.AllJoyn.IAllJoynMessageInfoFactory", 34664c2a-8289-43d4-b4a8-3f4de359f043)]
+    [interface_name("Windows.Devices.AllJoyn.IAllJoynMessageInfo", ff2b0127-2c12-4859-aa3a-c74461ee814c)]
+    runtimeclass AllJoynMessageInfo
+    {
+        [method_name( "Create" )] AllJoynMessageInfo(String senderUniqueName);
+        String SenderUniqueName{ get; };
+    }
+
+}

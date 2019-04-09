@@ -1,0 +1,941 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Xaml.Media.Animation
+{
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [webhosthidden]
+    enum SlideNavigationTransitionEffect
+    {
+        FromBottom,
+        FromLeft,
+        FromRight,
+    };
+
+}
+namespace Windows.UI.Xaml.Controls
+{
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ListPickerFlyoutSelectionMode
+    {
+        Single,
+        Multiple,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum PivotHeaderFocusVisualPlacement
+    {
+        ItemHeaders,
+        SelectedItemHeader,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum PivotSlideInAnimationGroup
+    {
+        Default,
+        GroupOne,
+        GroupTwo,
+        GroupThree,
+    };
+
+
+
+}
+namespace Windows.UI.Xaml.Media.Animation
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Media.Animation.ICommonNavigationTransitionInfoStatics", 1e3efe33-50be-4443-883c-e5627201c2e5)]
+    [interface_name("Windows.UI.Xaml.Media.Animation.ICommonNavigationTransitionInfo", 50345692-a555-4624-a361-0a91c1706473)]
+    [threading(both)]
+    runtimeclass CommonNavigationTransitionInfo
+        : Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo
+    {
+        CommonNavigationTransitionInfo();
+        static Windows.UI.Xaml.DependencyProperty IsStaggeringEnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsStaggerElementProperty{ get; };
+        static Boolean GetIsStaggerElement(Windows.UI.Xaml.UIElement element);
+        static void SetIsStaggerElement(Windows.UI.Xaml.UIElement element, Boolean value);
+        Boolean IsStaggeringEnabled{ get; };
+        Boolean IsStaggeringEnabled{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Media.Animation.IContinuumNavigationTransitionInfoStatics", 3e25dd53-b18f-4bf1-b3bc-92f516f29903)]
+    [interface_name("Windows.UI.Xaml.Media.Animation.IContinuumNavigationTransitionInfo", 4be1dbad-8ba6-4004-8438-8a9017978543)]
+    [threading(both)]
+    runtimeclass ContinuumNavigationTransitionInfo
+        : Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo
+    {
+        ContinuumNavigationTransitionInfo();
+        static Windows.UI.Xaml.DependencyProperty ExitElementProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsEntranceElementProperty{ get; };
+        static Boolean GetIsEntranceElement(Windows.UI.Xaml.UIElement element);
+        static void SetIsEntranceElement(Windows.UI.Xaml.UIElement element, Boolean value);
+        static Windows.UI.Xaml.DependencyProperty IsExitElementProperty{ get; };
+        static Boolean GetIsExitElement(Windows.UI.Xaml.UIElement element);
+        static void SetIsExitElement(Windows.UI.Xaml.UIElement element, Boolean value);
+        static Windows.UI.Xaml.DependencyProperty ExitElementContainerProperty{ get; };
+        static Boolean GetExitElementContainer(Windows.UI.Xaml.Controls.ListViewBase element);
+        static void SetExitElementContainer(Windows.UI.Xaml.Controls.ListViewBase element, Boolean value);
+        Windows.UI.Xaml.UIElement ExitElement{ get; };
+        Windows.UI.Xaml.UIElement ExitElement{ set; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.Animation.IDrillInNavigationTransitionInfo", 3b86201a-45d3-463b-939e-c8595f439bcc)]
+    [threading(both)]
+    runtimeclass DrillInNavigationTransitionInfo
+        : Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo
+    {
+        DrillInNavigationTransitionInfo();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Xaml.Media.Animation.IEntranceNavigationTransitionInfoStatics", f948c27a-40c9-469f-8f33-bf45c8811f21)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.Animation.IEntranceNavigationTransitionInfo", 720a256b-1c8a-41ee-82ec-8a87c0cf47da)]
+    [threading(both)]
+    runtimeclass EntranceNavigationTransitionInfo
+        : Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo
+    {
+        EntranceNavigationTransitionInfo();
+        static Windows.UI.Xaml.DependencyProperty IsTargetElementProperty{ get; };
+        static Boolean GetIsTargetElement(Windows.UI.Xaml.UIElement element);
+        static void SetIsTargetElement(Windows.UI.Xaml.UIElement element, Boolean value);
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [contentproperty("DefaultNavigationTransitionInfo")]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Media.Animation.INavigationThemeTransitionStatics", ea2f06e0-5e60-4f8e-bcaf-431487a294ab)]
+    [interface_name("Windows.UI.Xaml.Media.Animation.INavigationThemeTransition", 8833848c-4eb7-41f2-8799-9eef0a213b73)]
+    [threading(both)]
+    runtimeclass NavigationThemeTransition
+        : Windows.UI.Xaml.Media.Animation.Transition
+    {
+        static Windows.UI.Xaml.DependencyProperty DefaultNavigationTransitionInfoProperty{ get; };
+        NavigationThemeTransition();
+        Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo DefaultNavigationTransitionInfo{ get; };
+        Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo DefaultNavigationTransitionInfo{ set; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.Animation.ISlideNavigationTransitionInfo", d6ac9d77-2e03-405f-80ed-e62beef3668f)]
+    [threading(both)]
+    runtimeclass SlideNavigationTransitionInfo
+        : Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo
+    {
+        SlideNavigationTransitionInfo();
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.UI.Xaml.Media.Animation.ISlideNavigationTransitionInfoStatics2", 8a861baa-981a-5ace-9f85-cb7fde648a67)]
+        {
+            static Windows.UI.Xaml.DependencyProperty EffectProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Media.Animation.ISlideNavigationTransitionInfo2", 90e2d9c0-5c81-5001-8013-4fbfea4bf139)]
+        {
+            Windows.UI.Xaml.Media.Animation.SlideNavigationTransitionEffect Effect{ get; };
+            Windows.UI.Xaml.Media.Animation.SlideNavigationTransitionEffect Effect{ set; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.Animation.ISuppressNavigationTransitionInfo", 244d7b0c-b1b7-4871-9d3e-d56203a3a5b4)]
+    [threading(both)]
+    runtimeclass SuppressNavigationTransitionInfo
+        : Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo
+    {
+        SuppressNavigationTransitionInfo();
+    }
+
+
+}
+namespace Windows.UI.Xaml.Controls
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IPivotItemStatics", e147ad0c-488b-4a6e-becd-a5dbd9941754)]
+    [constructor_name("Windows.UI.Xaml.Controls.IPivotItemFactory", 0dced981-636e-4a34-8a3f-8ee018639285)]
+    [interface_name("Windows.UI.Xaml.Controls.IPivotItem", a4764371-a502-47a3-915e-4aa096daf87f)]
+    [threading(both)]
+    unsealed runtimeclass PivotItem
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        static Windows.UI.Xaml.DependencyProperty HeaderProperty{ get; };
+        [method_name( "CreateInstance" )] PivotItem();
+        Object Header{ get; };
+        Object Header{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Xaml.Controls.IPivotItemEventArgs", 1a6f7254-1ed5-4bc5-a060-655530bca6ba)]
+    [threading(both)]
+    runtimeclass PivotItemEventArgs
+    {
+        PivotItemEventArgs();
+        Windows.UI.Xaml.Controls.PivotItem Item{ get; };
+        Windows.UI.Xaml.Controls.PivotItem Item{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IDatePickedEventArgs", a1527b12-59c1-4521-b28c-b176675e7c5a)]
+    [threading(both)]
+    runtimeclass DatePickedEventArgs
+        : Windows.UI.Xaml.DependencyObject
+    {
+        DatePickedEventArgs();
+        Windows.Foundation.DateTime OldDate{ get; };
+        Windows.Foundation.DateTime NewDate{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IDatePickerFlyoutItemStatics", aa9c91da-07f6-4cdf-89b4-dda3bdb0ea6b)]
+    [interface_name("Windows.UI.Xaml.Controls.IDatePickerFlyoutItem", 9d9bc289-00d2-4aac-9c85-d74f06367887)]
+    [threading(both)]
+    runtimeclass DatePickerFlyoutItem
+        : Windows.UI.Xaml.DependencyObject
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Data.ICustomPropertyProvider
+    {
+        static Windows.UI.Xaml.DependencyProperty PrimaryTextProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SecondaryTextProperty{ get; };
+        String PrimaryText{ get; };
+        String PrimaryText{ set; };
+        String SecondaryText{ get; };
+        String SecondaryText{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IItemsPickedEventArgs", f95b9aac-a621-488e-9156-8ee31165be04)]
+    [threading(both)]
+    runtimeclass ItemsPickedEventArgs
+        : Windows.UI.Xaml.DependencyObject
+    {
+        ItemsPickedEventArgs();
+        Windows.Foundation.Collections.IVector <Object>  AddedItems{ get; };
+        Windows.Foundation.Collections.IVector <Object>  RemovedItems{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IPickerConfirmedEventArgs", 447a9b51-1e23-4779-992b-986849713941)]
+    [threading(both)]
+    runtimeclass PickerConfirmedEventArgs
+        : Windows.UI.Xaml.DependencyObject
+    {
+        PickerConfirmedEventArgs();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.ITimePickedEventArgs", 8ad3ff21-5f66-4785-b999-24fef39fb6db)]
+    [threading(both)]
+    runtimeclass TimePickedEventArgs
+        : Windows.UI.Xaml.DependencyObject
+    {
+        TimePickedEventArgs();
+        Windows.Foundation.TimeSpan OldTime{ get; };
+        Windows.Foundation.TimeSpan NewTime{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Xaml.Controls.IDatePickerFlyoutStatics2", afd3e569-81e6-4b54-84a9-68079b73e34e)]
+    [interface_name("Windows.UI.Xaml.Controls.IDatePickerFlyout", fbf33b1a-a3a4-4df8-9228-23a5ac27df4e)]
+    [threading(both)]
+    runtimeclass DatePickerFlyout
+        : Windows.UI.Xaml.Controls.Primitives.PickerFlyoutBase
+    {
+        static Windows.UI.Xaml.DependencyProperty DayFormatProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MonthFormatProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty YearFormatProperty{ get; };
+        DatePickerFlyout();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.UI.Xaml.Controls.IDatePickerFlyoutStatics", cd570377-5845-4c12-8c10-592d9fcc7cd9)]
+        {
+            static Windows.UI.Xaml.DependencyProperty CalendarIdentifierProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty DateProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty DayVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty MonthVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty YearVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty MinYearProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty MaxYearProperty{ get; };
+        }
+        String CalendarIdentifier{ get; };
+        String CalendarIdentifier{ set; };
+        Windows.Foundation.DateTime Date{ get; };
+        Windows.Foundation.DateTime Date{ set; };
+        Boolean DayVisible{ get; };
+        Boolean DayVisible{ set; };
+        Boolean MonthVisible{ get; };
+        Boolean MonthVisible{ set; };
+        Boolean YearVisible{ get; };
+        Boolean YearVisible{ set; };
+        Windows.Foundation.DateTime MinYear{ get; };
+        Windows.Foundation.DateTime MinYear{ set; };
+        Windows.Foundation.DateTime MaxYear{ get; };
+        Windows.Foundation.DateTime MaxYear{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.DatePickerFlyout, Windows.UI.Xaml.Controls.DatePickedEventArgs>  DatePicked;
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.IReference <Windows.Foundation.DateTime> >  ShowAtAsync(Windows.UI.Xaml.FrameworkElement target);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Xaml.Controls.IDatePickerFlyout2", cfb18dbb-9931-4119-8bda-54a86fdfac84)]
+        {
+            String DayFormat{ get; };
+            String DayFormat{ set; };
+            String MonthFormat{ get; };
+            String MonthFormat{ set; };
+            String YearFormat{ get; };
+            String YearFormat{ set; };
+        }
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IListPickerFlyoutStatics", fee25b97-8b96-4602-81d2-82fd8e0f7ea8)]
+    [interface_name("Windows.UI.Xaml.Controls.IListPickerFlyout", 0f0cb9d7-e5f3-45e6-9063-ff7bbb193c47)]
+    [threading(both)]
+    runtimeclass ListPickerFlyout
+        : Windows.UI.Xaml.Controls.Primitives.PickerFlyoutBase
+    {
+        static Windows.UI.Xaml.DependencyProperty ItemsSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemTemplateProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty DisplayMemberPathProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectionModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedIndexProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedItemProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedValueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedValuePathProperty{ get; };
+        ListPickerFlyout();
+        Object ItemsSource{ get; };
+        Object ItemsSource{ set; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ set; };
+        String DisplayMemberPath{ get; };
+        String DisplayMemberPath{ set; };
+        Windows.UI.Xaml.Controls.ListPickerFlyoutSelectionMode SelectionMode{ get; };
+        Windows.UI.Xaml.Controls.ListPickerFlyoutSelectionMode SelectionMode{ set; };
+        Int32 SelectedIndex{ get; };
+        Int32 SelectedIndex{ set; };
+        Object SelectedItem{ get; };
+        Object SelectedItem{ set; };
+        Object SelectedValue{ get; };
+        Object SelectedValue{ set; };
+        String SelectedValuePath{ get; };
+        String SelectedValuePath{ set; };
+        Windows.Foundation.Collections.IVector <Object>  SelectedItems{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.ListPickerFlyout, Windows.UI.Xaml.Controls.ItemsPickedEventArgs>  ItemsPicked;
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Object> >  ShowAtAsync(Windows.UI.Xaml.FrameworkElement target);
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [contentproperty("Content")]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IPickerFlyoutStatics", af18a436-f38a-4abd-b933-6286c115b07f)]
+    [interface_name("Windows.UI.Xaml.Controls.IPickerFlyout", a336ffdb-08d9-43e6-944e-f2e5c7cee630)]
+    [threading(both)]
+    runtimeclass PickerFlyout
+        : Windows.UI.Xaml.Controls.Primitives.PickerFlyoutBase
+    {
+        PickerFlyout();
+        static Windows.UI.Xaml.DependencyProperty ContentProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ConfirmationButtonsVisibleProperty{ get; };
+        Windows.UI.Xaml.UIElement Content{ get; };
+        Windows.UI.Xaml.UIElement Content{ set; };
+        Boolean ConfirmationButtonsVisible{ get; };
+        Boolean ConfirmationButtonsVisible{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.PickerFlyout, Windows.UI.Xaml.Controls.PickerConfirmedEventArgs>  Confirmed;
+        Windows.Foundation.IAsyncOperation <Boolean>  ShowAtAsync(Windows.UI.Xaml.FrameworkElement target);
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.ITimePickerFlyoutStatics", 3f6728ce-2169-4003-b4a8-8de7035a0ad6)]
+    [interface_name("Windows.UI.Xaml.Controls.ITimePickerFlyout", bb739d75-e836-439e-86d5-506d2d18e404)]
+    [threading(both)]
+    runtimeclass TimePickerFlyout
+        : Windows.UI.Xaml.Controls.Primitives.PickerFlyoutBase
+    {
+        static Windows.UI.Xaml.DependencyProperty ClockIdentifierProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TimeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinuteIncrementProperty{ get; };
+        TimePickerFlyout();
+        String ClockIdentifier{ get; };
+        String ClockIdentifier{ set; };
+        Windows.Foundation.TimeSpan Time{ get; };
+        Windows.Foundation.TimeSpan Time{ set; };
+        Int32 MinuteIncrement{ get; };
+        Int32 MinuteIncrement{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.TimePickerFlyout, Windows.UI.Xaml.Controls.TimePickedEventArgs>  TimePicked;
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.IReference <Windows.Foundation.TimeSpan> >  ShowAtAsync(Windows.UI.Xaml.FrameworkElement target);
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IDatePickerFlyoutPresenter", 7c62f70e-2ddc-4381-832f-54cbdfaa849a)]
+    [threading(both)]
+    runtimeclass DatePickerFlyoutPresenter
+        : Windows.UI.Xaml.Controls.Control
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [static_name("Windows.UI.Xaml.Controls.IDatePickerFlyoutPresenterStatics2", 4dc0c49e-1f8e-5966-bbdb-215750c73aba)]
+        {
+            static Windows.UI.Xaml.DependencyProperty IsDefaultShadowEnabledProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Xaml.Controls.IDatePickerFlyoutPresenter2", c5b2578f-96d8-55cc-97ee-3f88fc85e479)]
+        {
+            Boolean IsDefaultShadowEnabled{ get; };
+            Boolean IsDefaultShadowEnabled{ set; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IListPickerFlyoutPresenter", 68155fb3-883e-417a-80d0-e2fd88410084)]
+    runtimeclass ListPickerFlyoutPresenter
+        : Windows.UI.Xaml.Controls.Control
+    {
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ITimePickerFlyoutPresenter", c5320638-7a18-40ed-9fd0-4c852c09b24e)]
+    [threading(both)]
+    runtimeclass TimePickerFlyoutPresenter
+        : Windows.UI.Xaml.Controls.Control
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [static_name("Windows.UI.Xaml.Controls.ITimePickerFlyoutPresenterStatics2", aa5f0ddc-f2bb-53f2-a54d-b34acccf51e4)]
+        {
+            static Windows.UI.Xaml.DependencyProperty IsDefaultShadowEnabledProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Xaml.Controls.ITimePickerFlyoutPresenter2", a13b5b68-7ee9-59f7-aad6-6532a8a8c3bf)]
+        {
+            Boolean IsDefaultShadowEnabled{ get; };
+            Boolean IsDefaultShadowEnabled{ set; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IPickerFlyoutPresenter", 5884c978-6b27-4b38-a9ae-677c2994652e)]
+    runtimeclass PickerFlyoutPresenter
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.IPivotFactory", 1b0a818e-2529-4762-ba44-9abc68c3ceca)]
+    [static_name("Windows.UI.Xaml.Controls.IPivotStatics", ee22c7f4-c15d-4ff3-8a94-f50dfdfbe899)]
+    [interface_name("Windows.UI.Xaml.Controls.IPivot", 103e9b13-3400-4a16-90b9-6912bf06974e)]
+    [threading(both)]
+    unsealed runtimeclass Pivot
+        : Windows.UI.Xaml.Controls.ItemsControl
+    {
+        [method_name( "CreateInstance" )] Pivot();
+        static Windows.UI.Xaml.DependencyProperty TitleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TitleTemplateProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HeaderTemplateProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedIndexProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedItemProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsLockedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SlideInAnimationGroupProperty{ get; };
+        static Windows.UI.Xaml.Controls.PivotSlideInAnimationGroup GetSlideInAnimationGroup(Windows.UI.Xaml.FrameworkElement element);
+        static void SetSlideInAnimationGroup(Windows.UI.Xaml.FrameworkElement element, PivotSlideInAnimationGroup value);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.UI.Xaml.Controls.IPivotStatics3", 78b6274e-6616-4600-a039-922a5d09330b)]
+        {
+            static Windows.UI.Xaml.DependencyProperty HeaderFocusVisualPlacementProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty IsHeaderItemsCarouselEnabledProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.UI.Xaml.Controls.IPivotStatics2", d7518add-be75-4023-8deb-c6513c3192a3)]
+        {
+            static Windows.UI.Xaml.DependencyProperty LeftHeaderProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty LeftHeaderTemplateProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty RightHeaderProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty RightHeaderTemplateProperty{ get; };
+        }
+        Object Title{ get; };
+        Object Title{ set; };
+        Windows.UI.Xaml.DataTemplate TitleTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate TitleTemplate{ set; };
+        Windows.UI.Xaml.DataTemplate HeaderTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate HeaderTemplate{ set; };
+        Int32 SelectedIndex{ get; };
+        Int32 SelectedIndex{ set; };
+        Object SelectedItem{ get; };
+        Object SelectedItem{ set; };
+        Boolean IsLocked{ get; };
+        Boolean IsLocked{ set; };
+        event Windows.UI.Xaml.Controls.SelectionChangedEventHandler SelectionChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Pivot, Windows.UI.Xaml.Controls.PivotItemEventArgs>  PivotItemLoading;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Pivot, Windows.UI.Xaml.Controls.PivotItemEventArgs>  PivotItemLoaded;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Pivot, Windows.UI.Xaml.Controls.PivotItemEventArgs>  PivotItemUnloading;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Pivot, Windows.UI.Xaml.Controls.PivotItemEventArgs>  PivotItemUnloaded;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Xaml.Controls.IPivot2", 8b8a8660-1a55-411c-a82d-18991c3f0d6f)]
+        {
+            Object LeftHeader{ get; };
+            Object LeftHeader{ set; };
+            Windows.UI.Xaml.DataTemplate LeftHeaderTemplate{ get; };
+            Windows.UI.Xaml.DataTemplate LeftHeaderTemplate{ set; };
+            Object RightHeader{ get; };
+            Object RightHeader{ set; };
+            Windows.UI.Xaml.DataTemplate RightHeaderTemplate{ get; };
+            Windows.UI.Xaml.DataTemplate RightHeaderTemplate{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.UI.Xaml.Controls.IPivot3", 95bcbf96-f0da-4089-8c65-e8b81354c766)]
+        {
+            Windows.UI.Xaml.Controls.PivotHeaderFocusVisualPlacement HeaderFocusVisualPlacement{ get; };
+            Windows.UI.Xaml.Controls.PivotHeaderFocusVisualPlacement HeaderFocusVisualPlacement{ set; };
+            Boolean IsHeaderItemsCarouselEnabled{ get; };
+            Boolean IsHeaderItemsCarouselEnabled{ set; };
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+}
+namespace Windows.UI.Xaml.Controls.Primitives
+{
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.IJumpListItemBackgroundConverterStatics", 20e7c3dd-6f27-4808-b0be-83e0e9b5cc45)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IJumpListItemBackgroundConverter", 81177858-d224-410c-b16c-c5b6bb6188b2)]
+    [threading(both)]
+    runtimeclass JumpListItemBackgroundConverter
+        : Windows.UI.Xaml.DependencyObject
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Data.IValueConverter
+    {
+        static Windows.UI.Xaml.DependencyProperty EnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty DisabledProperty{ get; };
+        JumpListItemBackgroundConverter();
+        Windows.UI.Xaml.Media.Brush Enabled{ get; };
+        Windows.UI.Xaml.Media.Brush Enabled{ set; };
+        Windows.UI.Xaml.Media.Brush Disabled{ get; };
+        Windows.UI.Xaml.Media.Brush Disabled{ set; };
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.IJumpListItemForegroundConverterStatics", 474e7352-210c-4673-ac6a-413f0e2c7750)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IJumpListItemForegroundConverter", 1590ed38-c504-4796-a63a-5bfc9eefaae8)]
+    [threading(both)]
+    runtimeclass JumpListItemForegroundConverter
+        : Windows.UI.Xaml.DependencyObject
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Data.IValueConverter
+    {
+        JumpListItemForegroundConverter();
+        static Windows.UI.Xaml.DependencyProperty EnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty DisabledProperty{ get; };
+        Windows.UI.Xaml.Media.Brush Enabled{ get; };
+        Windows.UI.Xaml.Media.Brush Enabled{ set; };
+        Windows.UI.Xaml.Media.Brush Disabled{ get; };
+        Windows.UI.Xaml.Media.Brush Disabled{ set; };
+    }
+
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IPickerFlyoutBaseFactory", 7ec27a53-9502-4beb-b342-00566c8f16b0)]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.IPickerFlyoutBaseStatics", 5a4d0ac5-89ae-40e5-a7f1-bb702355adf3)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IPickerFlyoutBase", e33574ea-1076-44d1-9383-dc24ac5cff2a)]
+    [threading(both)]
+    unsealed runtimeclass PickerFlyoutBase
+        : Windows.UI.Xaml.Controls.Primitives.FlyoutBase
+    {
+        [method_name( "CreateInstance" )]protected PickerFlyoutBase();
+        static Windows.UI.Xaml.DependencyProperty TitleProperty{ get; };
+        static String GetTitle(Windows.UI.Xaml.DependencyObject element);
+        static void SetTitle(Windows.UI.Xaml.DependencyObject element, String value);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [overridable_name("Windows.UI.Xaml.Controls.Primitives.IPickerFlyoutBaseOverrides", 5bfc4f4a-4822-47b4-a958-77c20ba120d3)]
+        {
+            overridable void OnConfirmed();
+            overridable Boolean ShouldShowConfirmationButtons();
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.ILoopingSelectorStatics", 03e8bafa-8c7d-4fc5-b92a-f049fb933cc5)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.ILoopingSelector", 4c9a3e04-4827-49d9-8806-093957b0fd21)]
+    [threading(both)]
+    runtimeclass LoopingSelector
+        : Windows.UI.Xaml.Controls.Control
+    {
+        static Windows.UI.Xaml.DependencyProperty ShouldLoopProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedIndexProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedItemProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemWidthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemHeightProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemTemplateProperty{ get; };
+        Boolean ShouldLoop{ get; };
+        Boolean ShouldLoop{ set; };
+        Windows.Foundation.Collections.IVector <Object>  Items{ get; };
+        Windows.Foundation.Collections.IVector <Object>  Items{ set; };
+        Int32 SelectedIndex{ get; };
+        Int32 SelectedIndex{ set; };
+        Object SelectedItem{ get; };
+        Object SelectedItem{ set; };
+        Int32 ItemWidth{ get; };
+        Int32 ItemWidth{ set; };
+        Int32 ItemHeight{ get; };
+        Int32 ItemHeight{ set; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ set; };
+        event Windows.UI.Xaml.Controls.SelectionChangedEventHandler SelectionChanged;
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IPivotPanel", ad4ebe80-22a9-4ca3-9212-2773b6359ff3)]
+    [threading(both)]
+    runtimeclass PivotPanel
+        : Windows.UI.Xaml.Controls.Panel
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Controls.Primitives.IScrollSnapPointsInfo
+    {
+        PivotPanel();
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.ILoopingSelectorItem", c69714b9-27c6-4433-9d7c-0dbfb2f4344f)]
+    runtimeclass LoopingSelectorItem
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.ILoopingSelectorPanel", 40a9ba70-1011-4778-87f7-6bfd20d6377d)]
+    runtimeclass LoopingSelectorPanel
+        : Windows.UI.Xaml.Controls.Canvas
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Controls.Primitives.IScrollSnapPointsInfo
+    {
+    }
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IPivotHeaderItemFactory", 14308b37-185b-4117-bc77-dda2eb261b99)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IPivotHeaderItem", 594572c2-82aa-410b-9e55-fd8e2c98862d)]
+    [threading(both)]
+    unsealed runtimeclass PivotHeaderItem
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        [method_name( "CreateInstance" )] PivotHeaderItem();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IPivotHeaderPanel", 21484ebc-9241-4203-bd37-6c08fb096612)]
+    [threading(both)]
+    runtimeclass PivotHeaderPanel
+        : Windows.UI.Xaml.Controls.Canvas
+    {
+        PivotHeaderPanel();
+    }
+
+
+}
+namespace Windows.UI.Xaml.Automation.Peers
+{
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.ILoopingSelectorItemDataAutomationPeer", ef567e32-7cd2-4d32-9590-1f588d5ef38d)]
+    runtimeclass LoopingSelectorItemDataAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.AutomationPeer
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IVirtualizedItemProvider
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IDatePickerFlyoutPresenterAutomationPeer", 752aed38-c2bf-4880-82b2-a6c05e90c135)]
+    runtimeclass DatePickerFlyoutPresenterAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IListPickerFlyoutPresenterAutomationPeer", 56dfdc58-2395-4060-8047-8ea463698a24)]
+    runtimeclass ListPickerFlyoutPresenterAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.ILoopingSelectorAutomationPeer", 50b406ca-bae9-4816-8a3a-0cb4f96478a2)]
+    runtimeclass LoopingSelectorAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.ISelectionProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IItemContainerProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IExpandCollapseProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IScrollProvider
+    {
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.ILoopingSelectorItemAutomationPeer", d3fa68bf-04cf-4f4c-8d3e-4780a19d4788)]
+    runtimeclass LoopingSelectorItemAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IScrollItemProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.ISelectionItemProvider
+    {
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IPickerFlyoutPresenterAutomationPeer", 28414bf7-8382-4eae-93c1-d6f035aa8155)]
+    runtimeclass PickerFlyoutPresenterAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IPivotItemAutomationPeerFactory", f2810471-183f-416b-b41a-1e5a958a91f4)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IPivotItemAutomationPeer", 1a4241ad-5d55-4d27-b40f-2d37506fbe78)]
+    [threading(both)]
+    runtimeclass PivotItemAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+        [method_name( "CreateInstanceWithOwner" )] PivotItemAutomationPeer(Windows.UI.Xaml.Controls.PivotItem owner);
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IPivotAutomationPeerFactory", 3efe0f94-0c91-4341-b9ac-1b56b4e6b84f)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IPivotAutomationPeer", e715a8f8-3b9d-402c-81e2-6e912ef58981)]
+    [threading(both)]
+    runtimeclass PivotAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.ItemsControlAutomationPeer
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.ISelectionProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IScrollProvider
+    {
+        [method_name( "CreateInstanceWithOwner" )] PivotAutomationPeer(Windows.UI.Xaml.Controls.Pivot owner);
+    }
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IPivotItemDataAutomationPeerFactory", 517a2480-d3b6-412e-82b6-94a0a84c13b0)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IPivotItemDataAutomationPeer", a2a3b788-ea1d-48b7-88ee-f08b6aa07fee)]
+    [threading(both)]
+    runtimeclass PivotItemDataAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.ItemAutomationPeer
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IScrollItemProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.ISelectionItemProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.UI.Xaml.Automation.Provider.IVirtualizedItemProvider
+    {
+        [method_name( "CreateInstanceWithParentAndItem" )] PivotItemDataAutomationPeer(Object item, PivotAutomationPeer parent);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.ITimePickerFlyoutPresenterAutomationPeer", da93ee27-82f1-4701-8706-be297bf06043)]
+    runtimeclass TimePickerFlyoutPresenterAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+    }
+
+
+
+}

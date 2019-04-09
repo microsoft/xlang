@@ -1,0 +1,61 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IDynamicAppUriHandlerGroupStatics", 99baffae-4f40-4354-82b1-5ff25352ab85)]
+    [interface_name("Windows.Internal.StateRepository.IDynamicAppUriHandlerGroup", a98d729b-05c6-4f59-ba08-806d1195d809)]
+    [threading(both)]
+    runtimeclass DynamicAppUriHandlerGroup
+    {
+        DynamicAppUriHandlerGroup();
+        static void Add(DynamicAppUriHandlerGroup value);
+        static void Update(DynamicAppUriHandlerGroup value);
+        static void Delete(DynamicAppUriHandlerGroup value);
+        static void DeleteById(Int64 dynamicAppUriHandlerGroupID);
+        static void DeleteByUserAndPackageFamilyAndName(User User, PackageFamily PackageFamily, String Name);
+        static Boolean Exists(Int64 dynamicAppUriHandlerGroupID);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndPackageFamily(User User, PackageFamily PackageFamily);
+        static Boolean ExistsByUserAndPackageFamilyAndName(User User, PackageFamily PackageFamily, String Name);
+        static Windows.Internal.StateRepository.DynamicAppUriHandlerGroup TryGet(Int64 dynamicAppUriHandlerGroupID);
+        static Windows.Internal.StateRepository.DynamicAppUriHandlerGroup TryGetByUserAndPackageFamilyAndName(User User, PackageFamily PackageFamily, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DynamicAppUriHandlerGroup>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DynamicAppUriHandlerGroup>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DynamicAppUriHandlerGroup>  FindByUserAndPackageFamily(User User, PackageFamily PackageFamily);
+        static Windows.Internal.StateRepository.DynamicAppUriHandlerGroup TryGetByUserAndPackageFamilyNameAndName(User User, String packageFamilyName, String Name);
+        static void ReplaceByUserAndPackageFamilyNameAndName(User user, String PackageFamilyName, String Name, Windows.Foundation.Collections.IIterable <String>  HostNames);
+        Int64 _DynamicAppUriHandlerGroupID{ get; };
+        Int64 _DynamicAppUriHandlerGroupID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 PackageFamily{ get; };
+        Int64 PackageFamily{ set; };
+        Windows.Internal.StateRepository.PackageFamily GetPackageFamily();
+        void SetPackageFamily(PackageFamily value);
+        String Name{ get; };
+        String Name{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

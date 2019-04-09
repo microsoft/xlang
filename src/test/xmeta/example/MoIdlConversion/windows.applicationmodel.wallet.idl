@@ -1,0 +1,22 @@
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Wallet
+{
+    [contractversion(1)]
+    apicontract WalletContract{};
+
+    [contract(Windows.ApplicationModel.Wallet.WalletContract, 1)]
+    enum WalletActionKind
+    {
+        OpenItem,
+        Transaction,
+        MoreTransactions,
+        Message,
+        Verb,
+    };
+
+}

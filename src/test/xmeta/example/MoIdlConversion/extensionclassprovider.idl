@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [static_name("Windows.Internal.ComposableShell.IExtensionClassProviderStatics", eccfe6ce-970a-48cd-9076-549eed8e2e75)]
+    runtimeclass ExtensionClassProvider
+    {
+        static void GetExtensionClass(Windows.Internal.Foundation.Contracts.ActivationFactoryContractRedirectorContext context, out String result);
+    }
+
+}

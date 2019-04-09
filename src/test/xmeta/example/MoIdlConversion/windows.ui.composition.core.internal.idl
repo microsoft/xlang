@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Composition.Core.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [webhosthidden]
+    [uuid(ba28ae17-1a9d-4ba7-9a6c-45e27b0d4b63)]
+    [contract(Windows.UI.Composition.Core.Internal.InternalContract, 1)]
+    interface ICompositorControllerPartner
+    {
+        void WaitForCommitCompletion();
+    };
+
+    [contract(Windows.UI.Composition.Core.Internal.InternalContract, 1)]
+    [uuid(1ae27891-516c-4b9e-8018-b5f8d846685e)]
+    [webhosthidden]
+    interface ICompositorControllerStaticsPartner
+    {
+        Windows.UI.Composition.Core.CompositorController CreateForCoreWindow(Windows.UI.Core.CoreWindow coreWindow);
+    };
+
+}

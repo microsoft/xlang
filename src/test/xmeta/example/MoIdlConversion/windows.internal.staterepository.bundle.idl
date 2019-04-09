@@ -1,0 +1,53 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IBundleStatics", e923820d-aebc-498f-b3ff-9eecd3ff19fc)]
+    [interface_name("Windows.Internal.StateRepository.IBundle", 428085db-2f00-41b3-bcb4-51e94cc69f09)]
+    [threading(both)]
+    runtimeclass Bundle
+    {
+        Bundle();
+        static Boolean Exists(Int64 bundleID);
+        static Boolean ExistsByPackage(Package Package);
+        static Windows.Internal.StateRepository.Bundle Get(Int64 bundleID);
+        static Windows.Internal.StateRepository.Bundle TryGet(Int64 bundleID);
+        static Windows.Internal.StateRepository.Bundle GetByPackage(Package Package);
+        static Windows.Internal.StateRepository.Bundle TryGetByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Bundle>  Find();
+        Int64 _BundleID{ get; };
+        Int64 _BundleID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Boolean IsUniqueLanguageNull{ get; };
+        void SetUniqueLanguageToNull();
+        String UniqueLanguage{ get; };
+        String UniqueLanguage{ set; };
+        UInt32 UniqueScale{ get; };
+        UInt32 UniqueScale{ set; };
+        Int32 UniqueDXFeatureLevel{ get; };
+        Int32 UniqueDXFeatureLevel{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

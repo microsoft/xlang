@@ -1,0 +1,18 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.PaymentSheet
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(6d249855-1c6d-57de-b797-93f2846e0054)]
+    interface IPaymentSheetManager
+    {
+        Windows.Foundation.IAsyncAction LaunchPaymentSheet();
+    };
+
+}

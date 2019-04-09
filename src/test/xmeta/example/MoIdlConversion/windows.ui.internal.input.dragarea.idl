@@ -1,0 +1,30 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.Input.IInputDragAreaStatics", 5c1a374d-09bf-5edf-8c80-7b81826d2c42)]
+    [interface_name("Windows.UI.Internal.Input.IInputDragArea", cc301ad2-8621-4d2a-bbdd-be035447d7f0)]
+    [threading(both)]
+    runtimeclass InputDragArea
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Boolean IsSupported{ get; };
+        static Windows.UI.Internal.Input.InputDragArea GetForInputSite(InputSite inputSite);
+        Guid Type{ get; };
+        Guid Type{ set; };
+    }
+
+}

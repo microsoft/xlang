@@ -1,0 +1,44 @@
+
+
+
+
+
+
+namespace ProximityConnectModel
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(ProximityConnectModel.InternalContract, 1)]
+    [uuid(eeda057b-1722-4b6a-ba4f-aa9021e956a6)]
+    interface IProximityConnectStatics
+    {
+        Boolean IsBeaconListenHardwareOffloadSupported{ get; };
+    };
+
+
+    [contract(ProximityConnectModel.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("ProximityConnectModel.IProximityConnectConfiguration", 1726d41c-68f1-43a8-b2d8-7e7c23685596)]
+    runtimeclass ProximityConnectConfiguration
+    {
+        Boolean GetDockAutoConnectValue(String interfaceId);
+        void SetDockAutoConnectValue(String interfaceId, Boolean autoConnectEnabled, Int16 initialRssiValue);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(ProximityConnectModel.InternalContract, 1)]
+    [interface_name("ProximityConnectModel.IDockProximitySupportDetector", 43b6bb03-b5d5-45cd-8533-0d12a9d2792d)]
+    runtimeclass DockProximitySupportDetector
+    {
+        void StartDockDetection();
+        void StopDockDetection();
+        Boolean IsDockProximityEnabledMac(UInt64 macAddress);
+        Boolean IsDockProximityEnabledInterfaceId(String interfaceId);
+        Int16 GetDockWeightedRssiFromMacAddress(UInt64 macAddress);
+        Int16 GetDockWeightedRssiFromInterfaceId(String interfaceId);
+    }
+
+}

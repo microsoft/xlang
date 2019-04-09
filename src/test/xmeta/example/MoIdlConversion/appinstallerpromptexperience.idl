@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(143c77bb-2b96-4695-b4b0-3779dd7f3451)]
+    interface IAppInstallerPromptExperience
+    {
+        Windows.Foundation.Collections.IPropertySet PromptForUpdateCheckAndGetResults(String installerUri, String installerAumid, Windows.Internal.ApplicationModel.WindowManagement.WindowId callerWindowId);
+    };
+
+}

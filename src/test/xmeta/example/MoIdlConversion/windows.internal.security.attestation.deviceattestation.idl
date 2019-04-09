@@ -1,0 +1,60 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Security.Attestation
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Security.Attestation.InternalContract, 1)]
+    enum DeviceAttestationSessionCreateStatus
+    {
+        Ok,
+        UnknownFailure,
+        NotSupported,
+        ClientLogicUpdateRequired,
+        NetworkFailure,
+    };
+
+
+    [contract(Windows.Internal.Security.Attestation.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Security.Attestation.IDeviceAttestationSession", 40d6c44a-527e-52fd-8ffe-fd1348fc491b)]
+    runtimeclass DeviceAttestationSession
+        : Windows.Foundation.IClosable
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Security.Cryptography.Certificates.Certificate>  GetSessionCertificateAsync();
+        Windows.Foundation.IAsyncOperation <String>  GetSessionReportAsJwtAsync();
+        Windows.Foundation.IAsyncOperation <String>  GetRuntimeReportAsJwtAsync(UInt8[] optionalCustomData);
+    }
+
+
+    [contract(Windows.Internal.Security.Attestation.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Security.Attestation.IDeviceAttestationSessionCreateResult", f852e8c0-55b2-552b-990e-4dfabd015ba2)]
+    runtimeclass DeviceAttestationSessionCreateResult
+    {
+        Windows.Internal.Security.Attestation.DeviceAttestationSession Session{ get; };
+        Windows.Internal.Security.Attestation.DeviceAttestationSessionCreateStatus Status{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+    [contract(Windows.Internal.Security.Attestation.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Security.Attestation.IDeviceAttestationManagerStatics", 9195f9dc-f06a-5bb7-9ef4-52c35d288327)]
+    [threading(both)]
+    runtimeclass DeviceAttestationManager
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Internal.Security.Attestation.DeviceAttestationSessionCreateResult>  CreateSessionAsync(UInt8[] customData, Windows.Foundation.Uri relyingPartyId);
+        static Int32 IsSupported();
+    }
+
+}

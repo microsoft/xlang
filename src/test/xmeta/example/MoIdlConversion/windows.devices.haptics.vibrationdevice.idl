@@ -1,0 +1,40 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Haptics
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum VibrationAccessStatus
+    {
+        Allowed,
+        DeniedByUser,
+        DeniedBySystem,
+        DeniedByEnergySaver,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Devices.Haptics.IVibrationDeviceStatics", 53e2eded-2290-4ac9-8eb3-1a84122eb71c)]
+    [interface_name("Windows.Devices.Haptics.IVibrationDevice", 40f21a3e-8844-47ff-b312-06185a3844da)]
+    [threading(both)]
+    runtimeclass VibrationDevice
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Haptics.VibrationAccessStatus>  RequestAccessAsync();
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Haptics.VibrationDevice>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Haptics.VibrationDevice>  GetDefaultAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Haptics.VibrationDevice> >  FindAllAsync();
+        String Id{ get; };
+        Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+    }
+
+
+}

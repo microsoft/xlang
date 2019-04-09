@@ -1,0 +1,69 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.MessageDialogExperience
+{
+    [uuid(23caf4b1-b2db-4872-b38d-fc9ce19b8270)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface IMessageDialogExperience
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  LaunchAsync(MessageDialogOperation messageDialogOperation);
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.MessageDialogExperience.IMessageDialogOperation", b93bf25c-186f-46da-b408-b5db4a497238)]
+    runtimeclass MessageDialogOperation
+    {
+        Windows.Internal.PlatformExtensions.MessageDialogExperience.MessageDialogInfo Info{ get; };
+        Windows.UI.Popups.IUICommand SelectedCommand{ get; };
+        Windows.UI.Popups.IUICommand SelectedCommand{ set; };
+        Windows.Internal.ApplicationModel.WindowManagement.WindowId CallerWindowId{ get; };
+        UInt32 CallerProcessId{ get; };
+        Boolean IsCompleted{ get; };
+        Windows.Internal.PlatformExtensions.MessageDialogExperience.MessageDialogActivatedEventArgs ActivationArgs{ get; };
+        void Completed();
+        void Cancel();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.PlatformExtensions.MessageDialogExperience.MessageDialogOperation, Windows.Internal.PlatformExtensions.MessageDialogExperience.MessageDialogOperationCompletedEventArgs>  OperationCompleted;
+    }
+
+
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.MessageDialogExperience.IMessageDialogInfo", e4111ed7-7a54-452c-8d47-806239e5e49c)]
+    runtimeclass MessageDialogInfo
+    {
+        String Title{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Popups.IUICommand>  Commands{ get; };
+        UInt32 DefaultCommandIndex{ get; };
+        UInt32 CancelCommandIndex{ get; };
+        String Content{ get; };
+        Windows.UI.Popups.MessageDialogOptions Options{ get; };
+    }
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.MessageDialogExperience.IMessageDialogActivatedEventArgs", 2cdd15e1-af86-4aaf-a767-d14253412d16)]
+    runtimeclass MessageDialogActivatedEventArgs
+        : Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        Windows.Internal.PlatformExtensions.MessageDialogExperience.MessageDialogOperation Operation{ get; };
+    }
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.MessageDialogExperience.IMessageDialogOperationCompletedEventArgs", 4db26775-fabb-431c-ad75-9c5741d315d5)]
+    runtimeclass MessageDialogOperationCompletedEventArgs
+    {
+        Boolean IsCanceled{ get; };
+    }
+
+
+
+}

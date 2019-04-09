@@ -1,0 +1,222 @@
+
+
+
+
+
+
+
+
+
+
+namespace WindowsInternal.Shell.UnifiedTile.CuratedTileCollections
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    enum PackageStatusChangeType
+    {
+        Installed,
+        Uninstalled,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    [uuid(bb4b31ed-0705-432e-bf3d-24bf54bee10d)]
+    interface ICuratedTile
+    {
+        WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier Identifier{ get; };
+        Guid UniqueId{ get; };
+        Windows.Foundation.Point Location{ get; };
+        Windows.Foundation.Point Location{ set; };
+        Windows.Foundation.Size Size{ get; };
+        Windows.Foundation.Size Size{ set; };
+        String GetCustomProperty(String propertyName);
+        Boolean HasCustomProperty(String propertyName);
+        void RemoveCustomProperty(String propertyName);
+        void SetCustomProperty(String propertyName, String propertyValue);
+    };
+
+    [flags]
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    enum GroupAttributes
+    {
+        None,
+        LockedFromEditing,
+    };
+
+    [uuid(354cba6d-19ab-490c-97b6-8d4d9862e052)]
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    interface ICuratedTileGroup
+    {
+        Guid UniqueId{ get; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.GroupAttributes Attributes{ get; };
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.GroupAttributes Attributes{ set; };
+        Windows.Foundation.Point Location{ get; };
+        Windows.Foundation.Point Location{ set; };
+        Windows.Foundation.Size Size{ get; };
+        Windows.Foundation.Size Size{ set; };
+        Boolean LockedForCustomization{ get; };
+        Boolean LockedForCustomization{ set; };
+        Windows.Foundation.Collections.IMapView <Guid, WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileGroup>  GetGroups();
+        Windows.Foundation.Collections.IMapView <Guid, WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile>  GetTiles();
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileGroup CreateNewGroup();
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileGroup GetGroup(Guid groupId);
+        void DeleteGroup(Guid groupId);
+        void RemoveGroup(Guid groupId);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile AddTile(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tile);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile AddTileWithId(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tile, Guid uniqueId);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile GetTile(Guid tileId);
+        void DeleteTile(Guid tileId);
+        void RemoveTile(Guid tileId);
+        String GetCustomProperty(String propertyName);
+        Boolean HasCustomProperty(String propertyName);
+        void RemoveCustomProperty(String propertyName);
+        void SetCustomProperty(String propertyName, String propertyValue);
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    enum CollectionAttributes
+    {
+        None,
+        LockedFromEditing,
+        RemoveTilesOnUninstall,
+    };
+
+    [uuid(51a07090-3a1f-49ef-9932-a971b8154790)]
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    interface ICuratedTileCollection
+    {
+        String CollectionName{ get; };
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.CollectionAttributes Attributes{ get; };
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.CollectionAttributes Attributes{ set; };
+        UInt32 Version{ get; };
+        UInt32 Version{ set; };
+        Windows.Foundation.Collections.IMapView <Guid, WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileGroup>  GetGroups();
+        Windows.Foundation.Collections.IMapView <Guid, WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile>  GetTiles();
+        Windows.Foundation.Collections.IMapView <Guid, WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile>  GetAllTilesInCollection();
+        [return_name("tileExistsInCollection")] Boolean DoesCollectionContainTile(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tileIdentifier, out ICuratedTile tile);
+        [return_name("tileExistsInCollection")] Boolean FindTileAndParentGroup(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tileIdentifier, out ICuratedTile tile, out ICuratedTileGroup parent);
+        void MoveExistingGroupToNewParent(ICuratedTileGroup group, ICuratedTileGroup newParent);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileGroup CreateNewGroup();
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileGroup GetGroup(Guid groupId);
+        void DeleteGroup(Guid groupId);
+        void RemoveGroup(Guid groupId);
+        void MoveExistingTileToNewParent(ICuratedTile tile, ICuratedTileGroup newParent);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile AddTile(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tile);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile AddTileWithId(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tile, Guid uniqueId);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile GetTile(Guid tileId);
+        void DeleteTile(Guid tileId);
+        void RemoveTile(Guid tileId);
+        void Commit();
+        Windows.Foundation.IAsyncAction CommitAsync();
+        Windows.Foundation.IAsyncAction CommitAsyncWithTimerBypass();
+        void ResetToDefault();
+        Windows.Foundation.IAsyncAction ResetToDefaultAsync();
+        void CheckForUpdate();
+        String GetCustomProperty(String propertyName);
+        Boolean HasCustomProperty(String propertyName);
+        void RemoveCustomProperty(String propertyName);
+        void SetCustomProperty(String propertyName, String propertyValue);
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileCollectionOptions", a680369c-0862-41a0-b7cd-bb35e3c497eb)]
+    [threading(both)]
+    runtimeclass CuratedTileCollectionOptions
+    {
+        CuratedTileCollectionOptions();
+        Boolean BlockCreationOnAppRegistration{ get; };
+        Boolean BlockCreationOnAppRegistration{ set; };
+        Boolean CanRegisterBackgroundTask{ get; };
+        Boolean CanRegisterBackgroundTask{ set; };
+        Boolean HasExplicitCreationPermission{ get; };
+        Boolean HasExplicitCreationPermission{ set; };
+    }
+
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    [static_name("WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileCollectionManagerStatics", 15f254ac-49b3-4e6e-9c62-806ffaf554f9)]
+    [interface_name("WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileCollectionManager", 899ee71b-5c01-438f-b12e-61d49f6b4083)]
+    runtimeclass CuratedTileCollectionManager
+    {
+        CuratedTileCollectionManager();
+        static WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.CuratedTileCollectionManager CreateWithUser(Windows.System.User user);
+        void NotifyPackageStatusChanged(String aumid, PackageStatusChangeType changeType);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileCollection GetCollection(String collectionName);
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileCollection GetCollectionWithOptions(String collectionName, CuratedTileCollectionOptions options);
+        void DeleteCollection(String collectionName);
+        Boolean CollectionExists(String collectionName);
+        void InitializeCollection(String collectionName);
+    }
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    runtimeclass CuratedTile
+        : [default]WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTile
+    {
+        CuratedTile();
+    }
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    runtimeclass CuratedTileGroup
+        : [default]WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileGroup
+    {
+        CuratedTileGroup();
+    }
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    runtimeclass CuratedTileCollection
+        : [default]WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedTileCollection
+    {
+        CuratedTileCollection();
+    }
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    enum StartCollectionCustomizationRestrictionType
+    {
+        None,
+        OnlySpecifiedGroups,
+        FullLayout,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    enum TilePinSize
+    {
+        Tile2x2,
+        Tile4x2,
+    };
+
+    [uuid(adbf8965-6056-4126-ab26-6660af4661ce)]
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    interface IStartTileCollection
+    {
+        void PinToStart(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tileIdentifier, TilePinSize pinSize);
+        void PinToStartAtLocation(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tileIdentifier, ICuratedTileGroup group, Windows.Foundation.Point location, Windows.Foundation.Size size);
+        void UnpinFromStart(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier tileIdentifier);
+        void ReplaceTinyOrMediumTile(WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier existingTileIdentifier, WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier newTileIdentifier);
+        Guid LastGroupId{ get; };
+        Guid LastGroupId{ set; };
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.StartCollectionCustomizationRestrictionType CustomizationRestriction{ get; };
+        WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.StartCollectionCustomizationRestrictionType CustomizationRestriction{ set; };
+        UInt32 GroupCellWidth{ get; };
+        UInt32 GroupCellWidth{ set; };
+        UInt32 PreferredColumnCount{ get; };
+        UInt32 PreferredColumnCount{ set; };
+        UInt32 CurrentColumnCount{ get; };
+        UInt32 CurrentColumnCount{ set; };
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InternalContract, 1)]
+    [threading(mta)]
+    runtimeclass CollectionInitializationBackgroundTask
+        : [default]Windows.ApplicationModel.Background.IBackgroundTask
+    {
+        CollectionInitializationBackgroundTask();
+    }
+
+}

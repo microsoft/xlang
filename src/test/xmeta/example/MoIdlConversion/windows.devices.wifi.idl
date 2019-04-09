@@ -1,0 +1,175 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.WiFi
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiNetworkKind
+    {
+        Any,
+        Infrastructure,
+        Adhoc,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiPhyKind
+    {
+        Unknown,
+        Fhss,
+        Dsss,
+        IRBaseband,
+        Ofdm,
+        Hrdsss,
+        Erp,
+        HT,
+        Vht,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Dmg,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        HE,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiAccessStatus
+    {
+        Unspecified,
+        Allowed,
+        DeniedByUser,
+        DeniedBySystem,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiReconnectionKind
+    {
+        Automatic,
+        Manual,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WiFiConnectionStatus
+    {
+        UnspecifiedFailure,
+        Success,
+        AccessRevoked,
+        InvalidCredential,
+        NetworkNotAvailable,
+        Timeout,
+        UnsupportedAuthenticationProtocol,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum WiFiConnectionMethod
+    {
+        Default,
+        WpsPin,
+        WpsPushButton,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum WiFiWpsKind
+    {
+        Unknown,
+        Pin,
+        PushButton,
+        Nfc,
+        Ethernet,
+        Usb,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum WiFiWpsConfigurationStatus
+    {
+        UnspecifiedFailure,
+        Success,
+        Timeout,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.WiFi.IWiFiAdapterStatics", da25fddd-d24c-43e3-aabd-c4659f730f99)]
+    [interface_name("Windows.Devices.WiFi.IWiFiAdapter", a6c4e423-3d75-43a4-b9de-11e26b72d9b0)]
+    runtimeclass WiFiAdapter
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.WiFi.WiFiAdapter> >  FindAllAdaptersAsync();
+        static String GetDeviceSelector();
+        [method_name("FromIdAsync")] static Windows.Foundation.IAsyncOperation <Windows.Devices.WiFi.WiFiAdapter>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.WiFi.WiFiAccessStatus>  RequestAccessAsync();
+        Windows.Networking.Connectivity.NetworkAdapter NetworkAdapter{ get; };
+        Windows.Foundation.IAsyncAction ScanAsync();
+        Windows.Devices.WiFi.WiFiNetworkReport NetworkReport{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.WiFi.WiFiAdapter, Object>  AvailableNetworksChanged;
+        [method_name("ConnectAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.WiFi.WiFiConnectionResult>  ConnectAsync(WiFiAvailableNetwork availableNetwork, WiFiReconnectionKind reconnectionKind);
+        [method_name("ConnectWithPasswordCredentialAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Devices.WiFi.WiFiConnectionResult>  ConnectAsync(WiFiAvailableNetwork availableNetwork, WiFiReconnectionKind reconnectionKind, Windows.Security.Credentials.PasswordCredential passwordCredential);
+        [method_name("ConnectWithPasswordCredentialAndSsidAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Devices.WiFi.WiFiConnectionResult>  ConnectAsync(WiFiAvailableNetwork availableNetwork, WiFiReconnectionKind reconnectionKind, Windows.Security.Credentials.PasswordCredential passwordCredential, String ssid);
+        void Disconnect();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.WiFi.IWiFiAdapter2", 5bc4501d-81e4-453d-9430-1fcafbadd6b6)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Devices.WiFi.WiFiWpsConfigurationResult>  GetWpsConfigurationAsync(WiFiAvailableNetwork availableNetwork);
+            [method_name("ConnectWithPasswordCredentialAndSsidAndConnectionMethodAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Devices.WiFi.WiFiConnectionResult>  ConnectAsync(WiFiAvailableNetwork availableNetwork, WiFiReconnectionKind reconnectionKind, Windows.Security.Credentials.PasswordCredential passwordCredential, String ssid, WiFiConnectionMethod connectionMethod);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.WiFi.IWiFiNetworkReport", 9524ded2-5911-445e-8194-be4f1a704895)]
+    runtimeclass WiFiNetworkReport
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.WiFi.WiFiAvailableNetwork>  AvailableNetworks{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.WiFi.IWiFiAvailableNetwork", 26e96246-183e-4704-9826-71b4a2f0f668)]
+    runtimeclass WiFiAvailableNetwork
+    {
+        Windows.Foundation.TimeSpan Uptime{ get; };
+        String Ssid{ get; };
+        String Bssid{ get; };
+        Int32 ChannelCenterFrequencyInKilohertz{ get; };
+        Double NetworkRssiInDecibelMilliwatts{ get; };
+        UInt8 SignalBars{ get; };
+        Windows.Devices.WiFi.WiFiNetworkKind NetworkKind{ get; };
+        Windows.Devices.WiFi.WiFiPhyKind PhyKind{ get; };
+        Windows.Networking.Connectivity.NetworkSecuritySettings SecuritySettings{ get; };
+        Windows.Foundation.TimeSpan BeaconInterval{ get; };
+        Boolean IsWiFiDirect{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.WiFi.IWiFiConnectionResult", 143bdfd9-c37d-40be-a5c8-857bce85a931)]
+    runtimeclass WiFiConnectionResult
+    {
+        Windows.Devices.WiFi.WiFiConnectionStatus ConnectionStatus{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.WiFi.IWiFiWpsConfigurationResult", 67b49871-17ee-42d1-b14f-5a11f1226fb5)]
+    runtimeclass WiFiWpsConfigurationResult
+    {
+        Windows.Devices.WiFi.WiFiWpsConfigurationStatus Status{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.WiFi.WiFiWpsKind>  SupportedWpsKinds{ get; };
+    }
+
+
+
+
+
+}

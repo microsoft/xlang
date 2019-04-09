@@ -1,0 +1,24 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Composition.Desktop
+{
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Composition.Desktop.IDesktopWindowTarget", 6329d6ca-3366-490e-9db3-25312929ac51)]
+    runtimeclass DesktopWindowTarget
+        : Windows.UI.Composition.CompositionTarget
+    {
+        Boolean IsTopmost{ get; };
+    }
+
+}

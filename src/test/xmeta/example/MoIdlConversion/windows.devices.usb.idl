@@ -1,0 +1,411 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Usb
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UsbTransferDirection
+    {
+        Out,
+        In,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UsbEndpointType
+    {
+        Control,
+        Isochronous,
+        Bulk,
+        Interrupt,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UsbControlRecipient
+    {
+        Device,
+        SpecifiedInterface,
+        Endpoint,
+        Other,
+        DefaultInterface,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UsbControlTransferType
+    {
+        Standard,
+        Class,
+        Vendor,
+    };
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Usb.IUsbControlRequestType", 8e9465a6-d73d-46de-94be-aae7f07c0f5c)]
+    runtimeclass UsbControlRequestType
+    {
+        UsbControlRequestType();
+        Windows.Devices.Usb.UsbTransferDirection Direction{ get; };
+        Windows.Devices.Usb.UsbTransferDirection Direction{ set; };
+        Windows.Devices.Usb.UsbControlTransferType ControlTransferType{ get; };
+        Windows.Devices.Usb.UsbControlTransferType ControlTransferType{ set; };
+        Windows.Devices.Usb.UsbControlRecipient Recipient{ get; };
+        Windows.Devices.Usb.UsbControlRecipient Recipient{ set; };
+        UInt8 AsByte{ get; };
+        UInt8 AsByte{ set; };
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.Usb.IUsbSetupPacketFactory", c9257d50-1b2e-4a41-a2a7-338f0cef3c14)]
+    [interface_name("Windows.Devices.Usb.IUsbSetupPacket", 104ba132-c78f-4c51-b654-e49d02f2cb03)]
+    runtimeclass UsbSetupPacket
+    {
+        [method_name( "CreateWithEightByteBuffer" )] UsbSetupPacket(Windows.Storage.Streams.IBuffer eightByteBuffer);
+        UsbSetupPacket();
+        Windows.Devices.Usb.UsbControlRequestType RequestType{ get; };
+        Windows.Devices.Usb.UsbControlRequestType RequestType{ set; };
+        UInt8 Request{ get; };
+        UInt8 Request{ set; };
+        UInt32 Value{ get; };
+        UInt32 Value{ set; };
+        UInt32 Index{ get; };
+        UInt32 Index{ set; };
+        UInt32 Length{ get; };
+        UInt32 Length{ set; };
+    }
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Usb.IUsbDeviceClass", 051942f9-845e-47eb-b12a-38f2f617afe7)]
+    runtimeclass UsbDeviceClass
+    {
+        UsbDeviceClass();
+        UInt8 ClassCode{ get; };
+        UInt8 ClassCode{ set; };
+        Windows.Foundation.IReference <UInt8>  SubclassCode{ get; };
+        Windows.Foundation.IReference <UInt8>  SubclassCode{ set; };
+        Windows.Foundation.IReference <UInt8>  ProtocolCode{ get; };
+        Windows.Foundation.IReference <UInt8>  ProtocolCode{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [static_name("Windows.Devices.Usb.IUsbDeviceClassesStatics", b20b0527-c580-4599-a165-981b4fd03230)]
+    [default_interface]
+    [interface_name("Windows.Devices.Usb.IUsbDeviceClasses", 686f955d-9b92-4b30-9781-c22c55ac35cb)]
+    runtimeclass UsbDeviceClasses
+    {
+        static Windows.Devices.Usb.UsbDeviceClass CdcControl{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass Physical{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass PersonalHealthcare{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass ActiveSync{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass PalmSync{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass DeviceFirmwareUpdate{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass Irda{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass Measurement{ get; };
+        static Windows.Devices.Usb.UsbDeviceClass VendorSpecific{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [static_name("Windows.Devices.Usb.IUsbDeviceStatics", 066b85a2-09b7-4446-8502-6fe6dcaa7309)]
+    [interface_name("Windows.Devices.Usb.IUsbDevice", 5249b992-c456-44d5-ad5e-24f5a089f63b)]
+    runtimeclass UsbDevice
+        : Windows.Foundation.IClosable
+    {
+        [method_name("GetDeviceSelector")] static String GetDeviceSelector(UInt32 vendorId, UInt32 productId, Guid winUsbInterfaceClass);
+        [method_name("GetDeviceSelectorGuidOnly")] static String GetDeviceSelector(Guid winUsbInterfaceClass);
+        [method_name("GetDeviceSelectorVidPidOnly")] static String GetDeviceSelector(UInt32 vendorId, UInt32 productId);
+        static String GetDeviceClassSelector(UsbDeviceClass usbClass);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Usb.UsbDevice>  FromIdAsync(String deviceId);
+        [method_name("SendControlOutTransferAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <UInt32>  SendControlOutTransferAsync(UsbSetupPacket setupPacket, Windows.Storage.Streams.IBuffer buffer);
+        [method_name("SendControlOutTransferAsyncNoBuffer")] [remote_sync]Windows.Foundation.IAsyncOperation <UInt32>  SendControlOutTransferAsync(UsbSetupPacket setupPacket);
+        [method_name("SendControlInTransferAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  SendControlInTransferAsync(UsbSetupPacket setupPacket, Windows.Storage.Streams.IBuffer buffer);
+        [method_name("SendControlInTransferAsyncNoBuffer")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  SendControlInTransferAsync(UsbSetupPacket setupPacket);
+        Windows.Devices.Usb.UsbInterface DefaultInterface{ get; };
+        Windows.Devices.Usb.UsbDeviceDescriptor DeviceDescriptor{ get; };
+        Windows.Devices.Usb.UsbConfiguration Configuration{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Usb.IUsbInterface", a0322b95-7f47-48ab-a727-678c25be2112)]
+    runtimeclass UsbInterface
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbBulkInPipe>  BulkInPipes{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbInterruptInPipe>  InterruptInPipes{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbBulkOutPipe>  BulkOutPipes{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbInterruptOutPipe>  InterruptOutPipes{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbInterfaceSetting>  InterfaceSettings{ get; };
+        UInt8 InterfaceNumber{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbDescriptor>  Descriptors{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.Usb.IUsbDeviceDescriptor", 1f48d1f6-ba97-4322-b92c-b5b189216588)]
+    runtimeclass UsbDeviceDescriptor
+    {
+        UInt32 BcdUsb{ get; };
+        UInt8 MaxPacketSize0{ get; };
+        UInt32 VendorId{ get; };
+        UInt32 ProductId{ get; };
+        UInt32 BcdDeviceRevision{ get; };
+        UInt8 NumberOfConfigurations{ get; };
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Usb.IUsbConfiguration", 68177429-36a9-46d7-b873-fc689251ec30)]
+    runtimeclass UsbConfiguration
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbInterface>  UsbInterfaces{ get; };
+        Windows.Devices.Usb.UsbConfigurationDescriptor ConfigurationDescriptor{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbDescriptor>  Descriptors{ get; };
+    }
+
+
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Usb.IUsbDescriptor", 0a89f216-5f9d-4874-8904-da9ad3f5528f)]
+    runtimeclass UsbDescriptor
+    {
+        UInt8 Length{ get; };
+        UInt8 DescriptorType{ get; };
+        void ReadDescriptorBuffer(Windows.Storage.Streams.IBuffer buffer);
+    }
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Usb.IUsbConfigurationDescriptorStatics", 424ced93-e740-40a1-92bd-da120ea04914)]
+    [interface_name("Windows.Devices.Usb.IUsbConfigurationDescriptor", f2176d92-b442-407a-8207-7d646c0385f3)]
+    runtimeclass UsbConfigurationDescriptor
+    {
+        [return_name("success")] static Boolean TryParse(UsbDescriptor descriptor, out UsbConfigurationDescriptor parsed);
+        static Windows.Devices.Usb.UsbConfigurationDescriptor Parse(UsbDescriptor descriptor);
+        UInt8 ConfigurationValue{ get; };
+        UInt32 MaxPowerMilliamps{ get; };
+        Boolean SelfPowered{ get; };
+        Boolean RemoteWakeup{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [static_name("Windows.Devices.Usb.IUsbInterfaceDescriptorStatics", e34a9ff5-77d6-48b6-b0be-16c6422316fe)]
+    [interface_name("Windows.Devices.Usb.IUsbInterfaceDescriptor", 199670c7-b7ee-4f90-8cd5-94a2e257598a)]
+    runtimeclass UsbInterfaceDescriptor
+    {
+        [return_name("success")] static Boolean TryParse(UsbDescriptor descriptor, out UsbInterfaceDescriptor parsed);
+        static Windows.Devices.Usb.UsbInterfaceDescriptor Parse(UsbDescriptor descriptor);
+        UInt8 ClassCode{ get; };
+        UInt8 SubclassCode{ get; };
+        UInt8 ProtocolCode{ get; };
+        UInt8 AlternateSettingNumber{ get; };
+        UInt8 InterfaceNumber{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Usb.IUsbBulkInEndpointDescriptor", 3c6e4846-06cf-42a9-9dc2-971c1b14b6e3)]
+    runtimeclass UsbBulkInEndpointDescriptor
+    {
+        UInt32 MaxPacketSize{ get; };
+        UInt8 EndpointNumber{ get; };
+        Windows.Devices.Usb.UsbBulkInPipe Pipe{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.Usb.IUsbInterruptInEndpointDescriptor", c0528967-c911-4c3a-86b2-419c2da89039)]
+    runtimeclass UsbInterruptInEndpointDescriptor
+    {
+        UInt32 MaxPacketSize{ get; };
+        UInt8 EndpointNumber{ get; };
+        Windows.Foundation.TimeSpan Interval{ get; };
+        Windows.Devices.Usb.UsbInterruptInPipe Pipe{ get; };
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Usb.IUsbBulkOutEndpointDescriptor", 2820847a-ffee-4f60-9be1-956cac3ecb65)]
+    runtimeclass UsbBulkOutEndpointDescriptor
+    {
+        UInt32 MaxPacketSize{ get; };
+        UInt8 EndpointNumber{ get; };
+        Windows.Devices.Usb.UsbBulkOutPipe Pipe{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.Usb.IUsbInterruptOutEndpointDescriptor", cc9fed81-10ca-4533-952d-9e278341e80f)]
+    runtimeclass UsbInterruptOutEndpointDescriptor
+    {
+        UInt32 MaxPacketSize{ get; };
+        UInt8 EndpointNumber{ get; };
+        Windows.Foundation.TimeSpan Interval{ get; };
+        Windows.Devices.Usb.UsbInterruptOutPipe Pipe{ get; };
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Usb.IUsbEndpointDescriptorStatics", c890b201-9a6a-495e-a82c-295b9e708106)]
+    [interface_name("Windows.Devices.Usb.IUsbEndpointDescriptor", 6b4862d9-8df7-4b40-ac83-578f139f0575)]
+    runtimeclass UsbEndpointDescriptor
+    {
+        [return_name("success")] static Boolean TryParse(UsbDescriptor descriptor, out UsbEndpointDescriptor parsed);
+        static Windows.Devices.Usb.UsbEndpointDescriptor Parse(UsbDescriptor descriptor);
+        UInt8 EndpointNumber{ get; };
+        Windows.Devices.Usb.UsbTransferDirection Direction{ get; };
+        Windows.Devices.Usb.UsbEndpointType EndpointType{ get; };
+        Windows.Devices.Usb.UsbBulkInEndpointDescriptor AsBulkInEndpointDescriptor{ get; };
+        Windows.Devices.Usb.UsbInterruptInEndpointDescriptor AsInterruptInEndpointDescriptor{ get; };
+        Windows.Devices.Usb.UsbBulkOutEndpointDescriptor AsBulkOutEndpointDescriptor{ get; };
+        Windows.Devices.Usb.UsbInterruptOutEndpointDescriptor AsInterruptOutEndpointDescriptor{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.Usb.IUsbInterruptInEventArgs", b7b04092-1418-4936-8209-299cf5605583)]
+    runtimeclass UsbInterruptInEventArgs
+    {
+        Windows.Storage.Streams.IBuffer InterruptData{ get; };
+    }
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UsbReadOptions
+    {
+        None,
+        AutoClearStall,
+        OverrideAutomaticBufferManagement,
+        IgnoreShortPacket = 4,
+        AllowPartialReads = 8,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum UsbWriteOptions
+    {
+        None,
+        AutoClearStall,
+        ShortPacketTerminate,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Usb.IUsbInterruptInPipe", fa007116-84d7-48c7-8a3f-4c0b235f2ea6)]
+    runtimeclass UsbInterruptInPipe
+    {
+        Windows.Devices.Usb.UsbInterruptInEndpointDescriptor EndpointDescriptor{ get; };
+        Windows.Foundation.IAsyncAction ClearStallAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Usb.UsbInterruptInPipe, Windows.Devices.Usb.UsbInterruptInEventArgs>  DataReceived;
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Usb.IUsbBulkInPipe", f01d2d3b-4548-4d50-b326-d82cdabe1220)]
+    runtimeclass UsbBulkInPipe
+    {
+        UInt32 MaxTransferSizeBytes{ get; };
+        Windows.Devices.Usb.UsbBulkInEndpointDescriptor EndpointDescriptor{ get; };
+        Windows.Foundation.IAsyncAction ClearStallAsync();
+        Windows.Devices.Usb.UsbReadOptions ReadOptions{ set; };
+        Windows.Devices.Usb.UsbReadOptions ReadOptions{ get; };
+        void FlushBuffer();
+        Windows.Storage.Streams.IInputStream InputStream{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.Usb.IUsbBulkOutPipe", a8e9ee6e-0115-45aa-8b21-37b225bccee7)]
+    runtimeclass UsbBulkOutPipe
+    {
+        Windows.Devices.Usb.UsbBulkOutEndpointDescriptor EndpointDescriptor{ get; };
+        Windows.Foundation.IAsyncAction ClearStallAsync();
+        Windows.Devices.Usb.UsbWriteOptions WriteOptions{ set; };
+        Windows.Devices.Usb.UsbWriteOptions WriteOptions{ get; };
+        Windows.Storage.Streams.IOutputStream OutputStream{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.Usb.IUsbInterruptOutPipe", e984c8a9-aaf9-49d0-b96c-f661ab4a7f95)]
+    runtimeclass UsbInterruptOutPipe
+    {
+        Windows.Devices.Usb.UsbInterruptOutEndpointDescriptor EndpointDescriptor{ get; };
+        Windows.Foundation.IAsyncAction ClearStallAsync();
+        Windows.Devices.Usb.UsbWriteOptions WriteOptions{ set; };
+        Windows.Devices.Usb.UsbWriteOptions WriteOptions{ get; };
+        Windows.Storage.Streams.IOutputStream OutputStream{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Usb.IUsbInterfaceSetting", 1827bba7-8da7-4af7-8f4c-7f3032e781f5)]
+    runtimeclass UsbInterfaceSetting
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbBulkInEndpointDescriptor>  BulkInEndpoints{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbInterruptInEndpointDescriptor>  InterruptInEndpoints{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbBulkOutEndpointDescriptor>  BulkOutEndpoints{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbInterruptOutEndpointDescriptor>  InterruptOutEndpoints{ get; };
+        Boolean Selected{ get; };
+        Windows.Foundation.IAsyncAction SelectSettingAsync();
+        Windows.Devices.Usb.UsbInterfaceDescriptor InterfaceDescriptor{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Usb.UsbDescriptor>  Descriptors{ get; };
+    }
+
+
+
+
+
+
+}

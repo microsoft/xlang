@@ -1,0 +1,137 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum CodecKind
+    {
+        Audio,
+        Video,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum CodecCategory
+    {
+        Encoder,
+        Decoder,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.ICodecInfo", 51e89f85-ea97-499c-86ac-4ce5e73f3a42)]
+    runtimeclass CodecInfo
+    {
+        Windows.Media.Core.CodecKind Kind{ get; };
+        Windows.Media.Core.CodecCategory Category{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  Subtypes{ get; };
+        String DisplayName{ get; };
+        Boolean IsTrusted{ get; };
+    }
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.ICodecQuery", 222a953a-af61-4e04-808a-a4634e2f3ac4)]
+    [threading(both)]
+    runtimeclass CodecQuery
+    {
+        CodecQuery();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Media.Core.CodecInfo> >  FindAllAsync(CodecKind kind, CodecCategory category, String subType);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Media.Core.ICodecSubtypesStatics", a66ac4f2-888b-4224-8cf6-2a8d4eb02382)]
+    [threading(both)]
+    runtimeclass CodecSubtypes
+    {
+        static String VideoFormatDV25{ get; };
+        static String VideoFormatDV50{ get; };
+        static String VideoFormatDvc{ get; };
+        static String VideoFormatDvh1{ get; };
+        static String VideoFormatDvhD{ get; };
+        static String VideoFormatDvsd{ get; };
+        static String VideoFormatDvsl{ get; };
+        static String VideoFormatH263{ get; };
+        static String VideoFormatH264{ get; };
+        static String VideoFormatH265{ get; };
+        static String VideoFormatH264ES{ get; };
+        static String VideoFormatHevc{ get; };
+        static String VideoFormatHevcES{ get; };
+        static String VideoFormatM4S2{ get; };
+        static String VideoFormatMjpg{ get; };
+        static String VideoFormatMP43{ get; };
+        static String VideoFormatMP4S{ get; };
+        static String VideoFormatMP4V{ get; };
+        static String VideoFormatMpeg2{ get; };
+        static String VideoFormatVP80{ get; };
+        static String VideoFormatVP90{ get; };
+        static String VideoFormatMpg1{ get; };
+        static String VideoFormatMss1{ get; };
+        static String VideoFormatMss2{ get; };
+        static String VideoFormatWmv1{ get; };
+        static String VideoFormatWmv2{ get; };
+        static String VideoFormatWmv3{ get; };
+        static String VideoFormatWvc1{ get; };
+        static String VideoFormat420O{ get; };
+        static String AudioFormatAac{ get; };
+        static String AudioFormatAdts{ get; };
+        static String AudioFormatAlac{ get; };
+        static String AudioFormatAmrNB{ get; };
+        static String AudioFormatAmrWB{ get; };
+        static String AudioFormatAmrWP{ get; };
+        static String AudioFormatDolbyAC3{ get; };
+        static String AudioFormatDolbyAC3Spdif{ get; };
+        static String AudioFormatDolbyDDPlus{ get; };
+        static String AudioFormatDrm{ get; };
+        static String AudioFormatDts{ get; };
+        static String AudioFormatFlac{ get; };
+        static String AudioFormatFloat{ get; };
+        static String AudioFormatMP3{ get; };
+        static String AudioFormatMPeg{ get; };
+        static String AudioFormatMsp1{ get; };
+        static String AudioFormatOpus{ get; };
+        static String AudioFormatPcm{ get; };
+        static String AudioFormatWmaSpdif{ get; };
+        static String AudioFormatWMAudioLossless{ get; };
+        static String AudioFormatWMAudioV8{ get; };
+        static String AudioFormatWMAudioV9{ get; };
+    }
+
+
+    [gc_pressure(Windows.Foundation.Metadata.GCPressureAmount.High)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Core.ILowLightFusionResult", 78edbe35-27a0-42e0-9cd3-738d2089de9c)]
+    runtimeclass LowLightFusionResult
+        : Windows.Foundation.IClosable
+    {
+        Windows.Graphics.Imaging.SoftwareBitmap Frame{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [dualapipartition(0xa000004)]
+    [static_name("Windows.Media.Core.ILowLightFusionStatics", 5305016d-c29e-40e2-87a9-9e1fd2f192f5)]
+    [threading(both)]
+    runtimeclass LowLightFusion
+    {
+        static Windows.Foundation.Collections.IVectorView <Windows.Graphics.Imaging.BitmapPixelFormat>  SupportedBitmapPixelFormats{ get; };
+        static Int32 MaxSupportedFrameCount{ get; };
+        static Windows.Foundation.IAsyncOperationWithProgress <Windows.Media.Core.LowLightFusionResult, Double>  FuseAsync(Windows.Foundation.Collections.IIterable <Windows.Graphics.Imaging.SoftwareBitmap>  frameSet);
+    }
+
+
+}

@@ -1,0 +1,114 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum UserPresenceStates
+    {
+        NotPresent,
+        Present,
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum UserActiveStates
+    {
+        NotActive,
+        Active,
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum PowerMonitorRequestReasons
+    {
+        ReasonUnknown,
+        ReasonPowerButton,
+        ReasonRemoteConnection,
+        ReasonScMonitorpower,
+        ReasonUserInput,
+        ReasonAcDcDisplayBurst,
+        ReasonUserDisplayBurst,
+        ReasonPoSetSystemState,
+        ReasonSetThreadExecutionState,
+        ReasonFullWake,
+        ReasonSessionUnlock,
+        ReasonScreenOffRequest,
+        ReasonIdleTimeout,
+        ReasonPolicyChange,
+        ReasonSleepButton,
+        ReasonLid,
+        ReasonBatteryCountChange,
+        ReasonGracePeriod,
+        ReasonPnP,
+        ReasonDP,
+        ReasonSxTransition,
+        ReasonSystemIdle,
+        ReasonNearProximity,
+        ReasonThermalStandby,
+        ReasonResumePdc,
+        ReasonResumeS4,
+        ReasonTerminal,
+        ReasonPdcSignal,
+        ReasonAcDcDisplayBurstSuppressed,
+        ReasonSystemStateEntered,
+        ReasonWinrt,
+        ReasonUserInputKeyboard,
+        ReasonUserInputMouse,
+        ReasonUserInputTouch,
+        ReasonUserInputPen,
+        ReasonUserInputAccelerometer,
+        ReasonUserInputHid,
+        ReasonUserInputPoUserPresent,
+        ReasonUserInputSessionSwitch,
+        ReasonUserInputInitialization,
+        ReasonPdcSignalWindowsMobilePwrNotif,
+        ReasonPdcSignalWindowsMobileShell,
+        ReasonPdcSignalHeyCortana,
+        ReasonPdcSignalHolographicShell,
+        ReasonPdcSignalFingerprint,
+        ReasonDirectedDrips,
+        ReasonMax,
+    };
+
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.IDisplayUserPresenceStateChangedEventArgs", 1cf58b63-3633-4f8e-991f-9af255a45512)]
+    runtimeclass DisplayUserPresenceStateChangedEventArgs
+    {
+        String DisplayPersistentId{ get; };
+    }
+
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Internal.ComposableShell.IGlobalUserPresenceStateChangedEventArgs", 5333d55c-8c95-4fe4-b935-8195d54da592)]
+    runtimeclass GlobalUserPresenceStateChangedEventArgs
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [static_name("Windows.Internal.ComposableShell.IUserPresenceManagerStatics", eb3dceea-72bd-4dd6-a1a5-1ecbd2c118fd)]
+    [interface_name("Windows.Internal.ComposableShell.IUserPresenceManager", 258f6235-6bd6-4398-9c8f-c449a75d8729)]
+    [threading(both)]
+    runtimeclass UserPresenceManager
+    {
+        static Windows.Internal.ComposableShell.UserPresenceManager GetInstance();
+        Boolean TrySetUserPresenceState(String displayPersistentId, UserPresenceStates state, PowerMonitorRequestReasons reason);
+        void SetUserPresenceStateForAllDisplays(UserPresenceStates state);
+        Boolean TrySetUserActiveState(String displayPersistentId, UserActiveStates state, PowerMonitorRequestReasons reason);
+        void SetUserActiveStateForAllDisplays(UserActiveStates state);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.UserPresenceManager, Windows.Internal.ComposableShell.DisplayUserPresenceStateChangedEventArgs>  DisplayUserPresenceStateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.UserPresenceManager, Windows.Internal.ComposableShell.GlobalUserPresenceStateChangedEventArgs>  GlobalUserPresenceStateChanged;
+        Windows.Internal.ComposableShell.UserPresenceStates GetDisplayUserPresenceState(String displayPersistentId);
+        Windows.Internal.ComposableShell.UserPresenceStates GetGlobalUserPresenceState();
+    }
+
+
+}

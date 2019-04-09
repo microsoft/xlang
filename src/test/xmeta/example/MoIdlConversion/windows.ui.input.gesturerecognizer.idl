@@ -1,0 +1,268 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Input
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum HoldingState
+    {
+        Started,
+        Completed,
+        Canceled,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DraggingState
+    {
+        Started,
+        Continuing,
+        Completed,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CrossSlidingState
+    {
+        Started,
+        Dragging,
+        Selecting,
+        SelectSpeedBumping,
+        SpeedBumping,
+        Rearranging,
+        Completed,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GestureSettings
+    {
+        None,
+        Tap,
+        DoubleTap,
+        Hold = 4,
+        HoldWithMouse = 8,
+        RightTap = 16,
+        Drag = 32,
+        ManipulationTranslateX = 64,
+        ManipulationTranslateY = 128,
+        ManipulationTranslateRailsX = 256,
+        ManipulationTranslateRailsY = 512,
+        ManipulationRotate = 1024,
+        ManipulationScale = 2048,
+        ManipulationTranslateInertia = 4096,
+        ManipulationRotateInertia = 8192,
+        ManipulationScaleInertia = 16384,
+        CrossSlide = 32768,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        ManipulationMultipleFingerPanning = 65536,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct ManipulationDelta
+    {
+        Windows.Foundation.Point Translation;
+        Single Scale;
+        Single Rotation;
+        Single Expansion;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct ManipulationVelocities
+    {
+        Windows.Foundation.Point Linear;
+        Single Angular;
+        Single Expansion;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct CrossSlideThresholds
+    {
+        Single SelectionStart;
+        Single SpeedBumpStart;
+        Single SpeedBumpEnd;
+        Single RearrangeStart;
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(none)]
+    [interface_name("Windows.UI.Input.IMouseWheelParameters", ead0ca44-9ded-4037-8149-5e4cc2564468)]
+    runtimeclass MouseWheelParameters
+    {
+        Windows.Foundation.Point CharTranslation{ get; };
+        Windows.Foundation.Point CharTranslation{ set; };
+        Single DeltaScale{ get; };
+        Single DeltaScale{ set; };
+        Single DeltaRotationAngle{ get; };
+        Single DeltaRotationAngle{ set; };
+        Windows.Foundation.Point PageTranslation{ get; };
+        Windows.Foundation.Point PageTranslation{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(none)]
+    [interface_name("Windows.UI.Input.IGestureRecognizer", b47a37bf-3d6b-4f88-83e8-6dcb4012ffb0)]
+    runtimeclass GestureRecognizer
+    {
+        GestureRecognizer();
+        Windows.UI.Input.GestureSettings GestureSettings{ get; };
+        Windows.UI.Input.GestureSettings GestureSettings{ set; };
+        Boolean IsInertial{ get; };
+        Boolean IsActive{ get; };
+        Boolean ShowGestureFeedback{ get; };
+        Boolean ShowGestureFeedback{ set; };
+        Windows.Foundation.Point PivotCenter{ get; };
+        Windows.Foundation.Point PivotCenter{ set; };
+        Single PivotRadius{ get; };
+        Single PivotRadius{ set; };
+        Single InertiaTranslationDeceleration{ get; };
+        Single InertiaTranslationDeceleration{ set; };
+        Single InertiaRotationDeceleration{ get; };
+        Single InertiaRotationDeceleration{ set; };
+        Single InertiaExpansionDeceleration{ get; };
+        Single InertiaExpansionDeceleration{ set; };
+        Single InertiaTranslationDisplacement{ get; };
+        Single InertiaTranslationDisplacement{ set; };
+        Single InertiaRotationAngle{ get; };
+        Single InertiaRotationAngle{ set; };
+        Single InertiaExpansion{ get; };
+        Single InertiaExpansion{ set; };
+        Boolean ManipulationExact{ get; };
+        Boolean ManipulationExact{ set; };
+        Windows.UI.Input.CrossSlideThresholds CrossSlideThresholds{ get; };
+        Windows.UI.Input.CrossSlideThresholds CrossSlideThresholds{ set; };
+        Boolean CrossSlideHorizontally{ get; };
+        Boolean CrossSlideHorizontally{ set; };
+        Boolean CrossSlideExact{ get; };
+        Boolean CrossSlideExact{ set; };
+        Boolean AutoProcessInertia{ get; };
+        Boolean AutoProcessInertia{ set; };
+        Windows.UI.Input.MouseWheelParameters MouseWheelParameters{ get; };
+        Boolean CanBeDoubleTap(PointerPoint value);
+        void ProcessDownEvent(PointerPoint value);
+        void ProcessMoveEvents(Windows.Foundation.Collections.IVector <Windows.UI.Input.PointerPoint>  value);
+        void ProcessUpEvent(PointerPoint value);
+        void ProcessMouseWheelEvent(PointerPoint value, Boolean isShiftKeyDown, Boolean isControlKeyDown);
+        void ProcessInertia();
+        void CompleteGesture();
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.TappedEventArgs>  Tapped;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.RightTappedEventArgs>  RightTapped;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.HoldingEventArgs>  Holding;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.DraggingEventArgs>  Dragging;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.ManipulationStartedEventArgs>  ManipulationStarted;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.ManipulationUpdatedEventArgs>  ManipulationUpdated;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.ManipulationInertiaStartingEventArgs>  ManipulationInertiaStarting;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.ManipulationCompletedEventArgs>  ManipulationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.GestureRecognizer, Windows.UI.Input.CrossSlidingEventArgs>  CrossSliding;
+    }
+
+    [marshaling_behavior(none)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Input.ITappedEventArgs", cfa126e4-253a-4c3c-953b-395c37aed309)]
+    runtimeclass TappedEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        UInt32 TapCount{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(none)]
+    [interface_name("Windows.UI.Input.IRightTappedEventArgs", 4cbf40bd-af7a-4a36-9476-b1dce141709a)]
+    runtimeclass RightTappedEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+    }
+
+    [marshaling_behavior(none)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Input.IHoldingEventArgs", 2bf755c5-e799-41b4-bb40-242f40959b71)]
+    runtimeclass HoldingEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Input.HoldingState HoldingState{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(none)]
+    [interface_name("Windows.UI.Input.IDraggingEventArgs", 1c905384-083c-4bd3-b559-179cddeb33ec)]
+    runtimeclass DraggingEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Input.DraggingState DraggingState{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(none)]
+    [interface_name("Windows.UI.Input.IManipulationStartedEventArgs", ddec873e-cfce-4932-8c1d-3c3d011a34c0)]
+    runtimeclass ManipulationStartedEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Input.ManipulationDelta Cumulative{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(none)]
+    [interface_name("Windows.UI.Input.IManipulationUpdatedEventArgs", cb354ce5-abb8-4f9f-b3ce-8181aa61ad82)]
+    runtimeclass ManipulationUpdatedEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Input.ManipulationDelta Delta{ get; };
+        Windows.UI.Input.ManipulationDelta Cumulative{ get; };
+        Windows.UI.Input.ManipulationVelocities Velocities{ get; };
+    }
+
+    [marshaling_behavior(none)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Input.IManipulationInertiaStartingEventArgs", dd37a898-26bf-467a-9ce5-ccf3fb11371e)]
+    runtimeclass ManipulationInertiaStartingEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Input.ManipulationDelta Delta{ get; };
+        Windows.UI.Input.ManipulationDelta Cumulative{ get; };
+        Windows.UI.Input.ManipulationVelocities Velocities{ get; };
+    }
+
+    [marshaling_behavior(none)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Input.IManipulationCompletedEventArgs", b34ab22b-d19b-46ff-9f38-dec7754bb9e7)]
+    runtimeclass ManipulationCompletedEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Input.ManipulationDelta Cumulative{ get; };
+        Windows.UI.Input.ManipulationVelocities Velocities{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(none)]
+    [interface_name("Windows.UI.Input.ICrossSlidingEventArgs", e9374738-6f88-41d9-8720-78e08e398349)]
+    runtimeclass CrossSlidingEventArgs
+    {
+        Windows.Devices.Input.PointerDeviceType PointerDeviceType{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Input.CrossSlidingState CrossSlidingState{ get; };
+    }
+
+}

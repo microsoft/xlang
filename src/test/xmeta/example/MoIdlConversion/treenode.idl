@@ -1,0 +1,53 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum TreeNodeEventType
+    {
+        ChildAdded,
+        ChildRemoved,
+        Attached,
+        Detached,
+        Destroyed,
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [uuid(aa13ad37-07fd-4bde-bc22-7b228f29c517)]
+    interface ITreeNodeEventArgs
+    {
+        Windows.Internal.ComposableShell.TreeNodeEventType EventType{ get; };
+    };
+
+    [uuid(33129c95-d716-4fd4-81cd-43def9b39574)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    interface INodeChangedEventArgs requires Windows.Internal.ComposableShell.ITreeNodeEventArgs
+    {
+        Windows.Internal.ComposableShell.ITreeNode Node{ get; };
+    };
+
+    [uuid(2d10b4a2-7c09-4621-b36f-9a62ecbac6cb)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    interface ITreeNode
+    {
+        Windows.Internal.ComposableShell.ITreeNode Parent{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.ITreeNode>  Children{ get; };
+        UInt32 AddChild(ITreeNode node);
+        void RemoveChild(UInt32 cookie);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.ITreeNode, Windows.Internal.ComposableShell.ITreeNodeEventArgs>  NodeEvent;
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [uuid(6f67ad31-b581-43b0-a4c7-23915070d877)]
+    interface IComposerTreeNode
+    {
+        Windows.Internal.ComposableShell.ComposerContextId Context{ get; };
+    };
+
+}

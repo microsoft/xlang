@@ -1,0 +1,72 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IPackageLocationStatics", b8c8be3c-3a39-4e73-b4ba-c70d91d1b8ea)]
+    [interface_name("Windows.Internal.StateRepository.IPackageLocation", 26456d11-ae5c-456f-af81-e0bb3309d1c0)]
+    [threading(both)]
+    runtimeclass PackageLocation
+    {
+        static Boolean Exists(Int64 packageLocationID);
+        static Boolean ExistsByInstalledLocation(String InstalledLocation);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByVolume(Int64 Volume);
+        static Windows.Internal.StateRepository.PackageLocation Get(Int64 packageLocationID);
+        static Windows.Internal.StateRepository.PackageLocation TryGet(Int64 packageLocationID);
+        static Windows.Internal.StateRepository.PackageLocation GetByPackage(Package Package);
+        static Windows.Internal.StateRepository.PackageLocation TryGetByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageLocation>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageLocation>  FindByInstalledLocation(String InstalledLocation);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageLocation>  FindByVolume(Int64 Volume);
+        static Int64 GetVolumeByPackageFullName(String packageFullName);
+        static Windows.Internal.StateRepository.PackageLocation GetByUserAndApplicationUserModelId(User user, String applicationUserModelId);
+        PackageLocation();
+        Int64 _PackageLocationID{ get; };
+        Int64 _PackageLocationID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Int64 Volume{ get; };
+        Int64 Volume{ set; };
+        String InstalledLocation{ get; };
+        String InstalledLocation{ set; };
+        Windows.Storage.StorageFolder GetInstalledLocationAsStorageFolder();
+        void SetInstalledLocationAsStorageFolder(Windows.Storage.IStorageFolder value);
+        Boolean IsMutableLinkNull{ get; };
+        void SetMutableLinkToNull();
+        String MutableLink{ get; };
+        String MutableLink{ set; };
+        Windows.Storage.StorageFolder GetMutableLinkAsStorageFolder();
+        void SetMutableLinkAsStorageFolder(Windows.Storage.IStorageFolder value);
+        Boolean IsMutableLocationNull{ get; };
+        void SetMutableLocationToNull();
+        String MutableLocation{ get; };
+        String MutableLocation{ set; };
+        Windows.Storage.StorageFolder GetMutableLocationAsStorageFolder();
+        void SetMutableLocationAsStorageFolder(Windows.Storage.IStorageFolder value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        String EffectiveInstalledLocation{ get; };
+    }
+
+
+}

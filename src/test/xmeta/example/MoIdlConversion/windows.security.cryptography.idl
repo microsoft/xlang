@@ -1,0 +1,40 @@
+
+
+
+
+
+
+
+
+namespace Windows.Security.Cryptography
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BinaryStringEncoding
+    {
+        Utf8,
+        Utf16LE,
+        Utf16BE,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Security.Cryptography.ICryptographicBufferStatics", 320b7e22-3cb0-4cdf-8663-1d28910065eb)]
+    [threading(both)]
+    runtimeclass CryptographicBuffer
+    {
+        static Boolean Compare(Windows.Storage.Streams.IBuffer object1, Windows.Storage.Streams.IBuffer object2);
+        static Windows.Storage.Streams.IBuffer GenerateRandom(UInt32 length);
+        static UInt32 GenerateRandomNumber();
+        static Windows.Storage.Streams.IBuffer CreateFromByteArray(UInt8[] value);
+        static void CopyToByteArray(Windows.Storage.Streams.IBuffer buffer, out UInt8[] value);
+        static Windows.Storage.Streams.IBuffer DecodeFromHexString(String value);
+        static String EncodeToHexString(Windows.Storage.Streams.IBuffer buffer);
+        static Windows.Storage.Streams.IBuffer DecodeFromBase64String(String value);
+        static String EncodeToBase64String(Windows.Storage.Streams.IBuffer buffer);
+        static Windows.Storage.Streams.IBuffer ConvertStringToBinary(String value, BinaryStringEncoding encoding);
+        static String ConvertBinaryToString(BinaryStringEncoding encoding, Windows.Storage.Streams.IBuffer buffer);
+    }
+
+}

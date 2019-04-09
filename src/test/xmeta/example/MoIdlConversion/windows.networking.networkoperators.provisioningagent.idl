@@ -1,0 +1,60 @@
+
+
+
+
+
+
+
+
+namespace Windows.Networking.NetworkOperators
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ProfileMediaType
+    {
+        Wlan,
+        Wwan,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Networking.NetworkOperators.IProvisionFromXmlDocumentResults", 217700e0-8203-11df-adb9-f4ce462d9137)]
+    runtimeclass ProvisionFromXmlDocumentResults
+    {
+        Boolean AllElementsProvisioned{ get; };
+        String ProvisionResultsXml{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct ProfileUsage
+    {
+        UInt32 UsageInMegabytes;
+        Windows.Foundation.DateTime LastSyncTime;
+    };
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.NetworkOperators.IProvisionedProfile", 217700e0-8202-11df-adb9-f4ce462d9137)]
+    runtimeclass ProvisionedProfile
+    {
+        void UpdateCost(Windows.Networking.Connectivity.NetworkCostType value);
+        void UpdateUsage(ProfileUsage value);
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Networking.NetworkOperators.IProvisioningAgentStaticMethods", 217700e0-8101-11df-adb9-f4ce462d9137)]
+    [interface_name("Windows.Networking.NetworkOperators.IProvisioningAgent", 217700e0-8201-11df-adb9-f4ce462d9137)]
+    [threading(both)]
+    runtimeclass ProvisioningAgent
+    {
+        ProvisioningAgent();
+        static Windows.Networking.NetworkOperators.ProvisioningAgent CreateFromNetworkAccountId(String networkAccountId);
+        Windows.Foundation.IAsyncOperation <Windows.Networking.NetworkOperators.ProvisionFromXmlDocumentResults>  ProvisionFromXmlDocumentAsync(String provisioningXmlDocument);
+        Windows.Networking.NetworkOperators.ProvisionedProfile GetProvisionedProfile(ProfileMediaType mediaType, String profileName);
+    }
+
+}

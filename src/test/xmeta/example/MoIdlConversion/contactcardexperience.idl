@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(1b49844a-6401-4dc0-a5c0-44dca16f9210)]
+    interface IContactCardExperience
+    {
+        void IsSupported(out Boolean result);
+        void ShowContactCard(UInt64 hwndAsUINT64, Windows.ApplicationModel.Contacts.Contact contact, Windows.Foundation.Rect invocationRect, Windows.UI.Popups.Placement preferredPlacement, Windows.ApplicationModel.Contacts.ContactCardOptions contactCardOptions, Single userLogicalDpi, Boolean isDelayloadMode, out Windows.ApplicationModel.Contacts.Internal.IContactCardExperienceDelayedDataLoader result);
+    };
+
+}

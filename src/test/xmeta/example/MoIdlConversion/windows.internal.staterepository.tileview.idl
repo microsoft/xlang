@@ -1,0 +1,119 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.ITileViewStatics", 6d3bc882-23a4-4706-b8fa-fc7de2fc325d)]
+    [interface_name("Windows.Internal.StateRepository.ITileView", 19ad9e30-89f3-48f6-9c50-e34a59494544)]
+    [threading(both)]
+    runtimeclass TileView
+    {
+        TileView();
+        static Boolean Exists(Int64 tileViewID);
+        static Boolean ExistsByApplication(Application Application);
+        static Boolean ExistsByApplicationAndTileId(Application Application, String TileId);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByTileUniqueId(Guid TileUniqueId);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndApplication(User User, Application Application);
+        static Boolean ExistsByUserAndApplicationUserModelId(User User, String ApplicationUserModelId);
+        static Boolean ExistsByUserAndPackage(User User, Package Package);
+        static Windows.Internal.StateRepository.TileView Get(Int64 tileViewID);
+        static Windows.Internal.StateRepository.TileView TryGet(Int64 tileViewID);
+        static Windows.Internal.StateRepository.TileView GetByApplicationAndTileId(Application Application, String TileId);
+        static Windows.Internal.StateRepository.TileView TryGetByApplicationAndTileId(Application Application, String TileId);
+        static Windows.Internal.StateRepository.TileView GetByTileUniqueId(Guid TileUniqueId);
+        static Windows.Internal.StateRepository.TileView TryGetByTileUniqueId(Guid TileUniqueId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  FindByApplication(Application Application);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  FindByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  FindByUserAndApplication(User User, Application Application);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  FindByUserAndApplicationUserModelId(User User, String ApplicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  FindByUserAndPackage(User User, Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.TileView>  FindByUserAndGTChangeIdAndTileViewQueryFilter(User user, Int64 changeId, TileViewQueryFilter TileViewQueryFilter);
+        static Int64 GetMaxChangeIdByUser(User user);
+        Int64 _TileViewID{ get; };
+        Int64 _TileViewID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Application{ get; };
+        Int64 Application{ set; };
+        Windows.Internal.StateRepository.Application GetApplication();
+        void SetApplication(Application value);
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Windows.Internal.StateRepository.TileFlags Flags{ get; };
+        Windows.Internal.StateRepository.TileFlags Flags{ set; };
+        Boolean VisibleInAppList{ get; };
+        Boolean VisibleInAppList{ set; };
+        Boolean VisibleInSettings{ get; };
+        Boolean VisibleInSettings{ set; };
+        Boolean SupportsKidZone{ get; };
+        Boolean SupportsKidZone{ set; };
+        Boolean SupportsLockScreen{ get; };
+        Boolean SupportsLockScreen{ set; };
+        Windows.Internal.StateRepository.TileType TileType{ get; };
+        Windows.Internal.StateRepository.TileType TileType{ set; };
+        Windows.Internal.StateRepository.TileTemplate TileTemplate{ get; };
+        Windows.Internal.StateRepository.TileTemplate TileTemplate{ set; };
+        String TileId{ get; };
+        String TileId{ set; };
+        Boolean IsArgumentsNull{ get; };
+        void SetArgumentsToNull();
+        String Arguments{ get; };
+        String Arguments{ set; };
+        Boolean IsEditionIdNull{ get; };
+        void SetEditionIdToNull();
+        String EditionId{ get; };
+        String EditionId{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        Int64 _TileUserID{ get; };
+        Int64 _TileUserID{ set; };
+        UInt64 _TileUser_Revision{ get; };
+        UInt64 _TileUser_Revision{ set; };
+        Int64 _Created{ get; };
+        Int64 _Created{ set; };
+        Int64 _Modified{ get; };
+        Int64 _Modified{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 ApplicationIdentity{ get; };
+        Int64 ApplicationIdentity{ set; };
+        Windows.Internal.StateRepository.ApplicationIdentity GetApplicationIdentity();
+        void SetApplicationIdentity(ApplicationIdentity value);
+        Windows.Internal.StateRepository.TileUserState State{ get; };
+        Windows.Internal.StateRepository.TileUserState State{ set; };
+        Guid TileUniqueId{ get; };
+        Guid TileUniqueId{ set; };
+        String ApplicationUserModelId{ get; };
+        String ApplicationUserModelId{ set; };
+        Int64 ChangeId{ get; };
+        void GetTileInfo(out Int64 tileViewID, out TileFlags tileFlags, out TileType tileType, out TileTemplate tileTemplate, out String tileId, out Windows.Foundation.Collections.IPropertySet dictionaryAsPropertySet, out Guid tileUniqueId, out Int64 changeId);
+    }
+
+
+}

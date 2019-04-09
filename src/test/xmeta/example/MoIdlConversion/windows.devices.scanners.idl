@@ -1,0 +1,198 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Scanners
+{
+    [contractversion(1)]
+    apicontract ScannerDeviceContract{};
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    enum ImageScannerFormat
+    {
+        Jpeg,
+        Png,
+        DeviceIndependentBitmap,
+        Tiff,
+        Xps,
+        OpenXps,
+        Pdf,
+    };
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    [uuid(ae275d11-dadf-4010-bf10-cca5c83dcbb0)]
+    interface IImageScannerFormatConfiguration
+    {
+        Windows.Devices.Scanners.ImageScannerFormat DefaultFormat{ get; };
+        Windows.Devices.Scanners.ImageScannerFormat Format{ get; };
+        Windows.Devices.Scanners.ImageScannerFormat Format{ set; };
+        Boolean IsFormatSupported(ImageScannerFormat value);
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    [dualapipartition(0x6030000)]
+    runtimeclass ImageScannerAutoConfiguration
+        : [default]Windows.Devices.Scanners.IImageScannerFormatConfiguration
+    {
+    }
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    enum ImageScannerAutoCroppingMode
+    {
+        Disabled,
+        SingleRegion,
+        MultipleRegion,
+    };
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    enum ImageScannerColorMode
+    {
+        Color,
+        Grayscale,
+        Monochrome,
+        AutoColor,
+    };
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    struct ImageScannerResolution
+    {
+        Single DpiX;
+        Single DpiY;
+    };
+
+    [uuid(bfb50055-0b44-4c82-9e89-205f9c234e59)]
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    interface IImageScannerSourceConfiguration requires Windows.Devices.Scanners.IImageScannerFormatConfiguration
+    {
+        Windows.Foundation.Size MinScanArea{ get; };
+        Windows.Foundation.Size MaxScanArea{ get; };
+        Windows.Foundation.Rect SelectedScanRegion{ get; };
+        Windows.Foundation.Rect SelectedScanRegion{ set; };
+        Windows.Devices.Scanners.ImageScannerAutoCroppingMode AutoCroppingMode{ get; };
+        Windows.Devices.Scanners.ImageScannerAutoCroppingMode AutoCroppingMode{ set; };
+        Boolean IsAutoCroppingModeSupported(ImageScannerAutoCroppingMode value);
+        Windows.Devices.Scanners.ImageScannerResolution MinResolution{ get; };
+        Windows.Devices.Scanners.ImageScannerResolution MaxResolution{ get; };
+        Windows.Devices.Scanners.ImageScannerResolution OpticalResolution{ get; };
+        Windows.Devices.Scanners.ImageScannerResolution DesiredResolution{ get; };
+        Windows.Devices.Scanners.ImageScannerResolution DesiredResolution{ set; };
+        Windows.Devices.Scanners.ImageScannerResolution ActualResolution{ get; };
+        Windows.Devices.Scanners.ImageScannerColorMode DefaultColorMode{ get; };
+        Windows.Devices.Scanners.ImageScannerColorMode ColorMode{ get; };
+        Windows.Devices.Scanners.ImageScannerColorMode ColorMode{ set; };
+        Boolean IsColorModeSupported(ImageScannerColorMode value);
+        Int32 MinBrightness{ get; };
+        Int32 MaxBrightness{ get; };
+        UInt32 BrightnessStep{ get; };
+        Int32 DefaultBrightness{ get; };
+        Int32 Brightness{ get; };
+        Int32 Brightness{ set; };
+        Int32 MinContrast{ get; };
+        Int32 MaxContrast{ get; };
+        UInt32 ContrastStep{ get; };
+        Int32 DefaultContrast{ get; };
+        Int32 Contrast{ get; };
+        Int32 Contrast{ set; };
+    };
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    runtimeclass ImageScannerFlatbedConfiguration
+        : [default]Windows.Devices.Scanners.IImageScannerFormatConfiguration
+        , Windows.Devices.Scanners.IImageScannerSourceConfiguration
+    {
+    }
+
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    runtimeclass ImageScannerFeederConfiguration
+        : [default]Windows.Devices.Scanners.IImageScannerFormatConfiguration
+        , Windows.Devices.Scanners.IImageScannerSourceConfiguration
+    {
+
+        [interface_name("Windows.Devices.Scanners.IImageScannerFeederConfiguration", 74bdacee-fa97-4c17-8280-40e39c6dcc67)]
+        {
+            Boolean CanAutoDetectPageSize{ get; };
+            Boolean AutoDetectPageSize{ get; };
+            Boolean AutoDetectPageSize{ set; };
+            Windows.Graphics.Printing.PrintMediaSize PageSize{ get; };
+            Windows.Graphics.Printing.PrintMediaSize PageSize{ set; };
+            Windows.Graphics.Printing.PrintOrientation PageOrientation{ get; };
+            Windows.Graphics.Printing.PrintOrientation PageOrientation{ set; };
+            Windows.Foundation.Size PageSizeDimensions{ get; };
+            Boolean IsPageSizeSupported(Windows.Graphics.Printing.PrintMediaSize pageSize, Windows.Graphics.Printing.PrintOrientation pageOrientation);
+            UInt32 MaxNumberOfPages{ get; };
+            UInt32 MaxNumberOfPages{ set; };
+            Boolean CanScanDuplex{ get; };
+            Boolean Duplex{ get; };
+            Boolean Duplex{ set; };
+            Boolean CanScanAhead{ get; };
+            Boolean ScanAhead{ get; };
+            Boolean ScanAhead{ set; };
+        }
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Scanners.IImageScannerScanResult", c91624cd-9037-4e48-84c1-ac0975076bc5)]
+    runtimeclass ImageScannerScanResult
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Storage.StorageFile>  ScannedFiles{ get; };
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Scanners.IImageScannerPreviewResult", 08b7fe8e-8891-441d-be9c-176fa109c8bb)]
+    runtimeclass ImageScannerPreviewResult
+    {
+        Boolean Succeeded{ get; };
+        Windows.Devices.Scanners.ImageScannerFormat Format{ get; };
+    }
+
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    enum ImageScannerScanSource
+    {
+        Default,
+        Flatbed,
+        Feeder,
+        AutoConfigured,
+    };
+
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Devices.Scanners.ScannerDeviceContract, 1)]
+    [static_name("Windows.Devices.Scanners.IImageScannerStatics", bc57e70e-d804-4477-9fb5-b911b5473897)]
+    [interface_name("Windows.Devices.Scanners.IImageScanner", 53a88f78-5298-48a0-8da3-8087519665e0)]
+    [threading(both)]
+    runtimeclass ImageScanner
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Scanners.ImageScanner>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector();
+        String DeviceId{ get; };
+        Windows.Devices.Scanners.ImageScannerScanSource DefaultScanSource{ get; };
+        Boolean IsScanSourceSupported(ImageScannerScanSource value);
+        Windows.Devices.Scanners.ImageScannerFlatbedConfiguration FlatbedConfiguration{ get; };
+        Windows.Devices.Scanners.ImageScannerFeederConfiguration FeederConfiguration{ get; };
+        Windows.Devices.Scanners.ImageScannerAutoConfiguration AutoConfiguration{ get; };
+        Boolean IsPreviewSupported(ImageScannerScanSource scanSource);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Scanners.ImageScannerPreviewResult>  ScanPreviewToStreamAsync(ImageScannerScanSource scanSource, Windows.Storage.Streams.IRandomAccessStream targetStream);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Devices.Scanners.ImageScannerScanResult, UInt32>  ScanFilesToFolderAsync(ImageScannerScanSource scanSource, Windows.Storage.StorageFolder storageFolder);
+    }
+
+}

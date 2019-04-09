@@ -1,0 +1,50 @@
+
+
+
+
+
+
+
+
+namespace Windows.Security.Authorization.AppCapabilityAccess
+{
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum AppCapabilityAccessStatus
+    {
+        DeniedBySystem,
+        NotDeclaredByApp,
+        DeniedByUser,
+        UserPromptRequired,
+        Allowed,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Security.Authorization.AppCapabilityAccess.IAppCapabilityAccessChangedEventArgs", 0a578d15-bdd7-457e-8cca-6f53bd2e5944)]
+    runtimeclass AppCapabilityAccessChangedEventArgs
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [static_name("Windows.Security.Authorization.AppCapabilityAccess.IAppCapabilityStatics", 7c353e2a-46ee-44e5-af3d-6ad3fc49bd22)]
+    [interface_name("Windows.Security.Authorization.AppCapabilityAccess.IAppCapability", 4c49d915-8a2a-4295-9437-2df7c396aff4)]
+    [threading(both)]
+    runtimeclass AppCapability
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IMapView <String, Windows.Security.Authorization.AppCapabilityAccess.AppCapabilityAccessStatus> >  RequestAccessForCapabilitiesAsync(Windows.Foundation.Collections.IIterable <String>  capabilityNames);
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IMapView <String, Windows.Security.Authorization.AppCapabilityAccess.AppCapabilityAccessStatus> >  RequestAccessForCapabilitiesForUserAsync(Windows.System.User user, Windows.Foundation.Collections.IIterable <String>  capabilityNames);
+        static Windows.Security.Authorization.AppCapabilityAccess.AppCapability Create(String capabilityName);
+        static Windows.Security.Authorization.AppCapabilityAccess.AppCapability CreateWithProcessIdForUser(Windows.System.User user, String capabilityName, UInt32 pid);
+        String CapabilityName{ get; };
+        Windows.System.User User{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authorization.AppCapabilityAccess.AppCapabilityAccessStatus>  RequestAccessAsync();
+        Windows.Security.Authorization.AppCapabilityAccess.AppCapabilityAccessStatus CheckAccess();
+        event Windows.Foundation.TypedEventHandler <Windows.Security.Authorization.AppCapabilityAccess.AppCapability, Windows.Security.Authorization.AppCapabilityAccess.AppCapabilityAccessChangedEventArgs>  AccessChanged;
+    }
+
+
+}

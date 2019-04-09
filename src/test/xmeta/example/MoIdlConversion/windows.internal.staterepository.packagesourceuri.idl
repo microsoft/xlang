@@ -1,0 +1,54 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IPackageSourceUriStatics", d9f9bd2c-32f3-497f-9e3c-e178f7f859be)]
+    [interface_name("Windows.Internal.StateRepository.IPackageSourceUri", b3b62566-ec3c-4f37-93ed-1089e768cc3a)]
+    [threading(both)]
+    runtimeclass PackageSourceUri
+    {
+        PackageSourceUri();
+        static Boolean Exists(Int64 packageSourceUriID);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByPackageAndKind(Package Package, PackageSourceUriKind Kind);
+        static Windows.Internal.StateRepository.PackageSourceUri Get(Int64 packageSourceUriID);
+        static Windows.Internal.StateRepository.PackageSourceUri TryGet(Int64 packageSourceUriID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageSourceUri>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageSourceUri>  FindByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageSourceUri>  FindByPackageAndKind(Package Package, PackageSourceUriKind Kind);
+        Int64 _PackageSourceUriID{ get; };
+        Int64 _PackageSourceUriID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        String Uri{ get; };
+        String Uri{ set; };
+        Windows.Foundation.Uri UriAsUri{ get; };
+        Windows.Foundation.Uri UriAsUri{ set; };
+        Windows.Internal.StateRepository.PackageSourceUriKind Kind{ get; };
+        Windows.Internal.StateRepository.PackageSourceUriKind Kind{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

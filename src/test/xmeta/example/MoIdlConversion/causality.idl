@@ -1,0 +1,71 @@
+
+
+
+
+
+
+
+
+namespace Windows.Foundation.Diagnostics
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CausalityTraceLevel
+    {
+        Required,
+        Important,
+        Verbose,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CausalitySource
+    {
+        Application,
+        Library,
+        System,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CausalityRelation
+    {
+        AssignDelegate,
+        Join,
+        Choice,
+        Cancel,
+        Error,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CausalitySynchronousWork
+    {
+        CompletionNotification,
+        ProgressNotification,
+        Execution,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Foundation.Diagnostics.ITracingStatusChangedEventArgs", 410b7711-ff3b-477f-9c9a-d2efda302dc3)]
+    runtimeclass TracingStatusChangedEventArgs
+    {
+        Boolean Enabled{ get; };
+        Windows.Foundation.Diagnostics.CausalityTraceLevel TraceLevel{ get; };
+    }
+
+    [dualapipartition(0xa000006)]
+    [muse(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Foundation.Diagnostics.IAsyncCausalityTracerStatics", 50850b26-267e-451b-a890-ab6a370245ee)]
+    runtimeclass AsyncCausalityTracer
+    {
+        static void TraceOperationCreation(CausalityTraceLevel traceLevel, CausalitySource source, Guid platformId, UInt64 operationId, String operationName, UInt64 relatedContext);
+        static void TraceOperationCompletion(CausalityTraceLevel traceLevel, CausalitySource source, Guid platformId, UInt64 operationId, AsyncStatus status);
+        static void TraceOperationRelation(CausalityTraceLevel traceLevel, CausalitySource source, Guid platformId, UInt64 operationId, CausalityRelation relation);
+        static void TraceSynchronousWorkStart(CausalityTraceLevel traceLevel, CausalitySource source, Guid platformId, UInt64 operationId, CausalitySynchronousWork work);
+        static void TraceSynchronousWorkCompletion(CausalityTraceLevel traceLevel, CausalitySource source, CausalitySynchronousWork work);
+        static event Windows.Foundation.EventHandler <Windows.Foundation.Diagnostics.TracingStatusChangedEventArgs>  TracingStatusChanged;
+    }
+
+}

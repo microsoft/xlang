@@ -1,0 +1,160 @@
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    enum CSystemTriggerType
+    {
+        AnyUserPresent,
+        AnyUserAway,
+        InternetAvailable,
+        InternetNotAvailable,
+        SystemIdle,
+        SystemNotIdle,
+        TimeZoneChange,
+        DisplayOn,
+        DisplayOff,
+        DomainJoined,
+        DomainRemoved,
+        IpAddressAvailable,
+        IpAddressNotAvailable,
+        Boot,
+        OnlineIdConnectedStateChanged,
+        FreeNetworkAvailable,
+        FreeNetworkNotAvailable,
+        AcPowered,
+        DcPowered,
+        LowPower,
+        NotLowPower,
+        MaintenanceEnter,
+        MaintenanceExit,
+        BatterySaverEnter,
+        BatterySaverExit,
+        MaxEvent,
+    };
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    enum CSystemConditionType
+    {
+        AnyUserPresent,
+        InternetAvailable,
+        SystemIdle,
+        DisplayOn,
+        DomainJoined,
+        IpAddressAvailable,
+        FreeNetworkAvailable,
+        AcPowered,
+        LowPower,
+        Maintenance,
+        BatterySaver,
+        MaxEvent,
+    };
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    enum ComparisonOperator
+    {
+        NONE,
+        EQUAL,
+        NOT_EQUAL,
+        GREATER,
+        GREATER_EQUAL,
+        SMALLER,
+        SMALLER_EQUAL,
+    };
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    enum TriggerBufferingBehavior
+    {
+        Default,
+        BufferAll,
+        BufferSingle,
+        BufferNone,
+        BufferEnumMax,
+    };
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    struct TriggerOptions_V1
+    {
+        TriggerBufferingBehavior BufferingBehavior;
+        Boolean BatterySaverOverride;
+        Boolean Coalesceable;
+        UInt32 SuggestedCoalescingDelayMs;
+        UInt32 MaxCoalescingDelayMs;
+    };
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    struct TriggerOptions
+    {
+        TriggerBufferingBehavior BufferingBehavior;
+        Boolean BatterySaverOverride;
+        Boolean Coalesceable;
+        UInt32 SuggestedCoalescingDelayMs;
+        UInt32 MaxCoalescingDelayMs;
+        UInt32 ExecutionTimeOverrideMs;
+        UInt32 EventTypeIdOverride;
+    };
+
+
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.ICSystemTriggerFactory", 7f4ffeb2-0241-433c-bce3-ea42f22bfa3d)]
+    [interface_name("Windows.ApplicationModel.Background.ICSystemTrigger", 87e77d9c-4fec-4b95-ad6e-3c6dcfdedc02)]
+    [threading(mta)]
+    runtimeclass CSystemTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] CSystemTrigger(CSystemTriggerType triggerType);
+        Windows.ApplicationModel.Background.CSystemTriggerType TriggerType{ get; };
+    }
+
+
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.ICSystemConditionFactory", 6f989a99-770e-4539-840b-ec97284926d5)]
+    [interface_name("Windows.ApplicationModel.Background.ICSystemCondition", 96ce08cd-c964-4ee3-a8c4-f4ef36b27d1a)]
+    [threading(mta)]
+    runtimeclass CSystemCondition
+        : Windows.ApplicationModel.Background.IBackgroundCondition
+    {
+        [method_name( "Create" )] CSystemCondition(CSystemConditionType conditionType, Boolean eventValue);
+        Boolean EventValue{ get; };
+        Windows.ApplicationModel.Background.CSystemConditionType ConditionType{ get; };
+    }
+
+
+
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.ICustomSystemTriggerFactory", b20a4480-3ae6-4f5d-acab-19f8a325299e)]
+    [interface_name("Windows.ApplicationModel.Background.ICustomSystemTrigger", 7cef9a3e-1614-4a47-8a8b-4dff6f25f0e6)]
+    [threading(mta)]
+    runtimeclass CustomSystemTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] CustomSystemTrigger(UInt64 eventName, UInt8[] data, UInt32 offSet, ComparisonOperator comparisonOperator, TriggerOptions options);
+        UInt64 EventName{ get; };
+        UInt8 Data{ get; };
+        UInt32 Offset{ get; };
+        UInt32 DataSize{ get; };
+        Windows.ApplicationModel.Background.ComparisonOperator Operator{ get; };
+        Windows.ApplicationModel.Background.TriggerOptions Options{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    [interface_name("Windows.ApplicationModel.Background.ICustomSystemTriggerDetails", 4edebe61-718d-473a-be82-486f7f5aadb3)]
+    runtimeclass CustomSystemTriggerDetails
+    {
+        UInt8[] Payload{ get; };
+    }
+
+}

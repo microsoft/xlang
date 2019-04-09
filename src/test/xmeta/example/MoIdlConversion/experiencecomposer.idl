@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell.Core
+{
+    [uuid(abaf77e1-9eb8-5563-bc5c-0e43a4a69045)]
+    [contract(Windows.Internal.ComposableShell.Core.InternalContract, 1)]
+    interface IExperienceComposerHost
+    {
+        void AddXamlMetadataProvider(Object xamlMetadataProvider);
+    };
+
+    [contract(Windows.Internal.ComposableShell.Core.InternalContract, 1)]
+    [uuid(061d738a-d12a-5dad-b838-1f92be6c5fc1)]
+    interface IExperienceComposer
+    {
+        Object ComposerPageType{ get; };
+        Windows.Foundation.IAsyncAction InitializeComposerAsync(IExperienceComposerHost experienceComposerHost);
+        void HandleComposerCreated(Windows.UI.Xaml.Controls.UserControl composerHost);
+        void RegisterInputHost();
+        void UnregisterInputHost();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Core.IExperienceComposer, String>  ComposerReady;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Core.IExperienceComposer, String>  ComposerComplete;
+    };
+
+}

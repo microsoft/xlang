@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(c37a1772-b842-471c-a3cd-61ae773ec367)]
+    interface IShellApplicationStateContract
+    {
+        void TryInitiateApplicationSuspension(String applicationUserModelId);
+        void TryInitiateApplicationResume(String applicationUserModelId);
+        void TryInitiateApplicationExit(String applicationUserModelId);
+        void TryInitiateApplicationSuspensionByHostId(String applicationUserModelId, UInt64 hostId);
+        void TryInitiateApplicationResumeByHostId(String applicationUserModelId, UInt64 hostId);
+        void TryInitiateApplicationExitByHostId(String applicationUserModelId, UInt64 hostId);
+    };
+
+}

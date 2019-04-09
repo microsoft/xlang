@@ -1,0 +1,62 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    enum MagnifierGestureState
+    {
+        Started,
+        Continuing,
+        Completed,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    [static_name("Windows.UI.Internal.Input.IMagnifierControllerStatics", ca79c380-524a-5c97-85b4-8f96f736c206)]
+    [interface_name("Windows.UI.Internal.Input.IMagnifierController", f174b969-75ae-5b93-9a99-9653a61d15cf)]
+    [threading(both)]
+    runtimeclass MagnifierController
+    {
+        static Windows.UI.Internal.Input.MagnifierController Create();
+        Boolean ToggleEnabled{ get; };
+        Boolean ToggleEnabled{ set; };
+        Boolean GesturesEnabled{ get; };
+        Boolean GesturesEnabled{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.MagnifierController, Windows.UI.Internal.Input.MagnifierToggleEventArgs>  Toggled;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.MagnifierController, Windows.UI.Internal.Input.MagnifierGestureEventArgs>  Panning;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.MagnifierController, Windows.UI.Internal.Input.MagnifierGestureEventArgs>  Zooming;
+    }
+
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Internal.Input.IMagnifierToggleEventArgs", 702bdb0f-7179-5988-9b2c-a92bffa06438)]
+    runtimeclass MagnifierToggleEventArgs
+    {
+        Windows.Foundation.Point Position{ get; };
+    }
+
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Internal.Input.IMagnifierGestureEventArgs", 139a0e77-1170-5787-b89a-c82326a14bd5)]
+    runtimeclass MagnifierGestureEventArgs
+    {
+        Windows.Foundation.Point Position{ get; };
+        UInt32 ContactCount{ get; };
+        Windows.UI.Internal.Input.MagnifierGestureState State{ get; };
+    }
+
+
+
+
+}

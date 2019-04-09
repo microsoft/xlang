@@ -1,0 +1,97 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.FamilySafety.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+}
+namespace Windows.FamilySafety.Internal.Storage
+{
+    [uuid(cf8e5ae3-3737-40b5-849b-d812e50ff55a)]
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    interface IRatingManagerStorage
+    {
+        Windows.Foundation.IAsyncOperation <String>  CheckForUpdateAsync();
+    };
+
+
+}
+namespace Windows.FamilySafety.Internal
+{
+    [uuid(e67ed90b-ba23-4cde-b322-72865caf1dee)]
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    interface IRuntimeClassActivator
+    {
+        Object GetActivationFactory(String activatableClassId);
+    };
+
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    enum SearchRestriction
+    {
+        None,
+        SafeSearch,
+        Blocked,
+    };
+
+
+
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.FamilySafety.Internal.IUserSettingsFactory", 8b1a038b-cedc-45e1-bd56-4a0e71105406)]
+    [interface_name("Windows.FamilySafety.Internal.IUserSettings", f49db551-2e53-4a90-8896-0122e803ac77)]
+    [threading(both)]
+    runtimeclass UserSettings
+    {
+        [method_name( "Create" )] UserSettings(String userSid);
+        Windows.FamilySafety.Internal.SearchRestriction SearchRestriction{ get; };
+    }
+
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    [uuid(1509730d-58b9-4cde-b062-7ff33dc10ff6)]
+    interface IAction
+    {
+        void Invoke();
+    };
+
+    [uuid(edd6dce1-d177-4c24-b068-d699fcfe885e)]
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    interface IOnlineManagement
+    {
+        Boolean Enabled{ get; };
+        Boolean EnableForCurrentUser();
+        Windows.Foundation.IAsyncOperation <Boolean>  EnableForCurrentUserAsync();
+        Windows.Foundation.IAsyncAction Disable();
+    };
+
+
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.FamilySafety.Internal.IRatingManager", 7bd29fce-6a16-4cc2-81e0-db6b6569d729)]
+    [threading(both)]
+    runtimeclass RatingManager
+    {
+        RatingManager();
+        Windows.Foundation.IReference <UInt32>  GetAgeRating(String ratingSystemRegion, Windows.Media.ContentRestrictions.RatedContentCategory contentCategory, Windows.Foundation.Collections.IIterable <String>  ratings);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.FamilySafety.Internal.InternalContract, 1)]
+    [static_name("Windows.FamilySafety.Internal.IFamilySettingsStatics", 0f2495e9-edd6-46ef-a1f3-36713f4b5114)]
+    [threading(both)]
+    runtimeclass FamilySettings
+    {
+        static Windows.FamilySafety.Internal.IAction SettingsLink{ get; };
+        static Windows.FamilySafety.Internal.IOnlineManagement OnlineManagement{ get; };
+        static Boolean IsChild(String userSid);
+    }
+
+}

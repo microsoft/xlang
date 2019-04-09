@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(9d81c65f-a209-44fa-a96c-0e74c150663d)]
+    interface IDisplayEnhancementOverridePolicy
+    {
+        EventRegistrationToken RegisterViewToOverridableDisplayChanges(Windows.Internal.ApplicationModel.WindowManagement.WindowId windowId, Windows.Foundation.TypedEventHandler <Windows.Foundation.Collections.IVectorView <String> , Object>  displayChangedHandler);
+        void UnregisterViewToOverridableDisplayChanges(EventRegistrationToken cookie);
+    };
+
+}

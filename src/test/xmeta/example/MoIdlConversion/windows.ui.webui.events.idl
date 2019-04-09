@@ -1,0 +1,369 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.WebUI
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.UI.WebUI.IActivatedDeferral", c3bd1978-a431-49d8-a76a-395a4e03dcf3)]
+    runtimeclass ActivatedDeferral
+    {
+        void Complete();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.UI.WebUI.IActivatedOperation", b6a0b4bc-c6ca-42fd-9818-71904e45fed7)]
+    runtimeclass ActivatedOperation
+    {
+        Windows.UI.WebUI.ActivatedDeferral GetDeferral();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(ca6d5f74-63c2-44a6-b97b-d9a03c20bc9b)]
+    interface IActivatedEventArgsDeferral
+    {
+        Windows.UI.WebUI.ActivatedOperation ActivatedOperation{ get; };
+    };
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUILaunchActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IPrelaunchActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+        , [contract(Windows.Foundation.UniversalApiContract, 6)]
+        Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs2
+    {
+    }
+
+    [contract(Windows.ApplicationModel.Activation.WebUISearchActivatedEventsContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUISearchActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.ISearchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.ApplicationModel.Activation.WebUISearchActivatedEventsContract, 1)]
+        Windows.ApplicationModel.Activation.ISearchActivatedEventArgsWithLinguisticDetails
+        , [contract(Windows.ApplicationModel.Activation.WebUISearchActivatedEventsContract, 1)]
+        Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIFileActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IFileActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IFileActivatedEventArgsWithNeighboringFiles
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIProtocolActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IProtocolActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IProtocolActivatedEventArgsWithCallerPackageFamilyNameAndData
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUIProtocolForResultsActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IProtocolForResultsActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IProtocolActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IProtocolActivatedEventArgsWithCallerPackageFamilyNameAndData
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUIFileOpenPickerActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IFileOpenPickerActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IFileOpenPickerActivatedEventArgs2
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIFileSavePickerActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IFileSavePickerActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IFileSavePickerActivatedEventArgs2
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUICachedFileUpdaterActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.ICachedFileUpdaterActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIDeviceActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IDeviceActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [contract(Windows.ApplicationModel.Activation.ActivatedEventsContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUIPrintTaskSettingsActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IPrintTaskSettingsActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [contract(Windows.ApplicationModel.Activation.ActivationCameraSettingsContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUICameraSettingsActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.ICameraSettingsActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [contract(Windows.ApplicationModel.Activation.ActivatedEventsContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUIPrint3DWorkflowActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IPrint3DWorkflowActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.ApplicationModel.Activation.ActivatedEventsContract, 1)]
+    runtimeclass WebUILockScreenCallActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.ILockScreenCallActivatedEventArgs
+        , Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUILockScreenActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.ILockScreenActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIRestrictedLaunchActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IRestrictedLaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIFileOpenPickerContinuationEventArgs
+        : [default]Windows.ApplicationModel.Activation.IFileOpenPickerContinuationEventArgs
+        , Windows.ApplicationModel.Activation.IContinuationActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUIFileSavePickerContinuationEventArgs
+        : [default]Windows.ApplicationModel.Activation.IFileSavePickerContinuationEventArgs
+        , Windows.ApplicationModel.Activation.IContinuationActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIFolderPickerContinuationEventArgs
+        : [default]Windows.ApplicationModel.Activation.IFolderPickerContinuationEventArgs
+        , Windows.ApplicationModel.Activation.IContinuationActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIWebAuthenticationBrokerContinuationEventArgs
+        : [default]Windows.ApplicationModel.Activation.IWebAuthenticationBrokerContinuationEventArgs
+        , Windows.ApplicationModel.Activation.IContinuationActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [contract(Windows.ApplicationModel.Wallet.WalletContract, 1)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebUIWalletActionActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IWalletActionActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIWebAccountProviderActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IWebAccountProviderActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIDialReceiverActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IDialReceiverActivatedEventArgs
+        , Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IApplicationViewActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIToastNotificationActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IToastNotificationActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    runtimeclass WebUILockScreenComponentActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    runtimeclass WebUIPrintWorkflowForegroundTaskActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    runtimeclass WebUICommandLineActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.ICommandLineActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    runtimeclass WebUIStartupTaskActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IStartupTaskActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    runtimeclass WebUIBarcodeScannerPreviewActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IBarcodeScannerPreviewActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+    {
+    }
+
+}

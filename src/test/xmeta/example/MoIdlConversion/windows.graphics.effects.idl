@@ -1,0 +1,26 @@
+
+
+
+
+
+
+
+namespace Windows.Graphics.Effects
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(cb51c0ce-8fe6-4636-b202-861faa07d8f3)]
+    [webhosthidden]
+    interface IGraphicsEffect requires Windows.Graphics.Effects.IGraphicsEffectSource
+    {
+        String Name{ get; };
+        String Name{ set; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(2d8f9ddc-4339-4eb9-9216-f9deb75658a2)]
+    [webhosthidden]
+    interface IGraphicsEffectSource
+    {
+    };
+
+}

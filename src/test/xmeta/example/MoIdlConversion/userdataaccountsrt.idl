@@ -1,0 +1,337 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.UserDataAccounts
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UserDataAccountOtherAppReadAccess
+    {
+        SystemOnly,
+        Full,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        None,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UserDataAccountStoreAccessType
+    {
+        AllAccountsReadOnly,
+        AppAccountsReadWrite,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum UserDataAccountContentKinds
+    {
+        Email = 1,
+        Contact,
+        Appointment = 4,
+    };
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccount", b9c4367e-b348-4910-be94-4ad4bba6dea7)]
+    runtimeclass UserDataAccount
+    {
+        String Id{ get; };
+        String UserDisplayName{ get; };
+        String UserDisplayName{ set; };
+        Windows.ApplicationModel.UserDataAccounts.UserDataAccountOtherAppReadAccess OtherAppReadAccess{ get; };
+        Windows.ApplicationModel.UserDataAccounts.UserDataAccountOtherAppReadAccess OtherAppReadAccess{ set; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Icon{ get; };
+        String DeviceAccountTypeId{ get; };
+        String PackageFamilyName{ get; };
+        Windows.Foundation.IAsyncAction SaveAsync();
+        Windows.Foundation.IAsyncAction DeleteAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Appointments.AppointmentCalendar> >  FindAppointmentCalendarsAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Email.EmailMailbox> >  FindEmailMailboxesAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactList> >  FindContactListsAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactAnnotationList> >  FindContactAnnotationListsAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccount2", 078cd89f-de82-404b-8195-c8a3ac198f60)]
+        {
+            String EnterpriseId{ get; };
+            Boolean IsProtectedUnderLock{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccount3", 01533845-6c43-4286-9d69-3e1709a1f266)]
+        {
+            Windows.Foundation.Collections.IVector <String>  ExplictReadAccessPackageFamilyNames{ get; };
+            String DisplayName{ get; };
+            String DisplayName{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccount4", c4315210-eae5-4f0a-a8b2-1cca115e008f)]
+        {
+            Boolean CanShowCreateContactGroup{ get; };
+            Boolean CanShowCreateContactGroup{ set; };
+            Windows.Foundation.Collections.IPropertySet ProviderProperties{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.UserDataTasks.UserDataTaskList> >  FindUserDataTaskListsAsync();
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactGroup> >  FindContactGroupsAsync();
+            Windows.Foundation.IAsyncOperation <String>  TryShowCreateContactGroupAsync();
+            Boolean IsProtectedUnderLock{ set; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Icon{ set; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccountStore", 2073b0ad-7d0a-4e76-bf45-2368f978a59a)]
+    runtimeclass UserDataAccountStore
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.UserDataAccounts.UserDataAccount> >  FindAccountsAsync();
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserDataAccounts.UserDataAccount>  GetAccountAsync(String id);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserDataAccounts.UserDataAccount>  CreateAccountAsync(String userDisplayName);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccountStore2", b1e0aef7-9560-4631-8af0-061d30161469)]
+        {
+            [method_name("CreateAccountWithPackageRelativeAppIdAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserDataAccounts.UserDataAccount>  CreateAccountAsync(String userDisplayName, String packageRelativeAppId);
+            event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.UserDataAccounts.UserDataAccountStore, Windows.ApplicationModel.UserDataAccounts.UserDataAccountStoreChangedEventArgs>  StoreChanged;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccountStore3", 8142c094-f3c9-478b-b117-6585bebb6789)]
+        {
+            [method_name("CreateAccountWithPackageRelativeAppIdAndEnterpriseIdAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserDataAccounts.UserDataAccount>  CreateAccountAsync(String userDisplayName, String packageRelativeAppId, String enterpriseId);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccountStoreChangedEventArgs", 84e3e2e5-8820-4512-b1f6-2e035be1072c)]
+    runtimeclass UserDataAccountStoreChangedEventArgs
+    {
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccountManagerForUser", 56a6e8db-db8f-41ab-a65f-8c5971aac982)]
+    runtimeclass UserDataAccountManagerForUser
+    {
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserDataAccounts.UserDataAccountStore>  RequestStoreAsync(UserDataAccountStoreAccessType storeAccessType);
+        Windows.System.User User{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccountManagerStatics", 0d9b89ea-1928-4a20-86d5-3c737f7dc3b0)]
+    [threading(both)]
+    runtimeclass UserDataAccountManager
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.ApplicationModel.UserDataAccounts.IUserDataAccountManagerStatics2", 6a3ded88-316b-435e-b534-f7d4b4b7dba6)]
+        {
+            static Windows.ApplicationModel.UserDataAccounts.UserDataAccountManagerForUser GetForUser(Windows.System.User user);
+        }
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserDataAccounts.UserDataAccountStore>  RequestStoreAsync(UserDataAccountStoreAccessType storeAccessType);
+        static Windows.Foundation.IAsyncOperation <String>  ShowAddAccountAsync(UserDataAccountContentKinds contentKinds);
+        static Windows.Foundation.IAsyncAction ShowAccountSettingsAsync(String id);
+        static Windows.Foundation.IAsyncAction ShowAccountErrorResolverAsync(String id);
+    }
+
+}
+namespace Windows.ApplicationModel.UserDataAccounts.SystemAccess
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeviceAccountServerType
+    {
+        Exchange,
+        Pop,
+        Imap,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum DeviceAccountAuthenticationType
+    {
+        Basic,
+        OAuth,
+        SingleSignOn,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum DeviceAccountSyncScheduleKind
+    {
+        Manual,
+        Every15Minutes,
+        Every30Minutes,
+        Every60Minutes,
+        Every2Hours,
+        Daily,
+        AsItemsArrive,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum DeviceAccountMailAgeFilter
+    {
+        All,
+        Last1Day,
+        Last3Days,
+        Last7Days,
+        Last14Days,
+        Last30Days,
+        Last90Days,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum DeviceAccountIconId
+    {
+        Exchange,
+        Msa,
+        Outlook,
+        Generic,
+    };
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.UserDataAccounts.SystemAccess.IDeviceAccountConfiguration", ad0123a3-fbdc-4d1b-be43-5a27ea4a1b63)]
+    [threading(both)]
+    runtimeclass DeviceAccountConfiguration
+    {
+        DeviceAccountConfiguration();
+        String AccountName{ get; };
+        String AccountName{ set; };
+        String DeviceAccountTypeId{ get; };
+        String DeviceAccountTypeId{ set; };
+        Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountServerType ServerType{ get; };
+        Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountServerType ServerType{ set; };
+        String EmailAddress{ get; };
+        String EmailAddress{ set; };
+        String Domain{ get; };
+        String Domain{ set; };
+        Boolean EmailSyncEnabled{ get; };
+        Boolean EmailSyncEnabled{ set; };
+        Boolean ContactsSyncEnabled{ get; };
+        Boolean ContactsSyncEnabled{ set; };
+        Boolean CalendarSyncEnabled{ get; };
+        Boolean CalendarSyncEnabled{ set; };
+        String IncomingServerAddress{ get; };
+        String IncomingServerAddress{ set; };
+        Int32 IncomingServerPort{ get; };
+        Int32 IncomingServerPort{ set; };
+        Boolean IncomingServerRequiresSsl{ get; };
+        Boolean IncomingServerRequiresSsl{ set; };
+        String IncomingServerUsername{ get; };
+        String IncomingServerUsername{ set; };
+        String OutgoingServerAddress{ get; };
+        String OutgoingServerAddress{ set; };
+        Int32 OutgoingServerPort{ get; };
+        Int32 OutgoingServerPort{ set; };
+        Boolean OutgoingServerRequiresSsl{ get; };
+        Boolean OutgoingServerRequiresSsl{ set; };
+        String OutgoingServerUsername{ get; };
+        String OutgoingServerUsername{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.UserDataAccounts.SystemAccess.IDeviceAccountConfiguration2", f2b2e5a6-728d-4a4a-8945-2bf8580136de)]
+        {
+            Windows.Security.Credentials.PasswordCredential IncomingServerCredential{ get; };
+            Windows.Security.Credentials.PasswordCredential IncomingServerCredential{ set; };
+            Windows.Security.Credentials.PasswordCredential OutgoingServerCredential{ get; };
+            Windows.Security.Credentials.PasswordCredential OutgoingServerCredential{ set; };
+            String OAuthRefreshToken{ get; };
+            String OAuthRefreshToken{ set; };
+            Boolean IsExternallyManaged{ get; };
+            Boolean IsExternallyManaged{ set; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountIconId AccountIconId{ get; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountIconId AccountIconId{ set; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountAuthenticationType AuthenticationType{ get; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountAuthenticationType AuthenticationType{ set; };
+            Boolean IsSsoAuthenticationSupported{ get; };
+            String SsoAccountId{ get; };
+            String SsoAccountId{ set; };
+            Boolean AlwaysDownloadFullMessage{ get; };
+            Boolean AlwaysDownloadFullMessage{ set; };
+            Boolean DoesPolicyAllowMailSync{ get; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountSyncScheduleKind SyncScheduleKind{ get; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountSyncScheduleKind SyncScheduleKind{ set; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountMailAgeFilter MailAgeFilter{ get; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountMailAgeFilter MailAgeFilter{ set; };
+            Boolean IsClientAuthenticationCertificateRequired{ get; };
+            Boolean IsClientAuthenticationCertificateRequired{ set; };
+            Boolean AutoSelectAuthenticationCertificate{ get; };
+            Boolean AutoSelectAuthenticationCertificate{ set; };
+            String AuthenticationCertificateId{ get; };
+            String AuthenticationCertificateId{ set; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountSyncScheduleKind CardDavSyncScheduleKind{ get; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountSyncScheduleKind CardDavSyncScheduleKind{ set; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountSyncScheduleKind CalDavSyncScheduleKind{ get; };
+            Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountSyncScheduleKind CalDavSyncScheduleKind{ set; };
+            Windows.Foundation.Uri CardDavServerUrl{ get; };
+            Windows.Foundation.Uri CardDavServerUrl{ set; };
+            Boolean CardDavRequiresSsl{ get; };
+            Boolean CardDavRequiresSsl{ set; };
+            Windows.Foundation.Uri CalDavServerUrl{ get; };
+            Windows.Foundation.Uri CalDavServerUrl{ set; };
+            Boolean CalDavRequiresSsl{ get; };
+            Boolean CalDavRequiresSsl{ set; };
+            Boolean WasModifiedByUser{ get; };
+            Boolean WasModifiedByUser{ set; };
+            Boolean WasIncomingServerCertificateHashConfirmed{ get; };
+            Boolean WasIncomingServerCertificateHashConfirmed{ set; };
+            String IncomingServerCertificateHash{ get; };
+            String IncomingServerCertificateHash{ set; };
+            Boolean IsOutgoingServerAuthenticationRequired{ get; };
+            Boolean IsOutgoingServerAuthenticationRequired{ set; };
+            Boolean IsOutgoingServerAuthenticationEnabled{ get; };
+            Boolean IsOutgoingServerAuthenticationEnabled{ set; };
+            Boolean WasOutgoingServerCertificateHashConfirmed{ get; };
+            Boolean WasOutgoingServerCertificateHashConfirmed{ set; };
+            String OutgoingServerCertificateHash{ get; };
+            String OutgoingServerCertificateHash{ set; };
+            Boolean IsSyncScheduleManagedBySystem{ get; };
+            Boolean IsSyncScheduleManagedBySystem{ set; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.UserDataAccounts.SystemAccess.IUserDataAccountSystemAccessManagerStatics", 9d6b11b9-cbe5-45f5-822b-c267b81dbdb6)]
+    [threading(both)]
+    runtimeclass UserDataAccountSystemAccessManager
+    {
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <String> >  AddAndShowDeviceAccountsAsync(Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountConfiguration>  accounts);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.ApplicationModel.UserDataAccounts.SystemAccess.IUserDataAccountSystemAccessManagerStatics2", 943f854d-4b4e-439f-83d3-979b27c05ac7)]
+        {
+            static Windows.Foundation.IAsyncAction SuppressLocalAccountWithAccountAsync(String userDataAccountId);
+            static Windows.Foundation.IAsyncOperation <String>  CreateDeviceAccountAsync(DeviceAccountConfiguration account);
+            static Windows.Foundation.IAsyncAction DeleteDeviceAccountAsync(String accountId);
+            static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserDataAccounts.SystemAccess.DeviceAccountConfiguration>  GetDeviceAccountConfigurationAsync(String accountId);
+        }
+    }
+
+}

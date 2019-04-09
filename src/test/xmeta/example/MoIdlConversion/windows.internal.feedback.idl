@@ -1,0 +1,87 @@
+
+
+
+
+
+
+namespace Windows.Internal.Feedback
+{
+    [contractversion(2560)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    [interface_name("Windows.Internal.Feedback.ICourtesyEngine", 73784988-5340-46fa-a2c0-8b6373d55604)]
+    runtimeclass CourtesyEngine
+    {
+        CourtesyEngine();
+        void ProcessEscalation(String questionPayload);
+        void ProcessEscalation2(String questionPayload, Guid scenarioInstanceId);
+        void ProcessUifEscalation(Guid scenarioId, Guid scenarioInstanceId, HRESULT scenarioResult);
+    }
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    enum Successful
+    {
+        Unspecified,
+        Yes,
+        No,
+        NotSure,
+    };
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    enum Rating
+    {
+        Unspecified,
+        Value1,
+        Value2,
+        Value3,
+        Value4,
+        Value5,
+    };
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    enum GoodBad
+    {
+        Unspecified,
+        Yes,
+        No,
+    };
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    enum ThreePoint
+    {
+        Unspecified,
+        Positive,
+        Negative,
+        Neutral,
+    };
+
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    [uuid(d84c3c9f-ef29-4b68-9bba-5e78276bc4d1)]
+    interface ISiufFeedbackFactory
+    {
+        Windows.Internal.Feedback.SiufFeedback CreateInstance();
+    };
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    [interface_name("Windows.Internal.Feedback.ISiufFeedback", ebb75a0e-6000-4604-86c5-26f217347949)]
+    runtimeclass SiufFeedback
+    {
+        SiufFeedback();
+        void SubmitFeedbackFull(Guid QuestionId, Guid QuestionVersion, UInt32 QuestionValue, String FollowUpValue, String QuestionType, String DispatchType, UInt32 MeasureId, UInt32 CumulativeCountOfSiufSubmitted, String EmailAddress, Guid RootSubmissionId, out Guid pSubmissionId);
+        void SubmitFeedback(Guid QuestionId, Guid QuestionVersion, UInt32 QuestionValue, String FollowUpValue, String QuestionType, String DispatchType, UInt32 MeasureId);
+    }
+
+
+    [contract(Windows.Internal.Feedback.InternalContract, 1)]
+    [interface_name("Windows.Internal.Feedback.ISiufPayload", e1712d61-e200-4632-bfda-cfb3c0be6344)]
+    runtimeclass SiufPayload
+    {
+        SiufPayload();
+        void GetPropertiesFromSingleQuestionPayload(String Payload, out UInt32 MeasureId, out Guid QuestionVersion, out Guid QuestionId, out UInt32 QuestionPriority, out String QuestionType, out String ToastText, out String QuestionText, out String AnchorTextMin, out String AnchorTextMax, out String Ratings1FollowUpQuestion, out String Ratings2FollowUpQuestion, out String Ratings3FollowUpQuestion, out String Ratings4FollowUpQuestion, out String Ratings5FollowUpQuestion);
+    }
+
+}

@@ -1,0 +1,118 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace ApplicationTheme
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(ApplicationTheme.InternalContract, 1)]
+    enum ThemeImageType
+    {
+        StartBackground,
+        LockBackground,
+    };
+
+    [contract(ApplicationTheme.InternalContract, 1)]
+    enum ThemeImageCategory
+    {
+        Static,
+        Motion,
+    };
+
+    [contract(ApplicationTheme.InternalContract, 1)]
+    enum ThemeSoundType
+    {
+        Ringtone,
+        Reminder,
+        Notification,
+        Email,
+        Voicemail,
+        Sms,
+    };
+
+    [contract(ApplicationTheme.InternalContract, 1)]
+    enum ThemeAccentColorVariant
+    {
+        ThemeAccentLight3,
+        ThemeAccentLight2,
+        ThemeAccentLight1,
+        ThemeAccent,
+        ThemeAccentDark1,
+        ThemeAccentDark2,
+        ThemeAccentDark3,
+        ThemeBaseApplication,
+        ThemeBaseSystem,
+        ThemeTextApplication,
+        ThemeTextSystem,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(ApplicationTheme.InternalContract, 1)]
+    [static_name("ApplicationTheme.IAppThemeApiStatics", c5f80e59-a9fc-439d-9fc4-d290858e1867)]
+    runtimeclass AppThemeAPI
+    {
+        static void SetThemeBaseApplicationColor(Windows.UI.Color newColor);
+        static void SetThemeBaseSystemColor(Windows.UI.Color newColor);
+        static void SetThemeAccentColor(Windows.UI.Color newColor);
+        static Windows.UI.Color GetThemeColor(ThemeAccentColorVariant colorVariant);
+        static event Windows.Foundation.EventHandler <Object>  ThemeColorsChanged;
+        static Boolean AdvancedEffectsEnabled{ get; };
+    }
+
+    [uuid(6e29abd4-0d1e-43e3-86c5-dd1360033b20)]
+    [contract(ApplicationTheme.InternalContract, 1)]
+    interface IThemeImageStream
+    {
+        Windows.Storage.Streams.IRandomAccessStreamReference ImageStream{ get; };
+        ApplicationTheme.ThemeImageCategory Category{ get; };
+        Windows.Foundation.Size SourceDimensions{ get; };
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(ApplicationTheme.InternalContract, 1)]
+    [static_name("ApplicationTheme.IAppThemeBrokeredApiStatics", e287f4c6-2d4d-417c-9683-5aebc3748cab)]
+    runtimeclass AppThemeBrokeredAPI
+    {
+        static void SetThemeImage(ThemeImageType type, Windows.Storage.IStorageFile value);
+        static Windows.Foundation.Uri GetThemeImage(ThemeImageType type);
+        static void SetThemeSound(ThemeSoundType type, Windows.Storage.IStorageFile value);
+        static Windows.Foundation.Uri GetThemeSound(ThemeSoundType type);
+        static Boolean IsSupported();
+    }
+
+    [contract(ApplicationTheme.InternalContract, 1)]
+    [uuid(524abea5-b9b3-4de5-9ca0-39082673aca7)]
+    interface IAppThemeBrokeredStreamApiStatics
+    {
+        ApplicationTheme.IThemeImageStream GetThemeImageStream(ThemeImageType type);
+        void SetThemeImageStream(ThemeImageType type, IThemeImageStream imageStream);
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(ApplicationTheme.InternalContract, 1)]
+    [static_name("ApplicationTheme.IAppThemeBrokeredPlatformApiStatics", cca9f56a-4b57-4abf-98f3-ef087fbfc0d8)]
+    runtimeclass AppThemeBrokeredPlatformAPI
+    {
+        static void SetThemeImage(ThemeImageType type, Windows.Storage.IStorageFile value);
+        static void SetThemeImageStream(ThemeImageType type, IThemeImageStream imageStream);
+        static Windows.Foundation.Uri GetThemeImage(ThemeImageType type);
+        static ApplicationTheme.IThemeImageStream GetThemeImageStream(ThemeImageType type);
+        static void SetThemeSound(ThemeSoundType type, Windows.Storage.IStorageFile value);
+        static Windows.Foundation.Uri GetThemeSound(ThemeSoundType type);
+        static Boolean IsSupported();
+    }
+
+}

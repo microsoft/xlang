@@ -1,0 +1,50 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Services.Cortana
+{
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Cortana.ICortanaActionableInsightsOptions", aac2bbcf-9782-5420-b81e-7ae56af31815)]
+    [threading(both)]
+    runtimeclass CortanaActionableInsightsOptions
+    {
+        CortanaActionableInsightsOptions();
+        Windows.Foundation.Uri ContentSourceWebLink{ get; };
+        Windows.Foundation.Uri ContentSourceWebLink{ set; };
+        String SurroundingText{ get; };
+        String SurroundingText{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.Services.Cortana.ICortanaActionableInsightsStatics", b5ded412-9d2f-5cb5-9b05-356a0b836c10)]
+    [interface_name("Windows.Services.Cortana.ICortanaActionableInsights", 951ec6b1-fc83-586d-8b84-2452c8981625)]
+    [threading(both)]
+    runtimeclass CortanaActionableInsights
+    {
+        static Windows.Services.Cortana.CortanaActionableInsights GetDefault();
+        static Windows.Services.Cortana.CortanaActionableInsights GetForUser(Windows.System.User user);
+        Windows.System.User User{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  IsAvailableAsync();
+        [method_name("ShowInsightsForImageAsync")] Windows.Foundation.IAsyncAction ShowInsightsForImageAsync(Windows.Storage.Streams.IRandomAccessStreamReference imageStream);
+        [method_name("ShowInsightsForImageWithOptionsAsync")] Windows.Foundation.IAsyncAction ShowInsightsForImageAsync(Windows.Storage.Streams.IRandomAccessStreamReference imageStream, CortanaActionableInsightsOptions options);
+        [method_name("ShowInsightsForTextAsync")] Windows.Foundation.IAsyncAction ShowInsightsForTextAsync(String text);
+        [method_name("ShowInsightsForTextWithOptionsAsync")] Windows.Foundation.IAsyncAction ShowInsightsForTextAsync(String text, CortanaActionableInsightsOptions options);
+        [method_name("ShowInsightsAsync")] Windows.Foundation.IAsyncAction ShowInsightsAsync(Windows.ApplicationModel.DataTransfer.DataPackage datapackage);
+        [method_name("ShowInsightsWithOptionsAsync")] Windows.Foundation.IAsyncAction ShowInsightsAsync(Windows.ApplicationModel.DataTransfer.DataPackage datapackage, CortanaActionableInsightsOptions options);
+    }
+
+}

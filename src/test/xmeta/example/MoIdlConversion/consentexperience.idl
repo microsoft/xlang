@@ -1,0 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(cb343017-e99f-40d1-878a-dbddd8c4ab38)]
+    interface IConsentExperience
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.Shell.ConsentUx.UserConsentResponse>  RequestUserConsentAsync(Windows.Foundation.Collections.ValueSet requestContext, String primaryMessage, String detailMessage, String genericMessage, String allowText, String denyText, Guid relatedConsentActivityId);
+        Windows.Foundation.IAsyncOperation <Boolean>  ShowConsentNotificationAsync(Windows.Foundation.Collections.ValueSet requestContext, String primaryMessage, String detailMessage, Windows.Foundation.Uri destinationPathUri, Guid relatedConsentActivityId);
+    };
+
+}

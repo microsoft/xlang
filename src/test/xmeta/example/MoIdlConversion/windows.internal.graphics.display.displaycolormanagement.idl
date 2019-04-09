@@ -1,0 +1,65 @@
+
+
+
+
+
+
+namespace Windows.Internal.Graphics.Display.DisplayColorManagement
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Graphics.Display.DisplayColorManagement.InternalContract, 1)]
+    struct ShortRGB
+    {
+        UInt16 r;
+        UInt16 g;
+        UInt16 b;
+    };
+
+    [contract(Windows.Internal.Graphics.Display.DisplayColorManagement.InternalContract, 1)]
+    struct FloatRGB
+    {
+        Single r;
+        Single g;
+        Single b;
+    };
+
+    [contract(Windows.Internal.Graphics.Display.DisplayColorManagement.InternalContract, 1)]
+    struct MatrixType
+    {
+        Double f11;
+        Double f12;
+        Double f13;
+        Double f14;
+        Double f21;
+        Double f22;
+        Double f23;
+        Double f24;
+        Double f31;
+        Double f32;
+        Double f33;
+        Double f34;
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Graphics.Display.DisplayColorManagement.InternalContract, 1)]
+    [static_name("Windows.Internal.Graphics.Display.DisplayColorManagement.IDisplayColorManagementStatics", 62539684-40fc-4456-9a32-6ac61962ef46)]
+    [interface_name("Windows.Internal.Graphics.Display.DisplayColorManagement.IDisplayColorManagement", 30b8b10b-a8f9-4247-ad28-29dc0c931d1e)]
+    [threading(both)]
+    runtimeclass DisplayColorManagement
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Internal.Graphics.Display.DisplayColorManagement.DisplayColorManagement>  GetColorManagerForDisplayAsync(String monitorId, Guid purposeID);
+        String GetDisplayActiveColorProfile();
+        void SetDisplayColorGdiLut([range(0, 256)]ShortRGB[] lut);
+        void GetDisplayColorGdiLut(out ShortRGB[] lut);
+        void SetDisplayColorLut([range(0, 4096)]FloatRGB[] lut);
+        void GetDisplayColorLut(out FloatRGB[] lut);
+        void SetDisplayColorMatrix(MatrixType matrix);
+        void GetDisplayColorMatrix(out MatrixType matrix);
+    }
+
+
+}

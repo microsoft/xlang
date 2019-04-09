@@ -1,0 +1,77 @@
+
+
+
+
+
+
+
+namespace Windows.Phone.UI.Core
+{
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [webhosthidden]
+    enum CoreInputScope
+    {
+        Default,
+        Url,
+        EmailSmtpAddress = 5,
+        Number = 29,
+        TelephoneNumber = 32,
+        Text = 49,
+        Search = 51,
+    };
+
+    [uuid(196b175e-1a33-4b17-9935-338ef6443477)]
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [webhosthidden]
+    interface ICoreWindowKeyboardInput
+    {
+        Boolean IsKeyboardInputEnabled{ get; };
+        Boolean IsKeyboardInputEnabled{ set; };
+        Windows.Phone.UI.Core.KeyboardInputBuffer KeyboardInputBuffer{ get; };
+        Windows.Phone.UI.Core.KeyboardInputBuffer KeyboardInputBuffer{ set; };
+    };
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.Phone.UI.Core.IKeyboardInputBuffer", 3776ee93-8079-40cc-8c2f-a7a997cf9d6e)]
+    runtimeclass KeyboardInputBuffer
+    {
+        KeyboardInputBuffer();
+        String Text{ get; };
+        String Text{ set; };
+        UInt32 SelectionStart{ get; };
+        UInt32 SelectionLength{ get; };
+        void Select(UInt32 start, UInt32 length);
+        void SelectFromTap(UInt32 characterIndex);
+        Windows.Phone.UI.Core.CoreInputScope InputScope{ get; };
+        Windows.Phone.UI.Core.CoreInputScope InputScope{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.UI.Core.KeyboardInputBuffer, Windows.Phone.UI.Core.CoreTextChangedEventArgs>  TextChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.UI.Core.KeyboardInputBuffer, Windows.Phone.UI.Core.CoreSelectionChangedEventArgs>  SelectionChanged;
+    }
+
+
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.Phone.UI.Core.ICoreTextChangedEventArgs", 7e3c9572-60e4-4feb-8683-4cf0e0fa7659)]
+    runtimeclass CoreTextChangedEventArgs
+    {
+        UInt32 Start{ get; };
+        UInt32 OldLength{ get; };
+        String NewText{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Phone.PhoneInternalContract, 1)]
+    [webhosthidden]
+    [interface_name("Windows.Phone.UI.Core.ICoreSelectionChangedEventArgs", c2941949-3955-4ec2-8f88-3f2bfc04d0f1)]
+    runtimeclass CoreSelectionChangedEventArgs
+    {
+        UInt32 Start{ get; };
+        UInt32 Length{ get; };
+    }
+
+
+
+}

@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.AppResolver
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.AppResolver.InternalContract, 1)]
+    [interface_name("Windows.Internal.AppResolver.IAppResolverApplication", bbfe5731-ee09-415c-8418-6e290bc2a865)]
+    runtimeclass AppResolverApplication
+    {
+        String DisplayName{ get; };
+        String ProgId{ get; };
+        String AppId{ get; };
+        String ImagePath{ get; };
+        Boolean IsModern{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  Execute();
+    }
+
+    [contract(Windows.Internal.AppResolver.InternalContract, 1)]
+    enum AppResolverLaunchType
+    {
+        Protocol,
+        File,
+        AppUriHandler,
+    };
+
+    [contract(Windows.Internal.AppResolver.InternalContract, 1)]
+    [uuid(fcef6ffc-959f-4ed6-82dc-50c611b8873d)]
+    interface IAppResolverActivatedArgs requires Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  Execute(String appId);
+        void AppLaunched();
+        Windows.Internal.AppResolver.AppResolverLaunchType LaunchType{ get; };
+        Windows.Foundation.Collections.IVectorView <Object>  LaunchProviders{ get; };
+        String FileExtension{ get; };
+        String Scheme{ get; };
+        String Uri{ get; };
+        Windows.Storage.IStorageItem StorageItem{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.AppResolver.IAppResolverActivatedArgs, Object>  AppLaunchCompleted;
+    };
+
+    [contract(Windows.Internal.AppResolver.InternalContract, 1)]
+    runtimeclass AppResolverActivatedArgs
+        : [default]Windows.Internal.AppResolver.IAppResolverActivatedArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+    }
+
+
+    [contract(Windows.Internal.AppResolver.InternalContract, 1)]
+    [static_name("Windows.Internal.AppResolver.IAppResolverActivationArgsFactory", ed382808-fd3f-43a9-8c0a-83c7fa2aaff9)]
+    runtimeclass AppResolverActivationArgsFactory
+    {
+        static Windows.Internal.AppResolver.AppResolverActivatedArgs CreateAppResolverActivationArgs(Object launchInfo);
+    }
+
+}

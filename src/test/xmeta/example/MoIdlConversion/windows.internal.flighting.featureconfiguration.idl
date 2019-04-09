@@ -1,0 +1,33 @@
+
+
+
+
+
+
+namespace Windows.Internal.Flighting.FeatureConfiguration
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Flighting.FeatureConfiguration.InternalContract, 1)]
+    struct VariantConfiguration
+    {
+        UInt32 FeatureId;
+        UInt32 VariantId;
+        UInt32 Payload;
+    };
+
+
+    [contract(Windows.Internal.Flighting.FeatureConfiguration.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Flighting.FeatureConfiguration.IFeatureConfigurationsManager", 3764ece0-5c97-42ee-9a5a-02ad3cc40c7b)]
+    [threading(both)]
+    runtimeclass FeatureConfigurationsManager
+    {
+        FeatureConfigurationsManager();
+        void ReconcileFeatureConfigurations();
+        void AddFeatureConfigurations(Windows.Foundation.Collections.IVectorView <Windows.Internal.Flighting.FeatureConfiguration.VariantConfiguration>  featureConfigurations);
+    }
+
+}

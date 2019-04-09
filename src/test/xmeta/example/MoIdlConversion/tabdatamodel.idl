@@ -1,0 +1,324 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell.Tabs
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.IShellTabImage", 14728322-af04-41ad-9ed6-7d1b4821a7d2)]
+    runtimeclass ShellTabImage
+    {
+        Windows.Storage.Streams.Buffer Image{ get; };
+        String Glyph{ get; };
+        String FontFamily{ get; };
+        String FontFilePath{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  Color{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.IShellTabCommand", 8ff3297a-7aad-5862-8460-5c5269a8b237)]
+    runtimeclass ShellTabCommand
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabCommandId Id{ get; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage Icon{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage Icon{ set; };
+        Boolean CanInvoke{ get; };
+        Boolean CanInvoke{ set; };
+        void Invoke();
+        Object LifetimeControl{ get; };
+        Object LifetimeControl{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.ShellTabCommand, Object>  Invoked;
+    }
+
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.IShellTabGroup", f264283f-b510-4555-80ed-4c7216018854)]
+    runtimeclass ShellTabGroup
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroupId Id{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.Tabs.ShellTab>  GetTabs();
+        void InsertTabBefore(ShellTab newTab, ShellTab referenceTab);
+        void InsertTabAfter(ShellTab newTab, ShellTab referenceTab);
+        void InsertTabAt(ShellTab newTab, UInt32 desiredIndex);
+        void RemoveTab(ShellTab tab);
+        Windows.Internal.ComposableShell.Tabs.ShellTab SelectedTab{ get; };
+        void SelectTab(ShellTab value);
+        void RequestSelectTab(ShellTab tab);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.ShellTabGroup, Windows.Internal.ComposableShell.Tabs.ShellTabGroupSelectTabRequestedEventArgs>  SelectTabRequested;
+        Boolean IsPrivate{ get; };
+        Boolean IsPrivate{ set; };
+        Windows.Foundation.DateTime LastTabSelectedTime{ get; };
+        Boolean IsAppManaged{ get; };
+        Boolean IsAppManaged{ set; };
+    }
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.IShellTab", 3c3e4af7-f26d-4620-aa79-6440853c1416)]
+    runtimeclass ShellTab
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabId Id{ get; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        Object Tag{ get; };
+        Object Tag{ set; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage SelectedIcon{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage SelectedIcon{ set; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage UnselectedIcon{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage UnselectedIcon{ set; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage DefaultIcon{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage DefaultIcon{ set; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage ActiveIcon{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage ActiveIcon{ set; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage Thumbnail{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage Thumbnail{ set; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroup Group{ get; };
+        Boolean IsSelected{ get; };
+        Boolean IsDestroyed{ get; };
+        Boolean IsDestroyed{ set; };
+        Boolean IsRequestingAttention{ get; };
+        Boolean IsRequestingAttention{ set; };
+        Boolean IsPrivate{ get; };
+        Boolean IsPrivate{ set; };
+        Windows.Foundation.DateTime LastSelectedTime{ get; };
+        UInt32 WindowId{ get; };
+        UInt32 WindowId{ set; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.Tabs.ShellTabCommand>  Badges{ get; };
+        void InsertBadgeBefore(ShellTabCommand newBadge, ShellTabCommand referenceBadge);
+        void RemoveBadge(ShellTabCommand badge);
+        Windows.Foundation.IAsyncOperation <Object>  GetThumbnailVisualAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.ShellTab, Windows.Internal.ComposableShell.Tabs.ShellTabThumbnailVisualRequestedEventArgs>  ThumbnailVisualRequested;
+        Windows.UI.Color ForegroundColor{ get; };
+        Windows.UI.Color ForegroundColor{ set; };
+        Windows.UI.Color BackgroundColor{ get; };
+        Windows.UI.Color BackgroundColor{ set; };
+        Boolean IsSystemManaged{ get; };
+        void ResetProperties();
+        void CopyAppManagedProperties(ShellTab sourceTab);
+        void FireTabHostedAppChanged();
+    }
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.IShellTabThumbnailVisualRequestedEventArgs", 565936d5-3f97-4524-9c3a-d9de0963fd04)]
+    runtimeclass ShellTabThumbnailVisualRequestedEventArgs
+    {
+        Object ThumbnailVisual{ get; };
+        Object ThumbnailVisual{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.IShellTabGroupSelectTabRequestedEventArgs", d93f4511-55bb-4337-8bd2-efe4aae76f99)]
+    runtimeclass ShellTabGroupSelectTabRequestedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroup Group{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTab Tab{ get; };
+    }
+
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [uuid(de815fce-67de-41ea-8c7f-37a65bf92294)]
+    interface ITabDataModel
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.Tabs.ShellTabGroup>  ActiveGroups{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroup LastSelectedGroup{ get; };
+        [method_name("CreateGroup")] Windows.Internal.ComposableShell.Tabs.ShellTabGroup CreateGroup();
+        [method_name("CreateGroupWithTabs")] Windows.Internal.ComposableShell.Tabs.ShellTabGroup CreateGroup(Windows.Foundation.Collections.IIterable <Windows.Internal.ComposableShell.Tabs.ShellTab>  initialTabs);
+        Windows.Internal.ComposableShell.Tabs.ShellTab CreateTab();
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroup GetGroupById(ShellTabGroupId groupId);
+        Windows.Internal.ComposableShell.Tabs.ShellTab GetTabById(ShellTabId tabId);
+        void RemoveGroup(ShellTabGroup group);
+        [method_name("CreateWatcher")] Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher CreateWatcher();
+        [method_name("CreateWatcherWithGroup")] Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher CreateWatcher(ShellTabGroup group);
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage CreateIconFromFontGlyph(String glyph, String fontFamily, String fontFilePath, Windows.Foundation.IReference <Windows.UI.Color>  color);
+        Windows.Internal.ComposableShell.Tabs.ShellTabImage CreateIconFromImage(Windows.Storage.Streams.RandomAccessStreamReference image);
+        Windows.Internal.ComposableShell.Tabs.ShellTabCommand CreateCommand();
+        void AddUngroupedTab(ShellTab tab);
+        void RemoveUngroupedTab(ShellTab tab);
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.Tabs.ShellTab>  UngroupedTabs{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelWatcher", e16bdc4b-e380-4caf-b1ae-28a0bb6eefa9)]
+    runtimeclass TabDataModelWatcher
+    {
+        Windows.Internal.ComposableShell.Tabs.TabDataModelWatcherStatus Status{ get; };
+        void Start();
+        void Stop();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelGroupChangedEventArgs>  GroupAdded;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelGroupChangedEventArgs>  GroupRemoved;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelGroupPropertyChangedEventArgs>  GroupPropertyChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelGroupChangedEventArgs>  GroupRearranged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelTabsChangedEventArgs>  TabsChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelTabPropertyChangedEventArgs>  TabPropertyChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelTabHostedAppChangedEventArgs>  TabHostedAppChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelCommandChangedEventArgs>  BadgeAdded;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelCommandChangedEventArgs>  BadgeRemoved;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Windows.Internal.ComposableShell.Tabs.TabDataModelCommandPropertyChangedEventArgs>  BadgePropertyChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.Tabs.TabDataModelWatcher, Object>  Stopped;
+    }
+
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.ComposableShell.Tabs.IBrokeredTabDataModelViewStatics", 2b0b3489-be34-4098-ae3d-cf7ea11fefb5)]
+    [threading(both)]
+    runtimeclass BrokeredTabDataModelView
+        : [default]Windows.Internal.ComposableShell.Tabs.ITabDataModel
+    {
+        static Windows.Internal.ComposableShell.Tabs.BrokeredTabDataModelView Current{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [static_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelStatics", 82e95788-564d-4ee4-b8a1-39fc8fcf5025)]
+    [threading(both)]
+    runtimeclass TabDataModel
+        : [default]Windows.Internal.ComposableShell.Tabs.ITabDataModel
+    {
+        static Windows.Internal.ComposableShell.Tabs.TabDataModel Current{ get; };
+        static Windows.Internal.ComposableShell.Tabs.TabDataModel CreateForWCOS();
+
+        [interface_name("Windows.Internal.ComposableShell.Tabs.IApplicationManagedTabDataModel", 4c674bab-dced-42e2-85b3-ce2fd55982ce)]
+        {
+            Windows.Internal.ComposableShell.Tabs.ShellTab CreateApplicationManagedTab(ShellTabId tabId);
+            void ReplaceTab(ShellTab oldTab, ShellTab newTab);
+        }
+    }
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    enum TabDataModelWatcherStatus
+    {
+        Created,
+        Started,
+        EnumerationCompleted,
+        Stopping,
+        Stopped,
+        Aborted,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelGroupChangedEventArgs", f557eb25-555b-5ded-b17e-8bda9f602f1d)]
+    runtimeclass TabDataModelGroupChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroup Group{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelGroupPropertyChangedEventArgs", 648c2b53-63b7-5f1c-8c7b-69fd05bc370b)]
+    runtimeclass TabDataModelGroupPropertyChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroup Group{ get; };
+        String PropertyName{ get; };
+    }
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelTabsChangedEventArgs", 65bf3acd-6a10-50f1-ac6b-063e81b3f50a)]
+    runtimeclass TabDataModelTabsChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.TabDataModelTabsChangedKind ChangeKind{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabGroup Group{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTab RemovedTab{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTab AddedTab{ get; };
+        Int32 Index{ get; };
+    }
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelTabPropertyChangedEventArgs", ba36e3a5-19cc-54ae-9601-094b98af797e)]
+    runtimeclass TabDataModelTabPropertyChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTab Tab{ get; };
+        String PropertyName{ get; };
+    }
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelTabHostedAppChangedEventArgs", 16255616-7ff1-53a0-95ca-cec3888c1236)]
+    runtimeclass TabDataModelTabHostedAppChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTab Tab{ get; };
+    }
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelCommandChangedEventArgs", 3fe02722-3f19-56f4-9f0b-b895a7f2da0e)]
+    runtimeclass TabDataModelCommandChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTab Tab{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabCommand Command{ get; };
+        Int32 Index{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabDataModelCommandPropertyChangedEventArgs", 764a7946-0d13-5702-847c-f187a9f2b78a)]
+    runtimeclass TabDataModelCommandPropertyChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTab Tab{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabCommand Command{ get; };
+        String PropertyName{ get; };
+    }
+
+
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    enum TabDataModelTabsChangedKind
+    {
+        TabAdded,
+        TabRemoved,
+        TabReplaced,
+    };
+
+
+
+
+
+
+
+    [contract(Windows.Internal.ComposableShell.Tabs.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.ComposableShell.Tabs.ITabTransferContext", 577bd757-5821-56b8-9807-5520de0e4d2c)]
+    [threading(both)]
+    runtimeclass TabTransferContext
+    {
+        TabTransferContext();
+        Windows.Internal.ComposableShell.Tabs.ShellTabId TabId{ get; };
+        Windows.Internal.ComposableShell.Tabs.ShellTabId TabId{ set; };
+        Int32 ViewId{ get; };
+        Int32 ViewId{ set; };
+        Boolean IsCanceled{ get; };
+        Boolean IsCanceled{ set; };
+    }
+
+}

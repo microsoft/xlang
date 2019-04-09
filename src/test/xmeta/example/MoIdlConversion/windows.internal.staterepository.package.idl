@@ -1,0 +1,231 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IPackageStatics", 4408fb32-c420-41c5-b6c1-edce489bb84d)]
+    [interface_name("Windows.Internal.StateRepository.IPackage", 45807b92-a954-4628-9467-2ce260002ca9)]
+    [threading(both)]
+    runtimeclass Package
+    {
+        Package();
+        static Boolean Exists(Int64 packageID);
+        static Boolean ExistsByEditionId(String EditionId);
+        static Boolean ExistsByPackageFamily(PackageFamily PackageFamily);
+        static Boolean ExistsByPackageFamilyAndPackageType(PackageFamily PackageFamily, PackageType PackageType);
+        static Boolean ExistsByPackageFamilyAndPackageTypeAndResourceId(PackageFamily PackageFamily, PackageType PackageType, String ResourceId);
+        static Boolean ExistsByPackageFamilyAndPackageTypeAndResourceIdAndVersion(PackageFamily PackageFamily, PackageType PackageType, String ResourceId, UInt64 Version);
+        static Boolean ExistsByPackageFamilyAndResourceId(PackageFamily PackageFamily, String ResourceId);
+        static Boolean ExistsByPackageFamilyAndResourceIdAndArchitecture(PackageFamily PackageFamily, String ResourceId, UInt32 Architecture);
+        static Boolean ExistsByPackageFamilyAndResourceIdAndArchitectureAndVersion(PackageFamily PackageFamily, String ResourceId, UInt32 Architecture, UInt64 Version);
+        static Boolean ExistsByPackageFullName(String PackageFullName);
+        static Boolean ExistsBySourceBundle(Int64 SourceBundle);
+        static Boolean ExistsBySourceBundleAndPackageType(Int64 SourceBundle, PackageType PackageType);
+        static Windows.Internal.StateRepository.Package Get(Int64 packageID);
+        static Windows.Internal.StateRepository.Package TryGet(Int64 packageID);
+        static Windows.Internal.StateRepository.Package GetByPackageFamilyAndResourceIdAndArchitectureAndVersion(PackageFamily PackageFamily, String ResourceId, UInt32 Architecture, UInt64 Version);
+        static Windows.Internal.StateRepository.Package TryGetByPackageFamilyAndResourceIdAndArchitectureAndVersion(PackageFamily PackageFamily, String ResourceId, UInt32 Architecture, UInt64 Version);
+        static Windows.Internal.StateRepository.Package GetByPackageFullName(String PackageFullName);
+        static Windows.Internal.StateRepository.Package TryGetByPackageFullName(String PackageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByEditionId(String EditionId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamily(PackageFamily PackageFamily);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamilyAndPackageType(PackageFamily PackageFamily, PackageType PackageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamilyAndPackageTypeAndResourceId(PackageFamily PackageFamily, PackageType PackageType, String ResourceId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamilyAndPackageTypeAndResourceIdAndVersion(PackageFamily PackageFamily, PackageType PackageType, String ResourceId, UInt64 Version);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamilyAndResourceId(PackageFamily PackageFamily, String ResourceId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamilyAndResourceIdAndArchitecture(PackageFamily PackageFamily, String ResourceId, UInt32 Architecture);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindBySourceBundle(Int64 SourceBundle);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindBySourceBundleAndPackageType(Int64 SourceBundle, PackageType PackageType);
+        static Windows.Internal.StateRepository.Package GetCurrent();
+        static Windows.Internal.StateRepository.Package GetByUserAnd_PackageId(User user, Int64 _packageID);
+        static Windows.Internal.StateRepository.PackageOrigin GetPackageOriginByUserAndPackageFullName(User User, String packageFullName);
+        static Windows.Internal.StateRepository.PackageOrigin GetStagedPackageOriginByPackageFullName(String packageFullName);
+        static Boolean ExistsByNameAndArchitectureAndVersionAndResourceIdAndPublisherId(String name, UInt32 architecture, UInt64 Version, String ResourceId, String PublisherId);
+        static Boolean ExistsByPackageFamilyName(String packageFamilyName);
+        static Boolean ExistsByPackageFamilyNameAndPackageType(String packageFamilyName, PackageType packageType);
+        static Boolean ExistsByUserAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Boolean ExistsByUserAndNameAndArchitectureAndVersionAndResourceIdAndPublisherId(User user, String name, UInt32 architecture, UInt64 version, String resourceId, String publisherId);
+        static Boolean ExistsByUserAndPackageFamily(User user, PackageFamily packageFamily);
+        static Boolean ExistsByUserAndPackageFamilyAndPackageType(User user, PackageFamily packageFamily, PackageType packageType);
+        static Boolean ExistsByUserAndPackageFamilyName(User user, String packageFamilyName);
+        static Boolean ExistsByUserAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Boolean ExistsByUserAndPackageFullName(User user, String packageFullName);
+        static Boolean ExistsByUserAndPublisherId(User user, String publisherId);
+        static Windows.Internal.StateRepository.Package GetByNameAndArchitectureAndVersionAndResourceIdAndPublisherId(String name, UInt32 architecture, UInt64 version, String resourceId, String publisherId);
+        static Windows.Internal.StateRepository.Package GetByUserAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Windows.Internal.StateRepository.Package GetByUserAndNameAndArchitectureAndVersionAndResourceIdAndPublisherId(User user, String name, UInt32 architecture, UInt64 version, String resourceId, String publisherId);
+        static Windows.Internal.StateRepository.Package GetByUserAndPackageFullName(User user, String packageFullName);
+        static Windows.Internal.StateRepository.Package TryGetByNameAndArchitectureAndVersionAndResourceIdAndPublisherId(String name, UInt32 architecture, UInt64 version, String resourceId, String publisherId);
+        static Windows.Internal.StateRepository.Package TryGetByUserAndNameAndArchitectureAndVersionAndResourceIdAndPublisherId(User user, String name, UInt32 architecture, UInt64 version, String resourceId, String publisherId);
+        static Windows.Internal.StateRepository.Package TryGetByUserAndPackageFullName(User user, String packageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamilyName(String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageFamilyNameAndPackageType(String packageFamilyName, PackageType packageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserAndPackageFamily(User user, PackageFamily packageFamily);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserAndPackageFamilyAndPackageType(User user, PackageFamily packageFamily, PackageType packageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserAndPackageFamilyName(User user, String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserAndPublisherId(User user, String publisherId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUser(User user);
+        static Windows.Internal.StateRepository.Package GetMainPackageDependencyByUserAndSupplierPackage(User user, Package supplierPackage);
+        static void UpdateIsMachineRegisteredByPackageFullName(String packageFullName, Boolean value);
+        static void UpdateIsSingletonRegistered(Int64 _packageID, Boolean value);
+        static Windows.Internal.StateRepository.SupportedUsers GetEffectiveSupportedUsersByApplicationUserModelId(User user, String ApplicationUserModelId);
+        static Windows.Internal.StateRepository.SupportedUsers GetEffectiveSupportedUsersByPackageFullName(String packageFullName);
+        static void GetIsSilverlight81AndEffectiveSupportedUsersByUserAndPackageFullName(User user, String packageFullName, out Boolean isSilverlight81, out SupportedUsers effectiveSupportedUsers);
+        static void GetIsSilverlight81AndEffectiveSupportedUsersAndVolumeByUserAndPackageFullName(User user, String packageFullName, out Boolean isSilverlight81, out SupportedUsers effectiveSupportedUsers, out Int64 volume);
+        static Boolean ExistsByUserOrDefaultAccountAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Boolean ExistsByUserOrDefaultAccountAndPackageFullName(User user, String packageFullName);
+        static Boolean ExistsByUserOrDefaultAccountAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserOrDefaultAccountAndPackageFamilyNameAndPackageType(User user, String packageFamilyName, PackageType packageType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserOrDefaultAccountAndPackageFullName(User user, String packageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserOrDefaultAccountAndApplicationUserModelId(User user, String applicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserOrDefaultAccount(User user);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserOrDefaultAccountAnd_PackageID(User user, Int64 _packageID);
+        static Boolean GetEffectiveIsUninstallableByPackageFullName(String packageFullName);
+        static Windows.Internal.StateRepository.Package GetByUserOrDefaultAccountAndPackageFullName(User user, String packageFullName);
+        static Windows.Internal.StateRepository.Package TryGetByUserOrDefaultAccountAndPackageFullName(User user, String packageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByPackageOrigin(PackageOrigin packageOrigin);
+        static Windows.Internal.StateRepository.Package GetByInstalledLocation(String installedLocation);
+        static Windows.Internal.StateRepository.Package TryGetByInstalledLocation(String installedLocation);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindBundleAndMainOrOptionalNotPartOfBundleByUserAndNotOtherUser_SortedByPackageType(String user, String otherUser);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindMainOrOptionalByUserAndNotByFamilyAndOtherUser(String user, String otherUser);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Package>  FindByUserAndPackageTypeAndNotOtherUser(String user, PackageType packageType, String otherUser);
+        static Windows.Foundation.Collections.IVectorView <String>  FindPackageFullNamesByUserSidAndPackageTypeAndTargetDeviceFamily(String userSid, PackageType packageType, UInt32 targetDeviceFamily);
+        Int64 _PackageID{ get; };
+        Int64 _PackageID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 PackageFamily{ get; };
+        Int64 PackageFamily{ set; };
+        Windows.Internal.StateRepository.PackageFamily GetPackageFamily();
+        void SetPackageFamily(PackageFamily value);
+        Boolean IsResourceIdNull{ get; };
+        void SetResourceIdToNull();
+        String ResourceId{ get; };
+        String ResourceId{ set; };
+        UInt32 Architecture{ get; };
+        UInt32 Architecture{ set; };
+        UInt64 Version{ get; };
+        UInt64 Version{ set; };
+        String PackageFullName{ get; };
+        String PackageFullName{ set; };
+        Boolean IsInbox{ get; };
+        Boolean IsInbox{ set; };
+        Windows.Internal.StateRepository.PackageType PackageType{ get; };
+        Windows.Internal.StateRepository.PackageType PackageType{ set; };
+        Windows.Internal.StateRepository.PackageFlags Flags{ get; };
+        Windows.Internal.StateRepository.PackageFlags Flags{ set; };
+        Boolean IsDevelopmentMode{ get; };
+        Boolean IsDevelopmentMode{ set; };
+        Boolean HasServerApplication{ get; };
+        Boolean HasServerApplication{ set; };
+        Boolean HasCentennial{ get; };
+        Boolean HasCentennial{ set; };
+        Boolean IsMachineRegistered{ get; };
+        Boolean IsMachineRegistered{ set; };
+        Boolean IsPackagePayloadEncrypted{ get; };
+        Boolean IsPackagePayloadEncrypted{ set; };
+        Boolean IsMetadataLocationUnderSystemMetadata{ get; };
+        Boolean IsMetadataLocationUnderSystemMetadata{ set; };
+        Boolean HasRunFullTrustCapability{ get; };
+        Boolean HasRunFullTrustCapability{ set; };
+        Boolean IsInRelatedSet{ get; };
+        Boolean IsInRelatedSet{ set; };
+        Boolean DoNotAllowExecution{ get; };
+        Boolean DoNotAllowExecution{ set; };
+        Boolean IsNonQualifiedResourcePackage{ get; };
+        Boolean IsNonQualifiedResourcePackage{ set; };
+        Boolean MostRecentlyStagedInFamily{ get; };
+        Boolean MostRecentlyStagedInFamily{ set; };
+        Boolean IsMsixvc{ get; };
+        Boolean IsMsixvc{ set; };
+        Boolean IsSingletonRegistered{ get; };
+        Boolean IsSingletonRegistered{ set; };
+        Boolean NeedsSingletonRegistration{ get; };
+        Boolean NeedsSingletonRegistration{ set; };
+        Boolean FileSystemWriteVirtualizationDisabled{ get; };
+        Boolean FileSystemWriteVirtualizationDisabled{ set; };
+        Boolean RegistryWriteVirtualizationDisabled{ get; };
+        Boolean RegistryWriteVirtualizationDisabled{ set; };
+        Boolean LoaderSearchPathOverride{ get; };
+        Boolean LoaderSearchPathOverride{ set; };
+        Boolean IsMutablePackageDirectoryProcessed{ get; };
+        Boolean IsMutablePackageDirectoryProcessed{ set; };
+        Boolean IsModificationPackage{ get; };
+        Boolean IsModificationPackage{ set; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        String PublisherDisplayName{ get; };
+        String PublisherDisplayName{ set; };
+        Boolean IsDescriptionNull{ get; };
+        void SetDescriptionToNull();
+        String Description{ get; };
+        String Description{ set; };
+        String Logo{ get; };
+        String Logo{ set; };
+        UInt64 OSMinVersion{ get; };
+        UInt64 OSMinVersion{ set; };
+        UInt64 OSMaxVersionTested{ get; };
+        UInt64 OSMaxVersionTested{ set; };
+        Int64 TargetDeviceFamily{ get; };
+        Int64 TargetDeviceFamily{ set; };
+        UInt32 Capabilities{ get; };
+        UInt32 Capabilities{ set; };
+        Windows.Internal.StateRepository.SupportedUsers SupportedUsers{ get; };
+        Windows.Internal.StateRepository.SupportedUsers SupportedUsers{ set; };
+        Windows.Internal.StateRepository.SignatureOrigin SignatureOrigin{ get; };
+        Windows.Internal.StateRepository.SignatureOrigin SignatureOrigin{ set; };
+        Windows.Internal.StateRepository.PackageOrigin PackageOrigin{ get; };
+        Windows.Internal.StateRepository.PackageOrigin PackageOrigin{ set; };
+        Int64 Enterprise{ get; };
+        Int64 Enterprise{ set; };
+        Windows.Internal.StateRepository.Enterprise GetEnterprise();
+        void SetEnterprise(Enterprise value);
+        Int64 SourceBundle{ get; };
+        Int64 SourceBundle{ set; };
+        Boolean IsEditionIdNull{ get; };
+        void SetEditionIdToNull();
+        String EditionId{ get; };
+        String EditionId{ set; };
+        UInt64 OSVersionWhenIndexed{ get; };
+        UInt64 OSVersionWhenIndexed{ set; };
+        Int64 InPlaceUpdateBaseline{ get; };
+        Int64 InPlaceUpdateBaseline{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        String GetDisplayNameReference();
+        String GetDisplayNameLocalized();
+        String GetPublisherDisplayNameReference();
+        String GetPublisherDisplayNameLocalized();
+        String GetDescriptionReference();
+        String GetDescriptionLocalized();
+        String GetLogoReference();
+        String GetLogoLocalized();
+        Windows.Foundation.Uri GetLogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetLogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        Windows.Internal.StateRepository.SupportedUsers EffectiveSupportedUsers{ get; };
+        Boolean EffectiveIsUninstallable{ get; };
+        Boolean AreMrtResourcesRedirected{ get; };
+    }
+
+
+}

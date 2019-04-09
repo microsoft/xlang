@@ -1,0 +1,25 @@
+
+
+
+
+
+
+
+
+
+namespace WindowsInternal.Shell.UnifiedTile.Private
+{
+    [contractversion(1)]
+    [internal]
+    apicontract OneCoreUapInternalContract{};
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.Private.OneCoreUapInternalContract, 1)]
+    [static_name("WindowsInternal.Shell.UnifiedTile.Private.ITileVerbProviderCommonBrokerStatics", 93cd7e63-061d-4abd-9756-de54a171dacf)]
+    [threading(both)]
+    runtimeclass TileVerbProviderCommonBroker
+    {
+        static Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.UnifiedTile.TileVerb>  GetStorageItemVerbs(Windows.Storage.IStorageItem item, WindowsInternal.Shell.UnifiedTile.VerbEnumerationArgs args);
+    }
+
+}

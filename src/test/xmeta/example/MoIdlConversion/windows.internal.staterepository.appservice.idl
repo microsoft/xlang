@@ -1,0 +1,59 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IAppServiceStatics", ea289835-41db-4cf5-8871-fc7b1eaa477c)]
+    [interface_name("Windows.Internal.StateRepository.IAppService", ae655c6c-b973-45eb-aa3e-8b6467ff272f)]
+    [threading(both)]
+    runtimeclass AppService
+    {
+        static Boolean Exists(Int64 appServiceID);
+        static Boolean ExistsByExtension(ApplicationExtension Extension);
+        static Boolean ExistsByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Boolean ExistsByName(String Name);
+        static Boolean ExistsByNameAndExtension(String Name, ApplicationExtension Extension);
+        static Windows.Internal.StateRepository.AppService Get(Int64 appServiceID);
+        static Windows.Internal.StateRepository.AppService TryGet(Int64 appServiceID);
+        static Windows.Internal.StateRepository.AppService GetByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Windows.Internal.StateRepository.AppService TryGetByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Windows.Internal.StateRepository.AppService GetByNameAndExtension(String Name, ApplicationExtension Extension);
+        static Windows.Internal.StateRepository.AppService TryGetByNameAndExtension(String Name, ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppService>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppService>  FindByExtension(ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppService>  FindByName(String Name);
+        static Boolean ExistsByUserAndName(User user, String name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppService>  FindByUserAndName(User user, String name);
+        AppService();
+        Int64 _AppServiceID{ get; };
+        Int64 _AppServiceID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        Int64 Extension{ get; };
+        Int64 Extension{ set; };
+        Windows.Internal.StateRepository.ApplicationExtension GetExtension();
+        void SetExtension(ApplicationExtension value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

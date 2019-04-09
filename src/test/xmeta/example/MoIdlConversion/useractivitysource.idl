@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Internal.UserActivities
+{
+    [contract(Windows.ApplicationModel.Internal.UserActivities.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Internal.UserActivities.IUserActivitySourceStatic", 1c4a8477-b692-4b7e-a6c3-c31ea7a3248c)]
+    [threading(both)]
+    runtimeclass UserActivitySource
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserActivities.UserActivity>  TryGetUserActivityForWindowAsync(UInt32 windowId);
+    }
+
+}

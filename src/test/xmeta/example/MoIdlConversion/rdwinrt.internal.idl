@@ -1,0 +1,20 @@
+
+
+
+
+
+
+namespace Windows.Internal.System.RemoteDesktop
+{
+    [contractversion(1)]
+    [internal]
+    apicontract RdWinRTInternalContract{};
+
+    [contract(Windows.Internal.System.RemoteDesktop.RdWinRTInternalContract, 1)]
+    enum RemoteDesktopTransportTypeOld
+    {
+        Default,
+        NamedPipe,
+    };
+
+}

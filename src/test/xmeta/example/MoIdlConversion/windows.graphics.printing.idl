@@ -1,0 +1,155 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Printing
+{
+    [uuid(dedc0c30-f1eb-47df-aae6-ed5427511f01)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPrintDocumentSource
+    {
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.IPrintTaskProgressingEventArgs", 810cd3cb-b410-4282-a073-5ac378234174)]
+    runtimeclass PrintTaskProgressingEventArgs
+    {
+        UInt32 DocumentPageCount{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PrintTaskCompletion
+    {
+        Abandoned,
+        Canceled,
+        Failed,
+        Submitted,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Graphics.Printing.IPrintTaskCompletedEventArgs", 5bcd34af-24e9-4c10-8d07-14c346ba3fce)]
+    runtimeclass PrintTaskCompletedEventArgs
+    {
+        Windows.Graphics.Printing.PrintTaskCompletion Completion{ get; };
+    }
+
+
+    [muse(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.IPrintTask", 61d80247-6cf6-4fad-84e2-a5e82e2d4ceb)]
+    runtimeclass PrintTask
+    {
+        Windows.ApplicationModel.DataTransfer.DataPackagePropertySet Properties{ get; };
+        Windows.Graphics.Printing.IPrintDocumentSource Source{ get; };
+        Windows.Graphics.Printing.PrintTaskOptions Options{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing.PrintTask, Object>  Previewing;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing.PrintTask, Object>  Submitting;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing.PrintTask, Windows.Graphics.Printing.PrintTaskProgressingEventArgs>  Progressing;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing.PrintTask, Windows.Graphics.Printing.PrintTaskCompletedEventArgs>  Completed;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Graphics.Printing.IPrintTaskTargetDeviceSupport", 295d70c0-c2cb-4b7d-b0ea-93095091a220)]
+        {
+            Boolean IsPrinterTargetEnabled{ set; };
+            Boolean IsPrinterTargetEnabled{ get; };
+            Boolean Is3DManufacturingTargetEnabled{ set; };
+            Boolean Is3DManufacturingTargetEnabled{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Graphics.Printing.IPrintTask2", 36234877-3e53-4d9d-8f5e-316ac8dedae1)]
+        {
+            Boolean IsPreviewEnabled{ set; };
+            Boolean IsPreviewEnabled{ get; };
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.IPrintTaskSourceRequestedDeferral", 4a1560d1-6992-4d9d-8555-4ca4563fb166)]
+    runtimeclass PrintTaskSourceRequestedDeferral
+    {
+        void Complete();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6020000)]
+    [interface_name("Windows.Graphics.Printing.IPrintTaskSourceRequestedArgs", f9f067be-f456-41f0-9c98-5ce73e851410)]
+    runtimeclass PrintTaskSourceRequestedArgs
+    {
+        Windows.Foundation.DateTime Deadline{ get; };
+        void SetSource(IPrintDocumentSource source);
+        Windows.Graphics.Printing.PrintTaskSourceRequestedDeferral GetDeferral();
+    }
+
+    [uuid(6c109fa8-5cb6-4b3a-8663-f39cb02dc9b4)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    delegate void PrintTaskSourceRequestedHandler(PrintTaskSourceRequestedArgs args);
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.IPrintTaskRequestedDeferral", cfefb3f0-ce3e-42c7-9496-64800c622c44)]
+    runtimeclass PrintTaskRequestedDeferral
+    {
+        void Complete();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6020000)]
+    [interface_name("Windows.Graphics.Printing.IPrintTaskRequest", 6ff61e2e-2722-4240-a67c-f364849a17f3)]
+    runtimeclass PrintTaskRequest
+    {
+        Windows.Foundation.DateTime Deadline{ get; };
+        Windows.Graphics.Printing.PrintTask CreatePrintTask(String title, PrintTaskSourceRequestedHandler handler);
+        Windows.Graphics.Printing.PrintTaskRequestedDeferral GetDeferral();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.IPrintTaskRequestedEventArgs", d0aff924-a31b-454c-a7b6-5d0cc522fc16)]
+    runtimeclass PrintTaskRequestedEventArgs
+    {
+        Windows.Graphics.Printing.PrintTaskRequest Request{ get; };
+    }
+
+
+    [muse(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Graphics.Printing.IPrintManagerStatic", 58185dcd-e634-4654-84f0-e0152a8217ac)]
+    [interface_name("Windows.Graphics.Printing.IPrintManager", ff2a9694-8c99-44fd-ae4a-19d9aa9a0f0a)]
+    runtimeclass PrintManager
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Graphics.Printing.IPrintManagerStatic2", 35a99955-e6ab-4139-9abd-b86a729b3598)]
+        {
+            static Boolean IsSupported();
+        }
+        static Windows.Graphics.Printing.PrintManager GetForCurrentView();
+        static Windows.Foundation.IAsyncOperation <Boolean>  ShowPrintUIAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing.PrintManager, Windows.Graphics.Printing.PrintTaskRequestedEventArgs>  PrintTaskRequested;
+    }
+
+
+
+}

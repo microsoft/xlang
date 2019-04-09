@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IResourceStatics", f70a43a0-7021-41cf-b0fe-ec696f324d6e)]
+    [interface_name("Windows.Internal.StateRepository.IResource", 9a7923cc-7aee-431d-b021-80d544a9487b)]
+    [threading(both)]
+    runtimeclass Resource
+    {
+        static Boolean Exists(Int64 resourceID);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByPackageAndIndex(Package Package, UInt64 Index);
+        static Windows.Internal.StateRepository.Resource Get(Int64 resourceID);
+        static Windows.Internal.StateRepository.Resource TryGet(Int64 resourceID);
+        static Windows.Internal.StateRepository.Resource GetByPackageAndIndex(Package Package, UInt64 Index);
+        static Windows.Internal.StateRepository.Resource TryGetByPackageAndIndex(Package Package, UInt64 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Resource>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Resource>  FindByPackage(Package Package);
+        Resource();
+        Int64 _ResourceID{ get; };
+        Int64 _ResourceID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        UInt64 Index{ get; };
+        UInt64 Index{ set; };
+        String Language{ get; };
+        String Language{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

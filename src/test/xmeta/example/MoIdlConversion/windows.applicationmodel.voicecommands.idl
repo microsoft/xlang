@@ -1,0 +1,178 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.VoiceCommands
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandDefinition", 7972aad0-0974-4979-984b-cb8959cd61ae)]
+    runtimeclass VoiceCommandDefinition
+    {
+        String Language{ get; };
+        String Name{ get; };
+        Windows.Foundation.IAsyncAction SetPhraseListAsync(String phraseListName, Windows.Foundation.Collections.IIterable <String>  phraseList);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum VoiceCommandContentTileType
+    {
+        TitleOnly,
+        TitleWithText,
+        TitleWith68x68Icon,
+        TitleWith68x68IconAndText,
+        TitleWith68x92Icon,
+        TitleWith68x92IconAndText,
+        TitleWith280x140Icon,
+        TitleWith280x140IconAndText,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandDefinitionManagerStatics", 8fe7a69e-067e-4f16-a18c-5b17e9499940)]
+    runtimeclass VoiceCommandDefinitionManager
+    {
+        static Windows.Foundation.IAsyncAction InstallCommandDefinitionsFromStorageFileAsync(Windows.Storage.StorageFile file);
+        static Windows.Foundation.Collections.IMapView <String, Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinition>  InstalledCommandDefinitions{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandContentTile", 3eefe9f0-b8c7-4c76-a0de-1607895ee327)]
+    runtimeclass VoiceCommandContentTile
+    {
+        VoiceCommandContentTile();
+        String Title{ get; };
+        String Title{ set; };
+        String TextLine1{ get; };
+        String TextLine1{ set; };
+        String TextLine2{ get; };
+        String TextLine2{ set; };
+        String TextLine3{ get; };
+        String TextLine3{ set; };
+        Windows.Storage.IStorageFile Image{ get; };
+        Windows.Storage.IStorageFile Image{ set; };
+        Object AppContext{ get; };
+        Object AppContext{ set; };
+        String AppLaunchArgument{ get; };
+        String AppLaunchArgument{ set; };
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandContentTileType ContentTileType{ get; };
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandContentTileType ContentTileType{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandUserMessage", 674eb3c0-44f6-4f07-b979-4c723fc08597)]
+    runtimeclass VoiceCommandUserMessage
+    {
+        VoiceCommandUserMessage();
+        String DisplayMessage{ get; };
+        String DisplayMessage{ set; };
+        String SpokenMessage{ get; };
+        String SpokenMessage{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum VoiceCommandCompletionReason
+    {
+        Unknown,
+        CommunicationFailed,
+        ResourceLimitsExceeded,
+        Canceled,
+        TimeoutExceeded,
+        AppLaunched,
+        Completed,
+    };
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommand", 936f5273-ec82-42a6-a55c-d2d79ec6f920)]
+    runtimeclass VoiceCommand
+    {
+        String CommandName{ get; };
+        Windows.Foundation.Collections.IMapView <String, Windows.Foundation.Collections.IVectorView <String> >  Properties{ get; };
+        Windows.Media.SpeechRecognition.SpeechRecognitionResult SpeechRecognitionResult{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandResponseStatics", 2932f813-0d3b-49f2-96dd-625019bd3b5d)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandResponse", 0284b30e-8a3b-4cc4-a6a1-cad5be2716b5)]
+    runtimeclass VoiceCommandResponse
+    {
+        static UInt32 MaxSupportedVoiceCommandContentTiles{ get; };
+        [method_name("CreateResponse")] static Windows.ApplicationModel.VoiceCommands.VoiceCommandResponse CreateResponse(VoiceCommandUserMessage userMessage);
+        [method_name("CreateResponseWithTiles")] static Windows.ApplicationModel.VoiceCommands.VoiceCommandResponse CreateResponse(VoiceCommandUserMessage message, Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.VoiceCommands.VoiceCommandContentTile>  contentTiles);
+        [method_name("CreateResponseForPrompt")] static Windows.ApplicationModel.VoiceCommands.VoiceCommandResponse CreateResponseForPrompt(VoiceCommandUserMessage message, VoiceCommandUserMessage repeatMessage);
+        [method_name("CreateResponseForPromptWithTiles")] static Windows.ApplicationModel.VoiceCommands.VoiceCommandResponse CreateResponseForPrompt(VoiceCommandUserMessage message, VoiceCommandUserMessage repeatMessage, Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.VoiceCommands.VoiceCommandContentTile>  contentTiles);
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandUserMessage Message{ get; };
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandUserMessage Message{ set; };
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandUserMessage RepeatMessage{ get; };
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandUserMessage RepeatMessage{ set; };
+        String AppLaunchArgument{ get; };
+        String AppLaunchArgument{ set; };
+        Windows.Foundation.Collections.IVector <Windows.ApplicationModel.VoiceCommands.VoiceCommandContentTile>  VoiceCommandContentTiles{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandConfirmationResult", a022593e-8221-4526-b083-840972262247)]
+    runtimeclass VoiceCommandConfirmationResult
+    {
+        Boolean Confirmed{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandDisambiguationResult", ecc68cfe-c9ac-45df-a8ea-feea08ef9c5e)]
+    runtimeclass VoiceCommandDisambiguationResult
+    {
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandContentTile SelectedItem{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandServiceConnectionStatics", 370ebffb-2d34-42df-8770-074d0f334697)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandServiceConnection", d894bb9f-21da-44a4-98a2-fb131920a9cc)]
+    runtimeclass VoiceCommandServiceConnection
+    {
+        static Windows.ApplicationModel.VoiceCommands.VoiceCommandServiceConnection FromAppServiceTriggerDetails(Windows.ApplicationModel.AppService.AppServiceTriggerDetails triggerDetails);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.VoiceCommands.VoiceCommand>  GetVoiceCommandAsync();
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.VoiceCommands.VoiceCommandConfirmationResult>  RequestConfirmationAsync(VoiceCommandResponse response);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.VoiceCommands.VoiceCommandDisambiguationResult>  RequestDisambiguationAsync(VoiceCommandResponse response);
+        Windows.Foundation.IAsyncAction ReportProgressAsync(VoiceCommandResponse response);
+        Windows.Foundation.IAsyncAction ReportSuccessAsync(VoiceCommandResponse response);
+        Windows.Foundation.IAsyncAction ReportFailureAsync(VoiceCommandResponse response);
+        Windows.Foundation.IAsyncAction RequestAppLaunchAsync(VoiceCommandResponse response);
+        Windows.Globalization.Language Language{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.VoiceCommands.VoiceCommandServiceConnection, Windows.ApplicationModel.VoiceCommands.VoiceCommandCompletedEventArgs>  VoiceCommandCompleted;
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.VoiceCommands.IVoiceCommandCompletedEventArgs", c85e675d-fe42-432c-9907-09df9fcf64e8)]
+    runtimeclass VoiceCommandCompletedEventArgs
+    {
+        Windows.ApplicationModel.VoiceCommands.VoiceCommandCompletionReason Reason{ get; };
+    }
+
+
+
+
+}

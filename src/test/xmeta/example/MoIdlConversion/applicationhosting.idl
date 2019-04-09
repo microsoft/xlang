@@ -1,0 +1,75 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ApplicationHosting
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.ApplicationHosting.InternalContract, 1)]
+    [uuid(aeacd73f-184d-46bf-8641-8f825436e7ab)]
+    interface ICoreApplicationBridgeWindow
+    {
+        Boolean IsClosed{ get; };
+        void Show();
+        void Hide();
+        void Shutdown();
+    };
+
+    [uuid(54d81703-c9f1-4afe-a2f3-4d6f9b7c828c)]
+    [contract(Windows.Internal.ApplicationHosting.InternalContract, 1)]
+    interface ICoreApplicationBridgePrivate
+    {
+        Windows.Internal.ApplicationHosting.ICoreApplicationBridgeWindow BridgeWindow{ set; };
+        Windows.Internal.ApplicationHosting.ICoreApplicationBridgeWindow BridgeWindow{ get; };
+    };
+
+    [contract(Windows.Internal.ApplicationHosting.InternalContract, 1)]
+    enum ApplicationTerminationReason
+    {
+        None,
+        Closed,
+        Crashed,
+    };
+
+    [contract(Windows.Internal.ApplicationHosting.InternalContract, 1)]
+    [uuid(64194914-d4ce-483b-8366-0391ed1c045b)]
+    interface IApplicationTerminatedEventArgs
+    {
+        Windows.Internal.ApplicationHosting.ApplicationTerminationReason TerminationReason{ get; };
+    };
+
+    [uuid(730f230c-f245-4981-bb77-b5ab644d4c44)]
+    [contract(Windows.Internal.ApplicationHosting.InternalContract, 1)]
+    interface ICoreApplicationBridge
+    {
+        Windows.Foundation.Rect Position{ set; };
+        Windows.Foundation.Rect Position{ get; };
+        Boolean IsVisible{ set; };
+        Boolean IsVisible{ get; };
+        UInt32 HostWindow{ set; };
+        UInt32 HostWindow{ get; };
+        UInt32 ProcessId{ get; };
+        UInt64 Id{ get; };
+        event Windows.Foundation.TypedEventHandler <Object, Windows.Internal.ApplicationHosting.IApplicationTerminatedEventArgs>  Terminated;
+        void Close();
+    };
+
+
+    [contract(Windows.Internal.ApplicationHosting.InternalContract, 1)]
+    [interface_name("Windows.Internal.ApplicationHosting.ICoreApplicationBridgeFactory", ce0d9be7-3eb1-4714-9c0d-de128b2e819e)]
+    runtimeclass CoreApplicationBridgeFactory
+    {
+        UInt64 Id{ set; };
+        UInt64 Id{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Internal.ApplicationHosting.ICoreApplicationBridge>  ActivateApplication(Windows.Foundation.Rect rect, String appId, String contractId, Object activationArgs);
+        Object CreateLaunchActivationArgs(String arguments, String tileId);
+        Object CreateOOPActivationArgs(String className);
+    }
+
+}

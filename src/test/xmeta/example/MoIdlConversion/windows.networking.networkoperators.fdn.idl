@@ -1,0 +1,20 @@
+
+
+
+
+
+
+namespace Windows.Networking.NetworkOperators
+{
+    [contractversion(1)]
+    apicontract NetworkOperatorsFdnContract{};
+
+
+    [contract(Windows.Networking.NetworkOperators.NetworkOperatorsFdnContract, 1)]
+    [static_name("Windows.Networking.NetworkOperators.IFdnAccessManagerStatics", f2aa4395-f1e6-4319-aa3e-477ca64b2bdf)]
+    runtimeclass FdnAccessManager
+    {
+        static Windows.Foundation.IAsyncOperation <Boolean>  RequestUnlockAsync(String contactListId);
+    }
+
+}

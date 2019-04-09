@@ -1,0 +1,97 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.System.Power
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+    [static_name("Windows.System.Power.IBackgroundEnergyManagerStatics", b3161d95-1180-4376-96e1-4095568147ce)]
+    runtimeclass BackgroundEnergyManager
+    {
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 LowUsageLevel{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 NearMaxAcceptableUsageLevel{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 MaxAcceptableUsageLevel{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 ExcessiveUsageLevel{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 NearTerminationUsageLevel{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 TerminationUsageLevel{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 RecentEnergyUsage{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 RecentEnergyUsageLevel{ get; };
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static event Windows.Foundation.EventHandler <Object>  RecentEnergyUsageIncreased;
+        [deprecated("Background Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static event Windows.Foundation.EventHandler <Object>  RecentEnergyUsageReturnedToLow;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Power.IForegroundEnergyManagerStatics", 9ff86872-e677-4814-9a20-5337ca732b98)]
+    runtimeclass ForegroundEnergyManager
+    {
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 LowUsageLevel{ get; };
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 NearMaxAcceptableUsageLevel{ get; };
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 MaxAcceptableUsageLevel{ get; };
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 ExcessiveUsageLevel{ get; };
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 RecentEnergyUsage{ get; };
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt32 RecentEnergyUsageLevel{ get; };
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static event Windows.Foundation.EventHandler <Object>  RecentEnergyUsageIncreased;
+        [deprecated("Foreground Energy Manager has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static event Windows.Foundation.EventHandler <Object>  RecentEnergyUsageReturnedToLow;
+    }
+
+
+
+}
+namespace Windows.System.Power.Diagnostics
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [deprecated("Background Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Power.Diagnostics.IBackgroundEnergyDiagnosticsStatics", d7663702-d3a6-46e0-8f9b-50b95bb4f9c5)]
+    runtimeclass BackgroundEnergyDiagnostics
+    {
+        [deprecated("Background Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static Double DeviceSpecificConversionFactor{ get; };
+        [deprecated("Background Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt64 ComputeTotalEnergyUsage();
+        [deprecated("Background Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static void ResetTotalEnergyUsage();
+    }
+
+    [deprecated("Foreground Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.System.Power.Diagnostics.IForegroundEnergyDiagnosticsStatics", 23ca0917-cd07-4609-be15-8fe894c5e41e)]
+    runtimeclass ForegroundEnergyDiagnostics
+    {
+        [deprecated("Background Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static Double DeviceSpecificConversionFactor{ get; };
+        [deprecated("Background Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static UInt64 ComputeTotalEnergyUsage();
+        [deprecated("Background Energy Diagnostics has been deprecated. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        static void ResetTotalEnergyUsage();
+    }
+
+}

@@ -1,0 +1,73 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IWowDependencyGraphStatics", acc34ddc-8423-4710-8a88-a1eaa26897f8)]
+    [interface_name("Windows.Internal.StateRepository.IWowDependencyGraph", 90acc473-8dc2-439f-b720-840c55dc1aa2)]
+    [threading(both)]
+    runtimeclass WowDependencyGraph
+    {
+        WowDependencyGraph();
+        static Boolean Exists(Int64 wowDependencyGraphID);
+        static Boolean ExistsBySupplierPackage(Package SupplierPackage);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndDependentPackage(User User, Package DependentPackage);
+        static Boolean ExistsByUserAndDependentPackageAndDependencyType(User User, Package DependentPackage, DependencyGraphType DependencyType);
+        static Boolean ExistsByUserAndDependentPackageAndDependencyTypeAnd_WowDependencyGraphID(User User, Package DependentPackage, DependencyGraphType DependencyType, Int64 _WowDependencyGraphID);
+        static Boolean ExistsByUserAndDependentPackageAndIndex(User User, Package DependentPackage, Int32 Index);
+        static Boolean ExistsByUserAndDependentPackageAndSupplierPackage(User User, Package DependentPackage, Package SupplierPackage);
+        static Boolean ExistsByUserAndSupplierPackage(User User, Package SupplierPackage);
+        static Windows.Internal.StateRepository.WowDependencyGraph Get(Int64 wowDependencyGraphID);
+        static Windows.Internal.StateRepository.WowDependencyGraph TryGet(Int64 wowDependencyGraphID);
+        static Windows.Internal.StateRepository.WowDependencyGraph GetByUserAndDependentPackageAndSupplierPackage(User User, Package DependentPackage, Package SupplierPackage);
+        static Windows.Internal.StateRepository.WowDependencyGraph TryGetByUserAndDependentPackageAndSupplierPackage(User User, Package DependentPackage, Package SupplierPackage);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  FindBySupplierPackage(Package SupplierPackage);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  FindByUserAndDependentPackage(User User, Package DependentPackage);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  FindByUserAndDependentPackageAndDependencyType(User User, Package DependentPackage, DependencyGraphType DependencyType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  FindByUserAndDependentPackageAndDependencyTypeAnd_WowDependencyGraphID(User User, Package DependentPackage, DependencyGraphType DependencyType, Int64 _WowDependencyGraphID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  FindByUserAndDependentPackageAndIndex(User User, Package DependentPackage, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.WowDependencyGraph>  FindByUserAndSupplierPackage(User User, Package SupplierPackage);
+        Int64 _WowDependencyGraphID{ get; };
+        Int64 _WowDependencyGraphID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 DependentPackage{ get; };
+        Int64 DependentPackage{ set; };
+        Windows.Internal.StateRepository.Package GetDependentPackage();
+        void SetDependentPackage(Package value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Int64 SupplierPackage{ get; };
+        Int64 SupplierPackage{ set; };
+        Windows.Internal.StateRepository.Package GetSupplierPackage();
+        void SetSupplierPackage(Package value);
+        Windows.Internal.StateRepository.DependencyGraphType DependencyType{ get; };
+        Windows.Internal.StateRepository.DependencyGraphType DependencyType{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

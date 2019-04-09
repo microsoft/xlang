@@ -1,0 +1,50 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Internal.StateRepository.IProtocolLauncherInfo", 219c82b0-40f6-4f7e-a532-4373bb075ed7)]
+    [threading(both)]
+    runtimeclass ProtocolLauncherInfo
+    {
+        ProtocolLauncherInfo();
+        Int64 Protocol{ get; };
+        Int64 Protocol{ set; };
+        Windows.Internal.StateRepository.Protocol GetProtocol();
+        void SetProtocol(Protocol value);
+        Windows.Internal.StateRepository.ProtocolReturnResults ReturnResults{ get; };
+        Windows.Internal.StateRepository.ProtocolReturnResults ReturnResults{ set; };
+        Int64 Application{ get; };
+        Int64 Application{ set; };
+        Windows.Internal.StateRepository.Application GetApplication();
+        void SetApplication(Application value);
+        String ApplicationUserModelId{ get; };
+        String ApplicationUserModelId{ set; };
+        Boolean IsProgIDNull{ get; };
+        void SetProgIDToNull();
+        String ProgID{ get; };
+        String ProgID{ set; };
+        String PackageFamilyName{ get; };
+        String PackageFamilyName{ set; };
+        String PackageFullName{ get; };
+        String PackageFullName{ set; };
+        Windows.Internal.StateRepository.SupportedUsers SupportedUsers{ get; };
+        Windows.Internal.StateRepository.SupportedUsers SupportedUsers{ set; };
+        Windows.Internal.StateRepository.PackageOrigin PackageOrigin{ get; };
+        Windows.Internal.StateRepository.PackageOrigin PackageOrigin{ set; };
+        Windows.Internal.StateRepository.SupportedUsers EffectiveSupportedUsers{ get; };
+    }
+
+}

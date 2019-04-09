@@ -1,0 +1,89 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Storage.Streams
+{
+    [dualapipartition(0xa000006)]
+    [marshaling_behavior(agile)]
+    [muse(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Storage.Streams.IBufferFactory", 71af914d-c10f-484b-bc50-14bc623b3a27)]
+    [static_name("Windows.Storage.Streams.IBufferStatics", e901e65b-d716-475a-a90a-af7229b1e741)]
+    [threading(both)]
+    runtimeclass Buffer
+        : [default]Windows.Storage.Streams.IBuffer
+    {
+        [method_name( "Create" )] Buffer([range(0, 2147483647)]UInt32 capacity);
+        static Windows.Storage.Streams.Buffer CreateCopyFromMemoryBuffer(Windows.Foundation.IMemoryBuffer input);
+        static Windows.Foundation.MemoryBuffer CreateMemoryBufferOverIBuffer(IBuffer input);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(905a0fe0-bc53-11df-8c49-001e4fc686da)]
+    interface IBuffer
+    {
+        UInt32 Capacity{ get; };
+        UInt32 Length{ get; };
+        UInt32 Length{ set; };
+    };
+
+
+    [uuid(905a0fe1-bc53-11df-8c49-001e4fc686da)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IRandomAccessStream requires Windows.Foundation.IClosable, Windows.Storage.Streams.IInputStream, Windows.Storage.Streams.IOutputStream
+    {
+        UInt64 Size{ get; };
+        UInt64 Size{ set; };
+        Windows.Storage.Streams.IInputStream GetInputStreamAt(UInt64 position);
+        Windows.Storage.Streams.IOutputStream GetOutputStreamAt(UInt64 position);
+        UInt64 Position{ get; };
+        void Seek(UInt64 position);
+        Windows.Storage.Streams.IRandomAccessStream CloneStream();
+        Boolean CanRead{ get; };
+        Boolean CanWrite{ get; };
+    };
+
+    [uuid(905a0fe2-bc53-11df-8c49-001e4fc686da)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IInputStream requires Windows.Foundation.IClosable
+    {
+        [remote_sync]Windows.Foundation.IAsyncOperationWithProgress <Windows.Storage.Streams.IBuffer, UInt32>  ReadAsync(IBuffer buffer, UInt32 count, InputStreamOptions options);
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum InputStreamOptions
+    {
+        None,
+        Partial,
+        ReadAhead,
+    };
+
+    [uuid(905a0fe6-bc53-11df-8c49-001e4fc686da)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IOutputStream requires Windows.Foundation.IClosable
+    {
+        [remote_sync]Windows.Foundation.IAsyncOperationWithProgress <UInt32, UInt32>  WriteAsync(IBuffer buffer);
+        [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  FlushAsync();
+    };
+
+    [uuid(97d098a5-3b99-4de9-88a5-e11d2f50c795)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IContentTypeProvider
+    {
+        String ContentType{ get; };
+    };
+
+    [uuid(cc254827-4b3d-438f-9232-10c76bc7e038)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IRandomAccessStreamWithContentType requires Windows.Storage.Streams.IRandomAccessStream, Windows.Foundation.IClosable, Windows.Storage.Streams.IInputStream, Windows.Storage.Streams.IOutputStream, Windows.Storage.Streams.IContentTypeProvider
+    {
+    };
+
+}

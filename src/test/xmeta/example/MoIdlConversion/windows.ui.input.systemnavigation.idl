@@ -1,0 +1,49 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Core.IBackRequestedEventArgs", d603d28a-e411-4a4e-ba41-6a327a8675bc)]
+    runtimeclass BackRequestedEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AppViewBackButtonVisibility
+    {
+        Visible,
+        Collapsed,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        Disabled,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Core.ISystemNavigationManagerStatics", dc52b5ce-bee0-4305-8c54-68228ed683b5)]
+    [interface_name("Windows.UI.Core.ISystemNavigationManager", 93023118-cf50-42a6-9706-69107fa122e1)]
+    runtimeclass SystemNavigationManager
+    {
+        static Windows.UI.Core.SystemNavigationManager GetForCurrentView();
+        event Windows.Foundation.EventHandler <Windows.UI.Core.BackRequestedEventArgs>  BackRequested;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Core.ISystemNavigationManager2", 8c510401-67be-49ae-9509-671c1e54a389)]
+        {
+            Windows.UI.Core.AppViewBackButtonVisibility AppViewBackButtonVisibility{ get; };
+            Windows.UI.Core.AppViewBackButtonVisibility AppViewBackButtonVisibility{ set; };
+        }
+    }
+
+
+}

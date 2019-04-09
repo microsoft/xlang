@@ -1,0 +1,102 @@
+
+
+
+
+
+
+
+namespace Windows.Graphics.Display.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum HdmiDisplayColorSpace
+    {
+        RgbLimited,
+        RgbFull,
+        BT2020,
+        BT709,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum HdmiDisplayPixelEncoding
+    {
+        Rgb444,
+        Ycc444,
+        Ycc422,
+        Ycc420,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum HdmiDisplayHdrOption
+    {
+        None,
+        EotfSdr,
+        Eotf2084,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        DolbyVisionLowLatency,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    struct HdmiDisplayHdr2086Metadata
+    {
+        UInt16 RedPrimaryX;
+        UInt16 RedPrimaryY;
+        UInt16 GreenPrimaryX;
+        UInt16 GreenPrimaryY;
+        UInt16 BluePrimaryX;
+        UInt16 BluePrimaryY;
+        UInt16 WhitePointX;
+        UInt16 WhitePointY;
+        UInt16 MaxMasteringLuminance;
+        UInt16 MinMasteringLuminance;
+        UInt16 MaxContentLightLevel;
+        UInt16 MaxFrameAverageLightLevel;
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.Graphics.Display.Core.IHdmiDisplayMode", 0c06d5ad-1b90-4f51-9981-ef5a1c0ddf66)]
+    runtimeclass HdmiDisplayMode
+    {
+        UInt32 ResolutionWidthInRawPixels{ get; };
+        UInt32 ResolutionHeightInRawPixels{ get; };
+        Double RefreshRate{ get; };
+        Boolean StereoEnabled{ get; };
+        UInt16 BitsPerPixel{ get; };
+        Boolean IsEqual(HdmiDisplayMode mode);
+        Windows.Graphics.Display.Core.HdmiDisplayColorSpace ColorSpace{ get; };
+        Windows.Graphics.Display.Core.HdmiDisplayPixelEncoding PixelEncoding{ get; };
+        Boolean IsSdrLuminanceSupported{ get; };
+        Boolean IsSmpte2084Supported{ get; };
+        Boolean Is2086MetadataSupported{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Graphics.Display.Core.IHdmiDisplayMode2", 07cd4e9f-4b3c-42b8-84e7-895368718af2)]
+        {
+            Boolean IsDolbyVisionLowLatencySupported{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Graphics.Display.Core.IHdmiDisplayInformationStatics", 6ce6b260-f42a-4a15-914c-7b8e2a5a65df)]
+    [interface_name("Windows.Graphics.Display.Core.IHdmiDisplayInformation", 130b3c0a-f565-476e-abd5-ea05aee74c69)]
+    [threading(both)]
+    runtimeclass HdmiDisplayInformation
+    {
+        static Windows.Graphics.Display.Core.HdmiDisplayInformation GetForCurrentView();
+        Windows.Foundation.Collections.IVectorView <Windows.Graphics.Display.Core.HdmiDisplayMode>  GetSupportedDisplayModes();
+        Windows.Graphics.Display.Core.HdmiDisplayMode GetCurrentDisplayMode();
+        Windows.Foundation.IAsyncAction SetDefaultDisplayModeAsync();
+        [method_name("RequestSetCurrentDisplayModeAsync")] Windows.Foundation.IAsyncOperation <Boolean>  RequestSetCurrentDisplayModeAsync(HdmiDisplayMode mode);
+        [method_name("RequestSetCurrentDisplayModeWithHdrAsync")] Windows.Foundation.IAsyncOperation <Boolean>  RequestSetCurrentDisplayModeAsync(HdmiDisplayMode mode, HdmiDisplayHdrOption hdrOption);
+        [method_name("RequestSetCurrentDisplayModeWithHdrAndMetadataAsync")] Windows.Foundation.IAsyncOperation <Boolean>  RequestSetCurrentDisplayModeAsync(HdmiDisplayMode mode, HdmiDisplayHdrOption hdrOption, HdmiDisplayHdr2086Metadata hdrMetadata);
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.Core.HdmiDisplayInformation, Object>  DisplayModesChanged;
+    }
+
+
+}

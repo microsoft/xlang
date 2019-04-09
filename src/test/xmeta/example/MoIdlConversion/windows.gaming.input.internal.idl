@@ -1,0 +1,693 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Gaming.Input.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum ForceFeedbackEffectKind
+    {
+        Unknown,
+        ConditionSpring,
+        ConditionDamper,
+        ConditionInertia,
+        ConditionFriction,
+        Constant,
+        PeriodicSquareWave,
+        PeriodicSineWave,
+        PeriodicTriangleWave,
+        PeriodicSawtoothWaveUp,
+        PeriodicSawtoothWaveDown,
+        Ramp,
+        NativeSpring,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GameControllerBatteryChargingState
+    {
+        Unknown,
+        Inactive,
+        Active,
+        Error,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GameControllerBatteryKind
+    {
+        Unknown,
+        None,
+        Standard,
+        Rechargeable,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GameControllerBatteryLevel
+    {
+        Unknown,
+        Critical,
+        Low,
+        Medium,
+        Full,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GameControllerKind
+    {
+        None,
+        ArcadeStick,
+        FlightStick,
+        Gamepad,
+        RacingWheel,
+        RawGameController,
+        UINavigationController,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GameControllerTouchSensorShape
+    {
+        Point,
+        Linear,
+        Radial,
+        Circular,
+        Rectangular,
+    };
+
+    [flags]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipCaptureInputs
+    {
+        None,
+        MenuButton = 4,
+        ViewButton = 8,
+        AButton = 16,
+        BButton = 32,
+        XButton = 64,
+        YButton = 128,
+        DPadUpButton = 256,
+        DPadDownButton = 512,
+        DPadLeftButton = 1024,
+        DPadRightButton = 2048,
+        LeftShoulderButton = 4096,
+        RightShoulderButton = 8192,
+        LeftThumbstickButton = 16384,
+        RightThumbstickButton = 32768,
+        LeftTrigger = 65536,
+        RightTrigger = 131072,
+        LeftThumbstickAxes = 262144,
+        RightThumbstickAxes = 524288,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipDeviceFunction
+    {
+        Vibration = 1,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipGameControllerIRLedState
+    {
+        Off,
+        On,
+        BitwiseBlink = 4,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipGameControllerNexusLedState
+    {
+        Off,
+        On,
+        BlinkFast,
+        BlinkSlow,
+        BlinkCharge,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipIRCode
+    {
+        Invalid = -1,
+        Number_0,
+        Number_1,
+        Number_2,
+        Number_3,
+        Number_4,
+        Number_5,
+        Number_6,
+        Number_7,
+        Number_8,
+        Number_9,
+        Clear,
+        Enter,
+        Mute = 14,
+        Info,
+        VolumeUp,
+        VolumeDown,
+        ChannelUp,
+        ChannelDown,
+        FastForward,
+        Rewind,
+        Play,
+        Record,
+        Pause,
+        Stop,
+        SkipForward,
+        SkipBack,
+        Pound,
+        Decimal,
+        Up,
+        Down,
+        Left,
+        Right,
+        Ok,
+        Back,
+        DvdRootMenu,
+        Replay,
+        Guide,
+        LiveTV = 70,
+        Recordings = 72,
+        Subtitle = 77,
+        Nexus = 100,
+        B,
+        A,
+        Y,
+        X,
+        View = 110,
+        Menu,
+        PlayPause,
+        Movies,
+        TVShows,
+        AppChannels = 116,
+        TVListings,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipIRStatus
+    {
+        None,
+        KeyPress,
+        KeyRepeat,
+        UnknownRepeat,
+        KeyRelease,
+        Overflow = 129,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipMessageDataClass
+    {
+        Command,
+        LowLatency,
+        StandardLatency,
+        Audio,
+        Media,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum GipMessageDataKind
+    {
+        Unknown,
+        Custom,
+        Audio,
+        Security,
+        Gip,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum HapticsFeedbackCommand
+    {
+        PlayWaveform,
+        PlayWaveformWithIntensity,
+        PlayWaveformWithDuration,
+        PlayWaveformWithPlayCount,
+        StopWaveform,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum XusbGameControllerXenonLedState
+    {
+        Off,
+        Blink,
+        SwitchBlink1,
+        SwitchBlink2,
+        SwitchBlink3,
+        SwitchBlink4,
+        On1,
+        On2,
+        On3,
+        On4,
+        Cycle,
+        FastBlink,
+        SlowBlink,
+        FlipFlop,
+        AllBlink,
+    };
+
+    [flags]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    enum XusbGamepadInputs
+    {
+        None,
+        StartButton,
+        BackButton,
+        AButton = 4,
+        BButton = 8,
+        XButton = 16,
+        YButton = 32,
+        DPadUpButton = 64,
+        DPadDownButton = 128,
+        DPadLeftButton = 256,
+        DPadRightButton = 512,
+        LeftShoulderButton = 1024,
+        RightShoulderButton = 2048,
+        LeftThumbstickButton = 4096,
+        RightThumbstickButton = 8192,
+        LeftTrigger = 4194304,
+        RightTrigger = 8388608,
+        LeftThumbstickXAxis = 16777216,
+        LeftThumbstickYAxis = 33554432,
+        RightThumbstickXAxis = 67108864,
+        RightThumbstickYAxis = 134217728,
+        BindingButton = 536870912,
+        XenonButton = 1073741824,
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct ForceFeedbackEffectData
+    {
+        ForceFeedbackEffectKind EffectKind;
+        Windows.Foundation.Numerics.Vector3 FirstVector;
+        Windows.Foundation.Numerics.Vector3 SecondVector;
+        Single PositiveCoefficient;
+        Single NegativeCoefficient;
+        Single MaxPositiveMagnitude;
+        Single MaxNegativeMagnitude;
+        Single DeadZone;
+        Single Frequency;
+        Single Phase;
+        Single Bias;
+        Single AttackGain;
+        Single SustainGain;
+        Single ReleaseGain;
+        Double Gain;
+        Windows.Foundation.TimeSpan StartDelay;
+        Windows.Foundation.TimeSpan AttackDuration;
+        Windows.Foundation.TimeSpan SustainDuration;
+        Windows.Foundation.TimeSpan ReleaseDuration;
+        UInt32 RepeatCount;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct GameControllerTouchReading
+    {
+        Windows.Foundation.Rect ContactRect;
+        Windows.Foundation.Point Position;
+        Double Pressure;
+        Double Range;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct GipAudioFormat
+    {
+        UInt32 CaptureChannels;
+        UInt32 CaptureSampleFrequency;
+        UInt32 RenderChannels;
+        UInt32 RenderSampleFrequency;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct GipMessageProperties
+    {
+        GipMessageDataClass DataClass;
+        GipMessageDataKind DataKind;
+        UInt8 MessageId;
+        UInt16 MessageLength;
+        Boolean IsBigEndian;
+        Boolean IsDownstream;
+        Boolean IsReliable;
+        Boolean IsSequenced;
+        Boolean IsUpstream;
+        UInt16 Period;
+        UInt16 PersistenceTimeout;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct GipSystemMessageProperties
+    {
+        GipMessageDataClass DataClass;
+        UInt8 MessageId;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct HapticsCommandParameters
+    {
+        HapticsFeedbackCommand Command;
+        UInt32 FeedbackIndex;
+        Int32 PlayCount;
+        Double Intensity;
+        Windows.Foundation.TimeSpan DurationOrReplayInterval;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct HapticsControllerProperties
+    {
+        String Id;
+        Boolean IsIntensitySupported;
+        Boolean IsPlayCountSupported;
+        Boolean IsPlayDurationSupported;
+        Boolean IsReplayPauseIntervalSupported;
+        UInt32 SupportedFeedbackCount;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct HapticsFeedbackProperties
+    {
+        Windows.Foundation.TimeSpan Duration;
+        UInt16 Waveform;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct SyntheticGameControllerProviderProperties
+    {
+        String Description;
+        String ProviderId;
+        String ParentProviderId;
+        UInt16 HardwareVendorId;
+        UInt16 HardwareProductId;
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo HardwareVersionInfo;
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo FirmwareVersionInfo;
+        UInt32 AxisCount;
+        UInt32 ButtonCount;
+        UInt32 SwitchCount;
+        UInt32 TouchCount;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct TouchSensorProperties
+    {
+        Double AspectRatio;
+        Double MaxPressureInNewtons;
+        Double MaxRangeInMillimeters;
+        GameControllerTouchSensorShape Shape;
+        Boolean IsContactRectSupported;
+        UInt8 TouchPointCount;
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    struct XusbGameControllerDeviceCapabilities
+    {
+        Windows.Gaming.Input.Custom.XusbDeviceType Type;
+        Windows.Gaming.Input.Custom.XusbDeviceSubtype Subtype;
+        XusbGamepadInputs Inputs;
+        Boolean IsForceFeedbackSupported;
+        Boolean IsNavigationSupported;
+        Boolean IsPMDSupported;
+        Boolean IsVoiceSupported;
+        Boolean HasLowFrequencyVibrationMotor;
+        Boolean HasHighFrequencyVibrationMotor;
+    };
+
+    [uuid(d08de4e9-52b5-4dc7-87bc-9ee392d9d734)]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    interface IForceFeedbackEffectPrivate
+    {
+        Windows.Gaming.Input.Internal.ForceFeedbackEffectData EffectData{ get; };
+        void ReleaseOwnership(IForceFeedbackMotorPrivate value);
+        void TakeOwnership(IForceFeedbackMotorPrivate value);
+    };
+
+    [uuid(ff3b9be1-30b9-41a4-b3b8-451720afa077)]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    interface IForceFeedbackMotorPrivate
+    {
+        Windows.Gaming.Input.ForceFeedback.ForceFeedbackEffectState GetLoadedEffectState(IForceFeedbackEffectPrivate effect);
+        void StartLoadedEffect(IForceFeedbackEffectPrivate effect);
+        void StopLoadedEffect(IForceFeedbackEffectPrivate effect);
+        void UpdateLoadedEffect(IForceFeedbackEffectPrivate effect);
+        void Disconnect();
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [uuid(a739d9d1-7ce6-463f-b621-1b7ece835519)]
+    interface IGameControllerFactoryManagerStaticsPrivate
+    {
+        void OnProviderAdded(Windows.Gaming.Input.Custom.IGameControllerProvider value);
+        void OnProviderRemoved(Windows.Gaming.Input.Custom.IGameControllerProvider value);
+        void RegisterCustomFactory(Windows.Gaming.Input.Custom.ICustomGameControllerFactory factory, Guid interfaceId, UInt16 hardwareVendorId, UInt16 hardwareProductId, Windows.Gaming.Input.Custom.XusbDeviceType xusbType, Windows.Gaming.Input.Custom.XusbDeviceSubtype xusbSubtype, GameControllerKind gameControllerKind);
+        Windows.Gaming.Input.IGameController TryGetGameControllerWithInterfaceForProvider(Guid interfaceId, Windows.Gaming.Input.Custom.IGameControllerProvider provider);
+    };
+
+    [uuid(debcfefe-f763-4670-940b-57aae2b143ff)]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    interface IGameControllerPrivate requires Windows.Gaming.Input.IGameController
+    {
+        Windows.Gaming.Input.Custom.IGameControllerProvider Provider{ get; };
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [uuid(dfb528ea-3127-493d-8c9b-35320e1c1003)]
+    interface IGameControllerProviderInput
+    {
+        Boolean RacingWheelHasClutch{ get; };
+        Boolean RacingWheelHasHandbrake{ get; };
+        Boolean RacingWheelHasPatternShifter{ get; };
+        Int32 RacingWheelMaxPatternShifterGear{ get; };
+        Double RacingWheelMaxWheelAngle{ get; };
+        Int32 RawGameControllerAxisCount{ get; };
+        Int32 RawGameControllerButtonCount{ get; };
+        Int32 RawGameControllerSwitchCount{ get; };
+        Windows.Gaming.Input.GameControllerButtonLabel GetArcadeStickButtonLabel(Windows.Gaming.Input.ArcadeStickButtons button);
+        Windows.Gaming.Input.ArcadeStickReading GetCurrentArcadeStickReading();
+        Windows.Gaming.Input.FlightStickReading GetCurrentFlightStickReading();
+        Windows.Gaming.Input.GamepadReading GetCurrentGamepadReading();
+        Windows.Gaming.Input.RacingWheelReading GetCurrentRacingWheelReading();
+        [return_name("timestamp")] UInt64 GetCurrentRawGameControllerReading(ref Boolean[] buttonArray, ref Windows.Gaming.Input.GameControllerSwitchPosition[] switchArray, ref Double[] axisArray);
+        Windows.Gaming.Input.UINavigationReading GetCurrentUINavigationReading();
+        Windows.Gaming.Input.GameControllerButtonLabel GetFlightStickButtonLabel(Windows.Gaming.Input.FlightStickButtons button);
+        Windows.Gaming.Input.GameControllerSwitchKind GetFlightStickHatSwitchKind();
+        Windows.Gaming.Input.GameControllerButtonLabel GetGamepadButtonLabel(Windows.Gaming.Input.GamepadButtons button);
+        Windows.Gaming.Input.GameControllerButtonLabel GetRacingWheelButtonLabel(Windows.Gaming.Input.RacingWheelButtons button);
+        Windows.Gaming.Input.GameControllerButtonLabel GetRawGameControllerAxisLabel(Int32 axisIndex);
+        Windows.Gaming.Input.GameControllerButtonLabel GetRawGameControllerButtonLabel(Int32 buttonIndex);
+        Windows.Gaming.Input.GameControllerSwitchKind GetRawGameControllerSwitchKind(Int32 switchIndex);
+        Windows.Gaming.Input.GameControllerButtonLabel GetRawGameControllerSwitchLabel(Int32 switchIndex, Windows.Gaming.Input.GameControllerSwitchPosition switchPosition);
+        Windows.Gaming.Input.GameControllerButtonLabel GetRequiredUINavigationButtonLabel(Windows.Gaming.Input.RequiredUINavigationButtons button);
+        Windows.Gaming.Input.GameControllerButtonLabel GetOptionalUINavigationButtonLabel(Windows.Gaming.Input.OptionalUINavigationButtons button);
+        Boolean IsControllerKindSupported(GameControllerKind controllerKind);
+    };
+
+
+    [uuid(4f5ab6e9-0a5a-43f8-950d-752c10784517)]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    interface IGameControllerProviderManagerStaticsPrivate
+    {
+        Windows.Gaming.Input.Internal.SyntheticGameControllerProvider CreateSyntheticProvider(SyntheticGameControllerProviderProperties providerProperties, Windows.Gaming.Input.GameControllerSwitchKind[] switchKindArray, TouchSensorProperties[] touchSensorArray, HapticsControllerProperties[] hapticsControllerArray, HapticsFeedbackProperties[] hapticsFeedbackArray);
+        void OnProviderAdded(Windows.Gaming.Input.Custom.IGameControllerProvider value);
+        void OnProviderRemoved(Windows.Gaming.Input.Custom.IGameControllerProvider value);
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.Input.Internal.ISyntheticGameControllerProvider", 69c1c221-4c56-40bb-b6ab-017bf1efc9f2)]
+    runtimeclass SyntheticGameControllerProvider
+        : Windows.Gaming.Input.Custom.IGameControllerProvider
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Gaming.Input.Internal.SyntheticGameControllerProvider, Windows.Gaming.Input.Internal.HapticsCommandParameters>  HapticsCommandReceived;
+        event Windows.Foundation.EventHandler <Windows.Gaming.Input.Internal.SyntheticGameControllerProvider>  PowerOffRequested;
+        void Disconnect();
+        void SetBatteryReport(Windows.Devices.Power.BatteryReport value);
+        void SetConnectionState(Boolean isInStandbyMode, Boolean isUserActive, Boolean isWireless);
+        void SetCurrentReading(Boolean[] buttonArray, Windows.Gaming.Input.GameControllerSwitchPosition[] switchArray, Double[] axisArray, GameControllerTouchReading[] touchArray);
+    }
+
+    [uuid(c3542377-1ea7-4454-8deb-8aa6070db645)]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    interface IGameControllerProviderPrivate requires Windows.Gaming.Input.Custom.IGameControllerProvider
+    {
+        Windows.Gaming.Input.Internal.GameControllerBatteryChargingState BatteryChargingState{ get; };
+        Windows.Gaming.Input.Internal.GameControllerBatteryKind BatteryKind{ get; };
+        Windows.Gaming.Input.Internal.GameControllerBatteryLevel BatteryLevel{ get; };
+        String Description{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Haptics.SimpleHapticsController>  HapticFeedbackMotors{ get; };
+        Boolean IsConnectionWireless{ get; };
+        Boolean IsInStandbyMode{ get; };
+        Boolean IsSyntheticDevice{ get; };
+        Boolean IsUserActive{ get; };
+        String NonRoamableId{ get; };
+        String ParentProviderId{ get; };
+        String ProviderId{ get; };
+        Windows.Gaming.Input.ForceFeedback.ForceFeedbackMotor RacingWheelMotor{ get; };
+        void PowerOff();
+        void RegisterInputSink(Windows.Gaming.Input.Custom.IGameControllerInputSink inputSink);
+        void SetGamepadVibration(Windows.Gaming.Input.GamepadVibration vibration);
+        void UnregisterInputSink(Windows.Gaming.Input.Custom.IGameControllerInputSink inputSink);
+    };
+
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [uuid(f6d99cef-3636-46f4-a0a9-00751df46bcb)]
+    interface IGipGameControllerProviderPrivate requires Windows.Gaming.Input.Internal.IGameControllerProviderPrivate, Windows.Gaming.Input.Custom.IGameControllerProvider
+    {
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo DriverProtocolVersionInfo{ get; };
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo FirmwareUpdateProtocolVersionInfo{ get; };
+        UInt64 GipDeviceId{ get; };
+        Boolean IsConnectionEncrypted{ get; };
+        Boolean IsConnectionValidated{ get; };
+        Boolean IsFirmwareBetaUpdateAvailable{ get; };
+        Boolean IsFirmwareCorrupted{ get; };
+        Boolean IsFirmwareUpdateAvailable{ get; };
+        Boolean IsFirmwareUpdateMandatory{ get; };
+        Windows.Gaming.Input.Internal.GipDeviceMetadata Metadata{ get; };
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo SecurityProtocolVersionInfo{ get; };
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo WirelessProtocolVersionInfo{ get; };
+        Windows.Gaming.Input.Internal.GipCaptureInputs GetCaptureInputs();
+        Windows.Gaming.Input.IGameController GetCopilot();
+        Boolean GetDeviceFunctionState(GipDeviceFunction function);
+        Boolean HasCopilot();
+        Boolean IsCopilot(IGipGameControllerProviderPrivate pilot);
+        Boolean IsPilot(IGipGameControllerProviderPrivate copilot);
+        void JoinCopilotGroup(IGipGameControllerProviderPrivate pilot);
+        void LeaveCopilotGroup();
+        void SetCaptureInputs(GipCaptureInputs value);
+        void SetCopilot(Windows.Gaming.Input.IGameController controller);
+        void SetDeviceFunctionState(GipDeviceFunction function, Boolean value);
+        void SetIRLedState(GipGameControllerIRLedState state, UInt32 bitwisePattern);
+        void SetNexusLedState(GipGameControllerNexusLedState state);
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.Input.Internal.IGipDeviceMetadata", f24b4acb-9168-4492-a175-9c73b2d3ee0c)]
+    runtimeclass GipDeviceMetadata
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.Input.Internal.GipMessageProperties>  Messages{ get; };
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo MetadataVersion{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  PreferredTypes{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.Input.Internal.GipAudioFormat>  SupportedAudioFormats{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.Input.Custom.GameControllerVersionInfo>  SupportedFirmwareVersions{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt8>  SupportedHidDescriptor{ get; };
+        Windows.Foundation.Collections.IVectorView <Guid>  SupportedInterfaces{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.Input.Internal.GipSystemMessageProperties>  SupportedSystemMessageIdsIn{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.Input.Internal.GipSystemMessageProperties>  SupportedSystemMessageIdsOut{ get; };
+        Boolean IsInterfaceSupported(Guid interfaceId);
+    }
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [uuid(075ddbfa-cc84-4137-8ce7-aa552fea8fe2)]
+    interface IHidGameControllerProviderPrivate requires Windows.Gaming.Input.Internal.IGameControllerProviderPrivate, Windows.Gaming.Input.Custom.IGameControllerProvider
+    {
+        UInt32 InputBufferCount{ get; };
+        String ManufacturerString{ get; };
+        UInt16 MaxFeatureReportLength{ get; };
+        UInt16 MaxInputReportLength{ get; };
+        UInt16 MaxOutputReportLength{ get; };
+        String ProductString{ get; };
+        String SerialNumberString{ get; };
+        [return_name("value")] String TryGetIndexedString(UInt32 index, out Boolean found);
+    };
+
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.Input.Internal.IGameControllerTouchSensorProperties", 308f8e2e-00d9-4e12-848a-b02d10bb80be)]
+    runtimeclass GameControllerTouchSensorProperties
+    {
+        Double AspectRatio{ get; };
+        UInt32 Id{ get; };
+        Boolean IsContactRectSupported{ get; };
+        Double MaxPressureInNewtons{ get; };
+        Double MaxRangeInMillimeters{ get; };
+        Windows.Gaming.Input.Internal.GameControllerTouchSensorShape Shape{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [static_name("Windows.Gaming.Input.Internal.IRawTouchControllerStatics", e7283daa-b58d-42dc-8208-45accf7ee785)]
+    [interface_name("Windows.Gaming.Input.Internal.IRawTouchController", 9d0219ef-2db0-4496-bb98-ee1f142c216e)]
+    [threading(both)]
+    runtimeclass RawTouchController
+        : Windows.Gaming.Input.IGameController
+        , Windows.Gaming.Input.IGameControllerBatteryInfo
+    {
+        static event Windows.Foundation.EventHandler <Windows.Gaming.Input.Internal.RawTouchController>  RawTouchControllerAdded;
+        static event Windows.Foundation.EventHandler <Windows.Gaming.Input.Internal.RawTouchController>  RawTouchControllerRemoved;
+        static Windows.Foundation.Collections.IVectorView <Windows.Gaming.Input.Internal.RawTouchController>  RawTouchControllers{ get; };
+        static Windows.Gaming.Input.Internal.RawTouchController FromGameController(Windows.Gaming.Input.IGameController gameController);
+        Int32 AxisCount{ get; };
+        Int32 ButtonCount{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.Input.ForceFeedback.ForceFeedbackMotor>  ForceFeedbackMotors{ get; };
+        UInt16 HardwareProductId{ get; };
+        UInt16 HardwareVendorId{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Haptics.SimpleHapticsController>  SimpleHapticsControllers{ get; };
+        Int32 SwitchCount{ get; };
+        Int32 TouchCount{ get; };
+        Windows.Gaming.Input.GameControllerButtonLabel GetButtonLabel(Int32 buttonIndex);
+        [return_name("timestamp")] UInt64 GetCurrentReading(ref Boolean[] buttonArray, ref Windows.Gaming.Input.GameControllerSwitchPosition[] switchArray, ref Double[] axisArray, ref GameControllerTouchReading[] touchArray);
+        Windows.Gaming.Input.GameControllerSwitchKind GetSwitchKind(Int32 switchIndex);
+        Windows.Gaming.Input.Internal.GameControllerTouchSensorProperties GetTouchSensorProperties(Int32 touchIndex);
+    }
+
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [uuid(ac104f57-79bd-4af3-9675-5e667484818b)]
+    interface IXusbGameControllerProviderPrivate requires Windows.Gaming.Input.Internal.IGameControllerProviderPrivate, Windows.Gaming.Input.Custom.IGameControllerProvider
+    {
+        Windows.Gaming.Input.Internal.XusbGameControllerDeviceCapabilities Capabilities{ get; };
+        UInt64 XusbDeviceId{ get; };
+        Windows.Gaming.Input.Custom.GameControllerVersionInfo DriverProtocolVersionInfo{ get; };
+        Windows.Gaming.Input.Internal.XusbGameControllerXenonLedState GetXenonLedState();
+        void SetXenonLedState(XusbGameControllerXenonLedState value);
+    };
+
+
+    [webhosthidden]
+    [uuid(bce39d66-51af-4b1f-818a-74b934239653)]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    interface IGipGameControllerInputSinkPrivate requires Windows.Gaming.Input.Custom.IGipGameControllerInputSink, Windows.Gaming.Input.Custom.IGameControllerInputSink
+    {
+        void OnIRInputReceived(UInt64 timestamp, GipIRCode irCode, GipIRStatus status);
+    };
+
+    [webhosthidden]
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [uuid(91b59fa5-931c-47c3-807f-95ff862bcdf4)]
+    interface IForceFeedback
+    {
+        void SetGain(Double value);
+        UInt32 State{ get; };
+        UInt32 Load{ get; };
+        void DownloadEffect(IForceFeedbackEffectPrivate effect);
+        void DestroyEffect(IForceFeedbackEffectPrivate effect);
+        void StartEffect(IForceFeedbackEffectPrivate effect);
+        void StopEffect(IForceFeedbackEffectPrivate effect);
+        void Pause();
+        void Continue();
+        void StopAll();
+        void TurnOn();
+        void TurnOff();
+        void Reset();
+        void Disconnect();
+        void GetEffectState(IForceFeedbackEffectPrivate effect, out Windows.Gaming.Input.ForceFeedback.ForceFeedbackEffectState state);
+    };
+
+    [contract(Windows.Gaming.Input.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Gaming.Input.Internal.IGameControllerProviderManagerStatics", 7cccd809-3208-4da2-8bbf-15850ccb2e54)]
+    [threading(both)]
+    runtimeclass GameControllerProviderManager
+    {
+    }
+
+}

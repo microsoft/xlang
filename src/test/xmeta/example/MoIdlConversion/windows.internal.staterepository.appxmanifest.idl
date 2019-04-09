@@ -1,0 +1,47 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IAppxManifestStatics", 5fc148b1-ad6b-4d3d-b11d-e881979c15f4)]
+    [interface_name("Windows.Internal.StateRepository.IAppxManifest", 79ba6b5e-4ab0-48a0-b576-91153efd3388)]
+    [threading(both)]
+    runtimeclass AppxManifest
+    {
+        AppxManifest();
+        static Boolean Exists(Int64 appxManifestID);
+        static Boolean ExistsByPackage(Package Package);
+        static Windows.Internal.StateRepository.AppxManifest Get(Int64 appxManifestID);
+        static Windows.Internal.StateRepository.AppxManifest TryGet(Int64 appxManifestID);
+        static Windows.Internal.StateRepository.AppxManifest GetByPackage(Package Package);
+        static Windows.Internal.StateRepository.AppxManifest TryGetByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppxManifest>  Find();
+        Int64 _AppxManifestID{ get; };
+        Int64 _AppxManifestID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        String Xml{ get; };
+        String Xml{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

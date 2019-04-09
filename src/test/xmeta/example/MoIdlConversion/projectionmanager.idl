@@ -1,0 +1,36 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.ViewManagement
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.ViewManagement.IProjectionManagerStatics", b65f913d-e2f0-4ffd-ba95-34241647e45c)]
+    [threading(both)]
+    runtimeclass ProjectionManager
+    {
+        [method_name("StartProjectingAsync")] static Windows.Foundation.IAsyncAction StartProjectingAsync(Int32 projectionViewId, Int32 anchorViewId);
+        static Windows.Foundation.IAsyncAction SwapDisplaysForViewsAsync(Int32 projectionViewId, Int32 anchorViewId);
+        static Windows.Foundation.IAsyncAction StopProjectingAsync(Int32 projectionViewId, Int32 anchorViewId);
+        static Boolean ProjectionDisplayAvailable{ get; };
+        static event Windows.Foundation.EventHandler <Object>  ProjectionDisplayAvailableChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.UI.ViewManagement.IProjectionManagerStatics2", f33d2f43-2749-4cde-b977-c0c41e7415d1)]
+        {
+            [method_name("StartProjectingWithDeviceInfoAsync")] static Windows.Foundation.IAsyncAction StartProjectingAsync(Int32 projectionViewId, Int32 anchorViewId, Windows.Devices.Enumeration.DeviceInformation displayDeviceInfo);
+            [method_name("RequestStartProjectingAsync")] static Windows.Foundation.IAsyncOperation <Boolean>  RequestStartProjectingAsync(Int32 projectionViewId, Int32 anchorViewId, Windows.Foundation.Rect selection);
+            [method_name("RequestStartProjectingWithPlacementAsync")] static Windows.Foundation.IAsyncOperation <Boolean>  RequestStartProjectingAsync(Int32 projectionViewId, Int32 anchorViewId, Windows.Foundation.Rect selection, Windows.UI.Popups.Placement prefferedPlacement);
+            static String GetDeviceSelector();
+        }
+    }
+
+}

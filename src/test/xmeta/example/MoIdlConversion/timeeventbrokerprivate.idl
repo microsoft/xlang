@@ -1,0 +1,41 @@
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    struct AlarmTriggerOptions
+    {
+        Boolean Coalesceable;
+        UInt32 SuggestedCoalescingDelayMs;
+        UInt32 MaxCoalescingDelayMs;
+        UInt32 ExecutionTimeOverrideMs;
+        UInt32 EventTypeIdOverride;
+    };
+
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.ApplicationModel.Background.InternalContract, 1)]
+    [constructor_name("Windows.ApplicationModel.Background.IAlarmTriggerFactory", 4725971e-c31d-4857-b33b-50779cf665c1)]
+    [interface_name("Windows.ApplicationModel.Background.IAlarmTrigger", fbdc7d76-1b12-4f8e-b121-64f1b94a2cfb)]
+    [threading(mta)]
+    runtimeclass AlarmTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] AlarmTrigger(Windows.Foundation.DateTime initialDueTime, UInt32 periodInSeconds, UInt32 windowInSeconds, Boolean wakeEnabled, Boolean runDuringBatterySaver);
+        void SetTriggerOptions(AlarmTriggerOptions options);
+        Windows.Foundation.DateTime InitialDueTime{ get; };
+        UInt32 PeriodInSeconds{ get; };
+        Boolean RunDuringBatterySaver{ get; };
+        Boolean WakeEnabled{ get; };
+        UInt32 WindowInSeconds{ get; };
+        Windows.ApplicationModel.Background.AlarmTriggerOptions Options{ get; };
+    }
+
+}

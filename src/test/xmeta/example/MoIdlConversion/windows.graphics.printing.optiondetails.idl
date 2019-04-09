@@ -1,0 +1,429 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Printing.OptionDetails
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum PrintOptionStates
+    {
+        None,
+        Enabled,
+        Constrained,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PrintOptionType
+    {
+        Unknown,
+        Number,
+        Text,
+        ItemList,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        Toggle,
+    };
+
+    [uuid(390686cf-d682-495f-adfe-d7333f5c1808)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPrintOptionDetails
+    {
+        String OptionId{ get; };
+        Windows.Graphics.Printing.OptionDetails.PrintOptionType OptionType{ get; };
+        String ErrorText{ set; };
+        String ErrorText{ get; };
+        Windows.Graphics.Printing.OptionDetails.PrintOptionStates State{ set; };
+        Windows.Graphics.Printing.OptionDetails.PrintOptionStates State{ get; };
+        [variant]Object Value{ get; };
+        Boolean TrySetValue([variant]Object value);
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [uuid(4d01bbaf-645c-4de9-965f-6fc6bbc47cab)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPrintNumberOptionDetails requires Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+    {
+        UInt32 MinValue{ get; };
+        UInt32 MaxValue{ get; };
+    };
+
+    [uuid(ad75e563-5ce4-46bc-9918-ab9fad144c5b)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPrintTextOptionDetails requires Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+    {
+        UInt32 MaxCharacters{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(9a2257bf-fe61-43d8-a24f-a3f6ab7320e7)]
+    interface IPrintItemListOptionDetails requires Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+    {
+        [hasvariant]Windows.Foundation.Collections.IVectorView <Object>  Items{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintCopiesOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintNumberOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCopiesOptionDetails", 42053099-4339-4343-898d-2c47b5e0c341)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintMediaSizeOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintMediaSizeOptionDetails", 6c8d5bcf-c0bf-47c8-b84a-628e7d0d1a1d)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintMediaTypeOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintMediaTypeOptionDetails", f8c7000b-abf3-4abc-8e86-22abc5744a43)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintOrientationOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintOrientationOptionDetails", 46c38879-66e0-4da0-87b4-d25457824eb7)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PrintQualityOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintQualityOptionDetails", 2dd06ba1-ce1a-44e6-84f9-3a92ea1e3044)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintColorModeOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintColorModeOptionDetails", dba97704-f1d6-4843-a484-9b447cdcf3b6)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PrintDuplexOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintDuplexOptionDetails", fcd94591-d4a4-44fa-b3fe-42e0ba28d5ad)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintCollationOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCollationOptionDetails", d6abb166-a5a6-40dc-acc3-739f28f1e5d3)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintStapleOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintStapleOptionDetails", d43175bd-9c0b-44e0-84f6-ceebce653800)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PrintHolePunchOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintHolePunchOptionDetails", a6de1f18-482c-4657-9d71-8ddddbea1e1e)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PrintBindingOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintBindingOptionDetails", c3f4cc98-9564-4f16-a055-a98b9a49e9d3)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    runtimeclass PrintBorderingOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintBorderingOptionDetails", 4d73bc8f-fb53-4eb2-985f-1d91de0b7639)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintPageRangeOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+    {
+
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintPageRangeOptionDetails", 5a19e4b7-2be8-4aa7-9ea5-defbe8713b4e)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [uuid(e32bde1c-28af-4b90-95da-a3acf320b929)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPrintCustomOptionDetails requires Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+    {
+        String DisplayName{ set; };
+        String DisplayName{ get; };
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintCustomTextOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintCustomOptionDetails
+    {
+
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCustomTextOptionDetails", 2ad171f8-c8bd-4905-9192-0d75136e8b31)]
+        {
+            UInt32 MaxCharacters{ set; };
+            UInt32 MaxCharacters{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCustomTextOptionDetails2", cea70b54-b977-4718-8338-7ed2b0d86fe3)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    runtimeclass PrintCustomToggleOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintCustomOptionDetails
+    {
+
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCustomToggleOptionDetails", 9db4d514-e461-4608-8ee9-db6f5ed073c6)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCustomItemDetails", 5704b637-5c3a-449a-aa36-b3291b1192fd)]
+    runtimeclass PrintCustomItemDetails
+    {
+        String ItemId{ get; };
+        String ItemDisplayName{ set; };
+        String ItemDisplayName{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [muse(0x6030000)]
+    runtimeclass PrintCustomItemListOptionDetails
+        : [default]Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintCustomOptionDetails
+        , Windows.Graphics.Printing.OptionDetails.IPrintItemListOptionDetails
+    {
+
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCustomItemListOptionDetails", a5fafd88-58f2-4ebd-b90f-51e4f2944c5d)]
+        {
+            void AddItem(String itemId, String displayName);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCustomItemListOptionDetails2", c9d6353d-651c-4a39-906e-1091a1801bf1)]
+        {
+            void AddItem(String itemId, String displayName, String description, Windows.Storage.Streams.IRandomAccessStreamWithContentType icon);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintCustomItemListOptionDetails3", 4fa1b53f-3c34-4868-a407-fc5eab259b21)]
+        {
+            String WarningText{ set; };
+            String WarningText{ get; };
+            String Description{ set; };
+            String Description{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintTaskOptionChangedEventArgs", 65197d05-a5ee-4307-9407-9acad147679c)]
+    runtimeclass PrintTaskOptionChangedEventArgs
+    {
+        [variant]Object OptionId{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [muse(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Graphics.Printing.OptionDetails.IPrintTaskOptionDetailsStatic", 135da193-0961-4b6e-8766-f13b7fbccd58)]
+    [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintTaskOptionDetails", f5720af1-a89e-42a6-81af-f8e010b38a68)]
+    runtimeclass PrintTaskOptionDetails
+        : Windows.Graphics.Printing.IPrintTaskOptionsCore
+        , Windows.Graphics.Printing.IPrintTaskOptionsCoreUIConfiguration
+    {
+        static Windows.Graphics.Printing.OptionDetails.PrintTaskOptionDetails GetFromPrintTaskOptions(Windows.Graphics.Printing.PrintTaskOptions printTaskOptions);
+        Windows.Foundation.Collections.IMapView <String, Windows.Graphics.Printing.OptionDetails.IPrintOptionDetails>  Options{ get; };
+        Windows.Graphics.Printing.OptionDetails.PrintCustomItemListOptionDetails CreateItemListOption(String optionId, String displayName);
+        Windows.Graphics.Printing.OptionDetails.PrintCustomTextOptionDetails CreateTextOption(String optionId, String displayName);
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing.OptionDetails.PrintTaskOptionDetails, Windows.Graphics.Printing.OptionDetails.PrintTaskOptionChangedEventArgs>  OptionChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing.OptionDetails.PrintTaskOptionDetails, Object>  BeginValidation;
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Printing.OptionDetails.IPrintTaskOptionDetails2", 53730a09-f968-4692-a177-c074597186db)]
+        {
+            Windows.Graphics.Printing.OptionDetails.PrintCustomToggleOptionDetails CreateToggleOption(String optionId, String displayName);
+        }
+    }
+
+
+
+}

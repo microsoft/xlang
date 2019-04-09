@@ -1,0 +1,367 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.BackupRestore.SettingsProviders
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [flags]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    enum BackupProviderStatus
+    {
+        Enabled = 1,
+        Disabled,
+        Paused = 4,
+        BackupInProgress = 8,
+        RestoreInProgress = 16,
+        Error = 32,
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [flags]
+    enum BackupScopeStatus
+    {
+        Enabled = 1,
+        Protected,
+        Error = 4,
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    enum BackupTargetValidationResult
+    {
+        Valid,
+        Invalid,
+        AccessDenied,
+        ReadOnly,
+        BitLockerLocked,
+        Offline,
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    enum BackupTargetStatus
+    {
+        Online,
+        Offline,
+        CapacityFull,
+        AccessDenied,
+        BitLockerLocked,
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    enum BackupTargetType
+    {
+        Unknown,
+        Cloud,
+        FixedDisk,
+        RemovableDisk,
+        NetworkShare,
+    };
+
+    [flags]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    enum BackupSettingsLinkType
+    {
+        URL,
+        Application,
+        SettingsPage,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [interface_name("Windows.Internal.BackupRestore.SettingsProviders.IOneBackupHandlerStatics", c01d2385-eae8-42b0-abac-85a30f2ea27f)]
+    runtimeclass OneBackupHandlerStatics
+    {
+        OneBackupHandlerStatics();
+        Boolean AreBackupProvidersAvailable();
+    }
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(086c5c83-e0cb-4b8c-bcd6-071ac289c92d)]
+    interface IPropertyChangedEventArgs
+    {
+        String PropertyName{ get; };
+        Windows.Foundation.IPropertyValue NewValue{ get; };
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(48b32ae0-6d75-4b7a-ad34-39b4fef39602)]
+    interface IBackupPropertiesBase
+    {
+        Windows.Foundation.Collections.IMapView <String, Windows.Foundation.IPropertyValue>  GetProperties();
+        event Windows.Foundation.TypedEventHandler <Object, Windows.Internal.BackupRestore.SettingsProviders.IPropertyChangedEventArgs>  PropertyChanged;
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(0666c8dd-bebe-45ec-8005-0fc423094179)]
+    interface IBackupCapabilitiesProviderBase
+    {
+        Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase GetCapability(Guid riid);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(3a7f7145-fc0e-4de0-99e3-47eafe9e909e)]
+    interface IBackupTargetItem requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.BackupRestore.SettingsProviders.BackupTargetStatus>  GetStatusAsync();
+        Windows.Foundation.IAsyncOperation <UInt64>  GetBackupSizeAsync();
+        Windows.Foundation.IAsyncOperation <UInt64>  GetTargetCapacityAsync();
+        Windows.Foundation.IAsyncOperation <UInt64>  GetTargetAvailableSpaceAsync();
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(9626ec99-0ca2-40fd-abf4-78aeb66a65cc)]
+    [internal]
+    interface IFolderBackupScopeItem requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(bff357e0-b895-4ff7-b517-53396de7014f)]
+    interface IVolumeBackupScopeItem requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.BackupRestore.SettingsProviders.BackupScopeStatus>  GetStatusAsync();
+        Windows.Foundation.IAsyncOperation <UInt64>  GetSizeAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  GetBackupEnabledAsync();
+        Windows.Foundation.IAsyncAction SetBackupEnabledAsync(Boolean value);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(c239eaf0-8e99-42d5-b573-eb2562eb689e)]
+    interface IAppBackupScopeItem requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.BackupRestore.SettingsProviders.BackupScopeStatus>  GetStatusAsync();
+        Windows.Foundation.IAsyncOperation <UInt64>  GetSizeAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  GetBackupEnabledAsync();
+        Windows.Foundation.IAsyncAction SetBackupEnabledAsync(Boolean value);
+    };
+
+    [uuid(38f502a3-d89d-4e26-b33c-c3701805c919)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IBackupSettingsProvider requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Boolean IsCurrentDevice{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.BackupRestore.SettingsProviders.IBackupTargetItem>  GetTargets();
+        Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase GetCapability(Guid riid);
+        Windows.Internal.BackupRestore.SettingsProviders.IBackupCapabilitiesProviderBase GetBackupCapabilitiesProvider(Guid riid);
+    };
+
+    [uuid(c67194f3-e1af-44c1-a730-585736944358)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IRestoreBackupCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        void SetRestore();
+    };
+
+    [uuid(60e67856-2e3d-4d0e-bf4a-315bb78b0220)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IEnumBackupsProvider requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Internal.BackupRestore.SettingsProviders.IBackupSettingsProvider GetCurrentDeviceBackup();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.Internal.BackupRestore.SettingsProviders.IBackupSettingsProvider> >  GetBackupsAsync();
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(6450d4ae-35cb-46f6-9219-be4f2a6b0d85)]
+    interface IEnumBackupSettingsProviders
+    {
+        Windows.Foundation.Collections.IVector <Windows.Internal.BackupRestore.SettingsProviders.IEnumBackupsProvider>  Providers{ get; };
+        String RestoreSource{ get; };
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(255aba9f-6cee-4148-9f92-ce70bfee8ab8)]
+    interface IAppDataBackupCapabilitiesProvider requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase, Windows.Internal.BackupRestore.SettingsProviders.IBackupCapabilitiesProviderBase
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  GetBackupEnabledAsync();
+        Windows.Foundation.IAsyncAction SetBackupEnabledAsync(Boolean value);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(ba867308-3977-4425-825e-eb3991e547d9)]
+    interface IUserDataBackupCapabilitiesProvider requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase, Windows.Internal.BackupRestore.SettingsProviders.IBackupCapabilitiesProviderBase
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  GetBackupEnabledAsync();
+        Windows.Foundation.IAsyncAction SetBackupEnabledAsync(Boolean value);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(cc851f02-c8b6-47d5-b14e-8c8322982e3d)]
+    interface ISystemSettingsBackupCapabilitiesProvider requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase, Windows.Internal.BackupRestore.SettingsProviders.IBackupCapabilitiesProviderBase
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  GetBackupEnabledAsync();
+        Windows.Foundation.IAsyncAction SetBackupEnabledAsync(Boolean value);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(8322677e-f250-4b17-9041-03ecbf55ef8f)]
+    interface ISystemImageBackupCapabilitiesProvider requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase, Windows.Internal.BackupRestore.SettingsProviders.IBackupCapabilitiesProviderBase
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  GetBackupEnabledAsync();
+        Windows.Foundation.IAsyncAction SetBackupEnabledAsync(Boolean value);
+    };
+
+    [uuid(90d2d315-a5b9-4f66-af8a-ac8ce94428b8)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IManualBackupCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncAction StartBackupAsync();
+        Windows.Foundation.IAsyncAction CancelBackupAsync();
+    };
+
+    [uuid(e8342a99-1e5c-4c5e-aa01-1e1207e62626)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IRemoveBackupCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncAction RemoveBackupAsync();
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(97916853-1b15-448d-a899-a1ddb9955d4f)]
+    [internal]
+    interface IManageBackupsCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+    };
+
+    [uuid(bcb544ad-a7e8-4626-8228-71e529694009)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IBackupStatusCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.BackupRestore.SettingsProviders.BackupProviderStatus>  GetStatusAsync();
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(2966b3cb-0db2-45e8-92ff-617bde7e3f9c)]
+    interface IAddTargetCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.BackupRestore.SettingsProviders.IAddTargetCapability, Object>  TargetsChanged;
+        Windows.Foundation.IAsyncAction AddTargetAsync(IBackupTargetItem newTarget);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IIterator <Windows.Internal.BackupRestore.SettingsProviders.IBackupTargetItem> >  GetPrimaryTargetsAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IIterator <Windows.Internal.BackupRestore.SettingsProviders.IBackupTargetItem> >  GetSecondaryTargetsAsync();
+    };
+
+    [uuid(5ac6372f-c0e6-4416-aa41-600e32478615)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface ITargetValidationCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.BackupRestore.SettingsProviders.BackupTargetValidationResult>  ValidateTargetAsync(IBackupTargetItem targetItem);
+    };
+
+    [uuid(c51ec00c-30cd-4434-98e3-ef0c18873f4d)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IFixedBackupScopesCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Object> >  GetItemsAsync();
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(e3a4428e-65ce-4c38-9cdf-4b8c8c831ed3)]
+    interface IFolderIncludesBackupScopesCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Internal.BackupRestore.SettingsProviders.IFolderBackupScopeItem> >  GetItemsAsync();
+        Windows.Foundation.IAsyncAction AddFolderAsync(String folderPath);
+        Windows.Foundation.IAsyncAction RemoveFolderAsync(String folderPath);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(0be62ce3-4e52-4253-9393-93d6fd8d75db)]
+    interface IFolderExcludesBackupScopesCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Internal.BackupRestore.SettingsProviders.IFolderBackupScopeItem> >  GetItemsAsync();
+        Windows.Foundation.IAsyncAction ExcludeFolderAsync(String folderPath);
+        Windows.Foundation.IAsyncAction RemoveFolderAsync(String folderPath);
+    };
+
+    [uuid(11228dba-c3e5-440a-9276-d93c900c2883)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [internal]
+    interface IBackupFrequency requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(bab43323-70ff-47df-a7cb-23366ed025e9)]
+    interface IListBasedBackupFrequencyCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Internal.BackupRestore.SettingsProviders.IBackupFrequency> >  GetItemsAsync();
+        Windows.Foundation.IAsyncOperation <UInt32>  GetCurrentValueAsync();
+        Windows.Foundation.IAsyncAction SetCurrentValueAsync(UInt32 value);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(e97b5581-2926-49b0-8a22-d5ab52a2ce6a)]
+    interface IBoolBasedBackupFrequencyCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  GetCurrentValueAsync();
+        Windows.Foundation.IAsyncAction SetCurrentValueAsync(Boolean value);
+    };
+
+    [uuid(21a248c1-486a-4dd4-b3f5-120c9906cfad)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IRangeBasedTargetQuotaCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <UInt32>  GetCurrentValueAsync();
+        Windows.Foundation.IAsyncAction SetCurrentValueAsync(UInt32 value);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(d199d661-aeaf-4ae2-a1ad-33dc026cf981)]
+    [internal]
+    interface IRetentionListItem requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(e36a1beb-9667-4000-a752-b6eb669bc589)]
+    interface IListBasedRetentionCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Internal.BackupRestore.SettingsProviders.IRetentionListItem> >  GetItemsAsync();
+        Windows.Foundation.IAsyncOperation <UInt32>  GetCurrentValueAsync();
+        Windows.Foundation.IAsyncAction SetCurrentValueAsync(UInt32 value);
+    };
+
+    [uuid(24212bfc-01de-4fbb-b24b-8a8ae348433e)]
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    interface IBoolBasedRetentionCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  GetCurrentValueAsync();
+        Windows.Foundation.IAsyncAction SetCurrentValueAsync(Boolean value);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(020c954c-436c-42d5-ad9c-2c827b9fb933)]
+    [internal]
+    interface IManualCleanupOption requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(721c1064-38e6-48db-b9d5-c4e6fb050fdc)]
+    interface IListBasedManualCleanupCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.Internal.BackupRestore.SettingsProviders.IManualCleanupOption> >  GetItemsAsync();
+        Windows.Foundation.IAsyncAction PerformCleanupAsync(IManualCleanupOption cleanupOption);
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(b948c7e7-dcaa-4445-8080-91b841e6437e)]
+    [internal]
+    interface IBackupRelatedActionItem requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+    };
+
+    [contract(Windows.Internal.BackupRestore.SettingsProviders.InternalContract, 1)]
+    [uuid(d6fdf416-24fb-47f7-805e-2178f9381edd)]
+    interface IRelatedBackupSettingsCapability requires Windows.Internal.BackupRestore.SettingsProviders.IBackupPropertiesBase
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Internal.BackupRestore.SettingsProviders.IBackupRelatedActionItem> >  GetItemsAsync();
+        Windows.Internal.BackupRestore.SettingsProviders.IBackupRelatedActionItem GetSingleRelatedBackupSettingItem();
+    };
+
+}

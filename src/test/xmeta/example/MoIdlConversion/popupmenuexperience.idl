@@ -1,0 +1,54 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.PopupMenuExperience
+{
+    [uuid(4801b1b9-7a73-4283-b84d-7c4f9e3c4f5b)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface IPopupMenuExperience
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  LaunchAsync(PopupMenuOperation popupMenuOperation);
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.PopupMenuExperience.IPopupMenuOperation", 91a48776-427a-410b-bb5a-c9b833d4c9d2)]
+    runtimeclass PopupMenuOperation
+    {
+        Windows.Internal.PlatformExtensions.PopupMenuExperience.PopupMenuInfo Info{ get; };
+        Windows.UI.Popups.IUICommand SelectedCommand{ get; };
+        Windows.UI.Popups.IUICommand SelectedCommand{ set; };
+        Windows.Internal.ApplicationModel.WindowManagement.WindowId CallerWindowId{ get; };
+        Windows.Foundation.Rect Rect{ get; };
+        Windows.UI.Popups.Placement Placement{ get; };
+        Windows.Foundation.Point Position{ get; };
+        Boolean IsCompleted{ get; };
+        void Completed();
+        void Cancel();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.PlatformExtensions.PopupMenuExperience.PopupMenuOperation, Windows.Internal.PlatformExtensions.PopupMenuExperience.PopupMenuOperationCompletedEventArgs>  OperationCompleted;
+    }
+
+
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.PopupMenuExperience.IPopupMenuInfo", f22fb5f8-7e6e-4d26-b6d8-edcb059b8c28)]
+    runtimeclass PopupMenuInfo
+    {
+        Windows.Foundation.Collections.IVector <Windows.UI.Popups.IUICommand>  Commands{ get; };
+    }
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.PopupMenuExperience.IPopupMenuOperationCompletedEventArgs", 70ea33d3-0712-4c25-b48c-a1d10dda070d)]
+    runtimeclass PopupMenuOperationCompletedEventArgs
+    {
+        Boolean IsCanceled{ get; };
+    }
+
+
+}

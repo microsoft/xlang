@@ -1,0 +1,47 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IMrtDefaultTileStatics", eb2a98bd-c501-47d0-8df8-38afec395f1f)]
+    [interface_name("Windows.Internal.StateRepository.IMrtDefaultTile", 11bcfe6e-7e02-4a89-8384-01bee5954b14)]
+    [threading(both)]
+    runtimeclass MrtDefaultTile
+    {
+        MrtDefaultTile();
+        static Boolean Exists(Int64 mrtDefaultTileID);
+        static Boolean ExistsByDefaultTile(DefaultTile DefaultTile);
+        static Windows.Internal.StateRepository.MrtDefaultTile Get(Int64 mrtDefaultTileID);
+        static Windows.Internal.StateRepository.MrtDefaultTile TryGet(Int64 mrtDefaultTileID);
+        static Windows.Internal.StateRepository.MrtDefaultTile GetByDefaultTile(DefaultTile DefaultTile);
+        static Windows.Internal.StateRepository.MrtDefaultTile TryGetByDefaultTile(DefaultTile DefaultTile);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtDefaultTile>  Find();
+        Int64 _MrtDefaultTileID{ get; };
+        Int64 _MrtDefaultTileID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 DefaultTile{ get; };
+        Int64 DefaultTile{ set; };
+        Windows.Internal.StateRepository.DefaultTile GetDefaultTile();
+        void SetDefaultTile(DefaultTile value);
+        String ShortNameReference{ get; };
+        String ShortNameReference{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

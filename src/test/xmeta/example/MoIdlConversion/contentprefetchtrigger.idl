@@ -1,0 +1,26 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.ApplicationModel.Background.IContentPrefetchTriggerFactory", c2643eda-8a03-409e-b8c4-88814c28ccb6)]
+    [interface_name("Windows.ApplicationModel.Background.IContentPrefetchTrigger", 710627ee-04fa-440b-80c0-173202199e5d)]
+    [threading(mta)]
+    runtimeclass ContentPrefetchTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] ContentPrefetchTrigger(Windows.Foundation.TimeSpan waitInterval);
+        ContentPrefetchTrigger();
+        Windows.Foundation.TimeSpan WaitInterval{ get; };
+    }
+
+}

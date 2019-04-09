@@ -2,7 +2,6 @@ parser grammar XlangParser;
 
 options { tokenVocab=XlangLexer; }
 
-
 /* Entry Point */
 xlang
     : compilation_unit
@@ -10,11 +9,6 @@ xlang
 
 compilation_unit
     : using_directive* namespace_declaration*
-    ;
-
-// For lexer tests
-xlang_lexer_tests
-    : UUID
     ;
     
 /* Basic Concepts */
@@ -26,14 +20,12 @@ type_name
     : namespace_or_type_name
     ;
 
-
 namespace_or_type_name
     : IDENTIFIER type_argument_list?
     | namespace_or_type_name . IDENTIFIER type_argument_list?
     | qualified_alias_member
     ;
 
-/* Types */ //TODO: Nullable Types?
 type
     : value_type
     | class_type
@@ -70,7 +62,7 @@ non_array_type
     | class_type
     ;
 
-// Remove nullable type, Causing left resursive problems
+
 enum_integral_type
     : INT8
     | UINT8
@@ -282,7 +274,6 @@ method_modifier
     | OVERRIDABLE
     | PROTECTED
     | STATIC
-    | SEALED
     ;
 
 formal_parameter_list

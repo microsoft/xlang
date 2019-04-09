@@ -1,0 +1,214 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Input.Inking.Internal.Analysis
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    enum InkAnalysisPredefinedConfiguration
+    {
+        NoteTaking,
+        LineMode = 3,
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    enum InkAnalysisInputScope
+    {
+        Default,
+        Url,
+        FileFullPath,
+        FileName,
+        EmailUserName,
+        EmailSmtpAddress,
+        LoginName,
+        PersonFullName,
+        PersonPrefix,
+        PersonGivenName,
+        PersonMiddleName,
+        PersonSurname,
+        PersonSuffix,
+        AddressFull,
+        AddressPostalCode,
+        AddressStreet,
+        AddressStateOrProvince,
+        AddressCity,
+        AddressCountryName,
+        AddressCountryShortName,
+        CurrencyWithSymbol,
+        CurrencyWithoutSymbol,
+        DateFull,
+        DateMonthNumber,
+        DateDayNumber,
+        DateYear,
+        DateMonthName,
+        DateDayName,
+        Digits,
+        Number,
+        SingleCharacter,
+        TelephoneFull = 32,
+        TelephoneContryCode,
+        TelephoneAreaCode,
+        TelephoneLocalNumber,
+        TimeFull,
+        TimeHour,
+        TimeMinutesOrSeconds,
+        Search = 50,
+        SearchIncremental = 52,
+        Chat = 58,
+        PersonNameOrPhoneNumber,
+        EdgeAddressBar = 99,
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    struct InkAnalysisInputGuide
+    {
+        Windows.Foundation.Rect writingRect;
+        Windows.Foundation.Rect drawingRect;
+        Int32 rows;
+        Int32 cols;
+        Int32 midline;
+    };
+
+    [flags]
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    enum InkAnalysisAnnotationKind
+    {
+        None,
+        ScratchOut,
+        StrikethroughFromLeft,
+        StrikethroughFromRight = 4,
+        JoinAtTop = 8,
+        JoinAtBottom = 16,
+        InsertAtTop = 32,
+        InsertAtBottom = 64,
+        Commit = 128,
+        Overwrite = 256,
+        All = 511,
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    enum InkAnalysisAnnotationRelation
+    {
+        None = -1,
+        With,
+        From,
+        To,
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    [uuid(2bf9aca7-f871-4016-ac38-79b3f96485a0)]
+    interface IInkAnalysisAnnotationInternal
+    {
+        Windows.Foundation.Point AnnotationHotPoint{ get; };
+    };
+
+    [uuid(c13c10f1-ca0e-4b96-a8d9-81ad6afab7f6)]
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    interface IInkAnalyzerInternal
+    {
+        void SetInkRotation(Boolean value);
+        void AddStrokeForLanguage(Windows.UI.Input.Inking.InkStroke stroke, UInt32 languageId);
+        void AddStrokesForLanguage(Windows.Foundation.Collections.IIterable <Windows.UI.Input.Inking.InkStroke>  strokes, UInt32 languageId);
+        UInt32 GetStrokeLanguageId(UInt32 strokeId);
+        void SetStrokeLanguageId(UInt32 strokeId, UInt32 languageId);
+        void SetStrokesLanguageId(Windows.Foundation.Collections.IVectorView <UInt32>  strokeIds, UInt32 languageId);
+        void GroupStrokes(Windows.Foundation.Collections.IVectorView <UInt32>  strokeIds);
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisHint CreateAnalysisHint(Windows.Foundation.Rect rect);
+        void DeleteAnalysisHint(InkAnalysisHint value);
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisHint>  AnalysisHints{ get; };
+        UInt32 AddNonInkContent(Windows.UI.Input.Inking.Analysis.InkAnalysisNodeKind contextType, Windows.Foundation.Rect value, Single angle);
+        void RemoveNonInkContent(UInt32 nodeId);
+        void RemoveAllNonInkContent();
+        void SetConfiguration(InkAnalysisPredefinedConfiguration config);
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisAnnotationKind AnnotationKinds{ get; };
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisAnnotationKind AnnotationKinds{ set; };
+        UInt32 AddNonInkTextWord(Windows.Foundation.Rect value, Single angle, Single baseline);
+        void UpdateNonInkTextWord(UInt32 nodeId, Windows.Foundation.Rect value, Single angle, Single baseline);
+        Boolean IsLanguageAvailable(String LanguageTag);
+        Windows.Foundation.Collections.IVectorView <String>  GetAvailableLanguages();
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass InkAnalysisHint
+        : [default]Windows.UI.Input.Inking.Internal.Analysis.IInkAnalysisHint
+    {
+    }
+
+    [uuid(fc99f423-0bad-4614-8db6-c8357576ec26)]
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    interface IInkAnalysisRootInternal
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Input.Inking.Analysis.IInkAnalysisNode>  FindAnnotations();
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    [uuid(79bad274-a985-4da7-a524-a03d4d972309)]
+    interface IInkAnalysisLineInternal
+    {
+        Windows.Foundation.Collections.IVectorView <String>  TextAlternates{ get; };
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    [uuid(fefd58b3-d622-4b69-8088-2ab6f63eaf45)]
+    interface IInkAnalysisNodeInternal
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Input.Inking.Analysis.IInkAnalysisNode>  AnnotatedNodes{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Input.Inking.Analysis.IInkAnalysisNode>  AnnotatingNodes{ get; };
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisAnnotationKind AnnotationKind{ get; };
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisAnnotationRelation GetRelationWithAnnotatedNode(UInt32 nodeId);
+    };
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    [uuid(9d95c3b6-db8a-4b14-bdd1-f2d5d11dde15)]
+    interface IInkAnalysisTextWord
+    {
+        Single Baseline{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    runtimeclass InkAnalysisTextWord
+        : [default]Windows.UI.Input.Inking.Internal.Analysis.IInkAnalysisTextWord
+    {
+    }
+
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    [uuid(0d6d5d93-7a83-444a-9912-394a938f67e4)]
+    interface IInkAnalysisHint
+    {
+        Boolean IsGlobal{ get; };
+        Boolean IsGlobal{ set; };
+        Windows.Foundation.Rect BoundingRect{ get; };
+        Windows.Foundation.Rect BoundingRect{ set; };
+        String Factoid{ get; };
+        String Factoid{ set; };
+        String Constraint{ get; };
+        String Constraint{ set; };
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisInputScope InputScope{ get; };
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisInputScope InputScope{ set; };
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisInputGuide InputGuide{ get; };
+        Windows.UI.Input.Inking.Internal.Analysis.InkAnalysisInputGuide InputGuide{ set; };
+        String InputPrefix{ get; };
+        String InputPrefix{ set; };
+        String InputSuffix{ get; };
+        String InputSuffix{ set; };
+    };
+
+    [uuid(2fab9aa9-aa89-427c-8fd6-f3570e6252bd)]
+    [contract(Windows.UI.Input.Inking.Internal.Analysis.InternalContract, 1)]
+    interface IInkAnalyzerFactoryInternal
+    {
+        Windows.UI.Input.Inking.Analysis.InkAnalyzer CreateAnalyzer(InkAnalysisPredefinedConfiguration config);
+    };
+
+}

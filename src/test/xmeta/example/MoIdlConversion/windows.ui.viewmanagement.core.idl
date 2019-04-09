@@ -1,0 +1,114 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.ViewManagement.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum CoreInputViewOcclusionKind
+    {
+        Docked,
+        Floating,
+        Overlay,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum CoreInputViewXYFocusTransferDirection
+    {
+        Up,
+        Right,
+        Down,
+        Left,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum CoreInputViewKind
+    {
+        Default,
+        Keyboard,
+        Handwriting,
+        Emoji,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.ViewManagement.Core.ICoreInputViewStatics", 7d9b97cd-edbe-49cf-a54f-337de052907f)]
+    [interface_name("Windows.UI.ViewManagement.Core.ICoreInputView", c770cd7a-7001-4c32-bf94-25c1f554cbf1)]
+    runtimeclass CoreInputView
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [static_name("Windows.UI.ViewManagement.Core.ICoreInputViewStatics2", 7ebc0862-d049-4e52-87b0-1e90e98c49ed)]
+        {
+            static Windows.UI.ViewManagement.Core.CoreInputView GetForUIContext(Windows.UI.UIContext context);
+        }
+        static Windows.UI.ViewManagement.Core.CoreInputView GetForCurrentView();
+        event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.Core.CoreInputView, Windows.UI.ViewManagement.Core.CoreInputViewOcclusionsChangedEventArgs>  OcclusionsChanged;
+        Windows.Foundation.Collections.IVectorView <Windows.UI.ViewManagement.Core.CoreInputViewOcclusion>  GetCoreInputViewOcclusions();
+        Boolean TryShowPrimaryView();
+        Boolean TryHidePrimaryView();
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.UI.ViewManagement.Core.ICoreInputView2", 0ed726c1-e09a-4ae8-aedf-dfa4857d1a01)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.Core.CoreInputView, Windows.UI.ViewManagement.Core.CoreInputViewTransferringXYFocusEventArgs>  XYFocusTransferringFromPrimaryView;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.Core.CoreInputView, Object>  XYFocusTransferredToPrimaryView;
+            Boolean TryTransferXYFocusToPrimaryView(Windows.Foundation.Rect origin, CoreInputViewXYFocusTransferDirection direction);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.ViewManagement.Core.ICoreInputView3", bc941653-3ab9-4849-8f58-46e7f0353cfc)]
+        {
+            [method_name("TryShow")] Boolean TryShow();
+            [method_name("TryShowWithKind")] Boolean TryShow(CoreInputViewKind type);
+            Boolean TryHide();
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.ViewManagement.Core.ICoreInputViewOcclusionsChangedEventArgs", be1027e8-b3ee-4df7-9554-89cdc66082c2)]
+    runtimeclass CoreInputViewOcclusionsChangedEventArgs
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.UI.ViewManagement.Core.CoreInputViewOcclusion>  Occlusions{ get; };
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.ViewManagement.Core.ICoreInputViewOcclusion", cc36ce06-3865-4177-b5f5-8b65e0b9ce84)]
+    runtimeclass CoreInputViewOcclusion
+    {
+        Windows.Foundation.Rect OccludingRect{ get; };
+        Windows.UI.ViewManagement.Core.CoreInputViewOcclusionKind OcclusionKind{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.UI.ViewManagement.Core.ICoreInputViewTransferringXYFocusEventArgs", 04de169f-ba02-4850-8b55-d82d03ba6d7f)]
+    runtimeclass CoreInputViewTransferringXYFocusEventArgs
+    {
+        Windows.Foundation.Rect Origin{ get; };
+        Windows.UI.ViewManagement.Core.CoreInputViewXYFocusTransferDirection Direction{ get; };
+        Boolean TransferHandled{ set; };
+        Boolean TransferHandled{ get; };
+        Boolean KeepPrimaryViewVisible{ set; };
+        Boolean KeepPrimaryViewVisible{ get; };
+    }
+
+
+
+
+
+
+}

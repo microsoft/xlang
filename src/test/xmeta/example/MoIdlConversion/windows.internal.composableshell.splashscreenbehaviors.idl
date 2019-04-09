@@ -1,0 +1,45 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [uuid(a4df1f9d-be44-44b1-a3bc-33de5a92d921)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    interface ISplashScreenLayout
+    {
+        Windows.Foundation.Rect ClientRelativeLogicalImageLocation{ get; };
+        Windows.Foundation.Rect ClientRelativePhysicalImageLocation{ get; };
+        Windows.Foundation.Rect NonClientRelativeLogicalImageLocation{ get; };
+        Windows.Foundation.Rect NonClientRelativePhysicalImageLocation{ get; };
+        void ChangeVisibleBounds(Windows.Foundation.Rect visibleBoundsRaw);
+        [deprecated("HMONITOR based operations no longer supported", deprecate, Windows.Internal.ComposableShell.InternalContract, 0x10000)]
+        void ChangeDisplay(UInt64 display);
+        void ChangeScaleFactor(Int32 scaleFactor);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.ISplashScreenLayout, Object>  ImageLocationChanged;
+    };
+
+    [uuid(197d4880-6c5a-4bf8-b751-96b7b57f648d)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    interface ISplashScreenBehavior
+    {
+        [default_overload]
+        [method_name("CreateForApplication")] Windows.Internal.ComposableShell.ISplashScreenLayout CreateForApplication(String appId, Windows.Foundation.Rect visibleBoundsRaw);
+        [method_name("CreateForApplicationWithDisplay")] [deprecated("HMONITOR based operations no longer supported", deprecate, Windows.Internal.ComposableShell.InternalContract, 0x10000)]
+        Windows.Internal.ComposableShell.ISplashScreenLayout CreateForApplication(String appId, Windows.Foundation.Rect visibleBoundsRaw, UInt64 display);
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [threading(both)]
+    runtimeclass BasicSplashScreenBehavior
+        : [default]Windows.Internal.ComposableShell.ISplashScreenBehavior
+    {
+        BasicSplashScreenBehavior();
+    }
+
+}

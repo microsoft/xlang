@@ -1,0 +1,22 @@
+
+
+
+
+
+
+
+
+namespace Windows.Networking.Vpn
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(ceb78d07-d0a8-4703-a091-c8c2c0915bc4)]
+    interface IVpnPlugIn
+    {
+        void Connect(VpnChannel channel);
+        void Disconnect(VpnChannel channel);
+        void GetKeepAlivePayload(VpnChannel channel, out VpnPacketBuffer keepAlivePacket);
+        void Encapsulate(VpnChannel channel, VpnPacketBufferList packets, VpnPacketBufferList encapulatedPackets);
+        void Decapsulate(VpnChannel channel, VpnPacketBuffer encapBuffer, VpnPacketBufferList decapsulatedPackets, VpnPacketBufferList controlPacketsToSend);
+    };
+
+}

@@ -1,0 +1,27 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Sms
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.Sms.ISmsMessageRegistrationStatics", 63a05464-2898-4778-a03c-6f994907d63a)]
+    [interface_name("Windows.Devices.Sms.ISmsMessageRegistration", 1720503e-f34f-446b-83b3-0ff19923b409)]
+    [threading(both)]
+    runtimeclass SmsMessageRegistration
+    {
+        static Windows.Foundation.Collections.IVectorView <Windows.Devices.Sms.SmsMessageRegistration>  AllRegistrations{ get; };
+        static Windows.Devices.Sms.SmsMessageRegistration Register(String id, SmsFilterRules filterRules);
+        String Id{ get; };
+        void Unregister();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Sms.SmsMessageRegistration, Windows.Devices.Sms.SmsMessageReceivedTriggerDetails>  MessageReceived;
+    }
+
+
+}

@@ -1,0 +1,89 @@
+
+
+
+
+
+
+
+namespace Windows.System.Power
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BatteryStatus
+    {
+        NotPresent,
+        Discharging,
+        Idle,
+        Charging,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum EnergySaverStatus
+    {
+        Disabled,
+        Off,
+        On,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PowerSupplyStatus
+    {
+        NotPresent,
+        Inadequate,
+        Adequate,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Power.IPowerManagerStatics", 1394825d-62ce-4364-98d5-aa28c7fbd15b)]
+    [threading(both)]
+    runtimeclass PowerManager
+    {
+        static Windows.System.Power.EnergySaverStatus EnergySaverStatus{ get; };
+        static event Windows.Foundation.EventHandler <Object>  EnergySaverStatusChanged;
+        static Windows.System.Power.BatteryStatus BatteryStatus{ get; };
+        static event Windows.Foundation.EventHandler <Object>  BatteryStatusChanged;
+        static Windows.System.Power.PowerSupplyStatus PowerSupplyStatus{ get; };
+        static event Windows.Foundation.EventHandler <Object>  PowerSupplyStatusChanged;
+        static Int32 RemainingChargePercent{ get; };
+        static event Windows.Foundation.EventHandler <Object>  RemainingChargePercentChanged;
+        static Windows.Foundation.TimeSpan RemainingDischargeTime{ get; };
+        static event Windows.Foundation.EventHandler <Object>  RemainingDischargeTimeChanged;
+    }
+
+
+}
+namespace Windows.Devices.Power
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Power.IBatteryReport", c9858c3a-4e13-420a-a8d0-24f18f395401)]
+    runtimeclass BatteryReport
+    {
+        Windows.Foundation.IReference <Int32>  ChargeRateInMilliwatts{ get; };
+        Windows.Foundation.IReference <Int32>  DesignCapacityInMilliwattHours{ get; };
+        Windows.Foundation.IReference <Int32>  FullChargeCapacityInMilliwattHours{ get; };
+        Windows.Foundation.IReference <Int32>  RemainingCapacityInMilliwattHours{ get; };
+        Windows.System.Power.BatteryStatus Status{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Power.IBatteryStatics", 79cd72b6-9e5e-4452-bea6-dfcd541e597f)]
+    [interface_name("Windows.Devices.Power.IBattery", bc894fc6-0072-47c8-8b5d-614aaa7a437e)]
+    [threading(both)]
+    runtimeclass Battery
+    {
+        static Windows.Devices.Power.Battery AggregateBattery{ get; };
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Power.Battery>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector();
+        String DeviceId{ get; };
+        Windows.Devices.Power.BatteryReport GetReport();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Power.Battery, Object>  ReportUpdated;
+    }
+
+
+
+}

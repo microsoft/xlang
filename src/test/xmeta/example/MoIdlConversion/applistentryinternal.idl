@@ -1,0 +1,30 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Core.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract AppListEntryInternalContract{};
+
+    [uuid(722f2b9b-5e83-40f7-a9d6-52e300a17805)]
+    [contract(Windows.ApplicationModel.Core.Internal.AppListEntryInternalContract, 1)]
+    interface IAppListEntryInternalStatics
+    {
+        Windows.ApplicationModel.Core.AppListEntry Create(Windows.ApplicationModel.AppDisplayInfo appDisplayInfo, String appUserModelId);
+    };
+
+    [contract(Windows.ApplicationModel.Core.Internal.AppListEntryInternalContract, 1)]
+    [uuid(4c7545fd-63ed-4409-8f55-7170e531b880)]
+    interface IAppListEntryInternal
+    {
+        String ApplicationUserModelId{ get; };
+    };
+
+}

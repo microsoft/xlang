@@ -1,0 +1,133 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Lights
+{
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum LampPurposes
+    {
+        Undefined,
+        Control,
+        Accent,
+        Branding = 4,
+        Status = 8,
+        Illumination = 16,
+        Presentation = 32,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum LampArrayKind
+    {
+        Undefined,
+        Keyboard,
+        Mouse,
+        GameController,
+        Peripheral,
+        Scene,
+        Notification,
+        Chassis,
+        Wearable,
+        Furniture,
+        Art,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Lights.ILampStatics", a822416c-8885-401e-b821-8e8b38a8e8ec)]
+    [interface_name("Windows.Devices.Lights.ILamp", 047d5b9a-ea45-4b2b-b1a2-14dff00bde7b)]
+    [threading(both)]
+    runtimeclass Lamp
+        : Windows.Foundation.IClosable
+    {
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Lights.Lamp>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Lights.Lamp>  GetDefaultAsync();
+        String DeviceId{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Single BrightnessLevel{ get; };
+        Single BrightnessLevel{ set; };
+        Boolean IsColorSettable{ get; };
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Lights.Lamp, Windows.Devices.Lights.LampAvailabilityChangedEventArgs>  AvailabilityChanged;
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Lights.ILampAvailabilityChangedEventArgs", 4f6e3ded-07a2-499d-9260-67e304532ba4)]
+    runtimeclass LampAvailabilityChangedEventArgs
+    {
+        Boolean IsAvailable{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.Devices.Lights.ILampInfo", 30bb521c-0acf-49da-8c10-150b9cf62713)]
+    runtimeclass LampInfo
+    {
+        Int32 Index{ get; };
+        Windows.Devices.Lights.LampPurposes Purposes{ get; };
+        Windows.Foundation.Numerics.Vector3 Position{ get; };
+        Int32 RedLevelCount{ get; };
+        Int32 GreenLevelCount{ get; };
+        Int32 BlueLevelCount{ get; };
+        Int32 GainLevelCount{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  FixedColor{ get; };
+        Windows.UI.Color GetNearestSupportedColor(Windows.UI.Color desiredColor);
+        Windows.Foundation.TimeSpan UpdateLatency{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Lights.ILampArrayStatics", 7bb8c98d-5fc1-452d-bb1f-4ad410d398ff)]
+    [interface_name("Windows.Devices.Lights.ILampArray", 7ace9787-c8a0-4e95-a1e0-d58676538649)]
+    [threading(both)]
+    runtimeclass LampArray
+    {
+        static String GetDeviceSelector();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Lights.LampArray>  FromIdAsync(String deviceId);
+        String DeviceId{ get; };
+        UInt16 HardwareVendorId{ get; };
+        UInt16 HardwareProductId{ get; };
+        UInt16 HardwareVersion{ get; };
+        Windows.Devices.Lights.LampArrayKind LampArrayKind{ get; };
+        Int32 LampCount{ get; };
+        Windows.Foundation.TimeSpan MinUpdateInterval{ get; };
+        Windows.Foundation.Numerics.Vector3 BoundingBox{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Double BrightnessLevel{ get; };
+        Double BrightnessLevel{ set; };
+        Boolean IsConnected{ get; };
+        Boolean SupportsVirtualKeys{ get; };
+        Windows.Devices.Lights.LampInfo GetLampInfo(Int32 lampIndex);
+        Int32[] GetIndicesForKey(Windows.System.VirtualKey key);
+        Int32[] GetIndicesForPurposes(LampPurposes purposes);
+        void SetColor(Windows.UI.Color desiredColor);
+        void SetColorForIndex(Int32 lampIndex, Windows.UI.Color desiredColor);
+        void SetSingleColorForIndices(Windows.UI.Color desiredColor, Int32[] lampIndexes);
+        void SetColorsForIndices(Windows.UI.Color[] desiredColors, Int32[] lampIndexes);
+        void SetColorsForKey(Windows.UI.Color desiredColor, Windows.System.VirtualKey key);
+        void SetColorsForKeys(Windows.UI.Color[] desiredColors, Windows.System.VirtualKey[] keys);
+        void SetColorsForPurposes(Windows.UI.Color desiredColor, LampPurposes purposes);
+        Windows.Foundation.IAsyncAction SendMessageAsync(Int32 messageId, Windows.Storage.Streams.IBuffer message);
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  RequestMessageAsync(Int32 messageId);
+    }
+
+}

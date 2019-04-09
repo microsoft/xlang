@@ -1,0 +1,258 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.UI.XAMLHost
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [flags]
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    enum ViewConfigFlags
+    {
+        None,
+        ProcessAudioMessage,
+        WantsSoftKeyboardNotifications,
+        IgnoreInput = 4,
+        DisableIme = 8,
+        StayFullScreenOnPrimaryMonitor = 16,
+        PositionWindowOnWindowPosChanging = 32,
+        DisableViewActivityWhenMonitorIsOff = 64,
+        ModalToOwner = 128,
+        ShowCustomTitleBar = 256,
+        UseDesiredSize = 512,
+        RespondToThemeChanges = 1024,
+        ForceEnableOwnerOnDismissal = 2048,
+        WantsToDelayXamlViewActivity = 4096,
+        SetAtlasHint = 8192,
+        ProcessDisplayMessage = 16384,
+        LayeredAndOpaque = 32768,
+        ForceWindowPattern = 65536,
+    };
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    struct TitleBarInfo
+    {
+        Single Height;
+        Single Width;
+        Single CloseButtonXOffset;
+        Single CloseButtonWidth;
+        Single IconWidth;
+    };
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    enum CloseButtonState
+    {
+        Rest,
+        Hover,
+        Pressed,
+    };
+
+    [uuid(c8b50ca8-eddd-4a04-a730-646a54223985)]
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    interface IViewDefinition
+    {
+        String WindowClassName{ get; };
+        String ResourceFileName{ get; };
+        String WindowTitleUri{ get; };
+        String ApplicationResourcesUri{ get; };
+        Windows.UI.Xaml.UIElement RootUIElement{ get; };
+        Object RootViewModel{ get; };
+        Windows.UI.Xaml.Hosting.IXamlRuntimeSite XamlRuntimeSite{ get; };
+        Windows.Foundation.Collections.IIterable <Windows.UI.Xaml.Hosting.IXamlRuntimeSite>  XamlRuntimeSites{ get; };
+        Windows.UI.Xaml.ApplicationTheme Theme{ get; };
+        Windows.Internal.UI.XAMLHost.ViewConfigFlags ViewConfig{ get; };
+        UInt32 WindowZOrderBand{ get; };
+        UInt32 WindowStylesEx{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  ApplicationResources{ get; };
+        UInt16 LangID{ get; };
+        Windows.Foundation.Size MinWindowSize{ get; };
+        Windows.Foundation.Size MaxWindowSize{ get; };
+        Windows.Internal.UI.XAMLHost.TitleBarInfo GetTitleBarInfo(UInt32 scaleFactor);
+        void UpdateTitleBarCloseButtonState(CloseButtonState newState);
+        void TitleBarClose();
+        void OnHighContrastChange();
+        Windows.Foundation.Rect GetViewPosition(UInt32 scaleFactor, Windows.Foundation.Rect desiredSize);
+        void SetMergedResourceDictionary(Object resourceDictionary);
+        Windows.Foundation.Size AtlasSize{ get; };
+    };
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [uuid(b96ba785-0e10-4a12-96d5-f4a22934a5b5)]
+    interface IDispatchableTask
+    {
+        void Dispatch();
+    };
+
+    [uuid(a126f23a-20e7-4fe5-8b88-33f7cffb7579)]
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    interface IDispatchableTaskWithContext
+    {
+        void Dispatch(Object context);
+    };
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.IUIThreadDispatcher", 7b76cf90-ae25-4ffe-b0e3-23511e1d0911)]
+    runtimeclass UIThreadDispatcher
+    {
+        void DispatchTask(IDispatchableTask dispatchableTask);
+        void DispatchToRootViewModel(IDispatchableTaskWithContext dispatchableTaskWithContext);
+    }
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.IXAMLHostResourceMap", 9ec5ff19-0e46-467e-a23c-68c2e6cfda10)]
+    runtimeclass ResourceMap
+    {
+        ResourceMap();
+        String GetString(String key);
+        Windows.Storage.Streams.IRandomAccessStream GetImageStream(String key);
+    }
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.IXAMLHostDesiredSizeReady", 079d2ff9-aa24-43bc-9a18-d55034218671)]
+    runtimeclass DesiredSizeClass
+    {
+        DesiredSizeClass();
+        void DesiredSizeReady();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.XAMLHost.DesiredSizeClass, Object>  WindowUncloaked;
+    }
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [flags]
+    enum DisplayState
+    {
+        Off,
+        On,
+        Dim,
+        UserPresent = 4,
+        LidClosed = 8,
+        ScreenSaverActive = 16,
+    };
+
+    [uuid(9273687e-4e59-4ebc-8ec1-f833b4b077b6)]
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    delegate void DisplayStateChangedEventHandler(Object sender, DisplayState args);
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.IXAMLHostWindow", e635a44d-f52c-4ba8-ba7e-7e7ce10467c9)]
+    runtimeclass XAMLHostWindow
+    {
+        XAMLHostWindow();
+        void Start(IViewDefinition viewDefinition);
+        Windows.Internal.UI.XAMLHost.UIThreadDispatcher Dispatcher{ get; };
+        Windows.Internal.UI.XAMLHost.ResourceMap Resources{ get; };
+        UInt32 ScaleFactor{ get; };
+        Boolean IsVisible{ get; };
+        Boolean IsVisible{ set; };
+        Boolean IsCloaked{ get; };
+        Boolean IsCloaked{ set; };
+        Windows.Internal.UI.XAMLHost.DisplayState CurrentDisplayState{ get; };
+        event Windows.Internal.UI.XAMLHost.DisplayStateChangedEventHandler DisplayStateChanged;
+        void SetCaretWidth(Int32 value);
+        void SetTextScale(Int32 value);
+        void Shutdown();
+    }
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.IPopupHelper", af8998dd-85db-4990-9377-0c1707c81749)]
+    runtimeclass PopupHelper
+    {
+        PopupHelper();
+        void DismissPopups();
+    }
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    enum ToggledKeyState
+    {
+        Off,
+        On,
+    };
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    enum ToggledKey
+    {
+        CapsLock,
+    };
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    struct ToggledKeyAttributes
+    {
+        ToggledKey Key;
+        ToggledKeyState KeyState;
+    };
+
+    [uuid(22176e09-23a3-4c87-9896-77df1d9f9660)]
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    delegate void ToggledKeyStateChangedEventHandler(Object sender, ToggledKeyAttributes e);
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.IToggledKeyStatusProvider", 886fd600-f11d-4a1c-9605-010e270db07c)]
+    runtimeclass ToggledKeyStatusProvider
+    {
+        ToggledKeyStatusProvider();
+        Windows.Internal.UI.XAMLHost.ToggledKeyState GetToggledKeyState(ToggledKey key);
+        event Windows.Internal.UI.XAMLHost.ToggledKeyStateChangedEventHandler ToggledKeyChanged;
+    }
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    enum KeyboardState
+    {
+        Showing,
+        Hiding,
+    };
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    struct KeyboardAttributes
+    {
+        Windows.Foundation.Rect KeyboardSize;
+        Boolean IsImmersive;
+        Boolean IsSystemKeyboard;
+        KeyboardState TouchKeyboardState;
+    };
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [uuid(dcddeaca-6f06-4e0b-80a5-4cf63cccd712)]
+    delegate void TouchKeyboardChangedEventHandler(Object sender, KeyboardAttributes e);
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.ITouchKeyboardStatusProvider", aee7bcd4-c66a-47f0-a5c4-e91e2fef5afc)]
+    runtimeclass TouchKeyboardStatusProvider
+    {
+        TouchKeyboardStatusProvider();
+        Windows.Internal.UI.XAMLHost.KeyboardAttributes TouchKeyboardAttributes{ get; };
+        event Windows.Internal.UI.XAMLHost.TouchKeyboardChangedEventHandler TouchKeyboardChanged;
+    }
+
+    [uuid(e9f01397-69d5-4f2f-a939-8f40da45a6b5)]
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    delegate void DelayXamlViewCompletedEventHandler(Object sender);
+
+
+    [contract(Windows.Internal.UI.XAMLHost.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.XAMLHost.IDelayXamlViewActivity", 86b0c9b0-4038-4457-9804-502828336e1a)]
+    runtimeclass DelayXamlViewActivity
+    {
+        DelayXamlViewActivity();
+        void BeginDelay();
+        Boolean TryExecuteXamlViewCompleted();
+        void EndDelay();
+        event Windows.Internal.UI.XAMLHost.DelayXamlViewCompletedEventHandler DelayXamlViewCompleted;
+    }
+
+}

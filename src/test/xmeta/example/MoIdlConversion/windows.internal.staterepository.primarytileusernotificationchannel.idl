@@ -1,0 +1,33 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IPrimaryTileUserNotificationChannelStatics", b17fc34b-d906-4cd1-ad70-c16d125d1686)]
+    [interface_name("Windows.Internal.StateRepository.IPrimaryTileUserNotificationChannel", 366a9874-5ea2-436a-828f-0145bd6cf463)]
+    [threading(both)]
+    runtimeclass PrimaryTileUserNotificationChannel
+    {
+        static Windows.Internal.StateRepository.PrimaryTileUserNotificationChannel CreateForUser(User user);
+        static Windows.Internal.StateRepository.PrimaryTileUserNotificationChannel CreateForUserSid(String userSid);
+        static Windows.Internal.StateRepository.PrimaryTileUserNotificationChannel CreateForUserSecurityIdentifier(UInt8[] userSecurityIdentifier);
+        PrimaryTileUserNotificationChannel();
+        void RegisterForNotifications();
+        void DeregisterForNotifications();
+        Boolean IsRegisteredForNotifications{ get; };
+        String Name{ get; };
+        String UserSid{ get; };
+        void RaiseNotification();
+    }
+
+
+}

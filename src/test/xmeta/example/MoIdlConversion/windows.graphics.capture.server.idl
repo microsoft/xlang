@@ -1,0 +1,49 @@
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Capture.Server
+{
+    [contractversion(1)]
+    [internal]
+    apicontract BrokerInternalContract{};
+
+    [contract(Windows.Graphics.Capture.Server.BrokerInternalContract, 1)]
+    [uuid(a0a0623e-1cc1-549e-93eb-748318719214)]
+    interface ICapturableItemFacade
+    {
+        Windows.Graphics.Capture.Server.CapturableItem GetCapturableItem();
+    };
+
+    [contract(Windows.Graphics.Capture.Server.BrokerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Graphics.Capture.Server.ICapturableItemStatics", b9210dc9-45e7-5d2c-8c16-9fd0816922d9)]
+    [interface_name("Windows.Graphics.Capture.Server.ICapturableItem", 72958a42-bb30-58a0-a42d-5f8c6d186b98)]
+    [threading(both)]
+    runtimeclass CapturableItem
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Graphics.Capture.Server.CapturableItem>  PickAsync(Windows.Internal.ApplicationModel.WindowManagement.WindowId ownerWindow);
+        static Windows.Graphics.Capture.Server.CapturableItem CreateForWindow(Windows.Internal.ApplicationModel.WindowManagement.WindowId window);
+        static Windows.Graphics.Capture.Server.CapturableItem CreateForMonitor(UInt64 monitor);
+        String DisplayName{ get; };
+        Windows.Graphics.SizeInt32 Size{ get; };
+        Boolean Equals(CapturableItem item);
+    }
+
+
+    [contract(Windows.Graphics.Capture.Server.BrokerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Capture.Server.ICaptureSession", 277fba1d-a851-53e1-85e0-39f07be84c30)]
+    runtimeclass CaptureSession
+    {
+        void StartCapture();
+        void StopCapture();
+    }
+
+
+
+}

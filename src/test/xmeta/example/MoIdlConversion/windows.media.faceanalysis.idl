@@ -1,0 +1,101 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.FaceAnalysis
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.FaceAnalysis.IDetectedFace", 8200d454-66bc-34df-9410-e89400195414)]
+    runtimeclass DetectedFace
+    {
+        Windows.Graphics.Imaging.BitmapBounds FaceBox{ get; };
+    }
+
+}
+namespace Windows.Media.FaceAnalysis.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.FaceAnalysis.Internal.InternalContract, 1)]
+    [interface_name("Windows.Media.FaceAnalysis.Internal.IDetectedFaceFactory", 5c0aa150-4aeb-fa11-82c8-09967f73acc5)]
+    [threading(both)]
+    runtimeclass DetectedFaceFactory
+    {
+        DetectedFaceFactory();
+        Windows.Media.FaceAnalysis.DetectedFace CreateDetectedFace(Windows.Graphics.Imaging.BitmapBounds faceBox);
+    }
+
+
+}
+namespace Windows.Media.FaceAnalysis
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.FaceAnalysis.IFaceTrackerStatics", e9629198-1801-3fa5-932e-31d767af6c4d)]
+    [interface_name("Windows.Media.FaceAnalysis.IFaceTracker", 6ba67d8c-a841-4420-93e6-2420a1884fcf)]
+    [threading(both)]
+    runtimeclass FaceTracker
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Media.FaceAnalysis.FaceTracker>  CreateAsync();
+        static Windows.Foundation.Collections.IVectorView <Windows.Graphics.Imaging.BitmapPixelFormat>  GetSupportedBitmapPixelFormats();
+        static Boolean IsBitmapPixelFormatSupported(Windows.Graphics.Imaging.BitmapPixelFormat bitmapPixelFormat);
+        static Boolean IsSupported{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.Media.FaceAnalysis.DetectedFace> >  ProcessNextFrameAsync(Windows.Media.VideoFrame videoFrame);
+        Windows.Graphics.Imaging.BitmapSize MinDetectableFaceSize{ get; };
+        Windows.Graphics.Imaging.BitmapSize MinDetectableFaceSize{ set; };
+        Windows.Graphics.Imaging.BitmapSize MaxDetectableFaceSize{ get; };
+        Windows.Graphics.Imaging.BitmapSize MaxDetectableFaceSize{ set; };
+    }
+
+}
+namespace Windows.Media.FaceAnalysis.Internal
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.FaceAnalysis.Internal.InternalContract, 1)]
+    [interface_name("Windows.Media.FaceAnalysis.Internal.IInfraredFaceTrackerFactory", 6f686102-7810-46c5-b834-8686729d2809)]
+    [threading(both)]
+    runtimeclass InfraredFaceTrackerFactory
+    {
+        InfraredFaceTrackerFactory();
+        Windows.Foundation.IAsyncOperation <Windows.Media.FaceAnalysis.FaceTracker>  CreateAsync();
+    }
+
+
+}
+namespace Windows.Media.FaceAnalysis
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.FaceAnalysis.IFaceDetectorStatics", bc042d67-9047-33f6-881b-6746c1b218b8)]
+    [interface_name("Windows.Media.FaceAnalysis.IFaceDetector", 16b672dc-fe6f-3117-8d95-c3f04d51630c)]
+    [threading(both)]
+    runtimeclass FaceDetector
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Media.FaceAnalysis.FaceDetector>  CreateAsync();
+        static Windows.Foundation.Collections.IVectorView <Windows.Graphics.Imaging.BitmapPixelFormat>  GetSupportedBitmapPixelFormats();
+        static Boolean IsBitmapPixelFormatSupported(Windows.Graphics.Imaging.BitmapPixelFormat bitmapPixelFormat);
+        static Boolean IsSupported{ get; };
+        [method_name("DetectFacesAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.Media.FaceAnalysis.DetectedFace> >  DetectFacesAsync(Windows.Graphics.Imaging.SoftwareBitmap image);
+        [method_name("DetectFacesWithSearchAreaAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVector <Windows.Media.FaceAnalysis.DetectedFace> >  DetectFacesAsync(Windows.Graphics.Imaging.SoftwareBitmap image, Windows.Graphics.Imaging.BitmapBounds searchArea);
+        Windows.Graphics.Imaging.BitmapSize MinDetectableFaceSize{ get; };
+        Windows.Graphics.Imaging.BitmapSize MinDetectableFaceSize{ set; };
+        Windows.Graphics.Imaging.BitmapSize MaxDetectableFaceSize{ get; };
+        Windows.Graphics.Imaging.BitmapSize MaxDetectableFaceSize{ set; };
+    }
+
+
+
+}

@@ -1,0 +1,28 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [interface_name("Windows.Internal.StateRepository.IPrimaryTileUserDataChange", 16462b61-3298-441c-af1b-1c0995748cf7)]
+    [threading(both)]
+    runtimeclass PrimaryTileUserDataChange
+    {
+        PrimaryTileUserDataChange();
+        Int64 ChangeId{ get; };
+        Int64 ChangeId{ set; };
+        Windows.Internal.StateRepository.DataChangeDisposition Disposition{ get; };
+        Windows.Internal.StateRepository.DataChangeDisposition Disposition{ set; };
+        Guid TileUniqueId{ get; };
+        Guid TileUniqueId{ set; };
+    }
+
+}

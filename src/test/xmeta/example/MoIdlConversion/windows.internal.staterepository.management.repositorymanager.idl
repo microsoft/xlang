@@ -1,0 +1,183 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository.Management
+{
+    [flags]
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    enum RepositoryOptions
+    {
+        None,
+        ClearDatabaseCache,
+    };
+
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    [flags]
+    enum UpdateStatisticsOptions
+    {
+        None,
+        Force,
+        NoTracking,
+        MaintenanceTask = 4,
+        UpdateMachineDatabase = 65536,
+        UpdateDeploymentDatabase = 131072,
+    };
+
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    [flags]
+    enum OptimizeOptions
+    {
+        Default,
+        UpdateStatistics = 2,
+    };
+
+    [flags]
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    enum UpgradeOptions
+    {
+        None,
+        RollbackLongRunningTransactions,
+    };
+
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    [flags]
+    enum RepairOptions
+    {
+        None,
+        Force,
+        ReportOnly,
+        NoMachine = 4,
+        NoUser = 8,
+    };
+
+    [flags]
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    enum IntegrityOptions
+    {
+        None,
+        Fix,
+        Verbose,
+        AutoCheck = 4,
+    };
+
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    enum IntegrityDisposition
+    {
+        Unknown,
+        OK,
+        ErrorsDetected,
+    };
+
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    [flags]
+    enum CheckpointOptions
+    {
+        Default,
+        Force,
+        NoTracking,
+        Mode_Default = 0,
+        Mode_Passive = 16,
+        Mode_Full = 32,
+        Mode_Restart = 64,
+        Mode_Truncate = 128,
+        Mask_Mode = 240,
+    };
+
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    [flags]
+    enum MaintenanceOptions
+    {
+        Default,
+        Force,
+        NoTracking,
+        CheckIntegrity = 4,
+        AutoCheckIntegrity = 8,
+    };
+
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    [flags]
+    enum CacheManagementOptions
+    {
+        None,
+        Force,
+        NoData,
+    };
+
+    [flags]
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    enum ChangelogOptions
+    {
+        None,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.StateRepository.Management.IRepositoryManager", ac83c902-e556-456f-bb4b-58311f1f328b)]
+    [threading(both)]
+    runtimeclass RepositoryManager
+    {
+        RepositoryManager();
+        void BlockRequests(RepositoryOptions options);
+        void UnblockRequests(RepositoryOptions options);
+        void ClearDatabaseCache(RepositoryOptions options);
+        Boolean IsBlockRequests{ get; };
+        void UpdateStatistics(UpdateStatisticsOptions options);
+        void Optimize(OptimizeOptions options);
+        void Upgrade(UpgradeOptions options);
+        void Repair(String userSid, RepairOptions options, out UInt32 ghostsFound, out UInt32 ghostsDeleted);
+        void CheckIntegrity(IntegrityOptions options, out IntegrityDisposition disposition, out UInt64 countOfErrorsDetectedOrCorrected);
+        Boolean IsAutoCheck{ get; };
+        void SetAutoCheck();
+        void ResetAutoCheck();
+        void Checkpoint(CheckpointOptions options);
+        Boolean IsCheckpointDue{ get; };
+        void SetCheckpointIsDue(Boolean checkpointIsDue);
+        void DoMaintenance(MaintenanceOptions options);
+        Boolean IsMaintenanceDue{ get; };
+        void SetMaintenanceIsDue(Boolean maintenanceIsDue);
+        void Cache_Initialize(CacheManagementOptions options);
+        void Cache_Update(CacheManagementOptions options);
+        void Cache_CheckIntegrity(out UInt64 countOfErrorsDetectedOrCorrected);
+        void UpdateAllMultiPartTransactionsCascading();
+        void GCChangelogs(ChangelogOptions options);
+        void ClearChangelogs(ChangelogOptions options);
+    }
+
+    [uuid(4b7906ca-2e76-43c5-8532-306ad2ffbcfa)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryManagementContract, 1)]
+    interface IRepositoryManager_4b7906ca_2e76_43c5_8532_306ad2ffbcfa
+    {
+        void BlockRequests(RepositoryOptions options);
+        void UnblockRequests(RepositoryOptions options);
+        void ClearDatabaseCache(RepositoryOptions options);
+        Boolean IsBlockRequests{ get; };
+        void UpdateStatistics(UpdateStatisticsOptions options);
+        void Optimize(OptimizeOptions options);
+        void Upgrade(UpgradeOptions options);
+        void Repair(String userSid, RepairOptions options, out UInt32 ghostsFound, out UInt32 ghostsDeleted);
+        void CheckIntegrity(IntegrityOptions options);
+        Boolean IsAutoCheck{ get; };
+        void SetAutoCheck();
+        void ResetAutoCheck();
+        void Checkpoint(CheckpointOptions options);
+        Boolean IsCheckpointDue{ get; };
+        void SetCheckpointIsDue(Boolean checkpointIsDue);
+        void DoMaintenance(MaintenanceOptions options);
+        Boolean IsMaintenanceDue{ get; };
+        void SetMaintenanceIsDue(Boolean maintenanceIsDue);
+        void FixBundlesWithoutPackages();
+        void Cache_Initialize(CacheManagementOptions options);
+        void Cache_Update(CacheManagementOptions options);
+        void UpdateAllMultiPartTransactionsCascading();
+        void GCChangelogs(ChangelogOptions options);
+        void ClearChangelogs(ChangelogOptions options);
+    };
+
+}

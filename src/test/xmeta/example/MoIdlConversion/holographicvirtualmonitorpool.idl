@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Holographic
+{
+    [contract(Windows.Internal.Shell.Holographic.ShellCommonContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Holographic.IVirtualMonitorDestroyedEventArgs", 4e2a317e-468c-5251-9051-d00602e1d7bc)]
+    runtimeclass VirtualMonitorDestroyedEventArgs
+    {
+        String Name{ get; };
+        Guid Id{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Holographic.ShellCommonContract, 1)]
+    [interface_name("Windows.Internal.Shell.Holographic.IVirtualMonitor", 7622fbe8-871a-5d9f-89a1-77ee0de9c2e3)]
+    runtimeclass VirtualMonitor
+    {
+        String Name{ get; };
+        Guid Id{ get; };
+        String DeviceId{ get; };
+        void Destroy();
+        event Windows.Foundation.TypedEventHandler <Object, Windows.Internal.Shell.Holographic.VirtualMonitorDestroyedEventArgs>  Destroyed;
+    }
+
+    [contract(Windows.Internal.Shell.Holographic.ShellCommonContract, 1)]
+    struct VirtualMonitorPoolUsage
+    {
+        UInt32 AllocationCount;
+        UInt32 AvailableCount;
+        UInt32 InUseCount;
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Holographic.ShellCommonContract, 1)]
+    [interface_name("Windows.Internal.Shell.Holographic.IVirtualMonitorPool", 798c4679-019d-4636-9561-723c39d6d4bf)]
+    runtimeclass VirtualMonitorPool
+    {
+        Windows.Internal.Shell.Holographic.VirtualMonitorPoolUsage Usage{ get; };
+        Windows.Foundation.IAsyncAction ReserveAsync(UInt32 count);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.Shell.Holographic.VirtualMonitor>  AcquireVirtualMonitorAsync();
+        Windows.Foundation.IAsyncAction CompactAsync();
+        Windows.Foundation.IAsyncAction ClearAsync();
+    }
+
+}

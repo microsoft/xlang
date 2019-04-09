@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+namespace Windows.System.RemoteDesktop
+{
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [uuid(3f517c55-7d9c-5f57-acf7-babcd7c8476c)]
+    interface IDataBlob
+    {
+        void DoNothing();
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.System.RemoteDesktop.IContinuousBufferFactory", 3a564305-874b-56d8-b6b1-57eed176c2c2)]
+    [interface_name("Windows.System.RemoteDesktop.IContinuousBuffer", d9e2b415-da6f-525c-8022-84f97df98cd5)]
+    [threading(both)]
+    runtimeclass ContinuousBuffer
+        : Windows.Foundation.IClosable
+    {
+        [method_name( "CreateInstance" )] ContinuousBuffer(UInt32 length);
+        UInt32 Length{ get; };
+        UInt32 TailLength{ get; };
+        UInt32 Position{ get; };
+        Boolean Eof{ get; };
+        void SeekAbs(UInt32 position);
+        void SeekRel(UInt32 position);
+        Windows.System.RemoteDesktop.IDataBlob GetData();
+        Windows.System.RemoteDesktop.IDataBlob GetTail();
+        Windows.System.RemoteDesktop.IDataBlob GetSubBuffer(UInt32 length);
+        UInt8 Get();
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum SegmentPosition
+    {
+        Begin = 1,
+        End,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.ISegmentedBuffer", ab907679-d488-5a67-82ae-01cab19f1628)]
+    [threading(both)]
+    runtimeclass SegmentedBuffer
+        : Windows.Foundation.IClosable
+    {
+        SegmentedBuffer();
+        UInt32 TotalLength{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.System.RemoteDesktop.ContinuousBuffer>  Segments{ get; };
+        Windows.System.RemoteDesktop.ContinuousBuffer InsertSegment(UInt32 length, SegmentPosition location);
+        [method_name("Flatten")] UInt32 Flatten(IDataBlob preAllocatedBlob);
+        [method_name("Flatten2")] Windows.System.RemoteDesktop.IDataBlob Flatten();
+    }
+
+}

@@ -1,0 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(3eead0ff-7c1e-4726-a903-e4ad013d7852)]
+    interface IUserActivitySourceContract
+    {
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.UserActivities.UserActivity>  TryGetUserActivityForWindowAsync(Windows.Internal.ApplicationModel.WindowManagement.WindowId windowId, Windows.Internal.ComposableShell.Tabs.ShellTabId tabId);
+    };
+
+}

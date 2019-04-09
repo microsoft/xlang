@@ -1,0 +1,29 @@
+
+
+
+
+
+
+namespace Windows.Internal.UI.TaskBarSuggestions
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.TaskBarSuggestions.InternalContract, 1)]
+    [static_name("Windows.Internal.UI.TaskBarSuggestions.ITaskBarSuggestionsPinHelper", f96b5c0d-8f3b-42bd-a71d-20081f499cb3)]
+    [threading(both)]
+    runtimeclass TaskBarSuggestionsPinHelper
+    {
+        static void PinUnpinApp(String appId, Boolean appIdIsExplicit, String path, Boolean pin);
+        static void PinUnpinPlaceHolder(String appId, String path, String iconPath, Boolean pin);
+        static void IsPinnedToTaskBar(String appId, String path, out Boolean isPinned);
+        static Windows.Foundation.Collections.IVector <String>  GetPinnedAppIds();
+        static void GetUiAutomationId(String appId, out String automationId);
+        static void IsSpaceRemainingOnTaskBar(out Boolean isSpaceLeft);
+        static void IsSpaceRemainingForInitialPin(out Boolean isSpaceLeft);
+    }
+
+}

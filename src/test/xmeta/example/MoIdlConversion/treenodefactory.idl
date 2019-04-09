@@ -1,0 +1,24 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.ComposableShell.ITreeNodeFactory", c99f5268-e9c8-4039-bf09-8a63ffc0ffee)]
+    [threading(both)]
+    runtimeclass TreeNodeFactory
+    {
+        static void Create(ComposerContextId context, out ITreeNode node, out Windows.Internal.ApplicationModel.WindowManagement.WindowId window);
+        static void Destroy(Windows.Internal.ApplicationModel.WindowManagement.WindowId window);
+    }
+
+}

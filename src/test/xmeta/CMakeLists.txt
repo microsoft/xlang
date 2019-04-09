@@ -33,12 +33,11 @@ endif()
 
 add_custom_command(TARGET test_xmeta POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_SOURCE_DIR}/test/xmeta/example"
-    $<TARGET_FILE_DIR:test_xmeta>/example)
-
+    "${CMAKE_SOURCE_DIR}/test/xmeta/example/MoIdlConversion"
+    $<TARGET_FILE_DIR:test_xmeta>/MoIdlConversion)
 
 target_sources(test_xmeta
-    PUBLIC pch.cpp testlexer.cpp)
+    PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp)
 
 target_include_directories(test_xmeta
     PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
@@ -64,3 +63,4 @@ install(TARGETS test_xmeta DESTINATION "test/xmeta")
 if (WIN32)
     install(FILES $<TARGET_PDB_FILE:test_xmeta> DESTINATION "test/xmeta" OPTIONAL)
 endif ()
+

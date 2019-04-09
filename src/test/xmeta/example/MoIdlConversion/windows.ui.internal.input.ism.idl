@@ -1,0 +1,13 @@
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [contractversion(1)]
+    [internal]
+    apicontract ISMInternalContract{};
+
+}

@@ -1,0 +1,61 @@
+
+
+
+
+
+
+namespace Windows.Internal.Management.Deployment
+{
+    [contractversion(1)]
+    [internal]
+    apicontract ApiContract{};
+
+    [flags]
+    [contract(Windows.Internal.Management.Deployment.ApiContract, 1)]
+    enum InboxAppxInstallerState
+    {
+        None,
+        Running,
+        CriticalAppsInstalled,
+        AllAppsInstalled = 4,
+        Error = 8,
+        MaxValue = 15,
+    };
+
+
+    [contract(Windows.Internal.Management.Deployment.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Management.Deployment.IInboxAppxInstallerStateChangedEventArgs", cf3f8b5e-57f5-429e-a67c-927c7d174bb8)]
+    runtimeclass InboxAppxInstallerStateChangedEventArgs
+    {
+        Windows.Internal.Management.Deployment.InboxAppxInstallerState State{ get; };
+    }
+
+    [contract(Windows.Internal.Management.Deployment.ApiContract, 1)]
+    [uuid(ee23e266-9a22-4825-bf14-d66d2e91f4c6)]
+    interface IInboxAppxInstaller
+    {
+        Windows.Internal.Management.Deployment.InboxAppxInstallerState State{ get; };
+        event Windows.Foundation.TypedEventHandler <Object, Windows.Internal.Management.Deployment.InboxAppxInstallerStateChangedEventArgs>  StateChanged;
+        Windows.Foundation.IAsyncOperation <Boolean>  InstallInboxAppsAsync();
+    };
+
+    [contract(Windows.Internal.Management.Deployment.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass InboxAppxInstallerServer
+        : [default]Windows.Internal.Management.Deployment.IInboxAppxInstaller
+    {
+        InboxAppxInstallerServer();
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Management.Deployment.ApiContract, 1)]
+    [threading(both)]
+    runtimeclass InboxAppxInstallerClient
+        : [default]Windows.Internal.Management.Deployment.IInboxAppxInstaller
+    {
+        InboxAppxInstallerClient();
+    }
+
+}

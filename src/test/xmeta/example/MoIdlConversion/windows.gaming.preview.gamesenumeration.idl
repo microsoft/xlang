@@ -1,0 +1,137 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Gaming.Preview
+{
+    [contractversion(2)]
+    apicontract GamesEnumerationContract{};
+
+}
+namespace Windows.Gaming.Preview.GamesEnumeration
+{
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 1)]
+    enum GameListCategory
+    {
+        Candidate,
+        ConfirmedBySystem,
+        ConfirmedByUser,
+    };
+
+    [uuid(735924d3-811f-4494-b69c-c641a0c61543)]
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 1)]
+    interface IGameListEntry
+    {
+        Windows.ApplicationModel.AppDisplayInfo DisplayInfo{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  LaunchAsync();
+        Windows.Gaming.Preview.GamesEnumeration.GameListCategory Category{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+        Windows.Foundation.IAsyncAction SetCategoryAsync(GameListCategory value);
+    };
+
+
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 2)]
+    enum GameListEntryLaunchableState
+    {
+        NotLaunchable,
+        ByLastRunningFullPath,
+        ByUserProvidedPath,
+        ByTile,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 2)]
+    [interface_name("Windows.Gaming.Preview.GamesEnumeration.IGameModeConfiguration", 78e591af-b142-4ef0-8830-55bc2be4f5ea)]
+    runtimeclass GameModeConfiguration
+    {
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Windows.Foundation.Collections.IVector <String>  RelatedProcessNames{ get; };
+        Windows.Foundation.IReference <Int32>  PercentGpuTimeAllocatedToGame{ get; };
+        Windows.Foundation.IReference <Int32>  PercentGpuTimeAllocatedToGame{ set; };
+        Windows.Foundation.IReference <Int32>  PercentGpuMemoryAllocatedToGame{ get; };
+        Windows.Foundation.IReference <Int32>  PercentGpuMemoryAllocatedToGame{ set; };
+        Windows.Foundation.IReference <Int32>  PercentGpuMemoryAllocatedToSystemCompositor{ get; };
+        Windows.Foundation.IReference <Int32>  PercentGpuMemoryAllocatedToSystemCompositor{ set; };
+        Windows.Foundation.IReference <Int32>  MaxCpuCount{ get; };
+        Windows.Foundation.IReference <Int32>  MaxCpuCount{ set; };
+        Windows.Foundation.IReference <Int32>  CpuExclusivityMaskLow{ get; };
+        Windows.Foundation.IReference <Int32>  CpuExclusivityMaskLow{ set; };
+        Windows.Foundation.IReference <Int32>  CpuExclusivityMaskHigh{ get; };
+        Windows.Foundation.IReference <Int32>  CpuExclusivityMaskHigh{ set; };
+        Boolean AffinitizeToExclusiveCpus{ get; };
+        Boolean AffinitizeToExclusiveCpus{ set; };
+        Windows.Foundation.IAsyncAction SaveAsync();
+    }
+
+
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass GameListEntry
+        : [default]Windows.Gaming.Preview.GamesEnumeration.IGameListEntry
+    {
+
+        [contract(Windows.Gaming.Preview.GamesEnumerationContract, 2)]
+        [interface_name("Windows.Gaming.Preview.GamesEnumeration.IGameListEntry2", d84a8f8b-8749-4a25-90d3-f6c5a427886d)]
+        {
+            Windows.Gaming.Preview.GamesEnumeration.GameListEntryLaunchableState LaunchableState{ get; };
+            Windows.Storage.IStorageFile LauncherExecutable{ get; };
+            String LaunchParameters{ get; };
+            [method_name("SetLauncherExecutableFileAsync")] Windows.Foundation.IAsyncAction SetLauncherExecutableFileAsync(Windows.Storage.IStorageFile executableFile);
+            [method_name("SetLauncherExecutableFileWithParamsAsync")] Windows.Foundation.IAsyncAction SetLauncherExecutableFileAsync(Windows.Storage.IStorageFile executableFile, String launchParams);
+            String TitleId{ get; };
+            Windows.Foundation.IAsyncAction SetTitleIdAsync(String id);
+            Windows.Gaming.Preview.GamesEnumeration.GameModeConfiguration GameModeConfiguration{ get; };
+        }
+    }
+
+
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 2)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Gaming.Preview.GamesEnumeration.IGameModeUserConfigurationStatics", 6e50d97c-66ea-478e-a4a1-f57c0e8d00e7)]
+    [interface_name("Windows.Gaming.Preview.GamesEnumeration.IGameModeUserConfiguration", 72d34af4-756b-470f-a0c2-ba62a90795db)]
+    [threading(both)]
+    runtimeclass GameModeUserConfiguration
+    {
+        static Windows.Gaming.Preview.GamesEnumeration.GameModeUserConfiguration GetDefault();
+        Windows.Foundation.Collections.IVector <String>  GamingRelatedProcessNames{ get; };
+        Windows.Foundation.IAsyncAction SaveAsync();
+    }
+
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 1)]
+    [uuid(25f6a421-d8f5-4d91-b40e-53d5e86fde64)]
+    delegate void GameListChangedEventHandler(GameListEntry game);
+
+    [uuid(10c5648f-6c8f-4712-9b38-474bc22e76d8)]
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 1)]
+    delegate void GameListRemovedEventHandler(String identifier);
+
+
+
+    [contract(Windows.Gaming.Preview.GamesEnumerationContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Gaming.Preview.GamesEnumeration.IGameListStatics", 2ddd0f6f-9c66-4b05-945c-d6ed78491b8c)]
+    [threading(both)]
+    runtimeclass GameList
+    {
+
+        [contract(Windows.Gaming.Preview.GamesEnumerationContract, 2)]
+        [static_name("Windows.Gaming.Preview.GamesEnumeration.IGameListStatics2", 395f2098-ea1a-45aa-9268-a83905686f27)]
+        {
+            static Windows.Foundation.IAsyncOperation <Windows.Gaming.Preview.GamesEnumeration.GameListEntry>  MergeEntriesAsync(GameListEntry left, GameListEntry right);
+            static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Gaming.Preview.GamesEnumeration.GameListEntry> >  UnmergeEntryAsync(GameListEntry mergedEntry);
+        }
+        [method_name("FindAllAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Gaming.Preview.GamesEnumeration.GameListEntry> >  FindAllAsync();
+        [method_name("FindAllAsyncPackageFamilyName")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Gaming.Preview.GamesEnumeration.GameListEntry> >  FindAllAsync(String packageFamilyName);
+        static event Windows.Gaming.Preview.GamesEnumeration.GameListChangedEventHandler GameAdded;
+        static event Windows.Gaming.Preview.GamesEnumeration.GameListRemovedEventHandler GameRemoved;
+        static event Windows.Gaming.Preview.GamesEnumeration.GameListChangedEventHandler GameUpdated;
+    }
+
+}

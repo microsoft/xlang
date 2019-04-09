@@ -1,0 +1,158 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SystemTriggerType
+    {
+        Invalid,
+        SmsReceived,
+        UserPresent,
+        UserAway,
+        NetworkStateChange,
+        ControlChannelReset,
+        InternetAvailable,
+        SessionConnected,
+        ServicingComplete,
+        LockScreenApplicationAdded,
+        LockScreenApplicationRemoved,
+        TimeZoneChange,
+        OnlineIdConnectedStateChange,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        BackgroundWorkCostChange,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        PowerStateChange,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        DefaultSignInAccountChange,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SystemConditionType
+    {
+        Invalid,
+        UserPresent,
+        UserNotPresent,
+        InternetAvailable,
+        InternetNotAvailable,
+        SessionConnected,
+        SessionDisconnected,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        FreeNetworkAvailable,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        BackgroundWorkCostNotHigh,
+    };
+
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.ApplicationModel.Background.ISystemTriggerFactory", e80423d4-8791-4579-8126-87ec8aaa407a)]
+    [interface_name("Windows.ApplicationModel.Background.ISystemTrigger", 1d80c776-3748-4463-8d7e-276dc139ac1c)]
+    [threading(mta)]
+    runtimeclass SystemTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] SystemTrigger(SystemTriggerType triggerType, Boolean oneShot);
+        Boolean OneShot{ get; };
+        Windows.ApplicationModel.Background.SystemTriggerType TriggerType{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.ISystemConditionFactory", d269d1f1-05a7-49ae-87d7-16b2b8b9a553)]
+    [interface_name("Windows.ApplicationModel.Background.ISystemCondition", c15fb476-89c5-420b-abd3-fb3030472128)]
+    [threading(mta)]
+    runtimeclass SystemCondition
+        : Windows.ApplicationModel.Background.IBackgroundCondition
+    {
+        [method_name( "Create" )] SystemCondition(SystemConditionType conditionType);
+        Windows.ApplicationModel.Background.SystemConditionType ConditionType{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.INetworkOperatorNotificationTriggerFactory", 0a223e00-27d7-4353-adb9-9265aaea579d)]
+    [interface_name("Windows.ApplicationModel.Background.INetworkOperatorNotificationTrigger", 90089cc6-63cd-480c-95d1-6e6aef801e4a)]
+    [threading(mta)]
+    runtimeclass NetworkOperatorNotificationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] NetworkOperatorNotificationTrigger(String networkAccountId);
+        String NetworkAccountId{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [deprecated("DeviceManufacturerNotificationTrigger is deprecated and might not work on all platforms", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.IDeviceManufacturerNotificationTriggerFactory", 7955de75-25bb-4153-a1a2-3029fcabb652)]
+    [interface_name("Windows.ApplicationModel.Background.IDeviceManufacturerNotificationTrigger", 81278ab5-41ab-16da-86c2-7f7bf0912f5b)]
+    [threading(mta)]
+    runtimeclass DeviceManufacturerNotificationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [deprecated("DeviceManufacturerNotificationTrigger is deprecated and might not work on all platforms", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        [method_name( "Create" )] DeviceManufacturerNotificationTrigger(String triggerQualifier, Boolean oneShot);
+        [deprecated("DeviceManufacturerNotificationTrigger is deprecated and might not work on all platforms", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        String TriggerQualifier{ get; };
+        [deprecated("DeviceManufacturerNotificationTrigger is deprecated and might not work on all platforms", deprecate, Windows.Foundation.UniversalApiContract, 0x60000)]
+        Boolean OneShot{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum CustomSystemEventTriggerRecurrence
+    {
+        Once,
+        Always,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.ICustomSystemEventTriggerFactory", 6bcb16c5-f2dc-41b2-9efd-b96bdcd13ced)]
+    [interface_name("Windows.ApplicationModel.Background.ICustomSystemEventTrigger", f3596798-cf6b-4ef4-a0ca-29cf4a278c87)]
+    [threading(mta)]
+    runtimeclass CustomSystemEventTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] CustomSystemEventTrigger(String triggerId, CustomSystemEventTriggerRecurrence recurrence);
+        String TriggerId{ get; };
+        Windows.ApplicationModel.Background.CustomSystemEventTriggerRecurrence Recurrence{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Background.ICachedFileUpdaterTriggerDetails", 71838c13-1314-47b4-9597-dc7e248c17cc)]
+    runtimeclass CachedFileUpdaterTriggerDetails
+    {
+        Windows.Storage.Provider.CachedFileTarget UpdateTarget{ get; };
+        Windows.Storage.Provider.FileUpdateRequest UpdateRequest{ get; };
+        Boolean CanRequestUserInput{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.ICachedFileUpdaterTrigger", e21caeeb-32f2-4d31-b553-b9e01bde37e0)]
+    runtimeclass CachedFileUpdaterTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        CachedFileUpdaterTrigger();
+    }
+
+}

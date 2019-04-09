@@ -1,0 +1,80 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.ViewManagerInterop.Mobile
+{
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum AnimationFlags
+    {
+        None,
+        CrossSession,
+        ClientAnimation,
+        ShellAnimation = 4,
+        CrossTask = 8,
+        ShellCoordinatedAnimation = 16,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum AnimationType
+    {
+        Normal,
+        None,
+        Slide,
+        Swivel,
+        Turnstile,
+        Continuum,
+        Readerboard,
+        Custom,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum Direction
+    {
+        Forward,
+        Backward,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    struct MessageRoutingInformation
+    {
+        UInt32 ProcessId;
+        UInt32 ThreadId;
+        UInt64 Identity;
+        UInt64 ItemId;
+        Guid Connection;
+    };
+
+    [uuid(26b8251b-1437-4e19-a2a1-8283e7293a79)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IMobileClientWindowReadyForPresentationChangedEventArgs requires Windows.Internal.Shell.ViewManagerInterop.IClientWindowReadyForPresentationChangedEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.Mobile.AnimationFlags AnimationFlags{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.Mobile.AnimationType AnimationType{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.Mobile.Direction Direction{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(81f88394-b8b8-4673-8ed8-f967b11c012e)]
+    interface IMobileViewWrapper requires Windows.Internal.Shell.ViewManagerInterop.IViewWrapper, Windows.Internal.Shell.ViewManagerInterop.IClientWindowState, Windows.Internal.Shell.ViewManagerInterop.IViewRecoveryState
+    {
+        String Uri{ get; };
+        Boolean ShouldDeferBeginPresent{ get; };
+        Boolean ShouldDeferBeginPresent{ set; };
+        Boolean ShouldDeferEndPresent{ get; };
+        Boolean ShouldDeferEndPresent{ set; };
+        Windows.Internal.Shell.ViewManagerInterop.Mobile.MessageRoutingInformation ShellDataRoutingInformation{ get; };
+        UInt32 ParentViewInstanceId{ get; };
+        void Navigate(Windows.Internal.Shell.ViewManagerInterop.NavigationLevel navigationLevel, Direction direction, AnimationType animationType);
+        void BeginPresentView(Boolean present);
+        void EndPresentView(Boolean present);
+    };
+
+}

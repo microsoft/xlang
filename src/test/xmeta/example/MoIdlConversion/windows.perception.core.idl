@@ -1,0 +1,47 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Perception
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Perception.IPerceptionTimestamp", 87c24804-a22e-4adb-ba26-d78ef639bcf4)]
+    runtimeclass PerceptionTimestamp
+    {
+        Windows.Foundation.DateTime TargetTime{ get; };
+        Windows.Foundation.TimeSpan PredictionAmount{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Perception.IPerceptionTimestamp2", e354b7ed-2bd1-41b7-9ed0-74a15c354537)]
+        {
+            Windows.Foundation.TimeSpan SystemRelativeTargetTime{ get; };
+        }
+    }
+
+
+}
+namespace Windows.Perception.Spatial
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Perception.Spatial.ISpatialCoordinateSystem", 69ebca4b-60a3-3586-a653-59a7bd676d07)]
+    runtimeclass SpatialCoordinateSystem
+    {
+        Windows.Foundation.IReference <Windows.Foundation.Numerics.Matrix4x4>  TryGetTransformTo(SpatialCoordinateSystem target);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    struct SpatialRay
+    {
+        Windows.Foundation.Numerics.Vector3 Origin;
+        Windows.Foundation.Numerics.Vector3 Direction;
+    };
+
+}

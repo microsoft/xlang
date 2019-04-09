@@ -1,0 +1,199 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Notifications
+{
+    [contractversion(3)]
+    [internal]
+    apicontract WpnClientContract{};
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    enum WPN_TILE_TEMPLATE_SIZE
+    {
+        INVALID,
+        SMALL,
+        MEDIUM,
+        WIDE,
+        LARGE,
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    enum WPN_DEVICE_THEME
+    {
+        DEFAULT,
+        HIGH_CONTRAST_BLACK,
+        HIGH_CONTRAST_WHITE,
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    [uuid(07978036-2587-417d-85d1-6fa18e9c67e1)]
+    interface INotificationValueSet
+    {
+        void get_Payload(UInt32 scale, WPN_DEVICE_THEME theme, out Windows.Foundation.Collections.IPropertySet valueset);
+    };
+
+    [uuid(7a68fb41-4474-44fc-99f3-00c6a39b08fd)]
+    [contract(Windows.Internal.Notifications.WpnClientContract, 2)]
+    interface INotificationValueSet2
+    {
+        void get_PayloadForUser(UInt64 userContext, UInt32 scale, WPN_DEVICE_THEME theme, out Windows.Foundation.Collections.IPropertySet valueset);
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 2)]
+    [uuid(9f589171-8551-48a0-922b-1abf11a66340)]
+    interface IAdaptiveImage
+    {
+        String Url{ get; };
+        String Style{ get; };
+        String AltText{ get; };
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 2)]
+    [uuid(6d34502c-fa8a-4156-90cc-d7353fdab5ae)]
+    interface IAdaptiveNotification
+    {
+        String AdaptivePayload{ get; };
+        String PackageFamilyName{ get; };
+        String AdaptiveTitle{ get; };
+        String AdaptiveTitleMaxLines{ get; };
+        String AdaptiveSubtitle{ get; };
+        String AdaptiveSubtitleMaxLines{ get; };
+        Windows.Internal.Notifications.IAdaptiveImage AdaptiveProfileImage{ get; };
+        Windows.Internal.Notifications.IAdaptiveImage AdaptiveCardImage{ get; };
+        String AdaptiveForegroundActivation{ get; };
+        String AdaptiveProtocolActivation{ get; };
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    [uuid(94ce9b38-4a14-43f4-be3a-1740bda3adf1)]
+    interface IWpnClient
+    {
+        void ParseTile(String packageFamilyName, WPN_TILE_TEMPLATE_SIZE templateSize, UInt8[] payload, out INotificationValueSet notification);
+        void ParseBadge(String packageFamilyName, UInt8[] payload, out INotificationValueSet notification);
+        void ParseToast(String packageFamilyName, UInt8[] payload, out INotificationValueSet notification);
+    };
+
+    [uuid(3bcc89ff-385d-4c36-b1c8-4b8a79ae4d56)]
+    [contract(Windows.Internal.Notifications.WpnClientContract, 2)]
+    interface IWpnClient2
+    {
+        void ParseAdaptiveToast(String packageFamilyName, UInt8[] payload, out IAdaptiveNotification notification);
+        void TransformAdaptiveToast(IAdaptiveNotification notification, out INotificationValueSet notificationValueSet);
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 3)]
+    [uuid(660d9b4c-7cab-40b0-bd43-9c0244a8b7da)]
+    interface IWpnClient3
+    {
+        void ParseToast(String packageFamilyName, UInt32 wpnAppType, UInt8[] payload, out INotificationValueSet notification);
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    [uuid(6152e266-8805-4b1e-9fc9-4df263e44e8b)]
+    interface IWpnToastActivator
+    {
+        void set_Context(UInt32 callerWindowId, Windows.System.User user, Windows.Foundation.Collections.IPropertySet activationContext);
+        void Activate(String appUserModelId, String argument, String activationType, Windows.Foundation.Collections.IPropertySet activatorHints, Windows.Foundation.Collections.IVectorView <String>  userInput);
+        Boolean CanActivate(String appUserModelId, String activationType, Windows.Foundation.Collections.IPropertySet activatorHints);
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    [uuid(535aa053-78a8-438b-a1c9-94dcad4a6a67)]
+    interface IWpnAppInfoProvider
+    {
+        Windows.ApplicationModel.AppInfo FindAppInfo(String appId);
+    };
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass WpnClient
+        : [default]Windows.Internal.Notifications.IWpnClient
+        , [contract(Windows.Internal.Notifications.WpnClientContract, 2)]
+        Windows.Internal.Notifications.IWpnClient2
+        , [contract(Windows.Internal.Notifications.WpnClientContract, 3)]
+        Windows.Internal.Notifications.IWpnClient3
+    {
+        WpnClient();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 2)]
+    runtimeclass AdaptiveNotification
+        : [default]Windows.Internal.Notifications.IAdaptiveNotification
+    {
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 2)]
+    runtimeclass AdaptiveImage
+        : [default]Windows.Internal.Notifications.IAdaptiveImage
+    {
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass ToastActivatorSwitch
+        : [default]Windows.Internal.Notifications.IWpnToastActivator
+    {
+        ToastActivatorSwitch();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass ToastActivator_Foreground
+        : [default]Windows.Internal.Notifications.IWpnToastActivator
+    {
+        ToastActivator_Foreground();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass ToastActivator_Background
+        : [default]Windows.Internal.Notifications.IWpnToastActivator
+    {
+        ToastActivator_Background();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass ToastActivator_Protocol
+        : [default]Windows.Internal.Notifications.IWpnToastActivator
+    {
+        ToastActivator_Protocol();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass ToastActivator_AppLaunch
+        : [default]Windows.Internal.Notifications.IWpnToastActivator
+    {
+        ToastActivator_AppLaunch();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass ToastActivator_Collection
+        : [default]Windows.Internal.Notifications.IWpnToastActivator
+    {
+        ToastActivator_Collection();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass WpnAppInfoAggregator
+        : [default]Windows.Internal.Notifications.IWpnAppInfoProvider
+    {
+        WpnAppInfoAggregator();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass WpnAppInfoProvider_UWP
+        : [default]Windows.Internal.Notifications.IWpnAppInfoProvider
+    {
+        WpnAppInfoProvider_UWP();
+    }
+
+    [contract(Windows.Internal.Notifications.WpnClientContract, 1)]
+    runtimeclass WpnAppInfoProvider_Tdl
+        : [default]Windows.Internal.Notifications.IWpnAppInfoProvider
+    {
+        WpnAppInfoProvider_Tdl();
+    }
+
+}

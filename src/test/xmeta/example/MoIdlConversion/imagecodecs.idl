@@ -1,0 +1,318 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Imaging
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BitmapInterpolationMode
+    {
+        NearestNeighbor,
+        Linear,
+        Cubic,
+        Fant,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BitmapFlip
+    {
+        None,
+        Horizontal,
+        Vertical,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BitmapRotation
+    {
+        None,
+        Clockwise90Degrees,
+        Clockwise180Degrees,
+        Clockwise270Degrees,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct BitmapSize
+    {
+        UInt32 Width;
+        UInt32 Height;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ColorManagementMode
+    {
+        DoNotColorManage,
+        ColorManageToSRgb,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExifOrientationMode
+    {
+        IgnoreExifOrientation,
+        RespectExifOrientation,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PngFilterMode
+    {
+        Automatic,
+        None,
+        Sub,
+        Up,
+        Average,
+        Paeth,
+        Adaptive,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TiffCompressionMode
+    {
+        Automatic,
+        None,
+        Ccitt3,
+        Ccitt4,
+        Lzw,
+        Rle,
+        Zip,
+        LzwhDifferencing,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum JpegSubsamplingMode
+    {
+        Default,
+        Y4Cb2Cr0,
+        Y4Cb2Cr2,
+        Y4Cb4Cr4,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Graphics.Imaging.IBitmapTransform", ae755344-e268-4d35-adcf-e995d31a8d34)]
+    runtimeclass BitmapTransform
+    {
+        BitmapTransform();
+        UInt32 ScaledWidth{ get; };
+        UInt32 ScaledWidth{ set; };
+        UInt32 ScaledHeight{ get; };
+        UInt32 ScaledHeight{ set; };
+        Windows.Graphics.Imaging.BitmapInterpolationMode InterpolationMode{ get; };
+        Windows.Graphics.Imaging.BitmapInterpolationMode InterpolationMode{ set; };
+        Windows.Graphics.Imaging.BitmapFlip Flip{ get; };
+        Windows.Graphics.Imaging.BitmapFlip Flip{ set; };
+        Windows.Graphics.Imaging.BitmapRotation Rotation{ get; };
+        Windows.Graphics.Imaging.BitmapRotation Rotation{ set; };
+        Windows.Graphics.Imaging.BitmapBounds Bounds{ get; };
+        Windows.Graphics.Imaging.BitmapBounds Bounds{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Graphics.Imaging.IBitmapTypedValueFactory", 92dbb599-ce13-46bb-9545-cb3a3f63eb8b)]
+    [interface_name("Windows.Graphics.Imaging.IBitmapTypedValue", cd8044a9-2443-4000-b0cd-79316c56f589)]
+    [threading(both)]
+    runtimeclass BitmapTypedValue
+    {
+        [return_name("bitmapTypedValue")] [method_name( "Create" )] BitmapTypedValue(Object value, Windows.Foundation.PropertyType type);
+        Object Value{ get; };
+        Windows.Foundation.PropertyType Type{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [threading(both)]
+    runtimeclass BitmapPropertySet
+        : [default]Windows.Foundation.Collections.IMap<String, Windows.Graphics.Imaging.BitmapTypedValue>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Windows.Graphics.Imaging.BitmapTypedValue> >
+    {
+        BitmapPropertySet();
+    }
+
+    [uuid(7e0fe87a-3a70-48f8-9c55-196cf5a545f5)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IBitmapPropertiesView
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapPropertySet>  GetPropertiesAsync(Windows.Foundation.Collections.IIterable <String>  propertiesToRetrieve);
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass BitmapPropertiesView
+        : [default]Windows.Graphics.Imaging.IBitmapPropertiesView
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Graphics.Imaging.IBitmapProperties", ea9f4f1b-b505-4450-a4d1-e8ca94529d8d)]
+    runtimeclass BitmapProperties
+        : Windows.Graphics.Imaging.IBitmapPropertiesView
+    {
+        Windows.Foundation.IAsyncAction SetPropertiesAsync(Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, Windows.Graphics.Imaging.BitmapTypedValue> >  propertiesToSet);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Graphics.Imaging.IPixelDataProvider", dd831f25-185c-4595-9fb9-ccbe6ec18a6f)]
+    runtimeclass PixelDataProvider
+    {
+        UInt8[] DetachPixelData();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass ImageStream
+        : [default]Windows.Storage.Streams.IRandomAccessStreamWithContentType
+        , Windows.Storage.Streams.IContentTypeProvider
+        , Windows.Storage.Streams.IRandomAccessStream
+        , Windows.Storage.Streams.IOutputStream
+        , Windows.Foundation.IClosable
+        , Windows.Storage.Streams.IInputStream
+    {
+    }
+
+    [uuid(72a49a1c-8081-438d-91bc-94ecfc8185c6)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IBitmapFrame
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.ImageStream>  GetThumbnailAsync();
+        Windows.Graphics.Imaging.BitmapPropertiesView BitmapProperties{ get; };
+        Windows.Graphics.Imaging.BitmapPixelFormat BitmapPixelFormat{ get; };
+        Windows.Graphics.Imaging.BitmapAlphaMode BitmapAlphaMode{ get; };
+        Double DpiX{ get; };
+        Double DpiY{ get; };
+        UInt32 PixelWidth{ get; };
+        UInt32 PixelHeight{ get; };
+        UInt32 OrientedPixelWidth{ get; };
+        UInt32 OrientedPixelHeight{ get; };
+        [method_name("GetPixelDataAsync")] Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.PixelDataProvider>  GetPixelDataAsync();
+        [method_name("GetPixelDataTransformedAsync")] Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.PixelDataProvider>  GetPixelDataAsync(BitmapPixelFormat pixelFormat, BitmapAlphaMode alphaMode, BitmapTransform transform, ExifOrientationMode exifOrientationMode, ColorManagementMode colorManagementMode);
+    };
+
+    [uuid(fe287c9a-420c-4963-87ad-691436e08383)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IBitmapFrameWithSoftwareBitmap requires Windows.Graphics.Imaging.IBitmapFrame
+    {
+        [method_name("GetSoftwareBitmapAsync")] Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.SoftwareBitmap>  GetSoftwareBitmapAsync();
+        [method_name("GetSoftwareBitmapConvertedAsync")] Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.SoftwareBitmap>  GetSoftwareBitmapAsync(BitmapPixelFormat pixelFormat, BitmapAlphaMode alphaMode);
+        [method_name("GetSoftwareBitmapTransformedAsync")] Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.SoftwareBitmap>  GetSoftwareBitmapAsync(BitmapPixelFormat pixelFormat, BitmapAlphaMode alphaMode, BitmapTransform transform, ExifOrientationMode exifOrientationMode, ColorManagementMode colorManagementMode);
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass BitmapFrame
+        : [default]Windows.Graphics.Imaging.IBitmapFrame
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Graphics.Imaging.IBitmapFrameWithSoftwareBitmap
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Graphics.Imaging.IBitmapCodecInformation", 400caaf2-c4b0-4392-a3b0-6f6f9ba95cb4)]
+    runtimeclass BitmapCodecInformation
+    {
+        Guid CodecId{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  FileExtensions{ get; };
+        String FriendlyName{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  MimeTypes{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Graphics.Imaging.IBitmapDecoderStatics", 438ccb26-bcef-4e95-bad6-23a822e58d01)]
+    [interface_name("Windows.Graphics.Imaging.IBitmapDecoder", acef22ba-1d74-4c91-9dfc-9620745233e6)]
+    runtimeclass BitmapDecoder
+        : Windows.Graphics.Imaging.IBitmapFrame
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Graphics.Imaging.IBitmapFrameWithSoftwareBitmap
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Graphics.Imaging.IBitmapDecoderStatics2", 50ba68ea-99a1-40c4-80d9-aef0dafa6c3f)]
+        {
+            static Guid HeifDecoderId{ get; };
+            static Guid WebpDecoderId{ get; };
+        }
+        static Guid BmpDecoderId{ get; };
+        static Guid JpegDecoderId{ get; };
+        static Guid PngDecoderId{ get; };
+        static Guid TiffDecoderId{ get; };
+        static Guid GifDecoderId{ get; };
+        static Guid JpegXRDecoderId{ get; };
+        static Guid IcoDecoderId{ get; };
+        static Windows.Foundation.Collections.IVectorView <Windows.Graphics.Imaging.BitmapCodecInformation>  GetDecoderInformationEnumerator();
+        [method_name("CreateAsync")] static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapDecoder>  CreateAsync(Windows.Storage.Streams.IRandomAccessStream stream);
+        [method_name("CreateWithIdAsync")] static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapDecoder>  CreateAsync(Guid decoderId, Windows.Storage.Streams.IRandomAccessStream stream);
+        Windows.Graphics.Imaging.BitmapPropertiesView BitmapContainerProperties{ get; };
+        Windows.Graphics.Imaging.BitmapCodecInformation DecoderInformation{ get; };
+        UInt32 FrameCount{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.ImageStream>  GetPreviewAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapFrame>  GetFrameAsync(UInt32 frameIndex);
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Graphics.Imaging.IBitmapEncoderStatics", a74356a7-a4e4-4eb9-8e40-564de7e1ccb2)]
+    [interface_name("Windows.Graphics.Imaging.IBitmapEncoder", 2bc468e3-e1f8-4b54-95e8-32919551ce62)]
+    runtimeclass BitmapEncoder
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Graphics.Imaging.IBitmapEncoderStatics2", 33cbc259-fe31-41b1-b812-086d21e87e16)]
+        {
+            static Guid HeifEncoderId{ get; };
+        }
+        static Guid BmpEncoderId{ get; };
+        static Guid JpegEncoderId{ get; };
+        static Guid PngEncoderId{ get; };
+        static Guid TiffEncoderId{ get; };
+        static Guid GifEncoderId{ get; };
+        static Guid JpegXREncoderId{ get; };
+        static Windows.Foundation.Collections.IVectorView <Windows.Graphics.Imaging.BitmapCodecInformation>  GetEncoderInformationEnumerator();
+        [method_name("CreateAsync")] static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapEncoder>  CreateAsync(Guid encoderId, Windows.Storage.Streams.IRandomAccessStream stream);
+        [method_name("CreateWithEncodingOptionsAsync")] static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapEncoder>  CreateAsync(Guid encoderId, Windows.Storage.Streams.IRandomAccessStream stream, Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, Windows.Graphics.Imaging.BitmapTypedValue> >  encodingOptions);
+        static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapEncoder>  CreateForTranscodingAsync(Windows.Storage.Streams.IRandomAccessStream stream, BitmapDecoder bitmapDecoder);
+        static Windows.Foundation.IAsyncOperation <Windows.Graphics.Imaging.BitmapEncoder>  CreateForInPlacePropertyEncodingAsync(BitmapDecoder bitmapDecoder);
+        Windows.Graphics.Imaging.BitmapCodecInformation EncoderInformation{ get; };
+        Windows.Graphics.Imaging.BitmapProperties BitmapProperties{ get; };
+        Windows.Graphics.Imaging.BitmapProperties BitmapContainerProperties{ get; };
+        Boolean IsThumbnailGenerated{ get; };
+        Boolean IsThumbnailGenerated{ set; };
+        UInt32 GeneratedThumbnailWidth{ get; };
+        UInt32 GeneratedThumbnailWidth{ set; };
+        UInt32 GeneratedThumbnailHeight{ get; };
+        UInt32 GeneratedThumbnailHeight{ set; };
+        Windows.Graphics.Imaging.BitmapTransform BitmapTransform{ get; };
+        void SetPixelData(BitmapPixelFormat pixelFormat, BitmapAlphaMode alphaMode, UInt32 width, UInt32 height, Double dpiX, Double dpiY, [range(0, 2147483647)]UInt8[] pixels);
+        [method_name("GoToNextFrameAsync")] Windows.Foundation.IAsyncAction GoToNextFrameAsync();
+        [method_name("GoToNextFrameWithEncodingOptionsAsync")] Windows.Foundation.IAsyncAction GoToNextFrameAsync(Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, Windows.Graphics.Imaging.BitmapTypedValue> >  encodingOptions);
+        Windows.Foundation.IAsyncAction FlushAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Graphics.Imaging.IBitmapEncoderWithSoftwareBitmap", 686cd241-4330-4c77-ace4-0334968b1768)]
+        {
+            void SetSoftwareBitmap(SoftwareBitmap bitmap);
+        }
+    }
+
+
+
+
+}

@@ -1,0 +1,95 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IPackageExtensionStatics", d266abd9-46c7-426d-a49a-442c979a7020)]
+    [interface_name("Windows.Internal.StateRepository.IPackageExtension", 42493d7a-2a57-40e1-b77a-bb49a3c922a3)]
+    [threading(both)]
+    runtimeclass PackageExtension
+    {
+        PackageExtension();
+        static Boolean Exists(Int64 packageExtensionID);
+        static Boolean ExistsByCategory(String Category);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByPackageAndCategory(Package Package, String Category);
+        static Boolean ExistsByPackageAndIndex(Package Package, Int32 Index);
+        static Windows.Internal.StateRepository.PackageExtension Get(Int64 packageExtensionID);
+        static Windows.Internal.StateRepository.PackageExtension TryGet(Int64 packageExtensionID);
+        static Windows.Internal.StateRepository.PackageExtension GetByPackageAndIndex(Package Package, Int32 Index);
+        static Windows.Internal.StateRepository.PackageExtension TryGetByPackageAndIndex(Package Package, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageExtension>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageExtension>  FindByCategory(String Category);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageExtension>  FindByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageExtension>  FindByPackageAndCategory(Package Package, String Category);
+        static Boolean ExistsByUserAndCategory(User user, String category);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageExtension>  FindByUserAndCategory(User user, String category);
+        Int64 _PackageExtensionID{ get; };
+        Int64 _PackageExtensionID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        String Category{ get; };
+        String Category{ set; };
+        Boolean IsExecutableNull{ get; };
+        void SetExecutableToNull();
+        String Executable{ get; };
+        String Executable{ set; };
+        Windows.Storage.StorageFile GetExecutableAsStorageFile();
+        void SetExecutableAsStorageFile(Windows.Storage.IStorageFile value);
+        Boolean IsEntrypointNull{ get; };
+        void SetEntrypointToNull();
+        String Entrypoint{ get; };
+        String Entrypoint{ set; };
+        Boolean IsRuntimeTypeNull{ get; };
+        void SetRuntimeTypeToNull();
+        String RuntimeType{ get; };
+        String RuntimeType{ set; };
+        Boolean IsStartPageNull{ get; };
+        void SetStartPageToNull();
+        String StartPage{ get; };
+        String StartPage{ set; };
+        Windows.Storage.StorageFile GetStartPageAsStorageFile();
+        void SetStartPageAsStorageFile(Windows.Storage.IStorageFile value);
+        Windows.Internal.StateRepository.PackageExtensionFlags Flags{ get; };
+        Windows.Internal.StateRepository.PackageExtensionFlags Flags{ set; };
+        Boolean LocalizedDictionaryNeedsResolution{ get; };
+        Boolean LocalizedDictionaryNeedsResolution{ set; };
+        Boolean LocalizedDictionaryIsReady{ get; };
+        Boolean LocalizedDictionaryIsReady{ set; };
+        Boolean IsCentennialFullTrust{ get; };
+        Boolean IsCentennialFullTrust{ set; };
+        Boolean IsCentennialPartialTrust{ get; };
+        Boolean IsCentennialPartialTrust{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        Boolean _LocalizedDictionaryNeedsResolution{ get; };
+        Boolean _LocalizedDictionaryNeedsResolution{ set; };
+        Boolean _LocalizedDictionaryIsReady{ get; };
+        Boolean _LocalizedDictionaryIsReady{ set; };
+        Boolean IsCentennial{ get; };
+    }
+
+
+}

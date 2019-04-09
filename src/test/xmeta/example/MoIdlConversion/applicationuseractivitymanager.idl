@@ -1,0 +1,72 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.UserActivities
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.UserActivities.InternalContract, 1)]
+    enum ActivityAcquisitionType
+    {
+        None,
+        Published,
+        Requested,
+        Impersonated,
+        ImpersonatedAnchor,
+        Expected,
+        SystemPreGenerated,
+    };
+
+
+    [contract(Windows.Internal.Shell.UserActivities.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.UserActivities.IActivityChangedEventArgs", cd585d01-23bc-43ab-92b7-383c80ad2f72)]
+    runtimeclass ActivityChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.Tabs.ShellTabId TabId{ get; };
+        Windows.Internal.ApplicationModel.WindowManagement.WindowId WindowId{ get; };
+        Windows.ApplicationModel.UserActivities.UserActivity Activity{ get; };
+        Windows.Internal.Shell.UserActivities.ActivityAcquisitionType AcquisitionType{ get; };
+    }
+
+
+
+    [contract(Windows.Internal.Shell.UserActivities.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Shell.UserActivities.IApplicationUserActivityBrokerStatics", 2bf494a1-fcad-44dd-86af-b73450f355b1)]
+    [interface_name("Windows.Internal.Shell.UserActivities.IApplicationUserActivityBroker", 7179fada-cedf-43ab-b190-37bf20b121ff)]
+    [threading(both)]
+    runtimeclass ApplicationUserActivityBroker
+    {
+        static Windows.Internal.Shell.UserActivities.ApplicationUserActivityBroker Current{ get; };
+        Windows.ApplicationModel.UserActivities.UserActivity GetForTab(Windows.Internal.ComposableShell.Tabs.ShellTabId tabId);
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.UserActivities.UserActivity>  GetForTabs(Windows.Foundation.Collections.IVectorView <Windows.Internal.ComposableShell.Tabs.ShellTabId>  tabIds);
+        void AddViewTabActivity(Windows.Internal.ApplicationModel.WindowManagement.WindowId windowId, Windows.Internal.ComposableShell.Tabs.ShellTabId tabId, Windows.ApplicationModel.UserActivities.UserActivity activity, ActivityAcquisitionType acquisitionType);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.UserActivities.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.UserActivities.IApplicationUserActivityManagerStatics", e3b77541-53b4-4d4e-ae2a-6d728e8f0c83)]
+    [interface_name("Windows.Internal.Shell.UserActivities.IApplicationUserActivityManager", 1141df29-a23a-4063-a2c8-b06a4369be4d)]
+    [threading(both)]
+    runtimeclass ApplicationUserActivityManager
+    {
+        static Windows.Internal.Shell.UserActivities.ApplicationUserActivityManager Current{ get; };
+        [return_name("result")] Windows.ApplicationModel.UserActivities.UserActivity GetForTab(Windows.Internal.ComposableShell.Tabs.ShellTabId tabId, out ActivityAcquisitionType acquisitionType);
+        [return_name("result")] Windows.ApplicationModel.UserActivities.UserActivity GetForWindow(Windows.Internal.ApplicationModel.WindowManagement.WindowId windowId, out ActivityAcquisitionType acquisitionType);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.UserActivities.ApplicationUserActivityManager, Windows.Internal.Shell.UserActivities.ActivityChangedEventArgs>  TabActivityChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.UserActivities.ApplicationUserActivityManager, Windows.Internal.Shell.UserActivities.ActivityChangedEventArgs>  WindowActivityChanged;
+    }
+
+
+}

@@ -1,0 +1,40 @@
+
+
+
+
+
+
+
+namespace Windows.Devices.Adc.Provider
+{
+    [contract(Windows.Devices.DevicesLowLevelContract, 1)]
+    enum ProviderAdcChannelMode
+    {
+        SingleEnded,
+        Differential,
+    };
+
+    [contract(Windows.Devices.DevicesLowLevelContract, 1)]
+    [uuid(be545828-816d-4de5-a048-aba06958aaa8)]
+    interface IAdcControllerProvider
+    {
+        Int32 ChannelCount{ get; };
+        Int32 ResolutionInBits{ get; };
+        Int32 MinValue{ get; };
+        Int32 MaxValue{ get; };
+        Windows.Devices.Adc.Provider.ProviderAdcChannelMode ChannelMode{ get; };
+        Windows.Devices.Adc.Provider.ProviderAdcChannelMode ChannelMode{ set; };
+        Boolean IsChannelModeSupported(ProviderAdcChannelMode channelMode);
+        void AcquireChannel(Int32 channel);
+        void ReleaseChannel(Int32 channel);
+        Int32 ReadValue(Int32 channelNumber);
+    };
+
+    [contract(Windows.Devices.DevicesLowLevelContract, 1)]
+    [uuid(28953668-9359-4c57-bc88-e275e81638c9)]
+    interface IAdcProvider
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Adc.Provider.IAdcControllerProvider>  GetControllers();
+    };
+
+}

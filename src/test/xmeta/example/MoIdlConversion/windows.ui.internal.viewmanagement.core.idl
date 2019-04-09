@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.ViewManagement.Core
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [uuid(eef2539f-738f-4b44-89f2-128c9978fa52)]
+    [contract(Windows.UI.Internal.ViewManagement.Core.InternalContract, 1)]
+    interface IFrameworkInputView
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.Core.CoreInputView, Windows.UI.Internal.ViewManagement.Core.FrameworkInputViewOcclusionsChangedEventArgs>  FrameworkOcclusionsChanged;
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.ViewManagement.Core.InternalContract, 1)]
+    [interface_name("Windows.UI.Internal.ViewManagement.Core.IFrameworkInputViewOcclusionsChangedEventArgs", 6536bde6-1d15-4dac-a9f8-8189a1be3463)]
+    runtimeclass FrameworkInputViewOcclusionsChangedEventArgs
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.UI.ViewManagement.Core.CoreInputViewOcclusion>  Occlusions{ get; };
+        Boolean Handled{ get; };
+    }
+
+
+}

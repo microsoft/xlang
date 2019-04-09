@@ -1,0 +1,36 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.HolographicCapture
+{
+    [contractversion(2)]
+    [internal]
+    apicontract InternalContract{};
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.HolographicCapture.InternalContract, 1)]
+    [constructor_name("Windows.Internal.HolographicCapture.IContentCaptureFactory", 58679d93-f43a-43e4-9af3-2c74bf445adc)]
+    [interface_name("Windows.Internal.HolographicCapture.IContentCapture", 6d5cabf4-16ef-42ee-9563-eaf2b8b6fed4)]
+    runtimeclass ContentCapture
+        : Windows.Foundation.IClosable
+    {
+
+        [contract(Windows.Internal.HolographicCapture.InternalContract, 2)]
+        [constructor_name("Windows.Internal.HolographicCapture.IContentCaptureFactory2", ce231b88-d5c3-4c0e-a331-da125691fe69)]
+        {
+            [method_name( "CreateInstanceWithSize" )] ContentCapture(UInt32 displayFlags, Windows.Foundation.Size size);
+        }
+        [method_name( "CreateInstance" )] ContentCapture(UInt32 displayFlags);
+        void TakeScreenshot(String filePathAndName);
+        [method_name("FuzzyImageCompare")] Boolean FuzzyImageCompare(String fileNameAndPath1, String fileNameAndPath2, String diffFileNameAndPath);
+        [method_name("FuzzyImageCompareWithThreshold")] Boolean FuzzyImageCompare(String fileNameAndPath1, String fileNameAndPath2, String diffFileNameAndPath, Single threshold);
+    }
+
+
+}

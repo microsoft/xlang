@@ -1,0 +1,439 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.SpeechRecognition
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechRecognitionConstraintProbability
+    {
+        Default,
+        Min,
+        Max,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechRecognitionConfidence
+    {
+        High,
+        Medium,
+        Low,
+        Rejected,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechRecognitionScenario
+    {
+        WebSearch,
+        Dictation,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        FormFilling,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechRecognitionConstraintType
+    {
+        Topic,
+        List,
+        Grammar,
+        VoiceCommandDefinition,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechRecognizerState
+    {
+        Idle,
+        Capturing,
+        Processing,
+        SoundStarted,
+        SoundEnded,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        SpeechDetected,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Paused,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechRecognitionAudioProblem
+    {
+        None,
+        TooNoisy,
+        NoSignal,
+        TooLoud,
+        TooQuiet,
+        TooFast,
+        TooSlow,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechRecognitionResultStatus
+    {
+        Success,
+        TopicLanguageNotSupported,
+        GrammarLanguageMismatch,
+        GrammarCompilationFailure,
+        AudioQualityFailure,
+        UserCanceled,
+        Unknown,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        TimeoutExceeded,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        PauseLimitExceeded,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        NetworkFailure,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        MicrophoneUnavailable,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SpeechContinuousRecognitionMode
+    {
+        Default,
+        PauseOnRecognition,
+    };
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionSemanticInterpretation", aae1da9b-7e32-4c1f-89fe-0c65f486f52e)]
+    runtimeclass SpeechRecognitionSemanticInterpretation
+    {
+        Windows.Foundation.Collections.IMapView <String, Windows.Foundation.Collections.IVectorView <String> >  Properties{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionResult", 4e303157-034e-4652-857e-d0454cc4beec)]
+    runtimeclass SpeechRecognitionResult
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognitionResultStatus Status{ get; };
+        String Text{ get; };
+        Windows.Media.SpeechRecognition.SpeechRecognitionConfidence Confidence{ get; };
+        Windows.Media.SpeechRecognition.SpeechRecognitionSemanticInterpretation SemanticInterpretation{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.SpeechRecognition.SpeechRecognitionResult>  GetAlternates(UInt32 maxAlternates);
+        Windows.Media.SpeechRecognition.ISpeechRecognitionConstraint Constraint{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  RulePath{ get; };
+        Double RawConfidence{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionResult2", af7ed1ba-451b-4166-a0c1-1ffe84032d03)]
+        {
+            Windows.Foundation.DateTime PhraseStartTime{ get; };
+            Windows.Foundation.TimeSpan PhraseDuration{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(79ac1628-4d68-43c4-8911-40dc4101b55b)]
+    interface ISpeechRecognitionConstraint
+    {
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        String Tag{ get; };
+        String Tag{ set; };
+        Windows.Media.SpeechRecognition.SpeechRecognitionConstraintType Type{ get; };
+        Windows.Media.SpeechRecognition.SpeechRecognitionConstraintProbability Probability{ get; };
+        Windows.Media.SpeechRecognition.SpeechRecognitionConstraintProbability Probability{ set; };
+    };
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.SpeechRecognition.ISpeechRecognitionTopicConstraintFactory", 6e6863df-ec05-47d7-a5df-56a3431e58d2)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionTopicConstraint", bf6fdf19-825d-4e69-a681-36e48cf1c93e)]
+    runtimeclass SpeechRecognitionTopicConstraint
+        : Windows.Media.SpeechRecognition.ISpeechRecognitionConstraint
+    {
+        [method_name( "Create" )] SpeechRecognitionTopicConstraint(SpeechRecognitionScenario scenario, String topicHint);
+        [method_name( "CreateWithTag" )] SpeechRecognitionTopicConstraint(SpeechRecognitionScenario scenario, String topicHint, String tag);
+        Windows.Media.SpeechRecognition.SpeechRecognitionScenario Scenario{ get; };
+        String TopicHint{ get; };
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.SpeechRecognition.ISpeechRecognitionListConstraintFactory", 40f3cdc7-562a-426a-9f3b-3b4e282be1d5)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionListConstraint", 09c487e9-e4ad-4526-81f2-4946fb481d98)]
+    runtimeclass SpeechRecognitionListConstraint
+        : Windows.Media.SpeechRecognition.ISpeechRecognitionConstraint
+    {
+        [method_name( "Create" )] SpeechRecognitionListConstraint(Windows.Foundation.Collections.IIterable <String>  commands);
+        [method_name( "CreateWithTag" )] SpeechRecognitionListConstraint(Windows.Foundation.Collections.IIterable <String>  commands, String tag);
+        Windows.Foundation.Collections.IVector <String>  Commands{ get; };
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.SpeechRecognition.ISpeechRecognitionGrammarFileConstraintFactory", 3da770eb-c479-4c27-9f19-89974ef392d1)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionGrammarFileConstraint", b5031a8f-85ca-4fa4-b11a-474fc41b3835)]
+    runtimeclass SpeechRecognitionGrammarFileConstraint
+        : Windows.Media.SpeechRecognition.ISpeechRecognitionConstraint
+    {
+        [method_name( "Create" )] SpeechRecognitionGrammarFileConstraint(Windows.Storage.StorageFile file);
+        [method_name( "CreateWithTag" )] SpeechRecognitionGrammarFileConstraint(Windows.Storage.StorageFile file, String tag);
+        Windows.Storage.StorageFile GrammarFile{ get; };
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognizerTimeouts", 2ef76fca-6a3c-4dca-a153-df1bc88a79af)]
+    runtimeclass SpeechRecognizerTimeouts
+    {
+        Windows.Foundation.TimeSpan InitialSilenceTimeout{ get; };
+        Windows.Foundation.TimeSpan InitialSilenceTimeout{ set; };
+        Windows.Foundation.TimeSpan EndSilenceTimeout{ get; };
+        Windows.Foundation.TimeSpan EndSilenceTimeout{ set; };
+        Windows.Foundation.TimeSpan BabbleTimeout{ get; };
+        Windows.Foundation.TimeSpan BabbleTimeout{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognizerUIOptions", 7888d641-b92b-44ba-a25f-d1864630641f)]
+    runtimeclass SpeechRecognizerUIOptions
+    {
+        String ExampleText{ get; };
+        String ExampleText{ set; };
+        String AudiblePrompt{ get; };
+        String AudiblePrompt{ set; };
+        Boolean IsReadBackEnabled{ get; };
+        Boolean IsReadBackEnabled{ set; };
+        Boolean ShowConfirmation{ get; };
+        Boolean ShowConfirmation{ set; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionCompilationResult", 407e6c5d-6ac7-4da4-9cc1-2fce32cf7489)]
+    runtimeclass SpeechRecognitionCompilationResult
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognitionResultStatus Status{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.SpeechRecognition.ISpeechRecognizerStatics", 87a35eac-a7dc-4b0b-bcc9-24f47c0b7ebf)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognizer", 0bc3c9cb-c26a-40f2-aeb5-8096b2e48073)]
+    runtimeclass SpeechRecognizer
+        : Windows.Foundation.IClosable
+    {
+        SpeechRecognizer();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Media.SpeechRecognition.ISpeechRecognizerStatics2", 1d1b0d95-7565-4ef9-a2f3-ba15162a96cf)]
+        {
+            static Windows.Foundation.IAsyncOperation <Boolean>  TrySetSystemSpeechLanguageAsync(Windows.Globalization.Language speechLanguage);
+        }
+        static Windows.Globalization.Language SystemSpeechLanguage{ get; };
+        static Windows.Foundation.Collections.IVectorView <Windows.Globalization.Language>  SupportedTopicLanguages{ get; };
+        static Windows.Foundation.Collections.IVectorView <Windows.Globalization.Language>  SupportedGrammarLanguages{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Media.SpeechRecognition.ISpeechRecognizerFactory", 60c488dd-7fb8-4033-ac70-d046f64818e1)]
+        {
+            [method_name( "Create" )] SpeechRecognizer(Windows.Globalization.Language language);
+        }
+        Windows.Globalization.Language CurrentLanguage{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Media.SpeechRecognition.ISpeechRecognitionConstraint>  Constraints{ get; };
+        Windows.Media.SpeechRecognition.SpeechRecognizerTimeouts Timeouts{ get; };
+        Windows.Media.SpeechRecognition.SpeechRecognizerUIOptions UIOptions{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Media.SpeechRecognition.SpeechRecognitionCompilationResult>  CompileConstraintsAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Media.SpeechRecognition.SpeechRecognitionResult>  RecognizeAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Media.SpeechRecognition.SpeechRecognitionResult>  RecognizeWithUIAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.SpeechRecognition.SpeechRecognizer, Windows.Media.SpeechRecognition.SpeechRecognitionQualityDegradingEventArgs>  RecognitionQualityDegrading;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.SpeechRecognition.SpeechRecognizer, Windows.Media.SpeechRecognition.SpeechRecognizerStateChangedEventArgs>  StateChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognizer2", 63c9baf1-91e3-4ea4-86a1-7c3867d084a6)]
+        {
+            Windows.Media.SpeechRecognition.SpeechContinuousRecognitionSession ContinuousRecognitionSession{ get; };
+            Windows.Media.SpeechRecognition.SpeechRecognizerState State{ get; };
+            Windows.Foundation.IAsyncAction StopRecognitionAsync();
+            event Windows.Foundation.TypedEventHandler <Windows.Media.SpeechRecognition.SpeechRecognizer, Windows.Media.SpeechRecognition.SpeechRecognitionHypothesisGeneratedEventArgs>  HypothesisGenerated;
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionQualityDegradingEventArgs", 4fe24105-8c3a-4c7e-8d0a-5bd4f5b14ad8)]
+    runtimeclass SpeechRecognitionQualityDegradingEventArgs
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognitionAudioProblem Problem{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognizerStateChangedEventArgs", 563d4f09-ba03-4bad-ad81-ddc6c4dab0c3)]
+    runtimeclass SpeechRecognizerStateChangedEventArgs
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognizerState State{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionVoiceCommandDefinitionConstraint", f2791c2b-1ef4-4ae7-9d77-b6ff10b8a3c2)]
+    runtimeclass SpeechRecognitionVoiceCommandDefinitionConstraint
+        : Windows.Media.SpeechRecognition.ISpeechRecognitionConstraint
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechContinuousRecognitionSession", 6a213c04-6614-49f8-99a2-b5e9b3a085c8)]
+    runtimeclass SpeechContinuousRecognitionSession
+    {
+        Windows.Foundation.TimeSpan AutoStopSilenceTimeout{ get; };
+        Windows.Foundation.TimeSpan AutoStopSilenceTimeout{ set; };
+        [method_name("StartAsync")] Windows.Foundation.IAsyncAction StartAsync();
+        [method_name("StartWithModeAsync")] Windows.Foundation.IAsyncAction StartAsync(SpeechContinuousRecognitionMode mode);
+        Windows.Foundation.IAsyncAction StopAsync();
+        Windows.Foundation.IAsyncAction CancelAsync();
+        Windows.Foundation.IAsyncAction PauseAsync();
+        void Resume();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.SpeechRecognition.SpeechContinuousRecognitionSession, Windows.Media.SpeechRecognition.SpeechContinuousRecognitionCompletedEventArgs>  Completed;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.SpeechRecognition.SpeechContinuousRecognitionSession, Windows.Media.SpeechRecognition.SpeechContinuousRecognitionResultGeneratedEventArgs>  ResultGenerated;
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionHypothesisGeneratedEventArgs", 55161a7a-8023-5866-411d-1213bb271476)]
+    runtimeclass SpeechRecognitionHypothesisGeneratedEventArgs
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognitionHypothesis Hypothesis{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechRecognitionHypothesis", 7a7b25b0-99c5-4f7d-bf84-10aa1302b634)]
+    runtimeclass SpeechRecognitionHypothesis
+    {
+        String Text{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechContinuousRecognitionCompletedEventArgs", e3d069bb-e30c-5e18-424b-7fbe81f8fbd0)]
+    runtimeclass SpeechContinuousRecognitionCompletedEventArgs
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognitionResultStatus Status{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.SpeechRecognition.ISpeechContinuousRecognitionResultGeneratedEventArgs", 19091e1e-6e7e-5a46-40fb-76594f786504)]
+    runtimeclass SpeechContinuousRecognitionResultGeneratedEventArgs
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognitionResult Result{ get; };
+    }
+
+
+
+    [contract(Windows.Phone.PhoneContract, 1)]
+    [marshaling_behavior(agile)]
+    [deprecated("Use Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinitionManager instead of Windows.Media.SpeechRecognition.VoiceComandManager. For more info, see MSDN.", deprecate, Windows.Phone.PhoneContract, 0x10000)]
+    [static_name("Windows.Media.SpeechRecognition.IVoiceCommandManager", aa3a8dd5-b6e7-4ee2-baa9-dd6baced0a2b)]
+    runtimeclass VoiceCommandManager
+    {
+        [deprecated("Use Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinitionManager instead of Windows.Media.SpeechRecognition.VoiceComandManager. For more info, see MSDN.", deprecate, Windows.Phone.PhoneContract, 0x10000)]
+        static Windows.Foundation.IAsyncAction InstallCommandSetsFromStorageFileAsync(Windows.Storage.StorageFile file);
+        [deprecated("Use Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinitionManager instead of Windows.Media.SpeechRecognition.VoiceComandManager. For more info, see MSDN.", deprecate, Windows.Phone.PhoneContract, 0x10000)]
+        static Windows.Foundation.Collections.IMapView <String, Windows.Media.SpeechRecognition.VoiceCommandSet>  InstalledCommandSets{ get; };
+    }
+
+
+    [contract(Windows.Phone.PhoneContract, 1)]
+    [marshaling_behavior(agile)]
+    [deprecated("Use Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinition instead of Windows.Media.SpeechRecognition.VoiceComandSet. For more info, see MSDN.", deprecate, Windows.Phone.PhoneContract, 0x10000)]
+    [interface_name("Windows.Media.SpeechRecognition.IVoiceCommandSet", 0bedda75-46e6-4b11-a088-5c68632899b5)]
+    runtimeclass VoiceCommandSet
+    {
+        [deprecated("Use Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinition instead of Windows.Media.SpeechRecognition.VoiceComandSet. For more info, see MSDN.", deprecate, Windows.Phone.PhoneContract, 0x10000)]
+        String Language{ get; };
+        [deprecated("Use Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinition instead of Windows.Media.SpeechRecognition.VoiceComandSet. For more info, see MSDN.", deprecate, Windows.Phone.PhoneContract, 0x10000)]
+        String Name{ get; };
+        [deprecated("Use Windows.ApplicationModel.VoiceCommands.VoiceCommandDefinition instead of Windows.Media.SpeechRecognition.VoiceComandSet. For more info, see MSDN.", deprecate, Windows.Phone.PhoneContract, 0x10000)]
+        Windows.Foundation.IAsyncAction SetPhraseListAsync(String phraseListName, Windows.Foundation.Collections.IIterable <String>  phraseList);
+    }
+
+
+}
+namespace Windows.ApplicationModel.Activation
+{
+    [uuid(ab92dcfd-8d43-4de6-9775-20704b581b00)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IVoiceCommandActivatedEventArgs requires Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        Windows.Media.SpeechRecognition.SpeechRecognitionResult Result{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass VoiceCommandActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IVoiceCommandActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+}
+namespace Windows.UI.WebUI
+{
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass WebUIVoiceCommandActivatedEventArgs
+        : [default]Windows.ApplicationModel.Activation.IVoiceCommandActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+        , Windows.UI.WebUI.IActivatedEventArgsDeferral
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.ApplicationModel.Activation.IActivatedEventArgsWithUser
+    {
+    }
+
+}

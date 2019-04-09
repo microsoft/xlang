@@ -1,0 +1,1376 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Xaml.Controls.Maps
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum MapAnimationKind
+    {
+        Default,
+        None,
+        Linear,
+        Bow,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum MapCameraChangeReason
+    {
+        System,
+        UserInteraction,
+        Programmatic,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum MapColorScheme
+    {
+        Light,
+        Dark,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MapElementCollisionBehavior
+    {
+        Hide,
+        RemainVisible,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum MapInteractionMode
+    {
+        Auto,
+        Disabled,
+        GestureOnly,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        PointerAndKeyboard = 2,
+        ControlOnly,
+        GestureAndControl,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        PointerKeyboardAndControl = 4,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        PointerOnly,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum MapLoadingStatus
+    {
+        Loading,
+        Loaded,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        DataUnavailable,
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        DownloadedMapsManagerUnavailable,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum MapModel3DShadingOption
+    {
+        Default,
+        Flat,
+        Smooth,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum MapPanInteractionMode
+    {
+        Auto,
+        Disabled,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum MapProjection
+    {
+        WebMercator,
+        Globe,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MapStyle
+    {
+        None,
+        Road,
+        Aerial,
+        AerialWithRoads,
+        Terrain,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Aerial3D,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Aerial3DWithRoads,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Custom,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [webhosthidden]
+    enum MapTileAnimationState
+    {
+        Stopped,
+        Paused,
+        Playing,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MapTileLayer
+    {
+        LabelOverlay,
+        RoadOverlay,
+        AreaOverlay,
+        BackgroundOverlay,
+        BackgroundReplacement,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [webhosthidden]
+    enum MapVisibleRegionKind
+    {
+        Near,
+        Full,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MapWatermarkMode
+    {
+        Automatic,
+        On,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct MapZoomLevelRange
+    {
+        Double Min;
+        Double Max;
+    };
+
+
+}
+namespace Windows.UI.Xaml.Automation.Peers
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IMapControlAutomationPeer", 425beee4-f2e8-4bcb-9382-5dfdd11fe45f)]
+    runtimeclass MapControlAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+        , [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Windows.UI.Xaml.Automation.Provider.IScrollProvider
+        , [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.UI.Xaml.Automation.Provider.ITransformProvider2
+        , [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.UI.Xaml.Automation.Provider.ITransformProvider
+    {
+    }
+
+
+}
+namespace Windows.UI.Xaml.Controls.Maps
+{
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapCameraFactory", ea3b0f16-83af-4ace-8e71-10ad9f1e9e7f)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapCamera", 53a6b623-c0f8-4d8b-ad1e-a59598ea840b)]
+    [threading(both)]
+    runtimeclass MapCamera
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstanceWithLocation" )] MapCamera(Windows.Devices.Geolocation.Geopoint location);
+        [method_name( "CreateInstanceWithLocationAndHeading" )] MapCamera(Windows.Devices.Geolocation.Geopoint location, Double headingInDegrees);
+        [method_name( "CreateInstanceWithLocationHeadingAndPitch" )] MapCamera(Windows.Devices.Geolocation.Geopoint location, Double headingInDegrees, Double pitchInDegrees);
+        [method_name( "CreateInstanceWithLocationHeadingPitchRollAndFieldOfView" )] MapCamera(Windows.Devices.Geolocation.Geopoint location, Double headingInDegrees, Double pitchInDegrees, Double rollInDegrees, Double fieldOfViewInDegrees);
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ set; };
+        Double Heading{ get; };
+        Double Heading{ set; };
+        Double Pitch{ get; };
+        Double Pitch{ set; };
+        Double Roll{ get; };
+        Double Roll{ set; };
+        Double FieldOfView{ get; };
+        Double FieldOfView{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapActualCameraChangedEventArgs", daa080da-b7f4-422c-a618-bbaa7c1d814c)]
+    [threading(both)]
+    runtimeclass MapActualCameraChangedEventArgs
+    {
+        MapActualCameraChangedEventArgs();
+        Windows.UI.Xaml.Controls.Maps.MapCamera Camera{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapActualCameraChangedEventArgs2", 7ba4c7e5-10dc-455a-9d04-1d72fb6d9b93)]
+        {
+            Windows.UI.Xaml.Controls.Maps.MapCameraChangeReason ChangeReason{ get; };
+        }
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapActualCameraChangingEventArgs", 6b0dbed6-93f7-4682-8de5-a47a1cc7a945)]
+    [threading(both)]
+    runtimeclass MapActualCameraChangingEventArgs
+    {
+        MapActualCameraChangingEventArgs();
+        Windows.UI.Xaml.Controls.Maps.MapCamera Camera{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapActualCameraChangingEventArgs2", f2867897-40ac-4e8a-a927-510f3846a47e)]
+        {
+            Windows.UI.Xaml.Controls.Maps.MapCameraChangeReason ChangeReason{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapElementStatics", e8c71cf2-bfef-4b49-8e99-41b5e3789fd2)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapElementFactory", 4a30d007-0bd6-47a5-860b-7e7cf5f0c573)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElement", d61fc4df-b245-47f2-9ac2-43c058b1c903)]
+    [threading(both)]
+    unsealed runtimeclass MapElement
+        : Windows.UI.Xaml.DependencyObject
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapElementStatics3", e11ee92f-9742-49aa-aad8-2e466bff3796)]
+        {
+            static Windows.UI.Xaml.DependencyProperty MapStyleSheetEntryProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty MapStyleSheetEntryStateProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty TagProperty{ get; };
+        }
+        static Windows.UI.Xaml.DependencyProperty ZIndexProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VisibleProperty{ get; };
+        [method_name( "CreateInstance" )] MapElement();
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapElementStatics4", a4296f0b-dff8-467c-9315-6f6db93ee2ba)]
+        {
+            static Windows.UI.Xaml.DependencyProperty IsEnabledProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapElementStatics2", 9bf72f30-80fe-4f30-bcc1-fa894050f676)]
+        {
+            static Windows.UI.Xaml.DependencyProperty MapTabIndexProperty{ get; };
+        }
+        Int32 ZIndex{ get; };
+        Int32 ZIndex{ set; };
+        Boolean Visible{ get; };
+        Boolean Visible{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElement2", 6619f261-fba6-4964-a7ff-f1af63ab9cb0)]
+        {
+            Int32 MapTabIndex{ get; };
+            Int32 MapTabIndex{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElement3", 13efbc59-45ed-48b4-93ad-e3f78f8cf218)]
+        {
+            String MapStyleSheetEntry{ get; };
+            String MapStyleSheetEntry{ set; };
+            String MapStyleSheetEntryState{ get; };
+            String MapStyleSheetEntryState{ set; };
+            Object Tag{ get; };
+            Object Tag{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElement4", 645883b6-1fc1-4ceb-93bd-dc2c960072e9)]
+        {
+            Boolean IsEnabled{ get; };
+            Boolean IsEnabled{ set; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapContextRequestedEventArgs", fdd1b423-c961-4df2-bb57-82ee0f0bb591)]
+    [threading(both)]
+    runtimeclass MapContextRequestedEventArgs
+    {
+        MapContextRequestedEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Xaml.Controls.Maps.MapElement>  MapElements{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapCustomExperienceChangedEventArgs", b9e6fb9b-8fc1-4042-ac34-a61b38bb7514)]
+    [threading(both)]
+    runtimeclass MapCustomExperienceChangedEventArgs
+    {
+        MapCustomExperienceChangedEventArgs();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementClickEventArgs", 40168a11-d080-4519-99a1-3149fb8999d0)]
+    [threading(both)]
+    runtimeclass MapElementClickEventArgs
+    {
+        MapElementClickEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapElement>  MapElements{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementPointerEnteredEventArgs", ab85dd4e-91d7-4b31-8f0a-d390c7d3a2ef)]
+    [threading(both)]
+    runtimeclass MapElementPointerEnteredEventArgs
+    {
+        MapElementPointerEnteredEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapElement MapElement{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementPointerExitedEventArgs", c1a45af9-60c9-4679-9119-20abc75d931f)]
+    [threading(both)]
+    runtimeclass MapElementPointerExitedEventArgs
+    {
+        MapElementPointerExitedEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapElement MapElement{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementsLayerClickEventArgs", 2ca7cf66-af1b-4c05-8c85-f74ae3d4677f)]
+    [threading(both)]
+    runtimeclass MapElementsLayerClickEventArgs
+    {
+        MapElementsLayerClickEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapElement>  MapElements{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementsLayerContextRequestedEventArgs", da45d0b3-7a0e-4758-808b-3a637627eb0d)]
+    [threading(both)]
+    runtimeclass MapElementsLayerContextRequestedEventArgs
+    {
+        MapElementsLayerContextRequestedEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Xaml.Controls.Maps.MapElement>  MapElements{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementsLayerPointerEnteredEventArgs", 757fc032-4694-4404-8c89-348b6b76c5e6)]
+    [threading(both)]
+    runtimeclass MapElementsLayerPointerEnteredEventArgs
+    {
+        MapElementsLayerPointerEnteredEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapElement MapElement{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementsLayerPointerExitedEventArgs", 92f3c6ad-03ed-4c39-af20-2a07ee1ccea6)]
+    [threading(both)]
+    runtimeclass MapElementsLayerPointerExitedEventArgs
+    {
+        MapElementsLayerPointerExitedEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapElement MapElement{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapRightTappedEventArgs", 20943171-6fe8-40a6-ad0e-297379b575a7)]
+    [threading(both)]
+    runtimeclass MapRightTappedEventArgs
+    {
+        MapRightTappedEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTargetCameraChangedEventArgs", dbf00472-e953-4fa8-97d0-ea86359057cf)]
+    [threading(both)]
+    runtimeclass MapTargetCameraChangedEventArgs
+    {
+        MapTargetCameraChangedEventArgs();
+        Windows.UI.Xaml.Controls.Maps.MapCamera Camera{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTargetCameraChangedEventArgs2", 97c0b332-f2b6-460b-8d91-ac020a2383dd)]
+        {
+            Windows.UI.Xaml.Controls.Maps.MapCameraChangeReason ChangeReason{ get; };
+        }
+    }
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileBitmapRequestDeferral", fe370542-a4ac-4efa-9665-0490b0cafdd2)]
+    [threading(both)]
+    runtimeclass MapTileBitmapRequestDeferral
+    {
+        MapTileBitmapRequestDeferral();
+        void Complete();
+    }
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileBitmapRequest", 46733fbc-d89d-472b-b5f6-d7066b0584f4)]
+    [threading(both)]
+    runtimeclass MapTileBitmapRequest
+    {
+        MapTileBitmapRequest();
+        Windows.Storage.Streams.IRandomAccessStreamReference PixelData{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference PixelData{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapTileBitmapRequestDeferral GetDeferral();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileBitmapRequestedEventArgs", 337f691d-9b02-4aa2-8b1e-cc4d91719bf3)]
+    [threading(both)]
+    runtimeclass MapTileBitmapRequestedEventArgs
+    {
+        MapTileBitmapRequestedEventArgs();
+        Int32 X{ get; };
+        Int32 Y{ get; };
+        Int32 ZoomLevel{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapTileBitmapRequest Request{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileBitmapRequestedEventArgs2", 0261d114-246a-5296-bc85-590f53aa39c8)]
+        {
+            Int32 FrameIndex{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileUriRequestDeferral", c117ade0-bf3e-4c51-8faa-4b593cf68eb2)]
+    [threading(both)]
+    runtimeclass MapTileUriRequestDeferral
+    {
+        MapTileUriRequestDeferral();
+        void Complete();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileUriRequest", 17402335-3127-45b8-87a7-99f87d4e2745)]
+    [threading(both)]
+    runtimeclass MapTileUriRequest
+    {
+        MapTileUriRequest();
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Uri Uri{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapTileUriRequestDeferral GetDeferral();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileUriRequestedEventArgs", d2147b43-1bbf-4b98-8dd3-b7834e407e0d)]
+    [threading(both)]
+    runtimeclass MapTileUriRequestedEventArgs
+    {
+        MapTileUriRequestedEventArgs();
+        Int32 X{ get; };
+        Int32 Y{ get; };
+        Int32 ZoomLevel{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapTileUriRequest Request{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileUriRequestedEventArgs2", 2302185d-33b5-5a55-92f5-74a86a22efa6)]
+        {
+            Int32 FrameIndex{ get; };
+        }
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapCustomExperienceFactory", 7a403fb5-a1b1-4e7f-921e-3e6b8d8ebed6)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapCustomExperience", 64592866-14a3-4e5f-8883-8e9c500eeede)]
+    [threading(both)]
+    unsealed runtimeclass MapCustomExperience
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] MapCustomExperience();
+    }
+
+
+
+
+
+
+
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapInputEventArgs", 9fc503a0-a8a2-4394-92e9-2247764f2f49)]
+    [threading(both)]
+    runtimeclass MapInputEventArgs
+        : Windows.UI.Xaml.DependencyObject
+    {
+        MapInputEventArgs();
+        Windows.Foundation.Point Position{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+    }
+
+
+
+    [contentproperty("Items")]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapItemsControlStatics", 33a859c7-789b-425c-8a0a-32385896cb4a)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapItemsControl", 94c2c4d3-b335-42c5-b660-e6a07ec3bddc)]
+    [threading(both)]
+    runtimeclass MapItemsControl
+        : Windows.UI.Xaml.DependencyObject
+    {
+        MapItemsControl();
+        static Windows.UI.Xaml.DependencyProperty ItemsSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemTemplateProperty{ get; };
+        Object ItemsSource{ get; };
+        Object ItemsSource{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.DependencyObject>  Items{ get; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ set; };
+    }
+
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapLayerFactory", e02a2207-dee3-47c8-9825-bd029c5752f7)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapLayerStatics", 9ca4a26b-5db9-4f0c-bdd5-b1bffdcce946)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapLayer", 6d0ff9c1-a14d-4f97-8f57-46715b57683a)]
+    [threading(both)]
+    unsealed runtimeclass MapLayer
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] MapLayer();
+        static Windows.UI.Xaml.DependencyProperty MapTabIndexProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ZIndexProperty{ get; };
+        Int32 MapTabIndex{ get; };
+        Int32 MapTabIndex{ set; };
+        Boolean Visible{ get; };
+        Boolean Visible{ set; };
+        Int32 ZIndex{ get; };
+        Int32 ZIndex{ set; };
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapModel3DFactory", df7f0bcc-580a-498b-939b-0119a9dadb9e)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapModel3DStatics", 4834a480-8e56-4b0f-872d-7ead103187cd)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapModel3D", f8c541a1-ca27-4968-a2bf-9c20f06a0468)]
+    [threading(both)]
+    unsealed runtimeclass MapModel3D
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] MapModel3D();
+        [method_name("CreateFrom3MFAsync")] static Windows.Foundation.IAsyncOperation <Windows.UI.Xaml.Controls.Maps.MapModel3D>  CreateFrom3MFAsync(Windows.Storage.Streams.IRandomAccessStreamReference source);
+        [method_name("CreateFrom3MFWithShadingOptionAsync")] static Windows.Foundation.IAsyncOperation <Windows.UI.Xaml.Controls.Maps.MapModel3D>  CreateFrom3MFAsync(Windows.Storage.Streams.IRandomAccessStreamReference source, MapModel3DShadingOption shadingOption);
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapRouteViewFactory", f083addf-0066-4628-82fe-ea78c23cec1e)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapRouteView", 740eaec5-bacc-41e1-a67e-dd6513832049)]
+    [threading(both)]
+    unsealed runtimeclass MapRouteView
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstanceWithMapRoute" )] MapRouteView(Windows.Services.Maps.MapRoute route);
+        Windows.UI.Color RouteColor{ get; };
+        Windows.UI.Color RouteColor{ set; };
+        Windows.UI.Color OutlineColor{ get; };
+        Windows.UI.Color OutlineColor{ set; };
+        Windows.Services.Maps.MapRoute Route{ get; };
+    }
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapSceneStatics", 03e4ad6c-86ec-44d9-9597-fb75b7deba0a)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapScene", 8bba10a9-50e7-482c-9789-c688b178ac24)]
+    [threading(both)]
+    runtimeclass MapScene
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name("CreateFromBoundingBox")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromBoundingBox(Windows.Devices.Geolocation.GeoboundingBox bounds);
+        [method_name("CreateFromBoundingBoxWithHeadingAndPitch")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromBoundingBox(Windows.Devices.Geolocation.GeoboundingBox bounds, Double headingInDegrees, Double pitchInDegrees);
+        static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromCamera(MapCamera camera);
+        [method_name("CreateFromLocation")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromLocation(Windows.Devices.Geolocation.Geopoint location);
+        [method_name("CreateFromLocationWithHeadingAndPitch")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromLocation(Windows.Devices.Geolocation.Geopoint location, Double headingInDegrees, Double pitchInDegrees);
+        [method_name("CreateFromLocationAndRadius")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromLocationAndRadius(Windows.Devices.Geolocation.Geopoint location, Double radiusInMeters);
+        [method_name("CreateFromLocationAndRadiusWithHeadingAndPitch")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromLocationAndRadius(Windows.Devices.Geolocation.Geopoint location, Double radiusInMeters, Double headingInDegrees, Double pitchInDegrees);
+        [method_name("CreateFromLocations")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromLocations(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.Geopoint>  locations);
+        [method_name("CreateFromLocationsWithHeadingAndPitch")] static Windows.UI.Xaml.Controls.Maps.MapScene CreateFromLocations(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.Geopoint>  locations, Double headingInDegrees, Double pitchInDegrees);
+        Windows.UI.Xaml.Controls.Maps.MapCamera TargetCamera{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapScene, Windows.UI.Xaml.Controls.Maps.MapTargetCameraChangedEventArgs>  TargetCameraChanged;
+    }
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapStyleSheetStatics", abbd00ad-0a1c-4335-82f4-61d936aa197d)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapStyleSheet", ae54b2bf-8991-42ed-8d58-20473deede1d)]
+    [threading(both)]
+    runtimeclass MapStyleSheet
+        : Windows.UI.Xaml.DependencyObject
+    {
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet Aerial();
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet AerialWithOverlay();
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet RoadLight();
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet RoadDark();
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet RoadHighContrastLight();
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet RoadHighContrastDark();
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet Combine(Windows.Foundation.Collections.IIterable <Windows.UI.Xaml.Controls.Maps.MapStyleSheet>  styleSheets);
+        static Windows.UI.Xaml.Controls.Maps.MapStyleSheet ParseFromJson(String styleAsJson);
+        [return_name("returnValue")] static Boolean TryParseFromJson(String styleAsJson, out MapStyleSheet styleSheet);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapTileDataSourceFactory", a3920fbd-e446-4648-a74d-fd2c5d557c06)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileDataSource", c03d9f5e-be1f-4c69-9969-79467a513c38)]
+    [threading(both)]
+    unsealed runtimeclass MapTileDataSource
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] MapTileDataSource();
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapTileSourceFactory", cd7f811f-77fa-482b-9d34-71d31d465c48)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapTileSourceStatics", 93fcc93c-7035-4603-99b1-e659921b6093)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileSource", 88a76e4e-2fdf-4567-9255-1100519c8d62)]
+    [threading(both)]
+    unsealed runtimeclass MapTileSource
+        : Windows.UI.Xaml.DependencyObject
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapTileSourceStatics2", 75cdd47e-669c-50fd-ad85-5ea5174cf59b)]
+        {
+            static Windows.UI.Xaml.DependencyProperty AnimationStateProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty AutoPlayProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty FrameCountProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty FrameDurationProperty{ get; };
+        }
+        [method_name( "CreateInstance" )] MapTileSource();
+        [method_name( "CreateInstanceWithDataSource" )] MapTileSource(MapTileDataSource dataSource);
+        [method_name( "CreateInstanceWithDataSourceAndZoomRange" )] MapTileSource(MapTileDataSource dataSource, MapZoomLevelRange zoomLevelRange);
+        [method_name( "CreateInstanceWithDataSourceZoomRangeAndBounds" )] MapTileSource(MapTileDataSource dataSource, MapZoomLevelRange zoomLevelRange, Windows.Devices.Geolocation.GeoboundingBox bounds);
+        [method_name( "CreateInstanceWithDataSourceZoomRangeBoundsAndTileSize" )] MapTileSource(MapTileDataSource dataSource, MapZoomLevelRange zoomLevelRange, Windows.Devices.Geolocation.GeoboundingBox bounds, Int32 tileSizeInPixels);
+        static Windows.UI.Xaml.DependencyProperty DataSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty LayerProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ZoomLevelRangeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BoundsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty AllowOverstretchProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsFadingEnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsTransparencyEnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsRetryEnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ZIndexProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TilePixelSizeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VisibleProperty{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapTileDataSource DataSource{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapTileDataSource DataSource{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapTileLayer Layer{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapTileLayer Layer{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapZoomLevelRange ZoomLevelRange{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapZoomLevelRange ZoomLevelRange{ set; };
+        Windows.Devices.Geolocation.GeoboundingBox Bounds{ get; };
+        Windows.Devices.Geolocation.GeoboundingBox Bounds{ set; };
+        Boolean AllowOverstretch{ get; };
+        Boolean AllowOverstretch{ set; };
+        Boolean IsFadingEnabled{ get; };
+        Boolean IsFadingEnabled{ set; };
+        Boolean IsTransparencyEnabled{ get; };
+        Boolean IsTransparencyEnabled{ set; };
+        Boolean IsRetryEnabled{ get; };
+        Boolean IsRetryEnabled{ set; };
+        Int32 ZIndex{ get; };
+        Int32 ZIndex{ set; };
+        Int32 TilePixelSize{ get; };
+        Int32 TilePixelSize{ set; };
+        Boolean Visible{ get; };
+        Boolean Visible{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapTileSource2", 8e65ebbd-4095-5c15-99f1-1260b4e8b0a9)]
+        {
+            Windows.UI.Xaml.Controls.Maps.MapTileAnimationState AnimationState{ get; };
+            Boolean AutoPlay{ get; };
+            Boolean AutoPlay{ set; };
+            Int32 FrameCount{ get; };
+            Int32 FrameCount{ set; };
+            Windows.Foundation.TimeSpan FrameDuration{ get; };
+            Windows.Foundation.TimeSpan FrameDuration{ set; };
+            void Pause();
+            void Play();
+            void Stop();
+        }
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IStreetsidePanoramaStatics", d3b47f69-54b3-4ec5-b2a0-4f8204576507)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IStreetsidePanorama", 6fe00fd8-ad60-4664-b539-b1069f16c5af)]
+    [threading(both)]
+    runtimeclass StreetsidePanorama
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name("FindNearbyWithLocationAsync")] static Windows.Foundation.IAsyncOperation <Windows.UI.Xaml.Controls.Maps.StreetsidePanorama>  FindNearbyAsync(Windows.Devices.Geolocation.Geopoint location);
+        [method_name("FindNearbyWithLocationAndRadiusAsync")] static Windows.Foundation.IAsyncOperation <Windows.UI.Xaml.Controls.Maps.StreetsidePanorama>  FindNearbyAsync(Windows.Devices.Geolocation.Geopoint location, Double radiusInMeters);
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.ICustomMapTileDataSourceFactory", c8477947-c955-4f22-9444-a1d8d744af11)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.ICustomMapTileDataSource", 65da384a-2db1-4be1-b155-3d0c9ecf4799)]
+    [threading(both)]
+    unsealed runtimeclass CustomMapTileDataSource
+        : Windows.UI.Xaml.Controls.Maps.MapTileDataSource
+    {
+        [method_name( "CreateInstance" )] CustomMapTileDataSource();
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.CustomMapTileDataSource, Windows.UI.Xaml.Controls.Maps.MapTileBitmapRequestedEventArgs>  BitmapRequested;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IHttpMapTileDataSourceFactory", 53b4b107-84dc-4291-89f8-6d0bb612a055)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IHttpMapTileDataSource", 9d03cb5c-fd79-4795-87be-7e54ca0b37d0)]
+    [threading(both)]
+    unsealed runtimeclass HttpMapTileDataSource
+        : Windows.UI.Xaml.Controls.Maps.MapTileDataSource
+    {
+        [method_name( "CreateInstance" )] HttpMapTileDataSource();
+        [method_name( "CreateInstanceWithUriFormatString" )] HttpMapTileDataSource(String uriFormatString);
+        String UriFormatString{ get; };
+        String UriFormatString{ set; };
+        Windows.Foundation.Collections.IMap <String, String>  AdditionalRequestHeaders{ get; };
+        Boolean AllowCaching{ get; };
+        Boolean AllowCaching{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.HttpMapTileDataSource, Windows.UI.Xaml.Controls.Maps.MapTileUriRequestedEventArgs>  UriRequested;
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.ILocalMapTileDataSourceFactory", c5cfe9fc-72ac-4839-8a0d-011f24693c79)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.ILocalMapTileDataSource", 616257b5-9108-4f12-8bf4-bb3c8f6274e5)]
+    [threading(both)]
+    unsealed runtimeclass LocalMapTileDataSource
+        : Windows.UI.Xaml.Controls.Maps.MapTileDataSource
+    {
+        [method_name( "CreateInstance" )] LocalMapTileDataSource();
+        [method_name( "CreateInstanceWithUriFormatString" )] LocalMapTileDataSource(String uriFormatString);
+        String UriFormatString{ get; };
+        String UriFormatString{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.LocalMapTileDataSource, Windows.UI.Xaml.Controls.Maps.MapTileUriRequestedEventArgs>  UriRequested;
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapBillboardStatics", fdf839fe-e1f7-4fb0-8887-7da68c647333)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IMapBillboardFactory", be45a4c5-8f09-4b86-ae28-783740eb8b31)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapBillboard", 1694259d-0ae2-4f42-a02e-292ca835d39d)]
+    [threading(both)]
+    runtimeclass MapBillboard
+        : Windows.UI.Xaml.Controls.Maps.MapElement
+    {
+        static Windows.UI.Xaml.DependencyProperty LocationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty NormalizedAnchorPointProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CollisionBehaviorDesiredProperty{ get; };
+        [method_name( "CreateInstanceFromCamera" )] MapBillboard(MapCamera camera);
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ set; };
+        Windows.Foundation.Point NormalizedAnchorPoint{ get; };
+        Windows.Foundation.Point NormalizedAnchorPoint{ set; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Image{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Image{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapElementCollisionBehavior CollisionBehaviorDesired{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapElementCollisionBehavior CollisionBehaviorDesired{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapCamera ReferenceCamera{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapElement3DStatics", 6128011a-450f-442a-b9d9-aa815c71907a)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElement3D", 827af8d5-3843-48e2-bd00-0f0644fbe6a5)]
+    [threading(both)]
+    runtimeclass MapElement3D
+        : Windows.UI.Xaml.Controls.Maps.MapElement
+    {
+        MapElement3D();
+        static Windows.UI.Xaml.DependencyProperty LocationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HeadingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PitchProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty RollProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ScaleProperty{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapModel3D Model{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapModel3D Model{ set; };
+        Double Heading{ get; };
+        Double Heading{ set; };
+        Double Pitch{ get; };
+        Double Pitch{ set; };
+        Double Roll{ get; };
+        Double Roll{ set; };
+        Windows.Foundation.Numerics.Vector3 Scale{ get; };
+        Windows.Foundation.Numerics.Vector3 Scale{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapElementsLayerStatics", 34005727-f509-4d28-9180-911c03411d74)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapElementsLayer", de79689a-01ef-46f4-ac60-7c200b552610)]
+    [threading(both)]
+    runtimeclass MapElementsLayer
+        : Windows.UI.Xaml.Controls.Maps.MapLayer
+    {
+        MapElementsLayer();
+        static Windows.UI.Xaml.DependencyProperty MapElementsProperty{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapElement>  MapElements{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapElement>  MapElements{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapElementsLayer, Windows.UI.Xaml.Controls.Maps.MapElementsLayerClickEventArgs>  MapElementClick;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapElementsLayer, Windows.UI.Xaml.Controls.Maps.MapElementsLayerPointerEnteredEventArgs>  MapElementPointerEntered;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapElementsLayer, Windows.UI.Xaml.Controls.Maps.MapElementsLayerPointerExitedEventArgs>  MapElementPointerExited;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapElementsLayer, Windows.UI.Xaml.Controls.Maps.MapElementsLayerContextRequestedEventArgs>  MapContextRequested;
+    }
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapIconStatics", dcbc9e56-1190-4b5d-9e56-e5b6724aa328)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapIcon", d2096872-23d9-4a2b-8be0-69f3a85482ab)]
+    [threading(both)]
+    runtimeclass MapIcon
+        : Windows.UI.Xaml.Controls.Maps.MapElement
+    {
+        static Windows.UI.Xaml.DependencyProperty LocationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TitleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty NormalizedAnchorPointProperty{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapIconStatics2", ff4c306a-cf76-46ab-a12f-b603b986c696)]
+        {
+            static Windows.UI.Xaml.DependencyProperty CollisionBehaviorDesiredProperty{ get; };
+        }
+        MapIcon();
+        Windows.Devices.Geolocation.Geopoint Location{ get; };
+        Windows.Devices.Geolocation.Geopoint Location{ set; };
+        String Title{ get; };
+        String Title{ set; };
+        Windows.Foundation.Point NormalizedAnchorPoint{ get; };
+        Windows.Foundation.Point NormalizedAnchorPoint{ set; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Image{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Image{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapIcon2", 611254b9-d8aa-4bbd-a316-badf06911d63)]
+        {
+            Windows.UI.Xaml.Controls.Maps.MapElementCollisionBehavior CollisionBehaviorDesired{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapElementCollisionBehavior CollisionBehaviorDesired{ set; };
+        }
+    }
+
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapPolygonStatics", 37f573be-097b-424c-87cc-2ee042fda6d2)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapPolygon", abda2285-4926-4c3a-a5f9-19df7f69db3d)]
+    [threading(both)]
+    runtimeclass MapPolygon
+        : Windows.UI.Xaml.Controls.Maps.MapElement
+    {
+        static Windows.UI.Xaml.DependencyProperty PathProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty StrokeThicknessProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty StrokeDashedProperty{ get; };
+        MapPolygon();
+        Windows.Devices.Geolocation.Geopath Path{ get; };
+        Windows.Devices.Geolocation.Geopath Path{ set; };
+        Windows.UI.Color StrokeColor{ get; };
+        Windows.UI.Color StrokeColor{ set; };
+        Double StrokeThickness{ get; };
+        Double StrokeThickness{ set; };
+        Boolean StrokeDashed{ get; };
+        Boolean StrokeDashed{ set; };
+        Windows.UI.Color FillColor{ get; };
+        Windows.UI.Color FillColor{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapPolygon2", 96c8a11e-636b-4018-9c2e-acc9122a01b2)]
+        {
+            Windows.Foundation.Collections.IVector <Windows.Devices.Geolocation.Geopath>  Paths{ get; };
+        }
+    }
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapPolylineStatics", 61fde44b-1ddf-4303-b809-ec87f58ad065)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapPolyline", fbad24a2-24df-4a86-8ffa-0f8f4d9ec17d)]
+    [threading(both)]
+    runtimeclass MapPolyline
+        : Windows.UI.Xaml.Controls.Maps.MapElement
+    {
+        static Windows.UI.Xaml.DependencyProperty PathProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty StrokeDashedProperty{ get; };
+        MapPolyline();
+        Windows.Devices.Geolocation.Geopath Path{ get; };
+        Windows.Devices.Geolocation.Geopath Path{ set; };
+        Windows.UI.Color StrokeColor{ get; };
+        Windows.UI.Color StrokeColor{ set; };
+        Double StrokeThickness{ get; };
+        Double StrokeThickness{ set; };
+        Boolean StrokeDashed{ get; };
+        Boolean StrokeDashed{ set; };
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Maps.IStreetsideExperienceFactory", 7a5bcf3c-649e-4342-9995-68a6cf5961a7)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IStreetsideExperience", a558aec9-e30c-46c8-8116-484691675558)]
+    [threading(both)]
+    runtimeclass StreetsideExperience
+        : Windows.UI.Xaml.Controls.Maps.MapCustomExperience
+    {
+        [method_name( "CreateInstanceWithPanorama" )] StreetsideExperience(StreetsidePanorama panorama);
+        [method_name( "CreateInstanceWithPanoramaHeadingPitchAndFieldOfView" )] StreetsideExperience(StreetsidePanorama panorama, Double headingInDegrees, Double pitchInDegrees, Double fieldOfViewInDegrees);
+        Boolean AddressTextVisible{ get; };
+        Boolean AddressTextVisible{ set; };
+        Boolean CursorVisible{ get; };
+        Boolean CursorVisible{ set; };
+        Boolean OverviewMapVisible{ get; };
+        Boolean OverviewMapVisible{ set; };
+        Boolean StreetLabelsVisible{ get; };
+        Boolean StreetLabelsVisible{ set; };
+        Boolean ExitButtonVisible{ get; };
+        Boolean ExitButtonVisible{ set; };
+        Boolean ZoomButtonsVisible{ get; };
+        Boolean ZoomButtonsVisible{ set; };
+    }
+
+
+    [contentproperty("Children")]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Xaml.Controls.Maps.IMapControlStatics2", 04852b93-b446-4d31-9752-1ec69a5996ae)]
+    [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl", 42d0b851-5256-4747-9e6c-0d11e966141e)]
+    [threading(both)]
+    runtimeclass MapControl
+        : Windows.UI.Xaml.Controls.Control
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapControlStatics6", 3ccfdd7f-24d1-40a2-8351-b3063a8c95a4)]
+        {
+            static Windows.UI.Xaml.DependencyProperty LayersProperty{ get; };
+        }
+        static Windows.UI.Xaml.DependencyProperty BusinessLandmarksVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TransitFeaturesVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PanInteractionModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty RotateInteractionModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TiltInteractionModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ZoomInteractionModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty Is3DSupportedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsStreetsideSupportedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SceneProperty{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapControlStatics", c2c61795-2147-4f0a-942a-5493a85de807)]
+        {
+            static Windows.UI.Xaml.DependencyProperty CenterProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ChildrenProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ColorSchemeProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty DesiredPitchProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty HeadingProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty LandmarksVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty LoadingStatusProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty MapServiceTokenProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty PedestrianFeaturesVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty PitchProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty StyleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty TrafficFlowVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty TransformOriginProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty WatermarkModeProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ZoomLevelProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty MapElementsProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty RoutesProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty TileSourcesProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty LocationProperty{ get; };
+            static Windows.Devices.Geolocation.Geopoint GetLocation(Windows.UI.Xaml.DependencyObject element);
+            static void SetLocation(Windows.UI.Xaml.DependencyObject element, Windows.Devices.Geolocation.Geopoint value);
+            static Windows.UI.Xaml.DependencyProperty NormalizedAnchorPointProperty{ get; };
+            static Windows.Foundation.Point GetNormalizedAnchorPoint(Windows.UI.Xaml.DependencyObject element);
+            static void SetNormalizedAnchorPoint(Windows.UI.Xaml.DependencyObject element, Windows.Foundation.Point value);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapControlStatics5", 09626f00-b7dd-4189-a7f7-830c412deea3)]
+        {
+            static Windows.UI.Xaml.DependencyProperty MapProjectionProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty StyleSheetProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ViewPaddingProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapControlStatics4", fe785d97-5d13-4fa1-bf1d-84061768c183)]
+        {
+            static Windows.UI.Xaml.DependencyProperty BusinessLandmarksEnabledProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty TransitFeaturesEnabledProperty{ get; };
+        }
+        MapControl();
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapControlStatics8", adb7a7b0-0605-592c-bf9d-d10bdc2be47b)]
+        {
+            static Windows.UI.Xaml.DependencyProperty CanTiltDownProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty CanTiltUpProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty CanZoomInProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty CanZoomOutProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.UI.Xaml.Controls.Maps.IMapControlStatics7", 55f1ac4d-72c2-46b2-b7ae-790260be641b)]
+        {
+            static Windows.UI.Xaml.DependencyProperty RegionProperty{ get; };
+        }
+        Windows.Devices.Geolocation.Geopoint Center{ get; };
+        Windows.Devices.Geolocation.Geopoint Center{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.DependencyObject>  Children{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapColorScheme ColorScheme{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapColorScheme ColorScheme{ set; };
+        Double DesiredPitch{ get; };
+        Double DesiredPitch{ set; };
+        Double Heading{ get; };
+        Double Heading{ set; };
+        Boolean LandmarksVisible{ get; };
+        Boolean LandmarksVisible{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapLoadingStatus LoadingStatus{ get; };
+        String MapServiceToken{ get; };
+        String MapServiceToken{ set; };
+        Double MaxZoomLevel{ get; };
+        Double MinZoomLevel{ get; };
+        Boolean PedestrianFeaturesVisible{ get; };
+        Boolean PedestrianFeaturesVisible{ set; };
+        Double Pitch{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapStyle Style{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapStyle Style{ set; };
+        Boolean TrafficFlowVisible{ get; };
+        Boolean TrafficFlowVisible{ set; };
+        Windows.Foundation.Point TransformOrigin{ get; };
+        Windows.Foundation.Point TransformOrigin{ set; };
+        Windows.UI.Xaml.Controls.Maps.MapWatermarkMode WatermarkMode{ get; };
+        Windows.UI.Xaml.Controls.Maps.MapWatermarkMode WatermarkMode{ set; };
+        Double ZoomLevel{ get; };
+        Double ZoomLevel{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapElement>  MapElements{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapRouteView>  Routes{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapTileSource>  TileSources{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Object>  CenterChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Object>  HeadingChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Object>  LoadingStatusChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapInputEventArgs>  MapDoubleTapped;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapInputEventArgs>  MapHolding;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapInputEventArgs>  MapTapped;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Object>  PitchChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Object>  TransformOriginChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Object>  ZoomLevelChanged;
+        [method_name("FindMapElementsAtOffset")] Windows.Foundation.Collections.IVectorView <Windows.UI.Xaml.Controls.Maps.MapElement>  FindMapElementsAtOffset(Windows.Foundation.Point offset);
+        [method_name("GetLocationFromOffset")] void GetLocationFromOffset(Windows.Foundation.Point offset, out Windows.Devices.Geolocation.Geopoint location);
+        void GetOffsetFromLocation(Windows.Devices.Geolocation.Geopoint location, out Windows.Foundation.Point offset);
+        void IsLocationInView(Windows.Devices.Geolocation.Geopoint location, out Boolean isInView);
+        Windows.Foundation.IAsyncOperation <Boolean>  TrySetViewBoundsAsync(Windows.Devices.Geolocation.GeoboundingBox bounds, Windows.Foundation.IReference <Windows.UI.Xaml.Thickness>  margin, MapAnimationKind animation);
+        [method_name("TrySetViewWithCenterAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TrySetViewAsync(Windows.Devices.Geolocation.Geopoint center);
+        [method_name("TrySetViewWithCenterAndZoomAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TrySetViewAsync(Windows.Devices.Geolocation.Geopoint center, Windows.Foundation.IReference <Double>  zoomLevel);
+        [method_name("TrySetViewWithCenterZoomHeadingAndPitchAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TrySetViewAsync(Windows.Devices.Geolocation.Geopoint center, Windows.Foundation.IReference <Double>  zoomLevel, Windows.Foundation.IReference <Double>  heading, Windows.Foundation.IReference <Double>  desiredPitch);
+        [method_name("TrySetViewWithCenterZoomHeadingPitchAndAnimationAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TrySetViewAsync(Windows.Devices.Geolocation.Geopoint center, Windows.Foundation.IReference <Double>  zoomLevel, Windows.Foundation.IReference <Double>  heading, Windows.Foundation.IReference <Double>  desiredPitch, MapAnimationKind animation);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl2", e1fd644d-96ec-4065-b0f0-75281da3654d)]
+        {
+            Boolean BusinessLandmarksVisible{ get; };
+            Boolean BusinessLandmarksVisible{ set; };
+            Boolean TransitFeaturesVisible{ get; };
+            Boolean TransitFeaturesVisible{ set; };
+            Windows.UI.Xaml.Controls.Maps.MapPanInteractionMode PanInteractionMode{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapPanInteractionMode PanInteractionMode{ set; };
+            Windows.UI.Xaml.Controls.Maps.MapInteractionMode RotateInteractionMode{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapInteractionMode RotateInteractionMode{ set; };
+            Windows.UI.Xaml.Controls.Maps.MapInteractionMode TiltInteractionMode{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapInteractionMode TiltInteractionMode{ set; };
+            Windows.UI.Xaml.Controls.Maps.MapInteractionMode ZoomInteractionMode{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapInteractionMode ZoomInteractionMode{ set; };
+            Boolean Is3DSupported{ get; };
+            Boolean IsStreetsideSupported{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapScene Scene{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapScene Scene{ set; };
+            Windows.UI.Xaml.Controls.Maps.MapCamera ActualCamera{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapCamera TargetCamera{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapCustomExperience CustomExperience{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapCustomExperience CustomExperience{ set; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapElementClickEventArgs>  MapElementClick;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapElementPointerEnteredEventArgs>  MapElementPointerEntered;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapElementPointerExitedEventArgs>  MapElementPointerExited;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapActualCameraChangedEventArgs>  ActualCameraChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapActualCameraChangingEventArgs>  ActualCameraChanging;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapTargetCameraChangedEventArgs>  TargetCameraChanged;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapCustomExperienceChangedEventArgs>  CustomExperienceChanged;
+            void StartContinuousRotate(Double rateInDegreesPerSecond);
+            void StopContinuousRotate();
+            void StartContinuousTilt(Double rateInDegreesPerSecond);
+            void StopContinuousTilt();
+            void StartContinuousZoom(Double rateOfChangePerSecond);
+            void StopContinuousZoom();
+            Windows.Foundation.IAsyncOperation <Boolean>  TryRotateAsync(Double degrees);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryRotateToAsync(Double angleInDegrees);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryTiltAsync(Double degrees);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryTiltToAsync(Double angleInDegrees);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryZoomInAsync();
+            Windows.Foundation.IAsyncOperation <Boolean>  TryZoomOutAsync();
+            Windows.Foundation.IAsyncOperation <Boolean>  TryZoomToAsync(Double zoomLevel);
+            [method_name("TrySetSceneAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TrySetSceneAsync(MapScene scene);
+            [method_name("TrySetSceneWithAnimationAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TrySetSceneAsync(MapScene scene, MapAnimationKind animationKind);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl3", 586328f8-8cdd-40ae-9338-af2a7be845e5)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapRightTappedEventArgs>  MapRightTapped;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl4", 068f132a-1817-466d-b7ce-419b3f8e248b)]
+        {
+            Boolean BusinessLandmarksEnabled{ get; };
+            Boolean BusinessLandmarksEnabled{ set; };
+            Boolean TransitFeaturesEnabled{ get; };
+            Boolean TransitFeaturesEnabled{ set; };
+            Windows.Devices.Geolocation.Geopath GetVisibleRegion(MapVisibleRegionKind region);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl5", dd9b0ffd-7823-46a2-82c9-65ddac4f365f)]
+        {
+            Windows.UI.Xaml.Controls.Maps.MapProjection MapProjection{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapProjection MapProjection{ set; };
+            Windows.UI.Xaml.Controls.Maps.MapStyleSheet StyleSheet{ get; };
+            Windows.UI.Xaml.Controls.Maps.MapStyleSheet StyleSheet{ set; };
+            Windows.UI.Xaml.Thickness ViewPadding{ get; };
+            Windows.UI.Xaml.Thickness ViewPadding{ set; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Maps.MapControl, Windows.UI.Xaml.Controls.Maps.MapContextRequestedEventArgs>  MapContextRequested;
+            [method_name("FindMapElementsAtOffsetWithRadius")] Windows.Foundation.Collections.IVectorView <Windows.UI.Xaml.Controls.Maps.MapElement>  FindMapElementsAtOffset(Windows.Foundation.Point offset, Double radius);
+            [method_name("GetLocationFromOffsetWithReferenceSystem")] void GetLocationFromOffset(Windows.Foundation.Point offset, Windows.Devices.Geolocation.AltitudeReferenceSystem desiredReferenceSystem, out Windows.Devices.Geolocation.Geopoint location);
+            void StartContinuousPan(Double horizontalPixelsPerSecond, Double verticalPixelsPerSecond);
+            void StopContinuousPan();
+            Windows.Foundation.IAsyncOperation <Boolean>  TryPanAsync(Double horizontalPixels, Double verticalPixels);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryPanToAsync(Windows.Devices.Geolocation.Geopoint location);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl6", b0da89a2-1041-4bea-b88a-12ac9a82e0e2)]
+        {
+            Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapLayer>  Layers{ get; };
+            Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Maps.MapLayer>  Layers{ set; };
+            [method_name("TryGetLocationFromOffset")] [return_name("returnValue")] Boolean TryGetLocationFromOffset(Windows.Foundation.Point offset, out Windows.Devices.Geolocation.Geopoint location);
+            [method_name("TryGetLocationFromOffsetWithReferenceSystem")] [return_name("returnValue")] Boolean TryGetLocationFromOffset(Windows.Foundation.Point offset, Windows.Devices.Geolocation.AltitudeReferenceSystem desiredReferenceSystem, out Windows.Devices.Geolocation.Geopoint location);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl7", 0d86e453-0c1f-4f7e-ae66-4ad0b4987857)]
+        {
+            String Region{ get; };
+            String Region{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Xaml.Controls.Maps.IMapControl8", 009e9c46-724d-53ca-9421-7a48fc731523)]
+        {
+            Boolean CanTiltDown{ get; };
+            Boolean CanTiltUp{ get; };
+            Boolean CanZoomIn{ get; };
+            Boolean CanZoomOut{ get; };
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

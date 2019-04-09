@@ -1,0 +1,167 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.ViewManagement
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum HandPreference
+    {
+        LeftHanded,
+        RightHanded,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UIColorType
+    {
+        Background,
+        Foreground,
+        AccentDark3,
+        AccentDark2,
+        AccentDark1,
+        Accent,
+        AccentLight1,
+        AccentLight2,
+        AccentLight3,
+        Complement,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UIElementType
+    {
+        ActiveCaption,
+        Background,
+        ButtonFace,
+        ButtonText,
+        CaptionText,
+        GrayText,
+        Highlight,
+        HighlightText,
+        Hotlight,
+        InactiveCaption,
+        InactiveCaptionText,
+        Window,
+        WindowText,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        AccentColor = 1000,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        TextHigh,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        TextMedium,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        TextLow,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        TextContrastWithHigh,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        NonTextHigh,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        NonTextMediumHigh,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        NonTextMedium,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        NonTextMediumLow,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        NonTextLow,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        PageBackground,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        PopupBackground,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        OverlayOutsidePopup,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.ViewManagement.IAccessibilitySettings", fe0e8147-c4c0-4562-b962-1327b52ad5b9)]
+    runtimeclass AccessibilitySettings
+    {
+        AccessibilitySettings();
+        Boolean HighContrast{ get; };
+        String HighContrastScheme{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.AccessibilitySettings, Object>  HighContrastChanged;
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.ViewManagement.IUISettings", 85361600-1c63-4627-bcb1-3a89e0bc9c55)]
+    runtimeclass UISettings
+    {
+        UISettings();
+        Windows.UI.ViewManagement.HandPreference HandPreference{ get; };
+        Windows.Foundation.Size CursorSize{ get; };
+        Windows.Foundation.Size ScrollBarSize{ get; };
+        Windows.Foundation.Size ScrollBarArrowSize{ get; };
+        Windows.Foundation.Size ScrollBarThumbBoxSize{ get; };
+        UInt32 MessageDuration{ get; };
+        Boolean AnimationsEnabled{ get; };
+        Boolean CaretBrowsingEnabled{ get; };
+        UInt32 CaretBlinkRate{ get; };
+        UInt32 CaretWidth{ get; };
+        UInt32 DoubleClickTime{ get; };
+        UInt32 MouseHoverTime{ get; };
+        Windows.UI.Color UIElementColor(UIElementType desiredElement);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.ViewManagement.IUISettings2", bad82401-2721-44f9-bb91-2bb228be442f)]
+        {
+            Double TextScaleFactor{ get; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.UISettings, Object>  TextScaleFactorChanged;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.ViewManagement.IUISettings3", 03021be4-5254-4781-8194-5168f7d06d7b)]
+        {
+            Windows.UI.Color GetColorValue(UIColorType desiredColor);
+            event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.UISettings, Object>  ColorValuesChanged;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.ViewManagement.IUISettings4", 52bb3002-919b-4d6b-9b78-8dd66ff4b93b)]
+        {
+            Boolean AdvancedEffectsEnabled{ get; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.UISettings, Object>  AdvancedEffectsEnabledChanged;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.ViewManagement.IUISettings5", 5349d588-0cb5-5f05-bd34-706b3231f0bd)]
+        {
+            Boolean AutoHideScrollBars{ get; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.ViewManagement.UISettings, Windows.UI.ViewManagement.UISettingsAutoHideScrollBarsChangedEventArgs>  AutoHideScrollBarsChanged;
+        }
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [default_interface]
+    [interface_name("Windows.UI.ViewManagement.IUISettingsAutoHideScrollBarsChangedEventArgs", 87afd4b2-9146-5f02-8f6b-06d454174c0f)]
+    runtimeclass UISettingsAutoHideScrollBarsChangedEventArgs
+    {
+    }
+
+
+    [contractversion(1)]
+    apicontract ViewManagementViewScalingContract{};
+
+    [contract(Windows.UI.ViewManagement.ViewManagementViewScalingContract, 1)]
+    [static_name("Windows.UI.ViewManagement.IApplicationViewScalingStatics", b08fecf0-b946-45c8-a5e3-71f5aa78f861)]
+    [default_interface]
+    [interface_name("Windows.UI.ViewManagement.IApplicationViewScaling", 1d0ddc23-23f3-4b2d-84fe-74bf37b48b66)]
+    runtimeclass ApplicationViewScaling
+    {
+        static Boolean DisableLayoutScaling{ get; };
+        static Boolean TrySetDisableLayoutScaling(Boolean disableLayoutScaling);
+    }
+
+
+
+}

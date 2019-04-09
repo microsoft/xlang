@@ -1,0 +1,293 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Security.Authentication.Identity.Provider
+{
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorDeviceCapabilities
+    {
+        None,
+        SecureStorage,
+        StoreKeys,
+        ConfirmUserIntentToAuthenticate = 4,
+        [deprecated("SupportSecureUserPresenceCheck is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+        SupportSecureUserPresenceCheck = 8,
+        TransmittedDataIsEncrypted = 16,
+        HMacSha256 = 32,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        CloseRangeDataTransmission = 64,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorDeviceFindScope
+    {
+        User,
+        AllUsers,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorAuthenticationStage
+    {
+        NotStarted,
+        WaitingForUserConfirmation,
+        CollectingCredential,
+        SuspendingAuthentication,
+        CredentialCollected,
+        CredentialAuthenticated,
+        StoppingAuthentication,
+        ReadyForLock,
+        [deprecated("CheckingDevicePresence is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        CheckingDevicePresence,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorRegistrationStatus
+    {
+        Failed,
+        Started,
+        CanceledByUser,
+        PinSetupRequired,
+        DisabledByPolicy,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [deprecated("SecondaryAuthenticationFactorDevicePresenceMonitoringRegistrationStatus is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+    enum SecondaryAuthenticationFactorDevicePresenceMonitoringRegistrationStatus
+    {
+        Unsupported,
+        Succeeded,
+        DisabledByPolicy,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorAuthenticationStatus
+    {
+        Failed,
+        Started,
+        UnknownDevice,
+        DisabledByPolicy,
+        InvalidAuthenticationStage,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorFinishAuthenticationStatus
+    {
+        Failed,
+        Completed,
+        NonceExpired,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorAuthenticationScenario
+    {
+        SignIn,
+        CredentialPrompt,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum SecondaryAuthenticationFactorAuthenticationMessage
+    {
+        Invalid,
+        SwipeUpWelcome,
+        TapWelcome,
+        DeviceNeedsAttention,
+        LookingForDevice,
+        LookingForDevicePluggedin,
+        BluetoothIsDisabled,
+        NfcIsDisabled,
+        WiFiIsDisabled,
+        ExtraTapIsRequired,
+        DisabledByPolicy,
+        TapOnDeviceRequired,
+        HoldFinger,
+        ScanFinger,
+        UnauthorizedUser,
+        ReregisterRequired,
+        TryAgain,
+        SayPassphrase,
+        ReadyToSignIn,
+        UseAnotherSignInOption,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        ConnectionRequired,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        TimeLimitExceeded,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        CanceledByUser,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        CenterHand,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        MoveHandCloser,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        MoveHandFarther,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        PlaceHandAbove,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        RecognitionFailed,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        DeviceUnavailable,
+    };
+
+    [deprecated("SecondaryAuthenticationFactorDevicePresence is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum SecondaryAuthenticationFactorDevicePresence
+    {
+        Absent,
+        Present,
+    };
+
+    [deprecated("SecondaryAuthenticationFactorDevicePresenceMonitoringMode is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum SecondaryAuthenticationFactorDevicePresenceMonitoringMode
+    {
+        Unsupported,
+        AppManaged,
+        SystemManaged,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [static_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorRegistrationStatics", 1adf0f65-e3b7-4155-997f-b756ef65beba)]
+    [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorRegistration", 9f4cbbb4-8cba-48b0-840d-dbb22a54c678)]
+    [threading(both)]
+    runtimeclass SecondaryAuthenticationFactorRegistration
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorDevicePresenceMonitoringRegistrationStatics", 90499a19-7ef2-4523-951c-a417a24acf93)]
+        {
+            [deprecated("RegisterDevicePresenceMonitoringAsync is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+            [method_name("RegisterDevicePresenceMonitoringAsync")] static Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorDevicePresenceMonitoringRegistrationStatus>  RegisterDevicePresenceMonitoringAsync(String deviceId, String deviceInstancePath, SecondaryAuthenticationFactorDevicePresenceMonitoringMode monitoringMode);
+            [deprecated("RegisterDevicePresenceMonitoringWithNewDeviceAsync is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+            [method_name("RegisterDevicePresenceMonitoringWithNewDeviceAsync")] static Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorDevicePresenceMonitoringRegistrationStatus>  RegisterDevicePresenceMonitoringAsync(String deviceId, String deviceInstancePath, SecondaryAuthenticationFactorDevicePresenceMonitoringMode monitoringMode, String deviceFriendlyName, String deviceModelNumber, Windows.Storage.Streams.IBuffer deviceConfigurationData);
+            [deprecated("UnregisterDevicePresenceMonitoringAsync is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+            static Windows.Foundation.IAsyncAction UnregisterDevicePresenceMonitoringAsync(String deviceId);
+            [deprecated("IsDevicePresenceMonitoringSupported is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+            static Boolean IsDevicePresenceMonitoringSupported();
+        }
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorRegistrationResult>  RequestStartRegisteringDeviceAsync(String deviceId, SecondaryAuthenticationFactorDeviceCapabilities capabilities, String deviceFriendlyName, String deviceModelNumber, Windows.Storage.Streams.IBuffer deviceKey, Windows.Storage.Streams.IBuffer mutualAuthenticationKey);
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorInfo> >  FindAllRegisteredDeviceInfoAsync(SecondaryAuthenticationFactorDeviceFindScope queryType);
+        static Windows.Foundation.IAsyncAction UnregisterDeviceAsync(String deviceId);
+        static Windows.Foundation.IAsyncAction UpdateDeviceConfigurationDataAsync(String deviceId, Windows.Storage.Streams.IBuffer deviceConfigurationData);
+        Windows.Foundation.IAsyncAction FinishRegisteringDeviceAsync(Windows.Storage.Streams.IBuffer deviceConfigurationData);
+        Windows.Foundation.IAsyncAction AbortRegisteringDeviceAsync(String errorLogMessage);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorRegistrationResult", a4fe35f0-ade3-4981-af6b-ec195921682a)]
+    runtimeclass SecondaryAuthenticationFactorRegistrationResult
+    {
+        Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorRegistrationStatus Status{ get; };
+        Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorRegistration Registration{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [static_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorAuthenticationStatics", 3f582656-28f8-4e0f-ae8c-5898b9ae2469)]
+    [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorAuthentication", 020a16e5-6a25-40a3-8c00-50a023f619d1)]
+    [threading(both)]
+    runtimeclass SecondaryAuthenticationFactorAuthentication
+    {
+        [remote_sync]static Windows.Foundation.IAsyncAction ShowNotificationMessageAsync(String deviceName, SecondaryAuthenticationFactorAuthenticationMessage message);
+        static Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthenticationResult>  StartAuthenticationAsync(String deviceId, Windows.Storage.Streams.IBuffer serviceAuthenticationNonce);
+        static event Windows.Foundation.EventHandler <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthenticationStageChangedEventArgs>  AuthenticationStageChanged;
+        static Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthenticationStageInfo>  GetAuthenticationStageInfoAsync();
+        Windows.Storage.Streams.IBuffer ServiceAuthenticationHmac{ get; };
+        Windows.Storage.Streams.IBuffer SessionNonce{ get; };
+        Windows.Storage.Streams.IBuffer DeviceNonce{ get; };
+        Windows.Storage.Streams.IBuffer DeviceConfigurationData{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorFinishAuthenticationStatus>  FinishAuthenticationAsync(Windows.Storage.Streams.IBuffer deviceHmac, Windows.Storage.Streams.IBuffer sessionHmac);
+        Windows.Foundation.IAsyncAction AbortAuthenticationAsync(String errorLogMessage);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorAuthenticationResult", 9cbb5987-ef6d-4bc2-bf49-4617515a0f9a)]
+    runtimeclass SecondaryAuthenticationFactorAuthenticationResult
+    {
+        Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthenticationStatus Status{ get; };
+        Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthentication Authentication{ get; };
+    }
+
+
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorInfo", 1e2ba861-8533-4fce-839b-ecb72410ac14)]
+    runtimeclass SecondaryAuthenticationFactorInfo
+    {
+        String DeviceId{ get; };
+        String DeviceFriendlyName{ get; };
+        String DeviceModelNumber{ get; };
+        Windows.Storage.Streams.IBuffer DeviceConfigurationData{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorInfo2", 14d981a3-fc26-4ff7-abc3-48e82a512a0a)]
+        {
+            [deprecated("PresenceMonitoringMode is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+            Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorDevicePresenceMonitoringMode PresenceMonitoringMode{ get; };
+            [deprecated("UpdateDevicePresenceAsync is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+            Windows.Foundation.IAsyncAction UpdateDevicePresenceAsync(SecondaryAuthenticationFactorDevicePresence presenceState);
+            [deprecated("IsAuthenticationSupported is deprecated and might not work on all platforms. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x70000)]
+            Boolean IsAuthenticationSupported{ get; };
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorAuthenticationStageChangedEventArgs", d4a5ee56-7291-4073-bc1f-ccb8f5afdf96)]
+    runtimeclass SecondaryAuthenticationFactorAuthenticationStageChangedEventArgs
+    {
+        Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthenticationStageInfo StageInfo{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Security.Authentication.Identity.Provider.ISecondaryAuthenticationFactorAuthenticationStageInfo", 56fec28b-e8aa-4c0f-8e4c-a559e73add88)]
+    runtimeclass SecondaryAuthenticationFactorAuthenticationStageInfo
+    {
+        Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthenticationStage Stage{ get; };
+        Windows.Security.Authentication.Identity.Provider.SecondaryAuthenticationFactorAuthenticationScenario Scenario{ get; };
+        String DeviceId{ get; };
+    }
+
+
+
+
+
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.ISecondaryAuthenticationFactorAuthenticationTrigger", f237f327-5181-4f24-96a7-700a4e5fac62)]
+    [threading(mta)]
+    runtimeclass SecondaryAuthenticationFactorAuthenticationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        SecondaryAuthenticationFactorAuthenticationTrigger();
+    }
+
+}

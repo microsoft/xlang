@@ -1,0 +1,77 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.LockScreen
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.ApplicationModel.LockScreen.ILockScreenInfo", f59aa65c-9711-4dc9-a630-95b6cb8cdad0)]
+    runtimeclass LockScreenInfo
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.LockScreen.LockScreenInfo, Object>  LockScreenImageChanged;
+        Windows.Storage.Streams.IRandomAccessStream LockScreenImage{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.LockScreen.LockScreenInfo, Object>  BadgesChanged;
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.LockScreen.LockScreenBadge>  Badges{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.LockScreen.LockScreenInfo, Object>  DetailTextChanged;
+        Windows.Foundation.Collections.IVectorView <String>  DetailText{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.LockScreen.LockScreenInfo, Object>  AlarmIconChanged;
+        Windows.Storage.Streams.IRandomAccessStream AlarmIcon{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.ApplicationModel.LockScreen.ILockScreenBadge", e95105d9-2bff-4db0-9b4f-3824778b9c9a)]
+    runtimeclass LockScreenBadge
+    {
+        Windows.Storage.Streams.IRandomAccessStream Logo{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Glyph{ get; };
+        Windows.Foundation.IReference <UInt32>  Number{ get; };
+        String AutomationName{ get; };
+        void LaunchApp();
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.ApplicationModel.LockScreen.ILockScreenUnlockingDeferral", 7e7d1ad6-5203-43e7-9bd6-7c3947d1e3fe)]
+    runtimeclass LockScreenUnlockingDeferral
+    {
+        void Complete();
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.LockScreen.ILockApplicationHostStatics", f48fab8e-23d7-4e63-96a1-666ff52d3b2c)]
+    [interface_name("Windows.ApplicationModel.LockScreen.ILockApplicationHost", 38ee31ad-d94f-4e7c-81fa-4f4436506281)]
+    runtimeclass LockApplicationHost
+    {
+        static Windows.ApplicationModel.LockScreen.LockApplicationHost GetForCurrentView();
+        void RequestUnlock();
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.LockScreen.LockApplicationHost, Windows.ApplicationModel.LockScreen.LockScreenUnlockingEventArgs>  Unlocking;
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.LockScreen.ILockScreenUnlockingEventArgs", 44e6c007-75fb-4abb-9f8b-824748900c71)]
+    runtimeclass LockScreenUnlockingEventArgs
+    {
+        Windows.ApplicationModel.LockScreen.LockScreenUnlockingDeferral GetDeferral();
+        Windows.Foundation.DateTime Deadline{ get; };
+    }
+
+
+}

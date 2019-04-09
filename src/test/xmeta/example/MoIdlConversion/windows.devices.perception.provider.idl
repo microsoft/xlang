@@ -1,0 +1,303 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Perception.Provider
+{
+    [contractversion(1)]
+    [internal]
+    apicontract WorldProvidersContract{};
+
+
+
+    [uuid(a959ce07-ead3-33df-8ec1-b924abe019c4)]
+    [deprecated("IPerceptionFrameProviderManager may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPerceptionFrameProviderManager requires Windows.Foundation.IClosable
+    {
+        [deprecated("IPerceptionFrameProviderManager may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Devices.Perception.Provider.IPerceptionFrameProvider GetFrameProvider(PerceptionFrameProviderInfo frameProviderInfo);
+    };
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionFrameProviderInfo", cca959e8-797e-4e83-9b87-036a74142fc4)]
+    [threading(both)]
+    runtimeclass PerceptionFrameProviderInfo
+    {
+        PerceptionFrameProviderInfo();
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String Id{ get; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String Id{ set; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String DisplayName{ get; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String DisplayName{ set; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String DeviceKind{ get; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String DeviceKind{ set; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String FrameKind{ get; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String FrameKind{ set; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Boolean Hidden{ get; };
+        [deprecated("PerceptionFrameProviderInfo may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Boolean Hidden{ set; };
+    }
+
+    [deprecated("IPerceptionFrameProvider may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [uuid(794f7ab9-b37d-3b33-a10d-30626419ce65)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPerceptionFrameProvider requires Windows.Foundation.IClosable
+    {
+        [deprecated("IPerceptionFrameProvider may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Devices.Perception.Provider.PerceptionFrameProviderInfo FrameProviderInfo{ get; };
+        [deprecated("IPerceptionFrameProvider may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Boolean Available{ get; };
+        [deprecated("IPerceptionFrameProvider may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IPropertySet Properties{ get; };
+        [deprecated("IPerceptionFrameProvider may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        void Start();
+        [deprecated("IPerceptionFrameProvider may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        void Stop();
+        [deprecated("IPerceptionFrameProvider may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        void SetProperty(PerceptionPropertyChangeRequest value);
+    };
+
+    [marshaling_behavior(agile)]
+    [deprecated("PerceptionPropertyChangeRequest may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionPropertyChangeRequest", 3c5aeb51-350b-4df8-9414-59e09815510b)]
+    runtimeclass PerceptionPropertyChangeRequest
+    {
+        [deprecated("PerceptionPropertyChangeRequest may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String Name{ get; };
+        [deprecated("PerceptionPropertyChangeRequest may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        [variant]Object Value{ get; };
+        [deprecated("PerceptionPropertyChangeRequest may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Devices.Perception.PerceptionFrameSourcePropertyChangeStatus Status{ get; };
+        [deprecated("PerceptionPropertyChangeRequest may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Devices.Perception.PerceptionFrameSourcePropertyChangeStatus Status{ set; };
+        [deprecated("PerceptionPropertyChangeRequest may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+    [marshaling_behavior(agile)]
+    [deprecated("PerceptionFaceAuthenticationGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.Perception.Provider.IPerceptionFaceAuthenticationGroupFactory", e68a05d4-b60c-40f4-bcb9-f24d46467320)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionFaceAuthenticationGroup", e8019814-4a91-41b0-83a6-881a1775353e)]
+    [threading(both)]
+    runtimeclass PerceptionFaceAuthenticationGroup
+    {
+        [deprecated("PerceptionFaceAuthenticationGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        [method_name( "Create" )] PerceptionFaceAuthenticationGroup(Windows.Foundation.Collections.IIterable <String>  ids, PerceptionStartFaceAuthenticationHandler startHandler, PerceptionStopFaceAuthenticationHandler stopHandler);
+        [deprecated("PerceptionFaceAuthenticationGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IVectorView <String>  FrameProviderIds{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [deprecated("PerceptionControlGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.Perception.Provider.IPerceptionControlGroupFactory", 2f1af2e0-baf1-453b-bed4-cd9d4619154c)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionControlGroup", 172c4882-2fd9-4c4e-ba34-fdf20a73dde5)]
+    [threading(both)]
+    runtimeclass PerceptionControlGroup
+    {
+        [deprecated("PerceptionControlGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        [method_name( "Create" )] PerceptionControlGroup(Windows.Foundation.Collections.IIterable <String>  ids);
+        [deprecated("PerceptionControlGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IVectorView <String>  FrameProviderIds{ get; };
+    }
+
+    [deprecated("PerceptionCorrelationGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Perception.Provider.IPerceptionCorrelationGroupFactory", 7dfe2088-63df-48ed-83b1-4ab829132995)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionCorrelationGroup", 752a0906-36a7-47bb-9b79-56cc6b746770)]
+    [threading(both)]
+    runtimeclass PerceptionCorrelationGroup
+    {
+        [deprecated("PerceptionCorrelationGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        [method_name( "Create" )] PerceptionCorrelationGroup(Windows.Foundation.Collections.IIterable <Windows.Devices.Perception.Provider.PerceptionCorrelation>  relativeLocations);
+        [deprecated("PerceptionCorrelationGroup may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Perception.Provider.PerceptionCorrelation>  RelativeLocations{ get; };
+    }
+
+    [deprecated("PerceptionFrame may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionFrame", 7cfe7825-54bb-4d9d-bec5-8ef66151d2ac)]
+    runtimeclass PerceptionFrame
+    {
+        [deprecated("PerceptionFrame may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.TimeSpan RelativeTime{ get; };
+        [deprecated("PerceptionFrame may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.TimeSpan RelativeTime{ set; };
+        [deprecated("PerceptionFrame may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Collections.ValueSet Properties{ get; };
+        [deprecated("PerceptionFrame may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.IMemoryBuffer FrameData{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [deprecated("PerceptionStartFaceAuthenticationHandler may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [uuid(74816d2a-2090-4670-8c48-ef39e7ff7c26)]
+    delegate Boolean PerceptionStartFaceAuthenticationHandler(PerceptionFaceAuthenticationGroup sender);
+
+    [deprecated("PerceptionStopFaceAuthenticationHandler may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(387ee6aa-89cd-481e-aade-dd92f70b2ad7)]
+    delegate void PerceptionStopFaceAuthenticationHandler(PerceptionFaceAuthenticationGroup sender);
+
+
+
+
+    [deprecated("PerceptionCorrelation may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Perception.Provider.IPerceptionCorrelationFactory", d4a6c425-2884-4a8f-8134-2835d7286cbf)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionCorrelation", b4131a82-dff5-4047-8a19-3b4d805f7176)]
+    [threading(both)]
+    runtimeclass PerceptionCorrelation
+    {
+        [deprecated("PerceptionCorrelation may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        [method_name( "Create" )] PerceptionCorrelation(String targetId, Windows.Foundation.Numerics.Vector3 position, Windows.Foundation.Numerics.Quaternion orientation);
+        [deprecated("PerceptionCorrelation may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        String TargetId{ get; };
+        [deprecated("PerceptionCorrelation may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Numerics.Vector3 Position{ get; };
+        [deprecated("PerceptionCorrelation may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Foundation.Numerics.Quaternion Orientation{ get; };
+    }
+
+
+
+
+
+    [uuid(c3937be6-c05d-4247-9320-1aabaf16af31)]
+    [contract(Windows.Devices.Perception.Provider.WorldProvidersContract, 1)]
+    interface ISourceSet
+    {
+        Windows.Foundation.Collections.IVectorView <String>  SourceIds{ get; };
+    };
+
+    [contract(Windows.Devices.Perception.Provider.WorldProvidersContract, 1)]
+    [uuid(c9757795-c062-4a7a-bae9-7f4fe6e3d1a0)]
+    [internal]
+    interface IControllerModeSourceSet requires Windows.Devices.Perception.Provider.ISourceSet
+    {
+    };
+
+    [contract(Windows.Devices.Perception.Provider.WorldProvidersContract, 1)]
+    [uuid(5add8677-4fc2-4f84-9949-e49a7b21d33e)]
+    interface ICorrelationSourceSet requires Windows.Devices.Perception.Provider.ISourceSet
+    {
+        Windows.Foundation.Collections.IMapView <String, Windows.Devices.Perception.Provider.ISourceTransform>  Transforms{ get; };
+    };
+
+    [uuid(9c071292-585a-4f19-b500-61467edadb9b)]
+    [contract(Windows.Devices.Perception.Internal.InternalContract, 1)]
+    interface ISourceTransform
+    {
+        Windows.Foundation.Numerics.Vector3 Position{ get; };
+        Windows.Foundation.Numerics.Quaternion Orientation{ get; };
+    };
+
+    [contract(Windows.Devices.Perception.Provider.WorldProvidersContract, 1)]
+    [uuid(79d840d8-85e4-4e4a-ad80-843bf9071b78)]
+    interface IFaceAuthenticationSourceSet requires Windows.Devices.Perception.Provider.ISourceSet
+    {
+        void EnterFaceAuthenticationMode();
+        void ExitFaceAuthenticationMode();
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [deprecated("PerceptionVideoFrameAllocator may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Perception.Provider.IPerceptionVideoFrameAllocatorFactory", 1a58b0e1-e91a-481e-b876-a89e2bbc6b33)]
+    [interface_name("Windows.Devices.Perception.Provider.IPerceptionVideoFrameAllocator", 4c38a7da-fdd8-4ed4-a039-2a6f9b235038)]
+    [threading(both)]
+    runtimeclass PerceptionVideoFrameAllocator
+        : Windows.Foundation.IClosable
+    {
+        [deprecated("PerceptionVideoFrameAllocator may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        [method_name( "Create" )] PerceptionVideoFrameAllocator(UInt32 maxOutstandingFrameCountForWrite, Windows.Graphics.Imaging.BitmapPixelFormat format, Windows.Foundation.Size resolution, Windows.Graphics.Imaging.BitmapAlphaMode alpha);
+        [deprecated("PerceptionVideoFrameAllocator may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Devices.Perception.Provider.PerceptionFrame AllocateFrame();
+        [deprecated("PerceptionVideoFrameAllocator may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        Windows.Devices.Perception.Provider.PerceptionFrame CopyFromVideoFrame(Windows.Media.VideoFrame frame);
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [static_name("Windows.Devices.Perception.Provider.IPerceptionFrameProviderManagerServiceStatics", ae8386e6-cad9-4359-8f96-8eae51810526)]
+    [threading(both)]
+    runtimeclass PerceptionFrameProviderManagerService
+    {
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void RegisterFrameProviderInfo(IPerceptionFrameProviderManager manager, PerceptionFrameProviderInfo frameProviderInfo);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void UnregisterFrameProviderInfo(IPerceptionFrameProviderManager manager, PerceptionFrameProviderInfo frameProviderInfo);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void RegisterFaceAuthenticationGroup(IPerceptionFrameProviderManager manager, PerceptionFaceAuthenticationGroup faceAuthenticationGroup);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void UnregisterFaceAuthenticationGroup(IPerceptionFrameProviderManager manager, PerceptionFaceAuthenticationGroup faceAuthenticationGroup);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void RegisterControlGroup(IPerceptionFrameProviderManager manager, PerceptionControlGroup controlGroup);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void UnregisterControlGroup(IPerceptionFrameProviderManager manager, PerceptionControlGroup controlGroup);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void RegisterCorrelationGroup(IPerceptionFrameProviderManager manager, PerceptionCorrelationGroup correlationGroup);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void UnregisterCorrelationGroup(IPerceptionFrameProviderManager manager, PerceptionCorrelationGroup correlationGroup);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void UpdateAvailabilityForProvider(IPerceptionFrameProvider provider, Boolean available);
+        [deprecated("PerceptionFrameProviderManagerService may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static void PublishFrameForProvider(IPerceptionFrameProvider provider, PerceptionFrame frame);
+    }
+
+    [deprecated("KnownPerceptionFrameKind may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Perception.Provider.IKnownPerceptionFrameKindStatics", 3ae651d6-9669-4106-9fae-4835c1b96104)]
+    [threading(both)]
+    runtimeclass KnownPerceptionFrameKind
+    {
+        [deprecated("KnownPerceptionFrameKind may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static String Color{ get; };
+        [deprecated("KnownPerceptionFrameKind may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static String Depth{ get; };
+        [deprecated("KnownPerceptionFrameKind may be unavailable after Windows Creator Update. Please refer to AVStream on MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x40000)]
+        static String Infrared{ get; };
+    }
+
+}

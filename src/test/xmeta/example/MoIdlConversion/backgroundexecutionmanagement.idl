@@ -1,0 +1,57 @@
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BackgroundAccessStatus
+    {
+        Unspecified,
+        [deprecated("Use AlwaysAllowed or AllowedSubjectToSystemPolicy instead of AllowedWithAlwaysOnRealTimeConnectivity. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        AllowedWithAlwaysOnRealTimeConnectivity,
+        [deprecated("Use AlwaysAllowed or AllowedSubjectToSystemPolicy instead of AllowedMayUseActiveRealTimeConnectivity. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        AllowedMayUseActiveRealTimeConnectivity,
+        [deprecated("Use DeniedByUser or DeniedBySystemPolicy instead of Denied. For more info, see MSDN.", deprecate, Windows.Foundation.UniversalApiContract, 0x30000)]
+        Denied,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        AlwaysAllowed,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        AllowedSubjectToSystemPolicy,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        DeniedBySystemPolicy,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        DeniedByUser,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum BackgroundAccessRequestKind
+    {
+        AlwaysAllowed,
+        AllowedSubjectToSystemPolicy,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.Background.IBackgroundExecutionManagerStatics", e826ea58-66a9-4d41-83d4-b4c18c87b846)]
+    runtimeclass BackgroundExecutionManager
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.ApplicationModel.Background.IBackgroundExecutionManagerStatics2", 469b24ef-9bbb-4e18-999a-fd6512931be9)]
+        {
+            [method_name("RequestAccessKindAsync")] static Windows.Foundation.IAsyncOperation <Boolean>  RequestAccessKindAsync(BackgroundAccessRequestKind requestedAccess, String reason);
+        }
+        [method_name("RequestAccessAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.BackgroundAccessStatus>  RequestAccessAsync();
+        [method_name("RequestAccessForApplicationAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.BackgroundAccessStatus>  RequestAccessAsync(String applicationId);
+        [method_name("RemoveAccess")] static void RemoveAccess();
+        [method_name("RemoveAccessForApplication")] static void RemoveAccess(String applicationId);
+        [method_name("GetAccessStatus")] static Windows.ApplicationModel.Background.BackgroundAccessStatus GetAccessStatus();
+        [method_name("GetAccessStatusForApplication")] static Windows.ApplicationModel.Background.BackgroundAccessStatus GetAccessStatus(String applicationId);
+    }
+
+}

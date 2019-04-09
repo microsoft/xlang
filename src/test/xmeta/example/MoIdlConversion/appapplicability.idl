@@ -1,0 +1,38 @@
+
+
+
+
+
+
+
+namespace Windows.System.Profile
+{
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [flags]
+    enum UnsupportedAppRequirementReasons
+    {
+        Unknown,
+        DeniedBySystem,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.Profile.IUnsupportedAppRequirement", 6182445c-894b-5cbc-8976-a98e0a9b998d)]
+    runtimeclass UnsupportedAppRequirement
+    {
+        String Requirement{ get; };
+        Windows.System.Profile.UnsupportedAppRequirementReasons Reasons{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Profile.IAppApplicabilityStatics", 1664a082-0f38-5c99-83e4-48995970861c)]
+    [threading(both)]
+    runtimeclass AppApplicability
+    {
+        static Windows.Foundation.Collections.IVectorView <Windows.System.Profile.UnsupportedAppRequirement>  GetUnsupportedAppRequirements(Windows.Foundation.Collections.IIterable <String>  capabilities);
+    }
+
+}

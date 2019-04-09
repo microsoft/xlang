@@ -1,0 +1,195 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.ComponentUI
+{
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum ComponentState
+    {
+        Launched,
+        Connected,
+        PresentationReady,
+        Closed,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum ComponentLaunchError
+    {
+        Success,
+        VersionTooLow,
+        PackageNotInstalled,
+        PackageCorrupted,
+        AccessDenied,
+        InvalidParameter,
+    };
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IInputSitePrototype", a4f8d127-915d-51d9-85e5-d0b27e2d2f81)]
+    runtimeclass InputSitePrototype
+    {
+        UInt32 DummyProperty{ get; };
+        UInt32 DummyProperty{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentSite", 5588d8a9-8f35-5673-9aed-89f58e1af54d)]
+    runtimeclass ComponentSite
+    {
+        Windows.ApplicationModel.ComponentUI.ComponentState ComponentState{ get; };
+        Windows.Foundation.Size Size{ get; };
+        Windows.Foundation.Size Size{ set; };
+        UInt64 Id{ get; };
+        Windows.ApplicationModel.ComponentUI.InputSitePrototype Input{ get; };
+        Object ObjectModel{ get; };
+        String PackageFamilyName{ get; };
+        String PackageRelativeComponentId{ get; };
+        Windows.ApplicationModel.PackageVersion Version{ get; };
+        Boolean Visibility{ get; };
+        Boolean Visibility{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.ComponentUI.ComponentSite, Windows.ApplicationModel.ComponentUI.ComponentStateEventArgs>  ComponentStateChanged;
+        Windows.Foundation.IAsyncOperation <Boolean>  InitializeAsync();
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.AppService.AppServiceConnection>  OpenAppServiceConnectionAsync(String serviceName);
+        Windows.UI.Composition.Visual GetVisual(Windows.UI.Composition.Compositor hostCompositor);
+        Windows.Foundation.IAsyncAction CloseAsync();
+    }
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentStateEventArgs", fd9dba63-560d-56dc-b0c6-2b4f55cf5506)]
+    runtimeclass ComponentStateEventArgs
+    {
+        Windows.ApplicationModel.ComponentUI.ComponentState ComponentState{ get; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.ApplicationModel.ComponentUI.IComponentManagerStatics", e3a78cc4-a803-5e69-bd36-b24bbbe5a24f)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentManager", 10c8b8a5-2898-5812-9f1b-5fd1029659fe)]
+    [threading(both)]
+    runtimeclass ComponentManager
+    {
+        static Windows.ApplicationModel.ComponentUI.ComponentManager GetForCurrentView();
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.ComponentUI.ComponentManager, Windows.ApplicationModel.ComponentUI.ComponentAddedEventArgs>  ComponentAdded;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.ComponentUI.ComponentManager, Windows.ApplicationModel.ComponentUI.ComponentRemovedEventArgs>  ComponentRemoved;
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.ComponentUI.ComponentLaunchResults>  LaunchComponentAsync(String packageFamilyName, String componentId, ComponentLaunchOptions options);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.ComponentUI.ComponentReparentResults>  ReparentComponentAsync(ComponentSite component, Windows.ApplicationModel.Core.CoreApplicationView target);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentAddedEventArgs", 625eb8da-5943-597f-b33b-9fc1deb7078e)]
+    runtimeclass ComponentAddedEventArgs
+    {
+        Windows.ApplicationModel.ComponentUI.ComponentSite ComponentSite{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentRemovedEventArgs", 86fc4c16-066c-5f4c-92ab-4f4a4c634491)]
+    runtimeclass ComponentRemovedEventArgs
+    {
+        Windows.ApplicationModel.ComponentUI.ComponentSite ComponentSite{ get; };
+        Boolean Reparented{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentLaunchOptions", 17fed9b9-e873-5691-93af-353370814537)]
+    [threading(both)]
+    runtimeclass ComponentLaunchOptions
+    {
+        ComponentLaunchOptions();
+        Windows.Foundation.Collections.ValueSet ActivationArgs{ get; };
+        Boolean AllowBackgroundClipboardAccess{ get; };
+        Boolean AllowBackgroundClipboardAccess{ set; };
+        String ComponentObjectModelACID{ get; };
+        String ComponentObjectModelACID{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentLaunchResults", 255ee909-de4e-5625-a4af-78dce9341f0a)]
+    runtimeclass ComponentLaunchResults
+    {
+        Windows.ApplicationModel.ComponentUI.ComponentSite ComponentSite{ get; };
+        Windows.ApplicationModel.ComponentUI.ComponentLaunchError Error{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.ApplicationModel.ComponentUI.IComponentReparentResults", 9c2ddf6f-e493-56d4-b5ac-9eae117a43c2)]
+    runtimeclass ComponentReparentResults
+    {
+        Windows.ApplicationModel.ComponentUI.ComponentSite ComponentSite{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+
+
+
+
+
+
+}
+namespace Windows.ApplicationModel.ComponentUI.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalCUI{};
+
+    [uuid(5a877585-fa6a-51c0-9515-7dd695fb9a2f)]
+    [contract(Windows.ApplicationModel.ComponentUI.Internal.InternalCUI, 1)]
+    interface IComponentExtras
+    {
+        Boolean AllowModalDialog{ get; };
+        Boolean AllowModalDialog{ set; };
+        event Windows.Foundation.EventHandler <Object>  ModalDialog;
+    };
+
+    [uuid(cdf97747-e8cb-52d0-bb7f-4bb3e55ce104)]
+    [contract(Windows.ApplicationModel.ComponentUI.Internal.InternalCUI, 1)]
+    interface IComponentLaunchOptions2
+    {
+        Windows.ApplicationModel.Core.RestrictedAppContainer RacProfile{ get; };
+        Windows.ApplicationModel.Core.RestrictedAppContainer RacProfile{ set; };
+        void SetLpacAttributes(UInt8[] value);
+    };
+
+    [contract(Windows.ApplicationModel.ComponentUI.Internal.InternalCUI, 1)]
+    [uuid(cb0dbc03-4612-5456-b900-9050abe8cf44)]
+    interface IComponentInternalLaunchOptions
+    {
+        String ContractId{ get; };
+        String ContractId{ set; };
+        Windows.ApplicationModel.Core.CoreApplicationView TargetHost{ get; };
+        Windows.ApplicationModel.Core.CoreApplicationView TargetHost{ set; };
+    };
+
+}

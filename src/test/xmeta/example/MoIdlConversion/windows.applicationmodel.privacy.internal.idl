@@ -1,0 +1,35 @@
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Privacy.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalPrivacyContract{};
+
+    [contract(Windows.ApplicationModel.Privacy.Internal.InternalPrivacyContract, 1)]
+    enum ChallengeType
+    {
+        Default,
+        DeviceConsent,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Privacy.Internal.InternalPrivacyContract, 1)]
+    [interface_name("Windows.ApplicationModel.Privacy.Internal.IDeviceAccessBrokerExtension", ab778464-743d-4cfd-9b6d-589990d10a63)]
+    runtimeclass DeviceAccessBrokerExtension
+    {
+        Boolean CanShowConsentUIForUser(Windows.System.User user);
+        Boolean IsChallengeRequiredForUser(Windows.System.User user);
+        Windows.Foundation.IAsyncOperation <Boolean>  ShowChallengeForUserAsync(Windows.System.User user, ChallengeType challengeType);
+        String GetPreferredDisplayNameForUser(Windows.System.User user);
+        Windows.Foundation.IAsyncAction ShowConsentBlockedUiForUser(Windows.System.User user, String appSid, String capabilityName);
+    }
+
+}

@@ -1,0 +1,542 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Web
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WebErrorStatus
+    {
+        Unknown,
+        CertificateCommonNameIsIncorrect,
+        CertificateExpired,
+        CertificateContainsErrors,
+        CertificateRevoked,
+        CertificateIsInvalid,
+        ServerUnreachable,
+        Timeout,
+        ErrorHttpInvalidServerResponse,
+        ConnectionAborted,
+        ConnectionReset,
+        Disconnected,
+        HttpToHttpsOnRedirection,
+        HttpsToHttpOnRedirection,
+        CannotConnect,
+        HostNameNotResolved,
+        OperationCanceled,
+        RedirectFailed,
+        UnexpectedStatusCode,
+        UnexpectedRedirection,
+        UnexpectedClientError,
+        UnexpectedServerError,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        InsufficientRangeSupport,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        MissingContentLengthSupport,
+        MultipleChoices = 300,
+        MovedPermanently,
+        Found,
+        SeeOther,
+        NotModified,
+        UseProxy,
+        TemporaryRedirect = 307,
+        BadRequest = 400,
+        Unauthorized,
+        PaymentRequired,
+        Forbidden,
+        NotFound,
+        MethodNotAllowed,
+        NotAcceptable,
+        ProxyAuthenticationRequired,
+        RequestTimeout,
+        Conflict,
+        Gone,
+        LengthRequired,
+        PreconditionFailed,
+        RequestEntityTooLarge,
+        RequestUriTooLong,
+        UnsupportedMediaType,
+        RequestedRangeNotSatisfiable,
+        ExpectationFailed,
+        InternalServerError = 500,
+        NotImplemented,
+        BadGateway,
+        ServiceUnavailable,
+        GatewayTimeout,
+        HttpVersionNotSupported,
+    };
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Web.IWebErrorStatics", fe616766-bf27-4064-87b7-6563bb11ce2e)]
+    [threading(both)]
+    runtimeclass WebError
+    {
+        static Windows.Web.WebErrorStatus GetStatus(Int32 hresult);
+    }
+
+}
+namespace Windows.Web.Syndication
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct RetrievalProgress
+    {
+        UInt32 BytesRetrieved;
+        UInt32 TotalBytesToRetrieve;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct TransferProgress
+    {
+        UInt32 BytesSent;
+        UInt32 TotalBytesToSend;
+        UInt32 BytesRetrieved;
+        UInt32 TotalBytesToRetrieve;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SyndicationFormat
+    {
+        Atom10,
+        Rss20,
+        Rss10,
+        Rss092,
+        Rss091,
+        Atom03,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SyndicationErrorStatus
+    {
+        Unknown,
+        MissingRequiredElement,
+        MissingRequiredAttribute,
+        InvalidXml,
+        UnexpectedContent,
+        UnsupportedFormat,
+    };
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Web.Syndication.ISyndicationAttributeFactory", 624f1599-ed3e-420f-be86-640414886e4b)]
+    [interface_name("Windows.Web.Syndication.ISyndicationAttribute", 71e8f969-526e-4001-9a91-e84f83161ab1)]
+    [threading(both)]
+    runtimeclass SyndicationAttribute
+    {
+        [method_name( "CreateSyndicationAttribute" )] SyndicationAttribute(String attributeName, String attributeNamespace, String attributeValue);
+        SyndicationAttribute();
+        String Name{ get; };
+        String Name{ set; };
+        String Namespace{ get; };
+        String Namespace{ set; };
+        String Value{ get; };
+        String Value{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(753cef78-51f8-45c0-a9f5-f1719dec3fb2)]
+    interface ISyndicationNode
+    {
+        String NodeName{ get; };
+        String NodeName{ set; };
+        String NodeNamespace{ get; };
+        String NodeNamespace{ set; };
+        String NodeValue{ get; };
+        String NodeValue{ set; };
+        String Language{ get; };
+        String Language{ set; };
+        Windows.Foundation.Uri BaseUri{ get; };
+        Windows.Foundation.Uri BaseUri{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationAttribute>  AttributeExtensions{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.ISyndicationNode>  ElementExtensions{ get; };
+        Windows.Data.Xml.Dom.XmlDocument GetXmlDocument(SyndicationFormat format);
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [constructor_name("Windows.Web.Syndication.ISyndicationNodeFactory", 12902188-4acb-49a8-b777-a5eb92e18a79)]
+    [threading(both)]
+    runtimeclass SyndicationNode
+        : [default]Windows.Web.Syndication.ISyndicationNode
+    {
+        [method_name( "CreateSyndicationNode" )] SyndicationNode(String nodeName, String nodeNamespace, String nodeValue);
+        SyndicationNode();
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Web.Syndication.ISyndicationGeneratorFactory", a34083e3-1e26-4dbc-ba9d-1ab84beff97b)]
+    [interface_name("Windows.Web.Syndication.ISyndicationGenerator", 9768b379-fb2b-4f6d-b41c-088a5868825c)]
+    [threading(both)]
+    runtimeclass SyndicationGenerator
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        [method_name( "CreateSyndicationGenerator" )] SyndicationGenerator(String text);
+        SyndicationGenerator();
+        String Text{ get; };
+        String Text{ set; };
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Uri Uri{ set; };
+        String Version{ get; };
+        String Version{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(b9cc5e80-313a-4091-a2a6-243e0ee923f9)]
+    interface ISyndicationText requires Windows.Web.Syndication.ISyndicationNode
+    {
+        String Text{ get; };
+        String Text{ set; };
+        String Type{ get; };
+        String Type{ set; };
+        Windows.Data.Xml.Dom.XmlDocument Xml{ get; };
+        Windows.Data.Xml.Dom.XmlDocument Xml{ set; };
+    };
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Web.Syndication.ISyndicationTextFactory", ee7342f7-11c6-4b25-ab62-e596bd162946)]
+    [threading(both)]
+    runtimeclass SyndicationText
+        : [default]Windows.Web.Syndication.ISyndicationText
+        , Windows.Web.Syndication.ISyndicationNode
+    {
+        [method_name( "CreateSyndicationText" )] SyndicationText(String text);
+        [method_name( "CreateSyndicationTextEx" )] SyndicationText(String text, SyndicationTextType type);
+        SyndicationText();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SyndicationTextType
+    {
+        Text,
+        Html,
+        Xhtml,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Web.Syndication.ISyndicationContentFactory", 3d2fbb93-9520-4173-9388-7e2df324a8a0)]
+    [interface_name("Windows.Web.Syndication.ISyndicationContent", 4641fefe-0e55-40d0-b8d0-6a2ccba9fc7c)]
+    [threading(both)]
+    runtimeclass SyndicationContent
+        : Windows.Web.Syndication.ISyndicationText
+        , Windows.Web.Syndication.ISyndicationNode
+    {
+        [method_name( "CreateSyndicationContent" )] SyndicationContent(String text, SyndicationTextType type);
+        [method_name( "CreateSyndicationContentWithSourceUri" )] SyndicationContent(Windows.Foundation.Uri sourceUri);
+        SyndicationContent();
+        Windows.Foundation.Uri SourceUri{ get; };
+        Windows.Foundation.Uri SourceUri{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Web.Syndication.ISyndicationLinkFactory", 5ed863d4-5535-48ac-98d4-c190995080b3)]
+    [interface_name("Windows.Web.Syndication.ISyndicationLink", 27553abd-a10e-41b5-86bd-9759086eb0c5)]
+    [threading(both)]
+    runtimeclass SyndicationLink
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        [method_name( "CreateSyndicationLink" )] SyndicationLink(Windows.Foundation.Uri uri);
+        [method_name( "CreateSyndicationLinkEx" )] SyndicationLink(Windows.Foundation.Uri uri, String relationship, String title, String mediaType, UInt32 length);
+        SyndicationLink();
+        UInt32 Length{ get; };
+        UInt32 Length{ set; };
+        String MediaType{ get; };
+        String MediaType{ set; };
+        String Relationship{ get; };
+        String Relationship{ set; };
+        String Title{ get; };
+        String Title{ set; };
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Uri Uri{ set; };
+        String ResourceLanguage{ get; };
+        String ResourceLanguage{ set; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Web.Syndication.ISyndicationPerson", fa1ee5da-a7c6-4517-a096-0143faf29327)]
+    [threading(both)]
+    runtimeclass SyndicationPerson
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        SyndicationPerson();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Web.Syndication.ISyndicationPersonFactory", dcf4886d-229d-4b58-a49b-f3d2f0f5c99f)]
+        {
+            [method_name( "CreateSyndicationPerson" )] SyndicationPerson(String name);
+            [method_name( "CreateSyndicationPersonEx" )] SyndicationPerson(String name, String email, Windows.Foundation.Uri uri);
+        }
+        String Email{ get; };
+        String Email{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Uri Uri{ set; };
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Web.Syndication.ISyndicationCategory", 8715626f-0cba-4a7f-89ff-ecb5281423b6)]
+    [threading(both)]
+    runtimeclass SyndicationCategory
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        SyndicationCategory();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Web.Syndication.ISyndicationCategoryFactory", ab42802f-49e0-4525-8ab2-ab45c02528ff)]
+        {
+            [method_name( "CreateSyndicationCategory" )] SyndicationCategory(String term);
+            [method_name( "CreateSyndicationCategoryEx" )] SyndicationCategory(String term, String scheme, String label);
+        }
+        String Label{ get; };
+        String Label{ set; };
+        String Scheme{ get; };
+        String Scheme{ set; };
+        String Term{ get; };
+        String Term{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Web.Syndication.ISyndicationFeedFactory", 23472232-8be9-48b7-8934-6205131d9357)]
+    [interface_name("Windows.Web.Syndication.ISyndicationFeed", 7ffe3cd2-5b66-4d62-8403-1bc10d910d6b)]
+    [threading(both)]
+    runtimeclass SyndicationFeed
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        [method_name( "CreateSyndicationFeed" )] SyndicationFeed(String title, String subtitle, Windows.Foundation.Uri uri);
+        SyndicationFeed();
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationPerson>  Authors{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationCategory>  Categories{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationPerson>  Contributors{ get; };
+        Windows.Web.Syndication.SyndicationGenerator Generator{ get; };
+        Windows.Web.Syndication.SyndicationGenerator Generator{ set; };
+        Windows.Foundation.Uri IconUri{ get; };
+        Windows.Foundation.Uri IconUri{ set; };
+        String Id{ get; };
+        String Id{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationItem>  Items{ get; };
+        Windows.Foundation.DateTime LastUpdatedTime{ get; };
+        Windows.Foundation.DateTime LastUpdatedTime{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationLink>  Links{ get; };
+        Windows.Foundation.Uri ImageUri{ get; };
+        Windows.Foundation.Uri ImageUri{ set; };
+        Windows.Web.Syndication.ISyndicationText Rights{ get; };
+        Windows.Web.Syndication.ISyndicationText Rights{ set; };
+        Windows.Web.Syndication.ISyndicationText Subtitle{ get; };
+        Windows.Web.Syndication.ISyndicationText Subtitle{ set; };
+        Windows.Web.Syndication.ISyndicationText Title{ get; };
+        Windows.Web.Syndication.ISyndicationText Title{ set; };
+        Windows.Foundation.Uri FirstUri{ get; };
+        Windows.Foundation.Uri LastUri{ get; };
+        Windows.Foundation.Uri NextUri{ get; };
+        Windows.Foundation.Uri PreviousUri{ get; };
+        Windows.Web.Syndication.SyndicationFormat SourceFormat{ get; };
+        void Load(String feed);
+        void LoadFromXml(Windows.Data.Xml.Dom.XmlDocument feedDocument);
+    }
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Web.Syndication.ISyndicationItem", 548db883-c384-45c1-8ae8-a378c4ec486c)]
+    [threading(both)]
+    runtimeclass SyndicationItem
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        SyndicationItem();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Web.Syndication.ISyndicationItemFactory", 251d434f-7db8-487a-85e4-10d191e66ebb)]
+        {
+            [method_name( "CreateSyndicationItem" )] SyndicationItem(String title, SyndicationContent content, Windows.Foundation.Uri uri);
+        }
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationPerson>  Authors{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationCategory>  Categories{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationPerson>  Contributors{ get; };
+        Windows.Web.Syndication.SyndicationContent Content{ get; };
+        Windows.Web.Syndication.SyndicationContent Content{ set; };
+        String Id{ get; };
+        String Id{ set; };
+        Windows.Foundation.DateTime LastUpdatedTime{ get; };
+        Windows.Foundation.DateTime LastUpdatedTime{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Web.Syndication.SyndicationLink>  Links{ get; };
+        Windows.Foundation.DateTime PublishedDate{ get; };
+        Windows.Foundation.DateTime PublishedDate{ set; };
+        Windows.Web.Syndication.ISyndicationText Rights{ get; };
+        Windows.Web.Syndication.ISyndicationText Rights{ set; };
+        Windows.Web.Syndication.SyndicationFeed Source{ get; };
+        Windows.Web.Syndication.SyndicationFeed Source{ set; };
+        Windows.Web.Syndication.ISyndicationText Summary{ get; };
+        Windows.Web.Syndication.ISyndicationText Summary{ set; };
+        Windows.Web.Syndication.ISyndicationText Title{ get; };
+        Windows.Web.Syndication.ISyndicationText Title{ set; };
+        Windows.Foundation.Uri CommentsUri{ get; };
+        Windows.Foundation.Uri CommentsUri{ set; };
+        Windows.Foundation.Uri EditUri{ get; };
+        Windows.Foundation.Uri EditMediaUri{ get; };
+        String ETag{ get; };
+        Windows.Foundation.Uri ItemUri{ get; };
+        void Load(String item);
+        void LoadFromXml(Windows.Data.Xml.Dom.XmlDocument itemDocument);
+    }
+
+
+
+
+    [uuid(9e18a9b7-7249-4b45-b229-7df895a5a1f5)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface ISyndicationClient
+    {
+        Windows.Security.Credentials.PasswordCredential ServerCredential{ get; };
+        Windows.Security.Credentials.PasswordCredential ServerCredential{ set; };
+        Windows.Security.Credentials.PasswordCredential ProxyCredential{ get; };
+        Windows.Security.Credentials.PasswordCredential ProxyCredential{ set; };
+        UInt32 MaxResponseBufferSize{ get; };
+        UInt32 MaxResponseBufferSize{ set; };
+        UInt32 Timeout{ get; };
+        UInt32 Timeout{ set; };
+        Boolean BypassCacheOnRetrieve{ get; };
+        Boolean BypassCacheOnRetrieve{ set; };
+        void SetRequestHeader(String name, String value);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Web.Syndication.SyndicationFeed, Windows.Web.Syndication.RetrievalProgress>  RetrieveFeedAsync(Windows.Foundation.Uri uri);
+    };
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass SyndicationClient
+        : [default]Windows.Web.Syndication.ISyndicationClient
+    {
+        SyndicationClient();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Web.Syndication.ISyndicationClientFactory", 2ec4b32c-a79b-4114-b29a-05dffbafb9a4)]
+        {
+            [method_name( "CreateSyndicationClient" )] SyndicationClient(Windows.Security.Credentials.PasswordCredential serverCredential);
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.Web.Syndication.ISyndicationErrorStatics", 1fbb2361-45c7-4833-8aa0-be5f3b58a7f4)]
+    [threading(both)]
+    runtimeclass SyndicationError
+    {
+        static Windows.Web.Syndication.SyndicationErrorStatus GetStatus(Int32 hresult);
+    }
+
+
+}
+namespace Windows.Web.AtomPub
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Web.AtomPub.IResourceCollection", 7f5fd609-bc88-41d4-88fa-3de6704d428e)]
+    runtimeclass ResourceCollection
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        Windows.Web.Syndication.ISyndicationText Title{ get; };
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Web.Syndication.SyndicationCategory>  Categories{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  Accepts{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Web.AtomPub.IWorkspace", b41da63b-a4b8-4036-89c5-83c31266ba49)]
+    runtimeclass Workspace
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        Windows.Web.Syndication.ISyndicationText Title{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Web.AtomPub.ResourceCollection>  Collections{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Web.AtomPub.IServiceDocument", 8b7ec771-2ab3-4dbe-8bcc-778f92b75e51)]
+    runtimeclass ServiceDocument
+        : Windows.Web.Syndication.ISyndicationNode
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Web.AtomPub.Workspace>  Workspaces{ get; };
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Web.AtomPub.IAtomPubClient", 35392c38-cded-4d4c-9637-05f15c1c9406)]
+    [threading(both)]
+    runtimeclass AtomPubClient
+        : Windows.Web.Syndication.ISyndicationClient
+    {
+        AtomPubClient();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Web.AtomPub.IAtomPubClientFactory", 49d55012-57cb-4bde-ab9f-2610b172777b)]
+        {
+            [method_name( "CreateAtomPubClientWithCredentials" )] AtomPubClient(Windows.Security.Credentials.PasswordCredential serverCredential);
+        }
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Web.AtomPub.ServiceDocument, Windows.Web.Syndication.RetrievalProgress>  RetrieveServiceDocumentAsync(Windows.Foundation.Uri uri);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Storage.Streams.IInputStream, Windows.Web.Syndication.RetrievalProgress>  RetrieveMediaResourceAsync(Windows.Foundation.Uri uri);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Web.Syndication.SyndicationItem, Windows.Web.Syndication.RetrievalProgress>  RetrieveResourceAsync(Windows.Foundation.Uri uri);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Web.Syndication.SyndicationItem, Windows.Web.Syndication.TransferProgress>  CreateResourceAsync(Windows.Foundation.Uri uri, String description, Windows.Web.Syndication.SyndicationItem item);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Web.Syndication.SyndicationItem, Windows.Web.Syndication.TransferProgress>  CreateMediaResourceAsync(Windows.Foundation.Uri uri, String mediaType, String description, Windows.Storage.Streams.IInputStream mediaStream);
+        Windows.Foundation.IAsyncActionWithProgress <Windows.Web.Syndication.TransferProgress>  UpdateMediaResourceAsync(Windows.Foundation.Uri uri, String mediaType, Windows.Storage.Streams.IInputStream mediaStream);
+        Windows.Foundation.IAsyncActionWithProgress <Windows.Web.Syndication.TransferProgress>  UpdateResourceAsync(Windows.Foundation.Uri uri, Windows.Web.Syndication.SyndicationItem item);
+        Windows.Foundation.IAsyncActionWithProgress <Windows.Web.Syndication.TransferProgress>  UpdateResourceItemAsync(Windows.Web.Syndication.SyndicationItem item);
+        Windows.Foundation.IAsyncActionWithProgress <Windows.Web.Syndication.TransferProgress>  DeleteResourceAsync(Windows.Foundation.Uri uri);
+        Windows.Foundation.IAsyncActionWithProgress <Windows.Web.Syndication.TransferProgress>  DeleteResourceItemAsync(Windows.Web.Syndication.SyndicationItem item);
+        void CancelAsyncOperations();
+    }
+
+
+}

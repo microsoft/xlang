@@ -1,0 +1,76 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IDefaultTileStatics", e4e8b1a3-4837-4ef9-9cb6-97368eb7f809)]
+    [interface_name("Windows.Internal.StateRepository.IDefaultTile", b04762bb-0020-4540-966e-639baa6f597e)]
+    [threading(both)]
+    runtimeclass DefaultTile
+    {
+        static Boolean Exists(Int64 defaultTileID);
+        static Boolean ExistsByApplication(Application Application);
+        static Windows.Internal.StateRepository.DefaultTile Get(Int64 defaultTileID);
+        static Windows.Internal.StateRepository.DefaultTile TryGet(Int64 defaultTileID);
+        static Windows.Internal.StateRepository.DefaultTile GetByApplication(Application Application);
+        static Windows.Internal.StateRepository.DefaultTile TryGetByApplication(Application Application);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DefaultTile>  Find();
+        DefaultTile();
+        Int64 _DefaultTileID{ get; };
+        Int64 _DefaultTileID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Application{ get; };
+        Int64 Application{ set; };
+        Windows.Internal.StateRepository.Application GetApplication();
+        void SetApplication(Application value);
+        Windows.Internal.StateRepository.DefaultTileUpdateRecurrence UpdateRecurrence{ get; };
+        Windows.Internal.StateRepository.DefaultTileUpdateRecurrence UpdateRecurrence{ set; };
+        Boolean IsUpdateUriTemplateNull{ get; };
+        void SetUpdateUriTemplateToNull();
+        String UpdateUriTemplate{ get; };
+        String UpdateUriTemplate{ set; };
+        Windows.Foundation.Uri UpdateUriTemplateAsUri{ get; };
+        Windows.Foundation.Uri UpdateUriTemplateAsUri{ set; };
+        Windows.Internal.StateRepository.DefaultTileShowNameOnTiles ShowNameOnTiles{ get; };
+        Windows.Internal.StateRepository.DefaultTileShowNameOnTiles ShowNameOnTiles{ set; };
+        Boolean IsShortNameNull{ get; };
+        void SetShortNameToNull();
+        String ShortName{ get; };
+        String ShortName{ set; };
+        Windows.Internal.StateRepository.DefaultTileDefaultSize DefaultSize{ get; };
+        Windows.Internal.StateRepository.DefaultTileDefaultSize DefaultSize{ set; };
+        Boolean IsHoloContentChoiceNull{ get; };
+        void SetHoloContentChoiceToNull();
+        String HoloContentChoice{ get; };
+        String HoloContentChoice{ set; };
+        Windows.Storage.StorageFile GetHoloContentChoiceAsStorageFile();
+        void SetHoloContentChoiceAsStorageFile(Windows.Storage.IStorageFile value);
+        Boolean IsMixedRealityModelNull{ get; };
+        void SetMixedRealityModelToNull();
+        String MixedRealityModel{ get; };
+        String MixedRealityModel{ set; };
+        Windows.Storage.StorageFile GetMixedRealityModelAsStorageFile();
+        void SetMixedRealityModelAsStorageFile(Windows.Storage.IStorageFile value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

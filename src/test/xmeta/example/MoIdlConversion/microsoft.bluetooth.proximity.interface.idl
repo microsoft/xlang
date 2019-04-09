@@ -1,0 +1,134 @@
+
+
+
+
+
+
+
+
+
+namespace Microsoft.Bluetooth.Proximity.Interface
+{
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum DeviceProximityResultStatus
+    {
+        Success,
+        RadioNotAvailable,
+        RadioNotSupported,
+        DisabledByPolicy,
+        FilterNotSupported,
+        Unexpected,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum DeviceProximityPrimaryFilterRange
+    {
+        Short,
+        Long,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum DeviceProximityLevel
+    {
+        Unknown,
+        VeryClose,
+        Close,
+        Visible,
+        NotVisible,
+    };
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    enum DeviceProximitySessionStatus
+    {
+        Stopped,
+        PendingOutOfHardwareResources,
+        PendingRadioOff,
+        PendingYieldingToExternalComponent,
+        Started,
+        RadioNotAvailable,
+        RadioNotSupported,
+        DisabledByPolicy,
+        UnexpectedError,
+    };
+
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximityFilterConstraintStatics", a7a39bcf-0dd6-4823-b143-9272b6e522bd)]
+    [default_interface]
+    [interface_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximityFilterConstraint", a7c25f16-fb9a-4b69-b1fb-304c76559b09)]
+    [threading(both)]
+    runtimeclass DeviceProximityFilterConstraint
+    {
+        static Microsoft.Bluetooth.Proximity.Interface.DeviceProximityFilterConstraint CreateOneBeaconDeviceFilterConstraint(Microsoft.Bluetooth.Core.Interface.GapRemoteAddress address);
+        static Microsoft.Bluetooth.Proximity.Interface.DeviceProximityFilterConstraint CreateOneBeaconScenarioFilterConstraint(UInt8 scenarioType);
+        static Microsoft.Bluetooth.Proximity.Interface.DeviceProximityFilterConstraint CreateOneBeaconSubscenarioFilterConstraint(UInt8 scenarioType, UInt8 subScenarioType);
+    }
+
+
+
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximityFilterConfigurationStatics", fa13db1c-458e-4d64-ace8-a036407833bf)]
+    [default_interface]
+    [interface_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximityFilterConfiguration", 33ef8207-89da-4090-8595-b647998be446)]
+    [threading(both)]
+    runtimeclass DeviceProximityFilterConfiguration
+    {
+        static Microsoft.Bluetooth.Proximity.Interface.DeviceProximityFilterConfiguration CreatePrimaryFilterConfiguration(DeviceProximityPrimaryFilterRange filterRange);
+        static Microsoft.Bluetooth.Proximity.Interface.DeviceProximityFilterConfiguration CreateDeviceInRangeTriggerFilterConfiguration(DeviceProximityLevel proximityLevel);
+        static Microsoft.Bluetooth.Proximity.Interface.DeviceProximityFilterConfiguration CreateDeviceInRangeTrackingFilterConfiguration(DeviceProximityLevel proximityLevel, Boolean updateOnly, Windows.Foundation.IReference <Windows.Foundation.TimeSpan>  samplingInterval);
+    }
+
+
+
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximitySessionResult", a3dc3c44-fc68-493c-90f5-274ef303f137)]
+    runtimeclass DeviceProximitySessionResult
+    {
+        Microsoft.Bluetooth.Proximity.Interface.DeviceProximityResultStatus Status{ get; };
+        Microsoft.Bluetooth.Proximity.Interface.DeviceProximitySession Session{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximitySessionStatics", 2580b472-d0cf-45ba-b236-c804814b8333)]
+    [interface_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximitySession", edad782f-b44e-4881-81c2-297760c15ac9)]
+    [threading(both)]
+    runtimeclass DeviceProximitySession
+        : Windows.Foundation.IClosable
+    {
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Proximity.Interface.DeviceProximitySessionResult>  CreateBluetoothDeviceProximitySessionAsync(DeviceProximityFilterConstraint filterConstraint, DeviceProximityFilterConfiguration filterConfiguration);
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Microsoft.Bluetooth.Proximity.Interface.DeviceProximitySessionResult>  CreateBluetoothDeviceProximitySessionWithScanRequestCategoriesAsync(DeviceProximityFilterConstraint filterConstraint, DeviceProximityFilterConfiguration filterConfiguration, Microsoft.Bluetooth.Core.Interface.GapScanRequestCategories scanRequestCategories);
+        void Start();
+        void Stop();
+        Microsoft.Bluetooth.Proximity.Interface.DeviceProximitySessionStatus Status{ get; };
+        Guid SessionId{ get; };
+        event Windows.Foundation.TypedEventHandler <Microsoft.Bluetooth.Proximity.Interface.DeviceProximitySession, Object>  StatusChanged;
+        event Windows.Foundation.TypedEventHandler <Microsoft.Bluetooth.Proximity.Interface.DeviceProximitySession, Microsoft.Bluetooth.Proximity.Interface.DeviceProximityEventReceivedArgs>  ProximityEventReceived;
+    }
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Microsoft.Bluetooth.Interface.ApiContract, 1)]
+    [interface_name("Microsoft.Bluetooth.Proximity.Interface.IDeviceProximityEventReceivedArgs", 1737c191-92f5-4eba-b7f7-451adf8f78c3)]
+    runtimeclass DeviceProximityEventReceivedArgs
+    {
+        Windows.Foundation.DateTime Timestamp{ get; };
+        UInt64 LocalRadioAddress{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapRemoteAddress DeviceAddress{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapDeviceTrackingEventType EventType{ get; };
+        Microsoft.Bluetooth.Core.Interface.GapAdvertisement Advertisement{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  AdvertisementReceivedTimestamp{ get; };
+        Microsoft.Bluetooth.Proximity.Interface.DeviceProximityLevel ProximityLevel{ get; };
+    }
+
+
+
+}

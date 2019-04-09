@@ -1,0 +1,109 @@
+
+
+
+
+
+
+namespace WindowsInternal.Shell.UnifiedTile
+{
+    [contractversion(1)]
+    [internal]
+    apicontract IdentifiersInternalContract{};
+
+    [contract(WindowsInternal.Shell.UnifiedTile.IdentifiersInternalContract, 1)]
+    enum UnifiedTileIdentifierKind
+    {
+        Unknown,
+        Packaged,
+        Win32,
+        TargetedContent,
+    };
+
+    [uuid(d3653510-4fff-4bfa-905b-ea038b142fa5)]
+    [contract(WindowsInternal.Shell.UnifiedTile.IdentifiersInternalContract, 1)]
+    interface IUnifiedTileIdentifier
+    {
+        WindowsInternal.Shell.UnifiedTile.UnifiedTileIdentifierKind Kind{ get; };
+        String SerializedIdentifier{ get; };
+        String NotificationId{ get; };
+        String TelemetryId{ get; };
+        Boolean IsEqual(IUnifiedTileIdentifier other);
+    };
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.IdentifiersInternalContract, 1)]
+    [constructor_name("WindowsInternal.Shell.UnifiedTile.IPackagedUnifiedTileIdentifierFactory", ec3e7864-aaab-4367-9c63-94d289545500)]
+    [threading(both)]
+    runtimeclass PackagedUnifiedTileIdentifier
+        : [default]WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier
+    {
+        [method_name( "Create" )] PackagedUnifiedTileIdentifier(String aumid);
+        [method_name( "CreateWithTileId" )] PackagedUnifiedTileIdentifier(String aumid, String tileId);
+
+        [interface_name("WindowsInternal.Shell.UnifiedTile.IPackagedUnifiedTileIdentifier", a7668288-cc23-4b67-be8b-6c10455986b8)]
+        {
+            String AppUserModelId{ get; };
+            String TileId{ get; };
+            Boolean IsSecondaryTileId{ get; };
+        }
+    }
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.IdentifiersInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("WindowsInternal.Shell.UnifiedTile.IWin32UnifiedTileIdentifierFactory", 0e7735be-a965-44a6-a75f-54b8bcd67bec)]
+    [threading(both)]
+    runtimeclass Win32UnifiedTileIdentifier
+        : [default]WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier
+    {
+        [method_name( "Create" )] Win32UnifiedTileIdentifier(String appId);
+
+        [interface_name("WindowsInternal.Shell.UnifiedTile.IWin32UnifiedTileIdentifier", 5e8c6b47-79d6-40ac-8f45-30f87e82c583)]
+        {
+            String AppResolverAppId{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.IdentifiersInternalContract, 1)]
+    [constructor_name("WindowsInternal.Shell.UnifiedTile.ITargetedContentUnifiedTileIdentifierFactory", 1ffce3b9-51ad-429f-be82-8829d0c1181b)]
+    [threading(both)]
+    runtimeclass TargetedContentUnifiedTileIdentifier
+        : [default]WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier
+    {
+        [method_name( "Create" )] TargetedContentUnifiedTileIdentifier(String subscriptionId, String contentAlias);
+
+        [interface_name("WindowsInternal.Shell.UnifiedTile.ITargetedContentUnifiedTileIdentifier", 9be3b1e0-66b3-4cf5-b034-7d2a2db8132a)]
+        {
+            String SubscriptionId{ get; };
+            String ContentAlias{ get; };
+        }
+    }
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.IdentifiersInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("WindowsInternal.Shell.UnifiedTile.IUnknownUnifiedTileIdentifierFactory", cfa38482-7db4-4c20-bd30-f3833cec2899)]
+    [threading(both)]
+    runtimeclass UnknownUnifiedTileIdentifier
+        : [default]WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier
+    {
+        [return_name("result")] [method_name( "Create" )] UnknownUnifiedTileIdentifier(String value);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.IdentifiersInternalContract, 1)]
+    [static_name("WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifierStatics", 87a52467-266a-4b20-a2c8-e316bfbaf64a)]
+    [threading(both)]
+    runtimeclass UnifiedTileIdentifier
+    {
+        static WindowsInternal.Shell.UnifiedTile.IUnifiedTileIdentifier DeserializeIdentifier(String serializedIdentifier);
+    }
+
+}

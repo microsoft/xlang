@@ -1,0 +1,301 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Media
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPlaybackType
+    {
+        Unknown,
+        Music,
+        Video,
+        Image,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPlaybackAutoRepeatMode
+    {
+        None,
+        Track,
+        List,
+    };
+
+
+    [muse(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.ISystemMediaTransportControlsTimelineProperties", 5125316a-c3a2-475b-8507-93534dc88f15)]
+    [threading(both)]
+    runtimeclass SystemMediaTransportControlsTimelineProperties
+    {
+        SystemMediaTransportControlsTimelineProperties();
+        Windows.Foundation.TimeSpan StartTime{ get; };
+        Windows.Foundation.TimeSpan StartTime{ set; };
+        Windows.Foundation.TimeSpan EndTime{ get; };
+        Windows.Foundation.TimeSpan EndTime{ set; };
+        Windows.Foundation.TimeSpan MinSeekTime{ get; };
+        Windows.Foundation.TimeSpan MinSeekTime{ set; };
+        Windows.Foundation.TimeSpan MaxSeekTime{ get; };
+        Windows.Foundation.TimeSpan MaxSeekTime{ set; };
+        Windows.Foundation.TimeSpan Position{ get; };
+        Windows.Foundation.TimeSpan Position{ set; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6030000)]
+    [interface_name("Windows.Media.IMusicDisplayProperties", 6bbf0c59-d0a0-4d26-92a0-f978e1d18e7b)]
+    runtimeclass MusicDisplayProperties
+    {
+        String Title{ get; };
+        String Title{ set; };
+        String AlbumArtist{ get; };
+        String AlbumArtist{ set; };
+        String Artist{ get; };
+        String Artist{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.IMusicDisplayProperties2", 00368462-97d3-44b9-b00f-008afcefaf18)]
+        {
+            String AlbumTitle{ get; };
+            String AlbumTitle{ set; };
+            UInt32 TrackNumber{ get; };
+            UInt32 TrackNumber{ set; };
+            Windows.Foundation.Collections.IVector <String>  Genres{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.IMusicDisplayProperties3", 4db51ac1-0681-4e8c-9401-b8159d9eefc7)]
+        {
+            UInt32 AlbumTrackCount{ get; };
+            UInt32 AlbumTrackCount{ set; };
+        }
+    }
+
+
+
+    [muse(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.IVideoDisplayProperties", 5609fdb1-5d2d-4872-8170-45dee5bc2f5c)]
+    runtimeclass VideoDisplayProperties
+    {
+        String Title{ get; };
+        String Title{ set; };
+        String Subtitle{ get; };
+        String Subtitle{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.IVideoDisplayProperties2", b410e1ce-ab52-41ab-a486-cc10fab152f9)]
+        {
+            Windows.Foundation.Collections.IVector <String>  Genres{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6030000)]
+    [interface_name("Windows.Media.IImageDisplayProperties", cd0bc7ef-54e7-411f-9933-f0e98b0a96d2)]
+    runtimeclass ImageDisplayProperties
+    {
+        String Title{ get; };
+        String Title{ set; };
+        String Subtitle{ get; };
+        String Subtitle{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [muse(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.ISystemMediaTransportControlsDisplayUpdater", 8abbc53e-fa55-4ecf-ad8e-c984e5dd1550)]
+    runtimeclass SystemMediaTransportControlsDisplayUpdater
+    {
+        Windows.Media.MediaPlaybackType Type{ get; };
+        Windows.Media.MediaPlaybackType Type{ set; };
+        String AppMediaId{ get; };
+        String AppMediaId{ set; };
+        Windows.Storage.Streams.RandomAccessStreamReference Thumbnail{ get; };
+        Windows.Storage.Streams.RandomAccessStreamReference Thumbnail{ set; };
+        Windows.Media.MusicDisplayProperties MusicProperties{ get; };
+        Windows.Media.VideoDisplayProperties VideoProperties{ get; };
+        Windows.Media.ImageDisplayProperties ImageProperties{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  CopyFromFileAsync(MediaPlaybackType type, Windows.Storage.StorageFile source);
+        void ClearAll();
+        void Update();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaPlaybackStatus
+    {
+        Closed,
+        Changing,
+        Stopped,
+        Playing,
+        Paused,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SystemMediaTransportControlsButton
+    {
+        Play,
+        Pause,
+        Stop,
+        Record,
+        FastForward,
+        Rewind,
+        Next,
+        Previous,
+        ChannelUp,
+        ChannelDown,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SystemMediaTransportControlsProperty
+    {
+        SoundLevel,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6030000)]
+    [interface_name("Windows.Media.ISystemMediaTransportControlsButtonPressedEventArgs", b7f47116-a56f-4dc8-9e11-92031f4a87c2)]
+    runtimeclass SystemMediaTransportControlsButtonPressedEventArgs
+    {
+        Windows.Media.SystemMediaTransportControlsButton Button{ get; };
+    }
+
+
+    [muse(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.ISystemMediaTransportControlsPropertyChangedEventArgs", d0ca0936-339b-4cb3-8eeb-737607f56e08)]
+    runtimeclass SystemMediaTransportControlsPropertyChangedEventArgs
+    {
+        Windows.Media.SystemMediaTransportControlsProperty Property{ get; };
+    }
+
+
+    [muse(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.IPlaybackPositionChangeRequestedEventArgs", b4493f88-eb28-4961-9c14-335e44f3e125)]
+    runtimeclass PlaybackPositionChangeRequestedEventArgs
+    {
+        Windows.Foundation.TimeSpan RequestedPlaybackPosition{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [muse(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.IPlaybackRateChangeRequestedEventArgs", 2ce2c41f-3cd6-4f77-9ba7-eb27c26a2140)]
+    runtimeclass PlaybackRateChangeRequestedEventArgs
+    {
+        Double RequestedPlaybackRate{ get; };
+    }
+
+
+    [muse(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.IShuffleEnabledChangeRequestedEventArgs", 49b593fe-4fd0-4666-a314-c0e01940d302)]
+    runtimeclass ShuffleEnabledChangeRequestedEventArgs
+    {
+        Boolean RequestedShuffleEnabled{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [muse(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.IAutoRepeatModeChangeRequestedEventArgs", ea137efa-d852-438e-882b-c990109a78f4)]
+    runtimeclass AutoRepeatModeChangeRequestedEventArgs
+    {
+        Windows.Media.MediaPlaybackAutoRepeatMode RequestedAutoRepeatMode{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6030000)]
+    [static_name("Windows.Media.ISystemMediaTransportControlsStatics", 43ba380a-eca4-4832-91ab-d415fae484c6)]
+    [interface_name("Windows.Media.ISystemMediaTransportControls", 99fa3ff4-1742-42a6-902e-087d41f965ec)]
+    [threading(mta)]
+    runtimeclass SystemMediaTransportControls
+    {
+        static Windows.Media.SystemMediaTransportControls GetForCurrentView();
+        Windows.Media.MediaPlaybackStatus PlaybackStatus{ get; };
+        Windows.Media.MediaPlaybackStatus PlaybackStatus{ set; };
+        Windows.Media.SystemMediaTransportControlsDisplayUpdater DisplayUpdater{ get; };
+        Windows.Media.SoundLevel SoundLevel{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Boolean IsPlayEnabled{ get; };
+        Boolean IsPlayEnabled{ set; };
+        Boolean IsStopEnabled{ get; };
+        Boolean IsStopEnabled{ set; };
+        Boolean IsPauseEnabled{ get; };
+        Boolean IsPauseEnabled{ set; };
+        Boolean IsRecordEnabled{ get; };
+        Boolean IsRecordEnabled{ set; };
+        Boolean IsFastForwardEnabled{ get; };
+        Boolean IsFastForwardEnabled{ set; };
+        Boolean IsRewindEnabled{ get; };
+        Boolean IsRewindEnabled{ set; };
+        Boolean IsPreviousEnabled{ get; };
+        Boolean IsPreviousEnabled{ set; };
+        Boolean IsNextEnabled{ get; };
+        Boolean IsNextEnabled{ set; };
+        Boolean IsChannelUpEnabled{ get; };
+        Boolean IsChannelUpEnabled{ set; };
+        Boolean IsChannelDownEnabled{ get; };
+        Boolean IsChannelDownEnabled{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.SystemMediaTransportControls, Windows.Media.SystemMediaTransportControlsButtonPressedEventArgs>  ButtonPressed;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.SystemMediaTransportControls, Windows.Media.SystemMediaTransportControlsPropertyChangedEventArgs>  PropertyChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.ISystemMediaTransportControls2", ea98d2f6-7f3c-4af2-a586-72889808efb1)]
+        {
+            Windows.Media.MediaPlaybackAutoRepeatMode AutoRepeatMode{ get; };
+            Windows.Media.MediaPlaybackAutoRepeatMode AutoRepeatMode{ set; };
+            Boolean ShuffleEnabled{ get; };
+            Boolean ShuffleEnabled{ set; };
+            Double PlaybackRate{ get; };
+            Double PlaybackRate{ set; };
+            void UpdateTimelineProperties(SystemMediaTransportControlsTimelineProperties timelineProperties);
+            event Windows.Foundation.TypedEventHandler <Windows.Media.SystemMediaTransportControls, Windows.Media.PlaybackPositionChangeRequestedEventArgs>  PlaybackPositionChangeRequested;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.SystemMediaTransportControls, Windows.Media.PlaybackRateChangeRequestedEventArgs>  PlaybackRateChangeRequested;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.SystemMediaTransportControls, Windows.Media.ShuffleEnabledChangeRequestedEventArgs>  ShuffleEnabledChangeRequested;
+            event Windows.Foundation.TypedEventHandler <Windows.Media.SystemMediaTransportControls, Windows.Media.AutoRepeatModeChangeRequestedEventArgs>  AutoRepeatModeChangeRequested;
+        }
+    }
+
+
+
+
+}
+namespace Windows.Media.Core.Preview
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.Core.Preview.ISoundLevelBrokerStatics", 6a633961-dbed-464c-a09a-33412f5caa3f)]
+    [threading(both)]
+    runtimeclass SoundLevelBroker
+    {
+        static Windows.Media.SoundLevel SoundLevel{ get; };
+        static event Windows.Foundation.EventHandler <Object>  SoundLevelChanged;
+    }
+
+}

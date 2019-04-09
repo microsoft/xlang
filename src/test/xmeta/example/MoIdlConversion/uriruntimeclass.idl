@@ -1,0 +1,86 @@
+
+
+
+
+
+
+
+
+namespace Windows.Foundation
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [constructor_name("Windows.Foundation.IWwwFormUrlDecoderRuntimeClassFactory", 5b8c6b3d-24ae-41b5-a1bf-f0c3d544845b)]
+    [interface_name("Windows.Foundation.IWwwFormUrlDecoderRuntimeClass", d45a0451-f225-4542-9296-0e1df5d254df)]
+    [threading(both)]
+    runtimeclass WwwFormUrlDecoder
+        : Windows.Foundation.Collections.IVectorView<Windows.Foundation.IWwwFormUrlDecoderEntry>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.IWwwFormUrlDecoderEntry>
+    {
+        [method_name( "CreateWwwFormUrlDecoder" )] WwwFormUrlDecoder(String query);
+        String GetFirstValueByName(String name);
+    }
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Foundation.IUriEscapeStatics", c1d432ba-c824-4452-a7fd-512bc3bbe9a1)]
+    [constructor_name("Windows.Foundation.IUriRuntimeClassFactory", 44a9796f-723e-4fdf-a218-033e75b0c084)]
+    [interface_name("Windows.Foundation.IUriRuntimeClass", 9e365e57-48b2-4160-956f-c7385120bbfc)]
+    [threading(both)]
+    runtimeclass Uri
+        : [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Foundation.IStringable
+    {
+        static String UnescapeComponent(String toUnescape);
+        static String EscapeComponent(String toEscape);
+        [method_name( "CreateUri" )] Uri(String uri);
+        [method_name( "CreateWithRelativeUri" )] Uri(String baseUri, String relativeUri);
+        String AbsoluteUri{ get; };
+        String DisplayUri{ get; };
+        String Domain{ get; };
+        String Extension{ get; };
+        String Fragment{ get; };
+        String Host{ get; };
+        String Password{ get; };
+        String Path{ get; };
+        String Query{ get; };
+        Windows.Foundation.WwwFormUrlDecoder QueryParsed{ get; };
+        String RawUri{ get; };
+        String SchemeName{ get; };
+        String UserName{ get; };
+        Int32 Port{ get; };
+        Boolean Suspicious{ get; };
+        Boolean Equals(Uri pUri);
+        Windows.Foundation.Uri CombineUri(String relativeUri);
+
+        [interface_name("Windows.Foundation.IUriRuntimeClassWithAbsoluteCanonicalUri", 758d9661-221c-480f-a339-50656673f46f)]
+        {
+            String AbsoluteCanonicalUri{ get; };
+            String DisplayIri{ get; };
+        }
+    }
+
+
+
+
+    [uuid(125e7431-f678-4e8e-b670-20a9b06c512d)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IWwwFormUrlDecoderEntry
+    {
+        String Name{ get; };
+        String Value{ get; };
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    runtimeclass WwwFormUrlDecoderEntry
+        : [default]Windows.Foundation.IWwwFormUrlDecoderEntry
+    {
+    }
+
+}

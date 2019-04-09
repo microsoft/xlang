@@ -1,0 +1,88 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.ICustomInstallWorkStatics", 7bab4989-4926-4600-9ba5-d672459b6fe3)]
+    [interface_name("Windows.Internal.StateRepository.ICustomInstallWork", 6472cafc-c3cc-488b-a2eb-35cea7bbcb9a)]
+    [threading(both)]
+    runtimeclass CustomInstallWork
+    {
+        CustomInstallWork();
+        static void Add(CustomInstallWork value);
+        static void Update(CustomInstallWork value);
+        static void Delete(CustomInstallWork value);
+        static void DeleteById(Int64 customInstallWorkID);
+        static void DeleteByUserAndPackageAndIndex(User User, Package Package, Int32 Index);
+        static void DeleteByUserAndPackageAndName(User User, Package Package, String Name);
+        static Boolean Exists(Int64 customInstallWorkID);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndPackage(User User, Package Package);
+        static Boolean ExistsByUserAndPackageAndIndex(User User, Package Package, Int32 Index);
+        static Boolean ExistsByUserAndPackageAndName(User User, Package Package, String Name);
+        static Windows.Internal.StateRepository.CustomInstallWork TryGet(Int64 customInstallWorkID);
+        static Windows.Internal.StateRepository.CustomInstallWork TryGetByUserAndPackageAndIndex(User User, Package Package, Int32 Index);
+        static Windows.Internal.StateRepository.CustomInstallWork TryGetByUserAndPackageAndName(User User, Package Package, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.CustomInstallWork>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.CustomInstallWork>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.CustomInstallWork>  FindByUserAndPackage(User User, Package Package);
+        static void UpdateWorkId(Int64 customInstallWorkID, Int64 workId);
+        static void ClearWorkByWorkId(Int64 workId);
+        static void DeleteByWorkId(Int64 workId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.CustomInstallWork>  FindByUserAndPackageAnd_WorkId(User user, Package package, Int64 workId);
+        Int64 _CustomInstallWorkID{ get; };
+        Int64 _CustomInstallWorkID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        String Name{ get; };
+        String Name{ set; };
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Windows.Internal.StateRepository.CustomInstallWorkFlags Flags{ get; };
+        Windows.Internal.StateRepository.CustomInstallWorkFlags Flags{ set; };
+        Boolean Repair{ get; };
+        Boolean Repair{ set; };
+        Boolean Uninstall{ get; };
+        Boolean Uninstall{ set; };
+        Boolean MustRunUninstall{ get; };
+        Boolean MustRunUninstall{ set; };
+        Windows.Internal.StateRepository.CustomInstallWorkStatus Status{ get; };
+        Windows.Internal.StateRepository.CustomInstallWorkStatus Status{ set; };
+        String File{ get; };
+        String File{ set; };
+        Windows.Storage.StorageFile GetFileAsStorageFile();
+        void SetFileAsStorageFile(Windows.Storage.IStorageFile value);
+        Boolean IsArgumentsNull{ get; };
+        void SetArgumentsToNull();
+        String Arguments{ get; };
+        String Arguments{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

@@ -1,0 +1,648 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum CoreWindowActivationState
+    {
+        CodeActivated,
+        Deactivated,
+        PointerActivated,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum CoreWindowActivationMode
+    {
+        None,
+        Deactivated,
+        ActivatedNotForeground,
+        ActivatedInForeground,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum CoreCursorType
+    {
+        Arrow,
+        Cross,
+        Custom,
+        Hand,
+        Help,
+        IBeam,
+        SizeAll,
+        SizeNortheastSouthwest,
+        SizeNorthSouth,
+        SizeNorthwestSoutheast,
+        SizeWestEast,
+        UniversalNo,
+        UpArrow,
+        Wait,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Pin,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Person,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum CoreDispatcherPriority
+    {
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Idle = -2,
+        Low,
+        Normal,
+        High,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CoreProcessEventsOption
+    {
+        ProcessOneAndAllPending,
+        ProcessOneIfPresent,
+        ProcessUntilQuit,
+        ProcessAllIfPresent,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum CoreWindowFlowDirection
+    {
+        LeftToRight,
+        RightToLeft,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    [webhosthidden]
+    enum CoreVirtualKeyStates
+    {
+        None,
+        Down,
+        Locked,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum CoreAcceleratorKeyEventType
+    {
+        Character = 2,
+        DeadCharacter,
+        KeyDown = 0,
+        KeyUp,
+        SystemCharacter = 6,
+        SystemDeadCharacter,
+        SystemKeyDown = 4,
+        SystemKeyUp,
+        UnicodeCharacter = 8,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    enum CoreProximityEvaluationScore
+    {
+        Closest,
+        Farthest = 2147483647,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum CoreInputDeviceTypes
+    {
+        None,
+        Touch,
+        Pen,
+        Mouse = 4,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    struct CorePhysicalKeyStatus
+    {
+        UInt32 RepeatCount;
+        UInt32 ScanCode;
+        Boolean IsExtendedKey;
+        Boolean IsMenuKeyDown;
+        Boolean WasKeyDown;
+        Boolean IsKeyReleased;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    struct CoreProximityEvaluation
+    {
+        Int32 Score;
+        Windows.Foundation.Point AdjustedPoint;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(272b1ef3-c633-4da5-a26c-c6d0f56b29da)]
+    [webhosthidden]
+    interface ICoreWindowEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(79b9d5f2-879e-4b89-b798-79e47598030c)]
+    interface ICoreWindow
+    {
+        Object AutomationHostProvider{ get; };
+        Windows.Foundation.Rect Bounds{ get; };
+        Windows.Foundation.Collections.IPropertySet CustomProperties{ get; };
+        Windows.UI.Core.CoreDispatcher Dispatcher{ get; };
+        Windows.UI.Core.CoreWindowFlowDirection FlowDirection{ get; };
+        Windows.UI.Core.CoreWindowFlowDirection FlowDirection{ set; };
+        Boolean IsInputEnabled{ get; };
+        Boolean IsInputEnabled{ set; };
+        Windows.UI.Core.CoreCursor PointerCursor{ get; };
+        Windows.UI.Core.CoreCursor PointerCursor{ set; };
+        Windows.Foundation.Point PointerPosition{ get; };
+        Boolean Visible{ get; };
+        void Activate();
+        void Close();
+        Windows.UI.Core.CoreVirtualKeyStates GetAsyncKeyState(Windows.System.VirtualKey virtualKey);
+        Windows.UI.Core.CoreVirtualKeyStates GetKeyState(Windows.System.VirtualKey virtualKey);
+        void ReleasePointerCapture();
+        void SetPointerCapture();
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.WindowActivatedEventArgs>  Activated;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.AutomationProviderRequestedEventArgs>  AutomationProviderRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.CharacterReceivedEventArgs>  CharacterReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.CoreWindowEventArgs>  Closed;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.InputEnabledEventArgs>  InputEnabled;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.KeyEventArgs>  KeyDown;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.KeyEventArgs>  KeyUp;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.PointerEventArgs>  PointerCaptureLost;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.PointerEventArgs>  PointerEntered;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.PointerEventArgs>  PointerExited;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.PointerEventArgs>  PointerMoved;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.PointerEventArgs>  PointerPressed;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.PointerEventArgs>  PointerReleased;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.TouchHitTestingEventArgs>  TouchHitTesting;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.PointerEventArgs>  PointerWheelChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.WindowSizeChangedEventArgs>  SizeChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.VisibilityChangedEventArgs>  VisibilityChanged;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [muse(0x6020000)]
+    [interface_name("Windows.UI.Core.ICoreDispatcher", 60db2fa8-b705-4fde-a7d6-ebbb1891d39e)]
+    runtimeclass CoreDispatcher
+        : Windows.UI.Core.ICoreAcceleratorKeys
+    {
+        Boolean HasThreadAccess{ get; };
+        void ProcessEvents(CoreProcessEventsOption options);
+        Windows.Foundation.IAsyncAction RunAsync(CoreDispatcherPriority priority, DispatchedHandler agileCallback);
+        Windows.Foundation.IAsyncAction RunIdleAsync(IdleDispatchedHandler agileCallback);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Core.ICoreDispatcherWithTaskPriority", bafaecad-484d-41be-ba80-1d58c65263ea)]
+        {
+            Windows.UI.Core.CoreDispatcherPriority CurrentPriority{ get; };
+            Windows.UI.Core.CoreDispatcherPriority CurrentPriority{ set; };
+            [method_name("ShouldYield")] Boolean ShouldYield();
+            [method_name("ShouldYieldToPriority")] Boolean ShouldYield(CoreDispatcherPriority priority);
+            void StopProcessEvents();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Core.ICoreDispatcher2", 6f5e63c7-e3aa-4eae-b0e0-dcf321ca4b2f)]
+        {
+            Windows.Foundation.IAsyncOperation <Boolean>  TryRunAsync(CoreDispatcherPriority priority, DispatchedHandler agileCallback);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryRunIdleAsync(IdleDispatchedHandler agileCallback);
+        }
+    }
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.UI.Core.ICoreCursorFactory", f6359621-a79d-4ed3-8c32-a9ef9d6b76a4)]
+    [interface_name("Windows.UI.Core.ICoreCursor", 96893acf-111d-442c-8a77-b87992f8e2d6)]
+    runtimeclass CoreCursor
+    {
+        [method_name( "CreateCursor" )] CoreCursor(CoreCursorType type, UInt32 id);
+        UInt32 Id{ get; };
+        Windows.UI.Core.CoreCursorType Type{ get; };
+    }
+
+    [marshaling_behavior(standard)]
+    [muse(0x6020000)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Core.ICoreWindowStatic", 4d239005-3c2a-41b1-9022-536bb9cf93b1)]
+    runtimeclass CoreWindow
+        : [default]Windows.UI.Core.ICoreWindow
+        , [contract(Windows.Foundation.UniversalApiContract, 2)]
+        Windows.UI.Core.ICorePointerRedirector
+    {
+        static Windows.UI.Core.CoreWindow GetForCurrentThread();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Core.ICoreWindow2", 7c2b1b85-6917-4361-9c02-0d9e3a420b95)]
+        {
+            Windows.Foundation.Point PointerPosition{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.UI.Core.ICoreWindow3", 32c20dd8-faef-4375-a2ab-32640e4815c7)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Windows.UI.Core.ClosestInteractiveBoundsRequestedEventArgs>  ClosestInteractiveBoundsRequested;
+            String GetCurrentKeyEventDeviceId();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Core.ICoreWindow4", 35caf0d0-47f0-436c-af97-0dd88f6f5f02)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Object>  ResizeStarted;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreWindow, Object>  ResizeCompleted;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.UI.Core.ICoreWindow5", 4b4ae1e1-2e6d-4eaa-bda1-1c5cc1bee141)]
+        {
+            Windows.System.DispatcherQueue DispatcherQueue{ get; };
+            Windows.UI.Core.CoreWindowActivationMode ActivationMode{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [interface_name("Windows.UI.Core.ICoreWindow_CompositionIslands", a7ff5b48-94e0-40e6-8a80-228482b688ba)]
+        {
+            Windows.UI.Composition.VisualTreeIsland CompositionIsland{ get; };
+            Windows.UI.Composition.CompositionIslandEnvironment CompositionIslandEnvironment{ get; };
+            Windows.UI.Composition.VisualTreeIsland ConfigureCompositionIsland(Windows.UI.Composition.Compositor compositor);
+            void DestroyCompositionIsland();
+            Windows.UI.Core.CoreWindow GetForOwningThread();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [interface_name("Windows.UI.Core.ICoreWindowWithContext", 9ac40241-3575-4c3b-af66-e8c529d4d06c)]
+        {
+            Windows.UI.UIContext UIContext{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.UI.Core.IWindowActivatedEventArgs", 179d65e7-4658-4cb6-aa13-41d094ea255e)]
+    runtimeclass WindowActivatedEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Windows.UI.Core.CoreWindowActivationState WindowActivationState{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.UI.Core.IAutomationProviderRequestedEventArgs", 961ff258-21bf-4b42-a298-fa479d4c52e2)]
+    runtimeclass AutomationProviderRequestedEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Object AutomationProvider{ get; };
+        Object AutomationProvider{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Core.ICharacterReceivedEventArgs", c584659f-99b2-4bcc-bd33-04e63f42902e)]
+    runtimeclass CharacterReceivedEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        UInt32 KeyCode{ get; };
+        Windows.UI.Core.CorePhysicalKeyStatus KeyStatus{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [webhosthidden]
+    runtimeclass CoreWindowEventArgs
+        : [default]Windows.UI.Core.ICoreWindowEventArgs
+    {
+    }
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.UI.Core.IInputEnabledEventArgs", 80371d4f-2fd8-4c24-aa86-3163a87b4e5a)]
+    runtimeclass InputEnabledEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Boolean InputEnabled{ get; };
+    }
+
+    [webhosthidden]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Core.IKeyEventArgs", 5ff5e930-2544-4a17-bd78-1f2fdebb106b)]
+    runtimeclass KeyEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Windows.System.VirtualKey VirtualKey{ get; };
+        Windows.UI.Core.CorePhysicalKeyStatus KeyStatus{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.UI.Core.IKeyEventArgs2", 583add98-0790-4571-9b12-645ef9d79e42)]
+        {
+            String DeviceId{ get; };
+        }
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Core.IPointerEventArgs", 920d9cb1-a5fc-4a21-8c09-49dfe6ffe25f)]
+    runtimeclass PointerEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Windows.UI.Input.PointerPoint CurrentPoint{ get; };
+        Windows.System.VirtualKeyModifiers KeyModifiers{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Input.PointerPoint>  GetIntermediatePoints();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Core.ITouchHitTestingEventArgs", 22f3b823-0b7c-424e-9df7-33d4f962931b)]
+    runtimeclass TouchHitTestingEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Windows.UI.Core.CoreProximityEvaluation ProximityEvaluation{ get; };
+        Windows.UI.Core.CoreProximityEvaluation ProximityEvaluation{ set; };
+        Windows.Foundation.Point Point{ get; };
+        Windows.Foundation.Rect BoundingBox{ get; };
+        [method_name("EvaluateProximityToRect")] [default_overload]
+        Windows.UI.Core.CoreProximityEvaluation EvaluateProximity(Windows.Foundation.Rect controlBoundingBox);
+        [method_name("EvaluateProximityToPolygon")] Windows.UI.Core.CoreProximityEvaluation EvaluateProximity(Windows.Foundation.Point[] controlVertices);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Core.IWindowSizeChangedEventArgs", 5a200ec7-0426-47dc-b86c-6f475915e451)]
+    runtimeclass WindowSizeChangedEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Windows.Foundation.Size Size{ get; };
+    }
+
+    [marshaling_behavior(standard)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.Core.IVisibilityChangedEventArgs", bf9918ea-d801-4564-a495-b1e84f8ad085)]
+    runtimeclass VisibilityChangedEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Boolean Visible{ get; };
+    }
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.UI.Core.IClosestInteractiveBoundsRequestedEventArgs", 347c11d7-f6f8-40e3-b29f-ae50d3e86486)]
+    runtimeclass ClosestInteractiveBoundsRequestedEventArgs
+    {
+        Windows.Foundation.Point PointerPosition{ get; };
+        Windows.Foundation.Rect SearchBounds{ get; };
+        Windows.Foundation.Rect ClosestInteractiveBounds{ get; };
+        Windows.Foundation.Rect ClosestInteractiveBounds{ set; };
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(d1f276c4-98d8-4636-bf49-eb79507548e9)]
+    [webhosthidden]
+    delegate void DispatchedHandler();
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(a42b0c24-7f21-4abc-99c1-8f01007f0880)]
+    [webhosthidden]
+    delegate void IdleDispatchedHandler(IdleDispatchedHandlerArgs e);
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [muse(0x6030000)]
+    [interface_name("Windows.UI.Core.IIdleDispatchedHandlerArgs", 98bb6a24-dc1c-43cb-b4ed-d1c0eb2391f3)]
+    runtimeclass IdleDispatchedHandlerArgs
+    {
+        Boolean IsDispatcherIdle{ get; };
+    }
+
+
+
+    [uuid(9ffdf7f5-b8c9-4ef0-b7d2-1de626561fc8)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface ICoreAcceleratorKeys
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreDispatcher, Windows.UI.Core.AcceleratorKeyEventArgs>  AcceleratorKeyActivated;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Core.IAcceleratorKeyEventArgs", ff1c4c4a-9287-470b-836e-9086e3126ade)]
+    runtimeclass AcceleratorKeyEventArgs
+        : Windows.UI.Core.ICoreWindowEventArgs
+    {
+        Windows.UI.Core.CoreAcceleratorKeyEventType EventType{ get; };
+        Windows.System.VirtualKey VirtualKey{ get; };
+        Windows.UI.Core.CorePhysicalKeyStatus KeyStatus{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.UI.Core.IAcceleratorKeyEventArgs2", d300a9f6-2f7e-4873-a555-166e596ee1c5)]
+        {
+            String DeviceId{ get; };
+        }
+    }
+
+
+
+
+
+    [muse(0x6020000)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CoreAcceleratorKeys
+        : [default]Windows.UI.Core.ICoreAcceleratorKeys
+    {
+    }
+
+
+
+    [uuid(188f20d6-9873-464a-ace5-57e010f465e6)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    interface IInitializeWithCoreWindow
+    {
+        void Initialize(CoreWindow window);
+    };
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Core.ICoreWindowResizeManagerStatics", ae4a9045-6d70-49db-8e68-46ffbd17d38d)]
+    [interface_name("Windows.UI.Core.ICoreWindowResizeManager", b8f0b925-b350-48b3-a198-5c1a84700243)]
+    runtimeclass CoreWindowResizeManager
+    {
+        static Windows.UI.Core.CoreWindowResizeManager GetForCurrentView();
+        void NotifyLayoutCompleted();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.Core.ICoreWindowResizeManagerLayoutCapability", bb74f27b-a544-4301-80e6-0ae033ef4536)]
+        {
+            Boolean ShouldWaitForLayoutCompletion{ set; };
+            Boolean ShouldWaitForLayoutCompletion{ get; };
+        }
+    }
+
+    [webhosthidden]
+    [uuid(9f488807-4580-4be8-be68-92a9311713bb)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface ICoreInputSourceBase
+    {
+        Windows.UI.Core.CoreDispatcher Dispatcher{ get; };
+        Boolean IsInputEnabled{ get; };
+        Boolean IsInputEnabled{ set; };
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.InputEnabledEventArgs>  InputEnabled;
+    };
+
+    [uuid(bbf1bb18-e47a-48eb-8807-f8f8d3ea4551)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    interface ICorePointerInputSource
+    {
+        void ReleasePointerCapture();
+        void SetPointerCapture();
+        Boolean HasCapture{ get; };
+        Windows.Foundation.Point PointerPosition{ get; };
+        Windows.UI.Core.CoreCursor PointerCursor{ get; };
+        Windows.UI.Core.CoreCursor PointerCursor{ set; };
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.PointerEventArgs>  PointerCaptureLost;
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.PointerEventArgs>  PointerEntered;
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.PointerEventArgs>  PointerExited;
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.PointerEventArgs>  PointerMoved;
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.PointerEventArgs>  PointerPressed;
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.PointerEventArgs>  PointerReleased;
+        event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.PointerEventArgs>  PointerWheelChanged;
+    };
+
+    [uuid(d703708a-4516-4786-b1e5-2751d563f997)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    interface ICorePointerInputSource2 requires Windows.UI.Core.ICorePointerInputSource
+    {
+        Windows.System.DispatcherQueue DispatcherQueue{ get; };
+    };
+
+
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6030000)]
+    runtimeclass CoreComponentInputSource
+        : [default]Windows.UI.Core.ICoreInputSourceBase
+        , Windows.UI.Core.ICorePointerInputSource
+        , [contract(Windows.Foundation.UniversalApiContract, 6)]
+        Windows.UI.Core.ICorePointerInputSource2
+    {
+
+        [interface_name("Windows.UI.Core.ICoreKeyboardInputSource", 231c9088-e469-4df1-b208-6e490d71cb90)]
+        {
+            Windows.UI.Core.CoreVirtualKeyStates GetCurrentKeyState(Windows.System.VirtualKey virtualKey);
+            event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.CharacterReceivedEventArgs>  CharacterReceived;
+            event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.KeyEventArgs>  KeyDown;
+            event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.KeyEventArgs>  KeyUp;
+        }
+
+        [interface_name("Windows.UI.Core.ICoreComponentFocusable", 52f96fa3-8742-4411-ae69-79a85f29ac8b)]
+        {
+            Boolean HasFocus{ get; };
+            event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.CoreWindowEventArgs>  GotFocus;
+            event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.CoreWindowEventArgs>  LostFocus;
+        }
+
+        [interface_name("Windows.UI.Core.ICoreTouchHitTesting", b1d8a289-3acf-4124-9fa3-ea8aba353c21)]
+        {
+            event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Core.TouchHitTestingEventArgs>  TouchHitTesting;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.UI.Core.ICoreClosestInteractiveBoundsRequested", f303043a-e8bf-4e8e-ae69-c9dadd57a114)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Core.CoreComponentInputSource, Windows.UI.Core.ClosestInteractiveBoundsRequestedEventArgs>  ClosestInteractiveBoundsRequested;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.UI.Core.ICoreKeyboardInputSource2", fa24cb94-f963-47a5-8778-207c482b0afd)]
+        {
+            String GetCurrentKeyEventDeviceId();
+        }
+    }
+
+    [muse(0x6030000)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CoreIndependentInputSource
+        : [default]Windows.UI.Core.ICoreInputSourceBase
+        , Windows.UI.Core.ICorePointerInputSource
+        , [contract(Windows.Foundation.UniversalApiContract, 6)]
+        Windows.UI.Core.ICorePointerInputSource2
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [uuid(8f9d0c94-5688-4b0c-a9f1-f931f7fa3dc3)]
+    [webhosthidden]
+    interface ICorePointerRedirector
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.ICorePointerRedirector, Windows.UI.Core.PointerEventArgs>  PointerRoutedAway;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.ICorePointerRedirector, Windows.UI.Core.PointerEventArgs>  PointerRoutedTo;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Core.ICorePointerRedirector, Windows.UI.Core.PointerEventArgs>  PointerRoutedReleased;
+    };
+
+}

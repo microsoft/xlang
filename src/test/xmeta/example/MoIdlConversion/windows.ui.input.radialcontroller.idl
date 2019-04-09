@@ -1,0 +1,291 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Input
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum RadialControllerSystemMenuItemKind
+    {
+        Scroll,
+        Zoom,
+        UndoRedo,
+        Volume,
+        NextPreviousTrack,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum RadialControllerMenuKnownIcon
+    {
+        Scroll,
+        Zoom,
+        UndoRedo,
+        Volume,
+        NextPreviousTrack,
+        Ruler,
+        InkColor,
+        InkThickness,
+        PenType,
+    };
+
+
+
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Input.IRadialControllerScreenContact", 206aa434-e651-11e5-bf62-2c27d7404e85)]
+    runtimeclass RadialControllerScreenContact
+    {
+        Windows.Foundation.Rect Bounds{ get; };
+        Windows.Foundation.Point Position{ get; };
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.UI.Input.IRadialControllerMenu", 8506b35d-f640-4412-aba0-bad077e5ea8a)]
+    runtimeclass RadialControllerMenu
+    {
+        Windows.Foundation.Collections.IVector <Windows.UI.Input.RadialControllerMenuItem>  Items{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsEnabled{ set; };
+        Windows.UI.Input.RadialControllerMenuItem GetSelectedMenuItem();
+        void SelectMenuItem(RadialControllerMenuItem menuItem);
+        Boolean TrySelectPreviouslySelectedMenuItem();
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.UI.Input.IRadialControllerStatics", faded0b7-b84c-4894-87aa-8f25aa5f288b)]
+    [interface_name("Windows.UI.Input.IRadialController", 3055d1c8-df51-43d4-b23b-0e1037467a09)]
+    runtimeclass RadialController
+    {
+        static Boolean IsSupported();
+        static Windows.UI.Input.RadialController CreateForCurrentView();
+        Windows.UI.Input.RadialControllerMenu Menu{ get; };
+        Double RotationResolutionInDegrees{ get; };
+        Double RotationResolutionInDegrees{ set; };
+        Boolean UseAutomaticHapticFeedback{ get; };
+        Boolean UseAutomaticHapticFeedback{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerScreenContactStartedEventArgs>  ScreenContactStarted;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Object>  ScreenContactEnded;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerScreenContactContinuedEventArgs>  ScreenContactContinued;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Object>  ControlLost;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerRotationChangedEventArgs>  RotationChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerButtonClickedEventArgs>  ButtonClicked;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerControlAcquiredEventArgs>  ControlAcquired;
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Input.IRadialController2", 3d577eff-4cee-11e6-b535-001bdc06ab3b)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerButtonPressedEventArgs>  ButtonPressed;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerButtonHoldingEventArgs>  ButtonHolding;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialController, Windows.UI.Input.RadialControllerButtonReleasedEventArgs>  ButtonReleased;
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.UI.Input.IRadialControllerScreenContactStartedEventArgs", 206aa436-e651-11e5-bf62-2c27d7404e85)]
+    runtimeclass RadialControllerScreenContactStartedEventArgs
+    {
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Input.IRadialControllerScreenContactStartedEventArgs2", 3d577ef0-3cee-11e6-b535-001bdc06ab3b)]
+        {
+            Boolean IsButtonPressed{ get; };
+            Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000002)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Input.IRadialControllerScreenContactContinuedEventArgs", 206aa437-e651-11e5-bf62-2c27d7404e85)]
+    runtimeclass RadialControllerScreenContactContinuedEventArgs
+    {
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Input.IRadialControllerScreenContactContinuedEventArgs2", 3d577ef1-3cee-11e6-b535-001bdc06ab3b)]
+        {
+            Boolean IsButtonPressed{ get; };
+            Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.UI.Input.IRadialControllerRotationChangedEventArgs", 206aa435-e651-11e5-bf62-2c27d7404e85)]
+    runtimeclass RadialControllerRotationChangedEventArgs
+    {
+        Double RotationDeltaInDegrees{ get; };
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Input.IRadialControllerRotationChangedEventArgs2", 3d577eec-4cee-11e6-b535-001bdc06ab3b)]
+        {
+            Boolean IsButtonPressed{ get; };
+            Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Input.IRadialControllerButtonClickedEventArgs", 206aa438-e651-11e5-bf62-2c27d7404e85)]
+    runtimeclass RadialControllerButtonClickedEventArgs
+    {
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Input.IRadialControllerButtonClickedEventArgs2", 3d577ef3-3cee-11e6-b535-001bdc06ab3b)]
+        {
+            Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [interface_name("Windows.UI.Input.IRadialControllerControlAcquiredEventArgs", 206aa439-e651-11e5-bf62-2c27d7404e85)]
+    runtimeclass RadialControllerControlAcquiredEventArgs
+    {
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Input.IRadialControllerControlAcquiredEventArgs2", 3d577ef4-3cee-11e6-b535-001bdc06ab3b)]
+        {
+            Boolean IsButtonPressed{ get; };
+            Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.UI.Input.IRadialControllerButtonPressedEventArgs", 3d577eed-4cee-11e6-b535-001bdc06ab3b)]
+    runtimeclass RadialControllerButtonPressedEventArgs
+    {
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+        Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+    }
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Input.IRadialControllerButtonHoldingEventArgs", 3d577eee-3cee-11e6-b535-001bdc06ab3b)]
+    runtimeclass RadialControllerButtonHoldingEventArgs
+    {
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+        Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.UI.Input.IRadialControllerButtonReleasedEventArgs", 3d577eef-3cee-11e6-b535-001bdc06ab3b)]
+    runtimeclass RadialControllerButtonReleasedEventArgs
+    {
+        Windows.UI.Input.RadialControllerScreenContact Contact{ get; };
+        Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000002)]
+    [static_name("Windows.UI.Input.IRadialControllerMenuItemStatics", 249e0887-d842-4524-9df8-e0d647edc887)]
+    [interface_name("Windows.UI.Input.IRadialControllerMenuItem", c80fc98d-ad0b-4c9c-8f2f-136a2373a6ba)]
+    runtimeclass RadialControllerMenuItem
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.UI.Input.IRadialControllerMenuItemStatics2", 0cbb70be-7e3e-48bd-be04-2c7fcaa9c1ff)]
+        {
+            [method_name("CreateFromFontGlyph")] static Windows.UI.Input.RadialControllerMenuItem CreateFromFontGlyph(String displayText, String glyph, String fontFamily);
+            [method_name("CreateFromFontGlyphWithUri")] static Windows.UI.Input.RadialControllerMenuItem CreateFromFontGlyph(String displayText, String glyph, String fontFamily, Windows.Foundation.Uri fontUri);
+        }
+        static Windows.UI.Input.RadialControllerMenuItem CreateFromIcon(String displayText, Windows.Storage.Streams.RandomAccessStreamReference icon);
+        static Windows.UI.Input.RadialControllerMenuItem CreateFromKnownIcon(String displayText, RadialControllerMenuKnownIcon value);
+        String DisplayText{ get; };
+        [variant]Object Tag{ get; };
+        [variant]Object Tag{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.RadialControllerMenuItem, Object>  Invoked;
+    }
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [dualapipartition(0xa000002)]
+    [static_name("Windows.UI.Input.IRadialControllerConfigurationStatics", 79b6b0e5-069a-4486-a99d-8db772b9642f)]
+    [interface_name("Windows.UI.Input.IRadialControllerConfiguration", a6b79ecb-6a52-4430-910c-56370a9d6b42)]
+    runtimeclass RadialControllerConfiguration
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.UI.Input.IRadialControllerConfigurationStatics2", 53e08b17-e205-48d3-9caf-80ff47c4d7c7)]
+        {
+            static Windows.UI.Input.RadialController AppController{ set; };
+            static Windows.UI.Input.RadialController AppController{ get; };
+            static Boolean IsAppControllerEnabled{ set; };
+            static Boolean IsAppControllerEnabled{ get; };
+        }
+        static Windows.UI.Input.RadialControllerConfiguration GetForCurrentView();
+        void SetDefaultMenuItems(Windows.Foundation.Collections.IIterable <Windows.UI.Input.RadialControllerSystemMenuItemKind>  buttons);
+        void ResetToDefaultMenuItems();
+        Boolean TrySelectDefaultMenuItem(RadialControllerSystemMenuItemKind type);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Input.IRadialControllerConfiguration2", 3d577ef7-3cee-11e6-b535-001bdc06ab3b)]
+        {
+            Windows.UI.Input.RadialController ActiveControllerWhenMenuIsSuppressed{ set; };
+            Windows.UI.Input.RadialController ActiveControllerWhenMenuIsSuppressed{ get; };
+            Boolean IsMenuSuppressed{ set; };
+            Boolean IsMenuSuppressed{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Input.IRadialControllerScreenContactEndedEventArgs", 3d577ef2-3cee-11e6-b535-001bdc06ab3b)]
+    runtimeclass RadialControllerScreenContactEndedEventArgs
+    {
+        Boolean IsButtonPressed{ get; };
+        Windows.Devices.Haptics.SimpleHapticsController SimpleHapticsController{ get; };
+    }
+
+}

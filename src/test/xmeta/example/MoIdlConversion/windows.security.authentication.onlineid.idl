@@ -1,0 +1,144 @@
+
+
+
+
+
+
+
+
+namespace Windows.Security.Authentication.OnlineId
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CredentialPromptType
+    {
+        PromptIfNeeded,
+        RetypeCredentials,
+        DoNotPrompt,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Security.Authentication.OnlineId.IOnlineIdServiceTicketRequestFactory", bebb0a08-9e73-4077-9614-08614c0bc245)]
+    [interface_name("Windows.Security.Authentication.OnlineId.IOnlineIdServiceTicketRequest", 297445d3-fb63-4135-8909-4e354c061466)]
+    [threading(both)]
+    runtimeclass OnlineIdServiceTicketRequest
+    {
+        [method_name( "CreateOnlineIdServiceTicketRequest" )] OnlineIdServiceTicketRequest(String service, String policy);
+        [method_name( "CreateOnlineIdServiceTicketRequestAdvanced" )] OnlineIdServiceTicketRequest(String service);
+        String Service{ get; };
+        String Policy{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Security.Authentication.OnlineId.IOnlineIdServiceTicket", c95c547f-d781-4a94-acb8-c59874238c26)]
+    runtimeclass OnlineIdServiceTicket
+    {
+        String Value{ get; };
+        Windows.Security.Authentication.OnlineId.OnlineIdServiceTicketRequest Request{ get; };
+        Int32 ErrorCode{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass UserAuthenticationOperation
+        : [default]Windows.Foundation.IAsyncOperation<Windows.Security.Authentication.OnlineId.UserIdentity>
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass SignOutUserOperation
+        : [default]Windows.Foundation.IAsyncAction
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Authentication.OnlineId.IUserIdentity", 2146d9cd-0742-4be3-8a1c-7c7ae679aa88)]
+    runtimeclass UserIdentity
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Authentication.OnlineId.OnlineIdServiceTicket>  Tickets{ get; };
+        String Id{ get; };
+        String SafeCustomerId{ get; };
+        String SignInName{ get; };
+        String FirstName{ get; };
+        String LastName{ get; };
+        Boolean IsBetaAccount{ get; };
+        Boolean IsConfirmedPC{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Authentication.OnlineId.IOnlineIdAuthenticator", a003f58a-29ab-4817-b884-d7516dad18b9)]
+    [threading(both)]
+    runtimeclass OnlineIdAuthenticator
+    {
+        OnlineIdAuthenticator();
+        [method_name("AuthenticateUserAsync")] [remote_sync]Windows.Security.Authentication.OnlineId.UserAuthenticationOperation AuthenticateUserAsync(OnlineIdServiceTicketRequest request);
+        [method_name("AuthenticateUserAsyncAdvanced")] [remote_sync]Windows.Security.Authentication.OnlineId.UserAuthenticationOperation AuthenticateUserAsync(Windows.Foundation.Collections.IIterable <Windows.Security.Authentication.OnlineId.OnlineIdServiceTicketRequest>  requests, CredentialPromptType credentialPromptType);
+        [remote_sync]Windows.Security.Authentication.OnlineId.SignOutUserOperation SignOutUserAsync();
+        Guid ApplicationId{ set; };
+        Guid ApplicationId{ get; };
+        Boolean CanSignOut{ get; };
+        String AuthenticatedSafeCustomerId{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum OnlineIdSystemTicketStatus
+    {
+        Success,
+        Error,
+        ServiceConnectionError,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Security.Authentication.OnlineId.IOnlineIdSystemIdentity", 743cd20d-b6ca-434d-8124-53ea12685307)]
+    runtimeclass OnlineIdSystemIdentity
+    {
+        Windows.Security.Authentication.OnlineId.OnlineIdServiceTicket Ticket{ get; };
+        String Id{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Security.Authentication.OnlineId.IOnlineIdSystemTicketResult", db0a5ff8-b098-4acd-9d13-9e640652b5b6)]
+    runtimeclass OnlineIdSystemTicketResult
+    {
+        Windows.Security.Authentication.OnlineId.OnlineIdSystemIdentity Identity{ get; };
+        Windows.Security.Authentication.OnlineId.OnlineIdSystemTicketStatus Status{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Security.Authentication.OnlineId.IOnlineIdSystemAuthenticatorForUser", 5798befb-1de4-4186-a2e6-b563f86aaf44)]
+    runtimeclass OnlineIdSystemAuthenticatorForUser
+    {
+        [method_name("GetTicketAsync")] Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.OnlineId.OnlineIdSystemTicketResult>  GetTicketAsync(OnlineIdServiceTicketRequest request);
+        Guid ApplicationId{ set; };
+        Guid ApplicationId{ get; };
+        Windows.System.User User{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Security.Authentication.OnlineId.IOnlineIdSystemAuthenticatorStatics", 85047792-f634-41e3-96a4-5164e902c740)]
+    [threading(both)]
+    runtimeclass OnlineIdSystemAuthenticator
+    {
+        static Windows.Security.Authentication.OnlineId.OnlineIdSystemAuthenticatorForUser Default{ get; };
+        static Windows.Security.Authentication.OnlineId.OnlineIdSystemAuthenticatorForUser GetForUser(Windows.System.User user);
+    }
+
+}

@@ -1,0 +1,846 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Contacts
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactSelectionMode
+    {
+        Contacts,
+        Fields,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactChangeType
+    {
+        Created,
+        Modified,
+        Deleted,
+        ChangeTrackingLost,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactQueryDesiredFields
+    {
+        None,
+        PhoneNumber,
+        EmailAddress,
+        PostalAddress = 4,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactQuerySearchFields
+    {
+        None,
+        Name,
+        Email,
+        Phone = 4,
+        All = -1,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactQuerySearchScope
+    {
+        Local,
+        Server,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactStoreAccessType
+    {
+        AppContactsReadWrite,
+        AllContactsReadOnly,
+        AllContactsReadWrite,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactAnnotationStoreAccessType
+    {
+        AppAnnotationsReadWrite,
+        AllAnnotationsReadWrite,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactListOtherAppReadAccess
+    {
+        SystemOnly,
+        Limited,
+        Full,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        None,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactListOtherAppWriteAccess
+    {
+        None,
+        SystemOnly,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Limited,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactMatchReasonKind
+    {
+        Name,
+        EmailAddress,
+        PhoneNumber,
+        JobInfo,
+        YomiName,
+        Other,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactBatchStatus
+    {
+        Success,
+        ServerSearchSyncManagerError,
+        ServerSearchUnknownError,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactAnnotationOperations
+    {
+        None,
+        ContactProfile,
+        Message,
+        AudioCall = 4,
+        VideoCall = 8,
+        SocialFeeds = 16,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Share = 32,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactNameOrder
+    {
+        FirstNameLastName,
+        LastNameFirstName,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactListSyncStatus
+    {
+        Idle,
+        Syncing,
+        UpToDate,
+        AuthenticationError,
+        PolicyError,
+        UnknownError,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        ManualAccountRemovalRequired,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactCardHeaderKind
+    {
+        Default,
+        Basic,
+        Enterprise,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContactCardTabKind
+    {
+        Default,
+        Email,
+        Messaging,
+        Phone,
+        Video,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        OrganizationalHierarchy,
+    };
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactCardDelayedDataLoader", b60af902-1546-434d-869c-6e3520760ef3)]
+    runtimeclass ContactCardDelayedDataLoader
+        : Windows.Foundation.IClosable
+    {
+        void SetData(Contact contact);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactStore", 2c220b10-3a6c-4293-b9bc-fe987f6e0d52)]
+    runtimeclass ContactStore
+    {
+        [method_name("FindContactsAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.Contact> >  FindContactsAsync();
+        [method_name("FindContactsWithSearchTextAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.Contact> >  FindContactsAsync(String searchText);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  GetContactAsync(String contactId);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactStore2", 18ce1c22-ebd5-4bfb-b690-5f4f27c4f0e8)]
+        {
+            Windows.ApplicationModel.Contacts.ContactChangeTracker ChangeTracker{ get; };
+            event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Contacts.ContactStore, Windows.ApplicationModel.Contacts.ContactChangedEventArgs>  ContactChanged;
+            Windows.ApplicationModel.Contacts.AggregateContactManager AggregateContactManager{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactList> >  FindContactListsAsync();
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactList>  GetContactListAsync(String contactListId);
+            [method_name("CreateContactListAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactList>  CreateContactListAsync(String displayName);
+            Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  GetMeContactAsync();
+            [method_name("GetContactReader")] Windows.ApplicationModel.Contacts.ContactReader GetContactReader();
+            [method_name("GetContactReaderWithOptions")] Windows.ApplicationModel.Contacts.ContactReader GetContactReader(ContactQueryOptions options);
+            [method_name("CreateContactListInAccountAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactList>  CreateContactListAsync(String displayName, String userDataAccountId);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactStore3", cb882c6c-004e-4050-87f0-840407ee6818)]
+        {
+            Windows.ApplicationModel.Contacts.ContactChangeTracker GetChangeTracker(String identity);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactAnnotationStore", 23acf4aa-7a77-457d-8203-987f4b31af09)]
+    runtimeclass ContactAnnotationStore
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <String> >  FindContactIdsByEmailAsync(String emailAddress);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <String> >  FindContactIdsByPhoneNumberAsync(String phoneNumber);
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactAnnotation> >  FindAnnotationsForContactAsync(Contact contact);
+        [remote_sync]Windows.Foundation.IAsyncAction DisableAnnotationAsync(ContactAnnotation annotation);
+        [method_name("CreateAnnotationListAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactAnnotationList>  CreateAnnotationListAsync();
+        [method_name("CreateAnnotationListInAccountAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactAnnotationList>  CreateAnnotationListAsync(String userDataAccountId);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactAnnotationList>  GetAnnotationListAsync(String annotationListId);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactAnnotationList> >  FindAnnotationListsAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactAnnotationStore2", 7ede23fd-61e7-4967-8ec5-bdf280a24063)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactAnnotation> >  FindAnnotationsForContactListAsync(String contactListId);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactCardOptions", 8c0a4f7e-6ab6-4f3f-be72-817236eeea5b)]
+    runtimeclass ContactCardOptions
+    {
+        ContactCardOptions();
+        Windows.ApplicationModel.Contacts.ContactCardHeaderKind HeaderKind{ get; };
+        Windows.ApplicationModel.Contacts.ContactCardHeaderKind HeaderKind{ set; };
+        Windows.ApplicationModel.Contacts.ContactCardTabKind InitialTabKind{ get; };
+        Windows.ApplicationModel.Contacts.ContactCardTabKind InitialTabKind{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactCardOptions2", 8f271ba0-d74b-4cc6-9f53-1b0eb5d1273c)]
+        {
+            Windows.Foundation.Collections.IVector <String>  ServerSearchContactListIds{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IFullContactCardOptions", 8744436c-5cf9-4683-bdca-a1fdebf8dbce)]
+    runtimeclass FullContactCardOptions
+    {
+        FullContactCardOptions();
+        Windows.UI.ViewManagement.ViewSizePreference DesiredRemainingView{ get; };
+        Windows.UI.ViewManagement.ViewSizePreference DesiredRemainingView{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactManagerForUser", b74bba57-1076-4bef-aef3-54686d18387d)]
+    runtimeclass ContactManagerForUser
+    {
+        [method_name("ConvertContactToVCardAsync")] Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.RandomAccessStreamReference>  ConvertContactToVCardAsync(Contact contact);
+        [method_name("ConvertContactToVCardAsyncWithMaxBytes")] Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.RandomAccessStreamReference>  ConvertContactToVCardAsync(Contact contact, UInt32 maxBytes);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  ConvertVCardToContactAsync(Windows.Storage.Streams.IRandomAccessStreamReference vCard);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactStore>  RequestStoreAsync(ContactStoreAccessType accessType);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactAnnotationStore>  RequestAnnotationStoreAsync(ContactAnnotationStoreAccessType accessType);
+        Windows.ApplicationModel.Contacts.ContactNameOrder SystemDisplayNameOrder{ get; };
+        Windows.ApplicationModel.Contacts.ContactNameOrder SystemDisplayNameOrder{ set; };
+        Windows.ApplicationModel.Contacts.ContactNameOrder SystemSortOrder{ get; };
+        Windows.ApplicationModel.Contacts.ContactNameOrder SystemSortOrder{ set; };
+        Windows.System.User User{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactManagerForUser2", 4d469c2e-3b75-4a73-bb30-736645472256)]
+        {
+            void ShowFullContactCard(Contact contact, FullContactCardOptions fullContactCardOptions);
+        }
+    }
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactAnnotation", 821fc2ef-7d41-44a2-84c3-60a281dd7b86)]
+    runtimeclass ContactAnnotation
+    {
+        ContactAnnotation();
+        String Id{ get; };
+        String AnnotationListId{ get; };
+        String ContactId{ get; };
+        String ContactId{ set; };
+        String RemoteId{ get; };
+        String RemoteId{ set; };
+        Windows.ApplicationModel.Contacts.ContactAnnotationOperations SupportedOperations{ get; };
+        Windows.ApplicationModel.Contacts.ContactAnnotationOperations SupportedOperations{ set; };
+        Boolean IsDisabled{ get; };
+        Windows.Foundation.Collections.ValueSet ProviderProperties{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactAnnotation2", b691ecf3-4ab7-4a1f-9941-0c9cf3171b75)]
+        {
+            String ContactListId{ get; };
+            String ContactListId{ set; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactAnnotationList", 92a486aa-5c88-45b9-aad0-461888e68d8a)]
+    runtimeclass ContactAnnotationList
+    {
+        String Id{ get; };
+        String ProviderPackageFamilyName{ get; };
+        String UserDataAccountId{ get; };
+        Windows.Foundation.IAsyncAction DeleteAsync();
+        [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  TrySaveAnnotationAsync(ContactAnnotation annotation);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactAnnotation>  GetAnnotationAsync(String annotationId);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactAnnotation> >  FindAnnotationsByRemoteIdAsync(String remoteId);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactAnnotation> >  FindAnnotationsAsync();
+        [remote_sync]Windows.Foundation.IAsyncAction DeleteAnnotationAsync(ContactAnnotation annotation);
+    }
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactChangeTracker", 6e992952-309b-404d-9712-b37bd30278aa)]
+    runtimeclass ContactChangeTracker
+    {
+        void Enable();
+        Windows.ApplicationModel.Contacts.ContactChangeReader GetChangeReader();
+        void Reset();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactChangeTracker2", 7f8ad0fc-9321-4d18-9c09-d708c63fcd31)]
+        {
+            Boolean IsTracking{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactChangedEventArgs", 525e7fd1-73f3-4b7d-a918-580be4366121)]
+    runtimeclass ContactChangedEventArgs
+    {
+        Windows.ApplicationModel.Contacts.ContactChangedDeferral GetDeferral();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IAggregateContactManager", 0379d5dd-db5a-4fd3-b54e-4df17917a212)]
+    runtimeclass AggregateContactManager
+    {
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.Contact> >  FindRawContactsAsync(Contact contact);
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  TryLinkContactsAsync(Contact primaryContact, Contact secondaryContact);
+        [remote_sync]Windows.Foundation.IAsyncAction UnlinkRawContactAsync(Contact contact);
+        [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  TrySetPreferredSourceForPictureAsync(Contact aggregateContact, Contact rawContact);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.Contacts.IAggregateContactManager2", 5e8cc2d8-a9cd-4430-9c4b-01348db2ca50)]
+        {
+            Windows.Foundation.IAsyncAction SetRemoteIdentificationInformationAsync(String contactListId, String remoteSourceId, String accountId);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactList", 16ddec75-392c-4845-9dfb-51a3e7ef3e42)]
+    runtimeclass ContactList
+    {
+        String Id{ get; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        String SourceDisplayName{ get; };
+        Boolean IsHidden{ get; };
+        Boolean IsHidden{ set; };
+        Windows.ApplicationModel.Contacts.ContactListOtherAppReadAccess OtherAppReadAccess{ get; };
+        Windows.ApplicationModel.Contacts.ContactListOtherAppReadAccess OtherAppReadAccess{ set; };
+        Windows.ApplicationModel.Contacts.ContactListOtherAppWriteAccess OtherAppWriteAccess{ get; };
+        Windows.ApplicationModel.Contacts.ContactListOtherAppWriteAccess OtherAppWriteAccess{ set; };
+        Windows.ApplicationModel.Contacts.ContactChangeTracker ChangeTracker{ get; };
+        Windows.ApplicationModel.Contacts.ContactListSyncManager SyncManager{ get; };
+        Boolean SupportsServerSearch{ get; };
+        String UserDataAccountId{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Contacts.ContactList, Windows.ApplicationModel.Contacts.ContactChangedEventArgs>  ContactChanged;
+        Windows.Foundation.IAsyncAction SaveAsync();
+        Windows.Foundation.IAsyncAction DeleteAsync();
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  GetContactFromRemoteIdAsync(String remoteId);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  GetMeContactAsync();
+        [method_name("GetContactReader")] Windows.ApplicationModel.Contacts.ContactReader GetContactReader();
+        [method_name("GetContactReaderWithOptions")] Windows.ApplicationModel.Contacts.ContactReader GetContactReader(ContactQueryOptions options);
+        [remote_sync]Windows.Foundation.IAsyncAction SaveContactAsync(Contact contact);
+        [remote_sync]Windows.Foundation.IAsyncAction DeleteContactAsync(Contact contact);
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  GetContactAsync(String contactId);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactList2", cb3943b4-4550-4dcb-9229-40ff91fb0203)]
+        {
+            Windows.Foundation.IAsyncAction RegisterSyncManagerAsync();
+            Boolean SupportsServerSearch{ set; };
+            Windows.ApplicationModel.Contacts.ContactListSyncConstraints SyncConstraints{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactList3", 1578ee57-26fc-41e8-a850-5aa32514aca9)]
+        {
+            Windows.ApplicationModel.Contacts.ContactListLimitedWriteOperations LimitedWriteOperations{ get; };
+            Windows.ApplicationModel.Contacts.ContactChangeTracker GetChangeTracker(String identity);
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactReader", d397e42e-1488-42f2-bf64-253f4884bfed)]
+    runtimeclass ContactReader
+    {
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactBatch>  ReadBatchAsync();
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactMatchReason>  GetMatchingPropertiesWithMatchReason(Contact contact);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.ApplicationModel.Contacts.IContactQueryOptionsFactory", 543fba47-8ce7-46cb-9dac-9aa42a1bc8e2)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactQueryOptions", 4408cc9e-7d7c-42f0-8ac7-f50733ecdbc1)]
+    [threading(both)]
+    runtimeclass ContactQueryOptions
+    {
+        [method_name( "CreateWithText" )] ContactQueryOptions(String text);
+        [method_name( "CreateWithTextAndFields" )] ContactQueryOptions(String text, ContactQuerySearchFields fields);
+        ContactQueryOptions();
+        Windows.ApplicationModel.Contacts.ContactQueryTextSearch TextSearch{ get; };
+        Windows.Foundation.Collections.IVector <String>  ContactListIds{ get; };
+        Boolean IncludeContactsFromHiddenLists{ get; };
+        Boolean IncludeContactsFromHiddenLists{ set; };
+        Windows.ApplicationModel.Contacts.ContactQueryDesiredFields DesiredFields{ get; };
+        Windows.ApplicationModel.Contacts.ContactQueryDesiredFields DesiredFields{ set; };
+        Windows.ApplicationModel.Contacts.ContactAnnotationOperations DesiredOperations{ get; };
+        Windows.ApplicationModel.Contacts.ContactAnnotationOperations DesiredOperations{ set; };
+        Windows.Foundation.Collections.IVector <String>  AnnotationListIds{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactListSyncManager", 146e83be-7925-4acc-9de5-21ddd06f8674)]
+    runtimeclass ContactListSyncManager
+    {
+        Windows.ApplicationModel.Contacts.ContactListSyncStatus Status{ get; };
+        Windows.Foundation.DateTime LastSuccessfulSyncTime{ get; };
+        Windows.Foundation.DateTime LastAttemptedSyncTime{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  SyncAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Contacts.ContactListSyncManager, Object>  SyncStatusChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.ApplicationModel.Contacts.IContactListSyncManager2", a9591247-bb55-4e23-8128-370134a85d0d)]
+        {
+            Windows.ApplicationModel.Contacts.ContactListSyncStatus Status{ set; };
+            Windows.Foundation.DateTime LastSuccessfulSyncTime{ set; };
+            Windows.Foundation.DateTime LastAttemptedSyncTime{ set; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactListSyncConstraints", b2b0bf01-3062-4e2e-969d-018d1987f314)]
+    runtimeclass ContactListSyncConstraints
+    {
+        Boolean CanSyncDescriptions{ get; };
+        Boolean CanSyncDescriptions{ set; };
+        Windows.Foundation.IReference <Int32>  MaxHomePhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxHomePhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxMobilePhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxMobilePhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxWorkPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxWorkPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxOtherPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxOtherPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxPagerPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxPagerPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxBusinessFaxPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxBusinessFaxPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxHomeFaxPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxHomeFaxPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxCompanyPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxCompanyPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxAssistantPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxAssistantPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxRadioPhoneNumbers{ get; };
+        Windows.Foundation.IReference <Int32>  MaxRadioPhoneNumbers{ set; };
+        Windows.Foundation.IReference <Int32>  MaxPersonalEmailAddresses{ get; };
+        Windows.Foundation.IReference <Int32>  MaxPersonalEmailAddresses{ set; };
+        Windows.Foundation.IReference <Int32>  MaxWorkEmailAddresses{ get; };
+        Windows.Foundation.IReference <Int32>  MaxWorkEmailAddresses{ set; };
+        Windows.Foundation.IReference <Int32>  MaxOtherEmailAddresses{ get; };
+        Windows.Foundation.IReference <Int32>  MaxOtherEmailAddresses{ set; };
+        Windows.Foundation.IReference <Int32>  MaxHomeAddresses{ get; };
+        Windows.Foundation.IReference <Int32>  MaxHomeAddresses{ set; };
+        Windows.Foundation.IReference <Int32>  MaxWorkAddresses{ get; };
+        Windows.Foundation.IReference <Int32>  MaxWorkAddresses{ set; };
+        Windows.Foundation.IReference <Int32>  MaxOtherAddresses{ get; };
+        Windows.Foundation.IReference <Int32>  MaxOtherAddresses{ set; };
+        Windows.Foundation.IReference <Int32>  MaxBirthdayDates{ get; };
+        Windows.Foundation.IReference <Int32>  MaxBirthdayDates{ set; };
+        Windows.Foundation.IReference <Int32>  MaxAnniversaryDates{ get; };
+        Windows.Foundation.IReference <Int32>  MaxAnniversaryDates{ set; };
+        Windows.Foundation.IReference <Int32>  MaxOtherDates{ get; };
+        Windows.Foundation.IReference <Int32>  MaxOtherDates{ set; };
+        Windows.Foundation.IReference <Int32>  MaxOtherRelationships{ get; };
+        Windows.Foundation.IReference <Int32>  MaxOtherRelationships{ set; };
+        Windows.Foundation.IReference <Int32>  MaxSpouseRelationships{ get; };
+        Windows.Foundation.IReference <Int32>  MaxSpouseRelationships{ set; };
+        Windows.Foundation.IReference <Int32>  MaxPartnerRelationships{ get; };
+        Windows.Foundation.IReference <Int32>  MaxPartnerRelationships{ set; };
+        Windows.Foundation.IReference <Int32>  MaxSiblingRelationships{ get; };
+        Windows.Foundation.IReference <Int32>  MaxSiblingRelationships{ set; };
+        Windows.Foundation.IReference <Int32>  MaxParentRelationships{ get; };
+        Windows.Foundation.IReference <Int32>  MaxParentRelationships{ set; };
+        Windows.Foundation.IReference <Int32>  MaxChildRelationships{ get; };
+        Windows.Foundation.IReference <Int32>  MaxChildRelationships{ set; };
+        Windows.Foundation.IReference <Int32>  MaxJobInfo{ get; };
+        Windows.Foundation.IReference <Int32>  MaxJobInfo{ set; };
+        Windows.Foundation.IReference <Int32>  MaxWebsites{ get; };
+        Windows.Foundation.IReference <Int32>  MaxWebsites{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactListLimitedWriteOperations", e19813da-4a0b-44b8-9a1f-a0f3d218175f)]
+    runtimeclass ContactListLimitedWriteOperations
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  TryCreateOrUpdateContactAsync(Contact contact);
+        Windows.Foundation.IAsyncOperation <Boolean>  TryDeleteContactAsync(String contactId);
+    }
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactChangedDeferral", c5143ae8-1b03-46f8-b694-a523e83cfcb6)]
+    runtimeclass ContactChangedDeferral
+    {
+        void Complete();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactChange", 951d4b10-6a59-4720-a4e1-363d98c135d5)]
+    runtimeclass ContactChange
+    {
+        Windows.ApplicationModel.Contacts.ContactChangeType ChangeType{ get; };
+        Windows.ApplicationModel.Contacts.Contact Contact{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactChangeReader", 217319fa-2d0c-42e0-a9da-3ecd56a78a47)]
+    runtimeclass ContactChangeReader
+    {
+        void AcceptChanges();
+        void AcceptChangesThrough(ContactChange lastChangeToAccept);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.ContactChange> >  ReadBatchAsync();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactBatch", 35d1972d-bfce-46bb-93f8-a5b06ec5e201)]
+    runtimeclass ContactBatch
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.ApplicationModel.Contacts.Contact>  Contacts{ get; };
+        Windows.ApplicationModel.Contacts.ContactBatchStatus Status{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactMatchReason", bc922504-e7d8-413e-95f4-b75c54c74077)]
+    runtimeclass ContactMatchReason
+    {
+        Windows.ApplicationModel.Contacts.ContactMatchReasonKind Field{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Data.Text.TextSegment>  Segments{ get; };
+        String Text{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactQueryTextSearch", f7e3f9cb-a957-439b-a0b7-1c02a1963ff0)]
+    runtimeclass ContactQueryTextSearch
+    {
+        Windows.ApplicationModel.Contacts.ContactQuerySearchFields Fields{ get; };
+        Windows.ApplicationModel.Contacts.ContactQuerySearchFields Fields{ set; };
+        String Text{ get; };
+        String Text{ set; };
+        Windows.ApplicationModel.Contacts.ContactQuerySearchScope SearchScope{ get; };
+        Windows.ApplicationModel.Contacts.ContactQuerySearchScope SearchScope{ set; };
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactStoreNotificationTriggerDetails", abb298d6-878a-4f8b-a9ce-46bb7d1c84ce)]
+    runtimeclass ContactStoreNotificationTriggerDetails
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.Contacts.IContactManagerStatics", 81f21ac0-f661-4708-ba4f-d386bd0d622e)]
+    runtimeclass ContactManager
+    {
+        [method_name("ShowContactCard")] static void ShowContactCard(Contact contact, Windows.Foundation.Rect selection);
+        [method_name("ShowContactCardWithPlacement")] static void ShowContactCard(Contact contact, Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement);
+        [method_name("ShowDelayLoadedContactCard")] static Windows.ApplicationModel.Contacts.ContactCardDelayedDataLoader ShowDelayLoadedContactCard(Contact contact, Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.ApplicationModel.Contacts.IContactManagerStatics5", f7591a87-acb7-4fad-90f2-a8ab64cdbba4)]
+        {
+            static Windows.Foundation.IAsyncOperation <Boolean>  IsShowFullContactCardSupportedAsync();
+            static Boolean IncludeMiddleNameInSystemDisplayAndSort{ get; };
+            static Boolean IncludeMiddleNameInSystemDisplayAndSort{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.ApplicationModel.Contacts.IContactManagerStatics4", 24982272-347b-46dc-8d95-51bd41e15aaf)]
+        {
+            static Windows.ApplicationModel.Contacts.ContactManagerForUser GetForUser(Windows.System.User user);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.ApplicationModel.Contacts.IContactManagerStatics3", c4cc3d42-7586-492a-930b-7bc138fc2139)]
+        {
+            [method_name("ConvertContactToVCardAsync")] static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.RandomAccessStreamReference>  ConvertContactToVCardAsync(Contact contact);
+            [method_name("ConvertContactToVCardAsyncWithMaxBytes")] static Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.RandomAccessStreamReference>  ConvertContactToVCardAsync(Contact contact, UInt32 maxBytes);
+            static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.Contact>  ConvertVCardToContactAsync(Windows.Storage.Streams.IRandomAccessStreamReference vCard);
+            [method_name("RequestStoreAsyncWithAccessType")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactStore>  RequestStoreAsync(ContactStoreAccessType accessType);
+            static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactAnnotationStore>  RequestAnnotationStoreAsync(ContactAnnotationStoreAccessType accessType);
+            static Boolean IsShowContactCardSupported();
+            [method_name("ShowContactCardWithOptions")] static void ShowContactCard(Contact contact, Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement, ContactCardOptions contactCardOptions);
+            static Boolean IsShowDelayLoadedContactCardSupported();
+            [method_name("ShowDelayLoadedContactCardWithOptions")] static Windows.ApplicationModel.Contacts.ContactCardDelayedDataLoader ShowDelayLoadedContactCard(Contact contact, Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement, ContactCardOptions contactCardOptions);
+            static void ShowFullContactCard(Contact contact, FullContactCardOptions fullContactCardOptions);
+            static Windows.ApplicationModel.Contacts.ContactNameOrder SystemDisplayNameOrder{ get; };
+            static Windows.ApplicationModel.Contacts.ContactNameOrder SystemDisplayNameOrder{ set; };
+            static Windows.ApplicationModel.Contacts.ContactNameOrder SystemSortOrder{ get; };
+            static Windows.ApplicationModel.Contacts.ContactNameOrder SystemSortOrder{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.ApplicationModel.Contacts.IContactManagerStatics2", a178e620-47d8-48cc-963c-9592b6e510c6)]
+        {
+            [method_name("RequestStoreAsync")] static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Contacts.ContactStore>  RequestStoreAsync();
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.ApplicationModel.Contacts.IContactLaunchActionVerbsStatics", fb1232d6-ee73-46e7-8761-11cd0157728f)]
+    runtimeclass ContactLaunchActionVerbs
+    {
+        static String Call{ get; };
+        static String Message{ get; };
+        static String Map{ get; };
+        static String Post{ get; };
+        static String VideoCall{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Contacts.IContactGroup", 59bdeb01-9e9a-475d-bfe5-a37b806d852c)]
+    runtimeclass ContactGroup
+    {
+    }
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.ApplicationModel.Background.IContactStoreNotificationTrigger", c833419b-4705-4571-9a16-06b997bf9c96)]
+    [threading(both)]
+    runtimeclass ContactStoreNotificationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        ContactStoreNotificationTrigger();
+    }
+
+
+}
+namespace Windows.ApplicationModel.Contacts.DataProvider
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactDataProviderConnection", 1a398a52-8c9d-4d6f-a4e0-111e9a125a30)]
+    runtimeclass ContactDataProviderConnection
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Contacts.DataProvider.ContactDataProviderConnection, Windows.ApplicationModel.Contacts.DataProvider.ContactListSyncManagerSyncRequestEventArgs>  SyncRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Contacts.DataProvider.ContactDataProviderConnection, Windows.ApplicationModel.Contacts.DataProvider.ContactListServerSearchReadBatchRequestEventArgs>  ServerSearchReadBatchRequested;
+        void Start();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactDataProviderConnection2", a1d327b0-196c-4bfd-8f0f-c68d67f249d3)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Contacts.DataProvider.ContactDataProviderConnection, Windows.ApplicationModel.Contacts.DataProvider.ContactListCreateOrUpdateContactRequestEventArgs>  CreateOrUpdateContactRequested;
+            event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Contacts.DataProvider.ContactDataProviderConnection, Windows.ApplicationModel.Contacts.DataProvider.ContactListDeleteContactRequestEventArgs>  DeleteContactRequested;
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListSyncManagerSyncRequestEventArgs", 158e4dac-446d-4f10-afc2-02683ec533a6)]
+    runtimeclass ContactListSyncManagerSyncRequestEventArgs
+    {
+        Windows.ApplicationModel.Contacts.DataProvider.ContactListSyncManagerSyncRequest Request{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListServerSearchReadBatchRequestEventArgs", 1a27e87b-69d7-4e4e-8042-861cba61471e)]
+    runtimeclass ContactListServerSearchReadBatchRequestEventArgs
+    {
+        Windows.ApplicationModel.Contacts.DataProvider.ContactListServerSearchReadBatchRequest Request{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListCreateOrUpdateContactRequestEventArgs", 851c1690-1a51-4b0c-aeef-1240ac5bed75)]
+    runtimeclass ContactListCreateOrUpdateContactRequestEventArgs
+    {
+        Windows.ApplicationModel.Contacts.DataProvider.ContactListCreateOrUpdateContactRequest Request{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListDeleteContactRequestEventArgs", b22054a1-e8fa-4db5-9389-2d12ee7d15ee)]
+    runtimeclass ContactListDeleteContactRequestEventArgs
+    {
+        Windows.ApplicationModel.Contacts.DataProvider.ContactListDeleteContactRequest Request{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactDataProviderTriggerDetails", 527104be-3c62-43c8-9ae7-db531685cd99)]
+    runtimeclass ContactDataProviderTriggerDetails
+    {
+        Windows.ApplicationModel.Contacts.DataProvider.ContactDataProviderConnection Connection{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListSyncManagerSyncRequest", 3c0e57a4-c4e7-4970-9a8f-9a66a2bb6c1a)]
+    runtimeclass ContactListSyncManagerSyncRequest
+    {
+        String ContactListId{ get; };
+        Windows.Foundation.IAsyncAction ReportCompletedAsync();
+        Windows.Foundation.IAsyncAction ReportFailedAsync();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListServerSearchReadBatchRequest", ba776a97-4030-4925-9fb4-143b295e653b)]
+    runtimeclass ContactListServerSearchReadBatchRequest
+    {
+        String SessionId{ get; };
+        String ContactListId{ get; };
+        Windows.ApplicationModel.Contacts.ContactQueryOptions Options{ get; };
+        UInt32 SuggestedBatchSize{ get; };
+        Windows.Foundation.IAsyncAction SaveContactAsync(Windows.ApplicationModel.Contacts.Contact contact);
+        Windows.Foundation.IAsyncAction ReportCompletedAsync();
+        Windows.Foundation.IAsyncAction ReportFailedAsync(Windows.ApplicationModel.Contacts.ContactBatchStatus batchStatus);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListCreateOrUpdateContactRequest", b4af411f-c849-47d0-b119-91cf605b2f2a)]
+    runtimeclass ContactListCreateOrUpdateContactRequest
+    {
+        String ContactListId{ get; };
+        Windows.ApplicationModel.Contacts.Contact Contact{ get; };
+        Windows.Foundation.IAsyncAction ReportCompletedAsync(Windows.ApplicationModel.Contacts.Contact createdOrUpdatedContact);
+        Windows.Foundation.IAsyncAction ReportFailedAsync();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Contacts.DataProvider.IContactListDeleteContactRequest", 5e114687-ce03-4de5-8557-9ccf552d472a)]
+    runtimeclass ContactListDeleteContactRequest
+    {
+        String ContactListId{ get; };
+        String ContactId{ get; };
+        Windows.Foundation.IAsyncAction ReportCompletedAsync();
+        Windows.Foundation.IAsyncAction ReportFailedAsync();
+    }
+
+}

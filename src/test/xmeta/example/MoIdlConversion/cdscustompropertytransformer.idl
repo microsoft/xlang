@@ -1,0 +1,229 @@
+
+
+
+
+
+
+
+
+
+namespace WindowsInternal.Shell.CDSProperties
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesBatchToken", ce38d147-d122-4396-9284-4d784d5ee5c0)]
+    runtimeclass CDSTilePropertiesBatchToken
+        : Windows.Foundation.IClosable
+    {
+    }
+
+    [flags]
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    enum CDSTilePropertiesKinds
+    {
+        None,
+        Local,
+        LocalVolatile,
+        Roamed = 4,
+        All = 7,
+    };
+
+    [uuid(0b95d7ec-539e-4ad0-bab3-fc5acd05f716)]
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    interface ICDSTilePropertiesItem
+    {
+        String Id{ get; };
+        WindowsInternal.Shell.CDSProperties.CDSTilePropertiesKinds Kind{ get; };
+    };
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [flags]
+    enum ExtendedReconciliationRequirements
+    {
+        None,
+        Unknown,
+        PackagedVisibleInAppListPrimaryTiles,
+        PackagedNonVisibleInAppListPrimaryTiles = 4,
+        PackagedAllSecondaryTiles = 8,
+    };
+
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CDSLocalTileProperties
+        : [default]WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesItem
+    {
+
+        [interface_name("WindowsInternal.Shell.CDSProperties.ICDSLocalTileProperties", f2456d27-5e13-42b8-bc25-00b4cc364e44)]
+        {
+            Windows.Foundation.DateTime InstallTime{ get; };
+            Windows.Foundation.DateTime InstallTime{ set; };
+            void GetSeenNotifications(out UInt32 notification1, out UInt32 notification2, out UInt32 notification3, out UInt32 notification4, out UInt32 notification5);
+            void SetSeenNotifications(UInt32 notification1, UInt32 notification2, UInt32 notification3, UInt32 notification4, UInt32 notification5);
+            Boolean WasUnpinnedFromTaskbar{ get; };
+            Boolean WasUnpinnedFromTaskbar{ set; };
+            Windows.Foundation.DateTime GraveyardTime{ get; };
+            Windows.Foundation.DateTime GraveyardTime{ set; };
+            WindowsInternal.Shell.CDSProperties.ExtendedReconciliationRequirements ExtendedReconciliationRequirements{ get; };
+            WindowsInternal.Shell.CDSProperties.ExtendedReconciliationRequirements ExtendedReconciliationRequirements{ set; };
+        }
+    }
+
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CDSLocalVolatileTileProperties
+        : [default]WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesItem
+    {
+
+        [interface_name("WindowsInternal.Shell.CDSProperties.ICDSLocalVolatileTileProperties", 42bcc1f9-cee8-4141-8e63-b417cf554888)]
+        {
+            Single Relevance{ get; };
+            Single Relevance{ set; };
+            UInt32 LaunchCount{ get; };
+            UInt32 LaunchCount{ set; };
+            Windows.Foundation.DateTime LastLaunchTime{ get; };
+            Windows.Foundation.DateTime LastLaunchTime{ set; };
+            void SetUsageData(Single relevance, UInt32 launchCount, Windows.Foundation.DateTime lastLaunchTime);
+            void ClearUsageData();
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    runtimeclass CDSRoamedTileProperties
+        : [default]WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesItem
+    {
+
+        [interface_name("WindowsInternal.Shell.CDSProperties.ICDSRoamedTileProperties", 08f05079-9cdc-4a9f-a4ae-8a8661ecc402)]
+        {
+            Windows.Foundation.DateTime FirstSeenTime{ get; };
+            Windows.Foundation.DateTime FirstSeenTime{ set; };
+            Boolean WasRemovedFromRecentlyInstalledList{ get; };
+            Boolean WasRemovedFromRecentlyInstalledList{ set; };
+            Boolean WasRemovedFromFrequentAppsList{ get; };
+            Boolean WasRemovedFromFrequentAppsList{ set; };
+            Boolean IsLiveTileDisabled{ get; };
+            Boolean IsLiveTileDisabled{ set; };
+            Boolean IsUserPinned{ get; };
+            Boolean IsUserPinned{ set; };
+        }
+
+        [interface_name("WindowsInternal.Shell.CDSProperties.ICDSGamesListTileProperties", 84dabb6f-6903-4f45-b2cc-30d23eb63ca9)]
+        {
+            UInt32 GameListCategory{ get; };
+            UInt32 GameListCategory{ set; };
+            String XboxTitleId{ get; };
+            String XboxTitleId{ set; };
+        }
+    }
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [uuid(f8300a47-099e-4d13-9282-e4df39796d67)]
+    interface ICDSTilePropertiesBatchedChangedArgs
+    {
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesItem>  ChangedTiles{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  RemovedTiles{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    runtimeclass CDSTilePropertiesBatchedChangedArgs
+        : [default]WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesBatchedChangedArgs
+    {
+    }
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [uuid(d08a9559-b4cc-49af-98bb-2366c7449402)]
+    interface ICDSTilePropertiesBatched
+    {
+        WindowsInternal.Shell.CDSProperties.CDSTilePropertiesBatchToken CreateBatch();
+        Boolean HasLocalProperties(String itemId);
+        Boolean HasLocalVolatileProperties(String itemId);
+        Boolean HasRoamedProperties(String itemId);
+        WindowsInternal.Shell.CDSProperties.CDSLocalTileProperties GetLocalProperties(String itemId);
+        WindowsInternal.Shell.CDSProperties.CDSLocalVolatileTileProperties GetLocalVolatileProperties(String itemId);
+        WindowsInternal.Shell.CDSProperties.CDSRoamedTileProperties GetRoamedProperties(String itemId);
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.CDSProperties.CDSLocalTileProperties>  GetAllLocalProperties();
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.CDSProperties.CDSLocalVolatileTileProperties>  GetAllLocalVolatileProperties();
+        Windows.Foundation.Collections.IVectorView <WindowsInternal.Shell.CDSProperties.CDSRoamedTileProperties>  GetAllRoamedProperties();
+        void RemoveLocalProperties(String itemId);
+        void RemoveLocalVolatileProperties(String itemId);
+        void RemoveRoamedProperties(String itemId);
+        event Windows.Foundation.TypedEventHandler <WindowsInternal.Shell.CDSProperties.CDSTilePropertiesBatched, WindowsInternal.Shell.CDSProperties.CDSTilePropertiesBatchedChangedArgs>  LocalPropertiesChanged;
+        event Windows.Foundation.TypedEventHandler <WindowsInternal.Shell.CDSProperties.CDSTilePropertiesBatched, WindowsInternal.Shell.CDSProperties.CDSTilePropertiesBatchedChangedArgs>  LocalVolatilePropertiesChanged;
+        event Windows.Foundation.TypedEventHandler <WindowsInternal.Shell.CDSProperties.CDSTilePropertiesBatched, WindowsInternal.Shell.CDSProperties.CDSTilePropertiesBatchedChangedArgs>  RoamedPropertiesChanged;
+    };
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesBatchedFactory", 3055f2cd-a89f-43f3-be60-867e2644b283)]
+    [threading(both)]
+    runtimeclass CDSTilePropertiesBatched
+        : [default]WindowsInternal.Shell.CDSProperties.ICDSTilePropertiesBatched
+    {
+        [method_name( "Create" )] CDSTilePropertiesBatched(Windows.System.User user, CDSTilePropertiesKinds propertyKinds);
+    }
+
+
+    [uuid(c6da4ccf-cc4c-410e-9923-0a10baf146b2)]
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    interface IStartGlobalProperties
+    {
+        Boolean FullScreenMode{ get; };
+        Boolean FullScreenMode{ set; };
+        Boolean HideAppList{ get; };
+        Boolean HideAppList{ set; };
+        Boolean HideRecentList{ get; };
+        Boolean HideRecentList{ set; };
+        Boolean HideFrequentList{ get; };
+        Boolean HideFrequentList{ set; };
+        UInt32 StartMenuRelativeHeightPixels{ get; };
+        UInt32 StartMenuRelativeHeightPixels{ set; };
+        Boolean PlacesInitialized{ get; };
+        Boolean PlacesInitialized{ set; };
+        UInt32 PlacesInitializedVersion{ get; };
+        UInt32 PlacesInitializedVersion{ set; };
+        Windows.Foundation.Collections.IVectorView <Guid>  GetVisiblePlaces();
+        void SetVisiblePlaces(Windows.Foundation.Collections.IVectorView <Guid>  values);
+        Boolean StartViewRestoring{ get; };
+        Boolean StartViewRestoring{ set; };
+        event Windows.Foundation.TypedEventHandler <WindowsInternal.Shell.CDSProperties.StartGlobalProperties, WindowsInternal.Shell.CDSProperties.StartGlobalPropertiesChangedArgs>  PropertiesChanged;
+        Boolean PlacesTipDismissed{ get; };
+        Boolean PlacesTipDismissed{ set; };
+    };
+
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("WindowsInternal.Shell.CDSProperties.IStartGlobalPropertiesFactory", 2c670963-f8a9-4bbb-9adf-683a3a89537e)]
+    [threading(both)]
+    runtimeclass StartGlobalProperties
+        : [default]WindowsInternal.Shell.CDSProperties.IStartGlobalProperties
+    {
+        [method_name( "Create" )] StartGlobalProperties(Windows.System.User user);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    runtimeclass StartGlobalPropertiesChangedArgs
+        : [default]WindowsInternal.Shell.CDSProperties.IStartGlobalPropertiesChangedArgs
+    {
+    }
+
+
+    [uuid(fb32f177-5f49-428d-b792-55be64cfaab1)]
+    [contract(WindowsInternal.Shell.CDSProperties.InternalContract, 1)]
+    [internal]
+    interface IStartGlobalPropertiesChangedArgs
+    {
+    };
+
+}

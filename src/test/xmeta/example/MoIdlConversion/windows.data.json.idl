@@ -1,0 +1,152 @@
+
+
+
+
+
+
+
+
+namespace Windows.Data.Json
+{
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum JsonValueType
+    {
+        Null,
+        Boolean,
+        Number,
+        String,
+        Array,
+        Object,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum JsonErrorStatus
+    {
+        Unknown,
+        InvalidJsonString,
+        InvalidJsonNumber,
+        JsonValueNotFound,
+        ImplementationLimit,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [uuid(a3219ecb-f0b3-4dcd-beee-19d48cd3ed1e)]
+    interface IJsonValue
+    {
+        Windows.Data.Json.JsonValueType ValueType{ get; };
+        String Stringify();
+        String GetString();
+        Double GetNumber();
+        Boolean GetBoolean();
+        Windows.Data.Json.JsonArray GetArray();
+        Windows.Data.Json.JsonObject GetObject();
+    };
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Data.Json.IJsonArrayStatics", db1434a9-e164-499f-93e2-8a8f49bb90ba)]
+    [interface_name("Windows.Data.Json.IJsonArray", 08c1ddb6-0cbd-4a9a-b5d3-2f852dc37e81)]
+    [threading(both)]
+    runtimeclass JsonArray
+        : Windows.Data.Json.IJsonValue
+        , Windows.Foundation.Collections.IVector<Windows.Data.Json.IJsonValue>
+        , Windows.Foundation.Collections.IIterable<Windows.Data.Json.IJsonValue>
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Foundation.IStringable
+    {
+        JsonArray();
+        static Windows.Data.Json.JsonArray Parse(String input);
+        [return_name("succeeded")] static Boolean TryParse(String input, out JsonArray result);
+        Windows.Data.Json.JsonObject GetObjectAt(UInt32 index);
+        Windows.Data.Json.JsonArray GetArrayAt(UInt32 index);
+        String GetStringAt(UInt32 index);
+        Double GetNumberAt(UInt32 index);
+        Boolean GetBooleanAt(UInt32 index);
+    }
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    [static_name("Windows.Data.Json.IJsonObjectStatics", 2289f159-54de-45d8-abcc-22603fa066a0)]
+    [interface_name("Windows.Data.Json.IJsonObject", 064e24dd-29c2-4f83-9ac1-9ee11578beb3)]
+    [threading(both)]
+    runtimeclass JsonObject
+        : Windows.Data.Json.IJsonValue
+        , Windows.Foundation.Collections.IMap<String, Windows.Data.Json.IJsonValue>
+        , Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, Windows.Data.Json.IJsonValue> >
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Foundation.IStringable
+    {
+        static Windows.Data.Json.JsonObject Parse(String input);
+        [return_name("succeeded")] static Boolean TryParse(String input, out JsonObject result);
+        JsonObject();
+        Windows.Data.Json.JsonValue GetNamedValue(String name);
+        void SetNamedValue(String name, IJsonValue value);
+        Windows.Data.Json.JsonObject GetNamedObject(String name);
+        Windows.Data.Json.JsonArray GetNamedArray(String name);
+        String GetNamedString(String name);
+        Double GetNamedNumber(String name);
+        Boolean GetNamedBoolean(String name);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Data.Json.IJsonObjectWithDefaultValues", d960d2a2-b7f0-4f00-8e44-d82cf415ea13)]
+        {
+            [method_name("GetNamedValueOrDefault")] Windows.Data.Json.JsonValue GetNamedValue(String name, JsonValue defaultValue);
+            [method_name("GetNamedObjectOrDefault")] Windows.Data.Json.JsonObject GetNamedObject(String name, JsonObject defaultValue);
+            [method_name("GetNamedStringOrDefault")] String GetNamedString(String name, String defaultValue);
+            [method_name("GetNamedArrayOrDefault")] Windows.Data.Json.JsonArray GetNamedArray(String name, JsonArray defaultValue);
+            [method_name("GetNamedNumberOrDefault")] Double GetNamedNumber(String name, Double defaultValue);
+            [method_name("GetNamedBooleanOrDefault")] Boolean GetNamedBoolean(String name, Boolean defaultValue);
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Data.Json.IJsonValueStatics2", 1d9ecbe4-3fe8-4335-8392-93d8e36865f0)]
+    [threading(both)]
+    runtimeclass JsonValue
+        : [default]Windows.Data.Json.IJsonValue
+        , [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Windows.Foundation.IStringable
+    {
+        static Windows.Data.Json.JsonValue CreateNullValue();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Data.Json.IJsonValueStatics", 5f6b544a-2f53-48e1-91a3-f78b50a6345c)]
+        {
+            static Windows.Data.Json.JsonValue Parse(String input);
+            [return_name("succeeded")] static Boolean TryParse(String input, out JsonValue result);
+            static Windows.Data.Json.JsonValue CreateBooleanValue(Boolean input);
+            static Windows.Data.Json.JsonValue CreateNumberValue(Double input);
+            static Windows.Data.Json.JsonValue CreateStringValue(String input);
+        }
+    }
+
+
+
+
+
+
+
+
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Data.Json.IJsonErrorStatics2", 404030da-87d0-436c-83ab-fc7b12c0cc26)]
+    [threading(both)]
+    runtimeclass JsonError
+    {
+        static Windows.Data.Json.JsonErrorStatus GetJsonStatus(Int32 hresult);
+    }
+
+}

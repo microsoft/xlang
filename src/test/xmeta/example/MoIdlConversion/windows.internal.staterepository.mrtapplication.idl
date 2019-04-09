@@ -1,0 +1,77 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IMrtApplicationStatics", f7e80409-27e5-4514-805f-a431c4ce3b96)]
+    [interface_name("Windows.Internal.StateRepository.IMrtApplication", 8afe010a-b611-484e-944d-5ea6e4a23569)]
+    [threading(both)]
+    runtimeclass MrtApplication
+    {
+        static Boolean Exists(Int64 mrtApplicationID);
+        static Boolean ExistsByApplication(Application Application);
+        static Windows.Internal.StateRepository.MrtApplication Get(Int64 mrtApplicationID);
+        static Windows.Internal.StateRepository.MrtApplication TryGet(Int64 mrtApplicationID);
+        static Windows.Internal.StateRepository.MrtApplication GetByApplication(Application Application);
+        static Windows.Internal.StateRepository.MrtApplication TryGetByApplication(Application Application);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.MrtApplication>  Find();
+        MrtApplication();
+        Int64 _MrtApplicationID{ get; };
+        Int64 _MrtApplicationID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Application{ get; };
+        Int64 Application{ set; };
+        Windows.Internal.StateRepository.Application GetApplication();
+        void SetApplication(Application value);
+        String DisplayNameReference{ get; };
+        String DisplayNameReference{ set; };
+        String DescriptionReference{ get; };
+        String DescriptionReference{ set; };
+        String Square150x150LogoReference{ get; };
+        String Square150x150LogoReference{ set; };
+        String Square44x44LogoReference{ get; };
+        String Square44x44LogoReference{ set; };
+        Boolean IsWide310x150LogoReferenceNull{ get; };
+        void SetWide310x150LogoReferenceToNull();
+        String Wide310x150LogoReference{ get; };
+        String Wide310x150LogoReference{ set; };
+        Boolean IsSquare310x310LogoReferenceNull{ get; };
+        void SetSquare310x310LogoReferenceToNull();
+        String Square310x310LogoReference{ get; };
+        String Square310x310LogoReference{ set; };
+        Boolean IsSquare71x71LogoReferenceNull{ get; };
+        void SetSquare71x71LogoReferenceToNull();
+        String Square71x71LogoReference{ get; };
+        String Square71x71LogoReference{ set; };
+        Boolean IsStartPageReferenceNull{ get; };
+        void SetStartPageReferenceToNull();
+        String StartPageReference{ get; };
+        String StartPageReference{ set; };
+        Boolean IsSplashScreenImageReferenceNull{ get; };
+        void SetSplashScreenImageReferenceToNull();
+        String SplashScreenImageReference{ get; };
+        String SplashScreenImageReference{ set; };
+        Boolean IsVisualGroupReferenceNull{ get; };
+        void SetVisualGroupReferenceToNull();
+        String VisualGroupReference{ get; };
+        String VisualGroupReference{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

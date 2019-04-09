@@ -1,0 +1,118 @@
+
+
+
+
+
+
+
+
+namespace Windows.Media.Capture
+{
+    [contractversion(1)]
+    apicontract GameBarContract{};
+
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    enum GameBarCommand
+    {
+        OpenGameBar,
+        RecordHistoricalBuffer,
+        ToggleStartStopRecord,
+        StartRecord,
+        StopRecord,
+        TakeScreenshot,
+        StartBroadcast,
+        StopBroadcast,
+        PauseBroadcast,
+        ResumeBroadcast,
+        ToggleStartStopBroadcast,
+        ToggleMicrophoneCapture,
+        ToggleCameraCapture,
+        ToggleRecordingIndicator,
+    };
+
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    enum GameBarCommandOrigin
+    {
+        ShortcutKey,
+        Cortana,
+        AppCommand,
+    };
+
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    enum GameBarTargetCapturePolicy
+    {
+        EnabledBySystem,
+        EnabledByUser,
+        NotEnabled,
+        ProhibitedBySystem,
+        ProhibitedByPublisher,
+    };
+
+    [contract(Windows.Media.Capture.AppBroadcastContract, 1)]
+    enum GameBarServicesDisplayMode
+    {
+        Windowed,
+        FullScreenExclusive,
+    };
+
+
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.Capture.IGameBarServicesManagerStatics", 34c1b616-ff25-4792-98f2-d3753f15ac13)]
+    [interface_name("Windows.Media.Capture.IGameBarServicesManager", 3a4b9cfa-7f8b-4c60-9dbb-0bcd262dffc6)]
+    [threading(both)]
+    runtimeclass GameBarServicesManager
+    {
+        static Windows.Media.Capture.GameBarServicesManager GetDefault();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.GameBarServicesManager, Windows.Media.Capture.GameBarServicesManagerGameBarServicesCreatedEventArgs>  GameBarServicesCreated;
+    }
+
+
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Capture.IGameBarServicesManagerGameBarServicesCreatedEventArgs", ededbd9c-143e-49a3-a5ea-0b1995c8d46e)]
+    runtimeclass GameBarServicesManagerGameBarServicesCreatedEventArgs
+    {
+        Windows.Media.Capture.GameBarServices GameBarServices{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    [interface_name("Windows.Media.Capture.IGameBarServices", 2dbead57-50a6-499e-8c6c-d330a7311796)]
+    runtimeclass GameBarServices
+    {
+        Windows.Media.Capture.GameBarTargetCapturePolicy TargetCapturePolicy{ get; };
+        void EnableCapture();
+        void DisableCapture();
+        Windows.Media.Capture.GameBarServicesTargetInfo TargetInfo{ get; };
+        String SessionId{ get; };
+        Windows.Media.Capture.AppBroadcastServices AppBroadcastServices{ get; };
+        Windows.Media.Capture.AppCaptureServices AppCaptureServices{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Capture.GameBarServices, Windows.Media.Capture.GameBarServicesCommandEventArgs>  CommandReceived;
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    [interface_name("Windows.Media.Capture.IGameBarServicesTargetInfo", b4202f92-1611-4e05-b6ef-dfd737ae33b0)]
+    runtimeclass GameBarServicesTargetInfo
+    {
+        String DisplayName{ get; };
+        String AppId{ get; };
+        String TitleId{ get; };
+        Windows.Media.Capture.GameBarServicesDisplayMode DisplayMode{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Capture.GameBarContract, 1)]
+    [interface_name("Windows.Media.Capture.IGameBarServicesCommandEventArgs", a74226b2-f176-4fcf-8fbb-cf698b2eb8e0)]
+    runtimeclass GameBarServicesCommandEventArgs
+    {
+        Windows.Media.Capture.GameBarCommand Command{ get; };
+        Windows.Media.Capture.GameBarCommandOrigin Origin{ get; };
+    }
+
+
+
+}

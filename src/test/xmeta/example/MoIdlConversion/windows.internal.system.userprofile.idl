@@ -1,0 +1,66 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.System.UserProfile
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.System.UserProfile.InternalContract, 1)]
+    enum UserProfileEngagementStatus
+    {
+        Enrolled,
+        Eligible,
+        Ineligible,
+    };
+
+    [contract(Windows.Internal.System.UserProfile.InternalContract, 1)]
+    enum UserProfileEngagementItem
+    {
+        MsaPrimaryAccount,
+        OneDriveConnection,
+        OneDriveKnownFolderMove,
+        WindowsHello,
+        ActivitiesHistorySharing,
+        MobileExperienceDevice,
+        MobileExperiencePairedPhone,
+        UpToDateWindows,
+        MicrosoftRewards,
+    };
+
+
+
+    [contract(Windows.Internal.System.UserProfile.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.System.UserProfile.IUserProfileEngagementManagerStatics", 7ebbc22b-741b-538a-9067-1176aaec0b09)]
+    [interface_name("Windows.Internal.System.UserProfile.IUserProfileEngagementManager", c008ed67-d3a0-583f-b233-dcf630ccce32)]
+    [threading(both)]
+    runtimeclass UserProfileEngagementManager
+    {
+        static Windows.Internal.System.UserProfile.UserProfileEngagementManager GetForUser(Windows.System.User user);
+        static Windows.Internal.System.UserProfile.UserProfileEngagementManager GetDefault();
+        [return_name("result")] Boolean TryFastCheckEngagement(UserProfileEngagementItem item, out UserProfileEngagementStatus status);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.System.UserProfile.UserProfileEngagementStatus>  CheckEngagementAsync(UserProfileEngagementItem item);
+    }
+
+
+
+    [contract(Windows.Internal.System.UserProfile.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.System.UserProfile.IOneDriveEngagementManagerStatics", 0df05b8f-c752-5855-86b4-4d7d89fa08d8)]
+    [interface_name("Windows.Internal.System.UserProfile.IOneDriveEngagementManager", 74ec9286-cf9f-5079-89e2-ae0c32f9c678)]
+    [threading(both)]
+    runtimeclass OneDriveEngagementManager
+    {
+        static Windows.Internal.System.UserProfile.OneDriveEngagementManager GetForUser(Windows.System.User user);
+        static Windows.Internal.System.UserProfile.OneDriveEngagementManager GetDefault();
+        Windows.Foundation.IAsyncOperation <Boolean>  GetAreKnownFoldersPartiallyMovedAsync();
+    }
+
+}

@@ -1,0 +1,256 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.StartScreen
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum TileOptions
+    {
+        [deprecated("TileOptions.None may be altered or unavailable for release after Windows Phone 8.1.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        None,
+        [deprecated("TileOptions.ShowNameOnLogo may be altered or unavailable for releases after Windows Phone 8.1. Instead, use SecondaryTile.VisualElements.ShowNameOnSquare150x150Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        ShowNameOnLogo,
+        [deprecated("TileOptions.ShowNameWideOnLogo may be altered or unavailable for releases after Windows Phone 8.1. Instead, use SecondaryTile.VisualElements.ShowNameOnWide310x150Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        ShowNameOnWideLogo,
+        [deprecated("TileOptions.CopyOnDeployment may be altered or unavailable for releases after Windows Phone 8.1. Instead, use SecondaryTile.RoamingEnabled to control roaming behavior.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        CopyOnDeployment = 4,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TileSize
+    {
+        Default,
+        [deprecated("TileSize.Square30x30 may be altered or unavailable for release after Windows 10.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Square30x30,
+        [deprecated("TileSize.Square70x70 may be altered or unavailable for release after Windows Phone 8.1.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Square70x70,
+        Square150x150,
+        Wide310x150,
+        Square310x310,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Square71x71,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Square44x44,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ForegroundText
+    {
+        Dark,
+        Light,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum TileMixedRealityModelActivationBehavior
+    {
+        Default,
+        None,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [muse(0x6030000)]
+    [interface_name("Windows.UI.StartScreen.ISecondaryTileVisualElements", 1d8df333-815e-413f-9f50-a81da70a96b2)]
+    runtimeclass SecondaryTileVisualElements
+    {
+        [deprecated("SecondaryTileVisualElements.Square30x30Logo may be altered or unavailable for release after Windows 10.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri Square30x30Logo{ set; };
+        [deprecated("SecondaryTileVisualElements.Square30x30Logo may be altered or unavailable for release after Windows 10.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri Square30x30Logo{ get; };
+        [deprecated("SecondaryTileVisualElements.Square70x70Logo may be altered or unavailable for release after Windows Phone 8.1.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri Square70x70Logo{ set; };
+        [deprecated("SecondaryTileVisualElements.Square70x70Logo may be altered or unavailable for release after Windows Phone 8.1.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri Square70x70Logo{ get; };
+        Windows.Foundation.Uri Square150x150Logo{ set; };
+        Windows.Foundation.Uri Square150x150Logo{ get; };
+        Windows.Foundation.Uri Wide310x150Logo{ set; };
+        Windows.Foundation.Uri Wide310x150Logo{ get; };
+        Windows.Foundation.Uri Square310x310Logo{ set; };
+        Windows.Foundation.Uri Square310x310Logo{ get; };
+        Windows.UI.StartScreen.ForegroundText ForegroundText{ set; };
+        Windows.UI.StartScreen.ForegroundText ForegroundText{ get; };
+        Windows.UI.Color BackgroundColor{ set; };
+        Windows.UI.Color BackgroundColor{ get; };
+        Boolean ShowNameOnSquare150x150Logo{ set; };
+        Boolean ShowNameOnSquare150x150Logo{ get; };
+        Boolean ShowNameOnWide310x150Logo{ set; };
+        Boolean ShowNameOnWide310x150Logo{ get; };
+        Boolean ShowNameOnSquare310x310Logo{ set; };
+        Boolean ShowNameOnSquare310x310Logo{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.StartScreen.ISecondaryTileVisualElements2", fd2e31d0-57dc-4794-8ecf-5682f5f3e6ef)]
+        {
+            Windows.Foundation.Uri Square71x71Logo{ set; };
+            Windows.Foundation.Uri Square71x71Logo{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.StartScreen.ISecondaryTileVisualElements3", 56b55ad6-d15c-40f4-81e7-57ffd8f8a4e9)]
+        {
+            Windows.Foundation.Uri Square44x44Logo{ set; };
+            Windows.Foundation.Uri Square44x44Logo{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [feature(Velocity_SometimesAlwaysEnabled)]
+        [interface_name("Windows.UI.StartScreen.ISecondaryTileVisualElements4", 66566117-b544-40d2-8d12-74d4ec24d04c)]
+        {
+            Windows.UI.StartScreen.TileMixedRealityModel MixedRealityModel{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [muse(0x6020000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.StartScreen.ISecondaryTileFactory2", 274b8a3b-522d-448e-9eb2-d0672ab345c8)]
+    [static_name("Windows.UI.StartScreen.ISecondaryTileStatics", 99908dae-d051-4676-87fe-9ec242d83c74)]
+    [interface_name("Windows.UI.StartScreen.ISecondaryTile", 9e9e51e0-2bb5-4bc0-bb8d-42b23abcc88d)]
+    runtimeclass SecondaryTile
+    {
+        [method_name( "CreateMinimalTile" )] SecondaryTile(String tileId, String displayName, String arguments, Windows.Foundation.Uri square150x150Logo, TileSize desiredSize);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.UI.StartScreen.ISecondaryTileFactory", 57f52ca0-51bc-4abf-8ebf-627a0398b05a)]
+        {
+            [deprecated("SecondaryTile(string, string, string, string, Windows.UI.StartScreen.TileOptions, Windows.Foundation.Uri) may be altered or unavailable for releases after Windows Phone 8.1. Instead, use SecondaryTile(string, string, string, Windows.Foundation.Uri, Windows.UI.StartScreen.TileSize).", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+            [method_name( "CreateTile" )] SecondaryTile(String tileId, String shortName, String displayName, String arguments, TileOptions tileOptions, Windows.Foundation.Uri logoReference);
+            [deprecated("SecondaryTile(string, string, string, string, Windows.UI.StartScreen.TileOptions, Windows.Foundation.Uri, Windows.Foundation.Uri) may be altered or unavailable for releases after Windows Phone 8.1. Instead, use SecondaryTile(string, string, string, Windows.Foundation.Uri, Windows.UI.StartScreen.TileSize).", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+            [method_name( "CreateWideTile" )] SecondaryTile(String tileId, String shortName, String displayName, String arguments, TileOptions tileOptions, Windows.Foundation.Uri logoReference, Windows.Foundation.Uri wideLogoReference);
+            [method_name( "CreateWithId" )] SecondaryTile(String tileId);
+        }
+        SecondaryTile();
+        static Boolean Exists(String tileId);
+        [method_name("FindAllAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.UI.StartScreen.SecondaryTile> >  FindAllAsync();
+        [method_name("FindAllForApplicationAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.UI.StartScreen.SecondaryTile> >  FindAllAsync(String applicationId);
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.UI.StartScreen.SecondaryTile> >  FindAllForPackageAsync();
+        String TileId{ set; };
+        String TileId{ get; };
+        String Arguments{ set; };
+        String Arguments{ get; };
+        [deprecated("ShortName may be altered or unavailable for releases after Windows Phone 8.1. Instead, use DisplayName.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        String ShortName{ set; };
+        [deprecated("ShortName may be altered or unavailable for releases after Windows 8.1. Instead, use DisplayName.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        String ShortName{ get; };
+        String DisplayName{ set; };
+        String DisplayName{ get; };
+        [deprecated("Logo may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.Square150x150Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri Logo{ set; };
+        [deprecated("Logo may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.Square150x150Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri Logo{ get; };
+        [deprecated("SmallLogo may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.Square30x30Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri SmallLogo{ set; };
+        [deprecated("SmallLogo may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.Square30x30Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri SmallLogo{ get; };
+        [deprecated("WideLogo may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.Wide310x150Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri WideLogo{ set; };
+        [deprecated("WideLogo may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.Wide310x150Logo.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri WideLogo{ get; };
+        Windows.Foundation.Uri LockScreenBadgeLogo{ set; };
+        Windows.Foundation.Uri LockScreenBadgeLogo{ get; };
+        Boolean LockScreenDisplayBadgeAndTileText{ set; };
+        Boolean LockScreenDisplayBadgeAndTileText{ get; };
+        [deprecated("TileOptions may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.ShowNameOnSquare150x150Logo, VisualElements.ShowNameOnWide310x150Logo, and RoamingEnabled.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.UI.StartScreen.TileOptions TileOptions{ set; };
+        [deprecated("TileOptions may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.ShowNameOnSquare150x150Logo, VisualElements.ShowNameOnWide310x150Logo, and RoamingEnabled.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.UI.StartScreen.TileOptions TileOptions{ get; };
+        [deprecated("TileOptions may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.ShowNameOnSquare150x150Logo, VisualElements.ShowNameOnWide310x150Logo, and RoamingEnabled.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.UI.StartScreen.ForegroundText ForegroundText{ set; };
+        [deprecated("ForegroundText may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.ForegroundText.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.UI.StartScreen.ForegroundText ForegroundText{ get; };
+        [deprecated("BackgroundColor may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.BackgroundColor.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.UI.Color BackgroundColor{ set; };
+        [deprecated("BackgroundColor may be altered or unavailable for releases after Windows 8.1. Instead, use VisualElements.BackgroundColor.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.UI.Color BackgroundColor{ get; };
+        [method_name("RequestCreateAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestCreateAsync();
+        [method_name("RequestCreateAsyncWithPoint")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestCreateAsync(Windows.Foundation.Point invocationPoint);
+        [method_name("RequestCreateAsyncWithRect")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestCreateForSelectionAsync(Windows.Foundation.Rect selection);
+        [method_name("RequestCreateAsyncWithRectAndPlacement")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestCreateForSelectionAsync(Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement);
+        [method_name("RequestDeleteAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestDeleteAsync();
+        [method_name("RequestDeleteAsyncWithPoint")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestDeleteAsync(Windows.Foundation.Point invocationPoint);
+        [method_name("RequestDeleteAsyncWithRect")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestDeleteForSelectionAsync(Windows.Foundation.Rect selection);
+        [method_name("RequestDeleteAsyncWithRectAndPlacement")] [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestDeleteForSelectionAsync(Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement);
+        Windows.Foundation.IAsyncOperation <Boolean>  UpdateAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.UI.StartScreen.ISecondaryTile2", b2f6cc35-3250-4990-923c-294ab4b694dd)]
+        {
+            String PhoneticName{ set; };
+            String PhoneticName{ get; };
+            Windows.UI.StartScreen.SecondaryTileVisualElements VisualElements{ get; };
+            Boolean RoamingEnabled{ set; };
+            Boolean RoamingEnabled{ get; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.StartScreen.SecondaryTile, Windows.UI.StartScreen.VisualElementsRequestedEventArgs>  VisualElementsRequested;
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.StartScreen.IVisualElementsRequestedEventArgs", 7b6fc982-3a0d-4ece-af96-cd17e1b00b2d)]
+    runtimeclass VisualElementsRequestedEventArgs
+    {
+        Windows.UI.StartScreen.VisualElementsRequest Request{ get; };
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.StartScreen.ITileMixedRealityModel", b0764e5b-887d-4242-9a19-3d0a4ea78031)]
+    runtimeclass TileMixedRealityModel
+    {
+        Windows.Foundation.Uri Uri{ set; };
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.IReference <Windows.Perception.Spatial.SpatialBoundingBox>  BoundingBox{ set; };
+        Windows.Foundation.IReference <Windows.Perception.Spatial.SpatialBoundingBox>  BoundingBox{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.UI.StartScreen.ITileMixedRealityModel2", 439470b2-d7c5-410b-8319-9486a27b6c67)]
+        {
+            Windows.UI.StartScreen.TileMixedRealityModelActivationBehavior ActivationBehavior{ set; };
+            Windows.UI.StartScreen.TileMixedRealityModelActivationBehavior ActivationBehavior{ get; };
+        }
+    }
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.UI.StartScreen.IVisualElementsRequest", c138333a-9308-4072-88cc-d068db347c68)]
+    runtimeclass VisualElementsRequest
+    {
+        Windows.UI.StartScreen.SecondaryTileVisualElements VisualElements{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.StartScreen.SecondaryTileVisualElements>  AlternateVisualElements{ get; };
+        Windows.Foundation.DateTime Deadline{ get; };
+        Windows.UI.StartScreen.VisualElementsRequestDeferral GetDeferral();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.StartScreen.IVisualElementsRequestDeferral", a1656eb0-0126-4357-8204-bd82bb2a046d)]
+    runtimeclass VisualElementsRequestDeferral
+    {
+        void Complete();
+    }
+
+
+}

@@ -1,0 +1,36 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PredictionUnit
+{
+    [contractversion(1)]
+    [internal]
+    apicontract PredictionUnitInternalContract{};
+
+    [contract(Windows.Internal.PredictionUnit.PredictionUnitInternalContract, 1)]
+    struct BinaryClassificationResult
+    {
+        Boolean Result;
+        Double RawValue;
+        Boolean ExploratoryResult;
+    };
+
+
+    [contract(Windows.Internal.PredictionUnit.PredictionUnitInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.PredictionUnit.IPredictionEngine", 3400615d-540e-46ff-b224-42e778218b35)]
+    [threading(both)]
+    runtimeclass PredictionEngine
+    {
+        PredictionEngine();
+        Windows.Foundation.IAsyncAction InitializeAsync(String contentId, String contentPath, Windows.Storage.Streams.IRandomAccessStreamReference model, Windows.Storage.Streams.IRandomAccessStreamReference modelMetadata, String uniqueCorrelationId);
+        [method_name("GetPredictionAsync")] Windows.Foundation.IAsyncOperation <Windows.Internal.PredictionUnit.BinaryClassificationResult>  GetPredictionAsync(Double threshold, Double explorationRate, String uniqueCorrelationId, Windows.Foundation.Collections.IPropertySet evaluationContext);
+        [method_name("GetPredictionWithCustomFeaturesAsync")] Windows.Foundation.IAsyncOperation <Windows.Internal.PredictionUnit.BinaryClassificationResult>  GetPredictionAsync(Double threshold, Double explorationRate, String uniqueCorrelationId, Windows.Foundation.Collections.IPropertySet evaluationContext, Windows.Foundation.Collections.IPropertySet customFeatures);
+    }
+
+}

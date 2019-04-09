@@ -1,0 +1,24 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.FilePicker
+{
+    [uuid(5c770f80-d97a-40ad-8357-f96888c6975f)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface IPickerExperience
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  LaunchAsync(Windows.Storage.Internal.Pickers.IPickerOperation pickerOperation);
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    runtimeclass PickerExperience
+        : [default]Windows.Internal.PlatformExtensions.FilePicker.IPickerExperience
+    {
+    }
+
+}

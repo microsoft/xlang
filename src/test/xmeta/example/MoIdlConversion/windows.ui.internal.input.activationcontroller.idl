@@ -1,0 +1,38 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [interface_name("Windows.UI.Internal.Input.IActivatedEventArgs", d05f0a37-12ae-50f4-a68e-0157d587f054)]
+    runtimeclass ActivatedEventArgs
+    {
+        Boolean Activated{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.Input.IActivationControllerStatics", e3170296-258f-570b-be4e-7f0c51c51bcd)]
+    [interface_name("Windows.UI.Internal.Input.IActivationController", 245058ee-e3de-451b-8121-fb9a4b8dde4b)]
+    [threading(both)]
+    runtimeclass ActivationController
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.ActivationController GetForInputSite(InputSite inputSite, UInt64 hwnd);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.ActivationController, Windows.UI.Internal.Input.ActivatedEventArgs>  Activated;
+    }
+
+
+}

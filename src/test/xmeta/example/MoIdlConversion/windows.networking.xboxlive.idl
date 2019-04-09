@@ -1,0 +1,276 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Networking.XboxLive
+{
+    [contractversion(1)]
+    apicontract XboxLiveSecureSocketsContract{};
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    enum XboxLiveNetworkAccessKind
+    {
+        Open,
+        Moderate,
+        Strict,
+    };
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    enum XboxLiveSocketKind
+    {
+        None,
+        Datagram,
+        Stream,
+    };
+
+    [flags]
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    enum XboxLiveEndpointPairCreationBehaviors
+    {
+        None,
+        ReevaluatePath,
+    };
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    enum XboxLiveEndpointPairCreationStatus
+    {
+        Succeeded,
+        NoLocalNetworks,
+        NoCompatibleNetworkPaths,
+        LocalSystemNotAuthorized,
+        Canceled,
+        TimedOut,
+        RemoteSystemNotAuthorized,
+        RefusedDueToConfiguration,
+        UnexpectedInternalError,
+    };
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    enum XboxLiveEndpointPairState
+    {
+        Invalid,
+        CreatingOutbound,
+        CreatingInbound,
+        Ready,
+        DeletingLocally,
+        RemoteEndpointTerminating,
+        Deleted,
+    };
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    enum XboxLiveQualityOfServiceMetric
+    {
+        AverageLatencyInMilliseconds,
+        MinLatencyInMilliseconds,
+        MaxLatencyInMilliseconds,
+        AverageOutboundBitsPerSecond,
+        MinOutboundBitsPerSecond,
+        MaxOutboundBitsPerSecond,
+        AverageInboundBitsPerSecond,
+        MinInboundBitsPerSecond,
+        MaxInboundBitsPerSecond,
+    };
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    enum XboxLiveQualityOfServiceMeasurementStatus
+    {
+        NotStarted,
+        InProgress,
+        InProgressWithProvisionalResults,
+        Succeeded,
+        NoLocalNetworks,
+        NoCompatibleNetworkPaths,
+        LocalSystemNotAuthorized,
+        Canceled,
+        TimedOut,
+        RemoteSystemNotAuthorized,
+        RefusedDueToConfiguration,
+        UnexpectedInternalError,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [static_name("Windows.Networking.XboxLive.IXboxLiveDeviceAddressStatics", 5954a819-4a79-4931-827c-7f503e963263)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveDeviceAddress", f5bbd279-3c86-4b57-a31a-b9462408fd01)]
+    [threading(both)]
+    runtimeclass XboxLiveDeviceAddress
+    {
+        static Windows.Networking.XboxLive.XboxLiveDeviceAddress CreateFromSnapshotBase64(String base64);
+        static Windows.Networking.XboxLive.XboxLiveDeviceAddress CreateFromSnapshotBuffer(Windows.Storage.Streams.IBuffer buffer);
+        static Windows.Networking.XboxLive.XboxLiveDeviceAddress CreateFromSnapshotBytes(UInt8[] buffer);
+        static Windows.Networking.XboxLive.XboxLiveDeviceAddress GetLocal();
+        static UInt32 MaxSnapshotBytesSize{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.XboxLive.XboxLiveDeviceAddress, Object>  SnapshotChanged;
+        String GetSnapshotAsBase64();
+        Windows.Storage.Streams.IBuffer GetSnapshotAsBuffer();
+        void GetSnapshotAsBytes(ref UInt8[] buffer, out UInt32 bytesWritten);
+        Int32 Compare(XboxLiveDeviceAddress otherDeviceAddress);
+        Boolean IsValid{ get; };
+        Boolean IsLocal{ get; };
+        Windows.Networking.XboxLive.XboxLiveNetworkAccessKind NetworkAccessKind{ get; };
+    }
+
+
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Networking.XboxLive.IXboxLiveEndpointPairStatics", 64316b30-217a-4243-8ee1-6729281d27db)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveEndpointPair", 1e9a839b-813e-44e0-b87f-c87a093475e4)]
+    [threading(both)]
+    runtimeclass XboxLiveEndpointPair
+    {
+        static Windows.Networking.XboxLive.XboxLiveEndpointPair FindEndpointPairBySocketAddressBytes(UInt8[] localSocketAddress, UInt8[] remoteSocketAddress);
+        static Windows.Networking.XboxLive.XboxLiveEndpointPair FindEndpointPairByHostNamesAndPorts(Windows.Networking.HostName localHostName, String localPort, Windows.Networking.HostName remoteHostName, String remotePort);
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.XboxLive.XboxLiveEndpointPair, Windows.Networking.XboxLive.XboxLiveEndpointPairStateChangedEventArgs>  StateChanged;
+        Windows.Foundation.IAsyncAction DeleteAsync();
+        void GetRemoteSocketAddressBytes(ref UInt8[] socketAddress);
+        void GetLocalSocketAddressBytes(ref UInt8[] socketAddress);
+        Windows.Networking.XboxLive.XboxLiveEndpointPairState State{ get; };
+        Windows.Networking.XboxLive.XboxLiveEndpointPairTemplate Template{ get; };
+        Windows.Networking.XboxLive.XboxLiveDeviceAddress RemoteDeviceAddress{ get; };
+        Windows.Networking.HostName RemoteHostName{ get; };
+        String RemotePort{ get; };
+        Windows.Networking.HostName LocalHostName{ get; };
+        String LocalPort{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [static_name("Windows.Networking.XboxLive.IXboxLiveEndpointPairTemplateStatics", 1e13137b-737b-4a23-bc64-0870f75655ba)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveEndpointPairTemplate", 6b286ecf-3457-40ce-b9a1-c0cfe0213ea7)]
+    [threading(both)]
+    runtimeclass XboxLiveEndpointPairTemplate
+    {
+        static Windows.Networking.XboxLive.XboxLiveEndpointPairTemplate GetTemplateByName(String name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Networking.XboxLive.XboxLiveEndpointPairTemplate>  Templates{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.XboxLive.XboxLiveEndpointPairTemplate, Windows.Networking.XboxLive.XboxLiveInboundEndpointPairCreatedEventArgs>  InboundEndpointPairCreated;
+        [method_name("CreateEndpointPairDefaultAsync")] [default_overload]
+        Windows.Foundation.IAsyncOperation <Windows.Networking.XboxLive.XboxLiveEndpointPairCreationResult>  CreateEndpointPairAsync(XboxLiveDeviceAddress deviceAddress);
+        [method_name("CreateEndpointPairWithBehaviorsAsync")] [default_overload]
+        Windows.Foundation.IAsyncOperation <Windows.Networking.XboxLive.XboxLiveEndpointPairCreationResult>  CreateEndpointPairAsync(XboxLiveDeviceAddress deviceAddress, XboxLiveEndpointPairCreationBehaviors behaviors);
+        [method_name("CreateEndpointPairForPortsDefaultAsync")] [default_overload]
+        Windows.Foundation.IAsyncOperation <Windows.Networking.XboxLive.XboxLiveEndpointPairCreationResult>  CreateEndpointPairForPortsAsync(XboxLiveDeviceAddress deviceAddress, String initiatorPort, String acceptorPort);
+        [default_overload]
+        [method_name("CreateEndpointPairForPortsWithBehaviorsAsync")] Windows.Foundation.IAsyncOperation <Windows.Networking.XboxLive.XboxLiveEndpointPairCreationResult>  CreateEndpointPairForPortsAsync(XboxLiveDeviceAddress deviceAddress, String initiatorPort, String acceptorPort, XboxLiveEndpointPairCreationBehaviors behaviors);
+        String Name{ get; };
+        Windows.Networking.XboxLive.XboxLiveSocketKind SocketKind{ get; };
+        UInt16 InitiatorBoundPortRangeLower{ get; };
+        UInt16 InitiatorBoundPortRangeUpper{ get; };
+        UInt16 AcceptorBoundPortRangeLower{ get; };
+        UInt16 AcceptorBoundPortRangeUpper{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.XboxLive.XboxLiveEndpointPair>  EndpointPairs{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveInboundEndpointPairCreatedEventArgs", dc183b62-22ba-48d2-80de-c23968bd198b)]
+    runtimeclass XboxLiveInboundEndpointPairCreatedEventArgs
+    {
+        Windows.Networking.XboxLive.XboxLiveEndpointPair EndpointPair{ get; };
+    }
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveEndpointPairCreationResult", d9a8bb95-2aab-4d1e-9794-33ecc0dcf0fe)]
+    runtimeclass XboxLiveEndpointPairCreationResult
+    {
+        Windows.Networking.XboxLive.XboxLiveDeviceAddress DeviceAddress{ get; };
+        Windows.Networking.XboxLive.XboxLiveEndpointPairCreationStatus Status{ get; };
+        Boolean IsExistingPathEvaluation{ get; };
+        Windows.Networking.XboxLive.XboxLiveEndpointPair EndpointPair{ get; };
+    }
+
+
+
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveEndpointPairStateChangedEventArgs", 592e3b55-de08-44e7-ac3b-b9b9a169583a)]
+    runtimeclass XboxLiveEndpointPairStateChangedEventArgs
+    {
+        Windows.Networking.XboxLive.XboxLiveEndpointPairState OldState{ get; };
+        Windows.Networking.XboxLive.XboxLiveEndpointPairState NewState{ get; };
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveQualityOfServiceMetricResult", aeec53d1-3561-4782-b0cf-d3ae29d9fa87)]
+    runtimeclass XboxLiveQualityOfServiceMetricResult
+    {
+        Windows.Networking.XboxLive.XboxLiveQualityOfServiceMeasurementStatus Status{ get; };
+        Windows.Networking.XboxLive.XboxLiveDeviceAddress DeviceAddress{ get; };
+        Windows.Networking.XboxLive.XboxLiveQualityOfServiceMetric Metric{ get; };
+        UInt64 Value{ get; };
+    }
+
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveQualityOfServicePrivatePayloadResult", 5a6302ae-6f38-41c0-9fcc-ea6cb978cafc)]
+    runtimeclass XboxLiveQualityOfServicePrivatePayloadResult
+    {
+        Windows.Networking.XboxLive.XboxLiveQualityOfServiceMeasurementStatus Status{ get; };
+        Windows.Networking.XboxLive.XboxLiveDeviceAddress DeviceAddress{ get; };
+        Windows.Storage.Streams.IBuffer Value{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Networking.XboxLive.XboxLiveSecureSocketsContract, 1)]
+    [static_name("Windows.Networking.XboxLive.IXboxLiveQualityOfServiceMeasurementStatics", 6e352dca-23cf-440a-b077-5e30857a8234)]
+    [interface_name("Windows.Networking.XboxLive.IXboxLiveQualityOfServiceMeasurement", 4d682bce-a5d6-47e6-a236-cfde5fbdf2ed)]
+    [threading(both)]
+    runtimeclass XboxLiveQualityOfServiceMeasurement
+    {
+        XboxLiveQualityOfServiceMeasurement();
+        static void PublishPrivatePayloadBytes(UInt8[] payload);
+        static void ClearPrivatePayload();
+        static UInt32 MaxSimultaneousProbeConnections{ get; };
+        static UInt32 MaxSimultaneousProbeConnections{ set; };
+        static Boolean IsSystemOutboundBandwidthConstrained{ get; };
+        static Boolean IsSystemOutboundBandwidthConstrained{ set; };
+        static Boolean IsSystemInboundBandwidthConstrained{ get; };
+        static Boolean IsSystemInboundBandwidthConstrained{ set; };
+        static Windows.Storage.Streams.IBuffer PublishedPrivatePayload{ get; };
+        static Windows.Storage.Streams.IBuffer PublishedPrivatePayload{ set; };
+        static UInt32 MaxPrivatePayloadSize{ get; };
+        Windows.Foundation.IAsyncAction MeasureAsync();
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.XboxLive.XboxLiveQualityOfServiceMetricResult>  GetMetricResultsForDevice(XboxLiveDeviceAddress deviceAddress);
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.XboxLive.XboxLiveQualityOfServiceMetricResult>  GetMetricResultsForMetric(XboxLiveQualityOfServiceMetric metric);
+        Windows.Networking.XboxLive.XboxLiveQualityOfServiceMetricResult GetMetricResult(XboxLiveDeviceAddress deviceAddress, XboxLiveQualityOfServiceMetric metric);
+        Windows.Networking.XboxLive.XboxLiveQualityOfServicePrivatePayloadResult GetPrivatePayloadResult(XboxLiveDeviceAddress deviceAddress);
+        Windows.Foundation.Collections.IVector <Windows.Networking.XboxLive.XboxLiveQualityOfServiceMetric>  Metrics{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Networking.XboxLive.XboxLiveDeviceAddress>  DeviceAddresses{ get; };
+        Boolean ShouldRequestPrivatePayloads{ get; };
+        Boolean ShouldRequestPrivatePayloads{ set; };
+        UInt32 TimeoutInMilliseconds{ get; };
+        UInt32 TimeoutInMilliseconds{ set; };
+        UInt32 NumberOfProbesToAttempt{ get; };
+        UInt32 NumberOfProbesToAttempt{ set; };
+        UInt32 NumberOfResultsPending{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.XboxLive.XboxLiveQualityOfServiceMetricResult>  MetricResults{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Networking.XboxLive.XboxLiveQualityOfServicePrivatePayloadResult>  PrivatePayloadResults{ get; };
+    }
+
+}

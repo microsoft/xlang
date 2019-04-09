@@ -1,0 +1,26 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Input
+{
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Input.IKeyboardDeliveryInterceptorStatics", f9f63ba2-ceba-4755-8a7e-14c0ffecd239)]
+    [interface_name("Windows.UI.Input.IKeyboardDeliveryInterceptor", b4baf068-8f49-446c-8db5-8c0ffe85cc9e)]
+    runtimeclass KeyboardDeliveryInterceptor
+    {
+        static Windows.UI.Input.KeyboardDeliveryInterceptor GetForCurrentView();
+        Boolean IsInterceptionEnabledWhenInForeground{ get; };
+        Boolean IsInterceptionEnabledWhenInForeground{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.KeyboardDeliveryInterceptor, Windows.UI.Core.KeyEventArgs>  KeyDown;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Input.KeyboardDeliveryInterceptor, Windows.UI.Core.KeyEventArgs>  KeyUp;
+    }
+
+
+}

@@ -1,0 +1,60 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IContentGroupStatics", 236c9b83-bdbc-46b1-8f3e-aec94ed885ac)]
+    [interface_name("Windows.Internal.StateRepository.IContentGroup", 92db084f-49b4-4e6e-b219-a56252da9251)]
+    [threading(both)]
+    runtimeclass ContentGroup
+    {
+        static Boolean Exists(Int64 contentGroupID);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByPackageAndIndex(Package Package, Int32 Index);
+        static Boolean ExistsByPackageAndName(Package Package, String Name);
+        static Windows.Internal.StateRepository.ContentGroup Get(Int64 contentGroupID);
+        static Windows.Internal.StateRepository.ContentGroup TryGet(Int64 contentGroupID);
+        static Windows.Internal.StateRepository.ContentGroup GetByPackageAndIndex(Package Package, Int32 Index);
+        static Windows.Internal.StateRepository.ContentGroup TryGetByPackageAndIndex(Package Package, Int32 Index);
+        static Windows.Internal.StateRepository.ContentGroup GetByPackageAndName(Package Package, String Name);
+        static Windows.Internal.StateRepository.ContentGroup TryGetByPackageAndName(Package Package, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ContentGroup>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ContentGroup>  FindByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ContentGroup>  FindByPackage_SortedByIndex(Package package);
+        ContentGroup();
+        Int64 _ContentGroupID{ get; };
+        Int64 _ContentGroupID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        Windows.Internal.StateRepository.ContentGroupType ContentGroupType{ get; };
+        Windows.Internal.StateRepository.ContentGroupType ContentGroupType{ set; };
+        Windows.Internal.StateRepository.ContentGroupStatus Status{ get; };
+        Windows.Internal.StateRepository.ContentGroupStatus Status{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

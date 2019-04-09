@@ -1,0 +1,36 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.StartScreen
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.UI.StartScreen.IStartScreenManagerStatics", 7865ef0f-b585-464e-8993-34e8f8738d48)]
+    [interface_name("Windows.UI.StartScreen.IStartScreenManager", 4a1dcbcb-26e9-4eb4-8933-859eb6ecdb29)]
+    runtimeclass StartScreenManager
+    {
+        static Windows.UI.StartScreen.StartScreenManager GetDefault();
+        static Windows.UI.StartScreen.StartScreenManager GetForUser(Windows.System.User user);
+        Windows.System.User User{ get; };
+        Boolean SupportsAppListEntry(Windows.ApplicationModel.Core.AppListEntry appListEntry);
+        Windows.Foundation.IAsyncOperation <Boolean>  ContainsAppListEntryAsync(Windows.ApplicationModel.Core.AppListEntry appListEntry);
+        [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestAddAppListEntryAsync(Windows.ApplicationModel.Core.AppListEntry appListEntry);
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.StartScreen.IStartScreenManager2", 08a716b6-316b-4ad9-acb8-fe9cf00bd608)]
+        {
+            Windows.Foundation.IAsyncOperation <Boolean>  ContainsSecondaryTileAsync(String tileId);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryRemoveSecondaryTileAsync(String tileId);
+        }
+    }
+
+}

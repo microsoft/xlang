@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel
+{
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [static_name("Windows.ApplicationModel.IAppInstanceStatics", 9d11e77f-9ea6-47af-a6ec-46784c5ba254)]
+    [interface_name("Windows.ApplicationModel.IAppInstance", 675f2b47-f25f-4532-9fd6-3633e0634d01)]
+    [threading(both)]
+    runtimeclass AppInstance
+    {
+        static Windows.ApplicationModel.AppInstance RecommendedInstance{ get; };
+        static Windows.ApplicationModel.Activation.IActivatedEventArgs GetActivatedEventArgs();
+        static Windows.ApplicationModel.AppInstance FindOrRegisterInstanceForKey(String key);
+        static void Unregister();
+        static Windows.Foundation.Collections.IVector <Windows.ApplicationModel.AppInstance>  GetInstances();
+        String Key{ get; };
+        Boolean IsCurrentInstance{ get; };
+        void RedirectActivationTo();
+    }
+
+}

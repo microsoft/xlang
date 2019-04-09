@@ -1,0 +1,60 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    enum StatusBarColorElement
+    {
+        Invalid,
+        StatusBarBackgroundColor,
+        StatusBarBackgroundOpacity,
+        StatusBarForegroundColor,
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [uuid(bbaddbee-b431-4e53-a35c-5d3b4598ff9d)]
+    interface IStatusBarColorChangedEventArgs
+    {
+        Windows.Internal.ComposableShell.StatusBarColorElement ChangedColorElement{ get; };
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    struct ViewWithStatusBarProperties
+    {
+        OptionalColor StatusBarBackgroundColor;
+        Double StatusBarBackgroundOpacity;
+        OptionalColor StatusBarForegroundColor;
+        Windows.Foundation.Rect StatusBarOccludedRect;
+        Boolean IsStatusBarVisible;
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [uuid(1ea92359-441d-45b7-86d4-34fa870ba6f9)]
+    interface IViewWithStatusBar requires Windows.Internal.ComposableShell.IComposableView, Windows.Internal.ComposableShell.ITreeNode
+    {
+        Windows.Internal.ComposableShell.OptionalColor StatusBarBackgroundColor{ get; };
+        Double StatusBarBackgroundOpacity{ get; };
+        Windows.Internal.ComposableShell.OptionalColor StatusBarForegroundColor{ get; };
+        Windows.Foundation.Rect StatusBarOccludedRect{ set; };
+        Windows.Foundation.Rect StatusBarOccludedRect{ get; };
+        Boolean IsStatusBarVisible{ get; };
+        Windows.Internal.ComposableShell.ViewWithStatusBarProperties StatusBarProperties{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.IViewWithStatusBar, Windows.Internal.ComposableShell.IStatusBarColorChangedEventArgs>  StatusBarColorChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.IViewWithStatusBar, Object>  StatusBarHideRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ComposableShell.IViewWithStatusBar, Object>  StatusBarShowRequested;
+    };
+
+}

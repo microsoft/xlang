@@ -1,0 +1,62 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Ocr
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Ocr.IOcrWord", 3c2a477a-5cd9-3525-ba2a-23d1e0a68a1d)]
+    runtimeclass OcrWord
+    {
+        Windows.Foundation.Rect BoundingRect{ get; };
+        String Text{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Ocr.IOcrLine", 0043a16f-e31f-3a24-899c-d444bd088124)]
+    runtimeclass OcrLine
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Ocr.OcrWord>  Words{ get; };
+        String Text{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Ocr.IOcrResult", 9bd235b2-175b-3d6a-92e2-388c206e2f63)]
+    runtimeclass OcrResult
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Ocr.OcrLine>  Lines{ get; };
+        Windows.Foundation.IReference <Double>  TextAngle{ get; };
+        String Text{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.Ocr.IOcrEngineStatics", 5bffa85a-3384-3540-9940-699120d428a8)]
+    [interface_name("Windows.Media.Ocr.IOcrEngine", 5a14bc41-5b76-3140-b680-8825562683ac)]
+    [threading(both)]
+    runtimeclass OcrEngine
+    {
+        static UInt32 MaxImageDimension{ get; };
+        static Windows.Foundation.Collections.IVectorView <Windows.Globalization.Language>  AvailableRecognizerLanguages{ get; };
+        static Boolean IsLanguageSupported(Windows.Globalization.Language language);
+        static Windows.Media.Ocr.OcrEngine TryCreateFromLanguage(Windows.Globalization.Language language);
+        static Windows.Media.Ocr.OcrEngine TryCreateFromUserProfileLanguages();
+        Windows.Foundation.IAsyncOperation <Windows.Media.Ocr.OcrResult>  RecognizeAsync(Windows.Graphics.Imaging.SoftwareBitmap bitmap);
+        Windows.Globalization.Language RecognizerLanguage{ get; };
+    }
+
+}

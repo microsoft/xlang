@@ -1,0 +1,44 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [interface_name("Windows.UI.Internal.Input.IAttachableInputObjectSampleEventArgs", e21f709a-23f2-427b-9132-9900c56e278f)]
+    runtimeclass AttachableInputObjectSampleEventArgs
+    {
+        String Message{ get; };
+        Windows.Foundation.Point Position{ get; };
+    }
+
+
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.Input.IAttachableInputObjectSampleStatics", 320407ae-197d-4f66-a014-e91262c46a44)]
+    [constructor_name("Windows.UI.Internal.Input.IAttachableInputObjectSampleFactory", cdf391d0-49e4-5c6c-b935-a30be7fee928)]
+    [interface_name("Windows.UI.Internal.Input.IAttachableInputObjectSample", 66195c16-177d-47cc-af44-c3e595453069)]
+    [threading(both)]
+    runtimeclass AttachableInputObjectSample
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static void RequestHitTest(Windows.Foundation.Point position, String message);
+        [method_name( "CreateInstance" )] AttachableInputObjectSample(InputSite inputSite);
+        Boolean Enabled{ get; };
+        Boolean Enabled{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.AttachableInputObjectSample, Windows.UI.Internal.Input.AttachableInputObjectSampleEventArgs>  OnInput;
+    }
+
+
+
+}

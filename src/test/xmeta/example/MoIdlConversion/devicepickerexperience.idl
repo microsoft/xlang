@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.DevicePickerExperience
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(3724e171-04ad-4252-b5a7-751eb28312a9)]
+    interface IDevicePickerExperienceContract
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.PlatformExtensions.DevicePickerExperience.IDevicePickerExperienceContract, Object>  Dismissed;
+        void Launch(Guid pickerId, UInt32 callingProcessId, Windows.Internal.ApplicationModel.WindowManagement.WindowId ownerHwnd);
+        void Show(Windows.Foundation.Rect position, Windows.UI.Popups.Placement placement);
+        void Hide();
+    };
+
+}

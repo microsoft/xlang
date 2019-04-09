@@ -1,0 +1,57 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IDeploymentHistoryStatics", 9125d22c-1935-48a3-91f9-de64bf7440fc)]
+    [interface_name("Windows.Internal.StateRepository.IDeploymentHistory", e51ad084-1b1b-46f9-bd57-3ce17f9466a9)]
+    [threading(both)]
+    runtimeclass DeploymentHistory
+    {
+        static Boolean Exists(Int64 deploymentHistoryID);
+        static Boolean ExistsByPackageIdentity(PackageIdentity PackageIdentity);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByWhenOccurred(Windows.Foundation.DateTime WhenOccurred);
+        static Windows.Internal.StateRepository.DeploymentHistory Get(Int64 deploymentHistoryID);
+        static Windows.Internal.StateRepository.DeploymentHistory TryGet(Int64 deploymentHistoryID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DeploymentHistory>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DeploymentHistory>  FindByPackageIdentity(PackageIdentity PackageIdentity);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DeploymentHistory>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DeploymentHistory>  FindByWhenOccurred(Windows.Foundation.DateTime WhenOccurred);
+        DeploymentHistory();
+        Int64 _DeploymentHistoryID{ get; };
+        Int64 _DeploymentHistoryID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 PackageIdentity{ get; };
+        Int64 PackageIdentity{ set; };
+        Windows.Internal.StateRepository.PackageIdentity GetPackageIdentity();
+        void SetPackageIdentity(PackageIdentity value);
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int32 HResult{ get; };
+        Int32 HResult{ set; };
+        Windows.Foundation.DateTime WhenOccurred{ get; };
+        Windows.Foundation.DateTime WhenOccurred{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

@@ -1,0 +1,44 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Popups
+{
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MessageDialogOptions
+    {
+        None,
+        AcceptUserInputAfterDelay,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [muse(0x6020000)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.UI.Popups.IMessageDialogFactory", 2d161777-a66f-4ea5-bb87-793ffa4941f2)]
+    [interface_name("Windows.UI.Popups.IMessageDialog", 33f59b01-5325-43ab-9ab3-bdae440e4121)]
+    runtimeclass MessageDialog
+    {
+        [method_name( "Create" )] MessageDialog(String content);
+        [method_name( "CreateWithTitle" )] MessageDialog(String content, String title);
+        String Title{ get; };
+        String Title{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Popups.IUICommand>  Commands{ get; };
+        UInt32 DefaultCommandIndex{ get; };
+        UInt32 DefaultCommandIndex{ set; };
+        UInt32 CancelCommandIndex{ get; };
+        UInt32 CancelCommandIndex{ set; };
+        String Content{ get; };
+        String Content{ set; };
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.UI.Popups.IUICommand>  ShowAsync();
+        Windows.UI.Popups.MessageDialogOptions Options{ get; };
+        Windows.UI.Popups.MessageDialogOptions Options{ set; };
+    }
+
+}

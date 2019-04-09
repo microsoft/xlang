@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IConnectedSetPackageFamilyStatics", 0a72ae72-1158-49d6-852f-df6ef1d7c7af)]
+    [interface_name("Windows.Internal.StateRepository.IConnectedSetPackageFamily", 601238f5-648a-4340-bd29-c963debcdc13)]
+    [threading(both)]
+    runtimeclass ConnectedSetPackageFamily
+    {
+        static void Add(ConnectedSetPackageFamily value);
+        static void Update(ConnectedSetPackageFamily value);
+        static void Delete(ConnectedSetPackageFamily value);
+        static void DeleteById(Int64 connectedSetPackageFamilyID);
+        static void DeleteByConnectedSetAndPackageFamily(ConnectedSet ConnectedSet, PackageFamily PackageFamily);
+        static Boolean Exists(Int64 connectedSetPackageFamilyID);
+        static Boolean ExistsByConnectedSet(ConnectedSet ConnectedSet);
+        static Boolean ExistsByConnectedSetAndPackageFamily(ConnectedSet ConnectedSet, PackageFamily PackageFamily);
+        static Windows.Internal.StateRepository.ConnectedSetPackageFamily TryGet(Int64 connectedSetPackageFamilyID);
+        static Windows.Internal.StateRepository.ConnectedSetPackageFamily TryGetByConnectedSetAndPackageFamily(ConnectedSet ConnectedSet, PackageFamily PackageFamily);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ConnectedSetPackageFamily>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ConnectedSetPackageFamily>  FindByConnectedSet(ConnectedSet ConnectedSet);
+        ConnectedSetPackageFamily();
+        Int64 _ConnectedSetPackageFamilyID{ get; };
+        Int64 _ConnectedSetPackageFamilyID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 ConnectedSet{ get; };
+        Int64 ConnectedSet{ set; };
+        Windows.Internal.StateRepository.ConnectedSet GetConnectedSet();
+        void SetConnectedSet(ConnectedSet value);
+        Int64 PackageFamily{ get; };
+        Int64 PackageFamily{ set; };
+        Windows.Internal.StateRepository.PackageFamily GetPackageFamily();
+        void SetPackageFamily(PackageFamily value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

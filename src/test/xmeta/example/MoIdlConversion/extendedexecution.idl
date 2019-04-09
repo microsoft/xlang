@@ -1,0 +1,113 @@
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.ExtendedExecution
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExtendedExecutionReason
+    {
+        Unspecified,
+        LocationTracking,
+        SavingData,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExtendedExecutionResult
+    {
+        Allowed,
+        Denied,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExtendedExecutionRevokedReason
+    {
+        Resumed,
+        SystemPolicy,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.ExtendedExecution.IExtendedExecutionRevokedEventArgs", bfbc9f16-63b5-4c0b-aad6-828af5373ec3)]
+    runtimeclass ExtendedExecutionRevokedEventArgs
+    {
+        Windows.ApplicationModel.ExtendedExecution.ExtendedExecutionRevokedReason Reason{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.ExtendedExecution.IExtendedExecutionSession", af908a2d-118b-48f1-9308-0c4fc41e200f)]
+    [threading(both)]
+    runtimeclass ExtendedExecutionSession
+        : Windows.Foundation.IClosable
+    {
+        ExtendedExecutionSession();
+        Windows.ApplicationModel.ExtendedExecution.ExtendedExecutionReason Reason{ get; };
+        Windows.ApplicationModel.ExtendedExecution.ExtendedExecutionReason Reason{ set; };
+        String Description{ get; };
+        String Description{ set; };
+        UInt32 PercentProgress{ get; };
+        UInt32 PercentProgress{ set; };
+        event Windows.Foundation.TypedEventHandler <Object, Windows.ApplicationModel.ExtendedExecution.ExtendedExecutionRevokedEventArgs>  Revoked;
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.ExtendedExecution.ExtendedExecutionResult>  RequestExtensionAsync();
+    }
+
+}
+namespace Windows.ApplicationModel.ExtendedExecution.Foreground
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExtendedExecutionForegroundResult
+    {
+        Allowed,
+        Denied,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExtendedExecutionForegroundRevokedReason
+    {
+        Resumed,
+        SystemPolicy,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ExtendedExecutionForegroundReason
+    {
+        Unspecified,
+        SavingData,
+        BackgroundAudio,
+        Unconstrained,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.ExtendedExecution.Foreground.IExtendedExecutionForegroundRevokedEventArgs", b07cd940-9557-aea4-2c99-bdd56d9be461)]
+    runtimeclass ExtendedExecutionForegroundRevokedEventArgs
+    {
+        Windows.ApplicationModel.ExtendedExecution.Foreground.ExtendedExecutionForegroundRevokedReason Reason{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.ExtendedExecution.Foreground.IExtendedExecutionForegroundSession", fbf440e1-9d10-4201-b01e-c83275296f2e)]
+    [threading(both)]
+    runtimeclass ExtendedExecutionForegroundSession
+        : Windows.Foundation.IClosable
+    {
+        ExtendedExecutionForegroundSession();
+        String Description{ get; };
+        String Description{ set; };
+        event Windows.Foundation.TypedEventHandler <Object, Windows.ApplicationModel.ExtendedExecution.Foreground.ExtendedExecutionForegroundRevokedEventArgs>  Revoked;
+        Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.ExtendedExecution.Foreground.ExtendedExecutionForegroundResult>  RequestExtensionAsync();
+        Windows.ApplicationModel.ExtendedExecution.Foreground.ExtendedExecutionForegroundReason Reason{ get; };
+        Windows.ApplicationModel.ExtendedExecution.Foreground.ExtendedExecutionForegroundReason Reason{ set; };
+    }
+
+}

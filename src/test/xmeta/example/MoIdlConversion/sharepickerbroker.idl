@@ -1,0 +1,25 @@
+
+
+
+
+
+
+namespace Windows.Internal.Shell.SharePicker
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.Shell.SharePicker.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.SharePicker.ISharePickerBrokerStatics", ecf081a9-9a7b-4628-8a24-e8001466c047)]
+    runtimeclass SharePickerBroker
+    {
+        static Boolean IsCortanaEnabled();
+        static String GetEnterpriseIdForWindow(UInt64 sourceAppWindowInstanceId);
+        static void ClearNearShareToasts();
+        static Boolean IsContentDeliveryManagerAvailable();
+        static Windows.Foundation.IAsyncOperation <Boolean>  IsRadioAccessAllowedAsync();
+    }
+
+}

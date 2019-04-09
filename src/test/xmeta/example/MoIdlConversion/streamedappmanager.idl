@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.StreamedApps
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.Shell.StreamedApps.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.StreamedApps.IApplicationViewDisplaySettings", 600bee3a-5175-4184-9089-02fdf40f70fd)]
+    [threading(both)]
+    runtimeclass ApplicationViewDisplaySettings
+    {
+        ApplicationViewDisplaySettings();
+        String Name{ set; };
+        String Name{ get; };
+        String Description{ set; };
+        String Description{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Icon{ set; };
+        Windows.Storage.Streams.IRandomAccessStream Icon{ get; };
+        Windows.Storage.Streams.IRandomAccessStream SecondaryIcon{ set; };
+        Windows.Storage.Streams.IRandomAccessStream SecondaryIcon{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Thumbnail{ set; };
+        Windows.Storage.Streams.IRandomAccessStream Thumbnail{ get; };
+    }
+
+
+
+    [contract(Windows.Internal.Shell.StreamedApps.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Shell.StreamedApps.IApplicationViewInfoStatics", 99aeb30f-b46d-45f4-a44f-f37753067d88)]
+    [interface_name("Windows.Internal.Shell.StreamedApps.IApplicationViewInfo", c7fc90d8-29e5-4c4b-9c0c-b482cc888015)]
+    [threading(both)]
+    runtimeclass ApplicationViewInfo
+    {
+        static Windows.Internal.Shell.StreamedApps.ApplicationViewInfo CreateForCurrentView();
+        Windows.Internal.Shell.StreamedApps.ApplicationViewDisplaySettings ApplicationDisplaySettings{ get; };
+        Windows.Internal.ApplicationModel.WindowManagement.WindowId WindowId{ get; };
+        Windows.Internal.ApplicationModel.WindowManagement.WindowId MainWindowId{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.StreamedApps.InternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.StreamedApps.IApplicationInfoManager", 5139a17f-e452-4e6b-90b0-9392dca59755)]
+    [threading(both)]
+    runtimeclass ApplicationInfoManager
+    {
+        ApplicationInfoManager();
+        Windows.Foundation.IAsyncAction AddInfoAsync(ApplicationViewInfo vewInfo);
+        Windows.Foundation.IAsyncAction RemoveInfoAsync(ApplicationViewInfo item);
+        Windows.Foundation.IAsyncAction ShowViewInSwitcherAsync(Windows.ApplicationModel.Core.CoreApplicationView view);
+        Windows.Foundation.IAsyncAction HideViewInSwitcherAsync(Windows.ApplicationModel.Core.CoreApplicationView view);
+        event Windows.Foundation.EventHandler <Object>  Refresh;
+    }
+
+}

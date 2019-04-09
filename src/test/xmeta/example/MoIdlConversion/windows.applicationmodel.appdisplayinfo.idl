@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.IAppDisplayInfo", 1aeb1103-e4d4-41aa-a4f6-c4a276e79eac)]
+    runtimeclass AppDisplayInfo
+    {
+        String DisplayName{ get; };
+        String Description{ get; };
+        Windows.Storage.Streams.RandomAccessStreamReference GetLogo(Windows.Foundation.Size size);
+    }
+
+}

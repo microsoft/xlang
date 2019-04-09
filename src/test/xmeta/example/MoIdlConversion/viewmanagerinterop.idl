@@ -1,0 +1,689 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.ViewManagerInterop
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum NavigationLevel
+    {
+        Closed,
+        Inactive,
+        Idle,
+        Obscured,
+        Visible,
+        Active,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    struct InputRoutingInfo
+    {
+        UInt32 processId;
+        UInt32 threadId;
+        UInt64 identity;
+        UInt64 itemId;
+        Guid connectionGuid;
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum AdjacentDisplayFlags
+    {
+        None,
+        AdjacentToLeftDisplayEdge,
+        AdjacentToRightDisplayEdge,
+        ForceSize = 2147483647,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ViewState
+    {
+        FullScreenLandscape,
+        Filled,
+        Snapped,
+        FullScreenPortrait,
+        ForceSize = 2147483647,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ConsolidatedState
+    {
+        NotConsolidated,
+        SystemConsolidated,
+        UserConsolidated,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum AppViewMode
+    {
+        Default,
+        CompactOverlay,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ApplicationViewModeFlags
+    {
+        Default = 1,
+        CompactOverlay,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    struct ViewBounds
+    {
+        Int32 width;
+        Int32 height;
+        AdjacentDisplayFlags adjacentDisplayFlags;
+        ViewState applicationViewState;
+        Int32 X;
+        Int32 Y;
+        Windows.UI.ViewManagement.UserInteractionMode userInteractionMode;
+        Int32 fullScreenMode;
+        Windows.Internal.Holographic.UI.PresentationMode presentationMode;
+        AppViewMode applicationViewMode;
+        ApplicationViewModeFlags allowedApplicationViewModes;
+        Double displayScale;
+        Double rasterScale;
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ViewFrameworkViewType
+    {
+        Slate,
+        Exclusive,
+        HologramFrameworkDefault,
+        HologramFrameworkMaterial,
+        HologramFrameworkIsolated,
+        Shell,
+        Unset,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum DehydrationPolicy
+    {
+        Default,
+        DehydrateLast,
+        NeverDehydrate,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum Orientations
+    {
+        None,
+        Angle0,
+        Angle90,
+        Angle180 = 4,
+        Angle270 = 8,
+        Valid = 15,
+        ForceSize = 2147483647,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(fe572bd5-f747-4a28-a7c8-6b84cb43deb4)]
+    interface IClientWindowPrepareForPresentationChangedEventArgs
+    {
+        Boolean PreparingForPresentation{ get; };
+    };
+
+    [uuid(593ed2db-a1ee-4997-b822-f3fb111c012e)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IClientWindowReadyForPresentationChangedEventArgs
+    {
+        Boolean ReadyForPresentation{ get; };
+    };
+
+    [uuid(7357c375-0d63-4d6c-a22a-d2d4fc1c012e)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IClientWindowState
+    {
+        UInt32 ClientWindow{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IClientWindowState, Windows.Internal.Shell.ViewManagerInterop.IClientWindowPrepareForPresentationChangedEventArgs>  ClientWindowPrepareForPresentationChanged;
+        Boolean ClientWindowReadyForPresentation{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IClientWindowState, Windows.Internal.Shell.ViewManagerInterop.IClientWindowReadyForPresentationChangedEventArgs>  ClientWindowReadyForPresentationChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IClientWindowState, Object>  ClientWindowLayoutCompleted;
+        Windows.Internal.Shell.ViewManagerInterop.InputRoutingInfo TouchInputRoutingInfo{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IClientWindowState, Object>  TouchInputRoutingInfoChanged;
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(71a3f425-a716-4859-b1a4-1d9044e6a055)]
+    interface IViewRecoveryState
+    {
+        void TryRecoverPropertyAsUInt32(String propertyName, out UInt32 value, out Boolean foundProperty);
+        void PersistPropertyAsUInt32(String key, UInt32 value);
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(a3b199dc-8a9d-4cf2-9219-5cff951c012e)]
+    interface IViewHandledEventArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Boolean Handled{ get; };
+    };
+
+    [uuid(96c11dea-68de-44ef-a7f7-3aa869663d57)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.ViewEventType EventType{ get; };
+        Windows.Foundation.Collections.PropertySet EventContext{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ViewEventType
+    {
+        ViewCreated,
+        SelectTargetViewForNavigationRequest,
+        RequestNavigateToView,
+        NavigateAwayFromView,
+        ViewDestroyed,
+        ViewPropertyChanged,
+        WindowChanged,
+        VisibilityRevokedChanged,
+        ViewNavigationLevelChanged,
+        ViewWindowTitleChanged,
+        ApplicationDisplayNameChanged,
+        PreferredMinSizeChanged,
+        ApplicationViewSwitcher_TryShowAsStandalone,
+        ApplicationViewSwitcher_Switch,
+        ApplicationViewSwitcher_TryShowAsViewMode,
+        ViewForegroundStateChanged,
+        ViewNavigationFailed,
+        ApplicationPreferredLaunchWindowingModeChanged,
+        ApplicationPreferredLaunchViewSizeChanged,
+        RequestShowStandardSystemOverlays,
+        ApplicationIsViewExtendedIntoTitleBarChanged,
+        ApplicationIsTitleBarInputVisualSetChanged,
+        ApplicationTitleBarTextColorOverrideChanged,
+        ApplicationTitleBarBackgroundColorOverrideChanged,
+        ApplicationTitleBarButtonTextColorOverrideChanged,
+        ApplicationTitleBarButtonBackgroundColorOverrideChanged,
+        ApplicationTitleBarButtonHoverTextColorOverrideChanged,
+        ApplicationTitleBarButtonHoverBackgroundColorOverrideChanged,
+        ApplicationTitleBarButtonPressedTextColorOverrideChanged,
+        ApplicationTitleBarButtonPressedBackgroundColorOverrideChanged,
+        ApplicationTitleBarInactiveTextColorOverrideChanged,
+        ApplicationTitleBarInactiveBackgroundColorOverrideChanged,
+        ApplicationTitleBarInactiveButtonTextColorOverrideChanged,
+        ApplicationTitleBarInactiveButtonBackgroundColorOverrideChanged,
+        PopupUIShowingChanged,
+        ConsolidationRequested,
+        BackRequested,
+        SupportedOrientationsChanged,
+        StatusBarBackgroundColorChanged,
+        StatusBarBackgroundOpacityChanged,
+        StatusBarForegroundColorChanged,
+        StatusBarShowRequested,
+        StatusBarHideRequested,
+        ApplyWindowingSettings,
+        TitleBarVisibilityModeChanged,
+        FrameStyleChanged,
+    };
+
+    [uuid(360030af-7930-47a7-a1dd-184464be39de)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewPropertyChangedArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        String PropertyKey{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum PointerActivationPolicy
+    {
+        Activate,
+        DoNotActivate,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum WindowResizingState
+    {
+        NotResizing,
+        Resizing,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum AppRequestHandledResult
+    {
+        NotHandled,
+        Handled,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ViewEngagementFlags
+    {
+        None,
+        IsTabbed = 8,
+        IsOasisManaged = 16,
+        IsFlat = 32,
+        IsExclusive = 64,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(f4a53d68-890b-4931-bdbf-71158377eece)]
+    interface IViewWrapper requires Windows.Internal.Shell.ViewManagerInterop.IClientWindowState, Windows.Internal.Shell.ViewManagerInterop.IViewRecoveryState
+    {
+        UInt32 ViewInstanceId{ get; };
+        String AppUserModelId{ get; };
+        void SetSize(Windows.Foundation.Size value);
+        Windows.Foundation.Size PreferredMinSize{ get; };
+        Boolean IsViewExtendedIntoTitleBar{ get; };
+        Boolean IsTitleBarInputVisualSet{ get; };
+        Boolean IsTitleBarTextColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarTextColorOverride{ get; };
+        Boolean IsTitleBarBackgroundColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarBackgroundColorOverride{ get; };
+        Boolean IsTitleBarButtonTextColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarButtonTextColorOverride{ get; };
+        Boolean IsTitleBarButtonBackgroundColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarButtonBackgroundColorOverride{ get; };
+        Boolean IsTitleBarButtonHoverTextColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarButtonHoverTextColorOverride{ get; };
+        Boolean IsTitleBarButtonHoverBackgroundColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarButtonHoverBackgroundColorOverride{ get; };
+        Boolean IsTitleBarButtonPressedTextColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarButtonPressedTextColorOverride{ get; };
+        Boolean IsTitleBarButtonPressedBackgroundColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarButtonPressedBackgroundColorOverride{ get; };
+        Boolean IsTitleBarInactiveTextColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarInactiveTextColorOverride{ get; };
+        Boolean IsTitleBarInactiveBackgroundColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarInactiveBackgroundColorOverride{ get; };
+        Boolean IsTitleBarInactiveButtonTextColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarInactiveButtonTextColorOverride{ get; };
+        Boolean IsTitleBarInactiveButtonBackgroundColorOverrideSet{ get; };
+        Windows.UI.Color TitleBarInactiveButtonBackgroundColorOverride{ get; };
+        void ChangeTitleBarHeight(Double value);
+        void ChangeIsTitleBarVisible(Boolean value);
+        void ChangeTitleBarSystemOverlayLeftInset(Double value);
+        void ChangeTitleBarSystemOverlayRightInset(Double value);
+        void ChangeTitleBarInputRoutingInfo(InputRoutingInfo value);
+        void ChangeTitleBarInputRoutingHwnd(UInt32 value);
+        Boolean IsStatusBarBackgroundColorSet{ get; };
+        Windows.UI.Color StatusBarBackgroundColor{ get; };
+        Double StatusBarBackgroundOpacity{ get; };
+        Boolean IsStatusBarForegroundColorSet{ get; };
+        Windows.UI.Color StatusBarForegroundColor{ get; };
+        Windows.Foundation.Rect StatusBarOccludedRect{ set; };
+        Windows.Foundation.Rect StatusBarOccludedRect{ get; };
+        void Navigate(NavigationLevel value);
+        Windows.Internal.Shell.ViewManagerInterop.NavigationLevel NavigationLevel{ get; };
+        void GetPropertyAsInt(String propertyName, out Int32 value);
+        void GetPropertyAsUInt(String propertyName, out UInt32 value);
+        void GetPropertyAsBoolean(String propertyName, out Boolean value);
+        void GetPropertyAsString(String propertyName, out String value);
+        void ChangePropertyAsUInt32(String key, UInt32 value);
+        void ChangePropertyAsString(String key, String value);
+        void TryBack(Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IViewWrapper, Windows.Internal.Shell.ViewManagerInterop.IViewHandledEventArgs>  handler);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.Shell.ViewManagerInterop.AppRequestHandledResult>  RequestCloseAsync();
+        Boolean CanHandleCloseRequest{ get; };
+        UInt32 ProcessId{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.ViewBounds Bounds{ get; };
+        void ChangeBounds(ViewBounds bounds);
+        void ChangeVisibleBounds(Windows.Foundation.Rect value);
+        Windows.Internal.Shell.ViewManagerInterop.ConsolidatedState Consolidated{ get; };
+        void Consolidate(ConsolidatedState value);
+        String WindowTitle{ get; };
+        String ApplicationDisplayName{ get; };
+        [deprecated("HMONITOR based operations no longer supported on WCOS platforms", deprecate, Windows.Internal.Shell.ViewManagerInterop.InternalContract, 0x10000)]
+        void ChangeDisplay(UInt64 value);
+        Windows.Internal.Shell.ViewManagerInterop.WindowResizingState WindowResizingState{ set; };
+        Windows.Internal.Shell.ViewManagerInterop.WindowResizingState WindowResizingState{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.PointerActivationPolicy PointerActivationPolicy{ set; };
+        Windows.Internal.Shell.ViewManagerInterop.PointerActivationPolicy PointerActivationPolicy{ get; };
+        UInt64 UserContextToken{ get; };
+        void EnableInput(Boolean value);
+        Windows.Internal.Shell.ViewManagerInterop.ViewFrameworkViewType ViewFrameworkViewType{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.Orientations CurrentOrientation{ set; };
+        Windows.Internal.Shell.ViewManagerInterop.Orientations CurrentOrientation{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.Orientations SupportedOrientations{ get; };
+        UInt64 HostId{ get; };
+        Boolean IsOccluded{ set; };
+        Boolean IsOccluded{ get; };
+        void UpdateEngagementFlags(ViewEngagementFlags flagsToUpdate, ViewEngagementFlags flagValues);
+        String ExperienceId{ get; };
+        UInt32 FrameStyle{ set; };
+        UInt32 FrameStyle{ get; };
+        UInt32 TitlebarVisibilityMode{ set; };
+        UInt32 TitlebarVisibilityMode{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ActivationTimeoutPolicy
+    {
+        Default,
+        Disabled,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ImportanceMaskTypes
+    {
+        None,
+        IsValid,
+        PresentationClass,
+        ProximityClass = 4,
+        ReceivingInput = 8,
+        ControlForegroundBoost = 16,
+        IsShellExperience = 32,
+        XboxShellExperience = 64,
+        IsShellExperienceInit = 128,
+        ActivityLoweredImportance = 256,
+        InteractivityFlags = 511,
+        TotalOrdering,
+        Priority = 1024,
+        All = -1,
+    };
+
+    [uuid(35f1648c-265f-402c-b575-c9a325451df5)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewResourcePolicies requires Windows.Internal.Shell.ViewManagerInterop.IViewWrapper, Windows.Internal.Shell.ViewManagerInterop.IClientWindowState, Windows.Internal.Shell.ViewManagerInterop.IViewRecoveryState
+    {
+        void BoostPriority();
+        void UnboostPriority();
+        void SetImportanceVector(UInt32 value);
+        void SetImportanceVectorUsingMask(UInt32 value, ImportanceMaskTypes maskValue);
+        void SetDehydrationPolicy(DehydrationPolicy value);
+        void SetActivationTimeoutPolicy(ActivationTimeoutPolicy value);
+        void SetCustomResourceSet(String value, Windows.Foundation.Collections.ValueSet resourceSetOverrides);
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(2ce345bd-11db-4b6f-a348-a64e187a0e67)]
+    interface IViewWrapperSplashScreenSupport
+    {
+        void SetImageLocation(Windows.Foundation.Rect imageLocation);
+        void SetIsDismissed(Boolean dismissed);
+    };
+
+    [uuid(e092dc92-c492-4665-bdf3-d9842e1c012e)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IBasicViewWrapper
+    {
+        void Navigate(NavigationLevel value);
+        UInt32 ViewInstanceId{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.PointerActivationPolicy PointerActivationPolicy{ set; };
+        Windows.Internal.Shell.ViewManagerInterop.PointerActivationPolicy PointerActivationPolicy{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ViewEventPolicyResult
+    {
+        Resume,
+        Replace,
+        Deny,
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(55bf2c4d-7d53-45bf-b624-f136ee69adfb)]
+    interface IViewEventDispatcherReadyChangedEventArgs
+    {
+        Boolean Ready{ get; };
+    };
+
+    [uuid(cde8db35-efeb-4def-946e-fc9965264299)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IUserLogoffCompleteEventArgs
+    {
+        UInt64 UserContextToken{ get; };
+    };
+
+    [uuid(f5ef6433-2dc3-4aeb-b387-7c6cba1c012e)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewEventDispatcher
+    {
+        EventRegistrationToken RegisterForViewEvents(Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IViewWrapper, Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs>  handler, String appIdFilter, String experienceIdFilter);
+        void UnregisterForViewEvents(EventRegistrationToken token);
+        Boolean ViewEventDispatcherReady{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IViewEventDispatcher, Windows.Internal.Shell.ViewManagerInterop.IViewEventDispatcherReadyChangedEventArgs>  ViewEventDispatcherReadyChanged;
+        void InitiateUserLogoff(UInt64 userContextToken);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IViewEventDispatcher, Windows.Internal.Shell.ViewManagerInterop.IUserLogoffCompleteEventArgs>  UserLogoffComplete;
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(a93305f8-195b-4272-92db-4793ca1c012e)]
+    interface IViewEventDispatcherConfiguration
+    {
+        Boolean EnableForegroundManager{ get; };
+        Boolean EnableForegroundManager{ set; };
+        Boolean WaitForFirstLayoutCompleteEnabled{ get; };
+        Boolean WaitForFirstLayoutCompleteEnabled{ set; };
+        Boolean UseOldClientOperationBehavior{ get; };
+        Boolean UseOldClientOperationBehavior{ set; };
+    };
+
+    [uuid(73d6c545-9771-4aba-bb8c-713133ed635a)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewEventDispatcherCrashRecovery
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.ViewManagerInterop.IViewWrapper>  RecoverViews(EventRegistrationToken token);
+    };
+
+    [uuid(e662e2f1-294a-4b7e-b5e9-59aef81c012e)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IBasicViewManagement
+    {
+        void CreateBasicView(UInt32 processId, UInt32 windowId, InputRoutingInfo pointerRoutingInfo, InputRoutingInfo textRoutingInfo, out IBasicViewWrapper wrapper);
+        void DestroyBasicView(IBasicViewWrapper wrapper);
+        void CreateBasicViewWrapperForPreExistingBasicView(UInt32 viewId, UInt32 windowId, out IBasicViewWrapper wrapper);
+        void DestroyBasicViewWrapperForPreExistingBasicView(IBasicViewWrapper wrapper);
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass ViewEventDispatcher
+        : [default]Windows.Internal.Shell.ViewManagerInterop.IViewEventDispatcher
+    {
+    }
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass WindowEventDispatcher
+        : [default]Windows.Internal.Shell.ViewManagerInterop.IViewEventDispatcher
+    {
+    }
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(332ae7bb-4fd5-415e-9d03-169f39a72ba7)]
+    interface INavigateToViewArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        UInt32 RequestingViewInstanceId{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.ViewEventPolicyResult EventPolicyResult{ set; };
+        Windows.Internal.Shell.ViewManagerInterop.ViewEventPolicyResult EventPolicyResult{ get; };
+        UInt64 UserContextToken{ get; };
+        UInt32 ViewActivationFlags{ get; };
+        Int32 EventPolicyErrorCode{ set; };
+        Int32 EventPolicyErrorCode{ get; };
+        UInt32 PendingViewInstanceId{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  DisplayRegions{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  DisplayRegions{ set; };
+    };
+
+    [uuid(741390c6-ef1e-43ce-bfc2-6cfb131c012e)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewEventArgsForSelectTargetView requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        UInt32 RequestingViewInstanceId{ get; };
+        void SetTargetViewId(UInt32 targetViewId);
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(a8d2a90c-a403-4593-95ff-012516ae9351)]
+    interface IViewEventArgsForNavigationRequest requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        UInt32 DisplayRegionId{ get; };
+        UInt32 DisplayRegionId{ set; };
+        Boolean IsHolographicActivation{ get; };
+        Boolean IsHolographicActivation{ set; };
+    };
+
+    [uuid(ff24ec4d-0f9a-48f8-8083-39f5065b6a49)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewEventArgsForShowAsStandalone requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper ViewToShow{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper ViewAnchor{ get; };
+        Windows.UI.ViewManagement.ViewSizePreference ViewSizePreferenceToShow{ get; };
+        Windows.UI.ViewManagement.ViewSizePreference ViewSizePreferenceAnchor{ get; };
+        UInt64 NavigationRequestIdForActivation{ get; };
+        void CompleteOperation(UInt32 result);
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(8a11574c-5d5f-48d7-bd8c-d7a801fca248)]
+    interface IViewEventArgsForSwitch requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper ViewSwitchFrom{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper ViewSwitchTo{ get; };
+        Windows.UI.ViewManagement.ApplicationViewSwitchingOptions ViewSwitchOptions{ get; };
+        void CompleteOperation(UInt32 result);
+    };
+
+    [uuid(ffc41fc2-6037-4426-8bfb-7716e14343f7)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewEventArgsForShowAsViewMode requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper ViewToShow{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper ViewAnchor{ get; };
+        Windows.UI.ViewManagement.ApplicationViewMode ViewMode{ get; };
+        Windows.Internal.ApplicationModel.WindowManagement.ExperienceKind WindowExperienceKind{ get; };
+        Windows.UI.ViewManagement.ViewSizePreference ViewSizePreference{ get; };
+        Windows.UI.ViewManagement.ViewSizePreference ViewSizePreferenceAnchor{ get; };
+        Windows.Foundation.Size CustomSize{ get; };
+        void CompleteOperation(UInt32 result);
+        UInt32 GroupingPreferenceAsUInt32{ get; };
+    };
+
+    [uuid(ca746cf0-7375-4d7a-9d29-6c72d8b5e684)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IWindowingEnironmentSettingsArgsForImplicitEvent requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.IWindowingEnvironmentSettings WindowingEnvironmentSettings{ get; };
+    };
+
+    [uuid(be79570a-1ea0-49ff-93c5-45b496fe6968)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IWindowingEnvironmentSettings
+    {
+        UInt32 PresenterKind{ get; };
+        Boolean ApplyToWindowingEnvironment{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  RequestedDisplayRegionIds{ get; };
+        Windows.Foundation.Size Size{ get; };
+        Windows.Foundation.Point Offset{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper RelativePositionAnchorView{ get; };
+        Boolean AllowDisplayRegionSpanning{ get; };
+        UInt32 BoundsPreference{ get; };
+        Boolean KeepAspectRatio{ get; };
+        Boolean IncludeSystemChrome{ get; };
+        Boolean IsAdjacent{ get; };
+        Boolean IsExclusive{ get; };
+    };
+
+    [uuid(323969b3-f6c5-4ce8-ae53-27a29f8378b5)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface INavigationFailedArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Int32 ErrorCode{ get; };
+    };
+
+    [uuid(d3bccb71-bfb7-4d45-8e98-63e53eb64464)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IApplicationPreferredLaunchWindowingModeChangedArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Windows.UI.ViewManagement.ApplicationViewWindowingMode PreferredLaunchWindowingMode{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(f598bfc8-f459-431a-93aa-470efd1e151d)]
+    interface IApplicationPreferredLaunchViewSizeChangedArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Windows.Foundation.Size PreferredLaunchViewSize{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(559064cb-9dc0-4491-9a6c-ace3cd4e51c8)]
+    interface IWindowingEnvironmentSettingsArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Boolean Success{ set; };
+        Boolean Success{ get; };
+        UInt32 WindowingEnvironmentId{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.ViewManagerInterop.IViewWrapper>  Views{ get; };
+        void GetWindowingSettings(IViewWrapper view, out IWindowingEnvironmentSettings settings);
+        void SetNonShownViews(Windows.Foundation.Collections.IVectorView <Windows.Internal.Shell.ViewManagerInterop.IViewWrapper>  value);
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    enum ViewForegroundState
+    {
+        NotForeground,
+        Foreground,
+    };
+
+    [uuid(e20aafe2-b26a-492c-815c-f0220f1c012e)]
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    interface IViewForegroundStateChangedEventArgs requires Windows.Internal.Shell.ViewManagerInterop.IViewEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.ViewForegroundState ForegroundState{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(56dd4b13-d62a-4583-bdd1-3e829a1c012e)]
+    interface IForegroundViewChangedEventArgs
+    {
+        UInt32 NewForegroundViewId{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    struct HitTestInfo
+    {
+        UInt32 DeviceId;
+        UInt32 Monitor;
+        UInt32 PointX;
+        UInt32 PointY;
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(7a4b95d9-207b-4e52-9c05-d7c8de1c012e)]
+    interface ISelectViewToActivateForHitTestEventArgs
+    {
+        Windows.Internal.Shell.ViewManagerInterop.HitTestInfo HitTestInfo{ get; };
+        UInt32 SelectedViewInstanceId{ set; };
+        UInt32 SelectedViewInstanceId{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    struct ForegroundViewData
+    {
+        UInt32 viewInstanceId;
+        UInt32 windowInstanceId;
+        UInt32 processId;
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(f3305f7e-8b9b-41f2-be95-4e832447c357)]
+    interface IForegroundManager
+    {
+        void TransferForegroundWithinComponentTree(UInt32 viewId);
+        UInt32 ForegroundView{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.ForegroundViewData ForegroundViewData{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IForegroundManager, Windows.Internal.Shell.ViewManagerInterop.IForegroundViewChangedEventArgs>  ForegroundViewChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.ViewManagerInterop.IForegroundManager, Windows.Internal.Shell.ViewManagerInterop.ISelectViewToActivateForHitTestEventArgs>  SelectViewToActivateForHitTest;
+        void TransferForegroundFromComponentToHost(UInt32 viewId);
+    };
+
+    [contract(Windows.Internal.Shell.ViewManagerInterop.InternalContract, 1)]
+    [uuid(d9a6555a-1152-420a-8f11-9f446875f14b)]
+    interface ICoreShellViewInteropBroker
+    {
+        void PerformAppLaunchCapabilityAccessChecks(UInt32 appProcessId, UInt32 appOwnerWindowThreadId);
+    };
+
+}

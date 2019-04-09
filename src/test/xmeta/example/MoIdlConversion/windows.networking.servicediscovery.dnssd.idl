@@ -1,0 +1,96 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Networking.ServiceDiscovery.Dnssd
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DnssdRegistrationStatus
+    {
+        Success,
+        InvalidServiceName,
+        ServerError,
+        SecurityError,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DnssdServiceWatcherStatus
+    {
+        Created,
+        Started,
+        EnumerationCompleted,
+        Stopping,
+        Stopped,
+        Aborted,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Networking.ServiceDiscovery.Dnssd.IDnssdServiceWatcher", cc34d9c1-db7d-4b69-983d-c6f83f205682)]
+    runtimeclass DnssdServiceWatcher
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.ServiceDiscovery.Dnssd.DnssdServiceWatcher, Windows.Networking.ServiceDiscovery.Dnssd.DnssdServiceInstance>  Added;
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.ServiceDiscovery.Dnssd.DnssdServiceWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Networking.ServiceDiscovery.Dnssd.DnssdServiceWatcher, Object>  Stopped;
+        Windows.Networking.ServiceDiscovery.Dnssd.DnssdServiceWatcherStatus Status{ get; };
+        void Start();
+        void Stop();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Networking.ServiceDiscovery.Dnssd.IDnssdServiceInstanceFactory", 6cb061a1-c478-4331-9684-4af2186c0a2b)]
+    [interface_name("Windows.Networking.ServiceDiscovery.Dnssd.IDnssdServiceInstance", e246db7e-98a5-4ca1-b9e4-c253d33c35ff)]
+    [threading(both)]
+    runtimeclass DnssdServiceInstance
+        : Windows.Foundation.IStringable
+    {
+        [method_name( "Create" )] DnssdServiceInstance(String dnssdServiceInstanceName, Windows.Networking.HostName hostName, UInt16 port);
+        String DnssdServiceInstanceName{ get; };
+        String DnssdServiceInstanceName{ set; };
+        Windows.Networking.HostName HostName{ get; };
+        Windows.Networking.HostName HostName{ set; };
+        UInt16 Port{ get; };
+        UInt16 Port{ set; };
+        UInt16 Priority{ get; };
+        UInt16 Priority{ set; };
+        UInt16 Weight{ get; };
+        UInt16 Weight{ set; };
+        Windows.Foundation.Collections.IMap <String, String>  TextAttributes{ get; };
+        [method_name("RegisterStreamSocketListenerAsync1")] Windows.Foundation.IAsyncOperation <Windows.Networking.ServiceDiscovery.Dnssd.DnssdRegistrationResult>  RegisterStreamSocketListenerAsync(Windows.Networking.Sockets.StreamSocketListener socket);
+        [method_name("RegisterStreamSocketListenerAsync2")] Windows.Foundation.IAsyncOperation <Windows.Networking.ServiceDiscovery.Dnssd.DnssdRegistrationResult>  RegisterStreamSocketListenerAsync(Windows.Networking.Sockets.StreamSocketListener socket, Windows.Networking.Connectivity.NetworkAdapter adapter);
+        [method_name("RegisterDatagramSocketAsync1")] Windows.Foundation.IAsyncOperation <Windows.Networking.ServiceDiscovery.Dnssd.DnssdRegistrationResult>  RegisterDatagramSocketAsync(Windows.Networking.Sockets.DatagramSocket socket);
+        [method_name("RegisterDatagramSocketAsync2")] Windows.Foundation.IAsyncOperation <Windows.Networking.ServiceDiscovery.Dnssd.DnssdRegistrationResult>  RegisterDatagramSocketAsync(Windows.Networking.Sockets.DatagramSocket socket, Windows.Networking.Connectivity.NetworkAdapter adapter);
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Networking.ServiceDiscovery.Dnssd.IDnssdRegistrationResult", 3d786ad2-e606-5350-73ea-7e97f066162f)]
+    [threading(both)]
+    runtimeclass DnssdRegistrationResult
+        : Windows.Foundation.IStringable
+    {
+        DnssdRegistrationResult();
+        Windows.Networking.ServiceDiscovery.Dnssd.DnssdRegistrationStatus Status{ get; };
+        Windows.Networking.HostName IPAddress{ get; };
+        Boolean HasInstanceNameChanged{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass DnssdServiceInstanceCollection
+        : [default]Windows.Foundation.Collections.IVectorView<Windows.Networking.ServiceDiscovery.Dnssd.DnssdServiceInstance>
+        , Windows.Foundation.Collections.IIterable<Windows.Networking.ServiceDiscovery.Dnssd.DnssdServiceInstance>
+    {
+    }
+
+}

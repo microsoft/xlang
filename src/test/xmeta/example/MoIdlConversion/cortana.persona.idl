@@ -1,0 +1,157 @@
+
+
+
+
+
+
+
+
+
+
+namespace Cortana.Persona
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    enum PersonaScaleFactor
+    {
+        None,
+        Default,
+        Scale42,
+        Scale100 = 4,
+        Scale200 = 8,
+        Scale300 = 16,
+        Scale400 = 32,
+    };
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    enum AnimationSet
+    {
+        _Min,
+        Default = 0,
+        Circle,
+        MianTuan,
+        _Max = 2,
+    };
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    enum PauseBehavior
+    {
+        Immediate,
+        FirstFrame,
+    };
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    enum PersonaAssetState
+    {
+        Inactive,
+        Active,
+        Expired,
+    };
+
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    [interface_name("Cortana.Persona.IPersonaAnimationStartedEventArgs", e6c8fc48-cb83-456f-bef1-3a6a917209a9)]
+    runtimeclass PersonaAnimationStartedEventArgs
+    {
+        PersonaAnimationStartedEventArgs();
+        UInt32 Id{ get; };
+        String Animation{ get; };
+    }
+
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    [interface_name("Cortana.Persona.IPersonaAnimationRequestedEventArgs", 6fe1e4eb-75ed-4d23-a6f1-24b762741e1a)]
+    runtimeclass PersonaAnimationRequestedEventArgs
+    {
+        PersonaAnimationRequestedEventArgs();
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    }
+
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    [interface_name("Cortana.Persona.IPersonaAnimator", ce5574ac-8ada-4cf9-aea3-3d2871fb5fca)]
+    runtimeclass PersonaAnimator
+    {
+        PersonaAnimator();
+        Boolean EnableGlobalTransitions{ get; };
+        Boolean EnableGlobalTransitions{ set; };
+        Boolean EnableFrameStep{ get; };
+        Boolean EnableFrameStep{ set; };
+        Cortana.Persona.AnimationSet AnimationSet{ get; };
+        Cortana.Persona.AnimationSet AnimationSet{ set; };
+        void Play(String animationsString, UInt32 id);
+        void Pause(PauseBehavior pauseBehavior);
+        void Resume();
+        void Stop();
+        void Next();
+        void AdvanceFrame();
+        event Windows.Foundation.EventHandler <Object>  AnimationRequested;
+        event Windows.Foundation.EventHandler <Cortana.Persona.PersonaAnimationStartedEventArgs>  AnimationStarted;
+    }
+
+
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    [constructor_name("Cortana.Persona.IPersonaRenderThreadFactory", 438dc73c-3075-4254-a245-379056a57437)]
+    [interface_name("Cortana.Persona.IPersonaRenderThread", 9adcfbc5-90a2-4b11-9f07-24c10f10c507)]
+    runtimeclass PersonaRenderThread
+    {
+        [method_name( "Create" )] PersonaRenderThread(Boolean useHighQualityScaling, PersonaAnimator pPersonaAnimator);
+        void Startup();
+        Windows.Foundation.Size Size{ set; };
+        Windows.Foundation.Size Size{ get; };
+        Windows.Foundation.Size CompositionScale{ set; };
+        Windows.Foundation.Size CompositionScale{ get; };
+        Windows.Foundation.Size ScaleOverride{ set; };
+        Windows.Foundation.Size ScaleOverride{ get; };
+        Windows.UI.Color Color{ set; };
+        Windows.UI.Color Color{ get; };
+        Cortana.Persona.PersonaScaleFactor ScaleFactor{ set; };
+        Cortana.Persona.PersonaScaleFactor ScaleFactor{ get; };
+        Boolean PreferSmallestScaleFactor{ set; };
+        Boolean PreferSmallestScaleFactor{ get; };
+        Int32 ThreadPriority{ set; };
+        Int32 ThreadPriority{ get; };
+        event Windows.Foundation.EventHandler <Object>  SwapChainChanged;
+        event Windows.Foundation.EventHandler <Object>  Loaded;
+        void WakeUp();
+    }
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    [uuid(172625ef-53df-4cca-b37f-34285bf65a7c)]
+    interface IPersonaAssetMetadata
+    {
+        String Name{ get; };
+        UInt32 Version{ get; };
+        Cortana.Persona.PersonaAssetState State{ get; };
+    };
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    runtimeclass PersonaAssetMetadata
+        : [default]Cortana.Persona.IPersonaAssetMetadata
+    {
+        PersonaAssetMetadata();
+    }
+
+
+    [contract(Cortana.Persona.InternalContract, 1)]
+    [interface_name("Cortana.Persona.IDownloadPersonaAssetManager", b2337c7a-b2f7-4a5c-8a73-3cc728e00ec9)]
+    runtimeclass DownloadPersonaAssetManager
+    {
+        DownloadPersonaAssetManager();
+        String RootDownloadFolder{ get; };
+        String RelativeDownloadFolder{ get; };
+        Windows.Foundation.Collections.IMapView <String, Cortana.Persona.IPersonaAssetMetadata>  LoadAllMetadata();
+        void Save(String name, String blob, UInt32 version, String startTime, String endTime);
+        void DeleteAllExpired();
+        Cortana.Persona.PersonaAssetState GetState(String name);
+        Windows.Storage.IStorageFile GetAsset(String name);
+        Windows.Storage.Streams.IRandomAccessStream GetAssetStream(String name);
+        String GetPersonaAssetsAsString(Boolean excludeExpired);
+    }
+
+}

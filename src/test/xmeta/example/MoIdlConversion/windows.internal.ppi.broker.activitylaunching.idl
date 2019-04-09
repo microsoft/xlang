@@ -1,0 +1,143 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PPI.Activities
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [uuid(9831f050-bdfe-45ec-a2b1-8e89e448a3d0)]
+    interface IActivityLaunchArgs
+    {
+        Windows.Foundation.IAsyncAction LaunchAsync();
+        Boolean IgnoreAuthCheck{ get; };
+        Boolean IgnoreAuthCheck{ set; };
+    };
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [uuid(2d1a8c16-1f77-4a84-be36-f273b6a1dd1d)]
+    interface ISkypeMeetingLaunchArgs
+    {
+        String MeetingUri{ get; };
+        String MeetingUri{ set; };
+        Boolean IsScheduled{ get; };
+        Boolean IsScheduled{ set; };
+        Windows.Internal.PPI.Shell.SessionManagement.IMeetingData MeetingData{ get; };
+        Windows.Internal.PPI.Shell.SessionManagement.IMeetingData MeetingData{ set; };
+        Boolean EndPreviousMeeting{ get; };
+        Boolean EndPreviousMeeting{ set; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    runtimeclass SkypeMeetingLaunchArgs
+        : [default]Windows.Internal.PPI.Activities.IActivityLaunchArgs
+        , Windows.Internal.PPI.Activities.ISkypeMeetingLaunchArgs
+    {
+        SkypeMeetingLaunchArgs();
+    }
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass WhiteboardLaunchArgs
+        : [default]Windows.Internal.PPI.Activities.IActivityLaunchArgs
+    {
+        WhiteboardLaunchArgs();
+    }
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CortanaLaunchArgs
+        : [default]Windows.Internal.PPI.Activities.IActivityLaunchArgs
+    {
+        CortanaLaunchArgs();
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    runtimeclass ProjectionLaunchArgs
+        : [default]Windows.Internal.PPI.Activities.IActivityLaunchArgs
+    {
+        ProjectionLaunchArgs();
+    }
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    enum StartMenuLaunchType
+    {
+        StartMenu,
+        UserSignIn,
+        ProximalStart,
+    };
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [uuid(f5454ab7-2e39-4752-94a4-e647a189d21e)]
+    interface IStartMenuLaunchArgs
+    {
+        Windows.Internal.PPI.Activities.StartMenuLaunchType LaunchType{ get; };
+        Windows.Internal.PPI.Activities.StartMenuLaunchType LaunchType{ set; };
+    };
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass StartMenuLaunchArgs
+        : [default]Windows.Internal.PPI.Activities.IActivityLaunchArgs
+        , Windows.Internal.PPI.Activities.IStartMenuLaunchArgs
+    {
+        StartMenuLaunchArgs();
+    }
+
+    [uuid(cb7f37d6-fd06-4273-9961-fd6351d425bd)]
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    interface IMiracastConnectionLaunchArgs
+    {
+        UInt32 ConnectionId{ get; };
+        String Uri{ get; };
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [constructor_name("Windows.Internal.PPI.Activities.IMiracastConnectionLaunchArgsFactory", f4f775ae-5d85-4aaf-92dc-c1ecce618bb2)]
+    runtimeclass MiracastConnectionLaunchArgs
+        : [default]Windows.Internal.PPI.Activities.IActivityLaunchArgs
+        , Windows.Internal.PPI.Activities.IMiracastConnectionLaunchArgs
+    {
+        [method_name( "CreateInstance" )] MiracastConnectionLaunchArgs(UInt32 connectionId, String uri);
+    }
+
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    enum WiredConnectionType
+    {
+        Invalid,
+        VGA,
+        HDMI,
+        DisplayPort,
+    };
+
+    [uuid(b2a965d5-5029-4734-ac6d-d36972ada4b2)]
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    interface IWiredConnectionLaunchArgs
+    {
+        Windows.Internal.PPI.Activities.WiredConnectionType Type{ get; };
+        Guid CorrelationId{ get; };
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PPI.Activities.InternalContract, 1)]
+    [constructor_name("Windows.Internal.PPI.Activities.IWiredConnectionLaunchArgsFactory", 20318db6-b539-443f-a06c-6f6da96badc8)]
+    runtimeclass WiredConnectionLaunchArgs
+        : [default]Windows.Internal.PPI.Activities.IActivityLaunchArgs
+        , Windows.Internal.PPI.Activities.IWiredConnectionLaunchArgs
+    {
+        [method_name( "CreateInstance" )] WiredConnectionLaunchArgs(WiredConnectionType type, Guid correlationId);
+    }
+
+}

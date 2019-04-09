@@ -1,0 +1,449 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.System.RemoteSystems
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum RemoteSystemStatus
+    {
+        Unavailable,
+        DiscoveringAvailability,
+        Available,
+        Unknown,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum RemoteSystemDiscoveryType
+    {
+        Any,
+        Proximal,
+        Cloud,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        SpatiallyProximal,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum RemoteSystemStatusType
+    {
+        Any,
+        Available,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum RemoteSystemAccessStatus
+    {
+        Unspecified,
+        Allowed,
+        DeniedByUser,
+        DeniedBySystem,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum RemoteSystemAuthorizationKind
+    {
+        SameUser,
+        Anonymous,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum RemoteSystemPlatform
+    {
+        Unknown,
+        Windows,
+        Android,
+        Ios,
+        Linux,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum RemoteSystemWatcherError
+    {
+        Unknown,
+        InternetNotAvailable,
+        AuthenticationError,
+    };
+
+    [uuid(4a3ba9e4-99eb-45eb-ba16-0367728ff374)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    interface IRemoteSystemFilter
+    {
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemApp", 80e5bcbd-d54d-41b1-9b16-6810a871ed4f)]
+    runtimeclass RemoteSystemApp
+    {
+        String Id{ get; };
+        String DisplayName{ get; };
+        Boolean IsAvailableByProximity{ get; };
+        Boolean IsAvailableBySpatialProximity{ get; };
+        Windows.Foundation.Collections.IMapView <String, String>  Attributes{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystemApp2", 6369bf15-0a96-577a-8ff6-c35904dfa8f3)]
+        {
+            Windows.System.User User{ get; };
+            String ConnectionToken{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemWatcher", 5d600c7e-2c07-48c5-889c-455d2b099771)]
+    runtimeclass RemoteSystemWatcher
+    {
+        void Start();
+        void Stop();
+        event Windows.Foundation.TypedEventHandler <Windows.System.RemoteSystems.RemoteSystemWatcher, Windows.System.RemoteSystems.RemoteSystemAddedEventArgs>  RemoteSystemAdded;
+        event Windows.Foundation.TypedEventHandler <Windows.System.RemoteSystems.RemoteSystemWatcher, Windows.System.RemoteSystems.RemoteSystemUpdatedEventArgs>  RemoteSystemUpdated;
+        event Windows.Foundation.TypedEventHandler <Windows.System.RemoteSystems.RemoteSystemWatcher, Windows.System.RemoteSystems.RemoteSystemRemovedEventArgs>  RemoteSystemRemoved;
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystemWatcher2", 73436700-19ca-48f9-a4cd-780f7ad58c71)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.System.RemoteSystems.RemoteSystemWatcher, Windows.System.RemoteSystems.RemoteSystemEnumerationCompletedEventArgs>  EnumerationCompleted;
+            event Windows.Foundation.TypedEventHandler <Windows.System.RemoteSystems.RemoteSystemWatcher, Windows.System.RemoteSystems.RemoteSystemWatcherErrorOccurredEventArgs>  ErrorOccurred;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystemWatcher3", f79c0fcf-a913-55d3-8413-418fcf15ba54)]
+        {
+            Windows.System.User User{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemAddedEventArgs", 8f39560f-e534-4697-8836-7abea151516e)]
+    runtimeclass RemoteSystemAddedEventArgs
+    {
+        Windows.System.RemoteSystems.RemoteSystem RemoteSystem{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemUpdatedEventArgs", 7502ff0e-dbcb-4155-b4ca-b30a04f27627)]
+    runtimeclass RemoteSystemUpdatedEventArgs
+    {
+        Windows.System.RemoteSystems.RemoteSystem RemoteSystem{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemRemovedEventArgs", 8b3d16bb-7306-49ea-b7df-67d5714cb013)]
+    runtimeclass RemoteSystemRemovedEventArgs
+    {
+        String RemoteSystemId{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [default_interface]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemEnumerationCompletedEventArgs", c6e83d5f-4030-4354-a060-14f1b22c545d)]
+    runtimeclass RemoteSystemEnumerationCompletedEventArgs
+    {
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemWatcherErrorOccurredEventArgs", 74c5c6af-5114-4426-9216-20d81f8519ae)]
+    runtimeclass RemoteSystemWatcherErrorOccurredEventArgs
+    {
+        Windows.System.RemoteSystems.RemoteSystemWatcherError Error{ get; };
+    }
+
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.System.RemoteSystems.IRemoteSystemStatics", a485b392-ff2b-4b47-be62-743f2f140f30)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystem", ed5838cd-1e10-4a8c-b4a6-4e5fd6f97721)]
+    [threading(both)]
+    runtimeclass RemoteSystem
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [static_name("Windows.System.RemoteSystems.IRemoteSystemStatics3", 9995f16f-0b3c-5ac5-b325-cc73f437dfcd)]
+        {
+            [method_name("CreateWatcherForUser")] static Windows.System.RemoteSystems.RemoteSystemWatcher CreateWatcherForUser(Windows.System.User user);
+            [method_name("CreateWatcherWithFiltersForUser")] static Windows.System.RemoteSystems.RemoteSystemWatcher CreateWatcherForUser(Windows.System.User user, Windows.Foundation.Collections.IIterable <Windows.System.RemoteSystems.IRemoteSystemFilter>  filters);
+        }
+        static Windows.Foundation.IAsyncOperation <Windows.System.RemoteSystems.RemoteSystem>  FindByHostNameAsync(Windows.Networking.HostName hostName);
+        [method_name("CreateWatcher")] static Windows.System.RemoteSystems.RemoteSystemWatcher CreateWatcher();
+        [method_name("CreateWatcherWithFilters")] static Windows.System.RemoteSystems.RemoteSystemWatcher CreateWatcher(Windows.Foundation.Collections.IIterable <Windows.System.RemoteSystems.IRemoteSystemFilter>  filters);
+        static Windows.Foundation.IAsyncOperation <Windows.System.RemoteSystems.RemoteSystemAccessStatus>  RequestAccessAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.System.RemoteSystems.IRemoteSystemStatics2", 0c98edca-6f99-4c52-a272-ea4f36471744)]
+        {
+            static Boolean IsAuthorizationKindEnabled(RemoteSystemAuthorizationKind kind);
+        }
+        String DisplayName{ get; };
+        String Id{ get; };
+        String Kind{ get; };
+        Windows.System.RemoteSystems.RemoteSystemStatus Status{ get; };
+        Boolean IsAvailableByProximity{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystem2", 09dfe4ec-fb8b-4a08-a758-6876435d769e)]
+        {
+            Boolean IsAvailableBySpatialProximity{ get; };
+            Windows.Foundation.IAsyncOperation <Boolean>  GetCapabilitySupportedAsync(String capabilityName);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystem3", 72b4b495-b7c6-40be-831b-73562f12ffa8)]
+        {
+            String ManufacturerDisplayName{ get; };
+            String ModelDisplayName{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystem4", f164ffe5-b987-4ca5-9926-fa0438be6273)]
+        {
+            Windows.System.RemoteSystems.RemoteSystemPlatform Platform{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystem5", eb2ad723-e5e2-4ae2-a7a7-a1097a098e90)]
+        {
+            Windows.Foundation.Collections.IVectorView <Windows.System.RemoteSystems.RemoteSystemApp>  Apps{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystem6", d4cda942-c027-533e-9384-3a19b4f7eef3)]
+        {
+            Windows.System.User User{ get; };
+        }
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.System.RemoteSystems.IKnownRemoteSystemCapabilitiesStatics", 8108e380-7f8a-44e4-92cd-03b6469b94a3)]
+    [threading(both)]
+    runtimeclass KnownRemoteSystemCapabilities
+    {
+        static String AppService{ get; };
+        static String LaunchUri{ get; };
+        static String RemoteSession{ get; };
+        static String SpatialEntity{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [constructor_name("Windows.System.RemoteSystems.IRemoteSystemAuthorizationKindFilterFactory", ad65df4d-b66a-45a4-8177-8caed75d9e5a)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemAuthorizationKindFilter", 6b0dde8e-04d0-40f4-a27f-c2acbbd6b734)]
+    [threading(both)]
+    runtimeclass RemoteSystemAuthorizationKindFilter
+        : Windows.System.RemoteSystems.IRemoteSystemFilter
+    {
+        [method_name( "Create" )] RemoteSystemAuthorizationKindFilter(RemoteSystemAuthorizationKind remoteSystemAuthorizationKind);
+        Windows.System.RemoteSystems.RemoteSystemAuthorizationKind RemoteSystemAuthorizationKind{ get; };
+    }
+
+
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.System.RemoteSystems.IRemoteSystemConnectionRequestFactory", aa0a0a20-baeb-4575-b530-810bb9786334)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemConnectionRequest", 84ed4104-8d5e-4d72-8238-7621576c7a67)]
+    [threading(both)]
+    runtimeclass RemoteSystemConnectionRequest
+    {
+        [method_name( "Create" )] RemoteSystemConnectionRequest(RemoteSystem remoteSystem);
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [static_name("Windows.System.RemoteSystems.IRemoteSystemConnectionRequestStatics2", 460f1027-64ec-598e-a800-4f2ee58def19)]
+        {
+            static Windows.System.RemoteSystems.RemoteSystemConnectionRequest CreateFromConnectionToken(String connectionToken);
+            static Windows.System.RemoteSystems.RemoteSystemConnectionRequest CreateFromConnectionTokenForUser(Windows.System.User user, String connectionToken);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.System.RemoteSystems.IRemoteSystemConnectionRequestStatics", 86ca143d-8214-425c-8932-db49032d1306)]
+        {
+            static Windows.System.RemoteSystems.RemoteSystemConnectionRequest CreateForApp(RemoteSystemApp remoteSystemApp);
+        }
+        Windows.System.RemoteSystems.RemoteSystem RemoteSystem{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystemConnectionRequest2", 12df6d6f-bffc-483a-8abe-d34a6c19f92b)]
+        {
+            Windows.System.RemoteSystems.RemoteSystemApp RemoteSystemApp{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystemConnectionRequest3", de86c3e7-c9cc-5a50-b8d9-ba7b34bb8d0e)]
+        {
+            String ConnectionToken{ get; };
+        }
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [static_name("Windows.System.RemoteSystems.IRemoteSystemKindStatics", f6317633-ab14-41d0-9553-796aadb882db)]
+    [threading(both)]
+    runtimeclass RemoteSystemKinds
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.System.RemoteSystems.IRemoteSystemKindStatics2", b9e3a3d0-0466-4749-91e8-65f9d19a96a5)]
+        {
+            static String Iot{ get; };
+            static String Tablet{ get; };
+            static String Laptop{ get; };
+        }
+        static String Phone{ get; };
+        static String Hub{ get; };
+        static String Holographic{ get; };
+        static String Desktop{ get; };
+        static String Xbox{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.System.RemoteSystems.IRemoteSystemKindFilterFactory", a1fb18ee-99ea-40bc-9a39-c670aa804a28)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemKindFilter", 38e1c9ec-22c3-4ef6-901a-bbb1c7aad4ed)]
+    [threading(both)]
+    runtimeclass RemoteSystemKindFilter
+        : Windows.System.RemoteSystems.IRemoteSystemFilter
+    {
+        [method_name( "Create" )] RemoteSystemKindFilter(Windows.Foundation.Collections.IIterable <String>  remoteSystemKinds);
+        Windows.Foundation.Collections.IVectorView <String>  RemoteSystemKinds{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [constructor_name("Windows.System.RemoteSystems.IRemoteSystemDiscoveryTypeFilterFactory", 9f9eb993-c260-4161-92f2-9c021f23fe5d)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemDiscoveryTypeFilter", 42d9041f-ee5a-43da-ac6a-6fee25460741)]
+    [threading(both)]
+    runtimeclass RemoteSystemDiscoveryTypeFilter
+        : Windows.System.RemoteSystems.IRemoteSystemFilter
+    {
+        [method_name( "Create" )] RemoteSystemDiscoveryTypeFilter(RemoteSystemDiscoveryType discoveryType);
+        Windows.System.RemoteSystems.RemoteSystemDiscoveryType RemoteSystemDiscoveryType{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [constructor_name("Windows.System.RemoteSystems.IRemoteSystemStatusTypeFilterFactory", 33cf78fa-d724-4125-ac7a-8d281e44c949)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemStatusTypeFilter", 0c39514e-cbb6-4777-8534-2e0c521affa2)]
+    [threading(both)]
+    runtimeclass RemoteSystemStatusTypeFilter
+        : Windows.System.RemoteSystems.IRemoteSystemFilter
+    {
+        [method_name( "Create" )] RemoteSystemStatusTypeFilter(RemoteSystemStatusType remoteSystemStatusType);
+        Windows.System.RemoteSystems.RemoteSystemStatusType RemoteSystemStatusType{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.System.RemoteSystems.IRemoteSystemWebAccountFilterFactory", 348a2709-5f4d-5127-b4a7-bf99d5252b1b)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemWebAccountFilter", 3fb75873-87c8-5d8f-977e-f69f96d67238)]
+    [threading(both)]
+    runtimeclass RemoteSystemWebAccountFilter
+        : Windows.System.RemoteSystems.IRemoteSystemFilter
+    {
+        [method_name( "Create" )] RemoteSystemWebAccountFilter(Windows.Security.Credentials.WebAccount account);
+        Windows.Security.Credentials.WebAccount Account{ get; };
+    }
+
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteSystemAppResourceAccessType
+    {
+        Read,
+        ReadWrite,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [constructor_name("Windows.System.RemoteSystems.IRemoteSystemAppResourceInfoFactory", 401894f7-1fe6-41f2-bd67-52b9dfa84e27)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemAppResourceInfo", 7922ae9b-d16e-44b4-8a56-a26a977e854a)]
+    [threading(both)]
+    runtimeclass RemoteSystemAppResourceInfo
+    {
+        [method_name( "CreateWithDefaultAccessType" )] RemoteSystemAppResourceInfo(String name, String resourceType);
+        [method_name( "Create" )] RemoteSystemAppResourceInfo(String name, String resourceType, RemoteSystemAppResourceAccessType accessType);
+        RemoteSystemAppResourceInfo();
+        String Name{ get; };
+        String Name{ set; };
+        String ResourceType{ get; };
+        String ResourceType{ set; };
+        Windows.System.RemoteSystems.RemoteSystemAppResourceAccessType AccessType{ get; };
+        Windows.System.RemoteSystems.RemoteSystemAppResourceAccessType AccessType{ set; };
+    }
+
+
+
+
+    [feature(Velocity_AlwaysAlwaysEnabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.RemoteSystems.IRemoteSystemAppRegistrationStatics", 01b99840-cfd2-453f-ae25-c2539f086afd)]
+    [interface_name("Windows.System.RemoteSystems.IRemoteSystemAppRegistration", b47947b5-7035-4a5a-b8df-962d8f8431f4)]
+    [threading(both)]
+    runtimeclass RemoteSystemAppRegistration
+    {
+        static Windows.System.RemoteSystems.RemoteSystemAppRegistration GetDefault();
+        static Windows.System.RemoteSystems.RemoteSystemAppRegistration GetForUser(Windows.System.User user);
+        Windows.System.User User{ get; };
+        Windows.Foundation.Collections.IMap <String, String>  Attributes{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  SaveAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [feature(Velocity_AlwaysAlwaysDisabled)]
+        [interface_name("Windows.System.RemoteSystems.IRemoteSystemAppRegistration2", 3c2dc049-be1c-538f-a10c-e8caf6478068)]
+        {
+            Windows.Foundation.Collections.IVector <Windows.System.RemoteSystems.RemoteSystemAppResourceInfo>  Resources{ get; };
+        }
+    }
+
+}

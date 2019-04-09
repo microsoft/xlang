@@ -1,0 +1,95 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.System
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AppMemoryUsageLevel
+    {
+        Low,
+        Medium,
+        High,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        OverLimit,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IAppMemoryUsageLimitChangingEventArgs", 79f86664-feca-4da5-9e40-2bc63efdc979)]
+    runtimeclass AppMemoryUsageLimitChangingEventArgs
+    {
+        UInt64 OldLimit{ get; };
+        UInt64 NewLimit{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IAppMemoryReport", 6d65339b-4d6f-45bc-9c5e-e49b3ff2758d)]
+    runtimeclass AppMemoryReport
+    {
+        UInt64 PrivateCommitUsage{ get; };
+        UInt64 PeakPrivateCommitUsage{ get; };
+        UInt64 TotalCommitUsage{ get; };
+        UInt64 TotalCommitLimit{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.System.IAppMemoryReport2", 5f7f3738-51b7-42dc-b7ed-79ba46d28857)]
+        {
+            UInt64 ExpectedTotalCommitLimit{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.IProcessMemoryReport", 087305a8-9b70-4782-8741-3a982b6ce5e4)]
+    runtimeclass ProcessMemoryReport
+    {
+        UInt64 PrivateWorkingSetUsage{ get; };
+        UInt64 TotalWorkingSetUsage{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.System.IMemoryManagerStatics", 5c6c279c-d7ca-4779-9188-4057219ce64c)]
+    runtimeclass MemoryManager
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [static_name("Windows.System.IMemoryManagerStatics3", 149b59ce-92ad-4e35-89eb-50dfb4c0d91c)]
+        {
+            static Boolean TrySetAppMemoryUsageLimit(UInt64 value);
+        }
+        static UInt64 AppMemoryUsage{ get; };
+        static UInt64 AppMemoryUsageLimit{ get; };
+        static Windows.System.AppMemoryUsageLevel AppMemoryUsageLevel{ get; };
+        static event Windows.Foundation.EventHandler <Object>  AppMemoryUsageIncreased;
+        static event Windows.Foundation.EventHandler <Object>  AppMemoryUsageDecreased;
+        static event Windows.Foundation.EventHandler <Windows.System.AppMemoryUsageLimitChangingEventArgs>  AppMemoryUsageLimitChanging;
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.System.IMemoryManagerStatics4", c5a94828-e84e-4886-8a0d-44b3190e3b72)]
+        {
+            static UInt64 ExpectedAppMemoryUsageLimit{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.System.IMemoryManagerStatics2", 6eee351f-6d62-423f-9479-b01f9c9f7669)]
+        {
+            static Windows.System.AppMemoryReport GetAppMemoryReport();
+            static Windows.System.ProcessMemoryReport GetProcessMemoryReport();
+        }
+    }
+
+}

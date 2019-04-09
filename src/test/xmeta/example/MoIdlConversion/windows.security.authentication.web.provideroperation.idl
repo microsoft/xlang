@@ -1,0 +1,163 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Security.Credentials
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WebAccountState
+    {
+        None,
+        Connected,
+        Error,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WebAccountPictureSize
+    {
+        Size64x64 = 64,
+        Size208x208 = 208,
+        Size424x424 = 424,
+        Size1080x1080 = 1080,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Security.Credentials.IWebAccountProviderFactory", 1d767df1-e1e1-4b9a-a774-5c7c7e3bf371)]
+    [interface_name("Windows.Security.Credentials.IWebAccountProvider", 29dcc8c3-7ab9-4a7c-a336-b942f9dbf7c7)]
+    [threading(both)]
+    runtimeclass WebAccountProvider
+    {
+        [method_name( "CreateWebAccountProvider" )] WebAccountProvider(String id, String displayName, Windows.Foundation.Uri iconUri);
+        String Id{ get; };
+        String DisplayName{ get; };
+        [deprecated("IconUri may be altered or unavailable for releases after Windows 8.2. Instead, use Icon.", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.Uri IconUri{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Credentials.IWebAccountProvider2", 4a01eb05-4e42-41d4-b518-e008a5163614)]
+        {
+            String DisplayPurpose{ get; };
+            String Authority{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Credentials.IWebAccountProvider3", da1c518b-970d-4d49-825c-f2706f8ca7fe)]
+        {
+            Windows.System.User User{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Security.Credentials.IWebAccountProvider4", 718fd8db-e796-4210-b74e-84d29894b080)]
+        {
+            Boolean IsSystemProvider{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Security.Credentials.IWebAccountFactory", ac9afb39-1de9-4e92-b78f-0581a87f6e5c)]
+    [threading(both)]
+    runtimeclass WebAccount
+        : [default]Windows.Security.Credentials.IWebAccount
+    {
+        [method_name( "CreateWebAccount" )] WebAccount(WebAccountProvider webAccountProvider, String userName, WebAccountState state);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Security.Credentials.IWebAccount2", 7b56d6f8-990b-4eb5-94a7-5621f3a8b824)]
+        {
+            String Id{ get; };
+            Windows.Foundation.Collections.IMapView <String, String>  Properties{ get; };
+            Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  GetPictureAsync(WebAccountPictureSize desizedSize);
+            [method_name("SignOutAsync")] Windows.Foundation.IAsyncAction SignOutAsync();
+            [method_name("SignOutWithClientIdAsync")] Windows.Foundation.IAsyncAction SignOutAsync(String clientId);
+        }
+    }
+
+    [uuid(69473eb2-8031-49be-80bb-96cb46d99aba)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IWebAccount
+    {
+        Windows.Security.Credentials.WebAccountProvider WebAccountProvider{ get; };
+        String UserName{ get; };
+        Windows.Security.Credentials.WebAccountState State{ get; };
+    };
+
+
+
+
+
+
+
+}
+namespace Windows.Security.Authentication.Web.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum WebTokenRequestStatus
+    {
+        Success,
+        UserCancel,
+        AccountSwitch,
+        UserInteractionRequired,
+        AccountProviderNotAvailable,
+        ProviderError,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Security.Authentication.Web.Core.IWebProviderErrorFactory", e3c40a2d-89ef-4e37-847f-a8b9d5a32910)]
+    [interface_name("Windows.Security.Authentication.Web.Core.IWebProviderError", db191bb1-50c5-4809-8dca-09c99410245c)]
+    runtimeclass WebProviderError
+    {
+        [method_name( "Create" )] WebProviderError(UInt32 errorCode, String errorMessage);
+        UInt32 ErrorCode{ get; };
+        String ErrorMessage{ get; };
+        Windows.Foundation.Collections.IMap <String, String>  Properties{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Security.Authentication.Web.Core.IWebTokenResponseFactory", ab6bf7f8-5450-4ef6-97f7-052b0431c0f0)]
+    [interface_name("Windows.Security.Authentication.Web.Core.IWebTokenResponse", 67a7c5ca-83f6-44c6-a3b1-0eb69e41fa8a)]
+    [threading(both)]
+    runtimeclass WebTokenResponse
+    {
+        [method_name( "CreateWithToken" )] WebTokenResponse(String token);
+        [method_name( "CreateWithTokenAndAccount" )] WebTokenResponse(String token, Windows.Security.Credentials.WebAccount webAccount);
+        [method_name( "CreateWithTokenAccountAndError" )] WebTokenResponse(String token, Windows.Security.Credentials.WebAccount webAccount, WebProviderError error);
+        WebTokenResponse();
+        String Token{ get; };
+        Windows.Security.Authentication.Web.Core.WebProviderError ProviderError{ get; };
+        Windows.Security.Credentials.WebAccount WebAccount{ get; };
+        Windows.Foundation.Collections.IMap <String, String>  Properties{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Authentication.Web.Core.IWebTokenRequestResult", c12a8305-d1f8-4483-8d54-38fe292784ff)]
+    runtimeclass WebTokenRequestResult
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Authentication.Web.Core.WebTokenResponse>  ResponseData{ get; };
+        Windows.Security.Authentication.Web.Core.WebTokenRequestStatus ResponseStatus{ get; };
+        Windows.Security.Authentication.Web.Core.WebProviderError ResponseError{ get; };
+        Windows.Foundation.IAsyncAction InvalidateCacheAsync();
+    }
+
+
+
+}

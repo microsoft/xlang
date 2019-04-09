@@ -1,0 +1,30 @@
+
+
+
+
+
+
+
+namespace Windows.UI.ViewManagement
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UserInteractionMode
+    {
+        Mouse,
+        Touch,
+    };
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.ViewManagement.IUIViewSettingsStatics", 595c97a5-f8f6-41cf-b0fb-aacdb81fd5f6)]
+    [interface_name("Windows.UI.ViewManagement.IUIViewSettings", c63657f6-8850-470d-88f8-455e16ea2c26)]
+    runtimeclass UIViewSettings
+    {
+        static Windows.UI.ViewManagement.UIViewSettings GetForCurrentView();
+        Windows.UI.ViewManagement.UserInteractionMode UserInteractionMode{ get; };
+    }
+
+}

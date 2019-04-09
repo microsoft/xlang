@@ -1,0 +1,90 @@
+
+
+
+
+
+
+
+
+namespace WindowsInternal.Shell.UnifiedTile.CuratedTileCollections
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InitializationBrokerInternalContract{};
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InitializationBrokerInternalContract, 1)]
+    enum CollectionSKU
+    {
+        Invalid,
+        DesktopARM,
+        DesktopClient,
+        DesktopEnterprise,
+        DesktopClientN,
+        DesktopEnterpriseN,
+        Server,
+        ServerSolution,
+        Mobile,
+        PPI,
+        LongTermServicingBranch,
+        DesktopCloud,
+        DesktopCloudN,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InitializationBrokerInternalContract, 1)]
+    enum CollectionOfficeSKU
+    {
+        None,
+        DownloadOffice,
+        Mobile,
+        Desktop,
+        Desktop2016,
+        DesktopBridge,
+        DesktopBridgeSubscription,
+    };
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InitializationBrokerInternalContract, 1)]
+    struct CuratedCollectionSelectionData
+    {
+        CollectionSKU CollectionSku;
+        Boolean IsDualSim;
+        Boolean IsPreInstalledAppsEnabled;
+        Boolean IsSingleGroupModeEnabled;
+    };
+
+
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InitializationBrokerInternalContract, 1)]
+    [static_name("WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedCollectionInitializationStatics", 23755ada-c906-47a2-a10b-4da3c6395bfe)]
+    runtimeclass CuratedCollectionInitializationStatics
+    {
+        static Windows.Storage.Streams.IRandomAccessStream LoadDefaultLayout();
+        static Windows.Storage.Streams.IRandomAccessStream LoadLayoutModification();
+        static Windows.Foundation.DateTime GetPolicyLayoutFileTimestamp(String layoutFilePath);
+        static Windows.Storage.Streams.IRandomAccessStream LoadPolicyLayout(String layoutFilePath);
+        static String LoadWindows8MigratedLayout();
+        static void RenameWindows8MigratedLayout();
+        static String GetApplicationUserModelIdFromLinkFile(String linkFilePath);
+        static String GetLinkPathFromApplicationUserModelId(String applicationUserModelId);
+        static String LoadFallbackDefaultLayout();
+        static void FinishedProcessingCollectionMigration();
+        static Boolean IsMigrationPending();
+        static void GetMigrationData(out UInt32 previousMajorOSVersion, out UInt32 previousMinorOSVersion, out String previousOSVersion, out String previousOSBuild);
+        static void TryImportEdgeAssets();
+        static void CreateEdgeAssets(String encodedImageString, String filename);
+        static String CreateEdgeAssetsFromIconPath(String iconPath);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.InitializationBrokerInternalContract, 1)]
+    [static_name("WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.ICuratedCollectionSelectionHelpers", e07ce126-3bd3-4a7d-8416-9389b13a696f)]
+    [threading(both)]
+    runtimeclass CuratedCollectionSelectionHelpers
+    {
+        static WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.CuratedCollectionSelectionData GetLayoutSelectionVariables();
+        static WindowsInternal.Shell.UnifiedTile.CuratedTileCollections.CollectionSKU GetLayoutSku();
+        static Boolean IsDualSim{ get; };
+        static Boolean IsPreInstalledAppsEnabled{ get; };
+        static Boolean IsSingleGroupModeEnabled{ get; };
+    }
+
+}

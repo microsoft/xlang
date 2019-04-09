@@ -1,0 +1,48 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IApplicationResourceResolverStatics", 84463b2a-c88e-4597-b41f-17d3bf6486e9)]
+    [interface_name("Windows.Internal.StateRepository.IApplicationResourceResolver", 47afda03-0a2a-4c2f-9321-5fd5b487d897)]
+    [threading(both)]
+    runtimeclass ApplicationResourceResolver
+    {
+        static Windows.Internal.StateRepository.ApplicationResourceResolver Create(Application application);
+        String GetDisplayNameLocalized();
+        String GetDescriptionLocalized();
+        String GetSquare150x150LogoLocalized();
+        Windows.Foundation.Uri GetSquare150x150LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare150x150LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSquare44x44LogoLocalized();
+        Windows.Foundation.Uri GetSquare44x44LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare44x44LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetWide310x150LogoLocalized();
+        Windows.Foundation.Uri GetWide310x150LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetWide310x150LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSquare310x310LogoLocalized();
+        Windows.Foundation.Uri GetSquare310x310LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare310x310LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSquare71x71LogoLocalized();
+        Windows.Foundation.Uri GetSquare71x71LogoLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSquare71x71LogoLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetSplashScreenImageLocalized();
+        Windows.Foundation.Uri GetSplashScreenImageLocalizedAsUri();
+        Windows.Storage.Streams.RandomAccessStreamReference GetSplashScreenImageLocalizedAsRandomAccessStreamReference(Windows.Foundation.Size size);
+        String GetVisualGroupLocalized();
+    }
+
+
+}

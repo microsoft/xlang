@@ -1,0 +1,299 @@
+
+
+
+
+
+
+
+
+
+namespace WindowsUpdate.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    enum InstallType
+    {
+        Install,
+        Update,
+        UpdateAvailable,
+        Remediation,
+        Restore,
+        Disc,
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    enum InstallState
+    {
+        Pending,
+        AcquiringLicense,
+        Downloading,
+        Installing,
+        Completed,
+        Canceled,
+        Paused,
+        ReadyToDownload,
+        ReadyToInstall,
+        LowBattery,
+        WifiRecommended,
+        WifiRequired,
+        Error,
+        Starting,
+        RestoringData,
+    };
+
+    [uuid(11c6562f-d6dc-4246-aee4-1867b030b0e0)]
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    interface IFulfillmentDataInfo
+    {
+        String ProductId{ get; };
+        String SkuId{ get; };
+        String SkuId{ set; };
+        String CatalogId{ get; };
+        String CatalogId{ set; };
+        String PackageFamilyName{ get; };
+        String PackageFamilyName{ set; };
+        String ParentBundleId{ get; };
+        String ParentBundleId{ set; };
+        String ProductTitle{ get; };
+        String ProductTitle{ set; };
+        String LegacyXapPackageFamilyName{ get; };
+        String LegacyXapPackageFamilyName{ set; };
+        String MainPackageFamilyNameForDlc{ get; };
+        String MainPackageFamilyNameForDlc{ set; };
+        String WUCategoryId{ get; };
+        String WUCategoryId{ set; };
+        String FlightBundleId{ get; };
+        String FlightBundleId{ set; };
+        String Version{ get; };
+        String Version{ set; };
+        Windows.Foundation.Collections.IVectorView <String>  Sources{ get; };
+        void AddSource(String value);
+        Guid PackageId{ get; };
+        Guid PackageId{ set; };
+        String WorkId{ get; };
+        String WorkId{ set; };
+        Windows.Foundation.Uri SourceUri{ get; };
+        Windows.Foundation.Uri SourceUri{ set; };
+        Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  Dependencies{ get; };
+        Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  Dependencies{ set; };
+        String Market{ get; };
+        String Market{ set; };
+        String IntentPackageFullName{ get; };
+        String IntentPackageFullName{ set; };
+        String FulfillmentPluginId{ get; };
+        String FulfillmentPluginId{ set; };
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    runtimeclass FulfillmentDataInfo
+        : [default]WindowsUpdate.Internal.IFulfillmentDataInfo
+    {
+    }
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    enum StreamingType
+    {
+        Undetermined,
+        NotStreaming,
+        Streaming,
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    enum CollectionType
+    {
+        Undetermined,
+        Framework,
+        Other,
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    struct InstallWorkStatus
+    {
+        UInt32 taskId;
+        InstallState installState;
+        UInt64 downloadSize;
+        UInt64 autoDownloadSize;
+        UInt64 bytesDownloaded;
+        UInt32 percentComplete;
+        UInt32 lastDownloadSuccessPercentComplete;
+        UInt64 errorCode;
+        UInt32 userAttemptCount;
+        UInt32 systemAttemptCount;
+        Boolean readyForLaunch;
+        Boolean checkpointDataChanged;
+        StreamingType streamingType;
+        CollectionType collectionType;
+        Boolean isStaged;
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    enum ToastNotificationMode
+    {
+        Default,
+        Toast,
+        ToastWithoutPopup,
+        NoToast,
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    [uuid(54f920df-4081-4dc8-af9d-115f147abeb2)]
+    interface IInstallItem
+    {
+        String Id{ get; };
+        WindowsUpdate.Internal.InstallType InstallType{ get; };
+        WindowsUpdate.Internal.InstallState InstallState{ get; };
+        UInt64 DownloadSize{ get; };
+        UInt64 AutoDownloadSize{ get; };
+        UInt64 BytesDownloaded{ get; };
+        UInt32 PercentComplete{ get; };
+        HRESULT ErrorCode{ get; };
+        String PackageFamilyName{ get; };
+        Boolean IsInteractive{ get; };
+        UInt32 Flags{ get; };
+        UInt32 UserAttemptNumber{ get; };
+        UInt32 SystemAttemptNumber{ get; };
+        Boolean ReadyForLaunch{ get; };
+        UInt64 UserContext{ get; };
+        Boolean Mandatory{ get; };
+        String LegacyXapPackageFamilyName{ get; };
+        String ParentBundleId{ get; };
+        String WorkId{ get; };
+        String MainPackageFamilyName{ get; };
+        Boolean IsFramework{ get; };
+        Boolean IsStaged{ get; };
+        Boolean LaunchAfterInstall{ get; };
+        Boolean LaunchAfterInstall{ set; };
+        Boolean PinToDesktopAfterInstall{ get; };
+        Boolean PinToDesktopAfterInstall{ set; };
+        Boolean PinToStartAfterInstall{ get; };
+        Boolean PinToStartAfterInstall{ set; };
+        Boolean PinToTaskbarAfterInstall{ get; };
+        Boolean PinToTaskbarAfterInstall{ set; };
+        WindowsUpdate.Internal.ToastNotificationMode CompletedInstallToastNotificationMode{ get; };
+        WindowsUpdate.Internal.ToastNotificationMode CompletedInstallToastNotificationMode{ set; };
+        WindowsUpdate.Internal.ToastNotificationMode InstallInProgressToastNotificationMode{ get; };
+        WindowsUpdate.Internal.ToastNotificationMode InstallInProgressToastNotificationMode{ set; };
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    [uuid(5e0659da-f17b-451e-86b3-6f6967865ea6)]
+    interface IInstallItem2
+    {
+        Boolean IsValidForUser(UInt64 userContextToken);
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    runtimeclass InstallItem
+        : [default]WindowsUpdate.Internal.IInstallItem
+        , WindowsUpdate.Internal.IInstallItem2
+    {
+    }
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    enum AutoUpdateState
+    {
+        Disabled,
+        Enabled,
+        PolicyDisabled,
+        PolicyEnabled,
+    };
+
+    [uuid(5474a982-e485-45bd-bb9c-d8fcce05ba7e)]
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    interface IInstallControl
+    {
+        void Pause(String productId, String correlationVector);
+        void Resume(String productId, String clientId, String correlationVector);
+        void Cancel(String productId, String correlationVector);
+        void MoveToFrontOfDownloadQueue(String productId, String correlationVector);
+        Windows.Foundation.Collections.IVectorView <WindowsUpdate.Internal.IInstallItem>  ActiveInstalls{ get; };
+        WindowsUpdate.Internal.AutoUpdateState AutoUpdateState{ get; };
+        WindowsUpdate.Internal.AutoUpdateState AutoUpdateState{ set; };
+        event Windows.Foundation.TypedEventHandler <WindowsUpdate.Internal.IInstallControl, WindowsUpdate.Internal.IInstallItem>  Completed;
+        event Windows.Foundation.TypedEventHandler <WindowsUpdate.Internal.IInstallControl, WindowsUpdate.Internal.IInstallItem>  Progress;
+        void ResumeWithFlags(String productId, UInt32 dwSetFlags, UInt32 dwResetFlags, String clientId, String correlationVector);
+        void ResumeByCategoryId(String categoryId);
+        Object SuspendQueue(UInt32 timeoutInMs);
+        WindowsUpdate.Internal.IFulfillmentDataInfo CreateFulfillmentData(String productId);
+        Windows.Foundation.Collections.IVectorView <WindowsUpdate.Internal.IInstallItem>  InstallProducts(UInt64 userContextToken, Windows.Foundation.Collections.IVectorView <WindowsUpdate.Internal.IFulfillmentDataInfo>  products, InstallType installType, UInt32 flags, String identityData, String volumePath, String callerApplicationId, String correlationVector);
+        WindowsUpdate.Internal.IInstallItem InstallProduct(UInt64 userContextToken, IFulfillmentDataInfo product, InstallType installType, UInt32 flags, String identityData, String volumePath, String callerApplicationId, String correlationVector);
+        WindowsUpdate.Internal.IInstallItem InstallAppWithOfflineUpdateScan(UInt64 userContextToken, IFulfillmentDataInfo product, InstallType installType, UInt32 flags, String identityData, String volumePath, String callerApplicationId, String correlationVector);
+        Windows.Foundation.Collections.IVectorView <WindowsUpdate.Internal.IInstallItem>  InstallUpdates(UInt64 userContextToken, Windows.Foundation.Collections.IVectorView <WindowsUpdate.Internal.IFulfillmentDataInfo>  pFulfillmentData, UInt32 flags, Boolean requestedFromApp, String callerApplicationId, String correlationVector);
+        Windows.Foundation.Collections.IVectorView <String>  GetAvailableUpdates(UInt64 userContextToken, Windows.Foundation.Collections.IVectorView <String>  pCategoryIds, Boolean fApplicability, Boolean fInteractive, Boolean allowCachedResults, String callerApplicationId, String correlationVector);
+        void GetFreeEntitlementWithCID(UInt64 userContextToken, String productId, String skuId, String availabilityId, Boolean useDeviceTicket, String acquisitionIdentity, String callerApplicationId, String correlationVector, String campaignId);
+        String GetUriResponseWithAuthTicket(UInt64 userContextToken, String uri, String correlationVector, String catalogId, String acquisitionIdentity, Boolean forceUseAADTickets);
+        void SmartRetryAsync(Boolean stableNetworkAvailable, Boolean scheduledRetry, Boolean forceAppInUseRestartByPolicy);
+        void SetQueueOrder(String correlationVector, Windows.Foundation.Collections.IIterable <String>  orderedProductIds);
+        void PostCampaignDataForInstall(String productId, String skuId, String catalogId, String clientId, String campaignId, String extendedCampaignId, String correlationVector);
+        void UnblockLowPriorityWorkItems(String correlationVector, String clientId);
+        void BlockLowPriorityWorkItems(String correlationVector, String clientId);
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    runtimeclass InstallControl
+        : [default]WindowsUpdate.Internal.IInstallControl
+    {
+        InstallControl();
+    }
+
+    [uuid(c2fdb9d9-e6e0-425a-899f-c9562549996d)]
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    interface IStaticProgressHandler
+    {
+        void OnProgress(IInstallControl pInstallControl, IInstallItem pInstallItem);
+        void OnCompleted(IInstallControl pInstallControl, IInstallItem pInstallItem);
+    };
+
+    [uuid(3c0d3472-94c0-4fc6-a5c0-ddf3265a057d)]
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    interface IInstallWork
+    {
+        String WorkId{ get; };
+        WindowsUpdate.Internal.InstallState InstallState{ get; };
+        UInt32 Flags{ get; };
+        String PackageFullNames{ get; };
+        Windows.Storage.Streams.IBuffer CheckpointDataBlob{ get; };
+        void Cancel(Boolean interactive, String correlationVector);
+        void Pause(Boolean interactive, String correlationVector);
+        void Resume(Boolean interactive, String clientId, String correlationVector);
+        void DoWork();
+        UInt32 AddFulfillmentTask(IFulfillmentDataInfo pFulfillmentData);
+        WindowsUpdate.Internal.InstallWorkStatus GetTaskStatus(UInt32 taskId);
+        void UpdateProperties(String volumePath, UInt32 setFlags, UInt32 resetFlags);
+        event Windows.Foundation.EventHandler <WindowsUpdate.Internal.InstallWorkStatus>  StatusChanged;
+        String CorrelationVector{ get; };
+        WindowsUpdate.Internal.InstallType InstallType{ get; };
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    [uuid(df7285ec-81cb-47e3-a992-164e0b5aa793)]
+    interface IInstallWorkFactory
+    {
+        WindowsUpdate.Internal.IInstallWork Create(UInt64 userContext, IFulfillmentDataInfo pFulfillmentData, InstallType installType, UInt32 dwFlags, String identityData, String volumePath, String callerApplicationId, String correlationVector, Boolean preferOnlineWuScan);
+        WindowsUpdate.Internal.IInstallWork RestoreWork(UInt64 userContext, IFulfillmentDataInfo pFulfillmentData, InstallType installType, UInt32 dwFlags, String workId, InstallWorkStatus status, String identityData, String volumePath, String callerApplicationId, Windows.Storage.Streams.IBuffer checkpointDataBlob, String correlationVector);
+    };
+
+    [uuid(7c74bd0b-3bf0-4302-b5a9-af29bb4f2f12)]
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    interface IContentIdInfo
+    {
+        String Id{ get; };
+        String Version{ get; };
+    };
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    runtimeclass ContentIdInfo
+        : [default]WindowsUpdate.Internal.IContentIdInfo
+    {
+    }
+
+    [contract(WindowsUpdate.Internal.InternalContract, 1)]
+    runtimeclass UWAInstallWorkFactory
+        : [default]WindowsUpdate.Internal.IInstallWorkFactory
+    {
+    }
+
+}

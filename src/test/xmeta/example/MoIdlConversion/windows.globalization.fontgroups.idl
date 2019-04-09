@@ -1,0 +1,50 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Globalization.Fonts
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [interface_name("Windows.Globalization.Fonts.ILanguageFont", b12e5c3a-b76d-459b-beeb-901151cd77d1)]
+    runtimeclass LanguageFont
+    {
+        String FontFamily{ get; };
+        Windows.UI.Text.FontWeight FontWeight{ get; };
+        Windows.UI.Text.FontStretch FontStretch{ get; };
+        Windows.UI.Text.FontStyle FontStyle{ get; };
+        Double ScaleFactor{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Globalization.Fonts.ILanguageFontGroupFactory", fcaeac67-4e77-49c7-b856-dde934fc735b)]
+    [interface_name("Windows.Globalization.Fonts.ILanguageFontGroup", f33a7fc3-3a5c-4aea-b9ff-b39fb242f7f6)]
+    [threading(mta)]
+    runtimeclass LanguageFontGroup
+    {
+        [method_name( "CreateLanguageFontGroup" )] LanguageFontGroup(String languageTag);
+        Windows.Globalization.Fonts.LanguageFont UITextFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont UIHeadingFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont UITitleFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont UICaptionFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont UINotificationHeadingFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont TraditionalDocumentFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont ModernDocumentFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont DocumentHeadingFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont FixedWidthTextFont{ get; };
+        Windows.Globalization.Fonts.LanguageFont DocumentAlternate1Font{ get; };
+        Windows.Globalization.Fonts.LanguageFont DocumentAlternate2Font{ get; };
+    }
+
+
+}

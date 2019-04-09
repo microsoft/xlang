@@ -1,0 +1,37 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    struct RequestDisplayTimeoutOverrideEventToken
+    {
+        Int64 token;
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    struct EnsureDisplayOnEventToken
+    {
+        Int64 token;
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [static_name("Windows.Internal.ComposableShell.IDisplayPowerManagerStatics", 82925ac4-849c-430d-8dce-e65fc0f1c5b5)]
+    [interface_name("Windows.Internal.ComposableShell.IDisplayPowerManager", 29c3b48e-332d-492a-b22f-a427950fea7d)]
+    [threading(both)]
+    runtimeclass DisplayPowerManager
+    {
+        static Windows.Internal.ComposableShell.DisplayPowerManager GetInstance();
+        [return_name("requessSucceeded")] Boolean TryRequestDisplayTimeoutOverride(String displayPersistentId, UInt32 timeoutOnACPower, UInt32 dimOnACPower, UInt32 timeoutOnBattery, UInt32 dimOnBattery, out RequestDisplayTimeoutOverrideEventToken requestToken);
+        Windows.Internal.ComposableShell.RequestDisplayTimeoutOverrideEventToken RequestDisplayTimeoutOverrideForAllDisplays(UInt32 timeoutOnACPower, UInt32 dimOnACPower, UInt32 timeoutOnBattery, UInt32 dimOnBattery);
+        void DismissRequestDisplayTimeoutOverride(RequestDisplayTimeoutOverrideEventToken requestToken);
+    }
+
+}

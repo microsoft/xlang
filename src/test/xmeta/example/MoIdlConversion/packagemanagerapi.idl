@@ -1,0 +1,302 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Management.Deployment
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DeploymentProgressState
+    {
+        Queued,
+        Processing,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct DeploymentProgress
+    {
+        DeploymentProgressState state;
+        UInt32 percentage;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum DeploymentOptions
+    {
+        None,
+        ForceApplicationShutdown,
+        DevelopmentMode,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        InstallAllResources = 32,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        ForceTargetApplicationShutdown = 64,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        RequiredContentGroupOnly = 256,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        ForceUpdateFromAnyVersion = 262144,
+        [feature(Velocity_SometimesDisabledByDefault)]
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        RetainFilesOnFailure = 2097152,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum RemovalOptions
+    {
+        None,
+        PreserveApplicationData = 4096,
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        RemoveForAllUsers = 524288,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum AddPackageByAppInstallerOptions
+    {
+        None,
+        InstallAllResources = 32,
+        ForceTargetAppShutdown = 64,
+        RequiredContentGroupOnly = 256,
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        LimitToExistingPackages = 512,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PackageTypes
+    {
+        None,
+        Main,
+        Framework,
+        Resource = 4,
+        Bundle = 8,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Xap = 16,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Optional = 32,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x1)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Management.Deployment.IDeploymentResult", 2563b9ae-b77d-4c1f-8a7b-20e6ad515ef3)]
+    runtimeclass DeploymentResult
+    {
+        String ErrorText{ get; };
+        Guid ActivityId{ get; };
+        HRESULT ExtendedErrorCode{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Management.Deployment.IDeploymentResult2", fc0e715c-5a01-4bd7-bcf1-381c8c82e04a)]
+        {
+            Boolean IsRegistered{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PackageInstallState
+    {
+        NotInstalled,
+        Staged,
+        Installed,
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        Paused = 6,
+    };
+
+
+    [dualapipartition(0x1)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Management.Deployment.IPackageUserInformation", f6383423-fa09-4cbc-9055-15ca275e2e7e)]
+    runtimeclass PackageUserInformation
+    {
+        String UserSecurityId{ get; };
+        Windows.Management.Deployment.PackageInstallState InstallState{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PackageState
+    {
+        Normal,
+        LicenseInvalid,
+        Modified,
+        Tampered,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PackageStatus
+    {
+        OK,
+        LicenseIssue,
+        Modified,
+        Tampered = 4,
+        Disabled = 8,
+    };
+
+
+
+
+    [dualapipartition(0x1)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Management.Deployment.IPackageVolume", cf2672c3-1a40-4450-9739-2ace2e898853)]
+    runtimeclass PackageVolume
+    {
+        Boolean IsOffline{ get; };
+        Boolean IsSystemVolume{ get; };
+        String MountPoint{ get; };
+        String Name{ get; };
+        String PackageStorePath{ get; };
+        Boolean SupportsHardLinks{ get; };
+        [method_name("FindPackages")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackages();
+        [method_name("FindPackagesByNamePublisher")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackages(String packageName, String packagePublisher);
+        [method_name("FindPackagesByPackageFamilyName")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackages(String packageFamilyName);
+        [method_name("FindPackagesWithPackageTypes")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesWithPackageTypes(PackageTypes packageTypes);
+        [method_name("FindPackagesByNamePublisherWithPackagesTypes")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesWithPackageTypes(PackageTypes packageTypes, String packageName, String packagePublisher);
+        [method_name("FindPackagesByPackageFamilyNameWithPackageTypes")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesWithPackageTypes(PackageTypes packageTypes, String packageFamilyName);
+        [method_name("FindPackageByPackageFullName")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackage(String packageFullName);
+        [method_name("FindPackagesByUserSecurityId")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesForUser(String userSecurityId);
+        [method_name("FindPackagesByUserSecurityIdNamePublisher")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesForUser(String userSecurityId, String packageName, String packagePublisher);
+        [method_name("FindPackagesByUserSecurityIdPackageFamilyName")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesForUser(String userSecurityId, String packageFamilyName);
+        [method_name("FindPackagesByUserSecurityIdWithPackageTypes")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesForUserWithPackageTypes(String userSecurityId, PackageTypes packageTypes);
+        [method_name("FindPackagesByUserSecurityIdNamePublisherWithPackageTypes")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesForUserWithPackageTypes(String userSecurityId, PackageTypes packageTypes, String packageName, String packagePublisher);
+        [method_name("FindPackagesByUserSecurityIdPackageFamilyNameWithPackagesTypes")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackagesForUserWithPackageTypes(String userSecurityId, PackageTypes packageTypes, String packageFamilyName);
+        [method_name("FindPackageByUserSecurityIdPackageFullName")] Windows.Foundation.Collections.IVector <Windows.ApplicationModel.Package>  FindPackageForUser(String userSecurityId, String packageFullName);
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Management.Deployment.IPackageVolume2", 46abcf2e-9dd4-47a2-ab8c-c6408349bcd8)]
+        {
+            Boolean IsFullTrustPackageSupported{ get; };
+            Boolean IsAppxInstallSupported{ get; };
+            Windows.Foundation.IAsyncOperation <UInt64>  GetAvailableSpaceAsync();
+        }
+    }
+
+
+
+    [dualapipartition(0x1)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Management.Deployment.IPackageManagerDebugSettings", 1a611683-a988-4fcf-8f0f-ce175898e8eb)]
+    runtimeclass PackageManagerDebugSettings
+    {
+        [method_name("SetContentGroupStateAsync")] Windows.Foundation.IAsyncAction SetContentGroupStateAsync(Windows.ApplicationModel.Package package, String contentGroupName, Windows.ApplicationModel.PackageContentGroupState state);
+        [method_name("SetContentGroupStateWithPercentageAsync")] Windows.Foundation.IAsyncAction SetContentGroupStateAsync(Windows.ApplicationModel.Package package, String contentGroupName, Windows.ApplicationModel.PackageContentGroupState state, Double completionPercentage);
+    }
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x1)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Management.Deployment.IPackageManager", 9a7d4b65-5e8f-4fc7-a2e5-7f6925cb8b53)]
+    [threading(both)]
+    runtimeclass PackageManager
+    {
+        PackageManager();
+        [method_name("AddPackageAsync")] [remote_sync]Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions);
+        [remote_sync]Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  UpdatePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemovePackageAsync(String packageFullName);
+        [remote_sync]Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris);
+        [method_name("RegisterPackageAsync")] [remote_sync]Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageAsync(Windows.Foundation.Uri manifestUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions);
+        [method_name("FindPackages")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackages();
+        [method_name("FindPackagesByUserSecurityId")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesForUser(String userSecurityId);
+        [method_name("FindPackagesByNamePublisher")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackages(String packageName, String packagePublisher);
+        [method_name("FindPackagesByUserSecurityIdNamePublisher")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesForUser(String userSecurityId, String packageName, String packagePublisher);
+        Windows.Foundation.Collections.IIterable <Windows.Management.Deployment.PackageUserInformation>  FindUsers(String packageFullName);
+        void SetPackageState(String packageFullName, PackageState packageState);
+        [method_name("FindPackageByPackageFullName")] Windows.ApplicationModel.Package FindPackage(String packageFullName);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  CleanupPackageForUserAsync(String packageName, String userSecurityId);
+        [method_name("FindPackagesByPackageFamilyName")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackages(String packageFamilyName);
+        [method_name("FindPackagesByUserSecurityIdPackageFamilyName")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesForUser(String userSecurityId, String packageFamilyName);
+        [method_name("FindPackageByUserSecurityIdPackageFullName")] Windows.ApplicationModel.Package FindPackageForUser(String userSecurityId, String packageFullName);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Management.Deployment.IPackageManager2", f7aad08d-0840-46f2-b5d8-cad47693a095)]
+        {
+            [method_name("RemovePackageWithOptionsAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemovePackageAsync(String packageFullName, RemovalOptions removalOptions);
+            [method_name("StagePackageWithOptionsAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageByFullNameAsync(String mainPackageFullName, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFullNames, DeploymentOptions deploymentOptions);
+            [method_name("FindPackagesWithPackageTypes")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesWithPackageTypes(PackageTypes packageTypes);
+            [method_name("FindPackagesByUserSecurityIdWithPackageTypes")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesForUserWithPackageTypes(String userSecurityId, PackageTypes packageTypes);
+            [method_name("FindPackagesByNamePublisherWithPackageTypes")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesWithPackageTypes(String packageName, String packagePublisher, PackageTypes packageTypes);
+            [method_name("FindPackagesByUserSecurityIdNamePublisherWithPackageTypes")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesForUserWithPackageTypes(String userSecurityId, String packageName, String packagePublisher, PackageTypes packageTypes);
+            [method_name("FindPackagesByPackageFamilyNameWithPackageTypes")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesWithPackageTypes(String packageFamilyName, PackageTypes packageTypes);
+            [method_name("FindPackagesByUserSecurityIdPackageFamilyNameWithPackageTypes")] Windows.Foundation.Collections.IIterable <Windows.ApplicationModel.Package>  FindPackagesForUserWithPackageTypes(String userSecurityId, String packageFamilyName, PackageTypes packageTypes);
+            [method_name("StageUserDataAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StageUserDataAsync(String packageFullName);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Management.Deployment.IPackageManager3", daad9948-36f1-41a7-9188-bc263e0dcb72)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Management.Deployment.PackageVolume>  AddPackageVolumeAsync(String packageStorePath);
+            [method_name("AddPackageToVolumeAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions, PackageVolume targetVolume);
+            void ClearPackageStatus(String packageFullName, PackageStatus status);
+            [method_name("RegisterPackageWithAppDataVolumeAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageAsync(Windows.Foundation.Uri manifestUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions, PackageVolume appDataVolume);
+            [method_name("FindPackageVolumeByName")] Windows.Management.Deployment.PackageVolume FindPackageVolume(String volumeName);
+            Windows.Foundation.Collections.IIterable <Windows.Management.Deployment.PackageVolume>  FindPackageVolumes();
+            Windows.Management.Deployment.PackageVolume GetDefaultPackageVolume();
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  MovePackageToVolumeAsync(String packageFullName, DeploymentOptions deploymentOptions, PackageVolume targetVolume);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RemovePackageVolumeAsync(PackageVolume volume);
+            void SetDefaultPackageVolume(PackageVolume volume);
+            void SetPackageStatus(String packageFullName, PackageStatus status);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  SetPackageVolumeOfflineAsync(PackageVolume packageVolume);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  SetPackageVolumeOnlineAsync(PackageVolume packageVolume);
+            [method_name("StagePackageToVolumeAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions, PackageVolume targetVolume);
+            [method_name("StageUserDataWithOptionsAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StageUserDataAsync(String packageFullName, DeploymentOptions deploymentOptions);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Management.Deployment.IPackageManager4", 3c719963-bab6-46bf-8ff7-da4719230ae6)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Management.Deployment.PackageVolume> >  GetPackageVolumesAsync();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Management.Deployment.IPackageManager5", 711f3117-1afd-4313-978c-9bb6e1b864a7)]
+        {
+            [method_name("AddPackageToVolumeAndOptionalPackagesAsync")] [default_overload]
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions, PackageVolume targetVolume, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  externalPackageUris);
+            [method_name("StagePackageToVolumeAndOptionalPackagesAsync")] [default_overload]
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions, PackageVolume targetVolume, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  externalPackageUris);
+            [method_name("RegisterPackageByFamilyNameAndOptionalPackagesAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RegisterPackageByFamilyNameAsync(String mainPackageFamilyName, Windows.Foundation.Collections.IIterable <String>  dependencyPackageFamilyNames, DeploymentOptions deploymentOptions, PackageVolume appDataVolume, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames);
+            Windows.Management.Deployment.PackageManagerDebugSettings DebugSettings{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Management.Deployment.IPackageManager6", 0847e909-53cd-4e4f-832e-57d180f6e447)]
+        {
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  ProvisionPackageForAllUsersAsync(String packageFamilyName);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddPackageByAppInstallerFileAsync(Windows.Foundation.Uri appInstallerFileUri, AddPackageByAppInstallerOptions options, PackageVolume targetVolume);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RequestAddPackageByAppInstallerFileAsync(Windows.Foundation.Uri appInstallerFileUri, AddPackageByAppInstallerOptions options, PackageVolume targetVolume);
+            [method_name("AddPackageToVolumeAndRelatedSetAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  AddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions options, PackageVolume targetVolume, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  packageUrisToInstall, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  relatedPackageUris);
+            [method_name("StagePackageToVolumeAndRelatedSetAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  StagePackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions options, PackageVolume targetVolume, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  packageUrisToInstall, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  relatedPackageUris);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RequestAddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions, PackageVolume targetVolume, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  relatedPackageUris);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Management.Deployment.IPackageManager7", f28654f4-2ba7-4b80-88d6-be15f9a23fba)]
+        {
+            [method_name("RequestAddPackageAndRelatedSetAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  RequestAddPackageAsync(Windows.Foundation.Uri packageUri, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  dependencyPackageUris, DeploymentOptions deploymentOptions, PackageVolume targetVolume, Windows.Foundation.Collections.IIterable <String>  optionalPackageFamilyNames, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  relatedPackageUris, Windows.Foundation.Collections.IIterable <Windows.Foundation.Uri>  packageUrisToInstall);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Management.Deployment.IPackageManager8", b8575330-1298-4ee2-80ee-7f659c5d2782)]
+        {
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Management.Deployment.DeploymentResult, Windows.Management.Deployment.DeploymentProgress>  DeprovisionPackageForAllUsersAsync(String packageFamilyName);
+        }
+    }
+
+
+}

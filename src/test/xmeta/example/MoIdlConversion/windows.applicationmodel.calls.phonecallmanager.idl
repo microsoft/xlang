@@ -1,0 +1,310 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Calls
+{
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneNetworkState
+    {
+        Unknown,
+        NoSignal,
+        Deregistered,
+        Denied,
+        Searching,
+        Home,
+        RoamingInternational,
+        RoamingDomestic,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneVoicemailType
+    {
+        None,
+        Traditional,
+        Visual,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneCallMedia
+    {
+        Audio,
+        AudioAndVideo,
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 4)]
+        AudioAndRealTimeText,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneLineTransport
+    {
+        Cellular,
+        VoipApp,
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 5)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        Bluetooth,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneSimState
+    {
+        Unknown,
+        PinNotRequired,
+        PinUnlocked,
+        PinLocked,
+        PukLocked,
+        NotInserted,
+        Invalid,
+        Disabled,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneAudioRoutingEndpoint
+    {
+        Default,
+        Bluetooth,
+        Speakerphone,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneLineWatcherStatus
+    {
+        Created,
+        Started,
+        EnumerationCompleted,
+        Stopped,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum PhoneLineNetworkOperatorDisplayTextLocation
+    {
+        Default,
+        Tile,
+        Dialer,
+        InCallUI,
+    };
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    enum CellularDtmfMode
+    {
+        Continuous,
+        Burst,
+    };
+
+
+
+
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Calls.IPhoneLineStatics", f38b5f23-ceb0-404f-bcf2-ba9f697d8adf)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneLine", 27c66f30-6a69-34ca-a2ba-65302530c311)]
+    [threading(both)]
+    runtimeclass PhoneLine
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Calls.PhoneLine>  FromIdAsync(Guid lineId);
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Calls.PhoneLine, Object>  LineChanged;
+        Guid Id{ get; };
+        Windows.UI.Color DisplayColor{ get; };
+        Windows.ApplicationModel.Calls.PhoneNetworkState NetworkState{ get; };
+        String DisplayName{ get; };
+        Windows.ApplicationModel.Calls.PhoneVoicemail Voicemail{ get; };
+        String NetworkName{ get; };
+        Windows.ApplicationModel.Calls.PhoneLineCellularDetails CellularDetails{ get; };
+        Windows.ApplicationModel.Calls.PhoneLineTransport Transport{ get; };
+        Boolean CanDial{ get; };
+        Boolean SupportsTile{ get; };
+        Windows.ApplicationModel.Calls.PhoneCallVideoCapabilities VideoCallingCapabilities{ get; };
+        Windows.ApplicationModel.Calls.PhoneLineConfiguration LineConfiguration{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  IsImmediateDialNumberAsync(String number);
+        void Dial(String number, String displayName);
+        void DialWithOptions(PhoneDialOptions options);
+
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 5)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [interface_name("Windows.ApplicationModel.Calls.IPhoneLine2", 0167f56a-5344-5d64-8af3-a31a950e916a)]
+        {
+            void EnableTextReply(Boolean value);
+            String TransportDeviceId{ get; };
+        }
+    }
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneVoicemail", c9ce77f6-6e9f-3a8b-b727-6e0cf6998224)]
+    runtimeclass PhoneVoicemail
+    {
+        String Number{ get; };
+        Int32 MessageCount{ get; };
+        Windows.ApplicationModel.Calls.PhoneVoicemailType Type{ get; };
+        Windows.Foundation.IAsyncAction DialVoicemailAsync();
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneLineCellularDetails", 192601d5-147c-4769-b673-98a5ec8426cb)]
+    runtimeclass PhoneLineCellularDetails
+    {
+        Windows.ApplicationModel.Calls.PhoneSimState SimState{ get; };
+        Int32 SimSlotIndex{ get; };
+        Boolean IsModemOn{ get; };
+        Int32 RegistrationRejectCode{ get; };
+        String GetNetworkOperatorDisplayText(PhoneLineNetworkOperatorDisplayTextLocation location);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneCallVideoCapabilities", 02382786-b16a-4fdb-be3b-c4240e13ad0d)]
+    runtimeclass PhoneCallVideoCapabilities
+    {
+        Boolean IsVideoCallingCapable{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneLineConfiguration", fe265862-f64f-4312-b2a8-4e257721aa95)]
+    runtimeclass PhoneLineConfiguration
+    {
+        Boolean IsVideoCallingEnabled{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  ExtendedProperties{ get; };
+    }
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneDialOptions", b639c4b8-f06f-36cb-a863-823742b5f2d4)]
+    [threading(both)]
+    runtimeclass PhoneDialOptions
+    {
+        PhoneDialOptions();
+        String Number{ get; };
+        String Number{ set; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        Windows.ApplicationModel.Contacts.Contact Contact{ get; };
+        Windows.ApplicationModel.Contacts.Contact Contact{ set; };
+        Windows.ApplicationModel.Contacts.ContactPhone ContactPhone{ get; };
+        Windows.ApplicationModel.Contacts.ContactPhone ContactPhone{ set; };
+        Windows.ApplicationModel.Calls.PhoneCallMedia Media{ get; };
+        Windows.ApplicationModel.Calls.PhoneCallMedia Media{ set; };
+        Windows.ApplicationModel.Calls.PhoneAudioRoutingEndpoint AudioEndpoint{ get; };
+        Windows.ApplicationModel.Calls.PhoneAudioRoutingEndpoint AudioEndpoint{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneLineWatcher", 8a45cd0a-6323-44e0-a6f6-9f21f64dc90a)]
+    runtimeclass PhoneLineWatcher
+    {
+        void Start();
+        void Stop();
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Calls.PhoneLineWatcher, Windows.ApplicationModel.Calls.PhoneLineWatcherEventArgs>  LineAdded;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Calls.PhoneLineWatcher, Windows.ApplicationModel.Calls.PhoneLineWatcherEventArgs>  LineRemoved;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Calls.PhoneLineWatcher, Windows.ApplicationModel.Calls.PhoneLineWatcherEventArgs>  LineUpdated;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Calls.PhoneLineWatcher, Object>  EnumerationCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.ApplicationModel.Calls.PhoneLineWatcher, Object>  Stopped;
+        Windows.ApplicationModel.Calls.PhoneLineWatcherStatus Status{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneLineWatcherEventArgs", d07c753e-9e12-4a37-82b7-ad535dad6a67)]
+    runtimeclass PhoneLineWatcherEventArgs
+    {
+        Guid LineId{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneCallStore", 5f610748-18a6-4173-86d1-28be9dc62dba)]
+    runtimeclass PhoneCallStore
+    {
+        Windows.Foundation.IAsyncOperation <Boolean>  IsEmergencyPhoneNumberAsync(String number);
+        Windows.Foundation.IAsyncOperation <Guid>  GetDefaultLineAsync();
+        Windows.ApplicationModel.Calls.PhoneLineWatcher RequestLineWatcher();
+    }
+
+
+
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Calls.IPhoneCallManagerStatics2", c7e3c8bc-2370-431c-98fd-43be5f03086d)]
+    [threading(both)]
+    runtimeclass PhoneCallManager
+    {
+        static event Windows.Foundation.EventHandler <Object>  CallStateChanged;
+        static Boolean IsCallActive{ get; };
+        static Boolean IsCallIncoming{ get; };
+        static void ShowPhoneCallSettingsUI();
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Calls.PhoneCallStore>  RequestStoreAsync();
+
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+        [static_name("Windows.ApplicationModel.Calls.IPhoneCallManagerStatics", 60edac78-78a6-4872-a3ef-98325ec8b843)]
+        {
+            static void ShowPhoneCallUI(String phoneNumber, String displayName);
+        }
+    }
+
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Calls.IPhoneCallVideoCapabilitiesManagerStatics", f3c64b56-f00b-4a1c-a0c6-ee1910749ce7)]
+    [threading(both)]
+    runtimeclass PhoneCallVideoCapabilitiesManager
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Calls.PhoneCallVideoCapabilities>  GetCapabilitiesAsync(String phoneNumber);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [static_name("Windows.ApplicationModel.Calls.IPhoneCallBlockingStatics", 19646f84-2b79-26f1-a46f-694be043f313)]
+    [threading(both)]
+    runtimeclass PhoneCallBlocking
+    {
+        static Boolean BlockUnknownNumbers{ get; };
+        static Boolean BlockUnknownNumbers{ set; };
+        static Boolean BlockPrivateNumbers{ get; };
+        static Boolean BlockPrivateNumbers{ set; };
+        static Windows.Foundation.IAsyncOperation <Boolean>  SetCallBlockingListAsync(Windows.Foundation.Collections.IIterable <String>  phoneNumberList);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysAlwaysEnabled)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 5)]
+    [static_name("Windows.ApplicationModel.Calls.IPhoneLineTransportDeviceStatics", 0f3121ac-d609-51a1-96f3-fb00d1819252)]
+    [interface_name("Windows.ApplicationModel.Calls.IPhoneLineTransportDevice", efa8f889-cffa-59f4-97e4-74705b7dc490)]
+    [threading(both)]
+    runtimeclass PhoneLineTransportDevice
+    {
+        static Windows.ApplicationModel.Calls.PhoneLineTransportDevice FromId(String id);
+        [method_name("GetDeviceSelector")] static String GetDeviceSelector();
+        [method_name("GetDeviceSelectorForPhoneLineTransport")] static String GetDeviceSelector(PhoneLineTransport transport);
+        String DeviceId{ get; };
+        Windows.ApplicationModel.Calls.PhoneLineTransport Transport{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.Enumeration.DeviceAccessStatus>  RequestAccessAsync();
+        void RegisterApp();
+        void RegisterAppForUser(Windows.System.User user);
+        void UnregisterApp();
+        void UnregisterAppForUser(Windows.System.User user);
+        Boolean IsRegistered();
+        Boolean Connect();
+        Windows.Foundation.IAsyncOperation <Boolean>  ConnectAsync();
+    }
+
+}

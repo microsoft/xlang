@@ -1,0 +1,371 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.System.RemoteDesktop
+{
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.System.RemoteDesktop.IRemoteDesktopCredentialStatics", 48c67f69-6a15-53dd-a603-6e2cf147d0c3)]
+    [default_interface]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopCredential", caba4d9e-0d54-5212-9cb1-6dc3989f0761)]
+    [threading(both)]
+    runtimeclass RemoteDesktopCredential
+    {
+        static Windows.System.RemoteDesktop.RemoteDesktopCredential CreateForPasswordCredential(Windows.Security.Credentials.PasswordCredential credential);
+        static Windows.System.RemoteDesktop.RemoteDesktopCredential CreateFromUserNameAndPassword(String username, String password);
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopAuthenticationRequestReason
+    {
+        MissingCredentials,
+        InvalidCredentials,
+        FreshCredentialsRequiredByClient,
+        FreshCredentialsRequiredByServer,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopConnectionProgress
+    {
+        InitiatingRemoteConnection,
+        ConfiguringGateway,
+        SecuringGatewayConnection,
+        ConfiguringSessionHost,
+        SecuringSessionHostConnection,
+        DetectingNetworkQuality,
+        SessionBrokerFindingDestination,
+        SessionBrokerLoadingDestination,
+        SessionBrokerBringingSessionOnline,
+        SessionBrokerRedirectingToDestination,
+        VirtualMachineLoading,
+        VirtualMachineWaking,
+        VirtualMachineStarting,
+        VirtualMachineStartingSessionMonitoring,
+        VirtualMachineRetryingSessionMonitoring,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum RemoteDesktopConnectionInterruptedReason
+    {
+        EndpointUnreachable,
+        NetworkUnavailable,
+        SystemSuspended,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum RemoteDesktopConnectionHealth
+    {
+        Unknown,
+        Dropped,
+        Degraded,
+        Steady,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum RemoteDesktopDisconnectCode
+    {
+        AccountDisabled,
+        AccountExpired,
+        AccountLockedOut,
+        AccountRestricted,
+        AutoReconnectFailed,
+        CantUpgradeLicense,
+        CertExpired,
+        CertMismatch,
+        ConnectionBroken,
+        ConnectionTimeout,
+        DecompressionFailed,
+        EncryptionFailed,
+        GenericByServer,
+        GenericLicenseError,
+        GenericNetworkError,
+        GenericProtocolError,
+        GenericSecurityError,
+        CredSSPRequired,
+        IdleTimeout,
+        InitFipsFailed,
+        InvalidLicense,
+        InvalidLogonHours,
+        InvalidWorkStation,
+        KerberosUser2UserRequired,
+        LogonTimeout,
+        LogonTypeNotGranted,
+        LoopbackUnsupported,
+        NoLicenseAvailable,
+        NoLicenseServer,
+        NoRemoteConnectionLicense,
+        NoSuchUser,
+        PasswordExpired,
+        PasswordMustChange,
+        RemotingDisabled,
+        ReplacedByOtherConnection,
+        ServerDeniedConnection,
+        ServerInsufficientPrivileges,
+        ServerNameLookupFailed,
+        ServerOutOfMemory,
+        ServerTool,
+        SSLHandshakeFailed,
+        TimeSkew,
+        UnknownError,
+        UserInitiated,
+        VersionMismatch,
+        GatewayCertRevFailed,
+        GatewayInvalidCert,
+        GatewayCertRevoked,
+        GatewayCertInvalidCA,
+        GatewayCertCNInvalid,
+        GatewayCertDateInvalid,
+        GatewayAuthSupportError,
+        GatewayBadUri,
+        GatewayUnavailable,
+        GatewayDllLoadFailed,
+        GatewayLowResources,
+        GatewayRpcNotSupported,
+        GatewayNoScardService,
+        GatewayRemovedCard,
+        GatewayNoSmartCard,
+        GatewaySmartCardError,
+        GatewayInvalidAuthId,
+        GatewayTsHostNotFound,
+        GatewaySecurityPackageError,
+        GatewayRAPAccessDenied,
+        GatewayNAPAccessDenied,
+        GatewayNotAllowedByGP,
+        GatewayOutgoingAuthError,
+        GatewayPasswordExpired,
+        GatewayMaxConnectionsReached,
+        GatewayNotSupported,
+        GatewayCapabilityMismatch,
+        GatewayIncompatible,
+        GatewayInvalidSCPIN,
+        GatewayQuarantineAccessDenied,
+        GatewayNoCertAvailable,
+        GatewayUntrustedServer,
+        GatewayInvalidServerCert,
+        GatewayIncorrectCredTypePwd,
+        GatewayIncorrectCredTypeSC,
+        GatewayNoScardReader,
+        GatewayNetworkDown,
+        GatewayNoPreAuthCookie,
+        GatewayBlockedSmartcard,
+        GatewayIdleTimeout,
+        GatewaySessionTimeout,
+        GatewayCookieBadPacket,
+        GatewayCookieAuthAccessDenied,
+        GatewayUnsupportedAuthenticationMethod,
+        GatewaySDRNotSupportedByTs,
+        GatewaySccertNotFound,
+        GatewayCookieNotPresent,
+        GatewayCookieNotPresentInsecure,
+        GatewayCookieExpired,
+        GatewayCookieExpiredInsecure,
+        GatewayReauthNAPFailed,
+        GatewayCookieLengthExceeded,
+        GatewayResourceCapacityReached,
+        GatewayResourceAccessDenied,
+        GatewayResourceNotAvailable,
+        GatewayUnexpectedUserName,
+        GatewayResourceCreationPending,
+        GatewayDemoResourceNotAvailable,
+        GatewayAccountTrialExpired,
+        GatewayAccountDisabled,
+        GatewayForwardProxyError,
+        GatewayDualChannelWebProxyError,
+        GatewayUnknownError,
+        GatewaySmartCardGenericError,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopDisconnectResult
+    {
+        Pending,
+        Disconnected,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopEndpoint
+    {
+        SessionHost,
+        Gateway,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopConnectionStatus
+    {
+        New,
+        Connecting,
+        Connected,
+        Interrupted,
+        Disconnected,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [uuid(1e1600da-38f9-5315-a126-d664ccb65555)]
+    interface IRemoteDesktopConnectionState
+    {
+        Windows.System.RemoteDesktop.RemoteDesktopConnectionStatus ConnectionStatus{ get; };
+        Windows.System.RemoteDesktop.RemoteDesktopConnectingState GetAsConnectingState();
+        Windows.System.RemoteDesktop.RemoteDesktopConnectedState GetAsConnectedState();
+        Windows.System.RemoteDesktop.RemoteDesktopInterruptedState GetAsInterruptedState();
+        Windows.System.RemoteDesktop.RemoteDesktopDisconnectedState GetAsDisconnectedState();
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopConnectingState", a1a9361b-5b56-52b5-b9d3-62695a547b6b)]
+    runtimeclass RemoteDesktopConnectingState
+        : [feature(Velocity_SometimesAlwaysDisabled)]
+        Windows.System.RemoteDesktop.IRemoteDesktopConnectionState
+    {
+        Windows.System.RemoteDesktop.RemoteDesktopConnectionProgress ConnectionProgress{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopConnectedState", 1762df6c-5a90-5cdb-9496-3729c39ddd2d)]
+    runtimeclass RemoteDesktopConnectedState
+        : [feature(Velocity_SometimesAlwaysDisabled)]
+        Windows.System.RemoteDesktop.IRemoteDesktopConnectionState
+    {
+        Boolean HasLoggedIn{ get; };
+        Windows.System.RemoteDesktop.RemoteDesktopConnectionHealth ConnectionHealth{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopInterruptedState", bd6b5933-56e1-59c1-b69b-06ae192c7bf9)]
+    runtimeclass RemoteDesktopInterruptedState
+        : [feature(Velocity_SometimesAlwaysDisabled)]
+        Windows.System.RemoteDesktop.IRemoteDesktopConnectionState
+    {
+        UInt32 ReconnectAttemptCount{ get; };
+        Windows.System.RemoteDesktop.RemoteDesktopConnectionInterruptedReason InterruptedReason{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopDisconnectedState", a4ab1382-06d6-56f6-b325-1b783ea7bb81)]
+    runtimeclass RemoteDesktopDisconnectedState
+        : [feature(Velocity_SometimesAlwaysDisabled)]
+        Windows.System.RemoteDesktop.IRemoteDesktopConnectionState
+    {
+        Windows.System.RemoteDesktop.RemoteDesktopDisconnectCode DisconnectCode{ get; };
+        UInt32 ClientStackDisconnectCode{ get; };
+        UInt32 ServerStackDisconnectCode{ get; };
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [default_interface]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopNewConnectionState", 7c5a1ea8-dec7-5cac-8bbe-4a491b32ce97)]
+    runtimeclass RemoteDesktopNewConnectionState
+        : [feature(Velocity_SometimesAlwaysDisabled)]
+        Windows.System.RemoteDesktop.IRemoteDesktopConnectionState
+    {
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopConnectionStateChangedEventArgs", 5d72d448-d060-5019-af67-bd1138b49814)]
+    runtimeclass RemoteDesktopConnectionStateChangedEventArgs
+    {
+        Boolean ConnectionStatusChanged{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopAuthenticationRequestEventArgs", 2906347b-5c87-55d1-8237-b7eefc7a967b)]
+    runtimeclass RemoteDesktopAuthenticationRequestEventArgs
+    {
+        Windows.System.RemoteDesktop.RemoteDesktopEndpoint EndpointType{ get; };
+        Windows.System.RemoteDesktop.RemoteDesktopAuthenticationRequestReason Reason{ get; };
+        String UserNameHint{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+        void SetCredentials(RemoteDesktopCredential credential);
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopCertificateTrustChallengeEventArgs", e1d84919-3f9a-5afe-8105-c51bc253c4eb)]
+    runtimeclass RemoteDesktopCertificateTrustChallengeEventArgs
+    {
+        Windows.Security.Cryptography.Certificates.Certificate Certificate{ get; };
+        Windows.System.RemoteDesktop.RemoteDesktopEndpoint EndpointType{ get; };
+        Windows.Foundation.Deferral GetDeferral();
+        void SetAccepted(Boolean value);
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopConnectionResult", 23d62094-b428-5885-a343-89c6341023f7)]
+    runtimeclass RemoteDesktopConnectionResult
+    {
+        HRESULT ExtendedError{ get; };
+        Windows.System.RemoteDesktop.RemoteDesktopDisconnectCode FailureReason{ get; };
+        Boolean Success{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [constructor_name("Windows.System.RemoteDesktop.IRemoteDesktopConnectionFactory", 6c1cd581-8321-560c-99ff-5a2a2bac9577)]
+    [interface_name("Windows.System.RemoteDesktop.IRemoteDesktopConnection", 2a565525-778c-594a-88dc-b1e4e0ff88cf)]
+    [threading(both)]
+    runtimeclass RemoteDesktopConnection
+    {
+        [method_name( "CreateInstance" )] RemoteDesktopConnection(Windows.System.RemoteDesktop.Settings.RemoteDesktopConnectionSettings connectionSettings);
+        event Windows.Foundation.EventHandler <Windows.System.RemoteDesktop.RemoteDesktopAuthenticationRequestEventArgs>  AuthenticationRequired;
+        event Windows.Foundation.EventHandler <Windows.System.RemoteDesktop.RemoteDesktopCertificateTrustChallengeEventArgs>  CertificateTrustRequired;
+        event Windows.Foundation.EventHandler <Windows.System.RemoteDesktop.RemoteDesktopConnectionStateChangedEventArgs>  ConnectionStateChanged;
+        Windows.Foundation.IAsyncOperation <Windows.System.RemoteDesktop.RemoteDesktopConnectionResult>  ConnectAsync();
+        Windows.System.RemoteDesktop.RemoteDesktopDisconnectResult Disconnect();
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopConnectionProperties ActiveConnectionProperties{ get; };
+        Windows.System.RemoteDesktop.Graphics.RemoteDesktopConnectionGraphics Graphics{ get; };
+        Windows.System.RemoteDesktop.Input.RemoteDesktopConnectionInput Input{ get; };
+        Windows.System.RemoteDesktop.IRemoteDesktopConnectionState ConnectionState{ get; };
+        Windows.System.RemoteDesktop.VirtualChannels CustomDataChannels{ get; };
+    }
+
+}

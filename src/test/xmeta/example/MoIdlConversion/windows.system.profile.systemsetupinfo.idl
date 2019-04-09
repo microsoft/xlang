@@ -1,0 +1,30 @@
+
+
+
+
+
+
+
+namespace Windows.System.Profile
+{
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum SystemOutOfBoxExperienceState
+    {
+        NotStarted,
+        InProgress,
+        Completed,
+    };
+
+
+    [dualapipartition(0x1)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Profile.ISystemSetupInfoStatics", 2c9620a8-1d88-5e2d-a324-a543af4247ee)]
+    [threading(both)]
+    runtimeclass SystemSetupInfo
+    {
+        static Windows.System.Profile.SystemOutOfBoxExperienceState OutOfBoxExperienceState{ get; };
+        static event Windows.Foundation.EventHandler <Object>  OutOfBoxExperienceStateChanged;
+    }
+
+}

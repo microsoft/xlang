@@ -1,0 +1,221 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Phone.UI.Core
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    enum FULL_SCREEN_TYPE
+    {
+        FST_STANDARD,
+        FST_MINIMAL,
+        FST_SUPPRESS_SYSTEM_OVERLAYS,
+        FST_NONE,
+    };
+
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [webhosthidden]
+    enum VIEW_ADJACENT_DISPLAY_FLAGS
+    {
+        VADF_NONE,
+        VADF_ADJACENT_TO_LEFT_DISPLAY_EDGE,
+        VADF_ADJACENT_TO_RIGHT_DISPLAY_EDGE,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    enum VIEW_STATE
+    {
+        VS_FULLSCREEN_LANDSCAPE,
+        VS_FILLED,
+        VS_SNAPPED,
+        VS_FULLSCREEN_PORTRAIT,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    enum VIEW_USER_INTERACTION_MODE
+    {
+        VUIM_MOUSE,
+        VUIM_TOUCH,
+    };
+
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [webhosthidden]
+    enum VIEW_VISUAL_PRESENTATION_MODE
+    {
+        VVPM_DESKTOP,
+        VVPM_HOLOGRAPHIC,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    struct VIEW_BOUNDS
+    {
+        Int32 width;
+        Int32 height;
+        VIEW_ADJACENT_DISPLAY_FLAGS adjacentDisplayFlags;
+        VIEW_STATE applicationViewState;
+        Int32 X;
+        Int32 Y;
+        VIEW_USER_INTERACTION_MODE userInteractionMode;
+        Int32 fullScreenMode;
+        VIEW_VISUAL_PRESENTATION_MODE presentationMode;
+    };
+
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [webhosthidden]
+    struct CoreMessageRoutingInformation
+    {
+        UInt32 processId;
+        UInt32 threadId;
+        UInt64 identity;
+        UInt64 itemId;
+        Guid connectionGuid;
+    };
+
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [uuid(ebbfa3db-3082-4346-8f16-55acefc07f10)]
+    interface INavigationClient
+    {
+        Windows.ApplicationModel.Activation.SplashScreen SplashScreen{ get; };
+        Windows.ApplicationModel.Activation.SplashScreen SplashScreen{ set; };
+        Boolean IsScreenCaptureEnabled{ get; };
+        Boolean IsScreenCaptureEnabled{ set; };
+        Windows.Phone.UI.Core.FULL_SCREEN_TYPE SuppressSystemOverlays{ get; };
+        Windows.Phone.UI.Core.FULL_SCREEN_TYPE SuppressSystemOverlays{ set; };
+        Windows.Foundation.Rect VisibleBounds{ get; };
+        event Windows.Foundation.TypedEventHandler <Object, Object>  OrientationChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.UI.Core.INavigationClient, Object>  TitleBarVisibilityChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.UI.Core.INavigationClient, Object>  TitleBarLayoutMetricsChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Phone.UI.Core.INavigationClient, Object>  TitleBarInputRoutingInfoChanged;
+        Windows.Graphics.Display.DisplayOrientations GetCurrentOrientation();
+        void OnActivateWindow(Windows.UI.Core.CoreWindow window);
+        void OnCloseWindow(Windows.UI.Core.CoreWindow window);
+        void OnDestroyWindow(Windows.UI.Core.CoreWindow window);
+        Windows.Graphics.Display.DisplayOrientations GetNativeOrientation();
+        void ShowStandardSystemOverlays();
+        UInt32 GetViewInstanceId();
+        Windows.Phone.UI.Core.VIEW_BOUNDS GetViewBounds();
+        void SetPreferredMinSize(Windows.Foundation.Size value);
+        Int32 PreferredLaunchWindowingMode{ get; };
+        Int32 PreferredLaunchWindowingMode{ set; };
+        Windows.Foundation.Size PreferredLaunchViewSize{ get; };
+        Windows.Foundation.Size PreferredLaunchViewSize{ set; };
+        Boolean IsViewExtendedIntoTitleBar{ get; };
+        Boolean IsViewExtendedIntoTitleBar{ set; };
+        Double TitleBarHeight{ get; };
+        Boolean IsTitleBarVisible{ get; };
+        Double TitleBarSystemOverlayLeftInset{ get; };
+        Double TitleBarSystemOverlayRightInset{ get; };
+        Windows.Phone.UI.Core.CoreMessageRoutingInformation TitleBarInputRoutingInfo{ get; };
+        UInt32 TitleBarInputRoutingHwnd{ get; };
+        Boolean IsTitleBarInputVisualSet{ get; };
+        Boolean IsTitleBarInputVisualSet{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarTextColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarTextColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarBackgroundColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarBackgroundColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonTextColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonTextColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonBackgroundColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonBackgroundColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonHoverTextColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonHoverTextColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonHoverBackgroundColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonHoverBackgroundColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonPressedTextColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonPressedTextColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonPressedBackgroundColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarButtonPressedBackgroundColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveTextColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveTextColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveBackgroundColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveBackgroundColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveButtonTextColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveButtonTextColorOverride{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveButtonBackgroundColorOverride{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  TitleBarInactiveButtonBackgroundColorOverride{ set; };
+        Boolean OnNavigateBackRequest();
+        void SetAppAsComponent();
+        void DisableResponsiveAppViewPolicy();
+        void Uninitialize(Windows.UI.Core.CoreWindow window);
+    };
+
+    [uuid(e69088f4-56a8-4f05-80b5-e4a12da00e80)]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [webhosthidden]
+    interface INavigationClient2
+    {
+        event Windows.Foundation.TypedEventHandler <Object, Windows.Phone.UI.Core.IPresentationChangingEventArgs>  PresentationLoading;
+        event Windows.Foundation.TypedEventHandler <Object, Windows.Phone.UI.Core.IPresentationChangingEventArgs>  PresentationUnloaded;
+    };
+
+    [webhosthidden]
+    [uuid(5858ed02-a38f-41ee-a1c4-82a5887dee56)]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    interface IPresentationChangingEventArgs
+    {
+        Windows.Foundation.Deferral GetDeferral();
+    };
+
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [uuid(2aaaf8e1-cf26-44df-a957-fe4d29ace3ad)]
+    interface INavigationClient_WindowExperience
+    {
+        Boolean IsPinnedStateEnabled{ get; };
+        Boolean IsPinnedStateEnabled{ set; };
+    };
+
+
+    [marshaling_behavior(none)]
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [constructor_name("Windows.Phone.UI.Core.IImmersiveNavigationClientFactory", dba869da-c1c7-4a0d-a705-daaac1397e51)]
+    runtimeclass ImmersiveNavigationClient
+        : [default]Windows.Phone.UI.Core.INavigationClient
+    {
+        [method_name( "Create" )] ImmersiveNavigationClient(UInt32 viewInstanceId);
+    }
+
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [marshaling_behavior(none)]
+    [webhosthidden]
+    runtimeclass NavigationClient
+        : [default]Windows.Phone.UI.Core.INavigationClient
+        , Windows.Phone.UI.Core.INavigationClient2
+    {
+    }
+
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    [marshaling_behavior(none)]
+    [webhosthidden]
+    runtimeclass CoreNavigationClient
+        : [default]Windows.Phone.UI.Core.INavigationClient
+    {
+    }
+
+    [marshaling_behavior(none)]
+    [webhosthidden]
+    [contract(Windows.Phone.UI.Core.InternalContract, 1)]
+    runtimeclass PresentationChangingEventArgs
+        : [default]Windows.Phone.UI.Core.IPresentationChangingEventArgs
+    {
+    }
+
+}

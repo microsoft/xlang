@@ -1,0 +1,103 @@
+
+
+
+
+
+
+
+namespace Windows.Media.Devices
+{
+    [contractversion(1)]
+    apicontract CallControlContract{};
+
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    enum TelephonyKey
+    {
+        D0,
+        D1,
+        D2,
+        D3,
+        D4,
+        D5,
+        D6,
+        D7,
+        D8,
+        D9,
+        Star,
+        Pound,
+        A,
+        B,
+        C,
+        D,
+    };
+
+
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IDialRequestedEventArgs", 037b929e-953c-4286-8866-4f0f376c855a)]
+    runtimeclass DialRequestedEventArgs
+    {
+        void Handled();
+        Object Contact{ get; };
+    }
+
+
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Devices.IRedialRequestedEventArgs", 7eb55209-76ab-4c31-b40e-4b58379d580c)]
+    runtimeclass RedialRequestedEventArgs
+    {
+        void Handled();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    [interface_name("Windows.Media.Devices.IKeypadPressedEventArgs", d3a43900-b4fa-49cd-9442-89af6568f601)]
+    runtimeclass KeypadPressedEventArgs
+    {
+        Windows.Media.Devices.TelephonyKey TelephonyKey{ get; };
+    }
+
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    [uuid(596f759f-50df-4454-bc63-4d3d01b61958)]
+    delegate void CallControlEventHandler(CallControl sender);
+
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.Devices.ICallControlStatics", 03945ad5-85ab-40e1-af19-56c94303b019)]
+    [interface_name("Windows.Media.Devices.ICallControl", a520d0d6-ae8d-45db-8011-ca49d3b3e578)]
+    [threading(both)]
+    runtimeclass CallControl
+    {
+        static Windows.Media.Devices.CallControl GetDefault();
+        static Windows.Media.Devices.CallControl FromId(String deviceId);
+        UInt64 IndicateNewIncomingCall(Boolean enableRinger, String callerId);
+        UInt64 IndicateNewOutgoingCall();
+        void IndicateActiveCall(UInt64 callToken);
+        void EndCall(UInt64 callToken);
+        Boolean HasRinger{ get; };
+        event Windows.Media.Devices.CallControlEventHandler AnswerRequested;
+        event Windows.Media.Devices.CallControlEventHandler HangUpRequested;
+        event Windows.Media.Devices.DialRequestedEventHandler DialRequested;
+        event Windows.Media.Devices.RedialRequestedEventHandler RedialRequested;
+        event Windows.Media.Devices.KeypadPressedEventHandler KeypadPressed;
+        event Windows.Media.Devices.CallControlEventHandler AudioTransferRequested;
+    }
+
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    [uuid(5abbffdb-c21f-4bc4-891b-257e28c1b1a4)]
+    delegate void DialRequestedEventHandler(CallControl sender, DialRequestedEventArgs e);
+
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    [uuid(baf257d1-4ebd-4b84-9f47-6ec43d75d8b1)]
+    delegate void RedialRequestedEventHandler(CallControl sender, RedialRequestedEventArgs e);
+
+    [uuid(e637a454-c527-422c-8926-c9af83b559a0)]
+    [contract(Windows.Media.Devices.CallControlContract, 1)]
+    delegate void KeypadPressedEventHandler(CallControl sender, KeypadPressedEventArgs e);
+
+
+
+}

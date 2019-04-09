@@ -1,0 +1,87 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IFileTypeAssociationStatics", 8645456f-d9a2-4b82-afec-58f0e8df0acf)]
+    [interface_name("Windows.Internal.StateRepository.IFileTypeAssociation", 4cc8fe6a-5976-4ece-ac32-62e2a5497f46)]
+    [threading(both)]
+    runtimeclass FileTypeAssociation
+    {
+        FileTypeAssociation();
+        static Boolean Exists(Int64 fileTypeAssociationID);
+        static Boolean ExistsByContentType(String ContentType);
+        static Boolean ExistsByContentTypeAndExtension(String ContentType, ApplicationExtension Extension);
+        static Boolean ExistsByExtension(ApplicationExtension Extension);
+        static Boolean ExistsByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Boolean ExistsByFileType(String FileType);
+        static Boolean ExistsByFileTypeAndExtension(String FileType, ApplicationExtension Extension);
+        static Boolean ExistsByProgID(String ProgID);
+        static Boolean ExistsByProgIDAndExtension(String ProgID, ApplicationExtension Extension);
+        static Windows.Internal.StateRepository.FileTypeAssociation Get(Int64 fileTypeAssociationID);
+        static Windows.Internal.StateRepository.FileTypeAssociation TryGet(Int64 fileTypeAssociationID);
+        static Windows.Internal.StateRepository.FileTypeAssociation GetByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Windows.Internal.StateRepository.FileTypeAssociation TryGetByExtensionAndIndex(ApplicationExtension Extension, Int32 Index);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByContentType(String ContentType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByContentTypeAndExtension(String ContentType, ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByExtension(ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByFileType(String FileType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByFileTypeAndExtension(String FileType, ApplicationExtension Extension);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByProgID(String ProgID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByProgIDAndExtension(String ProgID, ApplicationExtension Extension);
+        static Boolean ExistsByUserAndContentType(User user, String contentType);
+        static Boolean ExistsByUserOrDefaultAccountAndContentType(User user, String contentType);
+        static Boolean ExistsByUserOrDefaultAccountAndContentTypeAndPackageFamilyName(User user, String contentType, String packageFamilyName);
+        static Boolean ExistsByUserAndFileType(User user, String fileType);
+        static Boolean ExistsByUserOrDefaultAccountAndFileType(User user, String fileType);
+        static Boolean ExistsByUserOrDefaultAccountAndFileTypeAndPackageFamilyName(User user, String fileType, String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByUserAndContentType(User user, String contentType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociationLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndContentType(User user, String contentType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociationLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndContentTypeAndPackageFamilyName(User user, String contentType, String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByUserAndFileType(User user, String fileType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociation>  FindByUser(User user);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociationLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndFileType(User user, String fileType);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociationLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndFileTypeAndPackageFamilyName(User user, String fileType, String packageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.FileTypeAssociationLauncherInfo>  FindLauncherInfoByUserOrDefaultAccountAndProgId(User user, String progId);
+        Int64 _FileTypeAssociationID{ get; };
+        Int64 _FileTypeAssociationID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        String FileType{ get; };
+        String FileType{ set; };
+        Boolean IsContentTypeNull{ get; };
+        void SetContentTypeToNull();
+        String ContentType{ get; };
+        String ContentType{ set; };
+        Int64 Extension{ get; };
+        Int64 Extension{ set; };
+        Windows.Internal.StateRepository.ApplicationExtension GetExtension();
+        void SetExtension(ApplicationExtension value);
+        Int32 Index{ get; };
+        Int32 Index{ set; };
+        Boolean IsProgIDNull{ get; };
+        void SetProgIDToNull();
+        String ProgID{ get; };
+        String ProgID{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

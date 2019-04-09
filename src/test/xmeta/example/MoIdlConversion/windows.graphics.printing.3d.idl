@@ -1,0 +1,118 @@
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Printing3D
+{
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    enum Print3DTaskDetail
+    {
+        Unknown,
+        ModelExceedsPrintBed,
+        UploadFailed,
+        InvalidMaterialSelection,
+        InvalidModel,
+        ModelNotManifold,
+        InvalidPrintTicket,
+    };
+
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    enum Print3DTaskCompletion
+    {
+        Abandoned,
+        Canceled,
+        Failed,
+        Slicing,
+        Submitted,
+    };
+
+
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing3D.IPrint3DTaskCompletedEventArgs", cc1914af-2614-4f1d-accc-d6fc4fda5455)]
+    runtimeclass Print3DTaskCompletedEventArgs
+    {
+        Windows.Graphics.Printing3D.Print3DTaskCompletion Completion{ get; };
+        Windows.Graphics.Printing3D.Print3DTaskDetail ExtendedStatus{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [interface_name("Windows.Graphics.Printing3D.IPrint3DTaskSourceChangedEventArgs", 5bcd34af-24e9-4c10-8d07-14c346ba3fcf)]
+    runtimeclass Print3DTaskSourceChangedEventArgs
+    {
+        Windows.Graphics.Printing3D.Printing3D3MFPackage Source{ get; };
+    }
+
+
+    [muse(0xa000000)]
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Graphics.Printing3D.IPrint3DTask", 8ce3d080-2118-4c28-80de-f426d70191ae)]
+    runtimeclass Print3DTask
+    {
+        Windows.Graphics.Printing3D.Printing3D3MFPackage Source{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing3D.Print3DTask, Object>  Submitting;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing3D.Print3DTask, Windows.Graphics.Printing3D.Print3DTaskCompletedEventArgs>  Completed;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing3D.Print3DTask, Windows.Graphics.Printing3D.Print3DTaskSourceChangedEventArgs>  SourceChanged;
+    }
+
+
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [dualapipartition(0xa000000)]
+    [muse(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing3D.IPrint3DTaskSourceRequestedArgs", c77c9aba-24af-424d-a3bf-92250c355602)]
+    runtimeclass Print3DTaskSourceRequestedArgs
+    {
+        void SetSource(Printing3D3MFPackage source);
+    }
+
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [uuid(e9175e70-c917-46de-bb51-d9a94db3711f)]
+    delegate void Print3DTaskSourceRequestedHandler(Print3DTaskSourceRequestedArgs args);
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [muse(0xa000000)]
+    [interface_name("Windows.Graphics.Printing3D.IPrint3DTaskRequest", 2595c46f-2245-4c5a-8731-0d604dc6bc3c)]
+    runtimeclass Print3DTaskRequest
+    {
+        Windows.Graphics.Printing3D.Print3DTask CreateTask(String title, String printerId, Print3DTaskSourceRequestedHandler handler);
+    }
+
+
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Printing3D.IPrint3DTaskRequestedEventArgs", 150cb77f-18c5-40d7-9f40-fab3096e05a9)]
+    runtimeclass Print3DTaskRequestedEventArgs
+    {
+        Windows.Graphics.Printing3D.Print3DTaskRequest Request{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Graphics.Printing3D.Printing3DContract, 1)]
+    [static_name("Windows.Graphics.Printing3D.IPrint3DManagerStatics", 0ef1cafe-a9ad-4c08-a917-1d1f863eabcb)]
+    [interface_name("Windows.Graphics.Printing3D.IPrint3DManager", 4d2fcb0a-7366-4971-8bd5-17c4e3e8c6c0)]
+    [threading(both)]
+    runtimeclass Print3DManager
+    {
+        static Windows.Graphics.Printing3D.Print3DManager GetForCurrentView();
+        static Windows.Foundation.IAsyncOperation <Boolean>  ShowPrintUIAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Printing3D.Print3DManager, Windows.Graphics.Printing3D.Print3DTaskRequestedEventArgs>  TaskRequested;
+    }
+
+
+}

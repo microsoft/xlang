@@ -1,0 +1,24 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [uuid(268a1f54-7eff-4fef-bff7-1ab51cfa7d6d)]
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [internal]
+    interface ICoreShellProductExtension
+    {
+    };
+
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CoreShellProductExtension
+        : [default]Windows.Internal.ComposableShell.ICoreShellProductExtension
+    {
+    }
+
+}

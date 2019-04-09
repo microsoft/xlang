@@ -1,0 +1,49 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Shell
+{
+    [contractversion(1)]
+    apicontract SecurityAppManagerContract{};
+
+    [contract(Windows.UI.Shell.SecurityAppManagerContract, 1)]
+    enum SecurityAppKind
+    {
+        WebProtection,
+    };
+
+    [contract(Windows.UI.Shell.SecurityAppManagerContract, 1)]
+    enum SecurityAppState
+    {
+        Disabled,
+        Enabled,
+    };
+
+    [contract(Windows.UI.Shell.SecurityAppManagerContract, 1)]
+    enum SecurityAppSubstatus
+    {
+        Undetermined,
+        NoActionNeeded,
+        ActionRecommended,
+        ActionNeeded,
+    };
+
+
+    [contract(Windows.UI.Shell.SecurityAppManagerContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Shell.ISecurityAppManager", 96ac500c-aed4-561d-bde8-953520343a2d)]
+    [threading(both)]
+    runtimeclass SecurityAppManager
+    {
+        SecurityAppManager();
+        Guid Register(SecurityAppKind kind, String displayName, Windows.Foundation.Uri detailsUri, Boolean registerPerUser);
+        void Unregister(SecurityAppKind kind, Guid guidRegistration);
+        void UpdateState(SecurityAppKind kind, Guid guidRegistration, SecurityAppState state, SecurityAppSubstatus substatus, Windows.Foundation.Uri detailsUri);
+    }
+
+}

@@ -1,0 +1,279 @@
+
+
+
+
+
+
+
+
+
+namespace Microsoft.HyperV.DataStore
+{
+    [contractversion(1)]
+    [internal]
+    apicontract DataStoreContract{};
+
+    [flags]
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    enum KeyValueStoreOpenFlags
+    {
+        Open,
+        OpenIf,
+        Create,
+        Supersede,
+        OpenDispositionMask = 3,
+        ExclusiveMode = 8,
+        NoReplayLogMode = 16,
+        ReadOnly = 32,
+        ShareDelete = 64,
+        LargePreallocate = 256,
+        AllowDisconnectedOpen = 512,
+        DisableCaHandles = 4096,
+    };
+
+    [flags]
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    enum KeyValueStoreObjectType
+    {
+        EmptyObjectType,
+        ObjectTableType,
+        KeyTableType,
+        FileObjectType,
+        FreeObjectType,
+        HeaderObjectType = 6,
+        ReplayLogObjectType,
+        ChangeTrackingBufferType,
+    };
+
+    [flags]
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    enum KeyValueStoreElementType
+    {
+        ObjectUnknown,
+        ObjectHeader,
+        ObjectData,
+        ObjectFree,
+    };
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    struct KeyValueStoreElementInformation
+    {
+        KeyValueStoreObjectType ObjectType;
+        KeyValueStoreElementType SubType;
+        UInt64 Offset;
+        UInt32 Size;
+    };
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    struct KeyValueStorePerfInfo
+    {
+        Int32 ConfigLockCount;
+        Int32 AcquireConfigLockAverageMilliseconds;
+        Int32 LockCount;
+        Int32 AcquireLockAverageMilliseconds;
+        Int32 ReleaseLockAverageMilliseconds;
+        Int32 AcquireFileLockAverageMilliseconds;
+        Int32 ReleaseFileLockAverageMilliseconds;
+        Int32 CacheUpdateAverageMilliseconds;
+        Int32 CommitAverageMilliseconds;
+        Int32 CommitBytesPerSecondAverage;
+        Int32 CompactAverageMilliseconds;
+        Int32 LoadFileAverageMilliseconds;
+        Int32 QuerySizeAverageMilliseconds;
+        Int32 RemoveAverageMilliseconds;
+        Int32 GetAverageMilliseconds;
+        Int32 SetAverageMilliseconds;
+        Int32 RemoveCount;
+        Int32 SetCount;
+        Int32 GetCount;
+        Int32 QuerySizeCount;
+        Int32 CommitCount;
+        Int32 CacheUpdateCount;
+        Int32 CompactCount;
+        Int32 ReadBytes;
+        Int32 ReadBytesPerSecondAverage;
+        Int32 WrittenBytes;
+        Int32 WriteBytesPerSecondAverage;
+        Int32 FileReadBytes;
+        Int32 FileReadBytesPerSecondAverage;
+        Int32 FileReadCount;
+        Int32 FileWrittenBytes;
+        Int32 FileWriteCount;
+    };
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    enum KeyValueStoreStreamType
+    {
+        Xml,
+        Binary,
+    };
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    enum KeyValueStoreIteratorType
+    {
+        EnumerateEverything,
+        EnumerateLeafs,
+        EnumerateChildren,
+    };
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    [uuid(d4ac26ac-7949-459c-ae20-70ab4262352f)]
+    interface IKeyValueFileIo
+    {
+        void Open(String FileName, UInt32 OpenFlags, out Boolean NewFile);
+    };
+
+    [uuid(95f0df49-db5b-47db-8f32-f9a62b5c27a7)]
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    interface IKeyValueMemoryFileIoBufferInfo
+    {
+        Windows.Storage.Streams.IBuffer AllocationContext{ get; };
+        Windows.Storage.Streams.IBuffer BaseBuffer{ get; };
+    };
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    [uuid(8a7a5f30-c967-4d41-8e46-93796e02bc5b)]
+    interface IKeyValueMemoryFileIoAllocator
+    {
+        Boolean LoadBuffers(Windows.Foundation.Collections.IVector <Microsoft.HyperV.DataStore.IKeyValueMemoryFileIoBufferInfo>  Buffers);
+        void SaveBuffers(Windows.Foundation.Collections.IVector <Microsoft.HyperV.DataStore.IKeyValueMemoryFileIoBufferInfo>  Buffers);
+        [return_name("BufferInfo")] Microsoft.HyperV.DataStore.IKeyValueMemoryFileIoBufferInfo AllocateBuffer(UInt32 BytesRequested, out UInt32 BytesAllocated);
+        void FreeBuffer(UInt32 SizeInBytes, IKeyValueMemoryFileIoBufferInfo BufferInfo);
+    };
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    [uuid(d9b11efa-c25c-4751-a1c9-14536b6ccbe1)]
+    interface IKeyValueStoreNodeInfo
+    {
+        Boolean IsValidEntry();
+        Boolean IsValue();
+        Boolean IsSubComponent();
+        String GetKeyName();
+        String GetNodeName();
+        String GetDataTypeAsString();
+        String GetDataAsString();
+        Microsoft.HyperV.DataStore.KeyValueStoreKeyType GetDataType();
+        UInt32 GetDataLength();
+        UInt32 GetDataValue(Windows.Storage.Streams.IBuffer DataBuffer);
+        Boolean LastIncrementClosedNode();
+        Int32 GetTreeDepth();
+    };
+
+
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    [marshaling_behavior(none)]
+    [static_name("Microsoft.HyperV.DataStore.IKeyValueStoreStatics", 01d7d0f9-d311-4699-8a4c-75096b7e597e)]
+    [constructor_name("Microsoft.HyperV.DataStore.IKeyValueStoreFactory", 04ce619a-6775-4f29-be77-b4e2bc2dda3a)]
+    [interface_name("Microsoft.HyperV.DataStore.IKeyValueStore", 6de696aa-007c-4612-8392-7e2143eef6db)]
+    runtimeclass KeyValueStore
+        : Windows.Foundation.Collections.IIterable<Microsoft.HyperV.DataStore.IKeyValueStoreNodeInfo>
+    {
+        static Microsoft.HyperV.DataStore.KeyValueStore CreateTransientInstance();
+        [method_name( "CreateInstance" )] KeyValueStore(String FileName, UInt32 Flags);
+        [method_name( "CreateInstanceWithFileIo" )] KeyValueStore(IKeyValueFileIo KvFileIo);
+        KeyValueStore();
+        void SetIntegerValue(String Key, Int64 Value);
+        Int64 GetIntegerValue(String Key);
+        void SetUnsignedIntegerValue(String Key, UInt64 Value);
+        UInt64 GetUnsignedIntegerValue(String Key);
+        void SetBooleanValue(String Key, Boolean Value);
+        Boolean GetBooleanValue(String Key);
+        void SetFloatingPointValue(String Key, Double Value);
+        Double GetFloatingPointValue(String Key);
+        void SetStringValue(String Key, String Value);
+        String GetStringValue(String Key);
+        void SetRawValue(String Key, Windows.Storage.Streams.IBuffer DataBuffer);
+        UInt32 GetRawValue(String Key, Windows.Storage.Streams.IBuffer DataBuffer);
+        void SetVariantValue(String Key, Object Value);
+        void GetVariantValue(String Key, out Object Value);
+        UInt32 QueryValueSize(String Key);
+        void RemoveValue(String Key);
+        Microsoft.HyperV.DataStore.KeyValueStoreKeyType GetEntryType(String Key);
+        void SetValueFromString(String KeyName, KeyValueStoreKeyType KeyType, String KeyValue);
+        String GetDataAsString(String KeyName);
+        void Lock(Boolean Exclusive);
+        void Unlock();
+        Boolean ThreadHoldsExclusiveLock();
+        void WriteToStream(Windows.Storage.Streams.IRandomAccessStream Stream, KeyValueStoreStreamType StreamType, Boolean IncludeByteOrderMark, Boolean WriteStandaloneDocument, String PrefixPath, Windows.Foundation.Collections.IVector <String>  NodesToSkip);
+        void ReadFromStream(Windows.Storage.Streams.IRandomAccessStream Stream, KeyValueStoreStreamType StreamType, Boolean ReadStandaloneDocument, String PrefixPath);
+        void AddNodeToStreamBinary(Windows.Storage.Streams.IRandomAccessStream Stream, String NodePath, String NodeToSkip);
+        void Unload();
+        void Commit();
+        Boolean CommitRequired();
+        void ClearAll();
+        void Store(String Filename, UInt32 Flags);
+        void CopyData(KeyValueStore SourceFile);
+        Boolean IsInTransientMode();
+        Windows.Foundation.Collections.IIterator <Microsoft.HyperV.DataStore.IKeyValueStoreNodeInfo>  Find(String KeyName, KeyValueStoreIteratorType IteratorType);
+        void SetDataVersion(UInt32 DataVersion);
+        UInt32 GetDataVersion();
+        UInt32 GetNumberOfKeys();
+        UInt64 GetNamesSizeInBytes();
+        UInt64 GetTableDataSizeInBytes();
+        UInt64 GetFileDataSizeInBytes();
+        UInt32 GetNumberOfKeyTables();
+        UInt32 GetNumberOfObjectTables();
+        UInt64 GetDataEnd();
+        UInt64 GetNumberOfFreeBytesInsideKeyTables();
+        UInt64 GetCurrentReplayLogSize();
+        UInt32 GetDataAlignment();
+        UInt32 GetSectorSize();
+        void SetSectorSize(UInt32 SectorSize);
+        UInt32 GetFragmentationRatio();
+        Boolean UsingFileTime();
+        Windows.Foundation.Collections.IVector <Microsoft.HyperV.DataStore.KeyValueStoreElementInformation>  GetElementInformation(Boolean ObjectsOnly);
+        UInt64 EnableSequenceChangeTracking(String RepositoryKey);
+        void DisableSequenceChangeTracking(String RepositoryKey);
+        UInt64 GetChangeTrackingSequenceNumber(String RepositoryKey);
+        void EnableChangeTracking();
+        void DisableChangeTracking();
+        UInt32 GetChangeTrackingBufferSize();
+        UInt32 GetChangeTrackingBuffer(Windows.Storage.Streams.IBuffer Buffer);
+        void ResetChangeTracking();
+        Boolean ChangeTrackingEnabled();
+        void ApplyChangeTrackingBuffer(Windows.Storage.Streams.IBuffer Buffer);
+
+        [interface_name("Microsoft.HyperV.DataStore.IKeyValueFileBackend", 7542bc1f-aad8-4900-abb3-a42349329f86)]
+        {
+            void Initialize();
+            void Open(String FileName, UInt32 Flags);
+            void Close();
+            UInt32 GetFlags();
+            Windows.Foundation.DateTime GetCreationTime();
+            Windows.Foundation.DateTime GetLastWriteTime();
+            void Compact(Boolean TruncateFile);
+            void SetEndOfFile(UInt64 EndOfFile);
+            UInt64 GetEndOfFile();
+            String GetFilename();
+            void Finalize();
+            void EnterFinalizationMode();
+            void CancelFinalizationMode();
+            Boolean IsInFinalizationMode();
+            Boolean IsStorageConnected();
+            void Reconnect();
+            void Disconnect(HRESULT Reason);
+            Microsoft.HyperV.DataStore.KeyValueStorePerfInfo GetStoragePerformanceInfo();
+            void Control(UInt32 ControlCode, Windows.Storage.Streams.IBuffer InputBuffer, Windows.Storage.Streams.IBuffer OutputBuffer, out UInt32 OutputWritten);
+        }
+    }
+
+
+
+
+    [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+    [marshaling_behavior(none)]
+    runtimeclass KeyValueFileIo
+        : [default]Microsoft.HyperV.DataStore.IKeyValueFileIo
+    {
+        KeyValueFileIo();
+
+        [contract(Microsoft.HyperV.DataStore.DataStoreContract, 1)]
+        [constructor_name("Microsoft.HyperV.DataStore.IKeyValueFileIoFactory", 0ef2dfb3-ee03-45c1-94ee-441788a43ddb)]
+        {
+            [method_name( "CreateMemoryFileIoInstance" )] KeyValueFileIo(IKeyValueMemoryFileIoAllocator Allocator);
+            [method_name( "CreateFailoverFileIoInstance" )] KeyValueFileIo(IKeyValueFileIo PrimaryFileIo, IKeyValueFileIo BackupFileIo);
+        }
+    }
+
+}

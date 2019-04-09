@@ -1,0 +1,157 @@
+
+
+
+
+
+
+
+
+
+namespace WindowsDevicePortal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract WindowsDevicePortalContract{};
+
+    [uuid(b836c2cd-f724-4c8a-89db-e003cd1fd645)]
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    interface IDevicePortalPlugin
+    {
+        void Initialize(IDevicePortalServer server);
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(59f7d490-942d-41c7-b850-2cf15d27a56b)]
+    interface IDevicePortalServer
+    {
+        void RegisterHttpHandler(String route, IDevicePortalHttpHandler handler);
+        void RegisterAsyncWebsocketHandler(String route, IDevicePortalAsyncWebsocketHandler handler);
+        void RegisterWebsocketHandler(String route, IDevicePortalWebsocketHandler handler);
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(d10c54ce-6b60-46fc-a0ad-84d1455eed87)]
+    interface IDevicePortalHttpHandler
+    {
+        void HandleRequest(IDevicePortalHttpRequest request, IDevicePortalHttpResponse response);
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(80e28c8c-4118-4f49-8aad-5751dd930501)]
+    interface IDevicePortalHttpRequest
+    {
+        WindowsDevicePortal.DevicePortalHttpRequestVerb Verb{ get; };
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Collections.IMapView <String, String>  GetHeaders();
+        Windows.Foundation.Collections.IVectorView <WindowsDevicePortal.IDevicePortalCookie>  GetCookies();
+        String GetContentType();
+        void GetBinary(out Windows.Storage.Streams.IBuffer buffer, out Int32 isLastFragment);
+        void GetText(out String buffer, out Int32 isLastFragment);
+        Windows.Foundation.Collections.IVectorView <String>  GetFiles();
+        Int32 IsWebsocketUpgradeRequest();
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    enum DevicePortalHttpRequestVerb
+    {
+        VerbUnparsed,
+        VerbUnknown,
+        VerbInvalid,
+        VerbOPTIONS,
+        VerbGET,
+        VerbHEAD,
+        VerbPOST,
+        VerbPUT,
+        VerbDELETE,
+        VerbTRACE,
+        VerbCONNECT,
+        VerbTRACK,
+        VerbMOVE,
+        VerbCOPY,
+        VerbPROPFIND,
+        VerbPROPPATCH,
+        VerbMKCOL,
+        VerbLOCK,
+        VerbUNLOCK,
+        VerbSEARCH,
+    };
+
+    [uuid(68fbcc34-3d11-4840-9ca3-c390720f299a)]
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    interface IDevicePortalCookie
+    {
+        String Name{ get; };
+        String Value{ get; };
+        UInt32 Version{ get; };
+        String Path{ get; };
+        String Domain{ get; };
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(ba002bfc-1859-410d-b042-7bfe678bec4a)]
+    interface IDevicePortalHttpResponse
+    {
+        String ContentType{ get; };
+        String ContentType{ set; };
+        UInt16 Status{ get; };
+        UInt16 Status{ set; };
+        String StatusReason{ get; };
+        String StatusReason{ set; };
+        void SetHeader(String name, String value);
+        void AddCookie(IDevicePortalServerCookie cookie);
+        void SendRedirect(Windows.Foundation.Uri uri);
+        void SendText(String string, Int32 isLastFragment);
+        void SendBinary(Windows.Storage.Streams.IBuffer buffer, Int32 isLastFragment);
+        void SendFile(String file);
+        void RedirectToSecure();
+        String ResolveLocalFile(String fileName);
+        void RunAsyncWebsocket(IDevicePortalAsyncWebsocketHandler handler);
+        void RunWebsocket(IDevicePortalWebsocketHandler handler);
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(1f7a2a0b-d9e1-4069-8758-11d4b3269151)]
+    interface IDevicePortalServerCookie requires WindowsDevicePortal.IDevicePortalCookie
+    {
+        Int32 Secure{ get; };
+        String Comment{ get; };
+        String MaxAge{ get; };
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(f2173a1c-28d3-4b50-a196-42d71561387d)]
+    interface IDevicePortalAsyncWebsocketHandler
+    {
+        void OnStart(IDevicePortalAsyncWebsocket socket);
+        void OnClose();
+        void OnTextMessage(String message);
+        void OnBinaryMessage(Windows.Storage.Streams.IBuffer message);
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(0f643e1f-1989-4f32-b8d2-f788188599ed)]
+    interface IDevicePortalAsyncWebsocket
+    {
+        void SendTextMessage(String message);
+        void SendBinaryMessage(Windows.Storage.Streams.IBuffer message);
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(e533e9ea-d94a-4ed8-8241-2b5dfff73bb0)]
+    interface IDevicePortalWebsocketHandler
+    {
+        void OnRun(IDevicePortalWebsocket socket);
+    };
+
+    [contract(WindowsDevicePortal.WindowsDevicePortalContract, 1)]
+    [uuid(05b74ded-e215-4018-b642-ba299f84a977)]
+    interface IDevicePortalWebsocket
+    {
+        Int32 Closed{ get; };
+        void SendTextMessage(String message);
+        void SendBinaryMessage(Windows.Storage.Streams.IBuffer message);
+        String WaitForTextMessage(UInt32 timeout);
+        Windows.Storage.Streams.IBuffer WaitForBinaryMessage(UInt32 timeout);
+    };
+
+}

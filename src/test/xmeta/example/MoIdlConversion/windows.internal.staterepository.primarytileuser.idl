@@ -1,0 +1,88 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IPrimaryTileUserStatics", 8143a469-a66f-4193-b544-54421662511c)]
+    [interface_name("Windows.Internal.StateRepository.IPrimaryTileUser", c6d9a0f2-ed00-4f2c-ae44-70701099ebc0)]
+    [threading(both)]
+    runtimeclass PrimaryTileUser
+    {
+        PrimaryTileUser();
+        static void Add(PrimaryTileUser value);
+        static void Update(PrimaryTileUser value);
+        static void Delete(PrimaryTileUser value);
+        static void DeleteById(Int64 primaryTileUserID);
+        static void DeleteByTileUniqueId(Guid TileUniqueId);
+        static void DeleteByUserAndApplicationIdentity(User User, ApplicationIdentity ApplicationIdentity);
+        static Boolean Exists(Int64 primaryTileUserID);
+        static Boolean ExistsByApplicationIdentity(ApplicationIdentity ApplicationIdentity);
+        static Boolean ExistsByTileUniqueId(Guid TileUniqueId);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndApplicationIdentity(User User, ApplicationIdentity ApplicationIdentity);
+        static Boolean ExistsBy_Created(Int64 _Created);
+        static Boolean ExistsBy_Modified(Int64 _Modified);
+        static Windows.Internal.StateRepository.PrimaryTileUser Get(Int64 primaryTileUserID);
+        static Windows.Internal.StateRepository.PrimaryTileUser TryGet(Int64 primaryTileUserID);
+        static Windows.Internal.StateRepository.PrimaryTileUser GetByTileUniqueId(Guid TileUniqueId);
+        static Windows.Internal.StateRepository.PrimaryTileUser TryGetByTileUniqueId(Guid TileUniqueId);
+        static Windows.Internal.StateRepository.PrimaryTileUser GetByUserAndApplicationIdentity(User User, ApplicationIdentity ApplicationIdentity);
+        static Windows.Internal.StateRepository.PrimaryTileUser TryGetByUserAndApplicationIdentity(User User, ApplicationIdentity ApplicationIdentity);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUser>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUser>  FindByApplicationIdentity(ApplicationIdentity ApplicationIdentity);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUser>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUser>  FindBy_Created(Int64 _Created);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUser>  FindBy_Modified(Int64 _Modified);
+        static void UpdateWorkId(Int64 primaryTileUserID, Int64 workId);
+        static void ClearWorkByWorkId(Int64 workId);
+        static void DeleteByWorkId(Int64 workId);
+        static Windows.Internal.StateRepository.PrimaryTileUserDataChange GetDataChangeByChangeId(Int64 changeId);
+        static Windows.Internal.StateRepository.PrimaryTileUserDataChange TryGetDataChangeByChangeId(Int64 changeId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUserDataChange>  FindDataChangeByGTChangeId(Int64 changeId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUserDataChange>  FindDataChangeByGTWhenOccurred(Windows.Foundation.DateTime whenOccurred);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUserDataChange>  FindDataChangeByUserAndGTChangeId(User user, Int64 changeId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryTileUserDataChange>  FindDataChangeByUserAndGTWhenOccurred(User user, Windows.Foundation.DateTime whenOccurred);
+        Int64 _PrimaryTileUserID{ get; };
+        Int64 _PrimaryTileUserID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 _Created{ get; };
+        Int64 _Created{ set; };
+        Int64 _Modified{ get; };
+        Int64 _Modified{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 ApplicationIdentity{ get; };
+        Int64 ApplicationIdentity{ set; };
+        Windows.Internal.StateRepository.ApplicationIdentity GetApplicationIdentity();
+        void SetApplicationIdentity(ApplicationIdentity value);
+        Windows.Internal.StateRepository.TileUserState State{ get; };
+        Windows.Internal.StateRepository.TileUserState State{ set; };
+        Guid TileUniqueId{ get; };
+        Guid TileUniqueId{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        void GenerateTileUniqueId();
+        Int64 ChangeId{ get; };
+    }
+
+
+}

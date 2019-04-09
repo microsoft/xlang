@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.UserPicker
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(d523acce-7644-4387-9da8-fe16b94bddcf)]
+    interface IUserManagerShowUIExtension
+    {
+        Windows.System.User ShowUserPickerSync(Boolean allowGuestAccounts, Windows.System.User callingUser, String callingAppAumid);
+    };
+
+}

@@ -1,0 +1,143 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Storage.Pickers.Provider
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    enum StartLocation
+    {
+        Persisted,
+        Root,
+        Specified,
+    };
+
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [interface_name("Windows.Storage.Pickers.Provider.IFileOpenPickerUIInternal", 6968c9cf-54cb-47e1-b986-e2080af8647c)]
+    runtimeclass FileOpenPickerUIInternal
+    {
+        FileOpenPickerUIInternal();
+        Boolean FolderMode{ get; };
+        Windows.Storage.Pickers.Provider.StartLocation StartLocation{ get; };
+        String StartLocationPath{ get; };
+        Windows.Storage.Pickers.PickerViewMode ViewMode{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Storage.Pickers.Provider.FileOpenPickerUIInternal, Windows.Storage.Pickers.Provider.CurrentLocationRequestedEventArgs>  CurrentLocationRequested;
+        void ClearCurrentLocation();
+        event Windows.Foundation.TypedEventHandler <Windows.Storage.Pickers.Provider.FileOpenPickerUIInternal, Object>  LocationReset;
+    }
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [interface_name("Windows.Storage.Pickers.Provider.ICurrentLocationRequestedEventArgs", f9d82b04-08c4-4e0f-9532-e0ab6501a545)]
+    runtimeclass CurrentLocationRequestedEventArgs
+    {
+        Windows.Storage.Pickers.Provider.CurrentLocationRequest Request{ get; };
+    }
+
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [interface_name("Windows.Storage.Pickers.Provider.ICurrentLocationRequest", ad0d8c06-cacf-4759-83a9-381bf8ad1570)]
+    runtimeclass CurrentLocationRequest
+    {
+        Windows.Storage.IStorageFolder CurrentLocation{ get; };
+        Windows.Storage.IStorageFolder CurrentLocation{ set; };
+        Windows.Storage.Pickers.Provider.CurrentLocationRequestDeferral GetDeferral();
+    }
+
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [interface_name("Windows.Storage.Pickers.Provider.ICurrentLocationRequestDeferral", d1383cc7-c47e-4076-a457-7ba31385edff)]
+    runtimeclass CurrentLocationRequestDeferral
+    {
+        void Complete();
+    }
+
+
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [interface_name("Windows.Storage.Pickers.Provider.IFileSavePickerUIInternal", dd8a1e6c-18da-4dee-a19b-fec313e53284)]
+    runtimeclass FileSavePickerUIInternal
+    {
+        FileSavePickerUIInternal();
+        Windows.Storage.Pickers.Provider.StartLocation StartLocation{ get; };
+        String StartLocationPath{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Storage.Pickers.Provider.FileSavePickerUIInternal, Object>  LocationReset;
+    }
+
+}
+namespace Windows.Internal.Storage.Pickers.Provider
+{
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    enum PickerTypeMode
+    {
+        PickFile,
+        PickFolder,
+    };
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [uuid(33bb9b45-9be7-4990-8450-faf9dfc3e555)]
+    interface IFolderPickerUI
+    {
+        void AddFolder(Windows.Storage.IStorageFolder folder);
+    };
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    struct CustomAppbarCommand
+    {
+        Int32 Id;
+        String Label;
+        String IconFileName;
+        String AppGuidToBeLaunched;
+        Boolean IsPrimaryCommand;
+    };
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [uuid(69d6a2b4-f9c0-4826-b534-341ce43f7f96)]
+    interface IExplorerExtensions
+    {
+        Windows.Storage.Pickers.PickerViewMode ViewMode{ get; };
+        Windows.Storage.Pickers.PickerLocationId LocationId{ get; };
+        Windows.Internal.Storage.Pickers.Provider.PickerTypeMode PickerMode{ get; };
+    };
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [uuid(5a278751-3138-405e-b1b6-d0c31a24d157)]
+    interface IFilePickerActivatedEventArgsPhonePrivate
+    {
+        Windows.Storage.IStorageItem InitialLocation{ get; };
+        Windows.Storage.IStorageItem InitialLocation{ set; };
+        Windows.Internal.Storage.Pickers.Provider.IExplorerExtensions PickerUI{ get; };
+    };
+
+
+}
+namespace Windows.Internal.Storage.Pickers
+{
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [static_name("Windows.Internal.Storage.Pickers.IFilePickerHelpersStatics", 482b3629-2b52-46df-a676-dcc675685606)]
+    runtimeclass FilePickerHelpers
+    {
+        static void SetupComponent(Object inspectableComponentSite, Object inspectableUIElement);
+        static Object GetRoutedAcceleratorKeysFromCoreWindow(Object inspectableCoreWindow);
+    }
+
+
+    [contract(Windows.Storage.Pickers.Provider.InternalContract, 1)]
+    [static_name("Windows.Internal.Storage.Pickers.IFilePickerConfiguration", 9e2d0683-3112-40db-bb0f-1a16b1c7a4a3)]
+    runtimeclass FilePickerConfiguration
+    {
+        static String GetHostedAppIdForStartLocation(Windows.Storage.Pickers.PickerLocationId suggestedStartLocation);
+        static Boolean BackButtonCanClosePicker{ get; };
+        static Windows.Foundation.Size DefaultDialogSize{ get; };
+    }
+
+}

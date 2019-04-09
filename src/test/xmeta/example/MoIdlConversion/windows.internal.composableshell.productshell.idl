@@ -1,0 +1,20 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell
+{
+    [contract(Windows.Internal.ComposableShell.InternalContract, 1)]
+    [uuid(1b4447cb-69e7-4a67-b257-f189d0b9e9ef)]
+    interface IProductShell
+    {
+        Windows.Foundation.Point GetViewPosition(IComposableView view);
+        void ReportApplicationStateChange();
+    };
+
+}

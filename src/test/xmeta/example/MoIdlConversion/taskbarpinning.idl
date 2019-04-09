@@ -1,0 +1,126 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.Taskbar
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    enum PinningLocation
+    {
+        AtBeginning,
+        AtEnd,
+        BetweenDefaultAndOEM,
+    };
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    struct PinnedWebsiteData
+    {
+        String IconPath;
+        String Title;
+        String RawUrl;
+    };
+
+
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Internal.Taskbar.IPinnedWebsiteFactory", c56505e7-2174-4245-975e-e01b4c375569)]
+    [interface_name("Windows.Internal.Taskbar.IPinnedWebsite", a2df29d7-85be-453b-b2b6-f9874077a5fd)]
+    [threading(both)]
+    runtimeclass PinnedWebsite
+    {
+        [method_name( "CreatePinnedWebsite" )] PinnedWebsite(String icon, String title, String url);
+        String IconPath{ get; };
+        String Title{ get; };
+        String Url{ get; };
+    }
+
+
+
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    [static_name("Windows.Internal.Taskbar.IPinnedWebsitesStatics", 8e03a134-f922-409b-9207-c625d92ae82e)]
+    runtimeclass PinnedWebsites
+    {
+        static void PinWebsite(String icon, String title, String url);
+        static Windows.Foundation.IAsyncAction PinWebsiteAsync(String icon, String title, String url);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.Taskbar.PinnedWebsite>  GetPinnedWebsites();
+        static Windows.Foundation.IAsyncAction UnpinWebsiteAsync(String url);
+        static void PrepareMigratePinnedWebsite(String rawUrl, String tileId);
+        static void FallbackMigratePinnedWebsite(String rawUrl, String tileId);
+    }
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    [static_name("Windows.Internal.Taskbar.IPinnedWebsitesBrokerStatics", d6e770c2-e392-4fb4-ad0c-d10acf2c1c64)]
+    runtimeclass PinnedWebsitesBroker
+    {
+        static void PinWebsite(String icon, String title, String rawUrl);
+        static void GetPinnedWebsites(out PinnedWebsiteData[] pinnedWebsites);
+        static void UnpinWebsite(String rawUrl);
+        static void PrepareMigratePinnedWebsite(String rawUrl, String tileId);
+        static void FallbackMigratePinnedWebsite(String rawUrl, String tileId);
+    }
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    [static_name("Windows.Internal.Taskbar.IPinnedAuxiliaryItemsStatics", 7d77a62e-574f-44ea-a65a-1238608dac36)]
+    runtimeclass PinnedAuxiliaryItems
+    {
+        static Windows.Foundation.Collections.IVector <UInt32>  PinOfficeItems(PinningLocation location, Windows.Foundation.Collections.IVector <String>  officeAppIds);
+        static Boolean IsAppIdSupported(String appId);
+    }
+
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Taskbar.IPinnedWebsiteTab", a41f822e-3053-5aac-ba8f-4e5258f5b5e4)]
+    runtimeclass PinnedWebsiteTab
+    {
+        String Title{ get; };
+        String Title{ set; };
+        String TileId{ get; };
+        String TileId{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Taskbar.PinnedWebsiteTab, Object>  CloseRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Taskbar.PinnedWebsiteTab, Object>  SwitchRequested;
+    }
+
+
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Taskbar.IPinnedWebsitesGroupingStatics", 5c4c28ac-eaf4-54f9-91e5-aa28d3f761ec)]
+    [interface_name("Windows.Internal.Taskbar.IPinnedWebsitesGrouping", 7c4a652b-82d5-5405-aa7b-6e4e8932e10b)]
+    [threading(both)]
+    runtimeclass PinnedWebsitesGrouping
+    {
+        static Windows.Internal.Taskbar.PinnedWebsitesGrouping GetForCurrentView();
+        Windows.Internal.Taskbar.PinnedWebsiteTab SelectedTab{ get; };
+        Windows.Internal.Taskbar.PinnedWebsiteTab SelectedTab{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.Taskbar.PinnedWebsiteTab>  GetCurrentTabs();
+        void InsertTab(PinnedWebsiteTab tab, PinnedWebsiteTab referenceTab);
+        void RemoveTab(PinnedWebsiteTab tab);
+        Windows.Internal.Taskbar.PinnedWebsiteTab CreateTab();
+    }
+
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    struct WindowId
+    {
+        UInt32 Value;
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Taskbar.InternalContract, 1)]
+    [interface_name("Windows.Internal.Taskbar.IPinnedWebsitesGroupingBroker", 7929b469-8bae-5c7e-ac25-47337bac5dfa)]
+    runtimeclass PinnedWebsitesGroupingBroker
+    {
+        void DataForWindowChanged(WindowId window);
+    }
+
+}

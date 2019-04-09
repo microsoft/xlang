@@ -1,0 +1,211 @@
+
+
+
+
+
+
+namespace DevicesFlowInteraction.Connection
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    enum DeviceConnectionState
+    {
+        Uninitialized,
+        Connecting,
+        Connected,
+        Disconnecting,
+        Disconnected,
+        Error,
+        ReconnectionError,
+        Paused,
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    enum DeviceWithDisplayConnectedState
+    {
+        Undefined,
+        ConnectedNoDisplay,
+        ConnectedCanDisplay,
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    enum AutoConnectState
+    {
+        Unspecified,
+        Enabled,
+        Disabled,
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    enum DeviceConnectionError
+    {
+        Unknown,
+        DeviceError,
+        DeviceNotFound,
+        DeviceForgotPairing,
+        ErrorSuccess,
+        OperationCanceled,
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    enum ConnectionDeviceClass
+    {
+        Undefined,
+        Miracast,
+        WiGig,
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    enum ConnectionDeviceOrigin
+    {
+        Unknown,
+        Internal,
+        UserInitiated,
+        Proximity,
+        Nfc,
+    };
+
+    [uuid(1111702c-fb5a-4bfb-aff8-4f8b418bd0a5)]
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    interface IConnectionErrorInfo
+    {
+        DevicesFlowInteraction.Connection.DeviceConnectionError ConnectionError{ get; };
+        DevicesFlowInteraction.Connection.DeviceConnectionState ConnectionState{ get; };
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [uuid(fda06235-f98e-4e82-96e0-bf01e37fbf0d)]
+    interface IDeviceConnection
+    {
+        String DeviceId{ get; };
+        String DeviceInstanceId{ get; };
+        String AepId{ get; };
+        DevicesFlowInteraction.Connection.DeviceConnectionState DeviceConnectionState{ get; };
+        DevicesFlowInteraction.Connection.AutoConnectState IsAutoConnectEnabled{ get; };
+        DevicesFlowInteraction.Connection.ConnectionDeviceClass ConnectionDeviceClass{ get; };
+        DevicesFlowInteraction.Connection.IConnectionErrorInfo ConnectionErrorInfo{ get; };
+        event Windows.Foundation.EventHandler <Object>  DeviceConnectionStateChanged;
+        void SetAutoConnect(Boolean autoConnect);
+    };
+
+    [uuid(8b317a4b-d737-4949-be6b-a36fdf2e8d6a)]
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    interface IDeviceWithDisplayConnection
+    {
+        DevicesFlowInteraction.Connection.DeviceWithDisplayConnectedState ConnectedState{ get; };
+    };
+
+    [uuid(601364b9-faef-4fa6-aad1-a1e562ec8dcd)]
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    interface IDeviceInteractionTelemetry
+    {
+        Guid CorrelationId{ get; };
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [uuid(5f5a5449-e8f3-453b-b6c8-4b89f032f4f7)]
+    interface IUIBCHandler
+    {
+        Boolean UIBCSupported{ get; };
+        Boolean UIBCAllowed{ get; };
+        Boolean UIBCAllowed{ set; };
+        Boolean UIBCToastHandled{ get; };
+        Boolean UIBCToastHandled{ set; };
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [uuid(6582b42d-33cb-4f2e-898c-761901cef723)]
+    interface ILatencyModeHandler
+    {
+        void SetDeviceLatencyMode(UInt32 dwMode);
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [uuid(99efee85-2021-4ffa-b1eb-c2293c50d2b0)]
+    interface IPairingOperation
+    {
+        void CancelPairing();
+        void WritePIN(String pin);
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [uuid(b78ef25b-b784-49c4-9538-243d087f346f)]
+    interface IPairingInteractionHandler
+    {
+        void OnPinEntryCeremony(IPairingOperation handler);
+        void OnPinDisplayCeremony(IPairingOperation handler, String pin);
+        void OnJustWorksCeremony(IPairingOperation handler);
+        void OnPushButtonCeremony(IPairingOperation handler);
+        void OnPairingComplete(Int32 hrError);
+    };
+
+    [uuid(74525071-bff2-4721-b28e-d1e0088994ea)]
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    interface IDeviceConnectionManager
+    {
+        void StartConnection(String deviceInterfaceId, String deviceInstanceId, Guid correlationId);
+        void StartConnectionWithAepId(String aepId, Guid correlationId);
+        [method_name("StartConnectionAsync")] [default_overload]
+        Windows.Foundation.IAsyncOperation <DevicesFlowInteraction.Connection.IDeviceConnection>  StartConnectionAsync(String deviceInterfaceId, String deviceInstanceId, Guid correlationId, ConnectionDeviceOrigin origin);
+        [method_name("StartConnectionWithPairingAsync")] Windows.Foundation.IAsyncOperation <DevicesFlowInteraction.Connection.IDeviceConnection>  StartConnectionAsync(String aepId, Guid correlationId, IPairingInteractionHandler handler);
+        void StopCurrentConnection();
+        void ForgetTerminatedConnection();
+        Boolean IsRepairRequiredForDevice(String deviceInstanceId);
+        void RefreshClientState();
+        Boolean HasActiveConnection{ get; };
+        DevicesFlowInteraction.Connection.IDeviceConnection CurrentConnection{ get; };
+    };
+
+    [uuid(6a0b2a60-3955-4802-ba14-93d5af8d3a23)]
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    interface IConnectionStateChangedEventArgs
+    {
+        DevicesFlowInteraction.Connection.IDeviceConnection PreviousConnection{ get; };
+        DevicesFlowInteraction.Connection.IDeviceConnection CurrentConnection{ get; };
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [uuid(8e249e31-fd7a-4fb0-9a23-721b68e5318f)]
+    interface IDeviceConnectionListener
+    {
+        event Windows.Foundation.TypedEventHandler <DevicesFlowInteraction.Connection.IDeviceConnectionListener, DevicesFlowInteraction.Connection.IConnectionStateChangedEventArgs>  ConnectionStateChanged;
+    };
+
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [uuid(60b1f356-1787-4510-bf85-d32c39d9398a)]
+    interface IDeviceInteractionManager
+    {
+        void StartDeviceConnection(String deviceInterfaceId);
+        void StopDeviceConnection(String deviceInterfaceId);
+        DevicesFlowInteraction.Connection.DeviceConnectionState GetCurrentConnectionStatusForDevice(String deviceInterfaceId);
+        void ForgetTerminatedConnections();
+        void RefreshClientState();
+        DevicesFlowInteraction.Connection.IDeviceConnectionManager GetDeviceConnectionManager(ConnectionDeviceClass deviceClass);
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [static_name("DevicesFlowInteraction.Connection.IDeviceConnectionManagerStatic", eddbab7d-0ead-458b-b7d9-13a3af74eb9b)]
+    runtimeclass DeviceConnectionManager
+        : [default]DevicesFlowInteraction.Connection.IDeviceConnectionManager
+        , DevicesFlowInteraction.Connection.IDeviceConnectionListener
+    {
+        static DevicesFlowInteraction.Connection.IDeviceConnectionManager GetDeviceConnectionManager(ConnectionDeviceClass deviceClass);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(DevicesFlowInteraction.Connection.InternalContract, 1)]
+    [static_name("DevicesFlowInteraction.Connection.IDeviceInteractionManagerStatic", 3e98ed04-3b2d-4436-934c-bdc8a843395c)]
+    runtimeclass DeviceInteractionManager
+        : [default]DevicesFlowInteraction.Connection.IDeviceInteractionManager
+        , DevicesFlowInteraction.Connection.IDeviceConnectionListener
+    {
+        static DevicesFlowInteraction.Connection.DeviceInteractionManager DeviceManager{ get; };
+    }
+
+}

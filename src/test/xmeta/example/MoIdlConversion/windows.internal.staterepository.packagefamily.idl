@@ -1,0 +1,69 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IPackageFamilyStatics", 86f5b0ee-9560-4d76-a06a-ca4c8bfe4426)]
+    [interface_name("Windows.Internal.StateRepository.IPackageFamily", 4fe0a6ff-aa6b-4cb3-9241-dd477a7abb84)]
+    [threading(both)]
+    runtimeclass PackageFamily
+    {
+        PackageFamily();
+        static Boolean Exists(Int64 packageFamilyID);
+        static Boolean ExistsByName(String Name);
+        static Boolean ExistsByNameAndPublisherId(String Name, String PublisherId);
+        static Boolean ExistsByPackageFamilyName(String PackageFamilyName);
+        static Boolean ExistsByPackageSID(String PackageSID);
+        static Boolean ExistsByPublisherId(String PublisherId);
+        static Windows.Internal.StateRepository.PackageFamily Get(Int64 packageFamilyID);
+        static Windows.Internal.StateRepository.PackageFamily TryGet(Int64 packageFamilyID);
+        static Windows.Internal.StateRepository.PackageFamily GetByNameAndPublisherId(String Name, String PublisherId);
+        static Windows.Internal.StateRepository.PackageFamily TryGetByNameAndPublisherId(String Name, String PublisherId);
+        static Windows.Internal.StateRepository.PackageFamily GetByPackageFamilyName(String PackageFamilyName);
+        static Windows.Internal.StateRepository.PackageFamily TryGetByPackageFamilyName(String PackageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageFamily>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageFamily>  FindByName(String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageFamily>  FindByPackageSID(String PackageSID);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageFamily>  FindByPublisherId(String PublisherId);
+        static Windows.Internal.StateRepository.PackageFamily GetCurrent();
+        static Boolean ExistsByUserAndNameAndPublisherId(User User, String Name, String PublisherId);
+        static Boolean ExistsByUserAndPackageFamilyName(User User, String PackageFamilyName);
+        static Windows.Internal.StateRepository.PackageFamily GetByUserAndNameAndPublisherId(User User, String Name, String PublisherId);
+        static Windows.Internal.StateRepository.PackageFamily GetByUserAndPackageFamilyName(User User, String PackageFamilyName);
+        static Windows.Internal.StateRepository.PackageFamily TryGetByUserAndNameAndPublisherId(User User, String Name, String PublisherId);
+        static Windows.Internal.StateRepository.PackageFamily TryGetByUserAndPackageFamilyName(User User, String PackageFamilyName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageFamily>  FindByUser(User User);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageFamily>  FindByUserAndPublisherId(User User, String PublisherId);
+        Int64 _PackageFamilyID{ get; };
+        Int64 _PackageFamilyID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        String Publisher{ get; };
+        String Publisher{ set; };
+        String PublisherId{ get; };
+        String PublisherId{ set; };
+        String PackageFamilyName{ get; };
+        String PackageFamilyName{ set; };
+        String PackageSID{ get; };
+        String PackageSID{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

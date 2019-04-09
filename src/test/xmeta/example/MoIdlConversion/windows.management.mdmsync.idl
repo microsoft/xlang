@@ -1,0 +1,94 @@
+
+
+
+
+
+
+
+namespace Windows.Management
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum MdmAlertMark
+    {
+        None,
+        Fatal,
+        Critical,
+        Warning,
+        Informational,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum MdmAlertDataType
+    {
+        String,
+        Base64,
+        Boolean,
+        Integer,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum MdmSessionState
+    {
+        NotStarted,
+        Starting,
+        Connecting,
+        Communicating,
+        AlertStatusAvailable,
+        Retrying,
+        Completed,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(standard)]
+    [dualapipartition(0x1)]
+    [interface_name("Windows.Management.IMdmAlert", b0fbc327-28c1-4b52-a548-c5807caf70b6)]
+    runtimeclass MdmAlert
+    {
+        MdmAlert();
+        String Data{ get; };
+        String Data{ set; };
+        Windows.Management.MdmAlertDataType Format{ get; };
+        Windows.Management.MdmAlertDataType Format{ set; };
+        Windows.Management.MdmAlertMark Mark{ get; };
+        Windows.Management.MdmAlertMark Mark{ set; };
+        String Source{ get; };
+        String Source{ set; };
+        UInt32 Status{ get; };
+        String Target{ get; };
+        String Target{ set; };
+        String Type{ get; };
+        String Type{ set; };
+    }
+
+
+    [dualapipartition(0x1)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Management.IMdmSession", fe89314c-8f64-4797-a9d7-9d88f86ae166)]
+    runtimeclass MdmSession
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Management.MdmAlert>  Alerts{ get; };
+        HRESULT ExtendedError{ get; };
+        String Id{ get; };
+        Windows.Management.MdmSessionState State{ get; };
+        Windows.Foundation.IAsyncAction AttachAsync();
+        void Delete();
+        [method_name("StartAsync")] Windows.Foundation.IAsyncAction StartAsync();
+        [method_name("StartWithAlertsAsync")] [remote_sync]Windows.Foundation.IAsyncAction StartAsync(Windows.Foundation.Collections.IIterable <Windows.Management.MdmAlert>  alerts);
+    }
+
+    [dualapipartition(0x1)]
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Management.IMdmSessionManagerStatics", cf4ad959-f745-4b79-9b5c-de0bf8efe44b)]
+    runtimeclass MdmSessionManager
+    {
+        static Windows.Foundation.Collections.IVectorView <String>  SessionIds{ get; };
+        static Windows.Management.MdmSession TryCreateSession();
+        static void DeleteSessionById(String sessionId);
+        static Windows.Management.MdmSession GetSessionById(String sessionId);
+    }
+
+}

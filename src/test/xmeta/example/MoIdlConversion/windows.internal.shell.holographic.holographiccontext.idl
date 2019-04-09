@@ -1,0 +1,56 @@
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Holographic
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.Holographic.InternalContract, 1)]
+    enum UserDisplayContext
+    {
+        Monitor,
+        HeadMountedDisplay,
+    };
+
+    [contract(Windows.Internal.Shell.Holographic.InternalContract, 1)]
+    enum UserInputContext
+    {
+        Desktop2D,
+        Holographic3D,
+    };
+
+    [contract(Windows.Internal.Shell.Holographic.InternalContract, 1)]
+    enum ShellState
+    {
+        Ready,
+        OOBE,
+        Suspended,
+        Stopped,
+        Fatal,
+        Suspending,
+    };
+
+    [contract(Windows.Internal.Shell.Holographic.InternalContract, 1)]
+    enum ContextInspectionOptions
+    {
+        None,
+        InspectComponentUI,
+    };
+
+
+    [contract(Windows.Internal.Shell.Holographic.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.Holographic.IContextIdentifierStatics", b80ca0d2-a583-4e8b-84c6-fac647a1d771)]
+    runtimeclass ContextIdentifier
+    {
+        static Windows.Internal.Shell.Holographic.UserDisplayContext GetWindowDisplayContext(UInt32 windowId, ContextInspectionOptions inspectionOptions);
+        static Windows.Internal.Shell.Holographic.UserDisplayContext GetUserDisplayContext();
+        static Windows.Internal.Shell.Holographic.UserInputContext GetUserInputContext();
+        static Windows.Internal.Shell.Holographic.ShellState GetShellState();
+    }
+
+}

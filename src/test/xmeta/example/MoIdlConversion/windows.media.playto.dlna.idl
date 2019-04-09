@@ -1,0 +1,104 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.PlayTo
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.PlayTo.ISourceChangeRequestedEventArgs", fb3f3a96-7aa6-4a8b-86e7-54f6c6d34f64)]
+    runtimeclass SourceChangeRequestedEventArgs
+    {
+        Windows.Storage.Streams.IRandomAccessStreamWithContentType Stream{ get; };
+        String Title{ get; };
+        String Author{ get; };
+        String Album{ get; };
+        String Genre{ get; };
+        String Description{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  Date{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ get; };
+        Windows.Foundation.IReference <UInt32>  Rating{ get; };
+        Windows.Foundation.Collections.IMapView <String, Object>  Properties{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.PlayTo.IPlaybackRateChangeRequestedEventArgs", 0f5661ae-2c88-4cca-8540-d586095d13a5)]
+    runtimeclass PlaybackRateChangeRequestedEventArgs
+    {
+        Double Rate{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.PlayTo.ICurrentTimeChangeRequestedEventArgs", 99711324-edc7-4bf5-91f6-3c8627db59e5)]
+    runtimeclass CurrentTimeChangeRequestedEventArgs
+    {
+        Windows.Foundation.TimeSpan Time{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.PlayTo.IMuteChangeRequestedEventArgs", e4b4f5f6-af1f-4f1e-b437-7da32400e1d4)]
+    runtimeclass MuteChangeRequestedEventArgs
+    {
+        Boolean Mute{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.PlayTo.IVolumeChangeRequestedEventArgs", 6f026d5c-cf75-4c2b-913e-6d7c6c329179)]
+    runtimeclass VolumeChangeRequestedEventArgs
+    {
+        Double Volume{ get; };
+    }
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.PlayTo.IPlayToReceiver", ac15cf47-a162-4aa6-af1b-3aa35f3b9069)]
+    [threading(both)]
+    runtimeclass PlayToReceiver
+    {
+        PlayToReceiver();
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Object>  PlayRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Object>  PauseRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Windows.Media.PlayTo.SourceChangeRequestedEventArgs>  SourceChangeRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Windows.Media.PlayTo.PlaybackRateChangeRequestedEventArgs>  PlaybackRateChangeRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Windows.Media.PlayTo.CurrentTimeChangeRequestedEventArgs>  CurrentTimeChangeRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Windows.Media.PlayTo.MuteChangeRequestedEventArgs>  MuteChangeRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Windows.Media.PlayTo.VolumeChangeRequestedEventArgs>  VolumeChangeRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Object>  TimeUpdateRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.PlayTo.PlayToReceiver, Object>  StopRequested;
+        void NotifyVolumeChange(Double volume, Boolean mute);
+        void NotifyRateChange(Double rate);
+        void NotifyLoadedMetadata();
+        void NotifyTimeUpdate(Windows.Foundation.TimeSpan currentTime);
+        void NotifyDurationChange(Windows.Foundation.TimeSpan duration);
+        void NotifySeeking();
+        void NotifySeeked();
+        void NotifyPaused();
+        void NotifyPlaying();
+        void NotifyEnded();
+        void NotifyError();
+        void NotifyStopped();
+        String FriendlyName{ get; };
+        String FriendlyName{ set; };
+        Boolean SupportsImage{ set; };
+        Boolean SupportsImage{ get; };
+        Boolean SupportsAudio{ set; };
+        Boolean SupportsAudio{ get; };
+        Boolean SupportsVideo{ set; };
+        Boolean SupportsVideo{ get; };
+        Windows.Foundation.Collections.IPropertySet Properties{ get; };
+        Windows.Foundation.IAsyncAction StartAsync();
+        Windows.Foundation.IAsyncAction StopAsync();
+    }
+
+}

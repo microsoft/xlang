@@ -1,0 +1,698 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Text
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CaretType
+    {
+        Normal,
+        Null,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum FindOptions
+    {
+        None,
+        Word = 2,
+        Case = 4,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum FormatEffect
+    {
+        Off,
+        On,
+        Toggle,
+        Undefined,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum HorizontalCharacterAlignment
+    {
+        Left,
+        Right,
+        Center,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum LetterCase
+    {
+        Lower,
+        Upper,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum LineSpacingRule
+    {
+        Undefined,
+        // Single,
+        OneAndHalf,
+        // Double,
+        AtLeast,
+        Exactly,
+        Multiple,
+        Percent,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum LinkType
+    {
+        Undefined,
+        NotALink,
+        ClientLink,
+        FriendlyLinkName,
+        FriendlyLinkAddress,
+        AutoLink,
+        AutoLinkEmail,
+        AutoLinkPhone,
+        AutoLinkPath,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MarkerAlignment
+    {
+        Undefined,
+        Left,
+        Center,
+        Right,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MarkerStyle
+    {
+        Undefined,
+        Parenthesis,
+        Parentheses,
+        Period,
+        Plain,
+        Minus,
+        NoNumber,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MarkerType
+    {
+        Undefined,
+        None,
+        Bullet,
+        Arabic,
+        LowercaseEnglishLetter,
+        UppercaseEnglishLetter,
+        LowercaseRoman,
+        UppercaseRoman,
+        UnicodeSequence,
+        CircledNumber,
+        BlackCircleWingding,
+        WhiteCircleWingding,
+        ArabicWide,
+        SimplifiedChinese,
+        TraditionalChinese,
+        JapanSimplifiedChinese,
+        JapanKorea,
+        ArabicDictionary,
+        ArabicAbjad,
+        Hebrew,
+        ThaiAlphabetic,
+        ThaiNumeric,
+        DevanagariVowel,
+        DevanagariConsonant,
+        DevanagariNumeric,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ParagraphAlignment
+    {
+        Undefined,
+        Left,
+        Center,
+        Right,
+        Justify,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ParagraphStyle
+    {
+        Undefined,
+        None,
+        Normal,
+        Heading1,
+        Heading2,
+        Heading3,
+        Heading4,
+        Heading5,
+        Heading6,
+        Heading7,
+        Heading8,
+        Heading9,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PointOptions
+    {
+        None,
+        IncludeInset,
+        Start = 32,
+        ClientCoordinates = 256,
+        AllowOffClient = 512,
+        Transform = 1024,
+        NoHorizontalScroll = 65536,
+        NoVerticalScroll = 262144,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum RangeGravity
+    {
+        UIBehavior,
+        Backward,
+        Forward,
+        Inward,
+        Outward,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum SelectionOptions
+    {
+        StartActive = 1,
+        AtEndOfLine,
+        Overtype = 4,
+        Active = 8,
+        Replace = 16,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum SelectionType
+    {
+        None,
+        InsertionPoint,
+        Normal,
+        InlineShape = 7,
+        Shape,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TabAlignment
+    {
+        Left,
+        Center,
+        Right,
+        Decimal,
+        Bar,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TabLeader
+    {
+        Spaces,
+        Dots,
+        Dashes,
+        Lines,
+        ThickLines,
+        Equals,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TextGetOptions
+    {
+        None,
+        AdjustCrlf,
+        UseCrlf,
+        UseObjectText = 4,
+        AllowFinalEop = 8,
+        NoHidden = 32,
+        IncludeNumbering = 64,
+        FormatRtf = 8192,
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        UseLf = 16777216,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TextSetOptions
+    {
+        None,
+        UnicodeBidi,
+        Unlink = 8,
+        Unhide = 16,
+        CheckTextLimit = 32,
+        FormatRtf = 8192,
+        ApplyRtfDocumentDefaults = 16384,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TextRangeUnit
+    {
+        Character,
+        Word,
+        Sentence,
+        Paragraph,
+        Line,
+        Story,
+        Screen,
+        Section,
+        Window,
+        CharacterFormat,
+        ParagraphFormat,
+        Object,
+        HardParagraph,
+        Cluster,
+        Bold,
+        Italic,
+        Underline,
+        Strikethrough,
+        ProtectedText,
+        Link,
+        SmallCaps,
+        AllCaps,
+        Hidden,
+        Outline,
+        Shadow,
+        Imprint,
+        Disabled,
+        Revised,
+        Subscript,
+        Superscript,
+        FontBound,
+        LinkProtected,
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        ContentLink,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum TextScript
+    {
+        Undefined,
+        Ansi,
+        EastEurope,
+        Cyrillic,
+        Greek,
+        Turkish,
+        Hebrew,
+        Arabic,
+        Baltic,
+        Vietnamese,
+        Default,
+        Symbol,
+        Thai,
+        ShiftJis,
+        GB2312,
+        Hangul,
+        Big5,
+        PC437,
+        Oem,
+        Mac,
+        Armenian,
+        Syriac,
+        Thaana,
+        Devanagari,
+        Bengali,
+        Gurmukhi,
+        Gujarati,
+        Oriya,
+        Tamil,
+        Telugu,
+        Kannada,
+        Malayalam,
+        Sinhala,
+        Lao,
+        Tibetan,
+        Myanmar,
+        Georgian,
+        Jamo,
+        Ethiopic,
+        Cherokee,
+        Aboriginal,
+        Ogham,
+        Runic,
+        Khmer,
+        Mongolian,
+        Braille,
+        Yi,
+        Limbu,
+        TaiLe,
+        NewTaiLue,
+        SylotiNagri,
+        Kharoshthi,
+        Kayahli,
+        UnicodeSymbol,
+        Emoji,
+        Glagolitic,
+        Lisu,
+        Vai,
+        NKo,
+        Osmanya,
+        PhagsPa,
+        Gothic,
+        Deseret,
+        Tifinagh,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UnderlineType
+    {
+        Undefined,
+        None,
+        // Single,
+        Words,
+        // Double,
+        Dotted,
+        Dash,
+        DashDot,
+        DashDotDot,
+        Wave,
+        Thick,
+        Thin,
+        DoubleWave,
+        HeavyWave,
+        LongDash,
+        ThickDash,
+        ThickDashDot,
+        ThickDashDotDot,
+        ThickDotted,
+        ThickLongDash,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum VerticalCharacterAlignment
+    {
+        Top,
+        Baseline,
+        Bottom,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.UI.Text.ITextConstantsStatics", 779e7c33-189d-4bfa-97c8-10db135d976e)]
+    [threading(both)]
+    runtimeclass TextConstants
+    {
+        static Windows.UI.Color AutoColor{ get; };
+        static Int32 MinUnitCount{ get; };
+        static Int32 MaxUnitCount{ get; };
+        static Windows.UI.Color UndefinedColor{ get; };
+        static Single UndefinedFloatValue{ get; };
+        static Int32 UndefinedInt32Value{ get; };
+        static Windows.UI.Text.FontStretch UndefinedFontStretch{ get; };
+        static Windows.UI.Text.FontStyle UndefinedFontStyle{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(beee4ddb-90b2-408c-a2f6-0a0ac31e33e4)]
+    [webhosthidden]
+    interface ITextDocument
+    {
+        Windows.UI.Text.CaretType CaretType{ get; };
+        Windows.UI.Text.CaretType CaretType{ set; };
+        Single DefaultTabStop{ get; };
+        Single DefaultTabStop{ set; };
+        Windows.UI.Text.ITextSelection Selection{ get; };
+        UInt32 UndoLimit{ get; };
+        UInt32 UndoLimit{ set; };
+        Boolean CanCopy();
+        Boolean CanPaste();
+        Boolean CanRedo();
+        Boolean CanUndo();
+        Int32 ApplyDisplayUpdates();
+        Int32 BatchDisplayUpdates();
+        void BeginUndoGroup();
+        void EndUndoGroup();
+        Windows.UI.Text.ITextCharacterFormat GetDefaultCharacterFormat();
+        Windows.UI.Text.ITextParagraphFormat GetDefaultParagraphFormat();
+        Windows.UI.Text.ITextRange GetRange(Int32 startPosition, Int32 endPosition);
+        Windows.UI.Text.ITextRange GetRangeFromPoint(Windows.Foundation.Point point, PointOptions options);
+        void GetText(TextGetOptions options, out String value);
+        void LoadFromStream(TextSetOptions options, Windows.Storage.Streams.IRandomAccessStream value);
+        void Redo();
+        void SaveToStream(TextGetOptions options, Windows.Storage.Streams.IRandomAccessStream value);
+        void SetDefaultCharacterFormat(ITextCharacterFormat value);
+        void SetDefaultParagraphFormat(ITextParagraphFormat value);
+        void SetText(TextSetOptions options, String value);
+        void Undo();
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(a6d36724-f28f-430a-b2cf-c343671ec0e9)]
+    [webhosthidden]
+    interface ITextSelection requires Windows.UI.Text.ITextRange
+    {
+        Windows.UI.Text.SelectionOptions Options{ get; };
+        Windows.UI.Text.SelectionOptions Options{ set; };
+        Windows.UI.Text.SelectionType Type{ get; };
+        Int32 EndKey(TextRangeUnit unit, Boolean extend);
+        Int32 HomeKey(TextRangeUnit unit, Boolean extend);
+        Int32 MoveDown(TextRangeUnit unit, Int32 count, Boolean extend);
+        Int32 MoveLeft(TextRangeUnit unit, Int32 count, Boolean extend);
+        Int32 MoveRight(TextRangeUnit unit, Int32 count, Boolean extend);
+        Int32 MoveUp(TextRangeUnit unit, Int32 count, Boolean extend);
+        void TypeText(String value);
+    };
+
+    [webhosthidden]
+    [uuid(5b9e4e57-c072-42a0-8945-af503ee54768)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface ITextRange
+    {
+        Char Character{ get; };
+        Char Character{ set; };
+        Windows.UI.Text.ITextCharacterFormat CharacterFormat{ get; };
+        Windows.UI.Text.ITextCharacterFormat CharacterFormat{ set; };
+        Windows.UI.Text.ITextRange FormattedText{ get; };
+        Windows.UI.Text.ITextRange FormattedText{ set; };
+        Int32 EndPosition{ get; };
+        Int32 EndPosition{ set; };
+        Windows.UI.Text.RangeGravity Gravity{ get; };
+        Windows.UI.Text.RangeGravity Gravity{ set; };
+        Int32 Length{ get; };
+        String Link{ get; };
+        String Link{ set; };
+        Windows.UI.Text.ITextParagraphFormat ParagraphFormat{ get; };
+        Windows.UI.Text.ITextParagraphFormat ParagraphFormat{ set; };
+        Int32 StartPosition{ get; };
+        Int32 StartPosition{ set; };
+        Int32 StoryLength{ get; };
+        String Text{ get; };
+        String Text{ set; };
+        Boolean CanPaste(Int32 format);
+        void ChangeCase(LetterCase value);
+        void Collapse(Boolean value);
+        void Copy();
+        void Cut();
+        Int32 Delete(TextRangeUnit unit, Int32 count);
+        Int32 EndOf(TextRangeUnit unit, Boolean extend);
+        Int32 Expand(TextRangeUnit unit);
+        Int32 FindText(String value, Int32 scanLength, FindOptions options);
+        void GetCharacterUtf32(out UInt32 value, Int32 offset);
+        Windows.UI.Text.ITextRange GetClone();
+        Int32 GetIndex(TextRangeUnit unit);
+        void GetPoint(HorizontalCharacterAlignment horizontalAlign, VerticalCharacterAlignment verticalAlign, PointOptions options, out Windows.Foundation.Point point);
+        void GetRect(PointOptions options, out Windows.Foundation.Rect rect, out Int32 hit);
+        void GetText(TextGetOptions options, out String value);
+        void GetTextViaStream(TextGetOptions options, Windows.Storage.Streams.IRandomAccessStream value);
+        Boolean InRange(ITextRange range);
+        void InsertImage(Int32 width, Int32 height, Int32 ascent, VerticalCharacterAlignment verticalAlign, String alternateText, Windows.Storage.Streams.IRandomAccessStream value);
+        Boolean InStory(ITextRange range);
+        Boolean IsEqual(ITextRange range);
+        Int32 Move(TextRangeUnit unit, Int32 count);
+        Int32 MoveEnd(TextRangeUnit unit, Int32 count);
+        Int32 MoveStart(TextRangeUnit unit, Int32 count);
+        void Paste(Int32 format);
+        void ScrollIntoView(PointOptions value);
+        void MatchSelection();
+        void SetIndex(TextRangeUnit unit, Int32 index, Boolean extend);
+        void SetPoint(Windows.Foundation.Point point, PointOptions options, Boolean extend);
+        void SetRange(Int32 startPosition, Int32 endPosition);
+        void SetText(TextSetOptions options, String value);
+        void SetTextViaStream(TextSetOptions options, Windows.Storage.Streams.IRandomAccessStream value);
+        Int32 StartOf(TextRangeUnit unit, Boolean extend);
+    };
+
+    [uuid(5adef3db-05fb-442d-8065-642afea02ced)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface ITextCharacterFormat
+    {
+        Windows.UI.Text.FormatEffect AllCaps{ get; };
+        Windows.UI.Text.FormatEffect AllCaps{ set; };
+        Windows.UI.Color BackgroundColor{ get; };
+        Windows.UI.Color BackgroundColor{ set; };
+        Windows.UI.Text.FormatEffect Bold{ get; };
+        Windows.UI.Text.FormatEffect Bold{ set; };
+        Windows.UI.Text.FontStretch FontStretch{ get; };
+        Windows.UI.Text.FontStretch FontStretch{ set; };
+        Windows.UI.Text.FontStyle FontStyle{ get; };
+        Windows.UI.Text.FontStyle FontStyle{ set; };
+        Windows.UI.Color ForegroundColor{ get; };
+        Windows.UI.Color ForegroundColor{ set; };
+        Windows.UI.Text.FormatEffect Hidden{ get; };
+        Windows.UI.Text.FormatEffect Hidden{ set; };
+        Windows.UI.Text.FormatEffect Italic{ get; };
+        Windows.UI.Text.FormatEffect Italic{ set; };
+        Single Kerning{ get; };
+        Single Kerning{ set; };
+        String LanguageTag{ get; };
+        String LanguageTag{ set; };
+        Windows.UI.Text.LinkType LinkType{ get; };
+        String Name{ get; };
+        String Name{ set; };
+        Windows.UI.Text.FormatEffect Outline{ get; };
+        Windows.UI.Text.FormatEffect Outline{ set; };
+        Single Position{ get; };
+        Single Position{ set; };
+        Windows.UI.Text.FormatEffect ProtectedText{ get; };
+        Windows.UI.Text.FormatEffect ProtectedText{ set; };
+        Single Size{ get; };
+        Single Size{ set; };
+        Windows.UI.Text.FormatEffect SmallCaps{ get; };
+        Windows.UI.Text.FormatEffect SmallCaps{ set; };
+        Single Spacing{ get; };
+        Single Spacing{ set; };
+        Windows.UI.Text.FormatEffect Strikethrough{ get; };
+        Windows.UI.Text.FormatEffect Strikethrough{ set; };
+        Windows.UI.Text.FormatEffect Subscript{ get; };
+        Windows.UI.Text.FormatEffect Subscript{ set; };
+        Windows.UI.Text.FormatEffect Superscript{ get; };
+        Windows.UI.Text.FormatEffect Superscript{ set; };
+        Windows.UI.Text.TextScript TextScript{ get; };
+        Windows.UI.Text.TextScript TextScript{ set; };
+        Windows.UI.Text.UnderlineType Underline{ get; };
+        Windows.UI.Text.UnderlineType Underline{ set; };
+        Int32 Weight{ get; };
+        Int32 Weight{ set; };
+        void SetClone(ITextCharacterFormat value);
+        Windows.UI.Text.ITextCharacterFormat GetClone();
+        Boolean IsEqual(ITextCharacterFormat format);
+    };
+
+    [uuid(2cf8cfa6-4676-498a-93f5-bbdbfc0bd883)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [webhosthidden]
+    interface ITextParagraphFormat
+    {
+        Windows.UI.Text.ParagraphAlignment Alignment{ get; };
+        Windows.UI.Text.ParagraphAlignment Alignment{ set; };
+        Single FirstLineIndent{ get; };
+        Windows.UI.Text.FormatEffect KeepTogether{ get; };
+        Windows.UI.Text.FormatEffect KeepTogether{ set; };
+        Windows.UI.Text.FormatEffect KeepWithNext{ get; };
+        Windows.UI.Text.FormatEffect KeepWithNext{ set; };
+        Single LeftIndent{ get; };
+        Single LineSpacing{ get; };
+        Windows.UI.Text.LineSpacingRule LineSpacingRule{ get; };
+        Windows.UI.Text.MarkerAlignment ListAlignment{ get; };
+        Windows.UI.Text.MarkerAlignment ListAlignment{ set; };
+        Int32 ListLevelIndex{ get; };
+        Int32 ListLevelIndex{ set; };
+        Int32 ListStart{ get; };
+        Int32 ListStart{ set; };
+        Windows.UI.Text.MarkerStyle ListStyle{ get; };
+        Windows.UI.Text.MarkerStyle ListStyle{ set; };
+        Single ListTab{ get; };
+        Single ListTab{ set; };
+        Windows.UI.Text.MarkerType ListType{ get; };
+        Windows.UI.Text.MarkerType ListType{ set; };
+        Windows.UI.Text.FormatEffect NoLineNumber{ get; };
+        Windows.UI.Text.FormatEffect NoLineNumber{ set; };
+        Windows.UI.Text.FormatEffect PageBreakBefore{ get; };
+        Windows.UI.Text.FormatEffect PageBreakBefore{ set; };
+        Single RightIndent{ get; };
+        Single RightIndent{ set; };
+        Windows.UI.Text.FormatEffect RightToLeft{ get; };
+        Windows.UI.Text.FormatEffect RightToLeft{ set; };
+        Windows.UI.Text.ParagraphStyle Style{ get; };
+        Windows.UI.Text.ParagraphStyle Style{ set; };
+        Single SpaceAfter{ get; };
+        Single SpaceAfter{ set; };
+        Single SpaceBefore{ get; };
+        Single SpaceBefore{ set; };
+        Windows.UI.Text.FormatEffect WidowControl{ get; };
+        Windows.UI.Text.FormatEffect WidowControl{ set; };
+        Int32 TabCount{ get; };
+        void AddTab(Single position, TabAlignment align, TabLeader leader);
+        void ClearAllTabs();
+        void DeleteTab(Single position);
+        Windows.UI.Text.ITextParagraphFormat GetClone();
+        void GetTab(Int32 index, out Single position, out TabAlignment align, out TabLeader leader);
+        Boolean IsEqual(ITextParagraphFormat format);
+        void SetClone(ITextParagraphFormat format);
+        void SetIndents(Single start, Single left, Single right);
+        void SetLineSpacing(LineSpacingRule rule, Single spacing);
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [webhosthidden]
+    runtimeclass RichEditTextDocument
+        : [default][contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.UI.Text.ITextDocument
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.UI.Text.ITextDocument2", f2311112-8c89-49c9-9118-f057cbb814ee)]
+        {
+            Boolean AlignmentIncludesTrailingWhitespace{ get; };
+            Boolean AlignmentIncludesTrailingWhitespace{ set; };
+            Boolean IgnoreTrailingCharacterSpacing{ get; };
+            Boolean IgnoreTrailingCharacterSpacing{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Text.ITextDocument3", 75ab03a1-a6f8-441d-aa18-0a851d6e5e3c)]
+        {
+            void ClearUndoRedoHistory();
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.UI.Text.IContentLinkInfo", 1ed52525-1c5f-48cb-b335-78b50a2ee642)]
+    [threading(both)]
+    runtimeclass ContentLinkInfo
+    {
+        ContentLinkInfo();
+        UInt32 Id{ get; };
+        UInt32 Id{ set; };
+        String DisplayText{ get; };
+        String DisplayText{ set; };
+        String SecondaryText{ get; };
+        String SecondaryText{ set; };
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Uri Uri{ set; };
+        String LinkContentKind{ get; };
+        String LinkContentKind{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    runtimeclass RichEditTextRange
+        : [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [default]Windows.UI.Text.ITextRange
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.UI.Text.IRichEditTextRange", 374e3515-ba8a-4a6e-8c59-0dde3d0cf5cd)]
+        {
+            Windows.UI.Text.ContentLinkInfo ContentLinkInfo{ get; };
+            Windows.UI.Text.ContentLinkInfo ContentLinkInfo{ set; };
+        }
+    }
+
+
+}

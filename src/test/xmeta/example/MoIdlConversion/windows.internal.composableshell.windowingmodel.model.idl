@@ -1,0 +1,94 @@
+
+
+
+
+
+
+namespace Windows.Internal.ComposableShell.WindowingModel
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    struct WindowId
+    {
+        UInt64 Value;
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    enum Visibility
+    {
+        NotVisible,
+        Visible,
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    enum EnabledState
+    {
+        Disabled,
+        Enabled,
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    struct UnsignedPhysicalPixels
+    {
+        UInt32 Value;
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    struct SignedPhysicalPixels
+    {
+        Int32 Value;
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    struct WindowPosition
+    {
+        SignedPhysicalPixels X;
+        SignedPhysicalPixels Y;
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    struct WindowSize
+    {
+        UnsignedPhysicalPixels Width;
+        UnsignedPhysicalPixels Height;
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    [uuid(0a075a5b-8893-5a57-a3a3-6591711725a7)]
+    interface IWindow
+    {
+        Windows.Internal.ComposableShell.WindowingModel.WindowId Id{ get; };
+    };
+
+    [uuid(a96bd013-2dc8-5bc0-9b53-a08059bc40f5)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    interface IWindowClientArea
+    {
+        void SetSize(WindowSize value);
+        void SetVisibility(Visibility value);
+        Object AppModelEntity{ get; };
+    };
+
+    [uuid(04a4fd3a-00be-56bc-802b-e1ecaa789d8e)]
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    interface IWindowingModelForWindowProvider
+    {
+        Windows.Internal.ComposableShell.WindowingModel.IWindow CreateNewWindow(IWindowClientArea clientArea);
+        void UncreateWindow(IWindow window);
+        void ForegroundWindowChanged(IWindow window);
+        void RaiseAppModelEvent(IWindow window, Object payload);
+    };
+
+    [contract(Windows.Internal.ComposableShell.WindowingModel.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [threading(both)]
+    runtimeclass WindowingModel
+        : Windows.Internal.ComposableShell.WindowingModel.IWindowingModelForWindowProvider
+    {
+        WindowingModel();
+    }
+
+}

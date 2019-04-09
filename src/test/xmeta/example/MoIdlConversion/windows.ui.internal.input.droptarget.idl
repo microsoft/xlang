@@ -1,0 +1,32 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.Input.IInputDropTargetStatics", 72e59132-041f-596d-bea1-929eef7e34e1)]
+    [interface_name("Windows.UI.Internal.Input.IInputDropTarget", f3889178-1f72-4379-bf87-91a7dfac9f78)]
+    [threading(both)]
+    runtimeclass InputDropTarget
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Boolean IsSupported{ get; };
+        static Windows.UI.Internal.Input.InputDropTarget GetForInputSite(InputSite inputSite);
+        UInt64 Id{ get; };
+        UInt64 Id{ set; };
+        Guid Type{ get; };
+        Guid Type{ set; };
+    }
+
+}

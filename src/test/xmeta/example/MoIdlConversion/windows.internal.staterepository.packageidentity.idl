@@ -1,0 +1,49 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IPackageIdentityStatics", 84485035-7d09-4684-8440-e8eb94f59919)]
+    [interface_name("Windows.Internal.StateRepository.IPackageIdentity", 38b0547e-34d2-418b-94d3-82475ee6d97d)]
+    [threading(both)]
+    runtimeclass PackageIdentity
+    {
+        static Boolean Exists(Int64 packageIdentityID);
+        static Boolean ExistsByPackageFamily(PackageFamily PackageFamily);
+        static Boolean ExistsByPackageFullName(String PackageFullName);
+        static Windows.Internal.StateRepository.PackageIdentity Get(Int64 packageIdentityID);
+        static Windows.Internal.StateRepository.PackageIdentity TryGet(Int64 packageIdentityID);
+        static Windows.Internal.StateRepository.PackageIdentity GetByPackageFullName(String PackageFullName);
+        static Windows.Internal.StateRepository.PackageIdentity TryGetByPackageFullName(String PackageFullName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageIdentity>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PackageIdentity>  FindByPackageFamily(PackageFamily PackageFamily);
+        PackageIdentity();
+        Int64 _PackageIdentityID{ get; };
+        Int64 _PackageIdentityID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 PackageFamily{ get; };
+        Int64 PackageFamily{ set; };
+        Windows.Internal.StateRepository.PackageFamily GetPackageFamily();
+        void SetPackageFamily(PackageFamily value);
+        String PackageFullName{ get; };
+        String PackageFullName{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

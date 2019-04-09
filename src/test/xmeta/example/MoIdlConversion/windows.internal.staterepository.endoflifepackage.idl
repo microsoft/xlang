@@ -1,0 +1,43 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IEndOfLifePackageStatics", 2a0936b0-2199-4446-bfb2-1bb913c44cb8)]
+    [interface_name("Windows.Internal.StateRepository.IEndOfLifePackage", 09ec5a45-e91d-40af-9905-1e981bf0f476)]
+    [threading(both)]
+    runtimeclass EndOfLifePackage
+    {
+        EndOfLifePackage();
+        static Boolean Exists(Int64 endOfLifePackageID);
+        static Boolean ExistsByPackageFamily(PackageFamily PackageFamily);
+        static Windows.Internal.StateRepository.EndOfLifePackage TryGet(Int64 endOfLifePackageID);
+        static Windows.Internal.StateRepository.EndOfLifePackage TryGetByPackageFamily(PackageFamily PackageFamily);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.EndOfLifePackage>  Find();
+        Int64 _EndOfLifePackage{ get; };
+        Int64 _EndOfLifePackage{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 PackageFamily{ get; };
+        Int64 PackageFamily{ set; };
+        Windows.Internal.StateRepository.PackageFamily GetPackageFamily();
+        void SetPackageFamily(PackageFamily value);
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

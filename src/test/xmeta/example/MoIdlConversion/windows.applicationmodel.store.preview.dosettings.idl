@@ -1,0 +1,42 @@
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Store.Preview
+{
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum DeliveryOptimizationDownloadMode
+    {
+        Simple,
+        HttpOnly,
+        Lan,
+        Group,
+        Internet,
+        Bypass,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum DeliveryOptimizationDownloadModeSource
+    {
+        Default,
+        Policy,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.ApplicationModel.Store.Preview.IDeliveryOptimizationSettingsStatics", 5c817caf-aed5-5999-b4c9-8c60898bc4f3)]
+    [interface_name("Windows.ApplicationModel.Store.Preview.IDeliveryOptimizationSettings", 1810fda0-e853-565e-b874-7a8a7b9a0e0f)]
+    [threading(both)]
+    runtimeclass DeliveryOptimizationSettings
+    {
+        static Windows.ApplicationModel.Store.Preview.DeliveryOptimizationSettings GetCurrentSettings();
+        Windows.ApplicationModel.Store.Preview.DeliveryOptimizationDownloadMode DownloadMode{ get; };
+        Windows.ApplicationModel.Store.Preview.DeliveryOptimizationDownloadModeSource DownloadModeSource{ get; };
+    }
+
+}

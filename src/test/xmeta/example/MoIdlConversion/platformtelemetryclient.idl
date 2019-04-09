@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+namespace Windows.System.Diagnostics.Telemetry
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum PlatformTelemetryRegistrationStatus
+    {
+        Success,
+        SettingsOutOfRange,
+        UnknownFailure,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.System.Diagnostics.Telemetry.IPlatformTelemetryRegistrationResult", 4d8518ab-2292-49bd-a15a-3d71d2145112)]
+    runtimeclass PlatformTelemetryRegistrationResult
+    {
+        Windows.System.Diagnostics.Telemetry.PlatformTelemetryRegistrationStatus Status{ get; };
+    }
+
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.System.Diagnostics.Telemetry.IPlatformTelemetryRegistrationSettings", 819a8582-ca19-415e-bb79-9c224bfa3a73)]
+    [threading(both)]
+    runtimeclass PlatformTelemetryRegistrationSettings
+    {
+        PlatformTelemetryRegistrationSettings();
+        UInt32 StorageSize{ get; };
+        UInt32 StorageSize{ set; };
+        UInt32 UploadQuotaSize{ get; };
+        UInt32 UploadQuotaSize{ set; };
+    }
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Diagnostics.Telemetry.IPlatformTelemetryClientStatics", 9bf3f25d-d5c3-4eea-8dbe-9c8dbb0d9d8f)]
+    [threading(both)]
+    runtimeclass PlatformTelemetryClient
+    {
+        [method_name("Register")] static Windows.System.Diagnostics.Telemetry.PlatformTelemetryRegistrationResult Register(String id);
+        [method_name("RegisterWithSettings")] static Windows.System.Diagnostics.Telemetry.PlatformTelemetryRegistrationResult Register(String id, PlatformTelemetryRegistrationSettings settings);
+    }
+
+}

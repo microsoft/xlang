@@ -1,0 +1,161 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Text
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    enum ShellRequestType
+    {
+        None,
+        ShowView,
+        HideView,
+        PositionAndSizeUpdate,
+        HideAllViews,
+    };
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    enum LifeCycleManagementType
+    {
+        None,
+        Suspend,
+        Resume,
+    };
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    enum MoveAnimationType
+    {
+        Move,
+        HideAndReshow,
+    };
+
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [uuid(7aa507a9-65c5-46da-86c9-c348f9b69949)]
+    interface IShellKeyboardHostingPolicy
+    {
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleButtomEdgeCandidateWindowAlignmentChanged(Boolean isBottomEdgeAligned, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlFocusChanged(Boolean isEditControlInFocus, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlPositionChanged(Windows.Foundation.Rect editControlRect, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlSelectionChanged(Windows.Foundation.Rect selectionRect, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlLineTypeChanged(UInt32 lineType, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleInputPaneTryShow(UInt32 viewId, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        Windows.Internal.Shell.Text.ShellRequestType HandleInputPaneTryHide(UInt32 viewId);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleFrameSizeUpdated(out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleFramePositionAndSizeUpdateCompleted(UInt32 viewId, Windows.Foundation.Rect frameRect, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleHardwareKeyboardPresenceChanged(Boolean isHardwareKeyboardConnected, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleConvertibleSlateModeChanged(Boolean isConvertibleSlateMode, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        Boolean HandleInputAppChanged(String inputAppAumId);
+        [return_name("isShowAllowed")] Boolean VerifyInputAppRequestedShow(Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeRequest requestPositionAndSize, UInt32 viewId, out UInt32 frameId, out Windows.Foundation.Rect viewRect);
+        [return_name("isHideAllowed")] Boolean VerifyInputAppRequestedHide(UInt32 viewId, out UInt32 frameId);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlManualInputPaneSettingChanged(Boolean isEditControlManualInputPaneEnabled, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlReadOnlySettingChanged(Boolean isEditControlReadOnly, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleInputModalityInfoChanged(Windows.UI.Internal.Text.Core.CoreKeyboardModalityInfo modalityInfo, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlEmbeddedHandwritingViewEnabledSettingChanged(Boolean isEditControlEmbeddedHandwritingViewEnabled, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("shellRequestType")] Windows.Internal.Shell.Text.ShellRequestType HandleEditControlEmbeddedHandwritingViewVisibleSettingChanged(Boolean isEditControlEmbeddedHandwritingViewVisible, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        Boolean CheckIfFocusShouldBeRemoved();
+        [return_name("type")] Windows.Internal.Shell.Text.LifeCycleManagementType HandleAppLifeCycleUpdate(Boolean forceResume, out UInt32 frameId);
+        Windows.Internal.Shell.Text.MoveAnimationType DetermineMoveAnimationType(UInt32 viewId);
+        void NotifyInputPaneShowing();
+        void NotifyInputPaneHiding();
+        void NotifyVisibilityPreference(UInt32 viewId, Boolean isExpectedToShow);
+        void NotifyInputAppDetached();
+        void GetShellState(out Boolean isEditControlInFocus, out Boolean isHardwareKeyboardConnected, out Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  positionAndSizeOptions);
+        [return_name("finalPosition")] Windows.Foundation.Rect HandleDragEnded(Windows.Foundation.Rect currentPosition, out MoveAnimationType type, out UInt32 frameId);
+    };
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [uuid(c055e011-f096-4fce-adb0-23c807fa7140)]
+    interface IShellInputExperienceHost
+    {
+        void Show(UInt32 frameId, UInt32 viewId, Windows.Foundation.Rect hostRect);
+        void Hide(UInt32 viewId);
+        void Suspend(UInt32 viewId);
+        void Resume(UInt32 frameId, UInt32 viewId);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Text.IShellInputExperienceHost, Windows.Internal.Shell.Text.IInputPaneShowingEventArgs>  InputPaneShowing;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Text.IShellInputExperienceHost, Windows.Internal.Shell.Text.IInputPaneHidingEventArgs>  InputPaneHiding;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Text.IShellInputExperienceHost, Windows.Internal.Shell.Text.IFrameSizeUpdatedEventArgs>  FrameSizeUpdated;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Text.IShellInputExperienceHost, Windows.Internal.Shell.Text.IBackButtonPressedEventArgs>  BackButtonPressed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Text.IShellInputExperienceHost, Windows.Internal.Shell.Text.IDragEndedEventArgs>  DragEnded;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Text.IShellInputExperienceHost, Windows.Internal.Shell.Text.IInputAppDetachedEventArgs>  InputAppDetached;
+    };
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [uuid(a4a68760-adac-4801-ab13-d826a4a4bc07)]
+    interface IInputPaneShowingEventArgs
+    {
+        Windows.Foundation.Rect OccludedRect{ get; };
+    };
+
+    [uuid(d9c1feee-0877-40e3-a725-223e678f40ea)]
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [internal]
+    interface IInputPaneHidingEventArgs
+    {
+    };
+
+    [uuid(d5b040c7-cc21-4cbb-a741-9de8573b52e0)]
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [internal]
+    interface IFrameSizeUpdatedEventArgs
+    {
+    };
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [uuid(8a544c78-acb6-4554-b0ad-4bf45bbf7bd4)]
+    [internal]
+    interface IBackButtonPressedEventArgs
+    {
+    };
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [uuid(157b8999-b111-4a02-9fcc-512f060ffb94)]
+    interface IDragEndedEventArgs
+    {
+        Windows.Foundation.Rect DragEndRect{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [uuid(61daa405-b4cb-4b7d-8aa5-76d8224125c7)]
+    [internal]
+    interface IInputAppDetachedEventArgs
+    {
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [static_name("Windows.Internal.Shell.Text.IShellKeyboardManagerStatics", 8fa14d03-10ba-4331-88d9-75c89a9bb896)]
+    [interface_name("Windows.Internal.Shell.Text.IShellKeyboardManager", 870bdef7-de81-4a8f-95dd-128dc0781466)]
+    runtimeclass ShellKeyboardManager
+    {
+        static Windows.Internal.Shell.Text.ShellKeyboardManager GetInstance();
+        void Initialize(IShellKeyboardHostingPolicy policy, IShellInputExperienceHost host);
+        void SetKeyboardPreference(String name, String value);
+        void UpdatePositionAndSizeOptions(Windows.Foundation.Collections.IVectorView <Windows.UI.Internal.Text.Core.CoreKeyboardPositionAndSizeOption>  options);
+        void ShellRequestShow(Windows.UI.Internal.Text.Core.CoreKeyboardViewType viewType);
+        void ShellRequestHide(Windows.UI.Internal.Text.Core.CoreKeyboardViewType viewType, Boolean delay);
+        void SwitchToNextInputProfile();
+        void SetTrackPosition(Boolean trackEditControlPosition, Boolean trackSelectionPosition);
+        void OnConvertibleSlateModeChanged();
+    }
+
+
+    [contract(Windows.Internal.Shell.Text.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.Shell.Text.IShellInputExperienceHostStatics", a14299a4-366b-49b6-9fae-4651bedbe1ed)]
+    runtimeclass ShellInputExperienceHost
+        : [default]Windows.Internal.Shell.Text.IShellInputExperienceHost
+    {
+        static Windows.Internal.Shell.Text.ShellInputExperienceHost GetInstance();
+    }
+
+}

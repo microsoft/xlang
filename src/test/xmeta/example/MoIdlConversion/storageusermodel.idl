@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Storage
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Storage.InternalContract, 1)]
+    [uuid(4bd0fcbb-ad6f-4796-993b-f3cf27c59444)]
+    interface IKnownFoldersUserModelStaticsPriv
+    {
+        Windows.Storage.StorageFolder GetApplicationDataFolderForUser(UInt32 folderId, Windows.System.User user);
+        Windows.Storage.StorageFolder GetPublisherCacheFolderForUser(String folderName, Windows.System.User user);
+    };
+
+    [contract(Windows.Internal.Storage.InternalContract, 1)]
+    [uuid(fbadd9a8-924b-4ef7-8b18-71166f361d19)]
+    interface IStorageItemWithUser requires Windows.Storage.IStorageItem2, Windows.Storage.IStorageItem
+    {
+        Windows.System.User User{ get; };
+    };
+
+}

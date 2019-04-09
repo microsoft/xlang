@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+namespace Windows.Media.Capture
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MediaCategory
+    {
+        Other,
+        Communications,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Media,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        GameChat,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Speech,
+    };
+
+}

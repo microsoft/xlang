@@ -1,0 +1,152 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Casting
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum CastingPlaybackTypes
+    {
+        None,
+        Audio,
+        Video,
+        Picture = 4,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CastingConnectionErrorStatus
+    {
+        Succeeded,
+        DeviceDidNotRespond,
+        DeviceError,
+        DeviceLocked,
+        ProtectedPlaybackFailed,
+        InvalidCastingSource,
+        Unknown,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CastingConnectionState
+    {
+        Disconnected,
+        Connected,
+        Rendering,
+        Disconnecting,
+        Connecting,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Casting.ICastingSource", f429ea72-3467-47e6-a027-522923e9d727)]
+    runtimeclass CastingSource
+    {
+        Windows.Foundation.Uri PreferredSourceUri{ get; };
+        Windows.Foundation.Uri PreferredSourceUri{ set; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.ICastingConnectionErrorOccurredEventArgs", a7fb3c69-8719-4f00-81fb-961863c79a32)]
+    runtimeclass CastingConnectionErrorOccurredEventArgs
+    {
+        Windows.Media.Casting.CastingConnectionErrorStatus ErrorStatus{ get; };
+        String Message{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Casting.ICastingDeviceStatics", e7d958d7-4d13-4237-a365-4c4f6a4cfd2f)]
+    [interface_name("Windows.Media.Casting.ICastingDevice", de721c83-4a43-4ad1-a6d2-2492a796c3f2)]
+    [threading(both)]
+    runtimeclass CastingDevice
+    {
+        static String GetDeviceSelector(CastingPlaybackTypes type);
+        static Windows.Foundation.IAsyncOperation <String>  GetDeviceSelectorFromCastingSourceAsync(CastingSource castingSource);
+        static Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingDevice>  FromIdAsync(String value);
+        static Windows.Foundation.IAsyncOperation <Boolean>  DeviceInfoSupportsCastingAsync(Windows.Devices.Enumeration.DeviceInformation device);
+        String Id{ get; };
+        String FriendlyName{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamWithContentType Icon{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingPlaybackTypes>  GetSupportedCastingPlaybackTypesAsync();
+        Windows.Media.Casting.CastingConnection CreateCastingConnection();
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.ICastingConnection", cd951653-c2f1-4498-8b78-5fb4cd3640dd)]
+    runtimeclass CastingConnection
+        : Windows.Foundation.IClosable
+    {
+        Windows.Media.Casting.CastingConnectionState State{ get; };
+        Windows.Media.Casting.CastingDevice Device{ get; };
+        Windows.Media.Casting.CastingSource Source{ get; };
+        Windows.Media.Casting.CastingSource Source{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.CastingConnection, Object>  StateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.CastingConnection, Windows.Media.Casting.CastingConnectionErrorOccurredEventArgs>  ErrorOccurred;
+        Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingConnectionErrorStatus>  RequestStartCastingAsync(CastingSource value);
+        Windows.Foundation.IAsyncOperation <Windows.Media.Casting.CastingConnectionErrorStatus>  DisconnectAsync();
+    }
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.ICastingDeviceSelectedEventArgs", dc439e86-dd57-4d0d-9400-af45e4fb3663)]
+    runtimeclass CastingDeviceSelectedEventArgs
+    {
+        Windows.Media.Casting.CastingDevice SelectedCastingDevice{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Casting.ICastingDevicePickerFilter", be8c619c-b563-4354-ae33-9fdaad8c6291)]
+    runtimeclass CastingDevicePickerFilter
+    {
+        Boolean SupportsAudio{ get; };
+        Boolean SupportsAudio{ set; };
+        Boolean SupportsVideo{ get; };
+        Boolean SupportsVideo{ set; };
+        Boolean SupportsPictures{ get; };
+        Boolean SupportsPictures{ set; };
+        Windows.Foundation.Collections.IVector <Windows.Media.Casting.CastingSource>  SupportedCastingSources{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Casting.ICastingDevicePicker", dcd39924-0591-49be-aacb-4b82ee756a95)]
+    [threading(both)]
+    runtimeclass CastingDevicePicker
+    {
+        CastingDevicePicker();
+        Windows.Media.Casting.CastingDevicePickerFilter Filter{ get; };
+        Windows.Devices.Enumeration.DevicePickerAppearance Appearance{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.CastingDevicePicker, Windows.Media.Casting.CastingDeviceSelectedEventArgs>  CastingDeviceSelected;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Casting.CastingDevicePicker, Object>  CastingDevicePickerDismissed;
+        [method_name("Show")] void Show(Windows.Foundation.Rect selection);
+        [method_name("ShowWithPlacement")] void Show(Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement);
+        void Hide();
+    }
+
+}

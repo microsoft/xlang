@@ -1,0 +1,201 @@
+
+
+
+
+
+
+
+namespace Windows.Security.ExchangeActiveSyncProvisioning
+{
+    [contractversion(1)]
+    apicontract EasContract{};
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasRequireEncryptionResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        NotProvisionedOnAllVolumes,
+        [deprecated("DeFixedDataNotSupported may be altered or unavailable for releases after Windows 8.1. Instead, use FixedDataNotSupported.", deprecate, Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 0x10000)]
+        DeFixedDataNotSupported,
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        FixedDataNotSupported = 4,
+        [deprecated("DeHardwareNotCompliant may be altered or unavailable for releases after Windows 8.1. Instead, use HardwareNotCompliant.", deprecate, Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 0x10000)]
+        DeHardwareNotCompliant,
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        HardwareNotCompliant = 5,
+        [deprecated("DeWinReNotConfigured may be altered or unavailable for releases after Windows 8.1. Instead, use LockNotConfigured.", deprecate, Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 0x10000)]
+        DeWinReNotConfigured,
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        LockNotConfigured = 6,
+        [deprecated("DeProtectionSuspended may be altered or unavailable for releases after Windows 8.1. Instead, use ProtectionSuspended.", deprecate, Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 0x10000)]
+        DeProtectionSuspended,
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        ProtectionSuspended = 7,
+        [deprecated("DeOsVolumeNotProtected may be altered or unavailable for releases after Windows 8.1. Instead, use OsVolumeNotProtected.", deprecate, Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 0x10000)]
+        DeOsVolumeNotProtected,
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        OsVolumeNotProtected = 8,
+        [deprecated("DeProtectionNotYetEnabled may be altered or unavailable for releases after Windows 8.1. Instead, use ProtectionNotYetEnabled.", deprecate, Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 0x10000)]
+        DeProtectionNotYetEnabled,
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        ProtectionNotYetEnabled = 9,
+        NoFeatureLicense,
+        OsNotProtected,
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        UnexpectedFailure,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasEncryptionProviderType
+    {
+        NotEvaluated,
+        WindowsEncryption,
+        OtherEncryption,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasMinPasswordLengthResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        RequestedPolicyIsStricter,
+        RequestedPolicyNotEnforceable,
+        InvalidParameter,
+        CurrentUserHasBlankPassword,
+        AdminsHaveBlankPassword,
+        UserCannotChangePassword,
+        AdminsCannotChangePassword,
+        LocalControlledUsersCannotChangePassword,
+        ConnectedAdminsProviderPolicyIsWeak,
+        ConnectedUserProviderPolicyIsWeak,
+        ChangeConnectedAdminsPassword,
+        ChangeConnectedUserPassword,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasDisallowConvenienceLogonResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        RequestedPolicyIsStricter,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasMinPasswordComplexCharactersResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        RequestedPolicyIsStricter,
+        RequestedPolicyNotEnforceable,
+        InvalidParameter,
+        CurrentUserHasBlankPassword,
+        AdminsHaveBlankPassword,
+        UserCannotChangePassword,
+        AdminsCannotChangePassword,
+        LocalControlledUsersCannotChangePassword,
+        ConnectedAdminsProviderPolicyIsWeak,
+        ConnectedUserProviderPolicyIsWeak,
+        ChangeConnectedAdminsPassword,
+        ChangeConnectedUserPassword,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasPasswordExpirationResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        RequestedPolicyIsStricter,
+        RequestedExpirationIncompatible,
+        InvalidParameter,
+        UserCannotChangePassword,
+        AdminsCannotChangePassword,
+        LocalControlledUsersCannotChangePassword,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasPasswordHistoryResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        RequestedPolicyIsStricter,
+        InvalidParameter,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasMaxPasswordFailedAttemptsResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        RequestedPolicyIsStricter,
+        InvalidParameter,
+    };
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    enum EasMaxInactivityTimeLockResult
+    {
+        NotEvaluated,
+        Compliant,
+        CanBeCompliant,
+        RequestedPolicyIsStricter,
+        InvalidParameter,
+    };
+
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    [interface_name("Windows.Security.ExchangeActiveSyncProvisioning.IEasComplianceResults", 463c299c-7f19-4c66-b403-cb45dd57a2b3)]
+    runtimeclass EasComplianceResults
+    {
+        Boolean Compliant{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasRequireEncryptionResult RequireEncryptionResult{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasMinPasswordLengthResult MinPasswordLengthResult{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasDisallowConvenienceLogonResult DisallowConvenienceLogonResult{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasMinPasswordComplexCharactersResult MinPasswordComplexCharactersResult{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasPasswordExpirationResult PasswordExpirationResult{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasPasswordHistoryResult PasswordHistoryResult{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasMaxPasswordFailedAttemptsResult MaxPasswordFailedAttemptsResult{ get; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasMaxInactivityTimeLockResult MaxInactivityTimeLockResult{ get; };
+
+        [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+        [interface_name("Windows.Security.ExchangeActiveSyncProvisioning.IEasComplianceResults2", 2fbe60c9-1aa8-47f5-88bb-cb3ef0bffb15)]
+        {
+            Windows.Security.ExchangeActiveSyncProvisioning.EasEncryptionProviderType EncryptionProviderType{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Security.ExchangeActiveSyncProvisioning.EasContract, 1)]
+    [interface_name("Windows.Security.ExchangeActiveSyncProvisioning.IEasClientSecurityPolicy", 45b72362-dfba-4a9b-aced-6fe2adcb6420)]
+    [threading(both)]
+    runtimeclass EasClientSecurityPolicy
+    {
+        EasClientSecurityPolicy();
+        Boolean RequireEncryption{ get; };
+        Boolean RequireEncryption{ set; };
+        UInt8 MinPasswordLength{ get; };
+        UInt8 MinPasswordLength{ set; };
+        Boolean DisallowConvenienceLogon{ get; };
+        Boolean DisallowConvenienceLogon{ set; };
+        UInt8 MinPasswordComplexCharacters{ get; };
+        UInt8 MinPasswordComplexCharacters{ set; };
+        Windows.Foundation.TimeSpan PasswordExpiration{ get; };
+        Windows.Foundation.TimeSpan PasswordExpiration{ set; };
+        UInt32 PasswordHistory{ get; };
+        UInt32 PasswordHistory{ set; };
+        UInt8 MaxPasswordFailedAttempts{ get; };
+        UInt8 MaxPasswordFailedAttempts{ set; };
+        Windows.Foundation.TimeSpan MaxInactivityTimeLock{ get; };
+        Windows.Foundation.TimeSpan MaxInactivityTimeLock{ set; };
+        Windows.Security.ExchangeActiveSyncProvisioning.EasComplianceResults CheckCompliance();
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Security.ExchangeActiveSyncProvisioning.EasComplianceResults>  ApplyAsync();
+    }
+
+}

@@ -1,0 +1,132 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.SecurityKeyEnrollment
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    enum SecurityKeyTransport
+    {
+        USB,
+        NFC,
+        BluetoothLE,
+    };
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    enum SecurityKeyKind
+    {
+        Unknown,
+        Touch,
+        Swipe,
+    };
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    enum SecurityKeyFingerprintState
+    {
+        NotSupported,
+        PinRequired,
+        NotEnrolled,
+        Enrolled,
+    };
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    enum SecurityKeyPinState
+    {
+        NotSupported,
+        NotEnrolled,
+        Enrolled,
+        Blocked,
+    };
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    enum SecurityKeyPinOperationResult
+    {
+        Success,
+        Required,
+        NotProvisioned,
+        Invalid,
+        PolicyViolation,
+        Blocked,
+        InvalidPowerCycle,
+        OneRetryRemaining,
+        CatastrophicError,
+    };
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    enum SecurityKeyFingerprintSampleStatus
+    {
+        Good,
+        TooHigh,
+        TooLow,
+        TooRight,
+        TooLeft,
+        TooFast,
+        TooSlow,
+        PoorQuality,
+        TooSkewed,
+        TooShort,
+        MergeFailure,
+        Exists,
+        DatabaseFull,
+        NoUserActivity,
+        NoUserPresenceTransition,
+        CatastrophicError,
+    };
+
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.SecurityKeyEnrollment.ISecurityKeyFingerprintEnrollmentResult", 00be8866-35a7-5d0c-9f34-d3f627cffb96)]
+    runtimeclass SecurityKeyFingerprintEnrollmentResult
+    {
+        Windows.Internal.SecurityKeyEnrollment.SecurityKeyFingerprintSampleStatus SampleStatus{ get; };
+        UInt32 RemainingSamples{ get; };
+    }
+
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.SecurityKeyEnrollment.ISecurityKeyEnrollmentArgs", 582fa227-8333-5e73-be6a-3c020304aaf6)]
+    runtimeclass SecurityKeyEnrollmentArgs
+    {
+        String Message{ get; };
+        Boolean IsFatalError{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.SecurityKeyEnrollment.ISecurityKeyContext", 35e04cd7-22ac-59b9-8ba2-12dd34e43ba3)]
+    runtimeclass SecurityKeyContext
+    {
+        Windows.Internal.SecurityKeyEnrollment.SecurityKeyTransport Transport{ get; };
+        Windows.Internal.SecurityKeyEnrollment.SecurityKeyKind Kind{ get; };
+        Windows.Internal.SecurityKeyEnrollment.SecurityKeyFingerprintState FingerprintState{ get; };
+        Windows.Internal.SecurityKeyEnrollment.SecurityKeyPinState PinState{ get; };
+        UInt32 PinRetriesRemaining{ get; };
+        UInt32 MaxFingerprintCaptureSamples{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Internal.SecurityKeyEnrollment.SecurityKeyPinOperationResult>  AuthenticatePinAsync(String pin);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.SecurityKeyEnrollment.SecurityKeyPinOperationResult>  SetPinAsync(String newPin);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.SecurityKeyEnrollment.SecurityKeyPinOperationResult>  ChangePinAsync(String oldPin, String newPin);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.SecurityKeyEnrollment.SecurityKeyFingerprintEnrollmentResult>  EnrollFingerprintAsync(Boolean isBeginEnrollment);
+        Windows.Foundation.IAsyncAction CancelEnrollFingerprintAsync();
+        Windows.Foundation.IAsyncAction RemoveAllFingerprintsAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  ResetDeviceAsync();
+    }
+
+    [contract(Windows.Internal.SecurityKeyEnrollment.InternalContract, 1)]
+    [uuid(8de7484e-478b-51b5-8a74-e38a24ae32f5)]
+    interface ISecurityKeyEnrollmentSession
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.SecurityKeyEnrollment.ISecurityKeyEnrollmentSession, Windows.Internal.SecurityKeyEnrollment.SecurityKeyEnrollmentArgs>  DeviceStateChanged;
+        Windows.Foundation.IAsyncOperation <Windows.Internal.SecurityKeyEnrollment.SecurityKeyContext>  SelectSecurityKeyAsync();
+    };
+
+}

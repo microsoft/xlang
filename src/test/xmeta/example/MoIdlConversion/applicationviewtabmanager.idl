@@ -1,0 +1,203 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.ViewManagement
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [static_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabIconStatics", 4d353d26-4efd-5af0-9ed3-63880217b5d6)]
+    [default_interface]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabIcon", 7a3e99fa-b8ad-5cd7-bf67-b99b391b4df5)]
+    [threading(both)]
+    runtimeclass ApplicationViewTabIcon
+    {
+        [method_name("CreateFromFontGlyph")] static Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon CreateFromFontGlyph(String glyph, String fontFamily);
+        [method_name("CreateFromFontGlyphWithUri")] static Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon CreateFromFontGlyph(String glyph, String fontFamily, Windows.Foundation.Uri fontUri);
+        [method_name("CreateFromFontGlyphWithUriAndColor")] static Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon CreateFromFontGlyph(String glyph, String fontFamily, Windows.Foundation.Uri fontUri, Windows.UI.Color color);
+        static Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon CreateFromImage(Windows.Storage.Streams.IRandomAccessStreamReference image);
+    }
+
+
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabCommandFactory", 71fc4e30-8c11-53fa-b2d9-bb378546d66f)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabCommand", a7eabde5-08ad-4898-aa7c-a7f21bdce9ba)]
+    [threading(both)]
+    runtimeclass ApplicationViewTabCommand
+    {
+        [method_name( "CreateInstance" )] ApplicationViewTabCommand(ApplicationViewTabIcon icon, String displayName);
+        [method_name( "CreateInstance2" )] ApplicationViewTabCommand(String displayName);
+        Guid Id{ get; };
+        Boolean CanInvoke{ get; };
+        Boolean CanInvoke{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabCommand, Object>  Invoked;
+        String DisplayName{ get; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon Icon{ get; };
+    }
+
+
+
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabStatics", 241ef6ae-a7c0-5f5f-b9fc-20c3360ed0c6)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTab", 6baec03a-7ba1-59ef-8ab0-6661f0609b3a)]
+    [threading(both)]
+    runtimeclass ApplicationViewTab
+    {
+        static Windows.UI.Internal.ViewManagement.ApplicationViewTab GetDefaultForCurrentView();
+        Guid Id{ get; };
+        Boolean IsExternal{ get; };
+        Object Tag{ get; };
+        Object Tag{ set; };
+        String Title{ get; };
+        String Title{ set; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon UnselectedIcon{ get; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon UnselectedIcon{ set; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon SelectedIcon{ get; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon SelectedIcon{ set; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabCommand Badge{ get; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabCommand Badge{ set; };
+        Windows.UI.Color BackgroundColor{ get; };
+        Windows.UI.Color BackgroundColor{ set; };
+        Windows.UI.Color ForegroundColor{ get; };
+        Windows.UI.Color ForegroundColor{ set; };
+        void SetIsRequestingAttention(Boolean isRequestingAttention);
+        Boolean IsLoading{ get; };
+        Boolean IsLoading{ set; };
+        Boolean IsUnresponsive{ get; };
+        Boolean IsUnresponsive{ set; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon TabPreview{ get; };
+        Windows.UI.Internal.ViewManagement.ApplicationViewTabIcon TabPreview{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTab, Object>  TabPreviewRequested;
+    }
+
+
+
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabInsertionContext", d36c7944-6870-5117-83e4-4173719a9a38)]
+    runtimeclass ApplicationViewTabInsertionContext
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [static_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabManagerStatics", 8184852f-b61e-5958-b4b3-93aa8304325c)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabManager", 4abad0fe-7218-50bd-89f6-8fd203fc9f41)]
+    [threading(both)]
+    runtimeclass ApplicationViewTabManager
+    {
+        static Windows.UI.Internal.ViewManagement.ApplicationViewTabManager GetForCurrentView();
+        static Boolean IsActivatingIntoExistingGroup(Windows.ApplicationModel.Activation.IActivatedEventArgs activatedEventArgs);
+        static Boolean IsViewInActivationGroup(Int32 viewId, Windows.ApplicationModel.Activation.IActivatedEventArgs activatedEventArgs);
+        static Boolean AreTabbedViewsPreferred{ get; };
+        static Boolean AreTabbedViewsPreferred{ set; };
+        static Boolean IsSupported{ get; };
+        static Windows.UI.Internal.ViewManagement.ApplicationViewTabInsertionContext GetDefaultInsertionContext(Windows.ApplicationModel.Activation.IActivatedEventArgs activationEventArgs);
+        Guid GroupId{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Internal.ViewManagement.ApplicationViewTab>  GetCurrentTabs();
+        Windows.UI.Internal.ViewManagement.ApplicationViewTab CreateTab();
+        void InsertTabAtDefaultPosition(ApplicationViewTab tab, ApplicationViewTabInsertionContext defaultInsertionContext);
+        Boolean TryInsertTabAfter(ApplicationViewTab tab, ApplicationViewTab referenceTab);
+        void AppendTab(ApplicationViewTab tab);
+        void RemoveTab(ApplicationViewTab tab);
+        Windows.UI.Internal.ViewManagement.ApplicationViewTab SelectedTab{ get; };
+        Boolean TrySelectTab(ApplicationViewTab tab);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Object>  SelectedTabChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Windows.UI.Internal.ViewManagement.ApplicationViewTabManagerTabEventArgs>  TabClosed;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Windows.UI.Internal.ViewManagement.ApplicationViewTabManagerTabCloseRequestedEventArgs>  TabCloseRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Windows.UI.Internal.ViewManagement.ApplicationViewTabTransferStartingEventArgs>  TabTransferStarting;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Object>  TabTransferCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Windows.UI.Internal.ViewManagement.ApplicationViewTabTransferReceivingEventArgs>  TabTransferReceiving;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Windows.UI.Internal.ViewManagement.ApplicationViewTabMenuItemsRequestedEventArgs>  TabMenuItemsRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Object>  GroupChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.ViewManagement.ApplicationViewTabManager, Object>  TabsRearranged;
+        Boolean AreTabsDrawnBySystem{ get; };
+        Boolean AreTabsShownInSwitcher{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabManagerTabEventArgs", cb24c069-a1e8-5666-9fc3-0894634d94d7)]
+    runtimeclass ApplicationViewTabManagerTabEventArgs
+    {
+        Windows.UI.Internal.ViewManagement.ApplicationViewTab Tab{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabManagerTabCloseRequestedEventArgs", 6044c863-031d-50c4-a4f4-10e9b4078975)]
+    runtimeclass ApplicationViewTabManagerTabCloseRequestedEventArgs
+    {
+        Windows.UI.Internal.ViewManagement.ApplicationViewTab Tab{ get; };
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabTransferStartingEventArgs", 79f29382-d075-5f93-959d-a738319e6d70)]
+    runtimeclass ApplicationViewTabTransferStartingEventArgs
+    {
+        Windows.UI.Internal.ViewManagement.ApplicationViewTab Tab{ get; };
+        Int32 NewViewId{ get; };
+        Int32 NewViewId{ set; };
+        Boolean IsCanceled{ get; };
+        Boolean IsCanceled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabTransferReceivingEventArgs", 65634d19-6421-5dca-8633-5323046114c0)]
+    runtimeclass ApplicationViewTabTransferReceivingEventArgs
+    {
+        Windows.UI.Internal.ViewManagement.ApplicationViewTab Tab{ get; };
+        Boolean IsCanceled{ get; };
+        Boolean IsCanceled{ set; };
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabMenuItemsRequestedEventArgs", 70c1d576-d91f-5a66-bb4c-6031e44390c0)]
+    runtimeclass ApplicationViewTabMenuItemsRequestedEventArgs
+    {
+        Windows.UI.Internal.ViewManagement.ApplicationViewTab Tab{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Internal.ViewManagement.ApplicationViewTabCommand>  MenuItems{ get; };
+    }
+
+
+
+
+
+
+
+
+    [contract(Windows.UI.Internal.ViewManagement.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.ViewManagement.IApplicationViewTabPolicyStatics", 66c1b58c-872c-5775-bd7c-2319994f510d)]
+    [threading(both)]
+    runtimeclass ApplicationViewTabPolicy
+    {
+        static Boolean UseCustomTabsWhenLaunchedIntoNewGroup{ get; };
+        static Boolean UseCustomTabsWhenLaunchedIntoNewGroup{ set; };
+    }
+
+}

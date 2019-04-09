@@ -1,0 +1,2093 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.PointOfService
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UnifiedPosErrorSeverity
+    {
+        UnknownErrorSeverity,
+        Warning,
+        Recoverable,
+        Unrecoverable,
+        AssistanceRequired,
+        Fatal,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UnifiedPosPowerReportingType
+    {
+        UnknownPowerReportingType,
+        Standard,
+        Advanced,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UnifiedPosHealthCheckLevel
+    {
+        UnknownHealthCheckLevel,
+        POSInternal,
+        External,
+        Interactive,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UnifiedPosErrorReason
+    {
+        UnknownErrorReason,
+        NoService,
+        Disabled,
+        Illegal,
+        NoHardware,
+        Closed,
+        Offline,
+        Failure,
+        Timeout,
+        Busy,
+        Extended,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MagneticStripeReaderAuthenticationLevel
+    {
+        NotSupported,
+        Optional,
+        Required,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterMapMode
+    {
+        Dots,
+        Twips,
+        English,
+        Metric,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterCartridgeSensors
+    {
+        None,
+        Removed,
+        Empty,
+        HeadCleaning = 4,
+        NearEnd = 8,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum PosPrinterColorCapabilities
+    {
+        None,
+        Primary,
+        Custom1,
+        Custom2 = 4,
+        Custom3 = 8,
+        Custom4 = 16,
+        Custom5 = 32,
+        Custom6 = 64,
+        Cyan = 128,
+        Magenta = 256,
+        Yellow = 512,
+        Full = 1024,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterColorCartridge
+    {
+        Unknown,
+        Primary,
+        Custom1,
+        Custom2,
+        Custom3,
+        Custom4,
+        Custom5,
+        Custom6,
+        Cyan,
+        Magenta,
+        Yellow,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterMarkFeedCapabilities
+    {
+        None,
+        ToTakeUp,
+        ToCutter,
+        ToCurrentTopOfForm = 4,
+        ToNextTopOfForm = 8,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum PosPrinterRuledLineCapabilities
+    {
+        None,
+        Horizontal,
+        Vertical,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterPrintSide
+    {
+        Unknown,
+        Side1,
+        Side2,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterLineDirection
+    {
+        Horizontal,
+        Vertical,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterLineStyle
+    {
+        SingleSolid,
+        DoubleSolid,
+        Broken,
+        Chain,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterMarkFeedKind
+    {
+        ToTakeUp,
+        ToCutter,
+        ToCurrentTopOfForm,
+        ToNextTopOfForm,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterAlignment
+    {
+        Left,
+        Center,
+        Right,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterBarcodeTextPosition
+    {
+        None,
+        Above,
+        Below,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterRotation
+    {
+        Normal,
+        Right90,
+        Left90,
+        Rotate180,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PosPrinterStatusKind
+    {
+        Online,
+        Off,
+        Offline,
+        OffOrOffline,
+        Extended,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CashDrawerStatusKind
+    {
+        Online,
+        Off,
+        Offline,
+        OffOrOffline,
+        Extended,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum BarcodeScannerStatus
+    {
+        Online,
+        Off,
+        Offline,
+        OffOrOffline,
+        Extended,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum LineDisplayPowerStatus
+    {
+        Unknown,
+        Online,
+        Off,
+        Offline,
+        OffOrOffline,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum LineDisplayHorizontalAlignment
+    {
+        Left,
+        Center,
+        Right,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum LineDisplayVerticalAlignment
+    {
+        Top,
+        Center,
+        Bottom,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum LineDisplayScrollDirection
+    {
+        Up,
+        Down,
+        Left,
+        Right,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum LineDisplayTextAttribute
+    {
+        Normal,
+        Blink,
+        Reverse,
+        ReverseBlink,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum LineDisplayCursorType
+    {
+        None,
+        Block,
+        HalfBlock,
+        Underline,
+        Reverse,
+        Other,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum LineDisplayMarqueeFormat
+    {
+        None,
+        Walk,
+        Place,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum LineDisplayDescriptorState
+    {
+        Off,
+        On,
+        Blink,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum LineDisplayTextAttributeGranularity
+    {
+        NotSupported,
+        EntireDisplay,
+        PerCharacter,
+    };
+
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum PosConnectionTypes
+    {
+        Local = 1,
+        IP,
+        Bluetooth = 4,
+        All = -1,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    struct SizeUInt32
+    {
+        UInt32 Width;
+        UInt32 Height;
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IUnifiedPosErrorData", 2b998c3a-555c-4889-8ed8-c599bb3a712a)]
+    [threading(both)]
+    runtimeclass UnifiedPosErrorData
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [constructor_name("Windows.Devices.PointOfService.IUnifiedPosErrorDataFactory", 4b982551-1ffe-451b-a368-63e0ce465f5a)]
+        {
+            [method_name( "CreateInstance" )] UnifiedPosErrorData(String message, UnifiedPosErrorSeverity severity, UnifiedPosErrorReason reason, UInt32 extendedReason);
+        }
+        String Message{ get; };
+        Windows.Devices.PointOfService.UnifiedPosErrorSeverity Severity{ get; };
+        Windows.Devices.PointOfService.UnifiedPosErrorReason Reason{ get; };
+        UInt32 ExtendedReason{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeScannerStatusUpdatedEventArgs", 355d8586-9c43-462b-a91a-816dc97f452c)]
+    runtimeclass BarcodeScannerStatusUpdatedEventArgs
+    {
+        Windows.Devices.PointOfService.BarcodeScannerStatus Status{ get; };
+        UInt32 ExtendedStatus{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.PointOfService.IBarcodeSymbologiesStatics", ca8549bb-06d2-43f4-a44b-c620679fd8d0)]
+    [threading(both)]
+    runtimeclass BarcodeSymbologies
+    {
+        static UInt32 Unknown{ get; };
+        static UInt32 Ean8{ get; };
+        static UInt32 Ean8Add2{ get; };
+        static UInt32 Ean8Add5{ get; };
+        static UInt32 Eanv{ get; };
+        static UInt32 EanvAdd2{ get; };
+        static UInt32 EanvAdd5{ get; };
+        static UInt32 Ean13{ get; };
+        static UInt32 Ean13Add2{ get; };
+        static UInt32 Ean13Add5{ get; };
+        static UInt32 Isbn{ get; };
+        static UInt32 IsbnAdd5{ get; };
+        static UInt32 Ismn{ get; };
+        static UInt32 IsmnAdd2{ get; };
+        static UInt32 IsmnAdd5{ get; };
+        static UInt32 Issn{ get; };
+        static UInt32 IssnAdd2{ get; };
+        static UInt32 IssnAdd5{ get; };
+        static UInt32 Ean99{ get; };
+        static UInt32 Ean99Add2{ get; };
+        static UInt32 Ean99Add5{ get; };
+        static UInt32 Upca{ get; };
+        static UInt32 UpcaAdd2{ get; };
+        static UInt32 UpcaAdd5{ get; };
+        static UInt32 Upce{ get; };
+        static UInt32 UpceAdd2{ get; };
+        static UInt32 UpceAdd5{ get; };
+        static UInt32 UpcCoupon{ get; };
+        static UInt32 TfStd{ get; };
+        static UInt32 TfDis{ get; };
+        static UInt32 TfInt{ get; };
+        static UInt32 TfInd{ get; };
+        static UInt32 TfMat{ get; };
+        static UInt32 TfIata{ get; };
+        static UInt32 Gs1DatabarType1{ get; };
+        static UInt32 Gs1DatabarType2{ get; };
+        static UInt32 Gs1DatabarType3{ get; };
+        static UInt32 Code39{ get; };
+        static UInt32 Code39Ex{ get; };
+        static UInt32 Trioptic39{ get; };
+        static UInt32 Code32{ get; };
+        static UInt32 Pzn{ get; };
+        static UInt32 Code93{ get; };
+        static UInt32 Code93Ex{ get; };
+        static UInt32 Code128{ get; };
+        static UInt32 Gs1128{ get; };
+        static UInt32 Gs1128Coupon{ get; };
+        static UInt32 UccEan128{ get; };
+        static UInt32 Sisac{ get; };
+        static UInt32 Isbt{ get; };
+        static UInt32 Codabar{ get; };
+        static UInt32 Code11{ get; };
+        static UInt32 Msi{ get; };
+        static UInt32 Plessey{ get; };
+        static UInt32 Telepen{ get; };
+        static UInt32 Code16k{ get; };
+        static UInt32 CodablockA{ get; };
+        static UInt32 CodablockF{ get; };
+        static UInt32 Codablock128{ get; };
+        static UInt32 Code49{ get; };
+        static UInt32 Aztec{ get; };
+        static UInt32 DataCode{ get; };
+        static UInt32 DataMatrix{ get; };
+        static UInt32 HanXin{ get; };
+        static UInt32 Maxicode{ get; };
+        static UInt32 MicroPdf417{ get; };
+        static UInt32 MicroQr{ get; };
+        static UInt32 Pdf417{ get; };
+        static UInt32 Qr{ get; };
+        static UInt32 MsTag{ get; };
+        static UInt32 Ccab{ get; };
+        static UInt32 Ccc{ get; };
+        static UInt32 Tlc39{ get; };
+        static UInt32 AusPost{ get; };
+        static UInt32 CanPost{ get; };
+        static UInt32 ChinaPost{ get; };
+        static UInt32 DutchKix{ get; };
+        static UInt32 InfoMail{ get; };
+        static UInt32 ItalianPost25{ get; };
+        static UInt32 ItalianPost39{ get; };
+        static UInt32 JapanPost{ get; };
+        static UInt32 KoreanPost{ get; };
+        static UInt32 SwedenPost{ get; };
+        static UInt32 UkPost{ get; };
+        static UInt32 UsIntelligent{ get; };
+        static UInt32 UsIntelligentPkg{ get; };
+        static UInt32 UsPlanet{ get; };
+        static UInt32 UsPostNet{ get; };
+        static UInt32 Us4StateFics{ get; };
+        static UInt32 OcrA{ get; };
+        static UInt32 OcrB{ get; };
+        static UInt32 Micr{ get; };
+        static UInt32 ExtendedBase{ get; };
+        static String GetName(UInt32 scanDataType);
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Devices.PointOfService.IBarcodeSymbologiesStatics2", 8b7518f4-99d0-40bf-9424-b91d6dd4c6e0)]
+        {
+            static UInt32 Gs1DWCode{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum BarcodeSymbologyDecodeLengthKind
+    {
+        AnyLength,
+        Discrete,
+        Range,
+    };
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeSymbologyAttributes", 66413a78-ab7a-4ada-8ece-936014b2ead7)]
+    runtimeclass BarcodeSymbologyAttributes
+    {
+        Boolean IsCheckDigitValidationEnabled{ get; };
+        Boolean IsCheckDigitValidationEnabled{ set; };
+        Boolean IsCheckDigitValidationSupported{ get; };
+        Boolean IsCheckDigitTransmissionEnabled{ get; };
+        Boolean IsCheckDigitTransmissionEnabled{ set; };
+        Boolean IsCheckDigitTransmissionSupported{ get; };
+        UInt32 DecodeLength1{ get; };
+        UInt32 DecodeLength1{ set; };
+        UInt32 DecodeLength2{ get; };
+        UInt32 DecodeLength2{ set; };
+        Windows.Devices.PointOfService.BarcodeSymbologyDecodeLengthKind DecodeLengthKind{ get; };
+        Windows.Devices.PointOfService.BarcodeSymbologyDecodeLengthKind DecodeLengthKind{ set; };
+        Boolean IsDecodeLengthSupported{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeScannerReport", 5ce4d8b0-a489-4b96-86c4-f0bf8a37753d)]
+    [threading(both)]
+    runtimeclass BarcodeScannerReport
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [constructor_name("Windows.Devices.PointOfService.IBarcodeScannerReportFactory", a2547326-2013-457c-8963-49c15dca78ce)]
+        {
+            [method_name( "CreateInstance" )] BarcodeScannerReport(UInt32 scanDataType, Windows.Storage.Streams.IBuffer scanData, Windows.Storage.Streams.IBuffer scanDataLabel);
+        }
+        UInt32 ScanDataType{ get; };
+        Windows.Storage.Streams.IBuffer ScanData{ get; };
+        Windows.Storage.Streams.IBuffer ScanDataLabel{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeScannerDataReceivedEventArgs", 4234a7e2-ed97-467d-ad2b-01e44313a929)]
+    runtimeclass BarcodeScannerDataReceivedEventArgs
+    {
+        Windows.Devices.PointOfService.BarcodeScannerReport Report{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeScannerErrorOccurredEventArgs", 2cd2602f-cf3a-4002-a75a-c5ec468f0a20)]
+    runtimeclass BarcodeScannerErrorOccurredEventArgs
+    {
+        Windows.Devices.PointOfService.BarcodeScannerReport PartialInputData{ get; };
+        Boolean IsRetriable{ get; };
+        Windows.Devices.PointOfService.UnifiedPosErrorData ErrorData{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeScannerImagePreviewReceivedEventArgs", f3b7de85-6e8b-434e-9f58-06ef26bc4baf)]
+    runtimeclass BarcodeScannerImagePreviewReceivedEventArgs
+    {
+        Windows.Storage.Streams.IRandomAccessStreamWithContentType Preview{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeScannerCapabilities", c60691e4-f2c8-4420-a307-b12ef6622857)]
+    runtimeclass BarcodeScannerCapabilities
+    {
+        Windows.Devices.PointOfService.UnifiedPosPowerReportingType PowerReportingType{ get; };
+        Boolean IsStatisticsReportingSupported{ get; };
+        Boolean IsStatisticsUpdatingSupported{ get; };
+        Boolean IsImagePreviewSupported{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.PointOfService.IBarcodeScannerCapabilities1", 8e5ab3e9-0e2c-472f-a1cc-ee8054b6a684)]
+        {
+            Boolean IsSoftwareTriggerSupported{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Devices.PointOfService.IBarcodeScannerCapabilities2", f211cfec-e1a1-4ea8-9abc-92b1596270ab)]
+        {
+            Boolean IsVideoPreviewSupported{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedBarcodeScanner", 4a63b49c-8fa4-4332-bb26-945d11d81e0f)]
+    runtimeclass ClaimedBarcodeScanner
+        : Windows.Foundation.IClosable
+    {
+        String DeviceId{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsDisabledOnDataReceived{ set; };
+        Boolean IsDisabledOnDataReceived{ get; };
+        Boolean IsDecodeDataEnabled{ set; };
+        Boolean IsDecodeDataEnabled{ get; };
+        Windows.Foundation.IAsyncAction EnableAsync();
+        Windows.Foundation.IAsyncAction DisableAsync();
+        void RetainDevice();
+        Windows.Foundation.IAsyncAction SetActiveSymbologiesAsync(Windows.Foundation.Collections.IIterable <UInt32>  symbologies);
+        Windows.Foundation.IAsyncAction ResetStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        Windows.Foundation.IAsyncAction UpdateStatisticsAsync(Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, String> >  statistics);
+        Windows.Foundation.IAsyncAction SetActiveProfileAsync(String profile);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedBarcodeScanner, Windows.Devices.PointOfService.BarcodeScannerDataReceivedEventArgs>  DataReceived;
+        event Windows.Foundation.EventHandler <Windows.Devices.PointOfService.ClaimedBarcodeScanner>  TriggerPressed;
+        event Windows.Foundation.EventHandler <Windows.Devices.PointOfService.ClaimedBarcodeScanner>  TriggerReleased;
+        event Windows.Foundation.EventHandler <Windows.Devices.PointOfService.ClaimedBarcodeScanner>  ReleaseDeviceRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedBarcodeScanner, Windows.Devices.PointOfService.BarcodeScannerImagePreviewReceivedEventArgs>  ImagePreviewReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedBarcodeScanner, Windows.Devices.PointOfService.BarcodeScannerErrorOccurredEventArgs>  ErrorOccurred;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedBarcodeScanner1", f61aad0c-8551-42b4-998c-970c20210a22)]
+        {
+            Windows.Foundation.IAsyncAction StartSoftwareTriggerAsync();
+            Windows.Foundation.IAsyncAction StopSoftwareTriggerAsync();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedBarcodeScanner2", e3b59e8c-2d8b-4f70-8af3-3448bedd5fe2)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.BarcodeSymbologyAttributes>  GetSymbologyAttributesAsync(UInt32 barcodeSymbology);
+            Windows.Foundation.IAsyncOperation <Boolean>  SetSymbologyAttributesAsync(UInt32 barcodeSymbology, BarcodeSymbologyAttributes attributes);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedBarcodeScanner3", e6ceb430-712e-45fc-8b86-cd55f5aef79d)]
+        {
+            Windows.Foundation.IAsyncOperation <Boolean>  ShowVideoPreviewAsync();
+            void HideVideoPreview();
+            Boolean IsVideoPreviewShownOnEnable{ set; };
+            Boolean IsVideoPreviewShownOnEnable{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedBarcodeScanner4", 5d501f97-376a-41a8-a230-2f37c1949dde)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedBarcodeScanner, Windows.Devices.PointOfService.ClaimedBarcodeScannerClosedEventArgs>  Closed;
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.PointOfService.IBarcodeScannerStatics", 5d115f6f-da49-41e8-8c8c-f0cb62a9c4fc)]
+    [interface_name("Windows.Devices.PointOfService.IBarcodeScanner", bea33e06-b264-4f03-a9c1-45b20f01134f)]
+    [threading(both)]
+    runtimeclass BarcodeScanner
+        : [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.Foundation.IClosable
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Devices.PointOfService.IBarcodeScannerStatics2", b8652473-a36f-4007-b1d0-279ebe92a656)]
+        {
+            [method_name("GetDeviceSelectorWithConnectionTypes")] static String GetDeviceSelector(PosConnectionTypes connectionTypes);
+        }
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.BarcodeScanner>  GetDefaultAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.BarcodeScanner>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector();
+        String DeviceId{ get; };
+        Windows.Devices.PointOfService.BarcodeScannerCapabilities Capabilities{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.ClaimedBarcodeScanner>  ClaimScannerAsync();
+        Windows.Foundation.IAsyncOperation <String>  CheckHealthAsync(UnifiedPosHealthCheckLevel level);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <UInt32> >  GetSupportedSymbologiesAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  IsSymbologySupportedAsync(UInt32 barcodeSymbology);
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  RetrieveStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        Windows.Foundation.Collections.IVectorView <String>  GetSupportedProfiles();
+        Boolean IsProfileSupported(String profile);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.BarcodeScanner, Windows.Devices.PointOfService.BarcodeScannerStatusUpdatedEventArgs>  StatusUpdated;
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.PointOfService.IBarcodeScanner2", 89215167-8cee-436d-89ab-8dfb43bb4286)]
+        {
+            String VideoDeviceId{ get; };
+        }
+    }
+
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [default_interface]
+    [interface_name("Windows.Devices.PointOfService.IClaimedBarcodeScannerClosedEventArgs", cf7d5489-a22c-4c65-a901-88d77d833954)]
+    runtimeclass ClaimedBarcodeScannerClosedEventArgs
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MagneticStripeReaderStatus
+    {
+        Unauthenticated,
+        Authenticated,
+        Extended,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MagneticStripeReaderAuthenticationProtocol
+    {
+        None,
+        ChallengeResponse,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MagneticStripeReaderTrackIds
+    {
+        None,
+        Track1,
+        Track2,
+        Track3 = 4,
+        Track4 = 8,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MagneticStripeReaderErrorReportingType
+    {
+        CardLevel,
+        TrackLevel,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MagneticStripeReaderTrackErrorType
+    {
+        None,
+        StartSentinelError,
+        EndSentinelError,
+        ParityError,
+        LrcError,
+        Unknown = -1,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.PointOfService.IMagneticStripeReaderEncryptionAlgorithmsStatics", 53b57350-c3db-4754-9c00-41392374a109)]
+    [threading(both)]
+    runtimeclass MagneticStripeReaderEncryptionAlgorithms
+    {
+        static UInt32 None{ get; };
+        static UInt32 TripleDesDukpt{ get; };
+        static UInt32 ExtendedBase{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.PointOfService.IMagneticStripeReaderCardTypesStatics", 528f2c5d-2986-474f-8454-7ccd05928d5f)]
+    [threading(both)]
+    runtimeclass MagneticStripeReaderCardTypes
+    {
+        static UInt32 Unknown{ get; };
+        static UInt32 Bank{ get; };
+        static UInt32 Aamva{ get; };
+        static UInt32 ExtendedBase{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderTrackData", 104cf671-4a9d-446e-abc5-20402307ba36)]
+    runtimeclass MagneticStripeReaderTrackData
+    {
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Windows.Storage.Streams.IBuffer DiscretionaryData{ get; };
+        Windows.Storage.Streams.IBuffer EncryptedData{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderReport", 6a5b6047-99b0-4188-bef1-eddf79f78fe6)]
+    runtimeclass MagneticStripeReaderReport
+    {
+        UInt32 CardType{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackData Track1{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackData Track2{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackData Track3{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackData Track4{ get; };
+        Windows.Foundation.Collections.IMapView <String, String>  Properties{ get; };
+        Windows.Storage.Streams.IBuffer CardAuthenticationData{ get; };
+        UInt32 CardAuthenticationDataLength{ get; };
+        Windows.Storage.Streams.IBuffer AdditionalSecurityInformation{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderBankCardDataReceivedEventArgs", 2e958823-a31a-4763-882c-23725e39b08e)]
+    runtimeclass MagneticStripeReaderBankCardDataReceivedEventArgs
+    {
+        Windows.Devices.PointOfService.MagneticStripeReaderReport Report{ get; };
+        String AccountNumber{ get; };
+        String ExpirationDate{ get; };
+        String ServiceCode{ get; };
+        String Title{ get; };
+        String FirstName{ get; };
+        String MiddleInitial{ get; };
+        String Surname{ get; };
+        String Suffix{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderAamvaCardDataReceivedEventArgs", 0a4bbd51-c316-4910-87f3-7a62ba862d31)]
+    runtimeclass MagneticStripeReaderAamvaCardDataReceivedEventArgs
+    {
+        Windows.Devices.PointOfService.MagneticStripeReaderReport Report{ get; };
+        String LicenseNumber{ get; };
+        String ExpirationDate{ get; };
+        String Restrictions{ get; };
+        String Class{ get; };
+        String Endorsements{ get; };
+        String BirthDate{ get; };
+        String FirstName{ get; };
+        String Surname{ get; };
+        String Suffix{ get; };
+        String Gender{ get; };
+        String HairColor{ get; };
+        String EyeColor{ get; };
+        String Height{ get; };
+        String Weight{ get; };
+        String Address{ get; };
+        String City{ get; };
+        String State{ get; };
+        String PostalCode{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderVendorSpecificCardDataReceivedEventArgs", af0a5514-59cc-4a60-99e8-99a53dace5aa)]
+    runtimeclass MagneticStripeReaderVendorSpecificCardDataReceivedEventArgs
+    {
+        Windows.Devices.PointOfService.MagneticStripeReaderReport Report{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderErrorOccurredEventArgs", 1fedf95d-2c84-41ad-b778-f2356a789ab1)]
+    runtimeclass MagneticStripeReaderErrorOccurredEventArgs
+    {
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackErrorType Track1Status{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackErrorType Track2Status{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackErrorType Track3Status{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackErrorType Track4Status{ get; };
+        Windows.Devices.PointOfService.UnifiedPosErrorData ErrorData{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderReport PartialInputData{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderStatusUpdatedEventArgs", 09cc6bb0-3262-401d-9e8a-e80d6358906b)]
+    runtimeclass MagneticStripeReaderStatusUpdatedEventArgs
+    {
+        Windows.Devices.PointOfService.MagneticStripeReaderStatus Status{ get; };
+        UInt32 ExtendedStatus{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReaderCapabilities", 7128809c-c440-44a2-a467-469175d02896)]
+    runtimeclass MagneticStripeReaderCapabilities
+    {
+        String CardAuthentication{ get; };
+        UInt32 SupportedEncryptionAlgorithms{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderAuthenticationLevel AuthenticationLevel{ get; };
+        Boolean IsIsoSupported{ get; };
+        Boolean IsJisOneSupported{ get; };
+        Boolean IsJisTwoSupported{ get; };
+        Windows.Devices.PointOfService.UnifiedPosPowerReportingType PowerReportingType{ get; };
+        Boolean IsStatisticsReportingSupported{ get; };
+        Boolean IsStatisticsUpdatingSupported{ get; };
+        Boolean IsTrackDataMaskingSupported{ get; };
+        Boolean IsTransmitSentinelsSupported{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedMagneticStripeReader", 475ca8f3-9417-48bc-b9d7-4163a7844c02)]
+    runtimeclass ClaimedMagneticStripeReader
+        : Windows.Foundation.IClosable
+    {
+        String DeviceId{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsDisabledOnDataReceived{ set; };
+        Boolean IsDisabledOnDataReceived{ get; };
+        Boolean IsDecodeDataEnabled{ set; };
+        Boolean IsDecodeDataEnabled{ get; };
+        Boolean IsDeviceAuthenticated{ get; };
+        UInt32 DataEncryptionAlgorithm{ set; };
+        UInt32 DataEncryptionAlgorithm{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackIds TracksToRead{ set; };
+        Windows.Devices.PointOfService.MagneticStripeReaderTrackIds TracksToRead{ get; };
+        Boolean IsTransmitSentinelsEnabled{ set; };
+        Boolean IsTransmitSentinelsEnabled{ get; };
+        Windows.Foundation.IAsyncAction EnableAsync();
+        Windows.Foundation.IAsyncAction DisableAsync();
+        void RetainDevice();
+        void SetErrorReportingType(MagneticStripeReaderErrorReportingType value);
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  RetrieveDeviceAuthenticationDataAsync();
+        Windows.Foundation.IAsyncAction AuthenticateDeviceAsync(UInt8[] responseToken);
+        Windows.Foundation.IAsyncAction DeAuthenticateDeviceAsync(UInt8[] responseToken);
+        Windows.Foundation.IAsyncAction UpdateKeyAsync(String key, String keyName);
+        Windows.Foundation.IAsyncAction ResetStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        Windows.Foundation.IAsyncAction UpdateStatisticsAsync(Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, String> >  statistics);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedMagneticStripeReader, Windows.Devices.PointOfService.MagneticStripeReaderBankCardDataReceivedEventArgs>  BankCardDataReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedMagneticStripeReader, Windows.Devices.PointOfService.MagneticStripeReaderAamvaCardDataReceivedEventArgs>  AamvaCardDataReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedMagneticStripeReader, Windows.Devices.PointOfService.MagneticStripeReaderVendorSpecificCardDataReceivedEventArgs>  VendorSpecificDataReceived;
+        event Windows.Foundation.EventHandler <Windows.Devices.PointOfService.ClaimedMagneticStripeReader>  ReleaseDeviceRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedMagneticStripeReader, Windows.Devices.PointOfService.MagneticStripeReaderErrorOccurredEventArgs>  ErrorOccurred;
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedMagneticStripeReader2", 236fafdf-e2dc-4d7d-9c78-060df2bf2928)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedMagneticStripeReader, Windows.Devices.PointOfService.ClaimedMagneticStripeReaderClosedEventArgs>  Closed;
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [default_interface]
+    [interface_name("Windows.Devices.PointOfService.IClaimedMagneticStripeReaderClosedEventArgs", 14ada93a-adcd-4c80-acda-c3eaed2647e1)]
+    runtimeclass ClaimedMagneticStripeReaderClosedEventArgs
+    {
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.PointOfService.IMagneticStripeReaderStatics", c45fab4a-efd7-4760-a5ce-15b0e47e94eb)]
+    [interface_name("Windows.Devices.PointOfService.IMagneticStripeReader", 1a92b015-47c3-468a-9333-0c6517574883)]
+    [threading(both)]
+    runtimeclass MagneticStripeReader
+        : [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.Foundation.IClosable
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Devices.PointOfService.IMagneticStripeReaderStatics2", 8cadc362-d667-48fa-86bc-f5ae1189262b)]
+        {
+            [method_name("GetDeviceSelectorWithConnectionTypes")] static String GetDeviceSelector(PosConnectionTypes connectionTypes);
+        }
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.MagneticStripeReader>  GetDefaultAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.MagneticStripeReader>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector();
+        String DeviceId{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderCapabilities Capabilities{ get; };
+        UInt32[] SupportedCardTypes{ get; };
+        Windows.Devices.PointOfService.MagneticStripeReaderAuthenticationProtocol DeviceAuthenticationProtocol{ get; };
+        Windows.Foundation.IAsyncOperation <String>  CheckHealthAsync(UnifiedPosHealthCheckLevel level);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.ClaimedMagneticStripeReader>  ClaimReaderAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IBuffer>  RetrieveStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        Windows.Devices.PointOfService.MagneticStripeReaderErrorReportingType GetErrorReportingType();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.MagneticStripeReader, Windows.Devices.PointOfService.MagneticStripeReaderStatusUpdatedEventArgs>  StatusUpdated;
+    }
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.PointOfService.IPosPrinterCharacterSetIdsStatics", 5c709eff-709a-4fe7-b215-06a748a38b39)]
+    [threading(both)]
+    runtimeclass PosPrinterCharacterSetIds
+    {
+        static UInt32 Utf16LE{ get; };
+        static UInt32 Ascii{ get; };
+        static UInt32 Ansi{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(de5b52ca-e02e-40e9-9e5e-1b488e6aacfc)]
+    interface ICommonPosPrintStationCapabilities
+    {
+        Boolean IsPrinterPresent{ get; };
+        Boolean IsDualColorSupported{ get; };
+        Windows.Devices.PointOfService.PosPrinterColorCapabilities ColorCartridgeCapabilities{ get; };
+        Windows.Devices.PointOfService.PosPrinterCartridgeSensors CartridgeSensors{ get; };
+        Boolean IsBoldSupported{ get; };
+        Boolean IsItalicSupported{ get; };
+        Boolean IsUnderlineSupported{ get; };
+        Boolean IsDoubleHighPrintSupported{ get; };
+        Boolean IsDoubleWidePrintSupported{ get; };
+        Boolean IsDoubleHighDoubleWidePrintSupported{ get; };
+        Boolean IsPaperEmptySensorSupported{ get; };
+        Boolean IsPaperNearEndSensorSupported{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  SupportedCharactersPerLine{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(09286b8b-9873-4d05-bfbe-4727a6038f69)]
+    interface ICommonReceiptSlipCapabilities requires Windows.Devices.PointOfService.ICommonPosPrintStationCapabilities
+    {
+        Boolean IsBarcodeSupported{ get; };
+        Boolean IsBitmapSupported{ get; };
+        Boolean IsLeft90RotationSupported{ get; };
+        Boolean IsRight90RotationSupported{ get; };
+        Boolean Is180RotationSupported{ get; };
+        Boolean IsPrintAreaSupported{ get; };
+        Windows.Devices.PointOfService.PosPrinterRuledLineCapabilities RuledLineCapabilities{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.PointOfService.PosPrinterRotation>  SupportedBarcodeRotations{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.PointOfService.PosPrinterRotation>  SupportedBitmapRotations{ get; };
+    };
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IReceiptPrinterCapabilities", b8f0b58f-51a8-43fc-9bd5-8de272a6415b)]
+    runtimeclass ReceiptPrinterCapabilities
+        : Windows.Devices.PointOfService.ICommonReceiptSlipCapabilities
+        , Windows.Devices.PointOfService.ICommonPosPrintStationCapabilities
+    {
+        Boolean CanCutPaper{ get; };
+        Boolean IsStampSupported{ get; };
+        Windows.Devices.PointOfService.PosPrinterMarkFeedCapabilities MarkFeedCapabilities{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.PointOfService.IReceiptPrinterCapabilities2", 20030638-8a2c-55ac-9a7b-7576d8869e99)]
+        {
+            Boolean IsReverseVideoSupported{ get; };
+            Boolean IsStrikethroughSupported{ get; };
+            Boolean IsSuperscriptSupported{ get; };
+            Boolean IsSubscriptSupported{ get; };
+            Boolean IsReversePaperFeedByLineSupported{ get; };
+            Boolean IsReversePaperFeedByMapModeUnitSupported{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.PointOfService.ISlipPrinterCapabilities", 99b16399-488c-4157-8ac2-9f57f708d3db)]
+    runtimeclass SlipPrinterCapabilities
+        : Windows.Devices.PointOfService.ICommonReceiptSlipCapabilities
+        , Windows.Devices.PointOfService.ICommonPosPrintStationCapabilities
+    {
+        Boolean IsFullLengthSupported{ get; };
+        Boolean IsBothSidesPrintingSupported{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.PointOfService.ISlipPrinterCapabilities2", 6ff89671-2d1a-5000-87c2-b0851bfdf07e)]
+        {
+            Boolean IsReverseVideoSupported{ get; };
+            Boolean IsStrikethroughSupported{ get; };
+            Boolean IsSuperscriptSupported{ get; };
+            Boolean IsSubscriptSupported{ get; };
+            Boolean IsReversePaperFeedByLineSupported{ get; };
+            Boolean IsReversePaperFeedByMapModeUnitSupported{ get; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [default_interface]
+    [interface_name("Windows.Devices.PointOfService.IJournalPrinterCapabilities", 3b5ccc43-e047-4463-bb58-17b5ba1d8056)]
+    runtimeclass JournalPrinterCapabilities
+        : Windows.Devices.PointOfService.ICommonPosPrintStationCapabilities
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.PointOfService.IJournalPrinterCapabilities2", 03b0b645-33b8-533b-baaa-a4389283ab0a)]
+        {
+            Boolean IsReverseVideoSupported{ get; };
+            Boolean IsStrikethroughSupported{ get; };
+            Boolean IsSuperscriptSupported{ get; };
+            Boolean IsSubscriptSupported{ get; };
+            Boolean IsReversePaperFeedByLineSupported{ get; };
+            Boolean IsReversePaperFeedByMapModeUnitSupported{ get; };
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.PointOfService.IPosPrinterCapabilities", cde95721-4380-4985-adc5-39db30cd93bc)]
+    runtimeclass PosPrinterCapabilities
+    {
+        Windows.Devices.PointOfService.UnifiedPosPowerReportingType PowerReportingType{ get; };
+        Boolean IsStatisticsReportingSupported{ get; };
+        Boolean IsStatisticsUpdatingSupported{ get; };
+        UInt32 DefaultCharacterSet{ get; };
+        Boolean HasCoverSensor{ get; };
+        Boolean CanMapCharacterSet{ get; };
+        Boolean IsTransactionSupported{ get; };
+        Windows.Devices.PointOfService.ReceiptPrinterCapabilities Receipt{ get; };
+        Windows.Devices.PointOfService.SlipPrinterCapabilities Slip{ get; };
+        Windows.Devices.PointOfService.JournalPrinterCapabilities Journal{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IPosPrinterStatus", d1f0c730-da40-4328-bf76-5156fa33b747)]
+    runtimeclass PosPrinterStatus
+    {
+        Windows.Devices.PointOfService.PosPrinterStatusKind StatusKind{ get; };
+        UInt32 ExtendedStatus{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.IPosPrinterStatusUpdatedEventArgs", 2edb87df-13a6-428d-ba81-b0e7c3e5a3cd)]
+    runtimeclass PosPrinterStatusUpdatedEventArgs
+    {
+        Windows.Devices.PointOfService.PosPrinterStatus Status{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Devices.PointOfService.IPosPrinterReleaseDeviceRequestedEventArgs", 2bcba359-1cef-40b2-9ecb-f927f856ae3c)]
+    runtimeclass PosPrinterReleaseDeviceRequestedEventArgs
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x1)]
+    [interface_name("Windows.Devices.PointOfService.IPosPrinterFontProperty", a7f4e93a-f8ac-5f04-84d2-29b16d8a633c)]
+    runtimeclass PosPrinterFontProperty
+    {
+        String TypeFace{ get; };
+        Boolean IsScalableToAnySize{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.PointOfService.SizeUInt32>  CharacterSizes{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedPosPrinter", 6d64ce0c-e03e-4b14-a38e-c28c34b86353)]
+    runtimeclass ClaimedPosPrinter
+        : Windows.Foundation.IClosable
+    {
+        String DeviceId{ get; };
+        Boolean IsEnabled{ get; };
+        UInt32 CharacterSet{ set; };
+        UInt32 CharacterSet{ get; };
+        Boolean IsCoverOpen{ get; };
+        Boolean IsCharacterSetMappingEnabled{ set; };
+        Boolean IsCharacterSetMappingEnabled{ get; };
+        Windows.Devices.PointOfService.PosPrinterMapMode MapMode{ set; };
+        Windows.Devices.PointOfService.PosPrinterMapMode MapMode{ get; };
+        Windows.Devices.PointOfService.ClaimedReceiptPrinter Receipt{ get; };
+        Windows.Devices.PointOfService.ClaimedSlipPrinter Slip{ get; };
+        Windows.Devices.PointOfService.ClaimedJournalPrinter Journal{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  EnableAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  DisableAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  RetainDeviceAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  ResetStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        Windows.Foundation.IAsyncOperation <Boolean>  UpdateStatisticsAsync(Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, String> >  statistics);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedPosPrinter, Windows.Devices.PointOfService.PosPrinterReleaseDeviceRequestedEventArgs>  ReleaseDeviceRequested;
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedPosPrinter2", 5bf7a3d5-5198-437a-82df-589993fa77e1)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedPosPrinter, Windows.Devices.PointOfService.ClaimedPosPrinterClosedEventArgs>  Closed;
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Devices.PointOfService.IPosPrinterStatics", 8ce0d4ea-132f-4cdf-a64a-2d0d7c96a85b)]
+    [interface_name("Windows.Devices.PointOfService.IPosPrinter", 2a03c10e-9a19-4a01-994f-12dfad6adcbf)]
+    [threading(both)]
+    runtimeclass PosPrinter
+        : [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PosPrinter>  GetDefaultAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PosPrinter>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector();
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Devices.PointOfService.IPosPrinterStatics2", eecd2c1c-b0d0-42e7-b137-b89b16244d41)]
+        {
+            [method_name("GetDeviceSelectorWithConnectionTypes")] static String GetDeviceSelector(PosConnectionTypes connectionTypes);
+        }
+        String DeviceId{ get; };
+        Windows.Devices.PointOfService.PosPrinterCapabilities Capabilities{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  SupportedCharacterSets{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  SupportedTypeFaces{ get; };
+        Windows.Devices.PointOfService.PosPrinterStatus Status{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.ClaimedPosPrinter>  ClaimPrinterAsync();
+        Windows.Foundation.IAsyncOperation <String>  CheckHealthAsync(UnifiedPosHealthCheckLevel level);
+        Windows.Foundation.IAsyncOperation <String>  GetStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.PosPrinter, Windows.Devices.PointOfService.PosPrinterStatusUpdatedEventArgs>  StatusUpdated;
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.PointOfService.IPosPrinter2", 248475e8-8b98-5517-8e48-760e86f68987)]
+        {
+            Windows.Foundation.Collections.IVectorView <UInt32>  SupportedBarcodeSymbologies{ get; };
+            Windows.Devices.PointOfService.PosPrinterFontProperty GetFontProperty(String typeface);
+        }
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedReceiptPrinter", 9ad27a74-dd61-4ee2-9837-5b5d72d538b9)]
+    runtimeclass ClaimedReceiptPrinter
+        : Windows.Devices.PointOfService.ICommonClaimedPosPrinterStation
+    {
+        UInt32 SidewaysMaxLines{ get; };
+        UInt32 SidewaysMaxChars{ get; };
+        UInt32 LinesToPaperCut{ get; };
+        Windows.Foundation.Size PageSize{ get; };
+        Windows.Foundation.Rect PrintArea{ get; };
+        Windows.Devices.PointOfService.ReceiptPrintJob CreateJob();
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedSlipPrinter", bd5deff2-af90-4e8a-b77b-e3ae9ca63a7f)]
+    runtimeclass ClaimedSlipPrinter
+        : Windows.Devices.PointOfService.ICommonClaimedPosPrinterStation
+    {
+        UInt32 SidewaysMaxLines{ get; };
+        UInt32 SidewaysMaxChars{ get; };
+        UInt32 MaxLines{ get; };
+        UInt32 LinesNearEndToEnd{ get; };
+        Windows.Devices.PointOfService.PosPrinterPrintSide PrintSide{ get; };
+        Windows.Foundation.Size PageSize{ get; };
+        Windows.Foundation.Rect PrintArea{ get; };
+        void OpenJaws();
+        void CloseJaws();
+        Windows.Foundation.IAsyncOperation <Boolean>  InsertSlipAsync(Windows.Foundation.TimeSpan timeout);
+        Windows.Foundation.IAsyncOperation <Boolean>  RemoveSlipAsync(Windows.Foundation.TimeSpan timeout);
+        void ChangePrintSide(PosPrinterPrintSide printSide);
+        Windows.Devices.PointOfService.SlipPrintJob CreateJob();
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedJournalPrinter", 67ea0630-517d-487f-9fdf-d2e0a0a264a5)]
+    runtimeclass ClaimedJournalPrinter
+        : Windows.Devices.PointOfService.ICommonClaimedPosPrinterStation
+    {
+        Windows.Devices.PointOfService.JournalPrintJob CreateJob();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Devices.PointOfService.IClaimedPosPrinterClosedEventArgs", e2b7a27b-4d40-471d-92ed-63375b18c788)]
+    runtimeclass ClaimedPosPrinterClosedEventArgs
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(9a94005c-0615-4591-a58f-30f87edfe2e4)]
+    interface IPosPrinterJob
+    {
+        void Print(String data);
+        [method_name("PrintLine")] void PrintLine(String data);
+        [method_name("PrintNewline")] void PrintLine();
+        Windows.Foundation.IAsyncOperation <Boolean>  ExecuteAsync();
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x1)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [interface_name("Windows.Devices.PointOfService.IPosPrinterPrintOptions", 0a2e16fd-1d02-5a58-9d59-bfcde76fde86)]
+    [threading(both)]
+    runtimeclass PosPrinterPrintOptions
+    {
+        PosPrinterPrintOptions();
+        String TypeFace{ get; };
+        String TypeFace{ set; };
+        UInt32 CharacterHeight{ get; };
+        UInt32 CharacterHeight{ set; };
+        Boolean Bold{ get; };
+        Boolean Bold{ set; };
+        Boolean Italic{ get; };
+        Boolean Italic{ set; };
+        Boolean Underline{ get; };
+        Boolean Underline{ set; };
+        Boolean ReverseVideo{ get; };
+        Boolean ReverseVideo{ set; };
+        Boolean Strikethrough{ get; };
+        Boolean Strikethrough{ set; };
+        Boolean Superscript{ get; };
+        Boolean Superscript{ set; };
+        Boolean Subscript{ get; };
+        Boolean Subscript{ set; };
+        Boolean DoubleWide{ get; };
+        Boolean DoubleWide{ set; };
+        Boolean DoubleHigh{ get; };
+        Boolean DoubleHigh{ set; };
+        Windows.Devices.PointOfService.PosPrinterAlignment Alignment{ get; };
+        Windows.Devices.PointOfService.PosPrinterAlignment Alignment{ set; };
+        UInt32 CharacterSet{ get; };
+        UInt32 CharacterSet{ set; };
+    }
+
+    [uuid(532199be-c8c3-4dc2-89e9-5c4a37b34ddc)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IReceiptOrSlipJob requires Windows.Devices.PointOfService.IPosPrinterJob
+    {
+        void SetBarcodeRotation(PosPrinterRotation value);
+        void SetPrintRotation(PosPrinterRotation value, Boolean includeBitmaps);
+        void SetPrintArea(Windows.Foundation.Rect value);
+        [method_name("SetBitmap")] void SetBitmap(UInt32 bitmapNumber, Windows.Graphics.Imaging.BitmapFrame bitmap, PosPrinterAlignment alignment);
+        [method_name("SetBitmapCustomWidthStandardAlign")] void SetBitmap(UInt32 bitmapNumber, Windows.Graphics.Imaging.BitmapFrame bitmap, PosPrinterAlignment alignment, UInt32 width);
+        [method_name("SetCustomAlignedBitmap")] void SetCustomAlignedBitmap(UInt32 bitmapNumber, Windows.Graphics.Imaging.BitmapFrame bitmap, UInt32 alignmentDistance);
+        [method_name("SetBitmapCustomWidthCustomAlign")] void SetCustomAlignedBitmap(UInt32 bitmapNumber, Windows.Graphics.Imaging.BitmapFrame bitmap, UInt32 alignmentDistance, UInt32 width);
+        void PrintSavedBitmap(UInt32 bitmapNumber);
+        void DrawRuledLine(String positionList, PosPrinterLineDirection lineDirection, UInt32 lineWidth, PosPrinterLineStyle lineStyle, UInt32 lineColor);
+        void PrintBarcode(String data, UInt32 symbology, UInt32 height, UInt32 width, PosPrinterBarcodeTextPosition textPosition, PosPrinterAlignment alignment);
+        void PrintBarcodeCustomAlign(String data, UInt32 symbology, UInt32 height, UInt32 width, PosPrinterBarcodeTextPosition textPosition, UInt32 alignmentDistance);
+        [method_name("PrintBitmap")] void PrintBitmap(Windows.Graphics.Imaging.BitmapFrame bitmap, PosPrinterAlignment alignment);
+        [method_name("PrintBitmapCustomWidthStandardAlign")] void PrintBitmap(Windows.Graphics.Imaging.BitmapFrame bitmap, PosPrinterAlignment alignment, UInt32 width);
+        [method_name("PrintCustomAlignedBitmap")] void PrintCustomAlignedBitmap(Windows.Graphics.Imaging.BitmapFrame bitmap, UInt32 alignmentDistance);
+        [method_name("PrintBitmapCustomWidthCustomAlign")] void PrintCustomAlignedBitmap(Windows.Graphics.Imaging.BitmapFrame bitmap, UInt32 alignmentDistance, UInt32 width);
+    };
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IReceiptPrintJob", aa96066e-acad-4b79-9d0f-c0cfc08dc77b)]
+    runtimeclass ReceiptPrintJob
+        : Windows.Devices.PointOfService.IReceiptOrSlipJob
+        , Windows.Devices.PointOfService.IPosPrinterJob
+    {
+        void MarkFeed(PosPrinterMarkFeedKind kind);
+        [method_name("CutPaper")] void CutPaper(Double percentage);
+        [method_name("CutPaperDefault")] void CutPaper();
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.PointOfService.IReceiptPrintJob2", 0cbc12e3-9e29-5179-bcd8-1811d3b9a10e)]
+        {
+            void StampPaper();
+            void Print(String data, PosPrinterPrintOptions printOptions);
+            void FeedPaperByLine(Int32 lineCount);
+            void FeedPaperByMapModeUnit(Int32 distance);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    runtimeclass SlipPrintJob
+        : [default]Windows.Devices.PointOfService.IReceiptOrSlipJob
+        , Windows.Devices.PointOfService.IPosPrinterJob
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.PointOfService.ISlipPrintJob", 5d88f95d-6131-5a4b-b7d5-8ef2da7b4165)]
+        {
+            void Print(String data, PosPrinterPrintOptions printOptions);
+            void FeedPaperByLine(Int32 lineCount);
+            void FeedPaperByMapModeUnit(Int32 distance);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    runtimeclass JournalPrintJob
+        : [default]Windows.Devices.PointOfService.IPosPrinterJob
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.Devices.PointOfService.IJournalPrintJob", 9f4f2864-f3f0-55d0-8c39-74cc91783eed)]
+        {
+            void Print(String data, PosPrinterPrintOptions printOptions);
+            void FeedPaperByLine(Int32 lineCount);
+            void FeedPaperByMapModeUnit(Int32 distance);
+        }
+    }
+
+    [uuid(b7eb66a8-fe8a-4cfb-8b42-e35b280cb27c)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface ICommonClaimedPosPrinterStation
+    {
+        UInt32 CharactersPerLine{ set; };
+        UInt32 CharactersPerLine{ get; };
+        UInt32 LineHeight{ set; };
+        UInt32 LineHeight{ get; };
+        UInt32 LineSpacing{ set; };
+        UInt32 LineSpacing{ get; };
+        UInt32 LineWidth{ get; };
+        Boolean IsLetterQuality{ set; };
+        Boolean IsLetterQuality{ get; };
+        Boolean IsPaperNearEnd{ get; };
+        Windows.Devices.PointOfService.PosPrinterColorCartridge ColorCartridge{ set; };
+        Windows.Devices.PointOfService.PosPrinterColorCartridge ColorCartridge{ get; };
+        Boolean IsCoverOpen{ get; };
+        Boolean IsCartridgeRemoved{ get; };
+        Boolean IsCartridgeEmpty{ get; };
+        Boolean IsHeadCleaning{ get; };
+        Boolean IsPaperEmpty{ get; };
+        Boolean IsReadyToPrint{ get; };
+        Boolean ValidateData(String data);
+    };
+
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.ICashDrawerStatus", 6bbd78bf-dca1-4e06-99eb-5af6a5aec108)]
+    runtimeclass CashDrawerStatus
+    {
+        Windows.Devices.PointOfService.CashDrawerStatusKind StatusKind{ get; };
+        UInt32 ExtendedStatus{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.ICashDrawerStatusUpdatedEventArgs", 30aae98a-0d70-459c-9553-87e124c52488)]
+    runtimeclass CashDrawerStatusUpdatedEventArgs
+    {
+        Windows.Devices.PointOfService.CashDrawerStatus Status{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.ICashDrawerCapabilities", 0bc6de0b-e8e7-4b1f-b1d1-3e501ad08247)]
+    runtimeclass CashDrawerCapabilities
+    {
+        Windows.Devices.PointOfService.UnifiedPosPowerReportingType PowerReportingType{ get; };
+        Boolean IsStatisticsReportingSupported{ get; };
+        Boolean IsStatisticsUpdatingSupported{ get; };
+        Boolean IsStatusReportingSupported{ get; };
+        Boolean IsStatusMultiDrawerDetectSupported{ get; };
+        Boolean IsDrawerOpenSensorAvailable{ get; };
+    }
+
+    [uuid(69cb3bc1-147f-421c-9c23-090123bb786c)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface ICashDrawerEventSourceEventArgs
+    {
+        Windows.Devices.PointOfService.CashDrawer CashDrawer{ get; };
+    };
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.PointOfService.ICashDrawerStatics", dfa0955a-d437-4fff-b547-dda969a4f883)]
+    [interface_name("Windows.Devices.PointOfService.ICashDrawer", 9f88f5c8-de54-4aee-a890-920bcbfe30fc)]
+    [threading(both)]
+    runtimeclass CashDrawer
+        : [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.CashDrawer>  GetDefaultAsync();
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.CashDrawer>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector();
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [static_name("Windows.Devices.PointOfService.ICashDrawerStatics2", 3e818121-8c42-40e8-9c0e-40297048104c)]
+        {
+            [method_name("GetDeviceSelectorWithConnectionTypes")] static String GetDeviceSelector(PosConnectionTypes connectionTypes);
+        }
+        String DeviceId{ get; };
+        Windows.Devices.PointOfService.CashDrawerCapabilities Capabilities{ get; };
+        Windows.Devices.PointOfService.CashDrawerStatus Status{ get; };
+        Boolean IsDrawerOpen{ get; };
+        Windows.Devices.PointOfService.CashDrawerEventSource DrawerEventSource{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.ClaimedCashDrawer>  ClaimDrawerAsync();
+        Windows.Foundation.IAsyncOperation <String>  CheckHealthAsync(UnifiedPosHealthCheckLevel level);
+        Windows.Foundation.IAsyncOperation <String>  GetStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.CashDrawer, Windows.Devices.PointOfService.CashDrawerStatusUpdatedEventArgs>  StatusUpdated;
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.PointOfService.ICashDrawerEventSource", e006e46c-f2f9-442f-8dd6-06c10a4227ba)]
+    runtimeclass CashDrawerEventSource
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.CashDrawerEventSource, Windows.Devices.PointOfService.CashDrawerClosedEventArgs>  DrawerClosed;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.CashDrawerEventSource, Windows.Devices.PointOfService.CashDrawerOpenedEventArgs>  DrawerOpened;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedCashDrawer", ca3f99af-abb8-42c1-8a84-5c66512f5a75)]
+    runtimeclass ClaimedCashDrawer
+        : Windows.Foundation.IClosable
+    {
+        String DeviceId{ get; };
+        Boolean IsEnabled{ get; };
+        Boolean IsDrawerOpen{ get; };
+        Windows.Devices.PointOfService.CashDrawerCloseAlarm CloseAlarm{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  OpenDrawerAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  EnableAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  DisableAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  RetainDeviceAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  ResetStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+        Windows.Foundation.IAsyncOperation <Boolean>  UpdateStatisticsAsync(Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, String> >  statistics);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedCashDrawer, Object>  ReleaseDeviceRequested;
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedCashDrawer2", 9cbab5a2-de42-4d5b-b0c1-9b57a2ba89c3)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedCashDrawer, Windows.Devices.PointOfService.ClaimedCashDrawerClosedEventArgs>  Closed;
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    runtimeclass CashDrawerClosedEventArgs
+        : [default]Windows.Devices.PointOfService.ICashDrawerEventSourceEventArgs
+    {
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CashDrawerOpenedEventArgs
+        : [default]Windows.Devices.PointOfService.ICashDrawerEventSourceEventArgs
+    {
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.PointOfService.ICashDrawerCloseAlarm", 6bf88cc7-6f63-430e-ab3b-95d75ffbe87f)]
+    runtimeclass CashDrawerCloseAlarm
+    {
+        Windows.Foundation.TimeSpan AlarmTimeout{ set; };
+        Windows.Foundation.TimeSpan AlarmTimeout{ get; };
+        UInt32 BeepFrequency{ set; };
+        UInt32 BeepFrequency{ get; };
+        Windows.Foundation.TimeSpan BeepDuration{ set; };
+        Windows.Foundation.TimeSpan BeepDuration{ get; };
+        Windows.Foundation.TimeSpan BeepDelay{ set; };
+        Windows.Foundation.TimeSpan BeepDelay{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.CashDrawerCloseAlarm, Object>  AlarmTimeoutExpired;
+        Windows.Foundation.IAsyncOperation <Boolean>  StartAsync();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [default_interface]
+    [interface_name("Windows.Devices.PointOfService.IClaimedCashDrawerClosedEventArgs", cc573f33-3f34-4c5c-baae-deadf16cd7fa)]
+    runtimeclass ClaimedCashDrawerClosedEventArgs
+    {
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayCapabilities", 5a15b5d1-8dc5-4b9c-9172-303e47b70c55)]
+    runtimeclass LineDisplayCapabilities
+    {
+        Boolean IsStatisticsReportingSupported{ get; };
+        Boolean IsStatisticsUpdatingSupported{ get; };
+        Windows.Devices.PointOfService.UnifiedPosPowerReportingType PowerReportingType{ get; };
+        Boolean CanChangeScreenSize{ get; };
+        Boolean CanDisplayBitmaps{ get; };
+        Boolean CanReadCharacterAtCursor{ get; };
+        Boolean CanMapCharacterSets{ get; };
+        Boolean CanDisplayCustomGlyphs{ get; };
+        Windows.Devices.PointOfService.LineDisplayTextAttributeGranularity CanReverse{ get; };
+        Windows.Devices.PointOfService.LineDisplayTextAttributeGranularity CanBlink{ get; };
+        Boolean CanChangeBlinkRate{ get; };
+        Boolean IsBrightnessSupported{ get; };
+        Boolean IsCursorSupported{ get; };
+        Boolean IsHorizontalMarqueeSupported{ get; };
+        Boolean IsVerticalMarqueeSupported{ get; };
+        Boolean IsInterCharacterWaitSupported{ get; };
+        UInt32 SupportedDescriptors{ get; };
+        UInt32 SupportedWindows{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Devices.PointOfService.IClaimedLineDisplayStatics", 78ca98fb-8b6b-4973-86f0-3e570c351825)]
+    [interface_name("Windows.Devices.PointOfService.IClaimedLineDisplay", 120ac970-9a75-4acf-aae7-09972bcf8794)]
+    [threading(both)]
+    runtimeclass ClaimedLineDisplay
+        : Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.ClaimedLineDisplay>  FromIdAsync(String deviceId);
+        [method_name("GetDeviceSelector")] static String GetDeviceSelector();
+        [method_name("GetDeviceSelectorWithConnectionTypes")] static String GetDeviceSelector(PosConnectionTypes connectionTypes);
+        String DeviceId{ get; };
+        Windows.Devices.PointOfService.LineDisplayCapabilities Capabilities{ get; };
+        String PhysicalDeviceName{ get; };
+        String PhysicalDeviceDescription{ get; };
+        String DeviceControlDescription{ get; };
+        String DeviceControlVersion{ get; };
+        String DeviceServiceVersion{ get; };
+        Windows.Devices.PointOfService.LineDisplayWindow DefaultWindow{ get; };
+        void RetainDevice();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedLineDisplay, Object>  ReleaseDeviceRequested;
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedLineDisplay2", a31c75ed-41f5-4e76-a074-795e47a46e97)]
+        {
+            Windows.Foundation.IAsyncOperation <String>  GetStatisticsAsync(Windows.Foundation.Collections.IIterable <String>  statisticsCategories);
+            Windows.Foundation.IAsyncOperation <String>  CheckHealthAsync(UnifiedPosHealthCheckLevel level);
+            Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplayPowerStatus>  CheckPowerStatusAsync();
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedLineDisplay, Windows.Devices.PointOfService.LineDisplayStatusUpdatedEventArgs>  StatusUpdated;
+            Windows.Foundation.Collections.IVectorView <Windows.Foundation.Size>  SupportedScreenSizesInCharacters{ get; };
+            Windows.Foundation.Size MaxBitmapSizeInPixels{ get; };
+            Windows.Foundation.Collections.IVectorView <Int32>  SupportedCharacterSets{ get; };
+            Windows.Devices.PointOfService.LineDisplayCustomGlyphs CustomGlyphs{ get; };
+            Windows.Devices.PointOfService.LineDisplayAttributes GetAttributes();
+            Windows.Foundation.IAsyncOperation <Boolean>  TryUpdateAttributesAsync(LineDisplayAttributes attributes);
+            Windows.Foundation.IAsyncOperation <Boolean>  TrySetDescriptorAsync(UInt32 descriptor, LineDisplayDescriptorState descriptorState);
+            Windows.Foundation.IAsyncOperation <Boolean>  TryClearDescriptorsAsync();
+            Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplayWindow>  TryCreateWindowAsync(Windows.Foundation.Rect viewport, Windows.Foundation.Size windowSize);
+            [method_name("TryStoreStorageFileBitmapAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplayStoredBitmap>  TryStoreStorageFileBitmapAsync(Windows.Storage.StorageFile bitmap);
+            [method_name("TryStoreStorageFileBitmapWithAlignmentAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplayStoredBitmap>  TryStoreStorageFileBitmapAsync(Windows.Storage.StorageFile bitmap, LineDisplayHorizontalAlignment horizontalAlignment, LineDisplayVerticalAlignment verticalAlignment);
+            [method_name("TryStoreStorageFileBitmapWithAlignmentAndWidthAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplayStoredBitmap>  TryStoreStorageFileBitmapAsync(Windows.Storage.StorageFile bitmap, LineDisplayHorizontalAlignment horizontalAlignment, LineDisplayVerticalAlignment verticalAlignment, Int32 widthInPixels);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Devices.PointOfService.IClaimedLineDisplay3", 642ecd92-e9d4-4ecc-af75-329c274cd18f)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.PointOfService.ClaimedLineDisplay, Windows.Devices.PointOfService.ClaimedLineDisplayClosedEventArgs>  Closed;
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.Devices.PointOfService.ILineDisplayStatics", 022dc0b6-11b0-4690-9547-0b39c5af2114)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplay", 24f5df4e-3c99-44e2-b73f-e51be3637a8c)]
+    [threading(both)]
+    runtimeclass LineDisplay
+        : Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplay>  FromIdAsync(String deviceId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplay>  GetDefaultAsync();
+        [method_name("GetDeviceSelector")] static String GetDeviceSelector();
+        [method_name("GetDeviceSelectorWithConnectionTypes")] static String GetDeviceSelector(PosConnectionTypes connectionTypes);
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Devices.PointOfService.ILineDisplayStatics2", 600c3f1c-77ab-4968-a7de-c02ff169f2cc)]
+        {
+            static Windows.Devices.PointOfService.LineDisplayStatisticsCategorySelector StatisticsCategorySelector{ get; };
+        }
+        String DeviceId{ get; };
+        Windows.Devices.PointOfService.LineDisplayCapabilities Capabilities{ get; };
+        String PhysicalDeviceName{ get; };
+        String PhysicalDeviceDescription{ get; };
+        String DeviceControlDescription{ get; };
+        String DeviceControlVersion{ get; };
+        String DeviceServiceVersion{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.ClaimedLineDisplay>  ClaimAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.PointOfService.ILineDisplay2", c296a628-ef44-40f3-bd1c-b04c6a5cdc7d)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.LineDisplayPowerStatus>  CheckPowerStatusAsync();
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayStatisticsCategorySelector", b521c46b-9274-4d24-94f3-b6017b832444)]
+    runtimeclass LineDisplayStatisticsCategorySelector
+    {
+        String AllStatistics{ get; };
+        String UnifiedPosStatistics{ get; };
+        String ManufacturerStatistics{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayWindow", d21feef4-2364-4be5-bee1-851680af4964)]
+    runtimeclass LineDisplayWindow
+        : Windows.Foundation.IClosable
+    {
+        Windows.Foundation.Size SizeInCharacters{ get; };
+        Windows.Foundation.TimeSpan InterCharacterWaitInterval{ get; };
+        Windows.Foundation.TimeSpan InterCharacterWaitInterval{ set; };
+        Windows.Foundation.IAsyncOperation <Boolean>  TryRefreshAsync();
+        [method_name("TryDisplayTextAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayTextAsync(String text, LineDisplayTextAttribute displayAttribute);
+        [method_name("TryDisplayTextAtPositionAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayTextAsync(String text, LineDisplayTextAttribute displayAttribute, Windows.Foundation.Point startPosition);
+        [method_name("TryDisplayTextNormalAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayTextAsync(String text);
+        Windows.Foundation.IAsyncOperation <Boolean>  TryScrollTextAsync(LineDisplayScrollDirection direction, UInt32 numberOfColumnsOrRows);
+        Windows.Foundation.IAsyncOperation <Boolean>  TryClearTextAsync();
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Devices.PointOfService.ILineDisplayWindow2", a95ce2e6-bdd8-4365-8e11-de94de8dff02)]
+        {
+            Windows.Devices.PointOfService.LineDisplayCursor Cursor{ get; };
+            Windows.Devices.PointOfService.LineDisplayMarquee Marquee{ get; };
+            Windows.Foundation.IAsyncOperation <UInt32>  ReadCharacterAtCursorAsync();
+            Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayStoredBitmapAtCursorAsync(LineDisplayStoredBitmap bitmap);
+            [method_name("TryDisplayStorageFileBitmapAtCursorAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayStorageFileBitmapAtCursorAsync(Windows.Storage.StorageFile bitmap);
+            [method_name("TryDisplayStorageFileBitmapAtCursorWithAlignmentAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayStorageFileBitmapAtCursorAsync(Windows.Storage.StorageFile bitmap, LineDisplayHorizontalAlignment horizontalAlignment, LineDisplayVerticalAlignment verticalAlignment);
+            [method_name("TryDisplayStorageFileBitmapAtCursorWithAlignmentAndWidthAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayStorageFileBitmapAtCursorAsync(Windows.Storage.StorageFile bitmap, LineDisplayHorizontalAlignment horizontalAlignment, LineDisplayVerticalAlignment verticalAlignment, Int32 widthInPixels);
+            [method_name("TryDisplayStorageFileBitmapAtPointAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayStorageFileBitmapAtPointAsync(Windows.Storage.StorageFile bitmap, Windows.Foundation.Point offsetInPixels);
+            [method_name("TryDisplayStorageFileBitmapAtPointWithWidthAsync")] Windows.Foundation.IAsyncOperation <Boolean>  TryDisplayStorageFileBitmapAtPointAsync(Windows.Storage.StorageFile bitmap, Windows.Foundation.Point offsetInPixels, Int32 widthInPixels);
+        }
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayStatusUpdatedEventArgs", ddd57c1a-86fb-4eba-93d1-6f5eda52b752)]
+    runtimeclass LineDisplayStatusUpdatedEventArgs
+    {
+        Windows.Devices.PointOfService.LineDisplayPowerStatus Status{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayCustomGlyphs", 2257f63c-f263-44f1-a1a0-e750a6a0ec54)]
+    runtimeclass LineDisplayCustomGlyphs
+    {
+        Windows.Foundation.Size SizeInPixels{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  SupportedGlyphCodes{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  TryRedefineAsync(UInt32 glyphCode, Windows.Storage.Streams.IBuffer glyphData);
+    }
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayAttributes", c17de99c-229a-4c14-a6f1-b4e4b1fead92)]
+    runtimeclass LineDisplayAttributes
+    {
+        Boolean IsPowerNotifyEnabled{ get; };
+        Boolean IsPowerNotifyEnabled{ set; };
+        Int32 Brightness{ get; };
+        Int32 Brightness{ set; };
+        Windows.Foundation.TimeSpan BlinkRate{ get; };
+        Windows.Foundation.TimeSpan BlinkRate{ set; };
+        Windows.Foundation.Size ScreenSizeInCharacters{ get; };
+        Windows.Foundation.Size ScreenSizeInCharacters{ set; };
+        Int32 CharacterSet{ get; };
+        Int32 CharacterSet{ set; };
+        Boolean IsCharacterSetMappingEnabled{ get; };
+        Boolean IsCharacterSetMappingEnabled{ set; };
+        Windows.Devices.PointOfService.LineDisplayWindow CurrentWindow{ get; };
+        Windows.Devices.PointOfService.LineDisplayWindow CurrentWindow{ set; };
+    }
+
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayStoredBitmap", f621515b-d81e-43ba-bf1b-bcfa3c785ba0)]
+    runtimeclass LineDisplayStoredBitmap
+    {
+        String EscapeSequence{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  TryDeleteAsync();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Devices.PointOfService.IClaimedLineDisplayClosedEventArgs", f915f364-d3d5-4f10-b511-90939edfacd8)]
+    runtimeclass ClaimedLineDisplayClosedEventArgs
+    {
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayCursorAttributes", 4e2d54fe-4ffd-4190-aae1-ce285f20c896)]
+    runtimeclass LineDisplayCursorAttributes
+    {
+        Boolean IsBlinkEnabled{ get; };
+        Boolean IsBlinkEnabled{ set; };
+        Windows.Devices.PointOfService.LineDisplayCursorType CursorType{ get; };
+        Windows.Devices.PointOfService.LineDisplayCursorType CursorType{ set; };
+        Boolean IsAutoAdvanceEnabled{ get; };
+        Boolean IsAutoAdvanceEnabled{ set; };
+        Windows.Foundation.Point Position{ get; };
+        Windows.Foundation.Point Position{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayCursor", ecdffc45-754a-4e3b-ab2b-151181085605)]
+    runtimeclass LineDisplayCursor
+    {
+        Boolean CanCustomize{ get; };
+        Boolean IsBlinkSupported{ get; };
+        Boolean IsBlockSupported{ get; };
+        Boolean IsHalfBlockSupported{ get; };
+        Boolean IsUnderlineSupported{ get; };
+        Boolean IsReverseSupported{ get; };
+        Boolean IsOtherSupported{ get; };
+        Windows.Devices.PointOfService.LineDisplayCursorAttributes GetAttributes();
+        Windows.Foundation.IAsyncOperation <Boolean>  TryUpdateAttributesAsync(LineDisplayCursorAttributes attributes);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.Devices.PointOfService.ILineDisplayMarquee", a3d33e3e-f46a-4b7a-bc21-53eb3b57f8b4)]
+    runtimeclass LineDisplayMarquee
+    {
+        Windows.Devices.PointOfService.LineDisplayMarqueeFormat Format{ get; };
+        Windows.Devices.PointOfService.LineDisplayMarqueeFormat Format{ set; };
+        Windows.Foundation.TimeSpan RepeatWaitInterval{ get; };
+        Windows.Foundation.TimeSpan RepeatWaitInterval{ set; };
+        Windows.Foundation.TimeSpan ScrollWaitInterval{ get; };
+        Windows.Foundation.TimeSpan ScrollWaitInterval{ set; };
+        Windows.Foundation.IAsyncOperation <Boolean>  TryStartScrollingAsync(LineDisplayScrollDirection direction);
+        Windows.Foundation.IAsyncOperation <Boolean>  TryStopScrollingAsync();
+    }
+
+
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    enum PaymentOperationStatus
+    {
+        Success,
+        PartialApproval,
+        Declined,
+        AuthorizationRequired,
+        CardError,
+        NetworkError,
+        TimeoutError,
+        Canceled,
+        InvalidTransaction,
+        InvalidToken,
+        InvalidTerminal,
+        InvalidReport,
+        DuplicateRequest,
+        UnsupportedImage,
+        UnsupportedCurrency,
+        MismatchedCurrency,
+        Busy,
+        UnknownError,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    enum PaymentMethodKind
+    {
+        DebitCard,
+        CreditCard,
+        GiftCard,
+        StoredValueCard,
+        EWallet,
+        Other,
+    };
+
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum PaymentUserResponse
+    {
+        None,
+        Yes,
+        No,
+    };
+
+
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [static_name("Windows.Devices.PointOfService.IPaymentDeviceStatics", 25464e64-c32d-4f1b-a380-e3681c3be97f)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentDevice", 11ef3904-7198-4184-92e8-37dbba01d81d)]
+    [threading(both)]
+    runtimeclass PaymentDevice
+        : Windows.Foundation.IClosable
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDevice>  FromIdAsync(String deviceId);
+        static String GetDeviceSelector();
+        String DeviceId{ get; };
+        String ConnectorCompanyName{ get; };
+        String ConnectorName{ get; };
+        String ConnectorVersion{ get; };
+        String TerminalCompanyName{ get; };
+        String TerminalModel{ get; };
+        String TerminalOSVersion{ get; };
+        String TerminalSerialNumber{ get; };
+        Windows.Devices.PointOfService.PaymentDeviceCapabilities Capabilities{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDeviceGetConfigurationResult>  GetConfigurationAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDeviceOperationResult>  SetConfigurationAsync(PaymentDeviceConfiguration configuration);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDeviceTransactionResult>  RequestPaymentAuthorizationAsync(PaymentDeviceTransactionRequest request);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDeviceTransactionResult>  RequestPaymentAsync(PaymentDeviceTransactionRequest request);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDeviceTransactionResult>  RequestRefundAsync(PaymentDeviceTransactionRequest request);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDeviceOperationResult>  VoidTransactionAsync(String transactionId);
+        Windows.Foundation.IAsyncOperation <Windows.Devices.PointOfService.PaymentDeviceOperationResult>  VoidTokenAsync(String tokenId);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentMethod", 917dedc9-164f-492f-b4c5-71f2e55fbdbd)]
+    runtimeclass PaymentMethod
+    {
+        Windows.Devices.PointOfService.PaymentMethodKind Kind{ get; };
+        String Description{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentDeviceCapabilities", d98b880d-bd4f-4b38-93b4-2ebd4ce51f97)]
+    runtimeclass PaymentDeviceCapabilities
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.PointOfService.PaymentMethod>  SupportedPaymentMethods{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  SupportedCurrencies{ get; };
+        String DefaultCurrency{ get; };
+        Boolean IsTokenizationSupported{ get; };
+        Boolean IsAvsSupported{ get; };
+        Boolean HasTrainingMode{ get; };
+        Boolean HasDisplay{ get; };
+        Boolean CanDisplayLineItems{ get; };
+        Boolean CanAskYesNoQuestion{ get; };
+        Boolean CanRequestEmail{ get; };
+        Boolean CanRequestTip{ get; };
+        Boolean CanRequestDonation{ get; };
+        Boolean CanDisplayImage{ get; };
+        Boolean CanDisplayQRCode{ get; };
+        Boolean CanPrint{ get; };
+        Boolean CanAutoPrintReceipts{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  SupportedReportKinds{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  SupportedContentTypes{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentDeviceConfiguration", 39dec2fd-ea4d-46d0-918a-672728541176)]
+    [threading(both)]
+    runtimeclass PaymentDeviceConfiguration
+    {
+        PaymentDeviceConfiguration();
+        String TerminalName{ get; };
+        String TerminalName{ set; };
+        String TerminalLocation{ get; };
+        String TerminalLocation{ set; };
+        Windows.Foundation.DateTime TerminalDateTime{ get; };
+        Windows.Foundation.DateTime TerminalDateTime{ set; };
+        Boolean IsTokenizationEnabled{ get; };
+        Boolean IsTokenizationEnabled{ set; };
+        String TipText{ get; };
+        String TipText{ set; };
+        String EmailAddressText{ get; };
+        String EmailAddressText{ set; };
+        String DonationText{ get; };
+        String DonationText{ set; };
+        Boolean IsAutoPrintReceiptsEnabled{ get; };
+        Boolean IsAutoPrintReceiptsEnabled{ set; };
+        Boolean IsTrainingModeEnabled{ get; };
+        Boolean IsTrainingModeEnabled{ set; };
+    }
+
+
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentDeviceGetConfigurationResult", 919b3009-3f2b-4308-892a-df213d119fd6)]
+    runtimeclass PaymentDeviceGetConfigurationResult
+    {
+        Windows.Devices.PointOfService.PaymentOperationStatus Status{ get; };
+        Windows.Devices.PointOfService.PaymentDeviceConfiguration Configuration{ get; };
+    }
+
+
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentDeviceOperationResult", 08bd4a80-0295-4894-9a13-cd1fdd826ad9)]
+    runtimeclass PaymentDeviceOperationResult
+    {
+        Windows.Devices.PointOfService.PaymentOperationStatus Status{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentDeviceTransactionRequest", 6a35848e-e963-4f51-b571-cc190ffd7ed8)]
+    [threading(both)]
+    runtimeclass PaymentDeviceTransactionRequest
+    {
+        PaymentDeviceTransactionRequest();
+        String CashierName{ get; };
+        String CashierName{ set; };
+        Windows.Globalization.CurrencyAmount RequestedAmount{ get; };
+        Windows.Globalization.CurrencyAmount RequestedAmount{ set; };
+        Windows.Globalization.CurrencyAmount RequestedCashBack{ get; };
+        Windows.Globalization.CurrencyAmount RequestedCashBack{ set; };
+        String AuthorizationCode{ get; };
+        String AuthorizationCode{ set; };
+        String TokenId{ get; };
+        String TokenId{ set; };
+        String AvsPostalCode{ get; };
+        String AvsPostalCode{ set; };
+        String AvsAddress{ get; };
+        String AvsAddress{ set; };
+        Boolean RequestTip{ get; };
+        Boolean RequestTip{ set; };
+        Boolean RequestDonation{ get; };
+        Boolean RequestDonation{ set; };
+        Boolean RequestEmail{ get; };
+        Boolean RequestEmail{ set; };
+        Boolean RequestAccountBalance{ get; };
+        Boolean RequestAccountBalance{ set; };
+        Boolean RequestSignature{ get; };
+        Boolean RequestSignature{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_AlwaysDisabledByDefault)]
+    [interface_name("Windows.Devices.PointOfService.IPaymentDeviceTransactionResult", d55fe97c-a5eb-4c1d-99ef-7bf45a32fc6e)]
+    runtimeclass PaymentDeviceTransactionResult
+    {
+        Windows.Devices.PointOfService.PaymentOperationStatus Status{ get; };
+        String AuthorizationRequiredText{ get; };
+        String TransactionId{ get; };
+        String AuthorizationCode{ get; };
+        String TokenId{ get; };
+        String AvsCode{ get; };
+        Windows.Devices.PointOfService.PaymentMethod MethodOfPayment{ get; };
+        String AccountHolderName{ get; };
+        String AccountIssuerName{ get; };
+        String AccountLast4Digits{ get; };
+        Windows.Globalization.CurrencyAmount AuthorizedAmount{ get; };
+        Windows.Globalization.CurrencyAmount Tip{ get; };
+        Windows.Globalization.CurrencyAmount Donation{ get; };
+        Windows.Globalization.CurrencyAmount CashBack{ get; };
+        Windows.Globalization.CurrencyAmount AccountBalance{ get; };
+        String CustomerEmail{ get; };
+        Windows.Storage.Streams.IBuffer CustomerSignature{ get; };
+    }
+
+
+}

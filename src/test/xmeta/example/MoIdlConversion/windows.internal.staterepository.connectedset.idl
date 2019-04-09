@@ -1,0 +1,50 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IConnectedSetStatics", a2b24328-1d73-4a87-92d5-1de594885bf5)]
+    [interface_name("Windows.Internal.StateRepository.IConnectedSet", c1d6fd37-b401-427a-83e0-71d2386b9c88)]
+    [threading(both)]
+    runtimeclass ConnectedSet
+    {
+        static void Add(ConnectedSet value);
+        static void Update(ConnectedSet value);
+        static void Delete(ConnectedSet value);
+        static void DeleteById(Int64 connectedSetID);
+        static void DeleteByName(String Name);
+        static Boolean Exists(Int64 connectedSetID);
+        static Boolean ExistsByName(String Name);
+        static Windows.Internal.StateRepository.ConnectedSet TryGet(Int64 connectedSetID);
+        static Windows.Internal.StateRepository.ConnectedSet TryGetByName(String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.ConnectedSet>  Find();
+        ConnectedSet();
+        Int64 _ConnectedSetID{ get; };
+        Int64 _ConnectedSetID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        String Name{ get; };
+        String Name{ set; };
+        Windows.Internal.StateRepository.ConnectedSetFlags Flags{ get; };
+        Windows.Internal.StateRepository.ConnectedSetFlags Flags{ set; };
+        Windows.Internal.StateRepository.ConnectedSetStatus Status{ get; };
+        Windows.Internal.StateRepository.ConnectedSetStatus Status{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

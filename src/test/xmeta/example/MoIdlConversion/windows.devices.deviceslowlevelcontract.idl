@@ -1,0 +1,12 @@
+
+
+
+
+
+
+namespace Windows.Devices
+{
+    [contractversion(3)]
+    apicontract DevicesLowLevelContract{};
+
+}

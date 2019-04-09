@@ -1,0 +1,83 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.I2c.Provider
+{
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    enum ProviderI2cBusSpeed
+    {
+        StandardMode,
+        FastMode,
+    };
+
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    enum ProviderI2cTransferStatus
+    {
+        FullTransfer,
+        PartialTransfer,
+        SlaveAddressNotAcknowledged,
+    };
+
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    enum ProviderI2cSharingMode
+    {
+        Exclusive,
+        Shared,
+    };
+
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    struct ProviderI2cTransferResult
+    {
+        ProviderI2cTransferStatus Status;
+        UInt32 BytesTransferred;
+    };
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    [interface_name("Windows.Devices.I2c.Provider.IProviderI2cConnectionSettings", e9db4e34-e510-44b7-809d-f2f85b555339)]
+    runtimeclass ProviderI2cConnectionSettings
+    {
+        Int32 SlaveAddress{ get; };
+        Int32 SlaveAddress{ set; };
+        Windows.Devices.I2c.Provider.ProviderI2cBusSpeed BusSpeed{ get; };
+        Windows.Devices.I2c.Provider.ProviderI2cBusSpeed BusSpeed{ set; };
+        Windows.Devices.I2c.Provider.ProviderI2cSharingMode SharingMode{ get; };
+        Windows.Devices.I2c.Provider.ProviderI2cSharingMode SharingMode{ set; };
+    }
+
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    [uuid(ad342654-57e8-453e-8329-d1e447d103a9)]
+    interface II2cDeviceProvider requires Windows.Foundation.IClosable
+    {
+        String DeviceId{ get; };
+        void Write(UInt8[] buffer);
+        Windows.Devices.I2c.Provider.ProviderI2cTransferResult WritePartial(UInt8[] buffer);
+        void Read([range(0, 2147483647)]ref UInt8[] buffer);
+        [return_name("result")] Windows.Devices.I2c.Provider.ProviderI2cTransferResult ReadPartial([range(0, 2147483647)]ref UInt8[] buffer);
+        void WriteRead(UInt8[] writeBuffer, [range(0, 2147483647)]ref UInt8[] readBuffer);
+        [return_name("result")] Windows.Devices.I2c.Provider.ProviderI2cTransferResult WriteReadPartial(UInt8[] writeBuffer, [range(0, 2147483647)]ref UInt8[] readBuffer);
+    };
+
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    [uuid(61c2bb82-4510-4163-a87c-4e15a9558980)]
+    interface II2cControllerProvider
+    {
+        Windows.Devices.I2c.Provider.II2cDeviceProvider GetDeviceProvider(ProviderI2cConnectionSettings settings);
+    };
+
+    [uuid(6f13083e-bf62-4fe2-a95a-f08999669818)]
+    [contract(Windows.Devices.DevicesLowLevelContract, 2)]
+    interface II2cProvider
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.I2c.Provider.II2cControllerProvider> >  GetControllersAsync();
+    };
+
+}

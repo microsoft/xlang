@@ -1,0 +1,41 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(standard)]
+    [constructor_name("Windows.ApplicationModel.Background.ITimeTriggerFactory", 38c682fe-9b54-45e6-b2f3-269b87a6f734)]
+    [interface_name("Windows.ApplicationModel.Background.ITimeTrigger", 656e5556-0b2a-4377-ba70-3b45a935547f)]
+    [threading(mta)]
+    runtimeclass TimeTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] TimeTrigger(UInt32 freshnessTime, Boolean oneShot);
+        UInt32 FreshnessTime{ get; };
+        Boolean OneShot{ get; };
+    }
+
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.ApplicationModel.Background.IMaintenanceTriggerFactory", 4b3ddb2e-97dd-4629-88b0-b06cf9482ae5)]
+    [interface_name("Windows.ApplicationModel.Background.IMaintenanceTrigger", 68184c83-fc22-4ce5-841a-7239a9810047)]
+    [threading(mta)]
+    runtimeclass MaintenanceTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] MaintenanceTrigger(UInt32 freshnessTime, Boolean oneShot);
+        UInt32 FreshnessTime{ get; };
+        Boolean OneShot{ get; };
+    }
+
+}

@@ -1,0 +1,87 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.UserSelection
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.UserSelection.IUserSelectionResult", 37957afc-2835-5072-974e-fd4d39f2bb68)]
+    runtimeclass UserSelectionResult
+    {
+        Boolean IsSelectionCanceled{ get; };
+        Windows.System.User SelectedUser{ get; };
+    }
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    enum UserSelectionScenario
+    {
+        Default,
+        Welcome,
+        Share,
+        ForceShowPicker,
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    enum CustomPickerScenario
+    {
+        ReceiveShareUrl,
+        ReceiveShareFile,
+        ReceiveShareFolder,
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(b0df66ae-f278-4dbb-a262-cdaf6af8feb4)]
+    interface IUserSelectionStatics
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.PlatformExtensions.UserSelection.UserSelectionResult>  GetUserForActivationAsync(String appUserModelId, Windows.System.User candidateUser);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.PlatformExtensions.UserSelection.UserSelectionResult>  GetUserForActivationScenarioAsync(UserSelectionScenario scenario, String appUserModelId, Windows.System.User candidateUser);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.PlatformExtensions.UserSelection.UserSelectionResult>  GetUserForAppTargetListAsync(UserSelectionScenario sceanrio, Windows.System.User candidateUser);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.PlatformExtensions.UserSelection.UserSelectionResult>  GetUserForProtocolActivationAsync(UserSelectionScenario sceanrio, String protocolUri, Windows.System.User candidateUser);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.PlatformExtensions.UserSelection.UserSelectionResult>  GetUserForCustomScenarioAsync(CustomPickerScenario scenario, Windows.System.User candidateUser);
+    };
+
+
+}
+namespace Windows.Internal.PlatformExtensions.UserSelection.Details
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.UserSelection.Details.IUserSelectionCompletion", c1f601f3-f755-4f8e-9b03-43157402872c)]
+    runtimeclass UserSelectionCompletion
+    {
+        Boolean CanContinue{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.PlatformExtensions.UserSelection.Details.UserSelectionCompletion, Object>  CanContinueChanged;
+        void OnError(HRESULT result);
+        void OnUserCancel();
+        void OnComplete(Windows.System.User selection);
+    }
+
+    [uuid(2d3cbd13-dbc5-495e-af00-6cb043b2051a)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface IUserSelectionDialog
+    {
+        void ShowUserSelectionDialog(UserSelectionCompletion selection, String appUserModelId, Boolean allowGuestAccounts);
+        void ShowUserSelectionDialogForCustomScenario(UserSelectionCompletion selection, Windows.Internal.PlatformExtensions.UserSelection.CustomPickerScenario scenario, Boolean allowGuestAccounts);
+    };
+
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    runtimeclass UserSelectionProvider
+        : [default]Windows.Internal.PlatformExtensions.UserSelection.IUserSelectionStatics
+    {
+        UserSelectionProvider();
+
+        [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+        [constructor_name("Windows.Internal.PlatformExtensions.UserSelection.Details.IUserSelectionProviderFactory", 33070993-5038-4545-8819-7c7640442801)]
+        {
+            [method_name( "CreateUserSelectionProvider" )] UserSelectionProvider(IUserSelectionDialog dialog);
+        }
+    }
+
+}

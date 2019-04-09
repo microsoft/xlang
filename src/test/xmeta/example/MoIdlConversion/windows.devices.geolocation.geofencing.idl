@@ -1,0 +1,123 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Geolocation.Geofencing
+{
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum MonitoredGeofenceStates
+    {
+        None,
+        Entered,
+        Exited,
+        Removed = 4,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [flags]
+    enum GeofenceState
+    {
+        None,
+        Entered,
+        Exited,
+        Removed = 4,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GeofenceMonitorStatus
+    {
+        Ready,
+        Initializing,
+        NoData,
+        Disabled,
+        NotInitialized,
+        NotAvailable,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GeofenceRemovalReason
+    {
+        Used,
+        Expired,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Geolocation.Geofencing.IGeofenceFactory", 841f624b-325f-4b90-bca7-2b8022a93796)]
+    [interface_name("Windows.Devices.Geolocation.Geofencing.IGeofence", 9c090823-edb8-47e0-8245-5bf61d321f2d)]
+    runtimeclass Geofence
+    {
+        [method_name( "Create" )] Geofence(String id, Windows.Devices.Geolocation.IGeoshape geoshape);
+        [method_name( "CreateWithMonitorStates" )] Geofence(String id, Windows.Devices.Geolocation.IGeoshape geoshape, MonitoredGeofenceStates monitoredStates, Boolean singleUse);
+        [method_name( "CreateWithMonitorStatesAndDwellTime" )] Geofence(String id, Windows.Devices.Geolocation.IGeoshape geoshape, MonitoredGeofenceStates monitoredStates, Boolean singleUse, Windows.Foundation.TimeSpan dwellTime);
+        [method_name( "CreateWithMonitorStatesDwellTimeStartTimeAndDuration" )] Geofence(String id, Windows.Devices.Geolocation.IGeoshape geoshape, MonitoredGeofenceStates monitoredStates, Boolean singleUse, Windows.Foundation.TimeSpan dwellTime, Windows.Foundation.DateTime startTime, Windows.Foundation.TimeSpan duration);
+        Windows.Foundation.DateTime StartTime{ get; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Windows.Foundation.TimeSpan DwellTime{ get; };
+        String Id{ get; };
+        Windows.Devices.Geolocation.Geofencing.MonitoredGeofenceStates MonitoredStates{ get; };
+        Windows.Devices.Geolocation.IGeoshape Geoshape{ get; };
+        Boolean SingleUse{ get; };
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Geolocation.Geofencing.IGeofenceMonitorStatics", 2dd32fcf-7e75-4899-ace3-2bd0a65cce06)]
+    [interface_name("Windows.Devices.Geolocation.Geofencing.IGeofenceMonitor", 4c0f5f78-1c1f-4621-bbbd-833b92247226)]
+    runtimeclass GeofenceMonitor
+    {
+        static Windows.Devices.Geolocation.Geofencing.GeofenceMonitor Current{ get; };
+        Windows.Devices.Geolocation.Geofencing.GeofenceMonitorStatus Status{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Devices.Geolocation.Geofencing.Geofence>  Geofences{ get; };
+        Windows.Devices.Geolocation.Geoposition LastKnownGeoposition{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Geolocation.Geofencing.GeofenceMonitor, Object>  GeofenceStateChanged;
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Geolocation.Geofencing.GeofenceStateChangeReport>  ReadReports();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Geolocation.Geofencing.GeofenceMonitor, Object>  StatusChanged;
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Geolocation.Geofencing.IGeofenceStateChangeReport", 9a243c18-2464-4c89-be05-b3ffff5babc5)]
+    runtimeclass GeofenceStateChangeReport
+    {
+        Windows.Devices.Geolocation.Geofencing.GeofenceState NewState{ get; };
+        Windows.Devices.Geolocation.Geofencing.Geofence Geofence{ get; };
+        Windows.Devices.Geolocation.Geoposition Geoposition{ get; };
+        Windows.Devices.Geolocation.Geofencing.GeofenceRemovalReason RemovalReason{ get; };
+    }
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum LocationTriggerType
+    {
+        Geofence,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.ApplicationModel.Background.ILocationTriggerFactory", 1106bb07-ff69-4e09-aa8b-1384ea475e98)]
+    [interface_name("Windows.ApplicationModel.Background.ILocationTrigger", 47666a1c-6877-481e-8026-ff7e14a811a0)]
+    [threading(both)]
+    runtimeclass LocationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        [method_name( "Create" )] LocationTrigger(LocationTriggerType triggerType);
+        Windows.ApplicationModel.Background.LocationTriggerType TriggerType{ get; };
+    }
+
+}

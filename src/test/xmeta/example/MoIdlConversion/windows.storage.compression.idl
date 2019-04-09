@@ -1,0 +1,54 @@
+
+
+
+
+
+
+
+
+namespace Windows.Storage.Compression
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum CompressAlgorithm
+    {
+        InvalidAlgorithm,
+        NullAlgorithm,
+        Mszip,
+        Xpress,
+        XpressHuff,
+        Lzms,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6020000)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Storage.Compression.ICompressorFactory", 5f3d96a4-2cfb-442c-a8ba-d7d11b039da0)]
+    [interface_name("Windows.Storage.Compression.ICompressor", 0ac3645a-57ac-4ee1-b702-84d39d5424e0)]
+    runtimeclass Compressor
+        : Windows.Storage.Streams.IOutputStream
+        , Windows.Foundation.IClosable
+    {
+        [method_name( "CreateCompressor" )] Compressor(Windows.Storage.Streams.IOutputStream underlyingStream);
+        [method_name( "CreateCompressorEx" )] Compressor(Windows.Storage.Streams.IOutputStream underlyingStream, CompressAlgorithm algorithm, UInt32 blockSize);
+        Windows.Foundation.IAsyncOperation <Boolean>  FinishAsync();
+        Windows.Storage.Streams.IOutputStream DetachStream();
+    }
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Storage.Compression.IDecompressorFactory", 5337e252-1da2-42e1-8834-0379d28d742f)]
+    [interface_name("Windows.Storage.Compression.IDecompressor", b883fe46-d68a-4c8b-ada0-4ee813fc5283)]
+    runtimeclass Decompressor
+        : Windows.Storage.Streams.IInputStream
+        , Windows.Foundation.IClosable
+    {
+        [method_name( "CreateDecompressor" )] Decompressor(Windows.Storage.Streams.IInputStream underlyingStream);
+        Windows.Storage.Streams.IInputStream DetachStream();
+    }
+
+
+
+}

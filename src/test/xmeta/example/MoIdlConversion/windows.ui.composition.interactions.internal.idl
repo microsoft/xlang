@@ -1,0 +1,88 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Composition.Interactions.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [webhosthidden]
+    [contract(Windows.UI.Composition.Interactions.Internal.InternalContract, 1)]
+    enum EdgyInputRouting
+    {
+        Normal,
+        ToClient,
+    };
+
+
+    [contract(Windows.UI.Composition.Interactions.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Composition.Interactions.Internal.IEdgyInteractionSourceStatics", 872bdf78-8ab8-4e45-b295-74e8f35e4211)]
+    [interface_name("Windows.UI.Composition.Interactions.Internal.IEdgyInteractionSource", aeb55454-daae-405c-a11d-c7fe673d028a)]
+    [threading(both)]
+    runtimeclass EdgyInteractionSource
+        : Windows.UI.Composition.Interactions.VisualInteractionSource
+    {
+        static Windows.UI.Composition.Interactions.Internal.EdgyInteractionSource Create(Windows.UI.Composition.Visual source);
+        Windows.Foundation.Numerics.Vector3 EdgeDirection{ get; };
+        Windows.Foundation.Numerics.Vector3 EdgeDirection{ set; };
+        UInt32 EdgeVertexCount{ get; };
+        Boolean Enabled{ get; };
+        Boolean Enabled{ set; };
+        Windows.UI.Composition.Interactions.Internal.EdgyInputRouting InputRouting{ get; };
+        Windows.UI.Composition.Interactions.Internal.EdgyInputRouting InputRouting{ set; };
+        void GetEdgeVertex(UInt32 index, out Windows.Foundation.Numerics.Vector3 value);
+        void SetEdgeVertices(Windows.Foundation.Numerics.Vector3[] vertices);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Composition.Interactions.Internal.EdgyInteractionSource, Windows.UI.Composition.Interactions.Internal.EdgyDetectedEventArgs>  EdgyDetected;
+    }
+
+
+    [contract(Windows.UI.Composition.Interactions.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass EdgyDetectedEventArgs
+        : [default]Windows.UI.Composition.Interactions.Internal.IEdgyDetectedEventArgs
+    {
+    }
+
+    [uuid(21d682de-601c-436e-bf0f-3b064e6f026c)]
+    [contract(Windows.UI.Composition.Interactions.Internal.InternalContract, 1)]
+    interface IEdgyDetectedEventArgs
+    {
+        String EdgeId{ get; };
+        Windows.Foundation.Numerics.Vector3 DetectedPoint{ get; };
+        UInt64 DetectedTime{ get; };
+        Windows.UI.Composition.Interactions.Internal.EdgyInputRouting InputRouting{ get; };
+        UInt32 PointerId{ get; };
+        Windows.Foundation.Numerics.Vector3 StartPoint{ get; };
+        UInt64 StartTime{ get; };
+    };
+
+
+    [contract(Windows.UI.Composition.Interactions.Internal.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Composition.Interactions.Internal.IEdgyExperienceSourceStatics", f6ccb499-c401-4acb-bcde-64b353719b1a)]
+    [interface_name("Windows.UI.Composition.Interactions.Internal.IEdgyExperienceSource", 01852286-5553-43a8-b179-54ae6d88a771)]
+    [threading(both)]
+    runtimeclass EdgyExperienceSource
+        : Windows.UI.Composition.Interactions.VisualInteractionSource
+    {
+        static Windows.UI.Composition.Interactions.Internal.EdgyExperienceSource Create(String edgeId, Windows.UI.Composition.Visual source);
+        String EdgeId{ get; };
+        Boolean AutoRedirectForManipulation{ get; };
+        Boolean AutoRedirectForManipulation{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Composition.Interactions.Internal.EdgyExperienceSource, Windows.UI.Composition.Interactions.Internal.EdgyDetectedEventArgs>  EdgyDetected;
+    }
+
+
+}

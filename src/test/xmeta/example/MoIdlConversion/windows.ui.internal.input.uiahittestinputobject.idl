@@ -1,0 +1,28 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Internal.Input.IUIAHitTestInputObjectStatics", ac3ac141-8a26-5f9e-8824-81ee359cfcde)]
+    [interface_name("Windows.UI.Internal.Input.IUIAHitTestInputObject", ced21ac4-80d9-481f-806a-11c69cb51bf5)]
+    [threading(both)]
+    runtimeclass UIAHitTestInputObject
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.UIAHitTestInputObject GetForInputSite(InputSite inputSite, Guid endpointId);
+        Guid EndpointId{ get; };
+    }
+
+}

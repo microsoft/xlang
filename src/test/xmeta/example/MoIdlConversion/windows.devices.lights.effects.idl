@@ -1,0 +1,203 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Lights.Effects
+{
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum LampArrayEffectStartMode
+    {
+        Sequential,
+        Simultaneous,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum LampArrayRepetitionMode
+    {
+        Occurrences,
+        Forever,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum LampArrayEffectCompletionBehavior
+    {
+        ClearState,
+        KeepState,
+    };
+
+    [uuid(11d45590-57fb-4546-b1ce-863107f740df)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    interface ILampArrayEffect
+    {
+        Int32 ZIndex{ get; };
+        Int32 ZIndex{ set; };
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.Devices.Lights.Effects.ILampArrayEffectPlaylistStatics", fb15235c-ea35-4c7f-a016-f3bfc6a6c47d)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArrayEffectPlaylist", 7de58bfe-6f61-4103-98c7-d6632f7b9169)]
+    [threading(both)]
+    runtimeclass LampArrayEffectPlaylist
+        : Windows.Foundation.Collections.IVectorView<Windows.Devices.Lights.Effects.ILampArrayEffect>
+        , Windows.Foundation.Collections.IIterable<Windows.Devices.Lights.Effects.ILampArrayEffect>
+    {
+        LampArrayEffectPlaylist();
+        static void StartAll(Windows.Foundation.Collections.IIterable <Windows.Devices.Lights.Effects.LampArrayEffectPlaylist>  value);
+        static void StopAll(Windows.Foundation.Collections.IIterable <Windows.Devices.Lights.Effects.LampArrayEffectPlaylist>  value);
+        static void PauseAll(Windows.Foundation.Collections.IIterable <Windows.Devices.Lights.Effects.LampArrayEffectPlaylist>  value);
+        void Append(ILampArrayEffect effect);
+        void OverrideZIndex(Int32 zIndex);
+        void Start();
+        void Stop();
+        void Pause();
+        Windows.Devices.Lights.Effects.LampArrayEffectStartMode EffectStartMode{ get; };
+        Windows.Devices.Lights.Effects.LampArrayEffectStartMode EffectStartMode{ set; };
+        Int32 Occurrences{ get; };
+        Int32 Occurrences{ set; };
+        Windows.Devices.Lights.Effects.LampArrayRepetitionMode RepetitionMode{ get; };
+        Windows.Devices.Lights.Effects.LampArrayRepetitionMode RepetitionMode{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Lights.Effects.ILampArraySolidEffectFactory", f862a32c-5576-4341-961b-aee1f13cf9dd)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArraySolidEffect", 441f8213-43cc-4b33-80eb-c6ddde7dc8ed)]
+    [threading(both)]
+    runtimeclass LampArraySolidEffect
+        : Windows.Devices.Lights.Effects.ILampArrayEffect
+    {
+        [method_name( "CreateInstance" )] LampArraySolidEffect(Windows.Devices.Lights.LampArray lampArray, Int32[] lampIndexes);
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Windows.Foundation.TimeSpan Duration{ set; };
+        Windows.Foundation.TimeSpan StartDelay{ get; };
+        Windows.Foundation.TimeSpan StartDelay{ set; };
+        Windows.Devices.Lights.Effects.LampArrayEffectCompletionBehavior CompletionBehavior{ get; };
+        Windows.Devices.Lights.Effects.LampArrayEffectCompletionBehavior CompletionBehavior{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.Devices.Lights.Effects.ILampArrayColorRampEffectFactory", 520bd133-0c74-4df5-bea7-4899e0266b0f)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArrayColorRampEffect", 2b004437-40a7-432e-a0b9-0d570c2153ff)]
+    [threading(both)]
+    runtimeclass LampArrayColorRampEffect
+        : Windows.Devices.Lights.Effects.ILampArrayEffect
+    {
+        [method_name( "CreateInstance" )] LampArrayColorRampEffect(Windows.Devices.Lights.LampArray lampArray, Int32[] lampIndexes);
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+        Windows.Foundation.TimeSpan RampDuration{ get; };
+        Windows.Foundation.TimeSpan RampDuration{ set; };
+        Windows.Foundation.TimeSpan StartDelay{ get; };
+        Windows.Foundation.TimeSpan StartDelay{ set; };
+        Windows.Devices.Lights.Effects.LampArrayEffectCompletionBehavior CompletionBehavior{ get; };
+        Windows.Devices.Lights.Effects.LampArrayEffectCompletionBehavior CompletionBehavior{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.Devices.Lights.Effects.ILampArrayBlinkEffectFactory", 879f1d97-9f50-49b2-a56f-013aa08d55e0)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArrayBlinkEffect", ebbf35f6-2fc5-4bb3-b3c3-6221a7680d13)]
+    [threading(both)]
+    runtimeclass LampArrayBlinkEffect
+        : Windows.Devices.Lights.Effects.ILampArrayEffect
+    {
+        [method_name( "CreateInstance" )] LampArrayBlinkEffect(Windows.Devices.Lights.LampArray lampArray, Int32[] lampIndexes);
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+        Windows.Foundation.TimeSpan AttackDuration{ get; };
+        Windows.Foundation.TimeSpan AttackDuration{ set; };
+        Windows.Foundation.TimeSpan SustainDuration{ get; };
+        Windows.Foundation.TimeSpan SustainDuration{ set; };
+        Windows.Foundation.TimeSpan DecayDuration{ get; };
+        Windows.Foundation.TimeSpan DecayDuration{ set; };
+        Windows.Foundation.TimeSpan RepetitionDelay{ get; };
+        Windows.Foundation.TimeSpan RepetitionDelay{ set; };
+        Windows.Foundation.TimeSpan StartDelay{ get; };
+        Windows.Foundation.TimeSpan StartDelay{ set; };
+        Int32 Occurrences{ get; };
+        Int32 Occurrences{ set; };
+        Windows.Devices.Lights.Effects.LampArrayRepetitionMode RepetitionMode{ get; };
+        Windows.Devices.Lights.Effects.LampArrayRepetitionMode RepetitionMode{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArrayBitmapRequestedEventArgs", c8b4af9e-fe63-4d51-babd-619defb454ba)]
+    runtimeclass LampArrayBitmapRequestedEventArgs
+    {
+        Windows.Foundation.TimeSpan SinceStarted{ get; };
+        void UpdateBitmap(Windows.Graphics.Imaging.SoftwareBitmap bitmap);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.Devices.Lights.Effects.ILampArrayBitmapEffectFactory", 13608090-e336-4c8f-9053-a92407ca7b1d)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArrayBitmapEffect", 3238e065-d877-4627-89e5-2a88f7052fa6)]
+    [threading(both)]
+    runtimeclass LampArrayBitmapEffect
+        : Windows.Devices.Lights.Effects.ILampArrayEffect
+    {
+        [method_name( "CreateInstance" )] LampArrayBitmapEffect(Windows.Devices.Lights.LampArray lampArray, Int32[] lampIndexes);
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Windows.Foundation.TimeSpan Duration{ set; };
+        Windows.Foundation.TimeSpan StartDelay{ get; };
+        Windows.Foundation.TimeSpan StartDelay{ set; };
+        Windows.Foundation.TimeSpan UpdateInterval{ get; };
+        Windows.Foundation.TimeSpan UpdateInterval{ set; };
+        Windows.Foundation.Size SuggestedBitmapSize{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Lights.Effects.LampArrayBitmapEffect, Windows.Devices.Lights.Effects.LampArrayBitmapRequestedEventArgs>  BitmapRequested;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArrayUpdateRequestedEventArgs", 73560d6a-576a-48af-8539-67ffa0ab3516)]
+    runtimeclass LampArrayUpdateRequestedEventArgs
+    {
+        Windows.Foundation.TimeSpan SinceStarted{ get; };
+        void SetColor(Windows.UI.Color desiredColor);
+        void SetColorForIndex(Int32 lampIndex, Windows.UI.Color desiredColor);
+        void SetSingleColorForIndices(Windows.UI.Color desiredColor, Int32[] lampIndexes);
+        void SetColorsForIndices(Windows.UI.Color[] desiredColors, Int32[] lampIndexes);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.Devices.Lights.Effects.ILampArrayCustomEffectFactory", 68b4774d-63e5-4af0-a58b-3e535b94e8c9)]
+    [interface_name("Windows.Devices.Lights.Effects.ILampArrayCustomEffect", ec579170-3c34-4876-818b-5765f78b0ee4)]
+    [threading(both)]
+    runtimeclass LampArrayCustomEffect
+        : Windows.Devices.Lights.Effects.ILampArrayEffect
+    {
+        [method_name( "CreateInstance" )] LampArrayCustomEffect(Windows.Devices.Lights.LampArray lampArray, Int32[] lampIndexes);
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Windows.Foundation.TimeSpan Duration{ set; };
+        Windows.Foundation.TimeSpan UpdateInterval{ get; };
+        Windows.Foundation.TimeSpan UpdateInterval{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Lights.Effects.LampArrayCustomEffect, Windows.Devices.Lights.Effects.LampArrayUpdateRequestedEventArgs>  UpdateRequested;
+    }
+
+
+}

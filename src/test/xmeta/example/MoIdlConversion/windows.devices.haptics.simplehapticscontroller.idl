@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Haptics
+{
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Haptics.ISimpleHapticsControllerFeedback", 3d577ef8-4cee-11e6-b535-001bdc06ab3b)]
+    runtimeclass SimpleHapticsControllerFeedback
+    {
+        UInt16 Waveform{ get; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+    }
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Haptics.ISimpleHapticsController", 3d577ef9-4cee-11e6-b535-001bdc06ab3b)]
+    runtimeclass SimpleHapticsController
+    {
+        String Id{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Haptics.SimpleHapticsControllerFeedback>  SupportedFeedback{ get; };
+        Boolean IsIntensitySupported{ get; };
+        Boolean IsPlayCountSupported{ get; };
+        Boolean IsPlayDurationSupported{ get; };
+        Boolean IsReplayPauseIntervalSupported{ get; };
+        void StopFeedback();
+        [method_name("SendHapticFeedback")] void SendHapticFeedback(SimpleHapticsControllerFeedback feedback);
+        [method_name("SendHapticFeedbackWithIntensity")] void SendHapticFeedback(SimpleHapticsControllerFeedback feedback, Double intensity);
+        void SendHapticFeedbackForDuration(SimpleHapticsControllerFeedback feedback, Double intensity, Windows.Foundation.TimeSpan playDuration);
+        void SendHapticFeedbackForPlayCount(SimpleHapticsControllerFeedback feedback, Double intensity, Int32 playCount, Windows.Foundation.TimeSpan replayPauseInterval);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [static_name("Windows.Devices.Haptics.IKnownSimpleHapticsControllerWaveformsStatics", 3d577ef7-4cee-11e6-b535-001bdc06ab3b)]
+    runtimeclass KnownSimpleHapticsControllerWaveforms
+    {
+        static UInt16 Click{ get; };
+        static UInt16 BuzzContinuous{ get; };
+        static UInt16 RumbleContinuous{ get; };
+        static UInt16 Press{ get; };
+        static UInt16 Release{ get; };
+    }
+
+}

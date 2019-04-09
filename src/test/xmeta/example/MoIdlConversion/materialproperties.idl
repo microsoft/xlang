@@ -1,0 +1,74 @@
+
+
+
+
+
+
+
+namespace Windows.UI
+{
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum TransparencyPolicy
+    {
+        Opaque,
+        Transparent,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    enum LightType
+    {
+        RevealAmbient,
+        RevealBorder,
+        RevealBorderWide,
+        ShadowAmbient,
+        ShadowDirectional,
+    };
+
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [uuid(592e523e-f578-42d3-9b29-307fc423ae43)]
+    interface IMaterialProperties
+    {
+        Windows.UI.TransparencyPolicy InAppTransparencyPolicy{ get; };
+        Windows.UI.TransparencyPolicy HostBackdropTransparencyPolicy{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.IMaterialProperties, Object>  TransparencyPolicyChanged;
+        Object TryGetLight(LightType type, Object compositor);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.IMaterialProperties, Object>  LightsChanged;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [static_name("Windows.UI.IMaterialPropertiesStatics", cada6c3f-d3a3-4dd3-9984-569aa9f5c8f1)]
+    runtimeclass MaterialProperties
+        : [default][feature(Velocity_AlwaysAlwaysDisabled)]
+        Windows.UI.IMaterialProperties
+    {
+        static Windows.UI.MaterialProperties GetForCurrentView();
+    }
+
+
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [uuid(2869475c-a273-4112-afbb-2805da0fb546)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    interface ICustomMaterialProperties
+    {
+        Windows.UI.TransparencyPolicy DesiredInAppTransparencyPolicy{ set; };
+        Windows.UI.TransparencyPolicy DesiredInAppTransparencyPolicy{ get; };
+        Windows.UI.TransparencyPolicy DesiredHostBackdropTransparencyPolicy{ set; };
+        Windows.UI.TransparencyPolicy DesiredHostBackdropTransparencyPolicy{ get; };
+    };
+
+    [feature(Velocity_AlwaysAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    runtimeclass CustomMaterialProperties
+        : [default][feature(Velocity_AlwaysAlwaysDisabled)]
+        Windows.UI.ICustomMaterialProperties
+        , [feature(Velocity_AlwaysAlwaysDisabled)]
+        Windows.UI.IMaterialProperties
+    {
+        CustomMaterialProperties();
+    }
+
+}

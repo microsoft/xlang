@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.IAppExtensionHostStatics", 9ea6951a-3208-4673-9a7c-e67263828ee6)]
+    [interface_name("Windows.Internal.StateRepository.IAppExtensionHost", 1d5fb1ee-9b55-4b11-b0b7-9162d1f75d41)]
+    [threading(both)]
+    runtimeclass AppExtensionHost
+    {
+        static Boolean Exists(Int64 appExtensionHostID);
+        static Boolean ExistsByExtension(ApplicationExtension Extension);
+        static Boolean ExistsByExtensionAndName(ApplicationExtension Extension, String Name);
+        static Windows.Internal.StateRepository.AppExtensionHost Get(Int64 appExtensionHostID);
+        static Windows.Internal.StateRepository.AppExtensionHost TryGet(Int64 appExtensionHostID);
+        static Windows.Internal.StateRepository.AppExtensionHost GetByExtensionAndName(ApplicationExtension Extension, String Name);
+        static Windows.Internal.StateRepository.AppExtensionHost TryGetByExtensionAndName(ApplicationExtension Extension, String Name);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppExtensionHost>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.AppExtensionHost>  FindByExtension(ApplicationExtension Extension);
+        static Boolean ExistsByUserAndApplicationUserModelIdAndName(User user, String applicationUserModelId, String name);
+        AppExtensionHost();
+        Int64 _AppExtensionHostID{ get; };
+        Int64 _AppExtensionHostID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Extension{ get; };
+        Int64 Extension{ set; };
+        Windows.Internal.StateRepository.ApplicationExtension GetExtension();
+        void SetExtension(ApplicationExtension value);
+        String Name{ get; };
+        String Name{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

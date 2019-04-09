@@ -1,0 +1,122 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.System.UserProfile
+{
+    [contractversion(2)]
+    apicontract UserProfileContract{};
+
+    [contractversion(1)]
+    apicontract UserProfileLockScreenContract{};
+
+    [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+    [contract(Windows.System.UserProfile.UserProfileContract, 1)]
+    enum AccountPictureKind
+    {
+        SmallImage,
+        LargeImage,
+        Video,
+    };
+
+    [contract(Windows.System.UserProfile.UserProfileContract, 1)]
+    [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+    enum SetAccountPictureResult
+    {
+        Success,
+        ChangeDisabled,
+        LargeOrDynamicError,
+        VideoFrameSizeError,
+        FileSizeError,
+        Failure,
+    };
+
+    [contract(Windows.System.UserProfile.UserProfileContract, 1)]
+    enum SetImageFeedResult
+    {
+        Success,
+        ChangeDisabled,
+        UserCanceled,
+    };
+
+
+    [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+    [contract(Windows.System.UserProfile.UserProfileContract, 1)]
+    [dualapipartition(0x6020000)]
+    [static_name("Windows.System.UserProfile.IUserInformationStatics", 77f3a910-48fa-489c-934e-2ae85ba8f772)]
+    runtimeclass UserInformation
+    {
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Boolean AccountPictureChangeEnabled{ get; };
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Boolean NameAccessAllowed{ get; };
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Windows.Storage.IStorageFile GetAccountPicture(AccountPictureKind kind);
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.System.UserProfile.SetAccountPictureResult>  SetAccountPictureAsync(Windows.Storage.IStorageFile image);
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.System.UserProfile.SetAccountPictureResult>  SetAccountPicturesAsync(Windows.Storage.IStorageFile smallImage, Windows.Storage.IStorageFile largeImage, Windows.Storage.IStorageFile video);
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.System.UserProfile.SetAccountPictureResult>  SetAccountPictureFromStreamAsync(Windows.Storage.Streams.IRandomAccessStream image);
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        [remote_sync]static Windows.Foundation.IAsyncOperation <Windows.System.UserProfile.SetAccountPictureResult>  SetAccountPicturesFromStreamsAsync(Windows.Storage.Streams.IRandomAccessStream smallImage, Windows.Storage.Streams.IRandomAccessStream largeImage, Windows.Storage.Streams.IRandomAccessStream video);
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static event Windows.Foundation.EventHandler <Object>  AccountPictureChanged;
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Windows.Foundation.IAsyncOperation <String>  GetDisplayNameAsync();
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Windows.Foundation.IAsyncOperation <String>  GetFirstNameAsync();
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Windows.Foundation.IAsyncOperation <String>  GetLastNameAsync();
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Windows.Foundation.IAsyncOperation <String>  GetPrincipalNameAsync();
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Windows.Foundation.IAsyncOperation <Windows.Foundation.Uri>  GetSessionInitiationProtocolUriAsync();
+        [deprecated("Use User instead of UserInformation. For more info, see MSDN.", deprecate, Windows.System.UserProfile.UserProfileContract, 0x20000)]
+        static Windows.Foundation.IAsyncOperation <String>  GetDomainNameAsync();
+    }
+
+
+
+    [dualapipartition(0x6020000)]
+    [contract(Windows.System.UserProfile.UserProfileLockScreenContract, 1)]
+    [static_name("Windows.System.UserProfile.ILockScreenImageFeedStatics", 2c0d73f6-03a9-41a6-9b01-495251ff51d5)]
+    runtimeclass LockScreen
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.System.UserProfile.SetImageFeedResult>  RequestSetImageFeedAsync(Windows.Foundation.Uri syndicationFeedUri);
+        static Boolean TryRemoveImageFeed();
+
+        [contract(Windows.System.UserProfile.UserProfileLockScreenContract, 1)]
+        [static_name("Windows.System.UserProfile.ILockScreenStatics", 3ee9d3ad-b607-40ae-b426-7631d9821269)]
+        {
+            static Windows.Foundation.Uri OriginalImageFile{ get; };
+            static Windows.Storage.Streams.IRandomAccessStream GetImageStream();
+            static Windows.Foundation.IAsyncAction SetImageFileAsync(Windows.Storage.IStorageFile value);
+            static Windows.Foundation.IAsyncAction SetImageStreamAsync(Windows.Storage.Streams.IRandomAccessStream value);
+        }
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.System.UserProfile.IUserProfilePersonalizationSettingsStatics", 91acb841-5037-454b-9883-bb772d08dd16)]
+    [interface_name("Windows.System.UserProfile.IUserProfilePersonalizationSettings", 8ceddab4-7998-46d5-8dd3-184f1c5f9ab9)]
+    [threading(both)]
+    runtimeclass UserProfilePersonalizationSettings
+    {
+        static Windows.System.UserProfile.UserProfilePersonalizationSettings Current{ get; };
+        static Boolean IsSupported();
+        Windows.Foundation.IAsyncOperation <Boolean>  TrySetLockScreenImageAsync(Windows.Storage.StorageFile imageFile);
+        Windows.Foundation.IAsyncOperation <Boolean>  TrySetWallpaperImageAsync(Windows.Storage.StorageFile imageFile);
+    }
+
+}

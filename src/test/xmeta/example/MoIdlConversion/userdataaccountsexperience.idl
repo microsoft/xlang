@@ -1,0 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [uuid(eef49c8f-fb87-4f1e-8e8b-acb445e52ea5)]
+    interface IUserDataAccountsExperience
+    {
+        void LaunchUserDataAccountsExperience(String windowTitle, Windows.Foundation.Size accountsControlSize, String contractLaunchAppId, String contractName, Object contractLaunchArgs, Windows.Internal.ApplicationModel.WindowManagement.WindowId callerWindowId, Windows.Foundation.TypedEventHandler <Windows.Internal.UI.ApplicationSettings.IViewOperation, Int32>  handler, UInt64 userContext);
+        void DismissApp();
+    };
+
+}

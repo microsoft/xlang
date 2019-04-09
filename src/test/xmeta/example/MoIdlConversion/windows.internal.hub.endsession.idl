@@ -1,0 +1,27 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.Hub.EndSession
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.Hub.EndSession.InternalContract, 1)]
+    runtimeclass CleanupManager
+        : [default]Windows.Internal.ComposableShell.SessionManagement.ISessionTransitionHandler
+    {
+        CleanupManager();
+
+        [interface_name("Windows.Internal.Hub.EndSession.ICleanupManager", 467edc9a-309d-405a-941b-080824f8004a)]
+        {
+            void CleanDevice();
+        }
+    }
+
+}

@@ -1,0 +1,418 @@
+
+
+
+
+
+
+
+
+namespace Windows.Devices.Geolocation
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PositionAccuracy
+    {
+        Default,
+        High,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PositionStatus
+    {
+        Ready,
+        Initializing,
+        NoData,
+        Disabled,
+        NotInitialized,
+        NotAvailable,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PositionSource
+    {
+        Cellular,
+        Satellite,
+        WiFi,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        IPAddress,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Unknown,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Default,
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        Obfuscated,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GeoshapeType
+    {
+        Geopoint,
+        Geocircle,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        Geopath,
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        GeoboundingBox,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AltitudeReferenceSystem
+    {
+        Unspecified,
+        Terrain,
+        Ellipsoid,
+        Geoid,
+        Surface,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    struct BasicGeoposition
+    {
+        Double Latitude;
+        Double Longitude;
+        Double Altitude;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum GeolocationAccessStatus
+    {
+        Unspecified,
+        Allowed,
+        Denied,
+    };
+
+    [uuid(c99ca2af-c729-43c1-8fab-d6dec914df7e)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IGeoshape
+    {
+        Windows.Devices.Geolocation.GeoshapeType GeoshapeType{ get; };
+        UInt32 SpatialReferenceId{ get; };
+        Windows.Devices.Geolocation.AltitudeReferenceSystem AltitudeReferenceSystem{ get; };
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.Geolocation.IGeopointFactory", db6b8d33-76bd-4e30-8af7-a844dc37b7a0)]
+    [interface_name("Windows.Devices.Geolocation.IGeopoint", 6bfa00eb-e56e-49bb-9caf-cbaa78a8bcef)]
+    runtimeclass Geopoint
+        : Windows.Devices.Geolocation.IGeoshape
+    {
+        [method_name( "Create" )] Geopoint(BasicGeoposition position);
+        [method_name( "CreateWithAltitudeReferenceSystem" )] Geopoint(BasicGeoposition position, AltitudeReferenceSystem altitudeReferenceSystem);
+        [method_name( "CreateWithAltitudeReferenceSystemAndSpatialReferenceId" )] Geopoint(BasicGeoposition position, AltitudeReferenceSystem altitudeReferenceSystem, UInt32 spatialReferenceId);
+        Windows.Devices.Geolocation.BasicGeoposition Position{ get; };
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Devices.Geolocation.IGeopathFactory", 27bea9c8-c7e7-4359-9b9b-fca3e05ef593)]
+    [interface_name("Windows.Devices.Geolocation.IGeopath", e53fd7b9-2da4-4714-a652-de8593289898)]
+    [threading(both)]
+    runtimeclass Geopath
+        : Windows.Devices.Geolocation.IGeoshape
+    {
+        [method_name( "Create" )] Geopath(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.BasicGeoposition>  positions);
+        [method_name( "CreateWithAltitudeReference" )] Geopath(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.BasicGeoposition>  positions, AltitudeReferenceSystem altitudeReferenceSystem);
+        [method_name( "CreateWithAltitudeReferenceAndSpatialReference" )] Geopath(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.BasicGeoposition>  positions, AltitudeReferenceSystem altitudeReferenceSystem, UInt32 spatialReferenceId);
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Geolocation.BasicGeoposition>  Positions{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Devices.Geolocation.IGeoboundingBoxStatics", 67b80708-e61a-4cd0-841b-93233792b5ca)]
+    [constructor_name("Windows.Devices.Geolocation.IGeoboundingBoxFactory", 4dfba589-0411-4abc-b3b5-5bbccb57d98c)]
+    [interface_name("Windows.Devices.Geolocation.IGeoboundingBox", 0896c80b-274f-43da-9a06-cbfcdaeb4ec2)]
+    [threading(both)]
+    runtimeclass GeoboundingBox
+        : Windows.Devices.Geolocation.IGeoshape
+    {
+        [method_name("TryCompute")] static Windows.Devices.Geolocation.GeoboundingBox TryCompute(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.BasicGeoposition>  positions);
+        [method_name("TryComputeWithAltitudeReference")] static Windows.Devices.Geolocation.GeoboundingBox TryCompute(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.BasicGeoposition>  positions, AltitudeReferenceSystem altitudeRefSystem);
+        [method_name("TryComputeWithAltitudeReferenceAndSpatialReference")] static Windows.Devices.Geolocation.GeoboundingBox TryCompute(Windows.Foundation.Collections.IIterable <Windows.Devices.Geolocation.BasicGeoposition>  positions, AltitudeReferenceSystem altitudeRefSystem, UInt32 spatialReferenceId);
+        [method_name( "Create" )] GeoboundingBox(BasicGeoposition northwestCorner, BasicGeoposition southeastCorner);
+        [method_name( "CreateWithAltitudeReference" )] GeoboundingBox(BasicGeoposition northwestCorner, BasicGeoposition southeastCorner, AltitudeReferenceSystem altitudeReferenceSystem);
+        [method_name( "CreateWithAltitudeReferenceAndSpatialReference" )] GeoboundingBox(BasicGeoposition northwestCorner, BasicGeoposition southeastCorner, AltitudeReferenceSystem altitudeReferenceSystem, UInt32 spatialReferenceId);
+        Windows.Devices.Geolocation.BasicGeoposition NorthwestCorner{ get; };
+        Windows.Devices.Geolocation.BasicGeoposition SoutheastCorner{ get; };
+        Windows.Devices.Geolocation.BasicGeoposition Center{ get; };
+        Double MinAltitude{ get; };
+        Double MaxAltitude{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Geolocation.IGeocoordinateSatelliteData", c32a74d9-2608-474c-912c-06dd490f4af7)]
+    runtimeclass GeocoordinateSatelliteData
+    {
+        Windows.Foundation.IReference <Double>  PositionDilutionOfPrecision{ get; };
+        Windows.Foundation.IReference <Double>  HorizontalDilutionOfPrecision{ get; };
+        Windows.Foundation.IReference <Double>  VerticalDilutionOfPrecision{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Geolocation.IVenueData", 66f39187-60e3-4b2f-b527-4f53f1c3c677)]
+    runtimeclass VenueData
+    {
+        String Id{ get; };
+        String Level{ get; };
+    }
+
+
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Geolocation.IGeocoordinate", ee21a3aa-976a-4c70-803d-083ea55bcbc4)]
+    runtimeclass Geocoordinate
+    {
+        [deprecated("Latitude may be altered or unavailable after Windows 8.1. Instead, use Point.Position.Latitude", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Double Latitude{ get; };
+        [deprecated("Longitude may be altered or unavailable after Windows 8.1. Instead, use Point.Position.Longitude", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Double Longitude{ get; };
+        [deprecated("Altitude may be altered or unavailable after Windows 8.1. Instead, use Point.Position.Altitude", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        Windows.Foundation.IReference <Double>  Altitude{ get; };
+        Double Accuracy{ get; };
+        Windows.Foundation.IReference <Double>  AltitudeAccuracy{ get; };
+        Windows.Foundation.IReference <Double>  Heading{ get; };
+        Windows.Foundation.IReference <Double>  Speed{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Geolocation.IGeocoordinateWithPositionData", 95e634be-dbd6-40ac-b8f2-a65c0340d9a6)]
+        {
+            Windows.Devices.Geolocation.PositionSource PositionSource{ get; };
+            Windows.Devices.Geolocation.GeocoordinateSatelliteData SatelliteData{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Geolocation.IGeocoordinateWithPoint", feea0525-d22c-4d46-b527-0b96066fc7db)]
+        {
+            Windows.Devices.Geolocation.Geopoint Point{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Geolocation.IGeocoordinateWithPositionSourceTimestamp", 8543fc02-c9f1-4610-afe0-8bc3a6a87036)]
+        {
+            Windows.Foundation.IReference <Windows.Foundation.DateTime>  PositionSourceTimestamp{ get; };
+        }
+    }
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.Geolocation.ICivicAddress", a8567a1a-64f4-4d48-bcea-f6b008eca34c)]
+    runtimeclass CivicAddress
+    {
+        String Country{ get; };
+        String State{ get; };
+        String City{ get; };
+        String PostalCode{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Geolocation.IGeoposition", c18d0454-7d41-4ff7-a957-9dffb4ef7f5b)]
+    runtimeclass Geoposition
+    {
+        Windows.Devices.Geolocation.Geocoordinate Coordinate{ get; };
+        Windows.Devices.Geolocation.CivicAddress CivicAddress{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Geolocation.IGeoposition2", 7f62f697-8671-4b0d-86f8-474a8496187c)]
+        {
+            Windows.Devices.Geolocation.VenueData VenueData{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Geolocation.IPositionChangedEventArgs", 37859ce5-9d1e-46c5-bf3b-6ad8cac1a093)]
+    runtimeclass PositionChangedEventArgs
+    {
+        Windows.Devices.Geolocation.Geoposition Position{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Devices.Geolocation.IStatusChangedEventArgs", 3453d2da-8c93-4111-a205-9aecfc9be5c0)]
+    runtimeclass StatusChangedEventArgs
+    {
+        Windows.Devices.Geolocation.PositionStatus Status{ get; };
+    }
+
+
+    [muse(0x6030000)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Geolocation.IGeolocatorStatics", 9a8e7571-2df5-4591-9f87-eb5fd894e9b7)]
+    [interface_name("Windows.Devices.Geolocation.IGeolocator", a9c3bf62-4524-4989-8aa9-de019d2e551f)]
+    [threading(both)]
+    runtimeclass Geolocator
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Geolocation.GeolocationAccessStatus>  RequestAccessAsync();
+        [method_name("GetGeopositionHistoryAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Geolocation.Geoposition> >  GetGeopositionHistoryAsync(Windows.Foundation.DateTime startTime);
+        [method_name("GetGeopositionHistoryWithDurationAsync")] static Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Devices.Geolocation.Geoposition> >  GetGeopositionHistoryAsync(Windows.Foundation.DateTime startTime, Windows.Foundation.TimeSpan duration);
+        Geolocator();
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Devices.Geolocation.IGeolocatorStatics2", 993011a2-fa1c-4631-a71d-0dbeb1250d9c)]
+        {
+            static Boolean IsDefaultGeopositionRecommended{ get; };
+            static Windows.Foundation.IReference <Windows.Devices.Geolocation.BasicGeoposition>  DefaultGeoposition{ set; };
+            static Windows.Foundation.IReference <Windows.Devices.Geolocation.BasicGeoposition>  DefaultGeoposition{ get; };
+        }
+        Windows.Devices.Geolocation.PositionAccuracy DesiredAccuracy{ get; };
+        Windows.Devices.Geolocation.PositionAccuracy DesiredAccuracy{ set; };
+        Double MovementThreshold{ get; };
+        Double MovementThreshold{ set; };
+        UInt32 ReportInterval{ get; };
+        UInt32 ReportInterval{ set; };
+        Windows.Devices.Geolocation.PositionStatus LocationStatus{ get; };
+        [method_name("GetGeopositionAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.Geolocation.Geoposition>  GetGeopositionAsync();
+        [method_name("GetGeopositionAsyncWithAgeAndTimeout")] Windows.Foundation.IAsyncOperation <Windows.Devices.Geolocation.Geoposition>  GetGeopositionAsync(Windows.Foundation.TimeSpan maximumAge, Windows.Foundation.TimeSpan timeout);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Geolocation.Geolocator, Windows.Devices.Geolocation.PositionChangedEventArgs>  PositionChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Geolocation.Geolocator, Windows.Devices.Geolocation.StatusChangedEventArgs>  StatusChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Devices.Geolocation.IGeolocatorWithScalarAccuracy", 96f5d3c1-b80f-460a-994d-a96c47a51aa4)]
+        {
+            Windows.Foundation.IReference <UInt32>  DesiredAccuracyInMeters{ get; };
+            Windows.Foundation.IReference <UInt32>  DesiredAccuracyInMeters{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.Geolocation.IGeolocator2", d1b42e6d-8891-43b4-ad36-27c6fe9a97b1)]
+        {
+            void AllowFallbackToConsentlessPositions();
+        }
+    }
+
+
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Devices.Geolocation.IGeocircleFactory", afd6531f-72b1-4f7d-87cc-4ed4c9849c05)]
+    [interface_name("Windows.Devices.Geolocation.IGeocircle", 39e45843-a7f9-4e63-92a7-ba0c28d124b1)]
+    runtimeclass Geocircle
+        : Windows.Devices.Geolocation.IGeoshape
+    {
+        [method_name( "Create" )] Geocircle(BasicGeoposition position, Double radius);
+        [method_name( "CreateWithAltitudeReferenceSystem" )] Geocircle(BasicGeoposition position, Double radius, AltitudeReferenceSystem altitudeReferenceSystem);
+        [method_name( "CreateWithAltitudeReferenceSystemAndSpatialReferenceId" )] Geocircle(BasicGeoposition position, Double radius, AltitudeReferenceSystem altitudeReferenceSystem, UInt32 spatialReferenceId);
+        Windows.Devices.Geolocation.BasicGeoposition Center{ get; };
+        Double Radius{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum VisitMonitoringScope
+    {
+        Venue,
+        City,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum VisitStateChange
+    {
+        TrackingLost,
+        Arrived,
+        Departed,
+        OtherMovement,
+    };
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Geolocation.IGeovisit", b1877a76-9ef6-41ab-a0dd-793ece76e2de)]
+    runtimeclass Geovisit
+    {
+        Windows.Devices.Geolocation.Geoposition Position{ get; };
+        Windows.Devices.Geolocation.VisitStateChange StateChange{ get; };
+        Windows.Foundation.DateTime Timestamp{ get; };
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Geolocation.IGeovisitStateChangedEventArgs", ceb4d1ff-8b53-4968-beed-4cecd029ce15)]
+    runtimeclass GeovisitStateChangedEventArgs
+    {
+        Windows.Devices.Geolocation.Geovisit Visit{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [static_name("Windows.Devices.Geolocation.IGeovisitMonitorStatics", bcf976a7-bbf2-4cdd-95cf-554c82edfb87)]
+    [interface_name("Windows.Devices.Geolocation.IGeovisitMonitor", 80118aaf-5944-4591-83c1-396647f54f2c)]
+    [threading(both)]
+    runtimeclass GeovisitMonitor
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.Geolocation.Geovisit>  GetLastReportAsync();
+        GeovisitMonitor();
+        Windows.Devices.Geolocation.VisitMonitoringScope MonitoringScope{ get; };
+        void Start(VisitMonitoringScope value);
+        void Stop();
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Geolocation.GeovisitMonitor, Windows.Devices.Geolocation.GeovisitStateChangedEventArgs>  VisitStateChanged;
+    }
+
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Geolocation.IGeovisitTriggerDetails", ea770d9e-d1c9-454b-99b7-b2f8cdd2482f)]
+    runtimeclass GeovisitTriggerDetails
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.Geolocation.Geovisit>  ReadReports();
+    }
+
+
+}
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Background.IGeovisitTrigger", 4818edaa-04e1-4127-9a4c-19351b8a80a4)]
+    [threading(both)]
+    runtimeclass GeovisitTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        GeovisitTrigger();
+        Windows.Devices.Geolocation.VisitMonitoringScope MonitoringScope{ get; };
+        Windows.Devices.Geolocation.VisitMonitoringScope MonitoringScope{ set; };
+    }
+
+}

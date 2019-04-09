@@ -1,0 +1,129 @@
+
+
+
+
+
+
+
+namespace Windows.Security.Authentication.Identity.Core
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MicrosoftAccountMultiFactorServiceResponse
+    {
+        Success,
+        Error,
+        NoNetworkConnection,
+        ServiceUnavailable,
+        TotpSetupDenied,
+        NgcNotSetup,
+        SessionAlreadyDenied,
+        SessionAlreadyApproved,
+        SessionExpired,
+        NgcNonceExpired,
+        InvalidSessionId,
+        InvalidSessionType,
+        InvalidOperation,
+        InvalidStateTransition,
+        DeviceNotFound,
+        FlowDisabled,
+        SessionNotApproved,
+        OperationCanceledByUser,
+        NgcDisabledByServer,
+        NgcKeyNotFoundOnServer,
+        UIRequired,
+        DeviceIdChanged,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MicrosoftAccountMultiFactorSessionAuthenticationStatus
+    {
+        Authenticated,
+        Unauthenticated,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MicrosoftAccountMultiFactorAuthenticationType
+    {
+        User,
+        Device,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    enum MicrosoftAccountMultiFactorSessionApprovalStatus
+    {
+        Pending,
+        Approved,
+        Denied,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Security.Authentication.Identity.Core.IMicrosoftAccountMultiFactorSessionInfo", 5f7eabb4-a278-4635-b765-b494eb260af4)]
+    runtimeclass MicrosoftAccountMultiFactorSessionInfo
+    {
+        String UserAccountId{ get; };
+        String SessionId{ get; };
+        String DisplaySessionId{ get; };
+        Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorSessionApprovalStatus ApprovalStatus{ get; };
+        Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorAuthenticationType AuthenticationType{ get; };
+        Windows.Foundation.DateTime RequestTime{ get; };
+        Windows.Foundation.DateTime ExpirationTime{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Security.Authentication.Identity.Core.IMicrosoftAccountMultiFactorOneTimeCodedInfo", 82ba264b-d87c-4668-a976-40cfae547d08)]
+    runtimeclass MicrosoftAccountMultiFactorOneTimeCodedInfo
+    {
+        String Code{ get; };
+        Windows.Foundation.TimeSpan TimeInterval{ get; };
+        Windows.Foundation.TimeSpan TimeToLive{ get; };
+        Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse ServiceResponse{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Security.Authentication.Identity.Core.IMicrosoftAccountMultiFactorGetSessionsResult", 4e23a9a0-e9fa-497a-95de-6d5747bf974c)]
+    runtimeclass MicrosoftAccountMultiFactorGetSessionsResult
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorSessionInfo>  Sessions{ get; };
+        Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse ServiceResponse{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [interface_name("Windows.Security.Authentication.Identity.Core.IMicrosoftAccountMultiFactorUnregisteredAccountsAndSessionInfo", aa7ec5fb-da3f-4088-a20d-5618afadb2e5)]
+    runtimeclass MicrosoftAccountMultiFactorUnregisteredAccountsAndSessionInfo
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorSessionInfo>  Sessions{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  UnregisteredAccounts{ get; };
+        Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse ServiceResponse{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Security.Authentication.Identity.Core.IMicrosoftAccountMultiFactorAuthenticatorStatics", d964c2e6-f446-4c71-8b79-6ea4024aa9b8)]
+    [interface_name("Windows.Security.Authentication.Identity.Core.IMicrosoftAccountMultiFactorAuthenticationManager", 0fd340a5-f574-4320-a08e-0a19a82322aa)]
+    [threading(both)]
+    runtimeclass MicrosoftAccountMultiFactorAuthenticationManager
+    {
+        static Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorAuthenticationManager Current{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorOneTimeCodedInfo>  GetOneTimePassCodeAsync(String userAccountId, UInt32 codeLength);
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse>  AddDeviceAsync(String userAccountId, String authenticationToken, String wnsChannelId);
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse>  RemoveDeviceAsync(String userAccountId);
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse>  UpdateWnsChannelAsync(String userAccountId, String channelUri);
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorGetSessionsResult>  GetSessionsAsync(Windows.Foundation.Collections.IIterable <String>  userAccountIdList);
+        Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorUnregisteredAccountsAndSessionInfo>  GetSessionsAndUnregisteredAccountsAsync(Windows.Foundation.Collections.IIterable <String>  userAccountIdList);
+        [method_name("ApproveSessionUsingAuthSessionInfoAsync")] Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse>  ApproveSessionAsync(MicrosoftAccountMultiFactorSessionAuthenticationStatus sessionAuthentictionStatus, MicrosoftAccountMultiFactorSessionInfo authenticationSessionInfo);
+        [method_name("ApproveSessionAsync")] Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse>  ApproveSessionAsync(MicrosoftAccountMultiFactorSessionAuthenticationStatus sessionAuthentictionStatus, String userAccountId, String sessionId, MicrosoftAccountMultiFactorAuthenticationType sessionAuthenticationType);
+        [method_name("DenySessionUsingAuthSessionInfoAsync")] Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse>  DenySessionAsync(MicrosoftAccountMultiFactorSessionInfo authenticationSessionInfo);
+        [method_name("DenySessionAsync")] Windows.Foundation.IAsyncOperation <Windows.Security.Authentication.Identity.Core.MicrosoftAccountMultiFactorServiceResponse>  DenySessionAsync(String userAccountId, String sessionId, MicrosoftAccountMultiFactorAuthenticationType sessionAuthenticationType);
+    }
+
+}

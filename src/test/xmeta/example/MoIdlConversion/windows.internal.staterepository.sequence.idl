@@ -1,0 +1,39 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [static_name("Windows.Internal.StateRepository.ISequenceStatics", 4235841b-f135-4a3b-889d-a929c3d8be3c)]
+    [interface_name("Windows.Internal.StateRepository.ISequence", a93b6589-990c-482c-a58c-a932260202d8)]
+    [threading(both)]
+    runtimeclass Sequence
+    {
+        static Boolean Exists(Int64 sequenceID);
+        static Boolean ExistsById(SequenceId Id);
+        static Windows.Internal.StateRepository.Sequence Get(Int64 sequenceID);
+        static Windows.Internal.StateRepository.Sequence TryGet(Int64 sequenceID);
+        static Windows.Internal.StateRepository.Sequence GetById(SequenceId Id);
+        static Windows.Internal.StateRepository.Sequence TryGetById(SequenceId Id);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.Sequence>  Find();
+        static Int64 GetCurrentValue(SequenceId sequenceId);
+        Sequence();
+        Int64 _SequenceID{ get; };
+        Int64 _SequenceID{ set; };
+        Windows.Internal.StateRepository.SequenceId Id{ get; };
+        Windows.Internal.StateRepository.SequenceId Id{ set; };
+        Int64 LastValue{ get; };
+        Int64 LastValue{ set; };
+    }
+
+
+}

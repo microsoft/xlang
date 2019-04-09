@@ -1,0 +1,94 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Effects
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum AudioEffectType
+    {
+        Other,
+        AcousticEchoCancellation,
+        NoiseSuppression,
+        AutomaticGainControl,
+        BeamForming,
+        ConstantToneRemoval,
+        Equalizer,
+        LoudnessEqualizer,
+        BassBoost,
+        VirtualSurround,
+        VirtualHeadphones,
+        SpeakerFill,
+        RoomCorrection,
+        BassManagement,
+        EnvironmentalEffects,
+        SpeakerProtection,
+        SpeakerCompensation,
+        DynamicRangeCompression,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x1)]
+    [interface_name("Windows.Media.Effects.IAudioEffect", 34aafa51-9207-4055-be93-6e5734a86ae4)]
+    runtimeclass AudioEffect
+    {
+        Windows.Media.Effects.AudioEffectType AudioEffectType{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.Effects.IAudioRenderEffectsManager", 4dc98966-8751-42b2-bfcb-39ca7864bd47)]
+    runtimeclass AudioRenderEffectsManager
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Effects.AudioRenderEffectsManager, Object>  AudioRenderEffectsChanged;
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Effects.AudioEffect>  GetAudioRenderEffects();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [deprecated("Not supported starting in windows 10", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+        [interface_name("Windows.Media.Effects.IAudioRenderEffectsManager2", a844cd09-5ecc-44b3-bb4e-1db07287139c)]
+        {
+            [deprecated("Not supported starting in windows 10", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+            Windows.Storage.Streams.IRandomAccessStreamWithContentType EffectsProviderThumbnail{ get; };
+            [deprecated("Not supported starting in windows 10", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+            String EffectsProviderSettingsLabel{ get; };
+            [deprecated("Not supported starting in windows 10", deprecate, Windows.Foundation.UniversalApiContract, 0x10000)]
+            void ShowSettingsUI();
+        }
+    }
+
+    [dualapipartition(0x1)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Effects.IAudioCaptureEffectsManager", 8f85c271-038d-4393-8298-540110608eef)]
+    runtimeclass AudioCaptureEffectsManager
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Media.Effects.AudioCaptureEffectsManager, Object>  AudioCaptureEffectsChanged;
+        Windows.Foundation.Collections.IVectorView <Windows.Media.Effects.AudioEffect>  GetAudioCaptureEffects();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Effects.IAudioEffectsManagerStatics", 66406c04-86fa-47cc-a315-f489d8c3fe10)]
+    [threading(mta)]
+    runtimeclass AudioEffectsManager
+    {
+        [method_name("CreateAudioRenderEffectsManager")] static Windows.Media.Effects.AudioRenderEffectsManager CreateAudioRenderEffectsManager(String deviceId, Windows.Media.Render.AudioRenderCategory category);
+        [method_name("CreateAudioRenderEffectsManagerWithMode")] static Windows.Media.Effects.AudioRenderEffectsManager CreateAudioRenderEffectsManager(String deviceId, Windows.Media.Render.AudioRenderCategory category, Windows.Media.AudioProcessing mode);
+        [method_name("CreateAudioCaptureEffectsManager")] static Windows.Media.Effects.AudioCaptureEffectsManager CreateAudioCaptureEffectsManager(String deviceId, Windows.Media.Capture.MediaCategory category);
+        [method_name("CreateAudioCaptureEffectsManagerWithMode")] static Windows.Media.Effects.AudioCaptureEffectsManager CreateAudioCaptureEffectsManager(String deviceId, Windows.Media.Capture.MediaCategory category, Windows.Media.AudioProcessing mode);
+    }
+
+}

@@ -1,0 +1,53 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.StateRepository.ITileViewQueryFilter", e3dd5d31-892e-4ad6-9ce9-8fe1f185047b)]
+    [threading(both)]
+    runtimeclass TileViewQueryFilter
+    {
+        TileViewQueryFilter();
+        Windows.Internal.StateRepository.TileType TileType{ get; };
+        Windows.Internal.StateRepository.TileType TileType{ set; };
+        Windows.Internal.StateRepository.TileFlags Flags{ get; };
+        Windows.Internal.StateRepository.TileFlags Flags{ set; };
+        Boolean VisibleInAppList{ get; };
+        Boolean VisibleInAppList{ set; };
+        Boolean VisibleInSettings{ get; };
+        Boolean VisibleInSettings{ set; };
+        Boolean SupportsKidZone{ get; };
+        Boolean SupportsKidZone{ set; };
+        Boolean SupportsLockScreen{ get; };
+        Boolean SupportsLockScreen{ set; };
+        Windows.Internal.StateRepository.TileFlags NotFlags{ get; };
+        Windows.Internal.StateRepository.TileFlags NotFlags{ set; };
+        Boolean IsApplicationUserModelIdNull{ get; };
+        void SetApplicationUserModelIdToNull();
+        String ApplicationUserModelId{ get; };
+        String ApplicationUserModelId{ set; };
+        Boolean IsTileIdNull{ get; };
+        void SetTileIdToNull();
+        String TileId{ get; };
+        String TileId{ set; };
+        Boolean NotVisibleInAppList{ get; };
+        Boolean NotVisibleInAppList{ set; };
+        Boolean NotVisibleInSettings{ get; };
+        Boolean NotVisibleInSettings{ set; };
+        Boolean NotSupportsKidZone{ get; };
+        Boolean NotSupportsKidZone{ set; };
+        Boolean NotSupportsLockScreen{ get; };
+        Boolean NotSupportsLockScreen{ set; };
+    }
+
+}

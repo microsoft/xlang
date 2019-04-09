@@ -1,0 +1,638 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.UI.BioEnrollment
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+}
+namespace Windows.Internal.UI.BioEnrollment.DataModel
+{
+    [uuid(9fdccb4a-0eb7-5b96-87a8-73560a076c7d)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    interface IDispatchEvent
+    {
+        void Dispatch();
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [uuid(2ab1e832-e448-533f-abd4-7a29a678dfe4)]
+    interface IUIThreadEventDispatcher
+    {
+        void DispatchEvent(IDispatchEvent dispatchEvent);
+    };
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.IUserVerificationInfo", c9c5b7db-12da-5512-89d8-0c833b83ec1f)]
+    [threading(both)]
+    runtimeclass UserVerificationInfo
+    {
+        UserVerificationInfo();
+        Boolean VerificationSucceeded{ get; };
+        String VerificationErrorText{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.ISuspendErrorStateInfo", e07d0768-3afb-5b7e-b9a0-aaa57471fc45)]
+    [threading(both)]
+    runtimeclass SuspendErrorStateInfo
+    {
+        SuspendErrorStateInfo();
+        Boolean IsSuspended{ get; };
+    }
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum EnrollmentKind
+    {
+        Face,
+        Fingerprint,
+        Iris,
+        SecurityKey,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum EnrollmentContext
+    {
+        Settings,
+        OOBE,
+        RetailDemo,
+        OOBEBrokered,
+        SettingsSoftLanding,
+        CXHAccountSetup,
+        CXHAccountSetupBrokered,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [uuid(722276e1-f271-516f-a15c-f9638e5d89ad)]
+    interface IBioEnrollmentSession
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.BioEnrollment.DataModel.UserVerificationInfo>  VerifyUserAsync();
+        void StartEnrollment();
+        void StartIdentify();
+        Boolean EnrollmentInProgress{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession, Object>  EnrollmentCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession, Windows.Internal.UI.BioEnrollment.DataModel.SuspendErrorStateInfo>  EnrollmentError;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession, Object>  EnrollmentPhaseReset;
+        void CancelEnrollment();
+        Windows.Internal.UI.BioEnrollment.DataModel.EnrollmentContext EnrollmentContext{ get; };
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSessionFactory", 6d1c60b8-9963-5e4f-b351-bda069fa6222)]
+    [threading(both)]
+    runtimeclass BioEnrollmentSessionFactory
+    {
+        BioEnrollmentSessionFactory();
+        Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession CreateBioEnrollmentSession(IUIThreadEventDispatcher dispatcher, EnrollmentKind enrollmentKind, EnrollmentContext enrollmentContext);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.IOOBEBioEnrollmentSessionFactory", cfe65bf5-38d0-5741-8581-9a84b4148140)]
+    [threading(both)]
+    runtimeclass OOBEBioEnrollmentSessionFactory
+    {
+        OOBEBioEnrollmentSessionFactory();
+        Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession CreateBioEnrollmentSession(EnrollmentKind enrollmentKind);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.IFullTrustOOBEBioEnrollmentSessionFactory", 557eb34a-8186-533b-9028-80c01ae58003)]
+    [threading(both)]
+    runtimeclass FullTrustOOBEBioEnrollmentSessionFactory
+    {
+        FullTrustOOBEBioEnrollmentSessionFactory();
+        Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession CreateBioEnrollmentSession(EnrollmentKind enrollmentKind);
+    }
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.IPerUserBioEnrollmentSessionFactory", 642df5d6-6be5-5e98-ac50-f2c27bfc131f)]
+    [threading(both)]
+    runtimeclass PerUserBioEnrollmentSessionFactory
+    {
+        PerUserBioEnrollmentSessionFactory();
+        Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession CreateBioEnrollmentSession(EnrollmentKind enrollmentKind, EnrollmentContext enrollmentContext);
+    }
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSessionUserStatics", fcd261d8-e0eb-5774-9582-baa0077958c0)]
+    [threading(both)]
+    runtimeclass BioEnrollmentSessionUser
+    {
+        static Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession CreateBioEnrollmentSessionForUser(Windows.System.User user, EnrollmentKind enrollmentKind, EnrollmentContext enrollmentContext);
+    }
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum Orientation
+    {
+        Unspecified,
+        Landscape,
+        Portrait,
+        Any,
+    };
+
+}
+namespace Windows.Internal.UI.BioEnrollment.DataModel.Face
+{
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FaceEnrollmentState
+    {
+        NotStarted,
+        FaceNotDetected,
+        NeedsFrontal,
+        NeedsLeft,
+        NeedsUp,
+        NeedsRight,
+        NeedsBottom,
+        TooNear,
+        TooFar,
+        TooBright,
+        TooDark,
+        PoorQuality,
+        SpoofDetected,
+        TooManyFaces,
+        EyesOccluded,
+        CompletedCapturesUpdated,
+        Finished,
+        Error,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FaceErrorState
+    {
+        None,
+        Generic,
+        BadOrMissingHardware,
+        CameraAccessConflict,
+        DuplicateTemplate,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FaceSensorType
+    {
+        None,
+        Infrared,
+        Color,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FaceEnrollmentPhase
+    {
+        None,
+        One,
+        Two,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FaceEnrollmentStage
+    {
+        None,
+        BackPose,
+        FrontPose,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    struct FaceStageColorInfo
+    {
+        Single sizeMin;
+        Single sizeMax;
+        Single sizeDisplay;
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Face.IFaceEnrollmentStateInfo", 1f547ae3-3885-55d8-8175-46e09d725bfe)]
+    [threading(both)]
+    runtimeclass FaceEnrollmentStateInfo
+    {
+        FaceEnrollmentStateInfo();
+        Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceEnrollmentState EnrollmentState{ get; };
+        String Message{ get; };
+        UInt32 CompletedCaptures{ get; };
+        Windows.Foundation.Rect BoundingBox{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Foundation.Point>  FacePoints{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceSensorType SensorType{ get; };
+        Boolean StageInfoComputed{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceStageColorInfo>  StageColorInfos{ get; };
+    }
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Face.IFaceSensorInfo", 39a3472f-b242-588c-a771-0ffb6fbeffcf)]
+    [threading(both)]
+    runtimeclass FaceSensorInfo
+    {
+        FaceSensorInfo();
+        String InfraredId{ get; };
+        String ColorId{ get; };
+        UInt32 InfraredSensorRotationAngle{ get; };
+    }
+
+    [uuid(8a9a4c03-2e7c-5407-9d31-07d0a62eecaa)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    interface IFaceEnrollmentStateManager requires Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession
+    {
+        UInt32 CapturesNeededToCompleteEnrollment{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceEnrollmentStateInfo EnrollmentState{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.Face.IFaceEnrollmentStateManager, Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceEnrollmentStateInfo>  EnrollmentStateUpdated;
+        Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceErrorState ErrorState{ get; };
+        void SetErrorState(HRESULT errorCode);
+        Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceSensorInfo SensorInfo{ get; };
+        Boolean ResumeCapture();
+        void PauseCapture();
+        Windows.Internal.UI.BioEnrollment.DataModel.Face.FaceEnrollmentPhase EnrollmentPhase{ get; };
+        void RestartCapture();
+    };
+
+}
+namespace Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint
+{
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FingerprintEnrollmentState
+    {
+        NotStarted,
+        Paused,
+        Capturing,
+        Finished,
+        Error,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FingerprintCaptureType
+    {
+        Unknown,
+        Center,
+        LeftEdge,
+        RightEdge,
+        TopEdge,
+        BottomEdge,
+    };
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.IFingerprintEnrollmentStateInfo", bf72944d-723e-576a-832c-2b791a353927)]
+    [threading(both)]
+    runtimeclass FingerprintEnrollmentStateInfo
+    {
+        FingerprintEnrollmentStateInfo();
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintEnrollmentState EnrollmentState{ get; };
+        String InfoMessage{ get; };
+        String InstructionMessage{ get; };
+        String ErrorMessage{ get; };
+        UInt32 CompletedCaptures{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintCaptureType CaptureType{ get; };
+    }
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FingerprintSensorKind
+    {
+        Touch,
+        Swipe,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FingerprintSensorLocation
+    {
+        NotSpecified,
+        Front,
+        Back,
+        Left,
+        Right,
+        Top,
+        ExternalSensor,
+        DualScreenRight,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FingerprintSensorShape
+    {
+        NotSpecified,
+        Square,
+        Rectangle,
+        Circle,
+        Oval,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum FingerprintSensorButton
+    {
+        None,
+        Power,
+        Start,
+    };
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.IFingerprintSensorInfo", 5541bf18-c45e-5c8e-9739-2247c03b7bf8)]
+    [threading(both)]
+    runtimeclass FingerprintSensorInfo
+    {
+        FingerprintSensorInfo();
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintSensorKind Kind{ get; };
+        UInt32 MaxRequiredCaptures{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintSensorLocation Location{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintSensorShape Shape{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintSensorButton Button{ get; };
+    }
+
+    [uuid(e3ffdbe8-edad-55c5-86c7-02fc446d4cea)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    interface IFingerprintEnrollmentStateManager requires Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession
+    {
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintEnrollmentStateInfo EnrollmentState{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.IFingerprintEnrollmentStateManager, Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintEnrollmentStateInfo>  EnrollmentStateUpdated;
+        Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintSensorInfo SensorInfo{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.IFingerprintEnrollmentStateManager, Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.FingerprintSensorInfo>  SensorInfoUpdated;
+        void ResumeCapture();
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Fingerprint.IExtendedFingerprintSensorInfoBroker", 4cfb59a9-220b-5222-acf5-8ae8aaa7b549)]
+    [threading(both)]
+    runtimeclass ExtendedFingerprintSensorInfoBroker
+    {
+        ExtendedFingerprintSensorInfoBroker();
+        void GetSensorInfo(String deviceInstanceId, out FingerprintSensorLocation location, out FingerprintSensorShape shape, out FingerprintSensorButton button);
+    }
+
+}
+namespace Windows.Internal.UI.BioEnrollment.DataModel.Iris
+{
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum IrisEnrollmentState
+    {
+        NotStarted,
+        PoorQuality,
+        TooBright,
+        TooDark,
+        SpoofDetected,
+        TooSkewed,
+        TooClosed,
+        Glare,
+        DirtyLens,
+        PoorFocus,
+        TooHigh,
+        TooLow,
+        TooLeft,
+        TooRight,
+        TooNear,
+        TooFar,
+        Finished,
+        Error,
+        PercentCompleteUpdated,
+        NoPositionalError,
+        NoRejectReason,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum IrisErrorState
+    {
+        None,
+        Generic,
+        RecoverableError,
+        NonRecoverableError,
+    };
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Iris.IIrisEnrollmentStateInfo", 08130423-0d8c-5cb9-93c7-1928df222c6f)]
+    [threading(both)]
+    runtimeclass IrisEnrollmentStateInfo
+    {
+        IrisEnrollmentStateInfo();
+        Windows.Internal.UI.BioEnrollment.DataModel.Iris.IrisEnrollmentState EnrollmentState{ get; };
+        String Message{ get; };
+        UInt32 PercentComplete{ get; };
+    }
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Iris.IIrisEnrollmentUIGridPoint", 7e2aa294-fb1b-584f-9d5e-33e29795a67e)]
+    runtimeclass IrisEnrollmentUIGridPoint
+    {
+        UInt16 Index{ get; };
+        UInt32 PercentComplete{ get; };
+        Double X{ get; };
+        Double Y{ get; };
+        Double Z{ get; };
+    }
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Iris.IIrisEnrollmentUIUpdateRequest", 745f5c8c-2747-5c40-b040-3f38f4955309)]
+    runtimeclass IrisEnrollmentUIUpdateRequest
+    {
+        Windows.Internal.UI.BioEnrollment.DataModel.Iris.IrisEnrollmentUIGridPoint RequestedUIGridPoint{ get; };
+    }
+
+    [uuid(d5abe0c0-de2f-5f9f-bb78-60a7adfabc96)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    interface IIrisEnrollmentStateManager requires Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession
+    {
+        Windows.Internal.UI.BioEnrollment.DataModel.Iris.IrisEnrollmentStateInfo EnrollmentState{ get; };
+        Windows.Foundation.Rect IRBoundingBox{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.Orientation IRSupportedOrientation{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.Iris.IIrisEnrollmentStateManager, Windows.Internal.UI.BioEnrollment.DataModel.Iris.IrisEnrollmentStateInfo>  EnrollmentStateUpdated;
+        void UpdateOrientation(Boolean currentOrientationSupported);
+        void SetErrorState(HRESULT errorCode);
+        void ResetEnrollmentPhase();
+        Windows.Internal.UI.BioEnrollment.DataModel.Iris.IrisEnrollmentUIUpdateRequest EnrollmentUIUpdateRequest{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.Iris.IIrisEnrollmentStateManager, Windows.Internal.UI.BioEnrollment.DataModel.Iris.IrisEnrollmentUIUpdateRequest>  CapturePausedAndEnrollmentUIUpdateRequested;
+        void ResumeCapture();
+        Windows.Internal.UI.BioEnrollment.DataModel.Iris.IrisErrorState ErrorState{ get; };
+    };
+
+}
+namespace Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey
+{
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum SecurityKeyFingerprintEnrollmentState
+    {
+        NotStarted,
+        Paused,
+        Capturing,
+        Finished,
+        Error,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum SecurityKeyFingerprintSensorKind
+    {
+        Touch,
+        Swipe,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.ISecurityKeyFingerprintEnrollmentStateInfo", 5c75856d-0455-589b-b2ca-42919a2f486c)]
+    runtimeclass SecurityKeyFingerprintEnrollmentStateInfo
+    {
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyFingerprintEnrollmentState FingerprintEnrollmentState{ get; };
+        String InfoMessage{ get; };
+        String InstructionMessage{ get; };
+        String ErrorMessage{ get; };
+        UInt32 CompletedCaptures{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyFingerprintSensorKind SensorKind{ get; };
+    }
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum SecurityKeyPinOperationStatus
+    {
+        None,
+        Succeeded,
+        Failed,
+        FatalError,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.ISecurityKeyPinOperationInfo", 9456ad24-1470-5b97-a1ff-268a209f86ae)]
+    runtimeclass SecurityKeyPinOperationInfo
+    {
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyPinOperationStatus PinOperationStatus{ get; };
+        String PinOperationErrorText{ get; };
+    }
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum SecurityKeyFingerprintState
+    {
+        NotSupported,
+        PinRequired,
+        NotEnrolled,
+        Enrolled,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum SecurityKeyPinState
+    {
+        NotSupported,
+        NotEnrolled,
+        Enrolled,
+        Blocked,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    enum SecurityKeySelectedEnrollmentType
+    {
+        None,
+        Pin,
+        Fingerprint,
+        Reset,
+        RemoveFingerprint,
+    };
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [uuid(3a75171f-29f6-5f3e-9e19-f138a6734693)]
+    interface ISecurityKeyEnrollmentStateManager requires Windows.Internal.UI.BioEnrollment.DataModel.IBioEnrollmentSession
+    {
+        Boolean IsSecurityKeyReady{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.ISecurityKeyEnrollmentStateManager, Object>  IsSecurityKeyReadyChanged;
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyFingerprintEnrollmentStateInfo FingerprintEnrollmentState{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.ISecurityKeyEnrollmentStateManager, Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyFingerprintEnrollmentStateInfo>  FingerprintEnrollmentStateUpdated;
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeySelectedEnrollmentType SelectedEnrollmentType{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeySelectedEnrollmentType SelectedEnrollmentType{ set; };
+        Boolean DeviceStateChangedIsFatalError{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.ISecurityKeyEnrollmentStateManager, Object>  DeviceStateChangedIsFatalErrorUpdated;
+        String DeviceStateChangedMessage{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.ISecurityKeyEnrollmentStateManager, Object>  DeviceStateChangedMessageUpdated;
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyPinState SecurityKeyPinState{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyFingerprintState SecurityKeyFingerprintState{ get; };
+        void SelectSecurityKey();
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyPinOperationInfo>  AuthenticatePin(String pin);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyPinOperationInfo>  SetPin(String pin);
+        Windows.Foundation.IAsyncOperation <Windows.Internal.UI.BioEnrollment.DataModel.SecurityKey.SecurityKeyPinOperationInfo>  ChangePin(String oldPin, String newPin);
+        Windows.Foundation.IAsyncAction RemoveFingerprint();
+        Windows.Foundation.IAsyncOperation <Boolean>  ResetSecurityKey();
+    };
+
+
+}
+namespace Windows.Internal.UI.BioEnrollment.DataModel.Pin
+{
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.DataModel.Pin.IPinEnrollmentManager", d03ce9cf-1cde-5cfb-990c-b63239dcf107)]
+    [threading(both)]
+    runtimeclass PinEnrollmentManager
+    {
+        PinEnrollmentManager();
+        Boolean IsPinEnrolled();
+    }
+
+
+}
+namespace Windows.Internal.UI.BioEnrollment.Broker
+{
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.Broker.IBioEnrollmentBroker", 8ce685a0-d63c-5852-816b-00ec3c302e97)]
+    [threading(both)]
+    runtimeclass BioEnrollmentBroker
+    {
+        BioEnrollmentBroker();
+        Windows.Foundation.IAsyncOperation <Boolean>  ShowEnrollmentAsync(Windows.Internal.UI.BioEnrollment.DataModel.EnrollmentKind kind, Windows.Internal.UI.BioEnrollment.DataModel.EnrollmentContext context, UInt32 callingHwnd);
+        Windows.Foundation.IAsyncOperation <Boolean>  ShowOOBEEnrollmentAsync(Windows.Internal.UI.BioEnrollment.DataModel.EnrollmentKind kind, Windows.Foundation.Rect appWindowLocation, Windows.Internal.UI.BioEnrollment.DataModel.EnrollmentContext context, UInt32 callingHwnd);
+        void UpdateWindowLocation(Windows.Foundation.Rect appWindowLocation);
+    }
+
+
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.Broker.IBioEnrollmentActivationArgs", 066d0a39-b752-5c96-b47a-3916257c5f45)]
+    [threading(both)]
+    runtimeclass BioEnrollmentActivationArgs
+        : Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        BioEnrollmentActivationArgs();
+        Windows.Internal.UI.BioEnrollment.DataModel.EnrollmentKind EnrollmentKind{ get; };
+        Boolean IsMobileSKU{ get; };
+        Windows.Internal.UI.BioEnrollment.DataModel.EnrollmentContext EnrollmentContext{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.BioEnrollment.Broker.BioEnrollmentActivationArgs, Object>  CloseRequested;
+        void OnBiometricCommitted();
+        void Complete(Boolean enrolled);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.BioEnrollment.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.BioEnrollment.Broker.IBioEnrollmentRetailDemo", 9252b96d-c950-5b7e-9a35-28afd05c883b)]
+    [threading(both)]
+    runtimeclass BioEnrollmentRetailDemo
+    {
+        BioEnrollmentRetailDemo();
+        void AddPinCredentialToDemoAccount();
+    }
+
+}

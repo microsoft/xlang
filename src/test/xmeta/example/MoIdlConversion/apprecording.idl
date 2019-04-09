@@ -1,0 +1,107 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.AppRecording
+{
+    [contractversion(1)]
+    apicontract AppRecordingContract{};
+
+    [contract(Windows.Media.AppRecording.AppRecordingContract, 1)]
+    enum AppRecordingSaveScreenshotOption
+    {
+        None,
+        HdrContentVisible,
+    };
+
+
+    [contract(Windows.Media.AppRecording.AppRecordingContract, 1)]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.AppRecording.IAppRecordingStatus", 1d0cc82c-bc18-4b8a-a6ef-127efab3b5d9)]
+    runtimeclass AppRecordingStatus
+    {
+        Boolean CanRecord{ get; };
+        Boolean CanRecordTimeSpan{ get; };
+        Windows.Foundation.TimeSpan HistoricalBufferDuration{ get; };
+        Windows.Media.AppRecording.AppRecordingStatusDetails Details{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Media.AppRecording.AppRecordingContract, 1)]
+    [interface_name("Windows.Media.AppRecording.IAppRecordingResult", 3a900864-c66d-46f9-b2d9-5bc2dad070d7)]
+    runtimeclass AppRecordingResult
+    {
+        Boolean Succeeded{ get; };
+        HRESULT ExtendedError{ get; };
+        Windows.Foundation.TimeSpan Duration{ get; };
+        Boolean IsFileTruncated{ get; };
+    }
+
+    [contract(Windows.Media.AppRecording.AppRecordingContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.Media.AppRecording.IAppRecordingSaveScreenshotResult", 9c5b8d0a-0abb-4457-aaee-24f9c12ec778)]
+    runtimeclass AppRecordingSaveScreenshotResult
+    {
+        Boolean Succeeded{ get; };
+        HRESULT ExtendedError{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Media.AppRecording.AppRecordingSavedScreenshotInfo>  SavedScreenshotInfos{ get; };
+    }
+
+
+    [contract(Windows.Media.AppRecording.AppRecordingContract, 1)]
+    [dualapipartition(0xa000004)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.AppRecording.IAppRecordingManagerStatics", 50e709f7-38ce-4bd3-9db2-e72bbe9de11d)]
+    [interface_name("Windows.Media.AppRecording.IAppRecordingManager", e7e26076-a044-48e2-a512-3094d574c7cc)]
+    [threading(both)]
+    runtimeclass AppRecordingManager
+    {
+        static Windows.Media.AppRecording.AppRecordingManager GetDefault();
+        Windows.Media.AppRecording.AppRecordingStatus GetStatus();
+        Windows.Foundation.IAsyncOperation <Windows.Media.AppRecording.AppRecordingResult>  StartRecordingToFileAsync(Windows.Storage.StorageFile file);
+        Windows.Foundation.IAsyncOperation <Windows.Media.AppRecording.AppRecordingResult>  RecordTimeSpanToFileAsync(Windows.Foundation.DateTime startTime, Windows.Foundation.TimeSpan duration, Windows.Storage.StorageFile file);
+        Windows.Foundation.Collections.IVectorView <String>  SupportedScreenshotMediaEncodingSubtypes{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Media.AppRecording.AppRecordingSaveScreenshotResult>  SaveScreenshotToFilesAsync(Windows.Storage.StorageFolder folder, String filenamePrefix, AppRecordingSaveScreenshotOption option, Windows.Foundation.Collections.IIterable <String>  requestedFormats);
+    }
+
+
+    [dualapipartition(0xa000004)]
+    [contract(Windows.Media.AppRecording.AppRecordingContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.AppRecording.IAppRecordingStatusDetails", b538a9b0-14ed-4412-ac45-6d672c9c9949)]
+    runtimeclass AppRecordingStatusDetails
+    {
+        Boolean IsAnyAppBroadcasting{ get; };
+        Boolean IsCaptureResourceUnavailable{ get; };
+        Boolean IsGameStreamInProgress{ get; };
+        Boolean IsTimeSpanRecordingDisabled{ get; };
+        Boolean IsGpuConstrained{ get; };
+        Boolean IsAppInactive{ get; };
+        Boolean IsBlockedForApp{ get; };
+        Boolean IsDisabledByUser{ get; };
+        Boolean IsDisabledBySystem{ get; };
+    }
+
+
+
+
+    [contract(Windows.Media.AppRecording.AppRecordingContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000004)]
+    [interface_name("Windows.Media.AppRecording.IAppRecordingSavedScreenshotInfo", 9b642d0a-189a-4d00-bf25-e1bb1249d594)]
+    runtimeclass AppRecordingSavedScreenshotInfo
+    {
+        Windows.Storage.StorageFile File{ get; };
+        String MediaEncodingSubtype{ get; };
+    }
+
+
+}

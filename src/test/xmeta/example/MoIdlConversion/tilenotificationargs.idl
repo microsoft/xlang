@@ -1,0 +1,19 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Notifications
+{
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Notifications.IShownTileNotification", 342d8988-5af2-481a-a6a3-f2fdc78de88e)]
+    runtimeclass ShownTileNotification
+    {
+        String Arguments{ get; };
+    }
+
+}

@@ -1,0 +1,112 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Graphics.Display
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Graphics.Display.IDisplayInformationStatics", c6a02a6c-d452-44dc-ba07-96f3c6adf9d1)]
+    [interface_name("Windows.Graphics.Display.IDisplayInformation", bed112ae-adc3-4dc9-ae65-851f4d7d4799)]
+    runtimeclass DisplayInformation
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_AlwaysAlwaysDisabled)]
+        [static_name("Windows.Graphics.Display.IDisplayInformationStatics2", 5b3a6c8c-cade-47b1-8738-fa8dd6fa4440)]
+        {
+            static Windows.Graphics.Display.DisplayInformation GetForUIContext(Windows.UI.UIContext context);
+        }
+        static Windows.Graphics.Display.DisplayInformation GetForCurrentView();
+        static Windows.Graphics.Display.DisplayOrientations AutoRotationPreferences{ get; };
+        static Windows.Graphics.Display.DisplayOrientations AutoRotationPreferences{ set; };
+        static event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayInformation, Object>  DisplayContentsInvalidated;
+        Windows.Graphics.Display.DisplayOrientations CurrentOrientation{ get; };
+        Windows.Graphics.Display.DisplayOrientations NativeOrientation{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayInformation, Object>  OrientationChanged;
+        Windows.Graphics.Display.ResolutionScale ResolutionScale{ get; };
+        Single LogicalDpi{ get; };
+        Single RawDpiX{ get; };
+        Single RawDpiY{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayInformation, Object>  DpiChanged;
+        Boolean StereoEnabled{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayInformation, Object>  StereoEnabledChanged;
+        Windows.Foundation.IAsyncOperation <Windows.Storage.Streams.IRandomAccessStream>  GetColorProfileAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayInformation, Object>  ColorProfileChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Graphics.Display.IDisplayInformation2", 4dcd0021-fad1-4b8e-8edf-775887b8bf19)]
+        {
+            Double RawPixelsPerViewPixel{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Graphics.Display.IDisplayInformation3", db15011d-0f09-4466-8ff3-11de9a3c929a)]
+        {
+            Windows.Foundation.IReference <Double>  DiagonalSizeInInches{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Graphics.Display.IDisplayInformation4", c972ce2f-1242-46be-b536-e1aafe9e7acf)]
+        {
+            UInt32 ScreenWidthInRawPixels{ get; };
+            UInt32 ScreenHeightInRawPixels{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Graphics.Display.IDisplayInformation5", 3a5442dc-2cde-4a8d-80d1-21dc5adcc1aa)]
+        {
+            Windows.Graphics.Display.AdvancedColorInfo GetAdvancedColorInfo();
+            event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayInformation, Object>  AdvancedColorInfoChanged;
+        }
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum AdvancedColorKind
+    {
+        StandardDynamicRange,
+        WideColorGamut,
+        HighDynamicRange,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum HdrMetadataFormat
+    {
+        Hdr10,
+        Hdr10Plus,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Graphics.Display.IAdvancedColorInfo", 8797dcfb-b229-4081-ae9a-2cc85e34ad6a)]
+    runtimeclass AdvancedColorInfo
+    {
+        Windows.Graphics.Display.AdvancedColorKind CurrentAdvancedColorKind{ get; };
+        Windows.Foundation.Point RedPrimary{ get; };
+        Windows.Foundation.Point GreenPrimary{ get; };
+        Windows.Foundation.Point BluePrimary{ get; };
+        Windows.Foundation.Point WhitePoint{ get; };
+        Single MaxLuminanceInNits{ get; };
+        Single MinLuminanceInNits{ get; };
+        Single MaxAverageFullFrameLuminanceInNits{ get; };
+        Single SdrWhiteLevelInNits{ get; };
+        Boolean IsHdrMetadataFormatCurrentlySupported(HdrMetadataFormat format);
+        Boolean IsAdvancedColorKindAvailable(AdvancedColorKind kind);
+    }
+
+
+}

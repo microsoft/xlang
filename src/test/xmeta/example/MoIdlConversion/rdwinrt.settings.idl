@@ -1,0 +1,257 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.System.RemoteDesktop.Settings
+{
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum RemoteDesktopAddressValidationFailureReason
+    {
+        None,
+        InvalidCharacters,
+        InvalidFormat,
+        EmptyAddress,
+        InvalidPort,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum RemoteDesktopUserNameValidationFailureReason
+    {
+        None,
+        EmptyUserName,
+        InvalidCharacters,
+        InvalidFormat,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum RemoteDesktopAudioMode
+    {
+        PlayOnClient,
+        PlayOnServer,
+        Disabled,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum RemoteDesktopAuthenticationLevel
+    {
+        AuthenticationNone,
+        AuthenticationRequired,
+        AuthenticationNegotiable,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopColorDepth
+    {
+        Depth15Bit = 15,
+        Depth16Bit,
+        Depth24Bit = 24,
+        Depth32Bit = 32,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopRemoteSessionType
+    {
+        Desktop,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum RemoteDesktopScreenMode
+    {
+        Windowed,
+        Fullscreen,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopAddressValidationResult", 03dc3706-f738-5cfe-8e06-21fad3cc70da)]
+    runtimeclass RemoteDesktopAddressValidationResult
+    {
+        Boolean IsValid{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopAddressValidationFailureReason FailureReason{ get; };
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopUserNameValidationResult", 5f3ca693-6c2b-5794-a406-6b4e1447751e)]
+    runtimeclass RemoteDesktopUserNameValidationResult
+    {
+        Boolean IsValid{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopUserNameValidationFailureReason FailureReason{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopPerformanceProperties", 3fae1870-409a-5c6e-a412-9b8f35c123af)]
+    runtimeclass RemoteDesktopPerformanceProperties
+    {
+        Boolean BlinkCursor{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopColorDepth ColorDepth{ get; };
+        Boolean FullWindowDrag{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopScreenMode ScreenMode{ get; };
+        Boolean ShowWallpaper{ get; };
+        Boolean UseAnimations{ get; };
+        Boolean UseFontSmoothing{ get; };
+        Boolean UseThemes{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopPerformanceSettings", 059e5e52-3970-5b34-8854-5fb442f74ea9)]
+    runtimeclass RemoteDesktopPerformanceSettings
+    {
+        Boolean BlinkCursor{ get; };
+        Boolean BlinkCursor{ set; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopColorDepth ColorDepth{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopColorDepth ColorDepth{ set; };
+        Boolean FullWindowDrag{ get; };
+        Boolean FullWindowDrag{ set; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopScreenMode ScreenMode{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopScreenMode ScreenMode{ set; };
+        Boolean ShowWallpaper{ get; };
+        Boolean ShowWallpaper{ set; };
+        Boolean UseAnimations{ get; };
+        Boolean UseAnimations{ set; };
+        Boolean UseFontSmoothing{ get; };
+        Boolean UseFontSmoothing{ set; };
+        Boolean UseThemes{ get; };
+        Boolean UseThemes{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopDeviceRedirectionSettings", edfd757d-fbef-5f75-afcd-ea2f1cd8e620)]
+    runtimeclass RemoteDesktopDeviceRedirectionSettings
+    {
+        Boolean IsClipboardRedirectionAllowed{ get; };
+        Boolean IsClipboardRedirectionAllowed{ set; };
+        Boolean IsAudioCaptureAllowed{ get; };
+        Boolean IsAudioCaptureAllowed{ set; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopAudioMode AudioOutputMode{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopAudioMode AudioOutputMode{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopDeviceRedirectionProperties", 344fe028-ce82-5428-813d-459939ab805f)]
+    runtimeclass RemoteDesktopDeviceRedirectionProperties
+    {
+        Boolean IsClipboardRedirectionAllowed{ get; };
+        Boolean IsAudioCaptureAllowed{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopAudioMode AudioOutputMode{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopConnectionProperties", 919f2504-c21d-5546-bbbe-cc83d4f20e61)]
+    runtimeclass RemoteDesktopConnectionProperties
+    {
+        String HostName{ get; };
+        UInt16 Port{ get; };
+        Boolean AdminSession{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopAuthenticationLevel AuthenticationLevel{ get; };
+        Boolean CredSspSupportEnabled{ get; };
+        Boolean AutoReconnect{ get; };
+        UInt16 AvailableTouchPoints{ get; };
+        Windows.Foundation.Size DesktopSize{ get; };
+        String LoadBalanceInfo{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopPerformanceProperties Performance{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopDeviceRedirectionProperties Redirections{ get; };
+        Boolean PromptForCredentialsOnClient{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopRemoteSessionType RemoteSessionType{ get; };
+        Boolean UseMultiDisplay{ get; };
+        Boolean UseRedirectionServerName{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopConnectionSettingsCreationResult", 35e63f23-bd6d-5d4e-949d-37ecb640e613)]
+    runtimeclass RemoteDesktopConnectionSettingsCreationResult
+    {
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopConnectionSettings ConnectionSettings{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopConnectionSettingsStatics", 08cebf0c-be91-5e35-a440-5e4abff41f71)]
+    [constructor_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopConnectionSettingsFactory", b2c9425b-3ea9-5677-b894-74bebccb1e7a)]
+    [interface_name("Windows.System.RemoteDesktop.Settings.IRemoteDesktopConnectionSettings", 1b2529da-6b2d-53b5-8243-7d3bfc1d4607)]
+    [threading(both)]
+    runtimeclass RemoteDesktopConnectionSettings
+    {
+        static Windows.System.RemoteDesktop.Settings.RemoteDesktopConnectionSettingsCreationResult CreateFromConnectionProperties(RemoteDesktopConnectionProperties rdpConnectionProperties);
+        static Windows.System.RemoteDesktop.Settings.RemoteDesktopConnectionSettingsCreationResult CreateFromConnectionString(String rdpFileContents);
+        static Windows.Foundation.IAsyncOperation <Windows.System.RemoteDesktop.Settings.RemoteDesktopConnectionSettingsCreationResult>  CreateFromFileAsync(Windows.Storage.IStorageFile rdpStorageFile);
+        static Windows.System.RemoteDesktop.Settings.RemoteDesktopAddressValidationResult ValidateAddress(String address);
+        static Windows.System.RemoteDesktop.Settings.RemoteDesktopUserNameValidationResult ValidateUserName(String username);
+        [method_name( "CreateInstance" )] RemoteDesktopConnectionSettings(String address);
+        Boolean AdminSession{ get; };
+        Boolean AdminSession{ set; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopAuthenticationLevel AuthenticationLevel{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopAuthenticationLevel AuthenticationLevel{ set; };
+        Boolean CredSspSupportEnabled{ get; };
+        Boolean CredSspSupportEnabled{ set; };
+        void SetEnforceCredSspSupport(Boolean value);
+        Boolean AutoReconnect{ get; };
+        Boolean AutoReconnect{ set; };
+        Windows.System.RemoteDesktop.RemoteDesktopCredential Credential{ get; };
+        Windows.System.RemoteDesktop.RemoteDesktopCredential Credential{ set; };
+        Windows.Foundation.Size DesktopSize{ get; };
+        Windows.Foundation.Size DesktopSize{ set; };
+        String HostName{ get; };
+        String HostName{ set; };
+        UInt16 Port{ get; };
+        UInt16 Port{ set; };
+        String LoadBalanceInfo{ get; };
+        String LoadBalanceInfo{ set; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopPerformanceSettings Performance{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopDeviceRedirectionSettings Redirections{ get; };
+        Boolean PromptForCredentialsOnClient{ get; };
+        Boolean PromptForCredentialsOnClient{ set; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopRemoteSessionType RemoteSessionType{ get; };
+        Windows.System.RemoteDesktop.Settings.RemoteDesktopRemoteSessionType RemoteSessionType{ set; };
+        Boolean UseMultiDisplay{ get; };
+        Boolean UseMultiDisplay{ set; };
+        Boolean UseRedirectionServerName{ get; };
+        Boolean UseRedirectionServerName{ set; };
+        UInt16 DesiredTouchPoints{ get; };
+        UInt16 DesiredTouchPoints{ set; };
+        UInt16 DesiredLanguageIdentifier{ get; };
+        UInt16 DesiredLanguageIdentifier{ set; };
+        UInt16 DesiredKeyboardIdentifier{ get; };
+        UInt16 DesiredKeyboardIdentifier{ set; };
+    }
+
+
+
+}

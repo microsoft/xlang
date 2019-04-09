@@ -1,0 +1,109 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.StateRepository.IPrimaryPreviewTileViewStatics", 27746622-e002-4be1-bed1-8a3f08ec08d3)]
+    [interface_name("Windows.Internal.StateRepository.IPrimaryPreviewTileView", 5cf19956-d34f-4f11-9721-22e62502313f)]
+    [threading(both)]
+    runtimeclass PrimaryPreviewTileView
+    {
+        PrimaryPreviewTileView();
+        static Boolean Exists(Int64 primaryPreviewTileViewID);
+        static Boolean ExistsByPackage(Package Package);
+        static Boolean ExistsByTileUniqueId(Guid TileUniqueId);
+        static Boolean ExistsByUser(User User);
+        static Boolean ExistsByUserAndApplication(User User, Application Application);
+        static Boolean ExistsByUserAndApplicationUserModelId(User User, String ApplicationUserModelId);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView Get(Int64 primaryPreviewTileViewID);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView TryGet(Int64 primaryPreviewTileViewID);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView GetByTileUniqueId(Guid TileUniqueId);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView TryGetByTileUniqueId(Guid TileUniqueId);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView GetByUserAndApplication(User User, Application Application);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView TryGetByUserAndApplication(User User, Application Application);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView GetByUserAndApplicationUserModelId(User User, String ApplicationUserModelId);
+        static Windows.Internal.StateRepository.PrimaryPreviewTileView TryGetByUserAndApplicationUserModelId(User User, String ApplicationUserModelId);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryPreviewTileView>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryPreviewTileView>  FindByPackage(Package Package);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.PrimaryPreviewTileView>  FindByUser(User User);
+        Int64 _PrimaryTileID{ get; };
+        Int64 _PrimaryTileID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 Application{ get; };
+        Int64 Application{ set; };
+        Windows.Internal.StateRepository.Application GetApplication();
+        void SetApplication(Application value);
+        Int64 Package{ get; };
+        Int64 Package{ set; };
+        Windows.Internal.StateRepository.Package GetPackage();
+        void SetPackage(Package value);
+        Windows.Internal.StateRepository.TileFlags Flags{ get; };
+        Windows.Internal.StateRepository.TileFlags Flags{ set; };
+        Boolean VisibleInAppList{ get; };
+        Boolean VisibleInAppList{ set; };
+        Boolean VisibleInSettings{ get; };
+        Boolean VisibleInSettings{ set; };
+        Boolean SupportsKidZone{ get; };
+        Boolean SupportsKidZone{ set; };
+        Boolean SupportsLockScreen{ get; };
+        Boolean SupportsLockScreen{ set; };
+        Windows.Internal.StateRepository.TileType TileType{ get; };
+        Windows.Internal.StateRepository.TileType TileType{ set; };
+        Windows.Internal.StateRepository.TileTemplate TileTemplate{ get; };
+        Windows.Internal.StateRepository.TileTemplate TileTemplate{ set; };
+        String TileId{ get; };
+        String TileId{ set; };
+        Boolean IsArgumentsNull{ get; };
+        void SetArgumentsToNull();
+        String Arguments{ get; };
+        String Arguments{ set; };
+        Boolean IsEditionIdNull{ get; };
+        void SetEditionIdToNull();
+        String EditionId{ get; };
+        String EditionId{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+        Int64 _PrimaryTileUserID{ get; };
+        Int64 _PrimaryTileUserID{ set; };
+        UInt64 _PrimaryTileUser_Revision{ get; };
+        UInt64 _PrimaryTileUser_Revision{ set; };
+        Int64 _Created{ get; };
+        Int64 _Created{ set; };
+        Int64 _Modified{ get; };
+        Int64 _Modified{ set; };
+        Int64 User{ get; };
+        Int64 User{ set; };
+        Windows.Internal.StateRepository.User GetUser();
+        void SetUser(User value);
+        Int64 ApplicationIdentity{ get; };
+        Int64 ApplicationIdentity{ set; };
+        Windows.Internal.StateRepository.ApplicationIdentity GetApplicationIdentity();
+        void SetApplicationIdentity(ApplicationIdentity value);
+        Windows.Internal.StateRepository.TileUserState State{ get; };
+        Windows.Internal.StateRepository.TileUserState State{ set; };
+        Guid TileUniqueId{ get; };
+        Guid TileUniqueId{ set; };
+        String ApplicationUserModelId{ get; };
+        String ApplicationUserModelId{ set; };
+    }
+
+
+}

@@ -1,0 +1,17 @@
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contractversion(1)]
+    [internal]
+    apicontract StateRepositoryContract{};
+
+    [contractversion(1)]
+    [internal]
+    apicontract StateRepositoryManagementContract{};
+
+}

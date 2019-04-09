@@ -1,0 +1,219 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Devices.HumanInterfaceDevice
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum HidReportType
+    {
+        Input,
+        Output,
+        Feature,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum HidCollectionType
+    {
+        Physical,
+        Application,
+        Logical,
+        Report,
+        NamedArray,
+        UsageSwitch,
+        UsageModifier,
+        Other,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.HumanInterfaceDevice.IHidDeviceStatics", 9e5981e4-9856-418c-9f73-77de0cd85754)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidDevice", 5f8a14e7-2200-432e-95da-d09b87d574a8)]
+    runtimeclass HidDevice
+        : Windows.Foundation.IClosable
+    {
+        [method_name("GetDeviceSelector")] static String GetDeviceSelector(UInt16 usagePage, UInt16 usageId);
+        [method_name("GetDeviceSelectorVidPid")] static String GetDeviceSelector(UInt16 usagePage, UInt16 usageId, UInt16 vendorId, UInt16 productId);
+        static Windows.Foundation.IAsyncOperation <Windows.Devices.HumanInterfaceDevice.HidDevice>  FromIdAsync(String deviceId, Windows.Storage.FileAccessMode accessMode);
+        UInt16 VendorId{ get; };
+        UInt16 ProductId{ get; };
+        UInt16 Version{ get; };
+        UInt16 UsagePage{ get; };
+        UInt16 UsageId{ get; };
+        [method_name("GetInputReportAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.HumanInterfaceDevice.HidInputReport>  GetInputReportAsync();
+        [method_name("GetInputReportByIdAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.HumanInterfaceDevice.HidInputReport>  GetInputReportAsync(UInt16 reportId);
+        [method_name("GetFeatureReportAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.HumanInterfaceDevice.HidFeatureReport>  GetFeatureReportAsync();
+        [method_name("GetFeatureReportByIdAsync")] Windows.Foundation.IAsyncOperation <Windows.Devices.HumanInterfaceDevice.HidFeatureReport>  GetFeatureReportAsync(UInt16 reportId);
+        [method_name("CreateOutputReport")] Windows.Devices.HumanInterfaceDevice.HidOutputReport CreateOutputReport();
+        [method_name("CreateOutputReportById")] Windows.Devices.HumanInterfaceDevice.HidOutputReport CreateOutputReport(UInt16 reportId);
+        [method_name("CreateFeatureReport")] Windows.Devices.HumanInterfaceDevice.HidFeatureReport CreateFeatureReport();
+        [method_name("CreateFeatureReportById")] Windows.Devices.HumanInterfaceDevice.HidFeatureReport CreateFeatureReport(UInt16 reportId);
+        [remote_sync]Windows.Foundation.IAsyncOperation <UInt32>  SendOutputReportAsync(HidOutputReport outputReport);
+        [remote_sync]Windows.Foundation.IAsyncOperation <UInt32>  SendFeatureReportAsync(HidFeatureReport featureReport);
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.HumanInterfaceDevice.HidBooleanControlDescription>  GetBooleanControlDescriptions(HidReportType reportType, UInt16 usagePage, UInt16 usageId);
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.HumanInterfaceDevice.HidNumericControlDescription>  GetNumericControlDescriptions(HidReportType reportType, UInt16 usagePage, UInt16 usageId);
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.HumanInterfaceDevice.HidDevice, Windows.Devices.HumanInterfaceDevice.HidInputReportReceivedEventArgs>  InputReportReceived;
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidInputReport", c35d0e50-f7e7-4e8d-b23e-cabbe56b90e9)]
+    runtimeclass HidInputReport
+    {
+        UInt16 Id{ get; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.HumanInterfaceDevice.HidBooleanControl>  ActivatedBooleanControls{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.HumanInterfaceDevice.HidBooleanControl>  TransitionedBooleanControls{ get; };
+        Windows.Devices.HumanInterfaceDevice.HidBooleanControl GetBooleanControl(UInt16 usagePage, UInt16 usageId);
+        Windows.Devices.HumanInterfaceDevice.HidBooleanControl GetBooleanControlByDescription(HidBooleanControlDescription controlDescription);
+        Windows.Devices.HumanInterfaceDevice.HidNumericControl GetNumericControl(UInt16 usagePage, UInt16 usageId);
+        Windows.Devices.HumanInterfaceDevice.HidNumericControl GetNumericControlByDescription(HidNumericControlDescription controlDescription);
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidFeatureReport", 841d9b79-5ae5-46e3-82ef-1fec5c8942f4)]
+    runtimeclass HidFeatureReport
+    {
+        UInt16 Id{ get; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Windows.Storage.Streams.IBuffer Data{ set; };
+        Windows.Devices.HumanInterfaceDevice.HidBooleanControl GetBooleanControl(UInt16 usagePage, UInt16 usageId);
+        Windows.Devices.HumanInterfaceDevice.HidBooleanControl GetBooleanControlByDescription(HidBooleanControlDescription controlDescription);
+        Windows.Devices.HumanInterfaceDevice.HidNumericControl GetNumericControl(UInt16 usagePage, UInt16 usageId);
+        Windows.Devices.HumanInterfaceDevice.HidNumericControl GetNumericControlByDescription(HidNumericControlDescription controlDescription);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidOutputReport", 62cb2544-c896-4463-93c1-df9db053c450)]
+    runtimeclass HidOutputReport
+    {
+        UInt16 Id{ get; };
+        Windows.Storage.Streams.IBuffer Data{ get; };
+        Windows.Storage.Streams.IBuffer Data{ set; };
+        Windows.Devices.HumanInterfaceDevice.HidBooleanControl GetBooleanControl(UInt16 usagePage, UInt16 usageId);
+        Windows.Devices.HumanInterfaceDevice.HidBooleanControl GetBooleanControlByDescription(HidBooleanControlDescription controlDescription);
+        Windows.Devices.HumanInterfaceDevice.HidNumericControl GetNumericControl(UInt16 usagePage, UInt16 usageId);
+        Windows.Devices.HumanInterfaceDevice.HidNumericControl GetNumericControlByDescription(HidNumericControlDescription controlDescription);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidBooleanControlDescription", 6196e543-29d8-4a2a-8683-849e207bbe31)]
+    runtimeclass HidBooleanControlDescription
+    {
+        UInt32 Id{ get; };
+        UInt16 ReportId{ get; };
+        Windows.Devices.HumanInterfaceDevice.HidReportType ReportType{ get; };
+        UInt16 UsagePage{ get; };
+        UInt16 UsageId{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.HumanInterfaceDevice.HidCollection>  ParentCollections{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.HumanInterfaceDevice.IHidBooleanControlDescription2", c8eed2ea-8a77-4c36-aa00-5ff0449d3e73)]
+        {
+            Boolean IsAbsolute{ get; };
+        }
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidNumericControlDescription", 638d5e86-1d97-4c75-927f-5ff58ba05e32)]
+    runtimeclass HidNumericControlDescription
+    {
+        UInt32 Id{ get; };
+        UInt16 ReportId{ get; };
+        Windows.Devices.HumanInterfaceDevice.HidReportType ReportType{ get; };
+        UInt32 ReportSize{ get; };
+        UInt32 ReportCount{ get; };
+        UInt16 UsagePage{ get; };
+        UInt16 UsageId{ get; };
+        Int32 LogicalMinimum{ get; };
+        Int32 LogicalMaximum{ get; };
+        Int32 PhysicalMinimum{ get; };
+        Int32 PhysicalMaximum{ get; };
+        UInt32 UnitExponent{ get; };
+        UInt32 Unit{ get; };
+        Boolean IsAbsolute{ get; };
+        Boolean HasNull{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Devices.HumanInterfaceDevice.HidCollection>  ParentCollections{ get; };
+    }
+
+    [dualapipartition(0x6030000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidInputReportReceivedEventArgs", 7059c5cb-59b2-4dc2-985c-0adc6136fa2d)]
+    runtimeclass HidInputReportReceivedEventArgs
+    {
+        Windows.Devices.HumanInterfaceDevice.HidInputReport Report{ get; };
+    }
+
+
+    [dualapipartition(0x6030000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidCollection", 7189f5a3-32f1-46e3-befd-44d2663b7e6a)]
+    runtimeclass HidCollection
+    {
+        UInt32 Id{ get; };
+        Windows.Devices.HumanInterfaceDevice.HidCollectionType Type{ get; };
+        UInt32 UsagePage{ get; };
+        UInt32 UsageId{ get; };
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidBooleanControl", 524df48a-3695-408c-bba2-e2eb5abfbc20)]
+    runtimeclass HidBooleanControl
+    {
+        UInt32 Id{ get; };
+        UInt16 UsagePage{ get; };
+        UInt16 UsageId{ get; };
+        Boolean IsActive{ get; };
+        Boolean IsActive{ set; };
+        Windows.Devices.HumanInterfaceDevice.HidBooleanControlDescription ControlDescription{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0x6030000)]
+    [interface_name("Windows.Devices.HumanInterfaceDevice.IHidNumericControl", e38a12a5-35a7-4b75-89c8-fb1f28b10823)]
+    runtimeclass HidNumericControl
+    {
+        UInt32 Id{ get; };
+        Boolean IsGrouped{ get; };
+        UInt16 UsagePage{ get; };
+        UInt16 UsageId{ get; };
+        Int64 Value{ get; };
+        Int64 Value{ set; };
+        Int64 ScaledValue{ get; };
+        Int64 ScaledValue{ set; };
+        Windows.Devices.HumanInterfaceDevice.HidNumericControlDescription ControlDescription{ get; };
+    }
+
+
+
+
+
+
+}

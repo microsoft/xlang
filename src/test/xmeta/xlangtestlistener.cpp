@@ -10,7 +10,7 @@ void xlangtestlistener::enterExpression(XlangParser::ExpressionContext * ctx) {
  }
 
 void xlangtestlistener::enterEnum_member_declaration(XlangParser::Enum_member_declarationContext *ctx) {
-    enums.insert(ctx->IDENTIFIER()->getText());
+    enums.insert(ctx->enum_identifier()->getText());
     if (ctx->enum_expression() == NULL)
     {
         return;
@@ -20,9 +20,9 @@ void xlangtestlistener::enterEnum_member_declaration(XlangParser::Enum_member_de
     {
         enums.insert(expressions->enum_decimal_integer()->getText());
     }
-    if (expressions->enum_identifier() != NULL)
+    if (expressions->enum_expresssion_identifier() != NULL)
     {
-        enums.insert(expressions->enum_identifier()->getText());
+        enums.insert(expressions->enum_expresssion_identifier()->getText());
     }
     if (expressions->enum_hexdecimal_integer() != NULL)
     {

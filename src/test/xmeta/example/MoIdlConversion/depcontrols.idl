@@ -1,0 +1,3965 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Xaml.Controls
+{
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRevealListViewItemPresenterFactory", d0ad2f91-52e6-5224-bfcc-556a4f962d56)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IRevealListViewItemPresenter", 14a0a491-f1de-51b5-bf46-22f727f7a777)]
+    [threading(both)]
+    unsealed runtimeclass RevealListViewItemPresenter
+        : Windows.UI.Xaml.Controls.Primitives.ListViewItemPresenter
+    {
+        [method_name( "CreateInstance" )] RevealListViewItemPresenter();
+    }
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum NavigationViewDisplayMode
+    {
+        Minimal,
+        Compact,
+        Expanded,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum NavigationViewBackButtonVisible
+    {
+        Collapsed,
+        Visible,
+        Auto,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum NavigationViewPaneDisplayMode
+    {
+        Auto,
+        Left,
+        Top,
+        LeftCompact,
+        LeftMinimal,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum NavigationViewSelectionFollowsFocus
+    {
+        Disabled,
+        Enabled,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum NavigationViewShoulderNavigationEnabled
+    {
+        WhenSelectionFollowsFocus,
+        Always,
+        Never,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    enum NavigationViewOverflowLabelMode
+    {
+        MoreLabel,
+        NoLabel,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewDisplayModeChangedEventArgs", b7c1ad35-5544-40c1-9b33-acfe1d6c8094)]
+    runtimeclass NavigationViewDisplayModeChangedEventArgs
+    {
+        Windows.UI.Xaml.Controls.NavigationViewDisplayMode DisplayMode{ get; };
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.INavigationViewItemBaseFactory", eb014cef-7890-4ebb-8245-02e8510f321d)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewItemBase", edf04eb1-37d1-471f-8570-3829ee5b2bc6)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewItemBase
+        : Windows.UI.Xaml.Controls.ListViewItem
+    {
+    }
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewSelectionChangedEventArgs", 5aa509a0-3a5e-4f54-896c-98b85f819508)]
+    runtimeclass NavigationViewSelectionChangedEventArgs
+    {
+        Object SelectedItem{ get; };
+        Boolean IsSettingsSelected{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.INavigationViewSelectionChangedEventArgs2", fd5af806-d10a-5e8b-973f-3b8fda944625)]
+        {
+            Windows.UI.Xaml.Controls.NavigationViewItemBase SelectedItemContainer{ get; };
+            Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo RecommendedNavigationTransitionInfo{ get; };
+        }
+    }
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewItemInvokedEventArgs", 29496822-55d2-49fa-964b-f1dbafef85c4)]
+    [threading(both)]
+    runtimeclass NavigationViewItemInvokedEventArgs
+    {
+        NavigationViewItemInvokedEventArgs();
+        Object InvokedItem{ get; };
+        Boolean IsSettingsInvoked{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.INavigationViewItemInvokedEventArgs2", b568f2dd-515e-5770-a466-bd5f43fb6442)]
+        {
+            Windows.UI.Xaml.Controls.NavigationViewItemBase InvokedItemContainer{ get; };
+            Windows.UI.Xaml.Media.Animation.NavigationTransitionInfo RecommendedNavigationTransitionInfo{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewPaneClosingEventArgs", 955575ba-75f5-432d-b49b-60e47552d5ee)]
+    runtimeclass NavigationViewPaneClosingEventArgs
+    {
+        Boolean Cancel{ get; };
+        Boolean Cancel{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewBackRequestedEventArgs", 446700e1-9a9d-4500-a71d-25c15809b879)]
+    runtimeclass NavigationViewBackRequestedEventArgs
+    {
+    }
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.INavigationViewTemplateSettingsFactory", 28a6a351-64bc-5b60-8f74-e9ee908a240e)]
+    [static_name("Windows.UI.Xaml.Controls.INavigationViewTemplateSettingsStatics", 2c885e59-f7b9-5078-aeb6-8d7a03c05d02)]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewTemplateSettings", 2956cbc4-0528-55d5-b2d1-eae807aea6da)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewTemplateSettings
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] NavigationViewTemplateSettings();
+        static Windows.UI.Xaml.DependencyProperty TopPaddingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty OverflowButtonVisibilityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PaneToggleButtonVisibilityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BackButtonVisibilityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TopPaneVisibilityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty LeftPaneVisibilityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SingleSelectionFollowsFocusProperty{ get; };
+        Double TopPadding{ get; };
+        Windows.UI.Xaml.Visibility OverflowButtonVisibility{ get; };
+        Windows.UI.Xaml.Visibility PaneToggleButtonVisibility{ get; };
+        Windows.UI.Xaml.Visibility BackButtonVisibility{ get; };
+        Windows.UI.Xaml.Visibility TopPaneVisibility{ get; };
+        Windows.UI.Xaml.Visibility LeftPaneVisibility{ get; };
+        Boolean SingleSelectionFollowsFocus{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.INavigationViewFactory", e50687c1-b7c2-4975-ad7a-5f4fe6a514c9)]
+    [static_name("Windows.UI.Xaml.Controls.INavigationViewStatics", 363a86c7-72da-4420-b871-15d9d0d45756)]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationView", f209ce15-391a-42ca-9fc6-f79da65aca32)]
+    [threading(both)]
+    unsealed runtimeclass NavigationView
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        [method_name( "CreateInstance" )] NavigationView();
+        static Windows.UI.Xaml.DependencyProperty IsPaneOpenProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CompactModeThresholdWidthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ExpandedModeThresholdWidthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PaneFooterProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HeaderProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HeaderTemplateProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty DisplayModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsSettingsVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsPaneToggleButtonVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty AlwaysShowHeaderProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CompactPaneLengthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty OpenPaneLengthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PaneToggleButtonStyleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MenuItemsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MenuItemsSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedItemProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SettingsItemProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty AutoSuggestBoxProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MenuItemTemplateProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MenuItemTemplateSelectorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MenuItemContainerStyleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MenuItemContainerStyleSelectorProperty{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [static_name("Windows.UI.Xaml.Controls.INavigationViewStatics2", 8cc50d74-1a42-4852-ab5a-6dc82f28a4ba)]
+        {
+            static Windows.UI.Xaml.DependencyProperty IsBackButtonVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty IsBackEnabledProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty PaneTitleProperty{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.UI.Xaml.Controls.INavigationViewStatics3", 9b6b69b7-f746-5550-91e1-ee0c9a85c05e)]
+        {
+            static Windows.UI.Xaml.DependencyProperty PaneDisplayModeProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty PaneHeaderProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty PaneCustomContentProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ContentOverlayProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty IsPaneVisibleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty SelectionFollowsFocusProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty TemplateSettingsProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ShoulderNavigationEnabledProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty OverflowLabelModeProperty{ get; };
+        }
+        Boolean IsPaneOpen{ get; };
+        Boolean IsPaneOpen{ set; };
+        Double CompactModeThresholdWidth{ get; };
+        Double CompactModeThresholdWidth{ set; };
+        Double ExpandedModeThresholdWidth{ get; };
+        Double ExpandedModeThresholdWidth{ set; };
+        Windows.UI.Xaml.UIElement PaneFooter{ get; };
+        Windows.UI.Xaml.UIElement PaneFooter{ set; };
+        Object Header{ get; };
+        Object Header{ set; };
+        Windows.UI.Xaml.DataTemplate HeaderTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate HeaderTemplate{ set; };
+        Windows.UI.Xaml.Controls.NavigationViewDisplayMode DisplayMode{ get; };
+        Boolean IsSettingsVisible{ get; };
+        Boolean IsSettingsVisible{ set; };
+        Boolean IsPaneToggleButtonVisible{ get; };
+        Boolean IsPaneToggleButtonVisible{ set; };
+        Boolean AlwaysShowHeader{ get; };
+        Boolean AlwaysShowHeader{ set; };
+        Double CompactPaneLength{ get; };
+        Double CompactPaneLength{ set; };
+        Double OpenPaneLength{ get; };
+        Double OpenPaneLength{ set; };
+        Windows.UI.Xaml.Style PaneToggleButtonStyle{ get; };
+        Windows.UI.Xaml.Style PaneToggleButtonStyle{ set; };
+        Object SelectedItem{ get; };
+        Object SelectedItem{ set; };
+        Windows.Foundation.Collections.IVector <Object>  MenuItems{ get; };
+        Object MenuItemsSource{ get; };
+        Object MenuItemsSource{ set; };
+        Object SettingsItem{ get; };
+        Windows.UI.Xaml.Controls.AutoSuggestBox AutoSuggestBox{ get; };
+        Windows.UI.Xaml.Controls.AutoSuggestBox AutoSuggestBox{ set; };
+        Windows.UI.Xaml.DataTemplate MenuItemTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate MenuItemTemplate{ set; };
+        Windows.UI.Xaml.Controls.DataTemplateSelector MenuItemTemplateSelector{ get; };
+        Windows.UI.Xaml.Controls.DataTemplateSelector MenuItemTemplateSelector{ set; };
+        Windows.UI.Xaml.Style MenuItemContainerStyle{ get; };
+        Windows.UI.Xaml.Style MenuItemContainerStyle{ set; };
+        Windows.UI.Xaml.Controls.StyleSelector MenuItemContainerStyleSelector{ get; };
+        Windows.UI.Xaml.Controls.StyleSelector MenuItemContainerStyleSelector{ set; };
+        Object MenuItemFromContainer(Windows.UI.Xaml.DependencyObject container);
+        Windows.UI.Xaml.DependencyObject ContainerFromMenuItem(Object item);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Windows.UI.Xaml.Controls.NavigationViewSelectionChangedEventArgs>  SelectionChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Windows.UI.Xaml.Controls.NavigationViewItemInvokedEventArgs>  ItemInvoked;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Windows.UI.Xaml.Controls.NavigationViewDisplayModeChangedEventArgs>  DisplayModeChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.UI.Xaml.Controls.INavigationView2", 2be49737-7c13-4c44-86c3-8b25e697a80e)]
+        {
+            Windows.UI.Xaml.Controls.NavigationViewBackButtonVisible IsBackButtonVisible{ get; };
+            Windows.UI.Xaml.Controls.NavigationViewBackButtonVisible IsBackButtonVisible{ set; };
+            Boolean IsBackEnabled{ get; };
+            Boolean IsBackEnabled{ set; };
+            String PaneTitle{ get; };
+            String PaneTitle{ set; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Windows.UI.Xaml.Controls.NavigationViewBackRequestedEventArgs>  BackRequested;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Object>  PaneClosed;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Windows.UI.Xaml.Controls.NavigationViewPaneClosingEventArgs>  PaneClosing;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Object>  PaneOpened;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.NavigationView, Object>  PaneOpening;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.INavigationView3", 8fdfab66-9bbc-5fa3-9043-a02bb4f8ef37)]
+        {
+            Windows.UI.Xaml.Controls.NavigationViewPaneDisplayMode PaneDisplayMode{ get; };
+            Windows.UI.Xaml.Controls.NavigationViewPaneDisplayMode PaneDisplayMode{ set; };
+            Windows.UI.Xaml.UIElement PaneHeader{ get; };
+            Windows.UI.Xaml.UIElement PaneHeader{ set; };
+            Windows.UI.Xaml.UIElement PaneCustomContent{ get; };
+            Windows.UI.Xaml.UIElement PaneCustomContent{ set; };
+            Windows.UI.Xaml.UIElement ContentOverlay{ get; };
+            Windows.UI.Xaml.UIElement ContentOverlay{ set; };
+            Boolean IsPaneVisible{ get; };
+            Boolean IsPaneVisible{ set; };
+            Windows.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus SelectionFollowsFocus{ get; };
+            Windows.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus SelectionFollowsFocus{ set; };
+            Windows.UI.Xaml.Controls.NavigationViewTemplateSettings TemplateSettings{ get; };
+            Windows.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled ShoulderNavigationEnabled{ get; };
+            Windows.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled ShoulderNavigationEnabled{ set; };
+            Windows.UI.Xaml.Controls.NavigationViewOverflowLabelMode OverflowLabelMode{ get; };
+            Windows.UI.Xaml.Controls.NavigationViewOverflowLabelMode OverflowLabelMode{ set; };
+        }
+    }
+
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.INavigationViewListFactory", faee9541-c3bf-47bf-b904-6155f4df6b4f)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewList", 4f726f85-5ce0-48cd-8ef2-1a29458a3404)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewList
+        : Windows.UI.Xaml.Controls.ListView
+    {
+        [method_name( "CreateInstance" )] NavigationViewList();
+    }
+
+
+
+
+
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.INavigationViewItemFactory", 973bdb4a-7e08-4f76-923c-f12bd685e86e)]
+    [static_name("Windows.UI.Xaml.Controls.INavigationViewItemStatics", 803c0081-fda5-4b90-aace-3f2306dbe5c4)]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewItem", 8614be0f-b7b6-4851-960a-f5e3f69f624a)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewItem
+        : Windows.UI.Xaml.Controls.NavigationViewItemBase
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.UI.Xaml.Controls.INavigationViewItemStatics2", f4f2f77c-54b4-541d-b747-3a96e9ff3d55)]
+        {
+            static Windows.UI.Xaml.DependencyProperty SelectsOnInvokedProperty{ get; };
+        }
+        [method_name( "CreateInstance" )] NavigationViewItem();
+        static Windows.UI.Xaml.DependencyProperty IconProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CompactPaneLengthProperty{ get; };
+        Windows.UI.Xaml.Controls.IconElement Icon{ get; };
+        Windows.UI.Xaml.Controls.IconElement Icon{ set; };
+        Double CompactPaneLength{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.INavigationViewItem2", ee488ef9-ea9c-5e04-b26c-83bf9655342f)]
+        {
+            Boolean SelectsOnInvoked{ get; };
+            Boolean SelectsOnInvoked{ set; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.INavigationViewItemSeparatorFactory", 71cf3a66-db86-49e0-8154-5fd356aedec0)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewItemSeparator", de62c951-bb9b-471e-83e3-af4791e7096a)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewItemSeparator
+        : Windows.UI.Xaml.Controls.NavigationViewItemBase
+    {
+        [method_name( "CreateInstance" )] NavigationViewItemSeparator();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.INavigationViewItemHeaderFactory", f3105988-7768-45d3-8bb0-6ded9e43a98b)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.INavigationViewItemHeader", e21df22c-da4a-4e74-9ffc-b163bd7adacd)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewItemHeader
+        : Windows.UI.Xaml.Controls.NavigationViewItemBase
+    {
+        [method_name( "CreateInstance" )] NavigationViewItemHeader();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum ParallaxSourceOffsetKind
+    {
+        Absolute,
+        Relative,
+    };
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [contentproperty("Child")]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IParallaxViewStatics", 8836e49c-0e0e-57d8-9395-f0a9a0d1bb28)]
+    [constructor_name("Windows.UI.Xaml.Controls.IParallaxViewFactory", e4eb9642-3e8e-5a26-94f2-9121d121b916)]
+    [interface_name("Windows.UI.Xaml.Controls.IParallaxView", 6b84fcd4-4083-5b4b-bc40-d9204e19b41a)]
+    [threading(both)]
+    unsealed runtimeclass ParallaxView
+        : Windows.UI.Xaml.FrameworkElement
+    {
+        static Windows.UI.Xaml.DependencyProperty ChildProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalSourceEndOffsetProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalSourceOffsetKindProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalSourceStartOffsetProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxHorizontalShiftRatioProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalShiftProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsHorizontalShiftClampedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsVerticalShiftClampedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalSourceEndOffsetProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalSourceOffsetKindProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalSourceStartOffsetProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxVerticalShiftRatioProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalShiftProperty{ get; };
+        [method_name( "CreateInstance" )] ParallaxView();
+        Windows.UI.Xaml.UIElement Child{ get; };
+        Windows.UI.Xaml.UIElement Child{ set; };
+        Double HorizontalShift{ get; };
+        Double HorizontalShift{ set; };
+        Double HorizontalSourceEndOffset{ get; };
+        Double HorizontalSourceEndOffset{ set; };
+        Windows.UI.Xaml.Controls.ParallaxSourceOffsetKind HorizontalSourceOffsetKind{ get; };
+        Windows.UI.Xaml.Controls.ParallaxSourceOffsetKind HorizontalSourceOffsetKind{ set; };
+        Double HorizontalSourceStartOffset{ get; };
+        Double HorizontalSourceStartOffset{ set; };
+        Boolean IsHorizontalShiftClamped{ get; };
+        Boolean IsHorizontalShiftClamped{ set; };
+        Boolean IsVerticalShiftClamped{ get; };
+        Boolean IsVerticalShiftClamped{ set; };
+        Double MaxHorizontalShiftRatio{ get; };
+        Double MaxHorizontalShiftRatio{ set; };
+        Double MaxVerticalShiftRatio{ get; };
+        Double MaxVerticalShiftRatio{ set; };
+        Windows.UI.Xaml.UIElement Source{ get; };
+        Windows.UI.Xaml.UIElement Source{ set; };
+        Double VerticalShift{ get; };
+        Double VerticalShift{ set; };
+        Double VerticalSourceEndOffset{ get; };
+        Double VerticalSourceEndOffset{ set; };
+        Windows.UI.Xaml.Controls.ParallaxSourceOffsetKind VerticalSourceOffsetKind{ get; };
+        Windows.UI.Xaml.Controls.ParallaxSourceOffsetKind VerticalSourceOffsetKind{ set; };
+        Double VerticalSourceStartOffset{ get; };
+        Double VerticalSourceStartOffset{ set; };
+        void RefreshAutomaticHorizontalOffsets();
+        void RefreshAutomaticVerticalOffsets();
+    }
+
+    [flags]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum AnimationContext
+    {
+        None,
+        CollectionChangeAdd,
+        CollectionChangeRemove,
+        CollectionChangeReset = 4,
+        LayoutTransition = 8,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [flags]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum ElementRealizationOptions
+    {
+        None,
+        ForceCreate,
+        SuppressAutoRecycle,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum FlowLayoutLineAlignment
+    {
+        Start,
+        Center,
+        End,
+        SpaceAround,
+        SpaceBetween,
+        SpaceEvenly,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum UniformGridLayoutItemsJustification
+    {
+        Start,
+        Center,
+        End,
+        SpaceAround,
+        SpaceBetween,
+        SpaceEvenly,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    enum UniformGridLayoutItemsStretch
+    {
+        None,
+        Fill,
+        Uniform,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [uuid(e9614972-02a5-598e-8ddb-5bb5aa2bfb52)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    delegate void ElementAnimationCompleted(ElementAnimator sender, Windows.UI.Xaml.UIElement element);
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.IElementAnimatorFactory", 99cac9a6-b0e7-549c-b6cf-c36a901924fe)]
+    [interface_name("Windows.UI.Xaml.Controls.IElementAnimator", 1f7eb4a2-a1c3-56d5-80b4-8bded0b1348e)]
+    [threading(both)]
+    unsealed runtimeclass ElementAnimator
+    {
+        [method_name( "CreateInstance" )] ElementAnimator();
+        event Windows.UI.Xaml.Controls.ElementAnimationCompleted ShowAnimationCompleted;
+        event Windows.UI.Xaml.Controls.ElementAnimationCompleted HideAnimationCompleted;
+        event Windows.UI.Xaml.Controls.ElementAnimationCompleted BoundsChangeAnimationCompleted;
+        void OnElementShown(Windows.UI.Xaml.UIElement element, AnimationContext context);
+        void OnElementHidden(Windows.UI.Xaml.UIElement element, AnimationContext context);
+        void OnElementBoundsChanged(Windows.UI.Xaml.UIElement element, AnimationContext context, Windows.Foundation.Rect oldBounds, Windows.Foundation.Rect newBounds);
+        Boolean HasShowAnimation(Windows.UI.Xaml.UIElement element, AnimationContext context);
+        Boolean HasHideAnimation(Windows.UI.Xaml.UIElement element, AnimationContext context);
+        Boolean HasBoundsChangeAnimation(Windows.UI.Xaml.UIElement element, AnimationContext context, Windows.Foundation.Rect oldBounds, Windows.Foundation.Rect newBounds);
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [protected_name("Windows.UI.Xaml.Controls.IElementAnimatorProtected", bf53c9ed-68a9-51e4-8b53-9eda8cbf0070)]
+        {
+            protected Boolean HasShowAnimationsPending{ get; };
+            protected Boolean HasHideAnimationsPending{ get; };
+            protected Boolean HasBoundsChangeAnimationsPending{ get; };
+            protected Windows.UI.Xaml.Controls.AnimationContext SharedContext{ get; };
+            protected void OnShowAnimationCompleted(Windows.UI.Xaml.UIElement element);
+            protected void OnHideAnimationCompleted(Windows.UI.Xaml.UIElement element);
+            protected void OnBoundsChangeAnimationCompleted(Windows.UI.Xaml.UIElement element);
+        }
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.IElementAnimatorOverrides", b3ea6219-e7d0-51aa-b598-d92b6b412948)]
+        {
+            overridable Boolean HasShowAnimationCore(Windows.UI.Xaml.UIElement element, AnimationContext context);
+            overridable Boolean HasHideAnimationCore(Windows.UI.Xaml.UIElement element, AnimationContext context);
+            overridable Boolean HasBoundsChangeAnimationCore(Windows.UI.Xaml.UIElement element, AnimationContext context, Windows.Foundation.Rect oldBounds, Windows.Foundation.Rect newBounds);
+            overridable void StartShowAnimation(Windows.UI.Xaml.UIElement element, AnimationContext context);
+            overridable void StartHideAnimation(Windows.UI.Xaml.UIElement element, AnimationContext context);
+            overridable void StartBoundsChangeAnimation(Windows.UI.Xaml.UIElement element, AnimationContext context, Windows.Foundation.Rect oldBounds, Windows.Foundation.Rect newBounds);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [uuid(98d348c4-51ea-5dc2-a45e-3cf34077bc24)]
+    [webhosthidden]
+    interface IKeyIndexMapping
+    {
+        String KeyFromIndex(Int32 index);
+        Int32 IndexFromKey(String key);
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IItemsSourceViewFactory", 22c780a6-39a4-5fdc-8bd6-c8d8aa0a216f)]
+    [interface_name("Windows.UI.Xaml.Controls.IItemsSourceView", 6942d923-316b-5ab6-978a-40efb1d0c2f2)]
+    [threading(both)]
+    unsealed runtimeclass ItemsSourceView
+        : Windows.UI.Xaml.Interop.INotifyCollectionChanged
+    {
+        [method_name( "CreateInstance" )] ItemsSourceView(Object source);
+        Int32 Count{ get; };
+        Object GetAt(Int32 index);
+        Boolean HasKeyIndexMapping{ get; };
+        String KeyFromIndex(Int32 index);
+        Int32 IndexFromKey(String key);
+    }
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.IVirtualizingLayoutFactory", 0b5fc552-3d5c-5965-a2d3-9bf7cc972c00)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IVirtualizingLayout", 7c0579e9-b592-5cd7-bdc5-005c5ed7b720)]
+    [threading(both)]
+    unsealed runtimeclass VirtualizingLayout
+        : Windows.UI.Xaml.Controls.Layout
+    {
+        [method_name( "CreateInstance" )] VirtualizingLayout();
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.IVirtualizingLayoutOverrides", 997500ed-2391-5b53-99e4-d500fc5f87fa)]
+        {
+            overridable void InitializeForContextCore(VirtualizingLayoutContext context);
+            overridable void UninitializeForContextCore(VirtualizingLayoutContext context);
+            overridable Windows.Foundation.Size MeasureOverride(VirtualizingLayoutContext context, Windows.Foundation.Size availableSize);
+            overridable Windows.Foundation.Size ArrangeOverride(VirtualizingLayoutContext context, Windows.Foundation.Size finalSize);
+            overridable void OnItemsChangedCore(VirtualizingLayoutContext context, Object source, Windows.UI.Xaml.Interop.NotifyCollectionChangedEventArgs args);
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contentproperty("ItemTemplate")]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IItemsRepeaterStatics", 7663d303-074c-5f9d-96d6-ba56c8f6f497)]
+    [constructor_name("Windows.UI.Xaml.Controls.IItemsRepeaterFactory", 527d0d75-ca56-57f0-9ebf-782630a35cce)]
+    [interface_name("Windows.UI.Xaml.Controls.IItemsRepeater", a45ff8ef-8c58-5bbf-9e68-5789e4b4a022)]
+    [threading(both)]
+    unsealed runtimeclass ItemsRepeater
+        : Windows.UI.Xaml.FrameworkElement
+    {
+        static Windows.UI.Xaml.DependencyProperty ItemsSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemTemplateProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty LayoutProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty AnimatorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalCacheLengthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalCacheLengthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BackgroundProperty{ get; };
+        [method_name( "CreateInstance" )] ItemsRepeater();
+        Object ItemsSource{ get; };
+        Object ItemsSource{ set; };
+        Windows.UI.Xaml.Controls.ItemsSourceView ItemsSourceView{ get; };
+        Windows.UI.Xaml.IElementFactory ItemTemplate{ get; };
+        Windows.UI.Xaml.IElementFactory ItemTemplate{ set; };
+        Windows.UI.Xaml.Controls.VirtualizingLayout Layout{ get; };
+        Windows.UI.Xaml.Controls.VirtualizingLayout Layout{ set; };
+        Double HorizontalCacheLength{ get; };
+        Double HorizontalCacheLength{ set; };
+        Double VerticalCacheLength{ get; };
+        Double VerticalCacheLength{ set; };
+        Windows.UI.Xaml.Media.Brush Background{ get; };
+        Windows.UI.Xaml.Media.Brush Background{ set; };
+        Int32 GetElementIndex(Windows.UI.Xaml.UIElement element);
+        Windows.UI.Xaml.UIElement TryGetElement(Int32 index);
+        Windows.UI.Xaml.UIElement GetOrCreateElement(Int32 index);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.ItemsRepeater, Windows.UI.Xaml.Controls.ItemsRepeaterElementPreparedEventArgs>  ElementPrepared;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.ItemsRepeater, Windows.UI.Xaml.Controls.ItemsRepeaterElementClearingEventArgs>  ElementClearing;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.ItemsRepeater, Windows.UI.Xaml.Controls.ItemsRepeaterElementIndexChangedEventArgs>  ElementIndexChanged;
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [interface_name("Windows.UI.Xaml.Controls.IItemsRepeater2", f1f2a8be-5645-5c78-a7f0-d66ae669fed7)]
+        {
+            Windows.UI.Xaml.Controls.ElementAnimator Animator{ get; };
+            Windows.UI.Xaml.Controls.ElementAnimator Animator{ set; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IItemsRepeaterElementPreparedEventArgs", e67092dd-0e9e-54ea-b082-bf634d609ffd)]
+    runtimeclass ItemsRepeaterElementPreparedEventArgs
+    {
+        Windows.UI.Xaml.UIElement Element{ get; };
+        Int32 Index{ get; };
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [interface_name("Windows.UI.Xaml.Controls.IItemsRepeaterElementClearingEventArgs", 6b21cb63-94b7-5905-8ad0-2c2fc5dcc07c)]
+    runtimeclass ItemsRepeaterElementClearingEventArgs
+    {
+        Windows.UI.Xaml.UIElement Element{ get; };
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [interface_name("Windows.UI.Xaml.Controls.IItemsRepeaterElementIndexChangedEventArgs", 96724548-e259-553a-b8c8-a9fc5c94dd14)]
+    runtimeclass ItemsRepeaterElementIndexChangedEventArgs
+    {
+        Windows.UI.Xaml.UIElement Element{ get; };
+        Int32 OldIndex{ get; };
+        Int32 NewIndex{ get; };
+    }
+
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IElementFactoryFactory", 5fca400e-0183-57b1-9ce6-d6e8948fc0dd)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IElementFactory", 9b48b4a4-1da5-5930-a7e9-d291529bd5a5)]
+    [threading(both)]
+    unsealed runtimeclass ElementFactory
+        : Windows.UI.Xaml.DependencyObject
+        , Windows.UI.Xaml.IElementFactory
+    {
+        [method_name( "CreateInstance" )] ElementFactory();
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.IElementFactoryOverrides", 40dc8745-5cc6-5462-8703-7ad61f88ad4e)]
+        {
+            overridable Windows.UI.Xaml.UIElement GetElementCore(Windows.UI.Xaml.ElementFactoryGetArgs args);
+            overridable void RecycleElementCore(Windows.UI.Xaml.ElementFactoryRecycleArgs args);
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.ILayoutContextFactory", 24ad6a17-0b4e-5b4e-9699-bf80de0b3866)]
+    [interface_name("Windows.UI.Xaml.Controls.ILayoutContext", 21f0bb0c-4e58-52dc-9ab2-06e63b569c65)]
+    [threading(both)]
+    unsealed runtimeclass LayoutContext
+        : Windows.UI.Xaml.DependencyObject
+    {
+        Object LayoutState{ get; };
+        Object LayoutState{ set; };
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.ILayoutContextOverrides", fb731636-66a7-5664-8f39-132de045fef0)]
+        {
+            overridable Object LayoutStateCore{ get; };
+            overridable Object LayoutStateCore{ set; };
+        }
+    }
+
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.INonVirtualizingLayoutContextFactory", 448e1c4b-bab6-56f4-87ba-12b468da8de6)]
+    [interface_name("Windows.UI.Xaml.Controls.INonVirtualizingLayoutContext", cdbc4fde-2ae0-5a6b-95d5-da6556b5b0a4)]
+    [threading(both)]
+    unsealed runtimeclass NonVirtualizingLayoutContext
+        : Windows.UI.Xaml.Controls.LayoutContext
+    {
+        [method_name( "CreateInstance" )] NonVirtualizingLayoutContext();
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Xaml.UIElement>  Children{ get; };
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.INonVirtualizingLayoutContextOverrides", 2abd6033-88ed-5387-85de-449c8c06f70c)]
+        {
+            overridable Windows.Foundation.Collections.IVectorView <Windows.UI.Xaml.UIElement>  ChildrenCore{ get; };
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.IVirtualizingLayoutContextFactory", 295dd0f5-7509-5f1e-afd9-9a4c84b6b607)]
+    [interface_name("Windows.UI.Xaml.Controls.IVirtualizingLayoutContext", 138b7b24-8c06-5de6-b629-f537a33a6d30)]
+    [threading(both)]
+    unsealed runtimeclass VirtualizingLayoutContext
+        : Windows.UI.Xaml.Controls.LayoutContext
+    {
+        [method_name( "CreateInstance" )] VirtualizingLayoutContext();
+        Int32 ItemCount{ get; };
+        Object GetItemAt(Int32 index);
+        Windows.Foundation.Rect RealizationRect{ get; };
+        [method_name("GetOrCreateElementAt")] Windows.UI.Xaml.UIElement GetOrCreateElementAt(Int32 index);
+        [method_name("GetOrCreateElementAt2")] Windows.UI.Xaml.UIElement GetOrCreateElementAt(Int32 index, ElementRealizationOptions options);
+        void RecycleElement(Windows.UI.Xaml.UIElement element);
+        Int32 RecommendedAnchorIndex{ get; };
+        Windows.Foundation.Point LayoutOrigin{ get; };
+        Windows.Foundation.Point LayoutOrigin{ set; };
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.IVirtualizingLayoutContextOverrides", 794e87b9-d3eb-5dc6-b7d4-2bce3458459a)]
+        {
+            overridable Int32 ItemCountCore();
+            overridable Object GetItemAtCore(Int32 index);
+            overridable Windows.Foundation.Rect RealizationRectCore();
+            overridable Windows.UI.Xaml.UIElement GetElementAtCore(Int32 index, ElementRealizationOptions options);
+            overridable void RecycleElementCore(Windows.UI.Xaml.UIElement element);
+            overridable Int32 RecommendedAnchorIndexCore{ get; };
+            overridable Windows.Foundation.Point LayoutOriginCore{ get; };
+            overridable Windows.Foundation.Point LayoutOriginCore{ set; };
+        }
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.ILayoutFactory", a14c0980-7d4d-5aec-a556-8a214520dce3)]
+    [interface_name("Windows.UI.Xaml.Controls.ILayout", 1da09330-b666-5435-9f8f-5f3ee3865839)]
+    [threading(both)]
+    unsealed runtimeclass Layout
+        : Windows.UI.Xaml.DependencyObject
+    {
+        void InitializeForContext(LayoutContext context);
+        void UninitializeForContext(LayoutContext context);
+        Windows.Foundation.Size Measure(LayoutContext context, Windows.Foundation.Size availableSize);
+        Windows.Foundation.Size Arrange(LayoutContext context, Windows.Foundation.Size finalSize);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Layout, Object>  MeasureInvalidated;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Layout, Object>  ArrangeInvalidated;
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [protected_name("Windows.UI.Xaml.Controls.ILayoutProtected", d9b8195b-6df0-58b3-9b8f-4e4355bd12b5)]
+        {
+            protected void InvalidateMeasure();
+            protected void InvalidateArrange();
+        }
+    }
+
+
+
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.INonVirtualizingLayoutFactory", 37e1d8bb-5d61-5906-a8a2-d2d9445152be)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.INonVirtualizingLayout", ed464ae7-6eb1-555a-8695-44310a60ab23)]
+    [threading(both)]
+    unsealed runtimeclass NonVirtualizingLayout
+        : Windows.UI.Xaml.Controls.Layout
+    {
+        [method_name( "CreateInstance" )] NonVirtualizingLayout();
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.INonVirtualizingLayoutOverrides", cfcef898-cdfb-565d-bd2c-0b504c75da35)]
+        {
+            overridable void InitializeForContextCore(NonVirtualizingLayoutContext context);
+            overridable void UninitializeForContextCore(NonVirtualizingLayoutContext context);
+            overridable Windows.Foundation.Size MeasureOverride(NonVirtualizingLayoutContext context, Windows.Foundation.Size availableSize);
+            overridable Windows.Foundation.Size ArrangeOverride(NonVirtualizingLayoutContext context, Windows.Foundation.Size finalSize);
+        }
+    }
+
+
+
+
+
+
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollAnchorProvider2", d913a13f-9d99-5792-8c33-7153a7238d32)]
+    [threading(both)]
+    runtimeclass ScrollAnchorProvider
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        ScrollAnchorProvider();
+        Double HorizontalAnchorRatio{ get; };
+        Double HorizontalAnchorRatio{ set; };
+        Double VerticalAnchorRatio{ get; };
+        Double VerticalAnchorRatio{ set; };
+    }
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    struct FlowLayoutAnchorInfo
+    {
+        Int32 Index;
+        Double Offset;
+    };
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IUniformGridLayoutStateFactory", 2e5c9172-f03f-555c-90b0-4383fb980648)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IUniformGridLayoutState", c821641e-3635-500d-b290-8bf60b423e96)]
+    [threading(both)]
+    unsealed runtimeclass UniformGridLayoutState
+    {
+        [method_name( "CreateInstance" )] UniformGridLayoutState();
+    }
+
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [static_name("Windows.UI.Xaml.Controls.IUniformGridLayoutStatics", 1d0de13d-c036-5580-925f-d0b6abb3fd19)]
+    [constructor_name("Windows.UI.Xaml.Controls.IUniformGridLayoutFactory", 967be1dd-460d-58be-84ce-a1b866060601)]
+    [interface_name("Windows.UI.Xaml.Controls.IUniformGridLayout", 160bb29f-7fe6-599d-a1b7-07de0007b833)]
+    [threading(both)]
+    unsealed runtimeclass UniformGridLayout
+        : Windows.UI.Xaml.Controls.VirtualizingLayout
+    {
+        static Windows.UI.Xaml.DependencyProperty OrientationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinItemWidthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinItemHeightProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinRowSpacingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinColumnSpacingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemsJustificationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemsStretchProperty{ get; };
+        [method_name( "CreateInstance" )] UniformGridLayout();
+        Windows.UI.Xaml.Controls.Orientation Orientation{ get; };
+        Windows.UI.Xaml.Controls.Orientation Orientation{ set; };
+        Double MinItemWidth{ get; };
+        Double MinItemWidth{ set; };
+        Double MinItemHeight{ get; };
+        Double MinItemHeight{ set; };
+        Double MinRowSpacing{ get; };
+        Double MinRowSpacing{ set; };
+        Double MinColumnSpacing{ get; };
+        Double MinColumnSpacing{ set; };
+        Windows.UI.Xaml.Controls.UniformGridLayoutItemsJustification ItemsJustification{ get; };
+        Windows.UI.Xaml.Controls.UniformGridLayoutItemsJustification ItemsJustification{ set; };
+        Windows.UI.Xaml.Controls.UniformGridLayoutItemsStretch ItemsStretch{ get; };
+        Windows.UI.Xaml.Controls.UniformGridLayoutItemsStretch ItemsStretch{ set; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IStackLayoutStateFactory", 66021397-0b0a-567f-be7b-ac95a06403fc)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IStackLayoutState", 24a6ecce-4515-5a7b-897c-5cde1a2165e1)]
+    [threading(both)]
+    unsealed runtimeclass StackLayoutState
+    {
+        [method_name( "CreateInstance" )] StackLayoutState();
+    }
+
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.IStackLayoutFactory", 4049a62f-210b-56ae-b1a1-dabbf7504e5c)]
+    [static_name("Windows.UI.Xaml.Controls.IStackLayoutStatics", 19f7764d-057c-5933-96a2-e3249180272a)]
+    [interface_name("Windows.UI.Xaml.Controls.IStackLayout", e97dd15c-c428-5ea4-bfb7-fcf2e6398fb0)]
+    [threading(both)]
+    unsealed runtimeclass StackLayout
+        : Windows.UI.Xaml.Controls.VirtualizingLayout
+    {
+        [method_name( "CreateInstance" )] StackLayout();
+        static Windows.UI.Xaml.DependencyProperty OrientationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SpacingProperty{ get; };
+        Windows.UI.Xaml.Controls.Orientation Orientation{ get; };
+        Windows.UI.Xaml.Controls.Orientation Orientation{ set; };
+        Double Spacing{ get; };
+        Double Spacing{ set; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IFlowLayoutStateFactory", f50033a2-16b4-5965-bf39-066431b8cf61)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IFlowLayoutState", 1f8c13e0-f8e7-5f93-8b3e-f46f6343a3df)]
+    [threading(both)]
+    unsealed runtimeclass FlowLayoutState
+    {
+        [method_name( "CreateInstance" )] FlowLayoutState();
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.IFlowLayoutFactory", c476e95d-a2ed-5a46-ad81-834ffd231f34)]
+    [static_name("Windows.UI.Xaml.Controls.IFlowLayoutStatics", d198b9fd-d560-5ff5-be1e-96bd38bcecaf)]
+    [interface_name("Windows.UI.Xaml.Controls.IFlowLayout", 16a8f773-1efc-5604-a790-3f684914a47f)]
+    [threading(both)]
+    unsealed runtimeclass FlowLayout
+        : Windows.UI.Xaml.Controls.VirtualizingLayout
+    {
+        [method_name( "CreateInstance" )] FlowLayout();
+        static Windows.UI.Xaml.DependencyProperty OrientationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinRowSpacingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinColumnSpacingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty LineAlignmentProperty{ get; };
+        Windows.UI.Xaml.Controls.Orientation Orientation{ get; };
+        Windows.UI.Xaml.Controls.Orientation Orientation{ set; };
+        Double MinRowSpacing{ get; };
+        Double MinRowSpacing{ set; };
+        Double MinColumnSpacing{ get; };
+        Double MinColumnSpacing{ set; };
+        Windows.UI.Xaml.Controls.FlowLayoutLineAlignment LineAlignment{ get; };
+        Windows.UI.Xaml.Controls.FlowLayoutLineAlignment LineAlignment{ set; };
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.IFlowLayoutOverrides", 49383838-34af-5996-b51a-5790fddd394e)]
+        {
+            overridable Windows.Foundation.Size GetMeasureSize(Int32 index, Windows.Foundation.Size availableSize);
+            overridable Windows.Foundation.Size GetProvisionalArrangeSize(Int32 index, Windows.Foundation.Size measureSize, Windows.Foundation.Size desiredSize);
+            overridable Boolean ShouldBreakLine(Int32 index, Double remainingSpace);
+            overridable Windows.UI.Xaml.Controls.FlowLayoutAnchorInfo GetAnchorForRealizationRect(Windows.Foundation.Size availableSize, VirtualizingLayoutContext context);
+            overridable Windows.UI.Xaml.Controls.FlowLayoutAnchorInfo GetAnchorForTargetElement(Int32 targetIndex, Windows.Foundation.Size availableSize, VirtualizingLayoutContext context);
+            overridable Windows.Foundation.Rect GetExtent(Windows.Foundation.Size availableSize, VirtualizingLayoutContext context, Windows.UI.Xaml.UIElement firstRealized, Int32 firstRealizedItemIndex, Windows.Foundation.Rect firstRealizedLayoutBounds, Windows.UI.Xaml.UIElement lastRealized, Int32 lastRealizedItemIndex, Windows.Foundation.Rect lastRealizedLayoutBounds);
+            overridable void OnElementMeasured(Windows.UI.Xaml.UIElement element, Int32 index, Windows.Foundation.Size availableSize, Windows.Foundation.Size measureSize, Windows.Foundation.Size desiredSize, Windows.Foundation.Size provisionalArrangeSize, VirtualizingLayoutContext context);
+            overridable void OnLineArranged(Int32 startIndex, Int32 countInLine, Double lineSize, VirtualizingLayoutContext context);
+        }
+    }
+
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.IRecyclePoolStatics", e405f56c-94a9-5a47-b0be-de810d2da334)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRecyclePoolFactory", bd92e505-3e00-5d0f-8480-e6d5eeab9864)]
+    [interface_name("Windows.UI.Xaml.Controls.IRecyclePool", 04efcda3-a5f4-54a5-9537-2218f58e8b2d)]
+    [threading(both)]
+    unsealed runtimeclass RecyclePool
+    {
+        static Windows.UI.Xaml.DependencyProperty PoolInstanceProperty{ get; };
+        static Windows.UI.Xaml.Controls.RecyclePool GetPoolInstance(Windows.UI.Xaml.DataTemplate dataTemplate);
+        static void SetPoolInstance(Windows.UI.Xaml.DataTemplate dataTemplate, RecyclePool value);
+        [method_name( "CreateInstance" )] RecyclePool();
+        [method_name("PutElement")] void PutElement(Windows.UI.Xaml.UIElement element, String key);
+        [method_name("PutElementWithOwner")] void PutElement(Windows.UI.Xaml.UIElement element, String key, Windows.UI.Xaml.UIElement owner);
+        [method_name("TryGetElement")] Windows.UI.Xaml.UIElement TryGetElement(String key);
+        [method_name("TryGetElementWithOwner")] Windows.UI.Xaml.UIElement TryGetElement(String key, Windows.UI.Xaml.UIElement owner);
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.IRecyclePoolOverrides", ecc9271c-3ed6-57f6-a696-9f74c839df7c)]
+        {
+            overridable void PutElementCore(Windows.UI.Xaml.UIElement element, String key, Windows.UI.Xaml.UIElement owner);
+            overridable Windows.UI.Xaml.UIElement TryGetElementCore(String key, Windows.UI.Xaml.UIElement owner);
+        }
+    }
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [interface_name("Windows.UI.Xaml.Controls.ISelectTemplateEventArgs", d3a62a36-0e3a-5181-82b7-465659ccc19c)]
+    runtimeclass SelectTemplateEventArgs
+    {
+        String TemplateKey{ get; };
+        String TemplateKey{ set; };
+        Object DataContext{ get; };
+        Windows.UI.Xaml.UIElement Owner{ get; };
+    }
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [contentproperty("Templates")]
+    [constructor_name("Windows.UI.Xaml.Controls.IRecyclingElementFactoryFactory", 6879aa52-78a6-59f5-8811-fca0650db47e)]
+    [interface_name("Windows.UI.Xaml.Controls.IRecyclingElementFactory", 104c199e-61b5-5f4e-92d8-572bb66ecc8f)]
+    [threading(both)]
+    unsealed runtimeclass RecyclingElementFactory
+        : Windows.UI.Xaml.Controls.ElementFactory
+    {
+        [method_name( "CreateInstance" )] RecyclingElementFactory();
+        Windows.UI.Xaml.Controls.RecyclePool RecyclePool{ get; };
+        Windows.UI.Xaml.Controls.RecyclePool RecyclePool{ set; };
+        Windows.Foundation.Collections.IMap <String, Windows.UI.Xaml.DataTemplate>  Templates{ get; };
+        Windows.Foundation.Collections.IMap <String, Windows.UI.Xaml.DataTemplate>  Templates{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.RecyclingElementFactory, Windows.UI.Xaml.Controls.SelectTemplateEventArgs>  SelectTemplateKey;
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [overridable_name("Windows.UI.Xaml.Controls.IRecyclingElementFactoryOverrides", afcded78-4b6e-578d-9912-3d76a7aaf4cb)]
+        {
+            overridable String OnSelectTemplateKeyCore(Object dataContext, Windows.UI.Xaml.UIElement owner);
+        }
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [static_name("Windows.UI.Xaml.Controls.IIndexPathStatics", 7013934e-9405-58aa-8dae-35275d451681)]
+    [interface_name("Windows.UI.Xaml.Controls.IIndexPath", 85d38e2e-de90-5e40-85da-7693a6c5d709)]
+    [threading(both)]
+    runtimeclass IndexPath
+        : Windows.Foundation.IStringable
+    {
+        [default_overload]
+        [method_name("CreateFrom")] static Windows.UI.Xaml.Controls.IndexPath CreateFrom(Int32 index);
+        [method_name("CreateFromGroupAndItemIndex")] static Windows.UI.Xaml.Controls.IndexPath CreateFrom(Int32 groupIndex, Int32 itemIndex);
+        static Windows.UI.Xaml.Controls.IndexPath CreateFromIndices(Windows.Foundation.Collections.IVector <Int32>  indices);
+        Int32 GetSize();
+        Int32 GetAt(Int32 index);
+        Int32 CompareTo(IndexPath other);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ISelectionModelSelectionChangedEventArgs", 6594b69b-f37d-51c7-9401-7a3e47427087)]
+    runtimeclass SelectionModelSelectionChangedEventArgs
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.UI.Xaml.Controls.ISelectionModelChildrenRequestedEventArgs", 8994cda4-d5e4-5f26-b130-60a4e7e1f19f)]
+    runtimeclass SelectionModelChildrenRequestedEventArgs
+    {
+        Object Source{ get; };
+        Object Children{ get; };
+        Object Children{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [constructor_name("Windows.UI.Xaml.Controls.ISelectionModelFactory", a6d86b77-7e6f-5fde-9923-c22e757b1ec6)]
+    [interface_name("Windows.UI.Xaml.Controls.ISelectionModel", 01f51e40-f7b6-573d-be65-6e88f6e41370)]
+    [threading(both)]
+    unsealed runtimeclass SelectionModel
+        : Windows.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        [method_name( "CreateInstance" )] SelectionModel();
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.SelectionModel, Windows.UI.Xaml.Controls.SelectionModelSelectionChangedEventArgs>  SelectionChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.SelectionModel, Windows.UI.Xaml.Controls.SelectionModelChildrenRequestedEventArgs>  ChildrenRequested;
+        Object Source{ get; };
+        Object Source{ set; };
+        Boolean SingleSelect{ get; };
+        Boolean SingleSelect{ set; };
+        Windows.UI.Xaml.Controls.IndexPath AnchorIndex{ get; };
+        Windows.UI.Xaml.Controls.IndexPath AnchorIndex{ set; };
+        Windows.UI.Xaml.Controls.IndexPath SelectedIndex{ get; };
+        Windows.UI.Xaml.Controls.IndexPath SelectedIndex{ set; };
+        Object SelectedItem{ get; };
+        Windows.Foundation.Collections.IVectorView <Object>  SelectedItems{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Xaml.Controls.IndexPath>  SelectedIndices{ get; };
+        [method_name("SetAnchorIndex")] void SetAnchorIndex(Int32 index);
+        [method_name("SetAnchorIndexWithGroup")] void SetAnchorIndex(Int32 groupIndex, Int32 itemIndex);
+        [method_name("Select")] [default_overload]
+        void Select(Int32 index);
+        [method_name("SelectWithGroup")] void Select(Int32 groupIndex, Int32 itemIndex);
+        void SelectAt(IndexPath index);
+        [method_name("Deselect")] [default_overload]
+        void Deselect(Int32 index);
+        [method_name("DeselectWithGroup")] void Deselect(Int32 groupIndex, Int32 itemIndex);
+        void DeselectAt(IndexPath index);
+        [default_overload]
+        [method_name("IsSelected")] Windows.Foundation.IReference <Boolean>  IsSelected(Int32 index);
+        [method_name("IsSelectedWithGroup")] Windows.Foundation.IReference <Boolean>  IsSelected(Int32 groupIndex, Int32 itemIndex);
+        Windows.Foundation.IReference <Boolean>  IsSelectedAt(IndexPath index);
+        [default_overload]
+        [method_name("SelectRangeFromAnchor")] void SelectRangeFromAnchor(Int32 index);
+        [method_name("SelectRangeFromAnchorWithGroup")] void SelectRangeFromAnchor(Int32 groupIndex, Int32 itemIndex);
+        void SelectRangeFromAnchorTo(IndexPath index);
+        [method_name("DeselectRangeFromAnchor")] [default_overload]
+        void DeselectRangeFromAnchor(Int32 index);
+        [method_name("DeselectRangeFromAnchorWithGroup")] void DeselectRangeFromAnchor(Int32 groupIndex, Int32 itemIndex);
+        void DeselectRangeFromAnchorTo(IndexPath index);
+        void SelectRange(IndexPath start, IndexPath end);
+        void DeselectRange(IndexPath start, IndexPath end);
+        void SelectAll();
+        void ClearSelection();
+
+        [feature(Velocity_SometimesAlwaysDisabled)]
+        [protected_name("Windows.UI.Xaml.Controls.ISelectionModelProtected", de1a8309-d4a3-556f-a181-acf27cc9d7d3)]
+        {
+            protected void OnPropertyChanged(String propertyName);
+        }
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRepeaterAutomationPeerFactory", fe0d8887-788d-577e-a0f6-8c811226b76e)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IRepeaterAutomationPeer", af4eb07a-ae1d-51db-be92-bba20763b225)]
+    [threading(both)]
+    unsealed runtimeclass RepeaterAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+        [method_name( "CreateInstance" )] RepeaterAutomationPeer(ItemsRepeater owner);
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum ScrollerState
+    {
+        Idle,
+        Interacting,
+        Inertia,
+        CustomAnimation,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum ScrollerScrollMode
+    {
+        Auto,
+        Enabled,
+        Disabled,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum ScrollerZoomMode
+    {
+        Enabled,
+        Disabled,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum ScrollerChainingMode
+    {
+        Auto,
+        Always,
+        Never,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum ScrollerRailingMode
+    {
+        Enabled,
+        Disabled,
+    };
+
+    [webhosthidden]
+    [flags]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum ScrollerInputKind
+    {
+        Touch = 1,
+        Pen,
+        MouseWheel = 4,
+        All = 255,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum ScrollerViewKind
+    {
+        Absolute,
+        RelativeToCurrentView,
+        RelativeToEndOfInertiaView,
+    };
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum ScrollerViewChangeKind
+    {
+        DisableAnimation,
+        AllowAnimation,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum ScrollerViewChangeSnapPointRespect
+    {
+        IgnoreSnapPoints,
+        RespectSnapPoints,
+    };
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum ScrollerViewChangeResult
+    {
+        Completed,
+        Interrupted,
+        Ignored,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.IScrollerChangeOffsetsOptionsFactory", 9eba2727-8711-5af8-b4c0-c15a4517ea13)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerChangeOffsetsOptions", b9786a1c-2f19-57a0-8e9d-19635030189c)]
+    [threading(both)]
+    runtimeclass ScrollerChangeOffsetsOptions
+    {
+        [method_name( "CreateInstance" )] ScrollerChangeOffsetsOptions(Double horizontalOffset, Double verticalOffset, ScrollerViewKind offsetsKind, ScrollerViewChangeKind viewChangeKind, ScrollerViewChangeSnapPointRespect snapPointRespect);
+        Double HorizontalOffset{ get; };
+        Double HorizontalOffset{ set; };
+        Double VerticalOffset{ get; };
+        Double VerticalOffset{ set; };
+        Windows.UI.Xaml.Controls.ScrollerViewKind OffsetsKind{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewKind OffsetsKind{ set; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeKind ViewChangeKind{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeKind ViewChangeKind{ set; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeSnapPointRespect SnapPointRespect{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeSnapPointRespect SnapPointRespect{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [constructor_name("Windows.UI.Xaml.Controls.IScrollerChangeOffsetsWithAdditionalVelocityOptionsFactory", 04263331-affa-5e51-9e38-051d73e1d621)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerChangeOffsetsWithAdditionalVelocityOptions", ef796015-cebd-5515-b704-b05eebb985b0)]
+    [threading(both)]
+    runtimeclass ScrollerChangeOffsetsWithAdditionalVelocityOptions
+    {
+        [method_name( "CreateInstance" )] ScrollerChangeOffsetsWithAdditionalVelocityOptions(Windows.Foundation.Numerics.Vector2 additionalVelocity, Windows.Foundation.IReference <Windows.Foundation.Numerics.Vector2>  inertiaDecayRate);
+        Windows.Foundation.Numerics.Vector2 AdditionalVelocity{ get; };
+        Windows.Foundation.Numerics.Vector2 AdditionalVelocity{ set; };
+        Windows.Foundation.IReference <Windows.Foundation.Numerics.Vector2>  InertiaDecayRate{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.Numerics.Vector2>  InertiaDecayRate{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.IScrollerChangeZoomFactorOptionsFactory", 8cb77bf0-4f1c-598a-9831-2e7544095a41)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerChangeZoomFactorOptions", 5150dff1-ca4c-5b0e-bad6-9330d55091ec)]
+    [threading(both)]
+    runtimeclass ScrollerChangeZoomFactorOptions
+    {
+        [method_name( "CreateInstance" )] ScrollerChangeZoomFactorOptions(Single zoomFactor, ScrollerViewKind zoomFactorKind, Windows.Foundation.Numerics.Vector2 centerPoint, ScrollerViewChangeKind viewChangeKind, ScrollerViewChangeSnapPointRespect snapPointRespect);
+        Single ZoomFactor{ get; };
+        Single ZoomFactor{ set; };
+        Windows.UI.Xaml.Controls.ScrollerViewKind ZoomFactorKind{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewKind ZoomFactorKind{ set; };
+        Windows.Foundation.Numerics.Vector2 CenterPoint{ get; };
+        Windows.Foundation.Numerics.Vector2 CenterPoint{ set; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeKind ViewChangeKind{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeKind ViewChangeKind{ set; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeSnapPointRespect SnapPointRespect{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeSnapPointRespect SnapPointRespect{ set; };
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IScrollerChangeZoomFactorWithAdditionalVelocityOptionsFactory", 125602df-b606-5d26-94eb-d5ae8579bb91)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerChangeZoomFactorWithAdditionalVelocityOptions", 12f1b566-e361-5dc9-8887-cf5906d5797f)]
+    [threading(both)]
+    runtimeclass ScrollerChangeZoomFactorWithAdditionalVelocityOptions
+    {
+        [method_name( "CreateInstance" )] ScrollerChangeZoomFactorWithAdditionalVelocityOptions(Single additionalVelocity, Windows.Foundation.IReference <Single>  inertiaDecayRate, Windows.Foundation.Numerics.Vector2 centerPoint);
+        Single AdditionalVelocity{ get; };
+        Single AdditionalVelocity{ set; };
+        Windows.Foundation.IReference <Single>  InertiaDecayRate{ get; };
+        Windows.Foundation.IReference <Single>  InertiaDecayRate{ set; };
+        Windows.Foundation.Numerics.Vector2 CenterPoint{ get; };
+        Windows.Foundation.Numerics.Vector2 CenterPoint{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerChangingOffsetsEventArgs", 88354f4b-f28c-5cc7-a311-7c3cb6cf3267)]
+    runtimeclass ScrollerChangingOffsetsEventArgs
+    {
+        Windows.UI.Composition.CompositionAnimation Animation{ get; };
+        Windows.UI.Composition.CompositionAnimation Animation{ set; };
+        Windows.Foundation.Numerics.Vector2 StartPosition{ get; };
+        Windows.Foundation.Numerics.Vector2 EndPosition{ get; };
+        Int32 ViewChangeId{ get; };
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerChangingZoomFactorEventArgs", 61c6c0ae-a28f-57b3-bf49-2163e8b11462)]
+    runtimeclass ScrollerChangingZoomFactorEventArgs
+    {
+        Windows.Foundation.Numerics.Vector2 CenterPoint{ get; };
+        Single StartZoomFactor{ get; };
+        Single EndZoomFactor{ get; };
+        Windows.UI.Composition.CompositionAnimation Animation{ get; };
+        Windows.UI.Composition.CompositionAnimation Animation{ set; };
+        Int32 ViewChangeId{ get; };
+    }
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerViewChangeCompletedEventArgs", 60b698f1-7593-558e-88f9-f7960243084f)]
+    runtimeclass ScrollerViewChangeCompletedEventArgs
+    {
+        Int32 ViewChangeId{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeResult Result{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerBringingIntoViewEventArgs", d7bfda89-be1b-57de-afb8-86a60e9ef4a0)]
+    runtimeclass ScrollerBringingIntoViewEventArgs
+    {
+        Windows.UI.Xaml.BringIntoViewRequestedEventArgs RequestEventArgs{ get; };
+        Double TargetHorizontalOffset{ get; };
+        Double TargetVerticalOffset{ get; };
+        Int32 ViewChangeId{ get; };
+        Boolean Cancel{ get; };
+        Boolean Cancel{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerAnchorRequestedEventArgs", 05eb4407-9aba-5c57-a2c8-f9691ee34a69)]
+    runtimeclass ScrollerAnchorRequestedEventArgs
+    {
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.UIElement>  AnchorCandidates{ get; };
+        Windows.UI.Xaml.UIElement AnchorElement{ get; };
+        Windows.UI.Xaml.UIElement AnchorElement{ set; };
+    }
+
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.ILayoutPanelFactory", 0cb7329a-43c6-5892-8ecc-74b743d1e75d)]
+    [static_name("Windows.UI.Xaml.Controls.ILayoutPanelStatics", 8d1e62cc-b20d-592b-9c77-6c6ee37e89a8)]
+    [interface_name("Windows.UI.Xaml.Controls.ILayoutPanel", 9ce7dde1-fd90-5a43-abc4-5b97777cedc2)]
+    [threading(both)]
+    unsealed runtimeclass LayoutPanel
+        : Windows.UI.Xaml.Controls.Panel
+    {
+        [method_name( "CreateInstance" )] LayoutPanel();
+        static Windows.UI.Xaml.DependencyProperty LayoutProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BorderBrushProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BorderThicknessProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PaddingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CornerRadiusProperty{ get; };
+        Windows.UI.Xaml.Controls.Layout Layout{ get; };
+        Windows.UI.Xaml.Controls.Layout Layout{ set; };
+        Windows.UI.Xaml.Media.Brush BorderBrush{ get; };
+        Windows.UI.Xaml.Media.Brush BorderBrush{ set; };
+        Windows.UI.Xaml.Thickness BorderThickness{ get; };
+        Windows.UI.Xaml.Thickness BorderThickness{ set; };
+        Windows.UI.Xaml.Thickness Padding{ get; };
+        Windows.UI.Xaml.Thickness Padding{ set; };
+        Windows.UI.Xaml.CornerRadius CornerRadius{ get; };
+        Windows.UI.Xaml.CornerRadius CornerRadius{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum ColorSpectrumShape
+    {
+        Box,
+        Ring,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum ColorSpectrumComponents
+    {
+        HueValue,
+        ValueHue,
+        HueSaturation,
+        SaturationHue,
+        SaturationValue,
+        ValueSaturation,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum ColorPickerHsvChannel
+    {
+        Hue,
+        Saturation,
+        Value,
+        Alpha,
+    };
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.IColorChangedEventArgs", 34f7201f-aad0-4c3a-b97b-2abf36455539)]
+    runtimeclass ColorChangedEventArgs
+    {
+        Windows.UI.Color OldColor{ get; };
+        Windows.UI.Color NewColor{ get; };
+    }
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.IColorPickerFactory", abae07ff-aecf-481d-9204-201c3894cd1b)]
+    [static_name("Windows.UI.Xaml.Controls.IColorPickerStatics", 67ca9be7-1574-451a-b6df-fe57d9d07b46)]
+    [interface_name("Windows.UI.Xaml.Controls.IColorPicker", 6232e371-5c64-43cb-8b35-7f82dde36740)]
+    [threading(both)]
+    unsealed runtimeclass ColorPicker
+        : Windows.UI.Xaml.Controls.Control
+    {
+        [method_name( "CreateInstance" )] ColorPicker();
+        static Windows.UI.Xaml.DependencyProperty ColorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PreviousColorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsAlphaEnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsColorSpectrumVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsColorPreviewVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsColorSliderVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsAlphaSliderVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsMoreButtonVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsColorChannelTextInputVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsAlphaTextInputVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsHexInputVisibleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinHueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxHueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinSaturationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxSaturationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinValueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxValueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ColorSpectrumShapeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ColorSpectrumComponentsProperty{ get; };
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+        Windows.Foundation.IReference <Windows.UI.Color>  PreviousColor{ get; };
+        Windows.Foundation.IReference <Windows.UI.Color>  PreviousColor{ set; };
+        Boolean IsAlphaEnabled{ get; };
+        Boolean IsAlphaEnabled{ set; };
+        Boolean IsColorSpectrumVisible{ get; };
+        Boolean IsColorSpectrumVisible{ set; };
+        Boolean IsColorPreviewVisible{ get; };
+        Boolean IsColorPreviewVisible{ set; };
+        Boolean IsColorSliderVisible{ get; };
+        Boolean IsColorSliderVisible{ set; };
+        Boolean IsAlphaSliderVisible{ get; };
+        Boolean IsAlphaSliderVisible{ set; };
+        Boolean IsMoreButtonVisible{ get; };
+        Boolean IsMoreButtonVisible{ set; };
+        Boolean IsColorChannelTextInputVisible{ get; };
+        Boolean IsColorChannelTextInputVisible{ set; };
+        Boolean IsAlphaTextInputVisible{ get; };
+        Boolean IsAlphaTextInputVisible{ set; };
+        Boolean IsHexInputVisible{ get; };
+        Boolean IsHexInputVisible{ set; };
+        Int32 MinHue{ get; };
+        Int32 MinHue{ set; };
+        Int32 MaxHue{ get; };
+        Int32 MaxHue{ set; };
+        Int32 MinSaturation{ get; };
+        Int32 MinSaturation{ set; };
+        Int32 MaxSaturation{ get; };
+        Int32 MaxSaturation{ set; };
+        Int32 MinValue{ get; };
+        Int32 MinValue{ set; };
+        Int32 MaxValue{ get; };
+        Int32 MaxValue{ set; };
+        Windows.UI.Xaml.Controls.ColorSpectrumShape ColorSpectrumShape{ get; };
+        Windows.UI.Xaml.Controls.ColorSpectrumShape ColorSpectrumShape{ set; };
+        Windows.UI.Xaml.Controls.ColorSpectrumComponents ColorSpectrumComponents{ get; };
+        Windows.UI.Xaml.Controls.ColorSpectrumComponents ColorSpectrumComponents{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.ColorPicker, Windows.UI.Xaml.Controls.ColorChangedEventArgs>  ColorChanged;
+    }
+
+
+
+
+
+    [webhosthidden]
+    [contentproperty("PrimaryCommands")]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.UI.Xaml.Controls.ICommandBarFlyoutFactory", dd6441b3-6df1-593d-b80c-daf5c1daee41)]
+    [interface_name("Windows.UI.Xaml.Controls.ICommandBarFlyout", fecd2c4d-f16a-58cd-8aca-db0f046f25c3)]
+    [threading(both)]
+    unsealed runtimeclass CommandBarFlyout
+        : Windows.UI.Xaml.Controls.Primitives.FlyoutBase
+    {
+        [method_name( "CreateInstance" )] CommandBarFlyout();
+        Windows.Foundation.Collections.IObservableVector <Windows.UI.Xaml.Controls.ICommandBarElement>  PrimaryCommands{ get; };
+        Windows.Foundation.Collections.IObservableVector <Windows.UI.Xaml.Controls.ICommandBarElement>  SecondaryCommands{ get; };
+    }
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.UI.Xaml.Controls.ITextCommandBarFlyoutFactory", 1b5918d8-b006-5ecd-ab72-6fdb48abc1f4)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ITextCommandBarFlyout", 90384f66-cd3d-5325-8f40-59b076463c40)]
+    [threading(both)]
+    unsealed runtimeclass TextCommandBarFlyout
+        : Windows.UI.Xaml.Controls.CommandBarFlyout
+    {
+        [method_name( "CreateInstance" )] TextCommandBarFlyout();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.UI.Xaml.Controls.IMenuBarItemFlyoutFactory", 1d24f9bd-bd19-5d95-b573-711f649fcbe9)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IMenuBarItemFlyout", ed00d2d8-b686-55fe-8dbb-f04a640e42ef)]
+    [threading(both)]
+    unsealed runtimeclass MenuBarItemFlyout
+        : Windows.UI.Xaml.Controls.MenuFlyout
+    {
+        [method_name( "CreateInstance" )] MenuBarItemFlyout();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contentproperty("Items")]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.UI.Xaml.Controls.IMenuBarItemStatics", 60a9e3fb-b405-50d0-bb78-d396a34da267)]
+    [constructor_name("Windows.UI.Xaml.Controls.IMenuBarItemFactory", ecf86f62-c394-50e2-a568-17af8cf26874)]
+    [interface_name("Windows.UI.Xaml.Controls.IMenuBarItem", bf643b4c-8125-5b53-a454-06e896a5acee)]
+    [threading(both)]
+    unsealed runtimeclass MenuBarItem
+        : Windows.UI.Xaml.Controls.Control
+    {
+        static Windows.UI.Xaml.DependencyProperty TitleProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemsProperty{ get; };
+        [method_name( "CreateInstance" )] MenuBarItem();
+        String Title{ get; };
+        String Title{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.MenuFlyoutItemBase>  Items{ get; };
+    }
+
+
+
+
+    [contentproperty("Items")]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IMenuBarFactory", dc619e50-72ba-513f-80aa-ddd093825dde)]
+    [static_name("Windows.UI.Xaml.Controls.IMenuBarStatics", bed31c25-7db8-51cc-9706-1d79327daf93)]
+    [interface_name("Windows.UI.Xaml.Controls.IMenuBar", c8f67b0c-0e76-5af2-bade-785049c80a41)]
+    [threading(both)]
+    unsealed runtimeclass MenuBar
+        : Windows.UI.Xaml.Controls.Control
+    {
+        [method_name( "CreateInstance" )] MenuBar();
+        static Windows.UI.Xaml.DependencyProperty ItemsProperty{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.MenuBarItem>  Items{ get; };
+    }
+
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.IPersonPictureFactory", 4f18330d-0416-4b92-bfd3-bf5780b46ab2)]
+    [static_name("Windows.UI.Xaml.Controls.IPersonPictureStatics", dbec0982-3c10-4639-9614-aa5b7cdc32ca)]
+    [interface_name("Windows.UI.Xaml.Controls.IPersonPicture", 6c230b6d-0d75-4059-91bc-7b174d1d7315)]
+    [threading(both)]
+    unsealed runtimeclass PersonPicture
+        : Windows.UI.Xaml.Controls.Control
+    {
+        [method_name( "CreateInstance" )] PersonPicture();
+        static Windows.UI.Xaml.DependencyProperty BadgeNumberProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BadgeGlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BadgeImageSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BadgeTextProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsGroupProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ContactProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty DisplayNameProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty InitialsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PreferSmallImageProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ProfilePictureProperty{ get; };
+        Int32 BadgeNumber{ get; };
+        Int32 BadgeNumber{ set; };
+        String BadgeGlyph{ get; };
+        String BadgeGlyph{ set; };
+        Windows.UI.Xaml.Media.ImageSource BadgeImageSource{ get; };
+        Windows.UI.Xaml.Media.ImageSource BadgeImageSource{ set; };
+        String BadgeText{ get; };
+        String BadgeText{ set; };
+        Boolean IsGroup{ get; };
+        Boolean IsGroup{ set; };
+        Windows.ApplicationModel.Contacts.Contact Contact{ get; };
+        Windows.ApplicationModel.Contacts.Contact Contact{ set; };
+        String DisplayName{ get; };
+        String DisplayName{ set; };
+        String Initials{ get; };
+        String Initials{ set; };
+        Boolean PreferSmallImage{ get; };
+        Boolean PreferSmallImage{ set; };
+        Windows.UI.Xaml.Media.ImageSource ProfilePicture{ get; };
+        Windows.UI.Xaml.Media.ImageSource ProfilePicture{ set; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    enum RefreshVisualizerOrientation
+    {
+        Auto,
+        Normal,
+        Rotate90DegreesCounterclockwise,
+        Rotate270DegreesCounterclockwise,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum RefreshVisualizerState
+    {
+        Idle,
+        Peeking,
+        Interacting,
+        Pending,
+        Refreshing,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IRefreshInteractionRatioChangedEventArgs", d7e47820-dc47-4b8e-bb27-7f0a83f29a07)]
+    runtimeclass RefreshInteractionRatioChangedEventArgs
+    {
+        Double InteractionRatio{ get; };
+    }
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.UI.Xaml.Controls.IRefreshRequestedEventArgs", 1b089f43-cfcf-4ac6-b31f-8dab6eefdd93)]
+    runtimeclass RefreshRequestedEventArgs
+    {
+        Windows.Foundation.Deferral GetDeferral();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.UI.Xaml.Controls.IRefreshStateChangedEventArgs", bb6c901e-21fe-4109-af80-73ec661b678a)]
+    runtimeclass RefreshStateChangedEventArgs
+    {
+        Windows.UI.Xaml.Controls.RefreshVisualizerState OldState{ get; };
+        Windows.UI.Xaml.Controls.RefreshVisualizerState NewState{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [static_name("Windows.UI.Xaml.Controls.IRefreshVisualizerStatics", afea56af-362a-4015-b155-733a1f869831)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRefreshVisualizerFactory", 6f5c6132-6e09-4c10-824a-127d36672715)]
+    [interface_name("Windows.UI.Xaml.Controls.IRefreshVisualizer", c0e30122-f3eb-4baa-a11f-c3f87342cbf4)]
+    [threading(both)]
+    unsealed runtimeclass RefreshVisualizer
+        : Windows.UI.Xaml.Controls.Control
+    {
+        static Windows.UI.Xaml.DependencyProperty InfoProviderProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty OrientationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ContentProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty StateProperty{ get; };
+        [method_name( "CreateInstance" )] RefreshVisualizer();
+        void RequestRefresh();
+        Windows.UI.Xaml.Controls.RefreshVisualizerOrientation Orientation{ get; };
+        Windows.UI.Xaml.Controls.RefreshVisualizerOrientation Orientation{ set; };
+        Windows.UI.Xaml.UIElement Content{ get; };
+        Windows.UI.Xaml.UIElement Content{ set; };
+        Windows.UI.Xaml.Controls.RefreshVisualizerState State{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.RefreshVisualizer, Windows.UI.Xaml.Controls.RefreshRequestedEventArgs>  RefreshRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.RefreshVisualizer, Windows.UI.Xaml.Controls.RefreshStateChangedEventArgs>  RefreshStateChanged;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    enum RefreshPullDirection
+    {
+        LeftToRight,
+        TopToBottom,
+        RightToLeft,
+        BottomToTop,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRefreshContainerFactory", 0a04777f-089e-4239-baeb-c4641484c37e)]
+    [static_name("Windows.UI.Xaml.Controls.IRefreshContainerStatics", a20af5a5-7015-475d-9de3-81a0479dda38)]
+    [interface_name("Windows.UI.Xaml.Controls.IRefreshContainer", 535dc413-b1d5-43c1-b057-8658ce1e0ba2)]
+    [threading(both)]
+    unsealed runtimeclass RefreshContainer
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        [method_name( "CreateInstance" )] RefreshContainer();
+        static Windows.UI.Xaml.DependencyProperty VisualizerProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PullDirectionProperty{ get; };
+        Windows.UI.Xaml.Controls.RefreshVisualizer Visualizer{ get; };
+        Windows.UI.Xaml.Controls.RefreshVisualizer Visualizer{ set; };
+        Windows.UI.Xaml.Controls.RefreshPullDirection PullDirection{ get; };
+        Windows.UI.Xaml.Controls.RefreshPullDirection PullDirection{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.RefreshContainer, Windows.UI.Xaml.Controls.RefreshRequestedEventArgs>  RefreshRequested;
+        void RequestRefresh();
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRatingItemInfoFactory", b0fd43d6-cfec-43c8-9ac5-0b0d5e25d862)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IRatingItemInfo", 9ccbe6a2-591e-47a0-a318-6a1f7947da2d)]
+    [threading(both)]
+    unsealed runtimeclass RatingItemInfo
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] RatingItemInfo();
+    }
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRatingItemFontInfoFactory", 9603fe56-9e9f-40b5-bae1-4481bb73bcd3)]
+    [static_name("Windows.UI.Xaml.Controls.IRatingItemFontInfoStatics", fb214f01-6434-4eeb-82ff-7ce5d40bf510)]
+    [interface_name("Windows.UI.Xaml.Controls.IRatingItemFontInfo", 054723e9-7989-4d5c-9d01-a7eb876f1071)]
+    [threading(both)]
+    unsealed runtimeclass RatingItemFontInfo
+        : Windows.UI.Xaml.Controls.RatingItemInfo
+    {
+        [method_name( "CreateInstance" )] RatingItemFontInfo();
+        static Windows.UI.Xaml.DependencyProperty DisabledGlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty GlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PlaceholderGlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PointerOverGlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PointerOverPlaceholderGlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty UnsetGlyphProperty{ get; };
+        String DisabledGlyph{ get; };
+        String DisabledGlyph{ set; };
+        String Glyph{ get; };
+        String Glyph{ set; };
+        String PointerOverGlyph{ get; };
+        String PointerOverGlyph{ set; };
+        String PointerOverPlaceholderGlyph{ get; };
+        String PointerOverPlaceholderGlyph{ set; };
+        String PlaceholderGlyph{ get; };
+        String PlaceholderGlyph{ set; };
+        String UnsetGlyph{ get; };
+        String UnsetGlyph{ set; };
+    }
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRatingItemImageInfoFactory", 269e03f2-da79-4787-9f4a-24a6fa56cde2)]
+    [static_name("Windows.UI.Xaml.Controls.IRatingItemImageInfoStatics", 8438486b-4b1c-4123-ba0b-73484d68c338)]
+    [interface_name("Windows.UI.Xaml.Controls.IRatingItemImageInfo", 25240e8c-e0d2-490e-b8f8-96c8ee0512b9)]
+    [threading(both)]
+    unsealed runtimeclass RatingItemImageInfo
+        : Windows.UI.Xaml.Controls.RatingItemInfo
+    {
+        [method_name( "CreateInstance" )] RatingItemImageInfo();
+        static Windows.UI.Xaml.DependencyProperty DisabledImageProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ImageProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PlaceholderImageProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PointerOverImageProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PointerOverPlaceholderImageProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty UnsetImageProperty{ get; };
+        Windows.UI.Xaml.Media.ImageSource DisabledImage{ get; };
+        Windows.UI.Xaml.Media.ImageSource DisabledImage{ set; };
+        Windows.UI.Xaml.Media.ImageSource Image{ get; };
+        Windows.UI.Xaml.Media.ImageSource Image{ set; };
+        Windows.UI.Xaml.Media.ImageSource PlaceholderImage{ get; };
+        Windows.UI.Xaml.Media.ImageSource PlaceholderImage{ set; };
+        Windows.UI.Xaml.Media.ImageSource PointerOverImage{ get; };
+        Windows.UI.Xaml.Media.ImageSource PointerOverImage{ set; };
+        Windows.UI.Xaml.Media.ImageSource PointerOverPlaceholderImage{ get; };
+        Windows.UI.Xaml.Media.ImageSource PointerOverPlaceholderImage{ set; };
+        Windows.UI.Xaml.Media.ImageSource UnsetImage{ get; };
+        Windows.UI.Xaml.Media.ImageSource UnsetImage{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRatingControlFactory", 18d81716-c542-4ccb-b347-5e62c5db782e)]
+    [static_name("Windows.UI.Xaml.Controls.IRatingControlStatics", d062d399-ad85-4c1c-b2c4-35dd4432275e)]
+    [interface_name("Windows.UI.Xaml.Controls.IRatingControl", a7d91ca7-e5cf-4963-a24e-9673fe5ffdd5)]
+    [threading(both)]
+    unsealed runtimeclass RatingControl
+        : Windows.UI.Xaml.Controls.Control
+    {
+        [method_name( "CreateInstance" )] RatingControl();
+        static Windows.UI.Xaml.DependencyProperty CaptionProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty InitialSetValueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsClearEnabledProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsReadOnlyProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxRatingProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PlaceholderValueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemInfoProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ValueProperty{ get; };
+        String Caption{ get; };
+        String Caption{ set; };
+        Int32 InitialSetValue{ get; };
+        Int32 InitialSetValue{ set; };
+        Boolean IsClearEnabled{ get; };
+        Boolean IsClearEnabled{ set; };
+        Boolean IsReadOnly{ get; };
+        Boolean IsReadOnly{ set; };
+        Int32 MaxRating{ get; };
+        Int32 MaxRating{ set; };
+        Double PlaceholderValue{ get; };
+        Double PlaceholderValue{ set; };
+        Windows.UI.Xaml.Controls.RatingItemInfo ItemInfo{ get; };
+        Windows.UI.Xaml.Controls.RatingItemInfo ItemInfo{ set; };
+        Double Value{ get; };
+        Double Value{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.RatingControl, Object>  ValueChanged;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum TwoPaneViewPriority
+    {
+        Pane1,
+        Pane2,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum TwoPaneViewMode
+    {
+        SinglePane,
+        Wide,
+        Tall,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum TwoPaneViewWideModeConfiguration
+    {
+        SinglePane,
+        LeftRight,
+        RightLeft,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum TwoPaneViewTallModeConfiguration
+    {
+        SinglePane,
+        TopBottom,
+        BottomTop,
+    };
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.ITwoPaneViewFactory", 18ff792d-58b4-59ed-a051-51aceffbcca9)]
+    [static_name("Windows.UI.Xaml.Controls.ITwoPaneViewStatics", 5a35c389-85c4-55f4-abb1-97451bc32d71)]
+    [interface_name("Windows.UI.Xaml.Controls.ITwoPaneView", 1b4d0db5-14ad-5926-bb8a-5b0a5c0085f0)]
+    [threading(both)]
+    unsealed runtimeclass TwoPaneView
+        : Windows.UI.Xaml.Controls.Control
+    {
+        [method_name( "CreateInstance" )] TwoPaneView();
+        static Windows.UI.Xaml.DependencyProperty Pane1Property{ get; };
+        static Windows.UI.Xaml.DependencyProperty Pane2Property{ get; };
+        static Windows.UI.Xaml.DependencyProperty Pane1LengthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty Pane2LengthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty PanePriorityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty WideModeConfigurationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TallModeConfigurationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinWideModeWidthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinTallModeHeightProperty{ get; };
+        Windows.UI.Xaml.UIElement Pane1{ get; };
+        Windows.UI.Xaml.UIElement Pane1{ set; };
+        Windows.UI.Xaml.UIElement Pane2{ get; };
+        Windows.UI.Xaml.UIElement Pane2{ set; };
+        Windows.UI.Xaml.GridLength Pane1Length{ get; };
+        Windows.UI.Xaml.GridLength Pane1Length{ set; };
+        Windows.UI.Xaml.GridLength Pane2Length{ get; };
+        Windows.UI.Xaml.GridLength Pane2Length{ set; };
+        Windows.UI.Xaml.Controls.TwoPaneViewPriority PanePriority{ get; };
+        Windows.UI.Xaml.Controls.TwoPaneViewPriority PanePriority{ set; };
+        Windows.UI.Xaml.Controls.TwoPaneViewMode Mode{ get; };
+        Windows.UI.Xaml.Controls.TwoPaneViewWideModeConfiguration WideModeConfiguration{ get; };
+        Windows.UI.Xaml.Controls.TwoPaneViewWideModeConfiguration WideModeConfiguration{ set; };
+        Windows.UI.Xaml.Controls.TwoPaneViewTallModeConfiguration TallModeConfiguration{ get; };
+        Windows.UI.Xaml.Controls.TwoPaneViewTallModeConfiguration TallModeConfiguration{ set; };
+        Double MinWideModeWidth{ get; };
+        Double MinWideModeWidth{ set; };
+        Double MinTallModeHeight{ get; };
+        Double MinTallModeHeight{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.TwoPaneView, Object>  ModeChanged;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum SwipeBehaviorOnInvoked
+    {
+        Auto,
+        Close,
+        RemainOpen,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum SwipeMode
+    {
+        Reveal,
+        Execute,
+    };
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.ISwipeItemsFactory", 47c460ee-d5aa-445f-b31e-50c076c011b9)]
+    [static_name("Windows.UI.Xaml.Controls.ISwipeItemsStatics", 376250df-48db-43e3-b0e9-089e5da9a114)]
+    [interface_name("Windows.UI.Xaml.Controls.ISwipeItems", b01726ff-969a-40d0-9f04-76084ce6d7b7)]
+    [threading(both)]
+    unsealed runtimeclass SwipeItems
+        : Windows.UI.Xaml.DependencyObject
+        , Windows.Foundation.Collections.IVector<Windows.UI.Xaml.Controls.SwipeItem>
+        , Windows.Foundation.Collections.IIterable<Windows.UI.Xaml.Controls.SwipeItem>
+    {
+        [method_name( "CreateInstance" )] SwipeItems();
+        static Windows.UI.Xaml.DependencyProperty ModeProperty{ get; };
+        Windows.UI.Xaml.Controls.SwipeMode Mode{ get; };
+        Windows.UI.Xaml.Controls.SwipeMode Mode{ set; };
+    }
+
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.ISwipeControlFactory", c0aaa3ae-d141-4e12-a728-5f95b507e7ab)]
+    [static_name("Windows.UI.Xaml.Controls.ISwipeControlStatics", e57ae83c-2216-4717-9ef6-4662334c6501)]
+    [interface_name("Windows.UI.Xaml.Controls.ISwipeControl", 9ee3d96f-6704-4823-aa15-1c143bc53cf7)]
+    [threading(both)]
+    unsealed runtimeclass SwipeControl
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        [method_name( "CreateInstance" )] SwipeControl();
+        static Windows.UI.Xaml.DependencyProperty LeftItemsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty RightItemsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TopItemsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BottomItemsProperty{ get; };
+        Windows.UI.Xaml.Controls.SwipeItems LeftItems{ get; };
+        Windows.UI.Xaml.Controls.SwipeItems LeftItems{ set; };
+        Windows.UI.Xaml.Controls.SwipeItems RightItems{ get; };
+        Windows.UI.Xaml.Controls.SwipeItems RightItems{ set; };
+        Windows.UI.Xaml.Controls.SwipeItems TopItems{ get; };
+        Windows.UI.Xaml.Controls.SwipeItems TopItems{ set; };
+        Windows.UI.Xaml.Controls.SwipeItems BottomItems{ get; };
+        Windows.UI.Xaml.Controls.SwipeItems BottomItems{ set; };
+        void Close();
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.ISwipeItemInvokedEventArgs", c5b025f5-cb32-4733-8011-5d0d37f4550a)]
+    runtimeclass SwipeItemInvokedEventArgs
+    {
+        Windows.UI.Xaml.Controls.SwipeControl SwipeControl{ get; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.ISwipeItemFactory", 844bd61a-1716-4097-bba2-7526da22de39)]
+    [static_name("Windows.UI.Xaml.Controls.ISwipeItemStatics", d0b44e96-2766-4d93-b5db-f5e1be832c2d)]
+    [interface_name("Windows.UI.Xaml.Controls.ISwipeItem", 836edadc-45c8-4a00-90a0-7107fa894a1b)]
+    [threading(both)]
+    unsealed runtimeclass SwipeItem
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] SwipeItem();
+        static Windows.UI.Xaml.DependencyProperty IconSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TextProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BackgroundProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ForegroundProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CommandProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CommandParameterProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty BehaviorOnInvokedProperty{ get; };
+        String Text{ get; };
+        String Text{ set; };
+        Windows.UI.Xaml.Controls.IconSource IconSource{ get; };
+        Windows.UI.Xaml.Controls.IconSource IconSource{ set; };
+        Windows.UI.Xaml.Media.Brush Background{ get; };
+        Windows.UI.Xaml.Media.Brush Background{ set; };
+        Windows.UI.Xaml.Media.Brush Foreground{ get; };
+        Windows.UI.Xaml.Media.Brush Foreground{ set; };
+        Windows.UI.Xaml.Input.ICommand Command{ get; };
+        Windows.UI.Xaml.Input.ICommand Command{ set; };
+        Object CommandParameter{ get; };
+        Object CommandParameter{ set; };
+        Windows.UI.Xaml.Controls.SwipeBehaviorOnInvoked BehaviorOnInvoked{ get; };
+        Windows.UI.Xaml.Controls.SwipeBehaviorOnInvoked BehaviorOnInvoked{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.SwipeItem, Windows.UI.Xaml.Controls.SwipeItemInvokedEventArgs>  Invoked;
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum TreeViewSelectionMode
+    {
+        None,
+        Multiple,
+    };
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewItemInvokedEventArgs", 472ab521-0242-4290-9363-ab4fe704527f)]
+    runtimeclass TreeViewItemInvokedEventArgs
+    {
+        Object InvokedItem{ get; };
+        Boolean Handled{ set; };
+        Boolean Handled{ get; };
+    }
+
+
+    [bindable]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.ITreeViewNodeFactory", 6ec62d90-aa19-414a-8a45-0a5589a836f7)]
+    [static_name("Windows.UI.Xaml.Controls.ITreeViewNodeStatics", 5d8276fe-e1d1-4b61-9e81-c7fb189a2980)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewNode", c04c8ed3-9af2-4e75-a329-7497a110e7a8)]
+    [threading(both)]
+    unsealed runtimeclass TreeViewNode
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] TreeViewNode();
+        static Windows.UI.Xaml.DependencyProperty ContentProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty DepthProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsExpandedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HasChildrenProperty{ get; };
+        Object Content{ get; };
+        Object Content{ set; };
+        Windows.UI.Xaml.Controls.TreeViewNode Parent{ get; };
+        Boolean IsExpanded{ get; };
+        Boolean IsExpanded{ set; };
+        Boolean HasChildren{ get; };
+        Int32 Depth{ get; };
+        Boolean HasUnrealizedChildren{ get; };
+        Boolean HasUnrealizedChildren{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.TreeViewNode>  Children{ get; };
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewExpandingEventArgs", c5e1fa63-4154-49d2-a21f-c34176605e3a)]
+    runtimeclass TreeViewExpandingEventArgs
+    {
+        Windows.UI.Xaml.Controls.TreeViewNode Node{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.ITreeViewExpandingEventArgs2", a12f54c3-87b9-5623-9c74-e6dd443cde18)]
+        {
+            Object Item{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewCollapsedEventArgs", 391db3b0-1e58-4539-9e93-387978f46cce)]
+    runtimeclass TreeViewCollapsedEventArgs
+    {
+        Windows.UI.Xaml.Controls.TreeViewNode Node{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.ITreeViewCollapsedEventArgs2", 747b2f4f-7b25-56aa-8300-78d83b7ab2db)]
+        {
+            Object Item{ get; };
+        }
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewDragItemsStartingEventArgs", 7bdb7ec4-e125-5773-9a3f-6695233d6250)]
+    runtimeclass TreeViewDragItemsStartingEventArgs
+    {
+        Boolean Cancel{ get; };
+        Boolean Cancel{ set; };
+        Windows.ApplicationModel.DataTransfer.DataPackage Data{ get; };
+        Windows.Foundation.Collections.IVector <Object>  Items{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewDragItemsCompletedEventArgs", 3ca8632c-4311-574e-8ab4-3b7aa5de7a88)]
+    runtimeclass TreeViewDragItemsCompletedEventArgs
+    {
+        Windows.ApplicationModel.DataTransfer.DataPackageOperation DropResult{ get; };
+        Windows.Foundation.Collections.IVectorView <Object>  Items{ get; };
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.ITreeViewListFactory", 288f6232-41d2-46f7-b1f5-691c625264b7)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewList", 0f00a54e-099a-47a5-a942-94692b01f452)]
+    [threading(both)]
+    unsealed runtimeclass TreeViewList
+        : Windows.UI.Xaml.Controls.ListView
+    {
+        [method_name( "CreateInstance" )] TreeViewList();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.ITreeViewFactory", cc5267c3-6c69-49ce-b445-753acee7948b)]
+    [static_name("Windows.UI.Xaml.Controls.ITreeViewStatics", ef913e08-83f2-4e16-bfb1-1577b98355f5)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeView", 9353cc5c-dd6e-453c-aedd-0c3ac993978b)]
+    [threading(both)]
+    unsealed runtimeclass TreeView
+        : Windows.UI.Xaml.Controls.Control
+    {
+        [method_name( "CreateInstance" )] TreeView();
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.UI.Xaml.Controls.ITreeViewStatics2", 16b1c8f9-7aa1-5e38-8218-7bba3ea417c0)]
+        {
+            static Windows.UI.Xaml.DependencyProperty CanDragItemsProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty CanReorderItemsProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ItemTemplateProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ItemTemplateSelectorProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ItemContainerStyleProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ItemContainerStyleSelectorProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ItemContainerTransitionsProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ItemsSourceProperty{ get; };
+        }
+        static Windows.UI.Xaml.DependencyProperty SelectionModeProperty{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.TreeViewNode>  RootNodes{ get; };
+        Windows.UI.Xaml.Controls.TreeViewSelectionMode SelectionMode{ get; };
+        Windows.UI.Xaml.Controls.TreeViewSelectionMode SelectionMode{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.TreeViewNode>  SelectedNodes{ get; };
+        void Expand(TreeViewNode value);
+        void Collapse(TreeViewNode value);
+        void SelectAll();
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.TreeView, Windows.UI.Xaml.Controls.TreeViewItemInvokedEventArgs>  ItemInvoked;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.TreeView, Windows.UI.Xaml.Controls.TreeViewExpandingEventArgs>  Expanding;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.TreeView, Windows.UI.Xaml.Controls.TreeViewCollapsedEventArgs>  Collapsed;
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.ITreeView2", 4f33a2e6-2f29-55d3-a1ab-1f4a863bf960)]
+        {
+            Windows.UI.Xaml.Controls.TreeViewNode NodeFromContainer(Windows.UI.Xaml.DependencyObject container);
+            Windows.UI.Xaml.DependencyObject ContainerFromNode(TreeViewNode node);
+            Object ItemFromContainer(Windows.UI.Xaml.DependencyObject container);
+            Windows.UI.Xaml.DependencyObject ContainerFromItem(Object item);
+            Boolean CanDragItems{ get; };
+            Boolean CanDragItems{ set; };
+            Boolean CanReorderItems{ get; };
+            Boolean CanReorderItems{ set; };
+            Windows.UI.Xaml.DataTemplate ItemTemplate{ get; };
+            Windows.UI.Xaml.DataTemplate ItemTemplate{ set; };
+            Windows.UI.Xaml.Controls.DataTemplateSelector ItemTemplateSelector{ get; };
+            Windows.UI.Xaml.Controls.DataTemplateSelector ItemTemplateSelector{ set; };
+            Windows.UI.Xaml.Style ItemContainerStyle{ get; };
+            Windows.UI.Xaml.Style ItemContainerStyle{ set; };
+            Windows.UI.Xaml.Controls.StyleSelector ItemContainerStyleSelector{ get; };
+            Windows.UI.Xaml.Controls.StyleSelector ItemContainerStyleSelector{ set; };
+            Windows.UI.Xaml.Media.Animation.TransitionCollection ItemContainerTransitions{ get; };
+            Windows.UI.Xaml.Media.Animation.TransitionCollection ItemContainerTransitions{ set; };
+            Object ItemsSource{ get; };
+            Object ItemsSource{ set; };
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.TreeView, Windows.UI.Xaml.Controls.TreeViewDragItemsStartingEventArgs>  DragItemsStarting;
+            event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.TreeView, Windows.UI.Xaml.Controls.TreeViewDragItemsCompletedEventArgs>  DragItemsCompleted;
+        }
+    }
+
+
+
+
+
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [constructor_name("Windows.UI.Xaml.Controls.ITreeViewItemTemplateSettingsFactory", 11a1953b-31b7-4f40-8633-02fc614b518c)]
+    [static_name("Windows.UI.Xaml.Controls.ITreeViewItemTemplateSettingsStatics", 55c720a8-70ed-4c21-93f4-2d79c1a4a5f7)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewItemTemplateSettings", ec323744-de31-4936-bfc2-1cb37ba1dc08)]
+    [threading(both)]
+    unsealed runtimeclass TreeViewItemTemplateSettings
+        : Windows.UI.Xaml.DependencyObject
+    {
+        [method_name( "CreateInstance" )] TreeViewItemTemplateSettings();
+        static Windows.UI.Xaml.DependencyProperty ExpandedGlyphVisibilityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CollapsedGlyphVisibilityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IndentationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty DragItemsCountProperty{ get; };
+        Windows.UI.Xaml.Visibility ExpandedGlyphVisibility{ get; };
+        Windows.UI.Xaml.Visibility CollapsedGlyphVisibility{ get; };
+        Windows.UI.Xaml.Thickness Indentation{ get; };
+        Int32 DragItemsCount{ get; };
+    }
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [constructor_name("Windows.UI.Xaml.Controls.ITreeViewItemFactory", 4ea32731-568d-4d0d-adfd-3d8dc5aa5d88)]
+    [static_name("Windows.UI.Xaml.Controls.ITreeViewItemStatics", 436795be-7396-46dc-a264-21c56581c5e5)]
+    [interface_name("Windows.UI.Xaml.Controls.ITreeViewItem", 4e05d3e6-6167-44e7-9c74-291ddd6df6eb)]
+    [threading(both)]
+    unsealed runtimeclass TreeViewItem
+        : Windows.UI.Xaml.Controls.ListViewItem
+    {
+        [method_name( "CreateInstance" )] TreeViewItem();
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.UI.Xaml.Controls.ITreeViewItemStatics2", a8af82f3-d803-5c25-b48d-ae0e73b16d8e)]
+        {
+            static Windows.UI.Xaml.DependencyProperty HasUnrealizedChildrenProperty{ get; };
+            static Windows.UI.Xaml.DependencyProperty ItemsSourceProperty{ get; };
+        }
+        static Windows.UI.Xaml.DependencyProperty GlyphOpacityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty GlyphBrushProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ExpandedGlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CollapsedGlyphProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty GlyphSizeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsExpandedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TreeViewItemTemplateSettingsProperty{ get; };
+        Double GlyphOpacity{ get; };
+        Double GlyphOpacity{ set; };
+        Windows.UI.Xaml.Media.Brush GlyphBrush{ get; };
+        Windows.UI.Xaml.Media.Brush GlyphBrush{ set; };
+        String ExpandedGlyph{ get; };
+        String ExpandedGlyph{ set; };
+        String CollapsedGlyph{ get; };
+        String CollapsedGlyph{ set; };
+        Double GlyphSize{ get; };
+        Double GlyphSize{ set; };
+        Boolean IsExpanded{ get; };
+        Boolean IsExpanded{ set; };
+        Windows.UI.Xaml.Controls.TreeViewItemTemplateSettings TreeViewItemTemplateSettings{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.UI.Xaml.Controls.ITreeViewItem2", 007baf7f-0493-51b4-879c-458024b34149)]
+        {
+            Boolean HasUnrealizedChildren{ get; };
+            Boolean HasUnrealizedChildren{ set; };
+            Object ItemsSource{ get; };
+            Object ItemsSource{ set; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ISplitButtonClickEventArgs", c227c2ca-26f4-5960-98d5-919149d1b525)]
+    runtimeclass SplitButtonClickEventArgs
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.UI.Xaml.Controls.ISplitButtonStatics", 8df07a81-0b1f-5ea9-be42-152ab9a4bc5e)]
+    [constructor_name("Windows.UI.Xaml.Controls.ISplitButtonFactory", 3201c32f-4d55-589d-97dd-617fa3642137)]
+    [interface_name("Windows.UI.Xaml.Controls.ISplitButton", 58bbb066-c2ea-5499-8150-40faa75f6bb5)]
+    [threading(both)]
+    unsealed runtimeclass SplitButton
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        static Windows.UI.Xaml.DependencyProperty FlyoutProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CommandProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty CommandParameterProperty{ get; };
+        [method_name( "CreateInstance" )] SplitButton();
+        Windows.UI.Xaml.Controls.Primitives.FlyoutBase Flyout{ get; };
+        Windows.UI.Xaml.Controls.Primitives.FlyoutBase Flyout{ set; };
+        Windows.UI.Xaml.Input.ICommand Command{ get; };
+        Windows.UI.Xaml.Input.ICommand Command{ set; };
+        Object CommandParameter{ get; };
+        Object CommandParameter{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.SplitButton, Windows.UI.Xaml.Controls.SplitButtonClickEventArgs>  Click;
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IToggleSplitButtonIsCheckedChangedEventArgs", 2138f0cf-5fcd-5dbb-99ae-359483070f6b)]
+    runtimeclass ToggleSplitButtonIsCheckedChangedEventArgs
+    {
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.UI.Xaml.Controls.IToggleSplitButtonFactory", 3fcf073b-e57c-573d-af38-d1b2ad387951)]
+    [interface_name("Windows.UI.Xaml.Controls.IToggleSplitButton", 28981b31-8e78-570c-bebb-685814485ae9)]
+    [threading(both)]
+    unsealed runtimeclass ToggleSplitButton
+        : Windows.UI.Xaml.Controls.SplitButton
+    {
+        [method_name( "CreateInstance" )] ToggleSplitButton();
+        Boolean IsChecked{ get; };
+        Boolean IsChecked{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.ToggleSplitButton, Windows.UI.Xaml.Controls.ToggleSplitButtonIsCheckedChangedEventArgs>  IsCheckedChanged;
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.ISplitButtonAutomationPeerFactory", d63a2534-77dc-5361-8422-4ad8750f45f4)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ISplitButtonAutomationPeer", c46a58b8-3828-5c36-aa13-f79f02c12f34)]
+    [threading(both)]
+    unsealed runtimeclass SplitButtonAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+        , Windows.UI.Xaml.Automation.Provider.IExpandCollapseProvider
+        , Windows.UI.Xaml.Automation.Provider.IInvokeProvider
+    {
+        [method_name( "CreateInstance" )] SplitButtonAutomationPeer(SplitButton owner);
+    }
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.UI.Xaml.Controls.IToggleSplitButtonAutomationPeerFactory", 9829b0a0-5a30-5eed-a3a3-1472c53b0a66)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IToggleSplitButtonAutomationPeer", 538e61de-7d46-5da7-94ab-acede6a12b9e)]
+    [threading(both)]
+    unsealed runtimeclass ToggleSplitButtonAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+        , Windows.UI.Xaml.Automation.Provider.IExpandCollapseProvider
+        , Windows.UI.Xaml.Automation.Provider.IToggleProvider
+    {
+        [method_name( "CreateInstance" )] ToggleSplitButtonAutomationPeer(ToggleSplitButton owner);
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IDropDownButtonFactory", 0d9f8ab5-e70d-52bd-9ca0-36ceecaa642a)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IDropDownButton", 671f74e6-2a27-5fa8-b0a2-79b2e71ebd87)]
+    [threading(both)]
+    unsealed runtimeclass DropDownButton
+        : Windows.UI.Xaml.Controls.Button
+    {
+        [method_name( "CreateInstance" )] DropDownButton();
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IDropDownButtonAutomationPeerFactory", b8c449b2-6354-5c0c-9e95-e0c99a293a44)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IDropDownButtonAutomationPeer", 72f294f1-bff6-5d07-9db4-54134506bc80)]
+    [threading(both)]
+    unsealed runtimeclass DropDownButtonAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.ButtonAutomationPeer
+        , Windows.UI.Xaml.Automation.Provider.IExpandCollapseProvider
+    {
+        [method_name( "CreateInstance" )] DropDownButtonAutomationPeer(DropDownButton owner);
+    }
+
+
+
+
+    [contentproperty("Items")]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.IRadioButtonsStatics", ef5970cc-d5de-5747-abd1-cc2cbcb8d5f4)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRadioButtonsFactory", 03a69c6c-7820-52ad-85a0-ca8e62c15b91)]
+    [interface_name("Windows.UI.Xaml.Controls.IRadioButtons", b1b5cfe2-329c-5183-b443-c064ce6be4f8)]
+    [threading(both)]
+    unsealed runtimeclass RadioButtons
+        : Windows.UI.Xaml.Controls.Control
+    {
+        static Windows.UI.Xaml.DependencyProperty ItemsSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ItemTemplateProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedIndexProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty SelectedItemProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaximumColumnsProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HeaderProperty{ get; };
+        [method_name( "CreateInstance" )] RadioButtons();
+        Object ItemsSource{ get; };
+        Object ItemsSource{ set; };
+        Windows.Foundation.Collections.IVector <Object>  Items{ get; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ get; };
+        Windows.UI.Xaml.DataTemplate ItemTemplate{ set; };
+        Windows.UI.Xaml.DependencyObject ContainerFromItem(Object item);
+        Windows.UI.Xaml.DependencyObject ContainerFromIndex(Int32 index);
+        Int32 SelectedIndex{ get; };
+        Int32 SelectedIndex{ set; };
+        Object SelectedItem{ get; };
+        Object SelectedItem{ set; };
+        event Windows.UI.Xaml.Controls.SelectionChangedEventHandler SelectionChanged;
+        Int32 MaximumColumns{ get; };
+        Int32 MaximumColumns{ set; };
+        Object Header{ get; };
+        Object Header{ set; };
+    }
+
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.IRadioMenuFlyoutItemFactory", a8317a17-112c-5a84-b3f0-5ca0e48499f2)]
+    [static_name("Windows.UI.Xaml.Controls.IRadioMenuFlyoutItemStatics", aba3cc52-45ec-5ab1-8295-ca22b9905696)]
+    [interface_name("Windows.UI.Xaml.Controls.IRadioMenuFlyoutItem", 53687d0e-434f-5328-9c56-49d642fb646c)]
+    [threading(both)]
+    unsealed runtimeclass RadioMenuFlyoutItem
+        : Windows.UI.Xaml.Controls.MenuFlyoutItem
+    {
+        [method_name( "CreateInstance" )] RadioMenuFlyoutItem();
+        static Windows.UI.Xaml.DependencyProperty IsCheckedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty GroupNameProperty{ get; };
+        Boolean IsChecked{ get; };
+        Boolean IsChecked{ set; };
+        String GroupName{ get; };
+        String GroupName{ set; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IXamlControlsResourcesStatics", 78290b57-b459-531d-9230-20668df0c564)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IXamlControlsResources", b7afa377-9992-5cc5-b525-dc70b4012a7a)]
+    [threading(both)]
+    runtimeclass XamlControlsResources
+        : Windows.UI.Xaml.ResourceDictionary
+    {
+        XamlControlsResources();
+        static void EnsureRevealLights(Windows.UI.Xaml.UIElement element);
+    }
+
+
+}
+namespace Windows.UI.Xaml.Controls.Primitives
+{
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IColorSpectrumFactory", 90c7e61e-904d-42ab-b44f-e68dbf0cdee9)]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.IColorSpectrumStatics", 906bee7c-2cee-4e90-968b-f0a5bd691b4a)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IColorSpectrum", ce46f271-f509-4f98-8288-e4942fb385df)]
+    [threading(both)]
+    unsealed runtimeclass ColorSpectrum
+        : Windows.UI.Xaml.Controls.Control
+    {
+        [method_name( "CreateInstance" )] ColorSpectrum();
+        static Windows.UI.Xaml.DependencyProperty ColorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HsvColorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinHueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxHueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinSaturationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxSaturationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinValueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxValueProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ShapeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ComponentsProperty{ get; };
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+        Windows.Foundation.Numerics.Vector4 HsvColor{ get; };
+        Windows.Foundation.Numerics.Vector4 HsvColor{ set; };
+        Int32 MinHue{ get; };
+        Int32 MinHue{ set; };
+        Int32 MaxHue{ get; };
+        Int32 MaxHue{ set; };
+        Int32 MinSaturation{ get; };
+        Int32 MinSaturation{ set; };
+        Int32 MaxSaturation{ get; };
+        Int32 MaxSaturation{ set; };
+        Int32 MinValue{ get; };
+        Int32 MinValue{ set; };
+        Int32 MaxValue{ get; };
+        Int32 MaxValue{ set; };
+        Windows.UI.Xaml.Controls.ColorSpectrumShape Shape{ get; };
+        Windows.UI.Xaml.Controls.ColorSpectrumShape Shape{ set; };
+        Windows.UI.Xaml.Controls.ColorSpectrumComponents Components{ get; };
+        Windows.UI.Xaml.Controls.ColorSpectrumComponents Components{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.ColorSpectrum, Windows.UI.Xaml.Controls.ColorChangedEventArgs>  ColorChanged;
+    }
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IColorPickerSliderFactory", 06d879a2-8c07-4b1e-a940-9fbce8f49639)]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.IColorPickerSliderStatics", 22eafc6a-9fe3-4eee-8734-a1398ec4413a)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IColorPickerSlider", 94394d83-e0df-4c5f-bbcd-8155f4020440)]
+    [threading(both)]
+    unsealed runtimeclass ColorPickerSlider
+        : Windows.UI.Xaml.Controls.Slider
+    {
+        [method_name( "CreateInstance" )] ColorPickerSlider();
+        static Windows.UI.Xaml.DependencyProperty ColorChannelProperty{ get; };
+        Windows.UI.Xaml.Controls.ColorPickerHsvChannel ColorChannel{ get; };
+        Windows.UI.Xaml.Controls.ColorPickerHsvChannel ColorChannel{ set; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.ICommandBarFlyoutCommandBarTemplateSettings", 47642c44-26ff-5d14-9cfc-77dc64f3a447)]
+    runtimeclass CommandBarFlyoutCommandBarTemplateSettings
+        : Windows.UI.Xaml.DependencyObject
+    {
+        Double OpenAnimationStartPosition{ get; };
+        Double OpenAnimationEndPosition{ get; };
+        Double CloseAnimationEndPosition{ get; };
+        Double CurrentWidth{ get; };
+        Double ExpandedWidth{ get; };
+        Double WidthExpansionDelta{ get; };
+        Double WidthExpansionAnimationStartPosition{ get; };
+        Double WidthExpansionAnimationEndPosition{ get; };
+        Double WidthExpansionMoreButtonAnimationStartPosition{ get; };
+        Double WidthExpansionMoreButtonAnimationEndPosition{ get; };
+        Double ExpandUpOverflowVerticalPosition{ get; };
+        Double ExpandDownOverflowVerticalPosition{ get; };
+        Double ExpandUpAnimationStartPosition{ get; };
+        Double ExpandUpAnimationEndPosition{ get; };
+        Double ExpandUpAnimationHoldPosition{ get; };
+        Double ExpandDownAnimationStartPosition{ get; };
+        Double ExpandDownAnimationEndPosition{ get; };
+        Double ExpandDownAnimationHoldPosition{ get; };
+        Windows.Foundation.Rect ContentClipRect{ get; };
+        Windows.Foundation.Rect OverflowContentClipRect{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.ICommandBarFlyoutCommandBarFactory", f8236f9f-5559-5697-8e6f-20d70ca17dd0)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.ICommandBarFlyoutCommandBar", 14146e7c-38c4-55c4-b706-ce18f6061e7e)]
+    [threading(both)]
+    unsealed runtimeclass CommandBarFlyoutCommandBar
+        : Windows.UI.Xaml.Controls.CommandBar
+    {
+        [method_name( "CreateInstance" )] CommandBarFlyoutCommandBar();
+        Windows.UI.Xaml.Controls.Primitives.CommandBarFlyoutCommandBarTemplateSettings FlyoutTemplateSettings{ get; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IRadioButtonsListViewFactory", 87d3c9d0-a2c0-5910-919c-cef06a3b5a94)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IRadioButtonsListView", ac6c8df6-7e6f-5add-9dbf-354c2ce61cd9)]
+    [threading(both)]
+    unsealed runtimeclass RadioButtonsListView
+        : Windows.UI.Xaml.Controls.ListView
+    {
+        [method_name( "CreateInstance" )] RadioButtonsListView();
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IRadioButtonsListViewItemFactory", c90a0d06-7a55-5d49-9045-f8792799a074)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IRadioButtonsListViewItem", fadb586f-2dfd-5bf2-a8f5-c2052328c142)]
+    [threading(both)]
+    unsealed runtimeclass RadioButtonsListViewItem
+        : Windows.UI.Xaml.Controls.ListViewItem
+    {
+        [method_name( "CreateInstance" )] RadioButtonsListViewItem();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.INavigationViewItemPresenterStatics", 52814604-cfc1-5ad5-a3aa-fa355be6bd76)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.INavigationViewItemPresenterFactory", bb062c50-4a36-52e7-9459-e89d02f3fc42)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.INavigationViewItemPresenter", 9956d3fc-4693-59cb-b6bf-37249058be96)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewItemPresenter
+        : Windows.UI.Xaml.Controls.ContentControl
+    {
+        static Windows.UI.Xaml.DependencyProperty IconProperty{ get; };
+        [method_name( "CreateInstance" )] NavigationViewItemPresenter();
+        Windows.UI.Xaml.Controls.IconElement Icon{ get; };
+        Windows.UI.Xaml.Controls.IconElement Icon{ set; };
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    enum ScrollerSnapPointApplicableRangeType
+    {
+        Mandatory,
+        MandatorySingle,
+        Optional,
+    };
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    enum ScrollerSnapPointAlignment
+    {
+        Near,
+        Center,
+        Far,
+    };
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollerSnapPointBaseFactory", 53fdb782-64d7-54c9-bde4-d30370ea7034)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScrollerSnapPointBase", 7134eae5-b366-5b99-96dd-a129934aaf9c)]
+    [threading(both)]
+    unsealed runtimeclass ScrollerSnapPointBase
+        : Windows.UI.Xaml.DependencyObject
+    {
+        Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointAlignment Alignment{ get; };
+        Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointAlignment Alignment{ set; };
+        Double SpecifiedApplicableRange{ get; };
+        Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointApplicableRangeType ApplicableRangeType{ get; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollerSnapPointIrregularFactory", 634d5876-7c29-529d-bf46-85b5d2d8f5e0)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScrollerSnapPointIrregular", cf0024c4-ecab-5745-9b98-79be77a0ac15)]
+    [threading(both)]
+    unsealed runtimeclass ScrollerSnapPointIrregular
+        : Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase
+    {
+        [method_name( "CreateInstance" )] ScrollerSnapPointIrregular(Double snapPointValue, ScrollerSnapPointAlignment alignment);
+        [method_name( "CreateInstance2" )] ScrollerSnapPointIrregular(Double snapPointValue, Double applicableRange, ScrollerSnapPointAlignment alignment);
+        Double Value{ get; };
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollerSnapPointRegularFactory", cb57ec7f-6a21-5a03-8e24-70b2372cea2c)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScrollerSnapPointRegular", 419028ae-604d-5875-8960-89cd4f4a9d0c)]
+    [threading(both)]
+    unsealed runtimeclass ScrollerSnapPointRegular
+        : Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase
+    {
+        [method_name( "CreateInstance" )] ScrollerSnapPointRegular(Double offset, Double interval, Double start, Double end, ScrollerSnapPointAlignment alignment);
+        [method_name( "CreateInstance2" )] ScrollerSnapPointRegular(Double offset, Double interval, Double start, Double end, Double applicableRange, ScrollerSnapPointAlignment alignment);
+        Double Offset{ get; };
+        Double Interval{ get; };
+        Double Start{ get; };
+        Double End{ get; };
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollControllerOffsetChangeRequestedEventArgsFactory", c1d4c1c7-71e4-5bb5-8274-3b4f447c044b)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScrollControllerOffsetChangeRequestedEventArgs", faf1c4ee-37a1-55d4-ab6a-5ccacaa593db)]
+    [threading(both)]
+    runtimeclass ScrollControllerOffsetChangeRequestedEventArgs
+    {
+        [method_name( "CreateInstance" )] ScrollControllerOffsetChangeRequestedEventArgs(Double offset, Windows.UI.Xaml.Controls.ScrollerViewKind offsetKind, Windows.UI.Xaml.Controls.ScrollerViewChangeKind offsetChangeKind);
+        Double Offset{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewKind OffsetKind{ get; };
+        Windows.UI.Xaml.Controls.ScrollerViewChangeKind OffsetChangeKind{ get; };
+        Int32 ViewChangeId{ get; };
+        Int32 ViewChangeId{ set; };
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollControllerOffsetChangeWithAdditionalVelocityRequestedEventArgsFactory", 513a3ca5-6593-5540-8eeb-ae16481a8d0c)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScrollControllerOffsetChangeWithAdditionalVelocityRequestedEventArgs", 8e58c70b-1041-51a1-8c60-03e768a14806)]
+    [threading(both)]
+    runtimeclass ScrollControllerOffsetChangeWithAdditionalVelocityRequestedEventArgs
+    {
+        [method_name( "CreateInstance" )] ScrollControllerOffsetChangeWithAdditionalVelocityRequestedEventArgs(Single additionalVelocity, Windows.Foundation.IReference <Single>  inertiaDecayRate);
+        Single AdditionalVelocity{ get; };
+        Windows.Foundation.IReference <Single>  InertiaDecayRate{ get; };
+        Int32 ViewChangeId{ get; };
+        Int32 ViewChangeId{ set; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollControllerInteractionRequestedEventArgsFactory", 45d4ab7a-842a-57e4-978e-6da86615cb14)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScrollControllerInteractionRequestedEventArgs", b7f53d7f-b3c5-5dc1-987e-fdeb25cfde14)]
+    [threading(both)]
+    runtimeclass ScrollControllerInteractionRequestedEventArgs
+    {
+        [method_name( "CreateInstance" )] ScrollControllerInteractionRequestedEventArgs(Windows.UI.Input.PointerPoint pointerPoint);
+        Windows.UI.Input.PointerPoint PointerPoint{ get; };
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    }
+
+    [uuid(d44becd9-feb2-563c-951f-3587aaa168e2)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    interface IScrollController
+    {
+        Boolean AreScrollerInteractionsAllowed{ get; };
+        Boolean IsInteracting{ get; };
+        Windows.UI.Composition.Visual InteractionVisual{ get; };
+        Windows.UI.Xaml.Controls.Orientation InteractionVisualScrollOrientation{ get; };
+        Windows.UI.Xaml.Controls.ScrollerRailingMode InteractionVisualScrollRailingMode{ get; };
+        void SetExpressionAnimationSources(Windows.UI.Composition.CompositionPropertySet propertySet, String minOffsetPropertyName, String maxOffsetPropertyName, String offsetPropertyName, String multiplierPropertyName);
+        void SetValues(Double minOffset, Double maxOffset, Double offset, Double viewport);
+        Windows.UI.Composition.CompositionAnimation GetOffsetChangeAnimation(Int32 offsetChangeId, Windows.Foundation.Numerics.Vector2 currentPosition, Windows.UI.Composition.CompositionAnimation defaultAnimation);
+        void OnOffsetChangeCompleted(Int32 offsetChangeId, Windows.UI.Xaml.Controls.ScrollerViewChangeResult result);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.IScrollController, Windows.UI.Xaml.Controls.Primitives.ScrollControllerOffsetChangeRequestedEventArgs>  OffsetChangeRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.IScrollController, Windows.UI.Xaml.Controls.Primitives.ScrollControllerOffsetChangeWithAdditionalVelocityRequestedEventArgs>  OffsetChangeWithAdditionalVelocityRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.IScrollController, Windows.UI.Xaml.Controls.Primitives.ScrollControllerInteractionRequestedEventArgs>  InteractionRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.IScrollController, Object>  InteractionInfoChanged;
+    };
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contentproperty("Child")]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollerFactory", 3e07438d-6491-55e4-8b19-ffe7e3574140)]
+    [static_name("Windows.UI.Xaml.Controls.Primitives.IScrollerStatics", 9f8998f7-39bb-5fab-bd60-0074d0a34cf8)]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScroller", 72fb83ea-f37d-580a-8998-67ffedc9ca59)]
+    [threading(both)]
+    unsealed runtimeclass Scroller
+        : Windows.UI.Xaml.FrameworkElement
+    {
+        [method_name( "CreateInstance" )] Scroller();
+        static Windows.UI.Xaml.DependencyProperty BackgroundProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ChildProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsChildAvailableWidthConstrainedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsChildAvailableHeightConstrainedProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalScrollChainingModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalScrollChainingModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalScrollRailingModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalScrollRailingModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalScrollModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalScrollModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ComputedHorizontalScrollModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ComputedVerticalScrollModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ZoomChainingModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty ZoomModeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty InputKindProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MinZoomFactorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxZoomFactorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsAnchoredAtHorizontalExtentProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsAnchoredAtVerticalExtentProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty HorizontalAnchorRatioProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty VerticalAnchorRatioProperty{ get; };
+        Windows.UI.Xaml.Media.Brush Background{ get; };
+        Windows.UI.Xaml.Media.Brush Background{ set; };
+        Windows.UI.Xaml.UIElement Child{ get; };
+        Windows.UI.Xaml.UIElement Child{ set; };
+        Windows.UI.Composition.CompositionPropertySet ExpressionAnimationSources{ get; };
+        Double HorizontalOffset{ get; };
+        Double VerticalOffset{ get; };
+        Single ZoomFactor{ get; };
+        Double ExtentWidth{ get; };
+        Double ExtentHeight{ get; };
+        Boolean IsChildAvailableWidthConstrained{ get; };
+        Boolean IsChildAvailableWidthConstrained{ set; };
+        Boolean IsChildAvailableHeightConstrained{ get; };
+        Boolean IsChildAvailableHeightConstrained{ set; };
+        Windows.UI.Xaml.Controls.ScrollerChainingMode HorizontalScrollChainingMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerChainingMode HorizontalScrollChainingMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerChainingMode VerticalScrollChainingMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerChainingMode VerticalScrollChainingMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerRailingMode HorizontalScrollRailingMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerRailingMode HorizontalScrollRailingMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerRailingMode VerticalScrollRailingMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerRailingMode VerticalScrollRailingMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerScrollMode HorizontalScrollMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerScrollMode HorizontalScrollMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerScrollMode VerticalScrollMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerScrollMode VerticalScrollMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerScrollMode ComputedHorizontalScrollMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerScrollMode ComputedVerticalScrollMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerChainingMode ZoomChainingMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerChainingMode ZoomChainingMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerZoomMode ZoomMode{ get; };
+        Windows.UI.Xaml.Controls.ScrollerZoomMode ZoomMode{ set; };
+        Windows.UI.Xaml.Controls.ScrollerInputKind InputKind{ get; };
+        Windows.UI.Xaml.Controls.ScrollerInputKind InputKind{ set; };
+        Double MinZoomFactor{ get; };
+        Double MinZoomFactor{ set; };
+        Double MaxZoomFactor{ get; };
+        Double MaxZoomFactor{ set; };
+        Windows.UI.Xaml.Controls.ScrollerState State{ get; };
+        Windows.UI.Xaml.Controls.Primitives.IScrollController HorizontalScrollController{ get; };
+        Windows.UI.Xaml.Controls.Primitives.IScrollController HorizontalScrollController{ set; };
+        Windows.UI.Xaml.Controls.Primitives.IScrollController VerticalScrollController{ get; };
+        Windows.UI.Xaml.Controls.Primitives.IScrollController VerticalScrollController{ set; };
+        Boolean IsAnchoredAtHorizontalExtent{ get; };
+        Boolean IsAnchoredAtHorizontalExtent{ set; };
+        Boolean IsAnchoredAtVerticalExtent{ get; };
+        Boolean IsAnchoredAtVerticalExtent{ set; };
+        Double HorizontalAnchorRatio{ get; };
+        Double HorizontalAnchorRatio{ set; };
+        Double VerticalAnchorRatio{ get; };
+        Double VerticalAnchorRatio{ set; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase>  HorizontalSnapPoints{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase>  VerticalSnapPoints{ get; };
+        Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase>  ZoomSnapPoints{ get; };
+        Int32 ChangeOffsets(Windows.UI.Xaml.Controls.ScrollerChangeOffsetsOptions options);
+        Int32 ChangeOffsetsWithAdditionalVelocity(Windows.UI.Xaml.Controls.ScrollerChangeOffsetsWithAdditionalVelocityOptions options);
+        Int32 ChangeZoomFactor(Windows.UI.Xaml.Controls.ScrollerChangeZoomFactorOptions options);
+        Int32 ChangeZoomFactorWithAdditionalVelocity(Windows.UI.Xaml.Controls.ScrollerChangeZoomFactorWithAdditionalVelocityOptions options);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Object>  ExtentChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Object>  StateChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Object>  ViewChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Windows.UI.Xaml.Controls.ScrollerChangingOffsetsEventArgs>  ChangingOffsets;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Windows.UI.Xaml.Controls.ScrollerChangingZoomFactorEventArgs>  ChangingZoomFactor;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Windows.UI.Xaml.Controls.ScrollerViewChangeCompletedEventArgs>  ViewChangeCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Windows.UI.Xaml.Controls.ScrollerBringingIntoViewEventArgs>  BringingIntoView;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Windows.UI.Xaml.Controls.ScrollerAnchorRequestedEventArgs>  AnchorRequested;
+    }
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Controls.Primitives.IScrollerAutomationPeerFactory", af7a930e-ea2e-5f8c-b2a2-e4ca56abcb61)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.Primitives.IScrollerAutomationPeer", b6267a3e-cf91-516d-8c7c-9969d6a99896)]
+    [threading(both)]
+    unsealed runtimeclass ScrollerAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+        [method_name( "CreateInstance" )] ScrollerAutomationPeer(Scroller owner);
+    }
+
+}
+namespace Windows.UI.Xaml.Media
+{
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [webhosthidden]
+    enum AcrylicBackgroundSource
+    {
+        HostBackdrop,
+        Backdrop,
+    };
+
+
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Media.IAcrylicBrushStatics", 2787fd79-a3da-423f-b81a-599147971523)]
+    [constructor_name("Windows.UI.Xaml.Media.IAcrylicBrushFactory", 81a32568-f6cc-4013-8363-928ae23b7a61)]
+    [interface_name("Windows.UI.Xaml.Media.IAcrylicBrush", 79bbcf4e-cd66-4f1b-a8b6-cd6d2977c18d)]
+    [threading(both)]
+    unsealed runtimeclass AcrylicBrush
+        : Windows.UI.Xaml.Media.XamlCompositionBrushBase
+    {
+        static Windows.UI.Xaml.DependencyProperty BackgroundSourceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TintColorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TintOpacityProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TintTransitionDurationProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty AlwaysUseFallbackProperty{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [static_name("Windows.UI.Xaml.Media.IAcrylicBrushStatics2", 129188a8-bf11-5bbc-8445-8c510e5926c0)]
+        {
+            static Windows.UI.Xaml.DependencyProperty TintLuminosityOpacityProperty{ get; };
+        }
+        [method_name( "CreateInstance" )] AcrylicBrush();
+        Windows.UI.Xaml.Media.AcrylicBackgroundSource BackgroundSource{ get; };
+        Windows.UI.Xaml.Media.AcrylicBackgroundSource BackgroundSource{ set; };
+        Windows.UI.Color TintColor{ get; };
+        Windows.UI.Color TintColor{ set; };
+        Double TintOpacity{ get; };
+        Double TintOpacity{ set; };
+        Windows.Foundation.TimeSpan TintTransitionDuration{ get; };
+        Windows.Foundation.TimeSpan TintTransitionDuration{ set; };
+        Boolean AlwaysUseFallback{ get; };
+        Boolean AlwaysUseFallback{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 8)]
+        [interface_name("Windows.UI.Xaml.Media.IAcrylicBrush2", c9645383-b19e-5ac0-86ff-3d90506dbcda)]
+        {
+            Windows.Foundation.IReference <Double>  TintLuminosityOpacity{ get; };
+            Windows.Foundation.IReference <Double>  TintLuminosityOpacity{ set; };
+        }
+    }
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum RevealBrushState
+    {
+        Normal,
+        PointerOver,
+        Pressed,
+    };
+
+
+
+
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Media.IRevealBrushFactory", 9d9379ce-e3a0-4aaf-be37-ea9d9dd43105)]
+    [static_name("Windows.UI.Xaml.Media.IRevealBrushStatics", 190f2625-7209-4d42-a847-1ac4bbbb3499)]
+    [interface_name("Windows.UI.Xaml.Media.IRevealBrush", 2036a0ed-8271-4398-9019-25872093f13f)]
+    [threading(both)]
+    unsealed runtimeclass RevealBrush
+        : Windows.UI.Xaml.Media.XamlCompositionBrushBase
+    {
+        [method_name( "CreateInstance" )]protected RevealBrush();
+        static Windows.UI.Xaml.DependencyProperty ColorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty TargetThemeProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty AlwaysUseFallbackProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty StateProperty{ get; };
+        static void SetState(Windows.UI.Xaml.UIElement element, RevealBrushState value);
+        static Windows.UI.Xaml.Media.RevealBrushState GetState(Windows.UI.Xaml.UIElement element);
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+        Windows.UI.Xaml.ApplicationTheme TargetTheme{ get; };
+        Windows.UI.Xaml.ApplicationTheme TargetTheme{ set; };
+        Boolean AlwaysUseFallback{ get; };
+        Boolean AlwaysUseFallback{ set; };
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Media.IRevealBorderBrushFactory", 94c25298-f5f8-4482-a25c-6758501a8626)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.IRevealBorderBrush", 060ba115-c542-483c-8202-5f03331866c9)]
+    [threading(both)]
+    unsealed runtimeclass RevealBorderBrush
+        : Windows.UI.Xaml.Media.RevealBrush
+    {
+        [method_name( "CreateInstance" )] RevealBorderBrush();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [constructor_name("Windows.UI.Xaml.Media.IRevealBackgroundBrushFactory", 8c56bcaa-02a5-4f45-8506-8d39228f5d3f)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.IRevealBackgroundBrush", 261dcc0e-1991-4cdf-aee0-6350a3f90bb9)]
+    [threading(both)]
+    unsealed runtimeclass RevealBackgroundBrush
+        : Windows.UI.Xaml.Media.RevealBrush
+    {
+        [method_name( "CreateInstance" )] RevealBackgroundBrush();
+    }
+
+
+
+}
+namespace Windows.UI.Xaml.Automation.Peers
+{
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.INavigationViewItemAutomationPeerFactory", 0bc2835d-aa38-4f97-9664-e6fc821d81ed)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.INavigationViewItemAutomationPeer", 309847a5-9971-4d8d-a81c-085c7086a1b9)]
+    [threading(both)]
+    unsealed runtimeclass NavigationViewItemAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.ListViewItemAutomationPeer
+    {
+        [method_name( "CreateInstanceWithOwner" )] NavigationViewItemAutomationPeer(Windows.UI.Xaml.Controls.NavigationViewItem owner);
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IColorSpectrumAutomationPeerFactory", 0ac400e1-b743-4496-837a-8889e6ac6497)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IColorSpectrumAutomationPeer", 15d5ba03-010d-4ff7-9087-f4dd09f831b7)]
+    [threading(both)]
+    unsealed runtimeclass ColorSpectrumAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+        [method_name( "CreateInstanceWithOwner" )] ColorSpectrumAutomationPeer(Windows.UI.Xaml.Controls.Primitives.ColorSpectrum owner);
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IColorPickerSliderAutomationPeerFactory", 1a55c77e-9dd6-45a3-9042-b40200fea1a9)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IColorPickerSliderAutomationPeer", a514215a-7293-4577-924c-47d4e0bf9b90)]
+    [threading(both)]
+    unsealed runtimeclass ColorPickerSliderAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.SliderAutomationPeer
+    {
+        [method_name( "CreateInstanceWithOwner" )] ColorPickerSliderAutomationPeer(Windows.UI.Xaml.Controls.Primitives.ColorPickerSlider owner);
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IMenuBarAutomationPeerFactory", 2a094871-4a9b-5a0b-9fda-7bc3ae957c53)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IMenuBarAutomationPeer", 4b6adcf1-f274-5592-85a8-7b099e99b320)]
+    [threading(both)]
+    unsealed runtimeclass MenuBarAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+        [method_name( "CreateInstance" )] MenuBarAutomationPeer(Windows.UI.Xaml.Controls.MenuBar owner);
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 7)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IMenuBarItemAutomationPeerFactory", c9c77746-130f-5b19-83a6-61db584613aa)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IMenuBarItemAutomationPeer", 0fce49b4-cff5-5c4b-98ee-e75fdddf799a)]
+    [threading(both)]
+    unsealed runtimeclass MenuBarItemAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+        , Windows.UI.Xaml.Automation.Provider.IExpandCollapseProvider
+        , Windows.UI.Xaml.Automation.Provider.IInvokeProvider
+    {
+        [method_name( "CreateInstance" )] MenuBarItemAutomationPeer(Windows.UI.Xaml.Controls.MenuBarItem owner);
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IPersonPictureAutomationPeerFactory", a95f1f6d-2524-44a4-97fd-1181130100ad)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IPersonPictureAutomationPeer", 27156d4c-a66f-4aaf-8286-4f796d30628c)]
+    [threading(both)]
+    unsealed runtimeclass PersonPictureAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+        [method_name( "CreateInstanceWithOwner" )] PersonPictureAutomationPeer(Windows.UI.Xaml.Controls.PersonPicture owner);
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IRatingControlAutomationPeerFactory", f179f272-9846-4632-8b9c-be6fa8d3c9bb)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IRatingControlAutomationPeer", 3d14349a-9963-4a47-823c-f457cb3209d5)]
+    [threading(both)]
+    unsealed runtimeclass RatingControlAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.FrameworkElementAutomationPeer
+    {
+        [method_name( "CreateInstanceWithOwner" )] RatingControlAutomationPeer(Windows.UI.Xaml.Controls.RatingControl owner);
+    }
+
+
+
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.ITreeViewListAutomationPeerFactory", 00f597e2-f811-475a-bfe6-290fe707fa88)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.ITreeViewListAutomationPeer", 71c1b5bc-bb29-4479-a8a8-606be6b823ae)]
+    [threading(both)]
+    unsealed runtimeclass TreeViewListAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.SelectorAutomationPeer
+    {
+        [method_name( "CreateInstanceWithOwner" )] TreeViewListAutomationPeer(Windows.UI.Xaml.Controls.TreeViewList owner);
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.ITreeViewItemAutomationPeerFactory", 73d388bf-1d01-4159-82c0-2b2996dbfdce)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.ITreeViewItemAutomationPeer", 2331d648-b617-437f-920c-71d450503e65)]
+    [threading(both)]
+    unsealed runtimeclass TreeViewItemAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.ListViewItemAutomationPeer
+        , Windows.UI.Xaml.Automation.Provider.IExpandCollapseProvider
+    {
+        [method_name( "CreateInstanceWithOwner" )] TreeViewItemAutomationPeer(Windows.UI.Xaml.Controls.TreeViewItem owner);
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Automation.Peers.IRadioButtonsListViewItemAutomationPeerFactory", 62f3666c-6b28-51bd-8ff8-a02344545bb6)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Automation.Peers.IRadioButtonsListViewItemAutomationPeer", d875e0ae-0a22-5131-bb90-fcf60cb78127)]
+    [threading(both)]
+    unsealed runtimeclass RadioButtonsListViewItemAutomationPeer
+        : Windows.UI.Xaml.Automation.Peers.ListViewItemAutomationPeer
+    {
+        [method_name( "CreateInstance" )] RadioButtonsListViewItemAutomationPeer(Windows.UI.Xaml.Controls.Primitives.RadioButtonsListViewItem owner);
+    }
+
+}
+namespace Windows.UI.Xaml.Controls
+{
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [uuid(b58ba586-b84e-5e99-93c1-31c7367c842f)]
+    delegate void ConfigurationChangedEventHandler(IRepeaterScrollingSurface sender);
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [uuid(ac9ecec6-c593-5fb6-8f07-c4993d714538)]
+    [webhosthidden]
+    interface IRepeaterScrollingSurface
+    {
+        Boolean IsHorizontallyScrollable{ get; };
+        Boolean IsVerticallyScrollable{ get; };
+        Windows.UI.Xaml.UIElement AnchorElement{ get; };
+        event Windows.UI.Xaml.Controls.ConfigurationChangedEventHandler ConfigurationChanged;
+        event Windows.UI.Xaml.Controls.PostArrangeEventHandler PostArrange;
+        event Windows.UI.Xaml.Controls.ViewportChangedEventHandler ViewportChanged;
+        void RegisterAnchorCandidate(Windows.UI.Xaml.UIElement element);
+        void UnregisterAnchorCandidate(Windows.UI.Xaml.UIElement element);
+        Windows.Foundation.Rect GetRelativeViewport(Windows.UI.Xaml.UIElement child);
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [uuid(d44102dd-88be-5abd-ac0d-bff0a14ebdf4)]
+    delegate void PostArrangeEventHandler(IRepeaterScrollingSurface sender);
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [uuid(b0e78842-62fd-5af0-9e00-38b4653dd698)]
+    delegate void ViewportChangedEventHandler(IRepeaterScrollingSurface sender, Boolean isFinal);
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IMUXControlsTestHooksLoggingMessageEventArgs", 32934e94-de6d-5173-87a8-3679e52f461a)]
+    runtimeclass MUXControlsTestHooksLoggingMessageEventArgs
+    {
+        String Message{ get; };
+        Boolean IsVerboseLevel{ get; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Xaml.Controls.IMUXControlsTestHooksStatics", 762d3428-77d9-5a95-b0e2-79bbfeeb4eb2)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IMUXControlsTestHooks", 0163e4d6-8689-585f-a135-5ffe18aa5bfc)]
+    [threading(both)]
+    runtimeclass MUXControlsTestHooks
+    {
+        static void SetOutputDebugStringLevelForType(String type, Boolean isLoggingInfoLevel, Boolean isLoggingVerboseLevel);
+        static void SetLoggingLevelForType(String type, Boolean isLoggingInfoLevel, Boolean isLoggingVerboseLevel);
+        static void SetLoggingLevelForInstance(Object sender, Boolean isLoggingInfoLevel, Boolean isLoggingVerboseLevel);
+        static event Windows.Foundation.TypedEventHandler <Object, Windows.UI.Xaml.Controls.MUXControlsTestHooksLoggingMessageEventArgs>  LoggingMessage;
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.IRepeaterTestHooksStatics", c181013e-adfb-50fe-bedb-89c26a1ed874)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IRepeaterTestHooks", 32097305-daa6-5cd6-a03f-a2ea66dac889)]
+    [threading(both)]
+    runtimeclass RepeaterTestHooks
+    {
+        static event Windows.Foundation.TypedEventHandler <Object, Object>  BuildTreeCompleted;
+        static Int32 GetElementFactoryElementIndex(Object getArgs);
+        static Object CreateRepeaterElementFactoryGetArgs();
+        static Object CreateRepeaterElementFactoryRecycleArgs();
+        static String GetLayoutId(Object layout);
+        static void SetLayoutId(Object layout, String id);
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    enum ScrollerSnapPointDimension
+    {
+        Vertical,
+        Horizontal,
+        Zoom,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerTestHooksAnchorEvaluatedEventArgs", 7c281e6f-6ece-5c39-ab07-bb49114fcb8f)]
+    runtimeclass ScrollerTestHooksAnchorEvaluatedEventArgs
+    {
+        Double ViewportAnchorPointHorizontalOffset{ get; };
+        Double ViewportAnchorPointVerticalOffset{ get; };
+        Windows.UI.Xaml.UIElement AnchorElement{ get; };
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerTestHooksInteractionSourcesChangedEventArgs", 528c63d8-f33e-5517-a0bb-960def8c165d)]
+    runtimeclass ScrollerTestHooksInteractionSourcesChangedEventArgs
+    {
+        Windows.UI.Composition.Interactions.CompositionInteractionSourceCollection InteractionSources{ get; };
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.IScrollerTestHooksStatics", 75334604-0f0b-562b-b1af-4896bdba48b4)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollerTestHooks", 51354d11-dc19-5f7d-9d2c-eb3d13e27247)]
+    [threading(both)]
+    runtimeclass ScrollerTestHooks
+    {
+        static Boolean AreAnchorNotificationsRaised{ get; };
+        static Boolean AreAnchorNotificationsRaised{ set; };
+        static Boolean AreInteractionSourcesNotificationsRaised{ get; };
+        static Boolean AreInteractionSourcesNotificationsRaised{ set; };
+        static Boolean IsInteractionTrackerMouseWheelZoomingEnabled{ get; };
+        static Boolean IsInteractionTrackerMouseWheelZoomingEnabled{ set; };
+        static Int32 MouseWheelDeltaForVelocityUnit{ get; };
+        static Int32 MouseWheelDeltaForVelocityUnit{ set; };
+        static Single MouseWheelInertiaDecayRate{ get; };
+        static Single MouseWheelInertiaDecayRate{ set; };
+        static void GetOffsetsChangeVelocityParameters(out Int32 millisecondsPerUnit, out Int32 minMilliseconds, out Int32 maxMilliseconds);
+        static void SetOffsetsChangeVelocityParameters(Int32 millisecondsPerUnit, Int32 minMilliseconds, Int32 maxMilliseconds);
+        static void GetZoomFactorChangeVelocityParameters(out Int32 millisecondsPerUnit, out Int32 minMilliseconds, out Int32 maxMilliseconds);
+        static void SetZoomFactorChangeVelocityParameters(Int32 millisecondsPerUnit, Int32 minMilliseconds, Int32 maxMilliseconds);
+        static void GetChildLayoutOffsetX(Windows.UI.Xaml.Controls.Primitives.Scroller scroller, out Single childLayoutOffsetX);
+        static void SetChildLayoutOffsetX(Windows.UI.Xaml.Controls.Primitives.Scroller scroller, Single childLayoutOffsetX);
+        static void GetChildLayoutOffsetY(Windows.UI.Xaml.Controls.Primitives.Scroller scroller, out Single childLayoutOffsetY);
+        static void SetChildLayoutOffsetY(Windows.UI.Xaml.Controls.Primitives.Scroller scroller, Single childLayoutOffsetY);
+        static Windows.Foundation.Collections.IVector <Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase>  GetConsolidatedSnapPoints(Windows.UI.Xaml.Controls.Primitives.Scroller scroller, ScrollerSnapPointDimension dimension);
+        static Windows.Foundation.Numerics.Vector2 GetSnapPointActualApplicableZone(Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase snapPoint);
+        static Int32 GetSnapPointCombinationCount(Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase snapPoint);
+        static Windows.UI.Color GetSnapPointVisualizationColor(Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase snapPoint);
+        static void SetSnapPointVisualizationColor(Windows.UI.Xaml.Controls.Primitives.ScrollerSnapPointBase snapPoint, Windows.UI.Color color);
+        static event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Windows.UI.Xaml.Controls.ScrollerTestHooksAnchorEvaluatedEventArgs>  AnchorEvaluated;
+        static event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Windows.UI.Xaml.Controls.ScrollerTestHooksInteractionSourcesChangedEventArgs>  InteractionSourcesChanged;
+        static event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Object>  ChildLayoutOffsetXChanged;
+        static event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.Primitives.Scroller, Object>  ChildLayoutOffsetYChanged;
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.ISwipeTestHooksStatics", e635a2c8-c5a6-5edf-9951-910e4c42505c)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ISwipeTestHooks", 590c9aa9-d6bd-503f-8820-9b0ac5748d33)]
+    [threading(both)]
+    runtimeclass SwipeTestHooks
+    {
+        static Windows.UI.Xaml.Controls.SwipeControl GetLastInteractedWithSwipeControl();
+        static Boolean GetIsOpen(SwipeControl swipeControl);
+        static Boolean GetIsIdle(SwipeControl swipeControl);
+        static event Windows.Foundation.TypedEventHandler <Object, Object>  LastInteractedWithSwipeControlChanged;
+        static event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.SwipeControl, Object>  OpenedStatusChanged;
+        static event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.SwipeControl, Object>  IdleStatusChanged;
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.ISpectrumBrushStatics", 1df68a67-c98c-5c69-855f-c746e7d20faa)]
+    [interface_name("Windows.UI.Xaml.Controls.ISpectrumBrush", 40b3a0fe-2ff2-5e73-ba8d-67803365c5dd)]
+    [threading(both)]
+    runtimeclass SpectrumBrush
+        : Windows.UI.Xaml.Media.XamlCompositionBrushBase
+    {
+        SpectrumBrush();
+        static Windows.UI.Xaml.DependencyProperty MinSurfaceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxSurfaceProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty MaxSurfaceOpacityProperty{ get; };
+        Windows.UI.Xaml.Media.LoadedImageSurface MinSurface{ get; };
+        Windows.UI.Xaml.Media.LoadedImageSurface MinSurface{ set; };
+        Windows.UI.Xaml.Media.LoadedImageSurface MaxSurface{ get; };
+        Windows.UI.Xaml.Media.LoadedImageSurface MaxSurface{ set; };
+        Double MaxSurfaceOpacity{ get; };
+        Double MaxSurfaceOpacity{ set; };
+    }
+
+    [uuid(3993c6d0-e0b1-5ffb-af04-9d48a39dc14a)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    interface IRefreshInfoProvider
+    {
+        void OnRefreshStarted();
+        void OnRefreshCompleted();
+        Boolean IsInteractingForRefresh{ get; };
+        Windows.UI.Composition.CompositionPropertySet CompositionProperties{ get; };
+        String InteractionRatioCompositionProperty{ get; };
+        Double ExecutionRatio{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.IRefreshInfoProvider, Object>  IsInteractingForRefreshChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.IRefreshInfoProvider, Windows.UI.Xaml.Controls.RefreshInteractionRatioChangedEventArgs>  InteractionRatioChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.IRefreshInfoProvider, Object>  RefreshStarted;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Xaml.Controls.IRefreshInfoProvider, Object>  RefreshCompleted;
+    };
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [uuid(b931ab3c-62e2-5504-9ae4-1e54d6e7bba7)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    interface IRefreshVisualizerPrivate
+    {
+        Windows.UI.Xaml.Controls.IRefreshInfoProvider InfoProvider{ get; };
+        Windows.UI.Xaml.Controls.IRefreshInfoProvider InfoProvider{ set; };
+        void SetInternalPullDirection(RefreshPullDirection value);
+    };
+
+    [uuid(7f277359-ebdf-5f9b-be92-3832c812f3d3)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    interface IRefreshInfoProviderAdapter
+    {
+        Windows.UI.Xaml.Controls.IRefreshInfoProvider AdaptFromTree(Windows.UI.Xaml.UIElement root, Windows.Foundation.Size visualizerSize);
+        void SetAnimations(Windows.UI.Xaml.UIElement refreshVisualizerAnimatableContainer);
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [uuid(9443b755-dfe1-5e84-a998-8e7f15239e45)]
+    interface IAdapterAnimationHandler
+    {
+        void InteractionTrackerAnimation(Windows.UI.Xaml.UIElement refreshVisualizer, Windows.UI.Xaml.UIElement infoProvider, Windows.UI.Composition.Interactions.InteractionTracker interactionTracker);
+        void RefreshRequestedAnimation(Windows.UI.Xaml.UIElement refreshVisualizer, Windows.UI.Xaml.UIElement infoProvider, Double executionRatio);
+        void RefreshCompletedAnimation(Windows.UI.Xaml.UIElement refreshVisualizer, Windows.UI.Xaml.UIElement infoProvider);
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Controls.IScrollViewerIRefreshInfoProviderAdapterFactory", bf487de6-afde-52e7-8fa0-d99f30c6c7f9)]
+    [interface_name("Windows.UI.Xaml.Controls.IScrollViewerIRefreshInfoProviderAdapter", 72bc6408-4539-58c0-bc3b-3ab076acb2ea)]
+    [threading(both)]
+    runtimeclass ScrollViewerIRefreshInfoProviderAdapter
+        : [feature(Velocity_SometimesAlwaysDisabled)]
+        Windows.UI.Xaml.Controls.IRefreshInfoProviderAdapter
+    {
+        [method_name( "CreateInstance" )] ScrollViewerIRefreshInfoProviderAdapter(RefreshPullDirection refreshPullDirection, IAdapterAnimationHandler animationHandler);
+        Windows.UI.Xaml.Controls.IRefreshInfoProvider Adapt(ScrollViewer adaptee, Windows.Foundation.Size visualizerSize);
+    }
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [uuid(83158281-5657-5413-9ccd-22c96c5481d9)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    interface IRefreshContainerPrivate
+    {
+        Windows.UI.Xaml.Controls.IRefreshInfoProviderAdapter RefreshInfoProviderAdapter{ get; };
+        Windows.UI.Xaml.Controls.IRefreshInfoProviderAdapter RefreshInfoProviderAdapter{ set; };
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.IPullToRefreshHelperTestApiStatics", b46ecf5a-cef2-5907-8a57-9ccb53994f56)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IPullToRefreshHelperTestApi", ac9db52e-fe2e-5a75-adaf-61f890155b60)]
+    [threading(both)]
+    runtimeclass PullToRefreshHelperTestApi
+    {
+        static Windows.UI.Xaml.Controls.RefreshInteractionRatioChangedEventArgs CreateRefreshInteractionRatioChangedEventArgsInstance(Double value);
+        static Windows.UI.Xaml.Controls.RefreshStateChangedEventArgs CreateRefreshStateChangedEventArgsInstance(RefreshVisualizerState oldValue, RefreshVisualizerState newValue);
+        static Windows.UI.Xaml.Controls.RefreshRequestedEventArgs CreateRefreshRequestedEventArgsInstance(Windows.Foundation.Deferral handler);
+    }
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.IDisplayRegionHelperTestApiStatics", b276e088-6232-5de8-ae67-a2aee4e540fb)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.IDisplayRegionHelperTestApi", a8097c33-57f2-58bd-a7df-48852baf4594)]
+    [threading(both)]
+    runtimeclass DisplayRegionHelperTestApi
+    {
+        static Boolean SimulateDisplayRegions{ get; };
+        static Boolean SimulateDisplayRegions{ set; };
+        static Windows.UI.Xaml.Controls.TwoPaneViewMode SimulateMode{ get; };
+        static Windows.UI.Xaml.Controls.TwoPaneViewMode SimulateMode{ set; };
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Controls.ISplitButtonTestApiStatics", add49cfc-b387-5e8d-9ae9-3073da807476)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Controls.ISplitButtonTestApi", cec13549-85e9-5e6b-8184-5f2521900361)]
+    [threading(both)]
+    runtimeclass SplitButtonTestApi
+    {
+        static Boolean SimulateTouch{ get; };
+        static Boolean SimulateTouch{ set; };
+    }
+
+
+
+}
+namespace Windows.UI.Xaml.Media
+{
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Media.IRevealBorderLightFactory", 56837f78-6d0e-572a-b52b-80ec602159c4)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.IRevealBorderLight", 244b27ed-a574-5162-9618-450c8d8b91a1)]
+    [threading(both)]
+    unsealed runtimeclass RevealBorderLight
+        : Windows.UI.Xaml.Media.XamlLight
+    {
+        [method_name( "CreateInstance" )] RevealBorderLight();
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Media.IRevealHoverLightFactory", fe01407e-f5dd-567b-b4ca-344346407a80)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.IRevealHoverLight", 50ee90c9-9266-588c-8ac1-4e46d9261e73)]
+    [threading(both)]
+    unsealed runtimeclass RevealHoverLight
+        : Windows.UI.Xaml.Media.XamlLight
+    {
+        [method_name( "CreateInstance" )] RevealHoverLight();
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Media.IRevealTestApi", b536af31-fb49-5a0d-9ebe-fbc8b87b2b30)]
+    [threading(both)]
+    runtimeclass RevealTestApi
+        : Windows.UI.Xaml.DependencyObject
+    {
+        RevealTestApi();
+        Windows.UI.Xaml.ApplicationTheme TargetTheme{ get; };
+        Windows.UI.Xaml.ApplicationTheme TargetTheme{ set; };
+        Windows.UI.Composition.SpotLight BackgroundLight{ get; };
+        Windows.UI.Xaml.Media.XamlLight BorderLight{ get; };
+        Windows.UI.Xaml.Media.XamlLight BorderWideLight{ get; };
+        Double BackgroundLightMinSize{ get; };
+        Double BackgroundLightMinSize{ set; };
+        Double BackgroundLightMaxSize{ get; };
+        Double BackgroundLightMaxSize{ set; };
+        Windows.UI.Composition.SpotLight GetSpotLight(XamlLight value);
+        Windows.UI.Composition.ExpressionAnimation GetHoverLightOffsetExpression(RevealHoverLight value);
+        Windows.UI.Xaml.Media.RevealBorderLight GetAsRevealBorderLight(XamlLight value);
+        Windows.UI.Xaml.Media.RevealHoverLight GetAsRevealHoverLight(XamlLight value);
+        Boolean BorderLight_ShouldBeOn(RevealBorderLight value);
+        Windows.UI.Composition.CompositionLight GetSharedLight(RevealBorderLight value);
+        Boolean BorderLight_FallbackToLocalLight(RevealBorderLight value);
+        Boolean HoverLight_ShouldBeOn(RevealHoverLight value);
+        Boolean HoverLight_IsPressed(RevealHoverLight value);
+        Boolean HoverLight_IsPointerOver(RevealHoverLight value);
+    }
+
+
+
+    [webhosthidden]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Xaml.Media.IMaterialHelperTestApiStatics", e1d69cf6-3033-5c80-bcdc-2479a1be5cb4)]
+    [default_interface]
+    [interface_name("Windows.UI.Xaml.Media.IMaterialHelperTestApi", c370b7ac-13c7-5d9c-ac20-084341f03d46)]
+    [threading(both)]
+    runtimeclass MaterialHelperTestApi
+        : Windows.UI.Xaml.DependencyObject
+    {
+        MaterialHelperTestApi();
+        static Boolean SimulateDisabledByPolicy{ get; };
+        static Boolean SimulateDisabledByPolicy{ set; };
+        static Boolean IgnoreAreEffectsFast{ get; };
+        static Boolean IgnoreAreEffectsFast{ set; };
+    }
+
+
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Xaml.Media.IXamlAmbientLightFactory", fec842ac-9f66-5314-9faf-13a164050a50)]
+    [static_name("Windows.UI.Xaml.Media.IXamlAmbientLightStatics", f77bebb8-6e05-501b-b11e-8c902a17bd93)]
+    [interface_name("Windows.UI.Xaml.Media.IXamlAmbientLight", 42fb01e2-17ce-5ace-a7f7-3232ce656b7d)]
+    [threading(both)]
+    unsealed runtimeclass XamlAmbientLight
+        : Windows.UI.Xaml.Media.XamlLight
+    {
+        [method_name( "CreateInstance" )] XamlAmbientLight();
+        static Windows.UI.Xaml.DependencyProperty ColorProperty{ get; };
+        static Windows.UI.Xaml.DependencyProperty IsTargetProperty{ get; };
+        // static void SetIsTarget(Windows.UI.Xaml.DependencyObject object, Boolean value);
+        // static Boolean GetIsTarget(Windows.UI.Xaml.DependencyObject object);
+        Windows.UI.Color Color{ get; };
+        Windows.UI.Color Color{ set; };
+    }
+
+
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Xaml.Media.IRevealBrushTestApi", b8cb9dfa-1c81-56ac-82a3-64b28677a58e)]
+    [threading(both)]
+    runtimeclass RevealBrushTestApi
+        : Windows.UI.Xaml.DependencyObject
+    {
+        RevealBrushTestApi();
+        Windows.UI.Xaml.Media.RevealBrush RevealBrush{ get; };
+        Windows.UI.Xaml.Media.RevealBrush RevealBrush{ set; };
+        Boolean IsInFallbackMode{ get; };
+        Boolean IsAmbientLightSet{ get; };
+        Boolean IsBorderLightSet{ get; };
+        Boolean IsHoverLightSet{ get; };
+        Windows.UI.Composition.CompositionBrush CompositionBrush{ get; };
+        Windows.UI.Composition.CompositionBrush NoiseBrush{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [interface_name("Windows.UI.Xaml.Media.IAcrylicTestApi", 63ee2d64-2002-5a0d-8838-0f5538f8e48b)]
+    [threading(both)]
+    runtimeclass AcrylicTestApi
+        : Windows.UI.Xaml.DependencyObject
+    {
+        AcrylicTestApi();
+        Windows.UI.Xaml.Media.AcrylicBrush AcrylicBrush{ get; };
+        Windows.UI.Xaml.Media.AcrylicBrush AcrylicBrush{ set; };
+        Boolean IsUsingAcrylicBrush{ get; };
+        Windows.UI.Composition.CompositionBrush CompositionBrush{ get; };
+        Windows.UI.Composition.CompositionBrush NoiseBrush{ get; };
+        void ForceCreateAcrylicBrush(Boolean useCrossFadeEffect);
+    }
+
+    [uuid(883fa86c-3c4b-5c1d-aeea-5b4a3e7e1158)]
+    [feature(Velocity_SometimesAlwaysDisabled)]
+    [webhosthidden]
+    [contract(Windows.Foundation.UniversalApiContract, 8)]
+    interface IAcrylicBrushStaticsPrivate
+    {
+        Windows.UI.Composition.CompositionEffectBrush CreateBackdropAcrylicEffectBrush(Windows.UI.Composition.Compositor compositor, Windows.UI.Color initialTintColor, Windows.UI.Color initialFallbackColor, Boolean willTintColorAlwaysBeOpaque);
+        Windows.UI.Composition.CompositionEffectBrush CreateBackdropAcrylicEffectBrushWithLuminosity(Windows.UI.Composition.Compositor compositor, Windows.UI.Color initialTintColor, Windows.UI.Color initialLuminosityColor, Windows.UI.Color initialFallbackColor, Boolean willTintColorAlwaysBeOpaque);
+    };
+
+}

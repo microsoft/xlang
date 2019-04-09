@@ -1,0 +1,63 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.StateRepository
+{
+    [contract(Windows.Internal.StateRepository.StateRepositoryContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Internal.StateRepository.IDynamicAppUriHandlerStatics", 302b8a63-89b9-48d0-a4a2-3bdb03468264)]
+    [interface_name("Windows.Internal.StateRepository.IDynamicAppUriHandler", 02b3cc0c-c32c-48b4-9c66-c6cbdb27fb14)]
+    [threading(both)]
+    runtimeclass DynamicAppUriHandler
+    {
+        DynamicAppUriHandler();
+        static void Add(DynamicAppUriHandler value);
+        static void Update(DynamicAppUriHandler value);
+        static void Delete(DynamicAppUriHandler value);
+        static void DeleteById(Int64 dynamicAppUriHandlerID);
+        static void DeleteByHostNameAndDynamicAppUriHandlerGroup(String HostName, DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static void DeleteByProgIDAndDynamicAppUriHandlerGroup(String ProgID, DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static Boolean Exists(Int64 dynamicAppUriHandlerID);
+        static Boolean ExistsByDynamicAppUriHandlerGroup(DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static Boolean ExistsByHostName(String HostName);
+        static Boolean ExistsByHostNameAndDynamicAppUriHandlerGroup(String HostName, DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static Boolean ExistsByProgID(String ProgID);
+        static Boolean ExistsByProgIDAndDynamicAppUriHandlerGroup(String ProgID, DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static Windows.Internal.StateRepository.DynamicAppUriHandler TryGet(Int64 dynamicAppUriHandlerID);
+        static Windows.Internal.StateRepository.DynamicAppUriHandler TryGetByHostNameAndDynamicAppUriHandlerGroup(String HostName, DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static Windows.Internal.StateRepository.DynamicAppUriHandler TryGetByProgIDAndDynamicAppUriHandlerGroup(String ProgID, DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DynamicAppUriHandler>  Find();
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DynamicAppUriHandler>  FindByDynamicAppUriHandlerGroup(DynamicAppUriHandlerGroup DynamicAppUriHandlerGroup);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DynamicAppUriHandler>  FindByHostName(String HostName);
+        static Windows.Foundation.Collections.IVectorView <Windows.Internal.StateRepository.DynamicAppUriHandler>  FindByProgID(String ProgID);
+        Int64 _DynamicAppUriHandlerID{ get; };
+        Int64 _DynamicAppUriHandlerID{ set; };
+        UInt64 _Revision{ get; };
+        UInt64 _Revision{ set; };
+        Int64 DynamicAppUriHandlerGroup{ get; };
+        Int64 DynamicAppUriHandlerGroup{ set; };
+        Windows.Internal.StateRepository.DynamicAppUriHandlerGroup GetDynamicAppUriHandlerGroup();
+        void SetDynamicAppUriHandlerGroup(DynamicAppUriHandlerGroup value);
+        String HostName{ get; };
+        String HostName{ set; };
+        Boolean IsProgIDNull{ get; };
+        void SetProgIDToNull();
+        String ProgID{ get; };
+        String ProgID{ set; };
+        Boolean Is_DictionaryNull{ get; };
+        void Set_DictionaryToNull();
+        void Get_Dictionary(out UInt8[] value);
+        void Set_Dictionary(UInt8[] value);
+        Windows.Foundation.Collections.IPropertySet Get_DictionaryAsPropertySet();
+    }
+
+
+}

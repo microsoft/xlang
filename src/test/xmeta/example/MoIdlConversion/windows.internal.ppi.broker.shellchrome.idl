@@ -1,0 +1,132 @@
+
+
+
+
+
+
+namespace Windows.Internal.PPI.Shell.Chrome
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    enum SidebarSide
+    {
+        None,
+        Left,
+        Right,
+    };
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    enum SidebarPanel
+    {
+        Call,
+        Roster,
+        Message,
+        Content,
+    };
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    enum SidebarButtonState
+    {
+        Disabled,
+        Enabled,
+        Badged,
+    };
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    enum SysTrayComponent
+    {
+        None,
+        QuickActions,
+        Notifications,
+    };
+
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.PPI.Shell.Chrome.IFullScreenChangedEventArgs", 6ca92935-f698-4176-8b59-d494af3340e5)]
+    runtimeclass FullScreenChangedEventArgs
+    {
+        FullScreenChangedEventArgs();
+        Boolean IsFullScreen{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    [static_name("Windows.Internal.PPI.Shell.Chrome.IBottomBarActionsStatics", cd95f6d5-93f8-41c6-8f23-689edb070afa)]
+    runtimeclass BottomBarActions
+    {
+        static void InvokeQuickActions();
+        static void InvokeNotifications();
+        static void LaunchAdminConsole();
+        static void LaunchConsole();
+        static void LaunchControlPanel();
+        static void LaunchMMC();
+        static void LaunchRemoveCI();
+        static Boolean IsSimulatingPresenceLost{ set; };
+        static Boolean IsSimulatingPresenceLost{ get; };
+        static void ToggleCortana();
+        static void LaunchMultitasking();
+        static void ExitFullScreen();
+        static void GetCortanaEnabledState(out Boolean isCortanaEnabled);
+        static void LaunchClockFlyout();
+        static event Windows.Foundation.EventHandler <Windows.Internal.PPI.Shell.Chrome.FullScreenChangedEventArgs>  FullScreenChanged;
+    }
+
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.PPI.Shell.Chrome.ISidebarStateChangedEventArgs", cd1781ca-f4c6-40aa-bdca-e20d07620554)]
+    runtimeclass SidebarStateChangedEventArgs
+    {
+        SidebarStateChangedEventArgs();
+        Windows.Internal.PPI.Shell.Chrome.SidebarSide Side{ get; };
+        Windows.Internal.PPI.Shell.Chrome.SidebarPanel Panel{ get; };
+        Windows.Internal.PPI.Shell.Chrome.SidebarButtonState CallButtonState{ get; };
+        Windows.Internal.PPI.Shell.Chrome.SidebarButtonState RosterButtonState{ get; };
+        Windows.Internal.PPI.Shell.Chrome.SidebarButtonState MessageButtonState{ get; };
+        Windows.Internal.PPI.Shell.Chrome.SidebarButtonState ContentButtonState{ get; };
+    }
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.PPI.Shell.Chrome.ISidebarActionsStatics", da0f46db-63de-4190-af85-6cf0307b6009)]
+    runtimeclass SidebarActions
+    {
+        static void SetDimensions(Int32 sidebarWidth, Int32 panelWidth);
+        static void SetHorizontalBarDimensions(Int32 barHeight, Int32 barWidth);
+        static void SetMeetingsTitleBarDimensions(Int32 barHeight, Int32 barWidth);
+        static void ToggleSidebarPanel(SidebarSide side, SidebarPanel panel, Boolean allowClose);
+        static event Windows.Foundation.EventHandler <Windows.Internal.PPI.Shell.Chrome.SidebarStateChangedEventArgs>  SidebarStateChanged;
+    }
+
+
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.PPI.Shell.Chrome.IStartMenuActionsStatics", 2a996b0e-a21f-406e-abcc-84b5c9b3116c)]
+    runtimeclass StartMenuActions
+    {
+        static void ImDone();
+        static void ToggleStartMenu();
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PPI.Shell.Chrome.InternalContract, 1)]
+    [static_name("Windows.Internal.PPI.Shell.Chrome.IRegistryOverridesStatics", 43bca4f2-8150-41e5-991f-d1bac7a7e5ca)]
+    runtimeclass RegistryOverrides
+    {
+        static Boolean CleanupShadeDisabled{ get; };
+        static Boolean WatermarkDisabled{ get; };
+        static Boolean MultiProjectionEnabled{ get; };
+        static Boolean CaptureModuleEnabled{ get; };
+        static Boolean WirelessDNDEnabled{ get; };
+        static Boolean MiracastDisabled{ get; };
+        static Boolean MyStuffDisabled{ get; };
+    }
+
+}

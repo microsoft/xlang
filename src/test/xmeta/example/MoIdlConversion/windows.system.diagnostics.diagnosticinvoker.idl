@@ -1,0 +1,55 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.System.Diagnostics
+{
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    enum DiagnosticActionState
+    {
+        Initializing,
+        Downloading,
+        VerifyingTrust,
+        Detecting,
+        Resolving,
+        VerifyingResolution,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Diagnostics.IDiagnosticInvokerStatics", 5cfad8de-f15c-4554-a813-c113c3881b09)]
+    [interface_name("Windows.System.Diagnostics.IDiagnosticInvoker", 187b270a-02e3-4f86-84fc-fdd892b5940f)]
+    [threading(both)]
+    runtimeclass DiagnosticInvoker
+    {
+        static Windows.System.Diagnostics.DiagnosticInvoker GetDefault();
+        static Windows.System.Diagnostics.DiagnosticInvoker GetForUser(Windows.System.User user);
+        static Boolean IsSupported{ get; };
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.System.Diagnostics.DiagnosticActionResult, Windows.System.Diagnostics.DiagnosticActionState>  RunDiagnosticActionAsync(Windows.Data.Json.JsonObject context);
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.System.Diagnostics.IDiagnosticInvoker2", e3bf945c-155a-4b52-a8ec-070c44f95000)]
+        {
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.System.Diagnostics.DiagnosticActionResult, Windows.System.Diagnostics.DiagnosticActionState>  RunDiagnosticActionFromStringAsync(String context);
+        }
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [interface_name("Windows.System.Diagnostics.IDiagnosticActionResult", c265a296-e73b-4097-b28f-3442f03dd831)]
+    runtimeclass DiagnosticActionResult
+    {
+        HRESULT ExtendedError{ get; };
+        Windows.Foundation.Collections.ValueSet Results{ get; };
+    }
+
+
+}

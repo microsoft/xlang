@@ -1,0 +1,49 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Accessibility.Experience
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Accessibility.Experience.InternalContract, 1)]
+    [interface_name("Windows.Internal.Accessibility.Experience.ITextScale", c95e56ae-c86c-5105-9e74-f1ffc389aafe)]
+    [threading(both)]
+    runtimeclass TextScale
+    {
+        TextScale();
+        void ApplyTextScale(Int32 textScaleFactor);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Accessibility.Experience.InternalContract, 1)]
+    [interface_name("Windows.Internal.Accessibility.Experience.ICustomCursor", 30cbcad0-37ac-56b6-8c0b-74b54a8058a5)]
+    [threading(both)]
+    runtimeclass CustomCursor
+    {
+        CustomCursor();
+        void ApplyCustomCursor(UInt32 cursorSize, Windows.UI.Color color);
+        void ApplyInvertedCursor(UInt32 cursorSize);
+    }
+
+
+    [contract(Windows.Internal.Accessibility.Experience.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Accessibility.Experience.IAutoHideScrollBars", 423aeedb-d4ca-5792-8d96-671fa9b8f8a6)]
+    [threading(both)]
+    runtimeclass AutoHideScrollBars
+    {
+        AutoHideScrollBars();
+        void ApplyAutoHideScrollBars(Boolean shouldAutoHideScrollBars);
+    }
+
+}

@@ -1,0 +1,205 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.UI.Internal.Input
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    [interface_name("Windows.UI.Internal.Input.IContextMenuKeyEventArgs", 08f03217-db10-5d63-a24c-8c4b8cfafc0a)]
+    runtimeclass ContextMenuKeyEventArgs
+    {
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    }
+
+
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Internal.Input.IKeyboardInputStatics", c08f828b-7c5a-5547-ada4-1eb3a3615db7)]
+    [interface_name("Windows.UI.Internal.Input.IKeyboardInput", cdaa6b9a-3990-5c1e-916f-7e812aa23335)]
+    [threading(both)]
+    runtimeclass KeyboardInput
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.KeyboardInput GetForInputSite(InputSite inputSite);
+        Windows.UI.Core.CoreVirtualKeyStates GetKeyState(Windows.System.VirtualKey virtualKey);
+        Windows.UI.Core.CoreVirtualKeyStates GetCurrentKeyState(Windows.System.VirtualKey virtualKey);
+        String CurrentKeyEventDeviceId{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.KeyboardInput, Windows.UI.Core.AcceleratorKeyEventArgs>  AcceleratorKeyActivated;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.KeyboardInput, Windows.UI.Core.CharacterReceivedEventArgs>  CharacterReceived;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.KeyboardInput, Windows.UI.Core.KeyEventArgs>  KeyDown;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.KeyboardInput, Windows.UI.Core.KeyEventArgs>  KeyUp;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.KeyboardInput, Windows.UI.Core.KeyEventArgs>  SysKeyDown;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.KeyboardInput, Windows.UI.Core.KeyEventArgs>  SysKeyUp;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.KeyboardInput, Windows.UI.Internal.Input.ContextMenuKeyEventArgs>  ContextMenuKey;
+    }
+
+
+
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.Input.IInputActivationListenerPartnerStatics", 7bf4c50d-3308-5220-a9f7-25b3da1a9aab)]
+    [threading(both)]
+    runtimeclass InputActivationListenerPartner
+    {
+        static Object GetForInputSite(InputSite inputSite);
+    }
+
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    enum FocusChangedDirection
+    {
+        None,
+        Next,
+        Previous,
+        Up,
+        Down,
+        Left,
+        Right,
+    };
+
+
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Internal.Input.IFocusChangedEventArgs", 48bd5b2e-85f0-5380-84a5-7a3f7b9d7e62)]
+    runtimeclass FocusChangedEventArgs
+    {
+        Windows.UI.Internal.Input.FocusChangedDirection Direction{ get; };
+    }
+
+
+
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [static_name("Windows.UI.Internal.Input.IFocusControllerStatics", 9c5e8eac-ded4-5dc8-9c9f-0507859059e5)]
+    [interface_name("Windows.UI.Internal.Input.IFocusController", ae7b1e90-62bf-5698-b0e7-138f0f5d8bfd)]
+    [threading(both)]
+    runtimeclass FocusController
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.FocusController GetForInputSite(InputSite inputSite);
+        Boolean TrySetFocus();
+        Boolean HasFocus{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [constructor_name("Windows.UI.Internal.Input.IFocusObserverFactory", dd39f63d-4687-589b-acd7-3ff12b2d9670)]
+    [interface_name("Windows.UI.Internal.Input.IFocusObserver", 2be278b2-1fc0-54de-8b40-c1480e094d2b)]
+    [threading(both)]
+    runtimeclass FocusObserver
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        [method_name( "CreateInstance" )] FocusObserver(InputSite inputSite);
+        Boolean HasFocus{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.FocusObserver, Windows.UI.Internal.Input.FocusChangedEventArgs>  GotFocus;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.FocusObserver, Windows.UI.Internal.Input.FocusChangedEventArgs>  LostFocus;
+    }
+
+
+
+
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.UI.Internal.Input.IPointerCursorControllerStatics", 2c4e42d1-884c-568f-97a8-136ed4a6c8bf)]
+    [interface_name("Windows.UI.Internal.Input.IPointerCursorController", 2bbe918f-0b13-503c-9829-eda2a83b8072)]
+    [threading(both)]
+    runtimeclass PointerCursorController
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.PointerCursorController GetForInputSite(InputSite inputSite);
+        Windows.Foundation.Point Position{ get; };
+        Windows.UI.Core.CoreCursor Cursor{ get; };
+        Windows.UI.Core.CoreCursor Cursor{ set; };
+    }
+
+
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.UI.Internal.Input.IPointerInputObserverFactory", fc7b9d72-1c95-55ce-8714-1f3a4b8562e3)]
+    [interface_name("Windows.UI.Internal.Input.IPointerInputObserver", db9bcab2-abc9-5b11-88ab-ab4b003dd604)]
+    [threading(both)]
+    runtimeclass PointerInputObserver
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        [method_name( "CreateInstance" )] PointerInputObserver(InputSite site);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerCaptureLost;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerEntered;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerExited;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerMoved;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerPressed;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerReleased;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerRoutedAway;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerRoutedReleased;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerRoutedTo;
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.PointerInputObserver, Windows.UI.Core.PointerEventArgs>  PointerWheelChanged;
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [static_name("Windows.UI.Internal.Input.IMouseCaptureStatics", 534a7e27-ab7f-54fc-acc9-69661189532d)]
+    [interface_name("Windows.UI.Internal.Input.IMouseCapture", ff810b24-61e3-5af4-a290-0593d97bd637)]
+    [threading(both)]
+    runtimeclass MouseCapture
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.MouseCapture GetForInputSite(InputSite inputSite);
+        Boolean TrySetCapture();
+        Boolean TryReleaseCapture();
+        Boolean HasCapture{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [webhosthidden]
+    [static_name("Windows.UI.Internal.Input.IClosestInteractiveBoundsProviderStatics", 33292302-3ebe-5c5a-b2a6-603f5899a8fa)]
+    [interface_name("Windows.UI.Internal.Input.IClosestInteractiveBoundsProvider", 764fbb5a-2ef6-5a78-8da8-8b9569432278)]
+    [threading(both)]
+    runtimeclass ClosestInteractiveBoundsProvider
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.ClosestInteractiveBoundsProvider GetForInputSite(InputSite inputSite);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.ClosestInteractiveBoundsProvider, Windows.UI.Core.ClosestInteractiveBoundsRequestedEventArgs>  ClosestInteractiveBoundsRequested;
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [contract(Windows.UI.Internal.Input.ISMInternalContract, 1)]
+    [static_name("Windows.UI.Internal.Input.ITouchHitTestingProviderStatics", befb3fc2-038e-527f-91ef-f51f301476a3)]
+    [interface_name("Windows.UI.Internal.Input.ITouchHitTestingProvider", 6aa11fa8-ceb6-5e3b-a0a3-9c065839de4e)]
+    [threading(both)]
+    runtimeclass TouchHitTestingProvider
+        : Windows.UI.Internal.Input.InputObjectPartner
+    {
+        static Windows.UI.Internal.Input.TouchHitTestingProvider GetForInputSite(InputSite inputSite);
+        event Windows.Foundation.TypedEventHandler <Windows.UI.Internal.Input.TouchHitTestingProvider, Windows.UI.Core.TouchHitTestingEventArgs>  TouchHitTestRequested;
+    }
+
+
+}

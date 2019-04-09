@@ -1,0 +1,28 @@
+
+
+
+
+
+
+
+namespace Windows.Internal.WCOS.Adapter
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.WCOS.Adapter.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [webhosthidden]
+    [dualapipartition(0xa000007)]
+    [interface_name("Windows.Internal.WCOS.Adapter.IAdapterControl", 39972ac6-1bc7-4b44-8274-7bd742c309d4)]
+    [threading(both)]
+    runtimeclass WCOSAdapterControl
+        : Windows.Foundation.IClosable
+    {
+        WCOSAdapterControl();
+        void Initialize();
+    }
+
+}

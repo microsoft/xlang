@@ -1,0 +1,85 @@
+
+
+
+
+
+
+
+
+namespace Windows.Media.ContentRestrictions
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum RatedContentCategory
+    {
+        General,
+        Application,
+        Game,
+        Movie,
+        Television,
+        Music,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ContentAccessRestrictionLevel
+    {
+        Allow,
+        Warn,
+        Block,
+        Hide,
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Media.ContentRestrictions.IRatedContentDescriptionFactory", 2e38df62-9b90-4fa6-89c1-4b8d2ffb3573)]
+    [interface_name("Windows.Media.ContentRestrictions.IRatedContentDescription", 694866df-66b2-4dc3-96b1-f090eedee255)]
+    [threading(both)]
+    runtimeclass RatedContentDescription
+    {
+        [method_name( "Create" )] RatedContentDescription(String id, String title, RatedContentCategory category);
+        String Id{ get; };
+        String Id{ set; };
+        String Title{ get; };
+        String Title{ set; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Image{ get; };
+        Windows.Storage.Streams.IRandomAccessStreamReference Image{ set; };
+        Windows.Media.ContentRestrictions.RatedContentCategory Category{ get; };
+        Windows.Media.ContentRestrictions.RatedContentCategory Category{ set; };
+        Windows.Foundation.Collections.IVector <String>  Ratings{ get; };
+        Windows.Foundation.Collections.IVector <String>  Ratings{ set; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.ContentRestrictions.IContentRestrictionsBrowsePolicy", 8c0133a4-442e-461a-8757-fad2f5bd37e4)]
+    runtimeclass ContentRestrictionsBrowsePolicy
+    {
+        String GeographicRegion{ get; };
+        Windows.Foundation.IReference <UInt32>  MaxBrowsableAgeRating{ get; };
+        Windows.Foundation.IReference <UInt32>  PreferredAgeRating{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.ContentRestrictions.IRatedContentRestrictions", 3f7f23cb-ba07-4401-a49d-8b9222205723)]
+    [threading(both)]
+    runtimeclass RatedContentRestrictions
+    {
+        RatedContentRestrictions();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Media.ContentRestrictions.IRatedContentRestrictionsFactory", fb4b2996-c3bd-4910-9619-97cfd0694d56)]
+        {
+            [method_name( "CreateWithMaxAgeRating" )] RatedContentRestrictions(UInt32 maxAgeRating);
+        }
+        Windows.Foundation.IAsyncOperation <Windows.Media.ContentRestrictions.ContentRestrictionsBrowsePolicy>  GetBrowsePolicyAsync();
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Media.ContentRestrictions.ContentAccessRestrictionLevel>  GetRestrictionLevelAsync(RatedContentDescription RatedContentDescription);
+        [remote_sync]Windows.Foundation.IAsyncOperation <Boolean>  RequestContentAccessAsync(RatedContentDescription RatedContentDescription);
+        event Windows.Foundation.EventHandler <Object>  RestrictionsChanged;
+    }
+
+}

@@ -1,0 +1,88 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Storage.Search
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Storage.Search.IContentIndexerStatics", 8c488375-b37e-4c60-9ba8-b760fda3e59d)]
+    [interface_name("Windows.Storage.Search.IContentIndexer", b1767f8d-f698-4982-b05f-3a6e8cab01a2)]
+    runtimeclass ContentIndexer
+    {
+        [method_name("GetIndexerWithName")] static Windows.Storage.Search.ContentIndexer GetIndexer(String indexName);
+        [method_name("GetIndexer")] static Windows.Storage.Search.ContentIndexer GetIndexer();
+        [remote_sync]Windows.Foundation.IAsyncAction AddAsync(IIndexableContent indexableContent);
+        [remote_sync]Windows.Foundation.IAsyncAction UpdateAsync(IIndexableContent indexableContent);
+        Windows.Foundation.IAsyncAction DeleteAsync(String contentId);
+        [remote_sync]Windows.Foundation.IAsyncAction DeleteMultipleAsync(Windows.Foundation.Collections.IIterable <String>  contentIds);
+        Windows.Foundation.IAsyncAction DeleteAllAsync();
+        [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IMapView <String, Object> >  RetrievePropertiesAsync(String contentId, Windows.Foundation.Collections.IIterable <String>  propertiesToRetrieve);
+        UInt64 Revision{ get; };
+
+        [interface_name("Windows.Storage.Search.IContentIndexerQueryOperations", 28823e10-4786-42f1-9730-792b3566b150)]
+        {
+            [method_name("CreateQueryWithSortOrderAndLanguage")] Windows.Storage.Search.ContentIndexerQuery CreateQuery(String searchFilter, Windows.Foundation.Collections.IIterable <String>  propertiesToRetrieve, Windows.Foundation.Collections.IIterable <Windows.Storage.Search.SortEntry>  sortOrder, String searchFilterLanguage);
+            [method_name("CreateQueryWithSortOrder")] Windows.Storage.Search.ContentIndexerQuery CreateQuery(String searchFilter, Windows.Foundation.Collections.IIterable <String>  propertiesToRetrieve, Windows.Foundation.Collections.IIterable <Windows.Storage.Search.SortEntry>  sortOrder);
+            [method_name("CreateQuery")] Windows.Storage.Search.ContentIndexerQuery CreateQuery(String searchFilter, Windows.Foundation.Collections.IIterable <String>  propertiesToRetrieve);
+        }
+    }
+
+    [uuid(ccf1a05f-d4b5-483a-b06e-e0db1ec420e4)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IIndexableContent
+    {
+        String Id{ get; };
+        String Id{ set; };
+        Windows.Foundation.Collections.IMap <String, Object>  Properties{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Stream{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Stream{ set; };
+        String StreamContentType{ get; };
+        String StreamContentType{ set; };
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Storage.Search.IValueAndLanguage", b9914881-a1ee-4bc4-92a5-466968e30436)]
+    runtimeclass ValueAndLanguage
+    {
+        ValueAndLanguage();
+        String Language{ get; };
+        String Language{ set; };
+        [variant]Object Value{ get; };
+        [variant]Object Value{ set; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Storage.Search.IContentIndexerQuery", 70e3b0f8-4bfc-428a-8889-cc51da9a7b9d)]
+    runtimeclass ContentIndexerQuery
+    {
+        Windows.Foundation.IAsyncOperation <UInt32>  GetCountAsync();
+        [method_name("GetPropertiesAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Foundation.Collections.IMapView <String, Object> > >  GetPropertiesAsync();
+        [method_name("GetPropertiesRangeAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Foundation.Collections.IMapView <String, Object> > >  GetPropertiesAsync(UInt32 startIndex, UInt32 maxItems);
+        [method_name("GetAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Storage.Search.IIndexableContent> >  GetAsync();
+        [method_name("GetRangeAsync")] Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Storage.Search.IIndexableContent> >  GetAsync(UInt32 startIndex, UInt32 maxItems);
+        Windows.Storage.StorageFolder QueryFolder{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass IndexableContent
+        : [default]Windows.Storage.Search.IIndexableContent
+    {
+        IndexableContent();
+    }
+
+}

@@ -1,0 +1,132 @@
+
+
+
+
+
+
+
+namespace Windows.Devices.Printers.Extensions
+{
+    [contractversion(2)]
+    apicontract ExtensionsContract{};
+
+
+    [contract(Windows.Devices.Printers.Extensions.ExtensionsContract, 1)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrintTaskConfigurationSaveRequestedDeferral", e959d568-f729-44a4-871d-bd0628696a33)]
+    runtimeclass PrintTaskConfigurationSaveRequestedDeferral
+    {
+        void Complete();
+    }
+
+
+    [contract(Windows.Devices.Printers.Extensions.ExtensionsContract, 1)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrintTaskConfigurationSaveRequest", eeaf2fcb-621e-4b62-ac77-b281cce08d60)]
+    runtimeclass PrintTaskConfigurationSaveRequest
+    {
+        void Cancel();
+        void Save(Object printerExtensionContext);
+        Windows.Devices.Printers.Extensions.PrintTaskConfigurationSaveRequestedDeferral GetDeferral();
+        Windows.Foundation.DateTime Deadline{ get; };
+    }
+
+
+    [contract(Windows.Devices.Printers.Extensions.ExtensionsContract, 1)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrintTaskConfigurationSaveRequestedEventArgs", e06c2879-0d61-4938-91d0-96a45bee8479)]
+    runtimeclass PrintTaskConfigurationSaveRequestedEventArgs
+    {
+        Windows.Devices.Printers.Extensions.PrintTaskConfigurationSaveRequest Request{ get; };
+    }
+
+
+    [contract(Windows.Devices.Printers.Extensions.ExtensionsContract, 1)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrintTaskConfiguration", e3c22451-3aa4-4885-9240-311f5f8fbe9d)]
+    runtimeclass PrintTaskConfiguration
+    {
+        Object PrinterExtensionContext{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Printers.Extensions.PrintTaskConfiguration, Windows.Devices.Printers.Extensions.PrintTaskConfigurationSaveRequestedEventArgs>  SaveRequested;
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Devices.Printers.Extensions.ExtensionsContract, 1)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrintNotificationEventDetails", e00e4c8a-4828-4da1-8bb8-8672df8515e7)]
+    runtimeclass PrintNotificationEventDetails
+    {
+        String PrinterName{ get; };
+        String EventData{ get; };
+        String EventData{ set; };
+    }
+
+
+    [contract(Windows.Devices.Printers.Extensions.ExtensionsContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Devices.Printers.Extensions.IPrintExtensionContextStatic", e70d9fc1-ff79-4aa4-8c9b-0c93aedfde8a)]
+    runtimeclass PrintExtensionContext
+    {
+        static Object FromDeviceId(String deviceId);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum Print3DWorkflowStatus
+    {
+        Abandoned,
+        Canceled,
+        Failed,
+        Slicing,
+        Submitted,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    enum Print3DWorkflowDetail
+    {
+        Unknown,
+        ModelExceedsPrintBed,
+        UploadFailed,
+        InvalidMaterialSelection,
+        InvalidModel,
+        ModelNotManifold,
+        InvalidPrintTicket,
+    };
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrint3DWorkflowPrintRequestedEventArgs", 19f8c858-5ac8-4b55-8a5f-e61567dafb4d)]
+    runtimeclass Print3DWorkflowPrintRequestedEventArgs
+    {
+        Windows.Devices.Printers.Extensions.Print3DWorkflowStatus Status{ get; };
+        void SetExtendedStatus(Print3DWorkflowDetail value);
+        void SetSource(Object source);
+        void SetSourceChanged(Boolean value);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrint3DWorkflowPrinterChangedEventArgs", 45226402-95fc-4847-93b3-134dbf5c60f7)]
+    runtimeclass Print3DWorkflowPrinterChangedEventArgs
+    {
+        String NewDeviceId{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 2)]
+    [interface_name("Windows.Devices.Printers.Extensions.IPrint3DWorkflow", c56f74bd-3669-4a66-ab42-c8151930cd34)]
+    runtimeclass Print3DWorkflow
+    {
+        String DeviceID{ get; };
+        Object GetPrintModelPackage();
+        Boolean IsPrintReady{ get; };
+        Boolean IsPrintReady{ set; };
+        event Windows.Foundation.TypedEventHandler <Windows.Devices.Printers.Extensions.Print3DWorkflow, Windows.Devices.Printers.Extensions.Print3DWorkflowPrintRequestedEventArgs>  PrintRequested;
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Devices.Printers.Extensions.IPrint3DWorkflow2", a2a6c54f-8ac1-4918-9741-e34f3004239e)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Devices.Printers.Extensions.Print3DWorkflow, Windows.Devices.Printers.Extensions.Print3DWorkflowPrinterChangedEventArgs>  PrinterChanged;
+        }
+    }
+
+
+}

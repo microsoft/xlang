@@ -1,0 +1,23 @@
+
+
+
+
+
+
+namespace Windows.Internal.UI.ContentDeliveryManager
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+
+    [contract(Windows.Internal.UI.ContentDeliveryManager.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.UI.ContentDeliveryManager.IExpansionExperience", db147050-dcbf-4699-abaf-273e512e2a91)]
+    [threading(both)]
+    runtimeclass ExpansionExperience
+    {
+        static void Show();
+    }
+
+}

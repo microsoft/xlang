@@ -1,0 +1,70 @@
+
+
+
+
+
+
+namespace WindowsInternal.ApplicationModel.Calls
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(WindowsInternal.ApplicationModel.Calls.InternalContract, 1)]
+    [flags]
+    enum VideoCapabilities
+    {
+        None,
+        VideoCalling,
+    };
+
+    [uuid(4cede541-c2a9-4342-bac3-dc63905312b0)]
+    [contract(WindowsInternal.ApplicationModel.Calls.InternalContract, 1)]
+    interface IPhoneVoicemailExtended
+    {
+        void ShowVisualVoicemailWizard();
+    };
+
+
+    [contract(WindowsInternal.ApplicationModel.Calls.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("WindowsInternal.ApplicationModel.Calls.IRcsPresenceManagerStatics", 9f725c20-a3b4-4333-8553-739f44ae1791)]
+    runtimeclass RcsPresenceManager
+    {
+        static WindowsInternal.ApplicationModel.Calls.VideoCapabilities RequestCapabilities(String phoneNumber);
+        static void PublishCapabilities(VideoCapabilities capabilities);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(WindowsInternal.ApplicationModel.Calls.InternalContract, 1)]
+    [static_name("WindowsInternal.ApplicationModel.Calls.IIncomingCallToastStatics", 495958d0-37b1-494b-90a4-07258caf648f)]
+    [threading(both)]
+    runtimeclass IncomingCallToast
+    {
+        static void Show(UInt32 callId);
+        static void Hide(UInt32 callId);
+        static void Update(UInt32 callId);
+    }
+
+
+    [contract(WindowsInternal.ApplicationModel.Calls.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("WindowsInternal.ApplicationModel.Calls.IAppLauncherStatics", 5393122d-07dd-45d3-9aed-acfbf1895eab)]
+    [threading(both)]
+    runtimeclass AppLauncher
+    {
+        static Windows.Foundation.IAsyncOperation <Boolean>  LaunchForActiveCallAsync(UInt32 callId);
+    }
+
+
+    [contract(WindowsInternal.ApplicationModel.Calls.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("WindowsInternal.ApplicationModel.Calls.IServiceUiToastStatics", daf9b96d-b02b-4c08-a51e-bfaf8e625d67)]
+    [threading(both)]
+    runtimeclass ServiceUiToast
+    {
+        static void PostLineErrorToastNotification(Guid lineId, HRESULT error);
+    }
+
+}

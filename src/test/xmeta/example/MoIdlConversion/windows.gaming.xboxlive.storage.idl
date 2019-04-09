@@ -1,0 +1,180 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Gaming.XboxLive
+{
+    [contractversion(1)]
+    apicontract StorageApiContract{};
+
+}
+namespace Windows.Gaming.XboxLive.Storage
+{
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    enum GameSaveErrorStatus
+    {
+        Ok,
+        Abort = -2147467260,
+        InvalidContainerName = -2138898431,
+        NoAccess,
+        OutOfLocalStorage,
+        UserCanceled,
+        UpdateTooBig,
+        QuotaExceeded,
+        ProvidedBufferTooSmall,
+        BlobNotFound,
+        NoXboxLiveInfo,
+        ContainerNotInSync,
+        ContainerSyncFailed,
+        UserHasNoXboxLiveInfo,
+        ObjectExpired,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveContainer", c3c08f89-563f-4ecd-9c6f-33fd0e323d10)]
+    runtimeclass GameSaveContainer
+    {
+        String Name{ get; };
+        Windows.Gaming.XboxLive.Storage.GameSaveProvider Provider{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveOperationResult>  SubmitUpdatesAsync(Windows.Foundation.Collections.IMapView <String, Windows.Storage.Streams.IBuffer>  blobsToWrite, Windows.Foundation.Collections.IIterable <String>  blobsToDelete, String displayName);
+        Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveOperationResult>  ReadAsync(Windows.Foundation.Collections.IMapView <String, Windows.Storage.Streams.IBuffer>  blobsToRead);
+        Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveBlobGetResult>  GetAsync(Windows.Foundation.Collections.IIterable <String>  blobsToRead);
+        Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveOperationResult>  SubmitPropertySetUpdatesAsync(Windows.Foundation.Collections.IPropertySet blobsToWrite, Windows.Foundation.Collections.IIterable <String>  blobsToDelete, String displayName);
+        Windows.Gaming.XboxLive.Storage.GameSaveBlobInfoQuery CreateBlobInfoQuery(String blobNamePrefix);
+    }
+
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveOperationResult", cf0f1a05-24a0-4582-9a55-b1bbbb9388d8)]
+    runtimeclass GameSaveOperationResult
+    {
+        Windows.Gaming.XboxLive.Storage.GameSaveErrorStatus Status{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveContainerInfoQuery", 3c94e863-6f80-4327-9327-ffc11afd42b3)]
+    runtimeclass GameSaveContainerInfoQuery
+    {
+        [method_name("GetContainerInfoAsync")] [default_overload]
+        Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveContainerInfoGetResult>  GetContainerInfoAsync();
+        [method_name("GetContainerInfoWithIndexAndMaxAsync")] Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveContainerInfoGetResult>  GetContainerInfoAsync(UInt32 startIndex, UInt32 maxNumberOfItems);
+        Windows.Foundation.IAsyncOperation <UInt32>  GetItemCountAsync();
+    }
+
+
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveProviderGetResult", 3ab90816-d393-4d65-ac16-41c3e67ab945)]
+    runtimeclass GameSaveProviderGetResult
+    {
+        Windows.Gaming.XboxLive.Storage.GameSaveErrorStatus Status{ get; };
+        Windows.Gaming.XboxLive.Storage.GameSaveProvider Value{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [static_name("Windows.Gaming.XboxLive.Storage.IGameSaveProviderStatics", d01d3ed0-7b03-449d-8cbd-3402842a1048)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveProvider", 90a60394-80fe-4211-97f8-a5de14dd95d2)]
+    runtimeclass GameSaveProvider
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveProviderGetResult>  GetForUserAsync(Windows.System.User user, String serviceConfigId);
+        static Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveProviderGetResult>  GetSyncOnDemandForUserAsync(Windows.System.User user, String serviceConfigId);
+        Windows.System.User User{ get; };
+        Windows.Gaming.XboxLive.Storage.GameSaveContainer CreateContainer(String name);
+        Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveOperationResult>  DeleteContainerAsync(String name);
+        [default_overload]
+        [method_name("CreateContainerInfoQuery")] Windows.Gaming.XboxLive.Storage.GameSaveContainerInfoQuery CreateContainerInfoQuery();
+        [method_name("CreateContainerInfoQueryWithName")] Windows.Gaming.XboxLive.Storage.GameSaveContainerInfoQuery CreateContainerInfoQuery(String containerNamePrefix);
+        Windows.Foundation.IAsyncOperation <Int64>  GetRemainingBytesInQuotaAsync();
+        Windows.Foundation.Collections.IVectorView <String>  ContainersChangedSinceLastSync{ get; };
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveBlobGetResult", 917281e0-7201-4953-aa2c-4008f03aef45)]
+    runtimeclass GameSaveBlobGetResult
+    {
+        Windows.Gaming.XboxLive.Storage.GameSaveErrorStatus Status{ get; };
+        Windows.Foundation.Collections.IMapView <String, Windows.Storage.Streams.IBuffer>  Value{ get; };
+    }
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveBlobInfoQuery", 9fdd74b2-eeee-447b-a9d2-7f96c0f83208)]
+    runtimeclass GameSaveBlobInfoQuery
+    {
+        [default_overload]
+        [method_name("GetBlobInfoAsync")] Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveBlobInfoGetResult>  GetBlobInfoAsync();
+        [method_name("GetBlobInfoWithIndexAndMaxAsync")] Windows.Foundation.IAsyncOperation <Windows.Gaming.XboxLive.Storage.GameSaveBlobInfoGetResult>  GetBlobInfoAsync(UInt32 startIndex, UInt32 maxNumberOfItems);
+        Windows.Foundation.IAsyncOperation <UInt32>  GetItemCountAsync();
+    }
+
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveContainerInfo", b7e27300-155d-4bb4-b2ba-930306f391b5)]
+    runtimeclass GameSaveContainerInfo
+    {
+        String Name{ get; };
+        UInt64 TotalSize{ get; };
+        String DisplayName{ get; };
+        Windows.Foundation.DateTime LastModifiedTime{ get; };
+        Boolean NeedsSync{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveBlobInfo", add38034-baf0-4645-b6d0-46edaffb3c2b)]
+    runtimeclass GameSaveBlobInfo
+    {
+        String Name{ get; };
+        UInt32 Size{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveContainerInfoGetResult", ffc50d74-c581-4f9d-9e39-30a10c1e4c50)]
+    runtimeclass GameSaveContainerInfoGetResult
+    {
+        Windows.Gaming.XboxLive.Storage.GameSaveErrorStatus Status{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.XboxLive.Storage.GameSaveContainerInfo>  Value{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Gaming.XboxLive.StorageApiContract, 1)]
+    [interface_name("Windows.Gaming.XboxLive.Storage.IGameSaveBlobInfoGetResult", c7578582-3697-42bf-989c-665d923b5231)]
+    runtimeclass GameSaveBlobInfoGetResult
+    {
+        Windows.Gaming.XboxLive.Storage.GameSaveErrorStatus Status{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Gaming.XboxLive.Storage.GameSaveBlobInfo>  Value{ get; };
+    }
+
+
+
+}

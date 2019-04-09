@@ -1,0 +1,172 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.DialProtocol
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DialAppState
+    {
+        Unknown,
+        Stopped,
+        Running,
+        NetworkFailure,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DialAppLaunchResult
+    {
+        Launched,
+        FailedToLaunch,
+        NotFound,
+        NetworkFailure,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DialAppStopResult
+    {
+        Stopped,
+        StopFailed,
+        OperationNotSupported,
+        NetworkFailure,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum DialDeviceDisplayStatus
+    {
+        None,
+        Connecting,
+        Connected,
+        Disconnecting,
+        Disconnected,
+        Error,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.DialProtocol.IDialAppStateDetails", ddc4a4a1-f5de-400d-bea4-8c8466bb2961)]
+    runtimeclass DialAppStateDetails
+    {
+        Windows.Media.DialProtocol.DialAppState State{ get; };
+        String FullXml{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.DialProtocol.IDialApp", 555ffbd3-45b7-49f3-bbd7-302db6084646)]
+    runtimeclass DialApp
+    {
+        String AppName{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Media.DialProtocol.DialAppLaunchResult>  RequestLaunchAsync(String appArgument);
+        Windows.Foundation.IAsyncOperation <Windows.Media.DialProtocol.DialAppStopResult>  StopAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Media.DialProtocol.DialAppStateDetails>  GetAppStateAsync();
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Media.DialProtocol.IDialDeviceStatics", aa69cc95-01f8-4758-8461-2bbd1cdc3cf3)]
+    [interface_name("Windows.Media.DialProtocol.IDialDevice", fff0edaf-759f-41d2-a20a-7f29ce0b3784)]
+    [threading(both)]
+    runtimeclass DialDevice
+    {
+        static String GetDeviceSelector(String appName);
+        static Windows.Foundation.IAsyncOperation <Windows.Media.DialProtocol.DialDevice>  FromIdAsync(String value);
+        static Windows.Foundation.IAsyncOperation <Boolean>  DeviceInfoSupportsDialAsync(Windows.Devices.Enumeration.DeviceInformation device);
+        String Id{ get; };
+        Windows.Media.DialProtocol.DialApp GetDialApp(String appName);
+
+        [contract(Windows.Foundation.UniversalApiContract, 2)]
+        [interface_name("Windows.Media.DialProtocol.IDialDevice2", bab7f3d5-5bfb-4eba-8b32-b57c5c5ee5c9)]
+        {
+            String FriendlyName{ get; };
+            Windows.Storage.Streams.IRandomAccessStreamReference Thumbnail{ get; };
+        }
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.DialProtocol.IDialDeviceSelectedEventArgs", 480b92ad-ac76-47eb-9c06-a19304da0247)]
+    runtimeclass DialDeviceSelectedEventArgs
+    {
+        Windows.Media.DialProtocol.DialDevice SelectedDialDevice{ get; };
+    }
+
+
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.DialProtocol.IDialDisconnectButtonClickedEventArgs", 52765152-9c81-4e55-adc2-0ebe99cde3b6)]
+    runtimeclass DialDisconnectButtonClickedEventArgs
+    {
+        Windows.Media.DialProtocol.DialDevice Device{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.DialProtocol.IDialDevicePickerFilter", c17c93ba-86c0-485d-b8d6-0f9a8f641590)]
+    runtimeclass DialDevicePickerFilter
+    {
+        Windows.Foundation.Collections.IVector <String>  SupportedAppNames{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Media.DialProtocol.IDialDevicePicker", ba7e520a-ff59-4f4b-bdac-d89f495ad6e1)]
+    [threading(both)]
+    runtimeclass DialDevicePicker
+    {
+        DialDevicePicker();
+        Windows.Media.DialProtocol.DialDevicePickerFilter Filter{ get; };
+        Windows.Devices.Enumeration.DevicePickerAppearance Appearance{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Media.DialProtocol.DialDevicePicker, Windows.Media.DialProtocol.DialDeviceSelectedEventArgs>  DialDeviceSelected;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.DialProtocol.DialDevicePicker, Windows.Media.DialProtocol.DialDisconnectButtonClickedEventArgs>  DisconnectButtonClicked;
+        event Windows.Foundation.TypedEventHandler <Windows.Media.DialProtocol.DialDevicePicker, Object>  DialDevicePickerDismissed;
+        [method_name("Show")] void Show(Windows.Foundation.Rect selection);
+        [method_name("ShowWithPlacement")] void Show(Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement);
+        [method_name("PickSingleDialDeviceAsync")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Media.DialProtocol.DialDevice>  PickSingleDialDeviceAsync(Windows.Foundation.Rect selection);
+        [method_name("PickSingleDialDeviceAsyncWithPlacement")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.Media.DialProtocol.DialDevice>  PickSingleDialDeviceAsync(Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement);
+        void Hide();
+        void SetDisplayStatus(DialDevice device, DialDeviceDisplayStatus status);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 5)]
+    [static_name("Windows.Media.DialProtocol.IDialReceiverAppStatics", 53183a3c-4c36-4d02-b28a-f2a9da38ec52)]
+    [interface_name("Windows.Media.DialProtocol.IDialReceiverApp", fd3e7c57-5045-470e-b304-4dd9b13e7d11)]
+    [threading(both)]
+    runtimeclass DialReceiverApp
+    {
+        static Windows.Media.DialProtocol.DialReceiverApp Current{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IMap <String, String> >  GetAdditionalDataAsync();
+        Windows.Foundation.IAsyncAction SetAdditionalDataAsync(Windows.Foundation.Collections.IIterable <Windows.Foundation.Collections.IKeyValuePair <String, String> >  additionalData);
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.DialProtocol.IDialReceiverApp2", 530c5805-9130-42ac-a504-1977dcb2ea8a)]
+        {
+            Windows.Foundation.IAsyncOperation <String>  GetUniqueDeviceNameAsync();
+        }
+    }
+
+
+
+}

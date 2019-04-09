@@ -1,0 +1,173 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.InstallService.Plugin
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    enum InstallServiceWorkProgressStage
+    {
+        Unknown,
+        Initializing,
+        Scanning,
+        AcquiringLicense,
+        DownloadingProduct,
+        Installing,
+        DownloadingUserData,
+    };
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    enum InstallServiceWorkPriority
+    {
+        Default,
+        Low,
+        High,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [interface_name("Windows.Internal.InstallService.Plugin.IInstallServiceWorkProgressStatus", b696e82d-1596-4ed1-a0db-3d1d62369e32)]
+    runtimeclass InstallServiceWorkProgressStatus
+    {
+        Windows.Internal.InstallService.Plugin.InstallServiceWorkProgressStage ProgressStage{ get; };
+        UInt64 TotalUnitsForStage{ get; };
+        UInt64 CompletedUnitsForStage{ get; };
+        Int32 TotalPercentComplete{ get; };
+    }
+
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.InstallService.Plugin.IInstallServiceWorkAttributes", f2f8bb2c-89df-411c-a5a8-24ab4c3007a0)]
+    runtimeclass InstallServiceWorkAttributes
+    {
+        Boolean ReadyToLaunch{ get; };
+        Boolean IsFramework{ get; };
+        Boolean Remediation{ get; };
+        Boolean MandatoryUpdate{ get; };
+        String TelemetryData{ get; };
+        String PackageFamilyName{ get; };
+        String ParentPackageFamilyName{ get; };
+        String WorkType{ get; };
+    }
+
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.InstallService.Plugin.IInstallServiceWorkDependency", 9de5aae9-abca-4b2b-b341-1d87aca78e9f)]
+    runtimeclass InstallServiceWorkDependency
+    {
+        String DependencySearchIdType{ get; };
+        String DependencySearchId{ get; };
+        Boolean ShouldAutoFulfill{ get; };
+    }
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [uuid(16c7e4a8-2f43-412a-aec2-9ead18aae62f)]
+    interface IInstallServiceWorkItem requires Windows.Foundation.IClosable
+    {
+        String SearchIdType{ get; };
+        String SearchId{ get; };
+        Windows.Internal.InstallService.Plugin.InstallServiceWorkPriority Priority{ get; };
+        Windows.Internal.InstallService.Plugin.InstallServiceWorkAttributes Attributes{ get; };
+        void SetInstallServiceConnection(IInstallServiceConnection value);
+        void Start(String cv);
+        void Pause(String cv);
+        void Cancel(String cv);
+        Boolean IsApplicableForUser(String userSID);
+        void UserOverrideRequestedForBlockedState(String cv, Int32 statusCode);
+    };
+
+    [uuid(aacb686f-fe6d-4843-8861-07a105ed5bcb)]
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    interface IInstallServiceConnection
+    {
+        void OnProgress(String cv, InstallServiceWorkProgressStatus value);
+        void OnSubTaskProgress(String cv, UInt32 taskId, InstallServiceWorkProgressStatus value);
+        void OnPriorityChanged(String cv);
+        void OnAttributesChanged(String cv);
+        void OnCheckpointDataChanged(String cv, Windows.Storage.Streams.IBuffer value);
+        void OnIdle(String cv);
+        [method_name("OnError")] void OnError(String cv, Int32 errorCode, String errorInfo);
+        void OnCanceled(String cv);
+        void OnCompleted(String cv);
+        void OnBlockedOnSystem(String cv, Int32 statusCode, String extendedInfo);
+        void OnBlockedOnDependencies(String cv, Windows.Foundation.Collections.IIterable <Windows.Internal.InstallService.Plugin.InstallServiceWorkDependency>  value);
+        Boolean IsWorkCompleted(String cv, String userSID, String SearchIdType, String SearchId);
+        [method_name("OnExtendedError")] void OnError(String cv, Int32 errorCode, Int32 extendedErrorCode, String errorInfo);
+    };
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [uuid(bb28b73a-3ea5-4d0e-955f-bc3d7cec6911)]
+    interface IInstallServiceWorkItemSubTask
+    {
+        String SearchIdType{ get; };
+        String SearchId{ get; };
+        Windows.Internal.InstallService.Plugin.InstallServiceWorkAttributes Attributes{ get; };
+    };
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [uuid(9d82fc5f-33d4-4f24-ae1f-5dc510d30a3a)]
+    interface IInstallServiceWorkItemWithSubTasks
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.InstallService.Plugin.IInstallServiceWorkItemSubTask>  SubTasks{ get; };
+    };
+
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.InstallService.Plugin.IInstallServiceCreateWorkProperties", 1bfd54fd-5490-466c-9953-d2a3a27f3f68)]
+    runtimeclass InstallServiceCreateWorkProperties
+    {
+        String CallerApplicationId{ get; };
+        Boolean IsInteractive{ get; };
+        String InstallLocation{ get; };
+        Boolean LaunchOnComplete{ get; };
+        Boolean Remediate{ get; };
+        String UserIdentityInfo{ get; };
+        Boolean StageButDoNotInstall{ get; };
+        Boolean ForceUseOfNonRemovableStorage{ get; };
+        Boolean AllowForcedAppRestart{ get; };
+        Boolean AllowDownloadOnAnyNetwork{ get; };
+        Boolean RequiresElevation{ get; };
+        Boolean IsInstallServicePlugin{ get; };
+        Boolean IsDiscInstall{ get; };
+        Boolean InstallForAllUsers{ get; };
+    }
+
+
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.InstallService.Plugin.IInstallServiceScanForUpdateProperties", 8b221136-cf37-41c2-967c-a5432d405e8c)]
+    runtimeclass InstallServiceScanForUpdateProperties
+    {
+        String CallerApplicationId{ get; };
+        Boolean IsInteractive{ get; };
+        Boolean AllowCachedResult{ get; };
+        Boolean AllowForcedAppRestart{ get; };
+        Boolean AutomaticallyDownloadAndInstallUpdateIfFound{ get; };
+        Boolean StageButDoNotInstall{ get; };
+    }
+
+    [uuid(42dfa3dd-f369-478e-b764-0079881e8d8d)]
+    [contract(Windows.Internal.InstallService.Plugin.InternalContract, 1)]
+    interface IInstallServicePlugin
+    {
+        UInt32 MaxConcurrentActiveWorkItems{ get; };
+        Windows.Internal.InstallService.Plugin.IInstallServiceWorkItem CreateInstallServiceWork(String correlationVector, String userSID, String fulfillmentData, InstallServiceCreateWorkProperties workProperties, Windows.Storage.Streams.IBuffer checkpointData);
+        Boolean IsWorkCompleted(String correlationVector, String userSID, String fulfillmentData);
+        Windows.Internal.InstallService.Plugin.IInstallServiceWorkItem ScanForUpdate(String correlationVector, String userSID, String fulfillmentData, InstallServiceScanForUpdateProperties workProperties);
+        Windows.Foundation.Collections.IIterable <Windows.Internal.InstallService.Plugin.IInstallServiceWorkItem>  ScanForAllUpdates(String correlationVector, String userSID, InstallServiceScanForUpdateProperties workProperties);
+        Boolean IsApplicableForUser(String correlationVector, String userSID, String fulfillmentData);
+    };
+
+}

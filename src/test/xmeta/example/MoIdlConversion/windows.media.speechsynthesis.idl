@@ -1,0 +1,163 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media
+{
+    [uuid(1803def8-dca5-4b6f-9c20-e3d3c0643625)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IMediaMarker
+    {
+        Windows.Foundation.TimeSpan Time{ get; };
+        String MediaMarkerType{ get; };
+        String Text{ get; };
+    };
+
+    [uuid(afeab189-f8dd-466e-aa10-920b52353fdf)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IMediaMarkers
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.IMediaMarker>  Markers{ get; };
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [static_name("Windows.Media.IMediaMarkerTypesStatics", bb198040-482f-4743-8832-45853821ece0)]
+    runtimeclass MediaMarkerTypes
+    {
+        static String Bookmark{ get; };
+    }
+
+}
+namespace Windows.Media.SpeechSynthesis
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum VoiceGender
+    {
+        Male,
+        Female,
+    };
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.SpeechSynthesis.IVoiceInformation", b127d6a4-1291-4604-aa9c-83134083352c)]
+    runtimeclass VoiceInformation
+    {
+        String DisplayName{ get; };
+        String Id{ get; };
+        String Language{ get; };
+        String Description{ get; };
+        Windows.Media.SpeechSynthesis.VoiceGender Gender{ get; };
+    }
+
+
+
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.SpeechSynthesis.ISpeechSynthesisStream", 83e46e93-244c-4622-ba0b-6229c4d0d65d)]
+    runtimeclass SpeechSynthesisStream
+        : Windows.Storage.Streams.IRandomAccessStreamWithContentType
+        , Windows.Storage.Streams.IContentTypeProvider
+        , Windows.Storage.Streams.IRandomAccessStream
+        , Windows.Storage.Streams.IOutputStream
+        , Windows.Foundation.IClosable
+        , Windows.Storage.Streams.IInputStream
+        , [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.Media.Core.ITimedMetadataTrackProvider
+    {
+        Windows.Foundation.Collections.IVectorView <Windows.Media.IMediaMarker>  Markers{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000000)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.Media.SpeechSynthesis.ISpeechSynthesizerOptions", a0e23871-cc3d-43c9-91b1-ee185324d83d)]
+    runtimeclass SpeechSynthesizerOptions
+    {
+        Boolean IncludeWordBoundaryMetadata{ get; };
+        Boolean IncludeWordBoundaryMetadata{ set; };
+        Boolean IncludeSentenceBoundaryMetadata{ get; };
+        Boolean IncludeSentenceBoundaryMetadata{ set; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [interface_name("Windows.Media.SpeechSynthesis.ISpeechSynthesizerOptions2", 1cbef60e-119c-4bed-b118-d250c3a25793)]
+        {
+            Double AudioVolume{ get; };
+            Double AudioVolume{ set; };
+            Double SpeakingRate{ get; };
+            Double SpeakingRate{ set; };
+            Double AudioPitch{ get; };
+            Double AudioPitch{ set; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [interface_name("Windows.Media.SpeechSynthesis.ISpeechSynthesizerOptions3", 401ed877-902c-4814-a582-a5d0c0769fa8)]
+        {
+            Windows.Media.SpeechSynthesis.SpeechAppendedSilence AppendedSilence{ get; };
+            Windows.Media.SpeechSynthesis.SpeechAppendedSilence AppendedSilence{ set; };
+            Windows.Media.SpeechSynthesis.SpeechPunctuationSilence PunctuationSilence{ get; };
+            Windows.Media.SpeechSynthesis.SpeechPunctuationSilence PunctuationSilence{ set; };
+        }
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum SpeechAppendedSilence
+    {
+        Default,
+        Min,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum SpeechPunctuationSilence
+    {
+        Default,
+        Min,
+    };
+
+
+    [dualapipartition(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.SpeechSynthesis.IInstalledVoicesStatic", 7d526ecc-7533-4c3f-85be-888c2baeebdc)]
+    [interface_name("Windows.Media.SpeechSynthesis.ISpeechSynthesizer", ce9f7c76-97f4-4ced-ad68-d51c458e45c6)]
+    runtimeclass SpeechSynthesizer
+        : Windows.Foundation.IClosable
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        [static_name("Windows.Media.SpeechSynthesis.IInstalledVoicesStatic2", 64255f2e-358d-4058-be9a-fd3fcb423530)]
+        {
+            static Windows.Foundation.IAsyncOperation <Boolean>  TrySetDefaultVoiceAsync(VoiceInformation voice);
+        }
+        static Windows.Foundation.Collections.IVectorView <Windows.Media.SpeechSynthesis.VoiceInformation>  AllVoices{ get; };
+        static Windows.Media.SpeechSynthesis.VoiceInformation DefaultVoice{ get; };
+        SpeechSynthesizer();
+        Windows.Foundation.IAsyncOperation <Windows.Media.SpeechSynthesis.SpeechSynthesisStream>  SynthesizeTextToStreamAsync(String text);
+        Windows.Foundation.IAsyncOperation <Windows.Media.SpeechSynthesis.SpeechSynthesisStream>  SynthesizeSsmlToStreamAsync(String Ssml);
+        Windows.Media.SpeechSynthesis.VoiceInformation Voice{ set; };
+        Windows.Media.SpeechSynthesis.VoiceInformation Voice{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.SpeechSynthesis.ISpeechSynthesizer2", a7c5ecb2-4339-4d6a-bbf8-c7a4f1544c2e)]
+        {
+            Windows.Media.SpeechSynthesis.SpeechSynthesizerOptions Options{ get; };
+        }
+    }
+
+}

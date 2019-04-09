@@ -1,0 +1,129 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract CoreDisplayContract{};
+
+    [uuid(0945dbee-9e29-4b9c-8893-4ca2e299ec4c)]
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    interface ICoreDisplay
+    {
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        UInt32 VolatileId{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Boolean IsPrimary{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Boolean IsInternal{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Boolean IsCloned{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Boolean IsWireless{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Boolean IsSimulated{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Foundation.Rect Rect{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Foundation.Rect WorkArea{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Graphics.Display.DisplayOrientations OrientationPreferences{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        UInt32 HorizontalSizeInMm{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        UInt32 VerticalSizeInMm{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        UInt64 ViewDescription{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Boolean IsDisplayDevicePresent(String deviceInstanceId);
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        String TryGetPersistentId();
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        String TryGetFriendlyName();
+    };
+
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    [uuid(43874417-8fa7-4a03-8d19-cc8aefe3d0b7)]
+    interface ICoreDisplaySource
+    {
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ICoreDisplay>  Displays{ get; };
+    };
+
+    [uuid(99b8b9a2-8296-49ff-ade4-96178d6e5516)]
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    interface ICoreDisplayManager
+    {
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.ICoreDisplay>  Displays{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        [default_overload]
+        [method_name("TryGetFromPersistentId")] Windows.Internal.ICoreDisplay TryGetFromId(String persistentId);
+        [method_name("TryGetFromVolatileId")] [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Internal.ICoreDisplay TryGetFromId(UInt32 volatileId);
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.ICoreDisplayManager, Windows.Internal.ICoreDisplayChangedEventArgs>  DisplayChanged;
+    };
+
+    [uuid(6667c1a3-87c6-48c3-a73c-4a4bacc5ac7f)]
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    interface ICoreDisplayChangedEventArgs
+    {
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Internal.ICoreDisplay Display{ get; };
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        Windows.Internal.DisplayChangeType ChangeType{ get; };
+    };
+
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    enum DisplayChangeType
+    {
+        Connected,
+        Disconnected,
+        PropertyChanged,
+    };
+
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    [uuid(3d497263-526e-4860-90ad-39e3ec1c90ac)]
+    interface ICoreDisplayManagerConfig
+    {
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        void OverrideDisplaySource(ICoreDisplaySource pSource);
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        void EnableAutoUpdate(Boolean enable);
+        [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+        void UpdateDisplays();
+    };
+
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    [marshaling_behavior(agile)]
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    [threading(both)]
+    runtimeclass CoreDisplayManager
+        : [default]Windows.Internal.ICoreDisplayManager
+        , Windows.Internal.ICoreDisplayManagerConfig
+    {
+        CoreDisplayManager();
+    }
+
+    [marshaling_behavior(agile)]
+    [deprecated("OneCore DisplayManager no longer supported on WCOS platforms", deprecate, Windows.Internal.CoreDisplayContract, 0x10000)]
+    [contract(Windows.Internal.CoreDisplayContract, 1)]
+    runtimeclass CoreDisplayChangedEventArgs
+        : [default]Windows.Internal.ICoreDisplayChangedEventArgs
+    {
+    }
+
+}

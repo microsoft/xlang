@@ -1,0 +1,633 @@
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Services.Store
+{
+    [contractversion(4)]
+    apicontract StoreContract{};
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    enum StorePurchaseStatus
+    {
+        Succeeded,
+        AlreadyPurchased,
+        NotPurchased,
+        NetworkError,
+        ServerError,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    enum StoreConsumableStatus
+    {
+        Succeeded,
+        InsufficentQuantity,
+        NetworkError,
+        ServerError,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    enum StoreDurationUnit
+    {
+        Minute,
+        Hour,
+        Day,
+        Week,
+        Month,
+        Year,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    enum StorePackageUpdateState
+    {
+        Pending,
+        Downloading,
+        Deploying,
+        Completed,
+        Canceled,
+        OtherError,
+        ErrorLowBattery,
+        ErrorWiFiRecommended,
+        ErrorWiFiRequired,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    enum StoreCanLicenseStatus
+    {
+        NotLicensableToUser,
+        Licensable,
+        LicenseActionNotApplicableToProduct,
+        NetworkError,
+        ServerError,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    enum StoreQueueItemState
+    {
+        Active,
+        Completed,
+        Canceled,
+        Error,
+        Paused,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    enum StoreQueueItemExtendedState
+    {
+        ActivePending,
+        ActiveStarting,
+        ActiveAcquiringLicense,
+        ActiveDownloading,
+        ActiveRestoringData,
+        ActiveInstalling,
+        Completed,
+        Canceled,
+        Paused,
+        Error,
+        PausedPackagesInUse,
+        PausedLowBattery,
+        PausedWiFiRecommended,
+        PausedWiFiRequired,
+        PausedReadyToInstall,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    enum StoreQueueItemKind
+    {
+        Install,
+        Update,
+        Repair,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    struct StorePackageUpdateStatus
+    {
+        String PackageFamilyName;
+        UInt64 PackageDownloadSizeInBytes;
+        UInt64 PackageBytesDownloaded;
+        Double PackageDownloadProgress;
+        Double TotalDownloadProgress;
+        StorePackageUpdateState PackageUpdateState;
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    enum StoreUninstallStorePackageStatus
+    {
+        Succeeded,
+        CanceledByUser,
+        NetworkError,
+        UninstallNotApplicable,
+        Error,
+    };
+
+    [contract(Windows.Services.Store.StoreContract, 4)]
+    enum StoreRateAndReviewStatus
+    {
+        Succeeded,
+        CanceledByUser,
+        NetworkError,
+        Error,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreProduct", 320e2c52-d760-450a-a42b-67d1e901ac90)]
+    runtimeclass StoreProduct
+    {
+        String StoreId{ get; };
+        String Language{ get; };
+        String Title{ get; };
+        String Description{ get; };
+        String ProductKind{ get; };
+        Boolean HasDigitalDownload{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  Keywords{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreImage>  Images{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreVideo>  Videos{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreSku>  Skus{ get; };
+        Boolean IsInUserCollection{ get; };
+        Windows.Services.Store.StorePrice Price{ get; };
+        String ExtendedJsonData{ get; };
+        Windows.Foundation.Uri LinkUri{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  GetIsAnySkuInstalledAsync();
+        [method_name("RequestPurchaseAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync();
+        [method_name("RequestPurchaseWithPurchasePropertiesAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync(StorePurchaseProperties storePurchaseProperties);
+        String InAppOfferToken{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreProductPagedQueryResult", c92718c5-4dd5-4869-a462-ecc6872e43c5)]
+    runtimeclass StoreProductPagedQueryResult
+    {
+        Windows.Foundation.Collections.IMapView <String, Windows.Services.Store.StoreProduct>  Products{ get; };
+        Boolean HasMoreResults{ get; };
+        HRESULT ExtendedError{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductPagedQueryResult>  GetNextAsync();
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStorePurchaseProperties", 836278f3-ff87-4364-a5b4-fd2153ebe43b)]
+    [threading(both)]
+    runtimeclass StorePurchaseProperties
+    {
+        StorePurchaseProperties();
+
+        [contract(Windows.Services.Store.StoreContract, 1)]
+        [constructor_name("Windows.Services.Store.IStorePurchasePropertiesFactory", a768f59e-fefd-489f-9a17-22a593e68b9d)]
+        {
+            [method_name( "Create" )] StorePurchaseProperties(String name);
+        }
+        String Name{ get; };
+        String Name{ set; };
+        String ExtendedJsonData{ get; };
+        String ExtendedJsonData{ set; };
+    }
+
+
+
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreLicense", 26dc9579-4c4f-4f30-bc89-649f60e36055)]
+    runtimeclass StoreLicense
+    {
+        String SkuStoreId{ get; };
+        Boolean IsActive{ get; };
+        Windows.Foundation.DateTime ExpirationDate{ get; };
+        String ExtendedJsonData{ get; };
+        String InAppOfferToken{ get; };
+    }
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreImage", 081fd248-adb4-4b64-a993-784789926ed5)]
+    runtimeclass StoreImage
+    {
+        Windows.Foundation.Uri Uri{ get; };
+        String ImagePurposeTag{ get; };
+        UInt32 Width{ get; };
+        UInt32 Height{ get; };
+        String Caption{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreVideo", f26cb184-6f5e-4dc2-886c-3c63083c2f94)]
+    runtimeclass StoreVideo
+    {
+        Windows.Foundation.Uri Uri{ get; };
+        String VideoPurposeTag{ get; };
+        UInt32 Width{ get; };
+        UInt32 Height{ get; };
+        String Caption{ get; };
+        Windows.Services.Store.StoreImage PreviewImage{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreSku", 397e6f55-4440-4f03-863c-91f3fec83d79)]
+    runtimeclass StoreSku
+    {
+        String StoreId{ get; };
+        String Language{ get; };
+        String Title{ get; };
+        String Description{ get; };
+        Boolean IsTrial{ get; };
+        String CustomDeveloperData{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreImage>  Images{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreVideo>  Videos{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreAvailability>  Availabilities{ get; };
+        Windows.Services.Store.StorePrice Price{ get; };
+        String ExtendedJsonData{ get; };
+        Boolean IsInUserCollection{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  BundledSkus{ get; };
+        Windows.Services.Store.StoreCollectionData CollectionData{ get; };
+        Windows.Foundation.IAsyncOperation <Boolean>  GetIsInstalledAsync();
+        [method_name("RequestPurchaseAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync();
+        [method_name("RequestPurchaseWithPurchasePropertiesAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync(StorePurchaseProperties storePurchaseProperties);
+        Boolean IsSubscription{ get; };
+        Windows.Services.Store.StoreSubscriptionInfo SubscriptionInfo{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStorePrice", 55ba94c4-15f1-407c-8f06-006380f4df0b)]
+    runtimeclass StorePrice
+    {
+        String FormattedBasePrice{ get; };
+        String FormattedPrice{ get; };
+        Boolean IsOnSale{ get; };
+        Windows.Foundation.DateTime SaleEndDate{ get; };
+        String CurrencyCode{ get; };
+        String FormattedRecurrencePrice{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStorePurchaseResult", add28552-f96a-463d-a7bb-c20b4fca6952)]
+    runtimeclass StorePurchaseResult
+    {
+        Windows.Services.Store.StorePurchaseStatus Status{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreAvailability", fa060325-0ffd-4493-ad43-f1f9918f69fa)]
+    runtimeclass StoreAvailability
+    {
+        String StoreId{ get; };
+        Windows.Foundation.DateTime EndDate{ get; };
+        Windows.Services.Store.StorePrice Price{ get; };
+        String ExtendedJsonData{ get; };
+        [method_name("RequestPurchaseAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync();
+        [method_name("RequestPurchaseWithPurchasePropertiesAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync(StorePurchaseProperties storePurchaseProperties);
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreCollectionData", 8aa4c3b3-5bb3-441a-2ab4-4dab73d5ce67)]
+    runtimeclass StoreCollectionData
+    {
+        Boolean IsTrial{ get; };
+        String CampaignId{ get; };
+        String DeveloperOfferId{ get; };
+        Windows.Foundation.DateTime AcquiredDate{ get; };
+        Windows.Foundation.DateTime StartDate{ get; };
+        Windows.Foundation.DateTime EndDate{ get; };
+        Windows.Foundation.TimeSpan TrialTimeRemaining{ get; };
+        String ExtendedJsonData{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreSubscriptionInfo", 4189776a-0559-43ac-a9c6-3ab0011fb8eb)]
+    runtimeclass StoreSubscriptionInfo
+    {
+        UInt32 BillingPeriod{ get; };
+        Windows.Services.Store.StoreDurationUnit BillingPeriodUnit{ get; };
+        Boolean HasTrialPeriod{ get; };
+        UInt32 TrialPeriod{ get; };
+        Windows.Services.Store.StoreDurationUnit TrialPeriodUnit{ get; };
+    }
+
+
+
+
+
+
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Services.Store.IStoreContextStatics", 9c06ee5f-15c0-4e72-9330-d6191cebd19c)]
+    [interface_name("Windows.Services.Store.IStoreContext", ac98b6be-f4fd-4912-babd-5035e5e8bcab)]
+    [threading(both)]
+    runtimeclass StoreContext
+    {
+        static Windows.Services.Store.StoreContext GetDefault();
+        static Windows.Services.Store.StoreContext GetForUser(Windows.System.User user);
+        Windows.System.User User{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Services.Store.StoreContext, Object>  OfflineLicensesChanged;
+        Windows.Foundation.IAsyncOperation <String>  GetCustomerPurchaseIdAsync(String serviceTicket, String publisherUserId);
+        Windows.Foundation.IAsyncOperation <String>  GetCustomerCollectionsIdAsync(String serviceTicket, String publisherUserId);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreAppLicense>  GetAppLicenseAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductResult>  GetStoreProductForCurrentAppAsync();
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductQueryResult>  GetStoreProductsAsync(Windows.Foundation.Collections.IIterable <String>  productKinds, Windows.Foundation.Collections.IIterable <String>  storeIds);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductQueryResult>  GetAssociatedStoreProductsAsync(Windows.Foundation.Collections.IIterable <String>  productKinds);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductPagedQueryResult>  GetAssociatedStoreProductsWithPagingAsync(Windows.Foundation.Collections.IIterable <String>  productKinds, UInt32 maxItemsToRetrievePerPage);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductQueryResult>  GetUserCollectionAsync(Windows.Foundation.Collections.IIterable <String>  productKinds);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductPagedQueryResult>  GetUserCollectionWithPagingAsync(Windows.Foundation.Collections.IIterable <String>  productKinds, UInt32 maxItemsToRetrievePerPage);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreConsumableResult>  ReportConsumableFulfillmentAsync(String productStoreId, UInt32 quantity, Guid trackingId);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreConsumableResult>  GetConsumableBalanceRemainingAsync(String productStoreId);
+        Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreAcquireLicenseResult>  AcquireStoreLicenseForOptionalPackageAsync(Windows.ApplicationModel.Package optionalPackage);
+        [method_name("RequestPurchaseAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync(String storeId);
+        [method_name("RequestPurchaseWithPurchasePropertiesAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StorePurchaseResult>  RequestPurchaseAsync(String storeId, StorePurchaseProperties storePurchaseProperties);
+        Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StorePackageUpdate> >  GetAppAndOptionalStorePackageUpdatesAsync();
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Services.Store.StorePackageUpdateResult, Windows.Services.Store.StorePackageUpdateStatus>  RequestDownloadStorePackageUpdatesAsync(Windows.Foundation.Collections.IIterable <Windows.Services.Store.StorePackageUpdate>  storePackageUpdates);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Services.Store.StorePackageUpdateResult, Windows.Services.Store.StorePackageUpdateStatus>  RequestDownloadAndInstallStorePackageUpdatesAsync(Windows.Foundation.Collections.IIterable <Windows.Services.Store.StorePackageUpdate>  storePackageUpdates);
+        Windows.Foundation.IAsyncOperationWithProgress <Windows.Services.Store.StorePackageUpdateResult, Windows.Services.Store.StorePackageUpdateStatus>  RequestDownloadAndInstallStorePackagesAsync(Windows.Foundation.Collections.IIterable <String>  storeIds);
+
+        [contract(Windows.Services.Store.StoreContract, 2)]
+        [interface_name("Windows.Services.Store.IStoreContext2", 18bc54da-7bd9-452c-9116-3bbd06ffc63a)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductResult>  FindStoreProductForPackageAsync(Windows.Foundation.Collections.IIterable <String>  productKinds, Windows.ApplicationModel.Package package);
+        }
+
+        [contract(Windows.Services.Store.StoreContract, 3)]
+        [interface_name("Windows.Services.Store.IStoreContext3", e26226ca-1a01-4730-85a6-ecc896e4ae38)]
+        {
+            Boolean CanSilentlyDownloadStorePackageUpdates{ get; };
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Services.Store.StorePackageUpdateResult, Windows.Services.Store.StorePackageUpdateStatus>  TrySilentDownloadStorePackageUpdatesAsync(Windows.Foundation.Collections.IIterable <Windows.Services.Store.StorePackageUpdate>  storePackageUpdates);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Services.Store.StorePackageUpdateResult, Windows.Services.Store.StorePackageUpdateStatus>  TrySilentDownloadAndInstallStorePackageUpdatesAsync(Windows.Foundation.Collections.IIterable <Windows.Services.Store.StorePackageUpdate>  storePackageUpdates);
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreCanAcquireLicenseResult>  CanAcquireStoreLicenseForOptionalPackageAsync(Windows.ApplicationModel.Package optionalPackage);
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreCanAcquireLicenseResult>  CanAcquireStoreLicenseAsync(String productStoreId);
+            [method_name("GetStoreProductsWithOptionsAsync")] Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreProductQueryResult>  GetStoreProductsAsync(Windows.Foundation.Collections.IIterable <String>  productKinds, Windows.Foundation.Collections.IIterable <String>  storeIds, StoreProductOptions storeProductOptions);
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreQueueItem> >  GetAssociatedStoreQueueItemsAsync();
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreQueueItem> >  GetStoreQueueItemsAsync(Windows.Foundation.Collections.IIterable <String>  storeIds);
+            [method_name("RequestDownloadAndInstallStorePackagesWithInstallOptionsAsync")] Windows.Foundation.IAsyncOperationWithProgress <Windows.Services.Store.StorePackageUpdateResult, Windows.Services.Store.StorePackageUpdateStatus>  RequestDownloadAndInstallStorePackagesAsync(Windows.Foundation.Collections.IIterable <String>  storeIds, StorePackageInstallOptions storePackageInstallOptions);
+            Windows.Foundation.IAsyncOperationWithProgress <Windows.Services.Store.StorePackageUpdateResult, Windows.Services.Store.StorePackageUpdateStatus>  DownloadAndInstallStorePackagesAsync(Windows.Foundation.Collections.IIterable <String>  storeIds);
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreUninstallStorePackageResult>  RequestUninstallStorePackageAsync(Windows.ApplicationModel.Package package);
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreUninstallStorePackageResult>  RequestUninstallStorePackageByStoreIdAsync(String storeId);
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreUninstallStorePackageResult>  UninstallStorePackageAsync(Windows.ApplicationModel.Package package);
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreUninstallStorePackageResult>  UninstallStorePackageByStoreIdAsync(String storeId);
+        }
+
+        [contract(Windows.Services.Store.StoreContract, 4)]
+        [interface_name("Windows.Services.Store.IStoreContext4", af9c6f69-bea1-4bf4-8e74-ae03e206c6b0)]
+        {
+            Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreRateAndReviewResult>  RequestRateAndReviewAppAsync();
+            Windows.Foundation.IAsyncOperation <Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreQueueItem> >  SetInstallOrderForAssociatedStoreQueueItemsAsync(Windows.Foundation.Collections.IIterable <Windows.Services.Store.StoreQueueItem>  items);
+        }
+    }
+
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreSendRequestResult", c73abe60-8272-4502-8a69-6e75153a4299)]
+    runtimeclass StoreSendRequestResult
+    {
+        String Response{ get; };
+        HRESULT ExtendedError{ get; };
+
+        [contract(Windows.Services.Store.StoreContract, 2)]
+        [interface_name("Windows.Services.Store.IStoreSendRequestResult2", 2901296f-c0b0-49d0-8e8d-aa940af9c10b)]
+        {
+            Windows.Web.Http.HttpStatusCode HttpStatusCode{ get; };
+        }
+    }
+
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreAppLicense", f389f9de-73c0-45ce-9bab-b2fe3e5eafd3)]
+    runtimeclass StoreAppLicense
+    {
+        String SkuStoreId{ get; };
+        Boolean IsActive{ get; };
+        Boolean IsTrial{ get; };
+        Windows.Foundation.DateTime ExpirationDate{ get; };
+        String ExtendedJsonData{ get; };
+        Windows.Foundation.Collections.IMapView <String, Windows.Services.Store.StoreLicense>  AddOnLicenses{ get; };
+        Windows.Foundation.TimeSpan TrialTimeRemaining{ get; };
+        Boolean IsTrialOwnedByThisUser{ get; };
+        String TrialUniqueId{ get; };
+
+        [contract(Windows.Services.Store.StoreContract, 4)]
+        [interface_name("Windows.Services.Store.IStoreAppLicense2", b4666e91-4443-40b3-993f-28904435bdc6)]
+        {
+            Boolean IsDiscLicense{ get; };
+        }
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreProductResult", b7674f73-3c87-4ee1-8201-f428359bd3af)]
+    runtimeclass StoreProductResult
+    {
+        Windows.Services.Store.StoreProduct Product{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreProductQueryResult", d805e6c5-d456-4ff6-8049-9076d5165f73)]
+    runtimeclass StoreProductQueryResult
+    {
+        Windows.Foundation.Collections.IMapView <String, Windows.Services.Store.StoreProduct>  Products{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreConsumableResult", ea5dab72-6a00-4052-be5b-bfdab4433352)]
+    runtimeclass StoreConsumableResult
+    {
+        Windows.Services.Store.StoreConsumableStatus Status{ get; };
+        Guid TrackingId{ get; };
+        UInt32 BalanceRemaining{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStoreAcquireLicenseResult", fbd7946d-f040-4cb3-9a39-29bcecdbe22d)]
+    runtimeclass StoreAcquireLicenseResult
+    {
+        Windows.Services.Store.StorePackageLicense StorePackageLicense{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStorePackageUpdate", 140fa150-3cbf-4a35-b91f-48271c31b072)]
+    runtimeclass StorePackageUpdate
+    {
+        Windows.ApplicationModel.Package Package{ get; };
+        Boolean Mandatory{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStorePackageUpdateResult", e79142ed-61f9-4893-b4fe-cf191603af7b)]
+    runtimeclass StorePackageUpdateResult
+    {
+        Windows.Services.Store.StorePackageUpdateState OverallState{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StorePackageUpdateStatus>  StorePackageUpdateStatuses{ get; };
+
+        [contract(Windows.Services.Store.StoreContract, 3)]
+        [interface_name("Windows.Services.Store.IStorePackageUpdateResult2", 071d012e-bc62-4f2e-87ea-99d801aeaf98)]
+        {
+            Windows.Foundation.Collections.IVectorView <Windows.Services.Store.StoreQueueItem>  StoreQueueItems{ get; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    [interface_name("Windows.Services.Store.IStoreCanAcquireLicenseResult", 3a693db3-0088-482f-86d5-bd46522663ad)]
+    runtimeclass StoreCanAcquireLicenseResult
+    {
+        HRESULT ExtendedError{ get; };
+        String LicensableSku{ get; };
+        Windows.Services.Store.StoreCanLicenseStatus Status{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreProductOptions", 5b34a0f9-a113-4811-8326-16199c927f31)]
+    [threading(both)]
+    runtimeclass StoreProductOptions
+    {
+        StoreProductOptions();
+        Windows.Foundation.Collections.IVector <String>  ActionFilters{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreQueueItem", 56d5c32b-f830-4293-9188-cad2dcde7357)]
+    runtimeclass StoreQueueItem
+    {
+        String ProductId{ get; };
+        String PackageFamilyName{ get; };
+        Windows.Services.Store.StoreQueueItemKind InstallKind{ get; };
+        Windows.Services.Store.StoreQueueItemStatus GetCurrentStatus();
+        event Windows.Foundation.TypedEventHandler <Windows.Services.Store.StoreQueueItem, Windows.Services.Store.StoreQueueItemCompletedEventArgs>  Completed;
+        event Windows.Foundation.TypedEventHandler <Windows.Services.Store.StoreQueueItem, Object>  StatusChanged;
+
+        [contract(Windows.Services.Store.StoreContract, 4)]
+        [interface_name("Windows.Services.Store.IStoreQueueItem2", 69491ca8-1ad4-447c-ad8c-a95035f64d82)]
+        {
+            Windows.Foundation.IAsyncAction CancelInstallAsync();
+            Windows.Foundation.IAsyncAction PauseInstallAsync();
+            Windows.Foundation.IAsyncAction ResumeInstallAsync();
+        }
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStorePackageInstallOptions", 1d3d630c-0ccd-44dd-8c59-80810a729973)]
+    [threading(both)]
+    runtimeclass StorePackageInstallOptions
+    {
+        StorePackageInstallOptions();
+        Boolean AllowForcedAppRestart{ get; };
+        Boolean AllowForcedAppRestart{ set; };
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    [interface_name("Windows.Services.Store.IStoreUninstallStorePackageResult", 9fca39fd-126f-4cda-b801-1346b8d0a260)]
+    runtimeclass StoreUninstallStorePackageResult
+    {
+        HRESULT ExtendedError{ get; };
+        Windows.Services.Store.StoreUninstallStorePackageStatus Status{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 4)]
+    [interface_name("Windows.Services.Store.IStoreRateAndReviewResult", 9d209d56-a6b5-4121-9b61-ee6d0fbdbdbb)]
+    runtimeclass StoreRateAndReviewResult
+    {
+        HRESULT ExtendedError{ get; };
+        String ExtendedJsonData{ get; };
+        Boolean WasUpdated{ get; };
+        Windows.Services.Store.StoreRateAndReviewStatus Status{ get; };
+    }
+
+
+
+
+
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    [interface_name("Windows.Services.Store.IStoreQueueItemStatus", 9bd6796f-9cc3-4ec3-b2ef-7be433b30174)]
+    runtimeclass StoreQueueItemStatus
+    {
+        Windows.Services.Store.StoreQueueItemState PackageInstallState{ get; };
+        Windows.Services.Store.StoreQueueItemExtendedState PackageInstallExtendedState{ get; };
+        Windows.Services.Store.StorePackageUpdateStatus UpdateStatus{ get; };
+        HRESULT ExtendedError{ get; };
+    }
+
+    [contract(Windows.Services.Store.StoreContract, 3)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Services.Store.IStoreQueueItemCompletedEventArgs", 1247df6c-b44a-439b-bb07-1d3003d005c2)]
+    runtimeclass StoreQueueItemCompletedEventArgs
+    {
+        Windows.Services.Store.StoreQueueItemStatus Status{ get; };
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [interface_name("Windows.Services.Store.IStorePackageLicense", 0c465714-14e1-4973-bd14-f77724271e99)]
+    runtimeclass StorePackageLicense
+        : Windows.Foundation.IClosable
+    {
+        event Windows.Foundation.TypedEventHandler <Windows.Services.Store.StorePackageLicense, Object>  LicenseLost;
+        Windows.ApplicationModel.Package Package{ get; };
+        Boolean IsValid{ get; };
+        void ReleaseLicense();
+    }
+
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Services.Store.StoreContract, 1)]
+    [static_name("Windows.Services.Store.IStoreRequestHelperStatics", 6ce5e5f9-a0c9-4b2c-96a6-a171c630038d)]
+    [threading(both)]
+    runtimeclass StoreRequestHelper
+    {
+        static Windows.Foundation.IAsyncOperation <Windows.Services.Store.StoreSendRequestResult>  SendRequestAsync(StoreContext context, UInt32 requestKind, String parametersAsJson);
+    }
+
+}

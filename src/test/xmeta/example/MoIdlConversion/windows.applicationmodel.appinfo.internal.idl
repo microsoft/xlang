@@ -1,0 +1,25 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Internal
+{
+    [contractversion(1)]
+    [internal]
+    apicontract IAppInfoInternalContract{};
+
+    [contract(Windows.ApplicationModel.Internal.IAppInfoInternalContract, 1)]
+    [uuid(32cb3d52-6a9e-45b6-8d83-95b6458efcc0)]
+    interface IAppInfoInternalStatics
+    {
+        Windows.ApplicationModel.AppInfo CreateFromApplicationId(Int64 applicationId);
+        Windows.ApplicationModel.AppInfo CreateFromUserAndApplicationId(Windows.Internal.StateRepository.User user, Int64 applicationId);
+    };
+
+}

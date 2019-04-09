@@ -1,0 +1,39 @@
+
+
+
+
+
+
+
+namespace Windows.System.Profile
+{
+    [contractversion(2)]
+    apicontract ProfileSharedModeContract{};
+
+
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.System.Profile.ProfileSharedModeContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.System.Profile.ISharedModeSettingsStatics", 893df40e-cad6-4d50-8c49-6fcfc03edb29)]
+    runtimeclass SharedModeSettings
+    {
+
+        [contract(Windows.System.Profile.ProfileSharedModeContract, 2)]
+        [static_name("Windows.System.Profile.ISharedModeSettingsStatics2", 608988a4-ccf1-4ee8-a5e2-fd6a1d0cfac8)]
+        {
+            static Boolean ShouldAvoidLocalStorage{ get; };
+        }
+        static Boolean IsEnabled{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [static_name("Windows.System.Profile.IEducationSettingsStatics", fc53f0ef-4d3e-4e13-9b23-505f4d091e92)]
+    runtimeclass EducationSettings
+    {
+        static Boolean IsEducationEnvironment{ get; };
+    }
+
+}

@@ -1,0 +1,42 @@
+
+
+
+
+
+
+namespace Windows.Foundation
+{
+    [contractversion(4)]
+    apicontract FoundationContract{};
+
+    [contractversion(8)]
+    apicontract UniversalApiContract{};
+
+}
+namespace Windows.UI.WebUI.Core
+{
+    [contractversion(1)]
+    apicontract WebUICommandBarContract{};
+
+}
+namespace Windows.ApplicationModel.Calls
+{
+    [contractversion(5)]
+    apicontract CallsPhoneContract{};
+
+}
+namespace Windows.Phone
+{
+    [contractversion(1)]
+    apicontract PhoneContract{};
+
+    [contractversion(1)]
+    apicontract PhoneInternalContract{};
+
+}
+namespace Windows.Networking.Sockets
+{
+    [contractversion(3)]
+    apicontract ControlChannelTriggerContract{};
+
+}

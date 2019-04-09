@@ -1,0 +1,42 @@
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Background
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ApplicationTriggerResult
+    {
+        Allowed,
+        CurrentlyRunning,
+        DisabledByPolicy,
+        UnknownError,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.ApplicationModel.Background.IApplicationTrigger", 0b468630-9574-492c-9e93-1a3ae6335fe9)]
+    [threading(both)]
+    runtimeclass ApplicationTrigger
+        : Windows.ApplicationModel.Background.IBackgroundTrigger
+    {
+        ApplicationTrigger();
+        [method_name("RequestAsync")] Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.ApplicationTriggerResult>  RequestAsync();
+        [method_name("RequestAsyncWithArguments")] [remote_sync]Windows.Foundation.IAsyncOperation <Windows.ApplicationModel.Background.ApplicationTriggerResult>  RequestAsync(Windows.Foundation.Collections.ValueSet arguments);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.ApplicationModel.Background.IApplicationTriggerDetails", 97dc6ab2-2219-4a9e-9c5e-41d047f76e82)]
+    runtimeclass ApplicationTriggerDetails
+    {
+        Windows.Foundation.Collections.ValueSet Arguments{ get; };
+    }
+
+}

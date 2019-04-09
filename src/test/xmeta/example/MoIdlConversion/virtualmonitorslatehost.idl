@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Holographic
+{
+    [contract(Windows.Internal.Shell.Holographic.ShellCommonContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Holographic.IVirtualMonitorSlateHost", 85deecca-ce99-50bf-bf87-495f1af6c7da)]
+    runtimeclass VirtualMonitorSlateHost
+    {
+        Windows.Foundation.IAsyncAction PortToHolographicAsync();
+        Windows.Foundation.IAsyncAction PortFromHolographicAsync();
+        Windows.Foundation.IAsyncAction ChangeBoundsAsync(UInt32 width, UInt32 height);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Holographic.ShellCommonContract, 1)]
+    [interface_name("Windows.Internal.Shell.Holographic.IVirtualMonitorSlateHostFactory", de2e9b5d-746f-5435-9e02-38148a6440e4)]
+    runtimeclass VirtualMonitorSlateHostFactory
+    {
+        Windows.Internal.Shell.Holographic.VirtualMonitorSlateHost Create(IViewHostItem view);
+    }
+
+}

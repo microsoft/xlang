@@ -1,0 +1,136 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Storage.Streams
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum ByteOrder
+    {
+        LittleEndian,
+        BigEndian,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum UnicodeEncoding
+    {
+        Utf8,
+        Utf16LE,
+        Utf16BE,
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass DataReaderLoadOperation
+        : [default]Windows.Foundation.IAsyncOperation<UInt32>
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(e2b50029-b4c1-4314-a4b8-fb813a2f275e)]
+    interface IDataReader
+    {
+        UInt32 UnconsumedBufferLength{ get; };
+        Windows.Storage.Streams.UnicodeEncoding UnicodeEncoding{ get; };
+        Windows.Storage.Streams.UnicodeEncoding UnicodeEncoding{ set; };
+        Windows.Storage.Streams.ByteOrder ByteOrder{ get; };
+        Windows.Storage.Streams.ByteOrder ByteOrder{ set; };
+        Windows.Storage.Streams.InputStreamOptions InputStreamOptions{ get; };
+        Windows.Storage.Streams.InputStreamOptions InputStreamOptions{ set; };
+        UInt8 ReadByte();
+        void ReadBytes(ref UInt8[] value);
+        Windows.Storage.Streams.IBuffer ReadBuffer(UInt32 length);
+        Boolean ReadBoolean();
+        Guid ReadGuid();
+        Int16 ReadInt16();
+        Int32 ReadInt32();
+        Int64 ReadInt64();
+        UInt16 ReadUInt16();
+        UInt32 ReadUInt32();
+        UInt64 ReadUInt64();
+        Single ReadSingle();
+        Double ReadDouble();
+        String ReadString(UInt32 codeUnitCount);
+        Windows.Foundation.DateTime ReadDateTime();
+        Windows.Foundation.TimeSpan ReadTimeSpan();
+        Windows.Storage.Streams.DataReaderLoadOperation LoadAsync(UInt32 count);
+        Windows.Storage.Streams.IBuffer DetachBuffer();
+        Windows.Storage.Streams.IInputStream DetachStream();
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000006)]
+    [constructor_name("Windows.Storage.Streams.IDataReaderFactory", d7527847-57da-4e15-914c-06806699a098)]
+    [static_name("Windows.Storage.Streams.IDataReaderStatics", 11fcbfc8-f93a-471b-b121-f379e349313c)]
+    [threading(both)]
+    runtimeclass DataReader
+        : [default]Windows.Storage.Streams.IDataReader
+        , Windows.Foundation.IClosable
+    {
+        [method_name( "CreateDataReader" )] DataReader(IInputStream inputStream);
+        static Windows.Storage.Streams.DataReader FromBuffer(IBuffer buffer);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass DataWriterStoreOperation
+        : [default]Windows.Foundation.IAsyncOperation<UInt32>
+    {
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(64b89265-d341-4922-b38a-dd4af8808c4e)]
+    interface IDataWriter
+    {
+        UInt32 UnstoredBufferLength{ get; };
+        Windows.Storage.Streams.UnicodeEncoding UnicodeEncoding{ get; };
+        Windows.Storage.Streams.UnicodeEncoding UnicodeEncoding{ set; };
+        Windows.Storage.Streams.ByteOrder ByteOrder{ get; };
+        Windows.Storage.Streams.ByteOrder ByteOrder{ set; };
+        void WriteByte(UInt8 value);
+        void WriteBytes(UInt8[] value);
+        [method_name("WriteBuffer")] void WriteBuffer(IBuffer buffer);
+        [method_name("WriteBufferRange")] void WriteBuffer(IBuffer buffer, UInt32 start, UInt32 count);
+        void WriteBoolean(Boolean value);
+        void WriteGuid(Guid value);
+        void WriteInt16(Int16 value);
+        void WriteInt32(Int32 value);
+        void WriteInt64(Int64 value);
+        void WriteUInt16(UInt16 value);
+        void WriteUInt32(UInt32 value);
+        void WriteUInt64(UInt64 value);
+        void WriteSingle(Single value);
+        void WriteDouble(Double value);
+        void WriteDateTime(Windows.Foundation.DateTime value);
+        void WriteTimeSpan(Windows.Foundation.TimeSpan value);
+        UInt32 WriteString(String value);
+        UInt32 MeasureString(String value);
+        Windows.Storage.Streams.DataWriterStoreOperation StoreAsync();
+        Windows.Foundation.IAsyncOperation <Boolean>  FlushAsync();
+        Windows.Storage.Streams.IBuffer DetachBuffer();
+        Windows.Storage.Streams.IOutputStream DetachStream();
+    };
+
+
+    [dualapipartition(0xa000006)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [marshaling_behavior(agile)]
+    [constructor_name("Windows.Storage.Streams.IDataWriterFactory", 338c67c2-8b84-4c2b-9c50-7b8767847a1f)]
+    [threading(both)]
+    runtimeclass DataWriter
+        : [default]Windows.Storage.Streams.IDataWriter
+        , Windows.Foundation.IClosable
+    {
+        [method_name( "CreateDataWriter" )] DataWriter(IOutputStream outputStream);
+        DataWriter();
+    }
+
+}

@@ -1,0 +1,85 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PPI.Ingest
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    enum IngestSourceType
+    {
+        VGA,
+        HDMI,
+        DP,
+    };
+
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    [uuid(bd2cbaa6-0a3f-40b6-b0f5-ac3f6d1e40ec)]
+    delegate void SignalAquiredEventHandler(SignalAquiredEventArgs pSignalAquiredEventArgs);
+
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.PPI.Ingest.ISignalAquiredEventArgs", f9c42bd3-8abd-4e54-89dd-32ae81f457c1)]
+    runtimeclass SignalAquiredEventArgs
+    {
+        Guid CorrelationId{ get; };
+        Windows.Internal.PPI.Ingest.IngestSource Source{ get; };
+    }
+
+    [uuid(c73201ec-0ee7-4405-9594-bfec6e30c976)]
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    delegate void SignalLostEventHandler(SignalLostEventArgs pSignalLostEventArgs);
+
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.PPI.Ingest.ISignalLostEventArgs", 9bc5b932-c98d-495e-8b74-f12b8a5e039e)]
+    runtimeclass SignalLostEventArgs
+    {
+        Guid CorrelationId{ get; };
+        Windows.Internal.PPI.Ingest.IngestSource Source{ get; };
+    }
+
+
+
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.PPI.Ingest.IIngestMonitor", 9f71f281-1a3d-4c55-883d-2f8b298355b5)]
+    runtimeclass IngestMonitor
+    {
+        event Windows.Internal.PPI.Ingest.SignalAquiredEventHandler SignalAquired;
+        event Windows.Internal.PPI.Ingest.SignalLostEventHandler SignalLost;
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    [interface_name("Windows.Internal.PPI.Ingest.IIngestSource", 2434983c-8d86-4bc2-9bb1-026d3868c550)]
+    runtimeclass IngestSource
+    {
+        Boolean SignalPresent{ get; };
+        Windows.Foundation.Uri ThumbnailUri{ get; };
+        Windows.Internal.PPI.Ingest.IngestSourceType Type{ get; };
+    }
+
+
+
+
+    [contract(Windows.Internal.PPI.Ingest.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.PPI.Ingest.IIngestComponent", ca6a5916-7450-4845-b601-6faadcb24b27)]
+    runtimeclass IngestComponent
+    {
+        IngestComponent();
+        Windows.Internal.PPI.Ingest.IngestMonitor Monitor{ get; };
+        Windows.Foundation.Uri Uri{ get; };
+        void SetStreamingSource(IngestSourceType type);
+        Windows.Internal.PPI.Ingest.IngestSource Source(IngestSourceType type);
+    }
+
+}

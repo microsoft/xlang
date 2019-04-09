@@ -1,0 +1,70 @@
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.ApplicationModel.Calls.Provider
+{
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [interface_name("Windows.ApplicationModel.Calls.Provider.IPhoneCallOrigin", 20613479-0ef9-4454-871c-afb66a14b6a5)]
+    [threading(both)]
+    runtimeclass PhoneCallOrigin
+    {
+        PhoneCallOrigin();
+        String Category{ get; };
+        String Category{ set; };
+        String CategoryDescription{ get; };
+        String CategoryDescription{ set; };
+        String Location{ get; };
+        String Location{ set; };
+
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 2)]
+        [interface_name("Windows.ApplicationModel.Calls.Provider.IPhoneCallOrigin2", 04c7e980-9ac2-4768-b536-b68da4957d02)]
+        {
+            String DisplayName{ get; };
+            String DisplayName{ set; };
+        }
+
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 3)]
+        [interface_name("Windows.ApplicationModel.Calls.Provider.IPhoneCallOrigin3", 49330fb4-d1a7-43a2-aeee-c07b6dbaf068)]
+        {
+            Windows.Storage.StorageFile DisplayPicture{ get; };
+            Windows.Storage.StorageFile DisplayPicture{ set; };
+        }
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 1)]
+    [static_name("Windows.ApplicationModel.Calls.Provider.IPhoneCallOriginManagerStatics", ccfc5a0a-9af7-6149-39d0-e076fcce1395)]
+    [threading(both)]
+    runtimeclass PhoneCallOriginManager
+    {
+
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 3)]
+        [static_name("Windows.ApplicationModel.Calls.Provider.IPhoneCallOriginManagerStatics2", 8bf3ee3f-40f4-4380-8c7c-aea2c9b8dd7a)]
+        {
+            static Windows.Foundation.IAsyncOperation <Boolean>  RequestSetAsActiveCallOriginAppAsync();
+        }
+        static Boolean IsCurrentAppActiveCallOriginApp{ get; };
+        static void ShowPhoneCallOriginSettingsUI();
+        static void SetCallOrigin(Guid requestId, PhoneCallOrigin callOrigin);
+
+        [contract(Windows.ApplicationModel.Calls.CallsPhoneContract, 5)]
+        [feature(Velocity_AlwaysAlwaysEnabled)]
+        [static_name("Windows.ApplicationModel.Calls.Provider.IPhoneCallOriginManagerStatics3", 2ed69764-a6e3-50f0-b76a-d67cb39bdfde)]
+        {
+            static Boolean IsSupported{ get; };
+        }
+    }
+
+}

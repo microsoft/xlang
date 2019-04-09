@@ -1,0 +1,135 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Web.UI.Interop
+{
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum WebViewControlMoveFocusReason
+    {
+        Programmatic,
+        Next,
+        Previous,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum WebViewControlProcessCapabilityState
+    {
+        Default,
+        Disabled,
+        Enabled,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum WebViewControlAcceleratorKeyRoutingStage
+    {
+        Tunneling,
+        Bubbling,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Web.UI.Interop.IWebViewControlProcess", 02c723ec-98d6-424a-b63e-c6136c36a0f2)]
+    runtimeclass WebViewControlProcess
+    {
+        WebViewControlProcess();
+
+        [contract(Windows.Foundation.UniversalApiContract, 6)]
+        [constructor_name("Windows.Web.UI.Interop.IWebViewControlProcessFactory", 47b65cf9-a2d2-453c-b097-f6779d4b8e02)]
+        {
+            [method_name( "CreateWithOptions" )] WebViewControlProcess(WebViewControlProcessOptions processOptions);
+        }
+        UInt32 ProcessId{ get; };
+        String EnterpriseId{ get; };
+        Boolean IsPrivateNetworkClientServerCapabilityEnabled{ get; };
+        Windows.Foundation.IAsyncOperation <Windows.Web.UI.Interop.WebViewControl>  CreateWebViewControlAsync(Int64 hostWindowHandle, Windows.Foundation.Rect bounds);
+        Windows.Foundation.Collections.IVectorView <Windows.Web.UI.Interop.WebViewControl>  GetWebViewControls();
+        void Terminate();
+        event Windows.Foundation.TypedEventHandler <Windows.Web.UI.Interop.WebViewControlProcess, Object>  ProcessExited;
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(standard)]
+    runtimeclass WebViewControl
+        : [default]Windows.Web.UI.IWebViewControl
+        , [contract(Windows.Foundation.UniversalApiContract, 7)]
+        Windows.Web.UI.IWebViewControl2
+    {
+
+        [interface_name("Windows.Web.UI.Interop.IWebViewControlSite", 133f47c6-12dc-4898-bd47-04967de648ba)]
+        {
+            Windows.Web.UI.Interop.WebViewControlProcess Process{ get; };
+            Double Scale{ set; };
+            Double Scale{ get; };
+            Windows.Foundation.Rect Bounds{ set; };
+            Windows.Foundation.Rect Bounds{ get; };
+            Boolean IsVisible{ set; };
+            Boolean IsVisible{ get; };
+            void Close();
+            void MoveFocus(WebViewControlMoveFocusReason reason);
+            event Windows.Foundation.TypedEventHandler <Windows.Web.UI.Interop.WebViewControl, Windows.Web.UI.Interop.WebViewControlMoveFocusRequestedEventArgs>  MoveFocusRequested;
+            event Windows.Foundation.TypedEventHandler <Windows.Web.UI.Interop.WebViewControl, Windows.Web.UI.Interop.WebViewControlAcceleratorKeyPressedEventArgs>  AcceleratorKeyPressed;
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [interface_name("Windows.Web.UI.Interop.IWebViewControlSite2", d13b2e3f-48ee-4730-8243-d2ed0c05606a)]
+        {
+            event Windows.Foundation.TypedEventHandler <Windows.Web.UI.Interop.WebViewControl, Object>  GotFocus;
+            event Windows.Foundation.TypedEventHandler <Windows.Web.UI.Interop.WebViewControl, Object>  LostFocus;
+        }
+    }
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Web.UI.Interop.IWebViewControlMoveFocusRequestedEventArgs", 6b2a340d-4bd0-405e-b7c1-1e72a492f446)]
+    runtimeclass WebViewControlMoveFocusRequestedEventArgs
+    {
+        Windows.Web.UI.Interop.WebViewControlMoveFocusReason Reason{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(standard)]
+    [interface_name("Windows.Web.UI.Interop.IWebViewControlAcceleratorKeyPressedEventArgs", 77a2a53e-7c74-437d-a290-3ac0d8cd5655)]
+    runtimeclass WebViewControlAcceleratorKeyPressedEventArgs
+    {
+        Windows.UI.Core.CoreAcceleratorKeyEventType EventType{ get; };
+        Windows.System.VirtualKey VirtualKey{ get; };
+        Windows.UI.Core.CorePhysicalKeyStatus KeyStatus{ get; };
+        Windows.Web.UI.Interop.WebViewControlAcceleratorKeyRoutingStage RoutingStage{ get; };
+        Boolean Handled{ get; };
+        Boolean Handled{ set; };
+    }
+
+
+
+    [marshaling_behavior(standard)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Web.UI.Interop.IWebViewControlProcessOptions", 1cca72a7-3bd6-4826-8261-6c8189505d89)]
+    runtimeclass WebViewControlProcessOptions
+    {
+        WebViewControlProcessOptions();
+        String EnterpriseId{ set; };
+        String EnterpriseId{ get; };
+        Windows.Web.UI.Interop.WebViewControlProcessCapabilityState PrivateNetworkClientServerCapability{ set; };
+        Windows.Web.UI.Interop.WebViewControlProcessCapabilityState PrivateNetworkClientServerCapability{ get; };
+    }
+
+
+
+
+
+}

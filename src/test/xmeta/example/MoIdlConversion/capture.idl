@@ -1,0 +1,97 @@
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.PlatformExtensions.Capture
+{
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    enum CapturableItemKind
+    {
+        Window,
+        Display,
+    };
+
+    [uuid(2353e605-bd48-4c76-a57a-64994b051890)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface ICaptureSession
+    {
+        void Start(UInt64 renderTargetGroupHandle);
+        void Stop();
+        Windows.Foundation.Size Size{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.PlatformExtensions.Capture.CaptureSession, Object>  CaptureLost;
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    runtimeclass CaptureSession
+        : [default]Windows.Internal.PlatformExtensions.Capture.ICaptureSession
+    {
+    }
+
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.Capture.ICapturableItem", a0994a39-487c-4687-87df-34e45990cc18)]
+    runtimeclass CapturableItem
+    {
+        String DisplayName{ get; };
+        Windows.Internal.PlatformExtensions.Capture.CapturableItemKind Kind{ get; };
+        Boolean Equals(CapturableItem item);
+        Windows.Internal.PlatformExtensions.Capture.CaptureSession CreateSession();
+    }
+
+    [uuid(37cdd3c9-2727-4268-a562-b56da52d270a)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface ICaptureItemProvider
+    {
+        Windows.Foundation.Collections.IVector <Windows.Internal.PlatformExtensions.Capture.CapturableItem>  Items{ get; };
+    };
+
+    [uuid(c9c49885-46e5-423c-be32-4902cb8a76af)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface ICapturePickerExperience
+    {
+        Windows.Foundation.IAsyncOperation <Windows.Internal.PlatformExtensions.Capture.CapturableItem>  PickAsync(Windows.Internal.ApplicationModel.WindowManagement.WindowId ownerWindow);
+    };
+
+    [uuid(62c199c9-dd22-41bd-ab2a-21ac3223ba89)]
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    interface ICapturePickerExperiencePolicy
+    {
+        Boolean CanShowPicker(Windows.Internal.ApplicationModel.WindowManagement.WindowId ownerWindow);
+        String GetWindowDisplayName(Windows.Internal.ApplicationModel.WindowManagement.WindowId ownerWindow);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.PlatformExtensions.Capture.CapturePickerExperiencePolicy, Object>  DismissRequested;
+    };
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    runtimeclass CapturePickerExperiencePolicy
+        : [default]Windows.Internal.PlatformExtensions.Capture.ICapturePickerExperiencePolicy
+    {
+    }
+
+
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    runtimeclass CaptureItemProvider
+        : [default]Windows.Internal.PlatformExtensions.Capture.ICaptureItemProvider
+    {
+    }
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.Capture.IDesktopDisplayCapturableItem", 2f5f1c42-2dea-4fa2-a9e1-b744015aaa42)]
+    runtimeclass DesktopDisplayCapturableItem
+    {
+        UInt64 MonitorHandle{ get; };
+    }
+
+    [contract(Windows.Internal.PlatformExtensions.InternalContract, 1)]
+    [interface_name("Windows.Internal.PlatformExtensions.Capture.IDesktopWindowCapturableItem", 5ed78b65-017c-4cb7-a935-7521855ecc71)]
+    runtimeclass DesktopWindowCapturableItem
+    {
+        Windows.Internal.ApplicationModel.WindowManagement.WindowId WindowHandle{ get; };
+    }
+
+}

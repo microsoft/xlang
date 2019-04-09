@@ -1,0 +1,659 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.Experience
+{
+    [contractversion(1)]
+    [internal]
+    apicontract ExperienceManagerInternalContract{};
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum FocusNavigateDirection
+    {
+        Up,
+        Down,
+        Next,
+        Prev,
+    };
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IStartExperienceManager", c2d211a1-a6d4-49b5-9704-d74cb4dff1ee)]
+    runtimeclass StartExperienceManager
+    {
+        void Prelaunch(Boolean applyBoost);
+        void Show(Boolean ignoreForegroundFailure, Boolean requestForeground, UInt32 showMethod);
+        void Hide(UInt32 hideMethod);
+        void DimStart();
+        void UnDimStart();
+        void TakeKeyboardFocus(FocusNavigateDirection focusDirection);
+        Windows.Foundation.Size GetStartSize();
+        void WorkAreaMayHaveChanged();
+        void PlayTransitionToCortana();
+        Boolean GetIsFullScreen();
+        void BringToForeground();
+        Boolean IsWindowFullyVisible();
+        void Uncloak();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Object>  Shown;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Object>  Hidden;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Object>  Destroyed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Object>  NotifyFocus;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Object>  DismissRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Object>  ExitTransitionToCortanaCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Object>  SetForegroundFailed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.StartExperienceManager, Int32>  LaunchResult;
+        UInt64 GetWindowHandle();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ITrayClockFlyoutExperienceManager", b1604325-6b59-427b-bf1b-80a2db02d3d8)]
+    runtimeclass TrayClockFlyoutExperienceManager
+    {
+        void ShowFlyout(Windows.Foundation.Rect trayItemRect);
+        void HideFlyout();
+        Boolean IsVisible();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ITrayBatteryFlyoutExperienceManager", 0a73aedc-1c68-410d-8d53-63af80951e8f)]
+    runtimeclass TrayBatteryFlyoutExperienceManager
+    {
+        void ShowFlyout(Windows.Foundation.Rect trayItemRect);
+        void HideFlyout();
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum VirtualTouchpadPosition
+    {
+        Default,
+        UsePreviousIfAvailable,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.IVirtualTouchpadExperienceManager", 17c4ec91-62df-486d-aa0d-6a11c725e414)]
+    runtimeclass VirtualTouchpadExperienceManager
+    {
+        void Show(VirtualTouchpadPosition desiredPosition, Windows.Foundation.Rect position);
+        void Hide();
+        Boolean IsVisible{ get; };
+        Boolean AreExperienceViewAndCursorOnTheSameMonitor{ get; };
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ImeMode
+    {
+        None,
+        JapanAlphabet,
+        JapanHiragana,
+    };
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IImeStatusNotificationExperienceManager", 08f4f43b-7be0-4a08-b5df-24044d7e8b72)]
+    runtimeclass ImeStatusNotificationExperienceManager
+    {
+        void SetMode(ImeMode statusToShow);
+    }
+
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IDeviceDiscoveryExperienceManager", 4f8c32e2-f707-4d00-ad96-edffd27b6b73)]
+    runtimeclass DeviceDiscoveryExperienceManager
+    {
+        void ShowFlyout();
+        void HideFlyout();
+        void SetFlyoutTitle(String title);
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IDisplayTopologyChangeExperienceManager", aa5bb64c-3f65-470f-a4e2-74834bc300c5)]
+    runtimeclass DisplayTopologyChangeExperienceManager
+    {
+        void ShowFlyout();
+        void HideFlyout();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IDevicePickerExperienceManager", af056671-a2c2-431f-9e6e-feced34ce6a9)]
+    runtimeclass DevicePickerExperienceManager
+    {
+        void Initialize(Guid pickerId, UInt32 callingProcessId, UInt64 parentWindow);
+        void ShowFlyout(Windows.Foundation.Rect position, Windows.UI.Popups.Placement placement);
+        void HideFlyout();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.DevicePickerExperienceManager, Object>  Dismissed;
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [uuid(d7756afb-9b2b-4f00-9229-88209b0e8953)]
+    interface IMiracastBannerResizeEventArgs
+    {
+        Boolean CrossedMinimumThreshold{ get; };
+        Boolean ButtonsMinimized{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    runtimeclass MiracastBannerResizeEventArgs
+        : [default]Windows.Internal.Shell.Experience.IMiracastBannerResizeEventArgs
+    {
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IMiracastBannerExperienceManager", ea565573-2887-4dcf-a6f7-4b52b8098df9)]
+    runtimeclass MiracastBannerExperienceManager
+    {
+        void Initialize();
+        void ShowFlyout();
+        void HideFlyout();
+        void DelayedDestroyFlyout();
+        void DestroyFlyout();
+        void SetPinned(Boolean fIsPinned);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.MiracastBannerExperienceManager, Object>  Dismissed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.MiracastBannerExperienceManager, Windows.Internal.Shell.Experience.IMiracastBannerResizeEventArgs>  Resized;
+    }
+
+    [uuid(b0f15396-8df4-4167-b062-b2c66f34efbb)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    interface IFocusNavigateEventArgs
+    {
+        Windows.Internal.Shell.Experience.FocusNavigateDirection Direction{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    runtimeclass FocusNavigateEventArgs
+        : [default]Windows.Internal.Shell.Experience.IFocusNavigateEventArgs
+    {
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [uuid(9697311c-768a-4cd5-9b37-049855339820)]
+    interface ICortanaShownEventArgs
+    {
+        Windows.Foundation.Rect RectInCortanaVisibleMonitor{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass CortanaShownEventArgs
+        : [default]Windows.Internal.Shell.Experience.ICortanaShownEventArgs
+    {
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum CortanaAppTransitionType
+    {
+        None,
+        IsolatedLaunch,
+        TransitionFromStart,
+        QFGoWideFromDefault,
+        QFGoWideFromStart,
+        TransitionSearchToCortana,
+        TransitionCortanaToSearch,
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum CortanaViewMode
+    {
+        Default,
+        Override,
+        Tablet,
+        Ambient,
+        Attract,
+        VisionOnScreen,
+        CenterScreen,
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum CortanaWindowSize
+    {
+        _Unknown,
+        Default,
+        Wide,
+        SearchBox,
+        PersonaOnly,
+        Tablet,
+        WideWithoutSearchBox,
+        Ambient,
+        Attract,
+        SetByProjectedAPI,
+        VisionOnScreen,
+        CenterScreen,
+        DefaultForCurrentExperience,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.ICortanaExperienceManager", cc316ad0-3e56-4dcb-bf02-8c10ea8bfbbe)]
+    runtimeclass CortanaExperienceManager
+    {
+        void Prelaunch(Boolean applyBoost);
+        void Show(String args, CortanaAppTransitionType appTransitionType);
+        void SetPositioningAnchorRect(Windows.Foundation.Rect monitorRect, Windows.Foundation.Rect rect);
+        void ShowWithStart(Boolean ignoreSetForegroundFailure);
+        void WorkAreaMayHaveChanged();
+        void Hide();
+        void MinimizeToBoxMode();
+        void TakeKeyboardFocus();
+        void PrepareForAppTransition(CortanaAppTransitionType appTransitionType);
+        Boolean CanTransitionFromStart();
+        void EnsureForegroundRights();
+        void PearlRectMayHaveChanged();
+        void Uncloak();
+        Boolean SuggestionsShowing{ get; };
+        Boolean IsExplicitDismissEnabled{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Windows.Internal.Shell.Experience.ICortanaShownEventArgs>  Shown;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  Hidden;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  Destroyed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  SuggestionsShown;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  SuggestionsHidden;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  SetForegroundFailed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Windows.Internal.Shell.Experience.IFocusNavigateEventArgs>  FocusNavigate;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  StartAndCortanaDismissRequested;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  AppRequestedDismiss;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  AppRequestedTransition;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  AppTransitionCompleted;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Int32>  LaunchResult;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  DeviceLocked;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  DeviceUnlocked;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.CortanaExperienceManager, Object>  NotifyRelaunch;
+        UInt64 GetWindowHandle();
+        Boolean LockCurtainShowing{ get; };
+        void NotifyUIATreesUnlinked();
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ShellExperienceViewChangeType
+    {
+        ApplicationActivatedForLaunch,
+        PriorityBoostRequested,
+        PriorityUnboostRequested,
+        SetForegroundFailed,
+        ViewCloaking,
+        ViewCreated,
+        ViewDestroyed,
+        ViewHidden,
+        ViewPropertiesChanging,
+        ViewShown,
+        ViewUncloaking,
+    };
+
+    [uuid(1b7d8b95-d5cb-4cff-874f-11fdf16217ac)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    interface IShellExperienceViewChangedArg
+    {
+        Windows.Internal.Shell.Experience.ShellExperienceViewChangeType Type{ get; };
+        Int32 HResult{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [uuid(945f341f-df0f-41d1-adae-5b9dabbb2139)]
+    interface IShellExperienceViewEventArg
+    {
+        String Name{ get; };
+        Windows.Foundation.Collections.IPropertySet ValueSet{ get; };
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ShellExperienceViewFocusOptions
+    {
+        Focus,
+        TryToFocus,
+        NoFocus,
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ShellExperienceViewBorderEdge
+    {
+        None,
+        Left,
+        Top,
+        Right = 4,
+        Bottom = 8,
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ShellExperienceViewBorderAccentState
+    {
+        Disabled,
+        Gradient,
+    };
+
+    [uuid(9f8649aa-a188-4bda-a412-ecb6807c94d8)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    interface IShellExperienceView
+    {
+        Windows.Foundation.Size DesiredSize{ get; };
+        Windows.Internal.Shell.ViewManagerInterop.IViewWrapper ViewWrapper{ get; };
+        Windows.Foundation.Collections.IPropertySet PropertySet{ get; };
+        Boolean Ready{ get; };
+        Boolean Visible{ get; };
+        void Activate(String args, ShellExperienceViewFocusOptions focusOptions);
+        void Hide();
+        void Uncloak();
+        void BringToForeground();
+        void NotifyView(String arguments, Windows.Foundation.Collections.IPropertySet valueSet);
+        void ShowBorder(ShellExperienceViewBorderEdge borderEdge, ShellExperienceViewBorderAccentState accentState);
+        void ShowBorderWithRect(ShellExperienceViewBorderEdge borderEdge, ShellExperienceViewBorderAccentState accentState, Windows.UI.Color gradientColor, Windows.Foundation.Rect rcClip);
+        void SetDrawingRegion(UInt64 hrgn, Boolean redraw);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.IShellExperienceView, Windows.Internal.Shell.Experience.IShellExperienceViewChangedArg>  ViewChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.IShellExperienceView, Windows.Internal.Shell.Experience.IShellExperienceViewEventArg>  ViewEvent;
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ShellExperiencePositionerType
+    {
+        None,
+        Desktop,
+        Holographic,
+    };
+
+    [uuid(c6ff146a-7f1d-492e-8981-e95cda605ef7)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    interface IShellExperiencePositioner
+    {
+        Windows.Internal.Shell.Experience.ShellExperiencePositionerType Type{ get; };
+        Boolean CanHandleView(IShellExperienceView view, ShellExperiencePositionerType oldExperiencePositionerType);
+        Object ControlLost(IShellExperienceView view, ShellExperiencePositionerType newExperiencePositionerType);
+        void ControlGained(IShellExperienceView view, ShellExperiencePositionerType oldExperiencePositionerType, Object handoffContext);
+        void ActivateView(IShellExperienceView view, String args, Windows.Foundation.Collections.IMapView <String, Object>  activatePropertySet);
+    };
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IJumpViewExperienceManager", 95fc070d-cc20-44e5-8c0d-75ed8f7100b0)]
+    runtimeclass JumpViewExperienceManager
+    {
+        void Show(String params);
+        void Dismiss();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.JumpViewExperienceManager, Windows.Internal.Shell.Experience.JumpViewExperienceEventArgs>  Shown;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.JumpViewExperienceManager, Windows.Internal.Shell.Experience.JumpViewExperienceEventArgs>  Hidden;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.JumpViewExperienceManager, Windows.Internal.Shell.Experience.JumpViewExperienceEventArgs>  Cancelled;
+    }
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.IJumpViewExperienceEventArgs", afe9aba4-877b-44b7-b9cb-1d0c97c6b204)]
+    runtimeclass JumpViewExperienceEventArgs
+    {
+        String Params{ get; };
+    }
+
+
+
+    [uuid(fdae1e57-9570-4461-bab5-532c0f899149)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    interface IExperienceManagerPriorityManipulator
+    {
+        void BoostPriority();
+        void UnboostPriority();
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.IHostExperienceManager", 2410129c-64a0-4b85-9e61-12caec38d6ef)]
+    runtimeclass HostExperienceManager
+    {
+        void AllowSuspension(Boolean isSuspensionAllowed);
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [default_interface]
+    [interface_name("Windows.Internal.Shell.Experience.ITestExperienceManager", cc0fb627-2cf4-4040-a314-335ca155b411)]
+    runtimeclass TestExperienceManager
+    {
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [default_interface]
+    [interface_name("Windows.Internal.Shell.Experience.IPeopleBarContainerExperienceManager", faf18a66-2374-41b2-b79b-ce800bc3122d)]
+    runtimeclass PeopleBarContainerExperienceManager
+    {
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IPeopleBarFlyoutExperienceManager", 1b7781cd-1b97-4728-8b6e-67a7e55cc53c)]
+    runtimeclass PeopleBarFlyoutExperienceManager
+    {
+        void ShowFlyout(Windows.Foundation.Point location);
+        void HideFlyout();
+        Boolean IsFlyoutOpen();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.IPeopleBarJumpViewExperienceManager", ab65b025-ff88-470a-9513-b62bcd7ce879)]
+    runtimeclass PeopleBarJumpViewExperienceManager
+    {
+        void Show(String params);
+        void Dismiss();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IShoulderTapExperienceManager", 8667db0d-6960-465f-b9a4-c461863efa91)]
+    runtimeclass ShoulderTapExperienceManager
+    {
+        void ShoulderTap(String contactId, String notificationId, String uri, String spriteUri, Int32 frameHeight, Int32 framesPerSecond, Int32 startingFrame, String altText, String appPackageFamilyName, String groupTitle);
+        void FocusHotkeyInvoked();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.IQuickConnectExperienceManager", 7fec38c1-a520-4797-848f-66efa8bd3502)]
+    runtimeclass QuickConnectExperienceManager
+    {
+        void ShowContactCard(Guid contactCardCookie, UInt64 hwndSource, Windows.ApplicationModel.Contacts.Contact contact, Windows.Foundation.Rect selection, Windows.UI.Popups.Placement preferredPlacement, Windows.ApplicationModel.Contacts.ContactCardOptions contactCardOptions, Single userLogicalDpi, Boolean isDelayloadMode);
+        void PopulateDelayLoadedContactCard(Guid contactCardCookie, Windows.ApplicationModel.Contacts.Contact contact);
+        void ExitContactCard();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ISoftLandingExperienceManager", 984634c4-91f4-4a71-89ca-5baa258a1d7b)]
+    runtimeclass SoftLandingExperienceManager
+    {
+        void FocusHotkeyInvoked();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ISharePickerExperienceManager", 0a57aff4-7ba4-49bf-88f0-b60d42d40a78)]
+    runtimeclass SharePickerExperienceManager
+    {
+        void Show(Windows.ApplicationModel.Internal.DataTransfer.ISharingOperation sharingOperation, Windows.Internal.Shell.Share.IShareExperienceCallbacks shareExperienceCallbacks, String correlationVector);
+        void ShowErrorMessage(UInt64 parentWindow);
+        void Hide();
+        String HostAppPackageFamilyName{ get; };
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.IExpansionExperienceManager", c83daff1-ca5a-48c0-93d9-10c3b962bb31)]
+    runtimeclass ExpansionExperienceManager
+    {
+        void Show();
+    }
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [interface_name("Windows.Internal.Shell.Experience.IInputDialExperienceManager", 599db028-e1d3-433d-9f90-32468634d59e)]
+    runtimeclass InputDialExperienceManager
+    {
+        void StartDeviceListener();
+        [return_name("token")] EventRegistrationToken Register(UInt64 menuWindow, UInt64 inputSink, Windows.Foundation.EventHandler <Object>  handler, out UInt32 sectionId);
+        void Unregister(UInt64 menuWindow, UInt32 sectionId, EventRegistrationToken token);
+        void AddCustomMenuItemWithKnownIcon(UInt64 menuWindow, UInt32 sectionId, UInt32 insertionIndex, String displayText, UInt32 itemId, UInt32 knownIcon);
+        void AddCustomMenuItemWithIcon(UInt64 menuWindow, UInt32 sectionId, UInt32 insertionIndex, String displayText, UInt32 itemId, Windows.Storage.Streams.IRandomAccessStreamReference icon);
+        void AddCustomMenuItemWithGlyph(UInt64 menuWindow, UInt32 sectionId, UInt32 insertionIndex, String displayText, String fontGlyph, String fontFamily, String fontFilePath, UInt32 itemId);
+        void RemoveCustomMenuItem(UInt64 menuWindow, UInt32 sectionId, UInt32 itemId);
+        void ClearCustomItems(UInt64 menuWindow, UInt32 sectionId);
+        void SetDefaultMenuItems(UInt64 menuWindow, Windows.Foundation.Collections.IIterable <Windows.UI.Input.RadialControllerSystemMenuItemKind>  globalItems);
+        void SelectDefaultMenuItem(UInt64 menuWindow, UInt32 itemId, out Boolean isSelectionSuccessful);
+        void SelectPreviouslyActiveMenuItem(UInt64 menuWindow, out Boolean isSelectionSuccessful);
+        void SetSelectedMenuItem(UInt64 menuWindow, UInt32 sectionId, UInt32 itemId, out Boolean isSelectionSuccessful);
+        void GetSelectedMenuItem(UInt64 menuWindow, out UInt32 sectionId, out UInt32 itemId);
+        void InvokeDispatched(UInt64 inputSink);
+        void ResetDefaultMenuItems(UInt64 menuWindow);
+        void SuppressMenu(UInt64 menuWindow, Boolean isMenuSuppressed, UInt64 inputSink);
+        void SetApplicationController(UInt64 menuWindow, Boolean isControllerEnabled, UInt64 inputSink, Boolean controllerIsNotNull);
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ITaskContinuityActivitiesExperienceManager", 075fd233-0985-4b7d-a756-3293380d1b4c)]
+    runtimeclass TaskContinuityActivitiesExperienceManager
+    {
+        void Show();
+        void Hide();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ILockScreenExperienceManager", a40cce11-67ee-4e74-8c46-91edb265261c)]
+    runtimeclass LockScreenExperienceManager
+    {
+        void Show();
+        void Hide();
+        void PositionApplication();
+        void SetDesiredPosition(Windows.Foundation.Rect position);
+        void GetApplicationId(out String aumid);
+        Boolean IsExperienceView(String aumid, UInt64 viewHandle);
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.LockScreenExperienceManager, Int32>  ActivationFailed;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.LockScreenExperienceManager, Object>  Shown;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.LockScreenExperienceManager, Object>  ViewDestroyed;
+        void BringToForeground();
+        void DestroyView();
+    }
+
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.Shell.Experience.ITabExperienceManager", cfd1fc22-acb7-4036-88b9-5ed4362a1186)]
+    runtimeclass TabExperienceManager
+    {
+        Windows.Internal.Shell.Experience.TitleBarFactory TryGetTitleBarFactory();
+        Windows.Foundation.IAsyncOperation <Windows.Internal.Shell.Experience.TitleBarFactory>  GetTitleBarFactoryAsync();
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TabExperienceManager, Object>  ExperienceLost;
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.Shell.Experience.TabExperienceManager, Object>  ExperienceCreated;
+        void BringToForeground();
+        Boolean IsEqualToCoreWindow(Windows.Internal.ApplicationModel.WindowManagement.WindowId window);
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [uuid(180f0455-5456-42b5-a11c-8710be39ae51)]
+    interface ITabCompanionExperienceManager
+    {
+        void ShowPrompt(Windows.Internal.ComposableShell.Tabs.ShellTabGroupId tabGroupId, String correlationVector);
+        void ShowPopover(Windows.Internal.ComposableShell.Tabs.ShellTabGroupId tabGroupId, String correlationVector);
+        Windows.Foundation.IAsyncOperation <Boolean>  ShowCloseAllPromptAsync(Windows.Internal.ComposableShell.Tabs.ShellTabGroupId tabGroupId, String correlationVector);
+        void DismissView(Windows.Internal.ComposableShell.Tabs.ShellTabGroupId tabGroupId);
+        void DestroyView(Windows.Internal.ComposableShell.Tabs.ShellTabGroupId tabGroupId);
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    runtimeclass TabCompanionExperienceManager
+        : [default]Windows.Internal.Shell.Experience.ITabCompanionExperienceManager
+    {
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ScreenClipProtocolActivationSourceType
+    {
+        Unknown,
+        FromScreenSketch,
+        FromQuickActions,
+        FromSearchBox,
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    enum ScreenClipInvocationType
+    {
+        Unknown,
+        PenButton,
+        QuickActions,
+        PrintScreen,
+        HotKey,
+        ScreenSketch,
+        SearchBox,
+    };
+
+    [uuid(93acf1bc-b1c9-423a-9fa5-d80c0935ddee)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    interface IScreenClippingExperienceManager
+    {
+        void LaunchOrToggle(ScreenClipInvocationType invocationType);
+        void GetScreenClippingBrokerAsIInspectable(out Object broker);
+        void HandleProtocolActivation(ScreenClipProtocolActivationSourceType type, String optionalArguments);
+    };
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [marshaling_behavior(agile)]
+    runtimeclass ScreenClippingExperienceManager
+        : [default]Windows.Internal.Shell.Experience.IScreenClippingExperienceManager
+    {
+    }
+
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    [uuid(f7e42d9f-f76a-4f44-a458-6ecbdd76d2b9)]
+    interface IInsightsExperienceManager
+    {
+        void Launch();
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.Experience.ExperienceManagerInternalContract, 1)]
+    runtimeclass InsightsExperienceManager
+        : [default]Windows.Internal.Shell.Experience.IInsightsExperienceManager
+    {
+    }
+
+}

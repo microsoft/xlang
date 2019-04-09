@@ -1,0 +1,425 @@
+
+
+
+
+
+
+
+
+
+
+namespace Windows.Media.Protection.PlayReady
+{
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PlayReadyDecryptorSetup
+    {
+        Uninitialized,
+        OnDemand,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PlayReadyEncryptionAlgorithm
+    {
+        Unprotected,
+        Aes128Ctr,
+        Cocktail = 4,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Aes128Cbc,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Unspecified = 65535,
+        Uninitialized = 2147483647,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Protection.PlayReady.IPlayReadyContentHeaderFactory2", d1239cf5-ae6d-4778-97fd-6e3a2eeadbeb)]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyContentHeader", 9a438a6a-7f4c-452e-88bd-0148c6387a2c)]
+    runtimeclass PlayReadyContentHeader
+    {
+        [method_name( "CreateInstanceFromComponents2" )] PlayReadyContentHeader(UInt32 dwFlags, [range(0, 2147483647)]Guid[] contentKeyIds, [range(0, 2147483647)]String[] contentKeyIdStrings, PlayReadyEncryptionAlgorithm contentEncryptionAlgorithm, Windows.Foundation.Uri licenseAcquisitionUrl, Windows.Foundation.Uri licenseAcquisitionUserInterfaceUrl, String customAttributes, Guid domainServiceId);
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Media.Protection.PlayReady.IPlayReadyContentHeaderFactory", cb97c8ff-b758-4776-bf01-217a8b510b2c)]
+        {
+            [method_name( "CreateInstanceFromWindowsMediaDrmHeader" )] PlayReadyContentHeader([range(0, 2147483647)]UInt8[] headerBytes, Windows.Foundation.Uri licenseAcquisitionUrl, Windows.Foundation.Uri licenseAcquisitionUserInterfaceUrl, String customAttributes, Guid domainServiceId);
+            [method_name( "CreateInstanceFromComponents" )] PlayReadyContentHeader(Guid contentKeyId, String contentKeyIdString, PlayReadyEncryptionAlgorithm contentEncryptionAlgorithm, Windows.Foundation.Uri licenseAcquisitionUrl, Windows.Foundation.Uri licenseAcquisitionUserInterfaceUrl, String customAttributes, Guid domainServiceId);
+            [method_name( "CreateInstanceFromPlayReadyHeader" )] PlayReadyContentHeader([range(0, 2147483647)]UInt8[] headerBytes);
+        }
+        Guid KeyId{ get; };
+        String KeyIdString{ get; };
+        Windows.Foundation.Uri LicenseAcquisitionUrl{ get; };
+        Windows.Foundation.Uri LicenseAcquisitionUserInterfaceUrl{ get; };
+        Guid DomainServiceId{ get; };
+        Windows.Media.Protection.PlayReady.PlayReadyEncryptionAlgorithm EncryptionType{ get; };
+        String CustomAttributes{ get; };
+        Windows.Media.Protection.PlayReady.PlayReadyDecryptorSetup DecryptorSetup{ get; };
+        UInt8[] GetSerializedHeader();
+        Windows.Media.Protection.PlayReady.PlayReadyContentHeader HeaderWithEmbeddedUpdates{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyContentHeader2", 359c79f4-2180-498c-965b-e754d875eab2)]
+        {
+            Guid[] KeyIds{ get; };
+            String[] KeyIdStrings{ get; };
+        }
+    }
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(8bad2836-a703-45a6-a180-76f3565aa725)]
+    interface IPlayReadyServiceRequest requires Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        Windows.Foundation.Uri Uri{ get; };
+        Windows.Foundation.Uri Uri{ set; };
+        String ResponseCustomData{ get; };
+        String ChallengeCustomData{ get; };
+        String ChallengeCustomData{ set; };
+        Windows.Foundation.IAsyncAction BeginServiceRequest();
+        Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest NextServiceRequest();
+        Windows.Media.Protection.PlayReady.PlayReadySoapMessage GenerateManualEnablingChallenge();
+        HRESULT ProcessManualEnablingResponse([range(0, 2147483647)]UInt8[] responseBytes);
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadySoapMessage", b659fcb5-ce41-41ba-8a0d-61df5fffa139)]
+    runtimeclass PlayReadySoapMessage
+    {
+        UInt8[] GetMessageBody();
+        Windows.Foundation.Collections.IPropertySet MessageHeaders{ get; };
+        Windows.Foundation.Uri Uri{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Protection.PlayReady.IPlayReadyContentResolver", fbfd2523-906d-4982-a6b8-6849565a7ce8)]
+    runtimeclass PlayReadyContentResolver
+    {
+        static Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest ServiceRequest(PlayReadyContentHeader contentHeader);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyIndividualizationServiceRequest", 21f5a86b-008c-4611-ab2f-aaa6c69f0e24)]
+    runtimeclass PlayReadyIndividualizationServiceRequest
+        : Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest
+        , Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        PlayReadyIndividualizationServiceRequest();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyDomainJoinServiceRequest", 171b4a5a-405f-4739-b040-67b9f0c38758)]
+    runtimeclass PlayReadyDomainJoinServiceRequest
+        : Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest
+        , Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        PlayReadyDomainJoinServiceRequest();
+        Guid DomainAccountId{ get; };
+        Guid DomainAccountId{ set; };
+        String DomainFriendlyName{ get; };
+        String DomainFriendlyName{ set; };
+        Guid DomainServiceId{ get; };
+        Guid DomainServiceId{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyDomainLeaveServiceRequest", 062d58be-97ad-4917-aa03-46d4c252d464)]
+    runtimeclass PlayReadyDomainLeaveServiceRequest
+        : Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest
+        , Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        PlayReadyDomainLeaveServiceRequest();
+        Guid DomainAccountId{ get; };
+        Guid DomainAccountId{ set; };
+        Guid DomainServiceId{ get; };
+        Guid DomainServiceId{ set; };
+    }
+
+    [uuid(5d85ff45-3e9f-4f48-93e1-9530c8d58c3e)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPlayReadyLicenseAcquisitionServiceRequest requires Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest, Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        Windows.Media.Protection.PlayReady.PlayReadyContentHeader ContentHeader{ get; };
+        Windows.Media.Protection.PlayReady.PlayReadyContentHeader ContentHeader{ set; };
+        Guid DomainServiceId{ get; };
+        Guid DomainServiceId{ set; };
+    };
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PlayReadyLicenseIterable
+        : [default]Windows.Foundation.Collections.IIterable<Windows.Media.Protection.PlayReady.IPlayReadyLicense>
+    {
+        PlayReadyLicenseIterable();
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [constructor_name("Windows.Media.Protection.PlayReady.IPlayReadyLicenseIterableFactory", d4179f08-0837-4978-8e68-be4293c8d7a6)]
+        {
+            [method_name( "CreateInstance" )] PlayReadyLicenseIterable(PlayReadyContentHeader contentHeader, Boolean fullyEvaluated);
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PlayReadyLicenseAcquisitionServiceRequest
+        : [default]Windows.Media.Protection.PlayReady.IPlayReadyLicenseAcquisitionServiceRequest
+        , Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest
+        , Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        PlayReadyLicenseAcquisitionServiceRequest();
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyLicenseAcquisitionServiceRequest2", b7fa5eb5-fe0c-b225-bc60-5a9edd32ceb5)]
+        {
+            Guid SessionId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyLicenseAcquisitionServiceRequest3", 394e5f4d-7f75-430d-b2e7-7f75f34b2d75)]
+        {
+            Windows.Media.Protection.PlayReady.PlayReadyLicenseIterable CreateLicenseIterable(PlayReadyContentHeader contentHeader, Boolean fullyEvaluated);
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyMeteringReportServiceRequest", c12b231c-0ecd-4f11-a185-1e24a4a67fb7)]
+    runtimeclass PlayReadyMeteringReportServiceRequest
+        : Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest
+        , Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        PlayReadyMeteringReportServiceRequest();
+        UInt8[] MeteringCertificate{ get; };
+        [range(0, 2147483647)]UInt8[] MeteringCertificate{ set; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [default_interface]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyRevocationServiceRequest", 543d66ac-faf0-4560-84a5-0e4acec939e4)]
+    runtimeclass PlayReadyRevocationServiceRequest
+        : Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest
+        , Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        PlayReadyRevocationServiceRequest();
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Protection.PlayReady.IPlayReadyLicenseManagement", aaeb2141-0957-4405-b892-8bf3ec5dadd9)]
+    runtimeclass PlayReadyLicenseManagement
+    {
+        static Windows.Foundation.IAsyncAction DeleteLicenses(PlayReadyContentHeader contentHeader);
+    }
+
+    [uuid(ee474c4e-fa3c-414d-a9f2-3ffc1ef832d4)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPlayReadyLicense
+    {
+        Boolean FullyEvaluated{ get; };
+        Boolean UsableForPlay{ get; };
+        Windows.Foundation.IReference <Windows.Foundation.DateTime>  ExpirationDate{ get; };
+        UInt32 ExpireAfterFirstPlay{ get; };
+        Guid DomainAccountID{ get; };
+        UInt32 ChainDepth{ get; };
+        Guid GetKIDAtChainDepth(UInt32 chainDepth);
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PlayReadyLicense
+        : [default]Windows.Media.Protection.PlayReady.IPlayReadyLicense
+    {
+
+        [contract(Windows.Foundation.UniversalApiContract, 4)]
+        [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyLicense2", 30f4e7a7-d8e3-48a0-bcda-ff9f40530436)]
+        {
+            Guid SecureStopId{ get; };
+            UInt32 SecurityLevel{ get; };
+            Boolean InMemoryOnly{ get; };
+            Boolean ExpiresInRealTime{ get; };
+        }
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PlayReadyLicenseIterator
+        : [default]Windows.Foundation.Collections.IIterator<Windows.Media.Protection.PlayReady.IPlayReadyLicense>
+    {
+    }
+
+    [uuid(adcc93ac-97e6-43ef-95e4-d7868f3b16a9)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPlayReadyDomain
+    {
+        Guid AccountId{ get; };
+        Guid ServiceId{ get; };
+        UInt32 Revision{ get; };
+        String FriendlyName{ get; };
+        Windows.Foundation.Uri DomainJoinUrl{ get; };
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PlayReadyDomain
+        : [default]Windows.Media.Protection.PlayReady.IPlayReadyDomain
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Protection.PlayReady.IPlayReadyDomainIterableFactory", 4df384ee-3121-4df3-a5e8-d0c24c0500fc)]
+    runtimeclass PlayReadyDomainIterable
+        : [default]Windows.Foundation.Collections.IIterable<Windows.Media.Protection.PlayReady.IPlayReadyDomain>
+    {
+        [method_name( "CreateInstance" )] PlayReadyDomainIterable(Guid domainAccountId);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PlayReadyDomainIterator
+        : [default]Windows.Foundation.Collections.IIterator<Windows.Media.Protection.PlayReady.IPlayReadyDomain>
+    {
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PlayReadyHardwareDRMFeatures
+    {
+        HardwareDRM = 1,
+        HEVC,
+        [contract(Windows.Foundation.UniversalApiContract, 5)]
+        Aes128Cbc,
+    };
+
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [static_name("Windows.Media.Protection.PlayReady.IPlayReadyStatics2", 1f8d6a92-5f9a-423e-9466-b33969af7a3d)]
+    runtimeclass PlayReadyStatics
+    {
+        static UInt32 PlayReadyCertificateSecurityLevel{ get; };
+
+        [contract(Windows.Foundation.UniversalApiContract, 7)]
+        [static_name("Windows.Media.Protection.PlayReady.IPlayReadyStatics5", 230a7075-dfa0-4f8e-a779-cefea9c6824b)]
+        {
+            static Windows.Foundation.IReference <Windows.Foundation.DateTime>  HardwareDRMDisabledAtTime{ get; };
+            static Windows.Foundation.IReference <Windows.Foundation.DateTime>  HardwareDRMDisabledUntilTime{ get; };
+            static void ResetHardwareDRMDisabled();
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 3)]
+        [static_name("Windows.Media.Protection.PlayReady.IPlayReadyStatics4", 50a91300-d824-4231-9d5e-78ef8844c7d7)]
+        {
+            static String InputTrustAuthorityToCreate{ get; };
+            static Guid ProtectionSystemId{ get; };
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Media.Protection.PlayReady.IPlayReadyStatics3", 3fa33f71-2dd3-4bed-ae49-f7148e63e710)]
+        {
+            static Guid SecureStopServiceRequestType{ get; };
+            static Boolean CheckSupportedHardware(PlayReadyHardwareDRMFeatures hwdrmFeature);
+        }
+
+        [contract(Windows.Foundation.UniversalApiContract, 1)]
+        [static_name("Windows.Media.Protection.PlayReady.IPlayReadyStatics", 5e69c00d-247c-469a-8f31-5c1a1571d9c6)]
+        {
+            static Guid DomainJoinServiceRequestType{ get; };
+            static Guid DomainLeaveServiceRequestType{ get; };
+            static Guid IndividualizationServiceRequestType{ get; };
+            static Guid LicenseAcquirerServiceRequestType{ get; };
+            static Guid MeteringReportServiceRequestType{ get; };
+            static Guid RevocationServiceRequestType{ get; };
+            static Guid MediaProtectionSystemId{ get; };
+            static UInt32 PlayReadySecurityVersion{ get; };
+        }
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [uuid(b5501ee5-01bf-4401-9677-05630a6a4cc8)]
+    interface IPlayReadySecureStopServiceRequest requires Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest, Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        Guid SessionID{ get; };
+        Windows.Foundation.DateTime StartTime{ get; };
+        Windows.Foundation.DateTime UpdateTime{ get; };
+        Boolean Stopped{ get; };
+        UInt8[] PublisherCertificate{ get; };
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Protection.PlayReady.IPlayReadySecureStopServiceRequestFactory", 0e448ac9-e67e-494e-9f49-6285438c76cf)]
+    runtimeclass PlayReadySecureStopServiceRequest
+        : [default]Windows.Media.Protection.PlayReady.IPlayReadySecureStopServiceRequest
+        , Windows.Media.Protection.PlayReady.IPlayReadyServiceRequest
+        , Windows.Media.Protection.IMediaProtectionServiceRequest
+    {
+        [method_name( "CreateInstance" )] PlayReadySecureStopServiceRequest([range(0, 2147483647)]UInt8[] publisherCertBytes);
+        [method_name( "CreateInstanceFromSessionID" )] PlayReadySecureStopServiceRequest(Guid sessionID, [range(0, 2147483647)]UInt8[] publisherCertBytes);
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Protection.PlayReady.IPlayReadySecureStopIterableFactory", 5f1f0165-4214-4d9e-81eb-e89f9d294aee)]
+    runtimeclass PlayReadySecureStopIterable
+        : [default]Windows.Foundation.Collections.IIterable<Windows.Media.Protection.PlayReady.IPlayReadySecureStopServiceRequest>
+    {
+        [method_name( "CreateInstance" )] PlayReadySecureStopIterable([range(0, 2147483647)]UInt8[] publisherCertBytes);
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    runtimeclass PlayReadySecureStopIterator
+        : [default]Windows.Foundation.Collections.IIterator<Windows.Media.Protection.PlayReady.IPlayReadySecureStopServiceRequest>
+    {
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    enum PlayReadyITADataFormat
+    {
+        SerializedProperties,
+        SerializedProperties_WithContentProtectionWrapper,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [interface_name("Windows.Media.Protection.PlayReady.IPlayReadyITADataGenerator", 24446b8e-10b9-4530-b25b-901a8029a9b2)]
+    runtimeclass PlayReadyITADataGenerator
+    {
+        PlayReadyITADataGenerator();
+        UInt8[] GenerateData(Guid guidCPSystemId, UInt32 countOfStreams, Windows.Foundation.Collections.IPropertySet configuration, PlayReadyITADataFormat format);
+    }
+
+    [uuid(a1723a39-87fa-4fdd-abbb-a9720e845259)]
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    interface IPlayReadyLicenseSession
+    {
+        Windows.Media.Protection.PlayReady.IPlayReadyLicenseAcquisitionServiceRequest CreateLAServiceRequest();
+        void ConfigureMediaProtectionManager(Windows.Media.Protection.MediaProtectionManager mpm);
+    };
+
+    [uuid(4909be3a-3aed-4656-8ad7-ee0fd7799510)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    interface IPlayReadyLicenseSession2 requires Windows.Media.Protection.PlayReady.IPlayReadyLicenseSession
+    {
+        Windows.Media.Protection.PlayReady.PlayReadyLicenseIterable CreateLicenseIterable(PlayReadyContentHeader contentHeader, Boolean fullyEvaluated);
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 1)]
+    [constructor_name("Windows.Media.Protection.PlayReady.IPlayReadyLicenseSessionFactory", 62492699-6527-429e-98be-48d798ac2739)]
+    runtimeclass PlayReadyLicenseSession
+        : [default]Windows.Media.Protection.PlayReady.IPlayReadyLicenseSession
+        , [contract(Windows.Foundation.UniversalApiContract, 4)]
+        Windows.Media.Protection.PlayReady.IPlayReadyLicenseSession2
+    {
+        [method_name( "CreateInstance" )] PlayReadyLicenseSession(Windows.Foundation.Collections.IPropertySet configuration);
+    }
+
+}

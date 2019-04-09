@@ -1,0 +1,211 @@
+
+
+
+
+
+
+
+
+namespace Windows.UI.Input.Inking.Analysis
+{
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum InkAnalysisDrawingKind
+    {
+        Drawing,
+        Circle,
+        Ellipse,
+        Triangle,
+        IsoscelesTriangle,
+        EquilateralTriangle,
+        RightTriangle,
+        Quadrilateral,
+        Rectangle,
+        Square,
+        Diamond,
+        Trapezoid,
+        Parallelogram,
+        Pentagon,
+        Hexagon,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum InkAnalysisNodeKind
+    {
+        UnclassifiedInk,
+        Root,
+        WritingRegion,
+        Paragraph,
+        Line,
+        InkWord,
+        InkBullet,
+        InkDrawing,
+        ListItem,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum InkAnalysisStatus
+    {
+        Updated,
+        Unchanged,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    enum InkAnalysisStrokeKind
+    {
+        Auto,
+        Writing,
+        Drawing,
+    };
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [dualapipartition(0xa000003)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisRoot", 3fb6a3c4-2fde-4061-8502-a90f32545b84)]
+    runtimeclass InkAnalysisRoot
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        String RecognizedText{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Input.Inking.Analysis.IInkAnalysisNode>  FindNodes(InkAnalysisNodeKind nodeKind);
+    }
+
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisResult", 8948ba79-a243-4aa3-a294-1f98bd0ff580)]
+    runtimeclass InkAnalysisResult
+    {
+        Windows.UI.Input.Inking.Analysis.InkAnalysisStatus Status{ get; };
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalyzer", f12b8f95-0866-4dc5-8c77-f88614dfe38c)]
+    runtimeclass InkAnalyzer
+    {
+        InkAnalyzer();
+        Windows.UI.Input.Inking.Analysis.InkAnalysisRoot AnalysisRoot{ get; };
+        Boolean IsAnalyzing{ get; };
+        void AddDataForStroke(Windows.UI.Input.Inking.InkStroke stroke);
+        void AddDataForStrokes(Windows.Foundation.Collections.IIterable <Windows.UI.Input.Inking.InkStroke>  strokes);
+        void ClearDataForAllStrokes();
+        void RemoveDataForStroke(UInt32 strokeId);
+        void RemoveDataForStrokes(Windows.Foundation.Collections.IIterable <UInt32>  strokeIds);
+        void ReplaceDataForStroke(Windows.UI.Input.Inking.InkStroke stroke);
+        void SetStrokeDataKind(UInt32 strokeId, InkAnalysisStrokeKind strokeKind);
+        Windows.Foundation.IAsyncOperation <Windows.UI.Input.Inking.Analysis.InkAnalysisResult>  AnalyzeAsync();
+    }
+
+    [uuid(29138686-1963-49d8-9589-e14384c769e3)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    interface IInkAnalyzerFactory
+    {
+        Windows.UI.Input.Inking.Analysis.InkAnalyzer CreateAnalyzer();
+    };
+
+
+    [uuid(30831f05-5f64-4a2c-ba37-4f4887879574)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    interface IInkAnalysisNode
+    {
+        UInt32 Id{ get; };
+        Windows.UI.Input.Inking.Analysis.InkAnalysisNodeKind Kind{ get; };
+        Windows.Foundation.Rect BoundingRect{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Foundation.Point>  RotatedBoundingRect{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.UI.Input.Inking.Analysis.IInkAnalysisNode>  Children{ get; };
+        Windows.UI.Input.Inking.Analysis.IInkAnalysisNode Parent{ get; };
+        Windows.Foundation.Collections.IVectorView <UInt32>  GetStrokeIds();
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    runtimeclass InkAnalysisNode
+        : [default]Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisWritingRegion", dd6d6231-bd16-4663-b5ae-941d3043ef5b)]
+    runtimeclass InkAnalysisWritingRegion
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        String RecognizedText{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisParagraph", d9ad045c-0cd1-4dd4-a68b-eb1f12b3d727)]
+    runtimeclass InkAnalysisParagraph
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        String RecognizedText{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisListItem", b4e3c23f-c4c3-4c3a-a1a6-9d85547ee586)]
+    runtimeclass InkAnalysisListItem
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        String RecognizedText{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisInkBullet", ee049368-6110-4136-95f9-ee809fc20030)]
+    runtimeclass InkAnalysisInkBullet
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        String RecognizedText{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisLine", a06d048d-2b8d-4754-ad5a-d0871193a956)]
+    runtimeclass InkAnalysisLine
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        String RecognizedText{ get; };
+        Int32 IndentLevel{ get; };
+    }
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisInkWord", 4bd228ad-83af-4034-8f3b-f8687dfff436)]
+    runtimeclass InkAnalysisInkWord
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        String RecognizedText{ get; };
+        Windows.Foundation.Collections.IVectorView <String>  TextAlternates{ get; };
+    }
+
+
+    [marshaling_behavior(agile)]
+    [dualapipartition(0xa000003)]
+    [contract(Windows.Foundation.UniversalApiContract, 4)]
+    [interface_name("Windows.UI.Input.Inking.Analysis.IInkAnalysisInkDrawing", 6a85ed1f-1fe4-4e15-898c-8e112377e021)]
+    runtimeclass InkAnalysisInkDrawing
+        : Windows.UI.Input.Inking.Analysis.IInkAnalysisNode
+    {
+        Windows.UI.Input.Inking.Analysis.InkAnalysisDrawingKind DrawingKind{ get; };
+        Windows.Foundation.Point Center{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Foundation.Point>  Points{ get; };
+    }
+
+}

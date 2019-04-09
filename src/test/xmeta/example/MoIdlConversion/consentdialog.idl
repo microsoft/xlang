@@ -1,0 +1,46 @@
+
+
+
+
+
+
+
+
+namespace Windows.Internal.Shell.ConsentDialog
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [contract(Windows.Internal.Shell.ConsentDialog.InternalContract, 1)]
+    enum ConsentCompletionReason
+    {
+        Accepted,
+        Declined,
+    };
+
+    [contract(Windows.Internal.Shell.ConsentDialog.InternalContract, 1)]
+    [uuid(33557041-969e-468c-a21d-4052eb67c9f3)]
+    interface IConsentDialogCallback
+    {
+        void OnCompletion(ConsentCompletionReason completionReason);
+    };
+
+    [contract(Windows.Internal.Shell.ConsentDialog.InternalContract, 1)]
+    [uuid(1f45ecf8-8803-4ecf-93c5-98228cffc897)]
+    interface IConsentDialogLaunchActivatedEventArgs requires Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs, Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        String CallerAppName{ get; };
+        Windows.Internal.Shell.ConsentDialog.IConsentDialogCallback ConsentDialogCallback{ get; };
+    };
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.Shell.ConsentDialog.InternalContract, 1)]
+    runtimeclass ConsentDialogLaunchActivatedEventArgs
+        : [default]Windows.Internal.Shell.ConsentDialog.IConsentDialogLaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs
+        , Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+    }
+
+}

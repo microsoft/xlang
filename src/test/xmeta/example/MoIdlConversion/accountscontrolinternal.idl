@@ -1,0 +1,205 @@
+namespace Windows.Internal.UI.ApplicationSettings
+{
+    [contractversion(1)]
+    [internal]
+    apicontract InternalContract{};
+
+    [uuid(6355cdfb-1628-4644-87f6-a71a54c1caa5)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    interface IAccountsSettingsPaneInternal
+    {
+        String Description{ get; };
+        void GetWebAccountProviderData(UInt32 index, out Windows.Security.Credentials.WebAccountProvider provider, out Windows.Foundation.IAsyncOperation <Windows.Storage.StorageFile>  operation, out String iconResourceString);
+        void GetWebAccountData(UInt32 index, out Windows.Security.Credentials.WebAccount account, out Windows.UI.ApplicationSettings.SupportedWebAccountActions actions);
+        void GetWebAccountIconData(UInt32 index, out Windows.Foundation.IAsyncOperation <Windows.Storage.StorageFile>  fileOperation, out String iconResourceString);
+        void GetSettingsData(UInt32 index, out String label);
+        void DispatchTokenBrokerAccountEvent(UInt32 index, Windows.Security.Credentials.WebAccountProvider provider, Guid parentActivityId);
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [static_name("Windows.Internal.UI.ApplicationSettings.IWebAccountProviderDataFactory", 6805c2b9-f466-4de3-91d4-c7b059435b45)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.IWebAccountProviderData", 81b54707-a97c-405d-b6bc-77558c9d8d91)]
+    [threading(both)]
+    runtimeclass WebAccountProviderData
+    {
+        static Windows.Internal.UI.ApplicationSettings.WebAccountProviderData CreateWebAccountProviderDataWithStorageFile(Windows.Security.Credentials.WebAccountProvider provider, String label, String displayPurpose, Windows.Storage.StorageFile file);
+        static Windows.Internal.UI.ApplicationSettings.WebAccountProviderData CreateWebAccountProviderDataWithMrt(Windows.Security.Credentials.WebAccountProvider provider, String label, String displayPurpose, UInt32 scaledIconSize, String iconMrt);
+        static Windows.Internal.UI.ApplicationSettings.WebAccountProviderData CreateWebAccountProviderDataWithStream(Windows.Security.Credentials.WebAccountProvider provider, String label, String displayPurpose, Windows.Storage.Streams.IRandomAccessStream icon);
+        String Id{ get; };
+        String Label{ get; };
+        String DisplayPurpose{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Icon{ get; };
+        Windows.Security.Credentials.WebAccountProvider WebAccountProvider{ get; };
+        void ResolveIconStream(AccountsControlIconCache iconCache);
+    }
+
+
+    [muse(0xa000000)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.IAccountsControlIconCache", 545d3f3d-b793-4339-974c-c30fffbb9e6b)]
+    [threading(both)]
+    runtimeclass AccountsControlIconCache
+    {
+        AccountsControlIconCache();
+        [method_name("GetIconStreamFromStorageFile")] Windows.Storage.Streams.IRandomAccessStream GetIconStream(Windows.Storage.StorageFile storageFile);
+        [method_name("GetIconStreamFromMrt")] Windows.Storage.Streams.IRandomAccessStream GetIconStream(String resourcePath, UInt32 scaledIconSize);
+    }
+
+
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Internal.UI.ApplicationSettings.IWebAccountDataFactory", 9e935434-f197-4d6a-b65e-c6ad450aa010)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.IWebAccountData", 1864ec82-44da-4118-91f2-e8d99162045b)]
+    [threading(both)]
+    runtimeclass WebAccountData
+    {
+        static Windows.Internal.UI.ApplicationSettings.WebAccountData CreateWebAccountDataWithStorageFile(Windows.Security.Credentials.WebAccount account, Windows.Storage.StorageFile file, Windows.UI.ApplicationSettings.SupportedWebAccountActions actions);
+        static Windows.Internal.UI.ApplicationSettings.WebAccountData CreateWebAccountDataWithMrt(Windows.Security.Credentials.WebAccount account, UInt32 scaledIconSize, String iconMrt, Windows.UI.ApplicationSettings.SupportedWebAccountActions actions);
+        static Windows.Internal.UI.ApplicationSettings.WebAccountData CreateWebAccountDataWithStream(Windows.Security.Credentials.WebAccount account, Windows.Storage.Streams.IRandomAccessStream iconStream, Windows.UI.ApplicationSettings.SupportedWebAccountActions actions);
+        static Windows.Internal.UI.ApplicationSettings.WebAccountData CreateWebAccountData(Windows.Security.Credentials.WebAccount account);
+        String Id{ get; };
+        String UserName{ get; };
+        String Label{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Icon{ get; };
+        Windows.Security.Credentials.WebAccountState State{ get; };
+        Windows.UI.ApplicationSettings.SupportedWebAccountActions Actions{ get; };
+        Windows.Security.Credentials.WebAccount WebAccount{ get; };
+        void ResolveIconStream(AccountsControlIconCache iconCache);
+        Windows.UI.ApplicationSettings.SupportedWebAccountActions Actions{ set; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [static_name("Windows.Internal.UI.ApplicationSettings.IBubbleHeadDataFactory", b9c99a89-292b-43a2-8618-0aa460ed9847)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.IBubbleHeadData", c7d4e714-a367-4d28-a4dc-9d76380323a1)]
+    [threading(both)]
+    runtimeclass BubbleHeadData
+    {
+        static Windows.Internal.UI.ApplicationSettings.BubbleHeadData CreateBubbleHeadData(String upn, String displayName, Boolean isAADAccount);
+        static Windows.Internal.UI.ApplicationSettings.BubbleHeadData CreateBubbleHeadDataWithStream(String upn, String displayName, Boolean isAADAccount, Windows.Storage.Streams.IRandomAccessStream iconStream);
+        String UPN{ get; };
+        String DisplayName{ get; };
+        Boolean IsAADAccount{ get; };
+        Windows.Storage.Streams.IRandomAccessStream Icon{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [constructor_name("Windows.Internal.UI.ApplicationSettings.ISettingsDataFactory", b64ad501-2228-4844-9335-f16681e2b126)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.ISettingsData", 79e88d52-9b77-420b-bd6f-86e81b7b47d7)]
+    [threading(both)]
+    runtimeclass SettingsData
+    {
+        [method_name( "CreateSettingsData" )] SettingsData(String label);
+        String Label{ get; };
+    }
+
+
+
+    [muse(0xa000000)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.IAccountsControlData", 051aa325-66e0-4914-91dc-2d088ba3b3e6)]
+    runtimeclass AccountsControlData
+    {
+        Windows.Foundation.Collections.IVector <Windows.Internal.UI.ApplicationSettings.WebAccountProviderData>  WebAccountProviderDataCollection{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.UI.ApplicationSettings.WebAccountData>  WebAccountDataCollection{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.UI.ApplicationSettings.SettingsData>  SettingsDataCollection{ get; };
+        String Header{ set; };
+        String Header{ get; };
+        String CallingAppId{ set; };
+        String CallingAppId{ get; };
+        Boolean CanCallBack{ set; };
+        Boolean CanCallBack{ get; };
+        Guid RelatedActivityId{ set; };
+        Guid RelatedActivityId{ get; };
+        UInt32 ScaledIconSize{ set; };
+        UInt32 ScaledIconSize{ get; };
+        Boolean SkipSavedAccountsView{ set; };
+        Boolean SkipSavedAccountsView{ get; };
+        String WindowTitle{ set; };
+        String WindowTitle{ get; };
+        Boolean SkipBubbleHeadView{ set; };
+        Boolean SkipBubbleHeadView{ get; };
+        Boolean ShouldBlockProviders{ set; };
+        Boolean ShouldBlockProviders{ get; };
+        Boolean IsMultiUsersInSessionSku{ set; };
+        Boolean IsMultiUsersInSessionSku{ get; };
+    }
+
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    enum ViewOperationType
+    {
+        AccountsControl,
+        Add,
+        Settings,
+        FixErrors,
+        Import,
+    };
+
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [uuid(86abb209-d366-45e5-924b-87d22dd32be4)]
+    interface IViewOperation
+    {
+        String ScenarioName{ get; };
+        UInt64 CallerWindowHandle{ get; };
+        String CallerPackageFullName{ get; };
+        Object OperationData{ get; };
+        Object OperationData{ set; };
+        Object Results{ get; };
+        Object Results{ set; };
+        Int32 ShouldSetDefaultFocus{ get; };
+        event Windows.Foundation.TypedEventHandler <Windows.Internal.UI.ApplicationSettings.IViewOperation, Int32>  Completed;
+        void Start(HRESULT hr);
+        void Execute(HRESULT hr);
+        void Finish(HRESULT hr);
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.IViewOperationActivatedEventArgs", bcd979d9-49de-4e1f-8603-f1fb996f05c4)]
+    [threading(both)]
+    runtimeclass ViewOperationActivatedEventArgs
+        : Windows.ApplicationModel.Activation.IActivatedEventArgs
+    {
+        ViewOperationActivatedEventArgs();
+        String ScenarioName{ get; };
+        Windows.Internal.UI.ApplicationSettings.IViewOperation Operation{ get; };
+    }
+
+
+    [muse(0xa000000)]
+    [marshaling_behavior(agile)]
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    [constructor_name("Windows.Internal.UI.ApplicationSettings.IAccountsControlBrokerFactory", 57393cab-1711-4a3b-b880-cc5c7c6649b2)]
+    [interface_name("Windows.Internal.UI.ApplicationSettings.IAccountsControlBroker", c88d8b7a-283f-4129-9c88-df59be5930d0)]
+    [threading(both)]
+    runtimeclass AccountsControlBroker
+    {
+        [method_name( "CreateBrokerForView" )] AccountsControlBroker(UInt64 coreWindowHandle);
+        Windows.Internal.UI.ApplicationSettings.AccountsControlData AccountsControlData{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Internal.UI.ApplicationSettings.WebAccountData>  TokenBrokerAccountDataCollection{ get; };
+        Windows.Security.Credentials.WebAccountProvider SelectedTokenBrokerProvider{ get; };
+        Windows.Foundation.Collections.IVector <Windows.Internal.UI.ApplicationSettings.BubbleHeadData>  BubbleHeadDataCollection{ get; };
+        Boolean IsAADProvider(Windows.Security.Credentials.WebAccountProvider provider);
+        Boolean IsAADAccount(Windows.Security.Credentials.WebAccount account);
+    }
+
+
+    [contract(Windows.Internal.UI.ApplicationSettings.InternalContract, 1)]
+    enum AccountsControlContextType
+    {
+        AccountsControlViewOperation,
+        MccsViewOperation,
+    };
+
+
+}

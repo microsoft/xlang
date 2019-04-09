@@ -1,0 +1,105 @@
+
+
+
+
+
+
+
+namespace Windows.Graphics.Display
+{
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    struct NitRange
+    {
+        Single MinNits;
+        Single MaxNits;
+        Single StepSizeNits;
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum DisplayColorOverrideScenario
+    {
+        Accurate,
+    };
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    enum DisplayBrightnessOverrideScenario
+    {
+        IdleBrightness,
+        BarcodeReadingBrightness,
+        FullBrightness,
+    };
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [static_name("Windows.Graphics.Display.IBrightnessOverrideSettingsStatics", d487dc90-6f74-440b-b383-5fe96cf00b0f)]
+    [interface_name("Windows.Graphics.Display.IBrightnessOverrideSettings", d112ab2a-7604-4dba-bcf8-4b6f49502cb0)]
+    [threading(both)]
+    runtimeclass BrightnessOverrideSettings
+    {
+        static Windows.Graphics.Display.BrightnessOverrideSettings CreateFromLevel(Double level);
+        static Windows.Graphics.Display.BrightnessOverrideSettings CreateFromNits(Single nits);
+        static Windows.Graphics.Display.BrightnessOverrideSettings CreateFromDisplayBrightnessOverrideScenario(DisplayBrightnessOverrideScenario overrideScenario);
+        Double DesiredLevel{ get; };
+        Single DesiredNits{ get; };
+    }
+
+
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [static_name("Windows.Graphics.Display.IColorOverrideSettingsStatics", b068e05f-c41f-4ac9-afab-827ab6248f9a)]
+    [interface_name("Windows.Graphics.Display.IColorOverrideSettings", fbefa134-4a81-4c4d-a5b6-7d1b5c4bd00b)]
+    [threading(both)]
+    runtimeclass ColorOverrideSettings
+    {
+        static Windows.Graphics.Display.ColorOverrideSettings CreateFromDisplayColorOverrideScenario(DisplayColorOverrideScenario overrideScenario);
+        Windows.Graphics.Display.DisplayColorOverrideScenario DesiredDisplayColorOverrideScenario{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [interface_name("Windows.Graphics.Display.IDisplayEnhancementOverrideCapabilities", 457060de-ee5a-47b7-9918-1e51e812ccc8)]
+    runtimeclass DisplayEnhancementOverrideCapabilities
+    {
+        Boolean IsBrightnessControlSupported{ get; };
+        Boolean IsBrightnessNitsControlSupported{ get; };
+        Windows.Foundation.Collections.IVectorView <Windows.Graphics.Display.NitRange>  GetSupportedNitRanges();
+    }
+
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [marshaling_behavior(agile)]
+    [interface_name("Windows.Graphics.Display.IDisplayEnhancementOverrideCapabilitiesChangedEventArgs", db61e664-15fa-49da-8b77-07dbd2af585d)]
+    runtimeclass DisplayEnhancementOverrideCapabilitiesChangedEventArgs
+    {
+        Windows.Graphics.Display.DisplayEnhancementOverrideCapabilities Capabilities{ get; };
+    }
+
+
+
+    [marshaling_behavior(agile)]
+    [contract(Windows.Foundation.UniversalApiContract, 6)]
+    [static_name("Windows.Graphics.Display.IDisplayEnhancementOverrideStatics", cf5b7ec1-9791-4453-b013-29b6f778e519)]
+    [interface_name("Windows.Graphics.Display.IDisplayEnhancementOverride", 429594cf-d97a-4b02-a428-5c4292f7f522)]
+    [threading(both)]
+    runtimeclass DisplayEnhancementOverride
+    {
+        static Windows.Graphics.Display.DisplayEnhancementOverride GetForCurrentView();
+        Windows.Graphics.Display.ColorOverrideSettings ColorOverrideSettings{ get; };
+        Windows.Graphics.Display.ColorOverrideSettings ColorOverrideSettings{ set; };
+        Windows.Graphics.Display.BrightnessOverrideSettings BrightnessOverrideSettings{ get; };
+        Windows.Graphics.Display.BrightnessOverrideSettings BrightnessOverrideSettings{ set; };
+        Boolean CanOverride{ get; };
+        Boolean IsOverrideActive{ get; };
+        Windows.Graphics.Display.DisplayEnhancementOverrideCapabilities GetCurrentDisplayEnhancementOverrideCapabilities();
+        void RequestOverride();
+        void StopOverride();
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayEnhancementOverride, Object>  CanOverrideChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayEnhancementOverride, Object>  IsOverrideActiveChanged;
+        event Windows.Foundation.TypedEventHandler <Windows.Graphics.Display.DisplayEnhancementOverride, Windows.Graphics.Display.DisplayEnhancementOverrideCapabilitiesChangedEventArgs>  DisplayEnhancementOverrideCapabilitiesChanged;
+    }
+
+
+}
