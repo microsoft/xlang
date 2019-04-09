@@ -34,6 +34,7 @@ DELEGATE: 'delegate';
 ENUM: 'enum';
 EVENT: 'event';
 INTERFACE: 'interface';
+// INTERNAL: 'internal';
 NAMESPACE: 'namespace';
 PARTIAL: 'partial';
 OUT: 'out';
@@ -85,7 +86,7 @@ BOOLEAN: 'Boolean';
 STRING: 'String';
 
 NILL: 'NULL';
-GUID: 'Guid';
+OBJECT: 'Object';
 
 SEMICOLON: ';';
 OPEN_BRACE: '{';

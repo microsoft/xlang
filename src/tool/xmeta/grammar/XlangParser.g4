@@ -53,11 +53,11 @@ value_type
     | CHAR16
     | SINGLE
     | DOUBLE
-    | GUID
     ;
 
 class_type
     : type_name
+    | OBJECT
     | NILL
     ;
 
@@ -296,8 +296,26 @@ return_type
     ;
 
 property_declaration
-    : attributes? property_modifier* type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
     ;
+
+property_identifier
+    : IDENTIFIER
+    | BOOLEAN
+    | STRING
+    | INT8
+    | INT16
+    | INT32
+    | INT64
+    | UINT8
+    | UINT16
+    | UINT32
+    | UINT64
+    | CHAR16
+    | SINGLE
+    | DOUBLE
+    | OBJECT
+    | NILL;
 
 property_modifier
     : PROTECTED
@@ -386,23 +404,41 @@ enum_modifier
     ;
 
 enum_member_declaration
-    : attributes? IDENTIFIER
-    | attributes? IDENTIFIER EQUAL enum_expression
+    : attributes? enum_identifier
+    | attributes? enum_identifier EQUAL enum_expression
     ;
 
 enum_expression 
     : enum_decimal_integer
     | enum_hexdecimal_integer
-    | enum_identifier;
+    | enum_expresssion_identifier;
 
 enum_decimal_integer
     : MINUS? DECIMAL_INTEGER_LITERAL;
     
-enum_identifier
+enum_expresssion_identifier
     : IDENTIFIER;
 
 enum_hexdecimal_integer
     : HEXADECIMAL_INTEGER_LITERAL;
+
+enum_identifier
+    : IDENTIFIER
+    | BOOLEAN
+    | STRING
+    | INT8
+    | INT16
+    | INT32
+    | INT64
+    | UINT8
+    | UINT16
+    | UINT32
+    | UINT64
+    | CHAR16
+    | SINGLE
+    | DOUBLE
+    | OBJECT
+    | NILL;
 
 /* Delegates */
 delegate_declaration
