@@ -13,7 +13,7 @@ using namespace antlr4;
 
 #pragma execution_character_set("utf-8")
 
-TEST_CASE("Midl3 compat test") {
+TEST_CASE("Midl3 compat test", "[!hide]") {
     std::string path = std::filesystem::current_path().string() + "\\MoIdlConversion";
     std::cout << "Starting test on Midl3 Idl Files" << std::endl;
     int num_errors = 0;
