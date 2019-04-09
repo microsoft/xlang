@@ -15,21 +15,58 @@ namespace pywinrt
 
     struct usage_exception {};
 
-    void process_args(int const argc, char** argv)
+    static constexpr cmd::option options[]
     {
-        static constexpr cmd::option options[]
+        { "input", 0, cmd::option::no_max, "<spec>", "Windows metadata to include in projection" },
+        { "output", 0, 1, "<path>", "Location of generated projection" },
+        { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in projection" },
+        { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from projection" },
+        { "verbose", 0, 0, {}, "Show detailed progress information" },
+        { "module", 0, 1, "<name>", "Name of generated projection. Defaults to winrt."},
+        { "help", 0, cmd::option::no_max, {}, "Show detailed help" },
+    };
+
+    static void print_usage(writer& w)
+    {
+        static auto printColumns = [](writer& w, std::string_view const& col1, std::string_view const& col2)
         {
-            { "input", 1 },
-            { "output", 0, 1 },
-            { "include", 0 },
-            { "exclude", 0 },
-            { "verbose", 0, 0 },
-            { "module", 0, 1 },
+            w.write_printf("  %-20s%s\n", col1.data(), col2.data());
         };
 
+        static auto printOption = [](writer& w, cmd::option const& opt)
+        {
+            if(opt.desc.empty())
+            {
+                return;
+            }
+            printColumns(w, w.write_temp("-% %", opt.name, opt.arg), opt.desc);
+        };
+
+        auto format = R"(
+Py/WinRT v%
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+  pywinrt.exe [options...]
+
+Options:
+
+%  ^@<path>             Response file containing command line options
+
+Where <spec> is one or more of:
+
+  path                Path to winmd file or recursively scanned folder
+  local               Local ^%WinDir^%\System32\WinMetadata folder
+  sdk[+]              Current version of Windows SDK [with extensions]
+  10.0.12345.0[+]     Specific version of Windows SDK [with extensions]
+)";
+        w.write(format, XLANG_VERSION_STRING, bind_each(printOption, options));
+    }
+
+    void process_args(int const argc, char** argv)
+    {
         cmd::reader args{ argc, argv, options };
 
-        if (!args)
+        if (!args || args.exists("help"))
         {
             throw usage_exception{};
         }
@@ -71,6 +108,7 @@ namespace pywinrt
 
     int run(int const argc, char** argv)
     {
+        int result{};
         writer w;
 
         try
@@ -156,16 +194,18 @@ namespace pywinrt
                 w.write("time: %ms\n", get_elapsed_time(start));
             }
         }
+        catch (usage_exception const&)
+        {
+            print_usage(w);
+        }
         catch (std::exception const& e)
         {
-            w.write("%\n", e.what());
-            w.flush_to_console();
-            getchar();
-            return -1;
+            w.write(" error: %\n", e.what());
+            result = 1;
         }
 
         w.flush_to_console();
-        return 0;
+        return result;
     }
 }
 
