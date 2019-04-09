@@ -26,6 +26,7 @@ fragment Newline
 
 /* Keywords */
 ABSTRACT: 'abstract';
+APICONTRACT: 'apicontract';
 ATTRIBUTE: 'attribute';
 CLASS: 'runtimeclass';
 CONST: 'const';
@@ -33,12 +34,11 @@ DELEGATE: 'delegate';
 ENUM: 'enum';
 EVENT: 'event';
 INTERFACE: 'interface';
-INTERNAL: 'internal';
 NAMESPACE: 'namespace';
 PARTIAL: 'partial';
-OBJECT: 'object';
 OUT: 'out';
 OVERRIDE: 'override';
+OVERRIDABLE: 'overridable';
 PROTECTED: 'protected';
 REF: 'ref';
 REQUIRES: 'requires';
@@ -47,6 +47,7 @@ STATIC: 'static';
 STRUCT: 'struct';
 TYPEOF: 'typeof';
 USING: 'using';
+UNSEALED: 'unsealed';
 VIRTUAL: 'virtual';
 VOID: 'void';
 
@@ -66,11 +67,7 @@ PLACEHOLDER_REMOVELATER: 'placeholder';
 ASSEMBLY: 'assembly';
 MODULE: 'module';
 FIELD: 'field';
-METHOD: 'method';
-PARAM: 'param';
-PROPERTY: 'property';
 RETURN: 'return';
-TYPE: 'type';
 
 // Xlang Type System
 INT8: 'Int8';
@@ -86,8 +83,9 @@ DOUBLE: 'Double';
 CHAR16: 'Char16';
 BOOLEAN: 'Boolean';
 STRING: 'String';
-GUID: 'Guid';
+
 NILL: 'NULL';
+GUID: 'Guid';
 
 SEMICOLON: ';';
 OPEN_BRACE: '{';
@@ -104,6 +102,7 @@ DOUBLE_COLON: '::';
 EQUAL: '=';
 LESS_THAN: '<';
 GREATER_THAN: '>';
+MINUS: '-';
 
 /* Identifiers */
 // Note: An identifier-or-keyword that is not a keyword
@@ -115,7 +114,7 @@ IDENTIFIER
     ;
     
 UUID
-   : HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit;
+   : HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit;
 
 BOOLEAN_LITERAL: 'true' | 'false';
 

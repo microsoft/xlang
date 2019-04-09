@@ -51,14 +51,13 @@ value_type
     | UINT32
     | UINT64
     | CHAR16
-    | GUID
     | SINGLE
     | DOUBLE
+    | GUID
     ;
 
 class_type
     : type_name
-    | OBJECT
     | NILL
     ;
 
@@ -126,11 +125,8 @@ attribute_target
     | MODULE
     | FIELD
     | EVENT
-    | METHOD
-    | PARAM
     | PROPERTY
     | RETURN
-    | TYPE
     | PUBLIC
     ;
 
@@ -193,12 +189,17 @@ namespace_member_declaration
     | interface_declaration
     | enum_declaration
     | delegate_declaration
+    | apicontract_declaration
     ;
 
 qualified_alias_member
     : IDENTIFIER DOUBLE_COLON IDENTIFIER type_argument_list?
     ;
-
+    
+apicontract_declaration
+    : attributes? APICONTRACT IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
+    ;
+    
 //* Classes *//
 class_declaration
     : attributes? class_modifier* CLASS IDENTIFIER type_parameter_list?
@@ -206,7 +207,7 @@ class_declaration
     ;
 
 class_modifier
-    : SEALED
+    : UNSEALED
     | STATIC
     ;
 
@@ -258,7 +259,7 @@ class_member_declaration
     ;
 
 method_declaration
-    : method_modifiers? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : attributes? method_modifiers? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 method_modifiers
@@ -268,6 +269,7 @@ method_modifiers
 
 method_modifier
     : OVERRIDE
+    | OVERRIDABLE
     | PROTECTED
     | STATIC
     | SEALED
@@ -283,6 +285,8 @@ fixed_parameter
 
 parameter_modifier
     : CONST REF
+    | REF CONST
+    | REF
     | OUT
     ;
 
@@ -298,6 +302,7 @@ property_declaration
 property_modifier
     : PROTECTED
     | STATIC
+    | OVERRIDABLE
     ;
 
 property_accessors
@@ -321,9 +326,13 @@ event_accessors
     ;
 
 class_constructor_declaration
-    : attributes? IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : attributes? class_constructor_modifier* IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
+class_constructor_modifier
+    : PROTECTED
+    ;
+    
 /* Structs */
 struct_declaration
     : attributes? STRUCT IDENTIFIER type_parameter_list?
@@ -387,7 +396,7 @@ enum_expression
     | enum_identifier;
 
 enum_decimal_integer
-    : DECIMAL_INTEGER_LITERAL;
+    : MINUS? DECIMAL_INTEGER_LITERAL;
     
 enum_identifier
     : IDENTIFIER;
@@ -399,14 +408,13 @@ enum_hexdecimal_integer
 delegate_declaration
     : attributes? delegate_modifier* DELEGATE return_type
         IDENTIFIER type_parameter_list?
-        OPEN_PARENS formal_parameter_list CLOSE_PARENS SEMICOLON
+        OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 delegate_modifier
     : NEW
     | PUBLIC
     | PROTECTED
-    | INTERNAL
     | PRIVATE
     ;
 
