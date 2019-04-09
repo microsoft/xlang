@@ -190,6 +190,7 @@ namespace_member_declaration
     | enum_declaration
     | delegate_declaration
     | apicontract_declaration
+    | attribute_declaration
     ;
 
 qualified_alias_member
@@ -200,7 +201,16 @@ apicontract_declaration
     : attributes? APICONTRACT IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
     ;
     
-//* Classes *//
+//* Class members *//
+attribute_declaration
+    : attributes? ATTRIBUTE IDENTIFIER
+        attribute_body SEMICOLON
+    ;
+
+attribute_body
+    : OPEN_BRACE field_declaration* CLOSE_BRACE
+    ;
+
 class_declaration
     : attributes? class_modifier* CLASS IDENTIFIER type_parameter_list?
         class_base? class_body SEMICOLON?
