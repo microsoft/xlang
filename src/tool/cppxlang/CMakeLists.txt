@@ -3,6 +3,7 @@ project(cppxlang)
 add_executable(cppxlang "")
 target_sources(cppxlang PUBLIC main.cpp pch.cpp "${PROJECT_BINARY_DIR}/strings.cpp")
 target_include_directories(cppxlang PUBLIC ${XLANG_LIBRARY_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
+target_compile_definitions(cppxlang PUBLIC "XLANG_VERSION_STRING=\"${XLANG_BUILD_VERSION}\"")
 
 GENERATE_STRING_LITERAL_FILES("${PROJECT_SOURCE_DIR}/strings/*" "strings" "xlang::strings" cppxlang)
 
@@ -14,7 +15,5 @@ else()
     target_link_libraries(cppxlang c++ c++abi c++experimental)
     target_link_libraries(cppxlang -lpthread)
 endif()
-
-string(APPEND CMAKE_CXX_FLAGS " -D \"XLANG_VERSION_STRING=\\\"${XLANG_BUILD_VERSION}\\\"\"")
 
 add_subdirectory(test_base)
