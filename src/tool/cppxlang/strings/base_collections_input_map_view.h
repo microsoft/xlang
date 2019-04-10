@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
     struct input_map_view final :
@@ -65,7 +65,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt::param
+namespace xlang::param
 {
     template <typename K, typename V>
     struct map_view
@@ -82,7 +82,7 @@ namespace winrt::param
 
         map_view(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_pair.first, winrt::get_abi(values));
+            attach_abi(m_pair.first, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -155,7 +155,7 @@ namespace winrt::param
 
         async_map_view(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>

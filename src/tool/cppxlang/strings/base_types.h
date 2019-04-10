@@ -1,8 +1,8 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
 #ifdef __IUnknown_INTERFACE_DEFINED__
-#define WINRT_WINDOWS_ABI
+#define XLANG_WINDOWS_ABI
     using hresult_type = long;
     using ref_count_type = unsigned long;
 #else
@@ -16,7 +16,7 @@ namespace winrt::impl
     using bstr = wchar_t*;
 }
 
-namespace winrt
+namespace xlang
 {
     struct hresult
     {
@@ -37,7 +37,7 @@ namespace winrt
 	using guid = xlang_guid;
 }
 
-namespace winrt::Windows::Foundation
+namespace xlang::Windows::Foundation
 {
     enum class TrustLevel : int32_t
     {

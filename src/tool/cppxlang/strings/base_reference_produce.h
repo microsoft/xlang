@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     struct reference final : implements<reference<T>, Windows::Foundation::IReference<T>, Windows::Foundation::IPropertyValue>
@@ -110,7 +110,7 @@ namespace winrt::impl
     template <typename T>
     struct reference_traits
     {
-        static auto make(T const& value) { return winrt::make<impl::reference<T>>(value); }
+        static auto make(T const& value) { return xlang::make<impl::reference<T>>(value); }
     };
 
     template <>
@@ -228,7 +228,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt::Windows::Foundation
+namespace xlang::Windows::Foundation
 {
     template <typename T>
     bool operator==(IReference<T> const& left, IReference<T> const& right)
@@ -253,7 +253,7 @@ namespace winrt::Windows::Foundation
     }
 }
 
-namespace winrt
+namespace xlang
 {
     inline Windows::Foundation::IInspectable box_value(param::hstring const& value)
     {
@@ -348,7 +348,7 @@ namespace winrt
     }
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     using optional = Windows::Foundation::IReference<T>;
