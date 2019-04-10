@@ -15,3 +15,6 @@ else()
     target_link_libraries(pywinrt c++ c++abi c++experimental)
     target_link_libraries(pywinrt -lpthread)
 endif()
+
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/pywinrt.exe" pywinrt_exe)
+set_target_properties(pywinrt PROPERTIES "pywinrt_exe" ${pywinrt_exe})
