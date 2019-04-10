@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="FastForwarderTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="arm">
+      <UniqueIdentifier>{fb0198dd-cabb-4ecb-8a2b-f717d3684524}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="arm64">
+      <UniqueIdentifier>{040d3b1d-8441-4bca-82dc-f058d70df739}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="amd64">
+      <UniqueIdentifier>{784aa1ab-f380-49b5-98d6-609645cecf8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="i386">
+      <UniqueIdentifier>{a5e66f62-9dc4-4974-a235-700a395a932e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\fast_fwd\i386\thunks.asm">
+      <Filter>i386</Filter>
+    </MASM>
+    <MASM Include="..\fast_fwd\arm64\thunks.asm">
+      <Filter>arm64</Filter>
+    </MASM>
+    <MASM Include="..\fast_fwd\arm\thunks.asm">
+      <Filter>arm</Filter>
+    </MASM>
+    <MASM Include="..\fast_fwd\amd64\thunks.asm">
+      <Filter>amd64</Filter>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="FastForwarderTest.idl" />
+  </ItemGroup>
+</Project>

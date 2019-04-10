@@ -48,6 +48,7 @@
     <ClInclude Include="..\strings\base_error.h" />
     <ClInclude Include="..\strings\base_events.h" />
     <ClInclude Include="..\strings\base_extern.h" />
+    <ClInclude Include="..\strings\base_fast_fwd.h" />
     <ClInclude Include="..\strings\base_foundation.h" />
     <ClInclude Include="..\strings\base_handle.h" />
     <ClInclude Include="..\strings\base_identity.h" />
