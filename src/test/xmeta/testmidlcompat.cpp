@@ -27,6 +27,7 @@ TEST_CASE("Midl3 compat test", "[!hide]") {
         std::cout << "Cannot find Midl3 Idl Files. They might not be avaibale on your machine." << std::endl;
         std::cout << "They might not be avaibale on your machine because the files are internal only." << std::endl;
         std::cout << "A subset of these test files may become avaibale at a later time" << std::endl;
+        return;
     }
 
     for (const auto & entry : iterator)
