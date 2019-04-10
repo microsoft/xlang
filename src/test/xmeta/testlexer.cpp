@@ -173,7 +173,7 @@ TEST_CASE("Enum assignments")
 TEST_CASE("Enum illegal assignments")
 {
     std::string test_idl_string_assignment =
-        "namespace Windows.Test \
+        "namespace Windows.Test { \
             enum Alignment \
             { \
                 Center = \"test\", \
@@ -181,10 +181,10 @@ TEST_CASE("Enum illegal assignments")
         }";
     
     xlangtestlistener listener1;
-    REQUIRE(setup_and_run_parser(test_idl_string_assignment, listener1) != 0);
+    REQUIRE(setup_and_run_parser(test_idl_string_assignment, listener1) == 1);
 
     std::string test_idl_float_assignment =
-        "namespace Windows.Test \
+        "namespace Windows.Test { \
             enum Alignment \
             { \
                 Right = 1.9 \
@@ -192,5 +192,5 @@ TEST_CASE("Enum illegal assignments")
         }";
 
     xlangtestlistener listener2;
-    REQUIRE(setup_and_run_parser(test_idl_float_assignment, listener2) != 0);
+    REQUIRE(setup_and_run_parser(test_idl_float_assignment, listener2) == 1);
 }
