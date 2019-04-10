@@ -193,7 +193,9 @@ struct writer : xlang::text::writer_base<writer>
     void pop_namespace();
     void pop_inline_namespace();
 
-    void push_contract_guard(contract_history const& vers);
+    bool push_contract_guard(version ver);
+    void push_contract_guard(contract_version ver);
+    void push_contract_guard(contract_history vers);
     void pop_contract_guards(std::size_t count);
 
     bool begin_declaration(std::string_view mangledName)

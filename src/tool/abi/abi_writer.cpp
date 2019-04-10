@@ -112,7 +112,25 @@ void writer::pop_inline_namespace()
     }
 }
 
-void writer::push_contract_guard(contract_history const& vers)
+bool writer::push_contract_guard(version ver)
+{
+    if (std::holds_alternative<contract_version>(ver))
+    {
+        push_contract_guard(std::get<contract_version>(ver));
+        return true;
+    }
+
+    return false;
+}
+
+void writer::push_contract_guard(contract_version ver)
+{
+    contract_history history;
+    history.current_contract = ver;
+    push_contract_guard(std::move(history));
+}
+
+void writer::push_contract_guard(contract_history vers)
 {
     auto [ns, name] = decompose_type(vers.current_contract.type_name);
     write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.current_contract.version });

@@ -518,6 +518,44 @@ static void write_cpp_interface_definition(writer& w, T const& type)
         write_cpp_function_declaration(w, func);
     }
 
+    if constexpr (is_interface)
+    {
+        if (type.fast_class)
+        {
+            w.write("\n%// Supplemental functions added by use of the fast ABI attribute\n", indent{});
+
+            auto fastAttr = get_attribute(type.fast_class->type(), metadata_namespace, "FastAbiAttribute"sv);
+            std::size_t fastContractDepth = w.push_contract_guard(version_from_attribute(fastAttr)) ? 1 : 0;
+
+            // If the class "derives" from any other class, the fast pointer-to-base functions come first
+            std::vector<class_type const*> baseClasses;
+            auto base = type.fast_class->base_class;
+            while (base)
+            {
+                baseClasses.push_back(base);
+                base = base->base_class;
+            }
+
+            std::for_each(baseClasses.rbegin(), baseClasses.rend(), [&](class_type const* baseClass)
+            {
+                w.write("%virtual % base_%() = 0;\n", indent{}, [&](writer& w) { baseClass->write_cpp_abi_param(w); }, baseClass->cpp_logical_name());
+            });
+
+            for (auto [iface, ver] : type.fast_class->supplemental_fast_interfaces)
+            {
+                w.write("\n%// Supplemental functions added for the % interface\n", indent{}, iface->clr_full_name());
+                fastContractDepth += w.push_contract_guard(ver) ? 1 : 0;
+
+                for (auto const& func : iface->functions)
+                {
+                    write_cpp_function_declaration(w, func);
+                }
+            }
+
+            w.pop_contract_guards(fastContractDepth);
+        }
+    }
+
     w.write(R"^-^(%};
 
 %extern MIDL_CONST_ID IID& IID_% = _uuidof(%);
@@ -687,6 +725,11 @@ static void write_c_function_declaration_macro(writer& w, T const& type, functio
 template <typename T>
 static void write_c_interface_definition(writer& w, T const& type)
 {
+    constexpr bool is_interface = std::is_same_v<T, interface_type>;
+    constexpr bool is_delegate = std::is_same_v<T, delegate_type>;
+    constexpr bool is_generic = std::is_same_v<T, generic_inst>;
+    static_assert(is_interface || is_delegate | is_generic);
+
     w.write("typedef struct");
     if (auto info = type.is_deprecated())
     {
@@ -704,8 +747,7 @@ static void write_c_interface_definition(writer& w, T const& type)
 
 )^-^", bind_c_type_name(type, "Vtbl"));
 
-    bool isDelegate = type.category() == category::delegate_type;
-    if (isDelegate)
+    if constexpr (is_delegate)
     {
         write_c_iunknown_interface(w, type);
     }
@@ -717,6 +759,47 @@ static void write_c_interface_definition(writer& w, T const& type)
     for (auto const& func : type.functions)
     {
         write_c_function_declaration(w, bind_c_type_name(type), func);
+    }
+
+    if constexpr (is_interface)
+    {
+        if (type.fast_class)
+        {
+            w.write("\n// Supplemental functions added by use of the fast ABI attribute\n");
+
+            auto fastAttr = get_attribute(type.fast_class->type(), metadata_namespace, "FastAbiAttribute"sv);
+            std::size_t fastContractDepth = w.push_contract_guard(version_from_attribute(fastAttr)) ? 1 : 0;
+
+            // If the class "derives" from any other class, the fast pointer-to-base functions come first
+            std::vector<class_type const*> baseClasses;
+            auto base = type.fast_class->base_class;
+            while (base)
+            {
+                baseClasses.push_back(base);
+                base = base->base_class;
+            }
+
+            std::for_each(baseClasses.rbegin(), baseClasses.rend(), [&](class_type const* baseClass)
+            {
+                w.write("    % (STDMETHODCALLTYPE* base_%)(%* This);\n",
+                    [&](writer& w) { baseClass->write_c_abi_param(w); },
+                    baseClass->cpp_logical_name(),
+                    bind_c_type_name(type));
+            });
+
+            for (auto [iface, ver] : type.fast_class->supplemental_fast_interfaces)
+            {
+                w.write("\n    // Supplemental functions added for the % interface\n", iface->clr_full_name());
+                fastContractDepth += w.push_contract_guard(ver) ? 1 : 0;
+
+                for (auto const& func : iface->functions)
+                {
+                    write_c_function_declaration(w, bind_c_type_name(type), func);
+                }
+            }
+
+            w.pop_contract_guards(fastContractDepth);
+        }
     }
 
     w.write(R"^-^(
@@ -732,7 +815,7 @@ interface %
 
 )^-^", bind_c_type_name(type, "Vtbl"), bind_c_type_name(type), bind_c_type_name(type, "Vtbl"));
 
-    if (isDelegate)
+    if constexpr (is_delegate)
     {
         write_c_iunknown_interface_macros(w, type);
     }
@@ -744,6 +827,53 @@ interface %
     for (auto const& func : type.functions)
     {
         write_c_function_declaration_macro(w, type, func);
+    }
+
+    if constexpr (is_interface)
+    {
+        if (type.fast_class)
+        {
+            w.write("// Supplemental functions added by use of the fast ABI attribute\n");
+
+            auto fastAttr = get_attribute(type.fast_class->type(), metadata_namespace, "FastAbiAttribute"sv);
+            std::size_t fastContractDepth = w.push_contract_guard(version_from_attribute(fastAttr)) ? 1 : 0;
+            w.write("\n");
+
+            // If the class "derives" from any other class, the fast pointer-to-base functions come first
+            std::vector<class_type const*> baseClasses;
+            auto base = type.fast_class->base_class;
+            while (base)
+            {
+                baseClasses.push_back(base);
+                base = base->base_class;
+            }
+
+            std::for_each(baseClasses.rbegin(), baseClasses.rend(), [&](class_type const* baseClass)
+            {
+                w.write(R"^-^(#define %_base_%(This) \
+    ((This)->lpVtbl->base_%(This))
+
+)^-^", bind_mangled_name_macro(type), baseClass->cpp_logical_name(), baseClass->cpp_logical_name());
+            });
+
+            for (auto [iface, ver] : type.fast_class->supplemental_fast_interfaces)
+            {
+                w.write("// Supplemental functions added for the % interface\n", iface->clr_full_name());
+                fastContractDepth += w.push_contract_guard(ver) ? 1 : 0;
+                w.write("\n");
+
+                for (auto const& func : iface->functions)
+                {
+                    write_c_function_declaration_macro(w, type, func);
+                }
+            }
+
+            w.pop_contract_guards(fastContractDepth);
+            if (fastContractDepth > 0)
+            {
+                w.write("\n");
+            }
+        }
     }
 
     w.write(R"^-^(#endif /* COBJMACROS */

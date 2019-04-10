@@ -93,6 +93,31 @@ inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_g
     return {};
 }
 
+inline xlang::meta::reader::TypeDef try_get_base(xlang::meta::reader::TypeDef const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+
+    // This could be System.Object, in which case we want to ignore
+    auto extends = type.Extends();
+    if (!extends)
+    {
+        return {};
+    }
+    else if (extends.type() != TypeDefOrRef::TypeRef)
+    {
+        return {};
+    }
+
+    auto ref = extends.TypeRef();
+    if ((ref.TypeNamespace() == "System"sv) && (ref.TypeName() == "Object"sv))
+    {
+        return {};
+    }
+
+    return find_required(ref);
+}
+
 template <typename T, typename Func>
 inline void for_each_attribute(
     T const& type,

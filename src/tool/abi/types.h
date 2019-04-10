@@ -38,6 +38,11 @@ struct metadata_type
     {
         return std::nullopt;
     }
+
+    virtual std::optional<contract_version> contract_from_index(std::size_t /*index*/) const
+    {
+        return std::nullopt;
+    }
 };
 
 inline bool operator<(metadata_type const& lhs, metadata_type const& rhs) noexcept
@@ -347,6 +352,13 @@ struct mapped_type final : metadata_type
         return 0;
     }
 
+    virtual std::optional<contract_version> contract_from_index(std::size_t index) const override
+    {
+        using namespace std::literals;
+        XLANG_ASSERT(index == 0);
+        return contract_version{ "Windows.Foundation.UniversalApiContract"sv, 1 };
+    }
+
 private:
 
     xlang::meta::reader::TypeDef m_type;
@@ -440,6 +452,31 @@ struct typedef_base : metadata_type
             return result;
         }
 
+        return std::nullopt;
+    }
+
+    virtual std::optional<contract_version> contract_from_index(std::size_t index) const override
+    {
+        if (!m_contractHistory)
+        {
+            return std::nullopt;
+        }
+
+        // Start with previous contracts
+        for (auto& prev : m_contractHistory->previous_contracts)
+        {
+            if (index-- == 0)
+            {
+                return contract_version{ prev.type_name, prev.version_introduced };
+            }
+        }
+
+        if (index == 0)
+        {
+            return m_contractHistory->current_contract;
+        }
+
+        XLANG_ASSERT(false);
         return std::nullopt;
     }
 
@@ -736,7 +773,8 @@ struct class_type final : typedef_base
     void write_c_definition(writer& w) const;
 
     std::vector<metadata_type const*> required_interfaces;
-    std::vector<interface_type const*> supplemental_fast_interfaces;
+    std::vector<std::pair<interface_type const*, version>> supplemental_fast_interfaces;
+    class_type const* base_class = nullptr;
     metadata_type const* default_interface = nullptr;
 
 private:

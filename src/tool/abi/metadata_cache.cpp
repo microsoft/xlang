@@ -277,7 +277,11 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
         return;
     }
 
-    // For classes, all we care about is the interfaces and taking note of the default interface, if there is one
+    if (auto base = try_get_base(type.type()))
+    {
+        type.base_class = &dynamic_cast<class_type const&>(this->find(base.TypeNamespace(), base.TypeName()));
+    }
+
     for (auto const& iface : type.type().InterfaceImpl())
     {
         process_contract_dependencies(*state.target, iface);
@@ -379,14 +383,23 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
 
             for (auto& [iface, rank] : rankingMap)
             {
-                type.supplemental_fast_interfaces.push_back(iface);
+                version ver;
+                if (std::holds_alternative<contract_version>(attrVer))
+                {
+                    ver = contract_version{ type.contract_from_index(rank.first)->type_name, rank.second };
+                }
+                else // platform_version
+                {
+                    ver = platform_version{ std::get<platform_version>(attrVer).platform, rank.second };
+                }
+                type.supplemental_fast_interfaces.push_back({ iface, ver });
             }
 
             std::sort(type.supplemental_fast_interfaces.begin(), type.supplemental_fast_interfaces.end(),
-                [&](interface_type const* lhs, interface_type const* rhs)
+                [&](auto const& lhs, auto const& rhs)
             {
-                auto& [lhsPtr, lhsRank] = *rankingMap.find(lhs);
-                auto& [rhsPtr, rhsRank] = *rankingMap.find(rhs);
+                auto& [lhsPtr, lhsRank] = *rankingMap.find(lhs.first);
+                auto& [rhsPtr, rhsRank] = *rankingMap.find(rhs.first);
                 if (lhsRank == rhsRank)
                 {
                     // Same ranking; sort by type name
