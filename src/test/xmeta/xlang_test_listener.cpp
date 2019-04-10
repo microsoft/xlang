@@ -1,15 +1,17 @@
-#include "xlangtestlistener.h"
+#include "xlang_test_listener.h"
 
-void xlangtestlistener::enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx)
+void xlang_test_listener::enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx)
 {
     namespaces.insert(ctx->IDENTIFIER()->getText());
 }
 
-void xlangtestlistener::enterExpression(XlangParser::ExpressionContext * ctx) {
+void xlang_test_listener::enterExpression(XlangParser::ExpressionContext * ctx) 
+{
     expressions.insert(ctx->getText());
- }
+}
 
-void xlangtestlistener::enterEnum_member_declaration(XlangParser::Enum_member_declarationContext *ctx) {
+void xlang_test_listener::enterEnum_member_declaration(XlangParser::Enum_member_declarationContext *ctx) 
+{
     enums.insert(ctx->enum_identifier()->getText());
     if (ctx->enum_expression() == NULL)
     {

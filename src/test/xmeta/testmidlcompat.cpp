@@ -6,7 +6,7 @@
 #include "antlr4-runtime.h"
 #include "XlangParser.h"
 #include "XlangLexer.h"
-#include "xlangtestlistener.h"
+#include "xlang_test_listener.h"
 #include <Windows.h>
 
 using namespace antlr4;
@@ -24,9 +24,9 @@ TEST_CASE("Midl3 compat test", "[!hide]") {
     }
     catch (...)
     {
-        std::cout << "Cannot find Midl3 Idl Files. They might not be avaibale on your machine." << std::endl;
-        std::cout << "They might not be avaibale on your machine because the files are internal only." << std::endl;
-        std::cout << "A subset of these test files may become avaibale at a later time" << std::endl;
+        std::cerr << "Cannot find Midl3 Idl Files. They might not be avaibale on your machine." << std::endl;
+        std::cerr << "They might not be avaibale on your machine because the files are internal only." << std::endl;
+        std::cerr << "A subset of these test files may become available at a later time." << std::endl;
         return;
     }
 
@@ -42,13 +42,13 @@ TEST_CASE("Midl3 compat test", "[!hide]") {
         CommonTokenStream tokens(&lexer);
         XlangParser parser(&tokens);
 
-        xlangtestlistener listener;
+        xlang_test_listener listener;
         tree::ParseTree *tree = parser.xlang();
         tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
         if (parser.getNumberOfSyntaxErrors() != 0)
         {
             num_errors++;
-            std::cout << "Syntax errors: " << parser.getNumberOfSyntaxErrors() << std::endl;
+            std::cerr << "Syntax errors: " << parser.getNumberOfSyntaxErrors() << std::endl;
         }
     }
     REQUIRE(num_errors == 0);

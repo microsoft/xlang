@@ -4,7 +4,7 @@
 #include "antlr4-runtime.h"
 #include "XlangParser.h"
 #include "XlangLexer.h"
-#include "xlangtestlistener.h"
+#include "xlang_test_listener.h"
 #include <Windows.h>
 
 using namespace antlr4;
@@ -22,16 +22,22 @@ using namespace antlr4;
     setup_and_run_parser
 
     This helper method sets up the tokenizer and parser from the idl string and
-    walks through the AST with the xlangtestlistener. The test listener is used to checked
+    walks through the AST with the xlang_test_listener. The test listener is used to checked
     whether the idk string was lexed and parsed correctly by simply adding the string to a 
     set which we check inside the check. This method also returns the number of syntax errors. 
 */
-int setup_and_run_parser(std::string idl, xlangtestlistener &listener)
+int setup_and_run_parser(std::string const& idl, xlang_test_listener &listener, bool disable_error_reporting = false)
 {
     ANTLRInputStream input(idl);
     XlangLexer lexer(&input);
+
     CommonTokenStream tokens(&lexer);
     XlangParser parser(&tokens);
+
+    if (disable_error_reporting) {
+        lexer.removeErrorListeners();
+        parser.removeErrorListeners();
+    }
 
     tree::ParseTree *tree = parser.xlang();
     tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
@@ -43,7 +49,7 @@ TEST_CASE("Namespace Identifier")
     std::string test_idl =
         "namespace test{}";
         
-    xlangtestlistener listener;
+    xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
 
     std::set<std::string> namespaces = listener.namespaces;
@@ -60,7 +66,7 @@ TEST_CASE("Token identifier with unicode letter character")
         namespace test5ªကညￜ {} \
         namespace test6ᛮⅫⅯ {}";
 
-    xlangtestlistener listener;
+    xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
     std::set<std::string> namespaces = listener.namespaces;
 
@@ -76,8 +82,8 @@ TEST_CASE("Identifer not starting with letter character")
 {
     std::string test_idl =
         "namespace 123abc {}";
-    xlangtestlistener listener;
-    REQUIRE(setup_and_run_parser(test_idl, listener) != 0);
+    xlang_test_listener listener;
+    REQUIRE(setup_and_run_parser(test_idl, listener, true) != 0);
 }
 
 TEST_CASE("Remove comments")
@@ -87,7 +93,7 @@ TEST_CASE("Remove comments")
         namespace test2 {} /* this is a \n multiline comment */ \n \
         namespace test3 {}";
 
-    xlangtestlistener listener;
+    xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
     std::set<std::string> namespaces = listener.namespaces;
 
@@ -103,7 +109,7 @@ TEST_CASE("Spacing")
         namespace   test2  \t {} \
         namespace    test3  \v {}";
 
-    xlangtestlistener listener;
+    xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
     std::set<std::string> namespaces = listener.namespaces;
 
@@ -123,7 +129,7 @@ TEST_CASE("Lexer uuid")
             delegate void WebAccountProviderCommandInvokedHandler(WebAccountProviderCommand command); \
         }";
 
-    xlangtestlistener listener;
+    xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
     std::set<std::string> expressions = listener.expressions;
 
@@ -154,7 +160,7 @@ TEST_CASE("Enum assignments")
             } \
         }";
 
-    xlangtestlistener listener;
+    xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
     std::set<std::string> enums = listener.enums;
 
@@ -180,8 +186,8 @@ TEST_CASE("Enum illegal assignments")
             } \
         }";
     
-    xlangtestlistener listener1;
-    REQUIRE(setup_and_run_parser(test_idl_string_assignment, listener1) == 1);
+    xlang_test_listener listener1;
+    REQUIRE(setup_and_run_parser(test_idl_string_assignment, listener1, true) == 1);
 
     std::string test_idl_float_assignment =
         "namespace Windows.Test { \
@@ -191,6 +197,6 @@ TEST_CASE("Enum illegal assignments")
             } \
         }";
 
-    xlangtestlistener listener2;
-    REQUIRE(setup_and_run_parser(test_idl_float_assignment, listener2) == 1);
+    xlang_test_listener listener2;
+    REQUIRE(setup_and_run_parser(test_idl_float_assignment, listener2, true) == 1);
 }

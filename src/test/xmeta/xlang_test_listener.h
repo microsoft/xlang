@@ -1,7 +1,7 @@
 #include "XlangParserBaseListener.h"
 #include <set>
 
-class xlangtestlistener : public XlangParserBaseListener
+class xlang_test_listener : public XlangParserBaseListener
 {
 public:
     void enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
