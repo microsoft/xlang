@@ -1,5 +1,5 @@
 
-namespace winrt::param
+namespace xlang::param
 {
     struct hstring
     {
@@ -13,7 +13,7 @@ namespace winrt::param
             xlang_delete_string(m_handle);
         }
 
-        hstring(winrt::hstring const& value) noexcept : m_handle(get_abi(value))
+        hstring(xlang::hstring const& value) noexcept : m_handle(get_abi(value))
         {
         }
 
@@ -66,9 +66,9 @@ namespace winrt::param
             init<wchar_t, true>(value);
         }
 #endif
-        operator winrt::hstring const&() const noexcept
+        operator xlang::hstring const&() const noexcept
         {
-            return *reinterpret_cast<winrt::hstring const*>(this);
+            return *reinterpret_cast<xlang::hstring const*>(this);
         }
 
     private:
@@ -118,7 +118,7 @@ namespace winrt::param
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     using param_type = std::conditional_t<std::is_same_v<T, hstring>, param::hstring, T>;

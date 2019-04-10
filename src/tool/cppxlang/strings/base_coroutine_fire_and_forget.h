@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     struct fire_and_forget {};
 }
@@ -7,11 +7,11 @@ namespace winrt
 namespace std::experimental
 {
     template <typename... Args>
-    struct coroutine_traits<winrt::fire_and_forget, Args...>
+    struct coroutine_traits<xlang::fire_and_forget, Args...>
     {
         struct promise_type
         {
-            winrt::fire_and_forget get_return_object() const noexcept
+            xlang::fire_and_forget get_return_object() const noexcept
             {
                 return{};
             }

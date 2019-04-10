@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename D>
     struct composable_factory
@@ -7,7 +7,7 @@ namespace winrt::impl
         template <typename I, typename... Args>
         static I CreateInstance(const Windows::Foundation::IInspectable& outer, Windows::Foundation::IInspectable& inner, Args&&... args)
         {
-            static_assert(std::is_base_of_v<Windows::Foundation::IInspectable, I>, "Requested interface must derive from winrt::Windows::Foundation::IInspectable");
+            static_assert(std::is_base_of_v<Windows::Foundation::IInspectable, I>, "Requested interface must derive from xlang::Windows::Foundation::IInspectable");
             inner = CreateInstanceImpl(outer, std::forward<Args>(args)...);
             return inner.as<I>();
         }
@@ -27,7 +27,7 @@ namespace winrt::impl
     };
 
     template <typename T, typename D, typename I>
-    class WINRT_EBO produce_dispatch_to_overridable_base
+    class XLANG_EBO produce_dispatch_to_overridable_base
     {
     protected:
         D& shim() noexcept

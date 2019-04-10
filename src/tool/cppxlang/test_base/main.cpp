@@ -2,5 +2,5 @@
 
 int main()
 {
-    winrt::get_activation_factory(u8"IBufferByteAcces");
+    xlang::get_activation_factory(u8"Foo");
 }

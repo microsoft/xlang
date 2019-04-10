@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     struct com_ptr
@@ -87,7 +87,7 @@ namespace winrt
 
         type** put() noexcept
         {
-            WINRT_ASSERT(m_ptr == nullptr);
+            XLANG_ASSERT(m_ptr == nullptr);
             return &m_ptr;
         }
 
@@ -193,7 +193,7 @@ namespace winrt
             }
         }
 
-        WINRT_NOINLINE void unconditional_release_ref() noexcept
+        XLANG_NOINLINE void unconditional_release_ref() noexcept
         {
             std::exchange(m_ptr, {})->Release();
         }
@@ -305,7 +305,7 @@ namespace winrt
 }
 
 template <typename T>
-void** IID_PPV_ARGS_Helper(winrt::com_ptr<T>* ptr) noexcept
+void** IID_PPV_ARGS_Helper(xlang::com_ptr<T>* ptr) noexcept
 {
-    return winrt::put_abi(*ptr);
+    return xlang::put_abi(*ptr);
 }

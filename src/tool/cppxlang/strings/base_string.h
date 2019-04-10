@@ -1,58 +1,58 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
-	template <typename char_type>
-	struct is_char_type_supported : std::false_type {};
+    template <typename char_type>
+    struct is_char_type_supported : std::false_type {};
 
-	template <>
-	struct is_char_type_supported<xlang_char8> : std::true_type {};
+    template <>
+    struct is_char_type_supported<xlang_char8> : std::true_type {};
 
-	template <>
-	struct is_char_type_supported<char16_t> : std::true_type {};
+    template <>
+    struct is_char_type_supported<char16_t> : std::true_type {};
 
 #ifdef _WIN32
-	template <>
-	struct is_char_type_supported<wchar_t> : std::true_type {};
+    template <>
+    struct is_char_type_supported<wchar_t> : std::true_type {};
 #endif
 
-	template <typename char_type>
-	auto normalize_char_type(std::basic_string_view<char_type> str) noexcept
-	{
-		static_assert(is_char_type_supported<char_type>::value);
-#ifdef _WIN32
-		static_assert(sizeof(wchar_t) == sizeof(char16_t));
-		if constexpr (std::is_same_v<char_type, wchar_t>)
-		{
-			return std::u16string_view{ reinterpret_cast<char16_t const*>(str.data()), str.size() };
-		}
-		else
-#endif
-		return str;
-	}
-	
-	inline xlang_string duplicate_string(xlang_string other)
+    template <typename char_type>
+    auto normalize_char_type(std::basic_string_view<char_type> str) noexcept
     {
-		xlang_string result = nullptr;
+        static_assert(is_char_type_supported<char_type>::value);
+#ifdef _WIN32
+        static_assert(sizeof(wchar_t) == sizeof(char16_t));
+        if constexpr (std::is_same_v<char_type, wchar_t>)
+        {
+            return std::u16string_view{ reinterpret_cast<char16_t const*>(str.data()), str.size() };
+        }
+        else
+#endif
+        return str;
+    }
+    
+    inline xlang_string duplicate_string(xlang_string other)
+    {
+        xlang_string result = nullptr;
         check_hresult(xlang_duplicate_string(other, &result));
         return result;
     }
 
-	template <typename char_type, typename = std::enable_if_t<is_char_type_supported<char_type>::value>>
-	inline xlang_string create_string(std::basic_string_view<char_type> value)
-	{
-		xlang_string result = nullptr;
-		auto const normalized = normalize_char_type(value);
-		auto const length = static_cast<uint32_t>(normalized.size());
-		if constexpr (sizeof(char_type) == sizeof(xlang_char8))
-		{
-			check_hresult(xlang_create_string_utf8(normalized.data(), length, &result));
-		}
-		else
-		{
-			check_hresult(xlang_create_string_utf16(normalized.data(), length, &result));
-		}
-		return result;
-	}
+    template <typename char_type, typename = std::enable_if_t<is_char_type_supported<char_type>::value>>
+    inline xlang_string create_string(std::basic_string_view<char_type> value)
+    {
+        xlang_string result = nullptr;
+        auto const normalized = normalize_char_type(value);
+        auto const length = static_cast<uint32_t>(normalized.size());
+        if constexpr (sizeof(char_type) == sizeof(xlang_char8))
+        {
+            check_hresult(xlang_create_string_utf8(normalized.data(), length, &result));
+        }
+        else
+        {
+            check_hresult(xlang_create_string_utf16(normalized.data(), length, &result));
+        }
+        return result;
+    }
 
     struct hstring_traits
     {
@@ -60,7 +60,7 @@ namespace winrt::impl
 
         static void close(type value) noexcept
         {
-			xlang_delete_string(value);
+            xlang_delete_string(value);
         }
 
         static constexpr type invalid() noexcept
@@ -70,7 +70,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     struct hstring
     {
@@ -102,102 +102,102 @@ namespace winrt
         hstring& operator=(hstring&&) = default;
         hstring(std::nullptr_t) = delete;
 
-		// char8_t overloads
-		hstring(std::initializer_list<xlang_char8> value) :
-			hstring(std::basic_string_view<xlang_char8>(value.begin(), value.size()))
-		{}
+        // char8_t overloads
+        hstring(std::initializer_list<xlang_char8> value) :
+            hstring(std::basic_string_view<xlang_char8>(value.begin(), value.size()))
+        {}
 
-		hstring(xlang_char8 const* value) :
+        hstring(xlang_char8 const* value) :
             hstring(std::basic_string_view<xlang_char8>(value))
-		{}
+        {}
 
-		hstring(xlang_char8 const* value, size_type size) :
+        hstring(xlang_char8 const* value, size_type size) :
             hstring(std::basic_string_view<xlang_char8>(value, size))
-		{}
+        {}
 
-		explicit hstring(std::basic_string_view<xlang_char8> const& value) :
+        explicit hstring(std::basic_string_view<xlang_char8> const& value) :
             m_handle(impl::create_string(value))
-		{}
+        {}
 
-		hstring& operator=(std::basic_string_view<xlang_char8> const& value)
+        hstring& operator=(std::basic_string_view<xlang_char8> const& value)
         {
-			return *this = hstring{ value };
+            return *this = hstring{ value };
         }
 
-		hstring& operator=(xlang_char8 const* const value)
+        hstring& operator=(xlang_char8 const* const value)
         {
-			return *this = hstring{ value };
+            return *this = hstring{ value };
         }
 
-		hstring& operator=(std::initializer_list<xlang_char8> value)
+        hstring& operator=(std::initializer_list<xlang_char8> value)
         {
-			return *this = hstring{ value };
+            return *this = hstring{ value };
         }
 
-		// char16_t overloads
-		hstring(std::initializer_list<char16_t> value) :
-			hstring(std::basic_string_view<char16_t>(value.begin(), value.size()))
-		{}
+        // char16_t overloads
+        hstring(std::initializer_list<char16_t> value) :
+            hstring(std::basic_string_view<char16_t>(value.begin(), value.size()))
+        {}
 
-		hstring(char16_t const* value) :
-			hstring(std::basic_string_view<char16_t>(value))
-		{}
+        hstring(char16_t const* value) :
+            hstring(std::basic_string_view<char16_t>(value))
+        {}
 
-		hstring(char16_t const* value, size_type size) :
-			hstring(std::basic_string_view<char16_t>(value, size))
-		{}
+        hstring(char16_t const* value, size_type size) :
+            hstring(std::basic_string_view<char16_t>(value, size))
+        {}
 
-		explicit hstring(std::basic_string_view<char16_t> const& value) :
-			m_handle(impl::create_string(value))
-		{}
+        explicit hstring(std::basic_string_view<char16_t> const& value) :
+            m_handle(impl::create_string(value))
+        {}
 
-		hstring& operator=(std::basic_string_view<char16_t> const& value)
-		{
-			return *this = hstring{ value };
-		}
+        hstring& operator=(std::basic_string_view<char16_t> const& value)
+        {
+            return *this = hstring{ value };
+        }
 
-		hstring& operator=(char16_t const* const value)
-		{
-			return *this = hstring{ value };
-		}
+        hstring& operator=(char16_t const* const value)
+        {
+            return *this = hstring{ value };
+        }
 
-		hstring& operator=(std::initializer_list<char16_t> value)
-		{
-			return *this = hstring{ value };
-		}
+        hstring& operator=(std::initializer_list<char16_t> value)
+        {
+            return *this = hstring{ value };
+        }
 
-		// wchar_t overloads, just for Windows
+        // wchar_t overloads, just for Windows
 #ifdef _WIN32
-		hstring(std::initializer_list<wchar_t> value) :
-			hstring(std::basic_string_view<wchar_t>(value.begin(), value.size()))
-		{}
+        hstring(std::initializer_list<wchar_t> value) :
+            hstring(std::basic_string_view<wchar_t>(value.begin(), value.size()))
+        {}
 
-		hstring(wchar_t const* value) :
-			hstring(std::basic_string_view<wchar_t>(value))
-		{}
+        hstring(wchar_t const* value) :
+            hstring(std::basic_string_view<wchar_t>(value))
+        {}
 
-		hstring(wchar_t const* value, size_type size) :
-			hstring(std::basic_string_view<wchar_t>(value, size))
-		{}
+        hstring(wchar_t const* value, size_type size) :
+            hstring(std::basic_string_view<wchar_t>(value, size))
+        {}
 
-		explicit hstring(std::basic_string_view<wchar_t> const& value) :
-			m_handle(impl::create_string(value))
-		{}
+        explicit hstring(std::basic_string_view<wchar_t> const& value) :
+            m_handle(impl::create_string(value))
+        {}
 
-		hstring& operator=(std::basic_string_view<wchar_t> const& value)
-		{
-			return *this = hstring{ value };
-		}
+        hstring& operator=(std::basic_string_view<wchar_t> const& value)
+        {
+            return *this = hstring{ value };
+        }
 
-		hstring& operator=(wchar_t const* const value)
-		{
-			return *this = hstring{ value };
-		}
+        hstring& operator=(wchar_t const* const value)
+        {
+            return *this = hstring{ value };
+        }
 
-		hstring& operator=(std::initializer_list<wchar_t> value)
-		{
-			return *this = hstring{ value };
-		}
+        hstring& operator=(std::initializer_list<wchar_t> value)
+        {
+            return *this = hstring{ value };
+        }
 #endif
 
         void clear() noexcept
@@ -208,26 +208,26 @@ namespace winrt
         operator std::basic_string_view<xlang_char8>() const noexcept
         {
             uint32_t size;
-			xlang_char8 const* data;
-			check_hresult(xlang_get_string_raw_buffer_utf8(m_handle.get(), &data, &size));
-			return { data, size };
+            xlang_char8 const* data;
+            check_hresult(xlang_get_string_raw_buffer_utf8(m_handle.get(), &data, &size));
+            return { data, size };
         }
 
         const_reference operator[](size_type pos) const noexcept
         {
-            WINRT_ASSERT(pos < size());
+            XLANG_ASSERT(pos < size());
             return*(begin() + pos);
         }
 
         const_reference front() const noexcept
         {
-            WINRT_ASSERT(!empty());
+            XLANG_ASSERT(!empty());
             return*begin();
         }
 
         const_reference back() const noexcept
         {
-            WINRT_ASSERT(!empty());
+            XLANG_ASSERT(!empty());
             return*(end() - 1);
         }
 
@@ -243,7 +243,7 @@ namespace winrt
 
         const_iterator begin() const noexcept
         {
-			return std::basic_string_view<value_type>(*this).data();
+            return std::basic_string_view<value_type>(*this).data();
         }
 
         const_iterator cbegin() const noexcept
@@ -253,8 +253,8 @@ namespace winrt
 
         const_iterator end() const noexcept
         {
-			auto view = std::basic_string_view<value_type>(*this);
-			return view.data() + view.size();
+            auto view = std::basic_string_view<value_type>(*this);
+            return view.data() + view.size();
         }
 
         const_iterator cend() const noexcept
@@ -289,7 +289,7 @@ namespace winrt
 
         size_type size() const noexcept
         {
-			return static_cast<size_type>(std::basic_string_view<value_type>(*this).size());
+            return static_cast<size_type>(std::basic_string_view<value_type>(*this).size());
         }
 
         friend void swap(hstring& left, hstring& right) noexcept
@@ -320,7 +320,7 @@ namespace winrt
 
     inline xlang_string detach_abi(hstring& object) noexcept
     {
-		xlang_string temp = get_abi(object);
+        xlang_string temp = get_abi(object);
         *reinterpret_cast<xlang_string*>(&object) = nullptr;
         return temp;
     }
@@ -337,44 +337,44 @@ namespace winrt
 
     inline void copy_to_abi(hstring const& object, xlang_string& value)
     {
-        WINRT_ASSERT(value == nullptr);
+        XLANG_ASSERT(value == nullptr);
         value = impl::duplicate_string(get_abi(object));
     }
 
-	inline xlang_string detach_abi(std::basic_string_view<xlang_char8> const& value)
-	{
-		return impl::create_string(value);
-	}
+    inline xlang_string detach_abi(std::basic_string_view<xlang_char8> const& value)
+    {
+        return impl::create_string(value);
+    }
 
-	inline xlang_string detach_abi(xlang_char8 const* const value)
-	{
-		return impl::create_string(std::basic_string_view<xlang_char8>(value));
-	}
+    inline xlang_string detach_abi(xlang_char8 const* const value)
+    {
+        return impl::create_string(std::basic_string_view<xlang_char8>(value));
+    }
 
-	inline xlang_string detach_abi(std::basic_string_view<char16_t> const& value)
-	{
-		return impl::create_string(value);
-	}
+    inline xlang_string detach_abi(std::basic_string_view<char16_t> const& value)
+    {
+        return impl::create_string(value);
+    }
 
-	inline xlang_string detach_abi(char16_t const* const value)
-	{
-		return impl::create_string(std::basic_string_view<char16_t>(value));
-	}
+    inline xlang_string detach_abi(char16_t const* const value)
+    {
+        return impl::create_string(std::basic_string_view<char16_t>(value));
+    }
 
 #ifdef _WIN32
-	inline xlang_string detach_abi(std::basic_string_view<wchar_t> const& value)
-	{
-		return impl::create_string(value);
-	}
+    inline xlang_string detach_abi(std::basic_string_view<wchar_t> const& value)
+    {
+        return impl::create_string(value);
+    }
 
-	inline xlang_string detach_abi(wchar_t const* const value)
-	{
-		return impl::create_string(std::basic_string_view<wchar_t>(value));
-	}
+    inline xlang_string detach_abi(wchar_t const* const value)
+    {
+        return impl::create_string(std::basic_string_view<wchar_t>(value));
+    }
 #endif
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <> struct abi<hstring>
     {
@@ -398,7 +398,7 @@ namespace winrt::impl
         hstring_builder& operator=(hstring_builder const&) = delete;
 
         explicit hstring_builder(uint32_t const size)
-			: m_size(size)
+            : m_size(size)
         {
             check_hresult(xlang_preallocate_string_buffer_utf8(m_size, &m_data, &m_buffer));
         }
@@ -413,35 +413,35 @@ namespace winrt::impl
 
         xlang_char8* data() noexcept
         {
-            WINRT_ASSERT(m_buffer != nullptr);
+            XLANG_ASSERT(m_buffer != nullptr);
             return m_data;
         }
 
         hstring to_hstring()
         {
-            WINRT_ASSERT(m_buffer != nullptr);
-			xlang_string result;
+            XLANG_ASSERT(m_buffer != nullptr);
+            xlang_string result;
             check_hresult(xlang_promote_string_buffer(m_buffer, &result, m_size));
             m_buffer = nullptr;
             return { result, take_ownership_from_abi };
         }
 
-		void size(uint32_t value) noexcept
-		{
-			WINRT_ASSERT(value <= m_original_size);
-			m_size = value;
-		}
+        void size(uint32_t value) noexcept
+        {
+            XLANG_ASSERT(value <= m_original_size);
+            m_size = value;
+        }
 
     private:
 
         xlang_char8* m_data{ nullptr };
-		xlang_string_buffer m_buffer{ nullptr };
-		uint32_t m_size{};
-		uint32_t const m_original_size{ m_size };
+        xlang_string_buffer m_buffer{ nullptr };
+        uint32_t m_size{};
+        uint32_t const m_original_size{ m_size };
     };
 }
 
-namespace winrt
+namespace xlang
 {
     inline hstring to_hstring(uint8_t value)
     {
@@ -452,70 +452,70 @@ namespace winrt
 
     inline hstring to_hstring(int8_t value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%" PRId8, value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%" PRId8, value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint16_t value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%" PRIu16, value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%" PRIu16, value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int16_t value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%" PRId16, value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%" PRId16, value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint32_t value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%" PRIu32, value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%" PRIu32, value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int32_t value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%" PRId32, value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%" PRId32, value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(uint64_t value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%" PRIu64, value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%" PRIu64, value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(int64_t value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%" PRId64, value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%" PRId64, value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(float value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%G", value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%G", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(double value)
     {
-		char buffer[32];
-		snprintf(buffer, std::size(buffer), "%G", value);
+        char buffer[32];
+        snprintf(buffer, std::size(buffer), "%G", value);
         return hstring{ buffer };
     }
 
     inline hstring to_hstring(char16_t value)
     {
-		char16_t buffer[2] = { value, 0 };
+        char16_t buffer[2] = { value, 0 };
         return hstring{ buffer };
     }
 
@@ -541,7 +541,7 @@ namespace winrt
     {
         char buffer[40];
         //{00000000-0000-0000-0000-000000000000}
-		snprintf(buffer, std::size(buffer), "{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
+        snprintf(buffer, std::size(buffer), "{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}",
             value.Data1, value.Data2, value.Data3, value.Data4[0], value.Data4[1],
             value.Data4[2], value.Data4[3], value.Data4[4], value.Data4[5], value.Data4[6], value.Data4[7]);
         return hstring{ buffer };
@@ -551,6 +551,6 @@ namespace winrt
     hstring to_hstring(T const& value)
     {
         std::string_view const view(value);
-		return hstring{ view };
+        return hstring{ view };
     }
 }

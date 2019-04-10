@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
     struct input_map final :
@@ -34,7 +34,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt::param
+namespace xlang::param
 {
     template <typename K, typename V>
     struct map
@@ -51,7 +51,7 @@ namespace winrt::param
 
         map(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
