@@ -82,11 +82,11 @@ namespace xlang::param
             {
                 if constexpr (sizeof(char_type) == sizeof(xlang_char8))
                 {
-                    WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf8(value.data(), length, &m_header, &m_handle));
+                    XLANG_VERIFY_(nullptr, xlang_create_string_reference_utf8(value.data(), length, &m_header, &m_handle));
                 }
                 else
                 {
-                    WINRT_VERIFY_(nullptr, xlang_create_string_reference_utf16(value.data(), length, &m_header, &m_handle));
+                    XLANG_VERIFY_(nullptr, xlang_create_string_reference_utf16(value.data(), length, &m_header, &m_handle));
                 }
             }
             else

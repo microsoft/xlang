@@ -133,10 +133,10 @@ namespace xlang::impl
     template <typename T>
     struct missing_guid
     {
-        static_assert(missing_guid_of<T>::value, "Support for non-WinRT interfaces is disabled. To enable, simply #include <unknwn.h> before any C++/WinRT headers.");
+        static_assert(missing_guid_of<T>::value, "Support for non-xlang interfaces is disabled. To enable, simply #include <unknwn.h> before any cppxlang headers.");
     };
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef XLANG_WINDOWS_ABI
     template <typename T>
     struct guid_storage
     {
@@ -178,7 +178,7 @@ namespace xlang::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO require : require_one<D, I>...
+    struct XLANG_EBO require : require_one<D, I>...
     {};
 
     template <typename D, typename I>
@@ -191,7 +191,7 @@ namespace xlang::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO base : base_one<D, I>...
+    struct XLANG_EBO base : base_one<D, I>...
     {};
 
     template <typename T>
