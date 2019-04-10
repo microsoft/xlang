@@ -34,11 +34,6 @@ struct metadata_type
 
     virtual bool is_experimental() const = 0;
 
-    virtual std::optional<std::uint32_t> version_for_platform(meta_platform /*platform*/) const
-    {
-        return std::nullopt;
-    }
-
     virtual std::optional<std::size_t> contract_index(std::string_view /*typeName*/, std::size_t /*version*/) const
     {
         return std::nullopt;
@@ -420,19 +415,6 @@ struct typedef_base : metadata_type
         return ::is_experimental(m_type);
     }
 
-    virtual std::optional<std::uint32_t> version_for_platform(meta_platform platform) const override
-    {
-        for (auto& ver : m_platformVersions)
-        {
-            if (ver.platform == platform)
-            {
-                return ver.version;
-            }
-        }
-
-        return std::nullopt;
-    }
-
     virtual std::optional<std::size_t> contract_index(std::string_view typeName, std::size_t version) const override
     {
         if (!m_contractHistory)
@@ -637,6 +619,8 @@ private:
     std::string m_abiName;
 };
 
+struct class_type;
+
 struct interface_type final : typedef_base
 {
     interface_type(xlang::meta::reader::TypeDef const& type) :
@@ -665,6 +649,9 @@ struct interface_type final : typedef_base
 
     std::vector<metadata_type const*> required_interfaces;
     std::vector<function_def> functions;
+
+    // When non-null, this interface gets extended with functions from other exclusiveto interfaces on the class
+    class_type const* fast_class = nullptr;
 };
 
 struct class_type final : typedef_base
@@ -749,8 +736,8 @@ struct class_type final : typedef_base
     void write_c_definition(writer& w) const;
 
     std::vector<metadata_type const*> required_interfaces;
+    std::vector<interface_type const*> supplemental_fast_interfaces;
     metadata_type const* default_interface = nullptr;
-    metadata_type const* fast_interface = nullptr;
 
 private:
 

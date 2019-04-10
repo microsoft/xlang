@@ -296,226 +296,142 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
 
     if (auto fastAttr = get_attribute(type.type(), metadata_namespace, "FastAbiAttribute"sv))
     {
-        // Determine the versioning "scheme" used for the fast ABI attribute as this will determine which default
-        // interface we will be extending as well as which interfaces we will be using to extend it. There are three
-        // different constructors we need to consider here:
-        //      1.  .ctor(UInt32)                                       - version for Platform.Windows
-        //      2.  .ctor(UInt32, Windows.Foundation.Metadata.Platform) - platform + version
-        //      3.  .ctor(UInt32, String)                               - contract + version
-        std::uint32_t platform; // NOTE: -1 if contract versioned
-        std::uint32_t version;
-        auto ctorArgs = fastAttr.Value().FixedArgs();
-        if (ctorArgs.size() == 1)
+        auto attrVer = version_from_attribute(fastAttr);
+        interface_type* fastInterface = nullptr;
+        relative_version_map rankingMap;
+        for (auto const& ifaceImpl : type.type().InterfaceImpl())
         {
-            platform = 0; // Platform.Windows
-            version = decode_integer<std::uint32_t>(std::get<ElemSig>(ctorArgs[0].value).value);
+            // If the interface is not exclusive to this class, ignore
+            auto iface = dynamic_cast<interface_type const*>(&find_dependent_type(state, ifaceImpl.Interface()));
+            if (!iface || !is_exclusiveto(iface->type()))
+            {
+                continue;
+            }
+
+            // Make sure that this interface reference applies for the same versioning "scheme" as the attribute
+            auto verMatch = match_versioning_scheme(attrVer, ifaceImpl);
+            if (!verMatch)
+            {
+                // No match on the interface reference is okay so long as there is _no_ versioning information on the
+                // reference. If there's not, then the requirement applies to all versioning schemes, so we look at the
+                // interface for the versioning information
+                if (get_attribute(ifaceImpl, metadata_namespace, "ContractVersionAttribute"sv) ||
+                    get_attribute(ifaceImpl, metadata_namespace, "VersionAttribute"sv))
+                {
+                    continue;
+                }
+
+                verMatch = match_versioning_scheme(attrVer, iface->type());
+                if (!verMatch)
+                {
+                    XLANG_ASSERT(false);
+                    continue;
+                }
+            }
+
+            // Take note if this is the default interface
+            if (is_default(ifaceImpl))
+            {
+                XLANG_ASSERT(!fastInterface);
+                XLANG_ASSERT(!iface->fast_class);
+                fastInterface = const_cast<interface_type*>(iface);
+                fastInterface->fast_class = &type;
+                continue;
+            }
+
+            // Ignore this interface if it's overridable, experimental, or in a disabled state
+            if (is_overridable(ifaceImpl))
+            {
+                continue;
+            }
+            else if (is_experimental(ifaceImpl) || is_experimental(iface->type()))
+            {
+                continue;
+            }
+            else if (!is_enabled(ifaceImpl) || !is_enabled(iface->type()))
+            {
+                continue;
+            }
+
+            // Determine how this interface's inclusion in the class relates to the class' version history
+            relative_version relVer = {};
+            xlang::call(*verMatch,
+                [&](contract_version const& ver)
+                {
+                    relVer.first = *type.contract_index(ver.type_name, ver.version);
+                    relVer.second = ver.version;
+                },
+                [&](platform_version const& ver)
+                {
+                    // For platform versioning, the "relative contract" (relVer.first) is always zero
+                    relVer.second = ver.version;
+                });
+            process_fastabi_required_interfaces(state, iface, relVer, rankingMap);
         }
-        else if (ctorArgs.size() == 2)
+
+        if (fastInterface)
         {
-            version = decode_integer<std::uint32_t>(std::get<ElemSig>(ctorArgs[0].value).value);
-            auto const& elemSig = std::get<ElemSig>(ctorArgs[1].value);
-            if (std::holds_alternative<std::string_view>(elemSig.value))
+            // The fast default interface may have gotten added to the map as a required interface. If so, remove it
+            if (auto itr = rankingMap.find(fastInterface); itr != rankingMap.end())
             {
-                platform = -1;
+                rankingMap.erase(itr);
             }
-            else
+
+            for (auto& [iface, rank] : rankingMap)
             {
-                // Windows.Foundation.Metadata.Platform is an int
-                auto const& enumSig = std::get<ElemSig::EnumValue>(elemSig.value);
-                platform = static_cast<std::uint32_t>(decode_integer<int>(enumSig.value));
+                type.supplemental_fast_interfaces.push_back(iface);
             }
+
+            std::sort(type.supplemental_fast_interfaces.begin(), type.supplemental_fast_interfaces.end(),
+                [&](interface_type const* lhs, interface_type const* rhs)
+            {
+                auto& [lhsPtr, lhsRank] = *rankingMap.find(lhs);
+                auto& [rhsPtr, rhsRank] = *rankingMap.find(rhs);
+                if (lhsRank == rhsRank)
+                {
+                    // Same ranking; sort by type name
+                    return lhsPtr->clr_full_name() < rhsPtr->clr_full_name();
+                }
+
+                return lhsRank < rhsRank;
+            });
         }
         else
         {
-            xlang::throw_invalid("Invalid fast ABI attribute");
+            XLANG_ASSERT(rankingMap.empty());
         }
+    }
+}
 
-        // We'll be extending the default interface. Due to the behavior commented above, we cannot rely on
-        // 'default_interface' being the correct interface, so loop through again to find the default interface that
-        // corresponds to the platform calculated above
-        for (auto const& iface : type.type().InterfaceImpl())
+void metadata_cache::process_fastabi_required_interfaces(
+    init_state& state,
+    interface_type const* currentInterface,
+    relative_version rank,
+    relative_version_map& interfaceMap)
+{
+    if (!is_exclusiveto(currentInterface->type()))
+    {
+        return; // Not exclusive-to, so can safely ignore
+    }
+    // NOTE: We should also ignore if this is the default interface that we are extending, however we may not have
+    //       enough information at this point to make that determination, so just allow it and remove later
+
+    if (auto itr = interfaceMap.find(currentInterface); itr != interfaceMap.end())
+    {
+        if (itr->second <= rank)
         {
-            if (auto attr = get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
-            {
-                // Required interfaces can be versioned. If they are, they only apply to the specified platform(s). If
-                // they are not, then they apply to all platform(s) specified for the type
-                auto contractAttr = get_attribute(iface, metadata_namespace, "ContractVersionAttribute"sv);
-                if (!contractAttr && !get_attribute(iface, metadata_namespace, "VersionAttribute"sv))
-                {
-                    // No versioning information; this should be the only default interface that applies to all platforms
-                    type.fast_interface = &find_dependent_type(state, iface.Interface());
-                }
-                else if (platform != (std::uint32_t)-1)
-                {
-                    for_each_attribute(iface, metadata_namespace, "VersionAttribute"sv, [&](bool first, auto const& verAttr)
-                    {
-                        (void)first; (void)verAttr; // TODO
-                    });
-                }
-                else if (contractAttr)
-                {
-                    type.fast_interface = &find_dependent_type(state, iface.Interface());
-                }
-
-                if (type.fast_interface)
-                {
-                    break;
-                }
-            }
+            return; // Already processed with at least as good a match
         }
+    }
 
-        if (!type.fast_interface)
+    interfaceMap[currentInterface] = rank;
+    for (auto const& ifaceImpl : currentInterface->type().InterfaceImpl())
+    {
+        auto type = &find_dependent_type(state, ifaceImpl.Interface());
+        if (auto iface = dynamic_cast<interface_type const*>(type))
         {
-
+            process_fastabi_required_interfaces(state, iface, rank, interfaceMap);
         }
-
-
-
-
-#if 0
-        // The fast ABI interface for a default interface is the interface itself, so we don't go about re-defining it.
-        // This will pose an issue, though, if the interface is defined in a different interface than the class since it
-        // is ill-formed to derive from an undefined type
-        XLANG_ASSERT(type.default_interface);
-        XLANG_ASSERT(dynamic_cast<generic_inst const*>(type.default_interface) ||
-            type.default_interface->clr_abi_namespace() == type.clr_logical_namespace());
-
-        auto checkRequiredInterface = [&](metadata_type const* ptr)
-        {
-            if (auto ifacePtr = dynamic_cast<interface_type const*>(ptr))
-            {
-                if (ifacePtr != type.default_interface)
-                {
-                    if (auto attr = get_attribute(ifacePtr->type(), metadata_namespace, "ExclusiveToAttribute"sv))
-                    {
-                        // NOTE: We'll assume that the metadata is well formed and that the interface in question is
-                        //       exclusive to the class we're currently processing
-                        return ifacePtr;
-                    }
-                }
-            }
-
-            return static_cast<interface_type const*>(nullptr);
-        };
-
-        // Compile a list of exclusive interfaces that we will then sort
-        // NOTE: Generic types will never be exclusive to, so we can ignore them
-        std::vector<interface_type const*> exclusiveInterfaces;
-        for (auto ptr : type.required_interfaces)
-        {
-            if (auto ifacePtr = checkRequiredInterface(ptr))
-            {
-                exclusiveInterfaces.push_back(ifacePtr);
-            }
-        }
-
-        // Required interfaces of the exclusive interfaces need to be considered as well
-        for (std::size_t i = 0; i < exclusiveInterfaces.size(); ++i)
-        {
-            for (auto const& iface : exclusiveInterfaces[i]->type().InterfaceImpl())
-            {
-                auto dep = &find_dependent_type(state, iface.Interface());
-                if (auto ifacePtr = checkRequiredInterface(dep))
-                {
-                    // It may be the case that we've already processed this type
-                    if (std::find(exclusiveInterfaces.begin(), exclusiveInterfaces.end(), ifacePtr) == exclusiveInterfaces.end())
-                    {
-                        exclusiveInterfaces.push_back(ifacePtr);
-                    }
-                }
-            }
-        }
-
-        // We need to sort exclusive interfaces based off when they were added to the class. We accomplish this by
-        // looking at when the interface was introduced relative to the class' contract history (if it has one)
-        auto contractHistory = get_contract_history(type.type());
-        auto contractPower = [&](interface_type const* iface)
-        {
-            auto initialContract = initial_contract(iface->type());
-            if (!initialContract)
-            {
-                xlang::throw_invalid("Interface '", iface->clr_full_name(), "' has no contract attribute, but is "
-                    "trying to be used as a fast ABI interface for class '", type.clr_full_name(), "' which does have "
-                    "a contract attribute");
-            }
-
-            std::size_t contractIndex = 0;
-            for (auto const& prev : contractHistory->previous_contracts)
-            {
-                if ((initialContract->type_name == prev.type_name) &&
-                    (initialContract->version >= prev.version_introduced) &&
-                    (initialContract->version < prev.version_removed))
-                {
-                    return std::make_pair(contractIndex, initialContract->version - prev.version_introduced);
-                }
-
-                ++contractIndex;
-            }
-
-            if ((initialContract->type_name == contractHistory->current_contract.type_name) &&
-                (initialContract->version >= contractHistory->current_contract.version))
-            {
-                return std::make_pair(contractIndex, initialContract->version - contractHistory->current_contract.version);
-            }
-
-            xlang::throw_invalid("Interface '", iface->clr_full_name(), "' is marked as exclusiveto class '",
-                type.clr_full_name(), "', but was introduced in a contract/version that the class was not a part of "
-                "and therefore cannot be used as a fast ABI interface");
-        };
-
-        auto getVersion = [&](interface_type const* iface)
-        {
-            if (auto ver = version_attribute(iface->type()))
-            {
-                return *ver;
-            }
-
-            xlang::throw_invalid("Interface '", iface->clr_full_name(), "' has no version attribute, but is trying to "
-                "be used as a fast ABI interface for class '", type.clr_full_name(), "' which has no contract attribute");
-        };
-
-        std::sort(exclusiveInterfaces.begin(), exclusiveInterfaces.end(),
-            [&](interface_type const* lhs, interface_type const* rhs)
-        {
-            if (contractHistory)
-            {
-                auto [lhsIndex, lhsVer] = contractPower(lhs);
-                auto [rhsIndex, rhsVer] = contractPower(rhs);
-                if (lhsIndex != rhsIndex)
-                {
-                    return lhsIndex < rhsIndex;
-                }
-                else if (lhsVer != rhsVer)
-                {
-                    return lhsVer < rhsVer;
-                }
-
-                // Otherwise, introduced in the same contract; sort alphabetically
-                return lhs->clr_full_name() < rhs->clr_full_name();
-            }
-            else
-            {
-                // No contract on the class is much easier to sort since it's just a version compare
-                auto lhsVer = getVersion(lhs);
-                auto rhsVer = getVersion(rhs);
-                if (lhsVer != rhsVer)
-                {
-                    return lhsVer < rhsVer;
-                }
-
-                // Otherwise, introduced in the same version; sort alphabetically
-                return lhs->clr_full_name() < rhs->clr_full_name();
-            }
-        });
-
-        auto base = type.default_interface;
-        type.fastabi_interfaces.reserve(exclusiveInterfaces.size());
-        for (auto iface : exclusiveInterfaces)
-        {
-            type.fastabi_interfaces.emplace_back(*base, *iface);
-            base = &type.fastabi_interfaces.back();
-        }
-#endif
     }
 }
 

@@ -70,6 +70,12 @@ inline xlang::meta::reader::ElementType underlying_enum_type(xlang::meta::reader
     return std::get<xlang::meta::reader::ElementType>(type.FieldList().first.Signature().Type().Type());
 }
 
+inline bool is_default(xlang::meta::reader::InterfaceImpl const& ifaceImpl)
+{
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(ifaceImpl, metadata_namespace, "DefaultAttribute"sv));
+}
+
 inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_get_default_interface(xlang::meta::reader::TypeDef const& type)
 {
     using namespace std::literals;
@@ -78,7 +84,7 @@ inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_g
 
     for (auto const& iface : type.InterfaceImpl())
     {
-        if (get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
+        if (is_default(iface))
         {
             return iface.Interface();
         }
@@ -153,9 +159,15 @@ T decode_integer(Variant const& value)
 }
 
 template <typename T>
+struct type_identity
+{
+    using type = T;
+};
+
+template <typename T>
 T decode_enum(xlang::meta::reader::ElemSig::EnumValue const& value)
 {
-    using integral_type = typename std::conditional_t<std::is_enum_v<T>, std::underlying_type<T>, T>::type;
+    using integral_type = typename std::conditional_t<std::is_enum_v<T>, std::underlying_type<T>, type_identity<T>>::type;
     return static_cast<T>(decode_integer<integral_type>(value.value));
 }
 
@@ -214,6 +226,38 @@ bool is_experimental(T const& value)
 {
     using namespace std::literals;
     return static_cast<bool>(get_attribute(value, metadata_namespace, "ExperimentalAttribute"sv));
+}
+
+inline bool is_overridable(xlang::meta::reader::InterfaceImpl const& iface)
+{
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(iface, metadata_namespace, "OverridableAttribute"sv));
+}
+
+inline bool is_exclusiveto(xlang::meta::reader::TypeDef const& iface)
+{
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(iface, metadata_namespace, "ExclusiveToAttribute"sv));
+}
+
+template <typename T>
+bool is_enabled(T const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+    if (auto attr = get_attribute(type, metadata_namespace, "FeatureAttribute"sv))
+    {
+        // There is a single constructor: .ctor(FeatureStage, bool), however we only care about the 'FeatureStage' value
+        // since our behavior
+        auto sig = attr.Value();
+        auto const& args = sig.FixedArgs();
+        XLANG_ASSERT(args.size() == 2);
+
+        auto stage = decode_enum<std::int32_t>(std::get<ElemSig::EnumValue>(std::get<ElemSig>(args[0].value).value));
+        return stage >= 2;
+    }
+
+    return true;
 }
 
 // NOTE: 37 characters for the null terminator; the actual string is 36 characters

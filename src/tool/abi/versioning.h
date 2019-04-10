@@ -192,3 +192,42 @@ inline std::optional<contract_history> get_contract_history(T const& value)
 
     return result;
 }
+
+template <typename T>
+std::optional<version> match_versioning_scheme(version const& ver, T const& value)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+
+    if (std::holds_alternative<contract_version>(ver))
+    {
+        if (auto history = get_contract_history(value))
+        {
+            if (history->previous_contracts.empty())
+            {
+                return history->current_contract;
+            }
+
+            auto range = history->previous_contracts.front();
+            return contract_version{ range.type_name, range.version_introduced };
+        }
+
+        return std::nullopt;
+    }
+    else
+    {
+        auto const& plat = std::get<platform_version>(ver);
+        std::optional<version> result;
+        for_each_attribute(value, metadata_namespace, "VersionAttribute"sv, [&](bool /*first*/, auto const& attr)
+        {
+            auto possibleMatch = decode_platform_version(attr);
+            if (possibleMatch.platform == plat.platform)
+            {
+                XLANG_ASSERT(!result);
+                result = possibleMatch;
+            }
+        });
+
+        return result;
+    }
+}
