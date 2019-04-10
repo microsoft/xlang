@@ -1,12 +1,12 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T, typename H>
     struct implements_delegate : abi_t<T>, H
     {
         implements_delegate(H&& handler) : H(std::forward<H>(handler)) {}
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
+        int32_t XLANG_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
@@ -19,12 +19,12 @@ namespace winrt::impl
             return error_no_interface;
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept final
+        uint32_t XLANG_CALL AddRef() noexcept final
         {
             return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t WINRT_CALL Release() noexcept final
+        uint32_t XLANG_CALL Release() noexcept final
         {
             uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
 
@@ -49,7 +49,7 @@ namespace winrt::impl
     }
 
     template <typename... T>
-    struct WINRT_NOVTABLE variadic_delegate_abi : unknown_abi
+    struct XLANG_NOVTABLE variadic_delegate_abi : unknown_abi
     {
         virtual void invoke(T const&...) = 0;
     };
@@ -64,7 +64,7 @@ namespace winrt::impl
             (*this)(args...);
         }
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
+        int32_t XLANG_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<Windows::Foundation::IUnknown>(id))
             {
@@ -77,12 +77,12 @@ namespace winrt::impl
             return error_no_interface;
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept final
+        uint32_t XLANG_CALL AddRef() noexcept final
         {
             return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t WINRT_CALL Release() noexcept final
+        uint32_t XLANG_CALL Release() noexcept final
         {
             uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
 
@@ -101,10 +101,10 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename... T>
-    struct WINRT_EBO delegate : Windows::Foundation::IUnknown
+    struct XLANG_EBO delegate : Windows::Foundation::IUnknown
     {
         delegate(std::nullptr_t = nullptr) noexcept {}
         delegate(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
@@ -140,7 +140,7 @@ namespace winrt
     private:
 
         template <typename H>
-        static winrt::delegate<T...> make(H&& handler)
+        static xlang::delegate<T...> make(H&& handler)
         {
             return { static_cast<void*>(new impl::variadic_delegate<H, T...>(std::forward<H>(handler))), take_ownership_from_abi };
         }

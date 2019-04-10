@@ -207,15 +207,15 @@ namespace xlang
                 return;
             }
 
-            // TODO: get rid of all these renames once parity with cppwinrt.exe has been reached...
+            // TODO: get rid of all these renames once parity with cppxlang.exe has been reached...
 
             if (name == "EventRegistrationToken" && ns == "Windows.Foundation")
             {
-                write("winrt::event_token");
+                write("xlang::event_token");
             }
             else if (name == "HResult" && ns == "Windows.Foundation")
             {
-                write("winrt::hresult");
+                write("xlang::hresult");
             }
             else if (abi_types)
             {
@@ -282,7 +282,7 @@ namespace xlang
         {
             if (type_name(type) == "System.Guid")
             {
-                write("winrt::guid");
+                write("xlang::guid");
             }
             else
             {

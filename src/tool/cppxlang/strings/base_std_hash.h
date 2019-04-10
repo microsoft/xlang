@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     inline size_t hash_data(void const* ptr, size_t const bytes) noexcept
     {
@@ -40,16 +40,16 @@ namespace winrt::impl
 
 namespace std
 {
-    template<> struct hash<winrt::hstring>
+    template<> struct hash<xlang::hstring>
     {
-        size_t operator()(winrt::hstring const& value) const noexcept
+        size_t operator()(xlang::hstring const& value) const noexcept
         {
             std::basic_string_view<xlang_char8> view = value;
-            return winrt::impl::hash_data(view.data(), view.size() * sizeof(xlang_char8));
+            return xlang::impl::hash_data(view.data(), view.size() * sizeof(xlang_char8));
         }
     };
 
-    template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
-    template<> struct hash<winrt::Windows::Foundation::IInspectable> : winrt::impl::hash_base<winrt::Windows::Foundation::IInspectable> {};
-    template<> struct hash<winrt::Windows::Foundation::IActivationFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IActivationFactory> {};
+    template<> struct hash<xlang::Windows::Foundation::IUnknown> : xlang::impl::hash_base<xlang::Windows::Foundation::IUnknown> {};
+    template<> struct hash<xlang::Windows::Foundation::IInspectable> : xlang::impl::hash_base<xlang::Windows::Foundation::IInspectable> {};
+    template<> struct hash<xlang::Windows::Foundation::IActivationFactory> : xlang::impl::hash_base<xlang::Windows::Foundation::IActivationFactory> {};
 }

@@ -3,38 +3,38 @@
 
 extern "C"
 {
-    int32_t  WINRT_CALL WINRT_IIDFromString(wchar_t const* string, winrt::guid* iid) noexcept;
-    void     WINRT_CALL WINRT_GetCurrentThreadStackLimits(uintptr_t* low_limit, uintptr_t* high_limit) noexcept;
-    uint32_t WINRT_CALL WINRT_GetLastError() noexcept;
-    int32_t  WINRT_CALL WINRT_CoGetObjectContext(winrt::guid const& iid, void** object) noexcept;
+    int32_t  XLANG_CALL XLANG_IIDFromString(wchar_t const* string, xlang::guid* iid) noexcept;
+    void     XLANG_CALL XLANG_GetCurrentThreadStackLimits(uintptr_t* low_limit, uintptr_t* high_limit) noexcept;
+    uint32_t XLANG_CALL XLANG_GetLastError() noexcept;
+    int32_t  XLANG_CALL XLANG_CoGetObjectContext(xlang::guid const& iid, void** object) noexcept;
 
-    uint32_t WINRT_CALL WINRT_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
-    int32_t  WINRT_CALL WINRT_TrySubmitThreadpoolCallback(void(WINRT_CALL *callback)(void*, void* context), void* context, void*) noexcept;
-    winrt::impl::ptp_timer WINRT_CALL WINRT_CreateThreadpoolTimer(void(WINRT_CALL *callback)(void*, void* context, void*), void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_SetThreadpoolTimer(winrt::impl::ptp_timer timer, void* time, uint32_t period, uint32_t window) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolTimer(winrt::impl::ptp_timer timer) noexcept;
-    winrt::impl::ptp_wait WINRT_CALL WINRT_CreateThreadpoolWait(void(WINRT_CALL *callback)(void*, void* context, void*, uint32_t result), void* context, void*) noexcept;
-    void     WINRT_CALL WINRT_SetThreadpoolWait(winrt::impl::ptp_wait wait, void* handle, void* timeout) noexcept;
-    void     WINRT_CALL WINRT_CloseThreadpoolWait(winrt::impl::ptp_wait wait) noexcept;
+    uint32_t XLANG_CALL XLANG_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
+    int32_t  XLANG_CALL XLANG_TrySubmitThreadpoolCallback(void(XLANG_CALL *callback)(void*, void* context), void* context, void*) noexcept;
+    xlang::impl::ptp_timer XLANG_CALL XLANG_CreateThreadpoolTimer(void(XLANG_CALL *callback)(void*, void* context, void*), void* context, void*) noexcept;
+    void     XLANG_CALL XLANG_SetThreadpoolTimer(xlang::impl::ptp_timer timer, void* time, uint32_t period, uint32_t window) noexcept;
+    void     XLANG_CALL XLANG_CloseThreadpoolTimer(xlang::impl::ptp_timer timer) noexcept;
+    xlang::impl::ptp_wait XLANG_CALL XLANG_CreateThreadpoolWait(void(XLANG_CALL *callback)(void*, void* context, void*, uint32_t result), void* context, void*) noexcept;
+    void     XLANG_CALL XLANG_SetThreadpoolWait(xlang::impl::ptp_wait wait, void* handle, void* timeout) noexcept;
+    void     XLANG_CALL XLANG_CloseThreadpoolWait(xlang::impl::ptp_wait wait) noexcept;
 }
 
-WINRT_LINK(IIDFromString, 8)
-WINRT_LINK(GetCurrentThreadStackLimits, 8)
-WINRT_LINK(GetLastError, 0)
-WINRT_LINK(CoGetObjectContext, 8)
+XLANG_LINK(IIDFromString, 8)
+XLANG_LINK(GetCurrentThreadStackLimits, 8)
+XLANG_LINK(GetLastError, 0)
+XLANG_LINK(CoGetObjectContext, 8)
 
-WINRT_LINK(WaitForSingleObject, 8)
-WINRT_LINK(TrySubmitThreadpoolCallback, 12)
-WINRT_LINK(CreateThreadpoolTimer, 12)
-WINRT_LINK(SetThreadpoolTimer, 16)
-WINRT_LINK(CloseThreadpoolTimer, 4)
-WINRT_LINK(CreateThreadpoolWait, 12)
-WINRT_LINK(SetThreadpoolWait, 12)
-WINRT_LINK(CloseThreadpoolWait, 4)
+XLANG_LINK(WaitForSingleObject, 8)
+XLANG_LINK(TrySubmitThreadpoolCallback, 12)
+XLANG_LINK(CreateThreadpoolTimer, 12)
+XLANG_LINK(SetThreadpoolTimer, 16)
+XLANG_LINK(CloseThreadpoolTimer, 4)
+XLANG_LINK(CreateThreadpoolWait, 12)
+XLANG_LINK(SetThreadpoolWait, 12)
+XLANG_LINK(CloseThreadpoolWait, 4)
 
 #endif
 
 extern "C"
 {
-    int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;
+    int32_t XLANG_CALL XLANG_GetActivationFactory(void* classId, void** factory) noexcept;
 }

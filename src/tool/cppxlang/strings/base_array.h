@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     struct array_view
@@ -53,13 +53,13 @@ namespace winrt
 
         reference operator[](size_type const pos) noexcept
         {
-            WINRT_ASSERT(pos < size());
+            XLANG_ASSERT(pos < size());
             return m_data[pos];
         }
 
         const_reference operator[](size_type const pos) const noexcept
         {
-            WINRT_ASSERT(pos < size());
+            XLANG_ASSERT(pos < size());
             return m_data[pos];
         }
 
@@ -85,25 +85,25 @@ namespace winrt
 
         reference front() noexcept
         {
-            WINRT_ASSERT(m_size > 0);
+            XLANG_ASSERT(m_size > 0);
             return*m_data;
         }
 
         const_reference front() const noexcept
         {
-            WINRT_ASSERT(m_size > 0);
+            XLANG_ASSERT(m_size > 0);
             return*m_data;
         }
 
         reference back() noexcept
         {
-            WINRT_ASSERT(m_size > 0);
+            XLANG_ASSERT(m_size > 0);
             return m_data[m_size - 1];
         }
 
         const_reference back() const noexcept
         {
-            WINRT_ASSERT(m_size > 0);
+            XLANG_ASSERT(m_size > 0);
             return m_data[m_size - 1];
         }
 
@@ -299,7 +299,7 @@ namespace winrt
 
         void alloc(size_type const size)
         {
-            WINRT_ASSERT(this->empty());
+            XLANG_ASSERT(this->empty());
 
             if (0 != size)
             {
@@ -378,7 +378,7 @@ namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     struct array_size_proxy
@@ -390,7 +390,7 @@ namespace winrt::impl
 
         ~array_size_proxy() noexcept
         {
-            WINRT_ASSERT(m_value.data() || (!m_value.data() && m_size == 0));
+            XLANG_ASSERT(m_value.data() || (!m_value.data() && m_size == 0));
             *reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t*>(&m_value) + 1) = m_size;
         }
 
@@ -419,7 +419,7 @@ namespace winrt::impl
     template <typename T>
     struct com_array_proxy
     {
-        com_array_proxy(uint32_t* size, winrt::impl::arg_out<T>* value) noexcept : m_size(size), m_value(value)
+        com_array_proxy(uint32_t* size, xlang::impl::arg_out<T>* value) noexcept : m_size(size), m_value(value)
         {}
 
         ~com_array_proxy() noexcept
@@ -435,7 +435,7 @@ namespace winrt::impl
         com_array_proxy(com_array_proxy const&) noexcept
         {
             // A Visual C++ compiler bug (550631) requires the copy constructor even though it is never called.
-            WINRT_ASSERT(false);
+            XLANG_ASSERT(false);
         }
 
     private:
@@ -446,7 +446,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     auto detach_abi(uint32_t* __valueSize, impl::arg_out<T>* value) noexcept

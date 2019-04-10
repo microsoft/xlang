@@ -1,6 +1,6 @@
 #include "pch.h"
 
-using namespace winrt;
+using namespace xlang;
 
 using u8string = std::basic_string<xlang_char8>;
 using u8string_view = std::basic_string_view<xlang_char8>;
@@ -578,6 +578,6 @@ TEST_CASE("hstring,unordered_map")
 
 static bool compare_hash(const u8string & value)
 {
-    return std::hash<u8string>{}(value) == std::hash<winrt::hstring>{}(winrt::hstring(value));
+    return std::hash<u8string>{}(value) == std::hash<hstring>{}(hstring(value));
 }
 

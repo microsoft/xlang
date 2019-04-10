@@ -56,7 +56,7 @@ namespace xlang
             }
             else
             {
-                name = "winrt_impl_result";
+                name = "xlang_impl_result";
             }
 
             return name;
