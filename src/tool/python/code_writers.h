@@ -1639,7 +1639,7 @@ struct pinterface_python_type<%<%>>
                 throw_invalid("invalid fundamental type");
             }
         },
-            [&](TypeDef const& type)
+            [&]([[maybe_unused]] TypeDef const& type)
         {
             XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write("py::pyobj_handle");
@@ -1704,7 +1704,7 @@ struct pinterface_python_type<%<%>>
                 throw_invalid("invalid fundamental type");
             }
         },
-            [&](type_definition const& type)
+            [&]([[maybe_unused]] type_definition const& type)
         {
             XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write("O");
@@ -1716,7 +1716,7 @@ struct pinterface_python_type<%<%>>
     {
         call(get_struct_field_semantics(field, true),
             [&](fundamental_type) { w.write(", &_%", field.Name()); },
-            [&](type_definition const& type)
+            [&]([[maybe_unused]] type_definition const& type)
         {
             XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write(", _%.put()", field.Name());
@@ -1749,7 +1749,7 @@ struct pinterface_python_type<%<%>>
     {
         call(get_struct_field_semantics(field, true),
             [&](fundamental_type) {},
-            [&](TypeDef const& type)
+            [&]([[maybe_unused]] TypeDef const& type)
         {
             XLANG_ASSERT(get_category(type) == category::struct_type);
             w.write(", &_%", field.Name());
