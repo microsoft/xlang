@@ -30,7 +30,7 @@ TEST_CASE("Midl3 compat test", "[!hide]") {
         return;
     }
 
-    for (const auto & entry : iterator)
+    for (auto const& entry : iterator)
     {
         std::cout << "Parsing File:" << std::endl;
         std::cout << entry.path() << std::endl;
