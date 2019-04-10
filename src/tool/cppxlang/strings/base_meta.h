@@ -9,7 +9,7 @@ namespace xlang
     D* get_self(I const& from) noexcept;
 
     struct take_ownership_from_abi_t {};
-    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
+    inline constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 
     template <typename T>
     struct com_ptr;
