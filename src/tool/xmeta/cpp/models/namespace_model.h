@@ -8,6 +8,8 @@
 
 #include "base_model.h"
 #include "class_model.h"
+#include "delegate_model.h"
+#include "enum_model.h"
 #include "struct_model.h"
 
 
@@ -26,9 +28,11 @@ namespace xlang::xmeta
         std::vector<std::string_view> using_namespace_directives;
 
         // Members
-        std::map<std::string_view, std::shared_ptr<class_model>> classes;
-        std::map<std::string_view, std::shared_ptr<struct_model>> structs;
-        std::map<std::string_view, std::shared_ptr<interface_model>> interfaces;
+        std::map<std::string_view, std::shared_ptr<class_model>, std::less<>> classes;
+        std::map<std::string_view, std::shared_ptr<struct_model>, std::less<>> structs;
+        std::map<std::string_view, std::shared_ptr<interface_model>, std::less<>> interfaces;
+        std::vector<enum_model> enums;
+        std::vector<delegate_model> delegates;
 
         std::shared_ptr<namespace_model> containing_namespace;
 
@@ -49,7 +53,7 @@ namespace xlang::xmeta
         std::shared_ptr<namespace_model> parent_namespace;
 
         // Members
-        std::map<std::string_view, std::shared_ptr<namespace_model>> child_namespaces;
+        std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> child_namespaces;
 
         // Vector of different namespace bodies defined.
         std::vector<std::shared_ptr<namespace_body_model>> ns_bodies;

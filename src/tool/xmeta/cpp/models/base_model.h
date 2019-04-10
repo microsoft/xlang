@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <variant>
 #include <vector>
 
 namespace xlang::xmeta
@@ -14,44 +15,45 @@ namespace xlang::xmeta
         size_t decl_line;
     };
 
-    enum class simple_t
+    enum class simple_type
     {
-        boolean_type,
-        string_type,
-        int16_type,
-        int32_type,
-        int64_type,
-        uint8_type,
-        uint16_type,
-        uint32_type,
-        uint64_type,
-        char16_type,
-        guid_type,
-        single_type,
-        double_type,
+        // TODO: rename
+        Boolean,
+        String,
+        Int8,
+        Int16,
+        Int32,
+        Int64,
+        Uint8,
+        Uint16,
+        Uint32,
+        Uint64,
+        Char16,
+        Guid,
+        Single,
+        Double,
+        Void
     };
 
-    struct xmeta_type
+    struct type
     {
-        bool is_void;
         bool is_array;
-        bool is_simple_type; // if (!is_void && !is_simple_type) { return type is struct, enum, class, interface, or delegate. }
-        simple_t simple_type;
-        std::string_view type_name;
-        std::vector<xmeta_type> type_arguments;
+        std::variant<simple_type, std::string> type_id;
+        std::vector<type> type_arguments;
     };
 
-    enum class parameter_modifier_t
+    // TODO: rename to parameter_semantics
+    enum class parameter_semantics
     {
-        none,
-        const_ref_parameter,
-        out_parameter
+        in,
+        const_ref,
+        out
     };
 
     struct formal_parameter_t
     {
-        parameter_modifier_t modifier;
-        xmeta_type type;
+        parameter_semantics modifier;
+        type type;
         std::string_view id;
     };
 }

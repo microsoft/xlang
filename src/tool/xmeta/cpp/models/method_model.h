@@ -9,10 +9,9 @@ namespace xlang::xmeta
 {
     struct method_modifiers
     {
-        bool is_protected;
-        bool is_override;
-        bool is_static;
-        bool is_sealed;
+        bool is_protected = false;
+        bool is_override = false;
+        bool is_static = false;
     };
 
     struct method_model : base_model

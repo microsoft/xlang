@@ -9,7 +9,10 @@ namespace xlang::xmeta
 {
     struct delegate_model : base_model
     {
-        delegate_model(std::string_view const& id, size_t decl_line) : base_model{ id, decl_line } { }
+        delegate_model(std::string_view const& id, size_t decl_line, xmeta_type const& return_type) :
+            base_model{ id, decl_line },
+            return_type{ return_type }
+        { }
         delegate_model() = delete;
 
         xmeta_type return_type;
