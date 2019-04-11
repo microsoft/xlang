@@ -134,6 +134,7 @@ Where <spec> is one or more of:
 
             auto module_dir = settings.output_folder / settings.module;
             auto src_dir = module_dir / "src";
+            create_directories(src_dir);
 
             group.add([&]
             {
@@ -151,32 +152,19 @@ Where <spec> is one or more of:
                     continue;
                 }
 
+                generated_namespaces.emplace_back(ns);
+
                 auto ns_dir = module_dir;
-                
-                auto append_dir = [&ns_dir](std::string_view const& ns_segment)
+                for (auto&& ns_segment : get_dotted_name_segments(ns))
                 {
                     std::string segment{ ns_segment };
                     std::transform(segment.begin(), segment.end(), segment.begin(), [](char c) {return static_cast<char>(::tolower(c)); });
                     ns_dir /= segment;
-                };
+                }
                 
-                size_t pos{};
-                while (true)
-                {
-                    auto new_pos = ns.find('.', pos);
-                    if (new_pos == std::string_view::npos)
-                    { 
-                        append_dir(ns.substr(pos));
-                        break;
-                    }
+                create_directories(ns_dir);
 
-                    append_dir(ns.substr(pos, new_pos - pos));
-                    pos = new_pos + 1;
-                } 
-
-                generated_namespaces.emplace_back(ns);
-
-                group.add([&, &ns = ns, &members = members]
+                group.add([&src_dir, ns_dir, ns = ns, members = members]
                 {
                     auto namespaces = write_namespace_cpp(src_dir, ns, members);
                     write_namespace_h(src_dir, ns, namespaces, members);
@@ -187,7 +175,6 @@ Where <spec> is one or more of:
             group.get();
 
             write_setup_py(settings.output_folder, generated_namespaces);
-            //write_cmake_lists_txt(settings.output_folder, generated_namespaces);
 
             if (settings.verbose)
             {
