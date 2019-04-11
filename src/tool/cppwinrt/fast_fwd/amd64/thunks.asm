@@ -47,7 +47,7 @@ NESTED_ENTRY InvokeForwarder, _TEXT
 NESTED_END InvokeForwarder, _TEXT
 
 ; Define thunks
-FAST_FORWARDER_THUNK MACRO i
+FAST_FWD_THUNK MACRO i
 LEAF_ENTRY fast_fwd_thunk&i, _TEXT
     mov rax, i
     jmp InvokeForwarder 

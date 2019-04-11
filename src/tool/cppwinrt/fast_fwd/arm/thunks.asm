@@ -44,7 +44,7 @@
 
     ; Define thunks
     MACRO 
-    FAST_FORWARDER_THUNK $i
+    FAST_FWD_THUNK $i
     LEAF_ENTRY fast_fwd_thunk$i
     ; Note: no scratch registers available (r12/IP is used by CFG), must use stack
     mov     r12, $i

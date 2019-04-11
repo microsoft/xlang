@@ -48,7 +48,7 @@
 
     ; Define thunks
     MACRO 
-    FAST_FORWARDER_THUNK $i
+    FAST_FWD_THUNK $i
     LEAF_ENTRY fast_fwd_thunk$i
     mov     x12, #$i
     b       InvokeForwarder
