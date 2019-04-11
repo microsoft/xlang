@@ -45,11 +45,9 @@ namespace xlang
 using namespace std::literals;
 using namespace winrt;
 
-#define JNI_EXPORT_NAMESPACE %
-
 )";
 
-        w.write(format, ns, ns, java_export{ ns });
+        w.write(format, ns, ns);
     }
 
     template<type_system system>
@@ -210,6 +208,7 @@ using namespace winrt;
 void JNICALL
 %(jni_env* env, jclass cls) noexcept try
 {
+    #pragma comment(linker, "/INCLUDE:" __FUNCTION__)
     #pragma comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
     %::jni_register(*env, cls);
 }
@@ -217,7 +216,7 @@ catch (...)
 {
     env->raise_java_exception("%");
 })";
-        auto export_name = std::string(ns) + "_" + std::string(type) + "_jni_register";
+        auto export_name = w.write_temp("%_%_jni_register", java_export{ ns }, type);
         w.write(format,
             export_name,
             type,
@@ -247,8 +246,7 @@ catch (...)
             gi.name,
             java_type_name{ gi.name, w.current_namespace },
             gi.java_element,
-            bind<write_jni_export>(gi.name, w.current_namespace),
-            gi.name
+            bind<write_jni_export>(gi.name, w.current_namespace)
         );
 
         w.add_unregister(gi.name);
@@ -343,6 +341,25 @@ catch (...)
         );
     }
 
+    static void write_jni_static(writer& w, MethodDef const& method)
+    {
+        auto format = R"(    static auto jni_%%(jni_env&, jclass%)
+    {
+        return type::%(%);
+    }
+
+)";
+        method_signature signature{ method };
+        auto&& params = signature.params();
+        w.write(format,
+            bind<write_method_name_as<java_type>>(method),
+            bind_each<write_param_type_as<java_suffix>>(params),
+            bind<write_params_as<jni_type>>(params, true),
+            bind<write_method_name_as<jni_type>>(method),
+            bind_list<write_jni_method_arg>(", ", params)
+        );
+    }
+
     static void write_jni_method(writer& w, MethodDef const& method)
     {
         auto format = R"(    static auto jni_%%(jni_env&, jobject, jlong abi%)
@@ -380,6 +397,20 @@ catch (...)
         w.write(format,
             bind_each<write_param_type_as<java_suffix>>(params),
             bind_each<write_param_type_as<java_descriptor>>(signature.params())
+        );
+    }
+
+    static void write_jni_static_registration(writer& w, MethodDef const& method)
+    {
+        auto format = R"(            JNI_METHOD_(jni_%%, "(%)%"),
+)";
+        method_signature signature{ method };
+        auto&& params = signature.params();
+        w.write(format,
+            bind<write_method_name_as<java_type>>(method),
+            bind_each<write_param_type_as<java_suffix>>(params),
+            bind_each<write_param_type_as<java_descriptor>>(signature.params()),
+            bind<write_return_type_as<java_descriptor>>(signature.return_signature())
         );
     }
 
@@ -473,12 +504,12 @@ catch (...)
 {
     static constexpr char projected_type[] = "%";
 %
-%%    static void jni_register(jni_env& env, jclass cls)
+%%%    static void jni_register(jni_env& env, jclass cls)
     {
         Projection::jni_register(env, cls);
 %        static JNINativeMethod methods[] =
         {
-%%        };
+%%%        };
         env.register_natives(cls, methods);
     }
 };
@@ -487,6 +518,8 @@ catch (...)
 )";
 
         auto interfaces = get_interface_info(w, type);
+        auto constructors = get_constructors(type);
+        auto statics = get_statics(type);
 
         w.write(format, 
             type.TypeName(),
@@ -495,10 +528,12 @@ catch (...)
             bind_each<write_jni_generic_base>(interfaces, type.TypeName()),
             java_type_name{ type },
             bind_each<write_jni_generic_trait>(interfaces),
-            bind_each<write_jni_constructor>(get_constructors(type)),
+            bind_each<write_jni_constructor>(constructors),
+            bind_each<write_jni_static>(statics),
             bind_each<write_jni_methods>(interfaces),
             bind_each<write_jni_generic_register>(interfaces),
-            bind_each<write_jni_constructor_registration>(get_constructors(type)),
+            bind_each<write_jni_constructor_registration>(constructors),
+            bind_each<write_jni_static_registration>(statics),
             bind_each<write_jni_method_registrations>(interfaces),
             bind<write_jni_export>(type.TypeName(), w.current_namespace)
         );
@@ -742,13 +777,13 @@ auto %_UnregisterFunc = &%_Unregister;
     {
         auto format = R"(package %;
 
-public class % extends Inspectable implements java.util.Iterator<%> {
+public class % extends Windows.Foundation.Inspectable implements java.util.Iterator<%> {
 
     public %(long abi) {
         super(abi);
     }
     
-    public %(Inspectable that) {
+    public %(Windows.Foundation.Inspectable that) {
         super(that);
     }
 
@@ -797,11 +832,81 @@ public class % extends Inspectable implements java.util.Iterator<%> {
         return std::move(w);
     }
 
+    static auto write_java_proxy_inspectable()
+    {
+        auto format = R"(package Windows.Foundation;
+
+public class Inspectable {
+
+	public Inspectable(long abi) {
+		this.abi = abi;
+	}
+
+	public Inspectable(Inspectable that) {
+		this.abi = that.abi;
+		jni_AddRef(abi);
+	}
+
+	^@Override
+	public boolean equals(Object arg0) {
+		return (arg0 instanceof Inspectable) ? ((Inspectable) arg0).getIdentity() == getIdentity() : false;
+	}
+
+	^@Override
+	protected void finalize() throws Throwable {
+		jni_Release(abi);
+	}
+
+	^@Override
+	public int hashCode() {
+		long id = getIdentity();
+		return (int) (id >> 32) * 31 ^ (int) id;
+	}
+
+	^@Override
+	public String toString() {
+		return jni_GetClassName(abi);
+	}
+
+	public long getIdentity() {
+		return jni_GetIdentity(abi);
+	}
+
+	public long getAbi() {
+		return abi;
+	}
+
+	protected long abi;
+
+	private native void jni_AddRef(long abi);
+
+	private native void jni_Release(long abi);
+
+	private native String jni_GetClassName(long abi);
+
+	private native long jni_GetIdentity(long abi);
+
+	private static native void jni_register();
+
+    static {
+        System.loadLibrary("%");
+        jni_register();
+    }
+};
+)";
+        writer w;
+        auto package = settings.package_base + "Windows.Foundation";
+        w.write(format,
+            settings.shared_lib.empty() ? w.write_temp("%", lower_case{ package }) : settings.shared_lib
+        );
+        return std::move(w);
+    }
+
     static auto write_java_proxy(TypeDef const& type)
     {
         auto format = R"(package %;
 
-public class % extends Inspectable %
+public class % extends Windows.Foundation.Inspectable %
 {
     public %(long abi) {
         super(abi);
@@ -819,7 +924,7 @@ public class % extends Inspectable %
         return false;
     }
 
-%%    private static native void jni_register();
+%%%    private static native void jni_register();
 
     static {
         System.loadLibrary("%");
@@ -827,7 +932,7 @@ public class % extends Inspectable %
     }
 };
         )";
-        
+
         writer w(type);
         auto package = settings.package_base + std::string(type.TypeNamespace());
         auto interfaces = get_interface_info(w, type);
@@ -842,6 +947,7 @@ public class % extends Inspectable %
             type.TypeName(),
             bind_each<write_java_public_methods>(interfaces),
             //bind_each<write_java_public_method>(type.MethodList()),
+            bind_each<write_java_native_method>(get_constructors(type)),
             bind_each<write_java_native_methods>(interfaces),
             //bind_each<write_java_native_method>(type.MethodList()),
             settings.shared_lib.empty() ? w.write_temp("%", lower_case{ package }) : settings.shared_lib
@@ -851,7 +957,7 @@ public class % extends Inspectable %
 
     static void write_java_interface_method(writer& w, MethodDef const& method)
     {
-        auto format = R"(    public % %(%);
+        auto format = R"(    % %(%);
 
 )";
         method_signature signature{ method };
@@ -861,6 +967,15 @@ public class % extends Inspectable %
             bind<write_method_name_as<java_type>>(method),
             bind<write_params_as<java_type>>(params, false)
         );
+    }
+
+    static void write_java_interface_methods(writer& w, std::pair<std::variant<generic_interface_type, std::string>, interface_info> const& ifc)
+    {
+        if (auto interface_name = std::get_if<std::string>(&ifc.first))
+        {
+            push_interface_generic_params params(w, ifc.second);
+            w.write("%", bind_each<write_java_interface_method>(ifc.second.type.MethodList()));
+        }
     }
 
     static auto write_java_interface(TypeDef const& type)
@@ -874,10 +989,13 @@ public interface % {
 
         writer w(type);
         auto interfaces = get_interface_info(w, type);
+        //auto interface_name  = std::string(type.TypeNamespace()) + "." + std::string(type.TypeName());
+        //push_interface_generic_params params(w, interfaces[interface_name]);
         w.write(format,
             lower_case{ settings.package_base + std::string(type.TypeNamespace()) },
             type.TypeName(),
-            bind_each<write_java_interface_method>(type.MethodList())
+            bind_each<write_java_interface_methods>(interfaces)
+            //bind_each<write_java_interface_method>(type.MethodList())
         );
         return std::move(w);
     }

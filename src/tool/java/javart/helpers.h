@@ -289,4 +289,19 @@ namespace xlang
 
         return std::move(constructors);
     }
+
+    auto get_statics(TypeDef const& type)
+    {
+        std::vector<MethodDef> constructors;
+
+        for (auto&& method : type.MethodList())
+        {
+            if (is_static(method))
+            {
+                constructors.push_back(method);
+            }
+        }
+
+        return std::move(constructors);
+    }
 }

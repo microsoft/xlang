@@ -165,7 +165,7 @@ namespace xlang
         void write_as(type_system system, TypeSig const& sig)
         {
             type_system_guard guard(*this, system);
-            write(sig.Type());
+            write(sig);
         }
 
         template <typename... Args>
@@ -390,7 +390,20 @@ namespace xlang
         {
             if (type_name(type) == "System.Guid")
             {
-                write("winrt::guid");
+                switch (current_type_system)
+                {
+                case type_system::java_descriptor:
+                case type_system::java_suffix:
+                    write("U");
+                    break;
+                case type_system::java_type:
+                    write("byte[]");
+                    break;
+                case type_system::jni_type:
+                    write("jbyte[16]");
+                    break;
+                }
+ //               write("winrt::guid");
             }
             else
             {
@@ -419,6 +432,7 @@ namespace xlang
             else if (type == ElementType::R4) { write("F"); }
             else if (type == ElementType::R8) { write("D"); }
             else if (type == ElementType::String) { write("Ljava/lang/String;"); }
+            else if (type == ElementType::Object) { write("Ljava/lang/Object;"); }
             else
             {
                 write("LTODO-desc-ElementType;");
@@ -442,6 +456,7 @@ namespace xlang
             else if (type == ElementType::R4) { write("F"); }
             else if (type == ElementType::R8) { write("D"); }
             else if (type == ElementType::String) { write("$"); }
+            else if (type == ElementType::Object) { write("O"); }
             else
             {
                 write("LTODO-desc-brief-ElementType;");
@@ -521,43 +536,38 @@ namespace xlang
             switch (type.type())
             {
             case TypeDefOrRef::TypeDef:
-                switch (current_type_system)
-                {
-                case type_system::java_descriptor:
-                case type_system::java_suffix:
-                case type_system::java_type:
-                    write("L%;", java_type_name{ type.TypeDef() });
-                    break;
-                case type_system::jni_type:
-                    write("jlong");
-                    break;
-                }
+                write(type.TypeDef());
+                //switch (current_type_system)
+                //{
+                //case type_system::java_descriptor:
+                //case type_system::java_suffix:
+                //case type_system::java_type:
+                //    write("L%;", java_type_name{ type.TypeDef() });
+                //    break;
+                //case type_system::jni_type:
+                //    write("jlong");
+                //    break;
+                //}
                 break;
             case TypeDefOrRef::TypeRef:
-                switch (current_type_system)
-                {
-                case type_system::java_descriptor:
-                case type_system::java_suffix:
-                case type_system::java_type:
-                    write(type.TypeRef());
-                    break;
-                case type_system::jni_type:
-                    write("jlong");
-                    break;
-                }
+                write(type.TypeRef());
+                //switch (current_type_system)
+                //{
+                //case type_system::java_descriptor:
+                //case type_system::java_suffix:
+                //case type_system::java_type:
+                //case type_system::jni_type:
+                //}
                 break;
             case TypeDefOrRef::TypeSpec:
-                switch (current_type_system)
-                {
-                case type_system::java_descriptor:
-                case type_system::java_suffix:
-                case type_system::java_type:
-                    write(type.TypeSpec().Signature().GenericTypeInst());
-                    break;
-                case type_system::jni_type:
-                    write("jlong");
-                    break;
-                }
+                write(type.TypeSpec().Signature().GenericTypeInst());
+                //switch (current_type_system)
+                //{
+                //case type_system::java_descriptor:
+                //case type_system::java_suffix:
+                //case type_system::java_type:
+                //case type_system::jni_type:
+                //}
                 break;
             }
         }
@@ -665,7 +675,21 @@ namespace xlang
         {
             if (signature.is_szarray())
             {
-                write("%[]", signature.Type());
+                switch (current_type_system)
+                {
+                case type_system::java_descriptor:
+                    write("[%", signature.Type());
+                    break;
+                case type_system::java_suffix:
+                    write("_%", signature.Type());
+                    break;
+                case type_system::java_type:
+                    write("%[]", signature.Type());
+                    break;
+                case type_system::jni_type:
+                    write("%[]", signature.Type());
+                    break;
+                }
             }
             else
             {

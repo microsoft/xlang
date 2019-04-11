@@ -182,24 +182,27 @@ namespace xlang::text
             m_second.clear();
         }
 
-        void flush_to_file(std::string const& filename)
+        void flush_to_file(std::string const& filename, bool bom_enabled = true)
         {
-            if (file_equal(filename))
+            if (file_equal(filename, bom_enabled))
             {
                 return;
             }
 
             std::ofstream file{ filename, std::ios::out | std::ios::binary };
-            file.write(reinterpret_cast<char const*>(m_bom.data()), m_bom.size());
+            if (bom_enabled)
+            {
+                file.write(reinterpret_cast<char const*>(m_bom.data()), m_bom.size());
+            }
             file.write(m_first.data(), m_first.size());
             file.write(m_second.data(), m_second.size());
             m_first.clear();
             m_second.clear();
         }
 
-        void flush_to_file(std::experimental::filesystem::path const& filename)
+        void flush_to_file(std::experimental::filesystem::path const& filename, bool bom_enabled = true)
         {
-            flush_to_file(filename.string());
+            flush_to_file(filename.string(), bom_enabled);
         }
 
         char back()
@@ -207,7 +210,7 @@ namespace xlang::text
             return m_first.empty() ? char{} : m_first.back();
         }
 
-        bool file_equal(std::string const& filename) const
+        bool file_equal(std::string const& filename, bool bom_enabled = true) const
         {
             if (!std::experimental::filesystem::exists(filename))
             {
@@ -215,6 +218,16 @@ namespace xlang::text
             }
 
             meta::reader::file_view file{ filename };
+
+            if (!bom_enabled)
+            {
+                if (!std::equal(m_first.begin(), m_first.end(), file.begin(), file.begin() + m_first.size()))
+                {
+                    return false;
+                }
+
+                return std::equal(m_second.begin(), m_second.end(), file.begin() + m_first.size(), file.end());
+            }
 
             if (file.size() != m_bom.size() + m_first.size() + m_second.size())
             {
