@@ -164,12 +164,6 @@ namespace pywinrt
         settings.filter.bind_each<write_python_import_type>(members.classes)(w);
         settings.filter.bind_each<write_python_import_type>(members.interfaces)(w);
 
-        if (settings.verbose)
-        {
-            auto foo = folder / "__init__.py";
-            printf("%s\n", foo.string().c_str());
-        }
-
         w.flush_to_file(folder / "__init__.py");
     }
 }

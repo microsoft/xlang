@@ -1463,7 +1463,7 @@ struct pinterface_python_type<%<%>>
                     w.write("int %(PyObject* arg) noexcept override\n{\n", put_method.Name());
                     {
                         writer::indent_guard gg{ w };
-                        write_setter_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, put_method); });
+                        write_setter_try_catch(w, [&](writer& w) { write_method_body_contents(w, type, put_method, true); });
                     }
                     w.write("}\n");
 
