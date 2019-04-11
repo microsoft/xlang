@@ -172,86 +172,6 @@ namespace winrt
     }
 #endif
 
-    struct thread_pool
-    {
-        thread_pool() :
-            m_pool(check_pointer(WINRT_CreateThreadpool(nullptr)))
-        {
-            m_environment.Pool = m_pool.get();
-        }
-
-        void thread_limits(uint32_t const high, uint32_t const low)
-        {
-            WINRT_SetThreadpoolThreadMaximum(m_pool.get(), high);
-            check_bool(WINRT_SetThreadpoolThreadMinimum(m_pool.get(), low));
-        }
-
-        bool await_ready() const noexcept
-        {
-            return false;
-        }
-
-        void await_resume() const noexcept
-        {
-        }
-
-        void await_suspend(std::experimental::coroutine_handle<> handle)
-        {
-            if (!WINRT_TrySubmitThreadpoolCallback(callback, handle.address(), &m_environment))
-            {
-                throw_last_error();
-            }
-        }
-
-    private:
-
-        static void WINRT_CALL callback(void*, void* context) noexcept
-        {
-            std::experimental::coroutine_handle<>::from_address(context)();
-        }
-
-        struct pool_traits
-        {
-            using type = impl::ptp_pool;
-
-            static void close(type value) noexcept
-            {
-                WINRT_CloseThreadpool(value);
-            }
-
-            static constexpr type invalid() noexcept
-            {
-                return nullptr;
-            }
-        };
-
-        struct environment
-        {
-            uint32_t Version{ 3 }; // Windows 7
-            void* Pool{};
-            void* CleanupGroup{};
-            void* CleanupGroupCancelCallback{};
-            void* RaceDll{};
-            void* ActivationContext{};
-            void* FinalizationCallback{};
-            union
-            {
-                uint32_t Flags{};
-                struct
-                {
-                    uint32_t LongFunction : 1;
-                    uint32_t Persistent : 1;
-                    uint32_t Private : 30;
-                } s;
-            } u;
-            int32_t CallbackPriority{ 1 }; // TP_CALLBACK_PRIORITY_NORMAL
-            uint32_t Size{ sizeof(environment) };
-        };
-
-        handle_type<pool_traits> m_pool;
-        environment m_environment;
-    };
-
     [[nodiscard]] inline auto resume_on_signal(void* handle, Windows::Foundation::TimeSpan timeout = {}) noexcept
     {
         struct awaitable
@@ -313,6 +233,88 @@ namespace winrt
 
         return awaitable{ handle, timeout };
     }
+
+    struct thread_pool
+    {
+        thread_pool() :
+            m_pool(check_pointer(WINRT_CreateThreadpool(nullptr)))
+        {
+            m_environment.Pool = m_pool.get();
+        }
+
+        void thread_limits(uint32_t const high, uint32_t const low)
+        {
+            WINRT_SetThreadpoolThreadMaximum(m_pool.get(), high);
+            check_bool(WINRT_SetThreadpoolThreadMinimum(m_pool.get(), low));
+        }
+
+        bool await_ready() const noexcept
+        {
+            return false;
+        }
+
+        void await_resume() const noexcept
+        {
+        }
+
+        void await_suspend(std::experimental::coroutine_handle<> handle)
+        {
+            if (!WINRT_TrySubmitThreadpoolCallback(callback, handle.address(), &m_environment))
+            {
+                throw_last_error();
+            }
+        }
+
+        // TODO: add resume_after and resume_on_signal members
+
+    private:
+
+        static void WINRT_CALL callback(void*, void* context) noexcept
+        {
+            std::experimental::coroutine_handle<>::from_address(context)();
+        }
+
+        struct pool_traits
+        {
+            using type = impl::ptp_pool;
+
+            static void close(type value) noexcept
+            {
+                WINRT_CloseThreadpool(value);
+            }
+
+            static constexpr type invalid() noexcept
+            {
+                return nullptr;
+            }
+        };
+
+        struct environment
+        {
+            uint32_t Version{ 3 }; // Windows 7
+            void* Pool{};
+            void* CleanupGroup{};
+            void* CleanupGroupCancelCallback{};
+            void* RaceDll{};
+            void* ActivationContext{};
+            void* FinalizationCallback{};
+            union
+            {
+                uint32_t Flags{};
+                struct
+                {
+                    uint32_t LongFunction : 1;
+                    uint32_t Persistent : 1;
+                    uint32_t Private : 30;
+                } s;
+            } u;
+            int32_t CallbackPriority{ 1 }; // TP_CALLBACK_PRIORITY_NORMAL
+            uint32_t Size{ sizeof(environment) };
+        };
+
+        handle_type<pool_traits> m_pool;
+        environment m_environment;
+    };
 
     [[nodiscard]] inline auto resume_foreground(
         Windows::UI::Core::CoreDispatcher const& dispatcher,
