@@ -74,6 +74,10 @@ extern "C"
     void     WINRT_CALL WINRT_StartThreadpoolIo(winrt::impl::ptp_io io) noexcept;
     void     WINRT_CALL WINRT_CancelThreadpoolIo(winrt::impl::ptp_io io) noexcept;
     void     WINRT_CALL WINRT_CloseThreadpoolIo(winrt::impl::ptp_io io) noexcept;
+    winrt::impl::ptp_pool WINRT_CALL WINRT_CreateThreadpool(void* reserved) noexcept;
+    void WINRT_CALL WINRT_SetThreadpoolThreadMaximum(winrt::impl::ptp_pool pool, uint32_t value) noexcept;
+    int32_t WINRT_CALL WINRT_SetThreadpoolThreadMinimum(winrt::impl::ptp_pool pool, uint32_t value) noexcept;
+    void     WINRT_CALL WINRT_CloseThreadpool(winrt::impl::ptp_pool pool) noexcept;
 
     int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept;
     int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;
@@ -152,3 +156,7 @@ WINRT_LINK(CreateThreadpoolIo, 16)
 WINRT_LINK(StartThreadpoolIo, 4)
 WINRT_LINK(CancelThreadpoolIo, 4)
 WINRT_LINK(CloseThreadpoolIo, 4)
+WINRT_LINK(CreateThreadpool, 4)
+WINRT_LINK(SetThreadpoolThreadMaximum, 8)
+WINRT_LINK(SetThreadpoolThreadMinimum, 8)
+WINRT_LINK(CloseThreadpool, 4)
