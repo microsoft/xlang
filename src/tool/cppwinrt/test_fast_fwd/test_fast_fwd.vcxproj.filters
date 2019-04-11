@@ -23,18 +23,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\fast_fwd\i386\thunks.asm">
-      <Filter>i386</Filter>
-    </MASM>
-    <MASM Include="..\fast_fwd\arm64\thunks.asm">
-      <Filter>arm64</Filter>
-    </MASM>
-    <MASM Include="..\fast_fwd\arm\thunks.asm">
-      <Filter>arm</Filter>
-    </MASM>
     <MASM Include="..\fast_fwd\amd64\thunks.asm">
       <Filter>amd64</Filter>
     </MASM>
+    <MASM Include="..\fast_fwd\i386\thunks.asm">
+      <Filter>i386</Filter>
+    </MASM>
+    <MARMASM Include="..\fast_fwd\arm64\thunks.asm">
+      <Filter>arm64</Filter>
+    </MARMASM>
+    <MARMASM Include="..\fast_fwd\arm\thunks.asm">
+      <Filter>arm</Filter>
+    </MARMASM>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="FastForwarderTest.idl" />

@@ -52,7 +52,8 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+    <Import Condition="'$(Platform)'=='Win32' or '$(Platform)'=='x64'" Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+    <Import Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'" Project="$(VCTargetsPath)\BuildCustomizations\marmasm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -314,21 +315,21 @@
       <FileType>Document</FileType>
       <IncludePaths>..\fast_fwd</IncludePaths>
     </MASM>
-    <MASM Include="..\fast_fwd\arm64\thunks.asm">
-      <ExcludedFromBuild Condition="'$(Platform)'!='ARM64'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <IncludePaths>..\fast_fwd</IncludePaths>
-    </MASM>
-    <MASM Include="..\fast_fwd\arm\thunks.asm">
-      <ExcludedFromBuild Condition="'$(Platform)'!='ARM'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <IncludePaths>..\fast_fwd</IncludePaths>
-    </MASM>
     <MASM Include="..\fast_fwd\i386\thunks.asm">
       <ExcludedFromBuild Condition="'$(Platform)'!='Win32'">true</ExcludedFromBuild>
       <FileType>Document</FileType>
       <IncludePaths>..\fast_fwd</IncludePaths>
     </MASM>
+    <MARMASM Include="..\fast_fwd\arm64\thunks.asm">
+      <ExcludedFromBuild Condition="'$(Platform)'!='ARM64'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <IncludePaths>..\fast_fwd</IncludePaths>
+    </MARMASM>
+    <MARMASM Include="..\fast_fwd\arm\thunks.asm">
+      <ExcludedFromBuild Condition="'$(Platform)'!='ARM'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <IncludePaths>..\fast_fwd</IncludePaths>
+    </MARMASM>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="FastForwarderTest.idl">
@@ -400,6 +401,7 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+    <Import Condition="'$(Platform)'=='Win32' or '$(Platform)'=='x64'" Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+    <Import Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'" Project="$(VCTargetsPath)\BuildCustomizations\marmasm.targets" />
   </ImportGroup>
 </Project>
