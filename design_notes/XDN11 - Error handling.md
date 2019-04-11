@@ -45,6 +45,9 @@ projections which the error propagates through to append additional error contex
 language to the existing xlang error info. The information together show how the error propagated
 and resulted in a failure.
 
+![Error origination diagram](XDN11_origination_diagram.png)
+Diagram highlighting error handling of a C# app calling a Python API which calls a Java API that results in an error.
+
 ## Guidance for Projection Authors
 
 - **DO** translate language errors to equivalent xlang errors and xlang errors to equivalent natural
