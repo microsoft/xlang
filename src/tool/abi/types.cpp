@@ -747,7 +747,8 @@ static void write_c_interface_definition(writer& w, T const& type)
 
 )^-^", bind_c_type_name(type, "Vtbl"));
 
-    if constexpr (is_delegate)
+    bool isDelegate = type.category() == category::delegate_type;
+    if (isDelegate)
     {
         write_c_iunknown_interface(w, type);
     }
@@ -815,7 +816,7 @@ interface %
 
 )^-^", bind_c_type_name(type, "Vtbl"), bind_c_type_name(type), bind_c_type_name(type, "Vtbl"));
 
-    if constexpr (is_delegate)
+    if (isDelegate)
     {
         write_c_iunknown_interface_macros(w, type);
     }
