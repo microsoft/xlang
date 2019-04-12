@@ -1,16 +1,15 @@
+$windows_sdk = '10.0.17763.0'
+$repoRootPath = (get-item $PSScriptRoot).parent.Parent.parent.Parent.FullName
+$buildPath = "$repoRootPath/_build/Windows/packages"
+$toolsPath = "$buildPath\tools"
 
-$pywinrt_exe = Get-ChildItem $repoRoot\_build\Windows\*\*\tool\python\pywinrt.exe | 
+$pywinrt_exe = Get-ChildItem $repoRootPath\_build\Windows\*\*\tool\python\pywinrt.exe | 
     Sort-Object -Descending | Select-Object -first 1
 
 if (-not $pywinrt_exe) {
     Write-Error "pywinrt not avaliable"
     exit
 }
-
-$windows_sdk = '10.0.17763.0'
-$repoRootPath = (get-item $PSScriptRoot).parent.Parent.parent.Parent.FullName
-$buildPath = "$repoRootPath/_build/Windows/packages"
-$toolsPath = "$buildPath\tools"
 
 mkdir $buildPath\tools -ErrorAction SilentlyContinue | Out-Null
 
