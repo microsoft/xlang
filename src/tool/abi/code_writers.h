@@ -55,7 +55,10 @@ inline void write_cpp_fully_qualified_type(writer& w, std::string_view typeNames
     w.write(cpp_typename_format(w), [&](writer& w) { w.write("@::%", typeNamespace, typeName); });
 }
 
-inline auto bind_cpp_fully_qualified_type(std::string_view typeNamespace, std::string_view typeName)
+// NOTE: xlang::bind captures arguments by reference in the lambda that it returns, however since all of these bind_*
+//       helpers are intermediate functions, we can't have it capturing references to our stack arguments, hence the
+//       reason all of these arguments are captured by reference
+inline auto bind_cpp_fully_qualified_type(std::string_view const& typeNamespace, std::string_view const& typeName)
 {
     return xlang::text::bind<write_cpp_fully_qualified_type>(typeNamespace, typeName);
 }

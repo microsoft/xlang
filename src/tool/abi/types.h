@@ -352,7 +352,7 @@ struct mapped_type final : metadata_type
         return 0;
     }
 
-    virtual std::optional<contract_version> contract_from_index(std::size_t index) const override
+    virtual std::optional<contract_version> contract_from_index([[maybe_unused]] std::size_t index) const override
     {
         using namespace std::literals;
         XLANG_ASSERT(index == 0);
