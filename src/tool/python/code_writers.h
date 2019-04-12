@@ -1878,14 +1878,14 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", const_cast<char**>(kwlist)%))
             {
                 write_setter_try_catch(w, [&](writer& w)
                 {
-                    w.write("custom_set(self->obj, py::converter<%>::convert_to(arg));\n", field.Signature().Type());
+                    w.write("custom_set(self->obj, py::converter<%>::convert_to(arg));\nreturn 0;\n", field.Signature().Type());
                 });
             }
             else
             {
                 write_setter_try_catch(w, [&](writer& w)
                 {
-                    w.write("self->obj.% = py::converter<%>::convert_to(arg);\n",
+                    w.write("self->obj.% = py::converter<%>::convert_to(arg);\nreturn 0;\n",
                         bind<write_struct_field_name>(field),
                         field.Signature().Type());
                 });
