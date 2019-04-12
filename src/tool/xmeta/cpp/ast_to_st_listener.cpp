@@ -1,18 +1,6 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "ast_to_st_listener.h"
-#include "symbol_table_helpers.h"
-#include "models/class_model.h"
-#include "models/delegate_model.h"
-#include "models/enum_model.h"
-#include "models/event_model.h"
-#include "models/interface_model.h"
-#include "models/method_model.h"
-#include "models/namespace_model.h"
-#include "models/property_model.h"
-#include "models/struct_model.h"
-
 using namespace xlang::xmeta;
 extern bool semantic_error_exists;
 
@@ -232,6 +220,11 @@ bool extract_enum_member(XlangParser::Enum_member_declarationContext *ast_enum_m
     }
     new_enum.members.emplace_back(new_enum_member);
     return true;
+}
+
+void ast_to_st_listener::set_symbol_table(xlang::xmeta::symbol_table_helper &symbol_table)
+{
+    symbol_table = st;
 }
 
 void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationContext *ctx)

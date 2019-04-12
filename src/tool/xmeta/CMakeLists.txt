@@ -18,10 +18,13 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/libs/
     ${PROJECT_SOURCE_DIR}/cpp/generated
     ${PROJECT_SOURCE_DIR}/cpp
+    ${PROJECT_SOURCE_DIR}/models
   )
 
 set(xmeta_gen_src
     ${PROJECT_SOURCE_DIR}/main.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/symbol_table_helpers.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/models/namespace_model.cpp
     ${xmeta_gen_generated}       
   )
 

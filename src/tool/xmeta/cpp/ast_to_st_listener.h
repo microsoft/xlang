@@ -1,12 +1,26 @@
 #pragma once
 
 #include "generated/XlangParserBaseListener.h"
+#include "ast_to_st_listener.h"
+#include "symbol_table_helpers.h"
+#include "models/class_model.h"
+#include "models/delegate_model.h"
+#include "models/enum_model.h"
+#include "models/event_model.h"
+#include "models/interface_model.h"
+#include "models/method_model.h"
+#include "models/namespace_model.h"
+#include "models/property_model.h"
+#include "models/struct_model.h"
 
 extern bool semantic_error_exists;
 
-class ast_to_st_listener : public XlangParserBaseListener
+struct ast_to_st_listener : XlangParserBaseListener
 {
-public:
+    xlang::xmeta::symbol_table_helper &symbol_table;
+
+    void set_symbol_table(xlang::xmeta::symbol_table_helper &st);
+
     void enterClass_declaration(XlangParser::Class_declarationContext *ctx) override;
     void exitClass_declaration(XlangParser::Class_declarationContext *ctx) override;
 

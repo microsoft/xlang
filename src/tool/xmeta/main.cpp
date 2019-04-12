@@ -23,17 +23,12 @@ int main(int argc, const char * argv[]) {
     CommonTokenStream tokens(&lexer);
     XlangParser parser(&tokens);
     parser.setBuildParseTree(true);
-
+    xlang::xmeta::symbol_table_helper;
+    // ast_to_st_listener listener;
+    
     tree::ParseTree *tree = parser.xlang();
+    // tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+
     std::string s = tree->toStringTree(&parser);
-    std::cout << tree->toStringTree(&parser) << std::endl;
 
-    std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
-
-    // This gets the token stream and prints out all the tokens corresponding to the file
-    TokenStream * ts = parser.getTokenStream();
-    for (int i = 0; i < ts->size(); i++)
-    {
-        std::cout << ts->get(i)->getType() << std::endl;
-    }
 }
