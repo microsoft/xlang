@@ -26,20 +26,20 @@ fragment Newline
 
 /* Keywords */
 ABSTRACT: 'abstract';
+APICONTRACT: 'apicontract';
 ATTRIBUTE: 'attribute';
 CLASS: 'runtimeclass';
 CONST: 'const';
-DEFAULT: 'default';
 DELEGATE: 'delegate';
 ENUM: 'enum';
 EVENT: 'event';
 INTERFACE: 'interface';
-INTERNAL: 'internal';
+// INTERNAL: 'internal';
 NAMESPACE: 'namespace';
 PARTIAL: 'partial';
-OBJECT: 'object';
 OUT: 'out';
 OVERRIDE: 'override';
+OVERRIDABLE: 'overridable';
 PROTECTED: 'protected';
 REF: 'ref';
 REQUIRES: 'requires';
@@ -48,6 +48,7 @@ STATIC: 'static';
 STRUCT: 'struct';
 TYPEOF: 'typeof';
 USING: 'using';
+UNSEALED: 'unsealed';
 VIRTUAL: 'virtual';
 VOID: 'void';
 
@@ -67,11 +68,7 @@ PLACEHOLDER_REMOVELATER: 'placeholder';
 ASSEMBLY: 'assembly';
 MODULE: 'module';
 FIELD: 'field';
-METHOD: 'method';
-PARAM: 'param';
-PROPERTY: 'property';
 RETURN: 'return';
-TYPE: 'type';
 
 // Xlang Type System
 INT8: 'Int8';
@@ -87,8 +84,9 @@ DOUBLE: 'Double';
 CHAR16: 'Char16';
 BOOLEAN: 'Boolean';
 STRING: 'String';
-GUID: 'Guid';
+
 NILL: 'NULL';
+OBJECT: 'Object';
 
 SEMICOLON: ';';
 OPEN_BRACE: '{';
@@ -105,6 +103,7 @@ DOUBLE_COLON: '::';
 EQUAL: '=';
 LESS_THAN: '<';
 GREATER_THAN: '>';
+MINUS: '-';
 
 /* Identifiers */
 // Note: An identifier-or-keyword that is not a keyword
@@ -116,7 +115,7 @@ IDENTIFIER
     ;
     
 UUID
-   : HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit '-' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit;
+   : HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit;
 
 BOOLEAN_LITERAL: 'true' | 'false';
 
@@ -970,48 +969,3 @@ fragment UnicodeClassZS
     | '\u3000' // IDEOGRAPHIC SPACE
     | '\u205F' // MEDIUM MATHEMATICAL SPACE
     ;
-
-/*
-Keyword
-    :
-    ( ABSTRACT
-    | ATTRIBUTE
-    | BOOLEAN
-    | UINT8
-    | CHAR
-    | CLASS
-    | CONST
-    | DEFAULT
-    | DELEGATE
-    | DOUBLE
-    | ENUM
-    | EVENT
-    | FALSE
-    | SINGLE
-    | INT32
-    | INTERFACE
-    | LONG
-    | NAMEPSACE
-    | NULL
-    | OBJECT
-    | OUT
-    | OVERRIDE
-    | PROTECTED
-    | PUBIC
-    | REF
-    | SEALED
-    | SHORT
-    | STATIC
-    | STRING
-    | STRUCT
-    | TRUE
-    | TYPEOF
-    | UINT32
-    | UINT64
-    | UINT16
-    | USING
-    | VIRTUAL
-    | VOID
-    )
-    ;
-*/

@@ -2,7 +2,6 @@ parser grammar XlangParser;
 
 options { tokenVocab=XlangLexer; }
 
-
 /* Entry Point */
 xlang
     : compilation_unit
@@ -10,11 +9,6 @@ xlang
 
 compilation_unit
     : using_directive* namespace_declaration*
-    ;
-
-// For lexer tests
-xlang_lexer_tests
-    : UUID
     ;
     
 /* Basic Concepts */
@@ -26,14 +20,12 @@ type_name
     : namespace_or_type_name
     ;
 
-
 namespace_or_type_name
     : IDENTIFIER type_argument_list?
     | namespace_or_type_name . IDENTIFIER type_argument_list?
     | qualified_alias_member
     ;
 
-/* Types */ //TODO: Nullable Types?
 type
     : value_type
     | class_type
@@ -51,7 +43,6 @@ value_type
     | UINT32
     | UINT64
     | CHAR16
-    | GUID
     | SINGLE
     | DOUBLE
     ;
@@ -71,7 +62,7 @@ non_array_type
     | class_type
     ;
 
-// Remove nullable type, Causing left resursive problems
+
 enum_integral_type
     : INT8
     | UINT8
@@ -126,11 +117,8 @@ attribute_target
     | MODULE
     | FIELD
     | EVENT
-    | METHOD
-    | PARAM
     | PROPERTY
     | RETURN
-    | TYPE
     | PUBLIC
     ;
 
@@ -193,20 +181,35 @@ namespace_member_declaration
     | interface_declaration
     | enum_declaration
     | delegate_declaration
+    | apicontract_declaration
+    | attribute_declaration
     ;
 
 qualified_alias_member
     : IDENTIFIER DOUBLE_COLON IDENTIFIER type_argument_list?
     ;
+    
+apicontract_declaration
+    : attributes? APICONTRACT IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
+    ;
+    
+//* Class members *//
+attribute_declaration
+    : attributes? ATTRIBUTE IDENTIFIER
+        attribute_body SEMICOLON
+    ;
 
-//* Classes *//
+attribute_body
+    : OPEN_BRACE field_declaration* CLOSE_BRACE
+    ;
+
 class_declaration
     : attributes? class_modifier* CLASS IDENTIFIER type_parameter_list?
         class_base? class_body SEMICOLON?
     ;
 
 class_modifier
-    : SEALED
+    : UNSEALED
     | STATIC
     ;
 
@@ -215,40 +218,70 @@ type_parameter_list
     ;
 
 class_base
-    : COLON class_type
+    : COLON class_type_base
     | COLON interface_type_list
-    | COLON class_type COMMA interface_type_list
+    | COLON class_type_base COMMA interface_type_list
+    ;
+
+/* TODO: Determine whether class_type_base and interface_type_base should exist
+ The only difference between class_type_base and interface_type_base is that
+ class_type base can be Object or NULL which doesn't make sense in terms of inheritance.
+ 
+ You can't really inherit from NULL. We can just remove this part of the grammar 
+ and have it referto just type_name. 
+ Let the semantic checking do the work of determining whether it is a class type or 
+ interface type.  
+*/
+class_type_base
+    : attributes? class_type
     ;
 
 interface_type_list
-    : type_name (COMMA type_name)*
+    : interface_type_base (COMMA interface_type_base)*
+    ;
+    
+interface_type_base
+    : attributes? type_name
     ;
 
 class_body
-    : OPEN_BRACE class_member_declaration* CLOSE_BRACE
+    : OPEN_BRACE class_member_declarations* CLOSE_BRACE
     ;
 
+class_member_declarations
+    : attributes OPEN_BRACE class_member_declaration* CLOSE_BRACE
+    | class_member_declaration
+    ;
+    
 class_member_declaration
-    : method_declaration
-    | property_declaration
-    | event_declaration
+    : class_method_declaration
+    | class_property_declaration
+    | class_event_declaration
     | class_constructor_declaration
     ;
 
-method_declaration
-    : method_modifiers? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+class_method_declaration
+    : attributes? method_modifier* return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
-method_modifiers
-    : method_modifier
-    | method_modifiers method_modifier
+class_event_declaration
+    : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
+    | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    ;
+
+class_property_declaration
+    : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    ;
+
+class_constructor_declaration
+    : attributes? class_constructor_modifier* IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 method_modifier
     : OVERRIDE
+    | OVERRIDABLE
     | PROTECTED
     | STATIC
-    | SEALED
     ;
 
 formal_parameter_list
@@ -261,6 +294,8 @@ fixed_parameter
 
 parameter_modifier
     : CONST REF
+    | REF CONST
+    | REF
     | OUT
     ;
 
@@ -269,24 +304,34 @@ return_type
     | VOID
     ;
 
-property_declaration
-    : attributes? property_modifier* type IDENTIFIER OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
-    ;
+property_identifier
+    : IDENTIFIER
+    | BOOLEAN
+    | STRING
+    | INT8
+    | INT16
+    | INT32
+    | INT64
+    | UINT8
+    | UINT16
+    | UINT32
+    | UINT64
+    | CHAR16
+    | SINGLE
+    | DOUBLE
+    | OBJECT
+    | NILL;
 
 property_modifier
     : PROTECTED
     | STATIC
+    | OVERRIDABLE
     ;
 
 property_accessors
     : attributes? GET SEMICOLON
     | attributes? SET SEMICOLON
     | attributes? GET SEMICOLON SET SEMICOLON
-    ;
-
-event_declaration
-    : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
-    | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
 
 event_modifier
@@ -298,10 +343,10 @@ event_accessors
     : attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON
     ;
 
-class_constructor_declaration
-    : attributes? IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+class_constructor_modifier
+    : PROTECTED
     ;
-
+    
 /* Structs */
 struct_declaration
     : attributes? STRUCT IDENTIFIER type_parameter_list?
@@ -314,7 +359,6 @@ struct_body
 
 field_declaration
     : type IDENTIFIER SEMICOLON
-    // TODO: Add variable initializers (<type> <id> = <expression>;)
     ;
 
 /* Interfaces */
@@ -332,11 +376,24 @@ interface_body
     ;
 
 interface_member_declaration
-    : method_declaration
-    | property_declaration
-    | event_declaration
+    : interface_method_declaration
+    | interface_property_declaration
+    | interface_event_declaration
     ;
 
+interface_method_declaration
+    : attributes? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    ;
+
+interface_property_declaration
+    : attributes? type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    ;
+    
+interface_event_declaration
+    : attributes? EVENT type IDENTIFIER SEMICOLON
+    | attributes? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    ;
+    
 /* Enums */
 enum_declaration
     : attributes? enum_modifier* ENUM IDENTIFIER enum_base? enum_body SEMICOLON?
@@ -356,36 +413,53 @@ enum_modifier
     ;
 
 enum_member_declaration
-    : attributes? IDENTIFIER
-    | attributes? IDENTIFIER EQUAL enum_expression
+    : attributes? enum_identifier
+    | attributes? enum_identifier EQUAL enum_expression
     ;
 
 enum_expression 
     : enum_decimal_integer
     | enum_hexdecimal_integer
-    | enum_identifier;
+    | enum_expresssion_identifier;
 
 enum_decimal_integer
-    : DECIMAL_INTEGER_LITERAL;
+    : MINUS? DECIMAL_INTEGER_LITERAL;
     
-enum_identifier
+enum_expresssion_identifier
     : IDENTIFIER;
 
 enum_hexdecimal_integer
     : HEXADECIMAL_INTEGER_LITERAL;
 
+enum_identifier
+    : IDENTIFIER
+    | BOOLEAN
+    | STRING
+    | INT8
+    | INT16
+    | INT32
+    | INT64
+    | UINT8
+    | UINT16
+    | UINT32
+    | UINT64
+    | CHAR16
+    | SINGLE
+    | DOUBLE
+    | OBJECT
+    | NILL;
+
 /* Delegates */
 delegate_declaration
     : attributes? delegate_modifier* DELEGATE return_type
         IDENTIFIER type_parameter_list?
-        OPEN_PARENS formal_parameter_list CLOSE_PARENS SEMICOLON
+        OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 delegate_modifier
     : NEW
     | PUBLIC
     | PROTECTED
-    | INTERNAL
     | PRIVATE
     ;
 
