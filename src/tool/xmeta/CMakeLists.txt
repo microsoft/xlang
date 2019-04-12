@@ -17,6 +17,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/
     ${PROJECT_SOURCE_DIR}/libs/
     ${PROJECT_SOURCE_DIR}/cpp/generated
+    ${PROJECT_SOURCE_DIR}/cpp
   )
 
 set(xmeta_gen_src

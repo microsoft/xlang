@@ -14,17 +14,17 @@ public:
 
     void exitEnum_declaration(XlangParser::Enum_declarationContext *ctx) override;
 
-    void exitEvent_declaration(XlangParser::Event_declarationContext *ctx) override;
+    void exitClass_event_declaration(XlangParser::Class_event_declarationContext *ctx) override;
 
     void enterInterface_declaration(XlangParser::Interface_declarationContext *ctx) override;
     void exitInterface_declaration(XlangParser::Interface_declarationContext *ctx) override;
 
-    void exitMethod_declaration(XlangParser::Method_declarationContext *ctx) override;
+    void exitClass_method_declaration(XlangParser::Class_method_declarationContext *ctx) override;
 
     void enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
     void exitNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
 
-    void exitProperty_declaration(XlangParser::Property_declarationContext *ctx) override;
+    void exitClass_property_declaration(XlangParser::Class_property_declarationContext *ctx) override;
 
     void enterStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;
     void exitStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;

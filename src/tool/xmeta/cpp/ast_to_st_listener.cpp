@@ -328,7 +328,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     cur_namespace_body->enums.emplace_back(new_enum);
 }
 
-void ast_to_st_listener::exitEvent_declaration(XlangParser::Event_declarationContext *ctx)
+void ast_to_st_listener::exitClass_event_declaration(XlangParser::Class_event_declarationContext *ctx)
 {
     auto id = ctx->IDENTIFIER();
     std::string_view event_name{ id->getText() };
@@ -392,7 +392,7 @@ void ast_to_st_listener::exitInterface_declaration(XlangParser::Interface_declar
     cur_interface = nullptr;
 }
 
-void ast_to_st_listener::exitMethod_declaration(XlangParser::Method_declarationContext *ctx)
+void ast_to_st_listener::exitClass_method_declaration(XlangParser::Class_method_declarationContext *ctx)
 {
     std::string_view method_name{ ctx->IDENTIFIER()->getText() };
     auto decl_line = ctx->IDENTIFIER()->getSymbol()->getLine();
@@ -496,7 +496,7 @@ void ast_to_st_listener::exitNamespace_declaration(XlangParser::Namespace_declar
     }
 }
 
-void ast_to_st_listener::exitProperty_declaration(XlangParser::Property_declarationContext *ctx)
+void ast_to_st_listener::exitClass_property_declaration(XlangParser::Class_property_declarationContext *ctx)
 {
     auto id = ctx->IDENTIFIER();
     auto decl_line = id->getSymbol()->getLine();

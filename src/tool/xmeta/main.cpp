@@ -3,6 +3,8 @@
 #include "antlr4-runtime.h"
 #include "XlangParser.h"
 #include "XlangLexer.h"
+#include "ast_to_st_listener.h"
+#include "symbol_table_helpers.h"
 
 #include <Windows.h>
 
