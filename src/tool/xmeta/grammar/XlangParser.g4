@@ -254,19 +254,27 @@ class_member_declarations
     ;
     
 class_member_declaration
-    : method_declaration
-    | property_declaration
-    | event_declaration
+    : class_method_declaration
+    | class_property_declaration
+    | class_event_declaration
     | class_constructor_declaration
     ;
 
-method_declaration
-    : attributes? method_modifiers? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+class_method_declaration
+    : attributes? method_modifier* return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
-method_modifiers
-    : method_modifier
-    | method_modifiers method_modifier
+class_event_declaration
+    : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
+    | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    ;
+
+class_property_declaration
+    : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    ;
+
+class_constructor_declaration
+    : attributes? class_constructor_modifier* IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 method_modifier
@@ -294,10 +302,6 @@ parameter_modifier
 return_type
     : type
     | VOID
-    ;
-
-property_declaration
-    : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
     ;
 
 property_identifier
@@ -330,11 +334,6 @@ property_accessors
     | attributes? GET SEMICOLON SET SEMICOLON
     ;
 
-event_declaration
-    : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
-    | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
-    ;
-
 event_modifier
     : PROTECTED
     | STATIC
@@ -342,10 +341,6 @@ event_modifier
 
 event_accessors
     : attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON
-    ;
-
-class_constructor_declaration
-    : attributes? class_constructor_modifier* IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 class_constructor_modifier
@@ -381,11 +376,24 @@ interface_body
     ;
 
 interface_member_declaration
-    : method_declaration
-    | property_declaration
-    | event_declaration
+    : interface_method_declaration
+    | interface_property_declaration
+    | interface_event_declaration
     ;
 
+interface_method_declaration
+    : attributes? return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    ;
+
+interface_property_declaration
+    : attributes? type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    ;
+    
+interface_event_declaration
+    : attributes? EVENT type IDENTIFIER SEMICOLON
+    | attributes? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    ;
+    
 /* Enums */
 enum_declaration
     : attributes? enum_modifier* ENUM IDENTIFIER enum_base? enum_body SEMICOLON?
