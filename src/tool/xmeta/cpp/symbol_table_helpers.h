@@ -7,10 +7,7 @@
 #include <sstream>
 #include <string>
 
-#include "models/class_model.h"
-#include "models/interface_model.h"
-#include "models/namespace_model.h"
-#include "models/struct_model.h"
+#include "models/xlang_models.h"
 
 namespace xlang::xmeta
 {
@@ -38,6 +35,42 @@ namespace xlang::xmeta
         auto const& get_namespaces() const
         {
             return namespaces;
+        }
+
+        auto const& get_cur_namespace_body() const
+        {
+            return cur_namespace_body;
+        }
+        void set_cur_namespace_body(std::shared_ptr<class_model> const& cur_namespace_body)
+        {
+            this->cur_namespace_body = cur_namespace_body;
+        }
+
+        auto const& get_cur_class() const
+        {
+            return cur_class;
+        }
+        void set_cur_class(std::shared_ptr<class_model> const& cur_class)
+        {
+            this->cur_class = cur_class;
+        }
+
+        auto const& get_cur_interface() const
+        {
+            return cur_interface;
+        }
+        void set_cur_interface(std::shared_ptr<class_model> const& cur_interface)
+        {
+            this->cur_interface = cur_interface;
+        }
+
+        auto const& get_cur_struct() const
+        {
+            return cur_struct;
+        }
+        void set_cur_struct(std::shared_ptr<class_model> const& cur_struct)
+        {
+            this->cur_class = cur_struct;
         }
 
     private:

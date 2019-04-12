@@ -1,75 +1,77 @@
 #include <algorithm>
 #include <stdexcept>
+#include <symbol_table_helpers.h>
+#include <ast_to_st_listener.h>
 
 using namespace xlang::xmeta;
 extern bool semantic_error_exists;
 
-std::map<std::string, enum_t> enum_t_antlr_to_xmeta_map
+std::map<std::string, enum_type> enum_t_antlr_to_xmeta_map
 {
-    { "Int8", enum_t::int8_enum },
-    { "UInt8", enum_t::uint8_enum },
-    { "Int16", enum_t::int16_enum },
-    { "UInt16", enum_t::uint16_enum },
-    { "Int32", enum_t::int32_enum },
-    { "UInt32", enum_t::uint32_enum },
-    { "Int64", enum_t::int64_enum },
-    { "UInt64", enum_t::uint64_enum }
+    { "Int8", enum_type::int8_enum },
+    { "UInt8", enum_type::uint8_enum },
+    { "Int16", enum_type::int16_enum },
+    { "UInt16", enum_type::uint16_enum },
+    { "Int32", enum_type::int32_enum },
+    { "UInt32", enum_type::uint32_enum },
+    { "Int64", enum_type::int64_enum },
+    { "UInt64", enum_type::uint64_enum }
 };
 
-simple_type value_type_antlr_to_xmeta(XlangParser::Value_typeContext *vt)
+simple_t value_type_antlr_to_xmeta(XlangParser::Value_typeContext *vt)
 {
-    simple_type return_type = simple_type::boolean;
+    simple_t return_type = simple_t::boolean_type;
     if (vt->BOOLEAN())
     {
-        return_type = simple_type::boolean_type;
+        return_type = simple_t::boolean_type;
     }
     else if (vt->STRING())
     {
-        return_type = simple_type::string_type;
+        return_type = simple_t::string_type;
     }
     else if (vt->INT16())
     {
-        return_type = simple_type::int16_type;
+        return_type = simple_t::int16_type;
     }
     else if (vt->INT32())
     {
-        return_type = simple_type::int32_type;
+        return_type = simple_t::int32_type;
     }
     else if (vt->INT64())
     {
-        return_type = simple_type::int64_type;
+        return_type = simple_t::int64_type;
     }
     else if (vt->UINT8())
     {
-        return_type = simple_type::uint8_type;
+        return_type = simple_t::uint8_type;
     }
     else if (vt->UINT16())
     {
-        return_type = simple_type::uint16_type;
+        return_type = simple_t::uint16_type;
     }
     else if (vt->UINT32())
     {
-        return_type = simple_type::uint32_type;
+        return_type = simple_t::uint32_type;
     }
     else if (vt->UINT64())
     {
-        return_type = simple_type::uint64_type;
+        return_type = simple_t::uint64_type;
     }
     else if (vt->CHAR16())
     {
-        return_type = simple_type::char16_type;
+        return_type = simple_t::char16_type;
     }
-    else if (vt->GUID())
-    {
-        return_type = simple_type::guid_type;
-    }
+    //else if (vt->GUID())
+    //{
+    //    return_type = simple_t::guid_type;
+    //}
     else if (vt->SINGLE())
     {
-        return_type = simple_type::single_type;
+        return_type = simple_t::single_type;
     }
     else if (vt->DOUBLE())
     {
-        return_type = simple_type::double_type;
+        return_type = simple_t::double_type;
     }
     return return_type;
 }
@@ -146,8 +148,8 @@ void extract_formal_params(std::vector<XlangParser::Fixed_parameterContext *> co
 
 bool extract_enum_member(XlangParser::Enum_member_declarationContext *ast_enum_member, enum_model & new_enum)
 {
-    enum_member new_enum_member;
-    new_enum_member.id = ast_enum_member->IDENTIFIER()->getText();
+   /* enum_member new_enum_member;
+    new_enum_member.id = ast_enum_member->enum_identifier()->getText();
     if (new_enum.get_member(new_enum_member.id) != new_enum.members.end())
     {
         write_enum_member_name_error(new_enum.decl_line, new_enum_member.id, new_enum.id);
@@ -219,10 +221,10 @@ bool extract_enum_member(XlangParser::Enum_member_declarationContext *ast_enum_m
         }
     }
     new_enum.members.emplace_back(new_enum_member);
-    return true;
+    return true;*/
 }
 
-void ast_to_st_listener::set_symbol_table(xlang::xmeta::symbol_table_helper &symbol_table)
+void ast_to_st_listener::set_symbol_table(xlang::xmeta::symbol_table_helper &st)
 {
     symbol_table = st;
 }
@@ -234,27 +236,27 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
     {
         std::string_view class_name{ id->getText() };
         auto decl_line = id->getSymbol()->getLine();
-        if (cur_namespace_body->member_id_exists(class_name))
+        if (symbol_table.get_cur_namespace_body()->member_id_exists(class_name))
         {
             // Semantically invalid by check 3 for namespace members.
-            write_namespace_member_name_error(decl_line, class_name);
+            symbol_table.write_namespace_member_name_error(decl_line, class_name);
             return;
         }
 
         class_modifier_t mod = class_modifier_t::none;
-        if (ctx->class_modifier())
-        {
-            if (ctx->class_modifier()->UNSEALED())
-            {
-                mod = class_modifier_t::unsealed_class;
-            }
-            else if (ctx->class_modifier()->STATIC())
-            {
-                mod = class_modifier_t::static_class;
-            }
-        }
+        //if (ctx->class_modifier())
+        //{
+        //    if (ctx->class_modifier()->UNSEALED())
+        //    {
+        //        mod = class_modifier_t::unsealed_class;
+        //    }
+        //    else if (ctx->class_modifier()->STATIC())
+        //    {
+        //        mod = class_modifier_t::static_class;
+        //    }
+        //}
         cur_class = std::make_shared<class_model>(class_name, decl_line, mod);
-        cur_namespace_body->classes[class_name] = cur_class;
+        symbol_table.get_cur_namespace_body->classes[class_name] = cur_class;
     }
 }
 

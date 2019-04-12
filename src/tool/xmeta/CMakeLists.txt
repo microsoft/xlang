@@ -24,6 +24,7 @@ include_directories(
 set(xmeta_gen_src
     ${PROJECT_SOURCE_DIR}/main.cpp
     ${PROJECT_SOURCE_DIR}/cpp/symbol_table_helpers.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/ast_to_st_listener.cpp
     ${PROJECT_SOURCE_DIR}/cpp/models/namespace_model.cpp
     ${xmeta_gen_generated}       
   )
