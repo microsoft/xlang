@@ -52,7 +52,7 @@ TEST_CASE("Namespace Identifier")
     xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
 
-    std::set<std::string> namespaces = listener.namespaces;
+    std::set<std::string> &namespaces = listener.namespaces;
     REQUIRE(namespaces.find("test") != namespaces.end());
 }
 
@@ -68,7 +68,7 @@ TEST_CASE("Token identifier with unicode letter character")
 
     xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
-    std::set<std::string> namespaces = listener.namespaces;
+    std::set<std::string> &namespaces = listener.namespaces;
 
     REQUIRE(namespaces.find("test1AÆĦǆＺ") != namespaces.end()); // LU 
     REQUIRE(namespaces.find("test2aăɶｚ") != namespaces.end()); // LL
@@ -95,7 +95,7 @@ TEST_CASE("Remove comments")
 
     xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
-    std::set<std::string> namespaces = listener.namespaces;
+    std::set<std::string> &namespaces = listener.namespaces;
 
     REQUIRE(namespaces.find("test") != namespaces.end());
     REQUIRE(namespaces.find("test2") != namespaces.end());
@@ -111,7 +111,7 @@ TEST_CASE("Spacing")
 
     xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
-    std::set<std::string> namespaces = listener.namespaces;
+    std::set<std::string> &namespaces = listener.namespaces;
 
     REQUIRE(namespaces.find("test") != namespaces.end());
     REQUIRE(namespaces.find("test2") != namespaces.end());
@@ -131,7 +131,7 @@ TEST_CASE("Lexer uuid")
 
     xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
-    std::set<std::string> expressions = listener.expressions;
+    std::set<std::string> &expressions = listener.expressions;
 
     REQUIRE(expressions.find("b7de5527-4c8f-42dd-84da-5ec493abdb9a") != expressions.end());
 }
@@ -162,7 +162,7 @@ TEST_CASE("Enum assignments")
 
     xlang_test_listener listener;
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
-    std::set<std::string> enums = listener.enums;
+    std::set<std::string> &enums = listener.enums;
 
     REQUIRE(enums.find("Red") != enums.end());
     REQUIRE(enums.find("Green") != enums.end());
