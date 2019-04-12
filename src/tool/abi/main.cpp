@@ -151,9 +151,9 @@ int main(int const argc, char** argv)
             auto includes = [&](auto const& vector)
             {
                 return std::find_if(vector.begin(), vector.end(), [&](auto const& t)
-                {
-                    return f.includes(t.type());
-                }) != vector.end();;
+                    {
+                        return f.includes(t.type());
+                    }) != vector.end();;
             };
             if (includes(types.enums) || includes(types.structs) || includes(types.delegates) ||
                 includes(types.interfaces) || includes(types.classes))
@@ -185,6 +185,7 @@ int main(int const argc, char** argv)
                 {
                     group.add([&, ns = ns]()
                     {
+                        auto typeCache = mdCache.compile_namespaces({ ns });
                         write_abi_header(ns, config, mdCache.compile_namespaces({ ns }));
                     });
                 }
@@ -215,85 +216,9 @@ int main(int const argc, char** argv)
                 }
                 else
                 {
-                    group.add([&]()
-                    {
-                        auto types = mdCache.compile_namespaces({ foundation_namespace, collections_namespace });
-
-                        // Remove both 'CollectionChange' and 'IVectorChangedEventArgs' since these are both defined in
-                        // ivectorchangedeventargs.h. There's no good reason for it to be separate (and in fact it works
-                        // perfectly fine without this), but it's sometimes a huge pain to try and get existing code to
-                        // build without it separated due to redefinition errors
-                        type_cache vectorChangedTypes{ &mdCache };
-                        if (auto itr = std::find_if(types.enums.begin(), types.enums.end(), [&](auto const& type)
-                        {
-                            return type.get().clr_full_name() == "Windows.Foundation.Collections.CollectionChange"sv;
-                        }); itr != types.enums.end())
-                        {
-                            vectorChangedTypes.enums.push_back(*itr);
-                            types.enums.erase(itr);
-                        }
-                        else
-                        {
-                            XLANG_ASSERT(false);
-                        }
-
-                        if (auto itr = std::find_if(types.interfaces.begin(), types.interfaces.end(), [&](auto const& type)
-                        {
-                            return type.get().clr_full_name() == "Windows.Foundation.Collections.IVectorChangedEventArgs"sv;
-                        }); itr != types.interfaces.end())
-                        {
-                            vectorChangedTypes.interfaces.push_back(*itr);
-                            types.interfaces.erase(itr);
-                        }
-                        else
-                        {
-                            XLANG_ASSERT(false);
-                        }
-
-                        write_abi_header(foundation_namespace, config, types);
-                        write_abi_header("ivectorchangedeventargs", config, vectorChangedTypes);
-                    });
+                    auto types = mdCache.compile_namespaces({ foundation_namespace, collections_namespace });
+                    write_abi_header(foundation_namespace, config, types);
                 }
-            });
-
-            group.add([&]()
-            {
-                // Write the 'Windows.Foundation.Collections.h' header
-                basic_writer w;
-                w.write(strings::generics_begin);
-
-                if (config.ns_prefix_state == ns_prefix::always)
-                {
-                    w.write("\nnamespace ABI {");
-                }
-                else if (config.ns_prefix_state == ns_prefix::optional)
-                {
-                    w.write(R"^-^(
-#if defined(MIDL_NS_PREFIX)
-namespace ABI {
-#endif // defined(MIDL_NS_PREFIX))^-^");
-                }
-
-                w.write(strings::generics_meta);
-                w.write(strings::generics_foundation);
-                w.write(strings::generics_collections);
-                w.write(strings::generics_async);
-                w.write(strings::generics_vector);
-
-                if (config.ns_prefix_state == ns_prefix::always)
-                {
-                    w.write("} // ABI\n");
-                }
-                else if (config.ns_prefix_state == ns_prefix::optional)
-                {
-                    w.write(R"^-^(#if defined(MIDL_NS_PREFIX)
-} // ABI
-#endif // defined(MIDL_NS_PREFIX)
-)^-^");
-                }
-
-                w.write(strings::generics_end);
-                w.flush_to_file(config.output_directory / "Windows.Foundation.Collections.h");
             });
         }
 

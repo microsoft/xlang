@@ -50,6 +50,19 @@ inline bool operator<(metadata_type const& lhs, metadata_type const& rhs) noexce
     return lhs.clr_full_name() < rhs.clr_full_name();
 }
 
+struct typename_comparator
+{
+    bool operator()(std::string_view lhs, metadata_type const& rhs)
+    {
+        return lhs < rhs.clr_full_name();
+    }
+
+    bool operator()(metadata_type const& lhs, std::string_view rhs)
+    {
+        return lhs.clr_full_name() < rhs;
+    }
+};
+
 struct element_type final : metadata_type
 {
     element_type(

@@ -651,6 +651,30 @@ type_cache metadata_cache::compile_namespaces(std::initializer_list<std::string_
             std::inserter(result.internal_dependencies, result.internal_dependencies.end()),
             std::inserter(result.external_dependencies, result.external_dependencies.end()),
             [&](auto const& type) { return includes_namespace(type.get().clr_logical_namespace()); });
+
+        // Remove any "built-in types" since these are either defined in other header files or are metadata only types
+        auto remove_type = [&](auto& list, std::string_view name)
+        {
+            auto [lo, hi] = std::equal_range(list.begin(), list.end(), name, typename_comparator{});
+            XLANG_ASSERT((lo + 1) >= hi);
+            list.erase(lo, hi);
+        };
+
+        if (ns == "Windows.Foundation.Collections"sv)
+        {
+            remove_type(result.enums, "Windows.Foundation.Collections.CollectionChange"sv);
+            remove_type(result.interfaces, "Windows.Foundation.Collections.IVectorChangedEventArgs"sv);
+        }
+        else if (ns == "Windows.Foundation.Metadata"sv)
+        {
+            remove_type(result.enums, "Windows.Foundation.Metadata.AttributeTargets");
+            remove_type(result.enums, "Windows.Foundation.Metadata.CompositionType");
+            remove_type(result.enums, "Windows.Foundation.Metadata.DeprecationType");
+            remove_type(result.enums, "Windows.Foundation.Metadata.FeatureStage");
+            remove_type(result.enums, "Windows.Foundation.Metadata.MarshalingType");
+            remove_type(result.enums, "Windows.Foundation.Metadata.Platform");
+            remove_type(result.enums, "Windows.Foundation.Metadata.ThreadingModel");
+        }
     }
 
     // Structs need all members to be defined prior to the struct definition
