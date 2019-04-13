@@ -30,8 +30,8 @@ $CPPWINRT_PATH = join-path $buildPath cppwinrt
 
 $pywinrt_path = join-path $buildPath pywinrt
 
-# $include = @("Windows.")
-$include = "Windows.Data.Json", "Windows.Devices.Geolocation", "Windows.Foundation", "Windows.Graphics.DirectX"
+$include = @("Windows.")
+# $include = "Windows.Data.Json", "Windows.Devices.Geolocation", "Windows.Foundation", "Windows.Graphics.DirectX"
 $include_param = $include | ForEach-Object{ "-include", "$_"}
 $exclude = "Windows.UI.Comp", "Windows.UI.Xaml"
 $exclude_param = $exclude | ForEach-Object{ "-exclude", "$_"}
