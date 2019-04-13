@@ -1,97 +1,68 @@
 #pragma once
 
 #include <algorithm>
+#include <optional>
 #include <string_view>
+#include <vector>
+#include <variant>
 
 #include "base_model.h"
 
 namespace xlang::xmeta
 {
-    enum class enum_t
+    enum class enum_semantics
     {
-        int8_enum,
-        uint8_enum,
-        int16_enum,
-        uint16_enum,
-        int32_enum,
-        uint32_enum,
-        int64_enum,
-        uint64_enum
+        Int8,
+        Uint8,
+        Int16,
+        Uint16,
+        Int32,
+        Uint32,
+        Int64,
+        Uint64
     };
+
+    using enum_member_semantics = std::variant<
+        int8_t,
+        uint8_t,
+        int16_t,
+        uint16_t,
+        int32_t,
+        uint32_t,
+        int64_t,
+        uint64_t>;
 
     struct enum_member
     {
-        std::string_view id;
-        int64_t signed_val;
-        uint64_t unsigned_val;
-        std::string_view value_id;
+        enum_member(std::string_view const& id, std::optional<enum_member_semantics> val);
+        enum_member(std::string_view const& id, std::string_view const& expression_id);
+
+        auto const& get_id() const;
+        auto const& get_value() const;
+        auto const& get_expression_id() const;
+
+        void set_value(enum_member_semantics const& val);
+
+    private:
+        std::string m_id;
+        std::optional<enum_member_semantics> m_value;
+        std::string m_expression_id;
     };
 
     struct enum_model : base_model
     {
-        enum_model(std::string_view const& id, size_t decl_line, enum_t type) :
-            base_model{ id, decl_line },
-            type{ type }
-        { }
+        enum_model(std::string_view const& id, size_t decl_line, enum_semantics t);
         enum_model() = delete;
 
-        auto get_member(std::string_view const& member_id) const
-        {
-            return std::find_if(members.begin(), members.end(),
-                [&member_id](enum_member const& em) { return em.id == member_id; });
-        }
+        auto const& get_members() const;
+        auto const& get_type() const;
 
-        bool is_signed() const
-        {
-            return type == enum_t::int8_enum ||
-                type == enum_t::int16_enum ||
-                type == enum_t::int32_enum ||
-                type == enum_t::int64_enum;
-        }
+        std::errc assign_value(std::string_view const& member_id, std::string_view str_val);
+        void add_member(std::string_view const& id, std::optional<enum_member_semantics> val);
+        void add_member(std::string_view const& id, std::string_view const& expression_id);
 
-        bool within_range(int64_t val) const
-        {
-            if (type == enum_t::int8_enum)
-            {
-                return std::numeric_limits<int8_t>::min() <= val && val <= std::numeric_limits<int8_t>::max();
-            }
-            else if (type == enum_t::int16_enum)
-            {
-                return std::numeric_limits<int16_t>::min() <= val && val <= std::numeric_limits<int16_t>::max();
-            }
-            else if (type == enum_t::int32_enum)
-            {
-                return std::numeric_limits<int32_t>::min() <= val && val <= std::numeric_limits<int32_t>::max();
-            }
-            else if (type == enum_t::int64_enum)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        bool within_range(uint64_t val) const
-        {
-            if (type == enum_t::uint8_enum)
-            {
-                return std::numeric_limits<uint8_t>::min() <= val && val <= std::numeric_limits<uint8_t>::max();
-            }
-            else if (type == enum_t::uint16_enum)
-            {
-                return std::numeric_limits<uint16_t>::min() <= val && val <= std::numeric_limits<uint16_t>::max();
-            }
-            else if (type == enum_t::uint32_enum)
-            {
-                return std::numeric_limits<uint32_t>::min() <= val && val <= std::numeric_limits<uint32_t>::max();
-            }
-            else if (type == enum_t::uint64_enum)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        enum_t type;
-        std::vector<enum_member> members;
+    private:
+        enum_semantics m_type;
+        std::vector<enum_member> m_members;
     };
 }
