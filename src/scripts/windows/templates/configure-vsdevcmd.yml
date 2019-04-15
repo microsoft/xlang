@@ -1,0 +1,11 @@
+parameters:
+  hostArchitecture: 'x86'    # defaults for any parameters that aren't specified
+  targetArchitecture: 'x86'  # defaults for any parameters that aren't specified
+
+steps:
+- task: BatchScript@1
+  displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host ${{ parameters.hostArchitecture }})'
+  inputs:
+    filename: 'src/scripts/windows/call-batchfile.bat'
+    arguments: '%vsdevcmd% -host_arch=${{ parameters.hostArchitecture }} -arch=${{ parameters.targetArchitecture }}'
+    modifyEnvironment: true

@@ -1,0 +1,17 @@
+parameters:
+  buildConfiguration: 'Release'    # defaults for any parameters that aren't specified
+  buildTarget: 'install'  # defaults for any parameters that aren't specified
+
+
+steps:
+- task: CMake@1
+  displayName: 'Generate xlang build files via cmake'
+  inputs:
+    cwd: '.'
+    cmakeArgs: '-S src -B_build -GNinja -DCMAKE_BUILD_TYPE=${{ parameters.buildConfiguration }} -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX=install'
+
+- task: CMake@1
+  displayName: 'build ${{ parameters.buildTarget }}'
+  inputs:
+    cwd: '.'
+    cmakeArgs: '--build .\_build\ -- -v ${{ parameters.buildTarget }}'
