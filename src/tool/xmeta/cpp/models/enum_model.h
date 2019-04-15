@@ -65,7 +65,7 @@ namespace xlang::xmeta
         void add_member(std::string_view const& id, std::string_view const& expression_id);
 
     private:
-        enum_semantics m_type;
         std::vector<enum_member> m_members;
+        enum_semantics m_type;
     };
 }

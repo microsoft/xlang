@@ -59,6 +59,8 @@ namespace xlang::xmeta
         namespace_model() = delete;
         namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent);
 
+        auto const& get_child_namespaces() const noexcept;
+        auto const& get_namespace_bodies() const noexcept;
         auto const& get_parent_namespace() const noexcept;
 
         void add_child_namespace(std::shared_ptr<namespace_model> const& child);

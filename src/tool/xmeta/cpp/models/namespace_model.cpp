@@ -61,6 +61,16 @@ namespace xlang::xmeta
         m_parent_namespace{ parent }
     { }
 
+    auto const& namespace_model::get_child_namespaces() const noexcept
+    {
+        return m_child_namespaces;
+    }
+
+    auto const& namespace_model::get_namespace_bodies() const noexcept
+    {
+        return m_namespace_bodies;
+    }
+
     auto const& namespace_model::get_parent_namespace() const noexcept
     {
         return m_parent_namespace;
