@@ -56,7 +56,7 @@ set_target_properties(_winrt PROPERTIES SUFFIX ".pyd")
 target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${PYTHON_ROOT}/tools/include")
 target_link_libraries(_winrt PRIVATE onecore)
 
-TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
+# TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
 
 string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 string(APPEND CMAKE_MODULE_LINKER_FLAGS " /LTCG")
