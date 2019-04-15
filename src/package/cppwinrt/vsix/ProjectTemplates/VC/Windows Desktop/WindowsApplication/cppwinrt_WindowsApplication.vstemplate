@@ -1,12 +1,12 @@
 <VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
-    <Name>Windows Console Application (C++/WinRT)</Name>
-    <Description>A project for creating a C++/WinRT Windows console application</Description>
+    <Name>Windows Desktop Application (C++/WinRT)</Name>
+    <Description>A project for creating a C++/WinRT Windows desktop application</Description>
     <ProjectType>VC</ProjectType>
     <SortOrder>4000</SortOrder>
-    <TemplateID>microsoft.Windows.CppWinRT.ConsoleApplication</TemplateID>
+    <TemplateID>microsoft.Windows.CppWinRT.WindowsApplication</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
-    <DefaultName>ConsoleApplication</DefaultName>
+    <DefaultName>WindowsApplication</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
     <LocationField>Enabled</LocationField>
     <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
@@ -14,11 +14,14 @@
     <PreviewImage>cppwinrt.png</PreviewImage>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="$safeprojectname$.vcxproj" File="ConsoleApplication.vcxproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.vcxproj.filters">ConsoleApplication.vcxproj.filters</ProjectItem>
+    <Project TargetFileName="$safeprojectname$.vcxproj" File="WindowsApplication.vcxproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.vcxproj.filters">WindowsApplication.vcxproj.filters</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.exe.manifest">WindowsApplication.exe.manifest</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.rc">WindowsApplication.rc</ProjectItem>
       <ProjectItem ReplaceParameters="false" TargetFileName="pch.h">pch.h</ProjectItem>
       <ProjectItem ReplaceParameters="false" TargetFileName="pch.cpp">pch.cpp</ProjectItem>
-      <ProjectItem ReplaceParameters="false" TargetFileName="main.cpp">main.cpp</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="winmain.cpp">winmain.cpp</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="resource.h">resource.h</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="readme.txt">readme.txt</ProjectItem>
     </Project>
   </TemplateContent>

@@ -3,15 +3,17 @@
 ========================================================================
 
 This project demonstrates how to get started consuming Windows Runtime 
-classes directly from standard C++, using either the SDK's platform 
-projection, or generating projection headers from Windows metadata files.
+classes directly from standard C++, using platform projection headers
+generated from Windows SDK metadata files.
 
-Steps to consume SDK platform projection:
-1. Include an SDK platform projection namespace header, such as 
-    "winrt/Windows.Foundation.h", in your pch.h.
-2. Consume winrt namespace and any Windows Runtime namespaces, such as 
+Steps to generate and consume SDK platform projection:
+1. Build project initally to generate platform projection headers into
+    your Generated Files folder.
+2. Include a projection namespace header in your pch.h, such as 
+    <winrt/Windows.Foundation.h>.
+3. Consume winrt namespace and any Windows Runtime namespaces, such as 
     winrt::Windows::Foundation, from source code.
-3. Initialize apartment via init_apartment() and consume winrt classes.
+4. Initialize apartment via init_apartment() and consume winrt classes.
 
 Steps to generate and consume a projection from third party metadata:
 1. Add a WinMD reference by right-clicking the References project node
