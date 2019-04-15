@@ -21,12 +21,12 @@ to be callable from any other supported language. Upon calling a component, erro
 can play a different role based on the audience and the situation.
 
 Errors are used by component implementers to indicate both expected and unexpected issues. Expected
-issues are situations which a component implementer foresees happening in a normal scenario such as
+issues are situations that a component implementer foresees happening in a normal scenario such as
 not being able to open a file and wants to communicate it to the consumer. In these cases, xlang
 recommends the use of the Try Pattern to communicate these issues. Unexpected issues are situations
 that are not foreseen in a normal scenario such as a memory allocation error. In these cases, a
 component implementer may use custom logging to log the issue to help them with diagnosing it.
-They can also propagate the error back to the consumer which xlang will translate from the
+They can also propagate the error back to the consumer and xlang will translate it from the
 component's language to the consumer's language.
 
 Errors are also used by projection implementers to indicate an issue while translating a call from
@@ -41,12 +41,12 @@ xlang error info when it is originated. This xlang error info is then stored wit
 language error by the consuming projection and is available to be logged and captured. If the consumer
 propagates the error, the error may end up traveling to another xlang projected component before
 reaching the failure point. To facilitate diagnosing these failures, xlang allows any producing
-projections which the error propagates through to append additional error context captured by that
-language to the existing xlang error info. The information together show how the error propagated
+projections that the error propagates through to append additional error context captured by that
+language to the existing xlang error info. The information together shows how the error propagated
 and resulted in a failure.
 
 ![Error origination diagram](XDN11_origination_diagram.png)
-Diagram highlighting error handling of a C# app calling a Python API which calls a Java API that results in an error.
+Diagram highlighting the error handling of a C# app calling a Python API that calls a Java API that results in an error.
 
 ## Guidance for Projection Authors
 
@@ -226,7 +226,7 @@ decrementing the reference count on it and the caller should assume ownership of
 To highlight this fact, the ABI functions are decorated with the `nodiscard` attribute to indicate the
 return value shouldn't be ignored. If the caller would like to handle the error, then the caller should
 take ownership of the error and release it using the conventions for reference counted xlang objects.
-Returning `nullptr` which has the value of 0 indicates the function completed without errors.
+Returning `nullptr` or the literal value 0 indicates the function completed without errors.
 
 ## Handling language errors
 
@@ -323,18 +323,11 @@ projected types. We want to provide the flexibility to projections to provide ex
 specific objects that may not already implement `IXlangObject` and have them not need to create a
 wrapper around it.
 
-A projection can use this parameter to provide additional diagnostic information about the error.
-It can do this by passing an object implementing the `IXlangErrorExtendedInfo` interface. This interface
-has a `GetExtendedInfo` function which, when implemented, will allow to provide the information as a string.
-This design allows any projection that the error propagates through to make this information available
-without it needing to know the specifics of what additional information each projection provides.
-
-```cpp
-interface IXlangErrorExtendedInfo : IUnknown
-{
-    void GetExtendedInfo(xlang_string * extendedInfo);
-}
-```
+A projection can use this parameter to provide additional diagnostic information about the error. It can
+do this by passing a xlang object with a string representation provided by the `GetObjectInfo` function
+for the `StringRepresentation` category. This allows any projection that the error propagates through
+to make this information available without it needing to know the specifics of what additional
+information each projection provides.
 
 A projection can also use this parameter to store other information that it may want to retrieve later
 or expose to tooling. An example use of this is to store a language exception or a custom error info.
@@ -400,52 +393,51 @@ This will allow consumers to get a full picture of the failure when they log an 
 familiar code they would typically use. To achieve this, xlang provides the `IXlangErrorInfo` interface.
 
 ```cpp
-interface IXLangErrorInfo
+struct IXLangErrorInfo
 {
     void GetError(xlang_result* error);
     void GetMessage(xlang_string* message);
     void GetLanguageError(xlang_string* error);
-    void GetExecutionTrace(IXlangErrorExecutionTrace* executionTrace);
+    void GetExecutionTrace(IUnknown* executionTrace);
     void GetLanguageIdentifier(xlang_string* identifier);
     void GetLanguageInformation(IUnknown* languageInformation);
-    void GetLanguageInformationAsString(xlang_string* languageInformation);
     void GetPropagatedError(IXlangErrorInfo** propagatedError);
     void PropagateError(
         xlang_string projectionIdentifier,
         xlang_string languageError,
-        IXlangErrorExecutionTrace* executionTrace,
+        IUnknown* executionTrace,
         IUnknown* languageInformation);
 }
 ```
 
-Most of the functions provided in this interface are self-explanatory. But there are a few which
-should be called out. There are 2 variants of the function used to get the additional language
-specific information (`GetLanguageInformation` and `GetLanguageInformationAsString`).
-`GetLanguageInformation` should be used in scenarios where the projection itself wants to retrieve
-an object they stored. After retrieving the object, the projection should verify it is their object
-by querying for some custom interface they implement on it.
-`GetLanguageInformationAsString` should be used in scenarios where a projection wants to retrieve the
-additional information stored to expose it as part of the language function used to log errors.
-The function will provide the information as a string if the object stored implements the
-`IXlangErrorExtendedInfo` interface. If it doesn't or no object was stored, it will just provide an
-empty string.
+Most of the functions provided in this interface are self-explanatory. But there are a few that
+should be called out.
 
-Another function to call out is the `GetPropagatedError` function. This function will allow
-to traverse the diagnostic information provided by the projections which the error propagated through.
-For each error info retrieved from it, the error and message functions will provide the same value as the
-initial error info. The remaining functions will provide the respective information provided the projection.
-It was decided to keep all these functions as part of the same interface rather than splitting them out to
-avoid having projections query for multiple interfaces to get details from the error info.
+The `GetLanguageInformation` function should be called by all consuming projections. If the projection
+uses it to store custom language specific objects, it should check if it had by querying for the
+custom interface it implements on it. If it determines that the stored object isn't one that it had
+stored or if it is a projection that doesn't use it to store custom language specific objects, then
+it should check if the stored object implements `IXlangObject`. If it does, it should call `GetObjectInfo`
+and retrieve the string representation of it, if any, and store it as part of the language error
+it constructs for the error and expose it when the language error is logged.
+
+The `GetPropagatedError` function will allow to traverse the diagnostic information provided by the
+projections that the error propagated through. For each error info retrieved from it, the `GetError`
+function and the `GetMessage` function will provide the same information as the initial error info.
+The remaining functions will provide the respective information provided the projection. All this
+information should be stored and exposed as part of the language error. It was decided to keep all
+these functions as part of the same interface rather than splitting them out to avoid having
+projections query for multiple interfaces to get basic details from the error info.
 
 ## Error free functions
 
 Some languages have a concept of error free functions (i.e. noexcept in C++) and can be marked as such
 in MIDL. Marking a function as noexcept will not affect how the function is represented at the
 xlang ABI because not all languages recognize noexcept and their projections will likely ignore the
-marker making it harder for them to accommodate such functions if there is differences in the ABI.
+marker making it harder for them to accommodate such functions if there are differences in the ABI.
 
-But, a projection which recognizes the noexcept marker may choose to optimize for it by assuming that
+But a projection that recognizes the noexcept marker may choose to optimize for it by assuming that
 functions marked with it will always return `nullptr` (to indicate success). To accommodate for this,
 producing projections should drop the `nodiscard` attribute on such functions. In addition, the runtime
-of the language which executes a function with this marker will likely take actions if there is an
+of the language that executes a function with this marker will likely take actions if there is an
 error in the function (i.e. fail fast).
