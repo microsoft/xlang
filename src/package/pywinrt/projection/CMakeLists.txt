@@ -1,12 +1,39 @@
 cmake_minimum_required(VERSION 3.12)
 
-message("CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}")
+function(ADD_OBJECT_DEPENDS file dependency)
+    get_source_file_property(cur_obj_depends ${file} OBJECT_DEPENDS)
+    if (${cur_obj_depends} STREQUAL "NOTFOUND")
+        set(new_obj_depends "${pch_output_file_name}")
+    else()
+        set(new_obj_depends "${cur_obj_depends};${dependency}")
+    endif()
+    set_source_files_properties(${file}  PROPERTIES OBJECT_DEPENDS ${new_obj_depends})
+endfunction(ADD_OBJECT_DEPENDS)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(/await /bigobj /GL /GR- /permissive-)
+function(TARGET_CONFIG_MSVC_PCH target pch_cpp pch_header)
 
-project(_winrt)
+    get_target_property(target_name ${target} NAME)
+    set(pch_output_file_name "${target_name}.pch")
+    set(pch_output_file "\"${CMAKE_CURRENT_BINARY_DIR}/${pch_output_file_name}\"")
+
+    get_target_property(sources ${target} SOURCES)
+    foreach(file ${sources})
+        get_filename_component(filename ${file} NAME)
+        if (${filename} STREQUAL ${pch_cpp})
+            set_source_files_properties(${file}
+                PROPERTIES
+                COMPILE_FLAGS " /Yc${pch_header} /Fp${pch_output_file}"
+                OBJECT_OUTPUTS ${pch_output_file_name})
+        else()
+            set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS " /Yu${pch_header} /Fp${pch_output_file}")
+            ADD_OBJECT_DEPENDS(${file} ${pch_output_file_name})
+        endif()
+    endforeach()
+
+    set_target_properties(${target} PROPERTIES PCH_OUTPUT_FILE ${pch_output_file})
+    set_property(GLOBAL APPEND PROPERTY PCH_OUTPUT_FILES ${pch_output_file})
+
+endfunction(TARGET_CONFIG_MSVC_PCH)
 
 if ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x64")
     set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/python")
@@ -14,13 +41,22 @@ elseif("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
     set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/pythonx86")
 endif()
 
+file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src/*.cpp")
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options(/await /bigobj /GL /GR- /permissive-)
+
+project(_winrt)
+
 link_directories("${PYTHON_ROOT}/tools/libs")
 
-file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src/*.cpp")
 add_library(_winrt MODULE ${sources})
 set_target_properties(_winrt PROPERTIES SUFFIX ".pyd")
 target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${PYTHON_ROOT}/tools/include")
 target_link_libraries(_winrt PRIVATE onecore)
+
+TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
 
 string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 string(APPEND CMAKE_MODULE_LINKER_FLAGS " /LTCG")

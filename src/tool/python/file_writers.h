@@ -4,6 +4,22 @@ namespace pywinrt
 {
     namespace stdfs = std::experimental::filesystem;
 
+    inline void write_pch_cpp(stdfs::path const& folder)
+    {
+        writer w;
+        write_license(w);
+        w.write("#include \"pch.h\"\n");
+        w.flush_to_file(folder / "pch.cpp");
+    }
+
+    inline void write_pch_h(stdfs::path const& folder)
+    {
+        writer w;
+        write_license(w);
+        w.write("#pragma once\n#include \"pybase.h\"\n");
+        w.flush_to_file(folder / "pch.h");
+    }
+
     inline void write_pybase_h(stdfs::path const& folder)
     {
         writer w;
@@ -92,6 +108,7 @@ namespace pywinrt
         auto filename = w.write_temp("py.%.cpp", ns);
 
         write_license(w);
+        w.write("#include \"pch.h\"\n");
         w.write("#include \"py.%.h\"\n", ns);
         if (ns == "Windows.Foundation")
         {

@@ -1,7 +1,5 @@
 $windows_sdk = '10.0.17763.0'
 $repoRootPath = (get-item $PSScriptRoot).parent.Parent.parent.Parent.FullName
-$buildPath = "$repoRootPath/_build/Windows/packages"
-$toolsPath = "$buildPath\tools"
 
 $pywinrt_exe = Get-ChildItem $repoRootPath\_build\Windows\*\*\tool\python\pywinrt.exe | 
     Sort-Object -Descending | Select-Object -first 1
@@ -11,31 +9,25 @@ if (-not $pywinrt_exe) {
     exit
 }
 
-mkdir $buildPath\tools -ErrorAction SilentlyContinue | Out-Null
+nuget install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory $repoRootPath/_build/_tools
+nuget install python -ExcludeVersion -OutputDirectory $PSScriptRoot
+nuget install pythonx86 -ExcludeVersion -OutputDirectory $PSScriptRoot
 
-$nuget_url = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
-$nuget_exe = join-path $toolsPath nuget.exe
+$cppwinrt_exe = "$repoRootPath/_build/_tools/Microsoft.Windows.CppWinRT\bin\cppwinrt.exe"
 
-if (-not(test-path $nuget_exe)) {
-    Invoke-WebRequest $nuget_url -OutFile $nuget_exe
-}
+& $cppwinrt_exe -in $windows_sdk -out $PSScriptRoot/cppwinrt -verbose
 
-& $nuget_exe install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory $buildPath\tools 
-& $nuget_exe install python -ExcludeVersion -OutputDirectory $buildPath\tools
-& $nuget_exe install pythonx86 -ExcludeVersion -OutputDirectory $buildPath\tools 
+$pywinrt_path = "$PSScriptRoot/pywinrt"
 
-$cppwinrt_exe = resolve-path $buildPath\tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe
-$CPPWINRT_PATH = join-path $buildPath cppwinrt
-& $cppwinrt_exe ("-in", $windows_sdk, "-out", $CPPWINRT_PATH, "-verbose")
+remove-item $pywinrt_path -Recurse -Force
 
-$pywinrt_path = join-path $buildPath pywinrt
+#$pyinclude = @("Windows.")
+$pyinclude = "Windows.Data.Json", "Windows.Devices.Geolocation", "Windows.Foundation", "Windows.Graphics.DirectX"
+#$pyexclude = "Windows.UI.Comp", "Windows.UI.Xaml"
+$pyexclude = @() #"Windows.UI.Comp", "Windows.UI.Xaml"
+$pyin = $pyinclude | ForEach-Object{ "-include", "$_"}
+$pyout = $pyexclude | ForEach-Object{ "-exclude", "$_"}
 
-$include = @("Windows.")
-# $include = "Windows.Data.Json", "Windows.Devices.Geolocation", "Windows.Foundation", "Windows.Graphics.DirectX"
-$include_param = $include | ForEach-Object{ "-include", "$_"}
-$exclude = "Windows.UI.Comp", "Windows.UI.Xaml"
-$exclude_param = $exclude | ForEach-Object{ "-exclude", "$_"}
+$pyparams = ("-in", $windows_sdk, "-out", $pywinrt_path, "-verbose") + $pyin + $pyout
 
-$all_param = ("-in", $windows_sdk, "-out", ${pywinrt_path}, "-verbose") + $include_param + $exclude_param
-& $pywinrt_exe $all_param
-
+& $pywinrt_exe $pyparams
