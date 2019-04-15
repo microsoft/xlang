@@ -8,10 +8,10 @@ namespace xlang::xmeta
     struct base_model
     {
         base_model() = delete;
-        base_model(std::string_view const& id, size_t decl_line, bool from_idl = true) :
+        base_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name) :
             m_id{ id },
             m_decl_line{ decl_line },
-            m_from_idl{ from_idl }
+            m_assembly_name{ assembly_name }
         { }
 
         auto const& get_id() const noexcept
@@ -24,14 +24,14 @@ namespace xlang::xmeta
             return m_decl_line;
         }
 
-        auto from_idl() const noexcept
+        auto const& get_assembly_name() const noexcept
         {
-            return m_from_idl;
+            return m_assembly_name;
         }
 
     private:
         std::string m_id;
         size_t m_decl_line;
-        bool m_from_idl;
+        std::string_view m_assembly_name;
     };
 }

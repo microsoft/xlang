@@ -57,7 +57,7 @@ namespace xlang::xmeta
     struct namespace_model : base_model
     {
         namespace_model() = delete;
-        namespace_model(std::string_view const& id, size_t decl_line, std::shared_ptr<namespace_model> const& parent);
+        namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent);
 
         auto const& get_parent_namespace() const noexcept;
 

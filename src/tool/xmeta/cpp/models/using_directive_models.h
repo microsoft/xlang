@@ -14,8 +14,8 @@ namespace xlang::xmeta
     struct using_alias_directive_model : base_model
     {
         using_alias_directive_model() = delete;
-        using_alias_directive_model(std::string_view const& id, size_t decl_line, std::string_view const& type_or_ns_name) :
-            base_model{ id, decl_line },
+        using_alias_directive_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& type_or_ns_name) :
+            base_model{ id, decl_line, assembly_name },
             m_type_or_namespace_ref{ type_or_ns_name }
         { }
 
@@ -53,8 +53,8 @@ namespace xlang::xmeta
     struct using_namespace_directive_model : base_model
     {
         using_namespace_directive_model() = delete;
-        using_namespace_directive_model(std::string_view const& id, size_t decl_line, std::string_view const& ns_name) :
-            base_model{ id, decl_line },
+        using_namespace_directive_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& ns_name) :
+            base_model{ id, decl_line, assembly_name },
             m_namespace_ref{ ns_name }
         { }
 

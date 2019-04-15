@@ -4,6 +4,8 @@
 #include <string_view>
 #include <variant>
 
+#include "model_ref.h"
+
 namespace xlang::xmeta
 {
     struct class_model;
@@ -53,10 +55,10 @@ namespace xlang::xmeta
 
         void set_semantic(type_semantics const& sem) noexcept
         {
-            m_semantic = sem;
+            m_semantic.resolve(sem);
         }
 
     private:
-        std::variant<std::string, type_semantics> m_semantic;
+        model_ref<type_semantics> m_semantic;
     };
 }

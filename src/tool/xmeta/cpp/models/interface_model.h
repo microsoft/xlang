@@ -16,8 +16,8 @@ namespace xlang::xmeta
     struct interface_model : base_model
     {
         interface_model() = delete;
-        interface_model(std::string_view const& id, size_t decl_line) :
-            base_model{ id, decl_line }
+        interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name) :
+            base_model{ id, decl_line, assembly_name }
         { }
 
         auto const& get_interface_bases() const noexcept

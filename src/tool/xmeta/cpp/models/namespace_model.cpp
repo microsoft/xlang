@@ -56,8 +56,8 @@ namespace xlang::xmeta
         return m_containing_namespace->get_full_namespace_name();
     }
 
-    namespace_model::namespace_model(std::string_view const& id, size_t decl_line, std::shared_ptr<namespace_model> const& parent) :
-        base_model{ id, decl_line },
+    namespace_model::namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent) :
+        base_model{ id, decl_line, assembly_name },
         m_parent_namespace{ parent }
     { }
 

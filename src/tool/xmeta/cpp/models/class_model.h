@@ -26,8 +26,8 @@ namespace xlang::xmeta
     struct class_model : base_model
     {
         class_model() = delete;
-        class_model(std::string_view const& id, size_t decl_line, class_semantics const& sem, std::string_view const& base_id) :
-            base_model{ id, decl_line },
+        class_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, class_semantics const& sem, std::string_view const& base_id) :
+            base_model{ id, decl_line, assembly_name },
             m_semantic{ sem },
             m_class_base_ref{ base_id }
         { }

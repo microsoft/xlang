@@ -55,7 +55,7 @@ namespace xlang::xmeta
     struct enum_model : base_model
     {
         enum_model() = delete;
-        enum_model(std::string_view const& id, size_t decl_line, enum_semantics t);
+        enum_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, enum_semantics t);
 
         auto const& get_members() const noexcept;
         auto const& get_type() const noexcept;
