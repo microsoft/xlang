@@ -3,6 +3,9 @@ jobs:
   pool:
     vmImage: 'windows-2019'
   steps:
+  - task: CmdLine@2
+    inputs:
+      script: 'echo $(Build.BuildNumber)'
   - template: templates/find-vsdevcmd.yml
   - template: templates/configure-vsdevcmd.yml
   - template: templates/make-xlang.yml
