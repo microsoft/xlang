@@ -22,13 +22,3 @@
 #define XLANG_VERIFY_(result, expression) (void)(expression)
 
 #endif
-
-inline bool operator==(xlang_guid const& lhs, xlang_guid const& rhs) noexcept
-{
-    static_assert(sizeof(xlang_guid) % sizeof(size_t) == 0);
-    constexpr size_t count = sizeof(xlang_guid) / sizeof(size_t);
-
-    auto guid1 = reinterpret_cast<size_t const*>(&lhs);
-    auto guid2 = reinterpret_cast<size_t const*>(&rhs);
-    return std::equal(guid1, guid1 + count, guid2, guid2 + count);
-}

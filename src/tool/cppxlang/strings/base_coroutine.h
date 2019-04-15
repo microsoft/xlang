@@ -1,5 +1,6 @@
 
-namespace winrt::impl
+#ifdef _WIN32
+namespace xlang::impl
 {
     template <typename Async>
     struct await_adapter
@@ -13,7 +14,7 @@ namespace winrt::impl
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
         {
-            auto context = capture<IContextCallback>(WINRT_CoGetObjectContext);
+            auto context = capture<IContextCallback>(XLANG_CoGetObjectContext);
 
             async.Completed([handle, context = std::move(context)](auto const&, Windows::Foundation::AsyncStatus)
             {
@@ -38,7 +39,7 @@ namespace winrt::impl
 }
 
 #ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
-namespace winrt::Windows::Foundation
+namespace xlang::Windows::Foundation
 {
     inline impl::await_adapter<IAsyncAction> operator co_await(IAsyncAction const& async)
     {
@@ -65,7 +66,7 @@ namespace winrt::Windows::Foundation
 }
 #endif
 
-namespace winrt
+namespace xlang
 {
     struct get_progress_token_t {};
 
@@ -82,7 +83,7 @@ namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename Promise>
     struct cancellation_token
@@ -110,7 +111,7 @@ namespace winrt::impl
             return m_promise->Status() == Windows::Foundation::AsyncStatus::Canceled;
         }
 
-        void callback(winrt::delegate<>&& cancel) noexcept
+        void callback(xlang::delegate<>&& cancel) noexcept
         {
             m_promise->cancellation_callback(std::move(cancel));
         }
@@ -157,7 +158,7 @@ namespace winrt::impl
     {
         using AsyncStatus = Windows::Foundation::AsyncStatus;
 
-        unsigned long WINRT_CALL Release() noexcept
+        unsigned long XLANG_CALL Release() noexcept
         {
             uint32_t const remaining = this->subtract_reference();
 
@@ -175,7 +176,7 @@ namespace winrt::impl
             AsyncStatus status;
 
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_completed_assigned)
                 {
@@ -186,7 +187,7 @@ namespace winrt::impl
 
                 if (m_status == AsyncStatus::Started)
                 {
-                    m_completed = make_agile_delegate(handler);
+                    m_completed = handler;
                     return;
                 }
 
@@ -201,7 +202,7 @@ namespace winrt::impl
 
         CompletedHandler Completed() noexcept
         {
-            slim_lock_guard const guard(m_lock);
+            std::lock_guard const guard(m_lock);
             return m_completed;
         }
 
@@ -212,7 +213,7 @@ namespace winrt::impl
 
         AsyncStatus Status() noexcept
         {
-            slim_lock_guard const guard(m_lock);
+            std::lock_guard const guard(m_lock);
             return m_status;
         }
 
@@ -220,7 +221,7 @@ namespace winrt::impl
         {
             try
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
                 rethrow_if_failed();
                 return error_ok;
             }
@@ -232,10 +233,10 @@ namespace winrt::impl
 
         void Cancel() noexcept
         {
-            winrt::delegate<> cancel;
+            xlang::delegate<> cancel;
 
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_status == AsyncStatus::Started)
                 {
@@ -257,7 +258,7 @@ namespace winrt::impl
 
         auto GetResults()
         {
-            slim_lock_guard const guard(m_lock);
+            std::lock_guard const guard(m_lock);
 
             if (m_status == AsyncStatus::Completed)
             {
@@ -265,7 +266,7 @@ namespace winrt::impl
             }
 
             rethrow_if_failed();
-            WINRT_ASSERT(m_status == AsyncStatus::Started);
+            XLANG_ASSERT(m_status == AsyncStatus::Started);
             throw hresult_illegal_method_call();
         }
 
@@ -284,7 +285,7 @@ namespace winrt::impl
             AsyncStatus status;
 
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_status == AsyncStatus::Started)
                 {
@@ -340,8 +341,8 @@ namespace winrt::impl
 
         void unhandled_exception() noexcept
         {
-            slim_lock_guard const guard(m_lock);
-            WINRT_ASSERT(m_status == AsyncStatus::Started || m_status == AsyncStatus::Canceled);
+            std::lock_guard const guard(m_lock);
+            XLANG_ASSERT(m_status == AsyncStatus::Started || m_status == AsyncStatus::Canceled);
             m_exception = std::current_exception();
 
             try
@@ -363,7 +364,7 @@ namespace winrt::impl
         {
             if (Status() == AsyncStatus::Canceled)
             {
-                throw winrt::hresult_canceled();
+                throw xlang::hresult_canceled();
             }
 
             return std::forward<Expression>(expression);
@@ -379,10 +380,10 @@ namespace winrt::impl
             return{ static_cast<Derived*>(this) };
         }
 
-        void cancellation_callback(winrt::delegate<>&& cancel) noexcept
+        void cancellation_callback(xlang::delegate<>&& cancel) noexcept
         {
             {
-                slim_lock_guard const guard(m_lock);
+                std::lock_guard const guard(m_lock);
 
                 if (m_status != AsyncStatus::Canceled)
                 {
@@ -405,10 +406,12 @@ namespace winrt::impl
         }
 
         std::exception_ptr m_exception{};
-        slim_mutex m_lock;
+        std::mutex m_lock;
         CompletedHandler m_completed;
-        winrt::delegate<> m_cancel;
+        xlang::delegate<> m_cancel;
         AsyncStatus m_status{ AsyncStatus::Started };
         bool m_completed_assigned{ false };
     };
 }
+
+#endif

@@ -31,7 +31,7 @@ namespace xlang
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
         { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "lib", 0, 1, "Specify library prefix (defaults to winrt)" },
+        { "lib", 0, 1, "Specify library prefix (defaults to xlang)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
@@ -54,10 +54,10 @@ namespace xlang
         };
 
         auto format = R"(
-C++/WinRT v%
+cppxlang v%
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-  cppwinrt.exe [options...]
+  cppxlang.exe [options...]
 
 Options:
 
@@ -94,7 +94,7 @@ Where <spec> is one or more of:
         settings.brackets = args.exists("brackets");
 
         auto output_folder = canonical(args.value("output"));
-        create_directories(output_folder / "winrt/impl");
+        create_directories(output_folder / "xlang/impl");
         output_folder += '/';
         settings.output_folder = output_folder.string();
 
@@ -133,7 +133,7 @@ Where <spec> is one or more of:
 
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
-            settings.component_lib = args.value("lib", "winrt");
+            settings.component_lib = args.value("lib", "xlang");
             settings.component_opt = args.exists("opt");
 
             if (settings.component_pch == ".")

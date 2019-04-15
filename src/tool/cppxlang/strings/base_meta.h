@@ -1,14 +1,15 @@
 
-namespace winrt
+namespace xlang
 {
     void check_hresult(hresult const result);
+    void check_hresult(xlang_error_info* result);
     hresult to_hresult() noexcept;
 
     template <typename D, typename I>
     D* get_self(I const& from) noexcept;
 
     struct take_ownership_from_abi_t {};
-    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
+    inline constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 
     template <typename T>
     struct com_ptr;
@@ -41,7 +42,7 @@ namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     using namespace std::literals;
 
@@ -132,10 +133,10 @@ namespace winrt::impl
     template <typename T>
     struct missing_guid
     {
-        static_assert(missing_guid_of<T>::value, "Support for non-WinRT interfaces is disabled. To enable, simply #include <unknwn.h> before any C++/WinRT headers.");
+        static_assert(missing_guid_of<T>::value, "Support for non-xlang interfaces is disabled. To enable, simply #include <unknwn.h> before any cppxlang headers.");
     };
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef XLANG_WINDOWS_ABI
     template <typename T>
     struct guid_storage
     {
@@ -177,7 +178,7 @@ namespace winrt::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO require : require_one<D, I>...
+    struct XLANG_EBO require : require_one<D, I>...
     {};
 
     template <typename D, typename I>
@@ -190,7 +191,7 @@ namespace winrt::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO base : base_one<D, I>...
+    struct XLANG_EBO base : base_one<D, I>...
     {};
 
     template <typename T>
@@ -263,14 +264,14 @@ namespace winrt::impl
     struct typelist_concat;
 
     template <>
-    struct typelist_concat<> { using type = winrt::impl::typelist<>; };
+    struct typelist_concat<> { using type = xlang::impl::typelist<>; };
 
     template <typename ... List>
-    struct typelist_concat<winrt::impl::typelist<List...>> { using type = winrt::impl::typelist<List...>; };
+    struct typelist_concat<xlang::impl::typelist<List...>> { using type = xlang::impl::typelist<List...>; };
 
     template <typename ... List1, typename ... List2, typename ... Rest>
-    struct typelist_concat<winrt::impl::typelist<List1...>, winrt::impl::typelist<List2...>, Rest...>
-        : typelist_concat<winrt::impl::typelist<List1..., List2...>, Rest...>
+    struct typelist_concat<xlang::impl::typelist<List1...>, xlang::impl::typelist<List2...>, Rest...>
+        : typelist_concat<xlang::impl::typelist<List1..., List2...>, Rest...>
     {};
 
     template <typename T>
@@ -301,45 +302,45 @@ namespace winrt::impl
 }
 
 template <typename T>
-constexpr auto operator|(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
+constexpr auto operator|(T const left, T const right) noexcept -> std::enable_if_t<xlang::impl::is_enum_flag_v<T>, T>
 {
-    return static_cast<T>(winrt::impl::to_underlying_type(left) | winrt::impl::to_underlying_type(right));
+    return static_cast<T>(xlang::impl::to_underlying_type(left) | xlang::impl::to_underlying_type(right));
 }
 
 template <typename T>
-constexpr auto operator|=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
+constexpr auto operator|=(T& left, T const right) noexcept -> std::enable_if_t<xlang::impl::is_enum_flag_v<T>, T>
 {
     left = left | right;
     return left;
 }
 
 template <typename T>
-constexpr auto operator&(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
+constexpr auto operator&(T const left, T const right) noexcept -> std::enable_if_t<xlang::impl::is_enum_flag_v<T>, T>
 {
-    return static_cast<T>(winrt::impl::to_underlying_type(left) & winrt::impl::to_underlying_type(right));
+    return static_cast<T>(xlang::impl::to_underlying_type(left) & xlang::impl::to_underlying_type(right));
 }
 
 template <typename T>
-constexpr auto operator&=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
+constexpr auto operator&=(T& left, T const right) noexcept -> std::enable_if_t<xlang::impl::is_enum_flag_v<T>, T>
 {
     left = left & right;
     return left;
 }
 
 template <typename T>
-constexpr auto operator~(T const value) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
+constexpr auto operator~(T const value) noexcept -> std::enable_if_t<xlang::impl::is_enum_flag_v<T>, T>
 {
-    return static_cast<T>(~winrt::impl::to_underlying_type(value));
+    return static_cast<T>(~xlang::impl::to_underlying_type(value));
 }
 
 template <typename T>
-constexpr auto operator^(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
+constexpr auto operator^(T const left, T const right) noexcept -> std::enable_if_t<xlang::impl::is_enum_flag_v<T>, T>
 {
-    return static_cast<T>(winrt::impl::to_underlying_type(left) ^ winrt::impl::to_underlying_type(right));
+    return static_cast<T>(xlang::impl::to_underlying_type(left) ^ xlang::impl::to_underlying_type(right));
 }
 
 template <typename T>
-constexpr auto operator^=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
+constexpr auto operator^=(T& left, T const right) noexcept -> std::enable_if_t<xlang::impl::is_enum_flag_v<T>, T>
 {
     left = left ^ right;
     return left;

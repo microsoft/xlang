@@ -1,15 +1,15 @@
 
-#ifdef _DEBUG
-#define WINRT_NATVIS
+#if defined(_WIN32) && defined(_DEBUG)
+#define XLANG_NATVIS
 #endif
 
-#ifdef WINRT_NATVIS
+#ifdef XLANG_NATVIS
 
-namespace winrt::impl
+namespace xlang::impl
 {
     struct natvis
     {
-        static auto WINRT_CALL abi_val(void* object, wchar_t const * iid_str, int method)
+        static auto XLANG_CALL abi_val(void* object, wchar_t const * iid_str, int method)
         {
             union variant
             {
@@ -31,10 +31,10 @@ namespace winrt::impl
             }
             value{};
             guid iid{};
-            if (WINRT_IIDFromString(iid_str, &iid) == error_ok)
+            if (XLANG_IIDFromString(iid_str, &iid) == error_ok)
             {
                 inspectable_abi* pinsp;
-                typedef int32_t(WINRT_CALL inspectable_abi::* PropertyAccessor)(void*);
+                typedef int32_t(XLANG_CALL inspectable_abi::* PropertyAccessor)(void*);
                 if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
                 {
                     auto vtbl = *(PropertyAccessor**)pinsp;
@@ -47,7 +47,7 @@ namespace winrt::impl
             return value;
         }
 
-        static auto WINRT_CALL get_val(winrt::Windows::Foundation::IInspectable* object, wchar_t const * iid_str, int method)
+        static auto XLANG_CALL get_val(xlang::Windows::Foundation::IInspectable* object, wchar_t const * iid_str, int method)
         {
             return abi_val(static_cast<unknown_abi*>(get_abi(*object)), iid_str, method);
         }
@@ -55,19 +55,17 @@ namespace winrt::impl
 }
 
 extern "C"
-__declspec(selectany)
-decltype(winrt::impl::natvis::abi_val) & WINRT_abi_val = winrt::impl::natvis::abi_val;
+__declspec(selectany) decltype(xlang::impl::natvis::abi_val) & XLANG_abi_val = xlang::impl::natvis::abi_val;
 
 extern "C"
-__declspec(selectany)
-decltype(winrt::impl::natvis::get_val) & WINRT_get_val = winrt::impl::natvis::get_val;
+__declspec(selectany) decltype(xlang::impl::natvis::get_val) & XLANG_get_val = xlang::impl::natvis::get_val;
 
 #ifdef _M_IX86
-#pragma comment(linker, "/include:_WINRT_abi_val")
-#pragma comment(linker, "/include:_WINRT_get_val")
+#pragma comment(linker, "/include:_XLANG_abi_val")
+#pragma comment(linker, "/include:_XLANG_get_val")
 #else
-#pragma comment(linker, "/include:WINRT_abi_val")
-#pragma comment(linker, "/include:WINRT_get_val")
+#pragma comment(linker, "/include:XLANG_abi_val")
+#pragma comment(linker, "/include:XLANG_get_val")
 #endif
 
 #endif
