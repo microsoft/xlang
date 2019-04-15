@@ -3,30 +3,64 @@
 #include <string_view>
 
 #include "base_model.h"
+#include "method_model.h"
+#include "model_types.h"
 
 namespace xlang::xmeta
 {
-    enum class property_modifier_t
+    struct property_semantics
     {
-        none,
-        protected_property,
-        static_property
+        bool is_protected = false;
+        bool is_static = false;
+    };
+
+    struct property_type_semantics
+    {
+        property_type_semantics(bool is_array, type_ref&& type_id) :
+            m_is_array{ is_array },
+            m_type_id{ std::move(type_id) }
+        { }
+
+    private:
+        bool m_is_array;
+        type_ref m_type_id;
     };
 
     struct property_model : base_model
     {
-        property_model(std::string_view const& id, size_t decl_line, property_modifier_t mod, xmeta_type const& type, bool get_declared, bool set_declared) :
+        property_model(std::string_view const& id, size_t decl_line, property_semantics const& sem, property_type_semantics&& type, std::shared_ptr<method_model> const& get_method, std::shared_ptr<method_model> const& set_method) :
             base_model{ id, decl_line },
-            property_modifier{ mod },
-            property_type{ type },
-            get_declared{ get_declared },
-            set_declared{ set_declared }
+            m_semantic{ sem },
+            m_type{ std::move(type) },
+            m_get_method{ get_method },
+            m_set_method{ set_method }
         { }
         property_model() = delete;
 
-        property_modifier_t property_modifier;
-        xmeta_type property_type;
-        bool get_declared;
-        bool set_declared;
+        auto const& get_semantic() const noexcept
+        {
+            return m_semantic;
+        }
+
+        auto const& get_type() const noexcept
+        {
+            return m_type;
+        }
+
+        auto const& get_get_method() const noexcept
+        {
+            return m_get_method;
+        }
+
+        auto const& get_set_method() const noexcept
+        {
+            return m_set_method;
+        }
+
+    private:
+        property_semantics m_semantic;
+        property_type_semantics m_type;
+        std::shared_ptr<method_model> m_get_method;
+        std::shared_ptr<method_model> m_set_method;
     };
 }

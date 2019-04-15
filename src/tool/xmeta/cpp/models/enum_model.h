@@ -1,38 +1,68 @@
 #pragma once
 
+#include <algorithm>
+#include <optional>
 #include <string_view>
+#include <vector>
+#include <variant>
 
 #include "base_model.h"
 
 namespace xlang::xmeta
 {
-    enum class enum_type
+    enum class enum_semantics
     {
-        int8_enum,
-        uint8_enum,
-        int16_enum,
-        uint16_enum,
-        int32_enum,
-        uint32_enum,
-        int64_enum,
-        uint64_enum
+        Int8,
+        Uint8,
+        Int16,
+        Uint16,
+        Int32,
+        Uint32,
+        Int64,
+        Uint64
     };
+
+    using enum_member_semantics = std::variant<
+        int8_t,
+        uint8_t,
+        int16_t,
+        uint16_t,
+        int32_t,
+        uint32_t,
+        int64_t,
+        uint64_t>;
 
     struct enum_member
     {
-        std::string_view id;
-        uint64_t value;
+        enum_member(std::string_view const& id, std::optional<enum_member_semantics> val);
+        enum_member(std::string_view const& id, std::string_view const& expression_id);
+
+        auto const& get_id() const noexcept;
+        auto const& get_value() const noexcept;
+        auto const& get_expression_id() const noexcept;
+
+        void set_value(enum_member_semantics const& val) noexcept;
+
+    private:
+        std::string m_id;
+        std::optional<enum_member_semantics> m_value;
+        std::string m_expression_id;
     };
 
     struct enum_model : base_model
     {
-        enum_model(std::string_view const& id, size_t decl_line, enum_type type) :
-            base_model{ id, decl_line },
-            type{ type }
-        { }
+        enum_model(std::string_view const& id, size_t decl_line, enum_semantics t);
         enum_model() = delete;
 
-        enum_type type;
-        std::vector<enum_member> members;
+        auto const& get_members() const noexcept;
+        auto const& get_type() const noexcept;
+
+        std::errc assign_value(std::string_view const& member_id, std::string_view const& str_val) noexcept;
+        void add_member(std::string_view const& id, std::optional<enum_member_semantics> val);
+        void add_member(std::string_view const& id, std::string_view const& expression_id);
+
+    private:
+        enum_semantics m_type;
+        std::vector<enum_member> m_members;
     };
 }
