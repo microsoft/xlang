@@ -52,7 +52,7 @@ Diagram highlighting error handling of a C# app calling a Python API which calls
 
 - **DO** translate language errors to equivalent xlang errors and xlang errors to equivalent natural
 language errors at the projection boundary.
-- **DO NOT** let language errors propagate past the projection boundary.
+- **DO NOT** let language errors (exceptions) propagate past the projection boundary.
 - **DO** invoke `xlang_originate_error` when receiving a language error with no associated xlang error info.
 - **DO** invoke `xlang_originate_error` when returning a new xlang error as part of the projection
 implementation.
@@ -61,7 +61,7 @@ implementation.
 to `xlang_originate_error` and `PropagateError`.
 - **DO** associate the xlang error info with the translated language error.
 - **CONSIDER** providing projection-specific diagnostic information that would be useful to diagnose
-failures by implementing `IXlangErrorExtendedInfo`.
+failures.
 - **DO** expose xlang's diagnostic information as part of the language specific error logging function
 and upon crash.
 - **DO** encourage component authors to follow the Try Pattern to communicate domain errors to the consumer.
@@ -95,35 +95,27 @@ This can end up being a generic error.
 
 ## xlang errors
 
-xlang will use an `Int32`, `xlang_result`, to represent its errors. The representation of this 32-bit
-value will be based on the same model used in COM for HRESULTs to assist with sharing error codes,
-but will not necessarily be defined in this design note on a bit by bit basis as is in COM.
-This is because xlang will not inherit all the HRESULT errors and will instead define a set of
-errors with their values defined. This will allow xlang to avoid defining all the possible HRESULT
-errors on each supported platform especially when most will not be used as xlang will be scope its errors
-to ones that are likely to occur during translation of calls. This will also allow for projections to
-avoid needing to maintain a large mapping of errors.
+xlang will define a limited set of errors that are scoped to ones that are likely to occur during the
+translation of calls and ones that are considered fatal. The errors will be represented by an `UInt32`,
+`xlang_result` and will be monotonically increasing.
 
-The following errors will be defined in xlang:
+`xlang_result`       | Value  | Description
+-------------------- | ------ | ----------------------------------------------------------------------
+xlang_success        | 0      | Operation succeeded (should not be originated)
+xlang_access_denied  | 1      | Requested operation / call is not allowed
+xlang_bounds         | 2      | Invalid index used such as when indexing arrays
+xlang_fail           | 3      | Generic error when no equivalent or better error mapping is available
+xlang_handle         | 4      | Invalid handle
+xlang_invalid_arg    | 5      | Invalid argument in a call
+xlang_invalid_state  | 6      | Call isn't allowed in the current state
+xlang_no_interface   | 7      | Class or interface not found
+xlang_not_impl       | 8      | Function / feature is not implemented
+xlang_out_of_memory  | 9      | Allocation issue resulting from not enough memory
+xlang_pointer        | 10     | Null pointer related errors
+xlang_type_load      | 11     | Syntax / type error during runtime
 
-xlang error          | Value      | Description
--------------------- | ---------- | ----------------------------------------------------------------------
-xlang_access_denied  | 0x80070005 | Requested operation / call is not allowed
-xlang_bounds         | 0x8000000b | Invalid index used such as when indexing arrays
-xlang_fail           | 0x80004005 | Generic error when no equivalent or better error mapping is available
-xlang_handle         | 0x80000006 | Invalid handle
-xlang_invalid_arg    | 0x80000003 | Invalid argument in a call
-xlang_invalid_state  | 0x8000000d | Call isn't allowed in the current state
-xlang_no_interface   | 0x80000004 | Class or interface not found
-xlang_not_impl       | 0x80000001 | Function / feature is not implemented
-xlang_out_of_memory  | 0x80000002 | Allocation issue resulting from not enough memory
-xlang_pointer        | 0x80000005 | Null pointer related errors
-xlang_success        | 0x00000000 | Reserved, not to be used
-xlang_type_load      | 0x80131522 | Syntax / type error during runtime
-
-Even though xlang only defines these errors, it will not explicitly prevent the use of other errors
-from the HRESULT family. But, those errors will not get a natural mapping from projections and likely
-end up as generic errors.
+These errors defined in xlang should get a natural mapping from projections if an equivalent error
+exists in the language it projects.
 
 ## Alternative to errors
 
@@ -256,7 +248,7 @@ xlang_originate_error will be defined in the PAL and will take the following par
 - a `xlang_string` with the error message
 - a `xlang_string` with an identifier for the projection
 - a `xlang_string` with the language specific error that occurred
-- a `IXlangErrorExecutionTrace` with the execution trace if available
+- an `IUnknown` with the execution trace if available
 - an `IUnknown` pointer with any additional language specific information (can be null)
 
 The `xlang_result` parameter is the only required parameter for the creation of the error info, but the
@@ -268,7 +260,7 @@ other parameters are recommended, if available, to assist the developer with dia
     xlang_string message,
     xlang_string projectionIdentifier,
     xlang_string languageError,
-    IXlangErrorExecutionTrace* executionTrace,
+    IUnknown* executionTrace,
     IUnknown* languageInformation)
 ```
 
@@ -286,14 +278,14 @@ error info.
 `PropagateError` will be defined in the `IXlangErrorInfo` interface and will take the following parameters:
 - a `xlang_string` indicating an identifier for the language
 - a `xlang_string` with the language specific error
-- a `IXlangErrorExecutionTrace` with the execution trace if available
+- an `IUnknown` with the execution trace if available
 - an `IUnknown` pointer with any additional language specific information (can be null)
 
 ```cpp
 void PropagateError(
     xlang_string projectionIdentifier,
     xlang_string languageError,
-    IXlangErrorExecutionTrace* executionTrace,
+    IUnknown* executionTrace,
     IUnknown* languageInformation)
 ```
 
@@ -312,98 +304,15 @@ Given that projections may evolve over time and change what they store as part o
 information, the identifier provided should also have a version number. Due to this, xlang recommends
 the identifier be in the form of <unique_projection_identifer>_<version_number>.
 
-## Execution traces
+## Execution traces (Early draft, incomplete)
 
 xlang allows projections to provide the execution trace captured by the language from when the error
 happened when calling the origination and propagation API. This execution trace can be the entire trace
 of the function calls leading to the error if the language had captured one or can be a stack trace
-from the point in time of the error. It can be also the name or module offset of the failing function
+from the point in time of the error. It can also be the name or module offset of the failing function
 if that is only what the projection has. It basically should be something that helps a developer or
 tooling determine where the error happened and how it propagated when looked at together with the
 execution traces from the propagations.
-
-Since each projection may have a different representation of this information, xlang provides the
-`IXlangErrorExecutionTrace` interface to retrieve it. A projection should call the appropriate
-functions in the `IXlangErrorExecutionTraceFactory` interface, based on the information it has
-available, to create an instance of an object implementing the `IXlangErrorExecutionTrace` interface.
-
-```cpp
-interface IXlangErrorExecutionTraceFactory : IUnknown
-{
-    void CreateFromString(xlang_string string, IXlangErrorExecutionTrace** executionTrace);
-    void CreateFromFrames(
-        IXlangErrorExecutionTraceFrame* frames[],
-        UInt32 numFrames,
-        IXlangErrorExecutionTrace** executionTrace);
-    void CreateFromNativeStackBackTrace(IXlangErrorExecutionTrace** executionTrace);
-	
-    void CreateFrameFromFunctionName(xlang_string functionName, IXlangErrorExecutionTraceFrame** frame);
-    void CreateFrameFromLineInfo(
-        xlang_string fileName,
-        xlang_string lineNumber,
-        IXlangErrorExecutionTraceFrame** frame);
-    void CreateFrameFromAddress(xlang_string address, IXlangErrorExecutionTraceFrame** frame);
-    void CreateFrameFromOffsetInfo(
-        xlang_string module,
-        xlang_string offset,
-        IXlangErrorExecutionTraceFrame** frame);
-    void CreateFrameFromString(xlang_string string, IXlangErrorExecutionTraceFrame** frame);
-}
-
-enum ExecutionTraceFormat
-{
-    Frames,
-    String
-}
-
-interface IXlangErrorExecutionTrace : IUnknown
-{
-    void GetFormat(ExecutionTraceFormat* traceFormat);
-    void GetFrames(
-        UInt32 maxFramesToRetrieve,
-        IXlangErrorExecutionTraceFrame* frames[],
-        UInt32* framesRetrieved);
-    void GetExecutionTrace(xlang_string* executionTrace);
-}
-
-enum ExecutionTraceFrameFormat
-{
-    FunctionName,
-    FileNameAndLineNumber,
-    Address,
-    ModuleAndOffset,
-    String
-}
-
-interface IXlangErrorExecutionTraceFrame : IUnknown
-{
-    void GetFormat(ExecutionTraceFrameFormat* frameFormat);
-    void GetFunctionName(xlang_string* functionName);	
-    void GetFileNameAndLineNumber(xlang_string* fileName, xlang_string* lineNumber);
-    void GetAddress(xlang_string* address);
-    void GetModuleAndOffset(xlang_string* module, xlang_string* offset);
-    void GetFrame(xlang_string* frame);
-}
-```
-
-As seen from these interfaces, xlang allows to construct and retrieve an execution trace consisting
-of frames in several different common formats:
-- Function name
-- Filename and line number
-- Address
-- Module and offset to the function
-
-In the case a language doesn't have frames that are in one of those formats, xlang allows to
-construct and retrieve a frame as a string. In addition, in the case a language doesn't have an
-execution trace that is in the format of an array of frames, xlang allows to construct and retrieve
-the execution trace as a string. This gives projections the flexibility to provide the execution
-trace in the format that is convenient and developer friendly based on what the language they project
-provides. xlang provides a `GetFrame` function in both interfaces to allow projections to determine the
-format the execution trace and the frames are stored in.
-
-To help with capturing the execution trace for errors in xlang PAL APIs and in projections who are
-implemented natively, xlang provides the `CreateFromNativeStackBackTrace` API which captures the
-current stack back trace and constructs an `IXlangErrorExecutionTrace` object using it.
 
 ## Providing additional language specific information
 
@@ -530,13 +439,13 @@ avoid having projections query for multiple interfaces to get details from the e
 
 ## Error free functions
 
-Some languages have a concept of error free functions (i.e. noexcept in C++). These functions
-will not be projected as error free because errors can occur while translating the call from the
-other language and while translating the result back (i.e. during activation of the class for the
-function). But if there was any error during the execution of the function itself, the language
-itself may take actions based on what it does for errors in error free functions (i.e. fail fast for
-noexcept).
+Some languages have a concept of error free functions (i.e. noexcept in C++) and can be marked as such
+in MIDL. Marking a function as noexcept will not affect how the function is represented at the
+xlang ABI because not all languages recognize noexcept and their projections will likely ignore the
+marker making it harder for them to accommodate such functions if there is differences in the ABI.
 
-Even though none of the projected functions will be error free, the PAL can consist of error free
-functions. These functions can be distinguished by the return parameter being void instead of
-`IXlangErrorInfo*`.
+But, a projection which recognizes the noexcept marker may choose to optimize for it by assuming that
+functions marked with it will always return `nullptr` (to indicate success). To accommodate for this,
+producing projections should drop the `nodiscard` attribute on such functions. In addition, the runtime
+of the language which executes a function with this marker will likely take actions if there is an
+error in the function (i.e. fail fast).
