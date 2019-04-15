@@ -28,6 +28,7 @@ void print_usage()
 
 int main(int const argc, char** argv)
 {
+    int exitCode = 0;
     basic_writer w;
 
     try
@@ -52,7 +53,7 @@ int main(int const argc, char** argv)
         if (!args)
         {
             print_usage();
-            return 0;
+            return 1;
         }
 
         abi_configuration config;
@@ -94,8 +95,8 @@ int main(int const argc, char** argv)
             config.ns_prefix_state = ns_prefix::never;
         }
 
-        auto const& inputFiles = args.values("input");
-        auto const& referenceFiles = args.values("reference");
+        auto inputFiles = args.files("input");
+        auto referenceFiles = args.files("reference");
 
         if (config.verbose)
         {
@@ -231,8 +232,10 @@ int main(int const argc, char** argv)
     }
     catch (std::exception const& e)
     {
+        exitCode = 1;
         w.write("%\n", e.what());
     }
 
     w.flush_to_console();
+    return exitCode;
 }
