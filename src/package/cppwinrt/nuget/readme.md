@@ -64,6 +64,8 @@ C++/WinRT behavior can be customized with these project properties:
 | CppWinRTPath | ...\cppwinrt.exe | NuGet package-relative path to cppwinrt.exe, for custom build rule invocation |
 \*Default value
 
+To customize the above properties, simply add a property sheet to your project via Add New Item | Visual C++ | Property Sheets | Property Sheet.  Then  add the necessary property value assignments to the PropertyGroup element.
+
 ## Troubleshooting
 
 The msbuild verbosity level maps to msbuild message importance as follows:
