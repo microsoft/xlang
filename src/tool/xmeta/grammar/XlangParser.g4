@@ -363,7 +363,7 @@ field_declaration
 
 /* Interfaces */
 interface_declaration
-    : attributes? PARTIAL? INTERFACE
+    : attributes? INTERFACE
         IDENTIFIER type_parameter_list? interface_base? interface_body SEMICOLON?
     ;
 

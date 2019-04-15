@@ -36,7 +36,6 @@ EVENT: 'event';
 INTERFACE: 'interface';
 // INTERNAL: 'internal';
 NAMESPACE: 'namespace';
-PARTIAL: 'partial';
 OUT: 'out';
 OVERRIDE: 'override';
 OVERRIDABLE: 'overridable';
