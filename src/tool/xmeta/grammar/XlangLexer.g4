@@ -26,27 +26,28 @@ fragment Newline
 
 /* Keywords */
 ABSTRACT: 'abstract';
+APICONTRACT: 'apicontract';
 ATTRIBUTE: 'attribute';
-CLASS: 'class';
+CLASS: 'runtimeclass';
 CONST: 'const';
-DEFAULT: 'default';
 DELEGATE: 'delegate';
 ENUM: 'enum';
 EVENT: 'event';
 INTERFACE: 'interface';
-INTERNAL: 'internal';
+// INTERNAL: 'internal';
 NAMESPACE: 'namespace';
-PARTIAL: 'partial';
-OBJECT: 'object';
 OUT: 'out';
 OVERRIDE: 'override';
+OVERRIDABLE: 'overridable';
 PROTECTED: 'protected';
 REF: 'ref';
+REQUIRES: 'requires';
 SEALED: 'sealed';
 STATIC: 'static';
 STRUCT: 'struct';
 TYPEOF: 'typeof';
 USING: 'using';
+UNSEALED: 'unsealed';
 VIRTUAL: 'virtual';
 VOID: 'void';
 
@@ -66,13 +67,10 @@ PLACEHOLDER_REMOVELATER: 'placeholder';
 ASSEMBLY: 'assembly';
 MODULE: 'module';
 FIELD: 'field';
-METHOD: 'method';
-PARAM: 'param';
-PROPERTY: 'property';
 RETURN: 'return';
-TYPE: 'type';
 
 // Xlang Type System
+INT8: 'Int8';
 INT16: 'Int16';
 INT32: 'Int32';
 INT64: 'Int64';
@@ -85,8 +83,9 @@ DOUBLE: 'Double';
 CHAR16: 'Char16';
 BOOLEAN: 'Boolean';
 STRING: 'String';
-GUID: 'Guid';
+
 NILL: 'NULL';
+OBJECT: 'Object';
 
 SEMICOLON: ';';
 OPEN_BRACE: '{';
@@ -103,12 +102,7 @@ DOUBLE_COLON: '::';
 EQUAL: '=';
 LESS_THAN: '<';
 GREATER_THAN: '>';
-
-/* Unicode character escape sequences */
-fragment UnicodeEscapeSequence
-    : '\\u' HexDigit HexDigit HexDigit HexDigit
-    | '\\U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
-    ;
+MINUS: '-';
 
 /* Identifiers */
 // Note: An identifier-or-keyword that is not a keyword
@@ -117,6 +111,34 @@ fragment UnicodeEscapeSequence
 IDENTIFIER
     : IdentifierOrKeyword
     | IdentifierOrKeyword ('.' IdentifierOrKeyword)*
+    ;
+    
+UUID
+   : HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit MINUS HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit;
+
+BOOLEAN_LITERAL: 'true' | 'false';
+
+DECIMAL_INTEGER_LITERAL
+    : DecimalDigit+ IntegerTypeSuffix?
+    ;
+
+HEXADECIMAL_INTEGER_LITERAL
+    : '0x' HexDigit+ IntegerTypeSuffix?
+    | '0X' HexDigit+ IntegerTypeSuffix?
+    ;
+
+REAL_LITERAL
+    : DecimalDigit+ '.' DecimalDigit+ ExponentPart RealTypeSuffix
+    | '.' DecimalDigit+ ExponentPart RealTypeSuffix
+    | DecimalDigit ExponentPart RealTypeSuffix
+    | DecimalDigit RealTypeSuffix
+    ;
+    
+CHARACTER_LITERAL: '\'' Character '\'';
+
+STRING_LITERAL
+    : RegularStringLiteral
+    | VerbatimStringLiteral
     ;
 
 fragment IdentifierOrKeyword
@@ -163,26 +185,6 @@ fragment FormattingCharacter
     | '\u200d'
     ;
 
-LITERAL
-    : BooleanLiteral
-    | IntegerLiteral
-    | RealLiteral
-    | CharacterLiteral
-    | StringLiteral
-    | NullLiteral
-    ;
-
-fragment BooleanLiteral: 'true' | 'false';
-
-fragment IntegerLiteral
-    : DecimalIntegerLiteral
-    | HexaDecmimalIntegerLiteral
-    ;
-
-fragment DecimalIntegerLiteral
-    : DecimalDigit+ IntegerTypeSuffix?
-    ;
-
 fragment DecimalDigit: [0-9];
 
 fragment IntegerTypeSuffix
@@ -199,20 +201,13 @@ fragment IntegerTypeSuffix
     | 'lU'
     | 'lu'
     ;
-
-fragment HexaDecmimalIntegerLiteral
-    : '0x' HexDigit+ IntegerTypeSuffix?
-    | '0X' HexDigit+ IntegerTypeSuffix?
+    
+fragment UnicodeEscapeSequence
+    : '\\u' HexDigit HexDigit HexDigit HexDigit
+    | '\\U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
     ;
-
+    
 fragment HexDigit: [0-9A-Fa-f];
-
-fragment RealLiteral
-    : DecimalDigit+ '.' DecimalDigit+ ExponentPart RealTypeSuffix
-    | '.' DecimalDigit+ ExponentPart RealTypeSuffix
-    | DecimalDigit ExponentPart RealTypeSuffix
-    | DecimalDigit RealTypeSuffix
-    ;
 
 fragment ExponentPart
     : 'e' Sign? DecimalDigit+
@@ -222,8 +217,6 @@ fragment ExponentPart
 fragment Sign: [+-];
 
 fragment RealTypeSuffix: [FfDd];
-
-fragment CharacterLiteral: '\'' Character '\'';
 
 fragment Character
     : SingleCharacter
@@ -254,11 +247,6 @@ fragment SimpleEscapeSequence
 
 fragment HexadecimalEscapeSequence
     : '\\x' HexDigit HexDigit? HexDigit? HexDigit?
-    ;
-
-fragment StringLiteral
-    : RegularStringLiteral
-    | VerbatimStringLiteral
     ;
 
 fragment RegularStringLiteral
@@ -292,8 +280,6 @@ fragment SingleVerbatimStringLiteralCharacter
 fragment QuoteEscapeSequence
     : '""'
     ;
-
-fragment NullLiteral: 'null';
 
 /* Unicode character classes */
 fragment UnicodeClassLU
@@ -982,48 +968,3 @@ fragment UnicodeClassZS
     | '\u3000' // IDEOGRAPHIC SPACE
     | '\u205F' // MEDIUM MATHEMATICAL SPACE
     ;
-
-/*
-Keyword
-    :
-    ( ABSTRACT
-    | ATTRIBUTE
-    | BOOLEAN
-    | UINT8
-    | CHAR
-    | CLASS
-    | CONST
-    | DEFAULT
-    | DELEGATE
-    | DOUBLE
-    | ENUM
-    | EVENT
-    | FALSE
-    | SINGLE
-    | INT32
-    | INTERFACE
-    | LONG
-    | NAMEPSACE
-    | NULL
-    | OBJECT
-    | OUT
-    | OVERRIDE
-    | PROTECTED
-    | PUBIC
-    | REF
-    | SEALED
-    | SHORT
-    | STATIC
-    | STRING
-    | STRUCT
-    | TRUE
-    | TYPEOF
-    | UINT32
-    | UINT64
-    | UINT16
-    | USING
-    | VIRTUAL
-    | VOID
-    )
-    ;
-*/
