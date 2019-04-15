@@ -394,6 +394,12 @@ namespace winrt::impl
             cancel();
         }
 
+#ifdef _DEBUG
+        void use__make__function_to_create_this_object() final
+        {
+        }
+#endif
+
     protected:
 
         void rethrow_if_failed() const

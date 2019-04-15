@@ -2,7 +2,7 @@
 namespace winrt::impl
 {
     template <typename T, typename Container>
-    struct input_iterable final :
+    struct input_iterable :
         implements<input_iterable<T, Container>, non_agile, no_weak_ref, wfc::IIterable<T>>,
         iterable_base<input_iterable<T, Container>, T>
     {
@@ -23,7 +23,7 @@ namespace winrt::impl
     };
 
     template <typename T, typename InputIt>
-    struct scoped_input_iterable final :
+    struct scoped_input_iterable :
         input_scope,
         implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, wfc::IIterable<T>>,
         iterable_base<scoped_input_iterable<T, InputIt>, T>

@@ -2,7 +2,7 @@
 namespace winrt::impl
 {
     template <typename T, typename Container>
-    struct input_vector_view final :
+    struct input_vector_view :
         implements<input_vector_view<T, Container>, non_agile, no_weak_ref, wfc::IVectorView<T>, wfc::IIterable<T>>,
         vector_view_base<input_vector_view<T, Container>, T>
     {
@@ -23,7 +23,7 @@ namespace winrt::impl
     };
 
     template <typename T, typename InputIt>
-    struct scoped_input_vector_view final :
+    struct scoped_input_vector_view :
         input_scope,
         implements<scoped_input_vector_view<T, InputIt>, non_agile, no_weak_ref, wfc::IVectorView<T>, wfc::IIterable<T>>,
         vector_view_base<scoped_input_vector_view<T, InputIt>, T>
