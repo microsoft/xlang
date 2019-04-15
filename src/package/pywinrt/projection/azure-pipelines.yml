@@ -1,14 +1,5 @@
 pool:
-
-  name: windows-2019
-
-  demands:
-
-  - Cmd
-
-  - cmake
-
-
+  vmImage: 'windows-2019'
 
 steps:
 
