@@ -18,6 +18,7 @@ namespace xlang::xmeta
 
     struct formal_parameter_model : base_model
     {
+        formal_parameter_model() = delete;
         formal_parameter_model(std::string_view const& id, size_t decl_line, parameter_semantics sem, type_ref&& type) :
             base_model{ id, decl_line },
             m_semantic{ sem },

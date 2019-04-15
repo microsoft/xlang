@@ -12,11 +12,11 @@ namespace xlang::xmeta
 {
     struct delegate_model : base_model
     {
+        delegate_model() = delete;
         delegate_model(std::string_view const& id, size_t decl_line, std::optional<type_ref>&& return_type) :
             base_model{ id, decl_line },
             m_return_type{ std::move(return_type) }
         { }
-        delegate_model() = delete;
 
         auto const& get_return_type() const noexcept
         {

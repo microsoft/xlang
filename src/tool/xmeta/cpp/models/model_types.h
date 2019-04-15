@@ -41,8 +41,10 @@ namespace xlang::xmeta
 
     struct type_ref
     {
-        type_ref(std::string_view const& id) : m_semantic{ std::string(id) } { }
-        type_ref(type_ref&& ref) = default;
+        type_ref() = delete;
+        type_ref(std::string_view const& id) :
+            m_semantic{ std::string(id) }
+        { }
 
         auto const& get_semantic() const noexcept
         {

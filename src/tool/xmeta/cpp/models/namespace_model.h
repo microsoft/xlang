@@ -25,6 +25,7 @@ namespace xlang::xmeta
     // will be used to differentiate the separate bodies.
     struct namespace_body_model
     {
+        namespace_body_model() = delete;
         namespace_body_model(std::shared_ptr<namespace_model> const& containing_namespace);
 
         void add_using_alias_directive(std::shared_ptr<using_alias_directive_model> const& uad);
@@ -55,8 +56,8 @@ namespace xlang::xmeta
 
     struct namespace_model : base_model
     {
-        namespace_model(std::string_view const& id, size_t decl_line, std::shared_ptr<namespace_model> const& parent);
         namespace_model() = delete;
+        namespace_model(std::string_view const& id, size_t decl_line, std::shared_ptr<namespace_model> const& parent);
 
         auto const& get_parent_namespace() const noexcept;
 

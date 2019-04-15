@@ -7,10 +7,11 @@
 #include <variant>
 
 #include "base_model.h"
+#include "event_model.h"
 #include "interface_model.h"
 #include "method_model.h"
+#include "model_ref.h"
 #include "property_model.h"
-#include "event_model.h"
 
 namespace xlang::xmeta
 {
@@ -24,12 +25,12 @@ namespace xlang::xmeta
 
     struct class_model : base_model
     {
+        class_model() = delete;
         class_model(std::string_view const& id, size_t decl_line, class_semantics const& sem, std::string_view const& base_id) :
             base_model{ id, decl_line },
             m_semantic{ sem },
-            m_class_base_ref{ std::string(base_id) }
+            m_class_base_ref{ base_id }
         { }
-        class_model() = delete;
 
         auto const& get_class_base_ref() const noexcept
         {
@@ -46,9 +47,19 @@ namespace xlang::xmeta
             return m_semantic;
         }
 
-        auto const& get_members() const noexcept
+        auto const& get_properties() const noexcept
         {
-            return m_members;
+            return m_properties;
+        }
+
+        auto const& get_methods() const noexcept
+        {
+            return m_methods;
+        }
+
+        auto const& get_events() const noexcept
+        {
+            return m_events;
         }
 
         void add_interface_base_ref(std::string_view const& interface_base_ref)
@@ -59,22 +70,22 @@ namespace xlang::xmeta
         void add_interface_base_ref(size_t index, std::shared_ptr<interface_model> const& interface_base_ref)
         {
             assert(index < m_interface_base_refs.size());
-            m_interface_base_refs[index] = interface_base_ref;
+            m_interface_base_refs[index].resolve(interface_base_ref);
         }
 
         void add_member(std::shared_ptr<property_model> const& member)
         {
-            m_members.emplace_back(member);
+            m_properties.emplace_back(member);
         }
 
         void add_member(std::shared_ptr<method_model> const& member)
         {
-            m_members.emplace_back(member);
+            m_methods.emplace_back(member);
         }
 
         void add_member(std::shared_ptr<event_model> const& member)
         {
-            m_members.emplace_back(member);
+            m_events.emplace_back(member);
         }
 
         void add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref)
@@ -88,15 +99,15 @@ namespace xlang::xmeta
         }
 
     private:
-        std::variant<std::string, std::shared_ptr<class_model>> m_class_base_ref;
-        std::vector<std::variant<std::string, std::shared_ptr<interface_model>>> m_interface_base_refs;
+        model_ref<std::shared_ptr<class_model>> m_class_base_ref;
+        std::vector<model_ref<std::shared_ptr<interface_model>>> m_interface_base_refs;
         class_semantics m_semantic;
         // TODO: Add type parameters (generic types)
 
-        std::vector<std::variant<
-            std::shared_ptr<property_model>,
-            std::shared_ptr<method_model>,
-            std::shared_ptr<event_model>>> m_members;
+        // Members
+        std::vector<std::shared_ptr<property_model>> m_properties;
+        std::vector<std::shared_ptr<method_model>> m_methods;
+        std::vector<std::shared_ptr<event_model>> m_events;
 
         std::vector<std::shared_ptr<interface_model>> m_static_interfaces;
         std::vector<std::shared_ptr<interface_model>> m_protected_interfaces;

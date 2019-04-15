@@ -16,6 +16,7 @@ namespace xlang::xmeta
 
     struct event_model : base_model
     {
+        event_model() = delete;
         event_model(std::string_view const& id, size_t decl_line, event_semantics const& sem, std::shared_ptr<method_model> const& add_method_ref, std::shared_ptr<method_model> const& remove_method_ref, type_ref&& t) :
             base_model{ id, decl_line },
             m_semantic{ sem },
@@ -23,7 +24,6 @@ namespace xlang::xmeta
             m_remove_method_ref{ remove_method_ref },
             m_type{ std::move(t) }
         { }
-        event_model() = delete;
 
         auto const& get_add_method_ref() const noexcept
         {

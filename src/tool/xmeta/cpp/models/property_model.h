@@ -16,6 +16,7 @@ namespace xlang::xmeta
 
     struct property_type_semantics
     {
+        property_type_semantics() = delete;
         property_type_semantics(bool is_array, type_ref&& type_id) :
             m_is_array{ is_array },
             m_type_id{ std::move(type_id) }
@@ -28,6 +29,7 @@ namespace xlang::xmeta
 
     struct property_model : base_model
     {
+        property_model() = delete;
         property_model(std::string_view const& id, size_t decl_line, property_semantics const& sem, property_type_semantics&& type, std::shared_ptr<method_model> const& get_method, std::shared_ptr<method_model> const& set_method) :
             base_model{ id, decl_line },
             m_semantic{ sem },
@@ -35,7 +37,6 @@ namespace xlang::xmeta
             m_get_method{ get_method },
             m_set_method{ set_method }
         { }
-        property_model() = delete;
 
         auto const& get_semantic() const noexcept
         {

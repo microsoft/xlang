@@ -18,6 +18,7 @@ namespace xlang::xmeta
 
     struct method_model : base_model
     {
+        method_model() = delete;
         method_model(std::string_view const& id, size_t decl_line, std::optional<type_ref>&& return_type, std::vector<formal_parameter_model>&& formal_params, method_semantics const& sem) :
             base_model{ id, decl_line },
             m_formal_parameters{ std::move(formal_params) },
@@ -31,7 +32,6 @@ namespace xlang::xmeta
             m_return_type{ std::move(return_type) },
             m_overridden_method_ref{ std::string(overridden_method_ref) }
         { }
-        method_model() = delete;
 
         auto const& get_formal_params() const noexcept
         {
