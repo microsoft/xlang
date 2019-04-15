@@ -18,12 +18,12 @@ namespace xlang::xmeta
         { }
         delegate_model() = delete;
 
-        auto const& get_return_type() const
+        auto const& get_return_type() const noexcept
         {
             return m_return_type;
         }
 
-        auto const& get_formal_parameters() const
+        auto const& get_formal_parameters() const noexcept
         {
             return m_formal_parameters;
         }

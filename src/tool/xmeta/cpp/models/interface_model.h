@@ -17,6 +17,16 @@ namespace xlang::xmeta
         interface_model(std::string_view const& id, size_t decl_line) : base_model{ id, decl_line } { }
         interface_model() = delete;
 
+        auto const& get_interface_bases() const noexcept
+        {
+            return m_interface_base_refs;
+        }
+
+        auto const& get_members() const noexcept
+        {
+            return m_members;
+        }
+
         void add_interface_base_ref(std::string_view const& interface_base_ref)
         {
             m_interface_base_refs.emplace_back(std::string(interface_base_ref));

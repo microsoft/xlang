@@ -44,14 +44,14 @@ namespace xlang::xmeta
         m_delegates.emplace_back(std::move(dm));
     }
 
-    bool namespace_body_model::member_id_exists(std::string_view const& member_id)
+    bool namespace_body_model::member_id_exists(std::string_view const& member_id) const
     {
         return m_classes.find(member_id) != m_classes.end() ||
             m_structs.find(member_id) != m_structs.end() ||
             m_interfaces.find(member_id) != m_interfaces.end();
     }
 
-    std::string namespace_body_model::get_full_namespace_name()
+    std::string namespace_body_model::get_full_namespace_name() const
     {
         return m_containing_namespace->get_full_namespace_name();
     }
@@ -61,24 +61,24 @@ namespace xlang::xmeta
         m_parent_namespace{ parent }
     { }
 
-    auto const& namespace_model::get_parent_namespace() const
+    auto const& namespace_model::get_parent_namespace() const noexcept
     {
         return m_parent_namespace;
     }
 
-    void namespace_model::add_child_namespace(std::shared_ptr<namespace_model> child)
+    void namespace_model::add_child_namespace(std::shared_ptr<namespace_model> const& child)
     {
-        std::string const& id = child->get_id();
+        auto id = child->get_id();
         assert(m_child_namespaces.find(id) == m_child_namespaces.end());
         m_child_namespaces[id] = child;
     }
 
-    void namespace_model::add_namespace_body(std::shared_ptr<namespace_body_model> body)
+    void namespace_model::add_namespace_body(std::shared_ptr<namespace_body_model> const& body)
     {
         m_namespace_bodies.emplace_back(body);
     }
 
-    bool namespace_model::member_id_exists(std::string_view const& member_id)
+    bool namespace_model::member_id_exists(std::string_view const& member_id) const
     {
         for (auto ns_body : m_namespace_bodies)
         {
@@ -91,15 +91,15 @@ namespace xlang::xmeta
         return m_child_namespaces.find(member_id) != m_child_namespaces.end();
     }
 
-    std::string namespace_model::get_full_namespace_name()
+    std::string namespace_model::get_full_namespace_name() const
     {
         if (m_parent_namespace != nullptr)
         {
-            return m_parent_namespace->get_full_namespace_name() + "." + std::string(get_id());
+            return m_parent_namespace->get_full_namespace_name() + "." + get_id();
         }
         else
         {
-            return std::string(get_id());
+            return get_id();
         }
     }
 }

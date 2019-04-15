@@ -18,45 +18,45 @@ namespace xlang::xmeta
             m_type_or_namespace_ref{ std::string(type_or_ns_name) }
         { }
 
-        bool is_resolved() const
+        bool is_resolved() const noexcept
         {
             return !std::holds_alternative<std::string>(m_type_or_namespace_ref);
         }
 
-        bool is_namespace_ref() const
+        bool is_namespace_ref() const noexcept
         {
             return std::holds_alternative<std::shared_ptr<namespace_model>>(m_type_or_namespace_ref);
         }
 
-        bool is_type_semantic() const
+        bool is_type_semantic() const noexcept
         {
             return std::holds_alternative<type_semantics>(m_type_or_namespace_ref);
         }
 
-        auto const& to_string()
+        auto const& to_string() noexcept
         {
             assert(!is_resolved());
             return std::get<std::string>(m_type_or_namespace_ref);
         }
 
-        auto const& to_type_semantic()
+        auto const& to_type_semantic() noexcept
         {
             assert(is_type_semantic());
             return std::get<type_semantics>(m_type_or_namespace_ref);
         }
 
-        auto const& to_namespace_model_ref()
+        auto const& to_namespace_model_ref() noexcept
         {
             assert(is_namespace_ref());
             return std::get<std::shared_ptr<namespace_model>>(m_type_or_namespace_ref);
         }
 
-        void set_type_ref(type_semantics const& sem)
+        void set_type_ref(type_semantics const& sem) noexcept
         {
             m_type_or_namespace_ref = sem;
         }
 
-        void set_namespace_ref(std::shared_ptr<namespace_model> const& nm)
+        void set_namespace_ref(std::shared_ptr<namespace_model> const& nm) noexcept
         {
             m_type_or_namespace_ref = nm;
         }
@@ -73,24 +73,24 @@ namespace xlang::xmeta
         { }
         using_namespace_directive_model(using_namespace_directive_model&& und) = default;
 
-        bool is_resolved() const
+        bool is_resolved() const noexcept
         {
             return !std::holds_alternative<std::string>(m_namespace_ref);
         }
 
-        auto const& to_string()
+        auto const& to_string() noexcept
         {
-            assert(std::holds_alternative<std::string>(m_namespace_ref));
+            assert(!is_resolved());
             return std::get<std::string>(m_namespace_ref);
         }
 
-        auto const& to_namespace_model_ref()
+        auto const& to_namespace_model_ref() noexcept
         {
-            assert(std::holds_alternative<std::shared_ptr<namespace_model>>(m_namespace_ref));
+            assert(is_resolved());
             return std::get<std::shared_ptr<namespace_model>>(m_namespace_ref);
         }
 
-        void set_namespace_ref(std::shared_ptr<namespace_model> const& nm)
+        void set_namespace_ref(std::shared_ptr<namespace_model> const& nm) noexcept
         {
             m_namespace_ref = nm;
         }

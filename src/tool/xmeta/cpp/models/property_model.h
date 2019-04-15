@@ -37,22 +37,22 @@ namespace xlang::xmeta
         { }
         property_model() = delete;
 
-        auto const& get_semantic() const
+        auto const& get_semantic() const noexcept
         {
             return m_semantic;
         }
 
-        auto const& get_type() const
+        auto const& get_type() const noexcept
         {
             return m_type;
         }
 
-        auto const& get_get_method() const
+        auto const& get_get_method() const noexcept
         {
             return m_get_method;
         }
 
-        auto const& get_set_method() const
+        auto const& get_set_method() const noexcept
         {
             return m_set_method;
         }

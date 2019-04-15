@@ -35,8 +35,8 @@ namespace xlang::xmeta
         void add_enum(enum_model&& em);
         void add_delegate(delegate_model&& em);
 
-        bool member_id_exists(std::string_view const& member_id);
-        std::string get_full_namespace_name();
+        bool member_id_exists(std::string_view const& member_id) const;
+        std::string get_full_namespace_name() const;
 
     private:
         // Using directives
@@ -58,14 +58,14 @@ namespace xlang::xmeta
         namespace_model(std::string_view const& id, size_t decl_line, std::shared_ptr<namespace_model> const& parent);
         namespace_model() = delete;
 
-        auto const& get_parent_namespace() const;
+        auto const& get_parent_namespace() const noexcept;
 
-        void add_child_namespace(std::shared_ptr<namespace_model> child);
-        void add_namespace_body(std::shared_ptr<namespace_body_model> body);
+        void add_child_namespace(std::shared_ptr<namespace_model> const& child);
+        void add_namespace_body(std::shared_ptr<namespace_body_model> const& body);
 
         // Used for semantic check #3 for namespace members
-        bool member_id_exists(std::string_view const& member_id);
-        std::string get_full_namespace_name();
+        bool member_id_exists(std::string_view const& member_id) const;
+        std::string get_full_namespace_name() const;
 
     private:
         std::shared_ptr<namespace_model> m_parent_namespace;

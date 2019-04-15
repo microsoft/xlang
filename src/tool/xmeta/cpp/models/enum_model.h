@@ -37,11 +37,11 @@ namespace xlang::xmeta
         enum_member(std::string_view const& id, std::optional<enum_member_semantics> val);
         enum_member(std::string_view const& id, std::string_view const& expression_id);
 
-        auto const& get_id() const;
-        auto const& get_value() const;
-        auto const& get_expression_id() const;
+        auto const& get_id() const noexcept;
+        auto const& get_value() const noexcept;
+        auto const& get_expression_id() const noexcept;
 
-        void set_value(enum_member_semantics const& val);
+        void set_value(enum_member_semantics const& val) noexcept;
 
     private:
         std::string m_id;
@@ -54,10 +54,10 @@ namespace xlang::xmeta
         enum_model(std::string_view const& id, size_t decl_line, enum_semantics t);
         enum_model() = delete;
 
-        auto const& get_members() const;
-        auto const& get_type() const;
+        auto const& get_members() const noexcept;
+        auto const& get_type() const noexcept;
 
-        std::errc assign_value(std::string_view const& member_id, std::string_view str_val);
+        std::errc assign_value(std::string_view const& member_id, std::string_view const& str_val) noexcept;
         void add_member(std::string_view const& id, std::optional<enum_member_semantics> val);
         void add_member(std::string_view const& id, std::string_view const& expression_id);
 

@@ -31,19 +31,24 @@ namespace xlang::xmeta
         { }
         class_model() = delete;
 
-        auto const& get_class_base_ref() const
+        auto const& get_class_base_ref() const noexcept
         {
             return m_class_base_ref;
         }
 
-        auto const& get_interface_base_refs() const
+        auto const& get_interface_base_refs() const noexcept
         {
             return m_interface_base_refs;
         }
 
-        auto const& get_semantic()
+        auto const& get_semantic() const noexcept
         {
             return m_semantic;
+        }
+
+        auto const& get_members() const noexcept
+        {
+            return m_members;
         }
 
         void add_interface_base_ref(std::string_view const& interface_base_ref)

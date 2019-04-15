@@ -33,27 +33,27 @@ namespace xlang::xmeta
         { }
         method_model() = delete;
 
-        auto const& get_formal_params() const
+        auto const& get_formal_params() const noexcept
         {
             return m_formal_parameters;
         }
 
-        auto const& get_overridden_method_ref() const
+        auto const& get_overridden_method_ref() const noexcept
         {
             return m_overridden_method_ref;
         }
 
-        auto const& get_return_type() const
+        auto const& get_return_type() const noexcept
         {
             return m_return_type;
         }
 
-        auto const& get_semantic() const
+        auto const& get_semantic() const noexcept
         {
             return m_semantic;
         }
 
-        void set_overridden_method_ref(std::shared_ptr<method_model> const& ref)
+        void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept
         {
             m_overridden_method_ref = ref;
         }
