@@ -69,6 +69,21 @@ jobs:
       _build\tool\python\pywinrt.exe -in 10.0.17763.0 -out src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate Projections'
 
-  - template: build-projection-tasks.yml
-    parameters:
-      targetArchitecture: '${{ parameters.targetArchitecture }}'
+  - task: BatchScript@1
+    displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host x64)'
+    inputs:
+      filename: 'src/scripts/windows/call-batchfile.bat'
+      arguments: '%vsdevcmd% -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}'
+      modifyEnvironment: true
+
+  - task: CMake@1
+    displayName: 'Generate python projection build files via cmake'
+    inputs:
+      cwd: '.'
+      cmakeArgs: '-S src/package/pywinrt/projection -B_build.projection.${{ parameters.targetArchitecture }} -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
+
+  - task: CMake@1
+    displayName: 'build python projection'
+    inputs:
+      cwd: '.'
+      cmakeArgs: '--build .\_build.projection.${{ parameters.targetArchitecture }} -- -v '
