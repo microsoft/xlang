@@ -46,19 +46,21 @@ jobs:
       cwd: '.'
       cmakeArgs: '--build .\_build\ -- -v pywinrt'
 
-  - task: NuGetCommand@2
+  # 333b11bd-d341-40d9-afcf-b32d5ce6f23b is the task guid for NuGetCommand (https://github.com/Microsoft/azure-pipelines-tasks/tree/master/Tasks/NuGetCommandV2)
+  # microsoft.visualstudio.com has a conflicting "NuGetCommand", so use task guid to disambiguate
+  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2
     displayName: 'NuGet install Microsoft.Windows.CppWinRT'
     inputs:
       command: custom
       arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
 
-  - task: NuGetCommand@2
+  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2
     displayName: 'NuGet install python'
     inputs:
       command: custom
       arguments: 'install python -ExcludeVersion  -OutputDirectory src\package\pywinrt\projection\'
 
-  - task: NuGetCommand@2
+  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2
     displayName: 'NuGet install pythonx86'
     inputs:
       command: custom
