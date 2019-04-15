@@ -397,11 +397,9 @@ namespace winrt
     }
 
     template <typename Interface>
-    impl::com_ref<Interface> create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
+    auto create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
     {
-        void* result{};
-        check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), &result));
-        return { result, take_ownership_from_abi };
+        return capture<Interface>(WINRT_CoCreateInstance, clsid, outer, context);
     }
 
     namespace Windows::Foundation

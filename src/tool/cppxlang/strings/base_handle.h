@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     struct handle_type
@@ -52,7 +52,7 @@ namespace winrt
 
         type* put() noexcept
         {
-            WINRT_ASSERT(m_value == T::invalid());
+            XLANG_ASSERT(m_value == T::invalid());
             return &m_value;
         }
 

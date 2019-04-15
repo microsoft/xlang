@@ -246,9 +246,9 @@ namespace winrt
             {
             }
 
-            bool await_ready() const
+            bool await_ready() const noexcept
             {
-                return m_dispatcher.HasThreadAccess();
+                return false;
             }
 
             void await_resume() const noexcept

@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T, typename Container>
     struct observable_vector final :
@@ -28,7 +28,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename T, typename Allocator = std::allocator<T>>
     Windows::Foundation::Collections::IVector<T> single_threaded_vector(std::vector<T, Allocator>&& values = {})

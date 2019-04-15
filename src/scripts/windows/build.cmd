@@ -24,7 +24,7 @@ goto :init
     set "OPT_VERBOSE_CMAKE="
     set "OPT_FORCE_CMAKE="
     set "BUILD_TYPE=Debug"
-    set "BUILD_VERSION=1.0.0"
+    set "BUILD_VERSION=0.0.0"
     set "BUILD_TARGET="
 
     pushd %~dp0..\..\..\

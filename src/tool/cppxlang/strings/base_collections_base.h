@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     template <typename D, typename T, typename Version = impl::no_collection_version>
     struct iterable_base : Version
