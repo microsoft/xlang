@@ -20,4 +20,4 @@ steps:
   displayName: 'build python projection'
   inputs:
     cwd: '.'
-    cmakeArgs: '--build .\_build.projection\ -- -v '
+    cmakeArgs: '--build .\_build.projection\.${{ parameters.targetArchitecture }} -- -v '

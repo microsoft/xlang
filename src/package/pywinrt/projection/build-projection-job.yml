@@ -4,7 +4,7 @@ parameters:
   targetArchitecture: 'amd64'  # defaults for any parameters that aren't specified
 
 jobs:
-- job: "PythonWinRTProjection-${{ parameters.targetArchitecture }}"
+- job: "PythonWinRTProjection_${{ parameters.targetArchitecture }}"
   pool:
     vmImage: 'windows-2019'
   timeoutInMinutes: 120
