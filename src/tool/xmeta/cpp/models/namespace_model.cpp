@@ -44,6 +44,41 @@ namespace xlang::xmeta
         m_delegates.emplace_back(std::move(dm));
     }
 
+    auto const& namespace_body_model::get_using_alias_directives() const noexcept
+    {
+        return m_using_alias_directives;
+    }
+
+    auto const& namespace_body_model::get_using_namespace_directives() const noexcept
+    {
+        return m_using_namespace_directives;
+    }
+
+    auto const& namespace_body_model::get_classes() const noexcept
+    {
+        return m_classes;
+    }
+
+    auto const& namespace_body_model::get_structs() const noexcept
+    {
+        return m_structs;
+    }
+
+    auto const& namespace_body_model::get_interfaces() const noexcept
+    {
+        return m_interfaces;
+    }
+
+    auto const& namespace_body_model::get_enums() const noexcept
+    {
+        return m_enums;
+    }
+
+    auto const& namespace_body_model::get_delegates() const noexcept
+    {
+        return m_delegates;
+    }
+
     bool namespace_body_model::member_id_exists(std::string_view const& member_id) const
     {
         return m_classes.find(member_id) != m_classes.end() ||
@@ -60,6 +95,16 @@ namespace xlang::xmeta
         base_model{ id, decl_line, assembly_name },
         m_parent_namespace{ parent }
     { }
+
+    auto const& namespace_model::get_child_namespaces() const noexcept
+    {
+        return m_child_namespaces;
+    }
+
+    auto const& namespace_model::get_namespace_bodies() const noexcept
+    {
+        return m_namespace_bodies;
+    }
 
     auto const& namespace_model::get_parent_namespace() const noexcept
     {

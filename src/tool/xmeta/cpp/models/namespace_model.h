@@ -36,6 +36,14 @@ namespace xlang::xmeta
         void add_enum(enum_model&& em);
         void add_delegate(delegate_model&& em);
 
+        auto const& get_using_alias_directives() const noexcept;
+        auto const& get_using_namespace_directives() const noexcept;
+        auto const& get_classes() const noexcept;
+        auto const& get_structs() const noexcept;
+        auto const& get_interfaces() const noexcept;
+        auto const& get_enums() const noexcept;
+        auto const& get_delegates() const noexcept;
+
         bool member_id_exists(std::string_view const& member_id) const;
         std::string get_full_namespace_name() const;
 
@@ -59,6 +67,8 @@ namespace xlang::xmeta
         namespace_model() = delete;
         namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent);
 
+        auto const& get_child_namespaces() const noexcept;
+        auto const& get_namespace_bodies() const noexcept;
         auto const& get_parent_namespace() const noexcept;
 
         void add_child_namespace(std::shared_ptr<namespace_model> const& child);
