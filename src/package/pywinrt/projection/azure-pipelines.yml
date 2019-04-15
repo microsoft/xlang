@@ -1,70 +1,10 @@
 
 jobs:
-- job: "PythonWinRTProjection"
-  pool:
-    vmImage: 'windows-2019'
-  timeoutInMinutes: 120
-  steps:
-  - script: |
-      @echo off
-      
-      set vswherepath="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
-      for /f "usebackq delims=" %%i in (`%vswherepath% -latest -property installationPath`) do (
-        set vslatest="%%i"
-        if exist "%%i\Common7\Tools\vsdevcmd.bat" (
-          set vsdevcmd="%%i\Common7\Tools\vsdevcmd.bat"
-        )
-      )
-      
-      @echo vslatest %vslatest%
-      @echo vsdevcmd %vsdevcmd%
-      
-      @echo ##vso[task.setvariable variable=vslatest]%vslatest%
-      @echo ##vso[task.setvariable variable=vsdevcmd]%vsdevcmd%
-    displayName: 'locate vsdevcmd via vswhere'
+- template: build-projection-job.yml
+  parameters:
+    targetArchitecture: x86
+- template: build-projection-job.yml
+  parameters:
+    targetArchitecture: amd64
+    
 
-  - task: BatchScript@1
-    displayName: 'Configure environment with VSDevCmd (arch x86/host x64)'
-    inputs:
-      filename: 'src/scripts/windows/call-batchfile.bat'
-      arguments: '%vsdevcmd% -host_arch=amd64 -arch=x86'
-      modifyEnvironment: true
-
-  - task: CMake@1
-    displayName: 'Generate xlang build files via cmake'
-    inputs:
-      cwd: '.'
-      cmakeArgs: '-S src -B_build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
-
-  - task: CMake@1
-    displayName: 'build pywinrt'
-    inputs:
-      cwd: '.'
-      cmakeArgs: '--build .\_build\ -- -v pywinrt'
-
-  - task: NuGetCommand@2
-    displayName: 'NuGet install Microsoft.Windows.CppWinRT'
-    inputs:
-      command: custom
-      arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
-
-  - task: NuGetCommand@2
-    displayName: 'NuGet install python'
-    inputs:
-      command: custom
-      arguments: 'install python -ExcludeVersion  -OutputDirectory src\package\pywinrt\projection\'
-
-  - task: NuGetCommand@2
-    displayName: 'NuGet install pythonx86'
-    inputs:
-      command: custom
-      arguments: 'install pythonx86 -ExcludeVersion  -OutputDirectory src\package\pywinrt\projection\'
-
-  - script: |
-      _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -in 10.0.17763.0 -out src\package\pywinrt\projection\cppwinrt -verbose
-      _build\tool\python\pywinrt.exe -in 10.0.17763.0 -out src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
-    displayName: 'Generate Projections'
-
-  - template: build-projection.yml
-    parameters:
-      targetArchitecture: 'x86'
