@@ -41,14 +41,15 @@ elseif("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
     set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/pythonx86")
 endif()
 
-file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/unity/*.cpp")
+file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src/*.cpp")
 foreach(file ${sources})
     message(${file})
 endforeach()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(/await /bigobj /GL /GR- /permissive-)
+add_compile_options(/await /bigobj /GR- /permissive-)
+# add_compile_options(/await /bigobj /GL /GR- /permissive-)
 
 project(_winrt)
 
@@ -62,7 +63,7 @@ target_link_libraries(_winrt PRIVATE onecore)
 TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
 
 string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-string(APPEND CMAKE_MODULE_LINKER_FLAGS " /LTCG:STATUS")
+# string(APPEND CMAKE_MODULE_LINKER_FLAGS " /LTCG:STATUS")
 
 if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.20.27404.0")
     string(APPEND CMAKE_CXX_FLAGS " /d2FH4")
