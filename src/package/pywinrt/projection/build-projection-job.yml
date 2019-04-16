@@ -28,10 +28,10 @@ jobs:
     displayName: 'locate vsdevcmd via vswhere'
 
   - task: BatchScript@1
-    displayName: 'Configure environment with VSDevCmd (arch x86/host x64)'
+    displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host x64)'
     inputs:
       filename: 'src/scripts/windows/call-batchfile.bat'
-      arguments: '%vsdevcmd% -host_arch=amd64 -arch=x86'
+      arguments: '%vsdevcmd% -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}'
       modifyEnvironment: true
 
   - task: CMake@1
@@ -44,7 +44,7 @@ jobs:
     displayName: 'build pywinrt'
     inputs:
       cwd: '.'
-      cmakeArgs: '--build .\_build\ -- -v pywinrt'
+      cmakeArgs: '--build .\_build -- -v pywinrt'
 
   # 333b11bd-d341-40d9-afcf-b32d5ce6f23b is the task guid for NuGetCommand (https://github.com/Microsoft/azure-pipelines-tasks/tree/master/Tasks/NuGetCommandV2)
   # microsoft.visualstudio.com has a conflicting "NuGetCommand", so use task guid to disambiguate
@@ -71,21 +71,14 @@ jobs:
       _build\tool\python\pywinrt.exe -in 10.0.17763.0 -out src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate Projections'
 
-  - task: BatchScript@1
-    displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host x64)'
-    inputs:
-      filename: 'src/scripts/windows/call-batchfile.bat'
-      arguments: '%vsdevcmd% -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}'
-      modifyEnvironment: true
-
   - task: CMake@1
     displayName: 'Generate python projection build files via cmake'
     inputs:
       cwd: '.'
-      cmakeArgs: '-S src/package/pywinrt/projection -B_build.projection.${{ parameters.targetArchitecture }} -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
+      cmakeArgs: '-S src/package/pywinrt/projection -B_build.projection -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
 
   - task: CMake@1
     displayName: 'build python projection'
     inputs:
       cwd: '.'
-      cmakeArgs: '--build .\_build.projection.${{ parameters.targetArchitecture }} -- -v '
+      cmakeArgs: '--build .\_build.projection -- -v '
