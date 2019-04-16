@@ -19,12 +19,12 @@ $cppwinrt_exe = "$repoRootPath/_build/_tools/Microsoft.Windows.CppWinRT\bin\cppw
 
 $pywinrt_path = "$PSScriptRoot/pywinrt"
 
-remove-item $pywinrt_path -Recurse -Force
+remove-item $pywinrt_path -Recurse -Force -ErrorAction SilentlyContinue
 
-#$pyinclude = @("Windows.")
-$pyinclude = "Windows.Data.Json", "Windows.Devices.Geolocation", "Windows.Foundation", "Windows.Graphics.DirectX"
+#$pyinclude = "Windows.Data.Json", "Windows.Devices.Geolocation", "Windows.Foundation", "Windows.Graphics.DirectX"
+$pyinclude = @("Windows.")
 #$pyexclude = "Windows.UI.Comp", "Windows.UI.Xaml"
-$pyexclude = @() #"Windows.UI.Comp", "Windows.UI.Xaml"
+$pyexclude = "Windows.UI.Composition", "Windows.UI.Xaml"
 $pyin = $pyinclude | ForEach-Object{ "-include", "$_"}
 $pyout = $pyexclude | ForEach-Object{ "-exclude", "$_"}
 
