@@ -26,26 +26,87 @@ namespace xlang::xmeta
     struct namespace_body_model
     {
         namespace_body_model() = delete;
-        namespace_body_model(std::shared_ptr<namespace_model> const& containing_namespace);
+        namespace_body_model(std::shared_ptr<namespace_model> const& containing_namespace) :
+            m_containing_namespace{ containing_namespace }
+        { }
 
-        void add_using_alias_directive(std::shared_ptr<using_alias_directive_model> const& uad);
-        void add_using_namespace_directive(using_namespace_directive_model&& und);
-        void add_class(std::shared_ptr<class_model> const& cm);
-        void add_struct(std::shared_ptr<struct_model> const& sm);
-        void add_interface(std::shared_ptr<interface_model> const& im);
-        void add_enum(enum_model&& em);
-        void add_delegate(delegate_model&& em);
+        auto const& get_using_alias_directives() const noexcept
+        {
+            return m_using_alias_directives;
+        }
 
-        auto const& get_using_alias_directives() const noexcept;
-        auto const& get_using_namespace_directives() const noexcept;
-        auto const& get_classes() const noexcept;
-        auto const& get_structs() const noexcept;
-        auto const& get_interfaces() const noexcept;
-        auto const& get_enums() const noexcept;
-        auto const& get_delegates() const noexcept;
+        auto const& get_using_namespace_directives() const noexcept
+        {
+            return m_using_namespace_directives;
+        }
 
-        bool member_id_exists(std::string_view const& member_id) const;
-        std::string get_full_namespace_name() const;
+        auto const& get_classes() const noexcept
+        {
+            return m_classes;
+        }
+
+        auto const& get_structs() const noexcept
+        {
+            return m_structs;
+        }
+
+        auto const& get_interfaces() const noexcept
+        {
+            return m_interfaces;
+        }
+
+        auto const& get_enums() const noexcept
+        {
+            return m_enums;
+        }
+
+        auto const& get_delegates() const noexcept
+        {
+            return m_delegates;
+        }
+
+        void add_using_alias_directive(std::shared_ptr<using_alias_directive_model> const& uad)
+        {
+            std::string_view id{ uad->get_id() };
+            m_using_alias_directives[id] = uad;
+        }
+
+        void add_using_namespace_directive(using_namespace_directive_model&& und)
+        {
+            m_using_namespace_directives.emplace_back(std::move(und));
+        }
+
+        void add_class(std::shared_ptr<class_model> const& cm)
+        {
+            m_classes[cm->get_id()] = cm;
+        }
+
+        void add_struct(std::shared_ptr<struct_model> const& sm)
+        {
+            m_structs[sm->get_id()] = sm;
+        }
+
+        void add_interface(std::shared_ptr<interface_model> const& im)
+        {
+            m_interfaces[im->get_id()] = im;
+        }
+
+        void add_enum(enum_model&& em)
+        {
+            m_enums.emplace_back(std::move(em));
+        }
+
+        void add_delegate(delegate_model&& dm)
+        {
+            m_delegates.emplace_back(std::move(dm));
+        }
+
+        bool member_id_exists(std::string_view const& member_id) const
+        {
+            return m_classes.find(member_id) != m_classes.end() ||
+                m_structs.find(member_id) != m_structs.end() ||
+                m_interfaces.find(member_id) != m_interfaces.end();
+        }
 
     private:
         // Using directives
@@ -65,18 +126,63 @@ namespace xlang::xmeta
     struct namespace_model : base_model
     {
         namespace_model() = delete;
-        namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent);
+        namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent) :
+            base_model{ id, decl_line, assembly_name },
+            m_parent_namespace{ parent }
+        { }
 
-        auto const& get_child_namespaces() const noexcept;
-        auto const& get_namespace_bodies() const noexcept;
-        auto const& get_parent_namespace() const noexcept;
+        auto const& get_child_namespaces() const noexcept
+        {
+            return m_child_namespaces;
+        }
 
-        void add_child_namespace(std::shared_ptr<namespace_model> const& child);
-        void add_namespace_body(std::shared_ptr<namespace_body_model> const& body);
+        auto const& get_namespace_bodies() const noexcept
+        {
+            return m_namespace_bodies;
+        }
+
+        auto const& get_parent_namespace() const noexcept
+        {
+            return m_parent_namespace;
+        }
+
+        void add_child_namespace(std::shared_ptr<namespace_model> const& child)
+        {
+            auto id = child->get_id();
+            assert(m_child_namespaces.find(id) == m_child_namespaces.end());
+            m_child_namespaces[id] = child;
+        }
+
+        void add_namespace_body(std::shared_ptr<namespace_body_model> const& body)
+        {
+            m_namespace_bodies.emplace_back(body);
+        }
 
         // Used for semantic check #3 for namespace members
-        bool member_id_exists(std::string_view const& member_id) const;
-        std::string get_full_namespace_name() const;
+        bool member_id_exists(std::string_view const& member_id) const
+        {
+            for (auto ns_body : m_namespace_bodies)
+            {
+                if (ns_body->member_id_exists(member_id))
+                {
+                    return true;
+                }
+            }
+
+            return m_child_namespaces.find(member_id) != m_child_namespaces.end();
+        }
+
+        std::string get_full_namespace_name() const
+        {
+            if (m_parent_namespace != nullptr)
+            {
+                return m_parent_namespace->get_full_namespace_name() + "." + get_id();
+            }
+            else
+            {
+                return get_id();
+            }
+        }
 
     private:
         std::shared_ptr<namespace_model> m_parent_namespace;
