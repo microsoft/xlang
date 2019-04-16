@@ -70,6 +70,11 @@ jobs:
       _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -in 10.0.17763.0 -out src\package\pywinrt\projection\cppwinrt -verbose
       _build\tool\python\pywinrt.exe -in 10.0.17763.0 -out src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate Projections'
+    
+  - task: PowerShell@2
+    displayName: 'Generate Unity files'
+    inputs:
+      filePath: 'src/package/pywinrt/projection/unity.ps1'
 
   - task: CMake@1
     displayName: 'Generate python projection build files via cmake'
