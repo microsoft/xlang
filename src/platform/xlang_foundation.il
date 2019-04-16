@@ -57,7 +57,7 @@
 .class public auto ansi windowsruntime sealed Foundation.AsyncActionCompletedHandler
        extends [mscorlib]System.MulticastDelegate
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 66 12 4E 38 78 36 E0 59 BF 8A 6C 80 3A DC 6D 78 00 00 )
 
@@ -75,7 +75,7 @@
 .class interface public abstract auto ansi windowsruntime Foundation.IAsyncAction
 
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 06 00 04 D9 49 53 33 5F AA E1 EE AD 74 6C B4 DD 00 00 )
 
@@ -144,7 +144,7 @@
 .class public auto ansi windowsruntime sealed Foundation.AsyncOperationCompletedHandler`1<TResult>
        extends [mscorlib]System.MulticastDelegate
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 A2 C9 C7 F6 FF 9F 60 5F 82 93 CC 3F 9B 0F B4 4B 00 00 )
 
@@ -162,7 +162,7 @@
 .class interface public abstract auto ansi windowsruntime Foundation.IAsyncOperation`1<TResult>
 
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 FB 0B 11 69 2F 60 10 5B 9A B0 CA 9F 04 48 02 E6 00 00 )
 
@@ -237,7 +237,7 @@
 .class public auto ansi windowsruntime sealed Foundation.TypedEventHandler`2<TSender, TResult>
        extends [mscorlib]System.MulticastDelegate
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 FD 78 32 6C B8 FB 2F 54 86 63 E6 6C 89 39 B0 C9 00 00 )
 
@@ -265,7 +265,7 @@
 .class interface public abstract auto ansi windowsruntime Foundation.Collections.IIterable`1<T>
 
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 EB DA 26 DB 98 57 32 5B B2 9C 3C B7 34 AA 3A 0A 00 00 )
 
@@ -278,7 +278,7 @@
 .class interface public abstract auto ansi windowsruntime Foundation.Collections.IIterator`1<T>
 
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 A3 5D 0D EF 4E D8 79 57 8E AA AB F5 9E 3C B5 AB 00 00 )
 
@@ -316,7 +316,7 @@
 .class interface public abstract auto ansi windowsruntime Foundation.Collections.IKeyValuePair`2<K, V>
 
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 62 0E 91 7E 55 F4 7A 52 87 3F 49 8D 4B DD 3A B6 00 00 )
 
@@ -345,7 +345,7 @@
     implements class Foundation.Collections.IMapView`2<!K, !V>,
                class Foundation.Collections.IIterable`1<class Foundation.Collections.IKeyValuePair`2<!K, !V>>
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 AE F1 2B 30 F3 17 DC 55 83 8B 41 EF 6F F5 62 A3 00 00 )
 
@@ -373,7 +373,7 @@
 .class interface public abstract auto ansi windowsruntime Foundation.Collections.IMapView`2<K, V>
     implements class Foundation.Collections.IIterable`1<class Foundation.Collections.IKeyValuePair`2<!K, !V>>
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 C9 57 E1 0E 6B DD 60 52 97 D1 65 5D BC 2C B5 16 00 00 )
 
@@ -402,7 +402,7 @@
     implements class Foundation.Collections.IVectorView`1<!T>,
                class Foundation.Collections.IIterable`1<!T>
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 21 19 6B 02 0D 4F C8 5E 9B 14 DF 5B DB C4 B6 A5 00 00 )
 
@@ -450,7 +450,7 @@
 .class interface public abstract auto ansi windowsruntime Foundation.Collections.IVectorView`1<T>
     implements class Foundation.Collections.IIterable`1<!T>
 {
-  .custom instance void [xlang_foundation]xlang.Foundation.Metadata.GuidAttribute::.ctor(
+  .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
         = ( 01 00 F7 17 D3 AD C6 43 35 5A 83 93 55 DB 93 DF 21 13 00 00 )
 
