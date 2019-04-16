@@ -42,6 +42,9 @@ elseif("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
 endif()
 
 file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/unity/*.cpp")
+foreach(file ${sources})
+    message(${file})
+endforeach()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

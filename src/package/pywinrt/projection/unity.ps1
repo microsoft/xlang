@@ -13,6 +13,7 @@ $unityGroups = Get-ChildItem $pywinrt_src_path\*.cpp |
 
 foreach ($g in $unityGroups)
 {
+    Write-Output "Unity: $($g.Name)"
     $cppIncludes = $g.group | ForEach-Object{"#include `"$($_.fullname)`""}
     "#include `"pch.h`"`n" | Set-Content -Path "$pywinrt_unity_path/$($g.Name).cpp" 
     $cppIncludes -join "`n" | add-Content -Path "$pywinrt_unity_path/$($g.Name).cpp" 
@@ -20,5 +21,6 @@ foreach ($g in $unityGroups)
 
 foreach ($f in $coreFiles)
 {
+    Write-Output "Core: $($f.Name)"
     Copy-Item $f $pywinrt_unity_path
 }
