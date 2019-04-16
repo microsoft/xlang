@@ -275,12 +275,32 @@ struct winrt_type<%>
         w.write("\n// ----- % Initialization --------------------\n", ns);
 
         write_ns_module_exec_func(w, members);
-        w.write(strings::ns_module_def, ns, bind<write_ns_module_name>(ns), bind<write_ns_module_name>(ns));
+        w.write(strings::ns_module_def, ns, bind<write_ns_module_name>(ns));
+    }
+
+    void write_namespace_module_init_function(writer& w, std::string_view const& ns)
+    {
+        auto format = R"(
+PyMODINIT_FUNC
+PyInit_% (void) noexcept
+{
+    return PyModuleDef_Init(&py::cpp::%::module_def);
+}
+)";
+        auto segments = get_dotted_name_segments(ns);
+        w.write(format, bind<write_ns_module_name>(ns), bind_list("::", segments));
     }
 
     void write_winrt_type_specialization_storage(writer& w, TypeDef const& type)
     {
-        w.write("\nPyTypeObject* py::winrt_type<%>::python_type;\n", bind<write_python_wrapper_template_type>(type));
+        if (!is_exclusive_to(type))
+        {
+            w.write("\nPyTypeObject* py::winrt_type<%>::python_type;", bind<write_python_wrapper_template_type>(type));
+        }
+    }
+
+    void write_winrt_type_name_constant(writer& w, TypeDef const& type)
+    {
         w.write("constexpr const char* const _type_name_@ = \"@\";\n", type.TypeName(), type.TypeName());
     }
 
@@ -1293,7 +1313,7 @@ static PyType_Spec _type_spec_@ =
         auto guard{ w.push_generic_params(type.GenericParam()) };
         
         w.write("\n// ----- @ % --------------------\n", type.TypeName(), bind<write_category>(type));
-        write_winrt_type_specialization_storage(w, type);
+        write_winrt_type_name_constant(w, type);
         write_new_function(w, type);
         write_dealloc_function(w, type);
         write_method_functions(w, type);
@@ -1904,12 +1924,12 @@ if (!PyArg_ParseTupleAndKeywords(args, kwds, "%", const_cast<char**>(kwlist)%))
 
     void write_struct_convert_functions(writer& w, TypeDef const& type)
     {
-        w.write("\nPyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
+        w.write("\n\nPyObject* py::converter<%>::convert(% instance) noexcept\n{\n", type, type);
         {
             writer::indent_guard g{ w };
             w.write("return py::wrap_struct(instance, py::get_python_type<%>());\n", type);
         }
-        w.write("}\n\n");
+        w.write("}\n");
 
         w.write("% py::converter<%>::convert_to(PyObject* obj)\n{\n", type, type);
         {
@@ -1949,7 +1969,7 @@ if (!PyDict_Check(obj))
 
             w.write("\nreturn return_value;\n");
         }
-        w.write("}\n");
+        w.write("}");
     }
 
     void write_struct(writer& w, TypeDef const& type)
@@ -1957,8 +1977,7 @@ if (!PyDict_Check(obj))
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
         w.write("\n// ----- % struct --------------------\n", type.TypeName());
-        write_winrt_type_specialization_storage(w, type);
-        write_struct_convert_functions(w, type);
+        write_winrt_type_name_constant(w, type);
         write_struct_constructor(w, type);
         write_dealloc_function(w, type);
         write_struct_getset_functions(w, type);

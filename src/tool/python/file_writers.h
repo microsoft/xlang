@@ -110,14 +110,30 @@ namespace pywinrt
         write_license(w);
         w.write("#include \"pch.h\"\n");
         w.write("#include \"py.%.h\"\n", ns);
+
+        settings.filter.bind_each<write_winrt_type_specialization_storage>(members.classes)(w);
+        settings.filter.bind_each<write_winrt_type_specialization_storage>(members.interfaces)(w);
+        settings.filter.bind_each<write_winrt_type_specialization_storage>(members.structs)(w);
+
         if (ns == "Windows.Foundation")
         {
             w.write(strings::custom_struct_convert);
         }
-        settings.filter.bind_each<write_inspectable_type>(members.classes)(w);
-        settings.filter.bind_each<write_inspectable_type>(members.interfaces)(w);
-        settings.filter.bind_each<write_struct>(members.structs)(w);
-        write_namespace_initialization(w, ns, members);
+        settings.filter.bind_each<write_struct_convert_functions>(members.structs)(w);
+
+        auto segments = get_dotted_name_segments(ns);
+        w.write("\n\nnamespace py::cpp::%\n{", bind_list("::", segments));
+        {
+            writer::indent_guard g{ w };
+
+            settings.filter.bind_each<write_inspectable_type>(members.classes)(w);
+            settings.filter.bind_each<write_inspectable_type>(members.interfaces)(w);
+            settings.filter.bind_each<write_struct>(members.structs)(w);
+            write_namespace_initialization(w, ns, members);
+        }
+        w.write("} // py::cpp::%\n", bind_list("::", segments));
+
+        write_namespace_module_init_function(w, ns);
 
         w.flush_to_file(folder / filename);
         return std::move(w.needed_namespaces);
