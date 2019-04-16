@@ -40,9 +40,35 @@ namespace xlang::xmeta
         return;
 
     finish:
-        m_metadata_dispenser->Release();
-        m_metadata_assembly_emitter->Release();
-        m_metadata_emitter->Release();
+        if (m_metadata_dispenser != nullptr)
+        {
+            m_metadata_dispenser->Release();
+        }
+        if (m_metadata_assembly_emitter != nullptr)
+        {
+            m_metadata_assembly_emitter->Release();
+        }
+        if (m_metadata_emitter != nullptr)
+        {
+            m_metadata_emitter->Release();
+        }
+        CoUninitialize();
+    }
+
+    void xmeta_emit::uninitialize()
+    {
+        if (m_metadata_dispenser != nullptr)
+        {
+            m_metadata_dispenser->Release();
+        }
+        if (m_metadata_assembly_emitter != nullptr)
+        {
+            m_metadata_assembly_emitter->Release();
+        }
+        if (m_metadata_emitter != nullptr)
+        {
+            m_metadata_emitter->Release();
+        }
         CoUninitialize();
     }
 
@@ -77,7 +103,27 @@ namespace xlang::xmeta
     void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& model) {};
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) {};
     void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model) {};
-    void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) {};
+
+    void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) {
+        std::string enum_name = model->get_id();
+
+        mdTypeDef token_enum_type_def;
+        m_metadata_emitter->DefineTypeDef(enum_name.c_str, dw_enum_typeflag, mdTokenNil, mdTokenNil, &token_enum_type_def);
+
+        for (enum_member const& enum_member : model->get_members())
+        {
+            std::string enum_member_name = enum_member.get_id();
+            auto enum_member_val = enum_member.get_value();
+     /*       m_metadata_emitter->DefineField(
+                token_enum_type_def,
+                enum_member_name.c_str(),
+
+            )*/
+        }
+
+    };
+    
+    
     void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model) {};
 
     void xmeta_emit::listen_method_model(std::shared_ptr<method_model> const& model) {};

@@ -19,6 +19,7 @@ namespace xlang::xmeta
         { };
 
         void initialize();
+        void uninitialize();
         void saveToFile();
 
         void listen_namespace_model(std::shared_ptr<namespace_model> const& model) override;
@@ -34,9 +35,9 @@ namespace xlang::xmeta
 
     private:
         std::wstring m_assembly_name;
-        IMetaDataDispenserEx *m_metadata_dispenser;
-        IMetaDataAssemblyEmit *m_metadata_assembly_emitter;
-        IMetaDataEmit2 *m_metadata_emitter;
+        IMetaDataDispenserEx *m_metadata_dispenser = nullptr;
+        IMetaDataAssemblyEmit *m_metadata_assembly_emitter = nullptr;
+        IMetaDataEmit2 *m_metadata_emitter = nullptr;
 
         mdAssembly tokenAssembly;
 
@@ -88,5 +89,7 @@ namespace xlang::xmeta
 
         HRESULT define_type_ref_by_name();
         HRESULT define_user_string();
+
+        static const DWORD dw_enum_typeflag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;  // Flag: Public | Sealed | Class | AutoLayout | WindowsRuntime
     };
 }
