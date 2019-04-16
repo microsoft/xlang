@@ -41,7 +41,7 @@ elseif("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
     set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/pythonx86")
 endif()
 
-file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src/*.cpp")
+file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/unity/*.cpp")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -53,7 +53,7 @@ link_directories("${PYTHON_ROOT}/tools/libs")
 
 add_library(_winrt MODULE ${sources})
 set_target_properties(_winrt PROPERTIES SUFFIX ".pyd")
-target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${PYTHON_ROOT}/tools/include")
+target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src" "${PYTHON_ROOT}/tools/include")
 target_link_libraries(_winrt PRIVATE onecore)
 
 TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
