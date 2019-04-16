@@ -23,6 +23,23 @@ namespace xlang::meta::reader
         return type.get_database().get_cache().find_required(type.TypeNamespace(), type.TypeName());
     }
 
+    inline TypeDef find_required(coded_index<TypeDefOrRef> const& type)
+    {
+        if (type.type() == TypeDefOrRef::TypeRef)
+        {
+            return find_required(type.TypeRef());
+        }
+        else if (type.type() == TypeDefOrRef::TypeDef)
+        {
+            return type.TypeDef();
+        }
+        else
+        {
+            XLANG_ASSERT(false);
+            return {};
+        }
+    }
+
     inline bool is_const(ParamSig const& param)
     {
         auto is_type_const = [](auto&& type)
