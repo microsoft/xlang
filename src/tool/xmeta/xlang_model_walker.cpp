@@ -28,15 +28,15 @@ namespace xlang::xmeta
                 enter_interface_model(val);
             }
 
-            //for (auto const&[key, val] : ns_body->get_enums())
-            //{
-            //    enter_enum_model(val);
-            //}
+            for (auto const& key : ns_body->get_enums())
+            {
+                enter_enum_model(key);
+            }
 
-            //for (auto const&[key, val] : ns_body->get_delegates())
-            //{
-            //    enter_delegate_model(val);
-            //}
+            for (auto const& key : ns_body->get_delegates())
+            {
+                enter_delegate_model(key);
+            }
         }
         for (auto const&[key, val] : model->get_child_namespaces())
         {
@@ -78,7 +78,7 @@ namespace xlang::xmeta
 
     }
 
-    void xlang_model_walker::enter_delegate_model(std::shared_ptr<delegate_model> const& model)
+    void xlang_model_walker::enter_delegate_model(delegate_model const& model)
     {
 
     }
