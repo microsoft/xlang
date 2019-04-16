@@ -26,5 +26,8 @@ endif()
 
 install(TARGETS pal DESTINATION "test/platform")
 if (WIN32)
+    add_custom_target(xlang_foundation
+        COMMAND ilasm /DLL /mdv="WindowsRuntime 1.4" /output="${CMAKE_CURRENT_BINARY_DIR}/xlang_foundation.xmeta" "${CMAKE_CURRENT_SOURCE_DIR}/xlang_foundation.il")
+    install(TARGETS xlang_foundation "test/platform")
     install(FILES $<TARGET_PDB_FILE:pal> DESTINATION "test/platform" OPTIONAL)
 endif ()
