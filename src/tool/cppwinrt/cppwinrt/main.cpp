@@ -282,7 +282,7 @@ Where <spec> is one or more of:
 
                     write_namespace_0_h(ns, members);
                     write_namespace_1_h(ns, members);
-                    write_namespace_2_h(ns, members, c);
+                    write_namespace_2_h(ns, members);
                     write_namespace_h(c, ns, members);
                 });
             }
