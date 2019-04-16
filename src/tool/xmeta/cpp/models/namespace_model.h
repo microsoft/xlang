@@ -91,9 +91,9 @@ namespace xlang::xmeta
             m_interfaces[im->get_id()] = im;
         }
 
-        void add_enum(enum_model&& em)
+        void add_enum(std::shared_ptr<enum_model> const& em)
         {
-            m_enums.emplace_back(std::move(em));
+            m_enums.emplace_back(em);
         }
 
         void add_delegate(delegate_model&& dm)
@@ -117,7 +117,7 @@ namespace xlang::xmeta
         std::map<std::string_view, std::shared_ptr<class_model>, std::less<>> m_classes;
         std::map<std::string_view, std::shared_ptr<struct_model>, std::less<>> m_structs;
         std::map<std::string_view, std::shared_ptr<interface_model>, std::less<>> m_interfaces;
-        std::vector<enum_model> m_enums;
+        std::vector<std::shared_ptr<enum_model>> m_enums;
         std::vector<delegate_model> m_delegates;
 
         std::shared_ptr<namespace_model> m_containing_namespace;
