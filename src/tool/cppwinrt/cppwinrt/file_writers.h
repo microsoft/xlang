@@ -140,7 +140,7 @@ namespace xlang
         w.save_header('1');
     }
 
-    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members, cache const& c)
+    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
