@@ -34,6 +34,7 @@ namespace xlang::xmeta
 
     struct enum_member
     {
+        enum_member() = delete;
         enum_member(std::string_view const& id, std::optional<enum_member_semantics> val);
         enum_member(std::string_view const& id, std::string_view const& expression_id);
 
@@ -46,13 +47,15 @@ namespace xlang::xmeta
     private:
         std::string m_id;
         std::optional<enum_member_semantics> m_value;
+
+        // Temporarily stores ID referenced in an enum assignment.
         std::string m_expression_id;
     };
 
     struct enum_model : base_model
     {
-        enum_model(std::string_view const& id, size_t decl_line, enum_semantics t);
         enum_model() = delete;
+        enum_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, enum_semantics t);
 
         auto const& get_members() const noexcept;
         auto const& get_type() const noexcept;
@@ -62,7 +65,7 @@ namespace xlang::xmeta
         void add_member(std::string_view const& id, std::string_view const& expression_id);
 
     private:
-        enum_semantics m_type;
         std::vector<enum_member> m_members;
+        enum_semantics m_type;
     };
 }

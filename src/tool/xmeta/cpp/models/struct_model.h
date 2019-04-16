@@ -13,8 +13,10 @@ namespace xlang::xmeta
 {
     struct struct_model : base_model
     {
-        struct_model(std::string_view const& id, size_t decl_line) : base_model{ id, decl_line } { }
         struct_model() = delete;
+        struct_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name) :
+            base_model{ id, decl_line, assembly_name }
+        { }
 
         auto const& get_fields() const noexcept
         {

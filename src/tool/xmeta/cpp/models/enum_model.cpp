@@ -35,8 +35,8 @@ namespace xlang::xmeta
         m_value = val;
     }
 
-    enum_model::enum_model(std::string_view const& id, size_t decl_line, enum_semantics t) :
-        base_model{ id, decl_line },
+    enum_model::enum_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, enum_semantics t) :
+        base_model{ id, decl_line, assembly_name },
         m_type{ t }
     { }
 
