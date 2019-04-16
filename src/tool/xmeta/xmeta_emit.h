@@ -21,6 +21,16 @@ namespace xlang::xmeta
         void initialize();
         void saveToFile();
 
+        void listen_namespace_model(std::shared_ptr<namespace_model> const& model) override;
+        void listen_class_model(std::shared_ptr<class_model> const& model) override;
+        void listen_struct_model(std::shared_ptr<struct_model> const& model) override;
+        void listen_interface_model(std::shared_ptr<interface_model> const& model) override;
+        void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
+        void listen_delegate_model(std::shared_ptr<delegate_model> const& model) override;
+
+        void listen_method_model(std::shared_ptr<method_model> const& model) override;
+        void listen_property_model(std::shared_ptr<property_model> const& model) override;
+        void listen_event_model(std::shared_ptr<event_model> const& model) override;
 
     private:
         std::wstring m_assembly_name;
@@ -78,6 +88,5 @@ namespace xlang::xmeta
 
         HRESULT define_type_ref_by_name();
         HRESULT define_user_string();
-
     };
 }

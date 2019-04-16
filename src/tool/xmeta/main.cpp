@@ -35,7 +35,7 @@ int main(int argc, const char * argv[]) {
     std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
 
     xlang::xmeta::xlang_model_walker walker();
-    //std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(std::wstring(L"test"));
+    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(std::wstring(L"test"));
     
     //namespace_model m("test", "error", NULL);
     //

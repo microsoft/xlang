@@ -13,7 +13,8 @@ namespace xlang::xmeta
                 CLSCTX_INPROC_SERVER,
                 IID_IMetaDataDispenser,
                 (void **)&m_metadata_dispenser);
-            if (FAILED(hr)) {
+            if (FAILED(hr)) 
+            {
                 goto finish;
             }
 
@@ -22,12 +23,15 @@ namespace xlang::xmeta
                 0,
                 IID_IMetaDataAssemblyEmit,
                 (IUnknown **)&m_metadata_assembly_emitter);
-            if (FAILED(hr)) {
+
+            if (FAILED(hr)) 
+            {
                 goto finish;
             }
 
             m_metadata_assembly_emitter->QueryInterface(IID_IMetaDataEmit2, (void **)&m_metadata_emitter);
-            if (FAILED(hr)) {
+            if (FAILED(hr)) 
+            {
                 goto finish;
             }
 
@@ -69,16 +73,16 @@ namespace xlang::xmeta
         return 0;
     }
 
-    void listen_namespace_model(std::shared_ptr<namespace_model> const& model) {};
-    void listen_class_model(std::shared_ptr<class_model> const& model) {};
-    void listen_struct_model(std::shared_ptr<struct_model> const& model) {};
-    void listen_interface_model(std::shared_ptr<interface_model> const& model) {};
-    void listen_enum_model(std::shared_ptr<enum_model> const& model) {};
-    void listen_delegate_model(std::shared_ptr<delegate_model> const& model) {};
+    void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& model) {};
+    void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& model) {};
+    void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) {};
+    void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model) {};
+    void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) {};
+    void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model) {};
 
-    void listen_method_model(std::shared_ptr<method_model> const& model) {};
-    void listen_property_model(std::shared_ptr<property_model> const& model) {};
-    void listen_event_model(std::shared_ptr<event_model> const& model) {};
+    void xmeta_emit::listen_method_model(std::shared_ptr<method_model> const& model) {};
+    void xmeta_emit::listen_property_model(std::shared_ptr<property_model> const& model) {};
+    void xmeta_emit::listen_event_model(std::shared_ptr<event_model> const& model) {};
 }
 
 
