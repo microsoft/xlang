@@ -64,6 +64,27 @@ C++/WinRT behavior can be customized with these project properties:
 | CppWinRTPath | ...\cppwinrt.exe | NuGet package-relative path to cppwinrt.exe, for custom build rule invocation |
 \*Default value
 
+To customize the above properties, a property sheet can be added to the project:
+* right-click the project node
+* select Add | New Item... | Visual C++ | Property Sheets | Property Sheet (.props) 
+* edit the resulting property sheet file
+* add the necessary project customizations
+* select View | Other Windows | Property Manager
+* right-click the project node
+* select Add Existing Property Sheet...
+* select the new property sheet file
+
+Alternatively, the project file can be edited directly:
+* right-click the project node
+* select Unload Project
+* right-click the project node
+* select Edit \<project\>.vcxproj
+* add the necessary project customizations
+* right-click the project node
+* select Reload Project and close the editor
+
+Finally, a standalone props or targets file can be injected into your project as described [here](https://docs.microsoft.com/en-us/cpp/build/modify-project-properties-without-changing-project-file?view=vs-2019).  However, this technique does not work well with automated builds.
+
 ## Troubleshooting
 
 The msbuild verbosity level maps to msbuild message importance as follows:
