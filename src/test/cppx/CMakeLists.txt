@@ -22,7 +22,13 @@ if (WIN32)
     install(FILES $<TARGET_PDB_FILE:test_cppx> DESTINATION "test/platform" OPTIONAL)
 endif ()
 
-add_custom_target(test_cppx_base_projection
-    COMMAND cppxlang -base -out "${CMAKE_CURRENT_BINARY_DIR}")
+if (WIN32)
+    get_target_property(xmeta_path xlang_foundation BINARY_DIR)
+    add_custom_target(test_cppx_base_projection
+        COMMAND cppxlang -base -in "{xmeta_path}/xlang_foundation.xmeta" -out "${CMAKE_CURRENT_BINARY_DIR}")
+else ()
+    add_custom_target(test_cppx_base_projection
+        COMMAND cppxlang -base -out "${CMAKE_CURRENT_BINARY_DIR}")
+endif ()
 
 add_dependencies(test_cppx test_cppx_base_projection)
