@@ -1,3 +1,5 @@
+#pragma once
+
 #include "base_model.h"
 #include "class_model.h"
 #include "delegate_model.h"
