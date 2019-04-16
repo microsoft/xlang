@@ -108,11 +108,6 @@ namespace xlang::xmeta
                 m_interfaces.find(member_id) != m_interfaces.end();
         }
 
-        std::string get_full_namespace_name() const
-        {
-            return m_containing_namespace->get_full_namespace_name();
-        }
-
     private:
         // Using directives
         std::map<std::string_view, std::shared_ptr<using_alias_directive_model>, std::less<>> m_using_alias_directives;

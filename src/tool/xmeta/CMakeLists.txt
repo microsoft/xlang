@@ -16,13 +16,17 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/antlr4-runtime/support
     ${PROJECT_SOURCE_DIR}/
     ${PROJECT_SOURCE_DIR}/libs/
-    ${PROJECT_SOURCE_DIR}/cpp/generated
+    ${PROJECT_SOURCE_DIR}/cpp/generated/
+    ${PROJECT_SOURCE_DIR}/cpp/models/
+    ${PROJECT_SOURCE_DIR}/cpp/
   )
 
 set(xmeta_gen_src
     ${PROJECT_SOURCE_DIR}/main.cpp
+    ${PROJECT_SOURCE_DIR}/xmeta_emit.cpp
+    ${PROJECT_SOURCE_DIR}/xlang_model_walker.cpp
     ${xmeta_gen_generated}       
-  )
+ )
 
 add_executable(xmeta ${xmeta_gen_src})
 

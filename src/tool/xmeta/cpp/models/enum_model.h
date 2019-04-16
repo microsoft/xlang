@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <charconv>
 #include <optional>
 #include <string_view>
 #include <vector>
@@ -95,7 +96,7 @@ namespace xlang::xmeta
             auto[p, ec] = std::from_chars(str_val.data(), str_val.data() + str_val.size(), result);
             if (ec == std::errc())
             {
-                m_value = result;
+                m_value.resolve(result);
             }
             return ec;
         }

@@ -1,5 +1,6 @@
 #pragma once
-#include <namespace_model.h>
+#include "xmeta_models.h"
+#include "xlang_model_listener.h"
 
 #include <vector>
 #include <mscoree.h>
@@ -10,18 +11,19 @@
 
 namespace xlang::xmeta
 {
-    class xmeta_emit
+    class xmeta_emit : public xlang_model_listener
     {
     public:
-        xmeta_emit(std::vector<namespace_model> const& namespaces, std::wstring const& assembly_name) 
-            : m_namespaces(namespaces), m_assembly_name(assembly_name)
+        xmeta_emit(std::wstring const& assembly_name) 
+            : m_assembly_name(assembly_name)
         { };
 
-        void emit_metadata();
+        void initialize();
+        void saveToFile();
+
 
     private:
         std::wstring m_assembly_name;
-        std::vector<namespace_model> m_namespaces;
         IMetaDataDispenserEx *m_metadata_dispenser;
         IMetaDataAssemblyEmit *m_metadata_assembly_emitter;
         IMetaDataEmit2 *m_metadata_emitter;
@@ -55,6 +57,27 @@ namespace xlang::xmeta
 
         // Windows specific methods
         HRESULT define_assembly();
-        HRESULT define_assembly_ref(); 
+        HRESULT define_assembly_ref();
+        HRESULT define_custom_attribute();
+        HRESULT define_event();
+        HRESULT define_field();
+        HRESULT define_member_ref();
+        HRESULT define_method();
+        HRESULT define_method_impl();
+        HRESULT define_param();
+        HRESULT define_property();
+        HRESULT define_type_def();
+        HRESULT define_generic_param();
+
+        // Not sure if we will use these
+        HRESULT define_module_ref();       
+        HRESULT define_nested_ref();
+        HRESULT define_permission_set();
+        HRESULT define_p_invoke_map();       
+        HRESULT define_security_attribute_set();
+
+        HRESULT define_type_ref_by_name();
+        HRESULT define_user_string();
+
     };
 }
