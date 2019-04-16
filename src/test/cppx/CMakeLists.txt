@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 project(test_cppx)
 
 add_executable(test_cppx "")
@@ -7,7 +5,7 @@ target_sources(test_cppx
     PUBLIC pch.cpp hstring.cpp)
 
 target_include_directories(test_cppx
-    PRIVATE ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_BINARY_DIR})
+    PRIVATE ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(test_cppx pal)
 RPATH_ORIGIN(test_cppx)

@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     constexpr int32_t hresult_from_win32(uint32_t const x) noexcept
     {
@@ -12,7 +12,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+namespace xlang
 {
     struct hresult_error
     {
@@ -162,7 +162,7 @@ namespace winrt
         hresult_canceled(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_canceled, take_ownership_from_abi) {}
     };
 
-    [[noreturn]] inline WINRT_NOINLINE void throw_hresult(hresult const result)
+    [[noreturn]] inline XLANG_NOINLINE void throw_hresult(hresult const result)
     {
         if (result == impl::error_bad_alloc)
         {
@@ -232,7 +232,7 @@ namespace winrt
         throw hresult_error(result, take_ownership_from_abi);
     }
 
-    inline WINRT_NOINLINE hresult to_hresult() noexcept
+    inline XLANG_NOINLINE hresult to_hresult() noexcept
     {
         try
         {
@@ -242,7 +242,7 @@ namespace winrt
         {
             return e.to_abi();
         }
-        WINRT_EXTERNAL_CATCH_CLAUSE
+        XLANG_EXTERNAL_CATCH_CLAUSE
         catch (std::bad_alloc const&)
         {
             return impl::error_bad_alloc;
@@ -284,7 +284,7 @@ namespace winrt
 #ifdef _WIN32
     [[noreturn]] inline void throw_last_error()
     {
-        throw_hresult(impl::hresult_from_win32(WINRT_GetLastError()));
+        throw_hresult(impl::hresult_from_win32(XLANG_GetLastError()));
     }
 
     template<typename T>
@@ -310,7 +310,7 @@ namespace winrt
     {
         if (!result)
         {
-            winrt::throw_last_error();
+            xlang::throw_last_error();
         }
     }
 

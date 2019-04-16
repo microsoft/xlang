@@ -1,10 +1,10 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     using filetime_period = std::ratio_multiply<std::ratio<100>, std::nano>;
 }
 
-namespace winrt
+namespace xlang
 {
     struct clock;
 
@@ -15,7 +15,7 @@ namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <> struct abi<Windows::Foundation::TimeSpan>
     {
@@ -48,7 +48,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     struct file_time
     {

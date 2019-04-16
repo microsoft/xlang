@@ -140,7 +140,7 @@ namespace xlang
         w.save_header('1');
     }
 
-    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members, cache const& c)
+    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -151,7 +151,6 @@ namespace xlang
         w.write_each<write_class>(members.classes);
         w.write_each<write_interface_override>(members.classes);
         write_close_namespace(w);
-        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();
@@ -182,6 +181,7 @@ namespace xlang
         write_close_namespace(w);
         write_type_namespace(w, ns);
         w.write_each<write_class_definitions>(members.classes);
+        w.write_each<write_fast_class_base_definitions>(members.classes);
 
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
@@ -191,6 +191,7 @@ namespace xlang
         w.write_each<write_std_hash>(members.interfaces);
         w.write_each<write_std_hash>(members.classes);
         write_close_namespace(w);
+        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();

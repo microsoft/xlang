@@ -184,7 +184,6 @@ namespace xlang
             case ElementType::Object:
                 return object_type{};
             }
-
             throw_invalid("element type not supported");
         },
             [](coded_index<TypeDefOrRef> type) -> type_semantics
@@ -192,7 +191,8 @@ namespace xlang
             return get_type_semantics(type);
         },
             [](GenericTypeIndex var) -> type_semantics { return generic_type_index{ var.index }; },
-            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); }
+            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); },
+            [](GenericMethodTypeIndex) -> type_semantics { throw_invalid("Generic methods not supported"); }
             }, signature.Type());
     }
 
@@ -405,31 +405,6 @@ namespace xlang
         return method.Flags().Static();
     }
 
-    inline bool is_get_method(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "get_");
-    }
-
-    inline bool is_put_method(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "put_");
-    }
-
-    bool is_python_setter(MethodDef const& method)
-    {
-        return is_put_method(method) && !is_static(method);
-    }
-
-    inline bool is_add_method(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "add_");
-    }
-
-    inline bool is_remove_method(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "remove_");
-    }
-
     auto get_property_methods(Property const& prop)
     {
         MethodDef get_method{}, set_method{};
@@ -566,19 +541,14 @@ namespace xlang
             || category == param_category::fill_array);
     }
 
-    int count_in_param(std::vector<method_signature::param_t> const& params)
+    auto count_in_param(std::vector<method_signature::param_t> const& params)
     {
-        int count{ 0 };
+        return std::count_if(params.begin(), params.end(), [](auto const& param) { return is_in_param(param); });
+    }
 
-        for (auto&& param : params)
-        {
-            if (is_in_param(param))
-            {
-                count++;
-            }
-        }
-
-        return count;
+    auto count_out_param(std::vector<method_signature::param_t> const& params)
+    {
+        return std::count_if(params.begin(), params.end(), [](auto const& param) { return is_out_param(param); });
     }
 
     enum class argument_convention
@@ -590,17 +560,23 @@ namespace xlang
 
     auto get_argument_convention(MethodDef const& method)
     {
-        if (is_constructor(method) && empty(method.ParamList()))
+        if (is_constructor(method))
         {
-            return argument_convention::no_args;
+            return empty(method.ParamList()) ? argument_convention::no_args : argument_convention::variable_args;
         }
-        else if (is_get_method(method))
+        else if (method.SpecialName())
         {
-            return argument_convention::no_args;
-        }
-        else if (is_put_method(method) || is_add_method(method) || is_remove_method(method))
-        {
-            return argument_convention::single_arg;
+            method_signature signature{ method };
+
+            if (signature.has_params())
+            {
+                XLANG_ASSERT(signature.params().size() == 1);
+                return argument_convention::single_arg;
+            }
+            else
+            {
+                return argument_convention::no_args;
+            }
         }
         else
         {

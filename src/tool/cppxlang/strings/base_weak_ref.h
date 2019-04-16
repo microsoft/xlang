@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     struct weak_ref

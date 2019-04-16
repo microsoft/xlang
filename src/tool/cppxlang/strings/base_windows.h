@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
@@ -43,7 +43,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt::Windows::Foundation
+namespace xlang::Windows::Foundation
 {
     struct IUnknown
     {
@@ -156,7 +156,7 @@ namespace winrt::Windows::Foundation
             }
         }
 
-        WINRT_NOINLINE void unconditional_release_ref() noexcept
+        XLANG_NOINLINE void unconditional_release_ref() noexcept
         {
             std::exchange(m_ptr, {})->Release();
         }
@@ -165,7 +165,7 @@ namespace winrt::Windows::Foundation
     };
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
     auto get_abi(T const& object) noexcept
@@ -253,7 +253,7 @@ namespace winrt
 
     inline void copy_to_abi(Windows::Foundation::IUnknown const& object, void*& value) noexcept
     {
-        WINRT_ASSERT(value == nullptr);
+        XLANG_ASSERT(value == nullptr);
         value = get_abi(object);
 
         if (value)
@@ -262,7 +262,7 @@ namespace winrt
         }
     }
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef XLANG_WINDOWS_ABI
 
     inline ::IUnknown* get_unknown(Windows::Foundation::IUnknown const& object) noexcept
     {
@@ -272,7 +272,7 @@ namespace winrt
 #endif
 }
 
-namespace winrt::Windows::Foundation
+namespace xlang::Windows::Foundation
 {
     inline bool operator==(IUnknown const& left, IUnknown const& right) noexcept
     {

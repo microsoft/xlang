@@ -11,7 +11,18 @@ namespace Windows.Foundation.Metadata
 
 namespace test_component
 {
-    delegate void AgileDelegate();
+    namespace Delegates
+    {
+        delegate void AgileDelegate();
+        delegate void InDelegate(String value);
+        delegate String ReturnStringDelegate();
+        delegate Int32 ReturnInt32Delegate();
+        delegate void OutStringDelegate(out String value);
+        delegate void OutInt32Delegate(out Int32 value);
+        delegate String[] ReturnStringArrayDelegate();
+        delegate void OutStringArrayDelegate(out String[] value);
+        delegate void RefStringArrayDelegate(ref String[] value);
+    }
 
     enum Signed
     {
@@ -54,142 +65,53 @@ namespace test_component
         String InStringable(Windows.Foundation.IStringable value);
         String InStruct(Struct value);
         String InStructRef(ref const Struct value);
+        String InEnum(Signed value);
 
         void OutInt32(out Int32 value);
         void OutString(out String value);
         void OutObject(out Object value);
         void OutStringable(out Windows.Foundation.IStringable value);
         void OutStruct(out Struct value);
+        void OutEnum(out Signed value);
 
         Int32 ReturnInt32();
         String ReturnString();
         Object ReturnObject();
         Windows.Foundation.IStringable ReturnStringable();
         Struct ReturnStruct();
+        Signed ReturnEnum();
 
         String InInt32Array(Int32[] value);
         String InStringArray(String[] value);
         String InObjectArray(Object[] value);
         String InStringableArray(Windows.Foundation.IStringable[] value);
         String InStructArray(Struct[] value);
+        String InEnumArray(Signed[] value);
 
         void OutInt32Array(out Int32[] value);
         void OutStringArray(out String[] value);
         void OutObjectArray(out Object[] value);
         void OutStringableArray(out Windows.Foundation.IStringable[] value);
         void OutStructArray(out Struct[] value);
+        void OutEnumArray(out Signed[] value);
 
         void RefInt32Array(ref Int32[] value);
         void RefStringArray(ref String[] value);
         void RefObjectArray(ref Object[] value);
         void RefStringableArray(ref Windows.Foundation.IStringable[] value);
         void RefStructArray(ref Struct[] value);
+        void RefEnumArray(ref Signed[] value);
 
         Int32[] ReturnInt32Array();
         String[] ReturnStringArray();
         Object[] ReturnObjectArray();
         Windows.Foundation.IStringable[] ReturnStringableArray();
         Struct[] ReturnStructArray();
+        Signed[] ReturnEnumArray();
 
         [noexcept] void NoexceptVoid();
         [noexcept] Int32 NoexceptInt32();
         [noexcept] String NoexceptString();
-    }
-
-    namespace Composition
-    {
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [exclusiveto(CompositionObject)]
-        [uuid(51205C5E-558A-4F2A-8D39-37BFE1E20DDD)]
-        interface ICompositionObjectFactory
-        {
-        }
-
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [exclusiveto(Visual)]
-        [uuid(AD0FF93E-B502-4EB5-87B4-9A38A71D0137)]
-        interface IVisualFactory
-        {
-        }
-
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [exclusiveto(CompositionObject)]
-        [uuid(BCB4AD45-7609-4550-934F-16002A68FDED)]
-        interface ICompositionObject
-        {
-            void Compositor();
-        }
-
-        [contract(Windows.Foundation.UniversalApiContract, 3.0)]
-        [exclusiveto(CompositionObject)]
-        [uuid(EF874EA1-5CFF-4B68-9E30-A1519D08BA03)]
-        interface ICompositionObject2
-        {
-            void StartAnimationGroup();
-        }
-
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [exclusiveto(Visual)]
-        [uuid(117E202D-A859-4C89-873B-C2AA566788E3)]
-        interface IVisual
-        {
-            void Offset();
-        }
-
-        [contract(Windows.Foundation.UniversalApiContract, 4.0)]
-        [exclusiveto(Visual)]
-        [uuid(3052B611-56C3-4C3E-8BF3-F6E1AD473F06)]
-        interface IVisual2
-        {
-            void ParentForTransform(Visual value);
-        }
-
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [exclusiveto(SpriteVisual)]
-        [uuid(08E05581-1AD1-4F97-9757-402D76E4233B)]
-        interface ISpriteVisual
-        {
-            void Brush();
-        }
-
-        [contract(Windows.Foundation.UniversalApiContract, 3.0)]
-        [exclusiveto(SpriteVisual)]
-        [uuid(588C9664-997A-4850-91FE-53CB58F81CE9)]
-        interface ISpriteVisual2
-        {
-            void Shadow();
-        }
-
-        [composable(ICompositionObjectFactory, protected, Windows.Foundation.UniversalApiContract, 2.0)]
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [marshaling_behavior(agile)]
-        [threading(both)]
-        runtimeclass CompositionObject
-        {
-            [default] interface ICompositionObject;
-            interface Windows.Foundation.IClosable;
-            [contract(Windows.Foundation.UniversalApiContract, 3.0)] interface ICompositionObject2;
-        }
-
-        [composable(IVisualFactory, protected, Windows.Foundation.UniversalApiContract, 2.0)]
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [marshaling_behavior(agile)]
-        [threading(both)]
-        runtimeclass Visual : CompositionObject
-        {
-            [default] interface IVisual;
-            [contract(Windows.Foundation.UniversalApiContract, 4.0)] interface IVisual2;
-        }
-
-        [activatable(Windows.Foundation.UniversalApiContract, 2.0)]
-        [contract(Windows.Foundation.UniversalApiContract, 2.0)]
-        [marshaling_behavior(agile)]
-        [threading(both)]
-        runtimeclass SpriteVisual : Visual
-        {
-            [default] interface ISpriteVisual;
-            [contract(Windows.Foundation.UniversalApiContract, 3.0)] interface ISpriteVisual2;
-        }
     }
 
     namespace Structs

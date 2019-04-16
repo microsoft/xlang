@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     struct xaml_typename_name
@@ -127,12 +127,12 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     inline Windows::UI::Xaml::Interop::TypeName xaml_typename()
     {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
+        static_assert(impl::has_category_v<T>, "T must be xlang type.");
         static const Windows::UI::Xaml::Interop::TypeName name{ hstring{ impl::xaml_typename_name<T>::value() }, impl::xaml_typename_kind<T>::value };
         return name;
     }

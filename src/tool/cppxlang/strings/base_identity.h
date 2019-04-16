@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     using default_interface = typename impl::default_interface<T>::type;
@@ -19,7 +19,7 @@ namespace winrt
     struct event_token;
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <size_t Size, typename T, size_t... Index>
     constexpr std::array<T, Size> to_array(T const* value, std::index_sequence<Index...> const) noexcept
@@ -680,7 +680,7 @@ namespace winrt::impl
     template <typename T>
     struct category_signature<class_category, T>
     {
-        constexpr static auto data{ combine(u8"rc(", to_array(name_v<T>), u8";", signature<winrt::default_interface<T>>::data, u8")") };
+        constexpr static auto data{ combine(u8"rc(", to_array(name_v<T>), u8";", signature<xlang::default_interface<T>>::data, u8")") };
     };
 
     template <typename... Args, typename T>
@@ -714,7 +714,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     constexpr auto name_of() noexcept

@@ -53,6 +53,18 @@ namespace winrt::test_component::implementation
         return value.First + value.Second + L"ref";
     }
 
+    hstring Class::InEnum(Signed const& value)
+    {
+        switch (value)
+        {
+        case Signed::First: return L"First";
+        case Signed::Second: return L"Second";
+        case Signed::Third: return L"Third";
+        }
+
+        throw hresult_invalid_argument();
+    }
+
     void Class::OutInt32(int32_t& value)
     {
         value = 123;
@@ -79,6 +91,11 @@ namespace winrt::test_component::implementation
         value.Second = L"2";
     }
 
+    void Class::OutEnum(Signed& value)
+    {
+        value = Signed::First;
+    }
+
     int32_t Class::ReturnInt32()
     {
         return 123;
@@ -98,6 +115,10 @@ namespace winrt::test_component::implementation
     Struct Class::ReturnStruct()
     {
         return { L"1", L"2" };
+    }
+    Signed Class::ReturnEnum()
+    {
+        return Signed::First;
     }
 
     hstring Class::InInt32Array(array_view<int32_t const> value)
@@ -155,6 +176,17 @@ namespace winrt::test_component::implementation
 
         return result;
     }
+    hstring Class::InEnumArray(array_view<Signed const> value)
+    {
+        hstring result;
+
+        for (auto&& v : value)
+        {
+            result = result + InEnum(v);
+        }
+
+        return result;
+    }
 
     void Class::OutInt32Array(com_array<int32_t>& value)
     {
@@ -179,6 +211,11 @@ namespace winrt::test_component::implementation
     void Class::OutStructArray(com_array<Struct>& value)
     {
         value = { { L"1", L"2" }, { L"10", L"20" } };
+    }
+
+    void Class::OutEnumArray(com_array<Signed>& value)
+    {
+        value = { Signed::First, Signed::Second };
     }
 
     void Class::RefInt32Array(array_view<int32_t> value)
@@ -235,6 +272,18 @@ namespace winrt::test_component::implementation
             });
     }
 
+    void Class::RefEnumArray(array_view<Signed> value)
+    {
+        Signed counter{ Signed::First };
+
+        std::generate(value.begin(), value.end() - 1, [&]
+            {
+                auto result = counter;
+                counter = static_cast<Signed>(static_cast<int32_t>(counter) + 1);
+                return result;
+            });
+    }
+
     com_array<int32_t> Class::ReturnInt32Array()
     {
         return { 1,2,3 };
@@ -258,6 +307,11 @@ namespace winrt::test_component::implementation
     com_array<Struct> Class::ReturnStructArray()
     {
         return { { L"1", L"2" }, { L"10", L"20" } };
+    }
+
+    com_array<Signed> Class::ReturnEnumArray()
+    {
+        return { Signed::First, Signed::Second };
     }
 
     void Class::NoexceptVoid() noexcept
