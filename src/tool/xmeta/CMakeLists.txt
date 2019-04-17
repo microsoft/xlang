@@ -36,6 +36,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${PROJECT_SOURCE_DIR}/libs/x86debug/antlr4-runtime.dll"
         $<TARGET_FILE_DIR:xmeta>)
+    # https://stackoverflow.com/questions/35310117/debug-assertion-failed-expression-acrt-first-block-header
+    # Temporary measure
+target_compile_options(xmeta PRIVATE "/MD$<$<CONFIG:Debug>:d>")
 else()
     target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/libs/x86release/antlr4-runtime.lib")
     add_custom_command(TARGET xmeta PRE_BUILD
@@ -43,3 +46,4 @@ else()
         "${PROJECT_SOURCE_DIR}/libs/x86release/antlr4-runtime.dll"
         $<TARGET_FILE_DIR:xmeta>)
 endif()
+

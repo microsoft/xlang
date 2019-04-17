@@ -47,6 +47,7 @@ namespace xlang::xmeta
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;
         mdTypeRef token_enum;
+        mdTypeRef token_value_type;
 
         // A generic assembly metadata struct.
         const ASSEMBLYMETADATA s_genericMetadata =
@@ -79,5 +80,7 @@ namespace xlang::xmeta
 
 
         static const DWORD dw_enum_typeflag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;  // Flag: Public | Sealed | Class | AutoLayout | WindowsRuntime
+        static const DWORD c_dwStructTypeFlag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
+        static const DWORD c_dwRuntimeClassTypeFlag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
     };
 }

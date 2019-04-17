@@ -32,6 +32,7 @@ namespace xlang::xmeta
 
             // Defining the mscorlib assemblyref
             RETURN_IF_FAILED(define_assembly());
+            RETURN_IF_FAILED(define_common_reference_assembly());
         }
         return S_OK;
     }
@@ -83,20 +84,70 @@ namespace xlang::xmeta
             &token_mscorlib));
 
         RETURN_IF_FAILED(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.Enum", &token_enum));
+        RETURN_IF_FAILED(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.ValueType", &token_value_type));
     }
 
 
     void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& model) {};
-    void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& model) {};
-    void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) {};
+    
+    void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& model) {
+        mdTypeDef token_class_type_def = mdTokenNil;
+        mdTypeRef token_local_type_ref = mdTokenNil;
+
+        LPCWSTR class_name = s2ws(model->get_id()).c_str();
+
+        // MIDL3 will disable certain flags depending on these conditions
+        //if (pRuntimeClass->IsComposable())
+        //{
+        //    // Turn off the sealed flag
+        //    dwTypeFlag = dwTypeFlag & (~tdSealed);
+        //}
+
+        ////  Empty runtime classes should appear with the abstract flag.
+        //if (pRuntimeClass->IsEmpty())
+        //{
+        //    dwTypeFlag = dwTypeFlag | tdAbstract;
+        //}
+
+        m_metadata_emitter->DefineTypeDef(
+            class_name,
+            c_dwRuntimeClassTypeFlag,
+            mdTokenNil, // Extends (Going to be null until we find out if it is base class)
+            mdTokenNil, // Extends (Going to be null until we find out if it is base class)
+            &token_class_type_def);
+    };
+    
+    void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) {
+        LPCWSTR struct_name = s2ws(model->get_id()).c_str();
+        mdTypeDef token_struct_type_def;
+        m_metadata_emitter->DefineTypeDef(struct_name, c_dwStructTypeFlag, token_value_type, mdTokenNil, &token_struct_type_def);
+
+        for (std::pair<type_ref, std::string> const& field : model->get_fields())
+        {
+            mdFieldDef token_field;
+            //m_metadata_emitter->DefineField(
+            //    token_struct_type_def, 
+            //    s2ws(field.second).c_str(), 
+            //    fdPublic, 
+            //    ,
+            //    ,
+            //    ELEMENT_TYPE_END,
+            //    nullptr,
+            //    0,
+            //    &token_field);
+
+        }
+    };
+    
     void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model) {};
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) {
-        std::string enum_name = model->get_id();
+        LPCWSTR enum_name = s2ws(model->get_id()).c_str();
 
         mdTypeDef token_enum_type_def;
-        m_metadata_emitter->DefineTypeDef(s2ws(enum_name).c_str(), dw_enum_typeflag, token_enum, mdTokenNil, &token_enum_type_def);
-       
+        m_metadata_emitter->DefineTypeDef(enum_name, dw_enum_typeflag, token_enum, mdTokenNil, &token_enum_type_def);
+        
+
         for (enum_member const& enum_member : model->get_members())
         {
             std::string enum_member_name = enum_member.get_id();
@@ -107,7 +158,6 @@ namespace xlang::xmeta
 
             )*/
         }
-
     };
     
     
