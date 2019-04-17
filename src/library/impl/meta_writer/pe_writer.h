@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <filesystem>
 
 namespace xlang::meta::writer
 {
@@ -37,9 +38,59 @@ namespace xlang::meta::writer
             m_header.defer_rva(&(nt_header->OptionalHeader.DataDirectory[com_directory].VirtualAddress), &s, cli_header);
         }
 
-        std::vector<uint8_t> write_to_memory()
+        void save_to_file(std::filesystem::path const& path)
+        {
+            std::basic_ofstream<uint8_t> output_file{ path, std::ios::binary };
+            auto const output = save_to_memory();
+            output_file.write(output.data(), output.size());
+        }
+
+        std::vector<uint8_t> save_to_memory()
         {
             resolve();
+            update_header();
+            uint32_t raw_size = m_sections.back().physical_offset() + static_cast<uint32_t>(m_sections.back().size());
+            std::vector<uint8_t> output;
+
+            // Write the top headers
+            output.reserve(raw_size);
+            {
+                auto headers_start = m_header.as<uint8_t>(0);
+                auto headers_end = headers_start + m_header.size();
+                output.insert(output.end(), headers_start, headers_end);
+            }
+            
+            // Write each section header
+            for (auto const& s : m_sections)
+            {
+                impl::image_section_header header{};
+                XLANG_ASSERT(s.name().size() <= 8);
+                std::copy(s.name().begin(), s.name().end(), header.Name);
+                header.Misc.VirtualSize = static_cast<uint32_t>(s.size());
+                header.VirtualAddress = s.virtual_offset();
+                header.SizeOfRawData = round_up(header.Misc.VirtualSize, file_alignment);
+                header.PointerToRawData = s.physical_offset();
+                header.Characteristics = 0x40000020; // IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_CODE
+                
+                auto begin = reinterpret_cast<uint8_t*>(&header);
+                auto end = begin + sizeof(impl::image_section_header);
+                output.insert(output.end(), begin, end);
+            }
+
+            // Write the sections
+            for (auto const& s : m_sections)
+            {
+                // Alignment padding
+                XLANG_ASSERT(output.size() <= s.physical_offset());
+                XLANG_ASSERT((s.physical_offset() & (file_alignment - 1)) == 0);
+                output.resize(s.physical_offset());
+
+                auto begin = s.as<uint8_t>(0);
+                auto end = begin + s.size();
+                output.insert(output.end(), begin, end);
+            }
+
+            return output;
         }
 
         struct section
@@ -52,6 +103,9 @@ namespace xlang::meta::writer
             }
             section(section const&) = delete;
             section& operator=(section const&) = delete;
+
+            section(section&&) = default;
+            section& operator=(section&&) = default;
 
             std::string const& name() const noexcept
             {
@@ -204,10 +258,15 @@ namespace xlang::meta::writer
             return m_header.as<impl::image_nt_headers32>(nt_header_offset);
         }
 
+        uint32_t get_raw_end_of_headers() const noexcept
+        {
+            return section_headers_offset + static_cast<uint32_t>(m_sections.size() * sizeof(impl::image_section_header));
+        }
+
         void resolve()
         {
             m_header.virtual_offset(0);
-            uint32_t const start_of_sections = section_headers_offset + static_cast<uint32_t>(m_sections.size() * sizeof(impl::image_section_header));
+            uint32_t const start_of_sections = get_raw_end_of_headers();
             
             uint32_t physical_offset = round_up(start_of_sections, file_alignment);
             uint32_t virtual_offset = round_up(start_of_sections, section_alignment);
@@ -225,6 +284,46 @@ namespace xlang::meta::writer
             for (auto& s : m_sections)
             {
                 s.resolve_rvas();
+            }
+        }
+
+        void update_header()
+        {
+            uint32_t const raw_image_size = m_sections.back().physical_offset() + static_cast<uint32_t>(m_sections.back().size());
+            uint32_t const raw_header_size = get_raw_end_of_headers();
+            {
+                auto dos_header = get_dos_header();
+                dos_header->e_magic = 0x5a4d; // "MZ
+                dos_header->e_lfanew = nt_header_offset;
+            }
+            {
+                auto nt_header = get_nt_header();
+                nt_header->Signature = 0x4550; // "PE
+                
+                auto& file_header = nt_header->FileHeader;
+                file_header.Machine = 0x014c; // IMAGE_FILE_MACHINE_I386
+                file_header.NumberOfSections = static_cast<uint16_t>(m_sections.size());
+                file_header.TimeDateStamp = static_cast<uint32_t>(time(nullptr));
+                file_header.SizeOfOptionalHeader = static_cast<uint16_t>(sizeof(impl::image_optional_header32));
+                file_header.Characteristics = 0x2102; // IMAGE_FILE_DLL | IMAGE_FILE_32BIT_MACHINE | IMAGE_FILE_EXECUTABLE_IMAGE
+
+                auto& optional_header = nt_header->OptionalHeader;
+                optional_header.Magic = 0x010b; // IMAGE_NT_OPTIONAL_HDR32_MAGIC
+                optional_header.MajorLinkerVersion = 6;
+                optional_header.ImageBase = 0x400000;
+                optional_header.SectionAlignment = section_alignment;
+                optional_header.FileAlignment = file_alignment;
+                optional_header.MajorOperatingSystemVersion = 5;
+                optional_header.MajorSubsystemVersion = 5;
+                optional_header.SizeOfImage = round_up(raw_image_size, section_alignment);
+                optional_header.SizeOfHeaders = round_up(raw_header_size, file_alignment);
+                optional_header.Subsystem = 0x3; // IMAGE_SUBSYSTEM_WINDOWS_CUI
+                optional_header.DllCharacteristics = 0x540; // IMAGE_DLLCHARACTERISTICS_NO_SEH | IMAGE_DLLCHARACTERISTICS_NX_COMPAT | IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE
+                optional_header.SizeOfStackReserve = 0x100000;
+                optional_header.SizeOfStackCommit = 0x1000;
+                optional_header.SizeOfHeapReserve = 0x100000;
+                optional_header.SizeOfHeapCommit = 0x1000;
+                optional_header.NumberOfRvaAndSizes = 16;
             }
         }
 
