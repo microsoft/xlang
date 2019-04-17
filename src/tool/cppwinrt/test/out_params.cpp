@@ -47,6 +47,12 @@ TEST_CASE("out_params")
         REQUIRE(value.Second == L"2");
     }
     {
+        Signed value;
+        object.OutEnum(value);
+        REQUIRE(value == Signed::First);
+    }
+
+    {
         com_array<int32_t> value(10);
         object.OutInt32Array(value);
         REQUIRE(value.size() == 3);
@@ -87,6 +93,14 @@ TEST_CASE("out_params")
         REQUIRE(value[1].First == L"10");
         REQUIRE(value[1].Second == L"20");
     }
+    {
+        com_array<Signed> value(10);
+        object.OutEnumArray(value);
+        REQUIRE(value.size() == 2);
+        REQUIRE(value[0] == Signed::First);
+        REQUIRE(value[1] == Signed::Second);
+    }
+
     {
         std::array<int32_t, 4> value{ 0xCC, 0xCC, 0xCC, 0xCC };
         object.RefInt32Array(value);
@@ -129,6 +143,14 @@ TEST_CASE("out_params")
         REQUIRE(value[2].First == L"");
         REQUIRE(value[2].Second == L"");
     }
+    {
+        std::array<Signed, 3> value{};
+        object.RefEnumArray(value);
+        REQUIRE(value.size() == 3);
+        REQUIRE(value[0] == Signed::First);
+        REQUIRE(value[1] == Signed::Second);
+        REQUIRE(value[2] == static_cast<Signed>(0));
+    }
 
     object.Fail(true);
 
@@ -159,6 +181,12 @@ TEST_CASE("out_params")
         REQUIRE(value.Second == L"");
     }
     {
+        Signed value = static_cast<Signed>(0xCC);
+        REQUIRE_THROWS_AS(object.OutEnum(value), hresult_invalid_argument);
+        REQUIRE(static_cast<int32_t>(value) == 0xCC);
+    }
+
+    {
         com_array<int32_t> value(10);
         REQUIRE_THROWS_AS(object.OutInt32Array(value), hresult_invalid_argument);
         REQUIRE(value.size() == 0);
@@ -183,6 +211,12 @@ TEST_CASE("out_params")
         REQUIRE_THROWS_AS(object.OutStructArray(value), hresult_invalid_argument);
         REQUIRE(value.size() == 0);
     }
+    {
+        com_array<Signed> value(10);
+        REQUIRE_THROWS_AS(object.OutEnumArray(value), hresult_invalid_argument);
+        REQUIRE(value.size() == 0);
+    }
+
     {
         std::array<int32_t, 4> value{ 0xCC, 0xCC, 0xCC, 0xCC };
         REQUIRE_THROWS_AS(object.RefInt32Array(value), hresult_invalid_argument);
@@ -224,5 +258,11 @@ TEST_CASE("out_params")
         REQUIRE(value[1].Second == L"");
         REQUIRE(value[2].First == L"");
         REQUIRE(value[2].Second == L"");
+    }
+    {
+        std::array<Signed, 2> value{ static_cast<Signed>(0xCC), static_cast<Signed>(0xCC) };
+        REQUIRE_THROWS_AS(object.RefEnumArray(value), hresult_invalid_argument);
+        REQUIRE(value[0] == static_cast<Signed>(0xCC));
+        REQUIRE(value[1] == static_cast<Signed>(0xCC));
     }
 }
