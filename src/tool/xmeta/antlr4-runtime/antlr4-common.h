@@ -41,6 +41,7 @@
 #ifdef _WIN32
   #ifdef _MSC_VER
     #pragma warning (disable: 4250) // Class inherits by dominance.
+    #pragma warning (disable: 4251)
     #pragma warning (disable: 4512) // assignment operator could not be generated
 
     #if _MSC_VER < 1900
