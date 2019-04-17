@@ -156,6 +156,7 @@ inline void write_deprecation_message(
     std::string_view deprecationMacro = "DEPRECATED")
 {
     using namespace xlang::text;
+    XLANG_ASSERT(w.config().enable_header_deprecation);
 
     auto [ns, name] = decompose_type(info.contract_type);
     w.write(R"^-^(#if % >= %

@@ -129,7 +129,7 @@ void enum_type::write_cpp_definition(writer& w) const
     w.push_namespace(clr_abi_namespace());
 
     w.write("%%", indent{}, enum_string(w));
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write("\n");
         write_deprecation_message(w, *info);
@@ -164,7 +164,7 @@ void enum_type::write_cpp_definition(writer& w) const
             }
             w.write(field.Name());
 
-            if (auto info = ::is_deprecated(field))
+            if (auto info = ::is_deprecated(field); info && w.config().enable_header_deprecation)
             {
                 w.write("\n");
                 write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
@@ -212,7 +212,7 @@ void enum_type::write_c_definition(writer& w) const
     auto contractDepth = begin_type_definition(w, *this);
 
     w.write("enum");
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write("\n");
         write_deprecation_message(w, *info);
@@ -239,7 +239,7 @@ void enum_type::write_c_definition(writer& w) const
             auto fieldContractDepth = push_type_contract_guards(w, field);
 
             w.write("    %_%", cpp_abi_name(), field.Name());
-            if (auto info = ::is_deprecated(field))
+            if (auto info = ::is_deprecated(field); info && w.config().enable_header_deprecation)
             {
                 w.write("\n");
                 write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
@@ -305,7 +305,7 @@ void struct_type::write_cpp_definition(writer& w) const
     w.push_namespace(clr_abi_namespace());
 
     w.write("%struct", indent{});
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write('\n');
         write_deprecation_message(w, *info);
@@ -322,7 +322,7 @@ void struct_type::write_cpp_definition(writer& w) const
 
     for (auto const& member : members)
     {
-        if (auto info = ::is_deprecated(member.field))
+        if (auto info = ::is_deprecated(member.field); info && w.config().enable_header_deprecation)
         {
             write_deprecation_message(w, *info, 1);
         }
@@ -341,7 +341,7 @@ void struct_type::write_c_definition(writer& w) const
     auto contractDepth = begin_type_definition(w, *this);
 
     w.write("struct");
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write('\n');
         write_deprecation_message(w, *info);
@@ -357,7 +357,7 @@ void struct_type::write_c_definition(writer& w) const
 
     for (auto const& member : members)
     {
-        if (auto info = ::is_deprecated(member.field))
+        if (auto info = ::is_deprecated(member.field); info && w.config().enable_header_deprecation)
         {
             write_deprecation_message(w, *info, 1);
         }
@@ -423,7 +423,7 @@ static std::string_view function_name(MethodDef const& def)
 
 static void write_cpp_function_declaration(writer& w, function_def const& func)
 {
-    if (auto info = is_deprecated(func.def))
+    if (auto info = is_deprecated(func.def); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info, 1);
     }
@@ -492,7 +492,7 @@ static void write_cpp_interface_definition(writer& w, T const& type)
     w.write(R"^-^(%MIDL_INTERFACE("%")
 )^-^", indent{}, bind_uuid(type));
 
-    if (auto info = is_deprecated(type.type()))
+    if (auto info = is_deprecated(type.type()); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info);
     }
@@ -623,7 +623,7 @@ static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 template <typename TypeName>
 static void write_c_function_declaration(writer& w, TypeName&& typeName, function_def const& func)
 {
-    if (auto info = is_deprecated(func.def))
+    if (auto info = is_deprecated(func.def); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info, 1);
     }
@@ -668,7 +668,7 @@ static void write_c_function_declaration(writer& w, TypeName&& typeName, functio
 template <typename T>
 static void write_c_function_declaration_macro(writer& w, T const& type, function_def const& func)
 {
-    if (auto info = is_deprecated(func.def))
+    if (auto info = is_deprecated(func.def); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info, 1);
     }
@@ -731,7 +731,7 @@ static void write_c_interface_definition(writer& w, T const& type)
     static_assert(is_interface || is_delegate | is_generic);
 
     w.write("typedef struct");
-    if (auto info = type.is_deprecated())
+    if (auto info = type.is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write('\n');
         write_deprecation_message(w, *info);
@@ -1134,7 +1134,7 @@ void class_type::write_cpp_definition(writer& w) const
         bind_list("_", namespace_range{ clr_logical_namespace() }),
         cpp_logical_name());
 
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info);
     }
@@ -1153,43 +1153,6 @@ void class_type::write_c_definition(writer& w) const
 {
     write_cpp_definition(w);
 }
-
-#if 0 // TODO?
-static void write_c_interface_function_declaration_macros(writer& w, interface_type const& type)
-{
-    for (auto const& func : type.functions)
-    {
-        write_c_function_declaration_macro(w, type, func);
-    }
-}
-
-static void write_c_interface_function_declaration_macros(writer& w, generic_inst const& type)
-{
-    for (auto const& func : type.functions)
-    {
-        write_c_function_declaration_macro(w, type, func);
-    }
-}
-
-static void write_c_interface_function_declaration_macros(writer& w, metadata_type const& type)
-{
-    if (auto iface = dynamic_cast<interface_type const*>(&type))
-    {
-        write_c_interface_function_declaration_macros(w, *iface);
-    }
-    else if (auto genericInst = dynamic_cast<generic_inst const*>(&type))
-    {
-        // NOTE: Default interfaces can be generic instantiations, hence the check here
-        write_c_interface_function_declaration_macros(w, *genericInst);
-    }
-    else
-    {
-        // auto const& fastAbi = dynamic_cast<fastabi_type const&>(type);
-        // write_c_interface_function_declaration_macros(w, fastAbi.base());
-        // write_c_interface_function_declaration_macros(w, fastAbi.current_interface());
-    }
-}
-#endif
 
 std::size_t generic_inst::push_contract_guards(writer& w) const
 {

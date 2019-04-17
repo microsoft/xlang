@@ -47,6 +47,7 @@ int main(int const argc, char** argv)
             { "ns-prefix", 0, 1 },
             { "enum-class", 0, 0 },
             { "lowercase-include-guard", 0, 0 },
+            { "enable-header-deprecation", 0, 0 }
         };
 
         reader args{ argc, argv, options };
@@ -61,6 +62,7 @@ int main(int const argc, char** argv)
         config.output_directory = output_directory(args);
         config.enum_class = args.exists("enum-class");
         config.lowercase_include_guard = args.exists("lowercase-include-guard");
+        config.enable_header_deprecation = args.exists("enable-header-deprecation");
 
         if (args.exists("ns-prefix"))
         {

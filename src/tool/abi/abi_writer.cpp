@@ -431,7 +431,10 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
         bind<write_include_guard>(fileName),
         bind<write_include_guard>(fileName),
         bind<write_include_guard>(fileName));
-    w.write(strings::deprecated_header_start);
+    if (config.enable_header_deprecation)
+    {
+        w.write(strings::deprecated_header_start);
+    }
     w.write(strings::ns_prefix_definitions,
         (config.ns_prefix_state == ns_prefix::always) ? strings::ns_prefix_always :
         (config.ns_prefix_state == ns_prefix::optional) ? strings::ns_prefix_optional : strings::ns_prefix_never);
@@ -472,7 +475,10 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
     {
         w.write(strings::optional_ns_prefix_end_definitions);
     }
-    w.write(strings::deprecated_header_end);
+    if (config.enable_header_deprecation)
+    {
+        w.write(strings::deprecated_header_end);
+    }
     w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
 
     auto filename{ config.output_directory };

@@ -25,6 +25,7 @@ struct abi_configuration
     ns_prefix ns_prefix_state = ns_prefix::always;
     bool enum_class = false;
     bool lowercase_include_guard = false;
+    bool enable_header_deprecation = false;
 
     std::string output_directory;
 };
