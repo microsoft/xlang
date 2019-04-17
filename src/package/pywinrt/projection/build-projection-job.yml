@@ -67,7 +67,7 @@ jobs:
       arguments: 'install pythonx86 -ExcludeVersion  -OutputDirectory src\package\pywinrt\projection\'
 
   - script: |
-      _build\tool\python\pywinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+      _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\cppwinrt -verbose
     displayName: 'Generate C++/WinRT Projections'
 
   - script: |
