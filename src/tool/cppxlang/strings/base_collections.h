@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     namespace wfc = Windows::Foundation::Collections;
 
@@ -30,7 +30,7 @@ namespace winrt::impl
 
         bool operator==(fast_iterator const& other) const noexcept
         {
-            WINRT_ASSERT(m_collection == other.m_collection);
+            XLANG_ASSERT(m_collection == other.m_collection);
             return m_index == other.m_index;
         }
 

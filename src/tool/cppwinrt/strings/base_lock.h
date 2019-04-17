@@ -67,23 +67,6 @@ namespace winrt
         slim_mutex& m_mutex;
     };
 
-    struct slim_shared_lock_guard
-    {
-        explicit slim_shared_lock_guard(slim_mutex& m) noexcept :
-        m_mutex(m)
-        {
-            m_mutex.lock_shared();
-        }
-
-        ~slim_shared_lock_guard() noexcept
-        {
-            m_mutex.unlock_shared();
-        }
-
-    private:
-        slim_mutex& m_mutex;
-    };
-
     struct slim_condition_variable
     {
         slim_condition_variable(slim_condition_variable const&) = delete;

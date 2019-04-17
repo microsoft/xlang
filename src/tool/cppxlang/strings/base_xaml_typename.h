@@ -1,10 +1,10 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     struct xaml_typename_name
     {
-        static constexpr std::wstring_view value() noexcept
+        static constexpr std::basic_string_view<xlang_char8> value() noexcept
         {
             return name_of<T>();
         }
@@ -12,41 +12,41 @@ namespace winrt::impl
     template <>
     struct xaml_typename_name<Windows::Foundation::Point>
     {
-        static constexpr std::wstring_view value() noexcept
+        static constexpr std::basic_string_view<xlang_char8> value() noexcept
         {
-            return L"Point"sv;
+            return u8"Point"sv;
         }
     };
     template <>
     struct xaml_typename_name<Windows::Foundation::Size>
     {
-        static constexpr std::wstring_view value() noexcept
+        static constexpr std::basic_string_view<xlang_char8> value() noexcept
         {
-            return L"Size"sv;
+            return u8"Size"sv;
         }
     };
     template <>
     struct xaml_typename_name<Windows::Foundation::Rect>
     {
-        static constexpr std::wstring_view value() noexcept
+        static constexpr std::basic_string_view<xlang_char8> value() noexcept
         {
-            return L"Rect"sv;
+            return u8"Rect"sv;
         }
     };
     template <>
     struct xaml_typename_name<Windows::Foundation::DateTime>
     {
-        static constexpr std::wstring_view value() noexcept
+        static constexpr std::basic_string_view<xlang_char8> value() noexcept
         {
-            return L"DateTime"sv;
+            return u8"DateTime"sv;
         }
     };
     template <>
     struct xaml_typename_name<Windows::Foundation::TimeSpan>
     {
-        static constexpr std::wstring_view value() noexcept
+        static constexpr std::basic_string_view<xlang_char8> value() noexcept
         {
-            return L"TimeSpan"sv;
+            return u8"TimeSpan"sv;
         }
     };
 
@@ -127,12 +127,12 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     inline Windows::UI::Xaml::Interop::TypeName xaml_typename()
     {
-        static_assert(impl::has_category_v<T>, "T must be WinRT type.");
+        static_assert(impl::has_category_v<T>, "T must be xlang type.");
         static const Windows::UI::Xaml::Interop::TypeName name{ hstring{ impl::xaml_typename_name<T>::value() }, impl::xaml_typename_kind<T>::value };
         return name;
     }

@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T, typename Container>
     struct input_iterable final :
@@ -66,7 +66,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt::param
+namespace xlang::param
 {
     template <typename T>
     struct iterable
@@ -83,7 +83,7 @@ namespace winrt::param
 
         iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_pair.first, winrt::get_abi(values));
+            attach_abi(m_pair.first, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -150,7 +150,7 @@ namespace winrt::param
 
         iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_pair.first, winrt::get_abi(values));
+            attach_abi(m_pair.first, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -228,7 +228,7 @@ namespace winrt::param
 
         async_iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -277,7 +277,7 @@ namespace winrt::param
 
         async_iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>

@@ -4,7 +4,7 @@ namespace winrt
     template <typename Interface = Windows::Foundation::IActivationFactory>
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
-        void* result;
+        void* result{};
         hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
 
         if (hr == impl::error_not_initialized)
@@ -199,6 +199,10 @@ namespace winrt::impl
         template <typename F>
         auto call(F&& callback)
         {
+#ifdef WINRT_DIAGNOSTICS
+            get_diagnostics_info().add_factory<Class>();
+#endif
+
             {
                 count_guard const guard(m_value.count);
 
@@ -212,6 +216,10 @@ namespace winrt::impl
 
             if (!object.template try_as<IAgileObject>())
             {
+#ifdef WINRT_DIAGNOSTICS
+                get_diagnostics_info().non_agile_factory<Class>();
+#endif
+
                 return callback(object);
             }
 
@@ -325,17 +333,14 @@ namespace winrt::impl
 
     template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
     {
-        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final
+        int32_t WINRT_CALL ActivateInstance(void** instance) noexcept final try
         {
-            try
-            {
-                *instance = nullptr;
-                typename D::abi_guard guard(this->shim());
-                *instance = detach_abi(this->shim().ActivateInstance());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *instance = nullptr;
+            typename D::abi_guard guard(this->shim());
+            *instance = detach_abi(this->shim().ActivateInstance());
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
     };
 }
 
@@ -392,11 +397,9 @@ namespace winrt
     }
 
     template <typename Interface>
-    impl::com_ref<Interface> create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
+    auto create_instance(guid const& clsid, uint32_t context = 0x1 /*CLSCTX_INPROC_SERVER*/, void* outer = nullptr)
     {
-        void* result;
-        check_hresult(WINRT_CoCreateInstance(clsid, outer, context, guid_of<Interface>(), &result));
-        return { result, take_ownership_from_abi };
+        return capture<Interface>(WINRT_CoCreateInstance, clsid, outer, context);
     }
 
     namespace Windows::Foundation
@@ -414,5 +417,16 @@ namespace winrt
                 return instance.try_as<T>();
             }
         };
+    }
+}
+
+namespace winrt::impl
+{
+    template <typename T>
+    T fast_activate(Windows::Foundation::IActivationFactory const& factory)
+    {
+        void* result{};
+        check_hresult((*(impl::abi_t<Windows::Foundation::IActivationFactory>**)&factory)->ActivateInstance(&result));
+        return{ result, take_ownership_from_abi };
     }
 }

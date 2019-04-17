@@ -19,7 +19,7 @@ struct api_contract
 
 struct category_compare
 {
-    bool operator()(typedef_base const& lhs, typedef_base const& rhs)
+    bool operator()(typedef_base const& lhs, typedef_base const& rhs) const
     {
         using namespace xlang::meta::reader;
         auto leftCat = get_category(lhs.type());

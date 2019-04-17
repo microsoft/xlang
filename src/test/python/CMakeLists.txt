@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.9)
-
-set(python_module_name pyrt)
+set(python_module_name winrt)
 
 set(winmd_files
     Windows.Foundation.FoundationContract
+    Windows.Networking.Connectivity.WwanContract
     Windows.Foundation.UniversalApiContract
-    Windows.AI.MachineLearning.MachineLearningContract
 )
 
 set(included_namespaces
@@ -14,49 +12,59 @@ set(included_namespaces
     Windows.Foundation
     Windows.Graphics.DirectX
 
+
     # uncomment out the following to run complete_winml_tutorial.py
-    Windows.AI.MachineLearning
-    Windows.Graphics.Imaging
-    Windows.Media
-    Windows.Storage
+    # Windows.AI.MachineLearning
+    # Windows.Graphics.Imaging
+    # Windows.Media
+    # Windows.Storage
 )
 
 set(excluded_namespaces
     Windows.Foundation.Diagnostics.
     Windows.Foundation.Metadata.
-    Windows.Media.Audio.
-    Windows.Media.Capture.
-    Windows.Media.Casting.
-    Windows.Media.ClosedCaptioning.
-    Windows.Media.ContentRestrictions.
-    Windows.Media.Control.
-    Windows.Media.Core.
-    Windows.Media.Devices.
-    Windows.Media.DialProtocol.
-    Windows.Media.Editing.
-    Windows.Media.Effects.
-    Windows.Media.FaceAnalysis.
-    Windows.Media.Import.
-    Windows.Media.MediaProperties.
-    Windows.Media.Ocr.
-    Windows.Media.Playback.
-    Windows.Media.Playlists.
-    Windows.Media.PlayTo.
-    Windows.Media.Protection.
-    Windows.Media.Render.
-    Windows.Media.SpeechRecognition.
-    Windows.Media.SpeechSynthesis.
-    Windows.Media.Streaming.
-    Windows.Media.Transcoding.
-    Windows.Storage.AccessCache.
-    Windows.Storage.BulkAccess.
-    Windows.Storage.Compression.
-    Windows.Storage.FileProperties.
-    Windows.Storage.Pickers.
-    Windows.Storage.Provider.
+    # Windows.Media.Audio.
+    # Windows.Media.Capture.
+    # Windows.Media.Casting.
+    # Windows.Media.ClosedCaptioning.
+    # Windows.Media.ContentRestrictions.
+    # Windows.Media.Control.
+    # Windows.Media.Core.
+    # Windows.Media.Devices.
+    # Windows.Media.DialProtocol.
+    # Windows.Media.Editing.
+    # Windows.Media.Effects.
+    # Windows.Media.FaceAnalysis.
+    # Windows.Media.Import.
+    # Windows.Media.MediaProperties.
+    # Windows.Media.Ocr.
+    # Windows.Media.Playback.
+    # Windows.Media.Playlists.
+    # Windows.Media.PlayTo.
+    # Windows.Media.Protection.
+    # Windows.Media.Render.
+    # Windows.Media.SpeechRecognition.
+    # Windows.Media.SpeechSynthesis.
+    # Windows.Media.Streaming.
+    # Windows.Media.Transcoding.
+    # Windows.Storage.AccessCache.
+    # Windows.Storage.BulkAccess.
+    # Windows.Storage.Compression.
+    # Windows.Storage.FileProperties.
+    # Windows.Storage.Pickers.
+    # Windows.Storage.Provider.
     # Windows.Storage.Search.
     # Windows.Storage.Streams.
 )
+
+# set(included_namespaces
+#     Windows.
+# )
+
+# set(excluded_namespaces
+#     Windows.UI.Composition
+#     Windows.UI.Xaml
+# )
 
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/generated" generated_files_folder)
 set(pywinrt_cmdline "-output ${generated_files_folder} -module ${python_module_name}")

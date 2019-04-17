@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.9)
 
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
+    cmake_policy(SET CMP0076 NEW)
+endif()
+
 set(XLANG_SCRIPTS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
 
 if(NOT DEFINED XLANG_BUILD_VERSION)
-set(XLANG_BUILD_VERSION "1.0.0")
+set(XLANG_BUILD_VERSION "0.0.0")
 endif()
 
 function(ADD_OBJECT_DEPENDS file dependency)

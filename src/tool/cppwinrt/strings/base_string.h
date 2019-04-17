@@ -322,7 +322,7 @@ namespace winrt::impl
         hstring to_hstring()
         {
             WINRT_ASSERT(m_buffer != nullptr);
-            void* result;
+            void* result{};
             check_hresult(WINRT_WindowsPromoteStringBuffer(m_buffer, &result));
             m_buffer = nullptr;
             return { result, take_ownership_from_abi };
@@ -332,6 +332,57 @@ namespace winrt::impl
 
         wchar_t* m_data{ nullptr };
         void* m_buffer{ nullptr };
+    };
+
+    template <typename T>
+    struct bind_in
+    {
+        bind_in(T const& object) noexcept : object(object)
+        {
+        }
+
+        T const& object;
+
+        template <typename R>
+        operator R const& () const noexcept
+        {
+            return reinterpret_cast<R const&>(object);
+        }
+    };
+
+    template <typename T>
+    struct bind_out
+    {
+        bind_out(T& object) noexcept : object(object)
+        {
+        }
+
+        T& object;
+
+        operator void** () const noexcept
+        {
+            if constexpr (std::is_same_v<T, hstring>)
+            {
+                object.clear();
+            }
+            else
+            {
+                object = nullptr;
+            }
+
+            return (void**)(&object);
+        }
+
+        template <typename R>
+        operator R* () const noexcept
+        {
+            if constexpr (!std::is_trivially_destructible_v<T>)
+            {
+                object = {};
+            }
+
+            return reinterpret_cast<R*>(&object);
+        }
     };
 }
 
