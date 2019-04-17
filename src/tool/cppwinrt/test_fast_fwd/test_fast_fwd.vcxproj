@@ -73,7 +73,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -89,7 +89,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -104,7 +104,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -120,7 +120,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -133,7 +133,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -147,7 +147,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -160,7 +160,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -174,7 +174,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -187,7 +187,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -201,7 +201,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -214,7 +214,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -228,7 +228,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -243,7 +243,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -259,7 +259,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -274,7 +274,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CppWinRTDir);$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -290,7 +290,7 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -309,24 +309,18 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <MASM Include="..\fast_fwd\amd64\thunks.asm">
-      <ExcludedFromBuild Condition="'$(Platform)'!='x64'">true</ExcludedFromBuild>
+  <Target Name="PreprocessArmThunk" Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'"
+    BeforeTargets="_MARMASM" Outputs="$(IntDir)thunks.pp" Inputs="..\fast_fwd\$(CmakePlatform)\thunks.asm">
+    <Exec Command="cl /I..\fast_fwd /E /Tc ..\fast_fwd\$(Platform)\thunks.asm > $(IntDir)thunks.pp" />
+  </Target>
+  <ItemGroup Condition="'$(Platform)'!='ARM' and '$(Platform)'!='ARM64'">
+    <MASM Include="..\fast_fwd\$(CmakePlatform)\thunks.asm">
       <FileType>Document</FileType>
       <IncludePaths>..\fast_fwd</IncludePaths>
     </MASM>
-    <MASM Include="..\fast_fwd\i386\thunks.asm">
-      <ExcludedFromBuild Condition="'$(Platform)'!='Win32'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <IncludePaths>..\fast_fwd</IncludePaths>
-    </MASM>
-    <MARMASM Include="..\fast_fwd\arm64\thunks.asm">
-      <ExcludedFromBuild Condition="'$(Platform)'!='ARM64'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <IncludePaths>..\fast_fwd</IncludePaths>
-    </MARMASM>
-    <MARMASM Include="..\fast_fwd\arm\thunks.asm">
-      <ExcludedFromBuild Condition="'$(Platform)'!='ARM'">true</ExcludedFromBuild>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'">
+    <MARMASM Include="$(IntDir)thunks.pp">
       <FileType>Document</FileType>
       <IncludePaths>..\fast_fwd</IncludePaths>
     </MARMASM>
@@ -384,7 +378,7 @@
   </ItemGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)FastForwarderTest.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)FastForwarderTest.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
