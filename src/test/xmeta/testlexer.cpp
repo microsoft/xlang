@@ -164,6 +164,10 @@ TEST_CASE("Enum assignments")
     REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
     std::set<std::string> &enums = listener.enums;
 
+    REQUIRE(enums.find("Color") != enums.end());
+    REQUIRE(enums.find("Alignment") != enums.end());
+    REQUIRE(enums.find("Permissions") != enums.end());
+
     REQUIRE(enums.find("Red") != enums.end());
     REQUIRE(enums.find("Green") != enums.end());
     REQUIRE(enums.find("Blue") != enums.end());
