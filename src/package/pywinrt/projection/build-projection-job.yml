@@ -28,10 +28,10 @@ jobs:
     displayName: 'locate vsdevcmd via vswhere'
 
   - task: BatchScript@1
-    displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host x64)'
+    displayName: 'Configure environment with VSDevCmd (arch x86/host x86)'
     inputs:
       filename: 'src/scripts/windows/call-batchfile.bat'
-      arguments: '%vsdevcmd% -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}'
+      arguments: '%vsdevcmd% -host_arch=x86 -arch=x86'
       modifyEnvironment: true
 
   - task: CMake@1
@@ -73,6 +73,13 @@ jobs:
   - script: |
       _build\tool\python\pywinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate Python/WinRT Projection'
+
+  - task: BatchScript@1
+    displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host x64)'
+    inputs:
+      filename: 'src/scripts/windows/call-batchfile.bat'
+      arguments: '%vsdevcmd% -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}'
+      modifyEnvironment: true
 
   - task: CMake@1
     displayName: 'Generate python projection build files via cmake'
