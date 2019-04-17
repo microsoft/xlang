@@ -11,6 +11,7 @@
 
 namespace xlang::xmeta
 {
+    inline std::wstring s2ws(const std::string& as);
     class xmeta_emit : public xlang_model_listener
     {
     public:
@@ -18,7 +19,7 @@ namespace xlang::xmeta
             : m_assembly_name(assembly_name)
         { };
 
-        void initialize();
+        HRESULT initialize();
         void uninitialize();
         void saveToFile();
 
@@ -39,7 +40,9 @@ namespace xlang::xmeta
         IMetaDataAssemblyEmit *m_metadata_assembly_emitter = nullptr;
         IMetaDataEmit2 *m_metadata_emitter = nullptr;
 
-        mdAssembly tokenAssembly;
+        mdAssembly token_assembly;
+        mdAssemblyRef token_mscorlib;
+        mdTypeRef token_enum;
 
         // A generic assembly metadata struct.
         const ASSEMBLYMETADATA s_genericMetadata =
@@ -68,27 +71,8 @@ namespace xlang::xmeta
 
         // Windows specific methods
         HRESULT define_assembly();
-        HRESULT define_assembly_ref();
-        HRESULT define_custom_attribute();
-        HRESULT define_event();
-        HRESULT define_field();
-        HRESULT define_member_ref();
-        HRESULT define_method();
-        HRESULT define_method_impl();
-        HRESULT define_param();
-        HRESULT define_property();
-        HRESULT define_type_def();
-        HRESULT define_generic_param();
+        HRESULT define_common_reference_assembly();
 
-        // Not sure if we will use these
-        HRESULT define_module_ref();       
-        HRESULT define_nested_ref();
-        HRESULT define_permission_set();
-        HRESULT define_p_invoke_map();       
-        HRESULT define_security_attribute_set();
-
-        HRESULT define_type_ref_by_name();
-        HRESULT define_user_string();
 
         static const DWORD dw_enum_typeflag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;  // Flag: Public | Sealed | Class | AutoLayout | WindowsRuntime
     };
