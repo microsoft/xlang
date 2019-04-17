@@ -27,15 +27,15 @@ set(xmeta_gen_src
 add_executable(xmeta ${xmeta_gen_src})
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/libs/x86debug/antlr4-runtime.lib")
+    target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86debug/antlr4-runtime.lib")
     add_custom_command(TARGET xmeta PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${PROJECT_SOURCE_DIR}/libs/x86debug/antlr4-runtime.dll"
+        "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86debug/antlr4-runtime.dll"
         $<TARGET_FILE_DIR:xmeta>)
 else()
-    target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/libs/x86release/antlr4-runtime.lib")
+    target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86release/antlr4-runtime.lib")
     add_custom_command(TARGET xmeta PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${PROJECT_SOURCE_DIR}/libs/x86release/antlr4-runtime.dll"
+        "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86release/antlr4-runtime.dll"
         $<TARGET_FILE_DIR:xmeta>)
 endif()

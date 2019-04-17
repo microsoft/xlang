@@ -346,4 +346,4 @@ src/package/vsix/LICENSE
 # Generated java files from Antlr
 src/tool/xmeta/java/Xlang*
 src/tool/xmeta/grammar/.antlr/
-src/tool/xmeta/libs/
+src/tool/xmeta/antlr4-runtime/antlrlib/
