@@ -6,7 +6,6 @@
 
 namespace xlang::xmeta
 {
-
     // Hard-coded the mscorlib strong name.
     BYTE s_mscorlibStrongNameBlob[] = { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 };
 
@@ -96,8 +95,8 @@ namespace xlang::xmeta
         std::string enum_name = model->get_id();
 
         mdTypeDef token_enum_type_def;
-        m_metadata_emitter->DefineTypeDef(s2ws(enum_name).c_str(), dw_enum_typeflag, mdTokenNil, mdTokenNil, &token_enum_type_def);
-
+        m_metadata_emitter->DefineTypeDef(s2ws(enum_name).c_str(), dw_enum_typeflag, token_enum, mdTokenNil, &token_enum_type_def);
+       
         for (enum_member const& enum_member : model->get_members())
         {
             std::string enum_member_name = enum_member.get_id();
@@ -112,7 +111,7 @@ namespace xlang::xmeta
     };
     
     
-    void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model) {};
+    void xmeta_emit::listen_delegate_model(delegate_model const& model) {};
 
     void xmeta_emit::listen_method_model(std::shared_ptr<method_model> const& model) {};
     void xmeta_emit::listen_property_model(std::shared_ptr<property_model> const& model) {};

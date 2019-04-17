@@ -36,7 +36,7 @@ int main(int argc, const char * argv[]) {
     std::vector<std::shared_ptr<xlang::xmeta::namespace_model>> v;
 
     xlang::xmeta::xlang_model_walker walker(v);
-    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(std::wstring(L"test"));
+    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(std::wstring(L"firsttest"));
     if (HRESULT hr = emitter->initialize() != S_OK)
     {
         // do something with the hresult
@@ -45,7 +45,8 @@ int main(int argc, const char * argv[]) {
     }
     walker.register_listener(emitter);
     walker.walk();
-    
+    emitter->saveToFile();
+    emitter->uninitialize();
     return 0;
 }
 

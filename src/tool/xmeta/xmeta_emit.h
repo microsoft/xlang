@@ -11,7 +11,11 @@
 
 namespace xlang::xmeta
 {
+
+    // Wide string from narrow string function
     inline std::wstring s2ws(const std::string& as);
+
+
     class xmeta_emit : public xlang_model_listener
     {
     public:
@@ -28,7 +32,7 @@ namespace xlang::xmeta
         void listen_struct_model(std::shared_ptr<struct_model> const& model) override;
         void listen_interface_model(std::shared_ptr<interface_model> const& model) override;
         void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
-        void listen_delegate_model(std::shared_ptr<delegate_model> const& model) override;
+        void listen_delegate_model(delegate_model const& model) override;
 
         void listen_method_model(std::shared_ptr<method_model> const& model) override;
         void listen_property_model(std::shared_ptr<property_model> const& model) override;

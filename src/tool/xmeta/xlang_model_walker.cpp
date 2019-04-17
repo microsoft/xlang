@@ -47,6 +47,7 @@ namespace xlang::xmeta
                 enter_delegate_model(key);
             }
         }
+
         for (auto const&[key, val] : model->get_child_namespaces())
         {
             enter_namespace_model(val);
@@ -56,16 +57,15 @@ namespace xlang::xmeta
 
     void xlang_model_walker::enter_class_model(std::shared_ptr<class_model> const& model)
     {
+        m_listener->listen_class_model(model);
         for (auto const& val : model->get_methods())
         {
             enter_method_model(val);
         }
-
         for (auto const& val : model->get_properties())
         {
             enter_property_model(val);
         }
-
         for (auto const& val : model->get_events())
         {
             enter_event_model(val);
@@ -74,12 +74,12 @@ namespace xlang::xmeta
 
     void xlang_model_walker::enter_struct_model(std::shared_ptr<struct_model> const& model)
     {
-
+        m_listener->listen_struct_model(model);
     }
 
     void xlang_model_walker::enter_interface_model(std::shared_ptr<interface_model> const& model)
     {
-
+        m_listener->listen_interface_model(model);
     }
 
     void xlang_model_walker::enter_enum_model(std::shared_ptr<enum_model> const& model)
@@ -89,21 +89,21 @@ namespace xlang::xmeta
 
     void xlang_model_walker::enter_delegate_model(delegate_model const& model)
     {
-
+        m_listener->listen_delegate_model(model);
     }
 
     void xlang_model_walker::enter_method_model(std::shared_ptr<method_model> const& model)
     {
-
+        m_listener->listen_method_model(model);
     }
 
     void xlang_model_walker::enter_property_model(std::shared_ptr<property_model> const& model)
     {
-
+        m_listener->listen_property_model(model);
     }
 
     void xlang_model_walker::enter_event_model(std::shared_ptr<event_model> const& model)
     {
-
+        m_listener->listen_event_model(model);
     }
 }
