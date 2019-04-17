@@ -45,11 +45,18 @@ namespace xlang::xmeta
             return m_type;
         }
 
+        auto const& get_parent() const noexcept
+        {
+            return m_parent;
+        }
+
     private:
         event_semantics m_semantic;
         type_ref m_type;
 
         std::shared_ptr<method_model> m_add_method_ref;
         std::shared_ptr<method_model> m_remove_method_ref;
+
+        std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> m_parent;
     };
 }

@@ -53,6 +53,11 @@ namespace xlang::xmeta
             return m_semantic;
         }
 
+        auto const& get_parent() const noexcept
+        {
+            return m_parent;
+        }
+
         void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept
         {
             m_overridden_method_ref = ref;
@@ -63,6 +68,7 @@ namespace xlang::xmeta
         std::optional<type_ref> m_return_type;
         std::vector<formal_parameter_model> m_formal_parameters;
         std::variant<std::string, std::shared_ptr<method_model>> m_overridden_method_ref;
+        std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> m_parent;
         // TODO: Add type parameters (generic types)
     };
 }

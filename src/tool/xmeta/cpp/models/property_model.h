@@ -51,10 +51,16 @@ namespace xlang::xmeta
             return m_set_method;
         }
 
+        auto const& get_parent() const noexcept
+        {
+            return m_parent;
+        }
+
     private:
         property_semantics m_semantic;
         property_type_semantics m_type;
         std::shared_ptr<method_model> m_get_method;
         std::shared_ptr<method_model> m_set_method;
+        std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> m_parent;
     };
 }
