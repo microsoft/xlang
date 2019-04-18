@@ -17,8 +17,8 @@ namespace xlang
 
     static constexpr cmd::option options[]
     {
-        { "input", 0, cmd::option::no_max, "<spec>", "Windows metadata to include in projection" },
-        { "reference", 0, cmd::option::no_max, "<spec>", "Windows metadata to reference from projection" },
+        { "input", 0, cmd::option::no_max, "<spec>", "Metadata to include in projection" },
+        { "reference", 0, cmd::option::no_max, "<spec>", "Metadata to reference from projection" },
         { "output", 0, 1, "<path>", "Location of generated projection and component templates" },
         { "component", 0, 1, "[<path>]", "Generate component templates, and optional implementation" },
         { "name", 0, 1, "<name>", "Specify explicit name for component files" },
@@ -29,9 +29,9 @@ namespace xlang
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
-        { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
+        { "optimize", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "lib", 0, 1, "Specify library prefix (defaults to xlang)" },
+        { "library", 0, 1, "<prefix>", "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
