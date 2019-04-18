@@ -105,6 +105,6 @@ jobs:
       contents: '*.pyd'
       targetFolder: src/package/pywinrt/projection/pywinrt/winrt
 
-  - script: python setup.py bdist_wheel --python-tag cp37 -p win-amd64
+  - script: python setup.py bdist_wheel --python-tag cp37 -p win-${{ parameters.targetArchitecture }}
     workingDirectory: src/package/pywinrt/projection/pywinrt
     displayName: python setup.py bdist_wheel 
