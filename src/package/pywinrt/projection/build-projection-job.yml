@@ -1,7 +1,7 @@
 
 
 parameters:
-  targetArchitecture: 'amd64'  # defaults for any parameters that aren't specified
+  targetArchitecture: 'x64'  # defaults for any parameters that aren't specified
 
 jobs:
 - job: "PythonWinRTProjection_${{ parameters.targetArchitecture }}"
@@ -54,41 +54,37 @@ jobs:
       command: custom
       arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
 
-  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2
-    displayName: 'NuGet install python'
+  - task: UsePythonVersion@0
     inputs:
-      command: custom
-      arguments: 'install python -ExcludeVersion  -OutputDirectory src\package\pywinrt\projection\'
+      versionSpec: '3.7.x' 
+      addToPath: true 
+      architecture: ${{ parameters.targetArchitecture }}
 
-  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2
-    displayName: 'NuGet install pythonx86'
-    inputs:
-      command: custom
-      arguments: 'install pythonx86 -ExcludeVersion  -OutputDirectory src\package\pywinrt\projection\'
+   - script: pip install wheel
+     
+  # - script: |
+  #     _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\cppwinrt -verbose
+  #   displayName: 'Generate C++/WinRT Projections'
 
-  - script: |
-      _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\cppwinrt -verbose
-    displayName: 'Generate C++/WinRT Projections'
+  # - script: |
+  #     _build\tool\python\pywinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+  #   displayName: 'Generate Python/WinRT Projection'
 
-  - script: |
-      _build\tool\python\pywinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
-    displayName: 'Generate Python/WinRT Projection'
+  # - task: BatchScript@1
+  #   displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host x64)'
+  #   inputs:
+  #     filename: 'src/scripts/windows/call-batchfile.bat'
+  #     arguments: '%vsdevcmd% -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}'
+  #     modifyEnvironment: true
 
-  - task: BatchScript@1
-    displayName: 'Configure environment with VSDevCmd (arch ${{ parameters.targetArchitecture }}/host x64)'
-    inputs:
-      filename: 'src/scripts/windows/call-batchfile.bat'
-      arguments: '%vsdevcmd% -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}'
-      modifyEnvironment: true
+  # - task: CMake@1
+  #   displayName: 'Generate python projection build files via cmake'
+  #   inputs:
+  #     cwd: '.'
+  #     cmakeArgs: '-S src/package/pywinrt/projection -B_build.projection -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
 
-  - task: CMake@1
-    displayName: 'Generate python projection build files via cmake'
-    inputs:
-      cwd: '.'
-      cmakeArgs: '-S src/package/pywinrt/projection -B_build.projection -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
-
-  - task: CMake@1
-    displayName: 'build python projection'
-    inputs:
-      cwd: '.'
-      cmakeArgs: '--build .\_build.projection -- -v '
+  # - task: CMake@1
+  #   displayName: 'build python projection'
+  #   inputs:
+  #     cwd: '.'
+  #     cmakeArgs: '--build .\_build.projection -- -v '

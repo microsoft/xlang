@@ -5,6 +5,6 @@ jobs:
     targetArchitecture: x86
 - template: build-projection-job.yml
   parameters:
-    targetArchitecture: amd64
+    targetArchitecture: x64
     
 
