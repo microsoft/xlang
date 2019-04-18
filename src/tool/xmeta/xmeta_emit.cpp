@@ -3,6 +3,7 @@
 #include <locale>
 #include <codecvt>
 #include <string>
+#include <comutil.h>
 
 using namespace winrt;
 
@@ -18,22 +19,27 @@ namespace xlang::xmeta
     
         // Windows only for now
         check_hresult(CoCreateInstance(CLSID_CorMetaDataDispenser,
-            0,
-            CLSCTX_INPROC_SERVER,
+            nullptr,
+            CLSCTX_INPROC,
             IID_IMetaDataDispenser,
-            (void **)&m_metadata_dispenser));
+            m_metadata_dispenser.put_void()));
+
+        {
+            variant_t version{ L"WindowsRuntime 1.4" };
+            check_hresult(m_metadata_dispenser->SetOption(MetaDataRuntimeVersion, &version.GetVARIANT()));
+        }
 
 
         check_hresult(m_metadata_dispenser->DefineScope(
                 CLSID_CorMetaDataRuntime,
                 0,
                 IID_IMetaDataAssemblyEmit,
-                (IUnknown **)&m_metadata_assembly_emitter));
+                reinterpret_cast<IUnknown**>(m_metadata_assembly_emitter.put_void())));
 
 
-        //check_hresult(m_metadata_assembly_emitter->QueryInterface(IID_IMetaDataEmit2, (void **)&m_metadata_emitter));
-        //check_hresult(m_metadata_emitter->QueryInterface(IID_IMetaDataImport, (void **)&m_metadata_import));
-            // Defining the mscorlib assemblyref
+        check_hresult(m_metadata_assembly_emitter->QueryInterface(IID_IMetaDataEmit2, m_metadata_emitter.put_void()));
+        check_hresult(m_metadata_emitter->QueryInterface(IID_IMetaDataImport, m_metadata_import.put_void()));
+       // Defining the mscorlib assemblyref
         define_assembly();
         define_common_reference_assembly();
     }
@@ -57,19 +63,20 @@ namespace xlang::xmeta
 
     void xmeta_emit::saveToFile()
     {
-        m_metadata_emitter->Save((m_assembly_name + L".xmeta").c_str(), 0);
+        m_metadata_emitter->Save((s2ws(m_assembly_name) + L".xmeta").c_str(), 0);
     }
 
     void xmeta_emit::define_assembly()
     {
         check_hresult(m_metadata_assembly_emitter->DefineAssembly(
-            NULL,
+            nullptr,
             0,
             SHA1_HASH_ALGO,
-            m_assembly_name.c_str(),
+            s2ws(m_assembly_name).c_str(),
             &(s_genericMetadata),
-            0,
+            afContentType_WindowsRuntime,
             &token_assembly));
+        check_hresult(m_metadata_emitter->SetModuleProps(s2ws(m_assembly_name).c_str()));
     }
 
     void xmeta_emit::define_common_reference_assembly()

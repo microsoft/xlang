@@ -19,7 +19,7 @@ namespace xlang::xmeta
     class xmeta_emit : public xlang_model_listener
     {
     public:
-        xmeta_emit(std::wstring const& assembly_name) 
+        xmeta_emit(std::string const& assembly_name) 
             : m_assembly_name(assembly_name)
         { };
 
@@ -44,7 +44,7 @@ namespace xlang::xmeta
 
         void define_method_parameter(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
     private:
-        std::wstring m_assembly_name;
+        std::string m_assembly_name;
         winrt::com_ptr<IMetaDataDispenserEx> m_metadata_dispenser;
         winrt::com_ptr<IMetaDataAssemblyEmit> m_metadata_assembly_emitter = nullptr;
         winrt::com_ptr<IMetaDataEmit2> m_metadata_emitter = nullptr;
