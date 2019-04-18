@@ -7,4 +7,4 @@ setuptools.setup(
     license="MIT",
     url="http://github.com/Microsoft/xlang",
     package_data={ "%":["_%.*.pyd"] },
-    packages = setuptools.find_namespace_packages())
+    packages = setuptools.find_namespace_packages(where='.', include=("%*")))

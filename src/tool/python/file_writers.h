@@ -161,7 +161,7 @@ namespace pywinrt
         writer w;
 
         write_license(w, "#");
-        w.write(strings::setup, settings.module, settings.module, settings.module);
+        w.write(strings::setup, settings.module, settings.module, settings.module, settings.module);
         w.flush_to_file(folder / "setup.py");
     }
 
