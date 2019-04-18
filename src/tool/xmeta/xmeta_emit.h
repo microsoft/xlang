@@ -34,9 +34,9 @@ namespace xlang::xmeta
         void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
         void listen_delegate_model(delegate_model const& model) override;
 
-        void define_class_method(std::shared_ptr<method_model> const& model, mdTypeDef const& class_td);
-        void define_class_property(std::shared_ptr<property_model> const& model, mdTypeDef const& class_td);
-        void define_class_event(std::shared_ptr<event_model> const& model, mdTypeDef const& class_td);
+        void define_class_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_class_def);
+        void define_class_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_class_def);
+        void define_class_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_class_def);
 
         void define_interface_method(std::shared_ptr<method_model> const& model, mdTypeDef const& class_td);
         void define_interface_property(std::shared_ptr<property_model> const& model, mdTypeDef const& class_td);
@@ -54,6 +54,7 @@ namespace xlang::xmeta
         mdAssemblyRef token_mscorlib;
         mdTypeRef token_enum;
         mdTypeRef token_value_type;
+        mdTypeRef token_delegate;
 
         // A generic assembly metadata struct.
         const ASSEMBLYMETADATA s_genericMetadata =
@@ -89,5 +90,6 @@ namespace xlang::xmeta
         static const DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         static const DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
         static const DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract 
+        static const DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;           // Flags: Public | Sealed | Class
     };
 }

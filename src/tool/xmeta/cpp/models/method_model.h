@@ -46,7 +46,7 @@ namespace xlang::xmeta
             m_overridden_method_ref{ std::string(overridden_method_ref) }
         { }
 
-        auto const& get_formal_params() const noexcept
+        auto const& get_formal_parameters() const noexcept
         {
             return m_formal_parameters;
         }
