@@ -21,27 +21,6 @@ if (-not $pywinrt_exe) {
 
 nuget install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory $projectionPath
 
-# TODO: pass python version as param
-$pythonVersion = "3.7.3"
-
-if ($env:VSCMD_ARG_TGT_ARCH -eq "x64")
-{
-    nuget install python -ExcludeVersion -OutputDirectory $projectionPath -version $pythonVersion
-    $python_exe = "$projectionPath/python/tools/python.exe"
-}
-elseif ($env:VSCMD_ARG_TGT_ARCH -eq "x86")
-{
-    nuget install pythonx86 -ExcludeVersion -OutputDirectory $projectionPath -version $pythonVersion
-    $python_exe = "$projectionPath/python/tools/pythonx86.exe"
-}
-else 
-{
-    Write-Error "VSCMD_ARG_TGT_ARCH not set to an expected value (x86 or x64)"
-    exit 
-}
-
-& $python_exe -m pip install wheel
-
 $cppwinrt_exe = "$projectionPath/Microsoft.Windows.CppWinRT\bin\cppwinrt.exe"
 
 & $cppwinrt_exe -input $windows_sdk -output $projectionPath/cppwinrt -verbose

@@ -49,13 +49,10 @@ add_compile_options(/await /bigobj /GR- /permissive-)
 project(_winrt)
 
 find_package (Python3 COMPONENTS Interpreter Development)
-message("Python3_EXECUTABLE ${Python3_EXECUTABLE}")
-
-link_directories("${PYTHON_ROOT}/tools/libs")
 
 Python3_add_library (_winrt MODULE ${sources})
 
-target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src" "${PYTHON_ROOT}/tools/include")
+target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src")
 target_link_libraries(_winrt PRIVATE onecore)
 
 TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
