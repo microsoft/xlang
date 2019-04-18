@@ -70,13 +70,14 @@ jobs:
         architecture: x86
 
   - script: pip install wheel
-  
+    displayName: pip install wheel
+
   - script: |
       _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\cppwinrt -verbose
     displayName: 'Generate C++/WinRT Projections'
 
   - script: |
-      _build\tool\python\pywinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+      _build\tool\python\pywinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate Python/WinRT Projection'
 
   - task: BatchScript@1
@@ -86,14 +87,14 @@ jobs:
       arguments: -host_arch=amd64 -arch=${{ parameters.targetArchitecture }}
       modifyEnvironment: true
 
-  # - task: CMake@1
-  #   displayName: 'Generate python projection build files via cmake'
-  #   inputs:
-  #     cwd: '.'
-  #     cmakeArgs: '-S src/package/pywinrt/projection -B_build.projection -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
+  - task: CMake@1
+    displayName: 'Generate python projection build files via cmake'
+    inputs:
+      cwd: '.'
+      cmakeArgs: '-S src/package/pywinrt/projection -B_build.projection -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
 
-  # - task: CMake@1
-  #   displayName: 'build python projection'
-  #   inputs:
-  #     cwd: '.'
-  #     cmakeArgs: '--build .\_build.projection -- -v '
+  - task: CMake@1
+    displayName: 'build python projection'
+    inputs:
+      cwd: '.'
+      cmakeArgs: '--build .\_build.projection -- -v '

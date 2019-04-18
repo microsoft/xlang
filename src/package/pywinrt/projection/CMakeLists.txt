@@ -35,23 +35,10 @@ function(TARGET_CONFIG_MSVC_PCH target pch_cpp pch_header)
 
 endfunction(TARGET_CONFIG_MSVC_PCH)
 
-if ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x64")
-    set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/python")
-elseif("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
-    set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/pythonx86")
-else()
-    # TODO: ARM support
-    message(FATAL_ERROR "invalid VSCMD_ARG_TGT_ARCH")
-endif()
-
 file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src/*.cpp")
 foreach(file ${sources})
     message(${file})
 endforeach()
-
-# if(DEFINED PYTHON_TAG AND DEFINED PLATFORM_TAG)
-#     message("suffix .${PYTHON_TAG}-${PLATFORM_TAG}.pyd")
-# endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -61,15 +48,12 @@ add_compile_options(/await /bigobj /GR- /permissive-)
 
 project(_winrt)
 
+find_package (Python3 COMPONENTS Interpreter Development)
+message("Python3_EXECUTABLE ${Python3_EXECUTABLE}")
+
 link_directories("${PYTHON_ROOT}/tools/libs")
 
-add_library(_winrt MODULE ${sources})
-
-if(DEFINED PYTHON_TAG AND DEFINED PLATFORM_TAG)
-    set_target_properties(_winrt PROPERTIES SUFFIX ".${PYTHON_TAG}-${PLATFORM_TAG}.pyd")
-else()
-     set_target_properties(_winrt PROPERTIES SUFFIX ".pyd")
-endif()
+Python3_add_library (_winrt MODULE ${sources})
 
 target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src" "${PYTHON_ROOT}/tools/include")
 target_link_libraries(_winrt PRIVATE onecore)
