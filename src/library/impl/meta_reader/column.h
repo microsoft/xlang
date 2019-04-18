@@ -48,6 +48,11 @@ namespace xlang::meta::reader
         return equal_range(get_database().GenericParam, coded_index<TypeOrMethodDef>());
     }
 
+    inline auto MethodDef::GenericParam() const
+    {
+        return equal_range(get_database().GenericParam, coded_index<TypeOrMethodDef>());
+    }
+
     inline auto TypeDef::InterfaceImpl() const
     {
         struct compare
@@ -479,7 +484,7 @@ namespace xlang::meta::reader
 
     inline auto AssemblyRef::Version() const
     {
-        auto const temp = get_value<uint64_t>(1);
+        auto const temp = get_value<uint64_t>(0);
         return AssemblyVersion{ static_cast<uint16_t>(temp & 0xffff), static_cast<uint16_t>((temp >> 16) & 0xffff), static_cast<uint16_t>((temp >> 32) & 0xffff), static_cast<uint16_t>((temp >> 48) & 0xffff) };
     }
 

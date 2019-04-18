@@ -8,7 +8,7 @@ namespace winrt
     D* get_self(I const& from) noexcept;
 
     struct take_ownership_from_abi_t {};
-    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
+    inline constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 
     template <typename T>
     struct com_ptr;
@@ -78,11 +78,8 @@ namespace winrt::impl
     template <typename D, typename I = D>
     using consume_t = typename consume<I>::template type<D>;
 
-    template <typename T>
-    struct delegate;
-
     template <typename T, typename H>
-    using delegate_t = typename delegate<T>::template type<H>;
+    struct delegate;
 
     template <typename T, typename = std::void_t<>>
     struct default_interface

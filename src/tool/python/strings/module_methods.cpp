@@ -1,29 +1,65 @@
+#include "pybase.h"
 #include <winrt/base.h>
 
-WINRT_EXPORT namespace std 
+PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type) noexcept
 {
-    template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
+    if (base_type != nullptr)
+    {
+        return PyType_FromSpecWithBases(type_spec, base_type);
+    }
+    else
+    {
+        return PyType_FromSpec(type_spec);
+    }
 }
 
-#include "pybase.h"
+PyTypeObject* py::register_python_type(PyObject* module, const char* const type_name, PyType_Spec* type_spec, PyObject* base_type)
+{
+    py::pyobj_handle type_object{ create_python_type(type_spec, base_type) };
+    if (!type_object)
+    {
+        throw winrt::hresult_error();
+    }
+    if (PyModule_AddObject(module, type_name, type_object.get()) != 0)
+    {
+        throw winrt::hresult_error();
+    }
+    return reinterpret_cast<PyTypeObject*>(type_object.detach());
+}
 
 PyTypeObject* py::winrt_type<py::winrt_base>::python_type;
+constexpr const char* const _type_name_winrt_base = "winrt_base";
 
 PyDoc_STRVAR(winrt_base_doc, "base class for wrapped WinRT object instances.");
 
-static PyType_Slot winrt_base_Type_slots[] =
+static PyObject* winrt_base_new(PyTypeObject* /* unused */, PyObject* /* unused */, PyObject* /* unused */) noexcept
 {
-    {Py_tp_doc, winrt_base_doc},
+    py::set_invalid_activation_error(_type_name_winrt_base);
+    return nullptr;
+}
+
+static void winrt_base_dealloc(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>* self)
+{
+    // auto hash_value = std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj);
+    // py::wrapped_instance(hash_value, nullptr);
+    self->obj = nullptr;
+}
+
+static PyType_Slot winrt_base_type_slots[] =
+{
+    { Py_tp_new, winrt_base_new },
+    { Py_tp_dealloc, winrt_base_dealloc },
+    { Py_tp_doc, winrt_base_doc},
     { 0, nullptr },
 };
 
-static PyType_Spec winrt_base_Type_spec =
+static PyType_Spec winrt_base_type_spec =
 {
-    "_winrt_base",
-    0,
+    "_%._winrt_base",
+    sizeof(py::winrt_wrapper<winrt::Windows::Foundation::IInspectable>),
     0,
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    winrt_base_Type_slots
+    winrt_base_type_slots
 };
 
 std::unordered_map<std::size_t, PyObject*> instance_map{};
@@ -60,13 +96,21 @@ PyObject* py::wrapped_instance(std::size_t key)
     //return it->second;
 }
 
-static PyObject* init_apartment(PyObject* /*unused*/, PyObject* /*unused*/)
+static PyObject* init_apartment(PyObject* /*unused*/, PyObject* /*unused*/) noexcept
 {
-    winrt::init_apartment();
-    Py_RETURN_NONE;
+    try
+    {
+        winrt::init_apartment();
+        Py_RETURN_NONE;
+    }
+    catch (...)
+    {
+        py::to_PyErr();
+        return nullptr;
+    }
 }
 
-static PyObject* uninit_apartment(PyObject* /*unused*/, PyObject* /*unused*/)
+static PyObject* uninit_apartment(PyObject* /*unused*/, PyObject* /*unused*/) noexcept
 {
     winrt::uninit_apartment();
     Py_RETURN_NONE;
@@ -78,20 +122,42 @@ static PyMethodDef module_methods[]{
     { nullptr }
 };
 
-static int module_exec(PyObject* module)
+static int module_exec(PyObject* module) noexcept
 {
-    PyObject* type_object = PyType_FromSpec(&winrt_base_Type_spec);
-    if (type_object == nullptr)
+    try
     {
-        return -1;
-    }
-    if (PyModule_AddObject(module, "_winrt_base", type_object) != 0)
-    {
-        Py_DECREF(type_object);
-        return -1;
-    }
-    py::winrt_type<py::winrt_base>::python_type = reinterpret_cast<PyTypeObject*>(type_object);
-    type_object = nullptr;
+        py::winrt_type<py::winrt_base>::python_type = py::register_python_type(module, _type_name_winrt_base, &winrt_base_type_spec, nullptr);
 
-    return 0;
+        return 0;
+    }
+    catch (...)
+    {
+        py::to_PyErr();
+        return -1;
+    }
+}
+
+static PyModuleDef_Slot module_slots[] = {
+    {Py_mod_exec, module_exec},
+    {0, nullptr}
+};
+
+PyDoc_STRVAR(module_doc, "_%");
+
+static PyModuleDef module_def = {
+    PyModuleDef_HEAD_INIT,
+    "_%",
+    module_doc,
+    0,
+    module_methods,
+    module_slots,
+    nullptr,
+    nullptr,
+    nullptr
+};
+
+PyMODINIT_FUNC
+PyInit__%(void) noexcept
+{
+    return PyModuleDef_Init(&module_def);
 }

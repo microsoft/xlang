@@ -26,9 +26,9 @@ namespace winrt
         return left == std::wstring_view(right);
     }
 
-    bool operator==(hstring const& left, nullptr_t) = delete;
+    bool operator==(hstring const& left, std::nullptr_t) = delete;
 
-    bool operator==(nullptr_t, hstring const& right) = delete;
+    bool operator==(std::nullptr_t, hstring const& right) = delete;
 
     inline bool operator<(hstring const& left, hstring const& right) noexcept
     {
@@ -83,15 +83,15 @@ namespace winrt
     inline bool operator<=(wchar_t const* left, hstring const& right) noexcept { return !(right < left); }
     inline bool operator>=(wchar_t const* left, hstring const& right) noexcept { return !(left < right); }
 
-    bool operator!=(hstring const& left, nullptr_t right) = delete;
-    bool operator>(hstring const& left, nullptr_t right) = delete;
-    bool operator<=(hstring const& left, nullptr_t right) = delete;
-    bool operator>=(hstring const& left, nullptr_t right) = delete;
+    bool operator!=(hstring const& left, std::nullptr_t right) = delete;
+    bool operator>(hstring const& left, std::nullptr_t right) = delete;
+    bool operator<=(hstring const& left, std::nullptr_t right) = delete;
+    bool operator>=(hstring const& left, std::nullptr_t right) = delete;
 
-    bool operator!=(nullptr_t left, hstring const& right) = delete;
-    bool operator>(nullptr_t left, hstring const& right) = delete;
-    bool operator<=(nullptr_t left, hstring const& right) = delete;
-    bool operator>=(nullptr_t left, hstring const& right) = delete;
+    bool operator!=(std::nullptr_t left, hstring const& right) = delete;
+    bool operator>(std::nullptr_t left, hstring const& right) = delete;
+    bool operator<=(std::nullptr_t left, hstring const& right) = delete;
+    bool operator>=(std::nullptr_t left, hstring const& right) = delete;
 }
 
 namespace winrt::impl
@@ -142,9 +142,9 @@ namespace winrt
         return impl::concat_hstring(std::wstring_view(&left, 1), right);
     }
 
-    hstring operator+(hstring const& left, nullptr_t) = delete;
+    hstring operator+(hstring const& left, std::nullptr_t) = delete;
 
-    hstring operator+(nullptr_t, hstring const& right) = delete;
+    hstring operator+(std::nullptr_t, hstring const& right) = delete;
 
     inline hstring operator+(hstring const& left, std::wstring_view const& right)
     {
