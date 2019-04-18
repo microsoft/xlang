@@ -4,30 +4,10 @@ jobs:
     vmImage: 'windows-2019'
 
   steps:
-  - script: |
-      @echo off
-      
-      set vswherepath="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
-      for /f "usebackq delims=" %%i in (`%vswherepath% -latest -property installationPath`) do (
-        set vslatest="%%i"
-        if exist "%%i\Common7\Tools\vsdevcmd.bat" (
-          set vsdevcmd="%%i\Common7\Tools\vsdevcmd.bat"
-        )
-      )
-      
-      @echo vslatest %vslatest%
-      @echo vsdevcmd %vsdevcmd%
-      
-      @echo ##vso[task.setvariable variable=vslatest]%vslatest%
-      @echo ##vso[task.setvariable variable=vsdevcmd]%vsdevcmd%
-    displayName: 'locate vsdevcmd via vswhere'
-
-  - task: BatchScript@1
-    displayName: 'Configure environment with VSDevCmd (arch x86/host x86)'
-    inputs:
-      filename: $(vsdevcmd)
-      arguments: -host_arch=x86 -arch=x86
-      modifyEnvironment: true
+  - template: vsdevcmd.yml
+    parameters:
+      buildArchitecture: 'x86'  
+      hostArchitecture: 'x86'
 
   - task: CMake@1
     displayName: 'Generate xlang build files via cmake'
@@ -58,3 +38,53 @@ jobs:
     displayName: 'Generate Python/WinRT Projection'
 
 
+- job: build_projection
+  pool:
+    vmImage: 'windows-2019'
+  timeoutInMinutes: 120
+  strategy:
+    maxParallel: 10
+    matrix:
+      Release_x86:
+        buildArchitecture: 'x86'
+        buildConfiguration: 'Release'
+      Release_x64:
+        buildArchitecture: 'amd64'
+        buildConfiguration: 'Release'
+
+  variables:
+    cppwinrtDir : $(build.artifactStagingDirectory)\cppwinrt
+    pywinrtDir : $(build.artifactStagingDirectory)\pywinrt
+    publishDir : $(Build.ArtifactStagingDirectory)\$(buildArchitecture)-$(buildConfiguration)
+
+  steps:
+  - template: vsdevcmd.yml
+    parameters:
+      buildArchitecture: $(buildArchitecture)  
+      hostArchitecture: 'amd64'
+  - template: findpython.yml
+    parameters:
+      architecture: $(buildArchitecture)  
+      versionSpec: '3.7.x'
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(cppwinrtDir)
+      contents: '*.pyd'
+      targetFolder: src/package/pywinrt/projection/pywinrt/
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(pywinrtDir)
+      contents: '*.pyd'
+      targetFolder: src/package/pywinrt/projection/cppwinrt/
+
+  - task: CMake@1
+    displayName: 'Generate python projection build files via cmake'
+    inputs:
+      cwd: '.'
+      cmakeArgs: '-S src/package/pywinrt/projection -B_buildProj -GNinja -DCMAKE_BUILD_TYPE=$(buildConfiguration) -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl'
+
+  - task: CMake@1
+    displayName: 'build python projection'
+    inputs:
+      cwd: '.'
+      cmakeArgs: '--build .\_buildProj -- -v'
