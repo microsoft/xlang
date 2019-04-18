@@ -102,7 +102,7 @@ jobs:
   - task: CopyFiles@2
     inputs:
       sourceFolder: _build.projection
-      contents: *.pyd 
+      contents: '*.pyd'
       targetFolder: src/package/pywinrt/projection/pywinrt/winrt
 
   - script: python setup.py bdist_wheel --python-tag cp37 -p win-amd64
