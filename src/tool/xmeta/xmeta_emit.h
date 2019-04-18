@@ -46,9 +46,9 @@ namespace xlang::xmeta
     private:
         std::wstring m_assembly_name;
         winrt::com_ptr<IMetaDataDispenserEx> m_metadata_dispenser;
-        IMetaDataAssemblyEmit *m_metadata_assembly_emitter = nullptr;
-        IMetaDataEmit2 *m_metadata_emitter = nullptr;
-        IMetaDataImport *m_metadata_import = nullptr;
+        winrt::com_ptr<IMetaDataAssemblyEmit> m_metadata_assembly_emitter = nullptr;
+        winrt::com_ptr<IMetaDataEmit2> m_metadata_emitter = nullptr;
+        winrt::com_ptr<IMetaDataImport> m_metadata_import = nullptr;
 
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;
