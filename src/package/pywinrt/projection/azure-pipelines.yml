@@ -39,6 +39,7 @@ jobs:
 
 
 - job: build_projection
+  dependsOn: generate_projection
   pool:
     vmImage: 'windows-2019'
   timeoutInMinutes: 120
