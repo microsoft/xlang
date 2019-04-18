@@ -3,10 +3,8 @@ jobs:
 - template: build-projection-job.yml
   parameters:
     targetArchitecture: x86
-    pythonArchitecture: x86
 - template: build-projection-job.yml
   parameters:
     targetArchitecture: amd64
-    pythonArchitecture: x64
     
 

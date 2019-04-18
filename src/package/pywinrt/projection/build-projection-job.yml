@@ -55,11 +55,19 @@ jobs:
       command: custom
       arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
 
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.7.x' 
-      addToPath: true 
-      architecture: ${{ parameters.pythonArchitecture }}
+  - ${{ if eq(parameters.targetArchitecture, 'amd64') }}:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7.x' 
+        addToPath: true 
+        architecture: x64
+
+  - ${{ if eq(parameters.targetArchitecture, 'x86') }}:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7.x' 
+        addToPath: true 
+        architecture: x86
 
   - script: pip install wheel
   
