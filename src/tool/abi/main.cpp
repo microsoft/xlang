@@ -156,7 +156,7 @@ int main(int const argc, char** argv)
                 return std::find_if(vector.begin(), vector.end(), [&](auto const& t)
                     {
                         return f.includes(t.type());
-                    }) != vector.end();;
+                    }) != vector.end();
             };
             if (includes(types.enums) || includes(types.structs) || includes(types.delegates) ||
                 includes(types.interfaces) || includes(types.classes))
@@ -188,7 +188,6 @@ int main(int const argc, char** argv)
                 {
                     group.add([&, ns = ns]()
                     {
-                        auto typeCache = mdCache.compile_namespaces({ ns });
                         write_abi_header(ns, config, mdCache.compile_namespaces({ ns }));
                     });
                 }

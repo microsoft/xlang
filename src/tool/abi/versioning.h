@@ -7,10 +7,6 @@ enum class meta_platform : int
 {
     windows = 0,
     windows_phone = 1,
-
-    // Not actually a value in the Windows.Foundation.Metadata.Platform enumeration, but it's useful to consider
-    // contract versioning "as-if" it were a platform
-    // contract = -1,
 };
 
 struct contract_version
