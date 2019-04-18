@@ -39,6 +39,9 @@ if ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x64")
     set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/python")
 elseif("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
     set(PYTHON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/pythonx86")
+else()
+    # TODO: ARM support
+    message(FATAL_ERROR "invalid VSCMD_ARG_TGT_ARCH")
 endif()
 
 file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src/*.cpp")
@@ -46,23 +49,35 @@ foreach(file ${sources})
     message(${file})
 endforeach()
 
+# if(DEFINED PYTHON_TAG AND DEFINED PLATFORM_TAG)
+#     message("suffix .${PYTHON_TAG}-${PLATFORM_TAG}.pyd")
+# endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# TODO: re-enable /GL and /LTCG when we get a bigger build machine
 add_compile_options(/await /bigobj /GR- /permissive-)
-# add_compile_options(/await /bigobj /GL /GR- /permissive-)
 
 project(_winrt)
 
 link_directories("${PYTHON_ROOT}/tools/libs")
 
 add_library(_winrt MODULE ${sources})
-set_target_properties(_winrt PROPERTIES SUFFIX ".pyd")
+
+if(DEFINED PYTHON_TAG AND DEFINED PLATFORM_TAG)
+    set_target_properties(_winrt PROPERTIES SUFFIX ".${PYTHON_TAG}-${PLATFORM_TAG}.pyd")
+else()
+     set_target_properties(_winrt PROPERTIES SUFFIX ".pyd")
+endif()
+
 target_include_directories(_winrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/cppwinrt" "${CMAKE_CURRENT_SOURCE_DIR}/pywinrt/winrt/src" "${PYTHON_ROOT}/tools/include")
 target_link_libraries(_winrt PRIVATE onecore)
 
 TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
 
 string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+# TODO: re-enable /GL and /LTCG when we get a bigger build machine
 # string(APPEND CMAKE_MODULE_LINKER_FLAGS " /LTCG:STATUS")
 
 if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.20.27404.0")
