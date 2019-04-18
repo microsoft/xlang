@@ -35,10 +35,12 @@ TEST_CASE("in_params")
     REQUIRE(object.InStringable(make<Value>(123)) == L"123");
     REQUIRE(object.InStruct({ L"1", L"2" }) == L"12");
     REQUIRE(object.InStructRef({ L"1", L"2" }) == L"12ref");
+    REQUIRE(object.InEnum(Signed::First) == L"First");
 
     REQUIRE(object.InInt32Array({ 1,2 }) == L"12");
     REQUIRE(object.InStringArray({ L"1", L"2" }) == L"12");
     REQUIRE(object.InObjectArray({ make<Value>(1), make<Value>(2) }) == L"12");
     REQUIRE(object.InStringableArray({ make<Value>(1), make<Value>(2) }) == L"12");
     REQUIRE(object.InStructArray({ {L"1",L"2"}, {L"3",L"4"} }) == L"1234");
+    REQUIRE(object.InEnumArray({ Signed::First, Signed::Second }) == L"FirstSecond");
 }
