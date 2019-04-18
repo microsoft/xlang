@@ -140,27 +140,28 @@ namespace xlang
         w.save_header('1');
     }
 
-    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members, cache const& c)
+    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
 
         write_type_namespace(w, ns);
         w.write_each<write_delegate>(members.delegates);
-        write_structs(w, members.structs);
+        bool const promote = write_structs(w, members.structs);
         w.write_each<write_class>(members.classes);
         w.write_each<write_interface_override>(members.classes);
         write_close_namespace(w);
-        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();
         write_preamble(w);
         write_open_file_guard(w, ns, '2');
 
+        char const impl = promote ? '2' : '1';
+
         for (auto&& depends : w.depends)
         {
-            w.write_depends(depends.first, '1');
+            w.write_depends(depends.first, impl);
         }
 
         w.write_depends(w.type_namespace, '1');
@@ -180,6 +181,7 @@ namespace xlang
         write_close_namespace(w);
         write_type_namespace(w, ns);
         w.write_each<write_class_definitions>(members.classes);
+        w.write_each<write_fast_class_base_definitions>(members.classes);
 
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
@@ -189,13 +191,14 @@ namespace xlang
         w.write_each<write_std_hash>(members.interfaces);
         w.write_each<write_std_hash>(members.classes);
         write_close_namespace(w);
+        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();
         write_preamble(w);
         write_open_file_guard(w, ns);
         write_version_assert(w);
-        w.write_parent_depends(c);
+        write_parent_depends(w, c, ns);
 
         for (auto&& depends : w.depends)
         {
@@ -218,6 +221,7 @@ namespace xlang
     static void write_component_g_h(TypeDef const& type)
     {
         writer w;
+        w.add_depends(type);
         write_component_g_h(w, type);
 
         w.swap();

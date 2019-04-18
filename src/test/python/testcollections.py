@@ -1,19 +1,21 @@
-import find_projection
+import sys
+sys.path.append("./generated")
+
 import unittest
 import asyncio
 
-import pyrt.windows.foundation.collections as wfc
+import winrt.windows.foundation.collections as wfc
 
 class TestCollections(unittest.TestCase):
 
     def test_stringmap(self):
         m = wfc.StringMap()
-        m.Insert("hello", "world")
+        m.insert("hello", "world")
 
-        self.assertTrue(m.HasKey("hello"))
-        self.assertFalse(m.HasKey("world"))
-        self.assertEqual(m.Size, 1)
-        self.assertEqual(m.Lookup("hello"), "world")
+        self.assertTrue(m.has_key("hello"))
+        self.assertFalse(m.has_key("world"))
+        self.assertEqual(m.size, 1)
+        self.assertEqual(m.lookup("hello"), "world")
 
 
     def test_stringmap_changed_event(self):
@@ -24,20 +26,20 @@ class TestCollections(unittest.TestCase):
             future = loop.create_future()
 
             def onMapChanged(sender, args): 
-                self.assertEqual(args.CollectionChange, wfc.CollectionChange.ItemInserted)
-                self.assertEqual(args.Key, "dr")
+                self.assertEqual(args.collection_change, wfc.CollectionChange.ITEM_INSERTED)
+                self.assertEqual(args.key, "dr")
 
-                self.assertEqual(sender.Size, 2)
-                self.assertTrue(sender.HasKey("dr"))
-                self.assertTrue(sender.HasKey("hello"))
+                self.assertEqual(sender.size, 2)
+                self.assertTrue(sender.has_key("dr"))
+                self.assertTrue(sender.has_key("hello"))
                 
                 loop.call_soon_threadsafe(asyncio.Future.set_result, future, True)
 
             m = wfc.StringMap()
-            m.Insert("hello", "world")
-            token = m.add_MapChanged(onMapChanged)
-            m.Insert("dr", "who")
-            m.remove_MapChanged(token)
+            m.insert("hello", "world")
+            token = m.add_map_changed(onMapChanged)
+            m.insert("dr", "who")
+            m.remove_map_changed(token)
 
             called = await future
             self.assertTrue(called)

@@ -8,7 +8,7 @@ namespace xlang
 
         for (auto&& base : get_bases(type))
         {
-            if (settings.filter.includes(base))
+            if (settings.component_filter.includes(base))
             {
                 continue;
             }
@@ -20,7 +20,7 @@ namespace xlang
                     continue;
                 }
 
-                if (info.overridable)
+                if (info.overridable && !is_always_disabled(info.type))
                 {
                     interfaces.push_back(name);
                 }
@@ -49,7 +49,7 @@ namespace xlang
 
         for (auto&& base : get_bases(type))
         {
-            if (settings.filter.includes(base))
+            if (settings.component_filter.includes(base))
             {
                 return;
             }
@@ -71,7 +71,7 @@ namespace xlang
 
     static void write_component_include(writer& w, TypeDef const& type)
     {
-        if (!has_factory_members(w, type))
+        if (!has_factory_members(w, type) || is_always_disabled(type))
         {
             return;
         }
@@ -94,7 +94,7 @@ namespace xlang
 
     static void write_component_activation(writer& w, TypeDef const& type)
     {
-        if (!has_factory_members(w, type))
+        if (!has_factory_members(w, type) || is_always_disabled(type))
         {
             return;
         }
@@ -158,7 +158,20 @@ void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
 %
     return nullptr;
 }
+)";
 
+        w.write(format,
+            bind_each<write_component_include>(classes),
+            settings.component_lib,
+            settings.component_lib,
+            bind_each<write_component_activation>(classes));
+
+        if (settings.component_lib != "winrt")
+        {
+            return;
+        }
+
+        format = R"(
 int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
 {
 #ifdef _WRL_MODULE_H_
@@ -171,36 +184,28 @@ int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
     return %_can_unload_now() ? 0 : 1;
 }
 
-int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept
+int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept try
 {
-    try
+    uint32_t length{};
+    wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
+    std::wstring_view const name{ buffer, length };
+    *factory = %_get_activation_factory(name);
+
+    if (*factory)
     {
-        uint32_t length{};
-        wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
-        std::wstring_view const name{ buffer, length };
-
-        *factory = %_get_activation_factory(name);
-
-        if (*factory)
-        {
-            return 0;
-        }
+        return 0;
+    }
 
 #ifdef _WRL_MODULE_H_
-        return ::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().GetActivationFactory(static_cast<HSTRING>(classId), reinterpret_cast<::IActivationFactory**>(factory));
+    return ::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().GetActivationFactory(static_cast<HSTRING>(classId), reinterpret_cast<::IActivationFactory**>(factory));
 #else
-        return winrt::hresult_class_not_available(name).to_abi();
+    return winrt::hresult_class_not_available(name).to_abi();
 #endif
-    }
-    catch (...) { return winrt::to_hresult(); }
 }
+catch (...) { return winrt::to_hresult(); }
 )";
 
         w.write(format,
-            bind_each<write_component_include>(classes),
-            settings.component_lib,
-            settings.component_lib,
-            bind_each<write_component_activation>(classes),
             settings.component_lib,
             settings.component_lib);
     }
@@ -209,7 +214,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
-            if (!info.base && !info.is_default)
+            if (!info.base && !info.is_default && !is_always_disabled(info.type))
             {
                 w.write(", @", interface_name);
             }
@@ -227,7 +232,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             return;
         }
 
-        if (settings.filter.includes(base_type))
+        if (settings.component_filter.includes(base_type))
         {
             return;
         }
@@ -236,7 +241,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[interface_name, info] : get_interfaces(w, base_type))
         {
-            if (info.overridable)
+            if (info.overridable && !is_always_disabled(info.type))
             {
                 w.write(", @", interface_name);
             }
@@ -283,7 +288,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             bind<write_consume_args>(signature));
     }
 
-        void write_component_static_forwarder(writer& w, MethodDef const& method)
+    void write_component_static_forwarder(writer& w, MethodDef const& method)
     {
         auto format = R"(        % %(%)
         {
@@ -308,13 +313,18 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : factories)
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable)
             {
                 if (!factory.type)
                 {
                     default_constructor = true;
 
-                    w.write(R"(        Windows::Foundation::IInspectable ActivateInstance() const
+                    w.write(R"(        auto ActivateInstance() const
         {
             return make<T>();
         }
@@ -349,7 +359,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         for (auto&&[factory_name, factory] : factories)
         {
-            if (!factory.type)
+            if (!factory.type || is_always_disabled(factory.type))
             {
                 continue;
             }
@@ -387,6 +397,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : get_factories(w, type))
         {
+            if (factory.type && is_always_disabled(factory.type))
+            {
+                continue;
+            }
+
             if (factory.activatable)
             {
                 if (!factory.type)
@@ -571,7 +586,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
             return;
         }
 
-        if (settings.filter.includes(base_type))
+        if (settings.component_filter.includes(base_type))
         {
             return;
         }
@@ -580,7 +595,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         for (auto&&[factory_name, factory] : get_factories(w, base_type))
         {
-            if (!factory.composable)
+            if (!factory.composable || is_always_disabled(factory.type))
             {
                 continue;
             }
@@ -613,7 +628,6 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
     {
         auto type_name = type.TypeName();
         auto type_namespace = type.TypeNamespace();
-        auto interfaces = get_interfaces(w, type);
         auto factories = get_factories(w, type);
         bool const non_static = !empty(type.InterfaceImpl());
 
@@ -646,7 +660,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
             if (base_type)
             {
-                bool const external_base_type = !settings.filter.includes(base_type);
+                bool const external_base_type = !settings.component_filter.includes(base_type);
 
                 if (external_base_type)
                 {
@@ -657,7 +671,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
                     for (auto&&[name, info] : base_interfaces)
                     {
-                        if (info.overridable)
+                        if (info.overridable || is_always_disabled(info.type))
                         {
                             continue;
                         }
@@ -776,7 +790,7 @@ namespace winrt::@::implementation
         auto type_name = type.TypeName();
         auto base_type = get_base_class(type);
 
-        if (base_type && settings.filter.includes(base_type))
+        if (base_type && settings.component_filter.includes(base_type))
         {
             w.write(" : %T<%, @::implementation::%>",
                 type_name,
@@ -873,7 +887,7 @@ namespace winrt::@::implementation
         auto base_type = get_base_class(type);
         std::string base_include;
 
-        if (base_type && settings.filter.includes(base_type))
+        if (base_type && settings.component_filter.includes(base_type))
         {
             base_include = "#include \"" + get_component_filename(base_type) + ".h\"\n";
         }

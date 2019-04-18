@@ -29,12 +29,14 @@ namespace xlang
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
-        { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
+        { "optimize", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "lib", 0, 1, "Specify library prefix (defaults to winrt)" },
+        { "library", 0, 1, "<prefix>", "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
+        { "fastabi", 0, 0 }, // Enable support for the Fast ABI
+        { "ignore_velocity", 0, 0 }, // Ignore feature staging metadata and always include implementations
     };
 
     static void print_usage(writer& w)
@@ -83,6 +85,7 @@ Where <spec> is one or more of:
         }
 
         settings.verbose = args.exists("verbose");
+        settings.fastabi = args.exists("fastabi");
 
         settings.input = args.files("input", database::is_database);
         settings.reference = args.files("reference", database::is_database);
@@ -118,15 +121,24 @@ Where <spec> is one or more of:
             settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
 
-            if (settings.component_name.empty() && settings.input.size() == 1)
+            if (settings.component_name.empty())
             {
-                settings.component_name = path(*settings.input.begin()).filename().replace_extension().string();
+                // For compatibility with C++/WinRT 1.0, the component_name defaults to the *first*
+                // input, hence the use of values() here that will return the args in input order.
+
+                auto& values = args.values("input");
+
+                if (!values.empty())
+                {
+                    settings.component_name = path(values[0]).filename().replace_extension().string();
+                }
             }
 
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
-            settings.component_lib = args.value("lib", "winrt");
-            settings.component_opt = args.exists("opt");
+            settings.component_lib = args.value("library", "winrt");
+            settings.component_opt = args.exists("optimize");
+            settings.component_ignore_velocity = args.exists("ignore_velocity");
 
             if (settings.component_pch == ".")
             {
@@ -153,12 +165,14 @@ Where <spec> is one or more of:
         return files;
     }
 
-    static void supplement_includes(cache const& c)
+    static void build_filters(cache const& c)
     {
-        if (settings.reference.empty() || !settings.include.empty())
+        if (settings.reference.empty())
         {
             return;
         }
+
+        std::set<std::string> include;
 
         for (auto file : settings.input)
         {
@@ -174,23 +188,51 @@ Where <spec> is one or more of:
                     continue;
                 }
 
-                settings.include.insert(std::string{ type.TypeNamespace() });
+                std::string full_name{ type.TypeNamespace() };
+                full_name += '.';
+                full_name += type.TypeName();
+                include.insert(full_name);
+            }
+        }
+
+        settings.projection_filter = { include, {} };
+        
+        settings.component_filter = { settings.include.empty() ? include : settings.include, settings.exclude };
+    }
+
+    static void build_fastabi_cache(cache const& c)
+    {
+        if (!settings.fastabi)
+        {
+            return;
+        }
+
+        for (auto&& [ns, members] : c.namespaces())
+        {
+            for (auto&& type : members.classes)
+            {
+                if (!has_fastabi(type))
+                {
+                    continue;
+                }
+
+                auto default_interface = get_default_interface(type);
+
+                if (default_interface.type() == TypeDefOrRef::TypeDef)
+                {
+                    settings.fastabi_cache.try_emplace(default_interface.TypeDef(), type);
+                }
+                else
+                {
+                    settings.fastabi_cache.try_emplace(find_required(default_interface.TypeRef()), type);
+                }
             }
         }
     }
 
-    static bool has_projected_types(cache::namespace_members const& members)
+    static int run(int const argc, char** argv)
     {
-        return
-            !members.interfaces.empty() ||
-            !members.classes.empty() ||
-            !members.enums.empty() ||
-            !members.structs.empty() ||
-            !members.delegates.empty();
-    }
-
-    static void run(int const argc, char** argv)
-    {
+        int result{};
         writer w;
 
         try
@@ -199,9 +241,9 @@ Where <spec> is one or more of:
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
             c.remove_cppwinrt_foundation_types();
-            supplement_includes(c);
-            settings.filter = { settings.include, settings.exclude };
-            settings.base = settings.base || (!settings.component && settings.filter.empty());
+            build_filters(c);
+            settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
+            build_fastabi_cache(c);
 
             if (settings.verbose)
             {
@@ -233,55 +275,52 @@ Where <spec> is one or more of:
             {
                 group.add([&, &ns = ns, &members = members]
                 {
-                    if (!has_projected_types(members) || !settings.filter.includes(members))
+                    if (!has_projected_types(members) || !settings.projection_filter.includes(members))
                     {
                         return;
                     }
 
                     write_namespace_0_h(ns, members);
                     write_namespace_1_h(ns, members);
-                    write_namespace_2_h(ns, members, c);
+                    write_namespace_2_h(ns, members);
                     write_namespace_h(c, ns, members);
                 });
             }
 
-            group.add([&]
+            if (settings.base)
             {
-                if (settings.base)
+                write_base_h();
+                write_coroutine_h();
+            }
+
+            if (settings.component)
+            {
+                std::vector<TypeDef> classes;
+
+                for (auto&&[ns, members] : c.namespaces())
                 {
-                    write_base_h();
-                    write_coroutine_h();
-                }
-
-                if (settings.component)
-                {
-                    std::vector<TypeDef> classes;
-
-                    for (auto&&[ns, members] : c.namespaces())
+                    for (auto&& type : members.classes)
                     {
-                        for (auto&& type : members.classes)
+                        if (settings.component_filter.includes(type))
                         {
-                            if (settings.filter.includes(type))
-                            {
-                                classes.push_back(type);
-                            }
-                        }
-                    }
-
-                    if (!classes.empty())
-                    {
-                        write_module_g_cpp(classes);
-
-                        for (auto&& type : classes)
-                        {
-                            write_component_g_h(type);
-                            write_component_g_cpp(type);
-                            write_component_h(type);
-                            write_component_cpp(type);
+                            classes.push_back(type);
                         }
                     }
                 }
-            });
+
+                if (!classes.empty())
+                {
+                    write_module_g_cpp(classes);
+
+                    for (auto&& type : classes)
+                    {
+                        write_component_g_h(type);
+                        write_component_g_cpp(type);
+                        write_component_h(type);
+                        write_component_cpp(type);
+                    }
+                }
+            }
 
             group.get();
 
@@ -297,13 +336,15 @@ Where <spec> is one or more of:
         catch (std::exception const& e)
         {
             w.write(" error: %\n", e.what());
+            result = 1;
         }
 
         w.flush_to_console();
+        return result;
     }
 }
 
 int main(int const argc, char** argv)
 {
-    xlang::run(argc, argv);
+    return xlang::run(argc, argv);
 }

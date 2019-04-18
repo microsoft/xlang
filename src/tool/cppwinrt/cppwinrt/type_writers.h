@@ -71,12 +71,20 @@ namespace xlang
     {
         using writer_base<writer>::write;
 
+        struct depends_compare
+        {
+            bool operator()(TypeDef const& left, TypeDef const& right) const
+            {
+                return left.TypeName() < right.TypeName();
+            }
+        };
+
         std::string type_namespace;
         bool abi_types{};
         bool param_names{};
         bool consume_types{};
         bool async_types{};
-        std::map<std::string_view, std::set<TypeDef>> depends;
+        std::map<std::string_view, std::set<TypeDef, depends_compare>> depends;
         std::vector<std::vector<std::string>> generic_param_stack;
 
         struct generic_param_guard
@@ -499,25 +507,6 @@ namespace xlang
             {
                 write_root_include(ns);
             }
-        }
-
-        void write_parent_depends(cache const& c)
-        {
-            auto pos = type_namespace.rfind('.');
-
-            if (pos == std::string::npos)
-            {
-                return;
-            }
-
-            auto parent = type_namespace.substr(0, pos);
-
-            if (c.namespaces().find(parent) == c.namespaces().end())
-            {
-                return;
-            }
-
-            write_root_include(parent);
         }
 
         void save_header(char impl = 0)

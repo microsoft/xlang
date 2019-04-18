@@ -3,7 +3,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="$(CmakeOutDir)strings.cpp" />
+    <ClCompile Include="$(OutDir)strings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code_writers.h" />
@@ -165,7 +165,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="$(CmakeOutDir)version.rc" />
+    <ResourceCompile Include="$(OutDir)version.rc" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="strings">

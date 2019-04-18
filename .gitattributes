@@ -3,3 +3,4 @@
 *.png   -text
 *.onnx  -text
 *.winmd -text
+*.jar   -text

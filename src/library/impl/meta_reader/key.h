@@ -9,17 +9,82 @@ namespace xlang::meta::reader
         return get_database().template get_table<Row>()[index()];
     }
 
-    inline auto typed_index<TypeDefOrRef>::TypeDef() const
+    inline auto typed_index<CustomAttributeType>::MemberRef() const
     {
-        return get_row<reader::TypeDef>();
+        return get_row<reader::MemberRef>();
     }
 
-    inline auto typed_index<TypeDefOrRef>::TypeRef() const
+    inline auto typed_index<CustomAttributeType>::MethodDef() const
+    {
+        return get_row<reader::MethodDef>();
+    }
+
+    inline auto typed_index<HasConstant>::Field() const
+    {
+        return get_row<reader::Field>();
+    }
+
+    inline auto typed_index<HasConstant>::Param() const
+    {
+        return get_row<reader::Param>();
+    }
+
+    inline auto typed_index<HasConstant>::Property() const
+    {
+        return get_row<reader::Property>();
+    }
+
+    inline auto typed_index<HasSemantics>::Property() const
+    {
+        return get_row<reader::Property>();
+    }
+
+    inline auto typed_index<HasSemantics>::Event() const
+    {
+        return get_row<reader::Event>();
+    }
+
+    inline auto typed_index<MethodDefOrRef>::MethodDef() const
+    {
+        return get_row<reader::MethodDef>();
+    }
+
+    inline auto typed_index<MethodDefOrRef>::MemberRef() const
+    {
+        return get_row<reader::MemberRef>();
+    }
+
+    inline auto typed_index<ResolutionScope>::Module() const
+    {
+        return get_row<reader::Module>();
+    }
+
+    inline auto typed_index<ResolutionScope>::ModuleRef() const
+    {
+        return get_row<reader::ModuleRef>();
+    }
+
+    inline auto typed_index<ResolutionScope>::AssemblyRef() const
+    {
+        return get_row<reader::AssemblyRef>();
+    }
+
+    inline auto typed_index<ResolutionScope>::TypeRef() const
     {
         return get_row<reader::TypeRef>();
     }
 
-    inline auto typed_index<TypeDefOrRef>::TypeSpec() const
+    inline TypeDef typed_index<TypeDefOrRef>::TypeDef() const
+    {
+        return get_row<reader::TypeDef>();
+    }
+
+    inline TypeRef typed_index<TypeDefOrRef>::TypeRef() const
+    {
+        return get_row<reader::TypeRef>();
+    }
+
+    inline TypeSpec typed_index<TypeDefOrRef>::TypeSpec() const
     {
         return get_row<reader::TypeSpec>();
     }
@@ -39,31 +104,6 @@ namespace xlang::meta::reader
         return TypeSpec().CustomAttribute();
     }
 
-    inline auto typed_index<HasConstant>::Field() const
-    {
-        return get_row<reader::Field>();
-    }
-
-    inline auto typed_index<HasConstant>::Param() const
-    {
-        return get_row<reader::Param>();
-    }
-
-    inline auto typed_index<HasConstant>::Property() const
-    {
-        return get_row<reader::Property>();
-    }
-
-    inline auto typed_index<CustomAttributeType>::MemberRef() const
-    {
-        return get_row<reader::MemberRef>();
-    }
-
-    inline auto typed_index<CustomAttributeType>::MethodDef() const
-    {
-        return get_row<reader::MethodDef>();
-    }
-
     inline auto typed_index<MemberRefParent>::TypeRef() const
     {
         return get_row<reader::TypeRef>();
@@ -74,20 +114,9 @@ namespace xlang::meta::reader
         return get_row<reader::TypeDef>();
     }
 
-    inline auto typed_index<HasSemantics>::Property() const
-    {
-        return get_row<reader::Property>();
-    }
-
-    inline auto typed_index<HasSemantics>::Event() const
-    {
-        return get_row<reader::Event>();
-    }
-
     inline bool TypeDef::is_enum() const
     {
-        auto base = Extends().TypeRef();
-        return base.TypeNamespace() == "System" && base.TypeName() == "Enum";
+        return extends_type(*this, "System"sv, "Enum"sv);
     }
 
     struct EnumDefinition
@@ -106,8 +135,23 @@ namespace xlang::meta::reader
                 }
             }
         }
+
+        auto get_enumerator(std::string_view const& name) const
+        {
+            auto fields = m_typedef.FieldList();
+
+            auto field = std::find_if(begin(fields), end(fields), [&](auto&& field)
+            {
+                return field.Name() == name;
+            });
+
+            XLANG_ASSERT(field != end(fields));
+            return field;
+        }
+
         TypeDef m_typedef;
         ElementType m_underlying_type{};
+    
     };
 
     inline auto TypeDef::get_enum_definition() const

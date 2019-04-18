@@ -51,7 +51,7 @@ namespace winrt::impl
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>> {};
+    struct is_interface : std::is_base_of<Windows::Foundation::IInspectable, T> {};
 
 #endif
 
@@ -715,7 +715,7 @@ namespace winrt::impl
     protected:
         static constexpr inspectable_abi* outer() noexcept { return nullptr; }
 
-        template <typename T, typename D, typename I>
+        template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
     };
 
@@ -727,10 +727,10 @@ namespace winrt::impl
     private:
         inspectable_abi* m_outer = nullptr;
 
-        template <typename T, typename D, typename I>
+        template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
 
-        template <typename D>
+        template <typename>
         friend struct composable_factory;
     };
 
@@ -799,7 +799,6 @@ namespace winrt::impl
 
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
-        static void final_release(std::unique_ptr<D>) noexcept {}
 
     protected:
 
@@ -889,7 +888,14 @@ namespace winrt::impl
                 // This ensures destruction has a stable value during destruction.
                 m_references = 1;
 
-                D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
+                if constexpr (has_final_release::value)
+                {
+                    D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
+                }
+                else
+                {
+                    delete this;
+                }
             }
 
             return target;
@@ -959,25 +965,19 @@ namespace winrt::impl
             return error_ok;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept
+        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept try
         {
-            try
-            {
-                *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
 
-        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
+        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept try
         {
-            try
-            {
-                *trustLevel = static_cast<D*>(this)->GetTrustLevel();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            *trustLevel = static_cast<D*>(this)->GetTrustLevel();
+            return error_ok;
         }
+        catch (...) { return to_hresult(); }
 
         uint32_t subtract_reference() noexcept
         {
@@ -1025,6 +1025,16 @@ namespace winrt::impl
         using is_factory = std::disjunction<std::is_same<Windows::Foundation::IActivationFactory, I>...>;
 
     private:
+
+        class has_final_release
+        {
+            template <typename U, typename = decltype(std::declval<U>().final_release(0))> static constexpr bool get_value(int) { return true; }
+            template <typename> static constexpr bool get_value(...) { return false; }
+
+        public:
+
+            static constexpr bool value = get_value<D>(0);
+        };
 
         using is_agile = std::negation<std::disjunction<std::is_same<non_agile, I>...>>;
         using is_inspectable = std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, I>...>;
@@ -1157,10 +1167,10 @@ namespace winrt::impl
             return Windows::Foundation::TrustLevel::BaseTrust;
         }
 
-        template <typename D, typename I, typename Enable>
+        template <typename, typename, typename>
         friend struct impl::produce_base;
 
-        template <typename D, typename I>
+        template <typename, typename>
         friend struct impl::produce;
     };
 
@@ -1184,7 +1194,7 @@ namespace winrt::impl
 
             static slim_mutex lock;
             slim_lock_guard const guard{ lock };
-            void* result;
+            void* result{};
             map->Lookup(get_abi(name), &result);
 
             if (result)
@@ -1347,7 +1357,7 @@ namespace winrt
             return impl::runtime_class_name<typename impl::implements_default_interface<D>::type>::get();
         }
 
-        template <typename D, typename... I>
+        template <typename, typename...>
         friend struct impl::root_implements;
 
         template <typename T>

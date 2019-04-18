@@ -1,10 +1,7 @@
 import sys
-vi = sys.version_info
-dirname = "lib.{2}-{0}.{1}".format(vi.major, vi.minor, "win-amd64" if sys.maxsize > 2**32 else "win32")
-test_module_path = "./pywinrt_output/build/" + dirname
-sys.path.append(str(test_module_path))
+sys.path.append("./pywinrt_output")
 
-import _pyrt
+import pyrt
 import asyncio
 
 def timed_op(fun):
@@ -32,58 +29,40 @@ def timed_op(fun):
 
     return async_wrapper if asyncio.iscoroutinefunction(fun) else sync_wrapper
 
-async def wrap_async_op(op):
-    loop = asyncio.get_event_loop()
-    future = loop.create_future()
-
-    def callback(operation, status):
-        if status == 1:
-            result = operation.GetResults()
-            loop.call_soon_threadsafe(asyncio.Future.set_result, future, result)
-        elif status == 2:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, asyncio.CancelledError())
-        elif status == 3:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("AsyncOp failed"))
-        else:
-            loop.call_soon_threadsafe(asyncio.Future.set_exception, future, RuntimeError("Unexpected AsyncStatus"))
-
-    op.put_Completed(callback)
-
-    return await future
-
-def run_async_code(code):
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(code())
-    loop.close()
+import pyrt.windows.ai.machinelearning as winml 
 
 @timed_op
 def load_model(model_path):
-    return _pyrt.LearningModel.LoadFromFilePath(model_path)
+    return winml.LearningModel.LoadFromFilePath(model_path)
 
 @timed_op
 async def load_image_file(file_path):
-    file = await wrap_async_op(_pyrt.StorageFile.GetFileFromPathAsync(file_path))
-    stream = await wrap_async_op(file.OpenAsync(0)) # 0 == FileAccessMode::Read 
-    decoder = await wrap_async_op(_pyrt.BitmapDecoder.CreateAsync(stream))
-    software_bitmap = await wrap_async_op(decoder.GetSoftwareBitmapAsync())
-    return _pyrt.VideoFrame.CreateWithSoftwareBitmap(software_bitmap)
+    from pyrt.windows.storage import StorageFile, FileAccessMode
+    from pyrt.windows.graphics.imaging import BitmapDecoder
+    from pyrt.windows.media import VideoFrame
+
+    file = await StorageFile.GetFileFromPathAsync(file_path)
+    stream = await file.OpenAsync(FileAccessMode.Read) 
+    decoder = await BitmapDecoder.CreateAsync(stream)
+    software_bitmap = await decoder.GetSoftwareBitmapAsync()
+    return VideoFrame.CreateWithSoftwareBitmap(software_bitmap)
 
 @timed_op
 def bind_model(model, image_frame):
-    device = _pyrt.LearningModelDevice(0) # 0 == LearningModelDeviceKind::Default
-    session = _pyrt.LearningModelSession(model, device)
-    binding = _pyrt.LearningModelBinding(session)
-    image_feature_value = _pyrt.ImageFeatureValue.CreateFromVideoFrame(image_frame)
+    device = winml.LearningModelDevice(winml.LearningModelDeviceKind.Default)
+    session = winml.LearningModelSession(model, device)
+    binding = winml.LearningModelBinding(session)
+    image_feature_value = winml.ImageFeatureValue.CreateFromVideoFrame(image_frame)
     binding.Bind("data_0", image_feature_value)
-    shape = _pyrt.TensorFloat.Create([1, 1000, 1, 1])
+    shape = winml.TensorFloat.Create([1, 1000, 1, 1])
     binding.Bind("softmaxout_1", shape)
     return (session, binding)
 
 @timed_op
 def evaluate_model(session, binding):
     results = session.Evaluate(binding, "RunId")
-    o = results.get_Outputs().Lookup("softmaxout_1")
-    result_tensor = _pyrt.TensorFloat._from(o)
+    o = results.Outputs["softmaxout_1"]
+    result_tensor = winml.TensorFloat._from(o)
     return result_tensor.GetAsVectorView()
 
 def load_labels(labels_path):
@@ -100,7 +79,7 @@ def print_results(results, labels):
     topProbabilities = [0.0 for x in range(3)]
     topProbabilityLabelIndexes = [0 for x in range(3)]
 
-    for i in range(results.get_Size()):
+    for i in range(results.Size):
         for j in range(3):
             result = results.GetAt(i)
             if result > topProbabilities[j]:
@@ -113,8 +92,9 @@ def print_results(results, labels):
         print(labels[topProbabilityLabelIndexes[i]], "with confidence of", topProbabilities[i])
 
 async def async_main():
+
     import os.path
-    
+
     model_path = os.path.abspath("./winml_content/SqueezeNet.onnx")
     model = load_model(model_path)
 
@@ -129,8 +109,7 @@ async def async_main():
 
     print_results(results, labels)
 
+loop = asyncio.get_event_loop()
+loop.run_until_complete(async_main())
+loop.close()
 
-
-_pyrt.init_apartment()
-
-run_async_code(async_main)
