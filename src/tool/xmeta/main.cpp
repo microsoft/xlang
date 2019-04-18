@@ -10,11 +10,13 @@
 #include <windows.h>
 #include <mscoree.h>
 #include <cor.h>
+#include <winrt/base.h>
 
 #pragma execution_character_set("utf-8")
 
 using namespace antlr4;
-    
+using namespace winrt;
+
 int main(int argc, const char * argv[]) {
 
     //std::ifstream stream;
@@ -37,12 +39,7 @@ int main(int argc, const char * argv[]) {
 
     xlang::xmeta::xlang_model_walker walker(v);
     std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(std::wstring(L"firsttest"));
-    if (HRESULT hr = emitter->initialize() != S_OK)
-    {
-        // do something with the hresult
-        emitter->uninitialize();
-        return 1;
-    }
+    emitter->initialize();
     walker.register_listener(emitter);
     walker.walk();
     emitter->saveToFile();

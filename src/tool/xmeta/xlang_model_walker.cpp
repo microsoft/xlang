@@ -79,5 +79,4 @@ namespace xlang::xmeta
     {
         m_listener->listen_delegate_model(model);
     }
-
 }

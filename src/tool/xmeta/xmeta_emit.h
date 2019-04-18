@@ -1,7 +1,7 @@
 #pragma once
 #include "xmeta_models.h"
 #include "xlang_model_listener.h"
-
+#include <winrt/base.h>
 #include <vector>
 #include <mscoree.h>
 #include <cor.h>
@@ -14,7 +14,7 @@ namespace xlang::xmeta
 
     // Wide string from narrow string function
     inline std::wstring s2ws(const std::string& as);
-
+    inline std::string type_semantics_to_string(model_ref<type_semantics> const& semantic_type);
 
     class xmeta_emit : public xlang_model_listener
     {
@@ -23,7 +23,7 @@ namespace xlang::xmeta
             : m_assembly_name(assembly_name)
         { };
 
-        HRESULT initialize();
+        void initialize();
         void uninitialize();
         void saveToFile();
 
@@ -38,9 +38,14 @@ namespace xlang::xmeta
         void define_class_property(std::shared_ptr<property_model> const& model, mdTypeDef const& class_td);
         void define_class_event(std::shared_ptr<event_model> const& model, mdTypeDef const& class_td);
 
+        void define_interface_method(std::shared_ptr<method_model> const& model, mdTypeDef const& class_td);
+        void define_interface_property(std::shared_ptr<property_model> const& model, mdTypeDef const& class_td);
+        void define_interface_event(std::shared_ptr<event_model> const& model, mdTypeDef const& class_td);
+
+        void define_method_parameter(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
     private:
         std::wstring m_assembly_name;
-        IMetaDataDispenserEx *m_metadata_dispenser = nullptr;
+        winrt::com_ptr<IMetaDataDispenserEx> m_metadata_dispenser;
         IMetaDataAssemblyEmit *m_metadata_assembly_emitter = nullptr;
         IMetaDataEmit2 *m_metadata_emitter = nullptr;
         IMetaDataImport *m_metadata_import = nullptr;
@@ -76,12 +81,13 @@ namespace xlang::xmeta
         };
 
         // Windows specific methods
-        HRESULT define_assembly();
-        HRESULT define_common_reference_assembly();
+        void define_assembly();
+        void define_common_reference_assembly();
 
 
         static const DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;  // Flag: Public | Sealed | Class | AutoLayout | WindowsRuntime
-        static const DWORD c_dwStructTypeFlag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
-        static const DWORD c_dwRuntimeClassTypeFlag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
+        static const DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
+        static const DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
+        static const DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract 
     };
 }
