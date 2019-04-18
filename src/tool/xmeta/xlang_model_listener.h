@@ -13,9 +13,5 @@ namespace xlang::xmeta
         virtual void listen_interface_model(std::shared_ptr<interface_model> const& model) = 0;
         virtual void listen_enum_model(std::shared_ptr<enum_model> const& model) = 0;
         virtual void listen_delegate_model(delegate_model const& model) = 0;
-
-        virtual void listen_method_model(std::shared_ptr<method_model> const& model) = 0;
-        virtual void listen_property_model(std::shared_ptr<property_model> const& model) = 0;
-        virtual void listen_event_model(std::shared_ptr<event_model> const& model) = 0;
     };
 }

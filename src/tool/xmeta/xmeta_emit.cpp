@@ -29,7 +29,7 @@ namespace xlang::xmeta
 
 
             RETURN_IF_FAILED(m_metadata_assembly_emitter->QueryInterface(IID_IMetaDataEmit2, (void **)&m_metadata_emitter));
-
+            RETURN_IF_FAILED( m_metadata_emitter->QueryInterface(IID_IMetaDataImport, (void **)&m_metadata_import));
             // Defining the mscorlib assemblyref
             RETURN_IF_FAILED(define_assembly());
             RETURN_IF_FAILED(define_common_reference_assembly());
@@ -115,6 +115,19 @@ namespace xlang::xmeta
             mdTokenNil, // Extends (Going to be null until we find out if it is base class)
             mdTokenNil, // Extends (Going to be null until we find out if it is base class)
             &token_class_type_def);
+
+        for (auto const& val : model->get_methods())
+        {
+            define_class_method(val, token_class_type_def);
+        }
+        for (auto const& val : model->get_properties())
+        {
+            define_class_property(val, token_class_type_def);
+        }
+        for (auto const& val : model->get_events())
+        {
+            define_class_event(val, token_class_type_def);
+        }
     };
     
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) {
@@ -145,7 +158,7 @@ namespace xlang::xmeta
         LPCWSTR enum_name = s2ws(model->get_id()).c_str();
 
         mdTypeDef token_enum_type_def;
-        m_metadata_emitter->DefineTypeDef(enum_name, dw_enum_typeflag, token_enum, mdTokenNil, &token_enum_type_def);
+        m_metadata_emitter->DefineTypeDef(enum_name, enum_type_flag, token_enum, mdTokenNil, &token_enum_type_def);
         
 
         for (enum_member const& enum_member : model->get_members())
@@ -163,9 +176,69 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(delegate_model const& model) {};
 
-    void xmeta_emit::listen_method_model(std::shared_ptr<method_model> const& model) {};
-    void xmeta_emit::listen_property_model(std::shared_ptr<property_model> const& model) {};
-    void xmeta_emit::listen_event_model(std::shared_ptr<event_model> const& model) {};
+    void xmeta_emit::define_class_method(std::shared_ptr<method_model> const& model, mdTypeDef const& class_td) {
+        LPCWSTR method_name = s2ws(model->get_id()).c_str();
+
+        DWORD method_flag;
+        mdMethodDef token_method_def;
+        //m_metadata_emitter->DefineMethod(
+        //    class_td,
+        //    method_name,
+        //    ,
+        //    ,
+        //    miRuntime,
+        //    &token_method_def);
+    };
+
+    void xmeta_emit::define_class_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_class) {
+        LPCWSTR property_name = s2ws(model->get_id()).c_str();
+        std::shared_ptr<method_model> get_method_model = model->get_get_method();
+        mdMethodDef token_get_method = mdTokenNil;
+        mdMethodDef token_set_method = mdTokenNil;
+        DWORD property_flag;
+        DWORD c_plus_type_flag;
+        if (get_method_model != nullptr) //TODO: This case is not suppose to happen
+        {
+            //m_metadata_emitter->DefineMethod(
+            //    token_class,
+            //    method_name,
+            //    ,
+            //    ,
+            //    miRuntime,
+            //    &token_get_method);
+            
+        }
+        std::shared_ptr<method_model> set_method_model = model->get_set_method();
+        if (set_method_model != nullptr)
+        {
+            //m_metadata_emitter->DefineMethod(
+            //    token_class,
+            //    method_name,
+            //    ,
+            //    ,
+            //    miRuntime,
+            //    &token_set_method);
+        }
+        
+        mdProperty token_property;
+        //m_metadata_emitter->DefineProperty(
+        //    token_class,
+        //    property_name,
+        //    property_flag,
+        //    , // pvSig
+        //    , // cbsig
+        //    , // c_plus_type_flag
+        //    nullptr,
+        //    0,
+        //    token_set_method,
+        //    token_get_method,
+        //    mdTokenNil,
+        //    &token_property);
+    };
+    
+    void xmeta_emit::define_class_event(std::shared_ptr<event_model> const& model, mdTypeDef const& class_td) {
+    
+    };
 
     inline std::wstring s2ws(const std::string& as)
     {

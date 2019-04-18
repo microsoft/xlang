@@ -34,15 +34,16 @@ namespace xlang::xmeta
         void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
         void listen_delegate_model(delegate_model const& model) override;
 
-        void listen_method_model(std::shared_ptr<method_model> const& model) override;
-        void listen_property_model(std::shared_ptr<property_model> const& model) override;
-        void listen_event_model(std::shared_ptr<event_model> const& model) override;
+        void define_class_method(std::shared_ptr<method_model> const& model, mdTypeDef const& class_td);
+        void define_class_property(std::shared_ptr<property_model> const& model, mdTypeDef const& class_td);
+        void define_class_event(std::shared_ptr<event_model> const& model, mdTypeDef const& class_td);
 
     private:
         std::wstring m_assembly_name;
         IMetaDataDispenserEx *m_metadata_dispenser = nullptr;
         IMetaDataAssemblyEmit *m_metadata_assembly_emitter = nullptr;
         IMetaDataEmit2 *m_metadata_emitter = nullptr;
+        IMetaDataImport *m_metadata_import = nullptr;
 
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;
@@ -79,7 +80,7 @@ namespace xlang::xmeta
         HRESULT define_common_reference_assembly();
 
 
-        static const DWORD dw_enum_typeflag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;  // Flag: Public | Sealed | Class | AutoLayout | WindowsRuntime
+        static const DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;  // Flag: Public | Sealed | Class | AutoLayout | WindowsRuntime
         static const DWORD c_dwStructTypeFlag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         static const DWORD c_dwRuntimeClassTypeFlag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
     };
