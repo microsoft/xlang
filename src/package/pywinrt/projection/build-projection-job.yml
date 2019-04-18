@@ -60,8 +60,7 @@ jobs:
       addToPath: true 
       architecture: ${{ parameters.targetArchitecture }}
 
-   - script: pip install wheel
-     
+  - script: pip install wheel
   # - script: |
   #     _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src\package\pywinrt\projection\cppwinrt -verbose
   #   displayName: 'Generate C++/WinRT Projections'
