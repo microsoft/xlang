@@ -98,3 +98,13 @@ jobs:
     inputs:
       cwd: '.'
       cmakeArgs: '--build .\_build.projection -- -v '
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: _build.projection
+      contents: *.pyd 
+      targetFolder: src/package/pywinrt/projection/pywinrt/winrt
+
+  - script: python setup.py bdist_wheel --python-tag cp37 -p win-amd64
+    workingDirectory: src/package/pywinrt/projection/pywinrt
+    displayName: python setup.py bdist_wheel 
