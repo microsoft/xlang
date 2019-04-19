@@ -12,6 +12,8 @@ namespace
     fire_and_forget Async(DispatcherQueue queue)
     {
         co_await resume_foreground(queue);
+
+        co_await queue;
     }
 }
 
