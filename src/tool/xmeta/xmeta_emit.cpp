@@ -7,6 +7,11 @@
 
 using namespace winrt;
 
+// TODO: TypeRefEmitter
+// method impl
+// class/interface impl
+
+
 namespace xlang::xmeta
 {
     // Hard-coded the mscorlib strong name.
@@ -176,22 +181,13 @@ namespace xlang::xmeta
 
         /* Define return value */
         mdParamDef token_return; // To be used for attributes later
-        std::string return_name = type_semantics_to_string(model->get_return_type()->get_semantic());
-        check_hresult(m_metadata_emitter->DefineParam(
-            token_method_def,
-            0,  // Index Zero represents the return value.
-            s2ws(return_name).c_str(),
-            0,  // return tyes have no flag set
-            (DWORD)-1,  // Ignore dwCPlusTypeFlag
-            nullptr,    // No constant value
-            0,
-            &token_return));
+        define_return(model->get_return_type(), token_method_def, &token_return);
 
         /* Define formal parameters */
         int index = 1;
         for (auto const& val : model->get_formal_parameters())
         {
-            define_method_parameter(val, token_method_def, index);
+            define_parameters(val, token_method_def, index);
             index++;
         }
 
@@ -398,30 +394,35 @@ namespace xlang::xmeta
 
         /* Define return value */
         mdParamDef token_return; // To be used for attributes later
-        std::string return_name = type_semantics_to_string(model.get_return_type()->get_semantic());
-        check_hresult(m_metadata_emitter->DefineParam(
-            token_delegate_type_def,
-            0,  // Index Zero represents the return value.
-            s2ws(return_name).c_str(),
-            0,  // return tyes have no flag set
-            (DWORD)-1,  // Ignore dwCPlusTypeFlag
-            nullptr,    // No constant value
-            0,
-            &token_return));
+        define_return(model.get_return_type(), token_delegate_type_def, &token_return);
 
         /* Define formal parameters */
         int index = 1;
         for (auto const& val : model.get_formal_parameters())
         {
-            define_method_parameter(val, token_delegate_type_def, index);
+            define_parameters(val, token_delegate_type_def, index);
             index++;
         }
 
 
     }
 
+    void xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return)
+    {
+        /* Define return value */
+        std::string return_name = type_semantics_to_string(retun_type->get_semantic());
+        check_hresult(m_metadata_emitter->DefineParam(
+            type_def,
+            0,  // Index Zero represents the return value.
+            s2ws(return_name).c_str(),
+            0,  // return tyes have no flag set
+            (DWORD)-1,  // Ignore dwCPlusTypeFlag
+            nullptr,    // No constant value
+            0,
+            token_return));
+    }
 
-    void xmeta_emit::define_method_parameter(formal_parameter_model const& model, mdMethodDef const& token_method_def, int parameter_index)
+    void xmeta_emit::define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method_def, int parameter_index)
     {
         LPCWSTR param_name = s2ws(model.get_id()).c_str();
 

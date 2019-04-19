@@ -39,7 +39,8 @@ namespace xlang::xmeta
         void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
         void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
 
-        void define_method_parameter(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
+        void define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return);
+        void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
     private:
         std::string m_assembly_name;
         winrt::com_ptr<IMetaDataDispenserEx> m_metadata_dispenser;
