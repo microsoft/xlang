@@ -34,6 +34,7 @@ namespace xlang::xmeta
         void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
         void listen_delegate_model(delegate_model const& model) override;
 
+        void define_type_def(std::string name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[], mdTypeDef *token_typedef);
         void define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def);
         void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
         void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
@@ -45,6 +46,7 @@ namespace xlang::xmeta
         winrt::com_ptr<IMetaDataAssemblyEmit> m_metadata_assembly_emitter = nullptr;
         winrt::com_ptr<IMetaDataEmit2> m_metadata_emitter = nullptr;
         winrt::com_ptr<IMetaDataImport> m_metadata_import = nullptr;
+        std::map<std::string, mdTypeRef> type_references;
 
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;

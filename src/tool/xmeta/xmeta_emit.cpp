@@ -96,6 +96,24 @@ namespace xlang::xmeta
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.MulticastDelegate", &token_delegate));
     }
 
+    void xmeta_emit::define_type_def(std::string name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[], mdTypeDef *token_typedef)
+    {
+        LPCWSTR wname = s2ws(name).c_str();
+        check_hresult(m_metadata_emitter->DefineTypeDef(
+            wname,
+            type_flag,
+            token_extend, 
+            token_implements,
+            token_typedef));
+
+        mdModule token_current_module;
+        check_hresult(m_metadata_import->GetModuleFromScope(&token_current_module));
+
+        mdTypeRef token_typeref;
+        check_hresult(m_metadata_emitter->DefineTypeRefByName(token_current_module, wname, &token_typeref));
+        type_references.insert(std::make_pair(name, token_typeref));
+    }
+
 
     void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& model) {};
     
@@ -104,7 +122,7 @@ namespace xlang::xmeta
         mdTypeDef token_class_type_def = mdTokenNil;
         mdTypeRef token_local_type_ref = mdTokenNil;
 
-        LPCWSTR class_name = s2ws(model->get_id()).c_str();
+        std::string class_name = model->get_id();
         DWORD type_flag = runtimeclass_type_flag;
         // MIDL3 will disable certain flags depending on these conditions
         //if (pRuntimeClass->IsComposable())
@@ -119,12 +137,12 @@ namespace xlang::xmeta
         //    type_flag = dwTypeFlag | tdAbstract;
         //}
 
-        check_hresult(m_metadata_emitter->DefineTypeDef(
+        define_type_def(
             class_name,
             type_flag,
             mdTokenNil, // Extends (Going to be null until we find out if it is base class)
             mdTokenNil, // Extends (Going to be null until we find out if it is base class)
-            &token_class_type_def));
+            &token_class_type_def);
 
         // TODO: Class base and interface implements
 
@@ -301,9 +319,8 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        LPCWSTR struct_name = s2ws(model->get_id()).c_str();
         mdTypeDef token_struct_type_def;
-        check_hresult(m_metadata_emitter->DefineTypeDef(struct_name, struct_type_flag, token_value_type, mdTokenNil, &token_struct_type_def));
+        define_type_def(model->get_id(), struct_type_flag, token_value_type, mdTokenNil, &token_struct_type_def);
 
         for (std::pair<type_ref, std::string> const& field : model->get_fields())
         {
@@ -327,8 +344,6 @@ namespace xlang::xmeta
         mdTypeDef token_interface_type_def = mdTokenNil;
         mdTypeRef token_local_type_ref = mdTokenNil;
 
-        LPCWSTR interface_name = s2ws(model->get_id()).c_str();
-
         DWORD type_flag = interface_type_flag;
         //if (pInterface->HasExclusiveToAttribute())
         //{
@@ -337,12 +352,12 @@ namespace xlang::xmeta
         //    type_flag |= tdNotPublic;
         //}
 
-        check_hresult(m_metadata_emitter->DefineTypeDef(
-            interface_name,
+        define_type_def(
+            model->get_id(),
             type_flag,
             mdTokenNil, // Extends (Going to be null until we find out if it is base class)
             mdTokenNil, // Extends (Going to be null until we find out if it is base class)
-            &token_interface_type_def));
+            &token_interface_type_def);
 
         for (auto const& val : model->get_methods())
         {
@@ -360,11 +375,8 @@ namespace xlang::xmeta
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
-        LPCWSTR enum_name = s2ws(model->get_id()).c_str();
-
         mdTypeDef token_enum_type_def;
-        check_hresult(m_metadata_emitter->DefineTypeDef(enum_name, enum_type_flag, 
-                                                    token_enum, mdTokenNil, &token_enum_type_def));
+        define_type_def(model->get_id(), enum_type_flag, token_enum, mdTokenNil, &token_enum_type_def);
         
 
         for (enum_member const& enum_member : model->get_members())
@@ -381,11 +393,8 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(delegate_model const& model) 
     {
-        LPCWSTR enum_name = s2ws(model.get_id()).c_str();
-
         mdTypeDef token_delegate_type_def;
-        check_hresult(m_metadata_emitter->DefineTypeDef(enum_name, delegate_type_flag,
-                                                    token_delegate, mdTokenNil, &token_delegate_type_def));
+        define_type_def(model.get_id(), delegate_type_flag, token_delegate, mdTokenNil, &token_delegate_type_def);
 
         /* Define return value */
         mdParamDef token_return; // To be used for attributes later
