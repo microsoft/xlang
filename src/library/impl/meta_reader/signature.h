@@ -58,6 +58,81 @@ namespace xlang::meta::reader
         return result;
     }
 
+    template <typename Iter>
+    Iter compress_unsigned(uint32_t value, Iter iter)
+    {
+        if (value <= 0x7f)
+        {
+            *iter++ = static_cast<uint8_t>(value);
+        }
+        else if (value <= 0x3fff)
+        {
+            *iter++ = static_cast<uint8_t>((value >> 8) | 0x80);
+            *iter++ = static_cast<uint8_t>(value & 0xff);
+        }
+        else if (value <= 0x1fffffff)
+        {
+            *iter++ = static_cast<uint8_t>((value >> 24) | 0xc0);
+            *iter++ = static_cast<uint8_t>((value >> 16) & 0xff);
+            *iter++ = static_cast<uint8_t>((value >> 8) & 0xff);
+            *iter++ = static_cast<uint8_t>(value & 0xff);
+        }
+        else
+        {
+            throw_invalid("Attempted to compress an out of range integer");
+        }
+        return iter;
+    }
+
+    struct byte_blob
+    {
+        void add_compressed_unsigned(uint32_t value)
+        {
+            compress_unsigned(value, std::back_inserter(m_data));
+        }
+
+        template <typename T>
+        void add_compressed_enum(T value)
+        {
+            static_assert(std::is_enum_v<T> && std::is_unsigned_v<T>);
+            add_compressed_unsigned(static_cast<std::underlying_type_t<T>>(value));
+        }
+
+        void add_null_string()
+        {
+            m_data.push_back(0xff);
+        }
+
+        void add_string(std::string_view value)
+        {
+            add_compressed_unsigned(static_cast<uint32_t>(value.size()));
+            m_data.insert(m_data.end(), value.begin(), value.end());
+        }
+
+        template <typename T>
+        void add_uncompressed(T value)
+        {
+            static_assert(std::is_arithmetic_v<T>);
+            if constexpr (std::is_same_v<bool, std::decay_t<T>>)
+            {
+                m_data.push_back(value ? 1 : 0);
+            }
+            else
+            {
+                static_assert(sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8);
+                auto ptr = reinterpret_cast<uint8_t const*>(&value);
+                m_data.insert(m_data.end(), value, value + sizeof(T));
+            }
+        }
+
+        void add_type_ref(coded_index<TypeDefOrRef> const& value)
+        {
+            add_uncompressed(value.raw_value());
+        }
+
+        std::vector<uint8_t> m_data;
+    };
+
     struct CustomModSig;
     struct FieldSig;
     struct GenericTypeInstSig;
@@ -67,6 +142,9 @@ namespace xlang::meta::reader
     struct RetTypeSig;
     struct TypeSig;
     struct TypeSpecSig;
+
+    struct construct_signature_t {};
+    inline constexpr construct_signature_t construct_signature;
 
     struct CustomModSig
     {
