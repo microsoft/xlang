@@ -42,6 +42,12 @@ namespace winrt::impl
             return m_values;
         }
 
+#ifdef _DEBUG
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
+
     private:
 
         Container const& m_values;

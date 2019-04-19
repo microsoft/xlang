@@ -42,6 +42,12 @@ namespace winrt::impl
             return range_container<InputIt>{ m_begin, m_end };
         }
 
+#ifdef _DEBUG
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
+
     private:
 
         InputIt const m_begin;

@@ -1174,20 +1174,20 @@ namespace winrt::impl
         friend struct impl::produce;
     };
 
-#pragma warning(push)
-#pragma warning(disable:4624) // destructor was implicitly defined as deleted
+//#pragma warning(push)
+//#pragma warning(disable:4624) // destructor was implicitly defined as deleted
     template <typename T>
     struct heap_implements final : T
     {
         using T::T;
 
 #ifdef _DEBUG
-        void use__make__function_to_create_this_object() final
+        void use_make_function_to_create_this_object() final
         {
         }
 #endif
     };
-#pragma warning(pop)
+//#pragma warning(pop)
 
 
     template <typename D>
@@ -1285,7 +1285,7 @@ namespace winrt
 
 #ifdef _DEBUG
         // Please use winrt::make<T>(args...) to avoid allocating a C++/WinRT implementation type on the stack.
-        virtual void use__make__function_to_create_this_object() = 0;
+        virtual void use_make_function_to_create_this_object() = 0;
 #endif
 
         weak_ref<D> get_weak()

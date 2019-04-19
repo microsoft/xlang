@@ -395,7 +395,7 @@ namespace winrt::impl
         }
 
 #ifdef _DEBUG
-        void use__make__function_to_create_this_object() final
+        void use_make_function_to_create_this_object() final
         {
         }
 #endif
