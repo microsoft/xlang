@@ -210,6 +210,7 @@
     <ClCompile Include="async_throw.cpp" />
     <ClCompile Include="capture.cpp" />
     <ClCompile Include="cmd_reader.cpp" />
+    <ClCompile Include="coro_base.cpp" />
     <ClCompile Include="custom_error.cpp" />
     <ClCompile Include="delegates.cpp" />
     <ClCompile Include="enum.cpp" />

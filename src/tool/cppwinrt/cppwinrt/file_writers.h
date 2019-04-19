@@ -51,11 +51,12 @@ namespace xlang
         write_open_file_guard(w, "COROUTINE");
 
         w.write(R"(
-#pragma message("Note: this header is deprecated and will be removed in a future update. Please directly include the namespace headers you need.")
-
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.System.h"
 #include "winrt/Windows.UI.Core.h"
+
+#pragma message (__FILE__ "(" WINRT_IMPL_STRING(__LINE__) "): This header is deprecated and will be removed in a future update. Please directly include the namespace headers you need.")
+
 )");
 
         write_close_file_guard(w);
