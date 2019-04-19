@@ -49,9 +49,7 @@ jobs:
         buildConfiguration: 'Release'
 
   variables:
-    cppwinrtDir : $(build.artifactStagingDirectory)\cppwinrt
-    pywinrtDir : $(build.artifactStagingDirectory)\pywinrt
-    publishDir : $(Build.ArtifactStagingDirectory)\$(buildArchitecture)-$(buildConfiguration)
+    pywinrtDir : $(build.artifactStagingDirectory)/pywinrt
 
   steps:
   - task: DownloadBuildArtifacts@0 
@@ -61,7 +59,7 @@ jobs:
       artifactName: 'pywinrt'
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-  - script: $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+  - script: $(pywinrtDir)/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate Python/WinRT Projection'
 
   # 333b11bd-d341-40d9-afcf-b32d5ce6f23b is the task guid for NuGetCommand (https://github.com/Microsoft/azure-pipelines-tasks/tree/master/Tasks/NuGetCommandV2)
@@ -102,29 +100,6 @@ jobs:
       contents: '*.pyd'
       targetFolder: src/package/pywinrt/projection/pywinrt/winrt
       
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: 'src/package/pywinrt/projection/pywinrt/'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/archive/$(Build.BuildId).zip'
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish artifact: pyd'
-    inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/archive
-      artifactName: archive
-
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: _build
-      contents: '*.pyd'
-      targetFolder: $(Build.ArtifactStagingDirectory)/pyd/$(buildArchitecture)
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish artifact: pyd'
-    inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/pyd
-      artifactName: pyd
-
   - script: pip install wheel
     displayName: pip install wheel
 
@@ -134,13 +109,13 @@ jobs:
 
   - task: CopyFiles@2
     inputs:
-      sourceFolder: src/package/pywinrt/projection/pywinrt/dist
+      sourceFolder: src/package/pywinrt/projection/pywinrt/wheel
       contents: '*'
-      targetFolder: $(Build.ArtifactStagingDirectory)/dist
+      targetFolder: $(Build.ArtifactStagingDirectory)/wheel
 
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish artifact: winrt-wheel'
+    displayName: 'Publish artifact: wheel'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/dist
-      artifactName: winrt-wheel
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/wheel
+      artifactName: wheel
 
