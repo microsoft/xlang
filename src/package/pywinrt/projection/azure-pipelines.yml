@@ -109,7 +109,7 @@ jobs:
 
   - task: CopyFiles@2
     inputs:
-      sourceFolder: src/package/pywinrt/projection/pywinrt/wheel
+      sourceFolder: src/package/pywinrt/projection/pywinrt/dist
       contents: '*'
       targetFolder: $(Build.ArtifactStagingDirectory)/wheel
 
