@@ -21,7 +21,7 @@ jobs:
       architecture: $(buildArchitecture)  
       pythonVersionSpec: '3.7.x'
 
-- template: AzurePipelinesTemplates/job-package-projection.yml
+- template: AzurePipelinesTemplates/job-sign-projection.yml
   parameters:
     dependsOn: 'build_projection'
     downloadArtifactName: 'projection'
