@@ -37,7 +37,7 @@ add_custom_command(TARGET test_xmeta POST_BUILD
     $<TARGET_FILE_DIR:test_xmeta>/midl3test)
 
 target_sources(test_xmeta
-    PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp)
+    PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp testxmetaemit.cpp)
 
 target_include_directories(test_xmeta
     PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)

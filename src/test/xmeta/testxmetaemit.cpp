@@ -1,24 +1,19 @@
+#include "pch.h"
 #include <iostream>
+#include <string>
+#include <filesystem>
 
 #include "antlr4-runtime.h"
 #include "XlangParser.h"
 #include "XlangLexer.h"
+#include "xlang_test_listener.h"
+#include <Windows.h>
 
-#include "xlang_model_walker.h"
-#include "xmeta_emit.h"
-#include "xmeta_models.h"
-#include <windows.h>
-#include <mscoree.h>
-#include <cor.h>
-#include <winrt/base.h>
+using namespace antlr4;
 
 #pragma execution_character_set("utf-8")
 
-using namespace antlr4;
-using namespace winrt;
-
-int main(int argc, const char * argv[]) {
-
+TEST_CASE("Enum metadata") {
     //std::ifstream stream;
     //printf("Opening %s \n", argv[1]);
     //stream.open(argv[1]);
