@@ -88,10 +88,36 @@ jobs:
     displayName: 'Generate python projection build files via cmake'
     inputs:
       cwd: '.'
-      cmakeArgs: '-S src/package/pywinrt/projection -B_buildProj -GNinja -DCMAKE_BUILD_TYPE=$(buildConfiguration) -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl'
+      cmakeArgs: '-S src/package/pywinrt/projection -B_build -GNinja -DCMAKE_BUILD_TYPE=$(buildConfiguration) -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl'
 
   - task: CMake@1
     displayName: 'build python projection'
     inputs:
       cwd: '.'
-      cmakeArgs: '--build .\_buildProj -- -v'
+      cmakeArgs: '--build .\_build -- -v'
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: _build
+      contents: '*.pyd'
+      targetFolder: src/package/pywinrt/projection/pywinrt/winrt
+
+  - script: pip install wheel
+    displayName: pip install wheel
+
+  - script: python setup.py bdist_wheel --python-tag cp37 -p win-${{ parameters.targetArchitecture }}
+    workingDirectory: src/package/pywinrt/projection/pywinrt
+    displayName: python setup.py bdist_wheel 
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: src/package/pywinrt/projection/pywinrt/dist
+      contents: '*'
+      targetFolder: (Build.ArtifactStagingDirectory)/dist
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: winrt-wheel'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/dist
+      artifactName: winrt-wheel
+
