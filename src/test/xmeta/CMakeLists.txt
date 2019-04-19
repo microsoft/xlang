@@ -37,7 +37,7 @@ add_custom_command(TARGET test_xmeta POST_BUILD
     $<TARGET_FILE_DIR:test_xmeta>/midl3test)
 
 target_sources(test_xmeta
-    PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp)
+    PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp test_symbol_table.cpp)
 
 target_include_directories(test_xmeta
     PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
@@ -47,13 +47,15 @@ if (MSVC)
     target_link_libraries(test_xmeta windowsapp ole32)
 endif()
 
-set(xmeta_gen_generated
+ set(xmeta_cpp
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangLexer.cpp
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangParser.cpp
     ${CMAKE_SOURCE_DIR}/test/xmeta/xlang_test_listener.cpp
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/ast_to_st_listener.cpp
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/symbol_table.cpp
  )
 
-target_sources(test_xmeta PUBLIC main.cpp ${xmeta_gen_generated})
+target_sources(test_xmeta PUBLIC main.cpp ${xmeta_cpp})
 
 # https://stackoverflow.com/questions/35310117/debug-assertion-failed-expression-acrt-first-block-header
 # Temporary measure
@@ -63,4 +65,3 @@ install(TARGETS test_xmeta DESTINATION "test/xmeta")
 if (WIN32)
     install(FILES $<TARGET_PDB_FILE:test_xmeta> DESTINATION "test/xmeta" OPTIONAL)
 endif ()
-

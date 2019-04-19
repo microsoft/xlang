@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert>
+#include <assert.h>
 #include <memory>
 #include <string>
 #include <variant>
@@ -14,6 +14,7 @@ namespace xlang::xmeta
     struct model_ref
     {
         model_ref() = delete;
+        model_ref& operator=(model_ref const& other) = default;
         explicit model_ref(std::string_view const& name) :
             m_ref{ std::string(name) }
         { }

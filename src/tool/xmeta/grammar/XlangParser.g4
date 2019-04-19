@@ -10,7 +10,7 @@ xlang
 compilation_unit
     : using_directive* namespace_declaration*
     ;
-    
+
 /* Basic Concepts */
 namespace_name
     : namespace_or_type_name
@@ -188,11 +188,11 @@ namespace_member_declaration
 qualified_alias_member
     : IDENTIFIER DOUBLE_COLON IDENTIFIER type_argument_list?
     ;
-    
+
 apicontract_declaration
     : attributes? APICONTRACT IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
     ;
-    
+
 //* Class members *//
 attribute_declaration
     : attributes? ATTRIBUTE IDENTIFIER
@@ -226,11 +226,11 @@ class_base
 /* TODO: Determine whether class_type_base and interface_type_base should exist
  The only difference between class_type_base and interface_type_base is that
  class_type base can be Object or NULL which doesn't make sense in terms of inheritance.
- 
- You can't really inherit from NULL. We can just remove this part of the grammar 
- and have it referto just type_name. 
- Let the semantic checking do the work of determining whether it is a class type or 
- interface type.  
+
+ You can't really inherit from NULL. We can just remove this part of the grammar
+ and have it referto just type_name.
+ Let the semantic checking do the work of determining whether it is a class type or
+ interface type.
 */
 class_type_base
     : attributes? class_type
@@ -239,7 +239,7 @@ class_type_base
 interface_type_list
     : interface_type_base (COMMA interface_type_base)*
     ;
-    
+
 interface_type_base
     : attributes? type_name
     ;
@@ -252,7 +252,7 @@ class_member_declarations
     : attributes OPEN_BRACE class_member_declaration* CLOSE_BRACE
     | class_member_declaration
     ;
-    
+
 class_member_declaration
     : class_method_declaration
     | class_property_declaration
@@ -346,7 +346,7 @@ event_accessors
 class_constructor_modifier
     : PROTECTED
     ;
-    
+
 /* Structs */
 struct_declaration
     : attributes? STRUCT IDENTIFIER type_parameter_list?
@@ -388,15 +388,15 @@ interface_method_declaration
 interface_property_declaration
     : attributes? type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
     ;
-    
+
 interface_event_declaration
     : attributes? EVENT type IDENTIFIER SEMICOLON
     | attributes? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
-    
+
 /* Enums */
 enum_declaration
-    : attributes? enum_modifier* ENUM IDENTIFIER enum_base? enum_body SEMICOLON?
+    : attributes? ENUM IDENTIFIER enum_base? enum_body SEMICOLON?
     ;
 
 enum_base
@@ -408,23 +408,19 @@ enum_body
     | OPEN_BRACE enum_member_declaration (COMMA enum_member_declaration)* COMMA? CLOSE_BRACE
     ;
 
-enum_modifier
-    : PUBLIC
-    ;
-
 enum_member_declaration
     : attributes? enum_identifier
     | attributes? enum_identifier EQUAL enum_expression
     ;
 
-enum_expression 
+enum_expression
     : enum_decimal_integer
     | enum_hexdecimal_integer
     | enum_expresssion_identifier;
 
 enum_decimal_integer
     : MINUS? DECIMAL_INTEGER_LITERAL;
-    
+
 enum_expresssion_identifier
     : IDENTIFIER;
 
