@@ -126,28 +126,30 @@ namespace xlang::xmeta
             mdTokenNil, // Extends (Going to be null until we find out if it is base class)
             &token_class_type_def));
 
+        // TODO: Class base and interface implements
+
         for (auto const& val : model->get_methods())
         {
-            define_class_method(val, token_class_type_def);
+            define_method(val, token_class_type_def);
         }
         for (auto const& val : model->get_properties())
         {
-            define_class_property(val, token_class_type_def);
+            define_property(val, token_class_type_def);
         }
         for (auto const& val : model->get_events())
         {
-            define_class_event(val, token_class_type_def);
+            define_event(val, token_class_type_def);
         }
     }
 
-    void xmeta_emit::define_class_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_class_def) 
+    void xmeta_emit::define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def) 
     {
         LPCWSTR method_name = s2ws(model->get_id()).c_str();
 
         DWORD method_flag;
         mdMethodDef token_method_def;
         //m_metadata_emitter->DefineMethod(
-        //    token_class_def,
+        //    token_def,
         //    method_name,
         //    ,
         //    ,
@@ -177,7 +179,7 @@ namespace xlang::xmeta
 
     }
 
-    void xmeta_emit::define_class_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_class_def) 
+    void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def) 
     {
         LPCWSTR property_name = s2ws(model->get_id()).c_str();
         
@@ -193,7 +195,7 @@ namespace xlang::xmeta
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
             m_metadata_emitter->DefineMethod(
-                token_class_def,
+                token_def,
                 get_method_name,
                 property_flag,
                 pv_sig_blob,
@@ -201,8 +203,8 @@ namespace xlang::xmeta
                 miRuntime,
                 impl_flag,
                 &token_get_method);
-
         }
+
         std::shared_ptr<method_model> set_method_model = model->get_set_method();
         if (set_method_model != nullptr)
         {
@@ -211,7 +213,7 @@ namespace xlang::xmeta
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
             m_metadata_emitter->DefineMethod(
-                token_class_def,
+                token_def,
                 set_method_name,
                 property_flag,
                 pv_sig_blob,
@@ -237,7 +239,7 @@ namespace xlang::xmeta
         //    &token_property);
     }
 
-    void xmeta_emit::define_class_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_class_def)
+    void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def)
     {
         LPCWSTR event_name = s2ws(model->get_id()).c_str();
 
@@ -246,21 +248,21 @@ namespace xlang::xmeta
         DWORD event_flag = 0;
         DWORD c_plus_type_flag;
         std::shared_ptr<method_model> add_method_model = model->get_add_method();
-        if (add_method_model != nullptr) //TODO: This case is not suppose to happen
+        if (add_method_model != nullptr) 
         {
             LPCWSTR get_method_name = s2ws(add_method_model->get_id()).c_str();
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
-            m_metadata_emitter->DefineMethod(
-                token_class_def,
+            check_hresult(m_metadata_emitter->DefineMethod(
+                token_def,
                 get_method_name,
                 event_flag,
                 pv_sig_blob,
                 cb_sig_blob,
                 miRuntime,
                 impl_flag,
-                &token_add_method);
+                &token_add_method));
 
         }
         std::shared_ptr<method_model> remove_method_model = model->get_remove_method();
@@ -271,7 +273,7 @@ namespace xlang::xmeta
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
             m_metadata_emitter->DefineMethod(
-                token_class_def,
+                token_def,
                 set_method_name,
                 event_flag,
                 pv_sig_blob,
@@ -344,30 +346,16 @@ namespace xlang::xmeta
 
         for (auto const& val : model->get_methods())
         {
-            define_interface_method(val, token_interface_type_def);
+            define_method(val, token_interface_type_def);
         }
         for (auto const& val : model->get_properties())
         {
-            define_interface_property(val, token_interface_type_def);
+            define_property(val, token_interface_type_def);
         }
         for (auto const& val : model->get_events())
         {
-            define_interface_event(val, token_interface_type_def);
+            define_event(val, token_interface_type_def);
         }
-    }
-
-
-    void xmeta_emit::define_interface_method(std::shared_ptr<method_model> const& model, mdTypeDef const& class_td)
-    {
-    }
-
-    void xmeta_emit::define_interface_property(std::shared_ptr<property_model> const& model, mdTypeDef const& class_td)
-    {
-    }
-
-    void xmeta_emit::define_interface_event(std::shared_ptr<event_model> const& model, mdTypeDef const& class_td)
-    {
-
     }
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 

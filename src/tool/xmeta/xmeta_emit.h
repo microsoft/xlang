@@ -34,13 +34,9 @@ namespace xlang::xmeta
         void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
         void listen_delegate_model(delegate_model const& model) override;
 
-        void define_class_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_class_def);
-        void define_class_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_class_def);
-        void define_class_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_class_def);
-
-        void define_interface_method(std::shared_ptr<method_model> const& model, mdTypeDef const& class_td);
-        void define_interface_property(std::shared_ptr<property_model> const& model, mdTypeDef const& class_td);
-        void define_interface_event(std::shared_ptr<event_model> const& model, mdTypeDef const& class_td);
+        void define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def);
+        void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
+        void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
 
         void define_method_parameter(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
     private:
