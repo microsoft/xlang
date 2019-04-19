@@ -4,5 +4,4 @@ using namespace winrt;
 
 TEST_CASE("scratch")
 {
-    InitializeThreadpoolEnvironment
 }
