@@ -113,7 +113,7 @@ jobs:
     inputs:
       sourceFolder: src/package/pywinrt/projection/pywinrt/dist
       contents: '*'
-      targetFolder: (Build.ArtifactStagingDirectory)/dist
+      targetFolder: $(Build.ArtifactStagingDirectory)/dist
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: winrt-wheel'
