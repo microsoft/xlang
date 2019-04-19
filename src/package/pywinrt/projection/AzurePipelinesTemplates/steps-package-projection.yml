@@ -11,7 +11,7 @@ steps:
 
 - script: python setup.py bdist_wheel --python-tag cp37 -p win-${{ parameters.architecture }}
   workingDirectory: _projection/${{ parameters.architecture }}/pywinrt
-  displayName: python setup.py bdist_wheel 
+  displayName: python setup.py bdist_wheel (${{ parameters.architecture }})
 
 - task: CopyFiles@2
   inputs:
