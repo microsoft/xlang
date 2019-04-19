@@ -62,7 +62,7 @@ jobs:
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
 - script: '$(Build.ArtifactStagingDirectory)'/pywinrt.exe -input 10.0.17763.0 -output $(Build.ArtifactStagingDirectory)\pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
-    displayName: 'Generate Python/WinRT Projection'
+  displayName: 'Generate Python/WinRT Projection'
 
   # 333b11bd-d341-40d9-afcf-b32d5ce6f23b is the task guid for NuGetCommand (https://github.com/Microsoft/azure-pipelines-tasks/tree/master/Tasks/NuGetCommandV2)
   # microsoft.visualstudio.com has a conflicting "NuGetCommand", so use task guid to disambiguate
