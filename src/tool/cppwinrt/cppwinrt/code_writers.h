@@ -3046,7 +3046,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 w.write(strings::base_reference_produce);
             }
 
-            w.write(strings::base_async);
+            w.write(strings::base_coroutine_foundation);
         }
         else if (namespace_name == "Windows.Foundation.Collections")
         {
@@ -3059,6 +3059,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             w.write(strings::base_collections_input_map);
             w.write(strings::base_collections_vector);
             w.write(strings::base_collections_map);
+        }
+        else if (namespace_name == "Windows.System")
+        {
+            w.write(strings::base_coroutine_system);
+        }
+        else if (namespace_name == "Windows.UI.Core")
+        {
+            w.write(strings::base_coroutine_ui_core);
         }
         else if (namespace_name == "Windows.UI.Xaml.Interop")
         {

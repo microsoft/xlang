@@ -36,7 +36,7 @@ namespace xlang
         w.write(strings::base_chrono);
         w.write(strings::base_security);
         w.write(strings::base_std_hash);
-        w.write(strings::base_reflect);
+        w.write(strings::base_coroutine_threadpool);
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
@@ -51,19 +51,12 @@ namespace xlang
         write_open_file_guard(w, "COROUTINE");
 
         w.write(R"(
-#include <experimental/coroutine>
+#pragma message("Note: this header is deprecated and will be removed in a future update. Please directly include the namespace headers you need.")
+
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.System.h"
 #include "winrt/Windows.UI.Core.h"
 )");
-
-        w.write(strings::base_coroutine);
-        w.write(strings::base_coroutine_resume);
-        w.write(strings::base_coroutine_action);
-        w.write(strings::base_coroutine_action_with_progress);
-        w.write(strings::base_coroutine_operation);
-        w.write(strings::base_coroutine_operation_with_progress);
-        w.write(strings::base_coroutine_fire_and_forget);
 
         write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + "winrt/coroutine.h");
