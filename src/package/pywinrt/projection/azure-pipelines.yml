@@ -61,8 +61,8 @@ jobs:
       artifactName: 'pywinrt'
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-- script: '$(Build.ArtifactStagingDirectory)'/pywinrt.exe -input 10.0.17763.0 -output $(Build.ArtifactStagingDirectory)\pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
-  displayName: 'Generate Python/WinRT Projection'
+  - script: $(Build.ArtifactStagingDirectory)/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+    displayName: 'Generate Python/WinRT Projection'
 
   # 333b11bd-d341-40d9-afcf-b32d5ce6f23b is the task guid for NuGetCommand (https://github.com/Microsoft/azure-pipelines-tasks/tree/master/Tasks/NuGetCommandV2)
   # microsoft.visualstudio.com has a conflicting "NuGetCommand", so use task guid to disambiguate
@@ -72,7 +72,7 @@ jobs:
       command: custom
       arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
 
-  - script: _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output $(Build.ArtifactStagingDirectory)\cppwinrt -verbose
+  - script: _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/cppwinrt -verbose
     displayName: 'Generate C++/WinRT Projections'
 
   - template: vsdevcmd.yml
@@ -83,16 +83,6 @@ jobs:
     parameters:
       architecture: $(buildArchitecture)  
       versionSpec: '3.7.x'
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: $(cppwinrtDir)
-      contents: '*.pyd'
-      targetFolder: src/package/pywinrt/projection/pywinrt/
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: $(pywinrtDir)
-      contents: '*.pyd'
-      targetFolder: src/package/pywinrt/projection/cppwinrt/
 
   - task: CMake@1
     displayName: 'Generate python projection build files via cmake'
