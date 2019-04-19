@@ -194,7 +194,7 @@ namespace xlang::xmeta
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
-            m_metadata_emitter->DefineMethod(
+            check_hresult(m_metadata_emitter->DefineMethod(
                 token_def,
                 get_method_name,
                 property_flag,
@@ -202,7 +202,7 @@ namespace xlang::xmeta
                 cb_sig_blob,
                 miRuntime,
                 impl_flag,
-                &token_get_method);
+                &token_get_method));
         }
 
         std::shared_ptr<method_model> set_method_model = model->get_set_method();
@@ -212,7 +212,7 @@ namespace xlang::xmeta
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
-            m_metadata_emitter->DefineMethod(
+            check_hresult(m_metadata_emitter->DefineMethod(
                 token_def,
                 set_method_name,
                 property_flag,
@@ -220,7 +220,7 @@ namespace xlang::xmeta
                 cb_sig_blob,
                 miRuntime,
                 impl_flag,
-                &token_set_method);
+                &token_set_method));
         }
 
         mdProperty token_property;
@@ -272,7 +272,7 @@ namespace xlang::xmeta
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
-            m_metadata_emitter->DefineMethod(
+            check_hresult(m_metadata_emitter->DefineMethod(
                 token_def,
                 set_method_name,
                 event_flag,
@@ -280,7 +280,7 @@ namespace xlang::xmeta
                 cb_sig_blob,
                 miRuntime,
                 impl_flag,
-                &token_remove_method);
+                &token_remove_method));
         }
 
         mdProperty token_event;
