@@ -100,7 +100,8 @@ jobs:
     inputs:
       sourceFolder: _build
       contents: '*.pyd'
-      targetFolder: 
+      targetFolder: src/package/pywinrt/projection/pywinrt/winrt
+      
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: 'src/package/pywinrt/projection/pywinrt/'
