@@ -100,7 +100,17 @@ jobs:
     inputs:
       sourceFolder: _build
       contents: '*.pyd'
-      targetFolder: src/package/pywinrt/projection/pywinrt/winrt
+      targetFolder: 
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'src/package/pywinrt/projection/pywinrt/'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/archive/$(Build.BuildId).zip'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: pyd'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/archive
+      artifactName: archive
 
   - task: CopyFiles@2
     inputs:
