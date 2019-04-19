@@ -7,7 +7,7 @@ jobs:
 - job: sign_projection
   dependsOn: ${{ parameters.dependsOn }}
   pool:
-    vmImage: 'windows-2019'
+    vmImage: Package ES Lab E
   steps:
   - task: DownloadBuildArtifacts@0 
     displayName: 'Download artifact: ${{ parameters.downloadArtifactName }}'

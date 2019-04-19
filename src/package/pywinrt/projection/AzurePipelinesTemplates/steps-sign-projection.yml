@@ -11,7 +11,12 @@ steps:
     destinationFolder: _projection/${{ parameters.architecture }}
     cleanDestinationFolder: true 
 
-# TODO: sign the dll
+ - task: PkgESCodeSign@10
+    displayName: CodeSign
+    inputs:
+      signConfigXml: '$(Build.SourcesDirectory)/src/package/pywinrt/projection/SignConfig.xml'
+      inPathRoot: '_projection/${{ parameters.architecture }}/pywinrt/winrt'
+      outPathRoot: '_projection/${{ parameters.architecture }}/pywinrt/winrt'
 
 - task: ArchiveFiles@2
   inputs:
