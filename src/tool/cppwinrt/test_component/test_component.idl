@@ -65,42 +65,49 @@ namespace test_component
         String InStringable(Windows.Foundation.IStringable value);
         String InStruct(Struct value);
         String InStructRef(ref const Struct value);
+        String InEnum(Signed value);
 
         void OutInt32(out Int32 value);
         void OutString(out String value);
         void OutObject(out Object value);
         void OutStringable(out Windows.Foundation.IStringable value);
         void OutStruct(out Struct value);
+        void OutEnum(out Signed value);
 
         Int32 ReturnInt32();
         String ReturnString();
         Object ReturnObject();
         Windows.Foundation.IStringable ReturnStringable();
         Struct ReturnStruct();
+        Signed ReturnEnum();
 
         String InInt32Array(Int32[] value);
         String InStringArray(String[] value);
         String InObjectArray(Object[] value);
         String InStringableArray(Windows.Foundation.IStringable[] value);
         String InStructArray(Struct[] value);
+        String InEnumArray(Signed[] value);
 
         void OutInt32Array(out Int32[] value);
         void OutStringArray(out String[] value);
         void OutObjectArray(out Object[] value);
         void OutStringableArray(out Windows.Foundation.IStringable[] value);
         void OutStructArray(out Struct[] value);
+        void OutEnumArray(out Signed[] value);
 
         void RefInt32Array(ref Int32[] value);
         void RefStringArray(ref String[] value);
         void RefObjectArray(ref Object[] value);
         void RefStringableArray(ref Windows.Foundation.IStringable[] value);
         void RefStructArray(ref Struct[] value);
+        void RefEnumArray(ref Signed[] value);
 
         Int32[] ReturnInt32Array();
         String[] ReturnStringArray();
         Object[] ReturnObjectArray();
         Windows.Foundation.IStringable[] ReturnStringableArray();
         Struct[] ReturnStructArray();
+        Signed[] ReturnEnumArray();
 
         [noexcept] void NoexceptVoid();
         [noexcept] Int32 NoexceptInt32();

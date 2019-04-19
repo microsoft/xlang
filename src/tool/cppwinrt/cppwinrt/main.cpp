@@ -31,7 +31,7 @@ namespace xlang
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
         { "optimize", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "library", 0, 1, "Specify library prefix (defaults to winrt)" },
+        { "library", 0, 1, "<prefix>", "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
@@ -282,7 +282,7 @@ Where <spec> is one or more of:
 
                     write_namespace_0_h(ns, members);
                     write_namespace_1_h(ns, members);
-                    write_namespace_2_h(ns, members, c);
+                    write_namespace_2_h(ns, members);
                     write_namespace_h(c, ns, members);
                 });
             }

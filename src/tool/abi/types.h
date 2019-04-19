@@ -3,6 +3,7 @@
 #include "meta_reader.h"
 #include "sha1.h"
 #include "type_names.h"
+#include "versioning.h"
 
 struct writer;
 
@@ -30,12 +31,37 @@ struct metadata_type
 
     virtual void write_c_forward_declaration(writer& w) const = 0;
     virtual void write_c_abi_param(writer& w) const = 0;
+
+    virtual bool is_experimental() const = 0;
+
+    virtual std::optional<std::size_t> contract_index(std::string_view /*typeName*/, std::size_t /*version*/) const
+    {
+        return std::nullopt;
+    }
+
+    virtual std::optional<contract_version> contract_from_index(std::size_t /*index*/) const
+    {
+        return std::nullopt;
+    }
 };
 
 inline bool operator<(metadata_type const& lhs, metadata_type const& rhs) noexcept
 {
     return lhs.clr_full_name() < rhs.clr_full_name();
 }
+
+struct typename_comparator
+{
+    bool operator()(std::string_view lhs, metadata_type const& rhs)
+    {
+        return lhs < rhs.clr_full_name();
+    }
+
+    bool operator()(metadata_type const& lhs, std::string_view rhs)
+    {
+        return lhs.clr_full_name() < rhs;
+    }
+};
 
 struct element_type final : metadata_type
 {
@@ -125,6 +151,12 @@ struct element_type final : metadata_type
 
     virtual void write_c_abi_param(writer& w) const override;
 
+    virtual bool is_experimental() const override
+    {
+        // Element types are never experimental
+        return false;
+    }
+
 private:
 
     std::string_view m_clrName;
@@ -176,7 +208,7 @@ struct system_type final : metadata_type
 
     virtual std::string_view mangled_name() const override
     {
-        xlang::throw_invalid("ElementType values don't have mangled names");
+        xlang::throw_invalid("System types don't have mangled names");
     }
 
     virtual std::string_view generic_param_mangled_name() const override
@@ -217,6 +249,12 @@ struct system_type final : metadata_type
     }
 
     virtual void write_c_abi_param(writer& w) const override;
+
+    virtual bool is_experimental() const override
+    {
+        // System types are never experimental
+        return false;
+    }
 
 private:
 
@@ -309,6 +347,31 @@ struct mapped_type final : metadata_type
 
     virtual void write_c_abi_param(writer& w) const override;
 
+    virtual bool is_experimental() const override
+    {
+        // Mapped types are never experimental
+        return false;
+    }
+
+    virtual std::optional<std::size_t> contract_index(std::string_view typeName, std::size_t /*version*/) const override
+    {
+        // All mapped types are introduced in the UniversalApiContract version 1
+        using namespace std::literals;
+        if (typeName != "Windows.Foundation.UniversalApiContract"sv)
+        {
+            return std::nullopt;
+        }
+
+        return 0;
+    }
+
+    virtual std::optional<contract_version> contract_from_index([[maybe_unused]] std::size_t index) const override
+    {
+        using namespace std::literals;
+        XLANG_ASSERT(index == 0);
+        return contract_version{ "Windows.Foundation.UniversalApiContract"sv, 1 };
+    }
+
 private:
 
     xlang::meta::reader::TypeDef m_type;
@@ -320,13 +383,7 @@ private:
 
 struct typedef_base : metadata_type
 {
-    typedef_base(xlang::meta::reader::TypeDef const& type) :
-        m_type(type),
-        m_clrFullName(::clr_full_name(type)),
-        m_mangledName(::mangled_name<false>(type)),
-        m_genericParamMangledName(::mangled_name<true>(type))
-    {
-    }
+    typedef_base(xlang::meta::reader::TypeDef const& type);
 
     virtual std::string_view clr_abi_namespace() const override
     {
@@ -378,6 +435,64 @@ struct typedef_base : metadata_type
 
     virtual void write_cpp_abi_name(writer& w) const override;
 
+    virtual bool is_experimental() const override
+    {
+        return ::is_experimental(m_type);
+    }
+
+    virtual std::optional<std::size_t> contract_index(std::string_view typeName, std::size_t version) const override
+    {
+        if (!m_contractHistory)
+        {
+            return std::nullopt;
+        }
+
+        // Start with previous contracts
+        std::size_t result = 0;
+        for (auto& prev : m_contractHistory->previous_contracts)
+        {
+            if ((prev.type_name == typeName) && (prev.version_introduced <= version) && (prev.version_removed > version))
+            {
+                return result;
+            }
+
+            ++result;
+        }
+
+        // Now the current contract
+        if ((m_contractHistory->current_contract.type_name == typeName) && (m_contractHistory->current_contract.version <= version))
+        {
+            return result;
+        }
+
+        return std::nullopt;
+    }
+
+    virtual std::optional<contract_version> contract_from_index(std::size_t index) const override
+    {
+        if (!m_contractHistory)
+        {
+            return std::nullopt;
+        }
+
+        // Start with previous contracts
+        for (auto& prev : m_contractHistory->previous_contracts)
+        {
+            if (index-- == 0)
+            {
+                return contract_version{ prev.type_name, prev.version_introduced };
+            }
+        }
+
+        if (index == 0)
+        {
+            return m_contractHistory->current_contract;
+        }
+
+        XLANG_ASSERT(false);
+        return std::nullopt;
+    }
+
     xlang::meta::reader::TypeDef const& type() const noexcept
     {
         return m_type;
@@ -406,6 +521,10 @@ protected:
     std::string m_clrFullName;
     std::string m_mangledName;
     std::string m_genericParamMangledName;
+
+    // Versioning information filled in by the base class constructor
+    std::vector<platform_version> m_platformVersions;
+    std::optional<contract_history> m_contractHistory;
 };
 
 struct enum_type final : typedef_base
@@ -550,6 +669,8 @@ private:
     std::string m_abiName;
 };
 
+struct class_type;
+
 struct interface_type final : typedef_base
 {
     interface_type(xlang::meta::reader::TypeDef const& type) :
@@ -578,9 +699,10 @@ struct interface_type final : typedef_base
 
     std::vector<metadata_type const*> required_interfaces;
     std::vector<function_def> functions;
-};
 
-struct fastabi_type;
+    // When non-null, this interface gets extended with functions from other exclusiveto interfaces on the class
+    class_type const* fast_class = nullptr;
+};
 
 struct class_type final : typedef_base
 {
@@ -664,8 +786,9 @@ struct class_type final : typedef_base
     void write_c_definition(writer& w) const;
 
     std::vector<metadata_type const*> required_interfaces;
+    std::vector<std::pair<interface_type const*, version>> supplemental_fast_interfaces;
+    class_type const* base_class = nullptr;
     metadata_type const* default_interface = nullptr;
-    std::vector<fastabi_type> fastabi_interfaces;
 
 private:
 
@@ -759,6 +882,20 @@ struct generic_inst final : metadata_type
     virtual void write_c_forward_declaration(writer& w) const override;
     virtual void write_c_abi_param(writer& w) const override;
 
+    virtual bool is_experimental() const override
+    {
+        // Generic instances are experimental only if their arguments are experimental
+        for (auto ptr : m_genericParams)
+        {
+            if (ptr->is_experimental())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     typedef_base const* generic_type() const noexcept
     {
         return m_genericType;
@@ -796,157 +933,5 @@ private:
     typedef_base const* m_genericType;
     std::vector<metadata_type const*> m_genericParams;
     std::string m_clrFullName;
-    std::string m_mangledName;
-};
-
-struct fastabi_type : metadata_type
-{
-    fastabi_type(metadata_type const& base, interface_type const& type) :
-        m_base(&base),
-        m_type(&type)
-    {
-        // Synthesize an interface name
-        m_typeName = "fastabi_";
-        m_typeName += m_type->cpp_abi_name();
-
-        m_mangledName = mangled_namespace<false>(m_type->clr_abi_namespace()) + "_C";
-        details::append_mangled_name<false>(m_mangledName, m_typeName);
-    }
-
-    [[noreturn]]
-    virtual std::string_view clr_full_name() const override
-    {
-        // Fast ABI types are generated from metadata/attributes; they don't actually exist in metadata and therefore
-        // have no CLR name, nor is there a reason we should ever try and reference it
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempt to reference a fast ABI type's CLR name");
-    }
-
-    virtual std::string_view clr_abi_namespace() const override
-    {
-        return m_type->clr_abi_namespace();
-    }
-
-    [[noreturn]]
-    virtual std::string_view clr_logical_namespace() const override
-    {
-        // Fast ABI types exist solely at the ABI and therefore we should never try and reference their 'logical' name
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempt to reference a fast ABI type's logical namespace");
-    }
-
-    virtual std::string_view cpp_abi_name() const override
-    {
-        return m_typeName;
-    }
-
-    [[noreturn]]
-    virtual std::string_view cpp_logical_name() const override
-    {
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempt to reference a fast ABI type's logical name");
-    }
-
-    virtual std::string_view mangled_name() const override
-    {
-        return m_mangledName;
-    }
-
-    [[noreturn]]
-    virtual std::string_view generic_param_mangled_name() const override
-    {
-        // Fast ABI types don't exist in metadata and therefore should never appear as generic parameters
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempt to use a fast ABI type as a generic parameter");
-    }
-
-    virtual void append_signature(sha1& hash) const override
-    {
-        hash.append("fastabi(");
-        m_type->append_signature(hash);
-        hash.append(")");
-    }
-
-    virtual std::size_t push_contract_guards(writer& w) const override
-    {
-        auto result = m_base->push_contract_guards(w);
-        result += m_type->push_contract_guards(w);
-        return result;
-    }
-
-    [[noreturn]]
-    virtual void write_cpp_forward_declaration(writer&) const override
-    {
-        // Fast ABI types should only ever be used as base classes, which need to be defined, so we should never find
-        // ourselves in a scenario where we are trying to forward declare one
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attemptint to forward declare a fast ABI type");
-    }
-
-    [[noreturn]]
-    virtual void write_cpp_generic_param_logical_type(writer&) const override
-    {
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempt to use a fast ABI type as a generic parameter");
-    }
-
-    [[noreturn]]
-    virtual void write_cpp_generic_param_abi_type(writer&) const override
-    {
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempt to use a fast ABI type as a generic parameter");
-    }
-
-    virtual void write_cpp_abi_name(writer& w) const override;
-
-    [[noreturn]]
-    virtual void write_cpp_abi_param(writer&) const override
-    {
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempting to use a fast ABI type as a function parameter or struct member");
-    }
-
-    [[noreturn]]
-    virtual void write_c_forward_declaration(writer&) const override
-    {
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempting to forward declare a fast ABI type");
-    }
-
-    [[noreturn]]
-    virtual void write_c_abi_param(writer&) const override
-    {
-        XLANG_ASSERT(false);
-        xlang::throw_invalid("Attempting to use a fast ABI type as a function parameter or struct member");
-    }
-    xlang::meta::reader::TypeDef const& type() const noexcept
-    {
-        return m_type->type();
-    }
-
-    interface_type const& current_interface() const noexcept
-    {
-        return *m_type;
-    }
-
-    metadata_type const& base() const noexcept
-    {
-        return *m_base;
-    }
-
-    auto is_deprecated() const noexcept
-    {
-        // TODO: Should this propagate? E.g. if IFoo2 is deprecated, should we infer that IFoo3 is deprecated?
-        return m_type->is_deprecated();
-    }
-
-    void write_cpp_definition(writer& w) const;
-    void write_c_definition(writer& w) const;
-
-private:
-
-    metadata_type const* m_base;
-    interface_type const* m_type;
-    std::string m_typeName;
     std::string m_mangledName;
 };

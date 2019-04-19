@@ -25,6 +25,7 @@ struct abi_configuration
     ns_prefix ns_prefix_state = ns_prefix::always;
     bool enum_class = false;
     bool lowercase_include_guard = false;
+    bool enable_header_deprecation = false;
 
     std::string output_directory;
 };
@@ -70,6 +71,12 @@ inline xlang::meta::reader::ElementType underlying_enum_type(xlang::meta::reader
     return std::get<xlang::meta::reader::ElementType>(type.FieldList().first.Signature().Type().Type());
 }
 
+inline bool is_default(xlang::meta::reader::InterfaceImpl const& ifaceImpl)
+{
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(ifaceImpl, metadata_namespace, "DefaultAttribute"sv));
+}
+
 inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_get_default_interface(xlang::meta::reader::TypeDef const& type)
 {
     using namespace std::literals;
@@ -78,13 +85,38 @@ inline xlang::meta::reader::coded_index<xlang::meta::reader::TypeDefOrRef> try_g
 
     for (auto const& iface : type.InterfaceImpl())
     {
-        if (get_attribute(iface, metadata_namespace, "DefaultAttribute"sv))
+        if (is_default(iface))
         {
             return iface.Interface();
         }
     }
 
     return {};
+}
+
+inline xlang::meta::reader::TypeDef try_get_base(xlang::meta::reader::TypeDef const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+
+    // This could be System.Object, in which case we want to ignore
+    auto extends = type.Extends();
+    if (!extends)
+    {
+        return {};
+    }
+    else if (extends.type() != TypeDefOrRef::TypeRef)
+    {
+        return {};
+    }
+
+    auto ref = extends.TypeRef();
+    if ((ref.TypeNamespace() == "System"sv) && (ref.TypeName() == "Object"sv))
+    {
+        return {};
+    }
+
+    return find_required(ref);
 }
 
 template <typename T, typename Func>
@@ -106,155 +138,63 @@ inline void for_each_attribute(
     }
 }
 
-struct contract_version
+namespace details
 {
-    std::string_view type_name;
-    std::uint32_t version;
-};
+    template <typename T, typename... Types>
+    struct variant_index;
 
-struct previous_contract
-{
-    std::string_view type_name;
-    std::uint32_t version_introduced;
-    std::uint32_t version_removed;
-};
-
-struct contract_attributes
-{
-    contract_version current_contract;
-
-    // NOTE: Ordered such that the "earliest" contracts come first. E.g. the first item is the contract where the type
-    //       was introduced. If the list is empty, then the above contract/version is the first contract
-    std::vector<previous_contract> previous_contracts;
-};
-
-template <typename T>
-inline std::optional<contract_attributes> get_contracts(T const& value)
-{
-    using namespace std::literals;
-    using namespace xlang::meta::reader;
-
-    // NOTE: While theoretically possible for a type to have previous contract version attribute(s) but no contract
-    //       version attribute, it would be rather silly to have '#if true || ...' so ignore
-    auto contractAttr = get_attribute(value, metadata_namespace, "ContractVersionAttribute"sv);
-    if (!contractAttr)
+    template <typename T, typename First, typename... Types>
+    struct variant_index<T, First, Types...>
     {
-        return std::nullopt;
-    }
-
-    // Although contract version constructors accept unsigned integers as arguments, the metadata occassionally has
-    // signed integers for these arguments...
-    auto read_version = [](auto const& variant)
-    {
-        if (std::holds_alternative<std::uint32_t>(variant))
-        {
-            return std::get<std::uint32_t>(variant);
-        }
-        else
-        {
-            return static_cast<std::uint32_t>(std::get<std::int32_t>(variant));
-        }
+        static constexpr bool found = std::is_same_v<T, First>;
+        static constexpr std::size_t value = std::conditional_t<found,
+            std::integral_constant<std::size_t, 0>,
+            variant_index<T, Types...>>::value + (found ? 0 : 1);
     };
+}
 
-    contract_attributes result;
+template <typename Variant, typename T>
+struct variant_index;
 
-    // The ContractVersionAttribute has three constructors, two of which are used for describing contract requirements
-    // and the third describing contract definitions. This function is intended only for use with the first two
-    auto sig = contractAttr.Value();
-    auto const& fixedArgs = sig.FixedArgs();
-    if (fixedArgs.size() != 2)
+template <typename... Types, typename T>
+struct variant_index<std::variant<Types...>, T> : details::variant_index<T, Types...>
+{
+};
+
+template <typename Variant, typename T>
+constexpr std::size_t variant_index_v = variant_index<Variant, T>::value;
+
+// Constructor arguments are not consistently encoded using the same type (e.g. using a signed 32-bit integer as an
+// argument to a constructor that takes an unsigned 32-bit integer)
+template <typename T, typename Variant>
+T decode_integer(Variant const& value)
+{
+    switch (value.index())
     {
-        XLANG_ASSERT(false);
-        return {};
+    case variant_index_v<Variant, std::int8_t>: return static_cast<T>(std::get<std::int8_t>(value));
+    case variant_index_v<Variant, std::uint8_t>: return static_cast<T>(std::get<std::uint8_t>(value));
+    case variant_index_v<Variant, std::int16_t>: return static_cast<T>(std::get<std::int16_t>(value));
+    case variant_index_v<Variant, std::uint16_t>: return static_cast<T>(std::get<std::uint16_t>(value));
+    case variant_index_v<Variant, std::int32_t>: return static_cast<T>(std::get<std::int32_t>(value));
+    case variant_index_v<Variant, std::uint32_t>: return static_cast<T>(std::get<std::uint32_t>(value));
+    case variant_index_v<Variant, std::int64_t>: return static_cast<T>(std::get<std::int64_t>(value));
+    case variant_index_v<Variant, std::uint64_t>: return static_cast<T>(std::get<std::uint64_t>(value));
+    case variant_index_v<Variant, char16_t>: return static_cast<T>(std::get<char16_t>(value));
+    default: return std::get<T>(value); // This should throw, but that's intentional
     }
-
-    auto const& elemSig = std::get<ElemSig>(fixedArgs[0].value);
-    xlang::call(elemSig.value,
-        [&](ElemSig::SystemType t)
-        {
-            result.current_contract.type_name = t.name;
-        },
-        [&](std::string_view name)
-        {
-            result.current_contract.type_name = name;
-        },
-        [](auto&&)
-        {
-            XLANG_ASSERT(false);
-        });
-
-    result.current_contract.version = read_version(std::get<ElemSig>(fixedArgs[1].value).value);
-
-    for_each_attribute(value, metadata_namespace, "PreviousContractVersionAttribute"sv,
-        [&](bool /*first*/, auto const& attr)
-    {
-        auto prevSig = attr.Value();
-        auto const& prevArgs = prevSig.FixedArgs();
-
-        // The PreviousContractVersionAttribute has two constructors, both of which start with the same three
-        // arguments - the only ones that we care about
-        previous_contract prev =
-        {
-            std::get<std::string_view>(std::get<ElemSig>(prevArgs[0].value).value),
-            read_version(std::get<ElemSig>(prevArgs[1].value).value),
-            read_version(std::get<ElemSig>(prevArgs[2].value).value),
-        };
-        if (prevArgs.size() == 4)
-        {
-            // This contract "came before" a later contract. If we've already added that contract to the list, we
-            // need to insert this one before it
-            auto toName = std::get<std::string_view>(std::get<ElemSig>(prevArgs[3].value).value);
-            auto itr = std::find_if(result.previous_contracts.begin(), result.previous_contracts.end(),
-                [&](auto const& prevContract)
-            {
-                return prevContract.type_name == toName;
-            });
-            result.previous_contracts.insert(itr, prev);
-        }
-        else
-        {
-            // This is the last contract that the type was in before moving to its current contract. Always insert
-            // it at the tail
-            result.previous_contracts.push_back(prev);
-        }
-    });
-
-    return result;
 }
 
 template <typename T>
-inline std::optional<contract_version> initial_contract(T const& value)
+struct type_identity
 {
-    auto attr = get_contracts(value);
-    if (!attr)
-    {
-        return std::nullopt;
-    }
-
-    if (attr->previous_contracts.empty())
-    {
-        return attr->current_contract;
-    }
-
-    return contract_version{ attr->previous_contracts[0].type_name, attr->previous_contracts[0].version_introduced };
-}
+    using type = T;
+};
 
 template <typename T>
-inline std::optional<std::uint32_t> version_attribute(T const& type)
+T decode_enum(xlang::meta::reader::ElemSig::EnumValue const& value)
 {
-    using namespace std::literals;
-    using namespace xlang::meta::reader;
-
-    if (auto attr = get_attribute(type, metadata_namespace, "VersionAttribute"sv))
-    {
-        auto sig = attr.Value();
-        auto const& prevArgs = sig.FixedArgs();
-
-        // The version is always the first argument
-        return std::get<std::uint32_t>(std::get<ElemSig>(prevArgs[0].value).value);
-    }
-
-    return std::nullopt;
+    using integral_type = typename std::conditional_t<std::is_enum_v<T>, std::underlying_type<T>, type_identity<T>>::type;
+    return static_cast<T>(decode_integer<integral_type>(value.value));
 }
 
 struct deprecation_info
@@ -305,6 +245,45 @@ inline bool is_flags_enum(xlang::meta::reader::TypeDef const& type)
 {
     using namespace std::literals;
     return static_cast<bool>(get_attribute(type, system_namespace, "FlagsAttribute"sv));
+}
+
+template <typename T>
+bool is_experimental(T const& value)
+{
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(value, metadata_namespace, "ExperimentalAttribute"sv));
+}
+
+inline bool is_overridable(xlang::meta::reader::InterfaceImpl const& iface)
+{
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(iface, metadata_namespace, "OverridableAttribute"sv));
+}
+
+inline bool is_exclusiveto(xlang::meta::reader::TypeDef const& iface)
+{
+    using namespace std::literals;
+    return static_cast<bool>(get_attribute(iface, metadata_namespace, "ExclusiveToAttribute"sv));
+}
+
+template <typename T>
+bool is_enabled(T const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+    if (auto attr = get_attribute(type, metadata_namespace, "FeatureAttribute"sv))
+    {
+        // There is a single constructor: .ctor(FeatureStage, bool), however we only care about the 'FeatureStage' value
+        // since our behavior
+        auto sig = attr.Value();
+        auto const& args = sig.FixedArgs();
+        XLANG_ASSERT(args.size() == 2);
+
+        auto stage = decode_enum<std::int32_t>(std::get<ElemSig::EnumValue>(std::get<ElemSig>(args[0].value).value));
+        return stage >= 2;
+    }
+
+    return true;
 }
 
 // NOTE: 37 characters for the null terminator; the actual string is 36 characters

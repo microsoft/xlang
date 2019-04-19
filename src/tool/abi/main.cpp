@@ -28,6 +28,7 @@ void print_usage()
 
 int main(int const argc, char** argv)
 {
+    int exitCode = 0;
     basic_writer w;
 
     try
@@ -46,13 +47,14 @@ int main(int const argc, char** argv)
             { "ns-prefix", 0, 1 },
             { "enum-class", 0, 0 },
             { "lowercase-include-guard", 0, 0 },
+            { "enable-header-deprecation", 0, 0 }
         };
 
         reader args{ argc, argv, options };
         if (!args)
         {
             print_usage();
-            return 0;
+            return 1;
         }
 
         abi_configuration config;
@@ -60,6 +62,7 @@ int main(int const argc, char** argv)
         config.output_directory = output_directory(args);
         config.enum_class = args.exists("enum-class");
         config.lowercase_include_guard = args.exists("lowercase-include-guard");
+        config.enable_header_deprecation = args.exists("enable-header-deprecation");
 
         if (args.exists("ns-prefix"))
         {
@@ -94,8 +97,8 @@ int main(int const argc, char** argv)
             config.ns_prefix_state = ns_prefix::never;
         }
 
-        auto const& inputFiles = args.values("input");
-        auto const& referenceFiles = args.values("reference");
+        auto inputFiles = args.files("input");
+        auto referenceFiles = args.files("reference");
 
         if (config.verbose)
         {
@@ -151,9 +154,9 @@ int main(int const argc, char** argv)
             auto includes = [&](auto const& vector)
             {
                 return std::find_if(vector.begin(), vector.end(), [&](auto const& t)
-                {
-                    return f.includes(t.type());
-                }) != vector.end();;
+                    {
+                        return f.includes(t.type());
+                    }) != vector.end();
             };
             if (includes(types.enums) || includes(types.structs) || includes(types.delegates) ||
                 includes(types.interfaces) || includes(types.classes))
@@ -215,85 +218,9 @@ int main(int const argc, char** argv)
                 }
                 else
                 {
-                    group.add([&]()
-                    {
-                        auto types = mdCache.compile_namespaces({ foundation_namespace, collections_namespace });
-
-                        // Remove both 'CollectionChange' and 'IVectorChangedEventArgs' since these are both defined in
-                        // ivectorchangedeventargs.h. There's no good reason for it to be separate (and in fact it works
-                        // perfectly fine without this), but it's sometimes a huge pain to try and get existing code to
-                        // build without it separated due to redefinition errors
-                        type_cache vectorChangedTypes{ &mdCache };
-                        if (auto itr = std::find_if(types.enums.begin(), types.enums.end(), [&](auto const& type)
-                        {
-                            return type.get().clr_full_name() == "Windows.Foundation.Collections.CollectionChange"sv;
-                        }); itr != types.enums.end())
-                        {
-                            vectorChangedTypes.enums.push_back(*itr);
-                            types.enums.erase(itr);
-                        }
-                        else
-                        {
-                            XLANG_ASSERT(false);
-                        }
-
-                        if (auto itr = std::find_if(types.interfaces.begin(), types.interfaces.end(), [&](auto const& type)
-                        {
-                            return type.get().clr_full_name() == "Windows.Foundation.Collections.IVectorChangedEventArgs"sv;
-                        }); itr != types.interfaces.end())
-                        {
-                            vectorChangedTypes.interfaces.push_back(*itr);
-                            types.interfaces.erase(itr);
-                        }
-                        else
-                        {
-                            XLANG_ASSERT(false);
-                        }
-
-                        write_abi_header(foundation_namespace, config, types);
-                        write_abi_header("ivectorchangedeventargs", config, vectorChangedTypes);
-                    });
+                    auto types = mdCache.compile_namespaces({ foundation_namespace, collections_namespace });
+                    write_abi_header(foundation_namespace, config, types);
                 }
-            });
-
-            group.add([&]()
-            {
-                // Write the 'Windows.Foundation.Collections.h' header
-                basic_writer w;
-                w.write(strings::generics_begin);
-
-                if (config.ns_prefix_state == ns_prefix::always)
-                {
-                    w.write("\nnamespace ABI {");
-                }
-                else if (config.ns_prefix_state == ns_prefix::optional)
-                {
-                    w.write(R"^-^(
-#if defined(MIDL_NS_PREFIX)
-namespace ABI {
-#endif // defined(MIDL_NS_PREFIX))^-^");
-                }
-
-                w.write(strings::generics_meta);
-                w.write(strings::generics_foundation);
-                w.write(strings::generics_collections);
-                w.write(strings::generics_async);
-                w.write(strings::generics_vector);
-
-                if (config.ns_prefix_state == ns_prefix::always)
-                {
-                    w.write("} // ABI\n");
-                }
-                else if (config.ns_prefix_state == ns_prefix::optional)
-                {
-                    w.write(R"^-^(#if defined(MIDL_NS_PREFIX)
-} // ABI
-#endif // defined(MIDL_NS_PREFIX)
-)^-^");
-                }
-
-                w.write(strings::generics_end);
-                w.flush_to_file(config.output_directory / "Windows.Foundation.Collections.h");
             });
         }
 
@@ -306,8 +233,10 @@ namespace ABI {
     }
     catch (std::exception const& e)
     {
+        exitCode = 1;
         w.write("%\n", e.what());
     }
 
     w.flush_to_console();
+    return exitCode;
 }
