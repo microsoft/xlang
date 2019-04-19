@@ -15,7 +15,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: _projection/${{ parameters.architecture }}
+    rootFolderOrFile: _projection/${{ parameters.architecture }}/pywinrt
     archiveFile: '$(Build.ArtifactStagingDirectory)/${{ parameters.publishArtifactName }}/${{ parameters.architecture }}.zip'
 
 
