@@ -1,5 +1,6 @@
 parameters:
   dependsOn: 'build_projection'
+  artifactName: 'projection'
 
 jobs:
 - job: package_projection
@@ -13,9 +14,8 @@ jobs:
     inputs: 
       buildType: 'current'
       downloadType: single
-      artifactName: 'projection'
+      artifactName: ${{ parameters.artifactName }}
       downloadPath: '$(Build.ArtifactStagingDirectory)'
-
 
   - task: UsePythonVersion@0
     inputs:
@@ -28,11 +28,13 @@ jobs:
   - template: steps-package-projection.yml
     parameters:
       architecture: x86  
+      artifactName: ${{ parameters.artifactName }}
 
   - template: steps-package-projection.yml
     parameters:
       architecture: amd64  
-
+      artifactName: ${{ parameters.artifactName }}
+      
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: wheel'
     inputs:

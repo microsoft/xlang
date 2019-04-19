@@ -23,4 +23,5 @@ jobs:
 
 - template: AzurePipelinesTemplates/job-package-projection.yml
   parameters:
-    architecture: build_projection
+    dependsOn: build_projection
+    artifactName: projection

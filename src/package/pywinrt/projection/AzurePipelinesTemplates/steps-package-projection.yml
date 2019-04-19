@@ -1,11 +1,12 @@
 
 parameters:
   architecture: 'amd64'
+  artifactName: 'projection'
 
 steps:
 - task: ExtractFiles@1
   inputs:
-    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}.zip'
+    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/${{ parameters.artifactName }}/${{ parameters.architecture }}.zip'
     destinationFolder: _projection/${{ parameters.architecture }}
     cleanDestinationFolder: true 
 
