@@ -105,7 +105,7 @@ jobs:
   - script: pip install wheel
     displayName: pip install wheel
 
-  - script: python setup.py bdist_wheel --python-tag cp37 -p win-${{ parameters.targetArchitecture }}
+  - script: python setup.py bdist_wheel --python-tag cp37 -p win-$(buildArchitecture)
     workingDirectory: src/package/pywinrt/projection/pywinrt
     displayName: python setup.py bdist_wheel 
 
