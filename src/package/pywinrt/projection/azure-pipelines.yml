@@ -77,6 +77,7 @@ jobs:
     parameters:
       buildArchitecture: $(buildArchitecture)  
       hostArchitecture: 'amd64'
+
   - template: findpython.yml
     parameters:
       architecture: $(buildArchitecture)  
@@ -99,17 +100,53 @@ jobs:
       sourceFolder: _build
       contents: '*.pyd'
       targetFolder: src/package/pywinrt/projection/pywinrt/winrt
-      
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: src/package/pywinrt/projection/pywinrt/
+      archiveFile: '$(Build.ArtifactStagingDirectory)/projection/$(buildArchitecture).zip'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: projection'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/projection
+      artifactName: projection
+
+- job: package_projection
+  dependsOn: build_projection
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+  
+  - task: DownloadBuildArtifacts@0 
+    inputs: 
+      buildType: 'current'
+      downloadType: single
+      artifactName: 'projection'
+      downloadPath: '$(Build.ArtifactStagingDirectory)'
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/*.zip'
+      destinationFolder: _projection
+      cleanDestinationFolder: true 
+
+  - template: findpython.yml
+    parameters:
+      architecture: $(buildArchitecture)  
+      versionSpec: '3.7.x'
+
   - script: pip install wheel
     displayName: pip install wheel
 
   - script: python setup.py bdist_wheel --python-tag cp37 -p win-$(buildArchitecture)
-    workingDirectory: src/package/pywinrt/projection/pywinrt
+    workingDirectory: _projection
     displayName: python setup.py bdist_wheel 
 
   - task: CopyFiles@2
     inputs:
-      sourceFolder: src/package/pywinrt/projection/pywinrt/wheel
+      sourceFolder: _projection/dist
       contents: '*'
       targetFolder: $(Build.ArtifactStagingDirectory)/wheel
 
