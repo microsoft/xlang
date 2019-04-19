@@ -35,9 +35,9 @@ jobs:
 
   - task: CopyFiles@2
     inputs:
-      sourceFolder: '$(Build.ArtifactStagingDirectory)/projeciton'
+      sourceFolder: '$(Build.ArtifactStagingDirectory)/projection'
       contents: '*'
-      targetFolder: $(Build.ArtifactStagingDirectory)/signed-projeciton
+      targetFolder: $(Build.ArtifactStagingDirectory)/signed-projection
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: signed-projection'
