@@ -1,0 +1,21 @@
+
+parameters:
+  architecture: 'amd64'
+
+steps:
+- task: ExtractFiles@1
+  inputs:
+    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}.zip'
+    destinationFolder: _projection/${{ parameters.architecture }}
+    cleanDestinationFolder: true 
+
+- script: python setup.py bdist_wheel --python-tag cp37 -p win-${{ parameters.architecture }}
+  workingDirectory: _projection/${{ parameters.architecture }}/pywinrt
+  displayName: python setup.py bdist_wheel 
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: _projection/${{ parameters.architecture }}/pywinrt/dist
+    contents: '*'
+    targetFolder: $(Build.ArtifactStagingDirectory)/wheel
+

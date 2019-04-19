@@ -1,6 +1,9 @@
+parameters:
+  dependsOn: 'build_projection'
+
 jobs:
 - job: package_projection
-  dependsOn: build_projection
+  dependsOn: ${{ parameters.dependsOn }}
   pool:
     vmImage: 'windows-2019'
 
@@ -13,17 +16,6 @@ jobs:
       artifactName: 'projection'
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/amd64.zip'
-      destinationFolder: _projection/amd64
-      cleanDestinationFolder: true 
-
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/x86.zip'
-      destinationFolder: _projection/x86
-      cleanDestinationFolder: true 
 
   - task: UsePythonVersion@0
     inputs:
@@ -33,25 +25,13 @@ jobs:
   - script: pip install wheel
     displayName: pip install wheel
 
-  - script: python setup.py bdist_wheel --python-tag cp37 -p win-amd64
-    workingDirectory: _projection/amd64/pywinrt
-    displayName: python setup.py bdist_wheel 
+  - template: AzurePipelinesTemplates/steps-package-projection.yml
+    parameters:
+      architecture: x86  
 
-  - script: python setup.py bdist_wheel --python-tag cp37 -p win-x86
-    workingDirectory: _projection/x86/pywinrt
-    displayName: python setup.py bdist_wheel 
-
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: _projection/amd64/pywinrt/dist
-      contents: '*'
-      targetFolder: $(Build.ArtifactStagingDirectory)/wheel
-
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: _projection/x86/pywinrt/dist
-      contents: '*'
-      targetFolder: $(Build.ArtifactStagingDirectory)/wheel
+  - template: AzurePipelinesTemplates/steps-package-projection.yml
+    parameters:
+      architecture: amd64  
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: wheel'
