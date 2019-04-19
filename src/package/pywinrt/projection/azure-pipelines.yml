@@ -1,6 +1,0 @@
-jobs:
-- template: AzurePipelinesTemplates/job-generate-projection.yml
-
-- template: AzurePipelinesTemplates/job-build-projection.yml
-
-- template: AzurePipelinesTemplates/job-package-projection.yml
