@@ -338,6 +338,9 @@ void metadata_cache::process_class_dependencies(init_state& state, class_type& t
             {
                 XLANG_ASSERT(!fastInterface);
                 XLANG_ASSERT(!iface->fast_class);
+
+                // NOTE: 'find_dependent_type' returns a const-ref since there are some items that it returns that may
+                // actually be const. This is not true for 'interface_type', hence the 'const_cast' here is appropriate
                 fastInterface = const_cast<interface_type*>(iface);
                 fastInterface->fast_class = &type;
                 continue;
