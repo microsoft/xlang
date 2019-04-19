@@ -43,7 +43,7 @@ int main(int argc, const char * argv[]) {
     emitter->initialize();
     walker.register_listener(emitter);
     walker.walk();
-    emitter->saveToFile();
+    emitter->save_to_file();
     emitter->uninitialize();
     return 0;
 }

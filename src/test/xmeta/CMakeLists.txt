@@ -12,10 +12,13 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/tool/xmeta/
     ${CMAKE_SOURCE_DIR}/tool/xmeta/libs/
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/models/
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/
 )
 
 add_executable(test_xmeta "")
+target_link_libraries(test_xmeta "WindowsApp.lib")
+target_link_libraries(test_xmeta "comsuppw.lib")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_libraries(test_xmeta "${CMAKE_SOURCE_DIR}/tool/xmeta/antlr4-runtime/antlrlib/x86debug/antlr4-runtime.lib")
@@ -51,6 +54,8 @@ set(xmeta_gen_generated
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangLexer.cpp
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangParser.cpp
     ${CMAKE_SOURCE_DIR}/test/xmeta/xlang_test_listener.cpp
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/xmeta_emit.cpp
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/xlang_model_walker.cpp
  )
 
 target_sources(test_xmeta PUBLIC main.cpp ${xmeta_gen_generated})

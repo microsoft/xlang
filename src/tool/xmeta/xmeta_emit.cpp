@@ -51,24 +51,20 @@ namespace xlang::xmeta
 
     void xmeta_emit::uninitialize()
     {
-        if (m_metadata_dispenser != nullptr)
-        {
-            m_metadata_dispenser->Release();
-        }
-        if (m_metadata_assembly_emitter != nullptr)
-        {
-            m_metadata_assembly_emitter->Release();
-        }
-        if (m_metadata_emitter != nullptr)
-        {
-            m_metadata_emitter->Release();
-        }
         CoUninitialize();
     }
 
-    void xmeta_emit::saveToFile()
+    void xmeta_emit::save_to_file()
     {
         m_metadata_emitter->Save((s2ws(m_assembly_name) + L".xmeta").c_str(), 0);
+    }
+
+    void xmeta_emit::save_to_memory(std::vector<uint8_t> *metadata)
+    {
+        DWORD save_size;
+        m_metadata_emitter->GetSaveSize(CorSaveSize::cssAccurate, &save_size);
+        metadata->resize(save_size);
+        check_hresult(m_metadata_emitter->SaveToMemory(metadata->data(), save_size));
     }
 
     void xmeta_emit::define_assembly()
