@@ -1,23 +1,28 @@
 
 namespace xlang::meta::reader
 {
-    inline std::pair<std::string_view, std::string_view> get_base_class_namespace_and_name(TypeDef type)
+    inline std::pair<std::string_view, std::string_view> get_type_namespace_and_name(coded_index<TypeDefOrRef> const& type)
     {
-        auto const extends = type.Extends();
-        if (extends.type() == TypeDefOrRef::TypeDef)
+        if (type.type() == TypeDefOrRef::TypeDef)
         {
-            auto const def = extends.TypeDef();
+            auto const def = type.TypeDef();
             return { def.TypeNamespace(), def.TypeName() };
         }
-        else if (extends.type() == TypeDefOrRef::TypeRef)
+        else if (type.type() == TypeDefOrRef::TypeRef)
         {
-            auto const ref = extends.TypeRef();
+            auto const ref = type.TypeRef();
             return { ref.TypeNamespace(), ref.TypeName() };
         }
         else
         {
+            XLANG_ASSERT(false);
             return {};
         }
+    }
+
+    inline std::pair<std::string_view, std::string_view> get_base_class_namespace_and_name(TypeDef const& type)
+    {
+        return get_type_namespace_and_name(type.Extends());
     }
 
     inline auto extends_type(TypeDef type, std::string_view typeNamespace, std::string_view typeName)
