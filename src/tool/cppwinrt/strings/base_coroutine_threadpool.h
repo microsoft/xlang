@@ -265,8 +265,6 @@ namespace winrt
             }
         }
 
-        // TODO: add resume_after and resume_on_signal members
-
     private:
 
         static void WINRT_CALL callback(void*, void* context) noexcept
@@ -289,9 +287,9 @@ namespace winrt
             }
         };
 
-        struct environment
+        struct environment // TP_CALLBACK_ENVIRON
         {
-            uint32_t Version{ 3 }; // Windows 7
+            uint32_t Version{ 3 };
             void* Pool{};
             void* CleanupGroup{};
             void* CleanupGroupCancelCallback{};
@@ -308,7 +306,7 @@ namespace winrt
                     uint32_t Private : 30;
                 } s;
             } u;
-            int32_t CallbackPriority{ 1 }; // TP_CALLBACK_PRIORITY_NORMAL
+            int32_t CallbackPriority{ 1 };
             uint32_t Size{ sizeof(environment) };
         };
 

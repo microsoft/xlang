@@ -42,4 +42,11 @@ namespace winrt
 
         return awaitable{ dispatcher, priority };
     };
+
+#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
+    inline auto operator co_await(Windows::System::DispatcherQueue const& dispatcher)
+    {
+        return resume_foreground(dispatcher);
+    }
+#endif
 }
