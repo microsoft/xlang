@@ -17,11 +17,17 @@ jobs:
       artifactName: ${{ parameters.downloadArtifactName }}
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.downloadArtifactName }}'
-      contents: '*'
-      targetFolder: $(Build.ArtifactStagingDirectory)/${{ parameters.publishArtifactName }}
+  - template: steps-sign-projection.yml
+    parameters:
+      architecture: x86  
+      artifactName: ${{ parameters.downloadArtifactName }}
+      publishArtifactName: ${{ parameters.publishArtifactName }}
+
+  - template: steps-sign-projection.yml
+    parameters:
+      architecture: amd64  
+      artifactName: ${{ parameters.downloadArtifactName }}
+      publishArtifactName: ${{ parameters.publishArtifactName }}
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: ${{ parameters.publishArtifactName }}'

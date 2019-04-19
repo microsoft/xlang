@@ -1,0 +1,21 @@
+
+parameters:
+  architecture: 'amd64'
+  artifactName: 'projection'
+  publishArtifactName: 'signed-projection'
+
+steps:
+- task: ExtractFiles@1
+  inputs:
+    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/${{ parameters.artifactName }}/${{ parameters.architecture }}.zip'
+    destinationFolder: _projection/${{ parameters.architecture }}
+    cleanDestinationFolder: true 
+
+# TODO: sign the dll
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: _projection/${{ parameters.architecture }}
+    archiveFile: '$(Build.ArtifactStagingDirectory)/${{ parameters.publishArtifactName }}/${{ parameters.architecture }}.zip'
+
+
