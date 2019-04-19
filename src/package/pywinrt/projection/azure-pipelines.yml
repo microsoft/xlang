@@ -102,6 +102,18 @@ jobs:
       contents: '*.pyd'
       targetFolder: src/package/pywinrt/projection/pywinrt/winrt
 
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: _build
+      contents: '*.pyd'
+      targetFolder: $(Build.ArtifactStagingDirectory)/pyd/$(buildArchitecture)
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: pyd'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/pyd
+      artifactName: pyd
+
   - script: pip install wheel
     displayName: pip install wheel
 
