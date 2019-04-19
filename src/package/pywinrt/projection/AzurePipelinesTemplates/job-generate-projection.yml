@@ -1,0 +1,34 @@
+jobs:
+- job: generate_projection
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+  - template: vsdevcmd.yml
+    parameters:
+      buildArchitecture: 'x86'  
+      hostArchitecture: 'x86'
+
+  - task: CMake@1
+    displayName: 'Generate xlang build files via cmake'
+    inputs:
+      cwd: '.'
+      cmakeArgs: -S src -B_build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
+
+  - task: CMake@1
+    displayName: 'build pywinrt'
+    inputs:
+      cwd: '.'
+      cmakeArgs: --build .\_build -- -v pywinrt
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: _build\tool\python\
+      contents: pywinrt.exe
+      targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: pywinrt'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'pywinrt'
