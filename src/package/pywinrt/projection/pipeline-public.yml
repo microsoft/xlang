@@ -1,7 +1,6 @@
 jobs:
 - template: AzurePipelinesTemplates/job-generate-projection.yml
 
-jobs:
 - job: build_projection
   dependsOn: generate_projection
   pool:
@@ -16,7 +15,7 @@ jobs:
       Release_x64:
         buildArchitecture: 'amd64'
         buildConfiguration: 'Release'
-  steps:
+  steps:    
   - template: AzurePipelinesTemplates/steps-build-projection.yml
     parameters:
       architecture: $(buildArchitecture)  
