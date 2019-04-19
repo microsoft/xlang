@@ -1,3 +1,4 @@
+// Intentionally not using pch...
 #include "catch.hpp"
 
 // Only need winrt/base.h for coroutine thread pool support.

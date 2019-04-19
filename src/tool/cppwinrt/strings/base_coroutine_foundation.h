@@ -16,7 +16,7 @@ namespace winrt::impl
         slim_mutex m;
         slim_condition_variable cv;
         bool completed = false;
-        async.Completed([&](auto && ...)
+        async.Completed([&](auto&&...)
             {
                 {
                     slim_lock_guard const guard(m);
@@ -48,7 +48,7 @@ namespace winrt::impl
                 com_callback_args args{};
                 args.data = handle.address();
 
-                auto callback = [](com_callback_args * args) noexcept -> int32_t
+                auto callback = [](com_callback_args* args) noexcept -> int32_t
                 {
                     std::experimental::coroutine_handle<>::from_address(args->data)();
                     return error_ok;
@@ -387,7 +387,7 @@ namespace winrt::impl
         }
 
         template <typename Expression>
-        Expression&& await_transform(Expression && expression)
+        Expression&& await_transform(Expression&& expression)
         {
             if (Status() == AsyncStatus::Canceled)
             {
@@ -407,7 +407,7 @@ namespace winrt::impl
             return{ static_cast<Derived*>(this) };
         }
 
-        void cancellation_callback(winrt::delegate<> && cancel) noexcept
+        void cancellation_callback(winrt::delegate<>&& cancel) noexcept
         {
             {
                 slim_lock_guard const guard(m_lock);

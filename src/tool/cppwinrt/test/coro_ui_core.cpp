@@ -1,3 +1,4 @@
+// Intentionally not using pch...
 #include "catch.hpp"
 
 // Only need winrt/Windows.UI.Core.h for resume_foreground CoreDispatcher support
