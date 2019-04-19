@@ -205,18 +205,18 @@ namespace xlang
     };
 
     template <typename T, typename F, typename...Args>
-    auto capture(F function, Args&&...args)
+    impl::com_ref<T> capture(F function, Args&& ...args)
     {
-        impl::com_ref<T> result{ nullptr };
-        check_hresult(function(args..., guid_of<T>(), reinterpret_cast<void**>(put_abi(result))));
-        return result;
+        void* result{};
+        check_hresult(function(args..., guid_of<T>(), &result));
+        return { result, take_ownership_from_abi };
     }
     template <typename T, typename O, typename M, typename...Args>
-    auto capture(com_ptr<O> const& object, M method, Args&&...args)
+    impl::com_ref<T> capture(com_ptr<O> const& object, M method, Args && ...args)
     {
-        impl::com_ref<T> result{ nullptr };
-        check_hresult((object.get()->*(method))(args..., guid_of<T>(), reinterpret_cast<void**>(put_abi(result))));
-        return result;
+        void* result{};
+        check_hresult((object.get()->*(method))(args..., guid_of<T>(), &result));
+        return { result, take_ownership_from_abi };
     }
 
     template <typename T>
