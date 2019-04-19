@@ -25,11 +25,11 @@ jobs:
   - script: pip install wheel
     displayName: pip install wheel
 
-  - template: AzurePipelinesTemplates/steps-package-projection.yml
+  - template: steps-package-projection.yml
     parameters:
       architecture: x86  
 
-  - template: AzurePipelinesTemplates/steps-package-projection.yml
+  - template: steps-package-projection.yml
     parameters:
       architecture: amd64  
 
