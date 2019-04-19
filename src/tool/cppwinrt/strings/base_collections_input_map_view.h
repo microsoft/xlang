@@ -2,7 +2,7 @@
 namespace winrt::impl
 {
     template <typename K, typename V, typename Container>
-    struct input_map_view final :
+    struct input_map_view :
         implements<input_map_view<K, V, Container>, non_agile, no_weak_ref, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
         map_view_base<input_map_view<K, V, Container>, K, V>
     {
@@ -23,7 +23,7 @@ namespace winrt::impl
     };
 
     template <typename K, typename V, typename Container>
-    struct scoped_input_map_view final :
+    struct scoped_input_map_view :
         input_scope,
         implements<scoped_input_map_view<K, V, Container>, non_agile, no_weak_ref, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
         map_view_base<scoped_input_map_view<K, V, Container>, K, V>
@@ -41,6 +41,12 @@ namespace winrt::impl
         {
             return m_values;
         }
+
+#ifdef _DEBUG
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
 
     private:
 

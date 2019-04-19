@@ -2,7 +2,7 @@
 namespace winrt::impl
 {
     template <typename T, typename Container>
-    struct input_vector final :
+    struct input_vector :
         implements<input_vector<T, Container>, wfc::IVector<T>, wfc::IVectorView<T>, wfc::IIterable<T>>,
         vector_base<input_vector<T, Container>, T>
     {
