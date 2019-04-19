@@ -13,13 +13,20 @@ inline void write_contract_version(writer& w, unsigned int value)
 
 inline void write_type_banner_version_info(writer& w, xlang::meta::reader::TypeDef const& type)
 {
-    if (auto contractInfo = get_contracts(type))
+    if (auto contractInfo = get_contract_history(type))
     {
         w.write(R"^-^( *
  * Introduced to % in version %
 )^-^",
             contractInfo->current_contract.type_name,
             xlang::text::bind<write_contract_version>(contractInfo->current_contract.version));
+    }
+
+    if (is_experimental(type))
+    {
+        w.write(R"^-^( *
+ * Type is for evaluation purposes and is subject to change or removal in future updates.
+)^-^");
     }
 }
 
@@ -105,26 +112,6 @@ inline void write_type_banner(writer& w, interface_type const& type)
     w.write(R"^-^( *
  */
 )^-^");
-}
-
-inline void write_type_banner(writer& w, fastabi_type const& type)
-{
-    using namespace std::literals;
-    using namespace xlang::meta::reader;
-
-    auto attr = get_attribute(type.current_interface().type(), metadata_namespace, "ExclusiveToAttribute"sv);
-    auto sig = attr.Value();
-    auto const& fixedArgs = sig.FixedArgs();
-    auto const& className = std::get<ElemSig::SystemType>(std::get<ElemSig>(fixedArgs[0].value).value).name;
-
-    w.write(R"^-^(/*
- *
- * Fast ABI Interface %.%
- *
- * Interface is a part of the implementation of type %
- *
- */
-)^-^", type.clr_abi_namespace(), type.cpp_abi_name(), className);
 }
 
 inline void write_type_banner(writer& w, class_type const& type)
