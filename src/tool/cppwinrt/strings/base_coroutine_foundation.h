@@ -1,6 +1,34 @@
 
 namespace winrt::impl
 {
+    inline bool is_sta() noexcept
+    {
+        int32_t aptType;
+        int32_t aptTypeQualifier;
+        return (error_ok == WINRT_CoGetApartmentType(&aptType, &aptTypeQualifier)) && ((aptType == 0 /*APTTYPE_STA*/) || (aptType == 3 /*APTTYPE_MAINSTA*/));
+    }
+
+    template <typename Async>
+    void blocking_suspend(Async const& async)
+    {
+        WINRT_ASSERT(!is_sta());
+
+        slim_mutex m;
+        slim_condition_variable cv;
+        bool completed = false;
+        async.Completed([&](auto&&...)
+            {
+                {
+                    slim_lock_guard const guard(m);
+                    completed = true;
+                }
+                cv.notify_one();
+            });
+
+        slim_lock_guard guard(m);
+        cv.wait(m, [&] { return completed; });
+    }
+
     template <typename Async>
     struct await_adapter
     {
@@ -416,5 +444,133 @@ namespace winrt::impl
         winrt::delegate<> m_cancel;
         AsyncStatus m_status{ AsyncStatus::Started };
         bool m_completed_assigned{ false };
+    };
+}
+
+namespace std::experimental
+{
+    template <typename... Args>
+    struct coroutine_traits<winrt::Windows::Foundation::IAsyncAction, Args...>
+    {
+        struct promise_type final : winrt::impl::promise_base<promise_type,
+            winrt::Windows::Foundation::IAsyncAction,
+            winrt::Windows::Foundation::AsyncActionCompletedHandler>
+        {
+            void return_void() const noexcept
+            {
+            }
+        };
+    };
+
+    template <typename TProgress, typename... Args>
+    struct coroutine_traits<winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>, Args...>
+    {
+        struct promise_type final : winrt::impl::promise_base<promise_type,
+            winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>,
+            winrt::Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>, TProgress>
+        {
+            using ProgressHandler = winrt::Windows::Foundation::AsyncActionProgressHandler<TProgress>;
+
+            void Progress(ProgressHandler const& handler) noexcept
+            {
+                winrt::slim_lock_guard const guard(this->m_lock);
+                m_progress = winrt::impl::make_agile_delegate(handler);
+            }
+
+            ProgressHandler Progress() noexcept
+            {
+                winrt::slim_lock_guard const guard(this->m_lock);
+                return m_progress;
+            }
+
+            void return_void() const noexcept
+            {
+            }
+
+            void set_progress(TProgress const& result)
+            {
+                if (auto handler = Progress())
+                {
+                    handler(*this, result);
+                }
+            }
+
+            ProgressHandler m_progress;
+        };
+    };
+
+    template <typename TResult, typename... Args>
+    struct coroutine_traits<winrt::Windows::Foundation::IAsyncOperation<TResult>, Args...>
+    {
+        struct promise_type final : winrt::impl::promise_base<promise_type,
+            winrt::Windows::Foundation::IAsyncOperation<TResult>,
+            winrt::Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+        {
+            TResult get_return_value() noexcept
+            {
+                return std::move(m_result);
+            }
+
+            void return_value(TResult&& value) noexcept
+            {
+                m_result = std::move(value);
+            }
+
+            void return_value(TResult const& value) noexcept
+            {
+                m_result = value;
+            }
+
+            TResult m_result{ winrt::impl::empty_value<TResult>() };
+        };
+    };
+
+    template <typename TResult, typename TProgress, typename... Args>
+    struct coroutine_traits<winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>, Args...>
+    {
+        struct promise_type final : winrt::impl::promise_base<promise_type,
+            winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>,
+            winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, TProgress>
+        {
+            using ProgressHandler = winrt::Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>;
+
+            void Progress(ProgressHandler const& handler) noexcept
+            {
+                winrt::slim_lock_guard const guard(this->m_lock);
+                m_progress = winrt::impl::make_agile_delegate(handler);
+            }
+
+            ProgressHandler Progress() noexcept
+            {
+                winrt::slim_lock_guard const guard(this->m_lock);
+                return m_progress;
+            }
+
+            TResult get_return_value() noexcept
+            {
+                return std::move(m_result);
+            }
+
+            void return_value(TResult&& value) noexcept
+            {
+                m_result = std::move(value);
+            }
+
+            void return_value(TResult const& value) noexcept
+            {
+                m_result = value;
+            }
+
+            void set_progress(TProgress const& result)
+            {
+                if (auto handler = Progress())
+                {
+                    handler(*this, result);
+                }
+            }
+
+            TResult m_result{ winrt::impl::empty_value<TResult>() };
+            ProgressHandler m_progress;
+        };
     };
 }
