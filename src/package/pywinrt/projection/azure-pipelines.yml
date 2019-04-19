@@ -128,25 +128,41 @@ jobs:
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/*.zip'
-      destinationFolder: _projection
+      archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/amd64.zip'
+      destinationFolder: _projection/amd64
       cleanDestinationFolder: true 
 
-  - template: findpython.yml
-    parameters:
-      architecture: $(buildArchitecture)  
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/projection/x86.zip'
+      destinationFolder: _projection/x86
+      cleanDestinationFolder: true 
+
+  - task: UsePythonVersion@0
+    inputs:
       versionSpec: '3.7.x'
+      addToPath: true 
 
   - script: pip install wheel
     displayName: pip install wheel
 
-  - script: python setup.py bdist_wheel --python-tag cp37 -p win-$(buildArchitecture)
-    workingDirectory: _projection
+  - script: python setup.py bdist_wheel --python-tag cp37 -p win-amd64
+    workingDirectory: _projection/amd64/pywinrt
+    displayName: python setup.py bdist_wheel 
+
+  - script: python setup.py bdist_wheel --python-tag cp37 -p win-x86
+    workingDirectory: _projection/x86/pywinrt
     displayName: python setup.py bdist_wheel 
 
   - task: CopyFiles@2
     inputs:
-      sourceFolder: _projection/dist
+      sourceFolder: _projection/amd64/pywinrt/dist
+      contents: '*'
+      targetFolder: $(Build.ArtifactStagingDirectory)/wheel
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: _projection/x86/pywinrt/dist
       contents: '*'
       targetFolder: $(Build.ArtifactStagingDirectory)/wheel
 
