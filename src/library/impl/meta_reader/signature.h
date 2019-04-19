@@ -94,7 +94,7 @@ namespace xlang::meta::reader
         template <typename T>
         void add_compressed_enum(T value)
         {
-            static_assert(std::is_enum_v<T> && std::is_unsigned_v<T>);
+            static_assert(std::is_enum_v<T> && std::is_unsigned_v<std::underlying_type_t<T>>);
             add_compressed_unsigned(static_cast<std::underlying_type_t<T>>(value));
         }
 
@@ -121,13 +121,13 @@ namespace xlang::meta::reader
             {
                 static_assert(sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8);
                 auto ptr = reinterpret_cast<uint8_t const*>(&value);
-                m_data.insert(m_data.end(), value, value + sizeof(T));
+                m_data.insert(m_data.end(), ptr, ptr + sizeof(T));
             }
         }
 
         void add_type_ref(coded_index<TypeDefOrRef> const& value)
         {
-            add_uncompressed(value.raw_value());
+            add_compressed_unsigned(value.raw_value());
         }
 
         std::vector<uint8_t> m_data;
@@ -143,9 +143,6 @@ namespace xlang::meta::reader
     struct TypeSig;
     struct TypeSpecSig;
 
-    struct construct_signature_t {};
-    inline constexpr construct_signature_t construct_signature;
-
     struct CustomModSig
     {
         CustomModSig(table_base const* table, byte_view& data)
@@ -153,6 +150,13 @@ namespace xlang::meta::reader
             , m_type(table, uncompress_unsigned(data))
         {
             XLANG_ASSERT(m_cmod == ElementType::CModReqd || m_cmod == ElementType::CModOpt);
+        }
+
+        explicit CustomModSig(ElementType cmod, coded_index<TypeDefOrRef> const& type)
+            : m_cmod(cmod)
+            , m_type(type)
+        {
+            XLANG_ASSERT((m_cmod == ElementType::CModOpt) || (m_cmod == ElementType::CModReqd));
         }
 
         ElementType CustomMod() const noexcept
@@ -165,6 +169,12 @@ namespace xlang::meta::reader
             return m_type;
         }
 
+        void write_signature(byte_blob& signature) const
+        {
+            signature.add_compressed_enum(m_cmod);
+            signature.add_type_ref(m_type);
+        }
+
     private:
         ElementType m_cmod;
         coded_index<TypeDefOrRef> m_type;
@@ -173,6 +183,22 @@ namespace xlang::meta::reader
     struct GenericTypeInstSig
     {
         GenericTypeInstSig(table_base const* table, byte_view& data);
+
+        GenericTypeInstSig(ElementType class_or_value, coded_index<TypeDefOrRef> type, std::vector<TypeSig> const& generic_args)
+            : m_class_or_value(class_or_value)
+            , m_type(type)
+            , m_generic_args(generic_args)
+        {
+            XLANG_ASSERT((m_class_or_value == ElementType::Class) || (m_class_or_value == ElementType::ValueType));
+        }
+
+        GenericTypeInstSig(ElementType class_or_value, coded_index<TypeDefOrRef> type, std::vector<TypeSig>&& generic_args)
+            : m_class_or_value(class_or_value)
+            , m_type(type)
+            , m_generic_args(std::move(generic_args))
+        {
+            XLANG_ASSERT((m_class_or_value == ElementType::Class) || (m_class_or_value == ElementType::ValueType));
+        }
 
         ElementType ClassOrValueType() const noexcept
         {
@@ -186,7 +212,7 @@ namespace xlang::meta::reader
 
         uint32_t GenericArgCount() const noexcept
         {
-            return m_generic_arg_count;
+            return static_cast<uint32_t>(m_generic_args.size());
         }
 
         auto GenericArgs() const noexcept
@@ -194,10 +220,11 @@ namespace xlang::meta::reader
             return std::pair{ m_generic_args.cbegin(), m_generic_args.cend() };
         }
 
+        void GenericTypeInstSig::write_signature(byte_blob& signature) const;
+
     private:
         ElementType m_class_or_value;
         coded_index<TypeDefOrRef> m_type;
-        uint32_t m_generic_arg_count;
         std::vector<TypeSig> m_generic_args;
     };
 
@@ -240,11 +267,15 @@ namespace xlang::meta::reader
     struct TypeSig
     {
         using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig, GenericMethodTypeIndex>;
+
         TypeSig(table_base const* table, byte_view& data)
             : m_is_szarray(parse_szarray(table, data))
             , m_cmod(parse_cmods(table, data))
-            , m_element_type(parse_element_type(data))
             , m_type(ParseType(table, data))
+        {}
+
+        TypeSig(value_type&& type)
+            : m_type(std::move(type))
         {}
 
         value_type const& Type() const noexcept
@@ -252,14 +283,49 @@ namespace xlang::meta::reader
             return m_type;
         }
 
-        ElementType element_type() const noexcept
-        {
-            return m_element_type;
-        }
-
         bool is_szarray() const noexcept
         {
             return m_is_szarray;
+        }
+
+        void is_szarray(bool value) noexcept
+        {
+            m_is_szarray = value;
+        }
+
+        void write_signature(byte_blob& signature) const
+        {
+            if (m_is_szarray)
+            {
+                signature.add_compressed_enum(ElementType::SZArray);
+            }
+            for (auto const& cmod : m_cmod)
+            {
+                cmod.write_signature(signature);
+            }
+            call(m_type,
+                [&](ElementType arg)
+                {
+                    signature.add_compressed_enum(arg);
+                },
+                [&](coded_index<TypeDefOrRef> const& arg)
+                {
+                    signature.add_type_ref(arg);
+                },
+                [&](GenericTypeIndex arg)
+                {
+                    signature.add_compressed_enum(ElementType::Var);
+                    signature.add_compressed_unsigned(arg.index);
+                },
+                [&](GenericMethodTypeIndex arg)
+                {
+                    signature.add_compressed_enum(ElementType::MVar);
+                    signature.add_compressed_unsigned(arg.index);
+                },
+                [&](GenericTypeInstSig const& arg)
+                {
+                    arg.write_signature(signature);
+                });
         }
 
     private:
@@ -270,9 +336,8 @@ namespace xlang::meta::reader
         }
 
         static value_type ParseType(table_base const* table, byte_view& data);
-        bool m_is_szarray;
+        bool m_is_szarray{ false };
         std::vector<CustomModSig> m_cmod;
-        ElementType m_element_type;
         value_type m_type;
     };
 
@@ -421,6 +486,14 @@ namespace xlang::meta::reader
             , m_type(table, data)
         {}
 
+        explicit FieldSig(TypeSig const& type)
+            : m_type(type)
+        {}
+
+        explicit FieldSig(TypeSig&& type)
+            : m_type(std::move(type))
+        {}
+
         auto CustomMod() const noexcept
         {
             return std::pair{ m_cmod.cbegin(), m_cmod.cend() };
@@ -429,6 +502,23 @@ namespace xlang::meta::reader
         TypeSig const& Type() const noexcept
         {
             return m_type;
+        }
+
+        void is_static(bool value) noexcept
+        {
+            if (value)
+            {
+                m_calling_convention = static_cast<CallingConvention>(static_cast<uint8_t>(m_calling_convention) | static_cast<uint8_t>(CallingConvention::HasThis));
+            }
+            else
+            {
+                m_calling_convention = enum_mask(m_calling_convention, CallingConvention::Mask);
+            }
+        }
+
+        void write_signature(byte_blob& signature) const
+        {
+            signature.add_compressed_enum(m_calling_convention);
         }
 
     private:
@@ -441,7 +531,7 @@ namespace xlang::meta::reader
             }
             return conv;
         }
-        CallingConvention m_calling_convention;
+        CallingConvention m_calling_convention{ CallingConvention::Field };
         std::vector<CustomModSig> m_cmod;
         TypeSig m_type;
     };
@@ -517,23 +607,37 @@ namespace xlang::meta::reader
     inline GenericTypeInstSig::GenericTypeInstSig(table_base const* table, byte_view& data)
         : m_class_or_value(uncompress_enum<ElementType>(data))
         , m_type(table, uncompress_unsigned(data))
-        , m_generic_arg_count(uncompress_unsigned(data))
     {
         if (!(m_class_or_value == ElementType::Class || m_class_or_value == ElementType::ValueType))
         {
             throw_invalid("Generic type instantiation signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
         }
 
-        if (m_generic_arg_count > data.size())
+        uint32_t const generic_arg_count = uncompress_unsigned(data);
+
+        if (generic_arg_count > data.size())
         {
             throw_invalid("Invalid blob array size");
         }
-        m_generic_args.reserve(m_generic_arg_count);
-        for (uint32_t arg = 0; arg < m_generic_arg_count; ++arg)
+        m_generic_args.reserve(generic_arg_count);
+        for (uint32_t arg = 0; arg < generic_arg_count; ++arg)
         {
             m_generic_args.emplace_back(table, data);
         }
     }
+
+    void GenericTypeInstSig::write_signature(byte_blob& signature) const
+    {
+        signature.add_compressed_enum(ElementType::GenericInst);
+        signature.add_compressed_enum(m_class_or_value);
+        signature.add_type_ref(m_type);
+        signature.add_compressed_unsigned(GenericArgCount());
+        for (auto const& arg : m_generic_args)
+        {
+            arg.write_signature(signature);
+        }
+    }
+
 
     inline TypeSig::value_type TypeSig::ParseType(table_base const* table, byte_view& data)
     {
