@@ -37,6 +37,11 @@ jobs:
       _build\tool\python\pywinrt.exe -input 10.0.17763.0 -output $(Build.ArtifactStagingDirectory)\pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate Python/WinRT Projection'
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: projections'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'projections'
 
 - job: build_projection
   dependsOn: generate_projection
@@ -59,6 +64,10 @@ jobs:
     publishDir : $(Build.ArtifactStagingDirectory)\$(buildArchitecture)-$(buildConfiguration)
 
   steps:
+  - task: DownloadBuildArtifacts@0 
+    inputs: 
+      artifactName: 'projections'
+      downloadPath: '$(Build.ArtifactStagingDirectory)'
   - template: vsdevcmd.yml
     parameters:
       buildArchitecture: $(buildArchitecture)  
