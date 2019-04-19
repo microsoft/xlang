@@ -21,29 +21,11 @@ jobs:
       architecture: $(buildArchitecture)  
       pythonVersionSpec: '3.7.x'
 
-- job: sign_projection
-  dependsOn: build_projection
-  pool:
-    vmImage: 'windows-2019'
-  steps:
-  - task: DownloadBuildArtifacts@0 
-    inputs: 
-      buildType: 'current'
-      downloadType: single
-      artifactName: projection
-      downloadPath: '$(Build.ArtifactStagingDirectory)'
-
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: '$(Build.ArtifactStagingDirectory)/projection'
-      contents: '*'
-      targetFolder: $(Build.ArtifactStagingDirectory)/signed-projection
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish artifact: signed-projection'
-    inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/signed-projection
-      artifactName: signed-projection
+- template: AzurePipelinesTemplates/job-package-projection.yml
+  parameters:
+    dependsOn: 'build_projection'
+    downloadArtifactName: 'projection'
+    publishArtifactName: 'signed-projection'
 
 - template: AzurePipelinesTemplates/job-package-projection.yml
   parameters:

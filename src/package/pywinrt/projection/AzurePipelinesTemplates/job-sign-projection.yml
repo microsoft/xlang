@@ -1,0 +1,31 @@
+parameters:
+  dependsOn: 'build_projection'
+  downloadArtifactName: 'projection'
+  publishArtifactName: 'signed-projection'
+
+jobs:
+- job: sign_projection
+  dependsOn: ${{ parameters.dependsOn }}
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - task: DownloadBuildArtifacts@0 
+    displayName: 'Download artifact: ${{ parameters.downloadArtifactName }}'
+    inputs: 
+      buildType: 'current'
+      downloadType: single
+      artifactName: ${{ parameters.downloadArtifactName }}
+      downloadPath: '$(Build.ArtifactStagingDirectory)'
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.downloadArtifactName }}'
+      contents: '*'
+      targetFolder: $(Build.ArtifactStagingDirectory)/${{ parameters.publishArtifactName }}
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: ${{ parameters.publishArtifactName }}'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/${{ parameters.publishArtifactName }}
+      artifactName: ${{ parameters.publishArtifactName }}
+
