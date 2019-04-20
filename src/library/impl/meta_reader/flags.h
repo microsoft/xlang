@@ -1,5 +1,3 @@
-#pragma once
-
 namespace xlang::impl
 {
     template <typename T>

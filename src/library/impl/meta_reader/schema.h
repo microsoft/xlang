@@ -1,4 +1,3 @@
-#pragma once
 
 namespace xlang::meta::reader
 {
@@ -105,7 +104,7 @@ namespace xlang::meta::reader
             return get_string(3);
         }
 
-        meta::signature::MethodDefSig Signature() const
+        MethodDefSig Signature() const
         {
             auto cursor = get_blob(4);
             return{ get_table(), cursor };
@@ -136,7 +135,7 @@ namespace xlang::meta::reader
             return get_string(1);
         }
 
-        meta::signature::MethodDefSig MethodSignature() const
+        MethodDefSig MethodSignature() const
         {
             auto cursor = get_blob(2);
             return{ get_table(), cursor };
@@ -174,7 +173,7 @@ namespace xlang::meta::reader
         auto Signature() const
         {
             auto cursor = get_blob(2);
-            return meta::signature::FieldSig{ get_table(), cursor };
+            return FieldSig{ get_table(), cursor };
         }
 
         auto CustomAttribute() const;
@@ -262,7 +261,7 @@ namespace xlang::meta::reader
     {
         using row_base::row_base;
 
-        meta::signature::TypeSpecSig Signature() const
+        TypeSpecSig Signature() const
         {
             auto cursor = get_blob(0);
             return{ get_table(), cursor };
@@ -359,7 +358,7 @@ namespace xlang::meta::reader
             return get_string(1);
         }
 
-        meta::signature::PropertySig Type() const
+        PropertySig Type() const
         {
             auto cursor = get_blob(2);
             return{ get_table(), cursor };

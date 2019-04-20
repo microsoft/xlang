@@ -1,4 +1,3 @@
-#pragma once
 
 namespace xlang::meta::reader
 {
@@ -30,10 +29,7 @@ namespace xlang::meta::reader
             return std::pair{ def.TypeNamespace(), def.TypeName() };
         }
     }
-}
 
-namespace xlang::meta::signature
-{
     struct ElemSig
     {
         struct SystemType
@@ -77,7 +73,7 @@ namespace xlang::meta::signature
         {
         }
 
-        static value_type read_element(database const& db, meta::signature::ParamSig const& param, byte_view& data)
+        static value_type read_element(database const& db, ParamSig const& param, byte_view& data)
         {
             auto const& type = param.Type().Type();
             if (auto element_type = std::get_if<ElementType>(&type))
@@ -89,7 +85,7 @@ namespace xlang::meta::signature
                 if ((type_index->type() == TypeDefOrRef::TypeRef && type_index->TypeRef().TypeNamespace() == "System" && type_index->TypeRef().TypeName() == "Type") ||
                     (type_index->type() == TypeDefOrRef::TypeDef && type_index->TypeDef().TypeNamespace() == "System" && type_index->TypeDef().TypeName() == "Type"))
                 {
-                    return SystemType{ meta::signature::read<std::string_view>(data) };
+                    return SystemType{ read<std::string_view>(data) };
                 }
                 else
                 {
@@ -378,15 +374,12 @@ namespace xlang::meta::signature
         std::vector<FixedArgSig> m_fixed_args;
         std::vector<NamedArgSig> m_named_args;
     };
-}
 
-namespace xlang::meta::reader
-{
     inline auto CustomAttribute::Value() const
     {
         auto const ctor = Type();
-        meta::signature::MethodDefSig const& method_sig = ctor.type() == CustomAttributeType::MemberRef ? ctor.MemberRef().MethodSignature() : ctor.MethodDef().Signature();
+        MethodDefSig const& method_sig = ctor.type() == CustomAttributeType::MemberRef ? ctor.MemberRef().MethodSignature() : ctor.MethodDef().Signature();
         auto cursor = get_blob(2);
-        return meta::signature::CustomAttributeSig{ get_table(), cursor, method_sig };
+        return CustomAttributeSig{ get_table(), cursor, method_sig };
     }
 }

@@ -1,4 +1,3 @@
-#pragma once
 
 namespace xlang::meta::reader
 {
