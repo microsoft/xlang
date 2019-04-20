@@ -1,3 +1,4 @@
+#pragma once
 
 namespace xlang::meta::reader
 {
@@ -11,6 +12,18 @@ namespace xlang::meta::reader
     auto const& end(std::pair<T, T> const& values) noexcept
     {
         return values.second;
+    }
+
+    template <typename T>
+    bool empty(std::pair<T, T> const& range) noexcept
+    {
+        return range.first == range.second;
+    }
+
+    template <typename T>
+    std::size_t size(std::pair<T, T> const& range) noexcept
+    {
+        return range.second - range.first;
     }
 
     template <typename T>

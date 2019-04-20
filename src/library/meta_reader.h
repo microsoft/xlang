@@ -8,7 +8,7 @@
 #include "impl/meta_reader/flags.h"
 #include "impl/meta_reader/table.h"
 #include "impl/meta_reader/index.h"
-#include "impl/meta_reader/signature.h"
+#include "impl/signature.h"
 #include "impl/meta_reader/schema.h"
 #include "impl/meta_reader/database.h"
 #include "impl/meta_reader/column.h"
