@@ -31,7 +31,8 @@ else()
         $<TARGET_FILE_DIR:test_xmeta>)
 endif()
 
-if(EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
+
+if (EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
 add_custom_command(TARGET test_xmeta POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test"
