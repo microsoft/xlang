@@ -1,3 +1,4 @@
+#pragma once
 
 namespace xlang::meta::reader
 {
@@ -77,6 +78,13 @@ namespace xlang::meta::reader
             XLANG_ASSERT(m_cmod == ElementType::CModReqd || m_cmod == ElementType::CModOpt);
         }
 
+        explicit CustomModSig(ElementType cmod, coded_index<TypeDefOrRef> const& type)
+            : m_cmod(cmod)
+            , m_type(type)
+        {
+            XLANG_ASSERT((m_cmod == ElementType::CModOpt) || (m_cmod == ElementType::CModReqd));
+        }
+
         ElementType CustomMod() const noexcept
         {
             return m_cmod;
@@ -96,6 +104,22 @@ namespace xlang::meta::reader
     {
         GenericTypeInstSig(table_base const* table, byte_view& data);
 
+        GenericTypeInstSig(ElementType class_or_value, coded_index<TypeDefOrRef> type, std::vector<TypeSig> const& generic_args)
+            : m_class_or_value(class_or_value)
+            , m_type(type)
+            , m_generic_args(generic_args)
+        {
+            XLANG_ASSERT((m_class_or_value == ElementType::Class) || (m_class_or_value == ElementType::ValueType));
+        }
+
+        GenericTypeInstSig(ElementType class_or_value, coded_index<TypeDefOrRef> type, std::vector<TypeSig>&& generic_args)
+            : m_class_or_value(class_or_value)
+            , m_type(type)
+            , m_generic_args(std::move(generic_args))
+        {
+            XLANG_ASSERT((m_class_or_value == ElementType::Class) || (m_class_or_value == ElementType::ValueType));
+        }
+
         ElementType ClassOrValueType() const noexcept
         {
             return m_class_or_value;
@@ -108,7 +132,7 @@ namespace xlang::meta::reader
 
         uint32_t GenericArgCount() const noexcept
         {
-            return m_generic_arg_count;
+            return static_cast<uint32_t>(m_generic_args.size());
         }
 
         auto GenericArgs() const noexcept
@@ -119,7 +143,6 @@ namespace xlang::meta::reader
     private:
         ElementType m_class_or_value;
         coded_index<TypeDefOrRef> m_type;
-        uint32_t m_generic_arg_count;
         std::vector<TypeSig> m_generic_args;
     };
 
@@ -162,11 +185,15 @@ namespace xlang::meta::reader
     struct TypeSig
     {
         using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig, GenericMethodTypeIndex>;
+
         TypeSig(table_base const* table, byte_view& data)
             : m_is_szarray(parse_szarray(table, data))
             , m_cmod(parse_cmods(table, data))
-            , m_element_type(parse_element_type(data))
             , m_type(ParseType(table, data))
+        {}
+
+        TypeSig(value_type&& type)
+            : m_type(std::move(type))
         {}
 
         value_type const& Type() const noexcept
@@ -174,14 +201,14 @@ namespace xlang::meta::reader
             return m_type;
         }
 
-        ElementType element_type() const noexcept
-        {
-            return m_element_type;
-        }
-
         bool is_szarray() const noexcept
         {
             return m_is_szarray;
+        }
+
+        void is_szarray(bool value) noexcept
+        {
+            m_is_szarray = value;
         }
 
     private:
@@ -192,9 +219,8 @@ namespace xlang::meta::reader
         }
 
         static value_type ParseType(table_base const* table, byte_view& data);
-        bool m_is_szarray;
+        bool m_is_szarray{ false };
         std::vector<CustomModSig> m_cmod;
-        ElementType m_element_type;
         value_type m_type;
     };
 
@@ -343,6 +369,14 @@ namespace xlang::meta::reader
             , m_type(table, data)
         {}
 
+        explicit FieldSig(TypeSig const& type)
+            : m_type(type)
+        {}
+
+        explicit FieldSig(TypeSig&& type)
+            : m_type(std::move(type))
+        {}
+
         auto CustomMod() const noexcept
         {
             return std::pair{ m_cmod.cbegin(), m_cmod.cend() };
@@ -351,6 +385,23 @@ namespace xlang::meta::reader
         TypeSig const& Type() const noexcept
         {
             return m_type;
+        }
+
+        void is_static(bool value) noexcept
+        {
+            if (value)
+            {
+                m_calling_convention = static_cast<CallingConvention>(static_cast<uint8_t>(m_calling_convention) | static_cast<uint8_t>(CallingConvention::HasThis));
+            }
+            else
+            {
+                m_calling_convention = enum_mask(m_calling_convention, CallingConvention::Mask);
+            }
+        }
+
+        CallingConvention get_CallingConvention() const noexcept
+        {
+            return m_calling_convention;
         }
 
     private:
@@ -363,7 +414,7 @@ namespace xlang::meta::reader
             }
             return conv;
         }
-        CallingConvention m_calling_convention;
+        CallingConvention m_calling_convention{ CallingConvention::Field };
         std::vector<CustomModSig> m_cmod;
         TypeSig m_type;
     };
@@ -395,6 +446,21 @@ namespace xlang::meta::reader
         CallingConvention CallConvention() const noexcept
         {
             return m_calling_convention;
+        }
+
+        auto CustomMod() const noexcept
+        {
+            return std::pair{ m_cmod.cbegin(), m_cmod.cend() };
+        }
+
+        uint32_t ParamCount() const noexcept
+        {
+            return static_cast<uint32_t>(m_params.size());
+        }
+
+        auto Params() const noexcept
+        {
+            return std::pair{ m_params.cbegin(), m_params.cend() };
         }
 
     private:
@@ -439,19 +505,20 @@ namespace xlang::meta::reader
     inline GenericTypeInstSig::GenericTypeInstSig(table_base const* table, byte_view& data)
         : m_class_or_value(uncompress_enum<ElementType>(data))
         , m_type(table, uncompress_unsigned(data))
-        , m_generic_arg_count(uncompress_unsigned(data))
     {
         if (!(m_class_or_value == ElementType::Class || m_class_or_value == ElementType::ValueType))
         {
             throw_invalid("Generic type instantiation signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
         }
 
-        if (m_generic_arg_count > data.size())
+        uint32_t const generic_arg_count = uncompress_unsigned(data);
+
+        if (generic_arg_count > data.size())
         {
             throw_invalid("Invalid blob array size");
         }
-        m_generic_args.reserve(m_generic_arg_count);
-        for (uint32_t arg = 0; arg < m_generic_arg_count; ++arg)
+        m_generic_args.reserve(generic_arg_count);
+        for (uint32_t arg = 0; arg < generic_arg_count; ++arg)
         {
             m_generic_args.emplace_back(table, data);
         }
