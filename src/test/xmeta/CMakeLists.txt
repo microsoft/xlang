@@ -31,10 +31,12 @@ else()
         $<TARGET_FILE_DIR:test_xmeta>)
 endif()
 
+if(EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
 add_custom_command(TARGET test_xmeta POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test"
     $<TARGET_FILE_DIR:test_xmeta>/midl3test)
+endif()
 
 target_sources(test_xmeta
     PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp test_symbol_table.cpp)
@@ -52,7 +54,7 @@ endif()
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/generated/XlangParser.cpp
     ${CMAKE_SOURCE_DIR}/test/xmeta/xlang_test_listener.cpp
     ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/ast_to_st_listener.cpp
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/symbol_table.cpp
+    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/xmeta_idl_reader.cpp
  )
 
 target_sources(test_xmeta PUBLIC main.cpp ${xmeta_cpp})

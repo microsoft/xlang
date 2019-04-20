@@ -11,4 +11,10 @@ public:
     std::set<std::string> namespaces;
     std::set<std::string> expressions;
     std::set<std::string> enums;
+    void reset()
+    {
+        namespaces.clear();
+        expressions.clear();
+        enums.clear();
+    }
 };

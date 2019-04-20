@@ -16,13 +16,13 @@ namespace xlang::xmeta
     enum class enum_semantics
     {
         Int8,
-        Uint8,
+        UInt8,
         Int16,
-        Uint16,
+        UInt16,
         Int32,
-        Uint32,
+        UInt32,
         Int64,
-        Uint64
+        UInt64
     };
 
     using enum_value_semantics = model_ref<int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t>;
@@ -57,19 +57,19 @@ namespace xlang::xmeta
             {
             case enum_semantics::Int8:
                 return increment<int8_t>();
-            case enum_semantics::Uint8:
+            case enum_semantics::UInt8:
                 return increment<uint8_t>();
             case enum_semantics::Int16:
                 return increment<int16_t>();
-            case enum_semantics::Uint16:
+            case enum_semantics::UInt16:
                 return increment<uint16_t>();
             case enum_semantics::Int32:
                 return increment<int32_t>();
-            case enum_semantics::Uint32:
+            case enum_semantics::UInt32:
                 return increment<uint32_t>();
             case enum_semantics::Int64:
                 return increment<int64_t>();
-            case enum_semantics::Uint64:
+            case enum_semantics::UInt64:
                 return increment<uint64_t>();
             }
             return std::errc::invalid_argument;
@@ -96,21 +96,22 @@ namespace xlang::xmeta
             {
             case enum_semantics::Int8:
                 return resolve_numeric_val<int8_t>(base);
-            case enum_semantics::Uint8:
+            case enum_semantics::UInt8:
                 return resolve_numeric_val<uint8_t>(base);
             case enum_semantics::Int16:
                 return resolve_numeric_val<int16_t>(base);
-            case enum_semantics::Uint16:
+            case enum_semantics::UInt16:
                 return resolve_numeric_val<uint16_t>(base);
             case enum_semantics::Int32:
                 return resolve_numeric_val<int32_t>(base);
-            case enum_semantics::Uint32:
+            case enum_semantics::UInt32:
                 return resolve_numeric_val<uint32_t>(base);
             case enum_semantics::Int64:
                 return resolve_numeric_val<int64_t>(base);
-            case enum_semantics::Uint64:
+            case enum_semantics::UInt64:
                 return resolve_numeric_val<uint64_t>(base);
             }
+            return std::errc::invalid_argument;
         }
 
         // resolve_numeric_val resolves the m_value string to type T. It is required that T is one

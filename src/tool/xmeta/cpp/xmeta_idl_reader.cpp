@@ -1,6 +1,9 @@
-#include "symbol_table.h"
-
 #include <assert.h>
+
+#include "xmeta_idl_reader.h"
+#include "ast_to_st_listener.h"
+#include "XlangLexer.h"
+#include "XlangParser.h"
 
 namespace xlang::xmeta
 {
@@ -16,8 +19,47 @@ namespace xlang::xmeta
         std::string_view new_name;
     };
 
+    size_t xmeta_idl_reader::read(std::istream& idl_contents, bool disable_error_reporting)
+    {
+        ast_to_st_listener listener{ *this };
+        return read(idl_contents, listener, disable_error_reporting);
+    }
+
+    size_t xmeta_idl_reader::read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting)
+    {
+        antlr4::ANTLRInputStream input{ idl_contents };
+        XlangLexer lexer{ &input };
+        antlr4::CommonTokenStream tokens{ &lexer };
+        XlangParser parser{ &tokens };
+        parser.setBuildParseTree(true);
+
+        if (disable_error_reporting) {
+            lexer.removeErrorListeners();
+            parser.removeErrorListeners();
+        }
+
+        antlr4::tree::ParseTree *tree = parser.xlang();
+        antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+
+        std::string s = tree->toStringTree(&parser);
+        std::cout << tree->toStringTree(&parser) << std::endl;
+
+        std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
+
+        // This gets the token stream and prints out all the tokens corresponding to the file
+        antlr4::TokenStream * ts = parser.getTokenStream();
+        for (size_t i = 0; i < ts->size(); i++)
+        {
+            std::cout << ts->get(i)->getType() << std::endl;
+        }
+
+        std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
+        return parser.getNumberOfSyntaxErrors();
+    }
+
+
     // Pushes a namespace to the current namespace scope, and adds it to the symbol table if necessary.
-    void xmeta_symbol_table::push_namespace(std::string_view const& name, size_t decl_line)
+    void xmeta_idl_reader::push_namespace(std::string_view const& name, size_t decl_line)
     {
         if (m_cur_namespace_body != nullptr)
         {
@@ -65,7 +107,7 @@ namespace xlang::xmeta
     }
 
     // Pops a namespace from the namespace scope.
-    void xmeta_symbol_table::pop_namespace()
+    void xmeta_idl_reader::pop_namespace()
     {
         if (m_cur_namespace_body != nullptr)
         {
@@ -80,7 +122,7 @@ namespace xlang::xmeta
         }
     }
 
-    void xmeta_symbol_table::reset(std::string_view const& assembly_name)
+    void xmeta_idl_reader::reset(std::string_view const& assembly_name)
     {
         m_assembly_names.clear();
         m_assembly_names.emplace_back(assembly_name);
@@ -90,36 +132,37 @@ namespace xlang::xmeta
         m_cur_class = nullptr;
         m_cur_interface = nullptr;
         m_cur_struct = nullptr;
+        m_num_semantic_errors = 0;
     }
 
-    void xmeta_symbol_table::write_error(size_t decl_line, std::string_view const& msg)
+    void xmeta_idl_reader::write_error(size_t decl_line, std::string_view const& msg)
     {
         std::cerr << "Semantic error (line " << decl_line << "): " << msg << std::endl;
-        semantic_error_exists = true;
+        m_num_semantic_errors++;
     }
 
-    void xmeta_symbol_table::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
+    void xmeta_idl_reader::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
     {
         std::ostringstream oss;
         oss << "Enum member '" << invalid_name << "' already defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_full_name() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
-    void xmeta_symbol_table::write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
+    void xmeta_idl_reader::write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
     {
         std::ostringstream oss;
         oss << "Enum member '" << invalid_name << "' not defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_full_name() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
-    void xmeta_symbol_table::write_enum_circular_dependency(size_t decl_line, std::string_view const& invalid_member_id, std::string_view const& enum_name)
+    void xmeta_idl_reader::write_enum_circular_dependency(size_t decl_line, std::string_view const& invalid_member_id, std::string_view const& enum_name)
     {
         std::ostringstream oss;
         oss << "Enum '" << enum_name << "' has a circular depencency, starting at member '" << invalid_member_id << "'";
         write_error(decl_line, oss.str());
     }
 
-    void xmeta_symbol_table::write_enum_const_expr_range_error(size_t decl_line, std::string_view const& invalid_expr, std::string_view const& enum_name)
+    void xmeta_idl_reader::write_enum_const_expr_range_error(size_t decl_line, std::string_view const& invalid_expr, std::string_view const& enum_name)
     {
         std::ostringstream oss;
         oss << "Constant expression '" << invalid_expr << "' not in range of enum '";
@@ -127,14 +170,14 @@ namespace xlang::xmeta
         write_error(decl_line, oss.str());
     }
 
-    void xmeta_symbol_table::write_namespace_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& original_name)
+    void xmeta_idl_reader::write_namespace_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& original_name)
     {
         std::ostringstream oss;
         oss << "Namespace name '" << invalid_name << "' invalid. There already exists a namespace '" << original_name << "', and names cannot differ only by case.";
         write_error(decl_line, oss.str());
     }
 
-    void xmeta_symbol_table::write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name)
+    void xmeta_idl_reader::write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name)
     {
         std::ostringstream oss;
         oss << "Member name '" << invalid_name << "' already defined in namespace '" << m_cur_namespace_body->get_containing_namespace()->get_full_name() << "'";

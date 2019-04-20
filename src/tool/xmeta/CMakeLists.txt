@@ -9,7 +9,7 @@ set(xmeta_gen_generated
 
 set(xmeta_cpp
     ${PROJECT_SOURCE_DIR}/cpp/ast_to_st_listener.cpp
-    ${PROJECT_SOURCE_DIR}/cpp/symbol_table.cpp
+    ${PROJECT_SOURCE_DIR}/cpp/xmeta_idl_reader.cpp
 )
 
 include_directories(

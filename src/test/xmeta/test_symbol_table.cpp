@@ -2,31 +2,28 @@
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <string_view>
 
 #include "antlr4-runtime.h"
-#include "symbol_table.h"
-#include "XlangParser.h"
-#include "XlangLexer.h"
+#include "xmeta_idl_reader.h"
 #include "ast_to_st_listener.h"
-#include "helpers.h"
 
 using namespace antlr4;
 using namespace xlang::xmeta;
 
-xmeta_symbol_table st{ "" };
 
 TEST_CASE("Duplicate Namespaces")
 {
-    std::string test_idl =
-        "namespace n { } \
-        namespace n { }";
+    std::istringstream test_idl(R"(
+        namespace n { }
+        namespace n { }
+    )");
 
-    st.reset("dup_ns.idl");
-    ast_to_st_listener listener{ st };
-    REQUIRE(setup_and_run_parser(test_idl, listener) == 0);
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
 
-    auto namespaces = st.get_namespaces();
+    auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("n");
     REQUIRE(it != namespaces.end());
     auto ns = it->second;
@@ -37,30 +34,24 @@ TEST_CASE("Duplicate Namespaces")
 
 TEST_CASE("Enum test")
 {
-    std::string test_idl =
-        "namespace n \
-        { \
-            enum e \
-            { \
-                e_member_1, \
-                e_member_2 = 3, \
-                e_member_3, \
-                e_member_4 = e_member_5, \
-                e_member_5 = 0x21 \
-            } \
-        } ";
+    std::istringstream test_idl{ R"(
+        namespace n
+        {
+            enum e
+            {
+                e_member_1,
+                e_member_2 = 3,
+                e_member_3,
+                e_member_4 = e_member_5,
+                e_member_5 = 0x21
+            }
+        }
+    )" };
 
-    ANTLRInputStream input(test_idl);
-    XlangLexer lexer(&input);
-    CommonTokenStream tokens(&lexer);
-    XlangParser parser(&tokens);
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
 
-    auto tree = parser.xlang();
-    st.reset("ns_members.idl");
-    ast_to_st_listener listener{ st };
-    tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
-
-    auto namespaces = st.get_namespaces();
+    auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("n");
     REQUIRE(it != namespaces.end());
     auto ns = it->second;
@@ -87,6 +78,38 @@ TEST_CASE("Enum test")
     REQUIRE((val1.is_resolved() && val1.get_resolved_target<int32_t>() == 0));
     REQUIRE((val2.is_resolved() && val2.get_resolved_target<int32_t>() == 3));
     REQUIRE((val3.is_resolved() && val3.get_resolved_target<int32_t>() == 4));
-    REQUIRE((val4.is_resolved() && val4.get_resolved_target<int32_t>() == 33));
-    REQUIRE((val5.is_resolved() && val5.get_resolved_target<int32_t>() == 33));
+    REQUIRE((val4.is_resolved() && val4.get_resolved_target<int32_t>() == 0x21));
+    REQUIRE((val5.is_resolved() && val5.get_resolved_target<int32_t>() == 0x21));
+}
+
+TEST_CASE("Enum circular dependency")
+{
+    std::istringstream implicit_dependency_error_idl{ R"(
+        namespace n
+        {
+            enum e
+            {
+                e_member_1 = e_member_3,
+                e_member_2,
+                e_member_3
+            }
+        }
+    )" };
+    std::istringstream explicit_dependency_error_idl{ R"(
+        namespace n
+        {
+            enum e
+            {
+                e_member_1 = e_member_2,
+                e_member_2 = e_member_1
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(implicit_dependency_error_idl) == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 1);
+    reader.reset("");
+    REQUIRE(reader.read(explicit_dependency_error_idl) == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 1);
 }
