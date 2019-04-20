@@ -29,8 +29,7 @@ set(xmeta_gen_src
  )
 
 add_executable(xmeta ${xmeta_gen_src})
-target_link_libraries(xmeta "WindowsApp.lib")
-target_link_libraries(xmeta "comsuppw.lib")
+target_link_libraries(xmeta "WindowsApp.lib" "comsuppw.lib")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86debug/antlr4-runtime.lib")
