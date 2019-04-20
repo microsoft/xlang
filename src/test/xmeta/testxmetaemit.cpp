@@ -17,6 +17,8 @@ using namespace antlr4;
 
 #pragma execution_character_set("utf-8")
 
+using namespace xlang::xmeta;
+
 int setup_and_run_parser2(std::string const& idl, xlang_test_listener &listener, bool disable_error_reporting = false)
 {
     ANTLRInputStream input(idl);
@@ -37,8 +39,8 @@ int setup_and_run_parser2(std::string const& idl, xlang_test_listener &listener,
 
 TEST_CASE("Assembly name metadata") 
 {
-    std::string assembly_namme = "testidl";
-    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_namme);
+    std::string assembly_name = "testidl";
+    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
     emitter->initialize();
 
     std::vector<uint8_t> metadata;
@@ -50,58 +52,70 @@ TEST_CASE("Assembly name metadata")
     xlang::meta::reader::database db{ writer.save_to_memory() };
 
     REQUIRE(db.Assembly.size() == 1);
-    REQUIRE(assembly_namme.compare(db.Assembly[0].Name()) == 0);
+    REQUIRE(assembly_name.compare(db.Assembly[0].Name()) == 0);
 
     emitter->uninitialize();
 }
 
 TEST_CASE("Enum metadata")
 {
-    //std::string test_idl =
-    //    "namespace Windows.Test \
-    //    { \
-    //        enum Color \
-    //        { \
-    //            Red, \
-    //            Green, \
-    //            Blue \
-    //        } \
-    //        enum Alignment \
-    //        { \
-    //            Center = 0, \
-    //            Right = 1 \
-    //        } \
-    //        enum Permissions \
-    //        { \
-    //            None = 0x0000, \
-    //            Camera = 0x0001, \
-    //            Microphone = 0x0002, \
-    //        } \
-    //    }";
+    std::string test_idl =
+        "namespace Windows.Test \
+        { \
+            enum Color \
+            { \
+                Red, \
+                Green, \
+                Blue \
+            } \
+            enum Alignment \
+            { \
+                Center = 0, \
+                Right = 1 \
+            } \
+            enum Permissions \
+            { \
+                None = 0x0000, \
+                Camera = 0x0001, \
+                Microphone = 0x0002, \
+            } \
+        }";
+    std::string assembly_name = "testidl";
+    xlang_test_listener listener;
+    REQUIRE(setup_and_run_parser2(test_idl, listener) == 0);
 
-    //xlang_test_listener listener;
-    //REQUIRE(setup_and_run_parser2(test_idl, listener) == 0);
+    std::vector<std::shared_ptr<xlang::xmeta::namespace_model>> v;
 
-    //std::vector<std::shared_ptr<xlang::xmeta::namespace_model>> v;
+    std::string ns_name("test");
+    std::shared_ptr<namespace_model> ns(new namespace_model(ns_name, 0, assembly_name, nullptr));
+    std::shared_ptr<namespace_body_model> ns_bm = std::make_shared<namespace_body_model>(namespace_body_model(ns));
+    
+    std::string enum_name("Color");
+    std::shared_ptr<enum_model> enum_m(new enum_model(enum_name, 0, assembly_name, enum_semantics::Uint32));
+    std::string enum_red("red");
+    std::string enum_val("1");
+    enum_m->add_member(enum_red, enum_val, true);
 
-    //xlang::xmeta::xlang_model_walker walker(v);
-    //std::string assembly_namme = "testidl";
-    //std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_namme);
-    ////
-    //emitter->initialize();
-    //walker.register_listener(emitter);
-    ////walker.walk();
+    ns_bm->add_enum(enum_m);
+    ns->add_namespace_body(ns_bm);
 
-    //std::vector<uint8_t> metadata;
-    //emitter->save_to_memory(&metadata);
+    v.push_back(ns);
 
-    //xlang::meta::writer::pe_writer writer;
-    //writer.add_metadata(metadata);
+    xlang::xmeta::xlang_model_walker walker(v);
+    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
 
-    //xlang::meta::reader::database db{ writer.save_to_memory() };
+    emitter->initialize();
+    walker.register_listener(emitter);
+    walker.walk();
 
-    //REQUIRE(db.Assembly.size() == 1);
-    //REQUIRE(assembly_namme.compare(db.Assembly[0].Name()) == 0);
+    std::vector<uint8_t> metadata;
+    emitter->save_to_memory(&metadata);
 
-    //emitter->uninitialize();
+    xlang::meta::writer::pe_writer writer;
+    writer.add_metadata(metadata);
+    xlang::meta::reader::database db{ writer.save_to_memory() };
+
+    REQUIRE(db.TypeDef.size() == 2);
+    REQUIRE(db.TypeDef[1].TypeName().compare("Color") == 0);
+    emitter->uninitialize();
 }

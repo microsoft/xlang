@@ -4,6 +4,7 @@
 #include <codecvt>
 #include <string>
 #include <comutil.h>
+#include <iostream>
 
 using namespace winrt;
 
@@ -99,9 +100,9 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_type_def(std::string name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[], mdTypeDef *token_typedef)
     {
-        LPCWSTR wname = s2ws(name).c_str();
+        std::wstring wname = s2ws(name);
         check_hresult(m_metadata_emitter->DefineTypeDef(
-            wname,
+            wname.c_str(),
             type_flag,
             token_extend, 
             token_implements,
@@ -111,7 +112,7 @@ namespace xlang::xmeta
         check_hresult(m_metadata_import->GetModuleFromScope(&token_current_module));
 
         mdTypeRef token_typeref;
-        check_hresult(m_metadata_emitter->DefineTypeRefByName(token_current_module, wname, &token_typeref));
+        check_hresult(m_metadata_emitter->DefineTypeRefByName(token_current_module, wname.c_str(), &token_typeref));
         type_references.insert(std::make_pair(name, token_typeref));
     }
 
@@ -163,13 +164,13 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def) 
     {
-        LPCWSTR method_name = s2ws(model->get_id()).c_str();
+        std::wstring method_name = s2ws(model->get_id());
 
         DWORD method_flag;
         mdMethodDef token_method_def;
         //m_metadata_emitter->DefineMethod(
         //    token_def,
-        //    method_name,
+        //    method_name.c_str(),
         //    ,
         //    ,
         //    miRuntime,
@@ -191,7 +192,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def) 
     {
-        LPCWSTR property_name = s2ws(model->get_id()).c_str();
+        std::wstring property_name = s2ws(model->get_id());
         
         mdMethodDef token_get_method = mdTokenNil;
         mdMethodDef token_set_method = mdTokenNil;
@@ -200,13 +201,13 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> get_method_model = model->get_get_method();
         if (get_method_model != nullptr) //TODO: This case is not suppose to happen
         {
-            LPCWSTR get_method_name = s2ws(get_method_model->get_id()).c_str();
+            std::wstring get_method_name = s2ws(get_method_model->get_id());
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
             check_hresult(m_metadata_emitter->DefineMethod(
                 token_def,
-                get_method_name,
+                get_method_name.c_str(),
                 property_flag,
                 pv_sig_blob,
                 cb_sig_blob,
@@ -218,13 +219,13 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> set_method_model = model->get_set_method();
         if (set_method_model != nullptr)
         {
-            LPCWSTR set_method_name = s2ws(set_method_model->get_id()).c_str();
+            std::wstring set_method_name = s2ws(set_method_model->get_id());
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
             check_hresult(m_metadata_emitter->DefineMethod(
                 token_def,
-                set_method_name,
+                set_method_name.c_str(),
                 property_flag,
                 pv_sig_blob,
                 cb_sig_blob,
@@ -236,7 +237,7 @@ namespace xlang::xmeta
         mdProperty token_property;
         //m_metadata_emitter->DefineProperty(
         //    token_class,
-        //    property_name,
+        //    property_name.c_str(),
         //    property_flag,
         //    , // pvSig
         //    , // cbsig
@@ -251,7 +252,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def)
     {
-        LPCWSTR event_name = s2ws(model->get_id()).c_str();
+        std::wstring event_name = s2ws(model->get_id());
 
         mdMethodDef token_add_method = mdTokenNil;
         mdMethodDef token_remove_method = mdTokenNil;
@@ -260,13 +261,13 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> add_method_model = model->get_add_method();
         if (add_method_model != nullptr) 
         {
-            LPCWSTR get_method_name = s2ws(add_method_model->get_id()).c_str();
+            std::wstring get_method_name = s2ws(add_method_model->get_id());
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
             check_hresult(m_metadata_emitter->DefineMethod(
                 token_def,
-                get_method_name,
+                get_method_name.c_str(),
                 event_flag,
                 pv_sig_blob,
                 cb_sig_blob,
@@ -278,13 +279,13 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> remove_method_model = model->get_remove_method();
         if (remove_method_model != nullptr)
         {
-            LPCWSTR set_method_name = s2ws(remove_method_model->get_id()).c_str();
+            std::wstring set_method_name = s2ws(remove_method_model->get_id());
             PCCOR_SIGNATURE pv_sig_blob = NULL;
             ULONG cb_sig_blob = 0;
             DWORD impl_flag = 0;
             check_hresult(m_metadata_emitter->DefineMethod(
                 token_def,
-                set_method_name,
+                set_method_name.c_str(),
                 event_flag,
                 pv_sig_blob,
                 cb_sig_blob,
@@ -296,7 +297,7 @@ namespace xlang::xmeta
         mdProperty token_event;
         //m_metadata_emitter->DefineEvent(
         //    token_class_def,
-        //    event_name,
+        //    event_name.c_str(),
         //    property_flag,
         //    , // pvSig
         //    , // cbsig
@@ -420,7 +421,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method_def, int parameter_index)
     {
-        LPCWSTR param_name = s2ws(model.get_id()).c_str();
+        std::wstring param_name = s2ws(model.get_id());
 
         DWORD param_flags = 0;
         if (parameter_index != 0)
@@ -439,7 +440,7 @@ namespace xlang::xmeta
         check_hresult(m_metadata_emitter->DefineParam(
             token_method_def,
             0, 
-            param_name,
+            param_name.c_str(),
             param_flags,
             (DWORD) - 1,
             nullptr,
