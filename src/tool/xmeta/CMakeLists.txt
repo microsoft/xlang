@@ -52,3 +52,4 @@ if (MSVC)
 endif()
 
 target_link_libraries(xmeta xmeta_antlr WindowsApp.lib comsuppw.lib)
+target_include_directories(xmeta PUBLIC ${XLANG_LIBRARY_PATH})

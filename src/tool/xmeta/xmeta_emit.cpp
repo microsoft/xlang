@@ -4,12 +4,102 @@
 #include <codecvt>
 #include <string>
 #include <comutil.h>
+#include <codecvt>
+#include <locale>
 
 using namespace winrt;
+using namespace xlang::meta::reader;
+using namespace xlang::meta::writer;
+using namespace xlang::xmeta;
 
 // TODO: TypeRefEmitter
 // method impl
 // class/interface impl
+
+namespace
+{
+    std::wstring s2ws(const std::string& as)
+    {
+        return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}.from_bytes(as);
+    }
+
+    // Useful helpers deal with meta::reader types, so use them primarily and translate to/from cor tokens for IMetaDataEmit and friends.
+    mdModule to_token(Module module)
+    {
+        return module.index() + 1 | mdtModule;
+    }
+
+    mdTypeRef to_token(TypeRef type_ref)
+    {
+        return type_ref.index() + 1 | mdtTypeRef;
+    }
+
+    mdAssembly to_token(Assembly assembly)
+    {
+        return assembly.index() + 1 | mdtAssembly;
+    }
+
+    mdAssemblyRef to_token(AssemblyRef assembly_ref)
+    {
+        return assembly_ref.index() + 1 | mdtAssemblyRef;
+    }
+
+    Module to_Module(mdModule token)
+    {
+        XLANG_ASSERT(TypeFromToken(token) == mdtModule);
+        return { nullptr, token - 1 };
+    }
+
+    TypeRef to_TypeRef(mdTypeRef token)
+    {
+        XLANG_ASSERT(TypeFromToken(token) == mdtTypeRef);
+        return { nullptr, token - 1 };
+    }
+
+    TypeDef to_TypeDef(mdTypeDef token)
+    {
+        XLANG_ASSERT(TypeFromToken(token) == mdtTypeDef);
+        return { nullptr, token - 1 };
+    }
+
+    Assembly to_Assembly(mdAssembly token)
+    {
+        XLANG_ASSERT(TypeFromToken(token) == mdtAssembly);
+        return { nullptr, token - 1 };
+    }
+
+    AssemblyRef to_AssemblyRef(mdAssemblyRef token)
+    {
+        XLANG_ASSERT(TypeFromToken(token) == mdtAssemblyRef);
+        return { nullptr, token - 1 };
+    }
+
+    ElementType to_ElementType(enum_semantics arg)
+    {
+        switch (arg)
+        {
+        case enum_semantics::Int8:
+            return ElementType::I1;
+        case enum_semantics::Uint8:
+            return ElementType::U1;
+        case enum_semantics::Int16:
+            return ElementType::I2;
+        case enum_semantics::Uint16:
+            return ElementType::U2;
+        case enum_semantics::Int32:
+            return ElementType::I4;
+        case enum_semantics::Uint32:
+            return ElementType::U4;
+        case enum_semantics::Int64:
+            return ElementType::I8;
+        case enum_semantics::Uint64:
+            return ElementType::U8;
+        default:
+            XLANG_ASSERT(false);
+            return ElementType::Void;
+        }
+    }
+}
 
 
 namespace xlang::xmeta
@@ -47,6 +137,10 @@ namespace xlang::xmeta
        // Defining the mscorlib assemblyref
         define_assembly();
         define_common_reference_assembly();
+
+        mdModule token_current_module;
+        check_hresult(m_metadata_import->GetModuleFromScope(&token_current_module));
+        m_module = to_Module(token_current_module);
     }
 
     void xmeta_emit::uninitialize()
@@ -69,10 +163,11 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_assembly()
     {
+        constexpr DWORD sha1_hash_algo{ 0x8004 };
         check_hresult(m_metadata_assembly_emitter->DefineAssembly(
             nullptr,
             0,
-            SHA1_HASH_ALGO,
+            sha1_hash_algo,
             s2ws(m_assembly_name).c_str(),
             &(s_genericMetadata),
             afContentType_WindowsRuntime,
@@ -97,22 +192,27 @@ namespace xlang::xmeta
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.MulticastDelegate", &token_delegate));
     }
 
-    void xmeta_emit::define_type_def(std::string name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[], mdTypeDef *token_typedef)
+    mdTypeDef xmeta_emit::define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[])
     {
-        LPCWSTR wname = s2ws(name).c_str();
+        auto wname = s2ws(name);
+        mdTypeDef token_typedef;
         check_hresult(m_metadata_emitter->DefineTypeDef(
-            wname,
+            wname.c_str(),
             type_flag,
             token_extend, 
             token_implements,
-            token_typedef));
-
-        mdModule token_current_module;
-        check_hresult(m_metadata_import->GetModuleFromScope(&token_current_module));
+            &token_typedef));
 
         mdTypeRef token_typeref;
-        check_hresult(m_metadata_emitter->DefineTypeRefByName(token_current_module, wname, &token_typeref));
-        type_references.insert(std::make_pair(name, token_typeref));
+        check_hresult(m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &token_typeref));
+
+        auto result = type_references.insert(std::make_pair(name, to_TypeRef(token_typeref)));
+        if (!result.second)
+        {
+            throw_invalid("Encountered duplicate TypeRef: " + name);
+        }
+
+        return token_typedef;
     }
 
 
@@ -138,12 +238,14 @@ namespace xlang::xmeta
         //    type_flag = dwTypeFlag | tdAbstract;
         //}
 
-        define_type_def(
+        mdTypeDef implements[] = { mdTokenNil };
+
+        auto class_type_def = define_type_def(
             class_name,
             type_flag,
-            mdTokenNil, // Extends (Going to be null until we find out if it is base class)
-            mdTokenNil, // Extends (Going to be null until we find out if it is base class)
-            &token_class_type_def);
+            mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
+            implements // Implements (Going to be null until we find out if it is base class));
+        );
 
         // TODO: Class base and interface implements
 
@@ -311,8 +413,8 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        mdTypeDef token_struct_type_def;
-        define_type_def(model->get_id(), struct_type_flag, token_value_type, mdTokenNil, &token_struct_type_def);
+        mdTypeDef implements[] = { mdTokenNil };
+        auto struct_type_def = define_type_def(model->get_id(), struct_type_flag, token_value_type, implements);
 
         for (std::pair<type_ref, std::string> const& field : model->get_fields())
         {
@@ -333,9 +435,6 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model) 
     {
-        mdTypeDef token_interface_type_def = mdTokenNil;
-        mdTypeRef token_local_type_ref = mdTokenNil;
-
         DWORD type_flag = interface_type_flag;
         //if (pInterface->HasExclusiveToAttribute())
         //{
@@ -344,12 +443,13 @@ namespace xlang::xmeta
         //    type_flag |= tdNotPublic;
         //}
 
-        define_type_def(
+        mdTypeDef implements[] = { mdTokenNil };
+        auto token_interface_type_def = define_type_def(
             model->get_id(),
             type_flag,
-            mdTokenNil, // Extends (Going to be null until we find out if it is base class)
-            mdTokenNil, // Extends (Going to be null until we find out if it is base class)
-            &token_interface_type_def);
+            mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
+            implements // Implements (Going to be null until we find out if it is base class)
+        );
 
         for (auto const& val : model->get_methods())
         {
@@ -367,14 +467,54 @@ namespace xlang::xmeta
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
-        mdTypeDef token_enum_type_def;
-        define_type_def(model->get_id(), enum_type_flag, token_enum, mdTokenNil, &token_enum_type_def);
+        auto const& type_name = model->get_id();
+        static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;
+        mdTypeDef implements[] = { mdTokenNil };
+        auto token_enum_type_def = define_type_def(type_name, enum_type_flag, token_enum, implements);
         
+        static constexpr DWORD enum_value_flag = fdRTSpecialName | fdSpecialName | fdPrivate;
+        ElementType const underlying_type = to_ElementType(model->get_type());
+        signature_blob value_signature;
+        value_signature.add_signature(FieldSig{ TypeSig{underlying_type} });
+        mdFieldDef field_token;
+        check_hresult(m_metadata_emitter->DefineField(token_enum_type_def,
+            L"value__",
+            enum_value_flag,
+            value_signature.data(),
+            value_signature.size(),
+            ELEMENT_TYPE_END,
+            nullptr,
+            0,
+            &field_token));
+
+        auto iter = type_references.find(type_name);
+        if (iter == type_references.end())
+        {
+            throw_invalid("Failed to find TypeRef for: " + type_name);
+        }
+        TypeRef const& enum_type_ref = iter->second;
+
+        static constexpr DWORD enumerator_flag = fdHasDefault | fdLiteral | fdStatic | fdPublic;
+        signature_blob enumerator_signature;
+        enumerator_signature.add_signature(FieldSig{ TypeSig{enum_type_ref.coded_index<TypeDefOrRef>()} });
 
         for (enum_member const& enum_member : model->get_members())
         {
-            std::string enum_member_name = enum_member.get_id();
-            auto enum_member_val = enum_member.get_value();
+            call(enum_member.get_resolved_value(), [&](auto const& val)
+                {
+                    using val_type = std::decay_t<decltype(val)>;
+                    static_assert(std::is_integral_v<val_type>);
+                    auto const& name = s2ws(enum_member.get_id());
+                    check_hresult(m_metadata_emitter->DefineField(token_enum_type_def,
+                        name.c_str(),
+                        enumerator_flag,
+                        enumerator_signature.data(),
+                        enumerator_signature.size(),
+                        static_cast<DWORD>(underlying_type),
+                        &val,
+                        static_cast<ULONG>(sizeof(val_type)),
+                        &field_token));
+                });
      /*       m_metadata_emitter->DefineField(
                 token_enum_type_def,
                 enum_member_name.c_str(),
@@ -385,8 +525,8 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(delegate_model const& model) 
     {
-        mdTypeDef token_delegate_type_def;
-        define_type_def(model.get_id(), delegate_type_flag, token_delegate, mdTokenNil, &token_delegate_type_def);
+        mdTypeDef implements[] = { mdTokenNil };
+        auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
 
         /* Define return value */
         mdParamDef token_return; // To be used for attributes later
@@ -447,18 +587,10 @@ namespace xlang::xmeta
             &token_param_def));
     }
     
-    inline std::wstring s2ws(const std::string& as)
-    {
-        wchar_t* buf = new wchar_t[as.size() * 2 + 2];
-        swprintf(buf, L"%S", as.c_str());
-        std::wstring rval = buf;
-        delete[] buf;
-        return rval;
-    }
 
     inline std::string type_semantics_to_string(model_ref<type_semantics> const& semantic_type)
     {
-        type_semantics ts = semantic_type.get_resolved_target<type_semantics>();
+        type_semantics const& ts = semantic_type.get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
             return std::get<std::shared_ptr<class_model>>(ts)->get_id();

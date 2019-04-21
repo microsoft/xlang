@@ -61,6 +61,20 @@ namespace xlang::xmeta
             return m_value;
         }
 
+        enum_member_semantics get_resolved_value() const
+        {
+            assert(m_value.is_resolved());
+            return std::visit(
+                [&](auto&& value) -> enum_member_semantics
+                {
+                    if constexpr (!std::is_integral_v<std::decay_t<decltype(value)>>)
+                    {
+                        throw_invalid("Unresolved enumerator: " + m_id);
+                    }
+                    return value;
+                }, m_value.get_resolved_target());
+        }
+
         std::errc convert_value(enum_semantics type) noexcept
         {
             std::string_view str_val{ m_value.get_ref_name() };
