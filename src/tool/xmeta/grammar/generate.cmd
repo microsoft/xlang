@@ -1,1 +1,0 @@
-antlr-4.7.2-complete.jar -o ../cpp/generated -Dlanguage=Cpp XlangLexer.g4 XlangParser.g4

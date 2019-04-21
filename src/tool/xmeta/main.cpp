@@ -30,7 +30,7 @@ int main(int argc, const char * argv[]) {
 
     // This gets the token stream and prints out all the tokens corresponding to the file
     TokenStream * ts = parser.getTokenStream();
-    for (int i = 0; i < ts->size(); i++)
+    for (std::size_t i = 0; i < ts->size(); ++i)
     {
         std::cout << ts->get(i)->getType() << std::endl;
     }
