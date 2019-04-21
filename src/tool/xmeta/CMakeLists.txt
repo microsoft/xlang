@@ -10,14 +10,14 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)
 
 # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
 set(ANTLR4_WITH_STATIC_CRT ON)
-# add external build for antlrcpp
-include(ExternalAntlr4Cpp)
 
 # set variable pointing to the antlr tool that supports C++
 # this is not required if the jar file can be found under PATH environment
 set(ANTLR_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/antlr-4.7.2-complete.jar)
+set(ANTLR4_ZIP_REPOSITORY ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/antlr4-4.7.2.zip)
 
-set(ANTLR4_TAG 4.7.2)
+# add external build for antlrcpp
+include(ExternalAntlr4Cpp)
 
 set(antlr_inputs ${CMAKE_CURRENT_SOURCE_DIR}/grammar/XlangLexer.g4 ${CMAKE_CURRENT_SOURCE_DIR}/grammar/XlangParser.g4)
 set(antlr_generated_dir ${CMAKE_CURRENT_BINARY_DIR}/antlr_generated)
