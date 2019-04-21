@@ -11,8 +11,8 @@ include_directories(
 )
 
 add_executable(test_xmeta "")
-target_link_libraries(test_xmeta "WindowsApp.lib")
-target_link_libraries(test_xmeta "comsuppw.lib")
+target_link_libraries(test_xmeta "WindowsApp.lib" "comsuppw.lib")
+
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
 add_custom_command(TARGET test_xmeta POST_BUILD
@@ -34,6 +34,8 @@ if (MSVC)
     target_link_libraries(test_xmeta windowsapp ole32)
 endif()
 
+# TODO Refactor the tool dependencies into a library that we can simply link against (instead of double compiling)
+target_include_directories(test_xmeta PRIVATE ${CMAKE_SOURCE_DIR}/tool/xmeta)
 set(xmeta_gen_generated
     ${CMAKE_SOURCE_DIR}/test/xmeta/xlang_test_listener.cpp
     ${CMAKE_SOURCE_DIR}/tool/xmeta/xmeta_emit.cpp
