@@ -186,6 +186,11 @@ namespace xlang::meta::reader
             return m_table->get_database();
         }
 
+        uint32_t raw_value() const noexcept
+        {
+            return m_value;
+        }
+
     protected:
 
         table_base const* m_table{};

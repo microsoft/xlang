@@ -2,49 +2,46 @@ cmake_minimum_required(VERSION 3.9)
 
 project(xmeta)
 
-set(xmeta_gen_generated
-    ${PROJECT_SOURCE_DIR}/cpp/generated/XlangLexer.cpp
-    ${PROJECT_SOURCE_DIR}/cpp/generated/XlangParser.cpp
- )
-
-set(xmeta_cpp
-    ${PROJECT_SOURCE_DIR}/cpp/ast_to_st_listener.cpp
-    ${PROJECT_SOURCE_DIR}/cpp/xmeta_idl_reader.cpp
+add_executable(xmeta
+    main.cpp
 )
 
-include_directories(
-    ${PROJECT_SOURCE_DIR}/antlr4-runtime/
-    ${PROJECT_SOURCE_DIR}/antlr4-runtime/misc/
-    ${PROJECT_SOURCE_DIR}/antlr4-runtime/atn/
-    ${PROJECT_SOURCE_DIR}/antlr4-runtime/dfa/
-    ${PROJECT_SOURCE_DIR}/antlr4-runtime/tree/
-    ${PROJECT_SOURCE_DIR}/antlr4-runtime/support/
-    ${PROJECT_SOURCE_DIR}/
-    ${PROJECT_SOURCE_DIR}/libs/
-    ${PROJECT_SOURCE_DIR}/cpp/
-    ${PROJECT_SOURCE_DIR}/cpp/generated/
-    ${PROJECT_SOURCE_DIR}/cpp/models/
-  )
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)
 
-set(xmeta_src
-    ${PROJECT_SOURCE_DIR}/main.cpp
-    ${xmeta_gen_generated}
-    ${xmeta_cpp}
-  )
+# using /MD flag for antlr4_runtime (for Visual C++ compilers only)
+set(ANTLR4_WITH_STATIC_CRT ON)
 
-add_executable(xmeta "")
-target_sources(xmeta PUBLIC ${xmeta_src})
+# set variable pointing to the antlr tool that supports C++
+# this is not required if the jar file can be found under PATH environment
+set(ANTLR_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/antlr-4.7.2-complete.jar)
+set(ANTLR4_ZIP_REPOSITORY ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/antlr4-4.7.2.zip)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86debug/antlr4-runtime.lib")
-    add_custom_command(TARGET xmeta PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86debug/antlr4-runtime.dll"
-        $<TARGET_FILE_DIR:xmeta>)
-else()
-    target_link_libraries(xmeta "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86release/antlr4-runtime.lib")
-    add_custom_command(TARGET xmeta PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${PROJECT_SOURCE_DIR}/antlr4-runtime/antlrlib/x86release/antlr4-runtime.dll"
-        $<TARGET_FILE_DIR:xmeta>)
+# add external build for antlrcpp
+include(ExternalAntlr4Cpp)
+
+set(antlr_inputs ${CMAKE_CURRENT_SOURCE_DIR}/grammar/XlangLexer.g4 ${CMAKE_CURRENT_SOURCE_DIR}/grammar/XlangParser.g4)
+set(antlr_generated_dir ${CMAKE_CURRENT_BINARY_DIR}/antlr_generated)
+set(antlr_generated_src ${antlr_generated_dir}/XlangLexer.cpp ${antlr_generated_dir}/XlangParser.cpp)
+
+add_library(xmeta_antlr)
+
+add_custom_command(OUTPUT ${antlr_generated_src}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${antlr_generated_dir}
+    COMMAND ${ANTLR_EXECUTABLE} -o ${antlr_generated_dir} -Dlanguage=Cpp ${antlr_inputs}
+    DEPENDS ${antlr_inputs})
+
+target_sources(xmeta_antlr PRIVATE ${antlr_generated_src})
+target_include_directories(xmeta_antlr PUBLIC
+    ${antlr_generated_dir}
+    ${ANTLR4_INCLUDE_DIRS} # antlr4cpp artifacts
+)
+target_link_libraries(xmeta_antlr PUBLIC antlr4_static)
+
+# required if linking to static library
+target_compile_definitions(xmeta_antlr PUBLIC -DANTLR4CPP_STATIC)
+
+if (MSVC)
+    target_compile_definitions(xmeta_antlr PUBLIC -D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 endif()
+
+target_link_libraries(xmeta xmeta_antlr)
