@@ -6,6 +6,9 @@ add_executable(xmeta
     main.cpp
 )
 
+add_library(xmeta_model cpp/xmeta_idl_reader.cpp cpp/ast_to_st_listener.cpp)
+target_include_directories(xmeta_model PUBLIC cpp/models cpp)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)
 
 # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
@@ -40,9 +43,10 @@ target_link_libraries(xmeta_antlr PUBLIC antlr4_static)
 # required if linking to static library
 target_compile_definitions(xmeta_antlr PUBLIC -DANTLR4CPP_STATIC)
 
+target_link_libraries(xmeta_model PUBLIC xmeta_antlr)
+
 if (MSVC)
     target_compile_definitions(xmeta_antlr PUBLIC -D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 endif()
 
-target_link_libraries(xmeta xmeta_antlr)
-
+target_link_libraries(xmeta xmeta_antlr xmeta_model)
