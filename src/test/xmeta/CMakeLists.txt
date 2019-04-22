@@ -27,14 +27,7 @@ if (MSVC)
     target_link_libraries(test_xmeta windowsapp ole32)
 endif()
 
-
-set(xmeta_gen_generated
-    ${CMAKE_SOURCE_DIR}/test/xmeta/xlang_test_listener.cpp
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/ast_to_st_listener.cpp
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/xmeta_idl_reader.cpp
- )
-
-target_sources(test_xmeta PUBLIC main.cpp ${xmeta_cpp})
+target_sources(test_xmeta PUBLIC main.cpp)
 
 install(TARGETS test_xmeta DESTINATION "test/xmeta")
 if (WIN32)
