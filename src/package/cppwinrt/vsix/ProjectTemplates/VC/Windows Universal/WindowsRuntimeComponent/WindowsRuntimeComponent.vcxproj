@@ -117,6 +117,7 @@
     <None Include="$safeprojectname$.def" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="PropertySheet.props" />
     <Text Include="readme.txt">
       <DeploymentContent>false</DeploymentContent>
     </Text>
