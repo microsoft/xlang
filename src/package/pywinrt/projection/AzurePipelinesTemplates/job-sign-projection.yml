@@ -15,21 +15,13 @@ jobs:
       artifactName: projection
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-  - task: PkgESCodeSign@10
-    displayName: CodeSign
-    env:
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-    inputs:
-      signConfigXml: '$(Build.SourcesDirectory)/src/package/pywinrt/projection/SignConfig.xml'
-      inPathRoot: '$(Build.ArtifactStagingDirectory)/projection/amd64'
-      outPathRoot: '$(Build.ArtifactStagingDirectory)/projection/amd64'
+  - template: steps-sign-projection.yml
+    parameters:
+      architecture: amd64
 
-  - task: PkgESCodeSign@10
-    displayName: CodeSign
-    inputs:
-      signConfigXml: '$(Build.SourcesDirectory)/src/package/pywinrt/projection/SignConfig.xml'
-      inPathRoot: '$(Build.ArtifactStagingDirectory)/projection/x86'
-      outPathRoot: '$(Build.ArtifactStagingDirectory)/projection/x86'
+  - template: steps-sign-projection.yml
+    parameters:
+      architecture: x86
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: projection'
