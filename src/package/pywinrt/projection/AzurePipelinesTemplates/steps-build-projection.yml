@@ -22,7 +22,7 @@ steps:
     arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
 
 - script: _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/cppwinrt -verbose
-  displayName: 'Generate C++/WinRT Projections'
+  displayName: 'Generate C++/WinRT Projection'
 
 - template: task-vsdevcmd.yml
   parameters:
@@ -43,20 +43,6 @@ steps:
       addToPath: true 
       architecture: x86
 
-- ${{ if eq(parameters.architecture, 'amd64') }}:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: ${{ parameters.versionSpec }}
-      addToPath: true 
-      architecture: x64
-
-- ${{ if eq(parameters.architecture, 'x86') }}:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: ${{ parameters.versionSpec }} 
-      addToPath: true 
-      architecture: x86
-      
 - task: CMake@1
   displayName: 'Generate python projection build files via cmake'
   inputs:
@@ -75,10 +61,16 @@ steps:
     contents: '*.pyd'
     targetFolder: src/package/pywinrt/projection/pywinrt/winrt
 
-- task: ArchiveFiles@2
+# - task: ArchiveFiles@2
+#   inputs:
+#     rootFolderOrFile: src/package/pywinrt/projection/pywinrt/
+#     archiveFile: '$(Build.ArtifactStagingDirectory)/projection/$(buildArchitecture).zip'
+
+- task: CopyFiles@2
   inputs:
-    rootFolderOrFile: src/package/pywinrt/projection/pywinrt/
-    archiveFile: '$(Build.ArtifactStagingDirectory)/projection/$(buildArchitecture).zip'
+    sourceFolder: src/package/pywinrt/projection/pywinrt/
+    contents: '**'
+    targetFolder: $(Build.ArtifactStagingDirectory)/projection/$(buildArchitecture)
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifact: projection'

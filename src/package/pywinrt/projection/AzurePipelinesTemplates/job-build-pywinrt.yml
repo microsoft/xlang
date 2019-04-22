@@ -1,5 +1,5 @@
 jobs:
-- job: generate_projection
+- job: build_pywinrt
   pool:
     vmImage: 'windows-2019'
 

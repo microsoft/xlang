@@ -1,7 +1,7 @@
 parameters:
-  dependsOn: 'build_projection'
-  downloadArtifactName: 'projection'
-  publishArtifactName: 'signed-projection'
+  dependsOn: build_projection
+  downloadArtifactName: projection
+  publishArtifactName: signed_projection
 
 jobs:
 - job: sign_projection

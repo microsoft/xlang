@@ -1,5 +1,5 @@
 parameters:
-  dependsOn: 'build_projection'
+  dependsOn: build_projection
   artifactName: 'projection'
 
 jobs:
