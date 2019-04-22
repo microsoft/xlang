@@ -9,6 +9,7 @@
 #include "metadata_cache.h"
 #include "namespace_iterator.h"
 #include "text_writer.h"
+#include "versioning.h"
 
 struct basic_writer : xlang::text::writer_base<basic_writer> {};
 
@@ -192,7 +193,9 @@ struct writer : xlang::text::writer_base<writer>
     void pop_namespace();
     void pop_inline_namespace();
 
-    void push_contract_guard(contract_attributes& vers);
+    bool push_contract_guard(version ver);
+    void push_contract_guard(contract_version ver);
+    void push_contract_guard(contract_history vers);
     void pop_contract_guards(std::size_t count);
 
     bool begin_declaration(std::string_view mangledName)
@@ -235,7 +238,7 @@ private:
     std::size_t m_indentation = 0;
     std::vector<std::string_view> m_namespaceStack;
 
-    std::vector<contract_attributes> m_contractGuardStack;
+    std::vector<contract_history> m_contractGuardStack;
 
     enum class declaration_stage
     {

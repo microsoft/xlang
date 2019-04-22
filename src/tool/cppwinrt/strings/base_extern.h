@@ -40,7 +40,6 @@ extern "C"
     uint32_t WINRT_CALL WINRT_FormatMessageW(uint32_t flags, void const* source, uint32_t code, uint32_t language, wchar_t* buffer, uint32_t size, va_list* arguments) noexcept;
     uint32_t WINRT_CALL WINRT_GetLastError() noexcept;
     void     WINRT_CALL WINRT_GetSystemTimePreciseAsFileTime(void* result) noexcept;
-    void     WINRT_CALL WINRT_GetCurrentThreadStackLimits(uintptr_t* low_limit, uintptr_t* high_limit) noexcept;
 
     int32_t  WINRT_CALL WINRT_OpenProcessToken(void* process, uint32_t access, void** token) noexcept;
     void*    WINRT_CALL WINRT_GetCurrentProcess() noexcept;
@@ -74,6 +73,10 @@ extern "C"
     void     WINRT_CALL WINRT_StartThreadpoolIo(winrt::impl::ptp_io io) noexcept;
     void     WINRT_CALL WINRT_CancelThreadpoolIo(winrt::impl::ptp_io io) noexcept;
     void     WINRT_CALL WINRT_CloseThreadpoolIo(winrt::impl::ptp_io io) noexcept;
+    winrt::impl::ptp_pool WINRT_CALL WINRT_CreateThreadpool(void* reserved) noexcept;
+    void WINRT_CALL WINRT_SetThreadpoolThreadMaximum(winrt::impl::ptp_pool pool, uint32_t value) noexcept;
+    int32_t WINRT_CALL WINRT_SetThreadpoolThreadMinimum(winrt::impl::ptp_pool pool, uint32_t value) noexcept;
+    void     WINRT_CALL WINRT_CloseThreadpool(winrt::impl::ptp_pool pool) noexcept;
 
     int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept;
     int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept;
@@ -118,7 +121,6 @@ WINRT_LINK(GetProcessHeap, 0)
 WINRT_LINK(FormatMessageW, 28)
 WINRT_LINK(GetLastError, 0)
 WINRT_LINK(GetSystemTimePreciseAsFileTime, 4)
-WINRT_LINK(GetCurrentThreadStackLimits, 8)
 
 WINRT_LINK(OpenProcessToken, 12)
 WINRT_LINK(GetCurrentProcess, 0)
@@ -152,3 +154,7 @@ WINRT_LINK(CreateThreadpoolIo, 16)
 WINRT_LINK(StartThreadpoolIo, 4)
 WINRT_LINK(CancelThreadpoolIo, 4)
 WINRT_LINK(CloseThreadpoolIo, 4)
+WINRT_LINK(CreateThreadpool, 4)
+WINRT_LINK(SetThreadpoolThreadMaximum, 8)
+WINRT_LINK(SetThreadpoolThreadMinimum, 8)
+WINRT_LINK(CloseThreadpool, 4)

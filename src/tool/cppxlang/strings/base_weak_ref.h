@@ -38,7 +38,7 @@ namespace xlang
             }
             else
             {
-                void* result;
+                void* result{};
                 m_ref->Resolve(guid_of<T>(), &result);
                 return { result, take_ownership_from_abi };
             }

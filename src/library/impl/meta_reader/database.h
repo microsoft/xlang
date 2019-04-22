@@ -25,7 +25,7 @@ namespace xlang::meta::reader
 {
     struct cache;
 
-    struct database : file_view
+    struct database
     {
         database(database&&) = delete;
         database& operator=(database&&) = delete;
@@ -95,16 +95,133 @@ namespace xlang::meta::reader
             return true;
         }
 
-        explicit database(std::string_view const& path, cache const* cache = nullptr) : file_view{ path }, m_path{ path }, m_cache{ cache }
+        explicit database(std::vector<uint8_t>&& buffer, cache const* cache = nullptr) : m_buffer{ std::move(buffer) }, m_view{ m_buffer.data(), m_buffer.data() + m_buffer.size() }, m_cache{ cache }
         {
-            auto dos = as<impl::image_dos_header>();
+            initialize();
+        }
+
+        explicit database(std::string_view const& path, cache const* cache = nullptr) : m_view{ path }, m_path{ path }, m_cache{ cache }
+        {
+            initialize();
+        }
+
+        table<TypeRef> TypeRef{ this };
+        table<GenericParamConstraint> GenericParamConstraint{ this };
+        table<TypeSpec> TypeSpec{ this };
+        table<TypeDef> TypeDef{ this };
+        table<CustomAttribute> CustomAttribute{ this };
+        table<MethodDef> MethodDef{ this };
+        table<MemberRef> MemberRef{ this };
+        table<Module> Module{ this };
+        table<Param> Param{ this };
+        table<InterfaceImpl> InterfaceImpl{ this };
+        table<Constant> Constant{ this };
+        table<Field> Field{ this };
+        table<FieldMarshal> FieldMarshal{ this };
+        table<DeclSecurity> DeclSecurity{ this };
+        table<ClassLayout> ClassLayout{ this };
+        table<FieldLayout> FieldLayout{ this };
+        table<StandAloneSig> StandAloneSig{ this };
+        table<EventMap> EventMap{ this };
+        table<Event> Event{ this };
+        table<PropertyMap> PropertyMap{ this };
+        table<Property> Property{ this };
+        table<MethodSemantics> MethodSemantics{ this };
+        table<MethodImpl> MethodImpl{ this };
+        table<ModuleRef> ModuleRef{ this };
+        table<ImplMap> ImplMap{ this };
+        table<FieldRVA> FieldRVA{ this };
+        table<Assembly> Assembly{ this };
+        table<AssemblyProcessor> AssemblyProcessor{ this };
+        table<AssemblyOS> AssemblyOS{ this };
+        table<AssemblyRef> AssemblyRef{ this };
+        table<AssemblyRefProcessor> AssemblyRefProcessor{ this };
+        table<AssemblyRefOS> AssemblyRefOS{ this };
+        table<File> File{ this };
+        table<ExportedType> ExportedType{ this };
+        table<ManifestResource> ManifestResource{ this };
+        table<NestedClass> NestedClass{ this };
+        table<GenericParam> GenericParam{ this };
+        table<MethodSpec> MethodSpec{ this };
+
+        template <typename T>
+        table<T> const& get_table() const noexcept;
+
+        cache const& get_cache() const noexcept
+        {
+            return *m_cache;
+        }
+
+        std::string const& path() const noexcept
+        {
+            return m_path;
+        }
+
+        std::string_view get_string(uint32_t const index) const
+        {
+            auto view = m_strings.seek(index);
+            auto last = std::find(view.begin(), view.end(), 0);
+
+            if (last == view.end())
+            {
+                throw_invalid("Missing string terminator");
+            }
+
+            return { reinterpret_cast<char const*>(view.begin()), static_cast<uint32_t>(last - view.begin()) };
+        }
+
+        byte_view get_blob(uint32_t const index) const
+        {
+            auto view = m_blobs.seek(index);
+            auto initial_byte = view.as<uint8_t>();
+            uint32_t blob_size_bytes{};
+
+            switch (initial_byte >> 5)
+            {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+                blob_size_bytes = 1;
+                initial_byte &= 0x7f;
+                break;
+
+            case 4:
+            case 5:
+                blob_size_bytes = 2;
+                initial_byte &= 0x3f;
+                break;
+
+            case 6:
+                blob_size_bytes = 4;
+                initial_byte &= 0x1f;
+                break;
+
+            default:
+                throw_invalid("Invalid blob encoding");
+            }
+
+            uint32_t blob_size{ initial_byte };
+
+            for (auto&& byte : view.sub(1, blob_size_bytes - 1))
+            {
+                blob_size = (blob_size << 8) + byte;
+            }
+
+            return { view.sub(blob_size_bytes, blob_size) };
+        }
+
+    private:
+        void initialize()
+        {
+            auto dos = m_view.as<impl::image_dos_header>();
 
             if (dos.e_magic != 0x5A4D) // IMAGE_DOS_SIGNATURE
             {
                 throw_invalid("Invalid DOS signature");
             }
 
-            auto pe = as<impl::image_nt_headers32>(dos.e_lfanew);
+            auto pe = m_view.as<impl::image_nt_headers32>(dos.e_lfanew);
 
             if (pe.FileHeader.NumberOfSections == 0 || pe.FileHeader.NumberOfSections > 100)
             {
@@ -112,7 +229,7 @@ namespace xlang::meta::reader
             }
 
             auto com = pe.OptionalHeader.DataDirectory[14]; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
-            auto sections = &as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32));
+            auto sections = &m_view.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32));
             auto sections_end = sections + pe.FileHeader.NumberOfSections;
 
             auto section = section_from_rva(sections, sections_end, com.VirtualAddress);
@@ -124,7 +241,7 @@ namespace xlang::meta::reader
 
             auto offset = offset_from_rva(*section, com.VirtualAddress);
 
-            auto cli = as<impl::image_cor20_header>(offset);
+            auto cli = m_view.as<impl::image_cor20_header>(offset);
 
             if (cli.cb != sizeof(impl::image_cor20_header))
             {
@@ -140,14 +257,14 @@ namespace xlang::meta::reader
 
             offset = offset_from_rva(*section, cli.MetaData.VirtualAddress);
 
-            if (as<uint32_t>(offset) != 0x424a5342)
+            if (m_view.as<uint32_t>(offset) != 0x424a5342)
             {
                 throw_invalid("CLI metadata magic signature not found");
             }
 
-            auto version_length = as<uint32_t>(offset + 12);
-            auto stream_count = as<uint16_t>(offset + version_length + 18);
-            auto view = seek(offset + version_length + 20);
+            auto version_length = m_view.as<uint32_t>(offset + 12);
+            auto stream_count = m_view.as<uint16_t>(offset + version_length + 18);
+            auto view = m_view.seek(offset + version_length + 20);
             byte_view tables;
 
             for (uint16_t i{}; i < stream_count; ++i)
@@ -157,19 +274,19 @@ namespace xlang::meta::reader
 
                 if (name.data() == "#Strings"sv)
                 {
-                    m_strings = sub(offset + stream.offset, stream.size);
+                    m_strings = m_view.sub(offset + stream.offset, stream.size);
                 }
                 else if (name.data() == "#Blob"sv)
                 {
-                    m_blobs = sub(offset + stream.offset, stream.size);
+                    m_blobs = m_view.sub(offset + stream.offset, stream.size);
                 }
                 else if (name.data() == "#GUID"sv)
                 {
-                    m_guids = sub(offset + stream.offset, stream.size);
+                    m_guids = m_view.sub(offset + stream.offset, stream.size);
                 }
                 else if (name.data() == "#~"sv)
                 {
-                    tables = sub(offset + stream.offset, stream.size);
+                    tables = m_view.sub(offset + stream.offset, stream.size);
                 }
                 else if (name.data() != "#US"sv)
                 {
@@ -336,114 +453,6 @@ namespace xlang::meta::reader
             GenericParamConstraint.set_data(view);
         }
 
-        table<TypeRef> TypeRef{ this };
-        table<GenericParamConstraint> GenericParamConstraint{ this };
-        table<TypeSpec> TypeSpec{ this };
-        table<TypeDef> TypeDef{ this };
-        table<CustomAttribute> CustomAttribute{ this };
-        table<MethodDef> MethodDef{ this };
-        table<MemberRef> MemberRef{ this };
-        table<Module> Module{ this };
-        table<Param> Param{ this };
-        table<InterfaceImpl> InterfaceImpl{ this };
-        table<Constant> Constant{ this };
-        table<Field> Field{ this };
-        table<FieldMarshal> FieldMarshal{ this };
-        table<DeclSecurity> DeclSecurity{ this };
-        table<ClassLayout> ClassLayout{ this };
-        table<FieldLayout> FieldLayout{ this };
-        table<StandAloneSig> StandAloneSig{ this };
-        table<EventMap> EventMap{ this };
-        table<Event> Event{ this };
-        table<PropertyMap> PropertyMap{ this };
-        table<Property> Property{ this };
-        table<MethodSemantics> MethodSemantics{ this };
-        table<MethodImpl> MethodImpl{ this };
-        table<ModuleRef> ModuleRef{ this };
-        table<ImplMap> ImplMap{ this };
-        table<FieldRVA> FieldRVA{ this };
-        table<Assembly> Assembly{ this };
-        table<AssemblyProcessor> AssemblyProcessor{ this };
-        table<AssemblyOS> AssemblyOS{ this };
-        table<AssemblyRef> AssemblyRef{ this };
-        table<AssemblyRefProcessor> AssemblyRefProcessor{ this };
-        table<AssemblyRefOS> AssemblyRefOS{ this };
-        table<File> File{ this };
-        table<ExportedType> ExportedType{ this };
-        table<ManifestResource> ManifestResource{ this };
-        table<NestedClass> NestedClass{ this };
-        table<GenericParam> GenericParam{ this };
-        table<MethodSpec> MethodSpec{ this };
-
-        template <typename T>
-        table<T> const& get_table() const noexcept;
-
-        cache const& get_cache() const noexcept
-        {
-            return *m_cache;
-        }
-
-        std::string const& path() const noexcept
-        {
-            return m_path;
-        }
-
-        std::string_view get_string(uint32_t const index) const
-        {
-            auto view = m_strings.seek(index);
-            auto last = std::find(view.begin(), view.end(), 0);
-
-            if (last == view.end())
-            {
-                throw_invalid("Missing string terminator");
-            }
-
-            return { reinterpret_cast<char const*>(view.begin()), static_cast<uint32_t>(last - view.begin()) };
-        }
-
-        byte_view get_blob(uint32_t const index) const
-        {
-            auto view = m_blobs.seek(index);
-            auto initial_byte = view.as<uint8_t>();
-            uint32_t blob_size_bytes{};
-
-            switch (initial_byte >> 5)
-            {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                blob_size_bytes = 1;
-                initial_byte &= 0x7f;
-                break;
-
-            case 4:
-            case 5:
-                blob_size_bytes = 2;
-                initial_byte &= 0x3f;
-                break;
-
-            case 6:
-                blob_size_bytes = 4;
-                initial_byte &= 0x1f;
-                break;
-
-            default:
-                throw_invalid("Invalid blob encoding");
-            }
-
-            uint32_t blob_size{ initial_byte };
-
-            for (auto&& byte : view.sub(1, blob_size_bytes - 1))
-            {
-                blob_size = (blob_size << 8) + byte;
-            }
-
-            return { view.sub(blob_size_bytes, blob_size) };
-        }
-
-    private:
-
         struct stream_range
         {
             uint32_t offset;
@@ -485,6 +494,9 @@ namespace xlang::meta::reader
         {
             return rva - section.VirtualAddress + section.PointerToRawData;
         }
+
+        std::vector<uint8_t> m_buffer;
+        file_view m_view;
 
         std::string const m_path;
         byte_view m_strings;
