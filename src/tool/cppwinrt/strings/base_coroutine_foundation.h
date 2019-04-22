@@ -9,9 +9,9 @@ namespace winrt::impl
     }
 
     template <typename Async>
-    void blocking_suspend(Async const& async)
+    void wait_for_completed(Async const& async, std::chrono::high_resolution_clock::duration const& timeout)
     {
-        WINRT_ASSERT(!is_sta());
+        // TODO: Maybe WaitForSingleObject is now faster.
 
         slim_mutex m;
         slim_condition_variable cv;
@@ -26,7 +26,28 @@ namespace winrt::impl
             });
 
         slim_lock_guard guard(m);
-        cv.wait(m, [&] { return completed; });
+        cv.wait_for(m, timeout, [&] { return completed; });
+    }
+
+    template <typename Async>
+    auto wait_for(Async const& async, std::chrono::high_resolution_clock::duration const& timeout)
+    {
+        WINRT_ASSERT(!is_sta());
+        wait_for_completed(async, timeout);
+        return async.Status();
+    }
+
+    template <typename Async>
+    auto wait_get(Async const& async)
+    {
+        WINRT_ASSERT(!is_sta());
+
+        if (async.Status() == Windows::Foundation::AsyncStatus::Started)
+        {
+            wait_for_completed(async, {});
+        }
+
+        return async.GetResults();
     }
 
     template <typename Async>
