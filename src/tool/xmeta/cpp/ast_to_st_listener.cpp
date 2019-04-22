@@ -181,7 +181,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
         type = str_to_enum_semantics(ctx->enum_base()->enum_integral_type()->getText());
     }
 
-    std::shared_ptr<enum_model> new_enum = std::make_shared<enum_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), type);
+    std::shared_ptr<enum_model> new_enum = std::make_shared<enum_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
 
     for (auto field : ctx->enum_body()->enum_member_declaration())
     {
