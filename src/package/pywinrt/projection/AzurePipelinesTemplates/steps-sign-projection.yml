@@ -8,5 +8,5 @@ steps:
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
   inputs:
     signConfigXml: '$(Build.SourcesDirectory)/src/package/pywinrt/projection/SignConfig.xml'
-    inPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.pythonVersionSpec }}'
-    outPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.pythonVersionSpec }}'
+    inPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}'
+    outPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}'
