@@ -591,35 +591,42 @@ namespace xlang
                 }
 
                 w.write(format, param_name, param_name);
+                continue;
+            }
+
+            TypeDef signature_type;
+            auto category = get_category(param_signature->Type(), &signature_type);
+
+            if (param.Flags().In())
+            {
+                switch (category)
+                {
+                case param_category::object_type:
+                case param_category::string_type:
+                    w.write("*(void**)(&%)", param_name);
+                    break;
+                case param_category::generic_type:
+                case param_category::struct_type:
+                    w.write("impl::bind_in(%)", param_name);
+                    break;
+                case param_category::enum_type:
+                    w.write("static_cast<%>(%)", signature_type.FieldList().first.Signature().Type(), param_name);
+                    break;
+                case param_category::fundamental_type:
+                    w.write(param_name);
+                    break;
+                }
             }
             else
             {
-                if (param.Flags().In())
+                switch (category)
                 {
-                    XLANG_ASSERT(!param.Flags().Out());
-
-                    if (wrap_abi(param_signature->Type()))
-                    {
-                        w.write("get_abi(%)", param_name);
-                    }
-                    else
-                    {
-                        w.write(param_name);
-                    }
-                }
-                else
-                {
-                    XLANG_ASSERT(!param.Flags().In());
-                    XLANG_ASSERT(param.Flags().Out());
-
-                    if (wrap_abi(param_signature->Type()))
-                    {
-                        w.write("put_abi(%)", param_name);
-                    }
-                    else
-                    {
-                        w.write("&%", param_name);
-                    }
+                case param_category::fundamental_type:
+                    w.write("&%", param_name);
+                    break;
+                default:
+                    w.write("impl::bind_out(%)", param_name);
+                    break;
                 }
             }
         }
@@ -3039,7 +3046,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 w.write(strings::base_reference_produce);
             }
 
-            w.write(strings::base_async);
+            w.write(strings::base_coroutine_foundation);
         }
         else if (namespace_name == "Windows.Foundation.Collections")
         {
@@ -3052,6 +3059,14 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             w.write(strings::base_collections_input_map);
             w.write(strings::base_collections_vector);
             w.write(strings::base_collections_map);
+        }
+        else if (namespace_name == "Windows.System")
+        {
+            w.write(strings::base_coroutine_system);
+        }
+        else if (namespace_name == "Windows.UI.Core")
+        {
+            w.write(strings::base_coroutine_ui_core);
         }
         else if (namespace_name == "Windows.UI.Xaml.Interop")
         {

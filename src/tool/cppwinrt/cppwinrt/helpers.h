@@ -216,12 +216,10 @@ namespace xlang
         call(method_signature.return_signature().Type().Type(),
             [&](GenericTypeInstSig const& type)
         {
-            auto generic_type = type.GenericType().TypeRef();
+            auto const&[type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
 
-            if (generic_type.TypeNamespace() == "Windows.Foundation")
+            if (type_namespace == "Windows.Foundation")
             {
-                auto type_name = generic_type.TypeName();
-
                 async =
                     type_name == "IAsyncAction" ||
                     type_name == "IAsyncOperation`1" ||
@@ -237,22 +235,17 @@ namespace xlang
     static TypeDef get_base_class(TypeDef const& derived)
     {
         auto extends = derived.Extends();
-
         if (!extends)
         {
             return{};
         }
 
-        auto base = extends.TypeRef();
-        auto type_name = base.TypeName();
-        auto type_namespace = base.TypeNamespace();
-
-        if (type_name == "Object" && type_namespace == "System")
+        auto const&[extends_namespace, extends_name] = get_type_namespace_and_name(extends);
+        if (extends_name == "Object" && extends_namespace == "System")
         {
             return {};
         }
-
-        return find_required(base);
+        return find_required(extends);
     };
 
 
@@ -399,7 +392,7 @@ namespace xlang
 
                     guard = w.push_generic_params(type_signature.GenericTypeInst());
                     auto signature = type_signature.GenericTypeInst();
-                    info.type = find_required(signature.GenericType().TypeRef());
+                    info.type = find_required(signature.GenericType());
 
                     break;
                 }
@@ -569,15 +562,104 @@ namespace xlang
 
         call(signature.Type(),
             [&](ElementType type)
-        {
-            wrap = type == ElementType::String || type == ElementType::Object;
-        },
+            {
+                wrap = type == ElementType::String || type == ElementType::Object;
+            },
             [&](auto&&)
-        {
-            wrap = true;
-        });
+            {
+                wrap = true;
+            });
 
         return wrap;
+    }
+
+    enum class param_category
+    {
+        generic_type,
+        object_type,
+        string_type,
+        enum_type,
+        struct_type,
+        array_type,
+        fundamental_type,
+    };
+
+    inline param_category get_category(TypeSig const& signature, TypeDef* signature_type = nullptr)
+    {
+        if (signature.is_szarray())
+        {
+            return param_category::array_type;
+        }
+
+        param_category result{};
+
+        call(signature.Type(),
+            [&](ElementType type)
+            {
+                if (type == ElementType::String)
+                {
+                    result = param_category::string_type;
+                }
+                else if (type == ElementType::Object)
+                {
+                    result = param_category::object_type;
+                }
+                else
+                {
+                    result = param_category::fundamental_type;
+                }
+            },
+            [&](coded_index<TypeDefOrRef> const& type)
+            {
+                TypeDef type_def;
+
+                if (type.type() == TypeDefOrRef::TypeDef)
+                {
+                    type_def = type.TypeDef();
+                }
+                else
+                {
+                    auto type_ref = type.TypeRef();
+
+                    if (type_name(type_ref) == "System.Guid")
+                    {
+                        result = param_category::struct_type;
+                        return;
+                    }
+
+                    type_def = find_required(type_ref);
+                }
+
+                if (signature_type)
+                {
+                    *signature_type = type_def;
+                }
+
+                switch (get_category(type_def))
+                {
+                case category::interface_type:
+                case category::class_type:
+                case category::delegate_type:
+                    result = param_category::object_type;
+                    return;
+                case category::struct_type:
+                    result = param_category::struct_type;
+                    return;
+                case category::enum_type:
+                    result = param_category::enum_type;
+                    return;
+                }
+            },
+            [&](GenericTypeInstSig const&)
+            {
+                result = param_category::object_type;
+            },
+            [&](auto&&)
+            {
+                result = param_category::generic_type;
+            });
+
+        return result;
     }
 
     static bool is_object(TypeSig const& signature)
@@ -623,11 +705,10 @@ namespace xlang
         if (starts_with(name, "struct "))
         {
             auto ref = std::get<coded_index<TypeDefOrRef>>(type.Type());
-            XLANG_ASSERT(ref.type() == TypeDefOrRef::TypeRef);
 
             name = "struct{";
 
-            for (auto&& nested : find_required(ref.TypeRef()).FieldList())
+            for (auto&& nested : find_required(ref).FieldList())
             {
                 name += " " + get_field_abi(w, nested) + " ";
                 name += nested.Name();

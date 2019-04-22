@@ -48,7 +48,7 @@ namespace winrt
 
     private:
 
-        struct iterator final : Version::iterator_type, implements<iterator, Windows::Foundation::Collections::IIterator<T>>
+        struct iterator : Version::iterator_type, implements<iterator, Windows::Foundation::Collections::IIterator<T>>
         {
             void abi_enter()
             {
@@ -318,7 +318,7 @@ namespace winrt
             m_changed(static_cast<D const&>(*this), make<args>(change, index));
         }
 
-        struct args final : implements<args, Windows::Foundation::Collections::IVectorChangedEventArgs>
+        struct args : implements<args, Windows::Foundation::Collections::IVectorChangedEventArgs>
         {
             args(Windows::Foundation::Collections::CollectionChange const change, uint32_t const index) noexcept :
                 m_change(change),
@@ -444,7 +444,7 @@ namespace winrt
             m_changed(static_cast<D const&>(*this), make<args>(change, key));
         }
 
-        struct args final : implements<args, Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+        struct args : implements<args, Windows::Foundation::Collections::IMapChangedEventArgs<K>>
         {
             args(Windows::Foundation::Collections::CollectionChange const change, K const& key) noexcept :
                 m_change(change),

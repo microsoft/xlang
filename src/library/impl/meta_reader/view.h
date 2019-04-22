@@ -146,13 +146,17 @@ namespace xlang::meta::reader
         file_view(file_view&&) noexcept = default;
         file_view& operator=(file_view&&) noexcept = default;
 
-        file_view(std::string_view const& path) : byte_view{ open_file(path) }
+        file_view(std::string_view const& path) : byte_view{ open_file(path) }, m_backed_by_file{ true }
+        {
+        }
+
+        file_view(uint8_t const* const first, uint8_t const* const last) noexcept : byte_view{ first, last }, m_backed_by_file{ false }
         {
         }
 
         ~file_view() noexcept
         {
-            if (*this)
+            if (m_backed_by_file)
             {
 #if XLANG_PLATFORM_WINDOWS
                 UnmapViewOfFile(begin());
@@ -163,6 +167,8 @@ namespace xlang::meta::reader
         }
 
     private:
+
+        bool m_backed_by_file;
 
 #if XLANG_PLATFORM_WINDOWS
         struct handle

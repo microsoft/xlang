@@ -2,7 +2,7 @@
 namespace winrt::impl
 {
     template <typename T, typename Container>
-    struct observable_vector final :
+    struct observable_vector :
         implements<observable_vector<T, Container>, wfc::IObservableVector<T>, wfc::IVector<T>, wfc::IVectorView<T>, wfc::IIterable<T>>,
         observable_vector_base<observable_vector<T, Container>, T>
     {
