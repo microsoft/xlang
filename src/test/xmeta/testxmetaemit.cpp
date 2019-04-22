@@ -33,7 +33,6 @@ int setup_and_run_parser2(std::string const& idl, xlang_test_listener &listener,
     }
 
     tree::ParseTree *tree = parser.xlang();
-    tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
     return parser.getNumberOfSyntaxErrors();
 }
 
@@ -43,11 +42,8 @@ TEST_CASE("Assembly name metadata")
     std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
     emitter->initialize();
 
-    std::vector<uint8_t> metadata;
-    emitter->save_to_memory(&metadata);
-
     xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(metadata);
+    writer.add_metadata(emitter->save_to_memory());
 
     xlang::meta::reader::database db{ writer.save_to_memory() };
 
@@ -80,6 +76,7 @@ TEST_CASE("Enum metadata")
                 Microphone = 0x0002, \
             } \
         }";
+
     std::string assembly_name = "testidl";
     xlang_test_listener listener;
     REQUIRE(setup_and_run_parser2(test_idl, listener) == 0);
@@ -108,11 +105,8 @@ TEST_CASE("Enum metadata")
     walker.register_listener(emitter);
     walker.walk();
 
-    std::vector<uint8_t> metadata;
-    emitter->save_to_memory(&metadata);
-
     xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(metadata);
+    writer.add_metadata(emitter->save_to_memory());
     xlang::meta::reader::database db{ writer.save_to_memory() };
 
     REQUIRE(db.TypeDef.size() == 2);

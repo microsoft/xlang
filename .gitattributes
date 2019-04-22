@@ -4,3 +4,4 @@
 *.onnx  -text
 *.winmd -text
 *.jar   -text
+*.zip   -text
