@@ -40,20 +40,6 @@ namespace xlang::xmeta
 
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
-
-        std::string s = tree->toStringTree(&parser);
-        std::cout << tree->toStringTree(&parser) << std::endl;
-
-        std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
-
-        // This gets the token stream and prints out all the tokens corresponding to the file
-        antlr4::TokenStream * ts = parser.getTokenStream();
-        for (size_t i = 0; i < ts->size(); i++)
-        {
-            std::cout << ts->get(i)->getType() << std::endl;
-        }
-
-        std::cout << parser.getNumberOfSyntaxErrors() << std::endl;
         return parser.getNumberOfSyntaxErrors();
     }
 

@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "antlr4-runtime.h"
-#include "generated/XlangParserBaseListener.h"
+#include "XlangParserBaseListener.h"
 
 #include "models/xmeta_models.h"
 

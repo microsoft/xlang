@@ -15,12 +15,12 @@ add_custom_command(TARGET test_xmeta POST_BUILD
 endif()
 
 target_sources(test_xmeta
-    PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp test_symbol_table.cpp)
+    PUBLIC pch.cpp testlexer.cpp testmidlcompat.cpp test_symbol_table.cpp xlang_test_listener.cpp)
 
 target_include_directories(test_xmeta
     PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
 
-target_link_libraries(test_xmeta xmeta_antlr)
+target_link_libraries(test_xmeta xmeta_antlr xmeta_model)
 
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(test_xmeta pch.cpp pch.h)

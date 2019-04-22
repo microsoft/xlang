@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string_view>
-#include "generated/XlangParserBaseListener.h"
+#include "XlangParserBaseListener.h"
 #include "models/enum_model.h"
 
 namespace xlang::xmeta
