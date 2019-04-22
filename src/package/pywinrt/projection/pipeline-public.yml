@@ -6,4 +6,3 @@ jobs:
 - template: AzurePipelinesTemplates/job-package-projection.yml
   parameters:
     dependsOn: build_projection
-    artifactName: projection
