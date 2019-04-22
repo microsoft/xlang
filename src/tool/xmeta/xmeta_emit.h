@@ -21,8 +21,8 @@ namespace xlang::xmeta
 
         void initialize();
         void uninitialize();
-        void save_to_file();
-        void save_to_memory(std::vector<uint8_t> *metadata);
+        void save_to_file() const;
+		std::vector<uint8_t> save_to_memory() const;
 
         void listen_namespace_model(std::shared_ptr<namespace_model> const& model) override;
         void listen_class_model(std::shared_ptr<class_model> const& model) override;

@@ -148,17 +148,19 @@ namespace xlang::xmeta
         CoUninitialize();
     }
 
-    void xmeta_emit::save_to_file()
+    void xmeta_emit::save_to_file() const
     {
         m_metadata_emitter->Save((s2ws(m_assembly_name) + L".xmeta").c_str(), 0);
     }
 
-    void xmeta_emit::save_to_memory(std::vector<uint8_t> *metadata)
+	std::vector<uint8_t> xmeta_emit::save_to_memory() const
     {
         DWORD save_size;
         m_metadata_emitter->GetSaveSize(CorSaveSize::cssAccurate, &save_size);
-        metadata->resize(save_size);
-        check_hresult(m_metadata_emitter->SaveToMemory(metadata->data(), save_size));
+		std::vector<uint8_t> metadata;
+        metadata.resize(save_size);
+        check_hresult(m_metadata_emitter->SaveToMemory(metadata.data(), save_size));
+		return metadata;
     }
 
     void xmeta_emit::define_assembly()

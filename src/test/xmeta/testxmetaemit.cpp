@@ -41,11 +41,8 @@ TEST_CASE("Assembly name metadata")
     std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_namme);
     emitter->initialize();
 
-    std::vector<uint8_t> metadata;
-    emitter->save_to_memory(&metadata);
-
     xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(metadata);
+    writer.add_metadata(emitter->save_to_memory());
 
     xlang::meta::reader::database db{ writer.save_to_memory() };
 
@@ -92,11 +89,8 @@ TEST_CASE("Enum metadata")
     //walker.register_listener(emitter);
     ////walker.walk();
 
-    //std::vector<uint8_t> metadata;
-    //emitter->save_to_memory(&metadata);
-
     //xlang::meta::writer::pe_writer writer;
-    //writer.add_metadata(metadata);
+    //writer.add_metadata(emitter->save_to_memory());
 
     //xlang::meta::reader::database db{ writer.save_to_memory() };
 
