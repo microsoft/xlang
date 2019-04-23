@@ -16,7 +16,11 @@ jobs:
       Release_x64:
         buildArchitecture: 'amd64'
         buildConfiguration: 'Release'
-  steps:    
+  steps:
+  - script: echo $(ProjectionType)
+  - script: echo $(variables['ProjectionType'])
+  - script: echo ${{ parameters.buildFullProjection }}
+  
   - template: steps-build-projection.yml
     parameters:
       architecture: $(buildArchitecture)  
