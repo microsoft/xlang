@@ -4,6 +4,10 @@ jobs:
     vmImage: 'windows-2019'
 
   steps:
+  - script: |
+    @echo off
+    @echo Build.BuildNumber $(Build.BuildNumber)
+
   - template: task-vsdevcmd.yml
     parameters:
       buildArchitecture: 'x86'  

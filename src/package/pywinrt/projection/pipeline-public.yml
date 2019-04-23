@@ -1,3 +1,4 @@
+name: $(Date:yyyyMMdd).$(Rev:.r)
 jobs:
 - template: AzurePipelinesTemplates/job-build-pywinrt.yml
 
