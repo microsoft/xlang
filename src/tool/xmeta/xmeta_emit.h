@@ -38,6 +38,7 @@ namespace xlang::xmeta
 
         void define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return);
         void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
+
     private:
         std::string m_assembly_name;
         winrt::com_ptr<IMetaDataDispenserEx> m_metadata_dispenser;
@@ -81,7 +82,6 @@ namespace xlang::xmeta
         // Windows specific methods
         void define_assembly();
         void define_common_reference_assembly();
-
 
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed

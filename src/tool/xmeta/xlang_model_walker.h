@@ -7,7 +7,6 @@ namespace xlang::xmeta
     class xlang_model_walker
     {
     public:
-
         xlang_model_walker(std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> const& namespaces)
             : m_namespaces(namespaces)
         { };

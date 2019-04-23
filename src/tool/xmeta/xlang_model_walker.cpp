@@ -47,12 +47,10 @@ namespace xlang::xmeta
                 enter_delegate_model(key);
             }
         }
-
         for (auto const&[key, val] : model->get_child_namespaces())
         {
             enter_namespace_model(val);
         }
-       
     }
 
     void xlang_model_walker::enter_class_model(std::shared_ptr<class_model> const& model)

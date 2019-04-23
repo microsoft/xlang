@@ -31,7 +31,7 @@ namespace xlang::xmeta
             m_return_type{ std::move(return_type) },
             m_parent{ parent },
             m_semantic{ sem },
-			m_implemented_method_ref{ "" }
+            m_implemented_method_ref{ "" }
         { }
 
         method_model(std::string_view const& id, 
