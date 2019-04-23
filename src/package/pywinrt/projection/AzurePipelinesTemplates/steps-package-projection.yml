@@ -2,7 +2,20 @@ parameters:
   architecture: 'amd64'
 
 steps:
-- script: python setup.py bdist_wheel --python-tag cp37 -p win-${{ parameters.architecture }}
+
+- ${{ if eq(parameters.architecture, 'amd64') }}:
+  - script: |
+      @echo off
+      @echo ##vso[task.setvariable variable=platname]win-amd64
+    displayName: 'set platname to win-amd64'
+
+- ${{ if eq(parameters.architecture, 'x86') }}:
+  - script: |
+      @echo off
+      @echo ##vso[task.setvariable variable=platname]win32
+    displayName: 'set platname to win32'
+
+- script: python setup.py bdist_wheel --python-tag cp37 --plat-name $(platname)
   workingDirectory: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }} 
   displayName: python setup.py bdist_wheel (${{ parameters.architecture }})
 
