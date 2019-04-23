@@ -7,6 +7,7 @@ jobs:
   - script: |
     @echo off
     @echo Build.BuildNumber $(Build.BuildNumber)
+    @echo buildFullProjection $(buildFullProjection)
 
   - template: task-vsdevcmd.yml
     parameters:
