@@ -18,3 +18,4 @@ jobs:
     parameters:
       architecture: $(buildArchitecture)  
       pythonVersionSpec: '3.7.x'
+      projectionType: $(ProjectionType)
