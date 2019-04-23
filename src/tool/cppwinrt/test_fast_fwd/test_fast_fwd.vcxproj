@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Hard-coded reference to cppwinrt props file, as if NuGet package added -->
+  <Import Project="..\..\..\package\cppwinrt\nuget\Microsoft.Windows.CppWinRT.props"/>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|ARM">
       <Configuration>Debug</Configuration>
@@ -51,10 +53,10 @@
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
+  <!-- <ImportGroup Label="ExtensionSettings">
     <Import Condition="'$(Platform)'=='Win32' or '$(Platform)'=='x64'" Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
     <Import Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'" Project="$(VCTargetsPath)\BuildCustomizations\marmasm.props" />
-  </ImportGroup>
+  </ImportGroup> -->
   <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
@@ -309,7 +311,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
-  <Target Name="PreprocessArmThunk" Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'"
+  <!-- <Target Name="PreprocessArmThunk" Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'"
     BeforeTargets="_MARMASM" Outputs="$(IntDir)thunks.pp" Inputs="..\fast_fwd\$(CmakePlatform)\thunks.asm">
     <Exec Command="cl /I..\fast_fwd /E /Tc ..\fast_fwd\$(Platform)\thunks.asm > $(IntDir)thunks.pp" />
   </Target>
@@ -324,7 +326,7 @@
       <FileType>Document</FileType>
       <IncludePaths>..\fast_fwd</IncludePaths>
     </MARMASM>
-  </ItemGroup>
+  </ItemGroup> -->
   <ItemGroup>
     <Midl Include="FastForwarderTest.idl">
       <AdditionalMetadataDirectories>C:\Windows\System32\WinMetadata</AdditionalMetadataDirectories>
@@ -395,7 +397,9 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Condition="'$(Platform)'=='Win32' or '$(Platform)'=='x64'" Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
-    <Import Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'" Project="$(VCTargetsPath)\BuildCustomizations\marmasm.targets" />
+    <!-- Hard-coded reference to cppwinrt targets file, as if NuGet package added -->
+    <Import Project="..\..\..\package\cppwinrt\nuget\Microsoft.Windows.CppWinRT.FastAbi.targets"/>
+    <!-- <Import Condition="'$(Platform)'=='Win32' or '$(Platform)'=='x64'" Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+    <Import Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'" Project="$(VCTargetsPath)\BuildCustomizations\marmasm.targets" /> -->
   </ImportGroup>
 </Project>

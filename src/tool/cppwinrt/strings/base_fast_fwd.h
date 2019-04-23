@@ -1030,10 +1030,10 @@ namespace winrt::impl
         void* const* m_vfptr;
         inspectable_abi* m_owner;
         std::size_t m_offset;
-        winrt::guid m_iid;
+        guid m_iid;
         std::atomic<uint32_t> m_references{ 1 };
 
-        fast_abi_forwarder(inspectable_abi* owner, winrt::guid const& iid, std::size_t offset) noexcept :
+        fast_abi_forwarder(inspectable_abi* owner, guid const& iid, std::size_t offset) noexcept :
             m_vfptr(s_vtable), m_owner(owner), m_iid(iid), m_offset(offset)
         {
             m_owner->AddRef();
@@ -1044,7 +1044,7 @@ namespace winrt::impl
             m_owner->Release();
         }
 
-        static int32_t WINRT_CALL QueryInterface(fast_abi_forwarder* self, winrt::guid const& iid, void** object) noexcept
+        static int32_t WINRT_CALL QueryInterface(fast_abi_forwarder* self, guid const& iid, void** object) noexcept
         {
             if (iid != self->m_iid)
             {
@@ -1072,7 +1072,7 @@ namespace winrt::impl
             return remaining;
         }
 
-        static uint32_t WINRT_CALL GetIids(fast_abi_forwarder* self, uint32_t* iidCount, winrt::guid** iids) noexcept
+        static uint32_t WINRT_CALL GetIids(fast_abi_forwarder* self, uint32_t* iidCount, guid** iids) noexcept
         {
             return self->m_owner->GetIids(iidCount, iids);
         }

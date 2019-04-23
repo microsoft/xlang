@@ -12,12 +12,13 @@ using namespace FastForwarderTest;
 #define REQUIRE_STR_EQUAL(s1, s2) \
     REQUIRE(std::wstring(s1).compare(std::wstring(s2)) == 0)
 
-template<typename TOwner, typename TForwarder>
-auto create_fast_abi_forwarder(TOwner owner, TForwarder& forwarder, size_t offset)
+template<typename TForwarder, typename TOwner>
+auto make_fast_abi_forwarder(TOwner const& owner, size_t offset)
 {
-	auto forwarder_id = guid_of<TForwarder>();
-	auto owner_abi = reinterpret_cast<impl::inspectable_abi*>(owner ? get_abi(owner) : nullptr);
-    *put_abi(forwarder) = reinterpret_cast<impl::inspectable_abi*>(new typename winrt::impl::fast_abi_forwarder(owner_abi, forwarder_id, offset));
+	TForwarder forwarder;
+	auto owner_abi = reinterpret_cast<impl::inspectable_abi*>(get_abi(owner));
+	*put_abi(forwarder) = new winrt::impl::fast_abi_forwarder(owner_abi, guid_of<TForwarder>(), offset);
+	return std::move(forwarder);
 }
 
 static inline size_t s_instances = 0;
@@ -203,12 +204,10 @@ TEST_CASE("MockUri")
 {
 	Uri uri{ L"http://aka.ms/xlang" };
 
-	IStringable str{ nullptr };
-    create_fast_abi_forwarder(uri, str, 1);
+	auto str = make_fast_abi_forwarder<IStringable>(uri, 1);
 	REQUIRE_STR_EQUAL(uri.DisplayUri(), str.ToString());
 
-	IUriRuntimeClassWithAbsoluteCanonicalUri can{ nullptr };
-    create_fast_abi_forwarder(uri, can, 0);
+	auto can = make_fast_abi_forwarder<IUriRuntimeClassWithAbsoluteCanonicalUri>(uri, 0);
 	REQUIRE_STR_EQUAL(can.AbsoluteCanonicalUri(), uri.AbsoluteCanonicalUri());
 	REQUIRE_STR_EQUAL(can.DisplayIri(), uri.DisplayIri());
 }
@@ -216,8 +215,7 @@ TEST_CASE("MockUri")
 TEST_CASE("Interface1")
 {
 	Class obj;
-	IInterface1 ifc1{ nullptr };
-    create_fast_abi_forwarder(obj, ifc1, 0);
+	auto ifc1 = make_fast_abi_forwarder<IInterface1>(obj, 0);
 
 	// Test various property get/set equivalences
 	obj.BooleanProp(true);
@@ -284,8 +282,7 @@ TEST_CASE("Interface1")
 TEST_CASE("Interface2")
 {
 	Class obj;
-	IInterface2 ifc2{ nullptr };
-    create_fast_abi_forwarder(obj, ifc2, 24);
+	auto ifc2 = make_fast_abi_forwarder<IInterface2>(obj, 24);
 
 	auto some_string = L"some string";
 	obj.SetString(some_string);
@@ -297,8 +294,7 @@ TEST_CASE("Interface2")
 TEST_CASE("Interface3")
 {
 	Class obj;
-	IInterface3 ifc3{ nullptr };
-    create_fast_abi_forwarder(obj, ifc3, 26);
+	auto ifc3 = make_fast_abi_forwarder<IInterface3>(obj, 26);
 
 	Struct str = ifc3.BigMethod(
 		// 9 integer args across registers and stack, all arches
@@ -319,14 +315,9 @@ TEST_CASE("QueryInterface")
 
 	REQUIRE(s_instances > 0);
 
-	IInterface1 ifc1{ nullptr };
-    create_fast_abi_forwarder(obj, ifc1, 0);
-
-	IInterface2 ifc2{ nullptr };
-    create_fast_abi_forwarder(obj, ifc2, 24);
-
-	IInterface3 ifc3{ nullptr };
-    create_fast_abi_forwarder(obj, ifc3, 26);
+	auto ifc1 = make_fast_abi_forwarder<IInterface1>(obj, 0);
+	auto ifc2 = make_fast_abi_forwarder<IInterface2>(obj, 24);
+	auto ifc3 = make_fast_abi_forwarder<IInterface3>(obj, 26);
 
 	ifc3 = nullptr;
 	ifc2 = nullptr;
