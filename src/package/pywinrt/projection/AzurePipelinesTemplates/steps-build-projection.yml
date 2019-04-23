@@ -61,11 +61,6 @@ steps:
     contents: '*.pyd'
     targetFolder: src/package/pywinrt/projection/pywinrt/winrt
 
-# - task: ArchiveFiles@2
-#   inputs:
-#     rootFolderOrFile: src/package/pywinrt/projection/pywinrt/
-#     archiveFile: '$(Build.ArtifactStagingDirectory)/projection/$(buildArchitecture).zip'
-
 - task: CopyFiles@2
   inputs:
     sourceFolder: src/package/pywinrt/projection/pywinrt/
