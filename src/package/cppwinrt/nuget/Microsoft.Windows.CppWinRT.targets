@@ -14,7 +14,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTTargetPlatformReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(TargetPlatformVersion)</CppWinRTTargetPlatformReferences>
         <CppWinRTWriteOnlyWhenDifferent Condition="('$(CppWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</CppWinRTWriteOnlyWhenDifferent>
         <CppWinRTWriteOnlyWhenDifferent Condition="'$(CppWinRTWriteOnlyWhenDifferent)' != 'true'">false</CppWinRTWriteOnlyWhenDifferent>
-        <CppWinRTPackageDir>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))</CppWinRTPackageDir>
         <CppWinRTPath Condition="'$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)..\..\bin\"</CppWinRTPath>
         
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
