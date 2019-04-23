@@ -78,12 +78,12 @@ TEST_CASE("Enum metadata")
     xlang::meta::writer::pe_writer writer;
     writer.add_metadata(emitter->save_to_memory());
     xlang::meta::reader::database db{ writer.save_to_memory() };
-
     REQUIRE(db.TypeDef.size() == 2);
-    REQUIRE(db.TypeDef[1].TypeName().compare("Color") == 0);
 
     auto const& enum_type = db.TypeDef[1];
     REQUIRE(enum_type.TypeName() == "Color");
+    // REQUIRE(enum_type.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
+
     auto const& fields = enum_type.FieldList();
     REQUIRE(size(fields) == 4); // # of enumerators plus one for the value
 
@@ -104,16 +104,17 @@ TEST_CASE("Enum metadata")
         REQUIRE(enum_field.Constant().ValueInt32() == enum_values[i - 1]);
 
         auto const& field_sig = enum_field.Signature();
-        //REQUIRE(empty(field_sig.CustomMod()));
-        //REQUIRE(field_sig.get_CallingConvention() == CallingConvention::Field);
-        //REQUIRE(field_sig.Type().is_szarray == false);
+        REQUIRE(empty(field_sig.CustomMod()));
+        REQUIRE(field_sig.get_CallingConvention() == CallingConvention::Field);
+        REQUIRE(!field_sig.Type().is_szarray());
 
- /*       auto const& coded_type = std::get<coded_index<TypeDefOrRef>>(field_sig.Type().Type());
+        auto const& coded_type = std::get<coded_index<TypeDefOrRef>>(field_sig.Type().Type());
         REQUIRE(coded_type.type() == TypeDefOrRef::TypeRef);
-*/
-        //auto const& type_ref = coded_type.TypeRef();
-        //REQUIRE(type_ref.TypeName() == "Color");
-        //REQUIRE(type_ref.ResolutionScope().type() == ResolutionScope::Module);
+
+        auto const& type_ref = coded_type.TypeRef();
+        REQUIRE(type_ref.TypeName() == "Color");
+        // REQUIRE(type_ref.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
+        REQUIRE(type_ref.ResolutionScope().type() == ResolutionScope::Module);
     }
 
     emitter->uninitialize();
