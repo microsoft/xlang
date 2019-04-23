@@ -41,12 +41,15 @@ int main(int argc, const char* argv[])
     xmeta_idl_reader reader{ "" };
     reader.read(stream);
 
-    std::string assembly_name = remove_path(remove_extension(std::string(argv[1])));
+    std::string assembly_name = remove_path(std::string(argv[1]));
     xlang_model_walker walker(reader.get_namespaces());
     std::shared_ptr<xmeta_emit> emitter = std::make_shared<xmeta_emit>(assembly_name);
-
     emitter->initialize();
     walker.register_listener(emitter);
     walker.walk();
-    emitter->save_to_file();
+
+    assembly_name = remove_extension(assembly_name);
+    xlang::meta::writer::pe_writer writer;
+    writer.add_metadata(emitter->save_to_memory());
+    writer.save_to_file(std::filesystem::current_path().concat("\\" + assembly_name + ".xmd"));
 }

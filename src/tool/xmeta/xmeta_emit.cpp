@@ -100,14 +100,18 @@ namespace
             return ElementType::Void;
         }
     }
+
+    std::string remove_extension(const std::string& filename) {
+        size_t lastdot = filename.find_last_of(".");
+        if (lastdot == std::string::npos) return filename;
+        return filename.substr(0, lastdot);
+    }
+
 }
 
 
 namespace xlang::xmeta
 {
-    // Hard-coded the mscorlib strong name.
-    BYTE s_mscorlibStrongNameBlob[] = { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 };
-
     void xmeta_emit::initialize() 
     {
         // Getting the meta data dispenser
@@ -149,9 +153,10 @@ namespace xlang::xmeta
         CoUninitialize();
     }
 
+    // This doesn't really output in a PE format
     void xmeta_emit::save_to_file() const
     {
-        m_metadata_emitter->Save((s2ws(m_assembly_name) + L".xmeta").c_str(), 0);
+        m_metadata_emitter->Save((s2ws(remove_extension(m_assembly_name)) + L".xmeta").c_str(), 0);
     }
 
 	std::vector<uint8_t> xmeta_emit::save_to_memory() const
@@ -180,6 +185,8 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_common_reference_assembly()
     {
+        // Hard-coded the mscorlib strong name.
+        constexpr BYTE s_mscorlibStrongNameBlob[] = { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 };
         check_hresult(m_metadata_assembly_emitter->DefineAssemblyRef(
             s_mscorlibStrongNameBlob,
             sizeof(s_mscorlibStrongNameBlob),
@@ -224,249 +231,248 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& model) 
     {
-        mdTypeDef token_class_type_def = mdTokenNil;
-        mdTypeRef token_local_type_ref = mdTokenNil;
+        //mdTypeDef token_class_type_def = mdTokenNil;
+        //mdTypeRef token_local_type_ref = mdTokenNil;
 
-        std::string class_name = model->get_id();
-        DWORD type_flag = runtimeclass_type_flag;
-        // MIDL3 will disable certain flags depending on these conditions
-        //if (pRuntimeClass->IsComposable())
+        //std::string class_name = model->get_id();
+        //DWORD type_flag = runtimeclass_type_flag;
+        //// MIDL3 will disable certain flags depending on these conditions
+        ////if (pRuntimeClass->IsComposable())
+        ////{
+        ////    // Turn off the sealed flag
+        ////    type_flag = dwTypeFlag & (~tdSealed);
+        ////}
+
+        //////  Empty runtime classes should appear with the abstract flag.
+        ////if (pRuntimeClass->IsEmpty())
+        ////{
+        ////    type_flag = dwTypeFlag | tdAbstract;
+        ////}
+
+        //mdTypeDef implements[] = { mdTokenNil };
+
+        //auto class_type_def = define_type_def(
+        //    class_name,
+        //    type_flag,
+        //    mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
+        //    implements // Implements (Going to be null until we find out if it is base class));
+        //);
+
+        //// TODO: Class base and interface implements
+
+        //for (auto const& val : model->get_methods())
         //{
-        //    // Turn off the sealed flag
-        //    type_flag = dwTypeFlag & (~tdSealed);
+        //    define_method(val, token_class_type_def);
         //}
-
-        ////  Empty runtime classes should appear with the abstract flag.
-        //if (pRuntimeClass->IsEmpty())
+        //for (auto const& val : model->get_properties())
         //{
-        //    type_flag = dwTypeFlag | tdAbstract;
+        //    define_property(val, token_class_type_def);
         //}
-
-        mdTypeDef implements[] = { mdTokenNil };
-
-        auto class_type_def = define_type_def(
-            class_name,
-            type_flag,
-            mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
-            implements // Implements (Going to be null until we find out if it is base class));
-        );
-
-        // TODO: Class base and interface implements
-
-        for (auto const& val : model->get_methods())
-        {
-            define_method(val, token_class_type_def);
-        }
-        for (auto const& val : model->get_properties())
-        {
-            define_property(val, token_class_type_def);
-        }
-        for (auto const& val : model->get_events())
-        {
-            define_event(val, token_class_type_def);
-        }
+        //for (auto const& val : model->get_events())
+        //{
+        //    define_event(val, token_class_type_def);
+        //}
     }
 
     void xmeta_emit::define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def) 
     {
-        std::wstring method_name = s2ws(model->get_id());
+        //std::wstring method_name = s2ws(model->get_id());
 
-        DWORD method_flag;
-        mdMethodDef token_method_def;
-        //m_metadata_emitter->DefineMethod(
-        //    token_def,
-        //    method_name.c_str(),
-        //    ,
-        //    ,
-        //    miRuntime,
-        //    &token_method_def);
+        //DWORD method_flag;
+        //mdMethodDef token_method_def;
+        ////m_metadata_emitter->DefineMethod(
+        ////    token_def,
+        ////    method_name.c_str(),
+        ////    ,
+        ////    ,
+        ////    miRuntime,
+        ////    &token_method_def);
 
-        /* Define return value */
-        mdParamDef token_return; // To be used for attributes later
-        define_return(model->get_return_type(), token_method_def, &token_return);
+        ///* Define return value */
+        //mdParamDef token_return; // To be used for attributes later
+        //define_return(model->get_return_type(), token_method_def, &token_return);
 
-        /* Define formal parameters */
-        int index = 1;
-        for (auto const& val : model->get_formal_parameters())
-        {
-            define_parameters(val, token_method_def, index);
-            index++;
-        }
-
+        ///* Define formal parameters */
+        //int index = 1;
+        //for (auto const& val : model->get_formal_parameters())
+        //{
+        //    define_parameters(val, token_method_def, index);
+        //    index++;
+        //}
     }
 
     void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def) 
     {
-        std::wstring property_name = s2ws(model->get_id());
-        
-        mdMethodDef token_get_method = mdTokenNil;
-        mdMethodDef token_set_method = mdTokenNil;
-        DWORD property_flag = 0;
-        DWORD c_plus_type_flag;
-        std::shared_ptr<method_model> get_method_model = model->get_get_method();
-        if (get_method_model != nullptr) //TODO: This case is not suppose to happen
-        {
-            std::wstring get_method_name = s2ws(get_method_model->get_id());
-            PCCOR_SIGNATURE pv_sig_blob = NULL;
-            ULONG cb_sig_blob = 0;
-            DWORD impl_flag = 0;
-            check_hresult(m_metadata_emitter->DefineMethod(
-                token_def,
-                get_method_name.c_str(),
-                property_flag,
-                pv_sig_blob,
-                cb_sig_blob,
-                miRuntime,
-                impl_flag,
-                &token_get_method));
-        }
+        //std::wstring property_name = s2ws(model->get_id());
+        //
+        //mdMethodDef token_get_method = mdTokenNil;
+        //mdMethodDef token_set_method = mdTokenNil;
+        //DWORD property_flag = 0;
+        //DWORD c_plus_type_flag;
+        //std::shared_ptr<method_model> get_method_model = model->get_get_method();
+        //if (get_method_model != nullptr) //TODO: This case is not suppose to happen
+        //{
+        //    std::wstring get_method_name = s2ws(get_method_model->get_id());
+        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
+        //    ULONG cb_sig_blob = 0;
+        //    DWORD impl_flag = 0;
+        //    check_hresult(m_metadata_emitter->DefineMethod(
+        //        token_def,
+        //        get_method_name.c_str(),
+        //        property_flag,
+        //        pv_sig_blob,
+        //        cb_sig_blob,
+        //        miRuntime,
+        //        impl_flag,
+        //        &token_get_method));
+        //}
 
-        std::shared_ptr<method_model> set_method_model = model->get_set_method();
-        if (set_method_model != nullptr)
-        {
-            std::wstring set_method_name = s2ws(set_method_model->get_id());
-            PCCOR_SIGNATURE pv_sig_blob = NULL;
-            ULONG cb_sig_blob = 0;
-            DWORD impl_flag = 0;
-            check_hresult(m_metadata_emitter->DefineMethod(
-                token_def,
-                set_method_name.c_str(),
-                property_flag,
-                pv_sig_blob,
-                cb_sig_blob,
-                miRuntime,
-                impl_flag,
-                &token_set_method));
-        }
+        //std::shared_ptr<method_model> set_method_model = model->get_set_method();
+        //if (set_method_model != nullptr)
+        //{
+        //    std::wstring set_method_name = s2ws(set_method_model->get_id());
+        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
+        //    ULONG cb_sig_blob = 0;
+        //    DWORD impl_flag = 0;
+        //    check_hresult(m_metadata_emitter->DefineMethod(
+        //        token_def,
+        //        set_method_name.c_str(),
+        //        property_flag,
+        //        pv_sig_blob,
+        //        cb_sig_blob,
+        //        miRuntime,
+        //        impl_flag,
+        //        &token_set_method));
+        //}
 
-        mdProperty token_property;
-        //m_metadata_emitter->DefineProperty(
-        //    token_class,
-        //    property_name.c_str(),
-        //    property_flag,
-        //    , // pvSig
-        //    , // cbsig
-        //    , // c_plus_type_flag
-        //    nullptr,
-        //    0,
-        //    token_set_method,
-        //    token_get_method,
-        //    mdTokenNil,
-        //    &token_property);
+        //mdProperty token_property;
+        ////m_metadata_emitter->DefineProperty(
+        ////    token_class,
+        ////    property_name.c_str(),
+        ////    property_flag,
+        ////    , // pvSig
+        ////    , // cbsig
+        ////    , // c_plus_type_flag
+        ////    nullptr,
+        ////    0,
+        ////    token_set_method,
+        ////    token_get_method,
+        ////    mdTokenNil,
+        ////    &token_property);
     }
 
     void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def)
     {
-        std::wstring event_name = s2ws(model->get_id());
+        //std::wstring event_name = s2ws(model->get_id());
 
-        mdMethodDef token_add_method = mdTokenNil;
-        mdMethodDef token_remove_method = mdTokenNil;
-        DWORD event_flag = 0;
-        DWORD c_plus_type_flag;
-        std::shared_ptr<method_model> add_method_model = model->get_add_method();
-        if (add_method_model != nullptr) 
-        {
-            std::wstring get_method_name = s2ws(add_method_model->get_id());
-            PCCOR_SIGNATURE pv_sig_blob = NULL;
-            ULONG cb_sig_blob = 0;
-            DWORD impl_flag = 0;
-            check_hresult(m_metadata_emitter->DefineMethod(
-                token_def,
-                get_method_name.c_str(),
-                event_flag,
-                pv_sig_blob,
-                cb_sig_blob,
-                miRuntime,
-                impl_flag,
-                &token_add_method));
+        //mdMethodDef token_add_method = mdTokenNil;
+        //mdMethodDef token_remove_method = mdTokenNil;
+        //DWORD event_flag = 0;
+        //DWORD c_plus_type_flag;
+        //std::shared_ptr<method_model> add_method_model = model->get_add_method();
+        //if (add_method_model != nullptr) 
+        //{
+        //    std::wstring get_method_name = s2ws(add_method_model->get_id());
+        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
+        //    ULONG cb_sig_blob = 0;
+        //    DWORD impl_flag = 0;
+        //    check_hresult(m_metadata_emitter->DefineMethod(
+        //        token_def,
+        //        get_method_name.c_str(),
+        //        event_flag,
+        //        pv_sig_blob,
+        //        cb_sig_blob,
+        //        miRuntime,
+        //        impl_flag,
+        //        &token_add_method));
 
-        }
-        std::shared_ptr<method_model> remove_method_model = model->get_remove_method();
-        if (remove_method_model != nullptr)
-        {
-            std::wstring set_method_name = s2ws(remove_method_model->get_id());
-            PCCOR_SIGNATURE pv_sig_blob = NULL;
-            ULONG cb_sig_blob = 0;
-            DWORD impl_flag = 0;
-            check_hresult(m_metadata_emitter->DefineMethod(
-                token_def,
-                set_method_name.c_str(),
-                event_flag,
-                pv_sig_blob,
-                cb_sig_blob,
-                miRuntime,
-                impl_flag,
-                &token_remove_method));
-        }
+        //}
+        //std::shared_ptr<method_model> remove_method_model = model->get_remove_method();
+        //if (remove_method_model != nullptr)
+        //{
+        //    std::wstring set_method_name = s2ws(remove_method_model->get_id());
+        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
+        //    ULONG cb_sig_blob = 0;
+        //    DWORD impl_flag = 0;
+        //    check_hresult(m_metadata_emitter->DefineMethod(
+        //        token_def,
+        //        set_method_name.c_str(),
+        //        event_flag,
+        //        pv_sig_blob,
+        //        cb_sig_blob,
+        //        miRuntime,
+        //        impl_flag,
+        //        &token_remove_method));
+        //}
 
-        mdProperty token_event;
-        //m_metadata_emitter->DefineEvent(
-        //    token_class_def,
-        //    event_name.c_str(),
-        //    property_flag,
-        //    , // pvSig
-        //    , // cbsig
-        //    , // c_plus_type_flag
-        //    nullptr,
-        //    0,
-        //    token_add_method,
-        //    token_remove_method,
-        //    mdTokenNil,
-        //    &token_event);
+        //mdProperty token_event;
+        ////m_metadata_emitter->DefineEvent(
+        ////    token_class_def,
+        ////    event_name.c_str(),
+        ////    property_flag,
+        ////    , // pvSig
+        ////    , // cbsig
+        ////    , // c_plus_type_flag
+        ////    nullptr,
+        ////    0,
+        ////    token_add_method,
+        ////    token_remove_method,
+        ////    mdTokenNil,
+        ////    &token_event);
     }
     
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        mdTypeDef implements[] = { mdTokenNil };
-        auto struct_type_def = define_type_def(model->get_id(), struct_type_flag, token_value_type, implements);
+        //mdTypeDef implements[] = { mdTokenNil };
+        //auto struct_type_def = define_type_def(model->get_id(), struct_type_flag, token_value_type, implements);
 
-        for (std::pair<type_ref, std::string> const& field : model->get_fields())
-        {
-            mdFieldDef token_field;
-            //m_metadata_emitter->DefineField(
-            //    token_struct_type_def, 
-            //    s2ws(field.second).c_str(), 
-            //    fdPublic, 
-            //    ,
-            //    ,
-            //    ELEMENT_TYPE_END,
-            //    nullptr,
-            //    0,
-            //    &token_field);
+        //for (std::pair<type_ref, std::string> const& field : model->get_fields())
+        //{
+        //    mdFieldDef token_field;
+        //    //m_metadata_emitter->DefineField(
+        //    //    token_struct_type_def, 
+        //    //    s2ws(field.second).c_str(), 
+        //    //    fdPublic, 
+        //    //    ,
+        //    //    ,
+        //    //    ELEMENT_TYPE_END,
+        //    //    nullptr,
+        //    //    0,
+        //    //    &token_field);
 
-        }
+        //}
     }
     
     void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model) 
     {
-        DWORD type_flag = interface_type_flag;
-        //if (pInterface->HasExclusiveToAttribute())
+        //DWORD type_flag = interface_type_flag;
+        ////if (pInterface->HasExclusiveToAttribute())
+        ////{
+        ////    // Mark this type as NotPublic.
+        ////    type_flag &= ~tdVisibilityMask;
+        ////    type_flag |= tdNotPublic;
+        ////}
+
+        //mdTypeDef implements[] = { mdTokenNil };
+        //auto token_interface_type_def = define_type_def(
+        //    model->get_id(),
+        //    type_flag,
+        //    mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
+        //    implements // Implements (Going to be null until we find out if it is base class)
+        //);
+
+        //for (auto const& val : model->get_methods())
         //{
-        //    // Mark this type as NotPublic.
-        //    type_flag &= ~tdVisibilityMask;
-        //    type_flag |= tdNotPublic;
+        //    define_method(val, token_interface_type_def);
         //}
-
-        mdTypeDef implements[] = { mdTokenNil };
-        auto token_interface_type_def = define_type_def(
-            model->get_id(),
-            type_flag,
-            mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
-            implements // Implements (Going to be null until we find out if it is base class)
-        );
-
-        for (auto const& val : model->get_methods())
-        {
-            define_method(val, token_interface_type_def);
-        }
-        for (auto const& val : model->get_properties())
-        {
-            define_property(val, token_interface_type_def);
-        }
-        for (auto const& val : model->get_events())
-        {
-            define_event(val, token_interface_type_def);
-        }
+        //for (auto const& val : model->get_properties())
+        //{
+        //    define_property(val, token_interface_type_def);
+        //}
+        //for (auto const& val : model->get_events())
+        //{
+        //    define_event(val, token_interface_type_def);
+        //}
     }
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
@@ -519,32 +525,25 @@ namespace xlang::xmeta
                         static_cast<ULONG>(sizeof(val_type)),
                         &field_token));
                 });
-     /*       m_metadata_emitter->DefineField(
-                token_enum_type_def,
-                enum_member_name.c_str(),
-
-            )*/
         }
     }
     
     void xmeta_emit::listen_delegate_model(delegate_model const& model) 
     {
-        mdTypeDef implements[] = { mdTokenNil };
-        auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
+        //mdTypeDef implements[] = { mdTokenNil };
+        //auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
 
-        /* Define return value */
-        mdParamDef token_return; // To be used for attributes later
-        define_return(model.get_return_type(), token_delegate_type_def, &token_return);
+        ///* Define return value */
+        //mdParamDef token_return; // To be used for attributes later
+        //define_return(model.get_return_type(), token_delegate_type_def, &token_return);
 
-        /* Define formal parameters */
-        int index = 1;
-        for (auto const& val : model.get_formal_parameters())
-        {
-            define_parameters(val, token_delegate_type_def, index);
-            index++;
-        }
-
-
+        ///* Define formal parameters */
+        //int index = 1;
+        //for (auto const& val : model.get_formal_parameters())
+        //{
+        //    define_parameters(val, token_delegate_type_def, index);
+        //    index++;
+        //}
     }
 
     void xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return)
@@ -649,7 +648,7 @@ namespace xlang::xmeta
         {
             return std::string("Object");
         }
-        return nullptr;
+        assert(false);
     }
 
 }
