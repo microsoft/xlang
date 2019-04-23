@@ -11,6 +11,14 @@ steps:
     artifactName: 'pywinrt'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
 
+- script: echo $(ProjectionType)
+- script: echo ${{ parameters.buildFullProjection }}
+
+- powershell: Write-Host $env:ProjectionType
+  displayName: 'PowerShell Script'
+  env:
+    ProjectionType: $(ProjectionType)
+
 - ${{ if eq(parameters.buildFullProjection, 'true') }}:
   - script: $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     displayName: 'Generate partial Python/WinRT Projection'

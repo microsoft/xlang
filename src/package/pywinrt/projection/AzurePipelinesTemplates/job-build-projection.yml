@@ -1,6 +1,3 @@
-parameters:
-  buildFullProjection: false
-
 jobs:
 - job: build_projection
   dependsOn: build_pywinrt
@@ -17,12 +14,7 @@ jobs:
         buildArchitecture: 'amd64'
         buildConfiguration: 'Release'
   steps:
-  - script: echo $(ProjectionType)
-  - script: echo $(variables['ProjectionType'])
-  - script: echo ${{ parameters.buildFullProjection }}
-  
   - template: steps-build-projection.yml
     parameters:
       architecture: $(buildArchitecture)  
       pythonVersionSpec: '3.7.x'
-      buildFullProjection: ${{ parameters.buildFullProjection }}
