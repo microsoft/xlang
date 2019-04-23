@@ -1,6 +1,36 @@
 
 namespace winrt::impl
 {
+    template <typename Async>
+    struct async_completed_handler;
+
+    template <typename Async>
+    using async_completed_handler_t = typename async_completed_handler<Async>::type;
+
+    template <>
+    struct async_completed_handler<Windows::Foundation::IAsyncAction>
+    {
+        using type = Windows::Foundation::AsyncActionCompletedHandler;
+    };
+
+    template <typename TProgress>
+    struct async_completed_handler<Windows::Foundation::IAsyncActionWithProgress<TProgress>>
+    {
+        using type = Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>;
+    };
+
+    template <typename TResult>
+    struct async_completed_handler<Windows::Foundation::IAsyncOperation<TResult>>
+    {
+        using type = Windows::Foundation::AsyncOperationCompletedHandler<TResult>;
+    };
+
+    template <typename TResult, typename TProgress>
+    struct async_completed_handler<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>>
+    {
+        using type = Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>;
+    };
+
     inline bool is_sta() noexcept
     {
         int32_t aptType;
@@ -9,24 +39,39 @@ namespace winrt::impl
     }
 
     template <typename Async>
-    void blocking_suspend(Async const& async)
+    void wait_for_completed(Async const& async, uint32_t const timeout)
+    {
+        void* event = check_pointer(WINRT_CreateEventW(nullptr, true, false, nullptr));
+
+        // The delegate is a local to ensure that the event outlives the call to WaitForSingleObject.
+        async_completed_handler_t<Async> delegate = [event = handle(event)](auto && ...)
+        {
+            WINRT_VERIFY(WINRT_SetEvent(event.get()));
+        };
+
+        async.Completed(delegate);
+        WINRT_WaitForSingleObject(event, timeout);
+    }
+
+    template <typename Async>
+    auto wait_for(Async const& async, Windows::Foundation::TimeSpan const& timeout)
+    {
+        WINRT_ASSERT(!is_sta());
+        wait_for_completed(async, static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
+        return async.Status();
+    }
+
+    template <typename Async>
+    auto wait_get(Async const& async)
     {
         WINRT_ASSERT(!is_sta());
 
-        slim_mutex m;
-        slim_condition_variable cv;
-        bool completed = false;
-        async.Completed([&](auto&&...)
-            {
-                {
-                    slim_lock_guard const guard(m);
-                    completed = true;
-                }
-                cv.notify_one();
-            });
+        if (async.Status() == Windows::Foundation::AsyncStatus::Started)
+        {
+            wait_for_completed(async, 0xFFFFFFFF); // INFINITE
+        }
 
-        slim_lock_guard guard(m);
-        cv.wait(m, [&] { return completed; });
+        return async.GetResults();
     }
 
     template <typename Async>
@@ -180,7 +225,7 @@ namespace winrt::impl
         Promise* m_promise;
     };
 
-    template <typename Derived, typename AsyncInterface, typename CompletedHandler, typename TProgress = void>
+    template <typename Derived, typename AsyncInterface, typename TProgress = void>
     struct promise_base : implements<Derived, AsyncInterface, Windows::Foundation::IAsyncInfo>
     {
         using AsyncStatus = Windows::Foundation::AsyncStatus;
@@ -198,7 +243,7 @@ namespace winrt::impl
             return remaining;
         }
 
-        void Completed(CompletedHandler const& handler)
+        void Completed(async_completed_handler_t<AsyncInterface> const& handler)
         {
             AsyncStatus status;
 
@@ -227,7 +272,7 @@ namespace winrt::impl
             }
         }
 
-        CompletedHandler Completed() noexcept
+        auto Completed() noexcept
         {
             slim_lock_guard const guard(m_lock);
             return m_completed;
@@ -308,7 +353,7 @@ namespace winrt::impl
 
         void set_completed() noexcept
         {
-            CompletedHandler handler;
+            async_completed_handler_t<AsyncInterface> handler;
             AsyncStatus status;
 
             {
@@ -422,7 +467,7 @@ namespace winrt::impl
             cancel();
         }
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
         void use_make_function_to_create_this_object() final
         {
         }
@@ -440,7 +485,7 @@ namespace winrt::impl
 
         std::exception_ptr m_exception{};
         slim_mutex m_lock;
-        CompletedHandler m_completed;
+        async_completed_handler_t<AsyncInterface> m_completed;
         winrt::delegate<> m_cancel;
         AsyncStatus m_status{ AsyncStatus::Started };
         bool m_completed_assigned{ false };
@@ -452,9 +497,7 @@ namespace std::experimental
     template <typename... Args>
     struct coroutine_traits<winrt::Windows::Foundation::IAsyncAction, Args...>
     {
-        struct promise_type final : winrt::impl::promise_base<promise_type,
-            winrt::Windows::Foundation::IAsyncAction,
-            winrt::Windows::Foundation::AsyncActionCompletedHandler>
+        struct promise_type final : winrt::impl::promise_base<promise_type, winrt::Windows::Foundation::IAsyncAction>
         {
             void return_void() const noexcept
             {
@@ -465,9 +508,7 @@ namespace std::experimental
     template <typename TProgress, typename... Args>
     struct coroutine_traits<winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>, Args...>
     {
-        struct promise_type final : winrt::impl::promise_base<promise_type,
-            winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>,
-            winrt::Windows::Foundation::AsyncActionWithProgressCompletedHandler<TProgress>, TProgress>
+        struct promise_type final : winrt::impl::promise_base<promise_type, winrt::Windows::Foundation::IAsyncActionWithProgress<TProgress>, TProgress>
         {
             using ProgressHandler = winrt::Windows::Foundation::AsyncActionProgressHandler<TProgress>;
 
@@ -502,9 +543,7 @@ namespace std::experimental
     template <typename TResult, typename... Args>
     struct coroutine_traits<winrt::Windows::Foundation::IAsyncOperation<TResult>, Args...>
     {
-        struct promise_type final : winrt::impl::promise_base<promise_type,
-            winrt::Windows::Foundation::IAsyncOperation<TResult>,
-            winrt::Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+        struct promise_type final : winrt::impl::promise_base<promise_type, winrt::Windows::Foundation::IAsyncOperation<TResult>>
         {
             TResult get_return_value() noexcept
             {
@@ -529,8 +568,7 @@ namespace std::experimental
     struct coroutine_traits<winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>, Args...>
     {
         struct promise_type final : winrt::impl::promise_base<promise_type,
-            winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>,
-            winrt::Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>, TProgress>
+            winrt::Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress>, TProgress>
         {
             using ProgressHandler = winrt::Windows::Foundation::AsyncOperationProgressHandler<TResult, TProgress>;
 

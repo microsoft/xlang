@@ -42,7 +42,7 @@ namespace winrt::impl
             return m_values;
         }
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
         void use_make_function_to_create_this_object() final
         {
         }

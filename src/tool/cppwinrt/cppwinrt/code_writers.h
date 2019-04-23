@@ -166,6 +166,17 @@ namespace xlang
         }
     }
 
+    static void write_generic_asserts(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        for (auto&& param : params)
+        {
+            auto format = R"(
+        static_assert(impl::has_category_v<%>, "% must be WinRT type.");)";
+
+            w.write(format, param, param);
+        }
+    }
+
     static void write_comma_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
     {
         for (auto&& param : params)
@@ -1337,33 +1348,49 @@ namespace xlang
         {
             w.write(R"(        void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
-            GetResults();
-        })");
+            wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperation`1")
         {
             w.write(R"(        TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
-            return GetResults();
-        })");
+            return wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
         else if (type_name == "Windows.Foundation.IAsyncActionWithProgress`1")
         {
             w.write(R"(        void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
-            GetResults();
-        })");
+            wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperationWithProgress`2")
         {
             w.write(R"(        TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
-            return GetResults();
-        })");
+            return wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
     }
 
@@ -2228,7 +2255,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     struct WINRT_EBO % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
-    {
+    {%
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
 %%    };
@@ -2239,6 +2266,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type,
                 bind<write_interface_requires>(type),
+                bind<write_generic_asserts>(generics),
                 type_name,
                 type_name,
                 bind<write_interface_usings>(type),
@@ -2263,7 +2291,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
 
         auto format = R"(    struct % : Windows::Foundation::IUnknown
-    {
+    {%
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
         template <typename L> %(L lambda);
@@ -2279,6 +2307,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         w.write(format,
             type_name,
+            bind<write_generic_asserts>(generics),
             type_name,
             type_name,
             type_name,

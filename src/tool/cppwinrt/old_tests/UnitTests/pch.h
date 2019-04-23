@@ -8,8 +8,6 @@
 #include <unknwn.h>
 #undef GetCurrentTime
 
-#include "winrt\coroutine.h"
-
 #include "winrt\Windows.Foundation.Collections.h"
 #include "winrt\Windows.Foundation.Diagnostics.h"
 #include "winrt\Windows.ApplicationModel.Activation.h"
