@@ -1,9 +1,10 @@
 name: $(Date:yyMMdd)$(Rev:.r)
 jobs:
-- template: AzurePipelinesTemplates/job-build-pywinrt.yml
+- job: dump_debug
+  - script: echo $(ProjectionType)
+  - script: echo $(variables['ProjectionType'])
 
-- script: echo $(ProjectionType)
-- script: echo $(variables['ProjectionType'])
+- template: AzurePipelinesTemplates/job-build-pywinrt.yml
 
 - template: AzurePipelinesTemplates/job-build-projection.yml
   ${{ if eq(variables['ProjectionType'], 'full') }}:
