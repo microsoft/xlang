@@ -6,6 +6,7 @@
 
 #include "base_model.h"
 #include "formal_parameter_model.h"
+#include "model_ref.h"
 #include "model_types.h"
 
 namespace xlang::xmeta
@@ -30,7 +31,7 @@ namespace xlang::xmeta
             m_return_type{ std::move(return_type) },
             m_parent{ parent },
             m_semantic{ sem },
-			m_implemented_method_ref{ nullptr }
+			m_implemented_method_ref{ "" }
         { }
 
         method_model(std::string_view const& id, 
