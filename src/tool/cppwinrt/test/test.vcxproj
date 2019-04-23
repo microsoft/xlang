@@ -208,6 +208,7 @@
     <ClCompile Include="async_return.cpp" />
     <ClCompile Include="async_suspend.cpp" />
     <ClCompile Include="async_throw.cpp" />
+    <ClCompile Include="async_wait_for.cpp" />
     <ClCompile Include="capture.cpp" />
     <ClCompile Include="cmd_reader.cpp" />
     <ClCompile Include="coro_foundation.cpp">
