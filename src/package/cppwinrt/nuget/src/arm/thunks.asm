@@ -44,13 +44,13 @@
 
     ; Define thunks
     MACRO 
-    FAST_FWD_THUNK $i
-    LEAF_ENTRY fast_fwd_thunk$i
+    WINRT_FF_THUNK $i
+    LEAF_ENTRY winrt_ff_thunk$i
     ; Note: no scratch registers available (r12/IP is used by CFG), must use stack
     mov     r12, $i
     push    r12
     ldr     pc, =InvokeForwarder 
-    LEAF_END fast_fwd_thunk$i
+    LEAF_END winrt_ff_thunk$i
     MEND
 
 #include "thunks.inc"

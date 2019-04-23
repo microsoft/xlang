@@ -30,12 +30,12 @@ InvokeForwarder PROC
 InvokeForwarder ENDP
 
 ; Define thunks
-FAST_FWD_THUNK MACRO i
-_fast_fwd_thunk&i&@0 PROC 
+WINRT_FF_THUNK MACRO i
+_winrt_ff_thunk&i&@0 PROC 
     mov eax, i
     jmp InvokeForwarder 
-_fast_fwd_thunk&i&@0 ENDP 
-PUBLIC _fast_fwd_thunk&i&@0
+_winrt_ff_thunk&i&@0 ENDP 
+PUBLIC _winrt_ff_thunk&i&@0
 ENDM
 
 include thunks.inc

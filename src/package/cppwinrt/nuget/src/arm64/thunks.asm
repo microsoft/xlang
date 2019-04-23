@@ -48,11 +48,11 @@
 
     ; Define thunks
     MACRO 
-    FAST_FWD_THUNK $i
-    LEAF_ENTRY fast_fwd_thunk$i
+    WINRT_FF_THUNK $i
+    LEAF_ENTRY winrt_ff_thunk$i
     mov     x12, #$i
     b       InvokeForwarder
-    LEAF_END fast_fwd_thunk$i
+    LEAF_END winrt_ff_thunk$i
     MEND
 
 #include "thunks.inc"
