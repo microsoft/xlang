@@ -1337,33 +1337,49 @@ namespace xlang
         {
             w.write(R"(        void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
-            GetResults();
-        })");
+            wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperation`1")
         {
             w.write(R"(        TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
-            return GetResults();
-        })");
+            return wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
         else if (type_name == "Windows.Foundation.IAsyncActionWithProgress`1")
         {
             w.write(R"(        void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
-            GetResults();
-        })");
+            wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperationWithProgress`2")
         {
             w.write(R"(        TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
-            return GetResults();
-        })");
+            return wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+        }
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
+        {
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
+        }
+)");
         }
     }
 
