@@ -82,7 +82,7 @@ namespace xlang::xmeta
         void add_enum(std::shared_ptr<enum_model> const& em);
         void add_delegate(std::shared_ptr<delegate_model> const& dm);
 
-        bool member_id_exists(std::string_view const& member_id) const;
+        bool type_id_exists(std::string_view const& member_id) const;
 
     private:
         // Using directives
@@ -93,8 +93,8 @@ namespace xlang::xmeta
         std::map<std::string_view, std::shared_ptr<class_model>, std::less<>> m_classes;
         std::map<std::string_view, std::shared_ptr<struct_model>, std::less<>> m_structs;
         std::map<std::string_view, std::shared_ptr<interface_model>, std::less<>> m_interfaces;
-        std::vector<std::shared_ptr<enum_model>> m_enums;
-        std::vector<std::shared_ptr<delegate_model>> m_delegates;
+        std::map<std::string_view, std::shared_ptr<enum_model>, std::less<>> m_enums;
+        std::map<std::string_view, std::shared_ptr<delegate_model>, std::less<>> m_delegates;
 
         std::shared_ptr<namespace_model> m_containing_namespace;
     };
@@ -104,7 +104,7 @@ namespace xlang::xmeta
         namespace_model() = delete;
         namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent) :
             base_model{ id, decl_line, assembly_name },
-            m_parent_namespace{ parent }
+            m_parent_namespace { parent }
         { }
 
         auto const& get_child_namespaces() const noexcept
@@ -122,16 +122,17 @@ namespace xlang::xmeta
             return m_parent_namespace;
         }
 
-        void add_child_namespace(std::shared_ptr<namespace_model> const& child);
         void add_namespace_body(std::shared_ptr<namespace_body_model> const& body);
+        void add_child_namespace(std::shared_ptr<namespace_model> const& child);
 
         // Used for semantic check #3 for namespace members
         bool member_id_exists(std::string_view const& member_id) const;
+        bool child_namespace_exists(std::string_view const& member_id) const;
         std::string get_full_name() const;
 
     private:
-        std::shared_ptr<namespace_model> m_parent_namespace;
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> m_child_namespaces;
         std::vector<std::shared_ptr<namespace_body_model>> m_namespace_bodies;
+        std::shared_ptr<namespace_model> m_parent_namespace;
     };
 }
