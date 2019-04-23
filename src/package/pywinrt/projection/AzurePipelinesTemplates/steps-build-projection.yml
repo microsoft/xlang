@@ -13,13 +13,13 @@ steps:
 - ${{ if eq(variables.buildFullProjection, 'true') }}:
   - script: |
       @echo off
-      @echo ##vso[task.setvariable variable=pywinrtinclude]"-include Windows."
-      splayName: 'Configure full python projection'
+      @echo ##vso[task.setvariable variable=pywinrtinclude]-include Windows.
+    displayName: 'Configure full python projection'
 
 - ${{ if ne(variables.buildFullProjection, 'true') }}:
   - script: |
       @echo off
-      @echo ##vso[task.setvariable variable=pywinrtinclude]"-include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -include Windows.Graphics.DirectX"
+      @echo ##vso[task.setvariable variable=pywinrtinclude]-include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -include Windows.Graphics.DirectX
     displayName: 'Configure partial python projection'
 
 - script: $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose $(pywinrtinclude) -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
