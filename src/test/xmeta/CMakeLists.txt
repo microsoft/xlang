@@ -10,7 +10,11 @@ include_directories(
 )
 
 add_executable(test_xmeta "")
-target_link_libraries(test_xmeta "WindowsApp.lib" "comsuppw.lib")
+
+target_link_libraries(test_xmeta 
+    WindowsApp.lib
+    comsuppw.lib
+)
 
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")

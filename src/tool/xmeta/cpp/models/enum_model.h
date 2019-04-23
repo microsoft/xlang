@@ -52,7 +52,7 @@ namespace xlang::xmeta
             m_value = value;
         }
 
-		enum_value_semantics get_resolved_value() const
+        enum_value_semantics get_resolved_value() const
         {
             assert(m_value.is_resolved());
             return std::visit(
@@ -65,7 +65,7 @@ namespace xlang::xmeta
                     return value;
                 }, m_value.get_resolved_target());
         }
-		
+        
         std::errc increment(enum_semantics type)
         {
             switch (type)

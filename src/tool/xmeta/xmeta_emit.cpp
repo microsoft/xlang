@@ -423,23 +423,39 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
+        //auto const& type_name = model->get_id();
+        //static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
         //mdTypeDef implements[] = { mdTokenNil };
-        //auto struct_type_def = define_type_def(model->get_id(), struct_type_flag, token_value_type, implements);
+        //auto token_struct_type_def = define_type_def(type_name, struct_type_flag, token_enum, implements);
 
-        //for (std::pair<type_ref, std::string> const& field : model->get_fields())
+        //auto iter = type_references.find(type_name);
+        //if (iter == type_references.end())
         //{
-        //    mdFieldDef token_field;
-        //    //m_metadata_emitter->DefineField(
-        //    //    token_struct_type_def, 
-        //    //    s2ws(field.second).c_str(), 
-        //    //    fdPublic, 
-        //    //    ,
-        //    //    ,
-        //    //    ELEMENT_TYPE_END,
-        //    //    nullptr,
-        //    //    0,
-        //    //    &token_field);
+        //    throw_invalid("Failed to find TypeRef for: " + type_name);
+        //}
+        //TypeRef const& struct_type_ref = iter->second;
 
+        //static constexpr DWORD enumerator_flag = fdHasDefault | fdLiteral | fdStatic | fdPublic;
+        //signature_blob enumerator_signature;
+        //enumerator_signature.add_signature(FieldSig{ TypeSig{struct_type_ref.coded_index<TypeDefOrRef>()} });
+
+        //for (std::pair<type_ref, std::string> const& enum_member : model->get_fields())
+        //{
+        //    call(enum_member.get_resolved_value(), [&](auto const& val)
+        //    {
+        //        using val_type = std::decay_t<decltype(val)>;
+        //        static_assert(std::is_integral_v<val_type>);
+        //        auto const& name = s2ws(enum_member.get_id());
+        //        check_hresult(m_metadata_emitter->DefineField(token_enum_type_def,
+        //            name.c_str(),
+        //            enumerator_flag,
+        //            enumerator_signature.data(),
+        //            enumerator_signature.size(),
+        //            static_cast<DWORD>(underlying_type),
+        //            &val,
+        //            static_cast<ULONG>(sizeof(val_type)),
+        //            &field_token));
+        //    });
         //}
     }
     

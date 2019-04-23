@@ -1,15 +1,13 @@
-#include <iostream>
 #include "pch.h"
+#include <iostream>
 
 #include "antlr4-runtime.h"
 #include "XlangParser.h"
 #include "XlangLexer.h"
-
 #include "xlang_model_walker.h"
 #include "xmeta_emit.h"
 #include "xmeta_models.h"
 #include "xlang_test_listener.h"
-
 #include "meta_reader.h"
 #include "meta_writer.h"
 #include "xmeta_idl_reader.h"
@@ -21,8 +19,8 @@ using namespace antlr4;
 using namespace xlang::xmeta;
 using namespace xlang::meta::reader;
 using namespace std;
-// In-depth checking of type properties of enums
 
+// In-depth checking of type properties of enums
 const TypeAttributes enum_type_attributes()
 {
     TypeAttributes result{};
