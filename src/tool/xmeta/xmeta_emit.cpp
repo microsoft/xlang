@@ -48,31 +48,31 @@ namespace
     Module to_Module(mdModule token)
     {
         XLANG_ASSERT(TypeFromToken(token) == mdtModule);
-        return { nullptr, token - 1 };
+        return { nullptr, RidFromToken(token) - 1 };
     }
 
     TypeRef to_TypeRef(mdTypeRef token)
     {
         XLANG_ASSERT(TypeFromToken(token) == mdtTypeRef);
-        return { nullptr, token - 1 };
+        return { nullptr, RidFromToken(token) - 1 };
     }
 
     TypeDef to_TypeDef(mdTypeDef token)
     {
         XLANG_ASSERT(TypeFromToken(token) == mdtTypeDef);
-        return { nullptr, token - 1 };
+        return { nullptr, RidFromToken(token) - 1 };
     }
 
     Assembly to_Assembly(mdAssembly token)
     {
         XLANG_ASSERT(TypeFromToken(token) == mdtAssembly);
-        return { nullptr, token - 1 };
+        return { nullptr, RidFromToken(token) - 1 };
     }
 
     AssemblyRef to_AssemblyRef(mdAssemblyRef token)
     {
         XLANG_ASSERT(TypeFromToken(token) == mdtAssemblyRef);
-        return { nullptr, token - 1 };
+        return { nullptr, RidFromToken(token) - 1 };
     }
 
     ElementType to_ElementType(enum_semantics arg)
@@ -506,7 +506,7 @@ namespace xlang::xmeta
 
         static constexpr DWORD enumerator_flag = fdHasDefault | fdLiteral | fdStatic | fdPublic;
         signature_blob enumerator_signature;
-        enumerator_signature.add_signature(FieldSig{ TypeSig{enum_type_ref.coded_index<TypeDefOrRef>()} });
+        enumerator_signature.add_signature(FieldSig{ TypeSig{ElementType::ValueType, enum_type_ref.coded_index<TypeDefOrRef>()} });
 
         for (enum_member const& enum_member : model->get_members())
         {
