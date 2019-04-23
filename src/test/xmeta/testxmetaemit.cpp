@@ -12,6 +12,7 @@
 
 #include "meta_reader.h"
 #include "meta_writer.h"
+#include "xmeta_idl_reader.h"
 
 using namespace antlr4;
 
@@ -55,50 +56,22 @@ TEST_CASE("Assembly name metadata")
 
 TEST_CASE("Enum metadata")
 {
-    std::string test_idl =
-        "namespace Windows.Test \
-        { \
-            enum Color \
-            { \
-                Red, \
-                Green, \
-                Blue \
-            } \
-            enum Alignment \
-            { \
-                Center = 0, \
-                Right = 1 \
-            } \
-            enum Permissions \
-            { \
-                None = 0x0000, \
-                Camera = 0x0001, \
-                Microphone = 0x0002, \
-            } \
-        }";
-
+    std::istringstream test_idl{ R"(
+        namespace Windows.Test
+        {
+            enum Color
+            {
+                Red,
+                Green,
+                Blue
+            }
+        }
+    )" };
     std::string assembly_name = "testidl";
-    xlang_test_listener listener;
-    REQUIRE(setup_and_run_parser2(test_idl, listener) == 0);
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+    xlang::xmeta::xlang_model_walker walker(reader.get_namespaces());
 
-    std::vector<std::shared_ptr<xlang::xmeta::namespace_model>> v;
-
-    std::string ns_name("test");
-    std::shared_ptr<namespace_model> ns(new namespace_model(ns_name, 0, assembly_name, nullptr));
-    std::shared_ptr<namespace_body_model> ns_bm = std::make_shared<namespace_body_model>(namespace_body_model(ns));
-    
-    std::string enum_name("Color");
-    std::shared_ptr<enum_model> enum_m(new enum_model(enum_name, 0, assembly_name, enum_semantics::UInt32));
-    std::string enum_red("red");
-    std::string enum_val("1");
-	enum_m->add_member({ enum_red, 1, enum_val });
-
-    ns_bm->add_enum(enum_m);
-    ns->add_namespace_body(ns_bm);
-
-    v.push_back(ns);
-
-    xlang::xmeta::xlang_model_walker walker(v);
     std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
 
     emitter->initialize();

@@ -11,9 +11,9 @@ namespace xlang::xmeta
 
     void xlang_model_walker::walk()
     {
-        for (auto const& ns : m_namespaces)
+        for (auto const& [key, val] : m_namespaces)
         {
-            enter_namespace_model(ns);
+            enter_namespace_model(val);
         }
     }
 
