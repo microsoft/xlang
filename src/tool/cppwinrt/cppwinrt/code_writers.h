@@ -1339,7 +1339,7 @@ namespace xlang
         {
             wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
         }
-        auto wait_for(std::chrono::high_resolution_clock::duration const& timeout) const
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
         {
             return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
         }
@@ -1351,9 +1351,9 @@ namespace xlang
         {
             return wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
         }
-        auto wait_for(std::chrono::high_resolution_clock::duration const& timeout) const
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
         {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
         }
 )");
         }
@@ -1363,9 +1363,9 @@ namespace xlang
         {
             wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
         }
-        auto wait_for(std::chrono::high_resolution_clock::duration const& timeout) const
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
         {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
         }
 )");
         }
@@ -1375,9 +1375,9 @@ namespace xlang
         {
             return wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
         }
-        auto wait_for(std::chrono::high_resolution_clock::duration const& timeout) const
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
         {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
+            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
         }
 )");
         }

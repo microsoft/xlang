@@ -32,7 +32,6 @@ extern "C"
     void     WINRT_CALL WINRT_SysFreeString(winrt::impl::bstr string) noexcept;
     uint32_t WINRT_CALL WINRT_SysStringLen(winrt::impl::bstr string) noexcept;
     int32_t  WINRT_CALL WINRT_IIDFromString(wchar_t const* string, winrt::guid* iid) noexcept;
-    int32_t  WINRT_CALL WINRT_CloseHandle(void* hObject) noexcept;
     int32_t  WINRT_CALL WINRT_MultiByteToWideChar(uint32_t codepage, uint32_t flags, char const* in_string, int32_t in_size, wchar_t* out_string, int32_t out_size) noexcept;
     int32_t  WINRT_CALL WINRT_WideCharToMultiByte(uint32_t codepage, uint32_t flags, wchar_t const* int_string, int32_t in_size, char* out_string, int32_t out_size, char const* default_char, int32_t* default_used) noexcept;
     int32_t  WINRT_CALL WINRT_HeapFree(void* heap, uint32_t flags, void* value) noexcept;
@@ -61,7 +60,11 @@ extern "C"
     void*   WINRT_CALL WINRT_InterlockedPushEntrySList(void* head, void* entry) noexcept;
     void*   WINRT_CALL WINRT_InterlockedFlushSList(void* head) noexcept;
 
+    void* WINRT_CALL WINRT_CreateEventW(void*, int32_t, int32_t, void*) noexcept;
+    int32_t WINRT_CALL WINRT_SetEvent(void*) noexcept;
+    int32_t  WINRT_CALL WINRT_CloseHandle(void* hObject) noexcept;
     uint32_t WINRT_CALL WINRT_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
+
     int32_t  WINRT_CALL WINRT_TrySubmitThreadpoolCallback(void(WINRT_CALL *callback)(void*, void* context), void* context, void*) noexcept;
     winrt::impl::ptp_timer WINRT_CALL WINRT_CreateThreadpoolTimer(void(WINRT_CALL *callback)(void*, void* context, void*), void* context, void*) noexcept;
     void     WINRT_CALL WINRT_SetThreadpoolTimer(winrt::impl::ptp_timer timer, void* time, uint32_t period, uint32_t window) noexcept;
@@ -113,7 +116,6 @@ WINRT_LINK(CoTaskMemFree, 4)
 WINRT_LINK(SysFreeString, 4)
 WINRT_LINK(SysStringLen, 4)
 WINRT_LINK(IIDFromString, 8)
-WINRT_LINK(CloseHandle, 4)
 WINRT_LINK(MultiByteToWideChar, 24)
 WINRT_LINK(WideCharToMultiByte, 32)
 WINRT_LINK(HeapFree, 12)
@@ -142,7 +144,11 @@ WINRT_LINK(InitializeSListHead, 4)
 WINRT_LINK(InterlockedPushEntrySList, 8)
 WINRT_LINK(InterlockedFlushSList, 4)
 
+WINRT_LINK(CreateEventW, 16)
+WINRT_LINK(SetEvent, 4)
+WINRT_LINK(CloseHandle, 4)
 WINRT_LINK(WaitForSingleObject, 8)
+
 WINRT_LINK(TrySubmitThreadpoolCallback, 12)
 WINRT_LINK(CreateThreadpoolTimer, 12)
 WINRT_LINK(SetThreadpoolTimer, 16)
