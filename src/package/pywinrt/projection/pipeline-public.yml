@@ -3,6 +3,9 @@ jobs:
 - template: AzurePipelinesTemplates/job-build-pywinrt.yml
 
 - template: AzurePipelinesTemplates/job-build-projection.yml
+  ${{ if eq(variables['ProjectionType'], 'full') }}:
+    parameters:
+      buildFullProjection: true
 
 - template: AzurePipelinesTemplates/job-package-projection.yml
   parameters:

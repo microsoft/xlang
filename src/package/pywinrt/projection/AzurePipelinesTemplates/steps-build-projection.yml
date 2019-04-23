@@ -1,13 +1,9 @@
-parameters:
-  architecture: 'x86'  # defaults for any parameters that aren't specified
+parameters: # defaults for any parameters that aren't specified
+  architecture: 'x86'
+  buildFullProjection: false
   pythonVersionSpec: '3.7.x'
 
 steps:
-- script: |
-    @echo off
-    @echo Build.BuildNumber $(Build.BuildNumber)
-    @echo buildFullProjection $(buildFullProjection)
-      
 - task: DownloadBuildArtifacts@0 
   inputs: 
     buildType: 'current'
@@ -15,20 +11,13 @@ steps:
     artifactName: 'pywinrt'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-- ${{ if eq(variables.buildFullProjection, 'true') }}:
-  - script: |
-      @echo off
-      @echo ##vso[task.setvariable variable=pywinrtinclude]-include Windows.
-    displayName: 'Configure full python projection'
+- ${{ if eq(parameters.buildFullProjection, 'true') }}:
+  - script: $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+    displayName: 'Generate partial Python/WinRT Projection'
 
-- ${{ if ne(variables.buildFullProjection, 'true') }}:
-  - script: |
-      @echo off
-      @echo ##vso[task.setvariable variable=pywinrtinclude]-include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -include Windows.Graphics.DirectX
-    displayName: 'Configure partial python projection'
-
-- script: $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose $(pywinrtinclude) -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
-  displayName: 'Generate Python/WinRT Projection'
+- ${{ if ne(parameters.buildFullProjection, 'true') }}:
+  - script: $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -include Windows.Graphics.DirectX -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+    displayName: 'Generate partial Python/WinRT Projection'
 
 # 333b11bd-d341-40d9-afcf-b32d5ce6f23b is the task guid for NuGetCommand (https://github.com/Microsoft/azure-pipelines-tasks/tree/master/Tasks/NuGetCommandV2)
 # microsoft.visualstudio.com has a conflicting "NuGetCommand", so use task guid to disambiguate
