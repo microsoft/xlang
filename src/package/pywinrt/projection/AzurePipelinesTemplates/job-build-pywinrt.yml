@@ -18,7 +18,7 @@ jobs:
     displayName: 'Generate xlang build files via cmake'
     inputs:
       cwd: '.'
-      cmakeArgs: -S src -B_build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
+      cmakeArgs: -S src -B_build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DXLANG_BUILD_VERSION=0.9.$(Build.BuildNumber)
 
   - task: CMake@1
     displayName: 'build pywinrt'

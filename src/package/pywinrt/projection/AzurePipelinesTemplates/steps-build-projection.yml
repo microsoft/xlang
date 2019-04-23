@@ -3,6 +3,11 @@ parameters:
   pythonVersionSpec: '3.7.x'
 
 steps:
+- script: |
+    @echo off
+    @echo Build.BuildNumber $(Build.BuildNumber)
+    @echo buildFullProjection $(buildFullProjection)
+      
 - task: DownloadBuildArtifacts@0 
   inputs: 
     buildType: 'current'
