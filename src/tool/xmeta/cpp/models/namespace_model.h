@@ -65,6 +65,11 @@ namespace xlang::xmeta
             return m_delegates;
         }
 
+        auto const& get_containing_namespace() const noexcept
+        {
+            return m_containing_namespace;
+        }
+
         void add_using_alias_directive(std::shared_ptr<using_alias_directive_model> const& uad)
         {
             std::string_view id{ uad->get_id() };
@@ -172,11 +177,11 @@ namespace xlang::xmeta
             return m_child_namespaces.find(member_id) != m_child_namespaces.end();
         }
 
-        std::string get_full_namespace_name() const
+        std::string get_full_name() const
         {
             if (m_parent_namespace != nullptr)
             {
-                return m_parent_namespace->get_full_namespace_name() + "." + get_id();
+                return m_parent_namespace->get_full_name() + "." + get_id();
             }
             else
             {

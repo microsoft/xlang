@@ -4,13 +4,13 @@ project(xmeta)
 
 add_executable(xmeta
     main.cpp
-	xlang_model_walker.cpp
-	xmeta_emit.cpp
+    xlang_model_walker.cpp
+    xmeta_emit.cpp
 )
 
-include_directories(	
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/cpp/models/
-)
+
+add_library(xmeta_model cpp/xmeta_idl_reader.cpp cpp/ast_to_st_listener.cpp)
+target_include_directories(xmeta_model PUBLIC cpp/models cpp)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)
 
@@ -47,9 +47,16 @@ target_link_libraries(xmeta_antlr PUBLIC antlr4_static)
 # required if linking to static library
 target_compile_definitions(xmeta_antlr PUBLIC -DANTLR4CPP_STATIC)
 
+target_link_libraries(xmeta_model PUBLIC xmeta_antlr)
+
 if (MSVC)
     target_compile_definitions(xmeta_antlr PUBLIC -D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 endif()
 
-target_link_libraries(xmeta xmeta_antlr WindowsApp.lib comsuppw.lib)
+target_link_libraries(xmeta
+    xmeta_antlr
+    xmeta_model
+    WindowsApp.lib
+    comsuppw.lib
+)
 target_include_directories(xmeta PUBLIC ${XLANG_LIBRARY_PATH})

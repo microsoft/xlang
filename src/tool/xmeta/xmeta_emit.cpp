@@ -81,19 +81,19 @@ namespace
         {
         case enum_semantics::Int8:
             return ElementType::I1;
-        case enum_semantics::Uint8:
+        case enum_semantics::UInt8:
             return ElementType::U1;
         case enum_semantics::Int16:
             return ElementType::I2;
-        case enum_semantics::Uint16:
+        case enum_semantics::UInt16:
             return ElementType::U2;
         case enum_semantics::Int32:
             return ElementType::I4;
-        case enum_semantics::Uint32:
+        case enum_semantics::UInt32:
             return ElementType::U4;
         case enum_semantics::Int64:
             return ElementType::I8;
-        case enum_semantics::Uint64:
+        case enum_semantics::UInt64:
             return ElementType::U8;
         default:
             XLANG_ASSERT(false);
@@ -627,13 +627,15 @@ namespace xlang::xmeta
                 return std::string("Int32");
             case simple_type::Int64:
                 return std::string("Int64");
-            case simple_type::Uint8:
+            case simple_type::UInt8:
                 return std::string("Uint8");
-            case simple_type::Uint16:
+            case simple_type::UInt16:
                 return std::string("Uint16");
-            case simple_type::Uint32:
-                return std::string("Uint32");
-            case simple_type::Char16:
+			case simple_type::UInt32:
+				return std::string("Uint32");
+			case simple_type::UInt64:
+				return std::string("Uint64");
+			case simple_type::Char16:
                 return std::string("Char16");
             case simple_type::Guid:
                 return std::string("Guid");

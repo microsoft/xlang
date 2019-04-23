@@ -88,10 +88,10 @@ TEST_CASE("Enum metadata")
     std::shared_ptr<namespace_body_model> ns_bm = std::make_shared<namespace_body_model>(namespace_body_model(ns));
     
     std::string enum_name("Color");
-    std::shared_ptr<enum_model> enum_m(new enum_model(enum_name, 0, assembly_name, enum_semantics::Uint32));
+    std::shared_ptr<enum_model> enum_m(new enum_model(enum_name, 0, assembly_name, enum_semantics::UInt32));
     std::string enum_red("red");
     std::string enum_val("1");
-    enum_m->add_member(enum_red, enum_val, true);
+	enum_m->add_member({ enum_red, 1, enum_val });
 
     ns_bm->add_enum(enum_m);
     ns->add_namespace_body(ns_bm);

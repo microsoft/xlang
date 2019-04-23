@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert>
+#include <assert.h>
 #include <memory>
 #include <string>
 #include <variant>
@@ -16,6 +16,7 @@ namespace xlang::xmeta
         using resolved_type = std::conditional_t<sizeof...(Ts) == 0, T, std::variant<T, Ts...>>;
 
         model_ref() = delete;
+        model_ref& operator=(model_ref const& other) = default;
         explicit model_ref(std::string_view const& name) :
             m_ref{ std::string(name) }
         { }
