@@ -5,17 +5,17 @@
 #include <utility>
 #include <vector>
 
-#include "base_model.h"
 #include "model_types.h"
+#include "namespace_member_model.h"
 #include "property_model.h"
 
 namespace xlang::xmeta
 {
-    struct struct_model : base_model
+    struct struct_model : namespace_member_model
     {
         struct_model() = delete;
-        struct_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name) :
-            base_model{ id, decl_line, assembly_name }
+        struct_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_ns_body }
         { }
 
         auto const& get_fields() const noexcept

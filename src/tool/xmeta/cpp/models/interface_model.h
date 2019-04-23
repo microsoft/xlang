@@ -1,23 +1,23 @@
 #pragma once
 
-#include <cassert>
+#include <assert.h>
 #include <string_view>
 #include <vector>
 
-#include "base_model.h"
 #include "event_model.h"
 #include "interface_model.h"
 #include "method_model.h"
 #include "model_ref.h"
+#include "namespace_member_model.h"
 #include "property_model.h"
 
 namespace xlang::xmeta
 {
-    struct interface_model : base_model
+    struct interface_model : namespace_member_model
     {
         interface_model() = delete;
-        interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name) :
-            base_model{ id, decl_line, assembly_name }
+        interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_ns_body }
         { }
 
         auto const& get_interface_bases() const noexcept

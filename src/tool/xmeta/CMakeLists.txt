@@ -6,7 +6,10 @@ add_executable(xmeta
     main.cpp
 )
 
-add_library(xmeta_model cpp/xmeta_idl_reader.cpp cpp/ast_to_st_listener.cpp)
+add_library(xmeta_model
+    cpp/xmeta_idl_reader.cpp
+    cpp/ast_to_st_listener.cpp
+    cpp/models/namespace_model.cpp)
 target_include_directories(xmeta_model PUBLIC cpp/models cpp)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)

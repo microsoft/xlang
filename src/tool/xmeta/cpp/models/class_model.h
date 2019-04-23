@@ -6,11 +6,11 @@
 #include <vector>
 #include <variant>
 
-#include "base_model.h"
 #include "event_model.h"
 #include "interface_model.h"
 #include "method_model.h"
 #include "model_ref.h"
+#include "namespace_member_model.h"
 #include "property_model.h"
 
 namespace xlang::xmeta
@@ -23,11 +23,11 @@ namespace xlang::xmeta
         static_class
     };
 
-    struct class_model : base_model
+    struct class_model : namespace_member_model
     {
         class_model() = delete;
-        class_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, class_semantics const& sem, std::string_view const& base_id) :
-            base_model{ id, decl_line, assembly_name },
+        class_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body, class_semantics const& sem, std::string_view const& base_id) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_ns_body },
             m_semantic{ sem },
             m_class_base_ref{ base_id }
         { }
