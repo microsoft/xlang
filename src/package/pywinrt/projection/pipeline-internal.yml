@@ -1,4 +1,4 @@
-name: $(System.TeamProject)_$(BuildID).$(Date:yy).$(Date:MMdd).$(DayOfYear).$(Rev:rrr)
+name: $(System.TeamProject)_$(BuildID).$(Date:yy).$(Date:MMdd).$(DayOfYear).$(Rev:r)
 jobs:
 - template: AzurePipelinesTemplates/job-build-pywinrt.yml
 

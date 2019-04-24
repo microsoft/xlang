@@ -1,10 +1,16 @@
 import setuptools
 
-# distutils.util.get_platform
+# Extract the build revision information from Build_BuildNumber environment variable. 
+# This relies on the format of the pipeline name being of the format: <build text>.$(Date:yy).$(Date:MMdd).$(DayOfYear).$(Rev:r)
+
+buildNumber = os.environ["Build_BuildNumber"].split('.')
+year = buildNumber[1]
+doy = buildNumber[3]
+rev = buildNumber[4]
 
 setuptools.setup(
     name = "winrt",
-    version = "1.0a0",
+    version = "1.0.{0}{1}.{2}".format(year, doy, rev),
     description="Generated Python/WinRT package",
     license="MIT",
     author='Microsoft Corporation',
