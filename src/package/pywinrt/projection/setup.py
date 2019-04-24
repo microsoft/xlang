@@ -3,6 +3,7 @@ import setuptools
 # Extract the build revision information from Build_BuildNumber environment variable. 
 # This relies on the format of the pipeline name being of the format: <build text>.$(Date:yy).$(Date:MMdd).$(DayOfYear).$(Rev:r)
 
+import os
 buildNumber = os.environ["Build_BuildNumber"].split('.')
 year = buildNumber[1]
 doy = buildNumber[3]
