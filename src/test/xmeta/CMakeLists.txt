@@ -23,7 +23,7 @@ target_sources(test_xmeta PUBLIC
 )
 
 target_include_directories(test_xmeta
-    PUBLIC ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
+    PUBLIC ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(test_xmeta xmeta_antlr xmeta_model)
 
