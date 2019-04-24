@@ -177,7 +177,7 @@ namespace xlang::xmeta
             0,
             sha1_hash_algo,
             s2ws(m_assembly_name).c_str(),
-            &(s_genericMetadata),
+            &s_genericMetadata,
             afContentType_WindowsRuntime,
             &token_assembly));
         check_hresult(m_metadata_emitter->SetModuleProps(s2ws(m_assembly_name).c_str()));
@@ -289,8 +289,7 @@ namespace xlang::xmeta
         ////    &token_method_def);
 
         ///* Define return value */
-        //mdParamDef token_return; // To be used for attributes later
-        //define_return(model->get_return_type(), token_method_def, &token_return);
+        //mdParamDef token_return = define_return(model->get_return_type(), token_method_def);
 
         ///* Define formal parameters */
         //int index = 1;
@@ -550,8 +549,8 @@ namespace xlang::xmeta
         auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
 
         /* Define return value */
-        mdParamDef token_return; // To be used for attributes later
-        define_return(model.get_return_type(), token_delegate_type_def, &token_return);
+        // To be used for attributes later
+        mdParamDef token_return = define_return(model.get_return_type(), token_delegate_type_def);
 
         /* Define formal parameters */
         int index = 1;
@@ -562,9 +561,10 @@ namespace xlang::xmeta
         }
     }
 
-    void xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return)
+    mdParamDef xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def)
     {
         /* Define return value */
+        mdParamDef token_param_return;
         std::string return_name = type_semantics_to_string(retun_type->get_semantic());
         check_hresult(m_metadata_emitter->DefineParam(
             type_def,
@@ -574,10 +574,11 @@ namespace xlang::xmeta
             (DWORD)-1,  // Ignore dwCPlusTypeFlag
             nullptr,    // No constant value
             0,
-            token_return));
+            &token_param_return));
+        return token_param_return;
     }
 
-    void xmeta_emit::define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method_def, int parameter_index)
+    void xmeta_emit::define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method_def, uint16_t parameter_index)
     {
         std::wstring param_name = s2ws(model.get_id());
 

@@ -16,18 +16,18 @@ namespace xlang::xmeta
     class xmeta_emit : public xlang_model_listener
     {
     public:
-        xmeta_emit(std::string_view const& assembly_name);
+        explicit xmeta_emit(std::string_view const& assembly_name);
         ~xmeta_emit();
 
         void save_to_file() const;
 		std::vector<uint8_t> save_to_memory() const;
 
-        void listen_namespace_model(std::shared_ptr<namespace_model> const& model) override;
-        void listen_class_model(std::shared_ptr<class_model> const& model) override;
-        void listen_struct_model(std::shared_ptr<struct_model> const& model) override;
-        void listen_interface_model(std::shared_ptr<interface_model> const& model) override;
-        void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
-        void listen_delegate_model(delegate_model const& model) override;
+        void listen_namespace_model(std::shared_ptr<namespace_model> const& model) override final;
+        void listen_class_model(std::shared_ptr<class_model> const& model) override final;
+        void listen_struct_model(std::shared_ptr<struct_model> const& model) override final;
+        void listen_interface_model(std::shared_ptr<interface_model> const& model) override final;
+        void listen_enum_model(std::shared_ptr<enum_model> const& model) override final;
+        void listen_delegate_model(delegate_model const& model) override final;
 
     private:
         std::string m_assembly_name;
@@ -77,8 +77,8 @@ namespace xlang::xmeta
         void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
         void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
 
-        void define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return);
-        void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
+        mdParamDef define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def);
+        void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
 
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
