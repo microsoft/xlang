@@ -43,9 +43,9 @@ TEST_CASE("Assemblies metadata")
     xlang::meta::reader::database db{ writer.save_to_memory() };
 
     REQUIRE(db.Assembly.size() == 1);
-    REQUIRE(db.Assembly[0].Name() == "testidl");
+    REQUIRE(db.Assembly[0].Name() == assembly_name);
     REQUIRE(db.AssemblyRef.size() == 1);
-    REQUIRE(db.AssemblyRef[0].Name() == "mscorlib");
+    REQUIRE(db.AssemblyRef[0].Name() == common_assembly_ref);
     emitter->uninitialize();
 }
 

@@ -5,17 +5,7 @@ project(test_xmeta)
 # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
 set(ANTLR4_WITH_STATIC_CRT ON)
 
-include_directories(
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/
-)
-
 add_executable(test_xmeta "")
-
-target_link_libraries(test_xmeta 
-    WindowsApp.lib
-    comsuppw.lib
-)
-
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
 add_custom_command(TARGET test_xmeta POST_BUILD
@@ -26,29 +16,23 @@ endif()
 
 target_sources(test_xmeta PUBLIC
     pch.cpp
-    testlexer.cpp
-    testmidlcompat.cpp
-    testxmetaemit.cpp
+    test_lexer.cpp
+    test_midl_compat.cpp
+    test_xmeta_emit.cpp
     xlang_test_listener.cpp
 )
 
 target_include_directories(test_xmeta
-    PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
+    PUBLIC ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
 
 target_link_libraries(test_xmeta xmeta_antlr xmeta_model)
 
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(test_xmeta pch.cpp pch.h)
-    target_link_libraries(test_xmeta windowsapp ole32)
+    target_link_libraries(test_xmeta windowsapp ole32 WindowsApp.lib comsuppw.lib)
 endif()
 
-# TODO Refactor the tool dependencies into a library that we can simply link against (instead of double compiling)
-set(xmeta_gen_generated
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/xmeta_emit.cpp
-    ${CMAKE_SOURCE_DIR}/tool/xmeta/xlang_model_walker.cpp
- )
-
-target_sources(test_xmeta PUBLIC main.cpp ${xmeta_gen_generated})
+target_sources(test_xmeta PUBLIC main.cpp)
 
 install(TARGETS test_xmeta DESTINATION "test/xmeta")
 if (WIN32)

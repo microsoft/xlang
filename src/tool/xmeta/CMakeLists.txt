@@ -4,13 +4,10 @@ project(xmeta)
 
 add_executable(xmeta
     main.cpp
-    xlang_model_walker.cpp
-    xmeta_emit.cpp
 )
 
-
-add_library(xmeta_model cpp/xmeta_idl_reader.cpp cpp/ast_to_st_listener.cpp)
-target_include_directories(xmeta_model PUBLIC cpp/models cpp)
+add_library(xmeta_model cpp/xmeta_idl_reader.cpp cpp/ast_to_st_listener.cpp cpp/xlang_model_walker.cpp cpp/xmeta_emit.cpp)
+target_include_directories(xmeta_model PUBLIC cpp/models cpp ${XLANG_LIBRARY_PATH})
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)
 
@@ -59,4 +56,3 @@ target_link_libraries(xmeta
     WindowsApp.lib
     comsuppw.lib
 )
-target_include_directories(xmeta PUBLIC ${XLANG_LIBRARY_PATH})

@@ -546,20 +546,20 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(delegate_model const& model) 
     {
-        //mdTypeDef implements[] = { mdTokenNil };
-        //auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
+        mdTypeDef implements[] = { mdTokenNil };
+        auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
 
-        ///* Define return value */
-        //mdParamDef token_return; // To be used for attributes later
-        //define_return(model.get_return_type(), token_delegate_type_def, &token_return);
+        /* Define return value */
+        mdParamDef token_return; // To be used for attributes later
+        define_return(model.get_return_type(), token_delegate_type_def, &token_return);
 
-        ///* Define formal parameters */
-        //int index = 1;
-        //for (auto const& val : model.get_formal_parameters())
-        //{
-        //    define_parameters(val, token_delegate_type_def, index);
-        //    index++;
-        //}
+        /* Define formal parameters */
+        int index = 1;
+        for (auto const& val : model.get_formal_parameters())
+        {
+            define_parameters(val, token_delegate_type_def, index);
+            index++;
+        }
     }
 
     void xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return)
