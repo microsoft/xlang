@@ -16,9 +16,11 @@
 
   <PropertyGroup>
     <XlangBuildVersion Condition="'$(XlangBuildVersion)'==''">2.3.4.5</XlangBuildVersion>
-    <CmakePlatform>x64</CmakePlatform>
+    <CmakePlatform>$(Platform)</CmakePlatform>
     <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
     <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt</CmakeOutDir>
+    <CppWinRTDir>$(CmakeOutDir)\</CppWinRTDir>
+    <CppWinRTDir Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'">$(SolutionDir)..\..\..\_build\Windows\x86\$(Configuration)\tool\cppwinrt\</CppWinRTDir>
     <OutDir>$(CmakeOutDir)\</OutDir>
   </PropertyGroup>
 
